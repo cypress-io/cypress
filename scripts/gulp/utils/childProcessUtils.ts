@@ -1,16 +1,15 @@
-import { ChildProcess,
-  ChildProcessWithoutNullStreams,
-  exec, ExecOptions,
-  fork, ForkOptions,
-  spawn, SpawnOptions,
+import type { ChildProcess,
+  ChildProcessWithoutNullStreams, ExecOptions, ForkOptions, SpawnOptions } from 'child_process'
+import {
+  exec,
+  fork,
+  spawn,
 } from 'child_process'
 import through2 from 'through2'
-import pDefer from 'p-defer'
 import util from 'util'
 
 import { prefixLog, prefixStream } from './prefixStream'
 import { addChildProcess } from '../tasks/gulpRegistry'
-import stripAnsi from 'strip-ansi'
 
 export type AllSpawnableApps =
   | `cmd-${string}`
@@ -40,13 +39,13 @@ export async function spawnUntilMatch (
   prefix: AllSpawnableApps,
   config: SpawnUntilMatchConfig,
 ) {
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
   let ready = false
 
   spawned(prefix, config.command, {
     ...config.options,
     tapOut (chunk, enc, cb) {
-      if (!ready && stripAnsi(String(chunk)).match(config.match)) {
+      if (!ready && util.stripVTControlCharacters(String(chunk)).match(config.match)) {
         ready = true
         setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
       }
@@ -69,7 +68,7 @@ export async function forkUntilMatch (
   prefix: AllSpawnableApps,
   config: ForkUntilMatchConfig,
 ) {
-  const dfd = pDefer<ChildProcess>()
+  const dfd = Promise.withResolvers<ChildProcess>()
   let ready = false
 
   const cp = await forked(prefix, config.modulePath, config.args, {
@@ -197,7 +196,7 @@ export interface StreamHandlerConfig extends TapThroughConfig {
 }
 
 function streamHandler (cp: ChildProcess, config: StreamHandlerConfig) {
-  const dfd = pDefer<ChildProcess>()
+  const dfd = Promise.withResolvers<ChildProcess>()
   const { command, tapErr = null, tapOut = null, prefix, waitForExit, waitForData = true } = config
   const prefixedStdout = cp.stdout?.pipe(
     through2(function (chunk, enc, cb) {

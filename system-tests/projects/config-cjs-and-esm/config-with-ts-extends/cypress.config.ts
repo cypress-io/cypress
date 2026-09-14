@@ -4,6 +4,5 @@ import { defineConfig } from 'cypress'
 require
 
 export default defineConfig({
-  allowCypressEnv: false,
   e2e: { supportFile: false },
 })

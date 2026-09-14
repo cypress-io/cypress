@@ -28,10 +28,10 @@ declare global {
 
 export const waitForSpecToFinish = (expectedResults?: ExpectedResults, timeout?: number) => {
   // Then ensure the tests are not running
-  cy.contains('Your tests are loading...', { timeout: timeout || 30000 }).should('not.exist')
+  cy.reporter({ timeout: timeout || 30000 }).contains('Your tests are loading...', { timeout: timeout || 30000 }).should('not.exist')
 
   // Then ensure the tests have finished (button shows "Rerun all tests" or "Run test" in Studio single-test mode)
-  cy.get('button.restart', { timeout: timeout || 30000 })
+  cy.reporter().find('button.restart', { timeout: timeout || 30000 })
 
   if (expectedResults) {
     shouldHaveTestResults(expectedResults)

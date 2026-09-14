@@ -15,6 +15,32 @@ function normalizeHeaderName (name: string): string {
   return name.toLowerCase()
 }
 
+/**
+ * Node lowercases IncomingMessage header keys; legacy proxy middleware looks
+ * them up that way (cookie, content-encoding, content-type, set-cookie, …).
+ * CDP Fetch preserves the browser's original casing, so normalize here when
+ * synthesizing Express-like req/incomingRes objects. Values for the same
+ * lowercased key are concatenated (Set-Cookie must not drop siblings).
+ */
+function lowercaseHeaders (headers: HttpHeaders): HttpHeaders {
+  return Object.entries(headers).reduce<HttpHeaders>((memo, [name, value]) => {
+    if (typeof value === 'undefined') {
+      return memo
+    }
+
+    const key = normalizeHeaderName(name)
+    const existing = memo[key]
+
+    if (existing) {
+      memo[key] = ([] as string[]).concat(existing, value)
+    } else {
+      memo[key] = value
+    }
+
+    return memo
+  }, {})
+}
+
 function parseCookieHeader (header?: string | string[]): Record<string, string> {
   const raw = Array.isArray(header) ? header.join('; ') : header
 
@@ -37,6 +63,14 @@ function parseCookieHeader (header?: string | string[]): Record<string, string> 
 
     return memo
   }, {})
+}
+
+function parseUrlQuery (url: string): Record<string, string> {
+  try {
+    return Object.fromEntries(new URL(url, 'http://127.0.0.1').searchParams)
+  } catch {
+    return {}
+  }
 }
 
 function serializeCookie (name: string, value: string, options: CookieOptions = {}): string {
@@ -89,10 +123,18 @@ export type SyntheticCypressResponse = CypressOutgoingResponseLike & {
   getCapturedStatusCode (): number
 }
 
+export type SyntheticExpressContext = {
+  req: CypressIncomingRequest
+  res: SyntheticCypressResponse
+}
+
 class SyntheticResponse extends Writable {
   private readonly kOutHeaders = Symbol('kOutHeaders')
   isInitial: null | boolean = null
-  wantsInjection: CypressOutgoingResponseLike['wantsInjection'] = false
+  // null = undecided. SetInjectionLevel skips its determination for any
+  // non-null value, so defaulting to false silently disables injection for
+  // every synthetic response.
+  wantsInjection: CypressOutgoingResponseLike['wantsInjection'] = null
   wantsSecurityRemoved: null | boolean = null
   body?: string | Readable
   statusCode = 200
@@ -233,17 +275,36 @@ export function createSyntheticIncomingResponse (response: HttpResponse): Incomi
   const incomingRes = new IncomingMessage(new Socket())
 
   incomingRes.statusCode = response.statusCode ?? 200
-  incomingRes.headers = response.headers ?? {}
+  incomingRes.statusMessage = response.statusMessage ?? ''
+  // Match Node IncomingMessage: response middleware looks up content-encoding,
+  // content-type, set-cookie, etc. with lowercase keys.
+  incomingRes.headers = lowercaseHeaders(response.headers ?? {})
+  // The browser negotiates the protocol with the origin directly, so there is no
+  // httpVersion to report. Node already leaves it null on an unparsed IncomingMessage.
 
   return incomingRes
 }
 
-export function createSyntheticExpressContext (request: HttpRequest): {
-  req: CypressIncomingRequest
-  res: SyntheticCypressResponse
-} {
+/**
+ * Reproduces what a browser-canceled request leaves behind on the MITM path,
+ * where the proxy socket dies: `req` destroyed and `res` closed. The legacy
+ * pipeline keys its cancellation handling on exactly those two signals
+ * (CorrelateBrowserPreRequest's `close` listener, and the `res.destroyed`
+ * check after the request stage), so nothing else has to know this transport
+ * has no socket to close.
+ */
+export function abortSyntheticExpressContext ({ req, res }: SyntheticExpressContext): void {
+  if (res.destroyed) {
+    return
+  }
+
+  req.destroy()
+  res.destroy()
+}
+
+export function createSyntheticExpressContext (request: HttpRequest): SyntheticExpressContext {
   const req = createRequestBodyStream(request.body) as CypressIncomingRequest
-  const headers = request.headers ?? {}
+  const headers = lowercaseHeaders(request.headers ?? {})
 
   req.method = request.method ?? 'GET'
   req.headers = headers
@@ -253,9 +314,17 @@ export function createSyntheticExpressContext (request: HttpRequest): {
   req.url = request.url
   req.body = request.body
   req.requestId = request.id
+  req.resourceType = request.resourceType
   req.isAUTFrame = false
   req.isFromExtraTarget = false
   req.isSyncRequest = false
+  // cy.intercept's request message picks `query` off this req (SERIALIZABLE_REQ_PROPS).
+  // Express provides it on the MITM path; without it the driver-side merge re-derives
+  // it and falsely flags the request as modified.
+  req.query = parseUrlQuery(request.url)
+  // httpVersion is deliberately left unset. There is no browser→proxy hop to report
+  // here, and the protocol the browser negotiates with the origin is not knowable
+  // while the request is paused.
 
   return {
     req,

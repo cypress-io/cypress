@@ -48,7 +48,8 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
         message,
         timeout: options.timeout,
         consoleProps () {
-          return envVars
+          // only the names, never the values
+          return { 'Env Vars': envVars }
         },
       })
 

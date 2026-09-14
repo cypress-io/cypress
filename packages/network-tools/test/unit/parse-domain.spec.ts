@@ -91,19 +91,11 @@ describe('lib/parse-domain', () => {
       })
     })
 
-    it('treats herokuapp.com as the public suffix when privateTlds is true (default)', () => {
+    it('treats a private suffix such as herokuapp.com as the tld', () => {
       expect(parseDomain('example.herokuapp.com')).toEqual({
         subdomain: '',
         domain: 'example',
         tld: 'herokuapp.com',
-      })
-    })
-
-    it('treats herokuapp as the registrable label when privateTlds is false', () => {
-      expect(parseDomain('example.herokuapp.com', { privateTlds: false })).toEqual({
-        subdomain: 'example',
-        domain: 'herokuapp',
-        tld: 'com',
       })
     })
 

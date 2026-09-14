@@ -29,11 +29,26 @@ const dispatchPrimedChangeEvents = function (state) {
   }
 }
 
+// `top` and `bottom` only describe the block axis, so they leave `inline` at the
+// browser default the way `scrollIntoView(alignToTop)` does. The rest name a
+// position either axis can take, so they apply to both.
 const scrollBehaviorOptionsMap = {
-  top: 'start',
-  bottom: 'end',
-  center: 'center',
-  nearest: 'nearest',
+  top: { block: 'start' },
+  bottom: { block: 'end' },
+  start: { block: 'start', inline: 'start' },
+  end: { block: 'end', inline: 'end' },
+  center: { block: 'center', inline: 'center' },
+  nearest: { block: 'nearest', inline: 'nearest' },
+}
+
+// `scrollBehavior` is either one of the alignments above or an explicit per-axis
+// `{ block, inline }` using the same values as the native `scrollIntoView`. An
+// axis the caller left out is omitted so that `scrollIntoView` applies its own
+// default.
+const toScrollIntoViewOptions = (scrollBehavior) => {
+  return _.isPlainObject(scrollBehavior)
+    ? _.pick(scrollBehavior, ['block', 'inline'])
+    : scrollBehaviorOptionsMap[scrollBehavior]
 }
 
 const getPositionFromArguments = function (positionOrX, y, options) {
@@ -531,12 +546,11 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
 
         if (options.scrollBehavior !== false) {
           // scroll the element into view
-          const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
+          const scrollIntoViewOptions = toScrollIntoViewOptions(options.scrollBehavior)
           const removeScrollBehaviorFix = addScrollBehaviorFix($el)
 
-          debug('scrollIntoView:', $el[0])
-          // Mirror the scroll behavior onto both axes.
-          $el.get(0).scrollIntoView({ block: scrollBehavior, inline: scrollBehavior })
+          debug('scrollIntoView:', $el[0], scrollIntoViewOptions)
+          $el.get(0).scrollIntoView(scrollIntoViewOptions)
 
           removeScrollBehaviorFix()
 
@@ -546,12 +560,16 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         }
 
         if (options.ensure.visibility) {
-          // ensure element is visible but do not check if hidden by ancestors
-          // until nudging algorithm occurs
-          // https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
-
-          // @ts-ignore
-          Cypress.ensure.isStrictlyVisible($el, name, _log)
+          // The legacy strategy checks visibility in two stages: the element here, then
+          // — after the covering/nudging algorithm below — whether it's hidden by ancestors.
+          // The modern strategy does it in one checkVisibility-based call here, so it has
+          // no second stage. https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
+          if (Cypress.config('visibilityStrategy') === 'modern') {
+            Cypress.ensure.isVisible($el, name, _log)
+          } else {
+            // @ts-expect-error - isStrictlyVisible is not declared on the Cypress.ensure type
+            Cypress.ensure.isStrictlyVisible($el, name, _log)
+          }
         }
 
         if (options.ensure.notReadonly) {
@@ -587,7 +605,13 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
         $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
-        Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
+
+        // Only the legacy strategy runs this ancestor phase. The modern check above
+        // already covers ancestor display/visibility, and it intentionally omits the
+        // legacy overflow/out-of-bounds clipping check (matching modern `should('be.visible')`).
+        if (Cypress.config('visibilityStrategy') !== 'modern') {
+          Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
+        }
       }
 
       // pass our final object into onReady

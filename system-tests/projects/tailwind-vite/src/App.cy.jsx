@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from 'cypress/react'
 
-export const App = () => {
+const App = () => {
   return (
     <div className='bg-red-100' id='hello'>
       Hello
@@ -11,5 +11,6 @@ export const App = () => {
 
 it('works', () => {
   mount(<App />)
-  cy.get('#hello').should('have.css', 'background-color', 'rgb(254, 226, 226)')
+
+  cy.get('#hello').should('have.css', 'background-color', 'oklch(0.936 0.032 17.717)')
 })

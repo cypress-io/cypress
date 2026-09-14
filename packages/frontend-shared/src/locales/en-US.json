@@ -119,7 +119,6 @@
     }
   },
   "specPage": {
-    "pageTitle": "Specs",
     "newSpecButton": "New spec",
     "searchPlaceholder": "Search specs",
     "clearSearch": "Clear search field",
@@ -164,15 +163,6 @@
       "flakyRate": "{0}% flaky rate",
       "flakyRuns": "{flakyRuns} flaky runs / {totalRuns} total | {flakyRuns} flaky run / {totalRuns} total | {flakyRuns} flaky runs / {totalRuns} total",
       "lastFlaky": "Last run flaky | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
-    },
-    "hoverButton": {
-      "connect": "Connect",
-      "connectProject": "Connect project",
-      "connectProjectShort": "Connect",
-      "requestAccess": "Request access",
-      "requestAccessShort": "Request",
-      "requestSent": "Request sent",
-      "requestSentShort": "Sent"
     },
     "connectProjectButton": "Connect your project",
     "cloudLoginButton": "Log in to Cypress Cloud",
@@ -296,7 +286,6 @@
       "ariaLabel": "Pages"
     },
     "debug": {
-      "debugFeature": "New Debug feature",
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
       "errored": "Relevant run had an error",
@@ -317,6 +306,7 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "deprecated": "Deprecated",
     "installed": "Installed",
     "latest": "Latest",
     "seeAllReleases": "See all releases",
@@ -585,10 +575,6 @@
         "name": "CSP Allow List",
         "description": "Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running."
       },
-      "experimentalFastVisibility": {
-        "name": "Fast visibility",
-        "description": "Enables a new [visibility algorithm](https://on.cypress.io/experiments/#experimental-fast-visibility) that is faster and more accurate, but may break some tests that rely on specialized semantics of the legacy visibility algorithm."
-      },
       "experimentalInteractiveRunEvents": {
         "name": "Interactive run events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
@@ -611,10 +597,6 @@
         "name": "Single tab run mode",
         "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
       },
-      "experimentalSourceRewriting": {
-        "name": "Source rewriting",
-        "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
-      },
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
         "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information."
@@ -626,10 +608,6 @@
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
         "description": "Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback."
-      },
-      "experimentalMemoryManagement": {
-        "name": "Memory Management",
-        "description": "Enables support for improved memory management within Chromium-based browsers."
       }
     },
     "device": {
@@ -691,7 +669,6 @@
         },
         "selectProject": {
           "organization": "Organization",
-          "noOrganizationSelectedError": "required when creating a new project",
           "manageOrgs": "Manage organizations",
           "project": "Project",
           "projectName": "Project name",
@@ -830,14 +807,11 @@
     "foundMoreThan100Runs": "We found more than 100 runs.",
     "goToCypressCloud": "Go to Cypress Cloud to see all runs",
     "emptyStates": {
-      "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
-      "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
       "connectToCypressCloud": "Connect to Cypress Cloud",
       "connect": {
         "title": "Connect to debug your tests",
         "description": "Cypress Cloud is built for teams who need to do testing at scale."
       },
-      "noProjectTestMessage": "Connect a Cypress Cloud project to locally debug failed CI test runs",
       "noRuns": {
         "title": "Copy the command below to record your first run",
         "description": "Review the {0} to Cypress Cloud",
@@ -845,9 +819,6 @@
       },
       "gitRepositoryNotDetected": "Git repository not detected",
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that Git is properly configured for your project.",
-      "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
-      "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
-      "learnAboutProjectSetupSrText": "about project setup in Cypress",
       "noRunsFoundForBranch": "No runs found for your branch",
       "noRunsForBranchMessage": "Cypress uses Git to show runs for your branch. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.",
       "slideshow": {
@@ -917,11 +888,6 @@
       "link": "install Cypress"
     }
   },
-  "majorVersionWelcome": {
-    "title": "What's New in Cypress",
-    "actionContinue": "Continue",
-    "linkReleaseNotes": "View full changelog"
-  },
   "setupWizard": {
     "selectFramework": {
       "title": "Project setup",
@@ -957,7 +923,11 @@
     "running": "Running {browser}",
     "focus": "Focus",
     "close": "Close",
-    "switchTestingType": "Switch testing type"
+    "switchTestingType": "Switch testing type",
+    "deprecatedRibbon": "Deprecated",
+    "deprecatedTitle": "Deprecated browser",
+    "deprecatedBody": "Electron is deprecated as a test browser and will be removed in a future version of Cypress. Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.",
+    "deprecatedLink": "See supported browsers"
   },
   "runner": {
     "header": {
@@ -973,7 +943,6 @@
     },
     "selectorPlayground": {
       "matches": "No matches | {n} match | {n} matches",
-      "playgroundTooltip": "Click an element to see a suggested selector",
       "copyTooltip": "Copy to clipboard",
       "copyTooltipAction": "Copied!",
       "printTooltip": "Print to console",

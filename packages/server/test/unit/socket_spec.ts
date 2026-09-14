@@ -78,6 +78,10 @@ describe('lib/socket', () => {
         testingType: 'e2e',
         getCurrentBrowser: () => null,
       })
+      // the client below CONNECTs through this server like a proxied browser,
+      // which only happens on the MITM path — and the server refuses CONNECT
+      // until a launch resolves that path
+      .then(() => this.server.setNetworkMode(false))
       .then(() => {
         this.options = {
           getSavedState: sinon.stub(),
@@ -232,6 +236,30 @@ describe('lib/socket', () => {
       })
     })
 
+    describe('on(mocha)', () => {
+      // the driver emits mocha events with a variable number of arguments, so each
+      // must reach onMocha individually rather than as one array
+      it('forwards every argument to onMocha', function (done) {
+        this.options.onMocha = function (...args) {
+          expect(args).to.deep.eq(['test:before:run', { id: 'r3', title: 'does something' }])
+
+          return done()
+        }
+
+        return this.client.emit('mocha', 'test:before:run', { id: 'r3', title: 'does something' })
+      })
+
+      it('forwards a single argument', function (done) {
+        this.options.onMocha = function (...args) {
+          expect(args).to.deep.eq(['start'])
+
+          return done()
+        }
+
+        return this.client.emit('mocha', 'start')
+      })
+    })
+
     describe('on(backend:request, get:fixture)', () => {
       it('returns the fixture object', function (done) {
         const cb = function (resp) {
@@ -291,6 +319,19 @@ describe('lib/socket', () => {
       })
     })
 
+    describe('on(backend:request, reset:server:state)', () => {
+      it('forwards the per-test options to options.onResetServerState', function (done) {
+        sinon.stub(this.options, 'onResetServerState')
+
+        return this.client.emit('backend:request', 'reset:server:state', { blockHosts: ['*.pendo.io'] }, (resp) => {
+          expect(this.options.onResetServerState).to.be.calledWith({ blockHosts: ['*.pendo.io'] })
+          expect(resp.response).to.be.undefined
+
+          return done()
+        })
+      })
+    })
+
     describe('on(backend:request, wait:for:prompt:ready)', () => {
       it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
         const mockCyPrompt = {
@@ -340,6 +381,16 @@ describe('lib/socket', () => {
           expect(resp.response).to.deep.eq({
             error: errors.cloneErr(mockCyPrompt.error),
           })
+
+          return done()
+        })
+      })
+
+      it('returns false if the cy prompt lifecycle manager was never initialized', function (done) {
+        ctx.coreData.cyPromptLifecycleManager = undefined
+
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
+          expect(resp.response).to.deep.eq({ success: false })
 
           return done()
         })
@@ -836,6 +887,11 @@ describe('lib/socket', () => {
         getCurrentBrowser: () => null,
       })
 
+      // the client below CONNECTs through this server like a proxied browser,
+      // which only happens on the MITM path — and the server refuses CONNECT
+      // until a launch resolves that path
+      await this.server.setNetworkMode(false)
+
       const options = {
         getSavedState: sinon.stub(),
         onSavedStateChanged: sinon.spy(),
@@ -1080,17 +1136,17 @@ describe('lib/socket', () => {
 
         it('watches file by path', function () {
           this.socket.watchTestFileByPath(this.cfg, {
-            relative: `integration${path.sep}test2.coffee`,
+            relative: `integration${path.sep}test2.js`,
           })
 
-          expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.coffee`, this.cfg)
+          expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.js`, this.cfg)
         })
 
         it('watches file by relative path in spec object', function () {
           // this is what happens now with component / integration specs
           const spec = {
             absolute: `${path.sep}foo${path.sep}bar`,
-            relative: `relative${path.sep}to${path.sep}root${path.sep}test2.coffee`,
+            relative: `relative${path.sep}to${path.sep}root${path.sep}test2.js`,
           }
 
           this.socket.watchTestFileByPath(this.cfg, spec)
@@ -1102,10 +1158,10 @@ describe('lib/socket', () => {
           sinon.stub(fs, 'statAsync').resolves()
           this.cfg.watchForFileChanges = true
           this.socket.watchTestFileByPath(this.cfg, {
-            relative: 'integration/test2.coffee',
+            relative: 'integration/test2.js',
           })
 
-          preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.coffee')
+          preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.js')
 
           return setTimeout(() => {
             expect(this.io.emit).to.be.calledWith('watched:file:changed')
@@ -1145,9 +1201,9 @@ describe('lib/socket', () => {
             })
           })
 
-          it('calls statAsync on .coffee file', function () {
-            return this.socket.onTestFileChange('foo/bar_coffee.coffee').then(() => {
-              expect(fs.statAsync).to.be.calledWith('foo/bar_coffee.coffee')
+          it('calls statAsync on .js file', function () {
+            return this.socket.onTestFileChange('foo/bar_style.js').then(() => {
+              expect(fs.statAsync).to.be.calledWith('foo/bar_style.js')
             })
           })
 

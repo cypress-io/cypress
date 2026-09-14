@@ -1,48 +1,18 @@
-/* eslint-disable no-console */
 import { start as spawnStart } from './spawn'
 import util from '../util'
 import state from '../tasks/state'
 import os from 'os'
 import chalk from 'chalk'
 import prettyBytes from 'pretty-bytes'
-import _ from 'lodash'
 
 // color for numbers and show values
 const g = chalk.green
 // color for paths
 const p = chalk.cyan
 const red = chalk.red
-// urls
-const link = chalk.blue.underline
 
 // to be exported
 const methods: any = {}
-
-methods.findProxyEnvironmentVariables = (): any => {
-  return _.pick(process.env, ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'])
-}
-
-const maskSensitiveVariables = (obj: any): any => {
-  const masked = { ...obj }
-
-  if (masked.CYPRESS_RECORD_KEY) {
-    masked.CYPRESS_RECORD_KEY = '<redacted>'
-  }
-
-  return masked
-}
-
-methods.findCypressEnvironmentVariables = (): any => {
-  const isCyVariable = (val: any, key: string): boolean => key.startsWith('CYPRESS_')
-
-  return _.pickBy(process.env, isCyVariable)
-}
-
-const formatCypressVariables = (): any => {
-  const vars = methods.findCypressEnvironmentVariables()
-
-  return maskSensitiveVariables(vars)
-}
 
 methods.start = async (options: any = {}): Promise<void> => {
   const args = ['--mode=info']
@@ -50,33 +20,6 @@ methods.start = async (options: any = {}): Promise<void> => {
   await spawnStart(args, {
     dev: options.dev,
   })
-
-  console.log()
-  const proxyVars = methods.findProxyEnvironmentVariables()
-
-  if (_.isEmpty(proxyVars)) {
-    console.log('Proxy Settings: none detected')
-  } else {
-    console.log('Proxy Settings:')
-    _.forEach(proxyVars, (value: any, key: string) => {
-      console.log('%s: %s', key, g(value))
-    })
-
-    console.log()
-    console.log('Learn More: %s', link('https://on.cypress.io/proxy-configuration'))
-    console.log()
-  }
-
-  const cyVars = formatCypressVariables()
-
-  if (_.isEmpty(cyVars)) {
-    console.log('Environment Variables: none detected')
-  } else {
-    console.log('Environment Variables:')
-    _.forEach(cyVars, (value: any, key: string) => {
-      console.log('%s: %s', key, g(value))
-    })
-  }
 
   console.log()
   console.log('Application Data:', p(util.getApplicationDataFolder()))

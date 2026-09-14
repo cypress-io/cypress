@@ -36,6 +36,5 @@ yarn workspace @packages/proxy check-ts
 **Integration Points**
 
 - Used by `@packages/server` as the core HTTP interception layer.
-- Depends on `@packages/rewriter` to transform JS/HTML response bodies.
 - Depends on `@packages/net-stubbing` for `cy.intercept()` route matching.
 - Depends on `@packages/socket` for real-time communication with the browser.

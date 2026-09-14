@@ -17,7 +17,7 @@ import type { AfterSpecDurations } from '@packages/types'
 import { agent } from '@packages/network'
 import type { CombinedAgent } from '@packages/network'
 
-import { apiUrl, apiRoutes, makeRoutes } from '../routes'
+import { getApiUrl, apiRoutes, makeRoutes } from '../routes'
 import { getText } from '../../util/status_code'
 import * as enc from '../encryption'
 import getEnvInformationForProjectRoot from '../environment'
@@ -71,6 +71,7 @@ const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
   'protocolMountVersion': 2,
+  'filterTestsAction': true,
 }
 
 let responseCache = {}
@@ -465,7 +466,7 @@ export default {
           projectId: options.projectId,
           testingType: options.testingType,
           cloudApi: {
-            url: apiUrl,
+            url: getApiUrl(),
             retryWithBackoff: this.retryWithBackoff,
             requestPromise: this.rp,
           },
@@ -634,6 +635,7 @@ export default {
     return retryWithBackoff(async (attemptIndex) => {
       const { projectRoot, timeout, ...preflightRequestBody } = preflightInfo
 
+      const apiUrl = getApiUrl()
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
       const envInformation = await getEnvInformationForProjectRoot(projectRoot, process.pid.toString())

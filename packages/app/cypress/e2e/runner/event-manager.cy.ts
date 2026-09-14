@@ -20,7 +20,7 @@ describe('event-manager', () => {
       })
 
       // trigger a rerun
-      cy.get('.restart').click()
+      cy.reporter().find('.restart').click()
 
       // keep retrying until eventReceived becomes true
       cy.wrap(() => eventReceived).invoke('call').should('be.true')
@@ -39,7 +39,7 @@ describe('event-manager', () => {
       cy.wrap(() => eventManager.reporterBus.listeners('runner:next').length).invoke('call').should('equal', 1)
 
       // trigger a rerun
-      cy.get('.restart').click()
+      cy.reporter().find('.restart').click()
 
       shouldHaveTestResults({
         passCount: 2,

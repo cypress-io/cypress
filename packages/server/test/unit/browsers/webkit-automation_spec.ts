@@ -1,7 +1,9 @@
 import '../../spec_helper'
 import { expect } from 'chai'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
+import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
 import type { RunModeVideoApi } from '@packages/types'
+import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 // builds a minimal mock of the Playwright objects WebKitAutomation interacts with
 function createMockBrowser () {
@@ -84,7 +86,7 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
@@ -93,8 +95,21 @@ describe('lib/browsers/webkit-automation', () => {
       videoApi: opts.videoApi,
       userAgent: opts.userAgent,
       isHeadless: opts.isHeadless ?? true,
+      cdpSocketServer: opts.cdpSocketServer,
     })
   }
+
+  context('automation socket', () => {
+    it('attaches a bridge for the new page before navigating', async () => {
+      const cdpSocketServer = { attachCDPClient: sinon.stub().resolves() }
+
+      await createAutomation({ cdpSocketServer })
+
+      expect(cdpSocketServer.attachCDPClient).to.be.calledWith(sinon.match.instanceOf(WebKitCDPBridge))
+      // the bridge's window bindings must exist before the runner loads and connects
+      expect(cdpSocketServer.attachCDPClient).to.be.calledBefore(mock.getLastPage().goto)
+    })
+  })
 
   context('devicePixelRatio', () => {
     // https://github.com/cypress-io/cypress/issues/23808
@@ -220,6 +235,68 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
       expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+    })
+
+    const runnerFrame = (name: string): any => {
+      return {
+        name: () => name,
+        url: () => 'about:blank',
+        title: sinon.stub().resolves(''),
+        childFrames: () => [],
+      }
+    }
+
+    it('falls back to the only child frame the runner does not own', async () => {
+      const wk = await createAutomation()
+
+      const aut: any = {
+        name: () => '',
+        url: () => 'http://localhost:3000/fallback.html',
+        title: sinon.stub().resolves('Fallback'),
+        childFrames: () => [],
+      }
+
+      mock.getLastPage().mainFrame = () => {
+        return {
+          childFrames: () => {
+            return [
+              runnerFrame(REPORTER_FRAME_NAME),
+              aut,
+              runnerFrame(`${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - 0: 'some-project'`),
+              runnerFrame(`${SPEC_FRAME_NAME_IDENTIFIER}: '/__cypress/iframes/spec.js'`),
+            ]
+          },
+        }
+      }
+
+      expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
+      expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+    })
+
+    it('fails rather than picking a runner frame when the AUT frame is gone', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastPage().mainFrame = () => {
+        return {
+          childFrames: () => {
+            return [
+              runnerFrame(REPORTER_FRAME_NAME),
+              runnerFrame(`${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - 0: 'some-project'`),
+              runnerFrame(`${SPEC_FRAME_NAME_IDENTIFIER}: '/__cypress/iframes/spec.js'`),
+            ]
+          },
+        }
+      }
+
+      let error: Error | undefined
+
+      try {
+        await wk.onRequest('get:aut:url', {})
+      } catch (err) {
+        error = err
+      }
+
+      expect(error?.message).to.include('Could not find AUT frame')
     })
 
     it('throws when no AUT frame can be found', async () => {

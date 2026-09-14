@@ -77,15 +77,15 @@ describe('browsers', () => {
         })
 
         FIREFOX_KNOWN_BROWSER_CHANNELS.forEach((browser) => {
-          it(`${browser.channel}: fails validation when Firefox major version is below 135`, () => {
+          it(`${browser.channel}: fails validation when Firefox major version is below 140`, () => {
             // @ts-expect-error
             const result = browser.validator({
-              majorVersion: '134',
+              majorVersion: '139',
               displayName: 'Firefox',
             })
 
             expect(result.isSupported).toBe(false)
-            expect(result.warningMessage).toEqual('Cypress does not support running Firefox version 134 due to lack of WebDriver BiDi support. To use Firefox with Cypress, install version 135 or newer.')
+            expect(result.warningMessage).toEqual('Cypress does not support running Firefox version 139 due to an incomplete WebDriver BiDi implementation. To use Firefox with Cypress, install version 140 or newer.')
           })
         })
       })

@@ -1,4 +1,3 @@
-import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 import { DataContext } from '../DataContext'
 import type { CloudRun, RelevantRun } from '../gen/graphcache-config.gen'
@@ -236,7 +235,7 @@ export class DataEmitterActions extends DataEmitterEvents {
   subscribeTo <T> (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: T, filter?: (val: any) => boolean, onUnsubscribe?: (listenerCount: number) => void }): AsyncGenerator<T> {
     const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
-    let dfd: pDefer.DeferredPromise<any> | undefined
+    let dfd: PromiseWithResolvers<any> | undefined
     let pending: any[] = []
     let done = false
 
@@ -276,7 +275,7 @@ export class DataEmitterActions extends DataEmitterEvents {
         }
 
         if (pending.length === 0) {
-          dfd = pDefer()
+          dfd = Promise.withResolvers()
 
           return await dfd.promise
         }

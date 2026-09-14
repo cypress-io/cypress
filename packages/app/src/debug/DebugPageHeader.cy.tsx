@@ -1,4 +1,5 @@
-import { CloudRunStatus, DebugPageHeaderFragmentDoc } from '../generated/graphql-test'
+import type { CloudRunStatus } from '../generated/graphql-test'
+import { DebugPageHeaderFragmentDoc } from '../generated/graphql-test'
 import DebugPageHeader from './DebugPageHeader.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
@@ -152,7 +153,7 @@ describe('<DebugPageHeader />', {
     cy.mountFragment(DebugPageHeaderFragmentDoc, {
       onResult (result) {
         if (result) {
-          result.totalDuration = 3602000000
+          result.totalDuration = 3602000
         }
       },
       render: (gqlVal) => {
@@ -163,7 +164,7 @@ describe('<DebugPageHeader />', {
     })
 
     cy.findByTestId('debug-header-createdAt')
-    .should('have.text', 'Run Total Duration: 16h 33m 20s (an hour ago) ')
+    .should('have.text', 'Run Total Duration: 01h 00m 02s (an hour ago) ')
   })
 
   it('renders count up duration for running', () => {

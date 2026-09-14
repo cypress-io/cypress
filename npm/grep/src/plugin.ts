@@ -66,16 +66,14 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
   }
 
   const { specPattern, excludeSpecPattern } = config
-  const integrationFolder = expose.grepIntegrationFolder || process.cwd()
 
   const grepFilterSpecs = expose.grepFilterSpecs === true || String(expose.grepFilterSpecs).toLowerCase() === 'true'
 
   if (grepFilterSpecs) {
     debug('specPattern', specPattern)
     debug('excludeSpecPattern', excludeSpecPattern)
-    debug('integrationFolder', integrationFolder)
     const specFiles = globbySync(specPattern, {
-      cwd: integrationFolder,
+      cwd: process.cwd(),
       ignore: Array.isArray(excludeSpecPattern) ? excludeSpecPattern : [excludeSpecPattern],
       absolute: true,
     })

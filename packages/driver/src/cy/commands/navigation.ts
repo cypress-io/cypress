@@ -6,7 +6,8 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
-import { $Location, LocationObject } from '../../cypress/location'
+import type { LocationObject } from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
@@ -657,16 +658,22 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
   return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
 }
 
+export const resetServerState = (Cypress, state) => {
+  state('redirectionCount', {})
+
+  // `blockHosts` is enforced server-side from a process-global config, so only the primary
+  // origin sends it, already resolved with any test config override by the time this fires
+  const options = Cypress.isCrossOriginSpecBridge ? {} : { blockHosts: Cypress.config('blockHosts') ?? null }
+
+  // reset any state on the backend
+  // TODO: this is a bug in e2e it needs to be returned
+  return Cypress.backend('reset:server:state', options)
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   reset()
 
-  Cypress.on('test:before:run:async', () => {
-    state('redirectionCount', {})
-
-    // reset any state on the backend
-    // TODO: this is a bug in e2e it needs to be returned
-    return Cypress.backend('reset:server:state')
-  })
+  Cypress.on('test:before:run:async', () => resetServerState(Cypress, state))
 
   Cypress.on('test:before:run', reset)
 

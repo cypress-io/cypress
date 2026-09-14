@@ -1,7 +1,8 @@
 import SidebarNavigation from './SidebarNavigation.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
-import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
+import type { CloudRunStatus, SidebarNavigationFragment } from '../generated/graphql-test'
+import { SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
 import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { cloneDeep } from 'lodash'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'

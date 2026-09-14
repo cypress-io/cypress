@@ -1,5 +1,4 @@
 module.exports = {
-  'allowCypressEnv': false,
   'fixturesFolder': 'tests/_fixtures',
   'port': 8888,
   'projectId': 'abc123',
@@ -15,7 +14,7 @@ module.exports = {
   },
   'e2e': {
     'supportFile': 'tests/_support/spec_helper.js',
-    'specPattern': 'tests/**/*.(js|ts|coffee)',
+    'specPattern': 'tests/**/*.(js|ts)',
     'setupNodeEvents': (on, config) => config,
   },
 }

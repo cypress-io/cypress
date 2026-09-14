@@ -74,7 +74,9 @@ fragment AutomationMissing on CurrentProject {
 }
 `
 
-const props = withDefaults(defineProps<{ gql: AutomationMissingFragment | null }>(), { gql: null })
+const props = withDefaults(defineProps<{
+  gql?: AutomationMissingFragment | null
+}>(), { gql: null })
 
 // Have to spread gql props since binding it to v-model causes error when testing
 const selectedBrowser = ref({ ...props.gql?.activeBrowser })

@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es5" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */,
-    "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
+    "target": "es2022" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */,
+    "module": "es2022" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "lib": [
-      "es2015",
+      "es2022",
       "dom"
     ]                                         /* Specify library files to be included in the compilation:  */,
     "allowJs": true                           /* Allow javascript files to be compiled. */,
@@ -46,7 +47,7 @@
 
     /* Experimental Options */
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
-    "esModuleInterop": true
+    "esModuleInterop": true,
   },
   "include": ["src", "cypress/component/**/*.{ts,tsx}", "cypress/component/**/*.vue"],
   "exclude": ["**/Translated*.vue"]

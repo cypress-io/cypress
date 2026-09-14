@@ -1,5 +1,6 @@
 import { expectType } from './index'
-import { mount, VueTestUtils } from '../dist'
+import type { VueTestUtils } from '../dist'
+import { mount } from '../dist'
 import * as VTU from '@vue/test-utils'
 import { defineComponent } from 'vue'
 
@@ -14,4 +15,4 @@ expectType<Cypress.Chainable>(
 
 // Rewritten relative types match those copied from node_modules
 // see npm/vue/inline-types.ts for more info.
-expectType<typeof VueTestUtils['config']['global']>(VTU['config']['global'])
+expectType<typeof VueTestUtils['config']['global']>(VTU.config.global)

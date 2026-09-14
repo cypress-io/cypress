@@ -1,9 +1,11 @@
 /**
  * @vitest-environment jsdom
  */
-import { vi, describe, it, expect, beforeEach, Mock, MockedObject } from 'vitest'
+import type { Mock, MockedObject } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 
-import addCommand, { PressCommand } from '../../../../../src/cy/commands/actions/press'
+import type { PressCommand } from '../../../../../src/cy/commands/actions/press'
+import addCommand from '../../../../../src/cy/commands/actions/press'
 import type { $Cy } from '../../../../../src/cypress/cy'
 import type { StateFunc } from '../../../../../src/cypress/state'
 import $errUtils from '../../../../../src/cypress/error_utils'

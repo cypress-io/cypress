@@ -1,3 +1,5 @@
+import { debug } from '../debug'
+
 export type ShouldLogRequestFacts = {
   matchingRoutes?: Array<{ staticResponse?: { log?: boolean } }>
   resourceType?: string
@@ -12,15 +14,25 @@ export function shouldLogRequest (facts: ShouldLogRequestFacts): boolean {
     const lastMatchingRoute = facts.matchingRoutes[0]
 
     if (!lastMatchingRoute.staticResponse) {
+      debug.core('shouldLogRequest true (matching intercept without static response)')
+
       // No StaticResponse is set, therefore the request must be logged.
       return true
     }
 
     if (lastMatchingRoute.staticResponse.log !== undefined) {
-      return Boolean(lastMatchingRoute.staticResponse.log)
+      const shouldLog = Boolean(lastMatchingRoute.staticResponse.log)
+
+      debug.core('shouldLogRequest %s (staticResponse.log)', shouldLog)
+
+      return shouldLog
     }
   }
 
+  const shouldLog = facts.resourceType === 'fetch' || facts.resourceType === 'xhr'
+
+  debug.core('shouldLogRequest %s (resourceType %s)', shouldLog, facts.resourceType ?? 'unknown')
+
   // 2. Otherwise, only log if it is an XHR or fetch.
-  return facts.resourceType === 'fetch' || facts.resourceType === 'xhr'
+  return shouldLog
 }

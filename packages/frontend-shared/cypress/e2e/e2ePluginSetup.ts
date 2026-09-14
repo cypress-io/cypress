@@ -5,20 +5,8 @@ hookRequire({ forceTypeScript: false })
 // Important!!! Ensure to import the prod dependencies (i.e. things that will be executing from the inner Cypress of Cypress in Cypress)
 // from ./prod-dependencies.ts as this is pre-loaded in the v8 snapshot via ./v8-snapshot-entry.ts. Otherwise, these dependencies
 // will not properly be marked as loaded in the v8 snapshot and may be reloaded when referenced from within the snapshot itself.
-import {
-  getOperationName,
-  Response,
-  makeGraphQLServer,
-  clearCtx,
-  DataContext,
-  globalPubSub,
-  setCtx,
-  buildSchema,
-  execute,
-  ExecutionResult,
-  GraphQLError,
-  parse,
-} from './prod-dependencies'
+import { getOperationName, Response, makeGraphQLServer, clearCtx, globalPubSub, setCtx, buildSchema, execute, GraphQLError, parse } from './prod-dependencies'
+import type { ExecutionResult, DataContext } from './prod-dependencies'
 
 import path from 'path'
 import execa from 'execa'
@@ -35,7 +23,6 @@ import nock from 'nock'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 import { CloudQuery } from '@packages/data-context/test/graphql/stubCloudTypes'
-import pDefer from 'p-defer'
 import { Readable } from 'stream'
 
 const pkg = require('@packages/root')
@@ -548,7 +535,6 @@ async function makeE2ETasks () {
         require,
         process,
         sinon,
-        pDefer,
         projectDir (projectName) {
           if (!fixtureDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)

@@ -7,5 +7,6 @@ describe('e2e promises', () => {
     spec: 'promises.cy.js',
     snapshot: true,
     expectedExitCode: 2,
+    config: { screenshotOnRunFailure: false },
   })
 })

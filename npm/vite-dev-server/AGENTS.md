@@ -15,7 +15,7 @@ yarn test -- "<glob-pattern>"          # run vitest specs matching a glob
 ## Architecture
 
 - `src/devServer.ts` — main entry point; resolves framework config and starts the Vite dev server
-- `src/getVite.ts` — dynamically loads the correct installed version of Vite (5, 6, or 7)
+- `src/getVite.ts` — dynamically loads the correct installed version of Vite (8)
 - `src/resolveConfig.ts` — merges user Vite config with Cypress-specific overrides
 - `src/constants.ts` — shared constants
 - `src/plugins/` — Vite plugins injected by the dev server:
@@ -27,7 +27,7 @@ yarn test -- "<glob-pattern>"          # run vitest specs matching a glob
 ## Gotchas / Notes
 
 - Published as an ES module (`"type": "module"` in package.json). Importing from CommonJS contexts requires special handling.
-- Supports Vite 5, 6, 7, and 8 simultaneously via aliased dev dependencies (`vite-5`, `vite-6`, `vite-7`, `vite-8`) and dynamic version detection at runtime.
+- Supports Vite 8 simultaneously via aliased dev dependencies (`vite-8`) and dynamic version detection at runtime.
 - The package runs its own integration tests using a "cypress-in-cypress" approach (`cypress:run`/`cypress:open` scripts) that set special environment variables (`CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT`).
 
 ## Integration Points

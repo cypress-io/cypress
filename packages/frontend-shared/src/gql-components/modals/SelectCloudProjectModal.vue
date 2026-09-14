@@ -394,11 +394,12 @@ async function createOrConnectProject () {
       const err = error.graphQLErrors[0]
 
       const extension = err.extensions?.code
+      const extensionStr = typeof extension === 'string' ? extension : String(extension ?? '')
 
-      isInternalServerError.value = extension === 'INTERNAL_SERVER_ERROR'
+      isInternalServerError.value = extensionStr === 'INTERNAL_SERVER_ERROR'
 
       graphqlError.value = {
-        extension,
+        extension: extensionStr,
         message: err.message,
       }
 

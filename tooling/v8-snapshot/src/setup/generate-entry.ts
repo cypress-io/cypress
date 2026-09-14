@@ -2,6 +2,7 @@ import { generateSnapshotEntryFromEntryDependencies } from '../generator/snapsho
 import debug from 'debug'
 import { ensureDirSync } from '../utils'
 import path from 'path'
+import forceNorewrite from './force-no-rewrite'
 
 const logInfo = debug('cypress:snapgen:info')
 const logError = debug('cypress:snapgen:error')
@@ -40,6 +41,7 @@ export async function generateEntry ({
         pathsMapper,
         nodeModulesOnly,
         integrityCheckSource,
+        forceNorewrite,
       },
     )
 

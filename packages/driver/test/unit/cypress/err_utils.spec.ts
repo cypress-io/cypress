@@ -238,4 +238,39 @@ describe('err_utils', () => {
       })
     }
   })
+
+  describe('errByPath token replacement', () => {
+    beforeEach(() => {
+      errUtils.extendErrorMessages({
+        __test__: {
+          interpolated: 'You passed: `{{arg}}`',
+        },
+      })
+    })
+
+    // `$` sequences ($&, $`, $', $$) are special in String.prototype.replace's
+    // replacement string. Args are user-controlled (e.g. cy.type('price $5')),
+    // so they must be inserted verbatim rather than interpreted as patterns.
+    it('inserts `$` sequences in args literally', () => {
+      const cases = ['a$&b', 'x$`y', 'a$\'b', '$$', 'price $5']
+
+      cases.forEach((arg) => {
+        const err = errUtils.errByPath('__test__.interpolated', { arg })
+
+        expect(err.message).toBe(`You passed: \`${arg}\``)
+      })
+    })
+
+    it('replaces every occurrence of a repeated token', () => {
+      errUtils.extendErrorMessages({
+        __test__: {
+          repeated: '{{arg}} and {{arg}}',
+        },
+      })
+
+      const err = errUtils.errByPath('__test__.repeated', { arg: 'a$&b' })
+
+      expect(err.message).toBe('a$&b and a$&b')
+    })
+  })
 })

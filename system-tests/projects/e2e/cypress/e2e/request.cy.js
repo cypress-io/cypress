@@ -11,9 +11,7 @@ describe('redirects + requests', () => {
       '2293': 'true',
       '2293-session': 'true',
     })
-    .getCookies().then((cookies) => {
-      console.log(cookies)
-
+    .getCookies().should((cookies) => {
       expect(cookies[0].domain).to.eq('localhost')
       expect(cookies[0].name).to.eq('2293')
       expect(cookies[0].value).to.eq('true')

@@ -5,7 +5,8 @@ import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
 
-const docsUrl = 'https://on.cypress.io'
+export const docsUrl = 'https://on.cypress.io'
+
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
 
@@ -100,8 +101,8 @@ const notInstalledCI = (executable: string): any => {
 
     Reasons it may be missing:
 
-    - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
-    - You ran 'npm install' at an earlier build step but did not persist: ${util.getCacheDir()}
+    - You're caching 'node_modules' but are not caching this path: ${state.getCacheDir()}
+    - You ran 'npm install' at an earlier build step but did not persist: ${state.getCacheDir()}
 
     Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
 
@@ -149,7 +150,7 @@ const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
 const invalidSmokeTestDisplayError = {
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution (msg: string): string {
+  solution (msg?: string): string {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 

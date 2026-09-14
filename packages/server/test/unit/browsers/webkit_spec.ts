@@ -16,6 +16,8 @@ describe('lib/browsers/webkit', () => {
     let options
     let automation
     let webkit
+    let wkAutomation
+    let wkInstance
 
     beforeEach(async () => {
       browser = {}
@@ -38,9 +40,11 @@ describe('lib/browsers/webkit', () => {
           }),
         },
       }
-      const wkAutomation = {
+
+      wkInstance = { reset: sinon.stub().resolves() }
+      wkAutomation = {
         WebKitAutomation: {
-          create: sinon.stub().resolves({}),
+          create: sinon.stub().resolves(wkInstance),
         },
       }
 
@@ -70,6 +74,50 @@ describe('lib/browsers/webkit', () => {
       await webkit.open(browser as any, 'http://the.url', options as any, automation as any)
 
       expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+    })
+
+    it('passes the cdpSocketServer through to the automation', async () => {
+      (plugins.has as any).returns(false)
+
+      const cdpSocketServer = { attachCDPClient: sinon.stub() }
+
+      await webkit.open(browser as any, 'http://the.url', options as any, automation as any, cdpSocketServer as any)
+
+      expect(wkAutomation.WebKitAutomation.create).to.be.calledWithMatch({ cdpSocketServer })
+    })
+
+    context('#connectToNewSpec', () => {
+      let specOptions
+
+      beforeEach(async () => {
+        (plugins.has as any).returns(false)
+
+        specOptions = { url: 'http://the.url', onInitializeNewBrowserTab: sinon.stub().resolves(), downloadsFolder: '/tmp/downloads' }
+      })
+
+      it('updates the automation socket server for the new spec', async () => {
+        const original = { attachCDPClient: sinon.stub() }
+        const replacement = { attachCDPClient: sinon.stub() }
+
+        await webkit.open(browser as any, 'http://the.url', options as any, automation as any, original as any)
+        wkInstance.cdpSocketServer = original
+
+        await webkit.connectToNewSpec(browser as any, specOptions, automation as any, replacement as any)
+
+        expect(wkInstance.cdpSocketServer).to.equal(replacement)
+        expect(wkInstance.reset).to.be.called
+      })
+
+      it('preserves the existing automation socket server when none is passed', async () => {
+        const original = { attachCDPClient: sinon.stub() }
+
+        await webkit.open(browser as any, 'http://the.url', options as any, automation as any, original as any)
+        wkInstance.cdpSocketServer = original
+
+        await webkit.connectToNewSpec(browser as any, specOptions, automation as any)
+
+        expect(wkInstance.cdpSocketServer).to.equal(original)
+      })
     })
   })
 

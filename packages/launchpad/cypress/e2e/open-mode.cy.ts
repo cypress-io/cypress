@@ -82,7 +82,7 @@ describe('Launchpad: Open Mode', () => {
             'x-framework': 'react',
             'x-dev-server': 'webpack',
             'x-notifications': 'failed',
-            'x-dependencies': 'typescript@5.3.3',
+            'x-dependencies': o.sinon.match(/^typescript@\d+\.\d+\.\d+/),
           },
         })
       })
@@ -122,7 +122,9 @@ describe('Launchpad: Open Mode', () => {
         cy.loginUser()
         cy.visitLaunchpad()
         cy.get('h1').should('contain', 'Choose a browser')
-        cy.withCtx((ctx, o) => {
+        // The manifest request fires asynchronously from the version-data query and can
+        // resolve after the 'Choose a browser' page renders, so retry until it has fired.
+        cy.withRetryableCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
               'x-logged-in': 'true',

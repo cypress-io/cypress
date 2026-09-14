@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-import { Cohort } from '@packages/types'
+import type { Cohort } from '@packages/types'
 import { cache } from '../../lib/cache'
 import * as cohorts from '../../lib/cohorts'
 

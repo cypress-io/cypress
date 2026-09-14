@@ -1,5 +1,6 @@
 import { observable, makeObservable } from 'mobx'
-import Instrument, { InstrumentProps } from '../instruments/instrument-model'
+import type { InstrumentProps } from '../instruments/instrument-model'
+import Instrument from '../instruments/instrument-model'
 
 export interface AgentProps extends InstrumentProps {
   callCount: number

@@ -1,6 +1,8 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest'
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest'
 import os from 'os'
-import si, { Systeminformation } from 'systeminformation'
+import path from 'path'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import util from '../../lib/util'
 import { errors, getError, formErrorText } from '../../lib/errors'
 
@@ -17,6 +19,10 @@ vi.mock('os', async (importActual) => {
     },
   }
 })
+
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
 
 vi.mock('systeminformation', async (importActual) => {
   const actual = await importActual()
@@ -118,6 +124,7 @@ describe('errors', function () {
         solution: 42,
       }
 
+      // @ts-expect-error - the invalid solution type is what this asserts on
       await expect(formErrorText(error)).rejects.toThrow()
     })
 
@@ -125,6 +132,31 @@ describe('errors', function () {
       const text: string = await formErrorText(errors.invalidSmokeTestDisplayError, 'current message', 'prev message')
 
       expect(text).toMatchSnapshot()
+    })
+  })
+
+  describe('.errors.notInstalledCI', function () {
+    const originalCacheFolder = process.env.CYPRESS_CACHE_FOLDER
+
+    afterEach(() => {
+      if (originalCacheFolder === undefined) {
+        delete process.env.CYPRESS_CACHE_FOLDER
+      } else {
+        process.env.CYPRESS_CACHE_FOLDER = originalCacheFolder
+      }
+    })
+
+    it('names the overridden cache folder in the paths to persist', async () => {
+      const cacheFolder = path.resolve('/tmp', 'custom-cypress-cache')
+
+      process.env.CYPRESS_CACHE_FOLDER = cacheFolder
+
+      const executable = path.join(cacheFolder, '1.2.3', 'Cypress', 'Cypress')
+      const text: string = await formErrorText(errors.notInstalledCI(executable))
+
+      expect(text).toContain(`are not caching this path: ${cacheFolder}`)
+      expect(text).toContain(`did not persist: ${cacheFolder}`)
+      expect(text).not.toContain(util.getCacheDir())
     })
   })
 })

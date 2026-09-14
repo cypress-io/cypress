@@ -3,7 +3,7 @@ const snapshot = require('snap-shot-it')
 import type { SpawnOptions, ChildProcess } from 'child_process'
 import stream from 'stream'
 import { expect } from './spec_helper'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
@@ -14,6 +14,7 @@ import {
   pathUpToProjectName,
   normalizeStdout,
   browserNameVersionRe,
+  teardownBudgetNoticeRe,
 } from './normalizeStdout'
 
 const isCi = require('ci-info').isCI
@@ -21,21 +22,17 @@ const isCi = require('ci-info').isCI
 require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
-let cp = require('child_process')
+const cp = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
-const http2 = require('http2')
 const human = require('human-interval')
 const morgan = require('morgan')
-const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const treeKill = require('tree-kill')
 const { once } = require('events')
 const os = require('os')
 const { create: createHttpsServer } = require('@packages/https-proxy/test/helpers/https_server')
-const { options: httpsServerTlsOptions } = require('@packages/https-proxy/test/helpers/certs')
-const { createHttp2NativeRouter } = require('./http2-native-server')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const settings = require(`@packages/server/lib/util/settings`)
@@ -281,19 +278,6 @@ type Server = {
    * If set, use `@packages/https-proxy`'s CA to set up self-signed HTTPS.
    */
   https?: boolean
-  /**
-   * If set, serve over HTTP/2 (requires TLS; implies `https`).
-   */
-  http2?: boolean
-  /**
-   * If set with `http2`, route via the native HTTP/2 `stream` API instead of Express.
-   * Required for server push and other features that need `Http2Stream.pushStream`.
-   */
-  http2Native?: boolean
-  /**
-   * Register native HTTP/2 stream routes when `http2Native` is set.
-   */
-  onHttp2NativeServer?: (register: import('./http2-native-server').Http2NativeRegister) => void
   /**
    * If set, use `express.static` middleware to serve the e2e project's static assets.
    */
@@ -582,12 +566,31 @@ function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) 
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
 
-cp = Bluebird.promisifyAll(cp)
-
 const processEnvCache = _.clone(process.env)
 
-Bluebird.config({
-  longStackTraces: true,
+// The budget notices are stripped from snapshots (see normalizeStdout) because whether teardown fits in
+// its budget depends on how loaded the machine is, not on the run. Tally them here so the trend stays
+// visible in the job output, and so a root-cause fix can be told apart from a quiet machine.
+const teardownBudget = { runs: 0, runsOverBudget: 0, notices: 0 }
+
+const recordTeardownBudget = (output: string) => {
+  const notices = output.match(teardownBudgetNoticeRe())
+
+  teardownBudget.runs++
+
+  if (notices) {
+    teardownBudget.runsOverBudget++
+    teardownBudget.notices += notices.length
+  }
+}
+
+process.on('exit', () => {
+  if (!teardownBudget.runs) {
+    return
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
 })
 
 // extract the 'Difference' section from a snap-shot-it error message
@@ -663,7 +666,7 @@ const ensurePort = function (port) {
 }
 
 const startServer = function (obj) {
-  const { onServer, port, https, http2: useHttp2, http2Native: useHttp2Native, onHttp2NativeServer } = obj
+  const { onServer, port, https } = obj
 
   ensurePort(port)
 
@@ -671,30 +674,7 @@ const startServer = function (obj) {
 
   let srv
 
-  // Strict h2-only origin: HTTP/1.1 clients are ALPN-rejected with a 403
-  // "Missing ALPN Protocol", keeping failures h2-specific. This includes
-  // cy.request, which is acceptable until it grows an h2 backend.
-  const http2ServerOptions = {
-    ...httpsServerTlsOptions,
-    allowHTTP1: false,
-  }
-
-  if (useHttp2 && useHttp2Native) {
-    const { register, onStream } = createHttp2NativeRouter()
-
-    if (typeof onHttp2NativeServer === 'function') {
-      onHttp2NativeServer(register)
-    }
-
-    srv = http2.createSecureServer(http2ServerOptions)
-    srv.on('stream', onStream)
-  } else if (useHttp2) {
-    srv = http2.createSecureServer(http2ServerOptions)
-
-    srv.on('request', (req, res) => {
-      app(req, res)
-    })
-  } else if (https) {
+  if (https) {
     srv = createHttpsServer(app)
   } else {
     srv = new http.Server(app)
@@ -702,22 +682,20 @@ const startServer = function (obj) {
 
   allowDestroy(srv)
 
-  if (!useHttp2Native) {
-    app.use(morgan('dev'))
+  app.use(morgan('dev'))
 
-    if (obj.cors) {
-      app.use(require('cors')())
-    }
-
-    if (obj.static) {
-      app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
-    }
+  if (obj.cors) {
+    app.use(require('cors')())
   }
 
-  return new Bluebird((resolve) => {
+  if (obj.static) {
+    app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
+  }
+
+  return new Promise((resolve) => {
     return srv.listen(port, () => {
       console.log(`listening on port: ${port}`)
-      if (typeof onServer === 'function' && !useHttp2Native) {
+      if (typeof onServer === 'function') {
         onServer(app, srv)
       }
 
@@ -740,7 +718,11 @@ const copy = function (projectPath: string) {
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
     const copy = (src, dest) => {
-      return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
+      return fs.copy(src, dest, { overwrite: true }).catch((err) => {
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      })
     }
 
     // copy each of the screenshots and videos
@@ -920,7 +902,7 @@ const systemTests = {
       if (options.servers) {
         const optsServers = [].concat(options.servers)
 
-        const servers = await Bluebird.map(optsServers, startServer)
+        const servers = await Promise.all(optsServers.map((server) => startServer(server)))
 
         this.servers = servers
       } else {
@@ -937,7 +919,7 @@ const systemTests = {
 
       if (s) {
         try {
-          await Bluebird.map(s, stopServer)
+          await Promise.all(s.map((srv) => stopServer(srv)))
         } catch (err) {
           console.error('Error stopping server', err)
           throw err
@@ -1102,6 +1084,8 @@ const systemTests = {
           stderr,
         }
       }
+
+      recordTeardownBudget(stdout)
 
       const { expectedExitCode, skipExitSignalAssertion } = options
 

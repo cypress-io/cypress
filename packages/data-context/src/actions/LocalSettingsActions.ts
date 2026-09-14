@@ -1,5 +1,5 @@
-import { AllowedState, defaultPreferences, Editor, NotifyCompletionStatuses } from '@packages/types'
-import pDefer from 'p-defer'
+import { defaultPreferences, NotifyCompletionStatuses } from '@packages/types'
+import type { AllowedState, Editor } from '@packages/types'
 import _ from 'lodash'
 import Debug from 'debug'
 
@@ -52,7 +52,7 @@ export class LocalSettingsActions {
 
     debug('refresh local settings')
 
-    const dfd = pDefer<Editor[]>()
+    const dfd = Promise.withResolvers<Editor[]>()
 
     this.ctx.coreData.localSettings.refreshing = dfd.promise
 
@@ -78,6 +78,6 @@ export class LocalSettingsActions {
       await this.ctx._apis.localSettingsApi.setPreferences(preferences)
     }
 
-    dfd.resolve()
+    dfd.resolve(availableEditors)
   }
 }

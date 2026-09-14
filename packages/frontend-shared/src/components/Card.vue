@@ -29,7 +29,7 @@
       <component
         :is="icon"
         class="opacity-100"
-        :class="[ hoverIcon && !disabled ? 'group-hover:opacity-0' : undefined,
+        :class="[ hoverIcon != null && !disabled ? 'group-hover:opacity-0' : undefined,
                   iconClass]
         "
         data-cy="card-icon"
@@ -44,6 +44,7 @@
         'text-indigo-500': !disabled
       }"
       :disabled="disabled"
+      data-cy="card-title"
     >
       {{ title }}
     </button>

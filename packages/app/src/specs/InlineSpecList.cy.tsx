@@ -1,4 +1,5 @@
-import { Specs_InlineSpecListFragment, Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
+import type { Specs_InlineSpecListFragment } from '../generated/graphql-test'
+import { Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'

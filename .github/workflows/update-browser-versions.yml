@@ -41,24 +41,30 @@ jobs:
         run: CI=true yarn
       - name: Check for new Chrome versions
         id: get-versions
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { getVersions } = require('./scripts/github-actions/update-browser-versions.js')
 
             getVersions({ core })
-      - name: Determine name of new branch and if it already exists
+      - name: Check if an open PR already exists for the update branch
         id: check-branch
         env:
-          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.latest_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_beta_version }}-cft-from-${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH_NAME: update-browser-versions
         run: |
-          echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-          echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
+          pr_exists=$(gh pr list --repo ${{ github.repository }} --head "$BRANCH_NAME" --base "$BASE_BRANCH" --state open --json number --jq 'length > 0')
+          # A leftover branch from a closed PR would base the new PR on a stale fork point
+          if [[ "$pr_exists" != "true" ]] && git show-ref --verify --quiet "refs/remotes/origin/$BRANCH_NAME"; then
+            git push origin --delete "$BRANCH_NAME"
+          fi
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "pr_exists=$pr_exists" >> $GITHUB_OUTPUT
       - name: Check need for PR or branch update
         id: check-need-for-pr
         run: |
-          echo "needs_pr=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}" >> $GITHUB_OUTPUT
-          echo "needs_branch_update=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_pr=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.pr_exists != 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_branch_update=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.pr_exists == 'true' }}" >> $GITHUB_OUTPUT
       ## Update available and a branch/PR already exists
       - name: Checkout existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
@@ -66,7 +72,7 @@ jobs:
       - name: Check need for update on existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
         id: check-need-for-branch-update
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { checkNeedForBranchUpdate } = require('./scripts/github-actions/update-browser-versions.js')
@@ -80,7 +86,7 @@ jobs:
       ## Both
       - name: Update Browser Versions File
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { updateBrowserVersionsFile } = require('./scripts/github-actions/update-browser-versions.js')
@@ -92,7 +98,7 @@ jobs:
             })
       - name: Commit and push via API
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -112,7 +118,7 @@ jobs:
       ## Update available and a branch/PR already exists
       - name: Update PR Title
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -129,7 +135,7 @@ jobs:
       - name: Create Pull Request
         id: create-pr
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |

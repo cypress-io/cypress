@@ -35,7 +35,7 @@ export function installStudioExitNavigationGuard (router: Router, getSpecDirtyDa
 
     const blocked = guardUnsavedStudioChanges(store, () => {
       store.resetDirtyState()
-      router.push(to)
+      void router.push(to)
     })
 
     return !blocked

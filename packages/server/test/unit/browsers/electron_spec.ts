@@ -41,6 +41,9 @@ describe('lib/browsers/electron', () => {
         isHeadless: false,
       },
       onError: () => {},
+      // Electron is deprecated as a test browser, so every launch resolves to the
+      // legacy proxy path.
+      useBrowserNetworkInterception: false,
     } as unknown as BrowserLaunchOpts & { some: string }
 
     this.automation = new Automation({
@@ -487,9 +490,13 @@ describe('lib/browsers/electron', () => {
         expect(electron._setProxy).not.to.be.called
       }).then(() => {
         // @ts-expect-error
-        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, {
+          proxyServer: 'foo',
+          proxyBypassList: '<-loopback>,example.com',
+          onError: () => {},
+        }, undefined, undefined, { attachCDPClient: sinon.stub() })
       }).then(() => {
-        expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
+        expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo', '<-loopback>,example.com')
       })
     })
 
@@ -604,7 +611,7 @@ describe('lib/browsers/electron', () => {
     it('handles download links via cdp', function () {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
-        expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation)
+        expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation, false)
       })
     })
 
@@ -711,6 +718,34 @@ describe('lib/browsers/electron', () => {
             resourceType: 'Document',
           }],
         })
+      })
+
+      // Even if a launch asks for the browser-side path, Electron's own AUT
+      // header injection stays on the MITM automation - it does not hand Fetch
+      // ownership to the network runtime the way chrome.ts does. The flag
+      // still reaches initializeCDP - electron.ts's initializeCDP call reads
+      // it the same way chrome.ts does - so in a real launch the window
+      // bootstrap script would be included; this test pins the argument
+      // reaching it (initializeCDP itself is stubbed in this suite, so no
+      // script is actually assembled here).
+      it('keeps Fetch ownership when the browser-side network path is requested', async function () {
+        const onPageCriClientReady = sinon.stub().resolves()
+
+        await electron._launch(this.win, this.url, this.automation, {
+          ...this.options,
+          useBrowserNetworkInterception: true,
+          onPageCriClientReady,
+        }, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        expect(onPageCriClientReady).not.to.have.been.called
+
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
+        })
+
+        expect(utils.initializeCDP).to.have.been.calledWith(this.pageCriClient, this.automation, true)
       })
 
       it('does not add header when not a document', async function () {
@@ -1305,7 +1340,22 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: 'proxy rules',
-          proxyBypassRules: '<-loopback>',
+        })
+      })
+    })
+
+    it('sets configured proxy bypass rules for webContents', () => {
+      const webContents = {
+        session: {
+          setProxy: sinon.stub().resolves(),
+        },
+      }
+
+      return electron._setProxy(webContents, 'proxy rules', 'localhost,example.com')
+      .then(() => {
+        expect(webContents.session.setProxy).to.be.calledWith({
+          proxyRules: 'proxy rules',
+          proxyBypassRules: 'localhost,example.com',
         })
       })
     })

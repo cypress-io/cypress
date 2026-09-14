@@ -10,14 +10,15 @@ import path from 'path'
 import _ from 'lodash'
 import fs from 'fs'
 
-import { getError, CypressError } from '@packages/errors'
+import { getError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
 import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
 import { EventCollectorSource, GitDataSource } from '../sources'
-import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
-import pDefer from 'p-defer'
+import { ProjectConfigManager } from './ProjectConfigManager'
+import type { OnFinalConfigLoadedOptions } from './ProjectConfigManager'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
@@ -56,7 +57,7 @@ export class ProjectLifecycleManager {
   private _projectRoot: string | undefined
   private _configManager: ProjectConfigManager | undefined
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
-  private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
+  private _pendingInitialize?: PromiseWithResolvers<FullConfig>
   private _cachedInitialConfig: Cypress.ConfigOptions | undefined
   private _cachedFullConfig: FullConfig | undefined
   private _initializedProject: unknown | undefined
@@ -547,7 +548,6 @@ export class ProjectLifecycleManager {
 
   /**
    * Handles pre-initialization checks. These will display warnings or throw with errors if catastrophic.
-   * Returns false, if we're not ready to initialize due to needing to migrate
    *
    * @param projectRoot the project's root
    * @returns true if we can initialize and false if not
@@ -825,7 +825,7 @@ export class ProjectLifecycleManager {
   }
 
   async initializeRunMode (testingType: TestingType | null) {
-    this._pendingInitialize = pDefer()
+    this._pendingInitialize = Promise.withResolvers()
 
     if (await this.waitForInitializeSuccess()) {
       if (!this.metaState.hasValidConfigFile) {

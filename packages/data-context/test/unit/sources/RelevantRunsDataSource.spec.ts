@@ -1,11 +1,11 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import debugLib from 'debug'
 
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunsDataSource } from '../../../src/sources'
 import { FAKE_PROJECT_WITH_ERROR, FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
-import { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
+import type { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 
 const debug = debugLib('cypress:data-context:test:unit:sources:RelevantRunsDataSource')
 

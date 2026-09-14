@@ -44,16 +44,15 @@ namespace CypressConfigTests {
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
+  Cypress.config('keystrokeDelay') // $ExpectType number | null
 }
 
 namespace CypressEnvTests {
   // Just making sure these are valid - no real type safety
-  Cypress.env('foo')
-  Cypress.env('foo', 'bar')
-  Cypress.env().foo
-  Cypress.env({
-    foo: 'bar',
-  })
+  cy.env(['KEY_1', 'KEY_2']) // $ExpectType Chainable<Record<string, any>>
+  cy.env(['KEY_1', 'KEY_2'], { log: false }) // $ExpectType Chainable<Record<string, any>>
+  cy.env(['KEY_1', 'KEY_2'], { timeout: 1000 }) // $ExpectType Chainable<Record<string, any>>
+  cy.env<{ KEY_1: string }>(['KEY_1'], { log: false, timeout: 1000 }) // $ExpectType Chainable<{ KEY_1: string; }>
 }
 
 namespace CypressExposeTests {
@@ -916,9 +915,7 @@ namespace CypressTestConfigOverridesTests {
   it('test', {
     animationDistanceThreshold: 10,
     defaultCommandTimeout: 6000,
-    env: {},
     expose: {},
-    execTimeout: 6000,
     includeShadowDom: true,
     requestTimeout: 6000,
     responseTimeout: 6000,
@@ -1205,7 +1202,10 @@ namespace CypressLocalStorageTests {
     result // $ExpectType StorageByOrigin
   })
   cy.getAllLocalStorage({ log: false })
+  cy.getAllLocalStorage({ timeout: 10 })
+  cy.getAllLocalStorage({ log: false, timeout: 10 })
   cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+  cy.getAllLocalStorage({ timeout: '10' }) // $ExpectError
 
   cy.clearAllLocalStorage().then((result) => {
     result // $ExpectType null
@@ -1217,7 +1217,10 @@ namespace CypressLocalStorageTests {
     result // $ExpectType StorageByOrigin
   })
   cy.getAllSessionStorage({ log: false })
+  cy.getAllSessionStorage({ timeout: 10 })
+  cy.getAllSessionStorage({ log: false, timeout: 10 })
   cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+  cy.getAllSessionStorage({ timeout: '10' }) // $ExpectError
 
   cy.clearAllSessionStorage().then((result) => {
     result // $ExpectType null
@@ -1302,19 +1305,22 @@ namespace CypressRequireTests {
   Cypress.require(123) // $ExpectError
 }
 
+// Regression guard: these globals are declared with `var` so they land on
+// `typeof globalThis`. The `window.` and `globalThis.` references below are the
+// only thing in this suite that fails if one is changed to `let` or `const`.
 namespace CypressGlobalsTests {
-  Cypress
-  cy
-  expect
-  assert
+  Cypress // $ExpectType Cypress & CyEventEmitter
+  cy // $ExpectType cy & CyEventEmitter
+  expect // $ExpectType ExpectStatic
+  assert // $ExpectType AssertStatic
 
-  window.Cypress
-  window.cy
-  window.expect
-  window.assert
+  window.Cypress // $ExpectType Cypress & CyEventEmitter
+  window.cy // $ExpectType cy & CyEventEmitter
+  window.expect // $ExpectType ExpectStatic
+  window.assert // $ExpectType AssertStatic
 
-  globalThis.Cypress
-  globalThis.cy
-  globalThis.expect
-  globalThis.assert
+  globalThis.Cypress // $ExpectType Cypress & CyEventEmitter
+  globalThis.cy // $ExpectType cy & CyEventEmitter
+  globalThis.expect // $ExpectType ExpectStatic
+  globalThis.assert // $ExpectType AssertStatic
 }

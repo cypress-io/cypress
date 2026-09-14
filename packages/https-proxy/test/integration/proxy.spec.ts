@@ -9,7 +9,7 @@ import { start as startProxy, stop as stopProxy, reset as resetProxy } from '../
 import { start as startHttpServer, stop as stopHttpServer } from '../helpers/http_server'
 import { start as startHttpsServer, stop as stopHttpsServer } from '../helpers/https_server'
 import fs from 'fs/promises'
-import { Server } from '../../lib/server'
+import type { Server } from '../../lib/server'
 
 describe('Proxy', () => {
   let proxy: Server

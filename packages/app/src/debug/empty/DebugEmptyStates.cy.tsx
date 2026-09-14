@@ -7,8 +7,9 @@ import DebugEmptyView from './DebugEmptyView.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { Promo_PromoSeenDocument, _PromoFragmentDoc } from '../../generated/graphql-test'
 import { DEBUG_PROMO_CAMPAIGNS, DEBUG_TAB_MEDIUM } from '../utils/constants'
+import type { VNode } from 'vue'
 
-function mountWithGql (component: JSX.Element) {
+function mountWithGql (component: VNode) {
   const recordEvent = cy.stub().as('recordEvent')
 
   cy.stubMutationResolver(Promo_PromoSeenDocument, (defineResult, args) => {

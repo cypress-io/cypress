@@ -9,6 +9,6 @@ describe('issue 9162', () => {
       failCount: 1,
     })
 
-    cy.contains('expected true to be false')
+    cy.reporter().contains('expected true to be false')
   })
 })

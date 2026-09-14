@@ -1,5 +1,4 @@
 import { describe, expect, it, jest } from '@jest/globals'
-import pDefer, { DeferredPromise } from 'p-defer'
 import EventEmitter from 'events'
 
 import type { SimpleGit } from 'simple-git'
@@ -52,7 +51,7 @@ describe('GitDataSource', () => {
   describe('Unit', () => {
     describe('in run mode', () => {
       it('does not load git info when setSpecs is called', async () => {
-        const revparseP = pDefer<void>()
+        const revparseP = Promise.withResolvers<void>()
 
         stubbedSimpleGit.revparse.mockImplementationOnce((opts: string) => {
           revparseP.resolve()
@@ -97,12 +96,12 @@ describe('GitDataSource', () => {
       const firstHashesReturnValue = ['abc']
       const secondHashes = [...firstHashes, { hash: 'efg' }]
       const secondHashesReturnValue = [...firstHashesReturnValue, 'efg']
-      let firstGitLogCall: DeferredPromise<void>
-      let secondGitLogCall: DeferredPromise<void>
+      let firstGitLogCall: PromiseWithResolvers<void>
+      let secondGitLogCall: PromiseWithResolvers<void>
 
       beforeEach(async () => {
-        firstGitLogCall = pDefer()
-        secondGitLogCall = pDefer()
+        firstGitLogCall = Promise.withResolvers()
+        secondGitLogCall = Promise.withResolvers()
         branchName = 'main'
         onBranchChange = jest.fn()
         onGitInfoChange = jest.fn()
@@ -124,7 +123,7 @@ describe('GitDataSource', () => {
         // #verifyGitRepo
 
         // constructor verifies the repo in open mode via #refreshAllGitData, but does not wait for it :womp:
-        const revparseP = pDefer<void>()
+        const revparseP = Promise.withResolvers<void>()
 
         stubbedSimpleGit.revparse.mockImplementationOnce((opts: string) => {
           revparseP.resolve()
@@ -138,7 +137,7 @@ describe('GitDataSource', () => {
         // #loadAndWatchCurrentBranch
 
         // next in initialization, it loads the current branch
-        const branchP = pDefer<void>()
+        const branchP = Promise.withResolvers<void>()
 
         // again, ignoring type warning re: chaining
         stubbedSimpleGit.branch.mockImplementationOnce((opts: P<'branch'>) => {
@@ -147,7 +146,7 @@ describe('GitDataSource', () => {
           return Promise.resolve({ current: branchName }) as unknown as R<'branch'>
         })
 
-        const onBranchChangeP = pDefer<void>()
+        const onBranchChangeP = Promise.withResolvers<void>()
 
         onBranchChange.mockImplementationOnce(() => onBranchChangeP.resolve())
 

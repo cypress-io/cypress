@@ -3,7 +3,7 @@ import { snapshotReporter } from './support/snapshot-reporter'
 
 // Returns wrapped attempt tag found within runnable containing selector
 const getAttemptTag = (sel: string) => {
-  return cy.get(`.test.runnable:contains(${sel}) .attempt-tag`)
+  return cy.reporter().find(`.test.runnable:contains(${sel}) .attempt-tag`)
 }
 
 describe('runner/cypress retries.ui.spec', {
@@ -25,7 +25,7 @@ describe('runner/cypress retries.ui.spec', {
       failCount: 0,
     })
 
-    cy.get('.test').should('have.length', 2)
+    cy.reporter().find('.test').should('have.length', 2)
   })
 
   it('collapses prev attempts and keeps final one open on failure', () => {
@@ -35,7 +35,7 @@ describe('runner/cypress retries.ui.spec', {
       failCount: 1,
     })
 
-    cy.get('.runnable-err-print').should('be.visible')
+    cy.reporter().find('.runnable-err-print').should('be.visible')
   })
 
   it('can toggle failed prev attempt open and log its error', { viewportHeight: 1200 }, () => {
@@ -49,7 +49,7 @@ describe('runner/cypress retries.ui.spec', {
       cy.spy(win.console, 'error').as('console_error')
     })
 
-    cy.contains('Attempt 1')
+    cy.reporter().contains('Attempt 1')
     .click()
     .closest('.attempt-item')
     .find('.runnable-err-print')
@@ -92,7 +92,7 @@ describe('runner/cypress retries.ui.spec', {
       },
     })
 
-    cy.get('.test.runnable:contains(t2)').then(($el) => {
+    cy.reporter().find('.test.runnable:contains(t2)').then(($el) => {
       expect($el).not.class('is-open')
       expect(stub).callCount(3)
     })
@@ -107,19 +107,19 @@ describe('runner/cypress retries.ui.spec', {
       failCount: 0,
     })
 
-    cy.get(attemptTag(1)).click().parentsUntil('.collapsible').last().parent().within(() => {
+    cy.reporter().find(attemptTag(1)).click().parentsUntil('.collapsible').last().parent().within(() => {
       cy.get('.instruments-container').should('contain', 'Spies / Stubs (1)')
       cy.get('.instruments-container').should('contain', 'Routes (1)')
       cy.get('.runnable-err').should('contain', 'AssertionError')
     })
 
-    cy.get(attemptTag(2)).click().parentsUntil('.collapsible').last().parent().within(() => {
+    cy.reporter().find(attemptTag(2)).click().parentsUntil('.collapsible').last().parent().within(() => {
       cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
       cy.get('.instruments-container').should('contain', 'Routes (2)')
       cy.get('.runnable-err').should('contain', 'AssertionError')
     })
 
-    cy.get(attemptTag(3)).parentsUntil('.collapsible').last().parent().within(() => {
+    cy.reporter().find(attemptTag(3)).parentsUntil('.collapsible').last().parent().within(() => {
       cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
       cy.get('.instruments-container').should('contain', 'Routes (2)')
       cy.get('.runnable-err').should('not.exist')
@@ -134,9 +134,9 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 0,
       })
 
-      cy.contains('test 2')
-      cy.contains('test 1').should('not.exist')
-      cy.contains('test 3').should('not.exist')
+      cy.reporter().contains('test 2')
+      cy.reporter().contains('test 1').should('not.exist')
+      cy.reporter().contains('test 3').should('not.exist')
     })
   })
 
@@ -148,7 +148,7 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 1,
       })
 
-      cy.contains('Although you have test retries')
+      cy.reporter().contains('Although you have test retries')
     })
 
     it('before all hooks are not run on the second attempt when fails outside of beforeAll', () => {
@@ -158,9 +158,9 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 0,
       })
 
-      cy.contains('test')
-      cy.contains('after all')
-      cy.contains('before all').should('not.exist')
+      cy.reporter().contains('test')
+      cy.reporter().contains('after all')
+      cy.reporter().contains('before all').should('not.exist')
     })
   })
 
@@ -172,28 +172,28 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 0,
       })
 
-      cy.contains('Attempt 1').click()
-      cy.get('.attempt-1 .hook-item .collapsible:contains(before each)').find('.command-state-failed')
-      cy.get('.attempt-1 .hook-item .collapsible:contains(before each (2))').should('not.exist')
-      cy.get('.attempt-1 .hook-item .collapsible:contains(test body)').should('not.exist')
-      cy.get('.attempt-1 .hook-item .collapsible:contains(after each)').should('not.exist')
-      cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
+      cy.reporter().contains('Attempt 1').click()
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(before each)').find('.command-state-failed')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(before each (2))').should('not.exist')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(test body)').should('not.exist')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(after each)').should('not.exist')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-      cy.contains('Attempt 2').click()
-      cy.get('.attempt-2 .hook-item .collapsible:contains(before each)')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(before each (2))')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(before each (3))').find('.command-state-failed')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(test body)').should('not.exist')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after each)')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
+      cy.reporter().contains('Attempt 2').click()
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(before each)')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(before each (2))')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(before each (3))').find('.command-state-failed')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(test body)').should('not.exist')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after each)')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-      cy.get('.attempt-3 .hook-item .collapsible:contains(before each)')
-      cy.get('.attempt-3 .hook-item .collapsible:contains(before each (2))')
-      cy.get('.attempt-3 .hook-item .collapsible:contains(before each (3))')
-      cy.get('.attempt-3 .hook-item .collapsible:contains(before each (4))')
-      cy.get('.attempt-3 .hook-item .collapsible:contains(test body)')
-      cy.get('.attempt-3 .hook-item .collapsible:contains(after each)')
-      cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(before each)')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(before each (2))')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(before each (3))')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(before each (4))')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(test body)')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(after each)')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(after all)')
     })
 
     it('beforeEach retried tests skip remaining tests in suite', () => {
@@ -205,7 +205,7 @@ describe('runner/cypress retries.ui.spec', {
       })
 
       // ensure the page is loaded before taking snapshot
-      cy.contains('skips this')
+      cy.reporter().contains('skips this')
     })
   })
 
@@ -219,28 +219,28 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 0,
       })
 
-      cy.contains('Attempt 1')
+      cy.reporter().contains('Attempt 1')
       .click()
       .then(shouldBeOpen)
 
-      cy.get('.attempt-1 .hook-item .collapsible:contains(after each (1))').find('.command-state-failed')
-      cy.get('.attempt-1 .hook-item .collapsible:contains(after each (2))')
-      cy.get('.attempt-1 .hook-item .collapsible:contains(after each (3))').should('not.exist')
-      cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(after each (1))').find('.command-state-failed')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(after each (2))')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(after each (3))').should('not.exist')
+      cy.reporter().find('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-      cy.contains('Attempt 2').click()
+      cy.reporter().contains('Attempt 2').click()
       .then(shouldBeOpen)
 
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))').find('.command-state-failed')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after each (1))')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after each (2))')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after each (3))').find('.command-state-failed')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-      cy.get('.attempt-tag').should('have.length', 3)
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
-      cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))')
-      cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
+      cy.reporter().find('.attempt-tag').should('have.length', 3)
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after each (1))')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after each (2))')
+      cy.reporter().find('.attempt-2 .hook-item .collapsible:contains(after each (3))')
+      cy.reporter().find('.attempt-3 .hook-item .collapsible:contains(after all)')
     })
 
     it('afterEach retried tests skip remaining tests in suite', () => {
@@ -261,10 +261,10 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 0,
       })
 
-      cy.contains('test 3').click()
+      cy.reporter().contains('test 3').click()
       getAttemptTag('test 3').first().click()
-      cy.contains('.attempt-1', 'after all').should('not.exist')
-      cy.contains('.attempt-2', 'after all')
+      cy.reporter().contains('.attempt-1', 'after all').should('not.exist')
+      cy.reporter().contains('.attempt-2', 'after all')
     })
 
     it('tests do not retry when afterAll fails', () => {
@@ -278,8 +278,8 @@ describe('runner/cypress retries.ui.spec', {
         cy.spy(win.console, 'error').as('console_error')
       })
 
-      cy.contains('Although you have test retries')
-      cy.get('.runnable-err-print').click()
+      cy.reporter().contains('Although you have test retries')
+      cy.reporter().find('.runnable-err-print').click()
       cy.get('@console_error').its('lastCall').should('be.calledWithMatch', 'Error')
     })
   })
@@ -329,7 +329,7 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 1,
       })
 
-      cy.get('.runnable-err')
+      cy.reporter().find('.runnable-err')
       .should(containText(`it('tries to set mocha retries', { retries: 2 }, () => `))
     })
 
@@ -340,7 +340,7 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 1,
       })
 
-      cy.get('.runnable-err')
+      cy.reporter().find('.runnable-err')
       .should(containText(`describe('suite 1', { retries: 0 }, () => `))
     })
 
@@ -351,7 +351,7 @@ describe('runner/cypress retries.ui.spec', {
         failCount: 1,
       })
 
-      cy.get('.runnable-err')
+      cy.reporter().find('.runnable-err')
       .should(containText(`describe('suite 1', { retries: 3 }, () => `))
     })
   })

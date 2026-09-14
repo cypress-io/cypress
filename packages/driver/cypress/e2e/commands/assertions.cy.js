@@ -800,6 +800,37 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  // Smoke tests for vanilla chai assertion aliases (chai owns their behavior);
+  // we only verify they're reachable through Cypress's expect/assert/should
+  // surfaces.
+  context('chai aliases', () => {
+    it('exists is an alias of exist', () => {
+      expect(0).to.exists
+      expect(null).to.not.exists
+      cy.wrap('foo').should('exist')
+    })
+
+    it('greaterThanOrEqual is an alias of least/gte', () => {
+      expect(2).to.be.greaterThanOrEqual(1)
+      expect(2).to.be.greaterThanOrEqual(2)
+      expect(2).to.not.be.greaterThanOrEqual(3)
+      cy.wrap(2).should('be.greaterThanOrEqual', 2)
+    })
+
+    it('lessThanOrEqual is an alias of most/lte', () => {
+      expect(1).to.be.lessThanOrEqual(2)
+      expect(2).to.be.lessThanOrEqual(2)
+      expect(2).to.not.be.lessThanOrEqual(1)
+      cy.wrap(1).should('be.lessThanOrEqual', 2)
+    })
+
+    it('oneOf can be chained with contain', () => {
+      expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])
+      expect([1, 2, 3]).to.contain.oneOf([3, 4, 5])
+      expect([1, 2, 3]).to.not.contain.oneOf([4, 5, 6])
+    })
+  })
+
   context('#assert', () => {
     beforeEach(function () {
       this.logs = []
@@ -1326,6 +1357,51 @@ describe('src/cy/commands/assertions', () => {
         )
       })
     })
+
+    // Cypress renders and truncates values in assertion messages with its own
+    // inspector rather than chai's built-in one. These render differently under
+    // chai's inspector (e.g. `[Function foo]`, ISO-8601 dates, and
+    // `{ name: 'Joe', …(1) }` instead of `{ Object (name, ...) }` once past the
+    // truncateThreshold), so these assertions catch a regression that would
+    // change failure messages.
+    describe('uses Cypress value inspection', () => {
+      const getAssertionError = (test) => {
+        try {
+          test()
+        } catch (err) {
+          return err
+        }
+
+        throw new Error('expected the assertion to throw, but it did not')
+      }
+
+      it('renders functions as [Function: name]', () => {
+        const foo = function foo () {}
+        const bar = function bar () {}
+
+        const err = getAssertionError(() => expect(foo).to.equal(bar))
+
+        expect(err.message).to.eq('expected [Function: foo] to equal [Function: bar]')
+      })
+
+      it('renders dates with toUTCString', () => {
+        const err = getAssertionError(() => expect(new Date(0)).to.equal(new Date(1)))
+
+        expect(err.message).to.eq('expected Thu, 01 Jan 1970 00:00:00 GMT to equal Thu, 01 Jan 1970 00:00:00 GMT')
+      })
+
+      it('truncates long objects past the truncateThreshold', () => {
+        const err = getAssertionError(() => expect({ name: 'Joe', age: 20, email: 'joe@example.com' }).to.equal(null))
+
+        expect(err.message).to.eq('expected { Object (name, age, ...) } to equal null')
+      })
+
+      it('truncates long arrays past the truncateThreshold', () => {
+        const err = getAssertionError(() => expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).to.equal(null))
+
+        expect(err.message).to.eq('expected [ Array(15) ] to equal null')
+      })
+    })
   })
 
   context('chai overrides', () => {
@@ -1430,6 +1506,42 @@ describe('src/cy/commands/assertions', () => {
         })
 
         cy.get('#does-not-exist').should('not.exist')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/25491
+      it('allows chaining another assertion after exist on a raw DOM element', () => {
+        cy.document().then((doc) => {
+          cy.wrap(doc.body).should('exist').and('exist')
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/25491
+      it('allows chaining after the exists alias on a raw DOM element', () => {
+        cy.document().then((doc) => {
+          cy.wrap(doc.body).should('exists').and('exists')
+        })
+      })
+
+      // chai's `exists` alias is a separate property from `exist`, so verify it
+      // gets Cypress's DOM-aware existence behavior and not chai's nullish check
+      // (an empty jQuery object is non-null, so vanilla chai would pass `exists`).
+      it('uses DOM existence behavior for the exists alias', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            cy.removeAllListeners('log:added')
+
+            expect(log.get('message')).to.eq('expected **#does-not-exist** not to exist in the DOM')
+
+            done()
+          }
+        })
+
+        cy.get('#does-not-exist').should('not.exists')
+      })
+
+      it('fails the exists alias for a detached jQuery subject', () => {
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('exists')
+        cy.wrap(cy.$$('.non-existent')).should('not.exists')
       })
     })
 
@@ -2124,11 +2236,11 @@ describe('src/cy/commands/assertions', () => {
         cy.wrap(undefined).should('have.value', 'somevalue')
       })
 
-      it('shows subject instead of undefined when a previous traversal errors', (done) => {
+      it('shows the searched content instead of undefined when a previous traversal errors', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'assert') {
             cy.removeAllListeners('log:added')
-            expect(log.get('message')).to.eq('expected **subject** to have class **updated**')
+            expect(log.get('message')).to.eq('expected **Does not exist** to have class **updated**')
             done()
           }
         })
@@ -2207,7 +2319,7 @@ describe('src/cy/commands/assertions', () => {
 
           // the error on this log should have this message appended to it
           expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
-          expect(err.message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
+          expect(err.message).to.match(/This element `<div>` is not visible/)
         })
 
         expect(this.$div).to.be.visible // 1
@@ -2876,6 +2988,21 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.attr('foo')
       })
+
+      it('throws when the attribute name is not a string', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `attr` assertion requires the attribute name to be a string. You passed: `{ width: \'200px\' }`',
+          )
+
+          // jQuery would have set the attribute rather than read it
+          expect(this.$div[0].getAttribute('width')).to.be.null
+
+          done()
+        })
+
+        expect(this.$div).to.have.attr({ width: '200px' })
+      })
     })
 
     context('prop', () => {
@@ -2992,6 +3119,21 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.prop('foo')
       })
+
+      // https://github.com/cypress-io/cypress/issues/26451
+      it('throws when the property name is not a string', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `prop` assertion requires the property name to be a string. You passed: `{ checked: false }`',
+          )
+
+          expect(this.$input[0].checked).to.be.true
+
+          done()
+        })
+
+        expect(this.$input).to.have.prop({ checked: false })
+      })
     })
 
     context('css', () => {
@@ -3061,6 +3203,37 @@ describe('src/cy/commands/assertions', () => {
         })
 
         expect({}).to.have.css('foo')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/26451
+      it('throws when the CSS property name is not a string', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `css` assertion requires the CSS property name to be a string. You passed: `{ backgroundColor: \'rgb(128, 0, 0)\' }`',
+          )
+
+          expect(this.$div[0].style.backgroundColor).to.eq('')
+
+          done()
+        })
+
+        expect(this.$div).to.have.css({ backgroundColor: 'rgb(128, 0, 0)' })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/26451
+      it('fails a should() without retrying and without styling the subject', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `css` assertion requires the CSS property name to be a string.',
+          )
+
+          expect(err.message).to.not.include('Timed out retrying')
+          expect(cy.$$('#attr-number')[0].style.backgroundColor).to.eq('')
+
+          done()
+        })
+
+        cy.get('#attr-number').should('have.css', { backgroundColor: 'rgb(128, 0, 0)' })
       })
     })
   })

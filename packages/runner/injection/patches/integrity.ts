@@ -1,4 +1,4 @@
-import constants from '@packages/rewriter/lib/constants.json'
+import constants from '@packages/proxy/lib/http/util/rewrite-constants.json'
 
 const STRIPPED_INTEGRITY_TAG = constants.STRIPPED_INTEGRITY_TAG
 

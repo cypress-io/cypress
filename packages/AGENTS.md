@@ -27,7 +27,6 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/network** — Node.js networking utilities: HTTP/HTTPS proxy-aware agents, CA certificate management, and connection helpers.
 - **@packages/network-tools** — Isomorphic (browser + Node.js) low-level networking utilities: CORS helpers, URI parsing, domain utilities.
 - **@packages/https-proxy** — Intercepts TLS connections by acting as a dynamic CA; generates per-hostname certificates on the fly using `node-forge`.
-- **@packages/rewriter** — Rewrites JS and HTML at proxy time to inject Cypress instrumentation (e.g., `document.domain` injection, spec bridge).
 
 ### Configuration & Data
 
@@ -48,6 +47,7 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/telemetry** — OpenTelemetry convenience wrapper for capturing performance spans and usage signals inside Cypress processes.
 - **@packages/icons** — Cypress icon assets (SVG, PNG, ICO) and build scripts that produce browser-consumable image files.
 - **@packages/stderr-filtering** — Utility for tagging and filtering noisy third-party stderr output into `debug` streams.
+- **@packages/agent-info** — Detects whether an AI coding agent invoked the current process, and which one, by fingerprinting environment variables.
 
 ### Build & Snapshot Infrastructure
 

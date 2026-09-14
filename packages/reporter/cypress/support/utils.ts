@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events'
-import CommandModel from './../../src/commands/command-model'
+import type { EventEmitter } from 'events'
+import type CommandModel from './../../src/commands/command-model'
 
 const { _ } = Cypress
 

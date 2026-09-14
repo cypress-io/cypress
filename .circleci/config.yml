@@ -24,6 +24,21 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
+  # (can also be set manually to run the Windows workflow)
+  run-windows-workflow:
+    type: boolean
+    default: false
+  # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
+  # Trigger Pipeline when a visual review is needed. Requires PERCY_TOKEN.
+  percy-enabled:
+    type: boolean
+    default: false
+  # Opt-in full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy)
+  # path on Chrome. Enable via Trigger Pipeline when investigating that path.
+  run-force-http1-tests:
+    type: boolean
+    default: false
 
 commands:
   persist:
@@ -165,6 +180,7 @@ jobs:
               name: Generate path-filtered pipeline parameters
               environment:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
+                PERCY_ENABLED: << pipeline.parameters.percy-enabled >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

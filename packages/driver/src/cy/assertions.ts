@@ -6,9 +6,6 @@ import $errUtils from '../cypress/error_utils'
 import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
 
-// TODO
-// bTagOpen + bTagClosed
-// are duplicated in assertions.coffee
 const butRe = /,? but\b/
 const bTagOpen = /\*\*/g
 const bTagClosed = /\*\*/g

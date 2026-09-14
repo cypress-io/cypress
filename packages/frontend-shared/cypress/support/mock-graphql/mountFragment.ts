@@ -10,8 +10,8 @@ import urql, { useQuery } from '@urql/vue'
 import type { TypedDocumentNode } from '@urql/vue'
 import type { FragmentDefinitionNode } from 'graphql'
 import { print } from 'graphql'
-import { SubscriptionHook, testUrqlClient } from './clientTestUrqlClient'
-import type { MutationResolverCallback as MutationResolver } from './clientTestUrqlClient'
+import { testUrqlClient } from './clientTestUrqlClient'
+import type { SubscriptionHook, MutationResolverCallback as MutationResolver } from './clientTestUrqlClient'
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
@@ -228,7 +228,7 @@ type MountFragmentConfig<T extends TypedDocumentNode<any, any>> = {
   /**
    * Render is passed the result of the "frag" and mounts the component under test
    */
-  render: (frag: Exclude<ResultOf<T>, undefined>) => JSX.Element
+  render: (frag: Exclude<ResultOf<T>, undefined>) => import('vue').VNode
   expectError?: boolean
 } & CyMountOptions<unknown>
 
@@ -239,7 +239,7 @@ type MountFragmentListConfig<T extends TypedDocumentNode<any, any>> = {
   count?: number
   variableTypes?: Record<keyof VariablesOf<T>, string>
   variables?: VariablesOf<T>
-  render: (frag: Exclude<ResultOf<T>, undefined>[]) => JSX.Element
+  render: (frag: Exclude<ResultOf<T>, undefined>[]) => import('vue').VNode
   onResult?: (result: ResultOf<T>, ctx: ClientTestContext) => ResultOf<T> | void
   expectError?: boolean
 } & CyMountOptions<unknown>

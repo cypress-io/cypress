@@ -9,8 +9,7 @@ import {
 @Component({
   selector: 'signals-optional-component',
   templateUrl: './signals-optional.component.html',
-  styleUrls: ['./signals-optional.component.scss'],
-  standalone: true,
+  styleUrls: ['./signals-optional.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignalsOptionalComponent {

@@ -1,11 +1,12 @@
 import crypto from 'crypto'
 import _ from 'lodash'
-import Bluebird from 'bluebird'
+import { setTimeout as delay } from 'node:timers/promises'
 import bodyParser from 'body-parser'
 import Debug from 'debug'
 import type { RequestHandler } from 'express'
 
-import { getExample, assertSchema, RecordSchemaVersions } from './validations/cloudValidations'
+import type { RecordSchemaVersions } from './validations/cloudValidations'
+import { getExample, assertSchema } from './validations/cloudValidations'
 
 import * as jose from 'jose'
 import base64Url from 'base64url'
@@ -224,11 +225,10 @@ export const routeHandlers: Record<string, RouteHandler> = {
   putScreenshots: {
     method: 'put',
     url: '/screenshots/:name',
-    res (req, res) {
-      return Bluebird.delay(300)
-      .then(() => {
-        return res.sendStatus(200)
-      })
+    async res (req, res) {
+      await delay(300)
+
+      return res.sendStatus(200)
     },
   },
   getCaptureScript: {

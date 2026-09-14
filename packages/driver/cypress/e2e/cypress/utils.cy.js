@@ -348,4 +348,23 @@ describe('driver/src/cypress/utils', () => {
       expect(encoded).to.equal('44K144Kk44OX44Oq44K544Gv5LiA55Wq')
     })
   })
+
+  context('.isValidHttpMethod', () => {
+    it('returns true for standard methods, case-insensitively', () => {
+      expect($utils.isValidHttpMethod('GET')).to.be.true
+      expect($utils.isValidHttpMethod('post')).to.be.true
+    })
+
+    it('returns true for the QUERY method', () => {
+      expect($utils.isValidHttpMethod('QUERY')).to.be.true
+      expect($utils.isValidHttpMethod('query')).to.be.true
+    })
+
+    it('returns false for unknown methods and non-strings', () => {
+      expect($utils.isValidHttpMethod('INVALID')).to.be.false
+      expect($utils.isValidHttpMethod('')).to.be.false
+      expect($utils.isValidHttpMethod(null)).to.be.false
+      expect($utils.isValidHttpMethod(undefined)).to.be.false
+    })
+  })
 })

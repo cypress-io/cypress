@@ -21,16 +21,24 @@
         alt=""
       />
       <div class="grow">
-        <button
-          class="box-border font-medium focus:outline-none text-left"
-          :class="{
-            'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
-            'text-jade-700': browser.isSelected,
-            'text-gray-500': browser.disabled || !browser.isVersionSupported
-          }"
-        >
-          {{ browser.displayName }}
-        </button>
+        <div class="flex items-center">
+          <button
+            class="box-border font-medium focus:outline-none text-left whitespace-nowrap"
+            :class="{
+              'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
+              'text-jade-700': browser.isSelected,
+              'text-gray-500': browser.disabled || !browser.isVersionSupported
+            }"
+          >
+            {{ browser.displayName }}
+          </button>
+          <Badge
+            v-if="browser.isDeprecated"
+            :label="t('topNav.deprecated')"
+            status="warning"
+            data-cy="deprecated-browser-badge"
+          />
+        </div>
         <div
           class="font-normal mr-[20px] text-gray-500 text-[14px] filter whitespace-nowrap group-focus-within:mix-blend-luminosity
           group-hover:mix-blend-luminosity
@@ -42,7 +50,7 @@
           </span>
         </div>
       </div>
-      <div>
+      <div class="pl-[16px]">
         <div class="flex items-center h-full align-middle">
           <template v-if="browser.isSelected">
             <div data-cy="top-nav-browser-list-selected-item">
@@ -80,6 +88,8 @@ import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import Tooltip from '../../components/Tooltip.vue'
+import Badge from '../../components/Badge.vue'
+import { sortBrowsersByDeprecation } from '../../utils/sortBrowsersByDeprecation'
 import _ from 'lodash'
 
 const { t } = useI18n()
@@ -94,6 +104,7 @@ fragment VerticalBrowserListItems on CurrentProject {
     version
     majorVersion
     isVersionSupported
+    isDeprecated
     warning
     disabled
   }
@@ -122,14 +133,14 @@ const props = withDefaults(defineProps <{
 })
 
 const browsers = computed(() => {
-  const alphaSortedBrowser = _.sortBy(props.gql.browsers ?? [], 'displayName')
+  const sortedBrowsers = sortBrowsersByDeprecation(props.gql.browsers ?? [])
 
-  const [selectedBrowser] = _.remove(alphaSortedBrowser, (browser) => browser.isSelected)
+  const [selectedBrowser] = _.remove(sortedBrowsers, (browser) => browser.isSelected)
 
   // move the selected browser to the top to easily see selected browser version at the top when opening the dropdown
-  alphaSortedBrowser.unshift(selectedBrowser)
+  sortedBrowsers.unshift(selectedBrowser)
 
-  return alphaSortedBrowser
+  return sortedBrowsers
 })
 
 const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)

@@ -23,6 +23,29 @@ describe('cy.env()', () => {
     })
   })
 
+  it('should log the requested names without their values', () => {
+    const logs: any[] = []
+
+    cy.on('log:added', (attrs, log) => {
+      if (attrs.name === 'env') {
+        logs.push(log)
+      }
+    })
+
+    cy.env(['CY_ENV_FOO', 'CY_ENV_BAR']).then(() => {
+      expect(logs).to.have.length(1)
+      expect(logs[0].get('message')).to.equal('CY_ENV_FOO, CY_ENV_BAR')
+
+      const consoleProps = logs[0].invoke('consoleProps')
+
+      expect(consoleProps.name).to.equal('env')
+      expect(consoleProps.type).to.equal('command')
+      expect(consoleProps.props).to.deep.equal({
+        'Env Vars': ['CY_ENV_FOO', 'CY_ENV_BAR'],
+      })
+    })
+  })
+
   it('should return undefined if passed a key that doesn\'t have a value', () => {
     cy.env(['CY_ENV_DOES_NOT_EXIST']).then(({ CY_ENV_DOES_NOT_EXIST }) => {
       expect(CY_ENV_DOES_NOT_EXIST).to.be.undefined

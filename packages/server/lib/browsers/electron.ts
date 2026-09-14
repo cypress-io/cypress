@@ -342,7 +342,7 @@ export = {
       ps = options.proxyServer
 
       if (ps) {
-        return this._setProxy(win.webContents, ps)
+        return this._setProxy(win.webContents, ps, options.proxyBypassList)
       }
     }
 
@@ -364,7 +364,7 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        utils.initializeCDP(pageCriClient, automation),
+        utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
         // Note that we are omitting `file_systems` as it is very non-performant to clear:
         // https://github.com/cypress-io/cypress/pull/32703
@@ -378,9 +378,13 @@ export = {
 
     // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
     if (cdpAutomation) {
-      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
-      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
-      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
+
+      if (pageCriClient) {
+        // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+        await cdpAutomation._handlePausedRequests(pageCriClient)
+        cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      }
     }
 
     await win.loadURL(url)
@@ -475,12 +479,11 @@ export = {
     return webContents.session.setUserAgent(userAgent)
   },
 
-  _setProxy (webContents, proxyServer) {
+  _setProxy (webContents, proxyServer, proxyBypassList?: string) {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
-      // bypass the proxy for loopback addresses
-      // https://github.com/cypress-io/cypress/issues/1872
-      proxyBypassRules: '<-loopback>',
+      // without any rules, Chromium's implicit rules keep loopback off the proxy
+      ...(proxyBypassList ? { proxyBypassRules: proxyBypassList } : {}),
     })
   },
 

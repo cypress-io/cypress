@@ -1,4 +1,6 @@
-function determineTagType (state: string) {
+import type { TagType } from '../lib/tag'
+
+function determineTagType (state: string): TagType {
   switch (state) {
     case 'failed':
       return 'failed-status'

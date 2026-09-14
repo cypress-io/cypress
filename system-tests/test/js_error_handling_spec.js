@@ -49,6 +49,7 @@ describe('e2e js error handling', () => {
     spec: 'js_error_handling_failing.cy.js',
     snapshot: true,
     expectedExitCode: 5,
+    config: { screenshotOnRunFailure: false },
     onStdout (stdout) {
       // firefox has a stack line for the cross-origin error that other browsers don't
       return stdout

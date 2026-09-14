@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest'
-import source_map_utils from '../../../src/cypress/source_map_utils'
+import type source_map_utils from '../../../src/cypress/source_map_utils'
 
 vi.mock('source-map', () => {
   const SourceMapConsumer = function (rawSourceMap) {

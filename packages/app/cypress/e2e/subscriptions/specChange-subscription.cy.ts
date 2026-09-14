@@ -164,7 +164,6 @@ describe('specChange subscription', () => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -194,9 +193,9 @@ e2e: {
     it('responds to specChange event for an added file', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -221,9 +220,9 @@ e2e: {
     it('responds to specChange event for a removed file', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -245,10 +244,10 @@ e2e: {
 
     it('handles removing the last file', () => {
       cy.contains('dom-content.spec').click()
-      cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+      cy.reporter().find('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
       cy.get('[data-cy=specs-list-panel]').should('be.visible')
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
       cy.withCtx(async (ctx, o) => {
         await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
       }, {
@@ -298,9 +297,9 @@ e2e: {
     it('responds to a cypress.config.js file change', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -313,7 +312,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -438,7 +436,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -464,7 +461,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {

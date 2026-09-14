@@ -1,5 +1,5 @@
 import '../../spec_helper'
-import { formatChromeFlags, formatElectronFlags } from '../../../lib/util/chromium_flags'
+import { formatChromeFlags, formatElectronFlags, DEFAULT_CHROME_FLAGS, DEFAULT_ELECTRON_FLAGS } from '../../../lib/util/chromium_flags'
 
 describe('lib/util/chromium_flags', () => {
   describe('#formatChromeFlags', () => {
@@ -24,6 +24,22 @@ describe('lib/util/chromium_flags', () => {
       const electronFlags = formatElectronFlags(flags)
 
       expect(electronFlags).to.deep.eq([{ name: 'one', value: '1' }, { name: 'two', value: '2' }, { name: 'three' }])
+    })
+  })
+
+  describe('DEFAULT_CHROME_FLAGS', () => {
+    it('disables HttpsUpgrades', () => {
+      const disableFeatures = DEFAULT_CHROME_FLAGS.find((flag) => flag.startsWith('--disable-features='))
+
+      expect(disableFeatures).to.include('HttpsUpgrades')
+    })
+  })
+
+  describe('DEFAULT_ELECTRON_FLAGS', () => {
+    it('disables HttpsUpgrades', () => {
+      const disableFeatures = DEFAULT_ELECTRON_FLAGS.find((flag) => flag.name === '--disable-features')
+
+      expect(disableFeatures?.value).to.include('HttpsUpgrades')
     })
   })
 })

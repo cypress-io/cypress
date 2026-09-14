@@ -8,5 +8,6 @@ export const stubBrowsers = longBrowsersList.map((browser, i): Browser => {
     ...testNodeId('Browser'),
     ...browser,
     isSelected: i === 0,
+    isDeprecated: browser.name === 'electron',
   }
 })

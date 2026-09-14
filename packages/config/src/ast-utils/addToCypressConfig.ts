@@ -7,7 +7,8 @@ import debugLib from 'debug'
 import { parse, print } from 'recast'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
-import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
+import type { ASTComponentDefinitionConfig } from './astConfigHelpers'
+import { addComponentDefinition, addE2EDefinition } from './astConfigHelpers'
 
 const debug = debugLib('cypress:config:addToCypressConfig')
 
@@ -161,33 +162,25 @@ function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }
       return dedent`
         import { defineConfig } from 'cypress'
 
-        export default defineConfig({
-          allowCypressEnv: false,
-        })
+        export default defineConfig({})
       `
     }
 
     return dedent`
       const { defineConfig } = require('cypress')
 
-      module.exports = defineConfig({
-        allowCypressEnv: false,
-      })
+      module.exports = defineConfig({})
     `
   }
 
   if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
     return dedent`
-      export default {
-        allowCypressEnv: false,
-      }
+      export default {}
     `
   }
 
   return dedent`
-    module.exports = {
-      allowCypressEnv: false,
-    }
+    module.exports = {}
   `
 }
 

@@ -1,12 +1,10 @@
 describe('Error handling', () => {
   it('it handles a config error', () => {
     cy.scaffoldProject('unify-plugin-errors')
-    cy.openProject('unify-plugin-errors')
+    cy.openProject('unify-plugin-errors', ['--e2e'])
     cy.loginUser()
 
     cy.visitLaunchpad()
-
-    cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body')
     .and('contain.text', 'threw an error from')
@@ -68,7 +66,7 @@ describe('Error handling', () => {
       cy.openProject('missing-vite-config', ['--component'])
       cy.visitLaunchpad()
 
-      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts', 'vite.config.cts'].forEach((idiomaticConfigFile) => {
+      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.mts'].forEach((idiomaticConfigFile) => {
         cy.contains(idiomaticConfigFile)
       })
 

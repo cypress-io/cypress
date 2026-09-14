@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 // @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from '../lib/tooltip'
 
 import Collapsible from '../collapsible/collapsible'
 import Tag from '../lib/tag'
@@ -23,7 +23,9 @@ const Route = observer(({ model }: RouteProps) => (
         tooltipMessage={`Aliased this route as: '${model.alias}'`}
         type='route'
         customClassName='route-alias-name'
-        content={model.alias}
+        // a route's alias is always the string passed to cy.intercept, never
+        // one of the object/array shapes the shared Alias type also allows
+        content={model.alias as string}
       />
     </td>
     <td className='route-num-responses'>{model.numResponses || '-'}</td>

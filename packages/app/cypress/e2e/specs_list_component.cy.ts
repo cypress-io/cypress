@@ -27,7 +27,9 @@ describe('App: Spec List (Component)', () => {
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
 
-    cy.get('[data-cy="runnable-header"]').should('be.visible')
+    // the reporter binds its `f` shortcut handler as it mounts (the same effect
+    // that adds the `mounted` class), so wait for that before pressing `f`
+    cy.reporter().find('.reporter.mounted')
     cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')

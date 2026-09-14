@@ -1,4 +1,10 @@
-describe('issue #5682 - backface visibility', () => {
+// These tests verify Cypress's detection of backface-visibility: hidden
+// rotated past 90 degrees as hidden — a behavior provided only by the
+// legacy ancestor-walking visibility algorithm. The modern algorithm
+// delegates to the browser's Element.checkVisibility() API which
+// intentionally does not analyze 3D transforms, so this regression
+// coverage runs only under visibilityStrategy: 'legacy'.
+describe('issue #5682 - backface visibility', { visibilityStrategy: 'legacy' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/issue-5682.html')
   })

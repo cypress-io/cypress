@@ -1,10 +1,12 @@
-import express, { Request } from 'express'
+import express from 'express'
+import type { Request } from 'express'
 import type { AddressInfo, Socket } from 'net'
-import { DataContext, getCtx, globalPubSub, GraphQLRequestInfo } from '../src'
-import pDefer from 'p-defer'
+import { DataContext, getCtx, globalPubSub } from '../src'
+import type { GraphQLRequestInfo } from '../src'
 import cors from 'cors'
 import { corsOriginDelegate, isOriginAllowed } from './corsOriginDelegate'
-import { SocketIONamespace, SocketIOServer } from '@packages/socket'
+import { SocketIOServer } from '@packages/socket'
+import type { SocketIONamespace } from '@packages/socket'
 import type { Server } from 'http'
 import { graphqlHTTP } from 'express-graphql'
 import serverDestroy from 'server-destroy'
@@ -16,7 +18,8 @@ import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { graphqlSchema } from './schema'
-import { DefinitionNode, DocumentNode, execute, Kind, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql'
+import { execute, Kind, parse } from 'graphql'
+import type { DefinitionNode, DocumentNode, OperationDefinitionNode, OperationTypeNode } from 'graphql'
 
 const debug = debugLib(`cypress-verbose:graphql:operation`)
 
@@ -34,7 +37,7 @@ globalPubSub.on('reset:data-context', (ctx) => {
 })
 
 export async function makeGraphQLServer () {
-  const dfd = pDefer<number>()
+  const dfd = Promise.withResolvers<number>()
   const app = express()
 
   app.use(cors(corsOriginDelegate))

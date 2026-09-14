@@ -5,7 +5,7 @@ import browserUtils from '../../../lib/browsers/utils'
 import { fs } from '../../../lib/util/fs'
 import * as detect from '@packages/launcher/lib/detect'
 import snapshot from 'snap-shot-it'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import _ from 'lodash'
 
 describe('lib/modes/info', () => {

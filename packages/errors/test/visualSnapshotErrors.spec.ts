@@ -215,6 +215,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    CLOUD_RERUN_FAILED_TESTS: () => {
+      return {
+        default: [{ message: 'Re-running only the tests that did not pass in the previous run.' }],
+      }
+    },
     CLOUD_API_RESPONSE_FAILED_RETRYING: () => {
       return {
         default: [{
@@ -510,6 +515,7 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+        beforeSpec: [err, 'beforeSpec'],
       }
     },
     CLOUD_PROTOCOL_CAPTURE_FAILURE: () => {
@@ -592,11 +598,6 @@ describe('visual error templates', () => {
     CLOUD_PROJECT_NOT_FOUND: () => {
       return {
         default: ['project-id-123', '/path/to/cypress.config.js'],
-      }
-    },
-    NO_PROJECT_ID: () => {
-      return {
-        default: ['/path/to/project/cypress.config.js'],
       }
     },
     NO_PROJECT_FOUND_AT_PROJECT_ROOT: () => {
@@ -689,6 +690,12 @@ describe('visual error templates', () => {
 
       return {
         default: ['/path/to/cypress.config.js', err],
+      }
+    },
+    TRUSTED_CERTIFICATES_LOAD_ERROR: () => {
+      return {
+        default: ['certs/server.crt.pem', makeErr()],
+        pem: ['trustedCertificates[0].pem', makeErr()],
       }
     },
     SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
@@ -927,6 +934,12 @@ describe('visual error templates', () => {
         default: [1, 'chrome', 62],
       }
     },
+    BROWSER_NETWORK_INTERCEPTION_ESCAPE: () => {
+      return {
+        default: ['https://www.example.com/dashboard', false],
+        runnerDocument: ['https://www.example.com/__/#/specs/runner?file=cypress/e2e/spec.cy.js', true],
+      }
+    },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {
       return {
         default: ['chrome'],
@@ -1096,6 +1109,12 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
@@ -1130,6 +1149,12 @@ describe('visual error templates', () => {
       }
     },
 
+    FORCE_HTTP1_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+
     INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
       return {
         default: [],
@@ -1137,6 +1162,11 @@ describe('visual error templates', () => {
     },
 
     INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+    BROWSER_ELECTRON_DEPRECATED: () => {
       return {
         default: [],
       }
@@ -1156,7 +1186,27 @@ describe('visual error templates', () => {
         default: ['http://localhost:8080'],
       }
     },
-    CYPRESS_ENV_DEPRECATION: () => {
+    ALLOW_CYPRESS_ENV_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+    EXEC_TIMEOUT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
+      return {
+        default: [],
+      }
+    },
+    VISIBILITY_STRATEGY_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
       return {
         default: [],
       }

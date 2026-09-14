@@ -53,12 +53,10 @@ interface StringValues {
 const _summaries: StringValues = {
   experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
-  experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalSingleTabRunMode: 'Runs all component specs in a single tab, trading spec isolation for faster run mode execution.',
   experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
   experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially',
   experimentalOriginDependencies: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
-  experimentalMemoryManagement: 'Enables support for improved memory management within Chromium-based browsers.',
 }
 
 /**
@@ -75,11 +73,9 @@ const _names: StringValues = {
   experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
   experimentalModifyObstructiveThirdPartyCode: 'Modify Obstructive Third Party Code',
   experimentalSingleTabRunMode: 'Single Tab Run Mode',
-  experimentalSourceRewriting: 'Improved Source Rewriting',
   experimentalWebKitSupport: 'WebKit Support',
   experimentalRunAllSpecs: 'Run All Specs',
   experimentalOriginDependencies: 'Origin Dependencies',
-  experimentalMemoryManagement: 'Memory Management',
 }
 
 /**

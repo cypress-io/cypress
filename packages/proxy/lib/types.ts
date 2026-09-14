@@ -40,7 +40,8 @@ export type CypressHeaderValue = string | string[] | number | undefined
 export interface CypressOutgoingResponseLike extends Writable {
   injectionNonce?: string
   isInitial: null | boolean
-  wantsInjection: CypressWantsInjection
+  // null = undecided; SetInjectionLevel only determines a level when unset
+  wantsInjection: CypressWantsInjection | null
   wantsSecurityRemoved: null | boolean
   body?: string | Readable
   destroyed: boolean

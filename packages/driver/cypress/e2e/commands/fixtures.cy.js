@@ -1,4 +1,4 @@
-const stripAnsi = require('strip-ansi')
+const { stripAnsi } = require('@packages/errors')
 
 const { assertLogLength } = require('../../support/utils')
 const { Promise } = Cypress

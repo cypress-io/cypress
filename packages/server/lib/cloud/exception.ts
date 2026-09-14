@@ -4,6 +4,7 @@ import api from './api'
 import user from './user'
 import * as system from '../util/system'
 import { stripPath } from './strip_path'
+import { isReportingDisabled } from './reporting_disabled'
 
 const { serializeError } = require('serialize-error')
 
@@ -64,8 +65,7 @@ const exception = {
   },
 
   async create (err: Error) {
-    if ((process.env['CYPRESS_INTERNAL_ENV'] !== 'production') ||
-       (process.env['CYPRESS_CRASH_REPORTS'] === '0')) {
+    if ((process.env['CYPRESS_INTERNAL_ENV'] !== 'production') || isReportingDisabled()) {
       return
     }
 

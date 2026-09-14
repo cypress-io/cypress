@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "experimentalDecorators": true,
-    "target": "es2020",
-    "module": "es2020",
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "lib": [
       "ESNext",
@@ -18,7 +19,6 @@
     ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
     "noPropertyAccessFromIndexSignature": true,
   },
   "include": ["src/**/*.*"],

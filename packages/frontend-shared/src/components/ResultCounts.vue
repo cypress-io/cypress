@@ -31,7 +31,8 @@ export interface ResultCountsProps {
   order?: string[]
 }
 
-import { computed, FunctionalComponent, SVGAttributes } from 'vue'
+import { computed } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
 import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'

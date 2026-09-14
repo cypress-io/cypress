@@ -1,0 +1,9 @@
+[31mA document served by a service worker was not intercepted by Cypress:[39m
+[31m[39m
+[31m[94mhttps://www.example.com/dashboard[39m[31m[39m
+[31m[39m
+[31mThe browser started the service worker and let it serve this document before Cypress could attach to it. The response kept its original headers and was invisible to [33mcy.intercept[39m[31m and Test Replay. If the document carries framebusting headers, the visit will time out.[39m
+[31m[39m
+[31mOnly the first escaped document in a spec is reported here. If this causes failures, set [33mforceHttp1[39m[31m to [33mtrue[39m[31m in your Cypress configuration to route traffic through Cypress's HTTP proxy, or configure [33mretries[39m[31m so an affected test re-runs after Cypress has attached to the worker.[39m
+[31m[39m
+[31mDetails: [94mhttps://github.com/cypress-io/cypress/issues/34674[39m[31m[39m

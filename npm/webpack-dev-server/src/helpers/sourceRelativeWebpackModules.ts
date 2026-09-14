@@ -48,9 +48,9 @@ export interface SourceRelativeWebpackResult {
 const originalModuleLoad = (Module as ModuleClass)._load
 const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 
-// We ship webpack@4 as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
+// We ship webpack as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
 // serves as our fallback.
-export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
+const cypressWebpackPath = (config: WebpackDevServerConfig) => {
   return require.resolve('@cypress/webpack-batteries-included-preprocessor', {
     paths: [config.cypressConfig.cypressBinaryRoot],
   })

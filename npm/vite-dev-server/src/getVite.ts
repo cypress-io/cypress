@@ -1,94 +1,76 @@
 import debugFn from 'debug'
 import { createRequire } from 'module'
 import path from 'path'
-import os from 'os'
-import type { ViteDevServerConfig } from './devServer.js'
+import { pathToFileURL } from 'url'
 import majorVersion from 'semver/functions/major.js'
+import type { ViteDevServerConfig } from './devServer.js'
 
 const debug = debugFn('cypress:vite-dev-server:getVite')
 
-export type Vite_7 = typeof import('vite-7')
+export type Vite = typeof import('vite-8')
 
-export type Vite_8 = typeof import('vite-8')
-
-class CJSNotSupportedError extends Error {
+export class ViteVersionNotSupportedError extends Error {
   constructor (message: string) {
     super(message)
-    this.name = 'CJSNotSupportedError'
+    this.name = 'ViteVersionNotSupportedError'
+  }
+}
+
+export class ViteNotInstalledError extends Error {
+  constructor (message: string) {
+    super(message)
+    this.name = 'ViteNotInstalledError'
   }
 }
 
 // "vite-dev-server" is bundled in the binary, so we need to require.resolve "vite"
 // from root of the active project since we don't bundle vite internally but rather
 // use the version the user has installed
-export async function getVite (config: ViteDevServerConfig): Promise<Vite_7 | Vite_8> {
-  const filePrefix = os.platform() === 'win32' ? 'file://' : ''
-
+export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
   try {
     const require = createRequire(import.meta.url)
     const vitePackageJsonPath = require.resolve('vite/package.json', { paths: [config.cypressConfig.projectRoot] })
-    const vitePackageJson = (await import(`${filePrefix}${vitePackageJsonPath}`, {
+
+    const vitePackageJsonUrl = pathToFileURL(vitePackageJsonPath).href
+    const vitePackageJson = (await import(vitePackageJsonUrl, {
       with: {
         type: 'json',
       },
     })).default
 
-    const viteExports = vitePackageJson.exports['.']
-    let esmPath = null
-    let cjsPath = null
-
-    // In Node 20, require.resolve in the ESM context returns the CJS path as if we were in a CJS context.
-    // In Node 22, this is not the case and the ESM context is returned correctly.
-    // In order to work around this, we need to check where the ESM path is so we can import the correct path.
-    // In Vite 7, the CJS build was removed so there is only a single string entry in the export.
-    // Otherwise, both builds exists in Vite 6 and under and we only want to get the ESM path.
-
     const majorVersionNumber = majorVersion(vitePackageJson.version)
 
-    if (majorVersionNumber >= 7) {
-      esmPath = viteExports
-    } else if (majorVersionNumber === 5) {
-      esmPath = viteExports.import.default
-      cjsPath = viteExports.require.default
-    } else {
-      esmPath = viteExports.import
-      cjsPath = viteExports.require
+    debug(`Found vite version v${majorVersionNumber}`)
+
+    if (majorVersionNumber < 8) {
+      // We know that vite < 8 will NOT work with the vite-dev-server.
+      // However, versions 8 or greater MAY work, but we are unsure of the future
+      // The cypress application will attempt to run versions of vite greater than 8, but will warn the user that this version is not expected
+      throw new ViteVersionNotSupportedError(`Vite 8 is the required version to use cypress/vite-dev-server. Found Vite version v${vitePackageJson.version}`)
     }
 
-    debug('vite ESM build path: %s', esmPath)
-    debug('vite CJS build path: %s', cjsPath)
+    const viteExports = vitePackageJson.exports['.']
 
-    try {
-      // try to import the ESM build of Vite
-      const esmViteImportPath = path.resolve(vitePackageJsonPath, '../', esmPath)
+    // Only attempt to import the ESM build of Vite.
+    // In Vite 7, the CJS build was removed so there is only a single string entry in the export.
+    // At time of writing, Vite 8 is our minimum supported version, so we can assume the ESM build is the only one we need to support.
 
-      debug('resolved esmViteImportPath as %s', esmViteImportPath)
+    // try to import the ESM build of Vite
+    const esmViteImportPath = path.resolve(vitePackageJsonPath, '../', viteExports)
 
-      const viteImport = await import(`${filePrefix}${esmViteImportPath}`)
+    debug('resolved esmViteImportPath as %s', esmViteImportPath)
 
-      return viteImport
-    } catch (err) {
-      if (majorVersionNumber >= 7) {
-        throw new CJSNotSupportedError(`CJS builds of vite ${majorVersionNumber} are not supported`)
-      }
+    const viteImportUrl = pathToFileURL(esmViteImportPath).href
+    const viteImport = await import(viteImportUrl)
 
-      // if the ESM build import fails, try to import the CJS build
-      debug('importing vite as ESM failed:', err)
-      debug('importing vite as CJS')
-      // Vite 4-6 both include the CJS distribution of Vite
-      const cjsViteImportPath = path.resolve(vitePackageJsonPath, '../', cjsPath)
-
-      debug('resolved cjsViteImportPath as %s', cjsViteImportPath)
-
-      const viteImport = await import(`${filePrefix}${cjsViteImportPath}`)
-
-      return viteImport.default
-    }
+    return viteImport
   } catch (err) {
-    if (err instanceof CJSNotSupportedError) {
+    if (err instanceof ViteVersionNotSupportedError) {
       throw err
     }
 
-    throw new Error(`Could not find "vite" in your project's dependencies. Please install "vite" to fix this error.\n\n${err}`)
+    debug(`vite version not found`)
+
+    throw new ViteNotInstalledError(`Could not find "vite" in your project's dependencies. Please install "vite" to fix this error.\n\n${err}`)
   }
 }

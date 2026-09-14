@@ -326,19 +326,11 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     1_fails.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails (fai     (1280x633)
-     led).png                                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails agai     (1280x633)
-     n (failed).png                                                                                 
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

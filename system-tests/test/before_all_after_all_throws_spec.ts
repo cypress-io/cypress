@@ -19,6 +19,7 @@ describe('before all and after all throw', () => {
     snapshot: true,
     expectedExitCode: 1,
     browser: 'electron',
+    config: { screenshotOnRunFailure: false },
     processEnv: {
       ELECTRON_ENABLE_LOGGING: 1,
     },

@@ -6,6 +6,18 @@ import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
 import type { SupportedKey } from './automation'
 
+export type CdpClientShape = {
+  send: (...args: any[]) => Promise<any>
+  on: (...args: any[]) => void
+  off: (...args: any[]) => void
+}
+
+// Releases a CdpFetchTransport attached to an extra-target (popup / `_blank`)
+// CDP session. Returned by OnExtraTargetCriClientReady.
+export type ExtraTargetDetach = () => Promise<void>
+
+export type OnExtraTargetCriClientReady = (client: CdpClientShape) => Promise<ExtraTargetDetach | undefined>
+
 /**
  * Interface for compiler error location information
  * Used across error handling systems to provide file, line, and column details
@@ -80,11 +92,46 @@ export type BrowserLaunchOpts = {
   browser: FoundBrowser & { isHeadless: boolean }
   url: string | undefined
   proxyServer?: string
+  proxyBypassList?: string
   isTextTerminal: boolean
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   relaunchBrowser?: () => Promise<any>
   protocolManager?: ProtocolManagerShape
+  onPageCriClientReady?: (client: CdpClientShape, isAUTFrame?: (frameId: string) => Promise<boolean>, onAUTFrameNavigated?: (listener: (url: string) => void) => () => void) => Promise<void>
+  /**
+   * When the MITM proxy is disabled, called for each extra-target (popup /
+   * `_blank`) CDP session so the CDP Fetch runtime can attach shared request
+   * middleware. Returns an optional detach callback invoked when the target
+   * is destroyed. Absent when the MITM proxy is enabled (header-only continue).
+   */
+  onExtraTargetCriClientReady?: OnExtraTargetCriClientReady
+  // Only set when the MITM proxy is disabled: `hosts` is translated into
+  // browser-level resolver rules instead of the Node-side DNS remap.
+  hosts?: { [host: string]: string } | null
+  /**
+   * Whether this launch intercepts browser traffic in the browser itself (CDP
+   * Fetch) instead of the HTTP/1 MITM proxy. `forceHttp1` and the browser both
+   * decide it, so it is resolved once per launch (openProject.launch) and every
+   * consumer reads this rather than re-deriving it.
+   */
+  useBrowserNetworkInterception: boolean
+  /**
+   * Base64 SHA-256 SPKI fingerprints of the user's `trustedCertificates`, resolved once
+   * per launch. On the browser (CDP) network path these are passed via
+   * `--ignore-certificate-errors-spki-list` alongside the blanket ignore flag, so a
+   * declared cert's origin is genuinely trusted (and therefore cacheable) rather than
+   * merely tolerated.
+   */
+  trustedCertificateFingerprints?: string[]
+  /**
+   * Whether to drop every origin's persisted service worker and cache storage
+   * ahead of each runner-document navigation on the browser network path — both
+   * at launch and when moving to the next spec. Resolved at launch from
+   * project-level `testIsolation`, because this runs before any spec code and so
+   * no suite-level override can be known yet.
+   */
+  shouldClearPersistedServiceWorkers?: boolean
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

@@ -1,10 +1,21 @@
 import _ from 'lodash'
 import fakeTimers from '@sinonjs/fake-timers'
 
+// @sinonjs/fake-timers 13+ fakes every supported time function by default when
+// no `toFake` list is provided. Substitute the historical default set — every
+// detected timer except `nextTick` and `queueMicrotask` — so cy.clock() fakes
+// the same functions as before the upgrade. An empty methods array is treated
+// as "no list" here, matching how 11.x already expanded it to that default.
 const install = (win, now, methods) => {
-  return fakeTimers.withGlobal(win).install({
+  const { timers, install: installClock } = fakeTimers.withGlobal(win)
+
+  const toFake = methods && methods.length
+    ? methods
+    : Object.keys(timers).filter((name) => name !== 'nextTick' && name !== 'queueMicrotask')
+
+  return installClock({
     now,
-    toFake: methods,
+    toFake,
   })
 }
 

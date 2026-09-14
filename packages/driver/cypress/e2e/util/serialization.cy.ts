@@ -1,4 +1,5 @@
 import { reifyDomElement, preprocessDomElement, preprocessLogLikeForSerialization, preprocessLogForSerialization, reifyLogFromSerialization } from '../../../src/util/serialization/log'
+import { isSerializableInCurrentBrowser } from '../../../src/util/serialization'
 
 describe('Log Serialization', () => {
   const buildSnapshot = (innerSnapshotElement) => {
@@ -790,5 +791,43 @@ describe('Log Serialization', () => {
         ],
       })
     })
+  })
+})
+
+describe('isSerializableInCurrentBrowser', () => {
+  it('returns true for values the structured clone algorithm supports', () => {
+    const serializable = [
+      1,
+      'string',
+      true,
+      null,
+      { a: 1, nested: { b: 2 } },
+      [1, 'two', { three: 3 }],
+      new Uint8Array([1, 2, 3]),
+      new Map([['a', 1]]),
+      new Set([1, 2, 3]),
+    ]
+
+    serializable.forEach((value) => {
+      expect(isSerializableInCurrentBrowser(value), `${String(value)} should be serializable`).to.be.true
+    })
+  })
+
+  it('returns false for values the structured clone algorithm rejects', () => {
+    const unserializable = [
+      () => {},
+      Symbol('sym'),
+      document.createElement('div'),
+    ]
+
+    unserializable.forEach((value) => {
+      expect(isSerializableInCurrentBrowser(value), `${String(value)} should not be serializable`).to.be.false
+    })
+  })
+
+  // Bluebird promises can slip past the structured clone algorithm as deeply-nested
+  // objects, so they are explicitly rejected to keep them off of postMessage
+  it('returns false for Cypress.Promise instances', () => {
+    expect(isSerializableInCurrentBrowser(Cypress.Promise.resolve('resolved'))).to.be.false
   })
 })

@@ -174,7 +174,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',
@@ -192,7 +192,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',
@@ -303,7 +303,7 @@ describe('cookies', () => {
 
               cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${baseUrl}`)
 
-              cy.getAllCookies().then((cookies) => {
+              cy.getAllCookies().should((cookies) => {
                 // reverse them so they'll be in the order they were set
                 cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 

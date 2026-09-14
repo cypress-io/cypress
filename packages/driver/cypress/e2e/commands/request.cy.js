@@ -560,6 +560,16 @@ describe('src/cy/commands/request', () => {
           expect(res.body).to.contain('M-SEARCH')
         })
       })
+
+      it('can use QUERY method', () => {
+        cy.request({
+          url: 'http://localhost:3500/dump-method',
+          method: 'QUERY',
+        })
+        .then((res) => {
+          expect(res.body).to.contain('QUERY')
+        })
+      })
     })
 
     describe('headers', () => {

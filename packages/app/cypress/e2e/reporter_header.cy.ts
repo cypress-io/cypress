@@ -11,7 +11,7 @@ describe('Reporter Header', () => {
     })
 
     it('selects the correct spec in the Specs List', () => {
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
 
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
@@ -20,7 +20,7 @@ describe('Reporter Header', () => {
 
     // TODO: Reenable as part of https://github.com/cypress-io/cypress/issues/23902
     it.skip('filters the list of specs when searching for specs', () => {
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
 
       cy.findByTestId('specs-list-panel').within(() => {
@@ -55,25 +55,25 @@ describe('Reporter Header', () => {
       })
 
       it('clicking down more options will open a popover with more options', () => {
-        cy.get('[data-cy="runnable-options-button"]').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Options')
+        cy.reporter().find('[data-cy="runnable-options-button"]').trigger('mouseover')
+        cy.reporter().find('.cy-tooltip').should('have.text', 'Options')
 
-        cy.get('[data-cy="more-options-runnable-popover"]').should('not.exist')
-        cy.get('[data-cy="runnable-options-button"]').click()
-        cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
-        cy.get('[data-cy="runnable-options-button"]').click()
-        cy.get('[data-cy="more-options-runnable-popover"]').should('not.exist')
+        cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('not.exist')
+        cy.reporter().find('[data-cy="runnable-options-button"]').click()
+        cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('be.visible')
+        cy.reporter().find('[data-cy="runnable-options-button"]').click()
+        cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('not.exist')
       })
 
       it('will show multiples actions in the popover', () => {
-        cy.get('[data-cy="runnable-options-button"]').click()
-        cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
-        cy.get('[data-cy="more-options-runnable-popover"]').should('contain', 'Open in IDE')
-        cy.get('[data-cy="more-options-runnable-popover"]').should('contain', 'New test')
-        cy.get('[data-cy="more-options-runnable-popover"]').should('contain', 'Auto-scrolling')
-        cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
-        cy.get(switchSelector).click()
-        cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
+        cy.reporter().find('[data-cy="runnable-options-button"]').click()
+        cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('be.visible')
+        cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('contain', 'Open in IDE')
+        cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('contain', 'New test')
+        cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('contain', 'Auto-scrolling')
+        cy.reporter().find(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
+        cy.reporter().find(switchSelector).click()
+        cy.reporter().find(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
       })
     })
 
@@ -86,12 +86,12 @@ describe('Reporter Header', () => {
       cy.contains('dom-content-scrollable-commands.spec').click()
 
       // wait for the test to scroll all the way to the bottom
-      cy.get(':contains("checks for list items to exist - iteration #25") + :contains("passed")', {
+      cy.reporter().find(':contains("checks for list items to exist - iteration #25") + :contains("passed")', {
         timeout: 20000,
       }).should('exist')
 
       // then, use the runnable container to fire the scroll events that previously would override and sync the preference config
-      cy.get('[data-cy="reporter-panel"] .reporter > header + .container').its('0').then(($runnableContainer) => {
+      cy.reporter().find('.reporter > header + .container').its('0').then(($runnableContainer) => {
         // scroll the container to the top.
         // fire multiple scroll events so our scroller component believes the scroll came from an actual user.
         [...Array(10).keys()].forEach(() => {
@@ -99,10 +99,10 @@ describe('Reporter Header', () => {
         })
       })
 
-      cy.get('[data-cy="runnable-options-button"]').click()
-      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-options-button"]').click()
+      cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('be.visible')
 
-      cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
+      cy.reporter().find(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
     })
   })
 })

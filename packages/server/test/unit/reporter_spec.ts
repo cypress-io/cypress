@@ -133,6 +133,100 @@ describe('lib/reporter', () => {
     })
   })
 
+  context('#setTestFilter', () => {
+    const failedTitle = 'TodoMVC - React When page is initially opened should focus on the todo input field'
+    const pendingTitle = 'TodoMVC - React When page is initially opened does something good'
+
+    it('reports every test when no filter is set', function () {
+      const { tests, stats } = this.reporter.results()
+
+      expect(tests).to.have.length(2)
+      expect(stats.tests).to.eq(2)
+    })
+
+    it('omits tests that are not in the keep-list from the reported results', function () {
+      this.reporter.setTestFilter([failedTitle])
+
+      const { tests, stats } = this.reporter.results()
+
+      expect(tests).to.have.length(1)
+      expect(tests[0].testId).to.eq('r4')
+      expect(tests[0].title).to.deep.eq([
+        'TodoMVC - React',
+        'When page is initially opened',
+        'should focus on the todo input field',
+      ])
+
+      // stats reflect only the executed test — the filtered-out pending test is
+      // not counted, consistent with how fully-skipped specs are omitted
+      expect(stats.tests).to.eq(1)
+      expect(stats.failures).to.eq(1)
+      expect(stats.pending).to.eq(0)
+    })
+
+    it('keeps every eligible test when multiple are in the keep-list', function () {
+      this.reporter.setTestFilter([failedTitle, pendingTitle])
+
+      const { tests } = this.reporter.results()
+
+      expect(tests.map((t) => t.testId)).to.deep.eq(['r4', 'r5'])
+    })
+
+    it('matches a test under a suite with an empty title, mirroring Mocha\'s native titlePath()', function () {
+      const root = {
+        id: 'e1',
+        root: true,
+        title: '',
+        tests: [],
+        suites: [
+          {
+            id: 'e2',
+            title: '',
+            tests: [
+              {
+                id: 'e3',
+                title: 'runs',
+                duration: 4,
+                state: 'passed',
+                timedOut: false,
+                async: 0,
+                sync: true,
+              },
+            ],
+            suites: [],
+          },
+        ],
+      }
+
+      this.reporter.setRunnables(root)
+      // matches Mocha's native `titlePath()`, which pushes the empty suite
+      // title as its own segment (only the root suite is omitted)
+      this.reporter.setTestFilter([' runs'])
+
+      const { tests } = this.reporter.results()
+
+      expect(tests.map((t) => t.testId)).to.deep.eq(['e3'])
+    })
+
+    it('treats an empty keep-list as no filter', function () {
+      this.reporter.setTestFilter([])
+
+      expect(this.reporter.results().tests).to.have.length(2)
+
+      this.reporter.setTestFilter(undefined)
+
+      expect(this.reporter.results().tests).to.have.length(2)
+    })
+
+    it('is reset by setRunnables so a filter does not leak across specs', function () {
+      this.reporter.setTestFilter([failedTitle])
+      expect(this.reporter.results().tests).to.have.length(1)
+
+      this.reporter.setRunnables(this.root)
+      expect(this.reporter.results().tests).to.have.length(2)
+    })
+  })
+
   // https://github.com/cypress-io/cypress/issues/7139
   // Reporters that need to perform asynchronous work on completion must use
   // Mocha's `done(failures, callback)` hook (not the synchronous `end` event,

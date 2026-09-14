@@ -14,8 +14,7 @@ export type SuperHero = {
 @Component({
   selector: 'control-flow-component',
   templateUrl: './control-flow.component.html',
-  styleUrls: ['./control-flow.component.scss'],
-  standalone: true,
+  styleUrls: ['./control-flow.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ControlFlowComponent {

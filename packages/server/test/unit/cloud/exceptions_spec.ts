@@ -185,6 +185,27 @@ at bar <stripped-path>bar.js:92\
       })
     })
 
+    // Reported as production, so the opt-out is what stops the report rather than
+    // the environment check ahead of it.
+    describe('with CYPRESS_DISABLE_GUEST_TELEMETRY set', () => {
+      beforeEach(() => {
+        process.env['CYPRESS_INTERNAL_ENV'] = 'production'
+
+        return process.env['CYPRESS_DISABLE_GUEST_TELEMETRY'] = '1'
+      })
+
+      afterEach(() => {
+        return delete process.env['CYPRESS_DISABLE_GUEST_TELEMETRY']
+      })
+
+      it('immediately resolves', () => {
+        return exception.create()
+        .then(() => {
+          expect(api.createCrashReport).to.not.be.called
+        })
+      })
+    })
+
     describe('development', () => {
       beforeEach(() => {
         return process.env['CYPRESS_INTERNAL_ENV'] = 'development'

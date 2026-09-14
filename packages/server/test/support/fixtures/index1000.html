@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Downloading 1000 images</h1>
+    <script>
+      const images = []
+
+      for (let i = 1; i <= 1000; ++i) {
+        images.push('files/smurfs' + i + '.jpg')
+      }
+
+      Promise.all(images.map((image) => fetch(image, { cache: 'force-cache', credentials: 'same-origin' })))
+    </script>
+  </body>
+</html>

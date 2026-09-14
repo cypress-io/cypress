@@ -43,6 +43,54 @@ describe('core/route-matching', function () {
         url: 'https://google.com/asdf?1234=a',
       })
     })
+
+    it('preserves colons in a basic-auth password', function () {
+      const credentials = Buffer.from('foo:b:a:r').toString('base64')
+
+      const matchable = getMatchableForRequest({
+        headers: {
+          authorization: `basic ${credentials}`,
+        },
+        method: 'GET',
+        proxiedUrl: 'https://google.com/',
+      } as RouteMatchableRequest)
+
+      expect(matchable.auth).toEqual({
+        username: 'foo',
+        password: 'b:a:r',
+      })
+    })
+
+    it('handles an empty basic-auth password', function () {
+      const credentials = Buffer.from('foo:').toString('base64')
+
+      const matchable = getMatchableForRequest({
+        headers: {
+          authorization: `basic ${credentials}`,
+        },
+        method: 'GET',
+        proxiedUrl: 'https://google.com/',
+      } as RouteMatchableRequest)
+
+      expect(matchable.auth).toEqual({
+        username: 'foo',
+        password: '',
+      })
+    })
+
+    it('ignores malformed basic-auth credentials with no separator', function () {
+      const credentials = Buffer.from('foobar').toString('base64')
+
+      const matchable = getMatchableForRequest({
+        headers: {
+          authorization: `basic ${credentials}`,
+        },
+        method: 'GET',
+        proxiedUrl: 'https://google.com/',
+      } as RouteMatchableRequest)
+
+      expect(matchable.auth).toBeUndefined()
+    })
   })
 
   describe('.doesRouteMatch', function () {
@@ -102,6 +150,30 @@ describe('core/route-matching', function () {
           password: /.*/,
         },
         method: 'POST',
+      }, false)
+    })
+
+    it('matches on a numeric port', function () {
+      tryMatch({
+        proxiedUrl: 'http://localhost:8080/foo',
+      }, {
+        port: 8080,
+      })
+    })
+
+    it('matches when the port is one of an array of ports', function () {
+      tryMatch({
+        proxiedUrl: 'http://localhost:8080/foo',
+      }, {
+        port: [3000, 8080],
+      })
+    })
+
+    it(`doesn't match a different port`, function () {
+      tryMatch({
+        proxiedUrl: 'http://localhost:8080/foo',
+      }, {
+        port: 9090,
       }, false)
     })
 

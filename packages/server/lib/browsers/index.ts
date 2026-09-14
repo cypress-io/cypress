@@ -3,10 +3,12 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
 import * as errors from '../errors'
+import { cypressSessions } from '../cypress-sessions'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
+import { BROWSER_FAMILY, isDeprecatedBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
@@ -24,6 +26,7 @@ interface KillOptions {
   nullOut?: boolean
   unbind?: boolean
   isOrphanedBrowserProcess?: boolean
+  timeoutMs?: number
 }
 
 const kill = (options: KillOptions = {}) => {
@@ -48,7 +51,11 @@ const kill = (options: KillOptions = {}) => {
   }
 
   return new Promise<void>((resolve) => {
+    let timer: NodeJS.Timeout | undefined
+
     instanceToKill.once('exit', () => {
+      clearTimeout(timer)
+
       if (options.unbind) {
         instanceToKill.removeAllListeners()
       }
@@ -57,6 +64,15 @@ const kill = (options: KillOptions = {}) => {
 
       resolve()
     })
+
+    if (options.timeoutMs != null) {
+      // Stop waiting, but leave the listeners attached: the process is still alive, so its later
+      // `exit` and `error` events still need somewhere to go.
+      timer = setTimeout(() => {
+        debug('browser process did not exit within %dms, leaving the rest to the OS', options.timeoutMs)
+        resolve()
+      }, options.timeoutMs)
+    }
 
     debug('killing browser process')
 
@@ -136,6 +152,7 @@ const browsers = {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
+    cypressSessions.setBrowser(browser)
 
     return this.getBrowserInstance()
   },
@@ -194,6 +211,21 @@ const browsers = {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     if (!options.url) throw new Error('Missing url in browsers.open')
+
+    // Surface the Electron deprecation in open mode only when Electron was
+    // explicitly requested via `--browser` or the `defaultBrowser` config —
+    // an interactive pick in the launchpad already shows the deprecation in
+    // the UI (ribbon + tag), so a terminal warning there would be redundant.
+    // Run mode emits this alongside the "Run Starting" header
+    // (see displayRunStarting), so `!isTextTerminal` also avoids double-printing.
+    // `--browser` / `defaultBrowser` can be a bare name (`electron`) or a
+    // `name:channel` form (`electron:stable`), so compare against the name part.
+    const requestedBrowser = ctx.modeOptions.browser || ctx.lifecycleManager.loadedFullConfig?.defaultBrowser
+    const requestedBrowserName = requestedBrowser?.split(':')[0]
+
+    if (!options.isTextTerminal && isDeprecatedBrowser(browser) && requestedBrowserName === browser.name) {
+      errors.warning('BROWSER_ELECTRON_DEPRECATED')
+    }
 
     debug('opening browser %o', browser)
 
@@ -258,6 +290,7 @@ const browsers = {
 
     instance = _instance
     instance.browser = browser
+    cypressSessions.setBrowser(browser)
 
     // TODO: normalizing opening and closing / exiting
     // so that there is a default for each browser but
@@ -293,6 +326,7 @@ const browsers = {
 
       options.onBrowserClose()
       browserLauncher.clearInstanceState()
+      cypressSessions.setBrowser(null)
       instance = null
 
       if (browserDidCrash) {

@@ -2,10 +2,11 @@ import { describe, expect, it, jest } from '@jest/globals'
 import { execute } from 'graphql'
 import { Response } from 'cross-fetch'
 
-import { DataContext } from '../../../src/DataContext'
-import { CloudDataResponse, CloudDataSource } from '../../../src/sources'
+import type { DataContext } from '../../../src/DataContext'
+import type { CloudDataResponse } from '../../../src/sources'
+import { CloudDataSource } from '../../../src/sources'
 import { createTestDataContext, scaffoldProject } from '../helper'
-import { ExecutionResult } from '@urql/core'
+import type { ExecutionResult } from '@urql/core'
 import {
   CLOUD_PROJECT_QUERY,
   CLOUD_PROJECT_RESPONSE,
@@ -346,6 +347,38 @@ describe('CloudDataSource', () => {
       })
 
       expect(fetchStub).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('cloud url', () => {
+    const originalEnv = process.env.CYPRESS_INTERNAL_ENV
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.CYPRESS_INTERNAL_ENV
+      } else {
+        process.env.CYPRESS_INTERNAL_ENV = originalEnv
+      }
+    })
+
+    it('does not freeze the environment at module load', async () => {
+      process.env.CYPRESS_INTERNAL_ENV = 'production'
+
+      const source = new CloudDataSource({
+        fetch: fetchStub,
+        getUser: getUserStub,
+        logout: logoutStub,
+        invalidateClientUrqlCache: invalidateCacheStub,
+      })
+
+      await source.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
+        operationType: 'query',
+      })
+
+      expect(fetchStub).toHaveBeenCalledWith('https://cloud.cypress.io/test-runner-graphql', expect.anything())
     })
   })
 })

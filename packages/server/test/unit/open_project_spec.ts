@@ -6,6 +6,7 @@ import { openProject } from '../../lib/open_project'
 import preprocessor from '../../lib/plugins/preprocessor'
 import runEvents from '../../lib/plugins/run_events'
 import Fixtures from '@tooling/system-tests'
+import { GracefulExit } from '../../lib/util/graceful-exit'
 import delay from 'lodash/delay'
 
 const todosPath = Fixtures.projectPath('todos')
@@ -63,7 +64,7 @@ describe('lib/open_project', () => {
         relative: 'path/to/spec',
       }
 
-      this.browser = { name: 'chrome' }
+      this.browser = { name: 'chrome', family: 'chromium' }
     })
 
     it('tells preprocessor to remove file on browser close', function () {
@@ -213,16 +214,141 @@ describe('lib/open_project', () => {
         expect(browsers.open).to.have.been.calledOnce
       })
 
-      it('does not pass proxyServer to browser when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-        delete this.config.proxyServer
+      // The launch resolves the network path once and hands the answer down, so
+      // the launcher flags, the CDP wiring, and the server's request-time gates
+      // cannot disagree about it.
+      context('resolved network path', () => {
+        it('passes the browser network path to the launcher for a chromium browser', async function () {
+          await openProject.launch(this.browser, this.spec)
 
-        return openProject.launch(this.browser, this.spec)
-        .then(() => {
-          expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.true
+          expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.a('function')
         })
-        .finally(() => {
-          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+
+        it('asks the launcher to clear persisted service workers on the browser network path', async function () {
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1].shouldClearPersistedServiceWorkers).to.be.true
+        })
+
+        it('leaves persisted service workers alone when testIsolation is disabled', async function () {
+          this.config.testIsolation = false
+
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1].shouldClearPersistedServiceWorkers).to.be.false
+        })
+
+        it('does not ask the launcher to clear persisted service workers on the MITM path', async function () {
+          await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
+
+          expect(browsers.open.lastCall.args[1].shouldClearPersistedServiceWorkers).to.be.undefined
+        })
+
+        it('passes the MITM path to the launcher when forceHttp1 is set', async function () {
+          this.config.forceHttp1 = true
+
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.false
+          expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.undefined
+        })
+
+        it('passes the MITM path to the launcher for a non-chromium browser', async function () {
+          await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
+
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.false
+        })
+
+        // Electron is deprecated as a test browser, so it stays on the legacy
+        // proxy even though it is chromium-family.
+        it('passes the MITM path to the launcher for electron', async function () {
+          await openProject.launch({ name: 'electron', family: 'chromium' }, this.spec)
+
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.false
+          expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.undefined
+          expect(browsers.open.lastCall.args[1]).to.include({
+            proxyServer: 'http://cy-proxy-server',
+            proxyBypassList: '<-loopback>',
+          })
+        })
+      })
+
+      context('upstream proxy', () => {
+        beforeEach(function () {
+          this.proxyEnv = {
+            HTTP_PROXY: process.env.HTTP_PROXY,
+            HTTPS_PROXY: process.env.HTTPS_PROXY,
+            NO_PROXY: process.env.NO_PROXY,
+          }
+
+          delete process.env.HTTP_PROXY
+          delete process.env.HTTPS_PROXY
+          delete process.env.NO_PROXY
+        })
+
+        afterEach(function () {
+          Object.entries(this.proxyEnv).forEach(([name, value]) => {
+            if (value === undefined) {
+              delete process.env[name]
+            } else {
+              process.env[name] = value
+            }
+          })
+        })
+
+        context('on the MITM path', () => {
+          it('proxies loopback through the cypress proxy when forceHttp1 is set', async function () {
+            this.config.forceHttp1 = true
+            process.env.HTTP_PROXY = 'http://proxy.example:8080'
+            process.env.NO_PROXY = 'example.com'
+
+            await openProject.launch(this.browser, this.spec)
+
+            expect(browsers.open.lastCall.args[1]).to.include({
+              proxyServer: 'http://cy-proxy-server',
+              proxyBypassList: '<-loopback>',
+            })
+          })
+
+          // Firefox and WebKit have no browser network path, so they fall back even
+          // with forceHttp1 unset.
+          it('proxies loopback through the cypress proxy for non-chromium browsers', async function () {
+            process.env.HTTP_PROXY = 'http://proxy.example:8080'
+            process.env.NO_PROXY = 'example.com'
+
+            await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
+
+            expect(browsers.open.lastCall.args[1]).to.include({
+              proxyServer: 'http://cy-proxy-server',
+              proxyBypassList: '<-loopback>',
+            })
+          })
+        })
+
+        context('on the browser network path', () => {
+          beforeEach(function () {
+            delete this.config.proxyServer
+          })
+
+          it('does not pass proxyServer to browser without an upstream proxy', async function () {
+            await openProject.launch(this.browser, this.spec)
+
+            expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
+          })
+
+          it('passes the upstream proxy and bypass list to the browser', async function () {
+            process.env.HTTP_PROXY = 'http://proxy.example:8080'
+            process.env.NO_PROXY = '<-loopback>,example.com'
+            this.config.hosts = { 'foo.example': '127.0.0.1' }
+
+            await openProject.launch(this.browser, this.spec)
+
+            expect(browsers.open.lastCall.args[1]).to.include({
+              proxyServer: 'http://proxy.example:8080',
+              proxyBypassList: 'example.com,foo.example',
+            })
+          })
         })
       })
     })
@@ -285,6 +411,63 @@ describe('lib/open_project', () => {
       const options = sinon.stub()
 
       await openProject.connectCyPromptToBrowser(options)
+    })
+  })
+
+  describe('#closeActiveProject', () => {
+    it('leaves the browser close unbounded when the process is not exiting', async function () {
+      sinon.stub(ProjectBase.prototype, 'close').resolves()
+      const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
+
+      // an earlier spec that stubbed process.exit can leave teardown marked as started
+      GracefulExit.resetForTesting()
+
+      await openProject.closeActiveProject()
+
+      expect(closeBrowserStub).to.have.been.calledOnce
+      expect(closeBrowserStub.firstCall.args[0].timeoutMs, 'a project switch has to wait for the browser to really be gone').to.be.undefined
+    })
+
+    it('bounds the browser close when the process is exiting', async function () {
+      sinon.stub(ProjectBase.prototype, 'close').resolves()
+      const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
+      const exitStub = sinon.stub(process, 'exit')
+
+      // exitGracefully flushes every registered step; drop the ones other specs left behind so this
+      // asserts on our own call
+      GracefulExit.resetForTesting()
+
+      // as a teardown step, the way it reaches this path in production (clearCtx -> ctx.destroy)
+      GracefulExit.addStep(() => openProject.closeActiveProject(), 'close project')
+
+      await GracefulExit.exitGracefully(0)
+
+      expect(closeBrowserStub).to.have.been.calledOnce
+      expect(closeBrowserStub.firstCall.args[0].timeoutMs, 'waiting on the browser unbounded spends the whole exit budget').to.be.a('number')
+
+      exitStub.restore()
+      GracefulExit.resetForTesting()
+    })
+
+    it('awaits projectBase.close before resetting and closing the browser', async function () {
+      let resolveClose
+      const closePromise = new Promise((resolve) => {
+        resolveClose = resolve
+      })
+      const closeStub = sinon.stub(ProjectBase.prototype, 'close').returns(closePromise)
+      const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
+
+      const closing = openProject.closeActiveProject()
+
+      expect(closeStub).to.have.been.calledOnce
+      expect(closeBrowserStub).not.to.have.been.called
+      expect(openProject.getProject()).to.not.be.null
+
+      resolveClose()
+      await closing
+
+      expect(closeBrowserStub).to.have.been.calledOnce
+      expect(openProject.getProject()).to.be.null
     })
   })
 })

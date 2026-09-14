@@ -6,27 +6,14 @@ describe('src/cy/commands/misc', () => {
     cy.visit('/fixtures/jquery.html')
   })
 
-  context('#end', () => {
-    it('nulls out the subject', () => {
-      cy.noop({}).end().then((subject) => {
-        expect(subject).to.be.null
-
-        // We want cy.end() to break the subject chain - any previous entries
-        // (in this case `{}`) should be discarded. No re-running any previous
-        // query functions once you've used `.end()` on a chain.
-        expect(cy.subjectChain()).to.eql([null])
-      })
-    })
-  })
-
   context('#log', () => {
     it('nulls out the subject', () => {
       cy.wrap({}).log('foo').then((subject) => {
         expect(subject).to.be.null
 
-        // We want cy.end() to break the subject chain - any previous entries
+        // We want cy.log() to break the subject chain - any previous entries
         // (in this case `{}`) should be discarded. No re-running any previous
-        // query functions once you've used `.end()` on a chain.
+        // query functions once you've used `.log()` on a chain.
         expect(cy.subjectChain()).to.eql([null])
       })
     })

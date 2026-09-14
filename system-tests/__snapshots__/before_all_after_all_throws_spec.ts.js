@@ -50,19 +50,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      1                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     test.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/test.cy.js/before all and after all throw -- te     (1280x720)
-     st 1 -- before all hook (failed).png                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/test.cy.js/before all and after all throw -- te     (1280x720)
-     st 1 -- after all hook (failed).png                                                            
 
 
 ====================================================================================================

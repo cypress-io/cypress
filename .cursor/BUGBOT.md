@@ -107,8 +107,6 @@ Essential rules for reviewing code changes in the Cypress monorepo.
   - Focus: Socket security, message handling, real-time communication
 
 ### Code Processing (Medium Priority)
-- **@packages/rewriter**: Code rewriting
-  - Focus: Code transformation logic, source map accuracy, JavaScript instrumentation
 - **@packages/v8-snapshot-require**: V8 snapshot support
   - Focus: Snapshot compatibility, performance impact, Electron integration
 - **@packages/packherd-require**: Dependency packing

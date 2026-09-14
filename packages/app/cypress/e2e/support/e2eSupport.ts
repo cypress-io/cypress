@@ -1,6 +1,7 @@
 import '@packages/frontend-shared/cypress/support/e2e'
 import 'cypress-real-events/support'
 import './execute-spec'
+import './reporter'
 
 Cypress.on('window:before:load', (win) => {
   // Can set this in a spec-by-spec basis to 'true' to use

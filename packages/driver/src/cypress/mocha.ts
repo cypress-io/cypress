@@ -1,6 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
-import $errUtils, { CypressError } from './error_utils'
+import type { CypressError } from './error_utils'
+import $errUtils from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
 import $sourceMapUtils from './source_map_utils'

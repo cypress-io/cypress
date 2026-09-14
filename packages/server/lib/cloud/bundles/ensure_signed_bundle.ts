@@ -8,7 +8,8 @@ import { sweepOrphanStaging } from './sweep_orphan_staging'
 import { streamDownloadVerifyExtract } from './stream_download_verify_extract'
 import { publishStagingToFinal } from './publish_staging_to_final'
 import { verifyBundleOnDisk, MANIFEST_SIG_FILE } from './verify_bundle_on_disk'
-import { BundleError, BundleKind } from './bundle_error'
+import type { BundleKind } from './bundle_error'
+import { BundleError } from './bundle_error'
 
 const debug = Debug('cypress:server:cloud:bundles:ensure-signed-bundle')
 

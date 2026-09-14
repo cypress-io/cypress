@@ -1,0 +1,27 @@
+[
+  {
+    "name": "specify.cy.ts",
+    "tests": [
+      {
+        "name": "hello world",
+        "state": "pending"
+      },
+      {
+        "name": "works",
+        "state": "pending"
+      },
+      {
+        "name": "works 2 @tag1",
+        "state": "passed"
+      },
+      {
+        "name": "works 2 @tag1 @tag2",
+        "state": "passed"
+      },
+      {
+        "name": "works @tag2",
+        "state": "pending"
+      }
+    ]
+  }
+]

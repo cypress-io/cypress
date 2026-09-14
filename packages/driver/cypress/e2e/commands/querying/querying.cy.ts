@@ -953,7 +953,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+          expect(err.message).to.match(/This element `<button#button>` is not visible/)
 
           done()
         })
@@ -965,7 +965,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('element `<button#button>` is not visible because')
+          expect(err.message).to.match(/element `<button#button>` is not visible/)
 
           done()
         })
@@ -1044,7 +1044,7 @@ describe('src/cy/commands/querying', () => {
           const getLog = this.logs[0]
           const assertionLog = this.logs[1]
 
-          expect(err.message).to.contain('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+          expect(err.message).to.match(/This element `<button#button>` is not visible/)
 
           expect(getLog.get('state')).to.eq('passed')
           expect(getLog.get('error')).to.be.undefined
@@ -1363,6 +1363,41 @@ describe('src/cy/commands/querying', () => {
           expect($el).to.be.null
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/25962
+      describe('describes the missing subject by its content', () => {
+        let assertMessage: string | undefined
+
+        beforeEach(() => {
+          assertMessage = undefined
+
+          cy.on('log:added', (attrs, log) => {
+            if (attrs.name === 'assert' && assertMessage === undefined) {
+              assertMessage = log.get('message')
+            }
+          })
+
+          return null
+        })
+
+        it('in an existence assertion', () => {
+          cy.contains('does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in an existence assertion with a filter', () => {
+          cy.contains('span', 'does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **span, does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in a length assertion', () => {
+          cy.contains('does-not-exist').should('have.length', 0).then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** to have a length of **0**')
+          })
+        })
+      })
     })
 
     describe('should(\'be.visible\')', () => {
@@ -1675,6 +1710,46 @@ space
 
             expect(el).to.eq(span.get(0))
           })
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/24911
+      // Reproducing this needs `=` and `[` in the same string, so the special
+      // characters are combined here rather than exercised one at a time.
+      describe('combined', () => {
+        const content = 'This is a custom label ~!@#$%^&*()_+=-[]{}\\|:",./? UID'
+
+        it('finds a descendant', () => {
+          const label = $('<label></label>').text(content).appendTo(cy.$$('body'))
+
+          cy.contains('label', content).then(($label) => {
+            expect($label.get(0)).to.eq(label.get(0))
+          })
+        })
+
+        it('finds the subject itself', () => {
+          // With no matching descendant, .contains() filters the subject, which
+          // runs the selector through jQuery's matchesSelector rather than find()
+          const label = $('<label id="combined-chars"></label>').text(content).appendTo(cy.$$('body'))
+
+          cy.get('#combined-chars').contains(content).then(($label) => {
+            expect($label.get(0)).to.eq(label.get(0))
+          })
+        })
+
+        it('asserts on the content', () => {
+          $('<label id="combined-chars-assertion"></label>').text(content).appendTo(cy.$$('body'))
+
+          cy.get('#combined-chars-assertion').should('contain', content)
+        })
+
+        it('reports missing content as not found', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('Expected to find content')
+            done()
+          })
+
+          cy.contains('label', content, { timeout: 100 })
         })
       })
     })

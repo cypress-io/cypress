@@ -1,10 +1,11 @@
+import type { InputSignal } from '@angular/core'
 import { StandaloneComponent } from './standalone.component'
 
 describe('StandaloneComponent', () => {
   it('can mount a standalone component', () => {
     cy.mount(StandaloneComponent, {
       componentProperties: {
-        name: 'Angular',
+        name: 'Angular' as unknown as InputSignal<string>,
       },
     })
 

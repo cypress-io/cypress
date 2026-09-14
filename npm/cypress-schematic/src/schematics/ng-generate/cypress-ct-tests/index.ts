@@ -1,7 +1,8 @@
-import { Rule, Tree, SchematicsException } from '@angular-devkit/schematics'
+import type { Rule, Tree } from '@angular-devkit/schematics'
+import { SchematicsException } from '@angular-devkit/schematics'
 
 import { getAngularJsonValue, getDirectoriesAndCreateSpecs } from '../../utils'
-import { Schema } from './schema'
+import type { Schema } from './schema'
 
 export default function (options: Schema): Rule {
   return (tree: Tree) => {

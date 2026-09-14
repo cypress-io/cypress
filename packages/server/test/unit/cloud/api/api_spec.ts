@@ -419,18 +419,25 @@ describe('lib/cloud/api', () => {
 
     describe('errors', () => {
       it('[F1] POST /preflight TimeoutError', () => {
-        preflightNock(API_BASEURL)
-        .times(2)
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
         .delayConnection(5000)
         .reply(200, {})
 
-        return api.sendPreflight({
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .delayConnection(5000)
+        .reply(200, {})
+
+        return prodApi.sendPreflight({
+          projectId: 'abc123',
           timeout: 100,
         })
         .then(() => {
           throw new Error('should have thrown here')
         })
         .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
           expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
         })
       })
@@ -641,6 +648,7 @@ describe('lib/cloud/api', () => {
           'protocolMountVersion': 2,
           'dynamicSpecsInSerialMode': true,
           'skipSpecAction': true,
+          'filterTestsAction': true,
         },
       }
     })

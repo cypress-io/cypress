@@ -2,12 +2,13 @@ import { describe, expect, beforeEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import RequestMiddleware from '../../../lib/http/request-middleware'
 import { testMiddleware } from './helpers'
-import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
-import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
+import type { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
+import type { HttpBuffer } from '../../../lib/http/util/buffers'
+import { HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 import { NetworkInterceptionCore } from '@packages/network-interception'
-import { HttpMiddlewareThis } from '../../../lib/http'
+import type { HttpMiddlewareThis } from '../../../lib/http'
 import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
 
 vi.mock('../../../lib/resourceTypeAndCredentialManager', () => {
@@ -960,6 +961,54 @@ describe('http/request-middleware', () => {
       expect(ctx.req.noPreRequestExpected).toBeTruthy()
       expect(ctx.res.once).toHaveBeenCalledWith('close', expect.any(Function))
       expect(ctx.res.off).toHaveBeenCalledWith('close', expect.any(Function))
+    })
+
+    it('preserves a pre-set resourceType when no browserPreRequest arrives', async () => {
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          browserPreRequest: undefined,
+          resourceType: 'xhr',
+          headers: [],
+        },
+        res: {
+          off: vi.fn(),
+          once: vi.fn(),
+        },
+        shouldCorrelatePreRequests: () => true,
+        getPreRequest: vi.fn().mockImplementation((cb) => {
+          cb({ browserPreRequest: undefined })
+        }),
+      }
+
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      expect(ctx.req.resourceType).toEqual('xhr')
+    })
+
+    it('lets browserPreRequest.resourceType override a pre-set resourceType', async () => {
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          browserPreRequest: undefined,
+          resourceType: 'xhr',
+          headers: [],
+        },
+        res: {
+          off: vi.fn(),
+          once: vi.fn(),
+        },
+        shouldCorrelatePreRequests: () => true,
+        getPreRequest: vi.fn().mockImplementation((cb) => {
+          cb({
+            browserPreRequest: {
+              resourceType: 'fetch',
+            },
+          })
+        }),
+      }
+
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      expect(ctx.req.resourceType).toEqual('fetch')
     })
 
     it('errors when the request is destroyed prior to receiving a pre-request', () => {

@@ -12,10 +12,12 @@ import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
-import { openFile, OpenFileDetails } from './util/file-opener'
+import type { OpenFileDetails } from './util/file-opener'
+import { openFile } from './util/file-opener'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './automation/cookie/jar'
+import type { SameSiteContext, SerializableAutomationCookie } from './automation/cookie/jar'
+import { cookieJar, automationCookieToToughCookie } from './automation/cookie/jar'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
@@ -133,8 +135,7 @@ export class SocketBase implements SocketBroadcaster {
       cookie: typeof cookie === 'string' ? { name: cookie } : cookie,
       destroyUpgrade: false,
       serveClient: false,
-      // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
     })
   }
 
@@ -207,14 +208,6 @@ export class SocketBase implements SocketBroadcaster {
 
     this.getIos().forEach((io) => {
       io?.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
-        if (socket.conn && socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
-          debug('polling WebSocket request received with non-WebKit browser, disconnecting')
-
-          // TODO(webkit): polling transport is only used for experimental WebKit, and it bypasses SocketAllowed,
-          // we d/c polling clients if we're not in WK. remove once WK ws proxying is fixed
-          return socket.disconnect(true)
-        }
-
         debug('socket connected')
 
         socket.on('disconnecting', (reason) => {
@@ -366,7 +359,7 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         socket.on('mocha', (...args: unknown[]) => {
-          return options.onMocha.apply(options, args)
+          return options.onMocha(...args)
         })
 
         socket.on('recorder:frame', (data) => {
@@ -532,7 +525,7 @@ export class SocketBase implements SocketBroadcaster {
               case 'http:request':
                 return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
-                return options.onResetServerState()
+                return options.onResetServerState(args[0])
               case 'get:fixture':
                 return getFixture(args[0], args[1])
               case 'net':
@@ -592,8 +585,16 @@ export class SocketBase implements SocketBroadcaster {
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
-              case 'wait:for:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+              case 'wait:for:prompt:ready': {
+                const cyPromptLifecycleManager = getCtx().coreData.cyPromptLifecycleManager
+
+                // The manager is not initialized when cy.prompt cannot possibly
+                // run, so report it as unavailable rather than returning nothing.
+                if (!cyPromptLifecycleManager) {
+                  return { success: false }
+                }
+
+                return cyPromptLifecycleManager.getCyPrompt().then(async (cyPrompt) => {
                   if (cyPrompt.cyPromptManager) {
                     await options.onCyPromptReady(cyPrompt.cyPromptManager)
                   }
@@ -603,6 +604,7 @@ export class SocketBase implements SocketBroadcaster {
                     error: cyPrompt.error ? errors.cloneErr(cyPrompt.error) : undefined,
                   }
                 })
+              }
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }

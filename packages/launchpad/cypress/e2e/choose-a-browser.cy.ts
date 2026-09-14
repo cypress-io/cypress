@@ -87,7 +87,10 @@ describe('Choose a browser page', () => {
 
       cy.openProject('launchpad', ['--e2e', '--browser', path])
 
-      cy.visitLaunchpad()
+      // Launchpad re-fetches its config on an increasing backoff while the project
+      // loads (see Main.vue), so the loading spinner can outlast visitLaunchpad's
+      // default settle timeout under CI load. Allow more time so it can clear.
+      cy.visitLaunchpad({ spinnerTimeout: 30000 })
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -115,7 +118,7 @@ describe('Choose a browser page', () => {
       cy.get('[data-cy="alert-suffix-icon"]').click()
       cy.get('[data-cy="alert-header"]').should('not.exist')
 
-      cy.visitLaunchpad()
+      cy.visitLaunchpad({ spinnerTimeout: 30000 })
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('not.exist')
     })
@@ -131,9 +134,22 @@ describe('Choose a browser page', () => {
 
       cy.findByRole('radio', { name: 'Firefox v6' })
 
-      cy.findByRole('radio', { name: 'Electron v13' })
+      // Electron's accessible name includes its deprecated ribbon text.
+      cy.findByRole('radio', { name: /Electron v13/ })
 
       cy.findByRole('radio', { name: 'Edge v9' })
+
+      // Electron is deprecated: it sorts after the other supported browsers and
+      // renders a deprecated ribbon with an informational tooltip.
+      cy.get('[data-cy="open-browser-list"] [data-cy-browser]').last()
+      .should('have.attr', 'data-cy-browser', 'electron')
+
+      cy.get('[data-cy-browser="electron"]').within(() => {
+        cy.findByTestId('deprecated-ribbon').should('contain', 'Deprecated').trigger('mouseenter')
+      })
+
+      cy.contains('Deprecated browser').should('be.visible')
+      cy.contains('a', 'See supported browsers').should('have.attr', 'href', 'https://on.cypress.io/launching-browsers')
     })
 
     it('performs mutation to launch selected browser when launch button is pressed', () => {
@@ -233,6 +249,11 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+
+      // `visitLaunchpad` resolves before the browser list mounts, and the list only learns
+      // about status changes through the subscription it opens on mount.
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
+
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
@@ -244,16 +265,18 @@ describe('Choose a browser page', () => {
       cy.wait('@closeBrowser')
     })
 
-    it('performs mutation to focus open browser when focus button is pressed', { retries: 15 }, () => {
+    it('performs mutation to focus open browser when focus button is pressed', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
 
+      cy.get('h1').should('contain', 'Choose a browser')
+
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
+
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
-
-      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.contains('button', 'Running Chrome').as('launchButton')
 
@@ -373,7 +396,13 @@ describe('Choose a browser page', () => {
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
-      cy.findByRole('radio', { name: 'Electron v13', checked: true })
+      cy.findByRole('radio', { name: /Electron v13/, checked: true })
+
+      // Even as the lone, preselected browser, Electron is marked deprecated.
+      cy.get('[data-cy-browser="electron"]').within(() => {
+        cy.findByTestId('deprecated-ribbon').should('contain', 'Deprecated')
+      })
+
       cy.percySnapshot()
     })
   })

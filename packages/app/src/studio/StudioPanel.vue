@@ -30,13 +30,15 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch, computed, h } from 'vue'
+import type { VNode } from 'vue'
 import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
-import { useMutation, gql, UseMutationResponse } from '@urql/vue'
+import { useMutation, gql } from '@urql/vue'
+import type { UseMutationResponse } from '@urql/vue'
 import { IconCypressStudio } from '@cypress-design/vue-icon'
 import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
@@ -47,7 +49,7 @@ import type { SnapshotStore } from '../runner/snapshot-store'
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
 interface Root {
-  render: (element: JSX.Element) => void
+  render: (element: VNode) => void
   unmount: () => void
 }
 

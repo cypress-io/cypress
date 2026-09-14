@@ -22,6 +22,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
   afterEach(() => {
     sinon.restore()
     delete process.env.CYPRESS_CRASH_REPORTS
+    delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
     delete process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
     delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
     if (oldNodeEnv) {
@@ -94,6 +95,21 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
 
     it('does not report error when CYPRESS_CRASH_REPORTS is 0', () => {
       process.env.CYPRESS_CRASH_REPORTS = '0'
+      const error = new Error('test error')
+
+      reportCyPromptError({
+        cloudApi,
+        cyPromptHash: 'abc123',
+        projectSlug: 'test-project',
+        error,
+        cyPromptMethod: 'testMethod',
+      })
+
+      expect(cloudRequestStub).to.not.have.been.called
+    })
+
+    it('does not report error when CYPRESS_DISABLE_GUEST_TELEMETRY is set', () => {
+      process.env.CYPRESS_DISABLE_GUEST_TELEMETRY = '1'
       const error = new Error('test error')
 
       reportCyPromptError({

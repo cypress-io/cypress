@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type {
   ForBrowserNetworkAutomation,
   ForCommandLog,
@@ -13,8 +14,6 @@ import type { BackendRoute } from '../types/backend-route'
 import type { CyHttpMessages } from '../types/external-types'
 import { mergeIncomingRequestChanges } from './merge-handler-result'
 import type { MergeIncomingRequestChangesOptions } from './merge-handler-result'
-import { planSubscriptions } from './plan-subscriptions'
-import type { PlanSubscriptionsOptions, PlannedRouteSubscriptions } from './plan-subscriptions'
 import { matchRoutes, matchesRoutePreflight } from './route-matching'
 import type { RouteMatchableRequest } from './route-matching'
 
@@ -32,7 +31,7 @@ export type NetworkInterceptionCoreOptions = {
 export type HandleInterceptRequestFn = (core: NetworkInterceptionCore) => Promise<void>
 
 /**
- * Orchestrates route matching, subscription planning, and handler merge logic.
+ * Orchestrates route matching and handler merge logic.
  * Side-effectful proxy/driver I/O stays in net-stubbing adapters until Stage 4+.
  */
 export class NetworkInterceptionCore {
@@ -44,10 +43,6 @@ export class NetworkInterceptionCore {
 
   matchesRoutePreflight (routes: BackendRoute[], req: RouteMatchableRequest): boolean {
     return matchesRoutePreflight(routes, req)
-  }
-
-  planSubscriptions (options: PlanSubscriptionsOptions): PlannedRouteSubscriptions[] {
-    return planSubscriptions(options)
   }
 
   mergeIncomingRequestChanges (
@@ -72,6 +67,8 @@ export class NetworkInterceptionCore {
       throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
 
+    debug.core('endRequestIfBlocked %o', this.buildRequestExchange(ctx))
+
     return port.endRequestIfBlocked(ctx, () => this.runRequestPolicies(ctx))
   }
 
@@ -89,13 +86,20 @@ export class NetworkInterceptionCore {
     const registration = this.options.policyRegistration
 
     if (!registration) {
+      debug.core('runRequestPolicies skipped (no policy registration)')
+
       return { ended: false, state: {} }
     }
 
-    return registration.runPolicies({
+    const exchange = this.buildRequestExchange(ctx)
+    const result = await registration.runPolicies({
       phase: 'request',
-      exchange: this.buildRequestExchange(ctx),
+      exchange,
     })
+
+    debug.core('runRequestPolicies %o -> %o', exchange, result)
+
+    return result
   }
 
   async correlateBrowserPreRequest (ctx: unknown): Promise<void> {
@@ -117,6 +121,8 @@ export class NetworkInterceptionCore {
     if (!port) {
       throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
+
+    debug.core('forwardToOrigin %o', this.buildRequestExchange(ctx))
 
     return port.forwardToOrigin(ctx)
   }
@@ -209,29 +215,5 @@ export class NetworkInterceptionCore {
     }
 
     return port.notifyResponseEndedWithEmptyBody(ctx, options)
-  }
-
-  get requestInterception (): ForRequestInterception | undefined {
-    return this.options.requestInterception
-  }
-
-  get responseInterception (): ForResponseInterception | undefined {
-    return this.options.responseInterception
-  }
-
-  get documentPreparation (): ForDocumentPreparation | undefined {
-    return this.options.documentPreparation
-  }
-
-  get networkCapture (): ForNetworkCapture | undefined {
-    return this.options.networkCapture
-  }
-
-  get cookieState (): ForCookieState | undefined {
-    return this.options.cookieState
-  }
-
-  get commandLog (): ForCommandLog | undefined {
-    return this.options.commandLog
   }
 }

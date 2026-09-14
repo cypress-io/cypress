@@ -55,6 +55,7 @@ Thanks for taking the time to contribute! :smile:
     - [Packages](#packages)
     - [AI assistant guidance files](#ai-assistant-guidance-files)
       - [Files used by AI tools](#files-used-by-ai-tools)
+      - [Choosing where guidance goes](#choosing-where-guidance-goes)
       - [Maintenance expectations](#maintenance-expectations)
       - [External references](#external-references)
   - [Committing Code](#committing-code)
@@ -192,7 +193,6 @@ Here is a list of the core packages in this repository with a short description,
  | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
  | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
  | [resolve-dist](./packages/resolve-dist)       | `@packages/resolve-dist`    | Centralizes the resolution of paths to compiled/static assets from server-side code..    |
- | [rewriter](./packages/rewriter)       | `@packages/rewriter`    | The logic to rewrite JS and HTML that flows through the Cypress proxy.
  | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
  | [runner](./packages/runner)           | `@packages/runner`      | (deprecated) The runner is the minimal "chrome" around the user's application under test. |
  | [scaffold-config](./packages/scaffold-config)           | `@packages/scaffold-config`      | The logic related to scaffolding new projects using launchpad.   |
@@ -220,7 +220,6 @@ Here is a list of the npm packages in this repository:
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
- | [angular-zoneless](./npm/angular-zoneless)             | `@cypress/angular-zoneless`        | Cypress component testing for Angular using zoneless change detection.       |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
@@ -229,7 +228,7 @@ Here is a list of the npm packages in this repository:
  | [svelte](./npm/svelte)                               | `@cypress/svelte`                   | Cypress component testing for Svelte.           |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |
  | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue 3.               |
- | [webpack-batteries-included-preprocessor](./npm/webpack-batteries-included-preprocessor)     | `@cypress/webpack-batteries-included-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript.  |
+ | [webpack-batteries-included-preprocessor](./npm/webpack-batteries-included-preprocessor)     | `@cypress/webpack-batteries-included-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features and TypeScript.  |
  | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
  | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |
 
@@ -243,6 +242,7 @@ You must have the following installed on your system to contribute locally:
 - [`Yarn v1 Classic`](https://yarnpkg.com/en/docs/install) (See also [Corepack](#corepack) below.)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
 - [`circleci CLI`](https://circleci.com/docs/guides/toolkit/local-cli/) if you intend on editing the CI configuration.
+- [`typescript-language-server`](https://github.com/typescript-language-server/typescript-language-server) (`npm install -g typescript-language-server typescript`) if you use Claude Code locally. The repo enables the `typescript-lsp` plugin in [.claude/settings.json](.claude/settings.json), which gives Claude type errors and go-to-definition across the monorepo, but the plugin does not install the binary for you. If `/plugin` reports the plugin as not installed, run `claude plugin install typescript-lsp@claude-plugins-official`.
 
 #### Debian/Ubuntu
 
@@ -480,16 +480,50 @@ to AI assistants while remaining transparent and minimal for human contributors.
 
 - `CLAUDE.md` — Used by Claude Code (Claude loads these by walking upward from the working directory).
 - `AGENTS.md` — Used by Codex CLI and Cursor. Claude references this via `@import`.
+- `.claude/skills/*/SKILL.md` — Used by Claude Code. A thin layer over `guides/` for the
+  few workflows needing agent-specific execution guidance, such as which permissions a
+  build phase requires (building the binary, debugging packaged artifacts).
 
 The root `AGENTS.md` provides project-wide context. Workspace and package-level
 `AGENTS.md` files add scoped details.
+
+#### Choosing where guidance goes
+
+**Default to a guide.** [`guides/`](./guides/) is where this repository keeps its
+procedures, and a guide is readable by every contributor and every AI tool, costs nothing
+until it is opened, and gives the workflow a single copy to keep correct. Index it in
+[`guides/README.md`](./guides/README.md) and link it from the relevant `AGENTS.md`.
+
+**Write a skill only when one of these is true**, and keep it to that content:
+
+- It pre-approves tools via `allowed-tools`, so a long multi-step task does not prompt on
+  every command. This is the one thing a skill can do that a markdown file cannot.
+- It is about operating the agent rather than doing the task — which permissions a phase
+  needs, host quirks such as unsetting `ELECTRON_RUN_AS_NODE`, or not re-prompting for
+  sandbox access mid-build. This would be noise in a contributor guide.
+
+**The test that settles most cases:** would a contributor doing this task by hand need to
+know it? If yes, it belongs in the guide, even when an agent needs it too. A prerequisite
+such as "this script needs a root `yarn` install and a `GH_TOKEN`" looks agent-specific and
+is not — anyone running that script hits the same failure.
+
+These are **not** reasons to write a skill:
+
+- *"It is a long multi-step procedure."* So is [the release process](./guides/release-process.md); `guides/` holds those.
+- *"The knowledge is scattered across several files."* That is a documentation problem. Consolidate it into one guide.
+- *"An agent might not find the guide."* The runbooks section of the root `AGENTS.md` provides the same discoverability whether it links a guide or a skill.
+- *"`AGENTS.md` should stay descriptive."* True, and that points at `guides/`, not at `.claude/`.
+
+A skill is a convenience layer for one tool and never a source of truth. It links to its
+guide and adds only the execution detail, so that contributors not using Claude are never
+sent into `.claude/` to find a rule.
 
 #### Maintenance expectations
 
 These files should be treated like other repository documentation:
 
 - If you change repository structure, commands, conventions, or workflows,
-  update the relevant `AGENTS.md` / `CLAUDE.md` in the same PR.
+  update the relevant `AGENTS.md` / `CLAUDE.md` / `SKILL.md` in the same PR.
 - Keep repo-local guidance factual and descriptive (what exists),
   not aspirational process.
 

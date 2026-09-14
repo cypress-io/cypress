@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type { ForNetworkPolicyRegistration } from '../ports/driving-ports'
 import type { NetworkExchange } from '../exchange/network-exchange'
 import type { NetworkPolicy, PolicyContext, PolicyPhase } from '../policies/types'
@@ -10,8 +11,6 @@ export type RunPoliciesResult = {
 export type RunPoliciesOptions = {
   phase: PolicyPhase
   exchange: NetworkExchange
-  onContinue?: () => void
-  onEnd?: () => void
 }
 
 /**
@@ -24,6 +23,7 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
 
   add (policy: NetworkPolicy): void {
     this.policies.push(policy)
+    debug.policies('registered policy %s (%s)', policy.name, policy.provenance)
   }
 
   getPolicies (): ReadonlyArray<NetworkPolicy> {
@@ -34,9 +34,11 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
    * Run registered policies for a phase. First matching policy that calls `end()` stops the chain.
    */
   async runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult> {
-    const { phase, exchange, onContinue, onEnd } = options
+    const { phase, exchange } = options
     let ended = false
     const state: Record<string, unknown> = {}
+
+    debug.policies('runPolicies phase=%s %o', phase, exchange)
 
     const ctx: PolicyContext = {
       phase,
@@ -44,16 +46,10 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
       state,
       continue () {
         // Intentional no-op: chain advancement is implicit via the loop below.
-        // Policies call continue() for API symmetry with end(); onContinue fires
-        // only when every matching policy completes without ending the chain.
+        // Policies call continue() for API symmetry with end().
       },
       end () {
-        if (ended) {
-          return
-        }
-
         ended = true
-        onEnd?.()
       },
     }
 
@@ -67,19 +63,23 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
       }
 
       if (!policy.when(exchange)) {
-        // e.g. policy when() returns false — try the next registered policy.
+        debug.policies('skipped policy %s (when=false)', policy.name)
+
         continue
       }
 
+      debug.policies('applying policy %s', policy.name)
       await policy.apply(ctx)
 
       if (ended) {
+        debug.policies('policy chain ended by %s %o', policy.name, state)
+
         return { ended: true, state }
       }
     }
 
     if (!ended) {
-      onContinue?.()
+      debug.policies('policy chain completed without ending')
     }
 
     return { ended, state }

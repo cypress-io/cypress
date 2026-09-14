@@ -226,7 +226,7 @@ export const getCommonConfig = () => {
       //    because it is fast and maps to filenames while showing compiled source
       // 'SourceMapDevToolPlugin' is used in production for the same reasons as 'eval', but it
       //    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
-      // files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
+      // files will be mapped like: `cypress://../driver/cy/commands/click.ts`
 
       // other sourcemap options:
       // [new webpack.SourceMapDevToolPlugin({
