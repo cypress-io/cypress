@@ -2,9 +2,14 @@
 // top frame has to be widened before spying on it
 const topWindow = () => window.top as Window & typeof globalThis
 
+// `_warn` is a Bluebird internal, so it is absent from Bluebird's public types
+type PromiseInternals = typeof Cypress.Promise.prototype & {
+  _warn (message: string, shouldUseOwnTrace?: boolean, promise?: unknown): void
+}
+
 describe('promises', () => {
   beforeEach(function () {
-    this.warn = cy.spy(Cypress.Promise.prototype as any, '_warn')
+    this.warn = cy.spy(Cypress.Promise.prototype as PromiseInternals, '_warn')
   })
 
   afterEach(function () {
