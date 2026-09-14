@@ -197,8 +197,8 @@ describe('open', () => {
   })
 
   describe('when platform is linux', () => {
-    // Windows has no `process.geteuid` property at all, which `vi.spyOn` requires and
-    // which restoring a captured value rather than a descriptor would leave behind.
+    // `process.geteuid` does not exist on Windows: `vi.spyOn` throws on a missing
+    // property, and a restore there has to delete the stub, not reinstate a value.
     let originalDescriptor: PropertyDescriptor | undefined
 
     const stubGeteuid = (euid?: number) => {

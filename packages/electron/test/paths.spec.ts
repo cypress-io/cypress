@@ -45,9 +45,8 @@ describe('paths', () => {
   beforeEach(async () => {
     originalPath = await vi.importActual('path')
 
-    // `paths.ts` builds every path through `path`, so the mocks delegate to `path.posix`.
-    // On the host's own implementation Windows yields separators and a drive letter, and
-    // the POSIX literals these specs assert on could only ever match on POSIX.
+    // The host implementation yields backslashes and a drive letter on Windows, which
+    // the POSIX literals asserted below can never match.
     vi.mocked(path.join).mockImplementation((...args) => {
       return originalPath.posix.join(...args)
     })
