@@ -101,6 +101,9 @@ describe('open', () => {
 
     // happy path defaults
     argv = ['--port', '1234']
+    // `os` is automocked, so without a default here `platform` keeps whatever the
+    // previously executed block set and the sandbox flag leaks across tests.
+    vi.mocked(os.platform).mockReturnValue('darwin')
     vi.spyOn(inspector, 'url').mockReturnValue(undefined)
     vi.mocked(spawn).mockReturnValue(mockChildProcess)
     vi.mocked(access).mockResolvedValue(undefined)
@@ -128,6 +131,7 @@ describe('open', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
+    vi.unstubAllEnvs()
   })
 
   it('opens the electron app and returns the child process', async () => {
