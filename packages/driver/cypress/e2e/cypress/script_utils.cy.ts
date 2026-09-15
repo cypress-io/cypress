@@ -1,7 +1,13 @@
-const Promise = require('bluebird')
-const $scriptUtils = require('@packages/driver/src/cypress/script_utils').default
-const $networkUtils = require('@packages/driver/src/cypress/network_utils').default
-const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils').default
+import Promise from 'bluebird'
+import $scriptUtils from '@packages/driver/src/cypress/script_utils'
+import $networkUtils from '@packages/driver/src/cypress/network_utils'
+import $sourceMapUtils from '@packages/driver/src/cypress/source_map_utils'
+
+type RunScriptsOptions = Parameters<typeof $scriptUtils.runScripts>[0]
+
+// the tests below exercise runScripts with deliberately partial browser,
+// window and script fakes rather than the real spec-loading inputs
+const runScripts = (options: Record<string, any>) => $scriptUtils.runScripts(options as RunScriptsOptions)
 
 describe('src/cypress/script_utils', () => {
   context('#runScripts', () => {
@@ -18,12 +24,12 @@ describe('src/cypress/script_utils', () => {
       }
 
       cy.stub($networkUtils, 'fetch').resolves('the script contents')
-      cy.stub($sourceMapUtils, 'extractSourceMap').returns()
+      cy.stub($sourceMapUtils, 'extractSourceMap').returns(undefined)
       cy.stub($sourceMapUtils, 'initializeSourceMapConsumer').resolves()
     })
 
     it('fetches each script in non-webkit browsers', () => {
-      return $scriptUtils.runScripts({
+      return runScripts({
         browser: { family: 'chromium' },
         scripts,
         specWindow: scriptWindow,
@@ -42,9 +48,11 @@ describe('src/cypress/script_utils', () => {
       }
       const createdScript1 = {
         addEventListener: cy.stub(),
+        src: '',
       }
       const createdScript2 = {
         addEventListener: cy.stub(),
+        src: '',
       }
       const doc = {
         querySelector: cy.stub().returns(foundScript),
@@ -56,7 +64,7 @@ describe('src/cypress/script_utils', () => {
 
       scriptWindow.document = doc
 
-      const runScripts = $scriptUtils.runScripts({
+      const runScriptsPromise = runScripts({
         scripts,
         specWindow: scriptWindow,
         browser: { family: 'webkit' },
@@ -73,7 +81,7 @@ describe('src/cypress/script_utils', () => {
       expect(createdScript2.addEventListener).to.be.calledWith('load')
       createdScript2.addEventListener.lastCall.args[1]()
 
-      await runScripts
+      await runScriptsPromise
 
       // sets script src
       expect(createdScript1.src).to.equal(scripts[0].relativeUrl)
@@ -86,7 +94,7 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('extracts the source map from each script', () => {
-      return $scriptUtils.runScripts({
+      return runScripts({
         browser: { family: 'chromium' },
         scripts,
         specWindow: scriptWindow,
@@ -100,7 +108,7 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('evals each script', () => {
-      return $scriptUtils.runScripts({
+      return runScripts({
         browser: { family: 'chromium' },
         scripts,
         specWindow: scriptWindow,
@@ -117,7 +125,7 @@ describe('src/cypress/script_utils', () => {
   context('#runPromises', () => {
     it('handles promises and doesnt try to fetch + eval manually', async () => {
       const scriptsAsPromises = [() => Promise.resolve(), () => Promise.resolve()]
-      const result = await $scriptUtils.runScripts({
+      const result = await runScripts({
         browser: { family: 'chromium' },
         scripts: scriptsAsPromises,
         specWindow: {},
