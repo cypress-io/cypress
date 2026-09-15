@@ -1,37 +1,105 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import EventEmitter from 'events'
+import { deepStrictEqual } from 'assert'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import type { ProtocolManagerShape } from '@packages/types'
-import type { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
 import type Protocol from 'devtools-protocol'
 import { fireDisconnect as fireDisconnectListeners } from '../../support/helpers/cdp-disconnect'
-const { expect, proxyquire, sinon } = require('../../spec_helper')
+import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
+
+type CriStub = {
+  send: Mock
+  on: Mock
+  off: Mock
+  close: Mock
+  _notifier: EventEmitter
+}
+
+type CriClientInstance = InstanceType<typeof CriClient>
+
+// cri-client reaches chrome-remote-interface through cdp-connection, so mocking
+// the leaf module covers both hops without stubbing cdp-connection itself
+const cdp = vi.hoisted(() => {
+  const state: { criStub: unknown } = { criStub: null }
+
+  const criImport = Object.assign(vi.fn(async () => state.criStub), {
+    New: vi.fn(async () => ({ webSocketDebuggerUrl: 'http://web/socket/url' })),
+  })
+
+  return { state, criImport }
+})
+
+vi.mock('chrome-remote-interface', () => {
+  return { default: cdp.criImport }
+})
 
 const DEBUGGER_URL = 'http://foo'
 const HOST = '127.0.0.1'
-const PORT = 50505
 
-describe('lib/browsers/cri-client', function () {
-  let send: sinon.SinonStub
-  let on: sinon.SinonStub
-  let off: sinon.SinonStub
+type RecordedCall = { args: unknown[], callId: number }
 
-  let criImport: sinon.SinonStub & {
-    New: sinon.SinonStub
-  }
-  let criStub: {
-    send: typeof send
-    on: typeof on
-    off: typeof off
-    close: sinon.SinonStub
-    _notifier: EventEmitter
-  }
-  let onError: sinon.SinonStub
-  let onReconnect: sinon.SinonStub
+// The shared cdp-disconnect helper replays on/off in sinon's global call order;
+// vi.fn has no equivalent id, so record one as the stubs are invoked and hand
+// the helper a getCalls() view over the recording.
+let nextCallId = 0
+let onCalls: RecordedCall[] = []
+let offCalls: RecordedCall[] = []
 
-  let getClient: (options?: { host?: string, fullyManageTabs?: boolean, protocolManager?: ProtocolManagerShape }) => ReturnType<typeof CriClient.create>
+const recordInto = (calls: RecordedCall[]) => {
+  return vi.fn((...args: unknown[]) => {
+    calls.push({ args, callId: nextCallId++ })
+  })
+}
+
+const asCallLog = (calls: RecordedCall[]) => {
+  return { getCalls: () => calls } as unknown as Parameters<typeof fireDisconnectListeners>[0]
+}
+
+const callsMatching = (mock: Mock, expected: unknown[]) => {
+  return mock.mock.calls.filter((call) => {
+    try {
+      deepStrictEqual(call.slice(0, expected.length), expected)
+
+      return true
+    } catch {
+      return false
+    }
+  })
+}
+
+// sinon's calledWith matches a prefix of the recorded arguments, where vitest's
+// toHaveBeenCalledWith requires the exact arity
+const expectCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsMatching(mock, expected), `calls matching ${String(expected[0])}`).not.toHaveLength(0)
+}
+
+const expectNotCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsMatching(mock, expected), `calls matching ${String(expected[0])}`).toHaveLength(0)
+}
+
+const expectCalledWithAndThrew = (mock: Mock, command: string) => {
+  const index = mock.mock.calls.findIndex((call) => call[0] === command)
+
+  expect(index, `a call to ${command}`).toBeGreaterThanOrEqual(0)
+  expect(mock.mock.results[index].type).toBe('throw')
+}
+
+describe('lib/browsers/cri-client', () => {
+  let send: Mock
+  let on: Mock
+  let off: Mock
+
+  let criStub: CriStub
+  let onError: Mock
+  let onReconnect: Mock
+
+  let getClient: (options?: { host?: string, fullyManageTabs?: boolean, protocolManager?: ProtocolManagerShape }) => Promise<CriClientInstance>
 
   const fireCDPEvent = <T extends keyof ProtocolMapping.Events>(method: T, params: Partial<ProtocolMapping.Events[T][0]>, sessionId?: string) => {
-    criStub.on.withArgs('event').args[0][1]({
+    const listener = onCalls.find((call) => call.args[0] === 'event')?.args[1] as (payload: unknown) => unknown
+
+    return listener({
       method,
       params,
       sessionId,
@@ -39,49 +107,40 @@ describe('lib/browsers/cri-client', function () {
   }
 
   // wraps the shared helper over the current criStub
-  const fireDisconnect = () => fireDisconnectListeners(criStub.on, criStub.off)
+  const fireDisconnect = () => fireDisconnectListeners(asCallLog(onCalls), asCallLog(offCalls))
 
-  beforeEach(function () {
-    send = sinon.stub()
-    onError = sinon.stub()
-    onReconnect = sinon.stub()
-    on = sinon.stub()
-    off = sinon.stub()
+  beforeEach(() => {
+    send = vi.fn()
+    onError = vi.fn()
+    onReconnect = vi.fn()
+    onCalls = []
+    offCalls = []
+    on = recordInto(onCalls)
+    off = recordInto(offCalls)
     criStub = {
       on,
       off,
       send,
-      close: sinon.stub().resolves(),
+      close: vi.fn(async () => {}),
       _notifier: new EventEmitter(),
     }
 
-    criImport = sinon.stub()
-    .withArgs({
-      target: DEBUGGER_URL,
-      local: true,
-    })
-    .resolves(criStub)
+    cdp.state.criStub = criStub
+    cdp.criImport.mockReset()
+    cdp.criImport.mockImplementation(async () => criStub)
+    cdp.criImport.New.mockReset()
+    cdp.criImport.New.mockImplementation(async () => ({ webSocketDebuggerUrl: 'http://web/socket/url' }))
 
-    criImport.New = sinon.stub().withArgs({ host: HOST, port: PORT, url: 'about:blank' }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
-
-    const CDPConnectionRef = proxyquire('../lib/browsers/cdp-protocol/cdp-connection', {
-      'chrome-remote-interface': criImport,
-    }).CDPConnection
-
-    const { CriClient } = proxyquire('../lib/browsers/cdp-protocol/cri-client', {
-      './cdp-connection': { CDPConnection: CDPConnectionRef },
-    })
-
-    getClient = ({ host, fullyManageTabs, protocolManager } = {}): Promise<CriClient> => {
+    getClient = ({ host, fullyManageTabs, protocolManager } = {}): Promise<CriClientInstance> => {
       return CriClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs, protocolManager, onReconnect })
     }
   })
 
-  context('.create', function () {
-    it('returns an instance of the CRI client', async function () {
+  describe('.create', () => {
+    it('returns an instance of the CRI client', async () => {
       const client = await getClient()
 
-      expect(client.send).to.be.instanceOf(Function)
+      expect(client.send).toBeInstanceOf(Function)
     })
 
     describe('when it has a host', () => {
@@ -89,7 +148,7 @@ describe('lib/browsers/cri-client', function () {
         const client = await getClient({ host: HOST })
 
         fireCDPEvent('Target.targetCrashed', { targetId: DEBUGGER_URL })
-        expect(client.crashed).to.be.true
+        expect(client.crashed).toBe(true)
       })
     })
 
@@ -98,14 +157,14 @@ describe('lib/browsers/cri-client', function () {
         const client = await getClient()
 
         fireCDPEvent('Target.targetCrashed', { targetId: DEBUGGER_URL })
-        expect(client.crashed).to.be.false
+        expect(client.crashed).toBe(false)
       })
     })
 
     describe('when it has a host and is fully managed and receives an attachedToTarget event', () => {
       beforeEach(async () => {
         await getClient({ host: HOST, fullyManageTabs: true })
-        criStub.send.resolves()
+        criStub.send.mockResolvedValue(undefined)
       })
 
       describe('target type is service worker, page, or other', () => {
@@ -118,7 +177,7 @@ describe('lib/browsers/cri-client', function () {
             })
           }))
 
-          expect(criStub.send).not.to.have.been.calledWith('Network.enable')
+          expectNotCalledWith(criStub.send, 'Network.enable')
         })
       })
 
@@ -130,7 +189,7 @@ describe('lib/browsers/cri-client', function () {
             } as Protocol.Target.TargetInfo,
           })
 
-          expect(criStub.send).to.have.been.calledWith('Network.enable')
+          expectCalledWith(criStub.send, 'Network.enable')
         })
       })
 
@@ -144,7 +203,7 @@ describe('lib/browsers/cri-client', function () {
             targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
           })
 
-          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+          expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
         })
 
         it('does not send Runtime.runIfWaitingForDebugger if not waiting for debugger', async () => {
@@ -154,11 +213,17 @@ describe('lib/browsers/cri-client', function () {
             targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
           })
 
-          expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+          expectNotCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger')
         })
 
         it('sends Runtime.runIfWaitingForDebugger even if Network.enable throws', async () => {
-          criStub.send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target closed'))
+          criStub.send.mockImplementation((command: string) => {
+            if (command === 'Network.enable') {
+              throw new Error('ProtocolError: Inspected target closed')
+            }
+
+            return Promise.resolve()
+          })
 
           await fireCDPEvent('Target.attachedToTarget', {
             waitingForDebugger: true,
@@ -166,12 +231,18 @@ describe('lib/browsers/cri-client', function () {
             targetInfo: { type: 'iframe' } as Protocol.Target.TargetInfo,
           })
 
-          expect(criStub.send).to.have.been.calledWith('Network.enable').and.to.have.thrown()
-          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+          expectCalledWithAndThrew(criStub.send, 'Network.enable')
+          expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
         })
 
         it('continues even if Runtime.runIfWaitingForDebugger throws', async () => {
-          criStub.send.withArgs('Runtime.runIfWaitingForDebugger').throws(new Error('ProtocolError: Inspected target closed'))
+          criStub.send.mockImplementation((command: string) => {
+            if (command === 'Runtime.runIfWaitingForDebugger') {
+              throw new Error('ProtocolError: Inspected target closed')
+            }
+
+            return Promise.resolve()
+          })
 
           await fireCDPEvent('Target.attachedToTarget', {
             waitingForDebugger: true,
@@ -179,14 +250,15 @@ describe('lib/browsers/cri-client', function () {
             targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
           })
 
-          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId).and.to.have.thrown()
+          expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
+          expectCalledWithAndThrew(criStub.send, 'Runtime.runIfWaitingForDebugger')
         })
       })
     })
 
     describe('when a child target (service worker / out-of-process iframe) attaches', () => {
       const sessionId = 'sw-session'
-      let client: CriClient
+      let client: CriClientInstance
 
       // drains the async attach handler, which fireCDPEvent invokes without
       // awaiting
@@ -194,13 +266,13 @@ describe('lib/browsers/cri-client', function () {
 
       beforeEach(async () => {
         client = await getClient({ host: HOST, fullyManageTabs: true })
-        criStub.send.resolves()
+        criStub.send.mockResolvedValue(undefined)
       })
 
       it('enables interception on the session before releasing the debugger', async () => {
         const enabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = vi.fn(() => enabled.promise)
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -210,16 +282,16 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
+        expect(client.onChildTargetAttached).toHaveBeenCalledExactlyOnceWith(sessionId)
 
         // a worker released before its session is intercepted fetches its own
         // script straight off the network, bypassing the middleware onion
-        expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+        expectNotCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger')
 
         enabled.resolve()
         await drain()
 
-        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('enables interception on origin-isolated iframe sessions before releasing the debugger', async () => {
@@ -229,7 +301,7 @@ describe('lib/browsers/cri-client', function () {
         // escapes to the real origin
         const enabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = vi.fn(() => enabled.promise)
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -239,17 +311,17 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
-        expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+        expect(client.onChildTargetAttached).toHaveBeenCalledExactlyOnceWith(sessionId)
+        expectNotCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger')
 
         enabled.resolve()
         await drain()
 
-        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('does not enable interception for other target types', async () => {
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         await Promise.all(['page', 'other'].map((type) => {
           return fireCDPEvent('Target.attachedToTarget', {
@@ -261,11 +333,13 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(client.onChildTargetAttached).not.to.have.been.called
+        expect(client.onChildTargetAttached).not.toHaveBeenCalled()
       })
 
       it('releases the debugger even when enabling interception fails', async () => {
-        client.onChildTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+        client.onChildTargetAttached = vi.fn(async () => {
+          throw new Error('ProtocolError: Inspected target closed')
+        })
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -276,7 +350,7 @@ describe('lib/browsers/cri-client', function () {
         await drain()
 
         // losing interception on one worker must not strand the target paused
-        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('releases the debugger when no interception hook is registered', async () => {
@@ -288,20 +362,20 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
     })
 
     describe('#whenChildTargetHandled', () => {
       const targetId = 'target-id'
       const sessionId = 'sw-session'
-      let client: CriClient
+      let client: CriClientInstance
 
       const drain = () => new Promise((resolve) => setImmediate(resolve))
 
       beforeEach(async () => {
         client = await getClient({ host: HOST, fullyManageTabs: true })
-        criStub.send.resolves()
+        criStub.send.mockResolvedValue(undefined)
       })
 
       it('resolves a waiter registered before the target attaches', async () => {
@@ -312,7 +386,7 @@ describe('lib/browsers/cri-client', function () {
         })
 
         await drain()
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: false,
@@ -321,7 +395,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       it('resolves immediately for a target that already finished attaching', async () => {
@@ -332,7 +406,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+        await expect(client.whenChildTargetHandled(targetId)).resolves.toBeUndefined()
       })
 
       it('resolves pending waiters when the client closes, rather than leaving them hanging on a dead connection', async () => {
@@ -344,7 +418,7 @@ describe('lib/browsers/cri-client', function () {
 
         await client.close()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       // Order-proof against a deferred onChildTargetAttached hook, same style
@@ -355,7 +429,7 @@ describe('lib/browsers/cri-client', function () {
         const enabled = Promise.withResolvers<void>()
         let resolved = false
 
-        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = vi.fn(() => enabled.promise)
 
         client.whenChildTargetHandled(targetId).then(() => {
           resolved = true
@@ -369,12 +443,12 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         enabled.resolve()
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       // "Handled" must mean interception is actually on, not merely that the
@@ -385,7 +459,7 @@ describe('lib/browsers/cri-client', function () {
         const enabled = Promise.withResolvers<void>()
         let resolved = false
 
-        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = vi.fn(() => enabled.promise)
 
         client.whenChildTargetHandled(targetId).then(() => {
           resolved = true
@@ -399,17 +473,17 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         enabled.reject(new Error('ProtocolError: Inspected target closed'))
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         // still released via close(), same as any other stranded waiter
         await client.close()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       it('commits a service worker target with no interception hook registered', async () => {
@@ -426,13 +500,13 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       it('resolves immediately for a waiter registered after the client has already closed', async () => {
         await client.close()
 
-        await expect(client.whenChildTargetHandled('anything')).to.be.fulfilled
+        await expect(client.whenChildTargetHandled('anything')).resolves.toBeUndefined()
       })
     })
 
@@ -458,9 +532,9 @@ describe('lib/browsers/cri-client', function () {
 
         await fireDisconnect()
 
-        expect(client.closed).to.be.false
+        expect(client.closed).toBe(false)
 
-        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+        await expect(client.whenChildTargetHandled(targetId)).resolves.toBeUndefined()
       })
 
       it('resolves a waiter already registered when the connection terminally disconnects', async () => {
@@ -473,20 +547,20 @@ describe('lib/browsers/cri-client', function () {
 
         await fireDisconnect()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
     })
 
     describe('eviction on detach/destroy (#34674 service worker restarts)', () => {
       const targetId = 'target-id'
       const sessionId = 'sw-session'
-      let client: CriClient
+      let client: CriClientInstance
 
       const drain = () => new Promise((resolve) => setImmediate(resolve))
 
       beforeEach(async () => {
         client = await getClient({ host: HOST, fullyManageTabs: true })
-        criStub.send.resolves()
+        criStub.send.mockResolvedValue(undefined)
       })
 
       // Guards against a target id being reused for a restarted service
@@ -502,7 +576,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+        await expect(client.whenChildTargetHandled(targetId)).resolves.toBeUndefined()
 
         fireCDPEvent('Target.detachedFromTarget', { sessionId, targetId })
 
@@ -511,7 +585,7 @@ describe('lib/browsers/cri-client', function () {
         const enabled = Promise.withResolvers<void>()
         let resolved = false
 
-        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = vi.fn(() => enabled.promise)
 
         client.whenChildTargetHandled(targetId).then(() => {
           resolved = true
@@ -525,12 +599,12 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         enabled.resolve()
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       // A detach event is not guaranteed to arrive before a reused targetId's
@@ -547,13 +621,13 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+        await expect(client.whenChildTargetHandled(targetId)).resolves.toBeUndefined()
 
         // no detach observed in between - a new instance simply attaches
         // under the same targetId
         const enabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = vi.fn(() => enabled.promise)
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -569,12 +643,12 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         enabled.resolve()
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       it('does not retain a stale "handled" entry for a target that detached without re-attaching', async () => {
@@ -597,7 +671,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
       })
 
       it('also evicts on Target.targetDestroyed, in case that is what actually arrives on this connection', async () => {
@@ -620,7 +694,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
       })
 
       // A detach that arrives while the attach handler is still suspended
@@ -633,7 +707,7 @@ describe('lib/browsers/cri-client', function () {
       it('does not mark a target handled from a stale attach that resumes after a mid-flight detach', async () => {
         const enabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = vi.fn(() => enabled.promise)
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -659,7 +733,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
       })
 
       it('resolves a pending waiter promptly when its target detaches', async () => {
@@ -670,13 +744,13 @@ describe('lib/browsers/cri-client', function () {
         })
 
         await drain()
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         fireCDPEvent('Target.detachedFromTarget', { sessionId, targetId })
 
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
     })
 
@@ -690,17 +764,17 @@ describe('lib/browsers/cri-client', function () {
     describe('#reenableChildTargetInterception', () => {
       const targetId = 'target-id'
       const sessionId = 'sw-session'
-      let client: CriClient
+      let client: CriClientInstance
 
       const drain = () => new Promise((resolve) => setImmediate(resolve))
 
       beforeEach(async () => {
         client = await getClient({ host: HOST, fullyManageTabs: true })
-        criStub.send.resolves()
+        criStub.send.mockResolvedValue(undefined)
       })
 
       const attachServiceWorker = async () => {
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -714,11 +788,11 @@ describe('lib/browsers/cri-client', function () {
       it('evicts the stale handled entry, re-runs the hook against the session on file, and commits on success', async () => {
         await attachServiceWorker()
 
-        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+        await expect(client.whenChildTargetHandled(targetId)).resolves.toBeUndefined()
 
         const reEnabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+        client.onChildTargetAttached = vi.fn(() => reEnabled.promise)
 
         const reenabled = client.reenableChildTargetInterception(targetId)
 
@@ -732,15 +806,15 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
-        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
+        expect(resolved).toBe(false)
+        expect(client.onChildTargetAttached).toHaveBeenCalledExactlyOnceWith(sessionId)
 
         reEnabled.resolve()
 
-        await expect(reenabled).to.be.fulfilled
+        await expect(reenabled).resolves.toBeUndefined()
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       // A target that has never been seen at all (no session, no handled
@@ -751,7 +825,7 @@ describe('lib/browsers/cri-client', function () {
       it('waits via whenChildTargetHandled for a target that has never been seen', async () => {
         // a hook must be registered, or the earlier no-hook check would
         // reject before ever reaching the never-seen-target branch below
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         let resolved = false
         let rejected = false
@@ -767,8 +841,8 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
-        expect(rejected).to.be.false
+        expect(resolved).toBe(false)
+        expect(rejected).toBe(false)
 
         // a concurrent attach for that same targetId eventually commits
         fireCDPEvent('Target.attachedToTarget', {
@@ -778,8 +852,8 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.true
-        expect(rejected).to.be.false
+        expect(resolved).toBe(true)
+        expect(rejected).toBe(false)
       })
 
       // Unlike a never-seen target, a stale handled entry means this target
@@ -789,7 +863,7 @@ describe('lib/browsers/cri-client', function () {
       it('rejects when the target has no session on file but still has a stale handled entry', async () => {
         await attachServiceWorker()
 
-        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+        await expect(client.whenChildTargetHandled(targetId)).resolves.toBeUndefined()
 
         // a late detach carrying only the session (no targetId) evicts
         // _targetSessions but leaves the stale handled entry behind
@@ -797,7 +871,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+        await expect(client.reenableChildTargetInterception(targetId)).rejects.toThrow()
       })
 
       it('rejects when no interception hook is registered', async () => {
@@ -809,15 +883,17 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+        await expect(client.reenableChildTargetInterception(targetId)).rejects.toThrow()
       })
 
       it('rejects when the hook rejects, and does not mark the target handled', async () => {
         await attachServiceWorker()
 
-        client.onChildTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+        client.onChildTargetAttached = vi.fn(async () => {
+          throw new Error('ProtocolError: Inspected target closed')
+        })
 
-        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+        await expect(client.reenableChildTargetInterception(targetId)).rejects.toThrow()
 
         let resolved = false
 
@@ -827,7 +903,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
       })
 
       it('rejects once the connection has closed', async () => {
@@ -835,7 +911,7 @@ describe('lib/browsers/cri-client', function () {
 
         await client.close()
 
-        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+        await expect(client.reenableChildTargetInterception(targetId)).rejects.toThrow()
       })
 
       // The exact missed-detach scenario the fresh-attach eviction (item 1)
@@ -848,7 +924,7 @@ describe('lib/browsers/cri-client', function () {
         const sessionOne = 'sw-session-1'
         const sessionTwo = 'sw-session-2'
 
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         // S1 attaches under targetId
         fireCDPEvent('Target.attachedToTarget', {
@@ -875,11 +951,11 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
-        await expect(client.reenableChildTargetInterception(targetId)).to.be.fulfilled
+        await expect(client.reenableChildTargetInterception(targetId)).resolves.toBeUndefined()
 
-        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionTwo)
+        expect(client.onChildTargetAttached).toHaveBeenCalledExactlyOnceWith(sessionTwo)
       })
 
       // Same scenario, but the late detach DOES carry a targetId - the
@@ -890,7 +966,7 @@ describe('lib/browsers/cri-client', function () {
         const sessionOne = 'sw-session-1'
         const sessionTwo = 'sw-session-2'
 
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         // S1 attaches under targetId
         fireCDPEvent('Target.attachedToTarget', {
@@ -915,11 +991,11 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
-        await expect(client.reenableChildTargetInterception(targetId)).to.be.fulfilled
+        await expect(client.reenableChildTargetInterception(targetId)).resolves.toBeUndefined()
 
-        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionTwo)
+        expect(client.onChildTargetAttached).toHaveBeenCalledExactlyOnceWith(sessionTwo)
       })
 
       // A detach arriving while the re-run is suspended mid-flight
@@ -933,7 +1009,7 @@ describe('lib/browsers/cri-client', function () {
 
         const reEnabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+        client.onChildTargetAttached = vi.fn(() => reEnabled.promise)
 
         const reenabled = client.reenableChildTargetInterception(targetId)
 
@@ -943,7 +1019,7 @@ describe('lib/browsers/cri-client', function () {
 
         reEnabled.resolve()
 
-        await expect(reenabled).to.be.fulfilled
+        await expect(reenabled).resolves.toBeUndefined()
 
         let resolved = false
 
@@ -953,24 +1029,24 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
       })
     })
 
     describe('Inspector.targetReloadedAfterCrash (#34674 crash-and-reload re-arm)', () => {
       const targetId = 'target-id'
       const sessionId = 'sw-session'
-      let client: CriClient
+      let client: CriClientInstance
 
       const drain = () => new Promise((resolve) => setImmediate(resolve))
 
       beforeEach(async () => {
         client = await getClient({ host: HOST, fullyManageTabs: true })
-        criStub.send.resolves()
+        criStub.send.mockResolvedValue(undefined)
       })
 
       const attachServiceWorker = async () => {
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -984,20 +1060,20 @@ describe('lib/browsers/cri-client', function () {
       it('re-invokes the hook for a known service worker session, without releasing the debugger itself', async () => {
         await attachServiceWorker()
 
-        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+        await expect(client.whenChildTargetHandled(targetId)).resolves.toBeUndefined()
 
-        client.onChildTargetAttached = sinon.stub().resolves()
-        criStub.send.resetHistory()
+        client.onChildTargetAttached = vi.fn(async () => {})
+        criStub.send.mockClear()
 
         fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
 
         await drain()
 
-        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
+        expect(client.onChildTargetAttached).toHaveBeenCalledExactlyOnceWith(sessionId)
 
         // releasing a crash-reloaded target from here is the browser
         // connection's job, not this one's
-        expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectNotCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('resolves a whenChildTargetHandled promise obtained after the crash event only once the re-run resolves', async () => {
@@ -1005,7 +1081,7 @@ describe('lib/browsers/cri-client', function () {
 
         const reEnabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+        client.onChildTargetAttached = vi.fn(() => reEnabled.promise)
 
         fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
 
@@ -1017,12 +1093,12 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
 
         reEnabled.resolve()
         await drain()
 
-        expect(resolved).to.be.true
+        expect(resolved).toBe(true)
       })
 
       it('leaves the target unhandled when the re-run hook rejects', async () => {
@@ -1030,7 +1106,7 @@ describe('lib/browsers/cri-client', function () {
 
         const reEnabled = Promise.withResolvers<void>()
 
-        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+        client.onChildTargetAttached = vi.fn(() => reEnabled.promise)
 
         fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
 
@@ -1043,17 +1119,17 @@ describe('lib/browsers/cri-client', function () {
         reEnabled.reject(new Error('ProtocolError: Inspected target closed'))
         await drain()
 
-        expect(resolved).to.be.false
+        expect(resolved).toBe(false)
       })
 
       it('does nothing for an unknown session', async () => {
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, 'unknown-session')
 
         await drain()
 
-        expect(client.onChildTargetAttached).not.to.have.been.called
+        expect(client.onChildTargetAttached).not.toHaveBeenCalled()
       })
 
       // Target.detachedFromTarget always carries a sessionId, even on the
@@ -1068,64 +1144,70 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        client.onChildTargetAttached = sinon.stub().resolves()
+        client.onChildTargetAttached = vi.fn(async () => {})
 
         fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
 
         await drain()
 
-        expect(client.onChildTargetAttached).not.to.have.been.called
+        expect(client.onChildTargetAttached).not.toHaveBeenCalled()
       })
     })
 
-    context('#send', function () {
-      it('calls cri.send with command and data', async function () {
-        send.resolves()
+    describe('#send', () => {
+      it('calls cri.send with command and data', async () => {
+        send.mockResolvedValue(undefined)
         const client = await getClient()
 
         client.send('DOM.getDocument', { depth: -1 })
-        expect(send).to.be.calledWith('DOM.getDocument', { depth: -1 })
+        expectCalledWith(send, 'DOM.getDocument', { depth: -1 })
       })
 
-      it('rejects if cri.send rejects', async function () {
-        const err = new Error
+      it('rejects if cri.send rejects', async () => {
+        const err = new Error()
 
-        send.rejects(err)
+        send.mockRejectedValue(err)
         const client = await getClient()
 
-        await expect(client.send('DOM.getDocument', { depth: -1 }))
-        .to.be.rejectedWith(err)
+        await expect(client.send('DOM.getDocument', { depth: -1 })).rejects.toBe(err)
       })
 
-      it('rejects if target has crashed', async function () {
+      it('rejects if target has crashed', async () => {
         const command = 'DOM.getDocument'
         const client = await getClient({ host: '127.0.0.1', fullyManageTabs: true })
 
         fireCDPEvent('Target.targetCrashed', { targetId: DEBUGGER_URL })
 
-        await expect(client.send(command, { depth: -1 })).to.be.rejectedWith(`${command} will not run as the target browser or tab CRI connection has crashed`)
+        await expect(client.send(command, { depth: -1 })).rejects.toThrow(`${command} will not run as the target browser or tab CRI connection has crashed`)
       })
 
-      it('does not reject if attachToTarget work throws', async function () {
-        criStub.send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
+      it('does not reject if attachToTarget work throws', async () => {
+        criStub.send.mockImplementation((command: string) => {
+          if (command === 'Network.enable') {
+            throw new Error('ProtocolError: Inspected target navigated or closed')
+          }
+
+          return Promise.resolve()
+        })
+
         await getClient({ host: '127.0.0.1', fullyManageTabs: true })
 
         // This would throw if the error was not caught
         await fireCDPEvent('Target.attachedToTarget', { targetInfo: { type: 'worker', targetId: DEBUGGER_URL, title: '', url: 'https://some_url', attached: true, canAccessOpener: true } })
       })
 
-      context('retries', () => {
+      describe('retries', () => {
         ([
           'WebSocket is not open',
           // @see https://github.com/cypress-io/cypress/issues/7180
           'WebSocket is already in CLOSING or CLOSED state',
           'WebSocket connection closed',
         ]).forEach((msg) => {
-          it(`with one '${msg}' message it retries once`, async function () {
+          it(`with one '${msg}' message it retries once`, async () => {
             const err = new Error(msg)
 
-            send.onFirstCall().rejects(err)
-            send.onSecondCall().resolves()
+            send.mockRejectedValueOnce(err)
+            send.mockResolvedValueOnce(undefined)
 
             const client = await getClient()
 
@@ -1133,15 +1215,15 @@ describe('lib/browsers/cri-client', function () {
 
             await fireDisconnect()
             await p
-            expect(send).to.be.calledTwice
+            expect(send).toHaveBeenCalledTimes(2)
           })
 
           it(`with two '${msg}' message it retries twice`, async () => {
             const err = new Error(msg)
 
-            send.onFirstCall().rejects(err)
-            send.onSecondCall().rejects(err)
-            send.onThirdCall().resolves()
+            send.mockRejectedValueOnce(err)
+            send.mockRejectedValueOnce(err)
+            send.mockResolvedValueOnce(undefined)
 
             const client = await getClient()
 
@@ -1150,15 +1232,15 @@ describe('lib/browsers/cri-client', function () {
             await fireDisconnect()
             await fireDisconnect()
             await getDocumentPromise
-            expect(send).to.have.callCount(3)
+            expect(send).toHaveBeenCalledTimes(3)
           })
 
           it(`with two '${msg}' message it retries enablements twice`, async () => {
             const err = new Error(msg)
 
-            send.onFirstCall().rejects(err)
-            send.onSecondCall().rejects(err)
-            send.onThirdCall().resolves()
+            send.mockRejectedValueOnce(err)
+            send.mockRejectedValueOnce(err)
+            send.mockResolvedValueOnce(undefined)
 
             const client = await getClient()
 
@@ -1167,37 +1249,37 @@ describe('lib/browsers/cri-client', function () {
             await fireDisconnect()
             await fireDisconnect()
             await enableNetworkPromise
-            expect(send).to.have.callCount(3)
+            expect(send).toHaveBeenCalledTimes(3)
           })
         })
       })
 
-      context('closed', () => {
-        it(`when socket is closed mid send'`, async function () {
+      describe('closed', () => {
+        it(`when socket is closed mid send'`, async () => {
           const err = new Error('WebSocket is not open: readyState 3 (CLOSED)')
 
-          send.onFirstCall().rejects(err)
+          send.mockRejectedValueOnce(err)
 
           const client = await getClient()
 
           await client.close()
 
-          await expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as the CRI connection to Target')
+          await expect(client.send('DOM.getDocument', { depth: -1 })).rejects.toThrow('DOM.getDocument will not run as the CRI connection to Target')
         })
 
-        it(`when socket is closed mid send ('WebSocket connection closed' variant)`, async function () {
+        it(`when socket is closed mid send ('WebSocket connection closed' variant)`, async () => {
           const err = new Error('WebSocket connection closed')
 
-          send.onFirstCall().rejects(err)
+          send.mockRejectedValueOnce(err)
           const client = await getClient()
 
           await client.close()
 
-          await expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as the CRI connection to Target')
+          await expect(client.send('DOM.getDocument', { depth: -1 })).rejects.toThrow('DOM.getDocument will not run as the CRI connection to Target')
         })
       })
 
-      context('when reconnection is disabled (cypress-in-cypress)', () => {
+      describe('when reconnection is disabled (cypress-in-cypress)', () => {
         beforeEach(() => {
           process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
         })
@@ -1206,11 +1288,11 @@ describe('lib/browsers/cri-client', function () {
           delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
         })
 
-        it('rejects an enqueued command when the socket terminally disconnects', async function () {
+        it('rejects an enqueued command when the socket terminally disconnects', async () => {
           const client = await getClient()
 
           // a send that fails like a closed socket gets enqueued to await a reconnect
-          send.onFirstCall().rejects(new Error('WebSocket is not open: readyState 3 (CLOSED)'))
+          send.mockRejectedValueOnce(new Error('WebSocket is not open: readyState 3 (CLOSED)'))
 
           const pending = client.send('Fetch.disable')
 
@@ -1220,30 +1302,30 @@ describe('lib/browsers/cri-client', function () {
           // with reconnection disabled, this disconnect is terminal - no reconnect will ever flush the queue
           await fireDisconnect()
 
-          await expect(pending).to.be.rejectedWith('The CRI connection to Target')
+          await expect(pending).rejects.toThrow('The CRI connection to Target')
         })
 
-        it('rejects sends after the socket has terminally disconnected instead of enqueuing them', async function () {
+        it('rejects sends after the socket has terminally disconnected instead of enqueuing them', async () => {
           const client = await getClient()
 
           await fireDisconnect()
 
-          await expect(client.send('Fetch.disable')).to.be.rejectedWith('Fetch.disable will not run as the CRI connection to Target')
+          await expect(client.send('Fetch.disable')).rejects.toThrow('Fetch.disable will not run as the CRI connection to Target')
         })
 
-        it('marks the client closed once a terminal disconnect has already happened', async function () {
+        it('marks the client closed once a terminal disconnect has already happened', async () => {
           const client = await getClient()
 
           await fireDisconnect()
 
-          await expect(client.close()).to.be.fulfilled
-          expect(client.closed).to.be.true
+          await expect(client.close()).resolves.toBeUndefined()
+          expect(client.closed).toBe(true)
         })
       })
     })
   })
 
-  context('#off', () => {
+  describe('#off', () => {
     const noop = () => {}
 
     it('removes the subscription', async () => {
@@ -1252,7 +1334,7 @@ describe('lib/browsers/cri-client', function () {
       client.on('Page.loadEventFired', noop)
       client.off('Page.loadEventFired', noop)
 
-      expect(client.queue.subscriptions).to.be.empty
+      expect(client.queue.subscriptions).toHaveLength(0)
     })
 
     it('leaves other subscriptions in place when the callback was never registered', async () => {
@@ -1265,12 +1347,12 @@ describe('lib/browsers/cri-client', function () {
       client.off('Page.loadEventFired', noop)
       client.off('Page.frameAttached', () => {})
 
-      expect(client.queue.subscriptions).to.have.length(1)
-      expect(client.queue.subscriptions[0].eventName).to.eq('Network.requestWillBeSent')
+      expect(client.queue.subscriptions).toHaveLength(1)
+      expect(client.queue.subscriptions[0].eventName).toBe('Network.requestWillBeSent')
     })
   })
 
-  context('#removeSessionEnablements', () => {
+  describe('#removeSessionEnablements', () => {
     it('drops only the detached session\'s enablements', async () => {
       const client = await getClient()
 
@@ -1281,7 +1363,7 @@ describe('lib/browsers/cri-client', function () {
 
       client.removeSessionEnablements('session-1')
 
-      expect(client.queue.enableCommands).to.deep.equal([
+      expect(client.queue.enableCommands).toEqual([
         { command: 'Network.enable', sessionId: 'session-2' },
         { command: 'Target.setDiscoverTargets', params: { discover: true } },
       ])
@@ -1294,33 +1376,33 @@ describe('lib/browsers/cri-client', function () {
 
       client.removeSessionEnablements(undefined as any)
 
-      expect(client.queue.enableCommands).to.have.length(1)
+      expect(client.queue.enableCommands).toHaveLength(1)
     })
   })
 
-  context('clone', () => {
+  describe('clone', () => {
     it('returns a new CriClient with the same options', async () => {
       const client = await getClient()
 
       const cloned = await client.clone()
 
-      expect(cloned['targetId']).to.equal(client['targetId'])
-      expect(cloned['onAsynchronousError']).to.equal(client['onAsynchronousError'])
-      expect(cloned['host']).to.equal(client['host'])
-      expect(cloned['port']).to.equal(client['port'])
-      expect(cloned['protocolManager']).to.equal(client['protocolManager'])
-      expect(cloned['fullyManageTabs']).to.equal(client['fullyManageTabs'])
-      expect(cloned['browserClient']).to.equal(client['browserClient'])
+      expect(cloned['targetId']).toBe(client['targetId'])
+      expect(cloned['onAsynchronousError']).toBe(client['onAsynchronousError'])
+      expect(cloned['host']).toBe(client['host'])
+      expect(cloned['port']).toBe(client['port'])
+      expect(cloned['protocolManager']).toBe(client['protocolManager'])
+      expect(cloned['fullyManageTabs']).toBe(client['fullyManageTabs'])
+      expect(cloned['browserClient']).toBe(client['browserClient'])
     })
   })
 
   describe('on reconnect', () => {
     it('resends *.enable commands and notifies protocol manager', async () => {
-      criStub._notifier.on = sinon.stub()
+      criStub._notifier.on = vi.fn() as typeof criStub._notifier.on
 
       const protocolManager = {
-        cdpReconnect: sinon.stub(),
-      } as ProtocolManagerShape
+        cdpReconnect: vi.fn(),
+      } as unknown as ProtocolManagerShape
 
       const client = await getClient({
         protocolManager,
@@ -1336,19 +1418,19 @@ describe('lib/browsers/cri-client', function () {
       client.send('Network.baz')
 
       // clear out previous calls before reconnect
-      criStub.send.reset()
+      criStub.send.mockReset()
 
       await fireDisconnect()
 
-      const reconnection = Promise.withResolvers()
+      const reconnection = Promise.withResolvers<void>()
 
-      onReconnect.callsFake(() => reconnection.resolve())
+      onReconnect.mockImplementation(() => reconnection.resolve())
       await reconnection.promise
 
-      expect(criStub.send).to.be.calledTwice
-      expect(criStub.send).to.be.calledWith('Page.enable')
-      expect(criStub.send).to.be.calledWith('Network.enable')
-      expect(protocolManager.cdpReconnect).to.be.called
+      expect(criStub.send).toHaveBeenCalledTimes(2)
+      expectCalledWith(criStub.send, 'Page.enable')
+      expectCalledWith(criStub.send, 'Network.enable')
+      expect(protocolManager.cdpReconnect).toHaveBeenCalled()
 
       await fireDisconnect()
     })
@@ -1361,18 +1443,18 @@ describe('lib/browsers/cri-client', function () {
       client.send('Fetch.disable')
 
       // clear out previous calls before reconnect
-      criStub.send.reset()
+      criStub.send.mockReset()
 
       await fireDisconnect()
 
-      const reconnection = Promise.withResolvers()
+      const reconnection = Promise.withResolvers<void>()
 
-      onReconnect.callsFake(() => reconnection.resolve())
+      onReconnect.mockImplementation(() => reconnection.resolve())
       await reconnection.promise
 
-      expect(criStub.send).to.be.calledOnce
-      expect(criStub.send).to.be.calledWith('Page.enable')
-      expect(criStub.send).not.to.be.calledWith('Fetch.enable')
+      expect(criStub.send).toHaveBeenCalledTimes(1)
+      expectCalledWith(criStub.send, 'Page.enable')
+      expectNotCalledWith(criStub.send, 'Fetch.enable')
 
       await fireDisconnect()
     })
@@ -1385,18 +1467,18 @@ describe('lib/browsers/cri-client', function () {
       client.send('Fetch.disable', undefined, 'session-a')
 
       // clear out previous calls before reconnect
-      criStub.send.reset()
+      criStub.send.mockReset()
 
       await fireDisconnect()
 
-      const reconnection = Promise.withResolvers()
+      const reconnection = Promise.withResolvers<void>()
 
-      onReconnect.callsFake(() => reconnection.resolve())
+      onReconnect.mockImplementation(() => reconnection.resolve())
       await reconnection.promise
 
-      expect(criStub.send).to.be.calledOnce
-      expect(criStub.send).to.be.calledWith('Fetch.enable', undefined, 'session-b')
-      expect(criStub.send).not.to.be.calledWith('Fetch.enable', undefined, 'session-a')
+      expect(criStub.send).toHaveBeenCalledTimes(1)
+      expectCalledWith(criStub.send, 'Fetch.enable', undefined, 'session-b')
+      expectNotCalledWith(criStub.send, 'Fetch.enable', undefined, 'session-a')
 
       await fireDisconnect()
     })
@@ -1412,17 +1494,17 @@ describe('lib/browsers/cri-client', function () {
       client.send('Fetch.enable', undefined, 'session-a')
 
       // clear out previous calls before reconnect
-      criStub.send.reset()
+      criStub.send.mockReset()
 
       await fireDisconnect()
 
-      const reconnection = Promise.withResolvers()
+      const reconnection = Promise.withResolvers<void>()
 
-      onReconnect.callsFake(() => reconnection.resolve())
+      onReconnect.mockImplementation(() => reconnection.resolve())
       await reconnection.promise
 
-      expect(criStub.send).to.be.calledOnce
-      expect(criStub.send).to.be.calledWith('Fetch.enable', undefined, 'session-a')
+      expect(criStub.send).toHaveBeenCalledTimes(1)
+      expectCalledWith(criStub.send, 'Fetch.enable', undefined, 'session-a')
 
       await fireDisconnect()
     })
@@ -1439,18 +1521,18 @@ describe('lib/browsers/cri-client', function () {
       client.send('Runtime.addBinding', { name: 'b' })
 
       // clear out previous calls before reconnect
-      criStub.send.reset()
+      criStub.send.mockReset()
 
       await fireDisconnect()
 
-      const reconnection = Promise.withResolvers()
+      const reconnection = Promise.withResolvers<void>()
 
-      onReconnect.callsFake(() => reconnection.resolve())
+      onReconnect.mockImplementation(() => reconnection.resolve())
       await reconnection.promise
 
-      expect(criStub.send).to.be.calledTwice
-      expect(criStub.send).to.be.calledWith('Runtime.addBinding', { name: 'a' })
-      expect(criStub.send).to.be.calledWith('Runtime.addBinding', { name: 'b' })
+      expect(criStub.send).toHaveBeenCalledTimes(2)
+      expectCalledWith(criStub.send, 'Runtime.addBinding', { name: 'a' })
+      expectCalledWith(criStub.send, 'Runtime.addBinding', { name: 'b' })
 
       await fireDisconnect()
     })
@@ -1467,18 +1549,18 @@ describe('lib/browsers/cri-client', function () {
       client.send('Fetch.enable', { patterns: [{ requestStage: 'Response' }] }, 'session-a')
 
       // clear out previous calls before reconnect
-      criStub.send.reset()
+      criStub.send.mockReset()
 
       await fireDisconnect()
 
-      const reconnection = Promise.withResolvers()
+      const reconnection = Promise.withResolvers<void>()
 
-      onReconnect.callsFake(() => reconnection.resolve())
+      onReconnect.mockImplementation(() => reconnection.resolve())
       await reconnection.promise
 
-      expect(criStub.send).to.be.calledTwice
-      expect(criStub.send).to.be.calledWith('Fetch.enable', { patterns: [{ requestStage: 'Request' }] }, 'session-a')
-      expect(criStub.send).to.be.calledWith('Fetch.enable', { patterns: [{ requestStage: 'Response' }] }, 'session-a')
+      expect(criStub.send).toHaveBeenCalledTimes(2)
+      expectCalledWith(criStub.send, 'Fetch.enable', { patterns: [{ requestStage: 'Request' }] }, 'session-a')
+      expectCalledWith(criStub.send, 'Fetch.enable', { patterns: [{ requestStage: 'Response' }] }, 'session-a')
 
       await fireDisconnect()
     })
@@ -1492,28 +1574,28 @@ describe('lib/browsers/cri-client', function () {
 
       circular.self = circular
 
-      expect(() => client.send('Runtime.addBinding', circular)).not.to.throw()
+      expect(() => client.send('Runtime.addBinding', circular)).not.toThrow()
     })
 
     it('errors if reconnecting fails', async () => {
       await getClient()
 
-      criImport.rejects()
+      cdp.criImport.mockRejectedValue(new Error())
 
       await fireDisconnect()
 
       await (new Promise((resolve) => setImmediate(resolve)))
 
-      expect(onError).to.be.called
+      expect(onError).toHaveBeenCalled()
 
-      const error = onError.lastCall.args[0]
+      const error = onError.mock.calls[onError.mock.calls.length - 1][0]
 
-      expect(error.messageMarkdown).to.equal('There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.')
-      expect(error.isFatalApiErr).to.be.true
+      expect(error.messageMarkdown).toBe('There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.')
+      expect(error.isFatalApiErr).toBe(true)
     })
 
     it('rejects previously enqueued commands when reconnection exhausts its retries and gives up', async () => {
-      send.onFirstCall().rejects(new Error('WebSocket is not open: readyState 3 (CLOSED)'))
+      send.mockRejectedValueOnce(new Error('WebSocket is not open: readyState 3 (CLOSED)'))
 
       const client = await getClient()
 
@@ -1522,11 +1604,11 @@ describe('lib/browsers/cri-client', function () {
       // let the failed send settle into the queue before reconnection starts failing
       await new Promise((resolve) => setImmediate(resolve))
 
-      criImport.rejects()
+      cdp.criImport.mockRejectedValue(new Error())
 
       await fireDisconnect()
 
-      await expect(pending).to.be.rejectedWith('The CRI connection to Target')
+      await expect(pending).rejects.toThrow('The CRI connection to Target')
     })
   })
 })
