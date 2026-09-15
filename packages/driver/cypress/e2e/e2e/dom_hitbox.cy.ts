@@ -1,5 +1,15 @@
-const { clickCommandLog } = require('../../support/utils')
+import { clickCommandLog } from '../../support/utils'
+
 const { _ } = Cypress
+
+interface RectLike {
+  width: number
+  height: number
+  top: number
+  left: number
+  right: number
+  bottom: number
+}
 
 // https://github.com/cypress-io/cypress/pull/5299/files
 // TODO(webkit): fix+unskip for experimental webkit
@@ -90,7 +100,7 @@ describe('rect highlight', { browser: '!webkit' }, () => {
   })
 })
 
-const ensureCorrectTargetPosition = (sel) => {
+const ensureCorrectTargetPosition = (sel: string) => {
   return cy.wrap(null, { timeout: 4000 }).should(() => {
     const target = cy.$$('div[data-highlight-hitbox]')[0].getBoundingClientRect()
 
@@ -107,7 +117,7 @@ const ensureCorrectTargetPosition = (sel) => {
   })
 }
 
-const ensureCorrectHighlightPositions = (sel, skipElementComparison) => {
+const ensureCorrectHighlightPositions = (sel?: string | null, skipElementComparison?: boolean) => {
   return cy.wrap(null, { timeout: 4000 }).should(() => {
     const els = {
       content: cy.$$('div[data-layer=Content]'),
@@ -122,7 +132,7 @@ const ensureCorrectHighlightPositions = (sel, skipElementComparison) => {
     if (!skipElementComparison) {
       const doc = els.content[0].ownerDocument
 
-      const contentHighlightCenter = [dims.content.x + dims.content.width / 2, dims.content.y + dims.content.height / 2]
+      const contentHighlightCenter: [number, number] = [dims.content.x + dims.content.width / 2, dims.content.y + dims.content.height / 2]
       const highlightedEl = doc.elementFromPoint(...contentHighlightCenter)
 
       expect(highlightedEl).eq(els.content[0])
@@ -137,19 +147,25 @@ const ensureCorrectHighlightPositions = (sel, skipElementComparison) => {
   })
 }
 
-const getAndPin = (sel) => {
+const getAndPin = (sel: string) => {
   cy.get(sel)
 
   clickCommandLog(sel, 'message-text')
 }
 
-const clickAndPin = (sel, ...args) => {
-  cy.get(sel).click(...args)
+const clickAndPin = (sel: string, x?: number, y?: number) => {
+  const $el = cy.get(sel)
+
+  if (x === undefined || y === undefined) {
+    $el.click()
+  } else {
+    $el.click(x, y)
+  }
 
   clickCommandLog('click')
 }
 
-const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {
+const expectToBeEqual = (rect1: RectLike, rect2: RectLike, mes = 'rect to be equal to rect') => {
   try {
     expect(rect1.width, 'width').to.be.closeTo(rect2.width, 1)
     expect(rect1.height, 'height').to.be.closeTo(rect2.height, 1)
@@ -163,7 +179,7 @@ const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {
   }
 }
 
-const expectToBeInside = (rectInner, rectOuter, mes = 'rect to be inside rect') => {
+const expectToBeInside = (rectInner: RectLike, rectOuter: RectLike, mes = 'rect to be inside rect') => {
   try {
     expect(rectInner.width, 'width').lte(rectOuter.width)
     expect(rectInner.height, 'height').lte(rectOuter.height)

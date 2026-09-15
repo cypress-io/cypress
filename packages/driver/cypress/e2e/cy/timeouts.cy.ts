@@ -1,4 +1,5 @@
 import { create } from '@packages/driver/src/cy/timeouts'
+import type { StateFunc } from '@packages/driver/src/cypress/state'
 
 describe('driver/src/cy/timeouts', () => {
   beforeEach(() => {
@@ -15,7 +16,7 @@ describe('driver/src/cy/timeouts', () => {
 
   context('timeout', () => {
     it('throws when no runnable', () => {
-      const state = () => { }
+      const state = (() => { }) as StateFunc
       const timeouts = create(state)
 
       const fn = () => {
@@ -30,7 +31,7 @@ describe('driver/src/cy/timeouts', () => {
 
   context('clearTimeout', () => {
     it('throws when no runnable', () => {
-      const state = () => { }
+      const state = (() => { }) as StateFunc
       const timeouts = create(state)
 
       const fn = () => {
