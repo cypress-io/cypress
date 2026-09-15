@@ -73,6 +73,7 @@ GitHub Actions handle automation, security scanning, and repository maintenance.
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | **Semantic Pull Request** | PR opened/edited | Validates PR title follows conventional commit format and has changelog entry |
+| **Check Lockfile** | PRs to develop/release, pushes to develop/release/electron | Validates `yarn.lock` is deduplicated and matches a real resolution pass |
 
 ### Repository Maintenance
 

@@ -60,10 +60,6 @@ jobs:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
-  - check-lockfile:
-      requires:
-        - internal-pr-build
-        - external-pr-build
   - check-ts:
       requires:
         - internal-pr-build
@@ -442,7 +438,6 @@ jobs:
       requires:
         # Always-run jobs
         - linux-lint
-        - check-lockfile
         - check-ts
         - health-check
         - lint-types

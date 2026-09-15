@@ -1,0 +1,58 @@
+name: Check Lockfile
+# Validates the committed yarn.lock two ways: that it is deduplicated, and that
+# it matches what a real resolution pass produces. Neither check reads build
+# output, so this runs here rather than in CircleCI, where the equivalent job
+# had to wait on the full `build` job just to borrow its node_modules.
+permissions:
+  contents: read
+on:
+  pull_request:
+    branches:
+      - develop
+      - release/*
+  push:
+    branches:
+      - develop
+      - release/*
+      - electron/*
+
+concurrency:
+  group: check-lockfile-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-lockfile:
+    name: Check Lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: .node-version
+          cache: yarn
+      # Runs first because it needs the committed yarn.lock byte-for-byte as
+      # checked out — any install ahead of it could rewrite the baseline it
+      # diffs against and turn a real drift into a silent pass.
+      - name: Check yarn.lock matches resolved dependencies 🔒
+        run: yarn check-lockfile-drift
+        env:
+          # The script's install is a full resolution pass. Set the timeout
+          # through yarn's env var rather than the script, which contributors
+          # also run locally.
+          YARN_NETWORK_TIMEOUT: 300000
+      # Passing the drift check means the install above left yarn.lock
+      # untouched, so node_modules is now populated and the lockfile is still
+      # pristine — exactly what yarn-deduplicate needs to read.
+      - name: Check yarn.lock is deduplicated 🧬
+        run: |
+          if ! yarn check-lockfile; then
+            echo ""
+            echo "yarn.lock has duplicates that the local postinstall would collapse on its own,"
+            echo "so the committed lockfile does not match the tree contributors actually install."
+            echo "Run 'yarn-deduplicate --strategy=highest' and commit the resulting yarn.lock."
+            exit 1
+          fi
