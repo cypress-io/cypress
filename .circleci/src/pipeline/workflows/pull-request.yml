@@ -431,9 +431,9 @@ jobs:
         - run-webpack-dev-server-integration-tests
         - run-vite-dev-server-integration-tests
 
-  # Fan-in aggregator — the only required GitHub status check for PRs.
-  # Required jobs fan into this one. Jobs that halt early (pipeline parameter
-  # false) still complete successfully.
+  # Fan-in aggregator — the required GitHub status check for the CircleCI PR
+  # workflow. Required jobs fan into this one. Jobs that halt early (pipeline
+  # parameter false) still complete successfully.
   - all-jobs-passed:
       requires:
         # Always-run jobs
