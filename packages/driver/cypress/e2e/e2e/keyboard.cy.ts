@@ -35,14 +35,13 @@ describe('keyboard', () => {
     })
 
     context('handles charCodes, keyCodes, and which for keyup, keydown, and keypress', () => {
-      const characters = [
+      const characters: [char: string, asciiCode: number, keyCode: number][] = [
         ['.', 46, 190],
         ['/', 47, 191],
         ['{enter}', 13, 13],
         ['*', 42, 56],
         ['+', 43, 187],
         ['-', 45, 189],
-
       ]
 
       characters.forEach(([char, asciiCode, keyCode]) => {
