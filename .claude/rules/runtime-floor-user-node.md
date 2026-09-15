@@ -9,12 +9,17 @@ paths:
 # Runtime floor: the user's Node
 
 This code runs in the **user's** Node, not the development Node and not the Node
-embedded in Electron. The supported range is `engines.node` in
-[`cli/package.json`](../../cli/package.json) — currently `^22.0.0 || ^24.0.0 || >=26.0.0`,
-so the binding floor is **Node 22**, below the `24.15.0` in [`.node-version`](../../.node-version).
+embedded in Electron. The floor is the **lowest major** in `engines.node` in
+[`cli/package.json`](../../cli/package.json), which is deliberately below the
+[`.node-version`](../../.node-version) used for development — so the dev Node tells
+you nothing about what is safe here:
 
-Before using a modern JS or Node API here, verify it against Node 22 on node.green.
-An API that works in development can still crash a user on the oldest supported line.
+```bash
+node -e "console.log(require('./cli/package.json').engines.node)"
+```
+
+Check that major on node.green before using a modern JS or Node API. An API that
+works in development can still crash a user on the oldest supported line.
 
 Two entry points reach this floor without being under `cli/`:
 
