@@ -1,6 +1,9 @@
 name: Check Lockfile
 # Neither check reads build output, so this runs on a bare checkout rather than
-# alongside the CircleCI jobs that need the built workspace.
+# alongside the CircleCI jobs that need the built workspace. Neither needs a
+# secret either, so there is no fork-pr-review environment here as there is on
+# the workflows that do — fork runs are already gated by the repository setting
+# requiring approval for outside collaborators.
 permissions:
   contents: read
 on:
@@ -22,10 +25,6 @@ jobs:
   check-lockfile:
     name: Check Lockfile
     runs-on: ubuntu-latest
-    # Fork PRs wait for a maintainer to approve the run. The event-name guard
-    # carries weight: `push` payloads have no pull_request, so the repository
-    # comparison on its own would also gate every develop and release push.
-    environment: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && 'fork-pr-review' || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
