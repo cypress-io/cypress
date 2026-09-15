@@ -29,7 +29,9 @@ If only unit/integration tests scoped to changed packages are sufficient, do **n
 
 Push your work to the branch name you add — do not repurpose an existing allowlisted branch (for example, do not change `update-v8-snapshot-cache-on-develop` to a different name).
 
-This gate turns on the main/multi-platform workflow graph — including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs. Note: `windows` specifically excludes plain `develop`/`release/*` pushes from this gate (it runs on those on a CircleCI Scheduled Pipeline instead — see the comment above the `windows` workflow in `@main.yml`); any other branch added here still turns Windows on immediately as before.
+This gate turns on the main/multi-platform workflow graph, including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs.
+
+This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-arm64` for plain `develop` pushes. On `develop` those four run from a scheduled pipeline — see "Scheduled platform CI" below. `windows` also skips `release/*`; the other three run on every `release/*` push. Any other branch you add here turns all five on per-push.
 
 **Optional — only if you need more than main workflows + path-filtered jobs:**
 
@@ -43,10 +45,30 @@ For typical v8 snapshot cache work, changes under `tooling/*` already enable `ru
 
 After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
-### What runs with only `&full-workflow-filters`
+### Per-workflow gates
 
 - **`linux-x64`**: most develop CI (build, system tests, `v8-integration-tests`, packaging, etc.) — subject to path filtering unless overridden
 - **`windows`**: Windows build, binary artifacts, v8 integration tests, and selected integration/unit jobs
 - **`linux-arm64` / `darwin-*`**: platform builds, packaging, and v8 integration tests where supported
 
+`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop` they run only from the scheduled pipeline. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough. `release/*` is enough for `linux-arm64` and both `darwin-*`, but not for `windows`.
+
 `npm-release` still runs only on `develop`, not on allowlisted feature branches.
+
+### Scheduled platform CI (develop)
+
+None of the four runs on every `develop` push. Windows moved for credit cost. The two `darwin-*` workflows moved to free leased self-hosted macOS hardware. `linux-arm64` costs almost nothing and moved for consistency, so all platform coverage lands in one sweep. Per-merge platform signal was not actionable anyway — `develop` passed 47 of 213 runs.
+
+**What exists today**: a CircleCI Scheduled Pipeline named "Windows Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` at 17:00 and 23:00 UTC and sets only `run-windows-workflow=true`. It does not set `run-platform-workflows=true`. Until it does, `linux-arm64`, `darwin-x64`, and `darwin-arm64` get zero `develop` coverage.
+
+**What the schedule must become**, to match the gates in `@main.yml`:
+
+- **Id**: `40ddfea0-34c3-47ab-8557-6bdb150b4d8d` (unchanged)
+- **Branch**: `develop`
+- **Parameters to set**: `run-windows-workflow=true` and `run-platform-workflows=true`
+- **Timetable**: 1×/weekday, Mon–Fri, at 23:00 UTC (drop the 17:00 slot, keep 23:00)
+- **Owner**: App Foundations team
+
+This is a CircleCI project setting, not code — it isn't visible anywhere in `.circleci/src`. Changing it requires CircleCI project-settings access (Project Settings → Triggers → Scheduled Pipelines), via the UI or `PATCH /api/v2/schedule/40ddfea0-34c3-47ab-8557-6bdb150b4d8d`.
+
+For an on-demand run of the platform workflows outside the schedule (e.g. to validate a change before it reaches `develop`), use Trigger Pipeline with `run-platform-workflows=true` (add `run-windows-workflow=true` too if you also want Windows).
