@@ -14,8 +14,7 @@ describe('e2e cookies spec', () => {
 
   context('__Host- prefix', () => {
     // https://github.com/cypress-io/cypress/issues/8261
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it('can set __Host- cookie', { retries: 15 }, () => {
+    it('can set __Host- cookie', () => {
       cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Host-foobar', 'someval', {
         domain: 'www.foobar.com',
@@ -31,8 +30,7 @@ describe('e2e cookies spec', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it('errors when __Host- cookie and secure:false', { retries: 15 }, (done) => {
+    it('errors when __Host- cookie and secure:false', (done) => {
       cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Host-foobar', 'someval')
 
@@ -45,8 +43,7 @@ describe('e2e cookies spec', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it('errors when __Host- cookie and path', { retries: 15 }, (done) => {
+    it('errors when __Host- cookie and path', (done) => {
       cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Host-foobar', 'someval', {
         secure: true,
@@ -61,8 +58,7 @@ describe('e2e cookies spec', () => {
   })
 
   context('__Secure- prefix', () => {
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it('can set __Secure- cookie', { retries: 15 }, () => {
+    it('can set __Secure- cookie', () => {
       cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'www.foobar.com',
@@ -78,8 +74,7 @@ describe('e2e cookies spec', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it('errors when __Secure- cookie secure:false', { retries: 15 }, (done) => {
+    it('errors when __Secure- cookie secure:false', (done) => {
       cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'www.foobar.com',
