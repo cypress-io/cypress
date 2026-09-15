@@ -37,7 +37,7 @@ the suite you care about ran at all:
 - `@packages/app` — `test` is literally `echo 'ok'`. Use `cypress:run:ct` or
   `cypress:run:e2e`.
 - `@packages/driver` — `test` is `vitest run`, which looks entirely normal and covers
-  a handful of unit specs. The driver's real coverage is 100+ `.cy.js` specs under
+  a handful of unit specs. The driver's real coverage is its Cypress specs under
   `cypress/e2e`, run with `yarn workspace @packages/driver cypress:run`. A green
   `test` says nothing about them.
 - `npm/webpack-preprocessor` — `test` is a webpack-5 matrix script that rewrites
