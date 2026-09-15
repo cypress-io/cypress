@@ -3,6 +3,7 @@ paths:
   - "**/__snapshots__/**"
   - "**/*.snap"
   - "**/*.ansi"
+  - "packages/app/cypress/e2e/runner/snapshots/**"
 ---
 
 # Updating snapshots
@@ -12,8 +13,11 @@ Four mechanisms live in this repo — using the wrong one is a hard error, not a
 
 - **snap-shot-it `.js`** (`@packages/server`, `system-tests`, `@tooling/v8-snapshot`, root
   `__snapshots__/`) — `SNAPSHOT_UPDATE=1 <test command>`
-- **vitest `.snap`** (`cli`, `@packages/{config,launcher}`, `npm/webpack-*`) — `yarn test -u`
-  in that workspace
+- **vitest `.snap`** (`cli`, `@packages/{config,launcher}`, `npm/webpack-dev-server`) —
+  `yarn test -u` in that workspace
+- **`npm/webpack-preprocessor` `.snap`** — `yarn test-e2e -u`. Its `test` script is the
+  webpack-5 matrix runner, which swallows `-u`, rewrites `package.json`, and reinstalls
+  deps
 - **`@packages/errors` `.ansi`** — `yarn test -u` from `packages/errors`; see
   [error handling](../../guides/error-handling.md)
 - **`@packages/app` runner `.json`** — `yarn workspace @packages/app cypress:run:e2e:update:snapshots`

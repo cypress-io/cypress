@@ -1,5 +1,6 @@
 ---
 paths:
+  - "packages/errors/src/errors.ts"
   - "packages/data-context/schemas/*.graphql"
   - "packages/data-context/src/gen/**"
   - "packages/cypress-sessions/lib/generated/**"
@@ -16,7 +17,8 @@ paths:
 - `src/generated/graphql.ts` in `app` / `launchpad` / `frontend-shared`, and
   `packages/cypress-sessions/lib/generated/graphql.ts` —
   `yarn workspace @packages/data-context build:graphql` (watch: `yarn codegen`)
-- autobarrel `index.ts` files (header `created by autobarrel`) — `yarn codegen`
+- autobarrel `index.ts` files (header `created by autobarrel`) — regenerated on save by
+  the `yarn codegen` watcher; there is no one-shot task
 - `scripts/gulp/monorepoPaths.ts` — `yarn gulp makePathMap`, after adding or removing a package
 - `.circleci/packed/*.yml` — `yarn pack-ci --validate`; edit `.circleci/src/` only
 
