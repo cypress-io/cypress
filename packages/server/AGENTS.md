@@ -50,6 +50,18 @@ yarn workspace @packages/server build-prod
 - Several dependencies (e.g., `axios`, `devtools-protocol`, `geckodriver`) are nohoisted to avoid version conflicts.
 - **The config/plugins child runs under the user's Node, not the bundled/dev Node.** `lib/plugins/child/require_async_child.ts` (and everything reachable from it) is forked with the user's resolved Node; its supported range is `engines.node` in `cli/package.json`, which is lower than the dev floor (`.node-version`) or the bundled Electron. Do not use runtime APIs newer than that floor in this path — the rest of the server runs in the bundled Electron main process. See root `AGENTS.md` → Runtime targets.
 
+**Cursor skills (Mocha → Vitest, JS → TypeScript)**
+
+For `test/unit` work, read [`.cursor/skills/server-unit-vitest-migration-guide/SKILL.md`](../../.cursor/skills/server-unit-vitest-migration-guide/SKILL.md) first; it lists which sibling skills to apply and in what order (only `test/unit` is in scope until integration is migrated separately).
+
+- **Mocha → Vitest:** [`.cursor/skills/server-unit-mocha-to-vitest/SKILL.md`](../../.cursor/skills/server-unit-mocha-to-vitest/SKILL.md). Focused skills (apply by signal; the guide maps these): [`.cursor/skills/server-unit-migrate-from-spec-helper/SKILL.md`](../../.cursor/skills/server-unit-migrate-from-spec-helper/SKILL.md), [`.cursor/skills/server-unit-sinon-to-vitest-mocks/SKILL.md`](../../.cursor/skills/server-unit-sinon-to-vitest-mocks/SKILL.md), [`.cursor/skills/server-unit-nock-vitest/SKILL.md`](../../.cursor/skills/server-unit-nock-vitest/SKILL.md), [`.cursor/skills/server-unit-deep-mocks-vitest/SKILL.md`](../../.cursor/skills/server-unit-deep-mocks-vitest/SKILL.md), [`.cursor/skills/server-unit-simple-mocks-vitest/SKILL.md`](../../.cursor/skills/server-unit-simple-mocks-vitest/SKILL.md), [`.cursor/skills/server-unit-two-hop-vi-mock/SKILL.md`](../../.cursor/skills/server-unit-two-hop-vi-mock/SKILL.md), [`.cursor/skills/server-unit-fake-timers-vitest/SKILL.md`](../../.cursor/skills/server-unit-fake-timers-vitest/SKILL.md), [`.cursor/skills/server-vitest-chai-migration/SKILL.md`](../../.cursor/skills/server-vitest-chai-migration/SKILL.md), [`.cursor/skills/server-vitest-express/SKILL.md`](../../.cursor/skills/server-vitest-express/SKILL.md).
+
+- **JS → TS (`lib`):** [`.cursor/skills/server-lib-js-to-ts/SKILL.md`](../../.cursor/skills/server-lib-js-to-ts/SKILL.md) — migrate `lib/**/*.js` to `*.ts` when tests or types need a coherent TypeScript module (often a prerequisite before migrating specs that import that code).
+
+- **JS → TS (unit specs):** [`.cursor/skills/server-unit-js-spec-to-ts-vitest/SKILL.md`](../../.cursor/skills/server-unit-js-spec-to-ts-vitest/SKILL.md) — `*_spec.js` → `*.spec.ts` with Vitest assertions and module style.
+
+- **Style / tooling:** [`.cursor/skills/js-ts-asi-no-semicolons/SKILL.md`](../../.cursor/skills/js-ts-asi-no-semicolons/SKILL.md) (no-semicolon ASI pitfalls); [`.cursor/skills/remove-check-more-types/SKILL.md`](../../.cursor/skills/remove-check-more-types/SKILL.md) when replacing `check-more-types` in migrated code.
+
 **Integration Points**
 
 - Consumes virtually every other `@packages/*` package in the monorepo.
