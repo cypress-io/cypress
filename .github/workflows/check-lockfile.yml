@@ -11,6 +11,7 @@ on:
     branches:
       - develop
       - release/*
+      - electron/*
   push:
     branches:
       - develop
