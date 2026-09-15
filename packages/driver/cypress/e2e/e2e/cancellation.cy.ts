@@ -1,5 +1,3 @@
-const { Promise } = Cypress
-
 let previousTestWasCanceled = false
 let calledAfterDoneEarly = false
 
@@ -12,7 +10,7 @@ describe('canceling command queues', () => {
     cy.once('stop', () => {
       expect(cy.state('promise').isCancelled()).to.be.true
 
-      return Promise
+      return Cypress.Promise
       .delay(50)
       .then(() => {
         expect(calledAfterStop).to.be.false
@@ -33,13 +31,14 @@ describe('canceling command queues', () => {
   })
 
   it('done early', (done) => {
-    cy.once('command:start', (cmd) => {
-      const { cancel } = cy.state('promise')
+    cy.once('command:start', () => {
+      const promise = cy.state('promise')
+      const { cancel } = promise
 
-      cy.state('promise').cancel = function (...args) {
+      promise.cancel = function () {
         previousTestWasCanceled = true
 
-        return cancel.apply(this, args)
+        return cancel.call(this)
       }
 
       done()
@@ -57,12 +56,12 @@ describe('canceling command queues', () => {
 
   it('command failure', (done) => {
     // make sure there are no unhandled rejections
-    Promise.onPossiblyUnhandledRejection(done)
+    Cypress.Promise.onPossiblyUnhandledRejection(done)
 
     let calledAfterFailure = false
 
     cy.on('fail', () => {
-      return Promise
+      return Cypress.Promise
       .delay(50)
       .then(() => {
         expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine

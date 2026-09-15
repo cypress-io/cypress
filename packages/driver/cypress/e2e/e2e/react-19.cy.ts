@@ -1,8 +1,8 @@
 // TODO(webkit): fix+unskip for webkit release
-describe('react v15.6.0', { browser: '!webkit' }, () => {
+describe('react v19.1.1', { browser: '!webkit' }, () => {
   context('fires onChange events', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/react-15.html')
+      cy.visit('/fixtures/react-19.html')
     })
 
     it('input', () => {
