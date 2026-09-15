@@ -518,12 +518,29 @@ A skill is a convenience layer for one tool and never a source of truth. It link
 guide and adds only the execution detail, so that contributors not using Claude are never
 sent into `.claude/` to find a rule.
 
+**Write a rule** (`.claude/rules/*.md`) only when guidance is *wrong outside a specific
+path* — the runtime floor a directory is bound by, which test runner a package uses, how
+one kind of snapshot is regenerated. A rule carries a `paths:` glob and loads only when a
+matching file is opened, so it is the one place where "this is true here and false three
+directories over" can be stated without qualifying it everywhere else.
+
+The same constraint applies as to skills: a rule is a pointer, never a source of truth. It
+links to the guide or `AGENTS.md` section that owns the topic, and stays short enough that
+a contributor not using Claude loses nothing by never opening it. A rule that starts
+growing its own procedure belongs in a guide instead.
+
+Check the `paths:` globs against real filenames before committing a rule. Most specs in
+this repo are `*_spec.ts` and `*.cy.js`, not `*.spec.ts` — a glob that matches nothing
+makes the rule silently inert, which is worse than not having written it.
+
 #### Maintenance expectations
 
 These files should be treated like other repository documentation:
 
 - If you change repository structure, commands, conventions, or workflows,
-  update the relevant `AGENTS.md` / `CLAUDE.md` / `SKILL.md` in the same PR.
+  update the relevant `AGENTS.md` / `CLAUDE.md` / `SKILL.md` / `.claude/rules/*.md`
+  in the same PR. Rules name specific packages and scripts, so moving or renaming
+  one can silently falsify a rule that still loads.
 - Keep repo-local guidance factual and descriptive (what exists),
   not aspirational process.
 
