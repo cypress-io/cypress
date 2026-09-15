@@ -7,9 +7,9 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 ## Workspaces
 
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
-- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (32 packages total)
-- **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling (15 packages)
-- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot` (3 packages)
+- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more
+- **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling
+- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot`
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
@@ -127,9 +127,11 @@ yarn clean-deps && yarn
 
 ## Architecture
 
+Orientation, not a registry — the directories under `packages/`, `npm/`, and `tooling/` are the authoritative list, and each carries its own `AGENTS.md` with the detail. Read a package's own file before working in it rather than relying on the one-liner here.
+
 ### CLI & Distribution
 
-- **`cypress` (`cli/`)** — The `cypress` npm package users install. Entry point for `cypress open`, `cypress run`, `cypress install`, etc. Version: 15.x.
+- **`cypress` (`cli/`)** — The `cypress` npm package users install. Entry point for `cypress open`, `cypress run`, `cypress install`, etc. The published version is set by semantic-release, not by `cli/package.json` (which stays `0.0.0-development`).
 
 ### Test Runner & Driver
 
@@ -144,7 +146,8 @@ yarn clean-deps && yarn
 
 - **`@packages/server`** — HTTP server responsible for serving test files, handling browser launching, socket communication, and orchestrating the test run.
 - **`@packages/proxy`** — HTTP/S proxy that intercepts all browser traffic during a test run.
-- **`@packages/net-stubbing`** — Network stubbing (`cy.intercept`) implementation — request matching, response manipulation.
+- **`@packages/net-stubbing`** — The `cy.intercept` surface: driver-side command, types, and the server-side glue.
+- **`@packages/network-interception`** — Transport-agnostic core behind `cy.intercept`: route matching, subscription planning, handler merging, and config policy. Holds the rules, none of the I/O — every transport is injected behind an interface.
 - **`@packages/network`** — Low-level network protocol utilities.
 - **`@packages/network-tools`** — Higher-level networking helpers used across packages.
 - **`@packages/https-proxy`** — HTTPS proxy implementation for TLS interception.
@@ -169,6 +172,10 @@ yarn clean-deps && yarn
 - **`@packages/telemetry`** — OpenTelemetry instrumentation wrapper used throughout the monorepo.
 - **`@packages/icons`** — Icon registry and SVG assets.
 - **`@packages/stderr-filtering`** — Stderr output filtering utilities.
+- **`@packages/agent-info`** — Fingerprints the environment block to tell whether Cypress was invoked by an AI coding agent, and which one. Intentionally pure and dependency-free.
+- **`@packages/cypress-sessions`** — The cross-process contract for Cypress sessions: shared schema, on-disk layout, and the liveness-probe route that lets the CLI find a running `cypress open` session and attach over CDP.
+- **`@packages/example`** — The bundled kitchensink example project. Its `cypress/` and `app/` contents are generated from upstream `cypress-example-kitchensink` — change it there, not here.
+- **`@packages/root`** — Root package metadata consumed by the binary build.
 
 ### Build & Snapshot Infrastructure
 
