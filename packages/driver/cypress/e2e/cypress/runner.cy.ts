@@ -1,12 +1,14 @@
+export {} // make typescript see this as a module
+
 const { _ } = Cypress
 
-const pending = []
-const testAfterRunEvents = []
+const pending: Cypress.ObjectLike[] = []
+const testAfterRunEvents: Cypress.ObjectLike[] = []
 
 Cypress.on('test:after:run', (test) => {
   testAfterRunEvents.push(test)
   if (test.state === 'pending') {
-    return pending.push(test)
+    pending.push(test)
   }
 })
 
@@ -100,5 +102,5 @@ describe('fires test:after:run after root after hook', () => {
 
 // https://github.com/cypress-io/cypress/issues/2296
 after(() => {
-  expect(_.last(testAfterRunEvents).title, 'test:after:run for test 2 should not have fired yet').eq('test 1')
+  expect(_.last(testAfterRunEvents)?.title, 'test:after:run for test 2 should not have fired yet').eq('test 1')
 })

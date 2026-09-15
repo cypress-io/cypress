@@ -1,12 +1,12 @@
-const { Command } = Cypress
+import $Command from '../../../src/cypress/command'
 
 describe('driver/src/cypress/command', () => {
-  let command
+  let command: $Command
 
   context('$Command', () => {
     context('._removeNonPrimitives', () => {
       before(() => {
-        command = Command.create({ })
+        command = $Command.create({ })
       })
 
       it('when args are undefined it does not remove non properties', () => {
@@ -42,7 +42,7 @@ describe('driver/src/cypress/command', () => {
       it('successfully clones command with arguments', () => {
         const args = ['.selector']
 
-        command = Command.create({
+        command = $Command.create({
           type: 'parent',
           name: 'command1',
           chainerId: 'id1',
@@ -52,13 +52,13 @@ describe('driver/src/cypress/command', () => {
         const spy = cy.spy(command, '_removeNonPrimitives')
         let clonedCommand = command.clone()
 
-        expect(clonedCommand).to.be.instanceOf(Command)
+        expect(clonedCommand).to.be.instanceOf($Command)
         expect(spy).to.have.been.calledWith(args)
         expect(clonedCommand.attributes).to.deep.eq(command.attributes)
       })
 
       it('successfully clones command with without arguments', () => {
-        command = Command.create({
+        command = $Command.create({
           type: 'parent',
           name: 'command1',
           chainerId: 'id1',
@@ -67,7 +67,7 @@ describe('driver/src/cypress/command', () => {
         const spy = cy.spy(command, '_removeNonPrimitives')
         let clonedCommand = command.clone()
 
-        expect(clonedCommand).to.be.instanceOf(Command)
+        expect(clonedCommand).to.be.instanceOf($Command)
         expect(spy).to.have.been.calledWith(undefined)
         expect(clonedCommand.attributes).to.deep.eq(command.attributes)
       })
