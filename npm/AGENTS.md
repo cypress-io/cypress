@@ -51,7 +51,7 @@ yarn nx run-many -t build --projects=tag:npm   # build all npm packages
 
 ## Notes
 
-- Several packages (`react`, `vue`, `angular`, `svelte`, `mount-utils`) run a `postbuild` script (`sync-exported-npm-with-cli.js`) that copies their `dist/` output into the `cli/` directory so the main `cypress` binary bundles them. Changes to these packages must be built before testing in the main binary.
+- **Re-export into `cli/`** (canonical description; other files point here). `react`, `vue`, `angular`, `svelte`, and `mount-utils` each run `postbuild` → [`scripts/sync-exported-npm-with-cli.js`](../scripts/sync-exported-npm-with-cli.js). It resolves the file list with `npm-packlist` — the files npm *would publish*, per the package's `files` key, which is a wider set than `dist/` — wipes `cli/<name>/`, copies them in, and then rewrites the `exports` map in `cli/package.json`. That is what makes `import ... from 'cypress/react'` resolve. Build the package before testing it in the binary; nothing else refreshes the `cli/` copy.
 - `@cypress/webpack-dev-server` and `@cypress/vite-dev-server` are bundled with the Cypress binary and generally do not need to be installed separately by end users; the object-syntax `devServer` config in `cypress.config.ts` is the primary API.
 - `@cypress/webpack-batteries-included-preprocessor` requires `@cypress/webpack-preprocessor` as a peer dependency and must be installed alongside it.
 - `@cypress/eslint-plugin-dev` is private and no longer published — it is for internal Cypress development only, and the packages that consume it are migrating to `@packages/eslint-config`. Do not recommend it to end users; the user-facing ESLint plugin lives at `eslint-plugin-cypress` (a separate repository).

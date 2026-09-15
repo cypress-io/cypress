@@ -63,7 +63,7 @@ Verify an arch or platform mock is load-bearing rather than decorative: flip its
 ## Notes
 
 - The main CLI build uses Rollup (configured in `rollup.config.mjs`). Entry points are `lib/index.ts`, `lib/cli.ts`, `lib/cypress.ts`, `lib/exec/xvfb.ts`, `lib/exec/spawn.ts`, and `lib/bin/cypress.ts`. Output goes to `dist/` and is copied to `build/` via `sync-build-dist.ts`.
-- Each CT adapter's `postbuild` runs `../../scripts/sync-exported-npm-with-cli.js`, which copies the adapter's published files into the matching subdirectory under `cli/` (e.g. `npm/react/dist` → `cli/react/dist`). This is what makes `import ... from 'cypress/react'` work.
+- The `cli/react`, `cli/vue`, `cli/angular`, `cli/svelte`, and `cli/mount-utils` directories are build output, not sources — each adapter's `postbuild` writes them, and the adapter sources live in `npm/`. See [`npm/AGENTS.md`](../npm/AGENTS.md) for the mechanism.
 - Unit tests for the CLI itself live in `cli/test/` and run under Vitest (`test/**/*.spec.ts`).
 - TypeScript type definitions for the public Cypress API live in `cli/types/`. The `dtslint` tool is used to validate them.
 - The `CYPRESS_INSTALL_BINARY` environment variable can be set to a path or URL to override the binary downloaded during `postinstall`.
