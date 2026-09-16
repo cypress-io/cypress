@@ -17,17 +17,27 @@
 # Trigger with run-force-http1-tests=true so the inherited-parameter probe is a
 # positive control.
 #
-# Read the answer off which probe jobs appear in the workflow:
+# READ THE SETUP JOB FIRST. If `launch-primary-workflow` failed, the answer is
+# in its error text, not in the job list: a filter expression rejected at
+# compile time takes the whole continuation down and no workflow appears at all.
 #
-#   control + inherited + param-true, NOT param-false
+# Then read the answer off which probe jobs appear:
+#
+#   declared-true present, declared-false absent
+#       -> expressions evaluate parameters correctly. Controls good, read on.
+#       -> if these two disagree, the probe itself is broken. Stop.
+#
+#   param-true present, param-false absent
 #       -> expressions read continuation values. #34782 is viable.
-#   control + inherited + param-true + param-false
+#   param-true present, param-false present
 #       -> expressions read declaration defaults and ignore the continuation
-#          value. #34782 would silently schedule everything.
-#   control + inherited only
+#          value. #34782 would silently schedule every job.
+#   param-true absent, param-false absent
 #       -> expressions cannot see continuation parameters. #34782 is dead.
-#   control only
-#       -> expressions are not working here at all. Experiment inconclusive.
+#
+# probe-inherited-true is a secondary data point on the trigger-time supply
+# path. It is not a control: if the API trigger does not set
+# run-force-http1-tests, its absence means nothing.
 #
 # Delete this file with the branch.
 when:
@@ -37,6 +47,16 @@ jobs:
   - filter-probe:
       name: probe-control
       label: control, no filter — must always appear
+
+  - filter-probe:
+      name: probe-declared-true
+      label: probe-always == true — declared default true, no supply path
+      filters: pipeline.parameters.probe-always == true
+
+  - filter-probe:
+      name: probe-declared-false
+      label: probe-never == true — declared default false, no supply path
+      filters: pipeline.parameters.probe-never == true
 
   - filter-probe:
       name: probe-inherited-true

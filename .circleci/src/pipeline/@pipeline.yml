@@ -42,6 +42,18 @@ parameters:
   run-windows-workflow:
     type: boolean
     default: false
+  # Scratch controls for the #34782 filter probe. Declared only here, never in
+  # .circleci/config.yml and never emitted into the continuation parameters map,
+  # so their values can only come from these defaults. A filter expression on
+  # them isolates "can an expression evaluate a parameter at all" from "can it
+  # read a value supplied through continuation". Delete with the experiment.
+  probe-always:
+    type: boolean
+    default: true
+  probe-never:
+    type: boolean
+    default: false
+
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
   # Default true so develop/release branches run everything without explicit params.
   run-driver-tests:
