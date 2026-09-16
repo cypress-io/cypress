@@ -1,5 +1,11 @@
-const { SourceMapConsumer } = require('source-map')
+import { SourceMapConsumer as BaseSourceMapConsumer } from 'source-map'
 import $sourceMapUtils from '@packages/driver/src/cypress/source_map_utils'
+
+// `initialize` points source-map at its wasm mappings. It exists at runtime but
+// not in the published typings, so declare it alongside the constructor.
+const SourceMapConsumer = BaseSourceMapConsumer as typeof BaseSourceMapConsumer & {
+  initialize: (options: { 'lib/mappings.wasm': string }) => void
+}
 
 const _ = Cypress._
 const { encodeBase64Unicode } = Cypress.utils
