@@ -148,6 +148,10 @@ const auditDependencies = (file, guarded) => {
 
     const deps = requires.map((r) => byName.get(r)).filter(Boolean)
 
+    // A name that resolves to no entry in this workflow is something this check
+    // cannot reason about, so say nothing rather than guess.
+    if (deps.length !== requires.length) continue
+
     if (deps.some((d) => !guarded.has(d.job))) continue // an unconditional dep always runs
 
     // An unguarded entry is meant to run on every pipeline. If every one of its
