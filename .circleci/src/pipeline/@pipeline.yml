@@ -3060,6 +3060,44 @@ jobs:
           package_url_path: ~/cypress/npm-package-url.json
           binary_url_path: ~/cypress/binary-url.json
 
+  # Alerts the author of the commit that broke the binary. Requires every binary
+  # job at `terminal`, so it wakes up however they finished, then asks the API
+  # which of them actually failed - a cancelled or skipped job is not a breakage.
+  # Scope comes from this job's own dependency list, so it follows the `requires:`
+  # block in the workflow rather than a second list of job names that would drift.
+  notify-binary-failure:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small.gen2
+    steps:
+      - run:
+          name: Comment on the commit if a binary job failed
+          command: |
+            JOBS=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
+            FAILED=$(echo "$JOBS" | jq -r '
+              (.items[]|select(.name=="notify-binary-failure").dependencies) as $d
+              | [.items[]|select(.id as $i|$d|index($i))|select(.status=="failed")|.name]
+              | join(", ")')
+
+            if [[ -z "$FAILED" ]]; then
+              echo "No binary job failed; nothing to report."
+              exit 0
+            fi
+
+            REPO="$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+            AUTH="Authorization: token $GH_TOKEN"
+            # develop is squash-merged, so the commit author is the PR author.
+            # An unresolvable author still gets a comment, just without the tag.
+            LOGIN=$(curl -sS -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1" \
+              | jq -r '.author.login // empty') || true
+            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($CIRCLE_BUILD_URL)"
+
+            curl -sfS -X POST -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1/comments" \
+              --data "$(jq -n --arg b "$BODY" '{body:$b}')"
+
   test-kitchensink:
     <<: *defaults
     parameters:

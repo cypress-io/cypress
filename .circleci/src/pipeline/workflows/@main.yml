@@ -452,6 +452,33 @@ linux-x64:
           - get-published-artifacts
           - system-tests-node-modules-install
 
+    # Binary jobs no longer run on pull requests, so develop is where they break.
+    # `terminal` on every entry means this waits for the whole binary fan-out to
+    # settle however it settles; the job itself decides whether anything actually
+    # failed. Only the leaves are listed - a failure further up reaches them as
+    # not_run, which is inside `terminal`.
+    - notify-binary-failure:
+        context: [ publish-binary, test-runner:npm-release ]
+        filters: pipeline.git.branch == "develop"
+        requires:
+          - test-npm-module-on-minimum-node-version: terminal
+          - test-types-cypress-and-jest: terminal
+          - test-full-typescript-project: terminal
+          - test-binary-against-kitchensink: terminal
+          - test-npm-module-and-verify-binary: terminal
+          - test-binary-against-staging: terminal
+          - test-binary-against-kitchensink-chrome: terminal
+          - test-binary-against-kitchensink-firefox: terminal
+          - test-binary-against-recipes: terminal
+          - test-binary-against-recipes-chrome: terminal
+          - test-binary-against-recipes-firefox: terminal
+          - test-binary-against-cypress-realworld-app: terminal
+          - "test binary as a non-root user": terminal
+          - "test binary as a root user": terminal
+          - binary-system-tests: terminal
+          - yarn-pnp-preprocessor-system-test: terminal
+          - svelte-webpack-system-test: terminal
+
 linux-arm64:
   when: *full-workflow-filters
   jobs:
