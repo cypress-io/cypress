@@ -82,6 +82,27 @@ emit_all_true() {
 # ----- branch override --------------------------------------------------------
 # On develop/release branches all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
+
+# ----- scratch verification override (experiment/34782-verify-*) --------------
+# A branch carrying the filter change also changes .circleci/, which is a global
+# trigger, so an ordinary PR on this branch would emit all-true and never
+# exercise the filters. These overrides pin an exact parameter set instead.
+# Delete with the branches — see #34782.
+if [[ "$BRANCH" == "experiment/34782-verify-v8-only" ]]; then
+  # run-v8-tests alone. system-tests-node-modules-install must still be
+  # scheduled, via the run-v8-tests clause of its four-way guard, or
+  # v8-integration-tests loses its only dependency and is dropped silently.
+  v8_tests=true
+  echo "verify-v8-only — run-v8-tests alone" >&2
+  emit_json
+  exit 0
+fi
+
+if [[ "$BRANCH" == "experiment/34782-verify-none" ]]; then
+  echo "verify-none — every path-filter parameter false" >&2
+  emit_json
+  exit 0
+fi
 if [[ "$BRANCH" == "develop" ]] || \
    [[ "$BRANCH" =~ ^release/ ]] || \
    [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
