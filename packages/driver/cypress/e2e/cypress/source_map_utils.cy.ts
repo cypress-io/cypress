@@ -154,7 +154,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('resolves null and does not initialize if no source map is provided', () => {
-      return $sourceMapUtils.initializeSourceMapConsumer(file1).then((consumer) => {
+      return $sourceMapUtils.initializeSourceMapConsumer(file1, undefined).then((consumer) => {
         expect(SourceMapConsumer.initialize).not.to.be.called
         expect(consumer).to.be.null
       })

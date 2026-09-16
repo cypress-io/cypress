@@ -15,7 +15,7 @@ const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,(.*)/ // matches 
 let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 let sourceMapProjectRoot: string = ''
 
-const initializeSourceMapConsumer = async (script, sourceMap?): Promise<BasicSourceMapConsumer | null> => {
+const initializeSourceMapConsumer = async (script, sourceMap): Promise<BasicSourceMapConsumer | null> => {
   if (!sourceMap) return null
 
   // @ts-ignore
