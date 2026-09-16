@@ -452,15 +452,20 @@ linux-x64:
           - get-published-artifacts
           - system-tests-node-modules-install
 
-# linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop push.
-# The two darwin workflows compete for leased self-hosted macOS hardware, and
-# per-merge platform signal isn't actionable at that frequency. linux-arm64 is
-# cheap but rides the same gate so all platform coverage lands in one sweep.
-# A CircleCI Scheduled Pipeline (configured in the CircleCI UI, not here) runs
-# them on develop by setting run-platform-workflows=true. force-persist-artifacts
-# is a top-level escape hatch so a manual Trigger Pipeline gets every platform
-# from one flag regardless of branch, instead of needing run-platform-workflows
-# set too on branches where &full-workflow-filters wouldn't otherwise fire it.
+# linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop or
+# release/* push. The two darwin workflows compete for leased self-hosted
+# macOS hardware, and per-merge platform signal isn't actionable at that
+# frequency. linux-arm64 is cheap but rides the same gate so all platform
+# coverage lands in one sweep. A release branch is long-lived enough that a
+# scheduled sweep covers it too, same as develop. A CircleCI Scheduled
+# Pipeline (configured in the CircleCI UI, not here) targets develop, and a
+# second one is repointed at whichever release/* branch is currently active,
+# by setting run-platform-workflows=true — see "Scheduled platform CI" in
+# AGENTS.md for both. force-persist-artifacts is a top-level escape hatch so
+# a manual Trigger Pipeline run gets every platform binary for one commit
+# from a single flag regardless of branch, rather than needing
+# run-platform-workflows set too on a branch where &full-workflow-filters
+# wouldn't otherwise fire it.
 linux-arm64:
   when: &scheduled-platform-filters
     or:
@@ -469,7 +474,11 @@ linux-arm64:
       - and:
           - *full-workflow-filters
           - not:
-              equal: [ develop, << pipeline.git.branch >> ]
+              or:
+                - equal: [ develop, << pipeline.git.branch >> ]
+                - matches:
+                    pattern: /^release\/\d+\.\d+\.\d+$/
+                    value: << pipeline.git.branch >>
   jobs:
     - node_modules_install:
         name: linux-arm64-node-modules-install
@@ -627,24 +636,10 @@ darwin-arm64:
         requires:
           - darwin-arm64-build
 
-# Windows CI is expensive in CircleCI credits, so it doesn't run on every
-# develop push either, and it also skips release/* entirely. It runs on
-# develop via the same CircleCI Scheduled Pipeline (configured in the CircleCI
-# UI, not here) that drives linux-arm64/darwin-x64/darwin-arm64, setting
-# run-platform-workflows=true, plus on the other filters listed below.
+# Windows CI is also expensive in CircleCI credits, and uses the same gate as
+# the other three platform workflows above — see the comment there.
 windows:
-  when:
-    or:
-      - equal: [ true, << pipeline.parameters.run-platform-workflows >> ]
-      - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
-      - and:
-          - *full-workflow-filters
-          - not:
-              or:
-                - equal: [ develop, << pipeline.git.branch >> ]
-                - matches:
-                    pattern: /^release\/\d+\.\d+\.\d+$/
-                    value: << pipeline.git.branch >>
+  when: *scheduled-platform-filters
   jobs:
     - node_modules_install:
         name: windows-node-modules-install

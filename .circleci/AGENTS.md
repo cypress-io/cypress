@@ -31,7 +31,7 @@ Push your work to the branch name you add — do not repurpose an existing allow
 
 This gate turns on the main/multi-platform workflow graph, including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs.
 
-This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-arm64` for plain `develop` pushes. On `develop` those four run from a scheduled pipeline — see "Scheduled platform CI" below. `windows` also skips `release/*`; the other three run on every `release/*` push. Any other branch you add here turns all five on per-push.
+This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-arm64` for plain `develop` or `release/*` pushes. On those two, all four run from a scheduled pipeline instead — see "Scheduled platform CI" below. Any other branch you add here turns all five on per-push.
 
 **Optional — only if you need more than main workflows + path-filtered jobs:**
 
@@ -51,24 +51,25 @@ After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 - **`windows`**: Windows build, binary artifacts, v8 integration tests, and selected integration/unit jobs
 - **`linux-arm64` / `darwin-*`**: platform builds, packaging, and v8 integration tests where supported
 
-`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop` they run only from the scheduled pipeline. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough. `release/*` is enough for `linux-arm64` and both `darwin-*`, but not for `windows`.
+`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop` and `release/*` they run only from a scheduled pipeline. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough.
 
 `npm-release` still runs only on `develop`, not on allowlisted feature branches.
 
-### Scheduled platform CI (develop)
+### Scheduled platform CI (develop and release/*)
 
-None of the four runs on every `develop` push. Windows moved for credit cost. The two `darwin-*` workflows moved to free leased self-hosted macOS hardware. `linux-arm64` costs almost nothing and moved for consistency, so all platform coverage lands in one sweep. Per-merge platform signal was not actionable anyway — `develop` passed 47 of 213 runs.
+None of the four runs on every `develop` or `release/*` push. Windows moved for credit cost. The two `darwin-*` workflows moved to free leased self-hosted macOS hardware. `linux-arm64` costs almost nothing and moved for consistency, so all platform coverage lands in one sweep. Per-merge platform signal was not actionable anyway — `develop` passed 47 of 213 runs. A release branch is long-lived enough for a scheduled sweep to cover it the same way.
 
-**What exists today**: a CircleCI Scheduled Pipeline named "Windows Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` at 17:00 and 23:00 UTC and sets `run-windows-workflow=true`. `run-windows-workflow` no longer exists as a pipeline parameter — `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read `run-platform-workflows` now. Until the schedule is repointed at that parameter, every scheduled fire submits an unrecognized parameter and CircleCI rejects the pipeline at creation — loud, not silent, but `linux-arm64`, `darwin-x64`, and `darwin-arm64` still get zero `develop` coverage in the meantime, same as `windows`.
+**What exists today**: a CircleCI Scheduled Pipeline named "Windows Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` at 17:00 and 23:00 UTC and sets `run-windows-workflow=true`. `run-windows-workflow` no longer exists as a pipeline parameter — `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read `run-platform-workflows` now. Until the schedule is repointed at that parameter, every scheduled fire submits an unrecognized parameter and CircleCI rejects the pipeline at creation — loud, not silent, but `linux-arm64`, `darwin-x64`, and `darwin-arm64` still get zero `develop` coverage in the meantime, same as `windows`. There is no release-branch schedule yet at all: `release/*` pushes get zero platform coverage of any kind until one exists.
 
-**What the schedule must become**, to match the gates in `@main.yml`:
+**What must exist**, to match the gates in `@main.yml`:
 
-- **Id**: `40ddfea0-34c3-47ab-8557-6bdb150b4d8d` (unchanged)
-- **Branch**: `develop`
-- **Parameters to set**: `run-platform-workflows=true` only
-- **Timetable**: 1×/weekday, Mon–Fri, at 23:00 UTC (drop the 17:00 slot, keep 23:00)
-- **Owner**: App Foundations team
+- **Develop schedule** — repoint the existing schedule (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`):
+  - **Branch**: `develop`
+  - **Parameters to set**: `run-platform-workflows=true` only
+  - **Timetable**: 1×/weekday, Mon–Fri, at 23:00 UTC (drop the 17:00 slot, keep 23:00)
+- **Release schedule** — a second Scheduled Pipeline, targeting whichever `release/*` branch is currently active, setting `run-platform-workflows=true`. Repointing its branch to the new release branch is part of cutting a release; disabling it is part of shipping one. There is no default branch this can target permanently, since release branches are cut and retired.
+- **Owner** (both schedules): App Foundations team
 
-This is a CircleCI project setting, not code — it isn't visible anywhere in `.circleci/src`. Changing it requires CircleCI project-settings access (Project Settings → Triggers → Scheduled Pipelines), via the UI or `PATCH /api/v2/schedule/40ddfea0-34c3-47ab-8557-6bdb150b4d8d`.
+Both are CircleCI project settings, not code — neither is visible anywhere in `.circleci/src`. Changing either requires CircleCI project-settings access (Project Settings → Triggers → Scheduled Pipelines), via the UI or `PATCH /api/v2/schedule/{id}`.
 
-For an on-demand run of all four platform workflows outside the schedule (e.g. to validate a change before it reaches `develop`), use Trigger Pipeline with `run-platform-workflows=true`. `force-persist-artifacts=true` does the same regardless of branch — see the comment above the `linux-arm64` workflow in `@main.yml`.
+For an on-demand run of all four platform workflows outside either schedule (e.g. to validate a change before it reaches `develop`, or to recover a missed/failed release-branch build), use Trigger Pipeline with `run-platform-workflows=true`, or `force-persist-artifacts=true` — the latter works regardless of branch and needs only one flag. See the comment above the `linux-arm64` workflow in `@main.yml`.

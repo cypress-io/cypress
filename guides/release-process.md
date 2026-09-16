@@ -95,6 +95,9 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - NOTE: If edits to the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md) are not needed, nor is a new version of [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases), this step can be skipped and the last build off `develop` can be used below.
 
 4. Once the `develop` branch is passing in CI and you have confirmed the `cypress-bot` has commented on the commit with the pre-release versions for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`, publishing can proceed.
+
+    `darwin-x64`, `darwin-arm64`, `linux-arm64`, and `windows` don't build on every `develop` commit — they run from a nightly CircleCI Scheduled Pipeline instead (see [`.circleci/AGENTS.md`](../.circleci/AGENTS.md)). Merges to `develop` cut off at 8PM EST the day before a release. Wait for that night's scheduled build to land on the release sha, and confirm it's green, before starting release day. If the schedule missed the sha or failed, trigger it manually with `force-persist-artifacts=true` on that exact sha.
+
     Tips for getting a green build:
      - If the `windows` workflow is failing with timeout errors, you can retry from the last failed step.
      - Sometimes a test can get stuck in a failing state between attempts on the `windows` workflow. In these cases, kicking off a full run of the workflow can help get it into a passing state.
