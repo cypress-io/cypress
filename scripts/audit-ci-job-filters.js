@@ -3,6 +3,13 @@
 // Checks that every workflow entry invoking a path-filtered job carries an
 // expression filter matching the pipeline parameters that job's guard consults.
 //
+// This runs in the lint job rather than in pack-workflows, which would be
+// earlier and fail closed, because pack-workflows runs on cimg/base:stable and
+// that image has no Node. The late gate is tolerable: `.circleci/*` is a global
+// trigger in generate-pipeline-parameters.sh, so a PR that changes this config
+// runs every job all-true anyway. A bad filter can only take effect on later
+// PRs, by which point this check has already blocked the config change.
+//
 // Once `halt-if-skipped` is removed, the guard exists only at the workflow
 // entry. Nothing else stops a new entry for an already-guarded job from
 // silently losing its filter and running on every PR, or — worse, via the
