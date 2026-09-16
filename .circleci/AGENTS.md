@@ -59,16 +59,16 @@ After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 None of the four runs on every `develop` push. Windows moved for credit cost. The two `darwin-*` workflows moved to free leased self-hosted macOS hardware. `linux-arm64` costs almost nothing and moved for consistency, so all platform coverage lands in one sweep. Per-merge platform signal was not actionable anyway — `develop` passed 47 of 213 runs.
 
-**What exists today**: a CircleCI Scheduled Pipeline named "Windows Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` at 17:00 and 23:00 UTC and sets only `run-windows-workflow=true`. It does not set `run-platform-workflows=true`. Until it does, `linux-arm64`, `darwin-x64`, and `darwin-arm64` get zero `develop` coverage.
+**What exists today**: a CircleCI Scheduled Pipeline named "Windows Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` at 17:00 and 23:00 UTC and sets `run-windows-workflow=true`. `run-windows-workflow` no longer exists as a pipeline parameter — `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read `run-platform-workflows` now. Until the schedule is repointed at that parameter, every scheduled fire submits an unrecognized parameter and CircleCI rejects the pipeline at creation — loud, not silent, but `linux-arm64`, `darwin-x64`, and `darwin-arm64` still get zero `develop` coverage in the meantime, same as `windows`.
 
 **What the schedule must become**, to match the gates in `@main.yml`:
 
 - **Id**: `40ddfea0-34c3-47ab-8557-6bdb150b4d8d` (unchanged)
 - **Branch**: `develop`
-- **Parameters to set**: `run-windows-workflow=true` and `run-platform-workflows=true`
+- **Parameters to set**: `run-platform-workflows=true` only
 - **Timetable**: 1×/weekday, Mon–Fri, at 23:00 UTC (drop the 17:00 slot, keep 23:00)
 - **Owner**: App Foundations team
 
 This is a CircleCI project setting, not code — it isn't visible anywhere in `.circleci/src`. Changing it requires CircleCI project-settings access (Project Settings → Triggers → Scheduled Pipelines), via the UI or `PATCH /api/v2/schedule/40ddfea0-34c3-47ab-8557-6bdb150b4d8d`.
 
-For an on-demand run of the platform workflows outside the schedule (e.g. to validate a change before it reaches `develop`), use Trigger Pipeline with `run-platform-workflows=true` (add `run-windows-workflow=true` too if you also want Windows).
+For an on-demand run of all four platform workflows outside the schedule (e.g. to validate a change before it reaches `develop`), use Trigger Pipeline with `run-platform-workflows=true`. `force-persist-artifacts=true` does the same regardless of branch — see the comment above the `linux-arm64` workflow in `@main.yml`.

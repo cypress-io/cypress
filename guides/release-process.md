@@ -57,9 +57,11 @@ If you don't have access to 1Password, ask a team member who has done a deploy.
 In order to publish a new version of the `cypress` package to the npm registry, CI must build and test it across multiple platforms and test projects. CI is set up to do the following on every commit to `develop`:
 
 1. Build the npm package with the [next target version](./next-version.md) baked in.
-2. Build the Linux, Mac & Windows binaries on CircleCI.
-3. Upload the binaries and the new npm package to the AWS S3 Bucket `cdn.cypress.io` under the "beta" folder.
+2. Build the Linux binaries on CircleCI.
+3. Upload the Linux binaries and the new npm package to the AWS S3 Bucket `cdn.cypress.io` under the "beta" folder.
 4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing from the npm registry.
+
+Mac and Windows binaries do not build on every `develop` commit. They build from a nightly CircleCI Scheduled Pipeline instead, or on demand via a manual Trigger Pipeline run — see the "Scheduled platform CI" section of [`.circleci/AGENTS.md`](../.circleci/AGENTS.md).
 
 Multiple test projects are launched for each target operating system and the results are reported
 back to GitHub using status checks so that you can see if a change has broken real-world usage

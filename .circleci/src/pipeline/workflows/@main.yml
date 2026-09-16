@@ -457,12 +457,15 @@ linux-x64:
 # per-merge platform signal isn't actionable at that frequency. linux-arm64 is
 # cheap but rides the same gate so all platform coverage lands in one sweep.
 # A CircleCI Scheduled Pipeline (configured in the CircleCI UI, not here) runs
-# them on develop by setting run-platform-workflows=true, plus on the other
-# filters listed below.
+# them on develop by setting run-platform-workflows=true. force-persist-artifacts
+# is a top-level escape hatch so a manual Trigger Pipeline gets every platform
+# from one flag regardless of branch, instead of needing run-platform-workflows
+# set too on branches where &full-workflow-filters wouldn't otherwise fire it.
 linux-arm64:
   when: &scheduled-platform-filters
     or:
       - equal: [ true, << pipeline.parameters.run-platform-workflows >> ]
+      - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - and:
           - *full-workflow-filters
           - not:
@@ -628,12 +631,12 @@ darwin-arm64:
 # develop push either, and it also skips release/* entirely. It runs on
 # develop via the same CircleCI Scheduled Pipeline (configured in the CircleCI
 # UI, not here) that drives linux-arm64/darwin-x64/darwin-arm64, setting
-# run-windows-workflow=true instead of run-platform-workflows=true, plus on
-# the other filters listed below.
+# run-platform-workflows=true, plus on the other filters listed below.
 windows:
   when:
     or:
-      - equal: [ true, << pipeline.parameters.run-windows-workflow >> ]
+      - equal: [ true, << pipeline.parameters.run-platform-workflows >> ]
+      - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - and:
           - *full-workflow-filters
           - not:
