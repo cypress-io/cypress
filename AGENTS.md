@@ -7,11 +7,24 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 ## Workspaces
 
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
-- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (32 packages total)
-- **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling (15 packages)
-- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot` (3 packages)
+- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more
+- **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling
+- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot`
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
+
+## Task runbooks
+
+Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), [V8 snapshots](./guides/v8-snapshots.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
+
+`.claude/skills/*/SKILL.md` adds a thin layer on top for the two workflows that need agent-specific execution guidance — which permissions a phase needs, long-running commands, and host quirks that would be noise in a contributor guide. Claude Code loads them on demand; **other agents should read the file directly**, since nothing loads them automatically:
+
+- [`building-cypress-binary`](./.claude/skills/building-cypress-binary/SKILL.md) — `binary-build` / `binary-package` / `binary-zip`, non-interactive flags, `ELECTRON_RUN_AS_NODE`, macOS signing.
+- [`debugging-cypress-artifacts`](./.claude/skills/debugging-cypress-artifacts/SKILL.md) — bugs that only reproduce in packaged output, the commit/build/clean/reset loop, `CYPRESS_RUN_BINARY`.
+
+`.claude/rules/*.md` is a second thin layer, for facts that are only correct in one part of the tree — which test runner a package uses, which runtime floor a directory is bound by, how a given kind of snapshot is regenerated. Each file carries a `paths:` glob, and Claude Code loads it when it opens a matching file. They are pointers, not sources of truth: every one links back to the guide or `AGENTS.md` section that owns the topic, so **other agents can skip them** and lose nothing.
+
+Add new guidance to a guide by default. A skill is only warranted when the content is about *running* the task rather than doing it correctly — if a contributor doing the task by hand would need to know it, it belongs in the guide. A rule is only warranted when the guidance is wrong outside a specific path. See [Choosing where guidance goes](./CONTRIBUTING.md#choosing-where-guidance-goes).
 
 ## Prerequisites
 
@@ -39,8 +52,10 @@ yarn start
 ### Testing
 
 ```bash
-# Run tests scoped to a single package (preferred over bare yarn test)
-yarn test --scope @packages/server
+# Run a single package's tests (go through the workspace, not the root test script —
+# the root script hardcodes its own --scope flags and lerna unions them, so
+# `yarn test --scope <pkg>` runs the whole default suite plus that package)
+yarn workspace @packages/server test
 
 # Target a specific vitest spec file (packages that use vitest)
 yarn workspace @packages/config test -- <path-to-spec>
@@ -53,6 +68,9 @@ yarn workspace @packages/server test-unit -- <path-to-spec>
 
 # Filter mocha tests by name pattern
 yarn workspace @packages/server test-unit -- --grep "<pattern>"
+
+# @packages/data-context is the one package on jest, not vitest or mocha
+yarn workspace @packages/data-context test-unit -- <path-to-spec>
 
 # Run system tests (full binary-level E2E)
 yarn test-system
@@ -86,6 +104,8 @@ yarn lint:fix
 
 > **Note**: This project does **not** use Prettier. All formatting is enforced via ESLint.
 
+The repo is mid-migration between two ESLint configs, so ignore rules live in two places: `ignorePatterns` in the root `.eslintrc.js` for the packages still on eslintrc, and the `ignores` block in `packages/eslint-config/src/baseConfig.ts` for the packages on flat config. Build output (`cjs/`, `esm/`, `dist/`) is already ignored in both; do not add a per-package `.eslintignore` for it, since patterns in those files that contain a `/` silently match nothing. [The ESLint migration guide](./guides/eslint-migration.md#6-ignore-build-output-centrally) explains the mechanism.
+
 ### Build
 
 ```bash
@@ -107,9 +127,11 @@ yarn clean-deps && yarn
 
 ## Architecture
 
+Orientation, not a registry — the directories under `packages/`, `npm/`, and `tooling/` are the authoritative list, and each carries its own `AGENTS.md` with the detail. Read a package's own file before working in it rather than relying on the one-liner here.
+
 ### CLI & Distribution
 
-- **`cypress` (`cli/`)** — The `cypress` npm package users install. Entry point for `cypress open`, `cypress run`, `cypress install`, etc. Version: 15.x.
+- **`cypress` (`cli/`)** — The `cypress` npm package users install. Entry point for `cypress open`, `cypress run`, `cypress install`, etc. The published version is set by semantic-release, not by `cli/package.json` (which stays `0.0.0-development`).
 
 ### Test Runner & Driver
 
@@ -124,7 +146,8 @@ yarn clean-deps && yarn
 
 - **`@packages/server`** — HTTP server responsible for serving test files, handling browser launching, socket communication, and orchestrating the test run.
 - **`@packages/proxy`** — HTTP/S proxy that intercepts all browser traffic during a test run.
-- **`@packages/net-stubbing`** — Network stubbing (`cy.intercept`) implementation — request matching, response manipulation.
+- **`@packages/net-stubbing`** — The `cy.intercept` surface: driver-side command, types, and the server-side glue.
+- **`@packages/network-interception`** — Transport-agnostic core behind `cy.intercept`: route matching, subscription planning, handler merging, and config policy. Holds the rules, none of the I/O — every transport is injected behind an interface.
 - **`@packages/network`** — Low-level network protocol utilities.
 - **`@packages/network-tools`** — Higher-level networking helpers used across packages.
 - **`@packages/https-proxy`** — HTTPS proxy implementation for TLS interception.
@@ -149,6 +172,10 @@ yarn clean-deps && yarn
 - **`@packages/telemetry`** — OpenTelemetry instrumentation wrapper used throughout the monorepo.
 - **`@packages/icons`** — Icon registry and SVG assets.
 - **`@packages/stderr-filtering`** — Stderr output filtering utilities.
+- **`@packages/agent-info`** — Fingerprints the environment block to tell whether Cypress was invoked by an AI coding agent, and which one. Intentionally pure and dependency-free.
+- **`@packages/cypress-sessions`** — The cross-process contract for Cypress sessions: shared schema, on-disk layout, and the liveness-probe route that lets the CLI find a running `cypress open` session and attach over CDP.
+- **`@packages/example`** — The bundled kitchensink example project. Its `cypress/` and `app/` contents are generated from upstream `cypress-example-kitchensink` — change it there, not here.
+- **`@packages/root`** — Root package metadata consumed by the binary build.
 
 ### Build & Snapshot Infrastructure
 
@@ -187,6 +214,7 @@ yarn clean-deps && yarn
 
 ## Code Conventions
 
+- **TypeScript for all new code** — New source, specs, and test fixtures must be TypeScript, not JavaScript. This includes system-test project fixtures: use `cypress.config.ts` and `.cy.ts` specs (lightweight fixtures without their own `node_modules` should `export default { ... }` a plain object rather than importing `defineConfig` from `cypress`).
 - **No Prettier** — Formatting is enforced entirely through ESLint. The `.prettierignore` excludes all files.
 - **Single quotes** — `'single'` quote style required for all JS/TS.
 - **No semicolons** — Enforced via ESLint (`semi: 'never'`).
@@ -246,7 +274,8 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Changelog & Template
 
-- For user-facing changes shipping with the next Cypress version, add a changelog entry to [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) — see the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md).
+- The semantic title prefix decides whether an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) is required, which section it belongs in, and how it must be phrased. The [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) is the source of truth for all of it — read it rather than guessing, and note that a `fix` prefix always requires an entry.
+- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
@@ -259,12 +288,15 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 - **External PRs**: Require manual approval via `approve-contributor-pr` gate before CI runs.
 - **Binary builds**: Triggered separately after npm release; cross-platform binaries are assembled and distributed via CDN.
 
-## Cursor Cloud specific instructions
+## Cloud agent environments
+
+Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, and similar). Most of this applies to any of them; bullets that name a host apply only there, so confirm the rest against the container you are in rather than assuming.
 
 ### Environment
 
-- Node.js >= 22.19.0 and Yarn 1.22.22 are pre-installed. The update script runs `yarn` which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
-- Xvfb is already running on `DISPLAY=:1`. Chrome is available at `/usr/bin/google-chrome-stable`.
+- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
+- The root `package.json` sets `engines.node` to the version in [`.node-version`](./.node-version), so yarn refuses to run any script on an older Node: `The engine "node" is incompatible with this module`. Containers that pre-install a lower version need the required one installed before anything else works — see [Matching the required Node version](#matching-the-required-node-version).
+- Browsers and a display are **not** guaranteed. Cursor Cloud runs Xvfb on `DISPLAY=:1` and ships Chrome at `/usr/bin/google-chrome-stable`; Claude Code on the web has neither, and offers only the Chromium that Playwright bundles under `$PLAYWRIGHT_BROWSERS_PATH`. Check `echo $DISPLAY` and resolve the browser path before running anything headed or Chrome-specific.
 
 ### Running Cypress in dev mode
 
@@ -273,13 +305,36 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Running tests
 
-- Prefer scoped tests: `yarn workspace @packages/<name> test` (vitest) or `yarn test --scope @packages/<name>` (lerna).
+- Prefer scoped tests: `yarn workspace @packages/<name> test`. Do not use `yarn test --scope <name>` — lerna unions scopes with the ones the root `test` script already sets, so it broadens the run instead of narrowing it. `yarn lint --scope` and `yarn check-ts --scope` do narrow correctly.
 - Some test suites (e.g., `@packages/network`) require privileged ports (443) and will fail with EACCES in unprivileged containers — this is expected.
 - `@packages/config` has 2 tests that assert `cypressBinaryRoot` contains `'cypress'`; these fail when the workspace directory name differs (e.g., `/workspace`). This is a known path-dependent issue, not a code bug.
 
 ### Linting
 
 - `yarn lint --scope @packages/<name>` for focused lint. Full monorepo lint: `yarn lint`.
+
+### Matching the required Node version
+
+Install the required version from the repo root, where `nvm` picks it up from [`.nvmrc`](./.nvmrc):
+
+```bash
+export NVM_DIR=/opt/nvm          # wherever nvm is installed
+. "$NVM_DIR/nvm.sh" || true      # see below: sourcing can exit non-zero
+nvm install                      # reads .nvmrc
+```
+
+Two things bite here:
+
+- **Source `nvm.sh` on its own line.** It exits non-zero when no default version is aliased yet, so `. "$NVM_DIR/nvm.sh" && nvm install` silently skips the install and looks like a failed download.
+- **`nvm use` does not survive a new shell.** Containers that put their own Node first on `PATH` keep resolving to it in every new shell, so the version reverts between commands. Prepend the installed version's bin directory to `PATH` in whatever the environment persists across commands (a shell profile, or the session env file that agent harnesses expose):
+
+```bash
+echo "export PATH=\"$(nvm which current | xargs dirname):\$PATH\"" >> ~/.bashrc
+```
+
+Verify with `node -v` in a *fresh* shell rather than the one that ran `nvm use`.
+
+Prefer this over `yarn --ignore-engines`: the flag only silences the check for the install itself. `yarn <script>` still refuses to run afterwards (`Commands cannot run with an incompatible environment`), and the postinstall rebuilds native modules such as `better-sqlite3` against the wrong Node.
 
 ### Key caveats
 

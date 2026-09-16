@@ -211,6 +211,11 @@
     "field": "trashAssetsBeforeRuns"
   },
   {
+    "value": [],
+    "from": "default",
+    "field": "trustedCertificates"
+  },
+  {
     "value": null,
     "from": "default",
     "field": "userAgent"

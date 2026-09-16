@@ -561,7 +561,7 @@ declare namespace Cypress {
      * @example isBrowser(['firefox', 'edge']) will be true only for the browsers 'firefox' and 'edge'
      * @example isBrowser('!firefox') will be true for every browser other than 'firefox'
      * @example isBrowser({ family: '!chromium'}) will be true for every browser not matching { family: 'chromium' }
-     * @param matcher browser name or matcher object to check.
+     * @param name browser name or matcher object to check.
      */
     isBrowser(name: IsBrowserMatcher): boolean
 
@@ -1055,7 +1055,7 @@ declare namespace Cypress {
       * to clear localStorage inside a single test. Yields `localStorage` object.
       *
       * @see https://on.cypress.io/clearlocalstorage
-      * @param {options} [object] - options object
+      * @param {object} [options] - options object
       * @example
        ```
        // Removes all local storage items, without logging
@@ -1071,7 +1071,7 @@ declare namespace Cypress {
       *
       * @see https://on.cypress.io/clearlocalstorage
       * @param {string} [key] - name of a particular item to remove (optional).
-      * @param {options} [object] - options object
+      * @param {object} [options] - options object
       * @example
        ```
        // Removes item "todos" without logging
@@ -2941,6 +2941,19 @@ declare namespace Cypress {
     certs: PEMCert[] | PFXCert[]
   }
 
+  /**
+   * A certificate the browser's own network stack should trust when it would
+   * otherwise reject it (e.g. a self-signed cert). Supply exactly one of a path
+   * to a PEM file, an inline PEM string, or a precomputed base64 SHA-256 SPKI
+   * fingerprint. A path is resolved against the project root, so an absolute
+   * path is used as-is. A PEM file or string holding several certificates
+   * trusts every certificate in the bundle.
+   */
+  type TrustedCertificate =
+    | { filePath: string }
+    | { pem: string }
+    | { spki: string }
+
   type RetryStrategyWithModeSpecs = RetryStrategy & {
     openMode: boolean // defaults to false
     runMode: boolean // defaults to true
@@ -3324,6 +3337,19 @@ declare namespace Cypress {
      * An array of objects defining the certificates
      */
     clientCertificates: ClientCertificate[]
+
+    /**
+     * Certificates the browser should treat as genuinely trusted rather than merely
+     * tolerating their errors (e.g. a self-signed development cert). On the native browser
+     * network path this lets the browser cache the origin's assets across navigations.
+     * Each entry supplies exactly one of a path to a PEM file (relative paths resolve
+     * against the project root), an inline PEM string, or a base64 SHA-256 SPKI
+     * fingerprint. Every certificate in a PEM bundle is trusted, not just the first.
+     * Unlike `clientCertificates`, entries are not scoped to a URL: the browser accepts
+     * a trusted key for any hostname that presents it.
+     * @default []
+     */
+    trustedCertificates: TrustedCertificate[]
 
     /**
      * Handle Cypress plugins
@@ -4035,14 +4061,14 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
-     * @param {AUTWindow} contentWindow the remote page's window object
+     * @param {AUTWindow} win the remote page's window object
      */
     onBeforeLoad(win: AUTWindow): void
 
     /**
      * Called once your page has fired its load event.
      *
-     * @param {AUTWindow} contentWindow the remote page's window object
+     * @param {AUTWindow} win the remote page's window object
      */
     onLoad(win: AUTWindow): void
 
