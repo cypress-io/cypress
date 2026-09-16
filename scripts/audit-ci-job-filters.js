@@ -144,11 +144,18 @@ const auditDependencies = (file, guarded) => {
     const guards = guarded.get(job)
     const requires = cfg.requires || []
 
-    if (!guards || !requires.length) continue
+    if (!requires.length) continue
 
     const deps = requires.map((r) => byName.get(r)).filter(Boolean)
 
     if (deps.some((d) => !guarded.has(d.job))) continue // an unconditional dep always runs
+
+    // An unguarded entry is meant to run on every pipeline. If every one of its
+    // dependencies can be filtered out, it can be dropped instead.
+    if (!guards) {
+      problems.push(`${file} → ${name}\n    runs unconditionally, but every dependency (${requires.join(', ')}) is conditional\n    the job would be dropped whenever they are all filtered out`)
+      continue
+    }
 
     const covered = new Set(deps.flatMap((d) => guarded.get(d.job)))
     const orphaned = guards.filter((g) => !covered.has(g))
@@ -169,7 +176,7 @@ const main = () => {
   ]
 
   if (problems.length) {
-    console.error(`\n✖ ${problems.length} workflow ${problems.length === 1 ? 'entry does' : 'entries do'} not match the guard on the job they invoke:\n`)
+    console.error(`\n✖ ${problems.length} workflow ${problems.length === 1 ? 'entry' : 'entries'} in a state that would lose test coverage:\n`)
     problems.forEach((p) => console.error(`  ${p}\n`))
     console.error(`Every entry invoking a guarded job needs an expression filter testing every\nparameter that job's guard consults. See cypress-io/cypress#34782.\n`)
     process.exit(1)
