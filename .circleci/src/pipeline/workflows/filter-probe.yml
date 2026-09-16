@@ -1,0 +1,54 @@
+# Scratch workflow for #34782. Determines whether a `filters:` expression can
+# read a pipeline parameter that arrives through `continuation/continue`, as
+# opposed to one supplied at trigger time and inherited into the continued
+# pipeline.
+#
+# This matters because every `run-*` path-filtering parameter arrives through
+# the continuation parameters map, while the only expression filters shipping
+# today (`run-force-http1-tests`) read an inherited parameter. Filter
+# expressions evaluate server-side at scheduling; the `halt-if-skipped` guards
+# they would replace interpolate at config-compile time. Nothing proves the
+# scheduling-time path can see continuation values.
+#
+# generate-pipeline-parameters.sh emits, for this branch only:
+#   run-npm-vue-tests  = true   (declared default in @pipeline.yml: true)
+#   run-npm-grep-tests = false  (declared default in @pipeline.yml: true)
+#
+# Trigger with run-force-http1-tests=true so the inherited-parameter probe is a
+# positive control.
+#
+# Read the answer off which probe jobs appear in the workflow:
+#
+#   control + inherited + param-true, NOT param-false
+#       -> expressions read continuation values. #34782 is viable.
+#   control + inherited + param-true + param-false
+#       -> expressions read declaration defaults and ignore the continuation
+#          value. #34782 would silently schedule everything.
+#   control + inherited only
+#       -> expressions cannot see continuation parameters. #34782 is dead.
+#   control only
+#       -> expressions are not working here at all. Experiment inconclusive.
+#
+# Delete this file with the branch.
+when:
+  equal: [ 'experiment/34782-filter-probe', << pipeline.git.branch >> ]
+
+jobs:
+  - filter-probe:
+      name: probe-control
+      label: control, no filter — must always appear
+
+  - filter-probe:
+      name: probe-inherited-true
+      label: run-force-http1-tests == true — inherited param, set at trigger time
+      filters: pipeline.parameters.run-force-http1-tests == true
+
+  - filter-probe:
+      name: probe-param-true
+      label: run-npm-vue-tests == true — continuation value true, default true
+      filters: pipeline.parameters.run-npm-vue-tests == true
+
+  - filter-probe:
+      name: probe-param-false
+      label: run-npm-grep-tests == true — continuation value false, default true
+      filters: pipeline.parameters.run-npm-grep-tests == true

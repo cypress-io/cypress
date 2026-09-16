@@ -82,6 +82,21 @@ emit_all_true() {
 # ----- branch override --------------------------------------------------------
 # On develop/release branches all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
+
+# ----- scratch probe override (experiment/34782-filter-probe) -----------------
+# Emits a known mixed parameter set so the filter-probe workflow can determine
+# whether a `filters:` expression reads a value supplied through
+# continuation/continue. Both parameters below are declared `default: true` in
+# @pipeline.yml, so run-npm-grep-tests=false distinguishes "read the
+# continuation value" from "read the declaration default".
+# Delete this block with the branch — see #34782.
+if [[ "$BRANCH" == "experiment/34782-filter-probe" ]]; then
+  npm_vue_tests=true
+  npm_grep_tests=false
+  echo "filter-probe branch — emitting fixed probe parameters" >&2
+  emit_json
+  exit 0
+fi
 if [[ "$BRANCH" == "develop" ]] || \
    [[ "$BRANCH" =~ ^release/ ]] || \
    [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then

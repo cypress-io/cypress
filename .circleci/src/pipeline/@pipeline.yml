@@ -1933,6 +1933,21 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
+  # Scratch probe for #34782 — determines whether a `filters:` expression can
+  # read a pipeline parameter supplied through continuation/continue. Costs one
+  # small container and an echo. Delete with the experiment branch.
+  filter-probe:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small.gen2
+    parameters:
+      label:
+        type: string
+    steps:
+      - run:
+          name: Probe scheduled
+          command: echo "SCHEDULED — << parameters.label >>"
+
   ready-to-release:
     <<: *defaults
     resource_class: small.gen2

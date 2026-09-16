@@ -19,6 +19,8 @@ when:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
     - not:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
+    - not:
+        equal: [ 'experiment/34782-filter-probe', << pipeline.git.branch >> ]
 
 jobs:
   # Internal PRs — install and build run immediately
