@@ -101,6 +101,9 @@ describe('open', () => {
 
     // happy path defaults
     argv = ['--port', '1234']
+    // `os` is automocked, so without a default here `platform` keeps whatever the
+    // previously executed block set and the sandbox flag leaks across tests.
+    vi.mocked(os.platform).mockReturnValue('darwin')
     vi.spyOn(inspector, 'url').mockReturnValue(undefined)
     vi.mocked(spawn).mockReturnValue(mockChildProcess)
     vi.mocked(access).mockResolvedValue(undefined)
@@ -123,12 +126,12 @@ describe('open', () => {
       }
     })
 
-    // @ts-expect-error
-    vi.spyOn(process, 'exit').mockImplementation(() => {})
+    vi.spyOn(process, 'exit').mockImplementation((() => {}) as () => never)
   })
 
   afterEach(() => {
     vi.clearAllMocks()
+    vi.unstubAllEnvs()
   })
 
   it('opens the electron app and returns the child process', async () => {
@@ -198,14 +201,34 @@ describe('open', () => {
   })
 
   describe('when platform is linux', () => {
+    // `process.geteuid` does not exist on Windows: `vi.spyOn` throws on a missing
+    // property, and a restore there has to delete the stub, not reinstate a value.
+    let originalDescriptor: PropertyDescriptor | undefined
+
+    const stubGeteuid = (euid?: number) => {
+      Object.defineProperty(process, 'geteuid', {
+        value: euid === undefined ? undefined : () => euid,
+        writable: true,
+        configurable: true,
+      })
+    }
+
     beforeEach(() => {
       vi.spyOn(os, 'platform').mockReturnValue('linux')
+      originalDescriptor = Object.getOwnPropertyDescriptor(process, 'geteuid')
     })
 
-    describe('anmd geteuid returns 0', () => {
+    afterEach(() => {
+      if (originalDescriptor) {
+        Object.defineProperty(process, 'geteuid', originalDescriptor)
+      } else {
+        Reflect.deleteProperty(process, 'geteuid')
+      }
+    })
+
+    describe('and geteuid returns 0', () => {
       beforeEach(() => {
-        // @ts-expect-error
-        vi.spyOn(process, 'geteuid').mockReturnValue(0)
+        stubGeteuid(0)
       })
 
       it('spawns with --no-sandbox', async () => {
@@ -216,9 +239,7 @@ describe('open', () => {
 
     describe('and geteuid returns 1000', () => {
       beforeEach(() => {
-        // @ts-expect-error
-
-        vi.spyOn(process, 'geteuid').mockReturnValue(1000)
+        stubGeteuid(1000)
       })
 
       it('spawns without --no-sandbox', async () => {
@@ -228,21 +249,8 @@ describe('open', () => {
     })
 
     describe('and geteuid is undefined', () => {
-      let originalGeteuid: typeof process.geteuid
-
       beforeEach(() => {
-        originalGeteuid = process.geteuid
-        Object.defineProperty(process, 'geteuid', {
-          value: undefined,
-          writable: true,
-        })
-      })
-
-      afterEach(() => {
-        Object.defineProperty(process, 'geteuid', {
-          value: originalGeteuid,
-          writable: true,
-        })
+        stubGeteuid()
       })
 
       it('spawns without --no-sandbox', async () => {
@@ -329,7 +337,7 @@ describe('open', () => {
       process.removeAllListeners('SIGINT')
       process.removeAllListeners('SIGTERM')
 
-      vi.spyOn(process, 'exit').mockImplementation(() => {})
+      vi.spyOn(process, 'exit').mockImplementation((() => {}) as () => never)
 
       vi.mocked(mockChildProcess.on).mockImplementation((event: string, fn) => {
         if (event === 'close') {

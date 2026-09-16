@@ -90,7 +90,7 @@ export class CyPromptManager implements CyPromptManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return this._cyPromptServer[method].apply(this._cyPromptServer, args)
+      return this._cyPromptServer[method](...args)
     } catch (error: unknown) {
       let actualError: Error
 
@@ -120,7 +120,7 @@ export class CyPromptManager implements CyPromptManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return await this._cyPromptServer[method].apply(this._cyPromptServer, args)
+      return await this._cyPromptServer[method](...args)
     } catch (error: unknown) {
       let actualError: Error
 

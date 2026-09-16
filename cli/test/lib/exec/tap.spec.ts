@@ -393,20 +393,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native sessions command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 54321,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 54321,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     // Reporting whether the runner page answers takes a session, so this command
     // opens one — bounded, and only where there is a browser to ask.
@@ -529,20 +531,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native status command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 4242,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 4242,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
       const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
@@ -774,20 +778,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native specs command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 4242,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 4242,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
       const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
@@ -966,20 +972,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native run command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 4242,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 4242,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
       const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
@@ -1001,7 +1009,7 @@ describe('lib/exec/tap', () => {
       })
     }
 
-    it('triggers the run and renders the launch outcome, without opening a connection', async () => {
+    it('triggers the run and acknowledges it as running, without opening a connection', async () => {
       mockLiveResolved(liveSession())
       mockSessionGraphql()
 
@@ -1009,24 +1017,23 @@ describe('lib/exec/tap', () => {
 
       const output = logger.print()
 
-      expect(output).toContain('cypress/e2e/login.cy.ts')
-      expect(output).toContain('e2e')
-      expect(output).toContain('Chrome')
+      expect(output).toContain('cypress/e2e/login.cy.ts is running')
+      expect(output).toContain('use tap status to check progress')
+      expect(output).not.toContain('testing type')
       expect(() => JSON.parse(output)).toThrow()
 
       // The run is driven from the session's data layer, not over a CDP connection.
       expect(withTapConnection).not.toHaveBeenCalled()
     })
 
-    it('prints the raw launch outcome with --json', async () => {
+    it('prints the running acknowledgement with --json, not the launched spec object', async () => {
       mockLiveResolved(liveSession())
       mockSessionGraphql()
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         spec: 'cypress/e2e/login.cy.ts',
-        testingType: 'e2e',
-        browser: 'Chrome',
+        status: 'running',
       })
     })
 

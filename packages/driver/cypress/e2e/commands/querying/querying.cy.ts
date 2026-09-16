@@ -1363,6 +1363,41 @@ describe('src/cy/commands/querying', () => {
           expect($el).to.be.null
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/25962
+      describe('describes the missing subject by its content', () => {
+        let assertMessage: string | undefined
+
+        beforeEach(() => {
+          assertMessage = undefined
+
+          cy.on('log:added', (attrs, log) => {
+            if (attrs.name === 'assert' && assertMessage === undefined) {
+              assertMessage = log.get('message')
+            }
+          })
+
+          return null
+        })
+
+        it('in an existence assertion', () => {
+          cy.contains('does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in an existence assertion with a filter', () => {
+          cy.contains('span', 'does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **span, does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in a length assertion', () => {
+          cy.contains('does-not-exist').should('have.length', 0).then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** to have a length of **0**')
+          })
+        })
+      })
     })
 
     describe('should(\'be.visible\')', () => {

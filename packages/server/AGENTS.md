@@ -8,11 +8,18 @@ yarn workspace @packages/server start
 
 # NOTE: Full suite is slow (hundreds of tests); always target a specific file or grep pattern
 
-# Run a specific unit test file
-yarn workspace @packages/server test-unit -- <path-to-spec>
+# Unit tests are split across two runners by filename:
+#   *_spec.ts -> mocha (test-unit-mocha)   *.spec.ts -> vitest (test-unit-vitest)
+# `test-unit` runs both; the filename filter below only narrows the mocha half.
 
-# Filter unit tests by name pattern
-yarn workspace @packages/server test-unit -- --grep "handles request"
+# Run a specific mocha unit test file
+yarn workspace @packages/server test-unit-mocha -- <path-to-spec>
+
+# Filter mocha unit tests by name pattern
+yarn workspace @packages/server test-unit-mocha -- --grep "handles request"
+
+# Run a specific vitest unit test file
+yarn workspace @packages/server test-unit-vitest -- <path-to-spec>
 
 # Run a specific integration test file
 yarn workspace @packages/server test-integration -- <path-to-spec>
