@@ -30,7 +30,7 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 | Stage | What It Does |
 |-------|--------------|
 | Linux x64 Build | Full build, packaging, and binary verification for Linux x64 |
-| Binary Creation | Triggers the `cypress-publish-binary` pipeline to build the Linux x64 and Linux ARM64 Electron binaries |
+| Binary Creation | Triggers the `cypress-publish-binary` pipeline to build the Linux x64 Electron binaries |
 | Binary Verification | Tests the built Linux binary against kitchensink, recipes, and real-world apps |
 | Release Preparation | Validates release readiness, prepares npm packages |
 
