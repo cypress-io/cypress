@@ -359,7 +359,7 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         socket.on('mocha', (...args: unknown[]) => {
-          return options.onMocha.apply(options, args)
+          return options.onMocha(...args)
         })
 
         socket.on('recorder:frame', (data) => {

@@ -58,15 +58,17 @@ const listSessions = async (options: TapCliOptions): Promise<number> => {
   const timeoutMs = options.timeout ?? FIND_SESSION_TIMEOUT_MS
   const responsive = await Promise.all(sessions.map((session) => probeRenderer(session, timeoutMs)))
 
-  const summaries: TapSessionSummary[] = sessions.map((session, index) => ({
-    pid: session.pid,
-    projectRoot: session.projectRoot,
-    testingType: session.testingType,
-    browserAttached: session.cdpBrowserWsUrl !== null,
-    browserName: session.browserName,
-    browserSupported: isTapSupportedBrowser(session.browserFamily),
-    ...(responsive[index] === undefined ? {} : { rendererResponsive: responsive[index] }),
-  }))
+  const summaries: TapSessionSummary[] = sessions.map((session, index) => {
+    return {
+      pid: session.pid,
+      projectRoot: session.projectRoot,
+      testingType: session.testingType,
+      browserAttached: session.cdpBrowserWsUrl !== null,
+      browserName: session.browserName,
+      browserSupported: isTapSupportedBrowser(session.browserFamily),
+      ...(responsive[index] === undefined ? {} : { rendererResponsive: responsive[index] }),
+    }
+  })
 
   renderOutcome('sessions', summaries, options.json)
 

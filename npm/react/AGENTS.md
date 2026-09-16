@@ -20,7 +20,7 @@ yarn cy:run -- --spec <path-to-spec>   # run a specific component test spec
 
 ## Gotchas / Notes
 
-- The `postbuild` step syncs `dist/` to `cli/react/` in the monorepo root — build before testing against the Cypress binary.
+- `postbuild` re-exports this package into `cli/react/` — build before testing against the Cypress binary. See [`npm/AGENTS.md`](../AGENTS.md).
 - Ships multiple bundle formats: CJS (`dist/cypress-react.cjs.js`), ESM bundler (`dist/cypress-react.esm-bundler.js`), and browser UMD (`dist/cypress-react.browser.js`).
 - Supports React 18 and 19 via peer dependency ranges.
 
