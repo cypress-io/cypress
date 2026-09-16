@@ -7,9 +7,9 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 ## Workspaces
 
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
-- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (32 packages total)
-- **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling (15 packages)
-- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot` (3 packages)
+- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more
+- **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling
+- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot`
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
@@ -22,7 +22,9 @@ Step-by-step procedures live in [`guides/`](./guides/) — start there for any m
 - [`building-cypress-binary`](./.claude/skills/building-cypress-binary/SKILL.md) — `binary-build` / `binary-package` / `binary-zip`, non-interactive flags, `ELECTRON_RUN_AS_NODE`, macOS signing.
 - [`debugging-cypress-artifacts`](./.claude/skills/debugging-cypress-artifacts/SKILL.md) — bugs that only reproduce in packaged output, the commit/build/clean/reset loop, `CYPRESS_RUN_BINARY`.
 
-Add new guidance to a guide by default. A skill is only warranted when the content is about *running* the task rather than doing it correctly — if a contributor doing the task by hand would need to know it, it belongs in the guide. See [Choosing where guidance goes](./CONTRIBUTING.md#choosing-where-guidance-goes).
+`.claude/rules/*.md` is a second thin layer, for facts that are only correct in one part of the tree — which test runner a package uses, which runtime floor a directory is bound by, how a given kind of snapshot is regenerated. Each file carries a `paths:` glob, and Claude Code loads it when it opens a matching file. They are pointers, not sources of truth: every one links back to the guide or `AGENTS.md` section that owns the topic, so **other agents can skip them** and lose nothing.
+
+Add new guidance to a guide by default. A skill is only warranted when the content is about *running* the task rather than doing it correctly — if a contributor doing the task by hand would need to know it, it belongs in the guide. A rule is only warranted when the guidance is wrong outside a specific path. See [Choosing where guidance goes](./CONTRIBUTING.md#choosing-where-guidance-goes).
 
 ## Prerequisites
 
@@ -50,8 +52,10 @@ yarn start
 ### Testing
 
 ```bash
-# Run tests scoped to a single package (preferred over bare yarn test)
-yarn test --scope @packages/server
+# Run a single package's tests (go through the workspace, not the root test script —
+# the root script hardcodes its own --scope flags and lerna unions them, so
+# `yarn test --scope <pkg>` runs the whole default suite plus that package)
+yarn workspace @packages/server test
 
 # Target a specific vitest spec file (packages that use vitest)
 yarn workspace @packages/config test -- <path-to-spec>
@@ -64,6 +68,9 @@ yarn workspace @packages/server test-unit -- <path-to-spec>
 
 # Filter mocha tests by name pattern
 yarn workspace @packages/server test-unit -- --grep "<pattern>"
+
+# @packages/data-context is the one package on jest, not vitest or mocha
+yarn workspace @packages/data-context test-unit -- <path-to-spec>
 
 # Run system tests (full binary-level E2E)
 yarn test-system
@@ -120,9 +127,11 @@ yarn clean-deps && yarn
 
 ## Architecture
 
+Orientation, not a registry — the directories under `packages/`, `npm/`, and `tooling/` are the authoritative list, and each carries its own `AGENTS.md` with the detail. Read a package's own file before working in it rather than relying on the one-liner here.
+
 ### CLI & Distribution
 
-- **`cypress` (`cli/`)** — The `cypress` npm package users install. Entry point for `cypress open`, `cypress run`, `cypress install`, etc. Version: 15.x.
+- **`cypress` (`cli/`)** — The `cypress` npm package users install. Entry point for `cypress open`, `cypress run`, `cypress install`, etc. The published version is set by semantic-release, not by `cli/package.json` (which stays `0.0.0-development`).
 
 ### Test Runner & Driver
 
@@ -137,7 +146,8 @@ yarn clean-deps && yarn
 
 - **`@packages/server`** — HTTP server responsible for serving test files, handling browser launching, socket communication, and orchestrating the test run.
 - **`@packages/proxy`** — HTTP/S proxy that intercepts all browser traffic during a test run.
-- **`@packages/net-stubbing`** — Network stubbing (`cy.intercept`) implementation — request matching, response manipulation.
+- **`@packages/net-stubbing`** — The `cy.intercept` surface: driver-side command, types, and the server-side glue.
+- **`@packages/network-interception`** — Transport-agnostic core behind `cy.intercept`: route matching, subscription planning, handler merging, and config policy. Holds the rules, none of the I/O — every transport is injected behind an interface.
 - **`@packages/network`** — Low-level network protocol utilities.
 - **`@packages/network-tools`** — Higher-level networking helpers used across packages.
 - **`@packages/https-proxy`** — HTTPS proxy implementation for TLS interception.
@@ -162,6 +172,10 @@ yarn clean-deps && yarn
 - **`@packages/telemetry`** — OpenTelemetry instrumentation wrapper used throughout the monorepo.
 - **`@packages/icons`** — Icon registry and SVG assets.
 - **`@packages/stderr-filtering`** — Stderr output filtering utilities.
+- **`@packages/agent-info`** — Fingerprints the environment block to tell whether Cypress was invoked by an AI coding agent, and which one. Intentionally pure and dependency-free.
+- **`@packages/cypress-sessions`** — The cross-process contract for Cypress sessions: shared schema, on-disk layout, and the liveness-probe route that lets the CLI find a running `cypress open` session and attach over CDP.
+- **`@packages/example`** — The bundled kitchensink example project. Its `cypress/` and `app/` contents are generated from upstream `cypress-example-kitchensink` — change it there, not here.
+- **`@packages/root`** — Root package metadata consumed by the binary build.
 
 ### Build & Snapshot Infrastructure
 
@@ -291,7 +305,7 @@ Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, an
 
 ### Running tests
 
-- Prefer scoped tests: `yarn workspace @packages/<name> test` (vitest) or `yarn test --scope @packages/<name>` (lerna).
+- Prefer scoped tests: `yarn workspace @packages/<name> test`. Do not use `yarn test --scope <name>` — lerna unions scopes with the ones the root `test` script already sets, so it broadens the run instead of narrowing it. `yarn lint --scope` and `yarn check-ts --scope` do narrow correctly.
 - Some test suites (e.g., `@packages/network`) require privileged ports (443) and will fail with EACCES in unprivileged containers — this is expected.
 - `@packages/config` has 2 tests that assert `cypressBinaryRoot` contains `'cypress'`; these fail when the workspace directory name differs (e.g., `/workspace`). This is a known path-dependent issue, not a code bug.
 
