@@ -303,6 +303,35 @@ describe('ProjectActions', () => {
     })
   })
 
+  describe('launchProject', () => {
+    beforeEach(() => {
+      ctx.coreData.currentProject = '/cy-project'
+      ctx.coreData.currentTestingType = 'e2e'
+      ctx.coreData.activeBrowser = { id: 'abc' } as any
+    })
+
+    it('counts the launch before it settles so a concurrent auto-launch check does not launch again', async () => {
+      let resolveLaunch!: () => void
+      const launchProject = jest.fn().mockReturnValue(new Promise<void>((resolve) => {
+        resolveLaunch = resolve
+      }))
+
+      Object.assign(ctx._apis.projectApi, { launchProject })
+
+      expect(actions.launchCount).toBe(0)
+
+      const launching = actions.launchProject('e2e')
+
+      expect(launchProject).toHaveBeenCalledTimes(1)
+      expect(actions.launchCount).toBe(1)
+
+      resolveLaunch()
+      await launching
+
+      expect(actions.launchCount).toBe(1)
+    })
+  })
+
   describe('debugCloudRun', () => {
     beforeEach(() => {
       jest.spyOn(ctx.relevantRuns, 'moveToRun')

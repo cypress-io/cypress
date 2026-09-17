@@ -93,9 +93,10 @@ const debug = debugLib('cypress:data-context:ProjectActions')
 export class ProjectActions {
   /**
    * @var globalLaunchCount
-   * Used as a read-only in the launchpad to ensure
-   * that launchProject is only called once if
-   * the --browser flag is passed alone.
+   * Read by the launchpad (`shouldLaunchBrowserFromOpenBrowser`) so the
+   * `--browser` auto-launch fires only once. Counts launches as they start,
+   * not as they finish: a browser launch takes seconds, and the launchpad
+   * re-reads this while one is in flight.
    */
   private globalLaunchCount = 0
   constructor (private ctx: DataContext) {}
@@ -301,8 +302,14 @@ export class ProjectActions {
       this.api.resetServer()
     }
 
-    await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    // Counted before the launch settles: a launch takes seconds, and the
+    // launchpad's auto-launch check reads `launchCount` inside that window
+    // (dismissing the major-version welcome mounts OpenBrowser mid-launch).
+    // A count that only moves afterwards lets it launch a second browser,
+    // and the two launches tear each other's CDP connection down (#34868).
     this.globalLaunchCount++
+
+    await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
 
     return
   }

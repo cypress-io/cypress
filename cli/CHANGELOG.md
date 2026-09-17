@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Bugfixes:**
+
+- Fixed an issue where `cypress open` with both a `--browser` and a testing type flag launched the browser twice the first time Cypress showed its major-version welcome screen — on first open after upgrading, or after clearing app data. The two launches tore down each other's connection, so in Chrome, Chromium, and Edge Cypress could not connect to the browser, and Electron reported that its tab closed unexpectedly. Restarting Cypress worked around it. Fixes [#34868](https://github.com/cypress-io/cypress/issues/34868).
+
 **Dependency Updates:**
 
 - Upgraded `proxy-addr` from `2.0.7` to `2.0.8` to address a [User Impersonation](https://security.snyk.io/vuln/SNYK-JS-PROXYADDR-19812342) (CVE-2026-90711) vulnerability reported in security scans. Addresses [#34858](https://github.com/cypress-io/cypress/issues/34858).
