@@ -94,9 +94,9 @@ export class ProjectActions {
   /**
    * @var globalLaunchCount
    * Read by the launchpad (`shouldLaunchBrowserFromOpenBrowser`) so the
-   * `--browser` auto-launch fires only once. Counts launches as they start,
-   * not as they finish: a browser launch takes seconds, and the launchpad
-   * re-reads this while one is in flight.
+   * `--browser` auto-launch fires only once. Incremented as a launch starts:
+   * a launch takes seconds, and dismissing the major-version welcome mounts
+   * OpenBrowser, which re-reads this inside that window (#34868).
    */
   private globalLaunchCount = 0
   constructor (private ctx: DataContext) {}
@@ -302,11 +302,6 @@ export class ProjectActions {
       this.api.resetServer()
     }
 
-    // Counted before the launch settles: a launch takes seconds, and the
-    // launchpad's auto-launch check reads `launchCount` inside that window
-    // (dismissing the major-version welcome mounts OpenBrowser mid-launch).
-    // A count that only moves afterwards lets it launch a second browser,
-    // and the two launches tear each other's CDP connection down (#34868).
     this.globalLaunchCount++
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)

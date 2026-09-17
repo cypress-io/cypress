@@ -212,9 +212,7 @@ watch(
   },
 )
 
-// Dismissing the welcome renders OpenBrowser, which owns the `--browser`
-// auto-launch (and waits for the config to be ready before firing it), so
-// no launch is issued from here.
+// OpenBrowser mounts once the welcome is dismissed and owns the `--browser` auto-launch
 function handleClearLandingPage () {
   setMajorVersionWelcomeDismissed(GET_MAJOR_VERSION_FOR_CONTENT())
 }

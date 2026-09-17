@@ -3,7 +3,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where `cypress open` with both a `--browser` and a testing type flag launched the browser twice the first time Cypress showed its major-version welcome screen — on first open after upgrading, or after clearing app data. The two launches tore down each other's connection, so in Chrome, Chromium, and Edge Cypress could not connect to the browser, and Electron reported that its tab closed unexpectedly. Restarting Cypress worked around it. Fixes [#34868](https://github.com/cypress-io/cypress/issues/34868).
+- Fixed an issue where `cypress open` with both a `--browser` and a testing type flag launched the browser twice the first time Cypress showed its major-version welcome screen — on first open after upgrading, or after clearing app data. Fixes [#34868](https://github.com/cypress-io/cypress/issues/34868).
 
 **Dependency Updates:**
 
