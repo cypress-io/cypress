@@ -1,7 +1,6 @@
 export {} // make typescript see this as a module
 
-// The driver strips these internal bookkeeping keys off the resolved config
-// before handing it to the test, so they are not part of the public type.
+// Internal to the driver's test override bookkeeping, so not on the public config type.
 type ConfigWithTestOverrideInternals = Cypress.Config & {
   testConfigList?: unknown
   unverifiedTestConfig?: unknown
