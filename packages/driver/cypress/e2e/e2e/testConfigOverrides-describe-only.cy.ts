@@ -1,3 +1,12 @@
+export {} // make typescript see this as a module
+
+// The driver strips these internal bookkeeping keys off the resolved config
+// before handing it to the test, so they are not part of the public type.
+type ConfigWithTestOverrideInternals = Cypress.Config & {
+  testConfigList?: unknown
+  unverifiedTestConfig?: unknown
+}
+
 const shouldNotExecute = () => {
   throw new Error('Test Override validation should have failed & it block should not have executed.')
 }
@@ -16,7 +25,7 @@ describe('correctly applies overrides ', { retries: 1 }, () => {
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('when valid configuration', () => {
     it('for describe.only', { baseUrl: null }, () => {
-      const config = Cypress.config()
+      const config = Cypress.config() as ConfigWithTestOverrideInternals
 
       expect(config.testConfigList).to.be.undefined
       expect(config.unverifiedTestConfig).to.be.undefined
