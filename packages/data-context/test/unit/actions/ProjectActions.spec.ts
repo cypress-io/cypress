@@ -330,6 +330,16 @@ describe('ProjectActions', () => {
 
       expect(actions.launchCount).toBe(1)
     })
+
+    it('does not count a launch that rejects', async () => {
+      const launchProject = jest.fn().mockRejectedValue(new Error('browser failed to launch'))
+
+      Object.assign(ctx._apis.projectApi, { launchProject })
+
+      await expect(actions.launchProject('e2e')).rejects.toThrow('browser failed to launch')
+
+      expect(actions.launchCount).toBe(0)
+    })
   })
 
   describe('debugCloudRun', () => {

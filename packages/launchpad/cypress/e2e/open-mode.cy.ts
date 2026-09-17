@@ -221,12 +221,18 @@ describe('Launchpad: Open Mode', () => {
     stubAvailableBrowsers()
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.withCtx((ctx, o) => {
+      // the count outlives openProject, so an earlier launch in this spec would disable the auto-launch
+      ctx.actions.project.launchCount = 0
+
       // A real launch takes seconds. Dismissing the welcome mounts OpenBrowser
       // inside that window, and its own auto-launch check must not launch again.
       o.sinon.stub(ctx._apis.projectApi, 'launchProject').callsFake(() => {
         return new Promise((resolve) => setTimeout(resolve, 1000))
       })
     })
+
+    // OpenBrowser decides whether to auto-launch from this query's response
+    cy.intercept('query-OpenBrowser_LocalSettings').as('openBrowserLocalSettings')
 
     // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad({ showWelcome: true })
@@ -235,6 +241,7 @@ describe('Launchpad: Open Mode', () => {
     cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
     cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+    cy.wait('@openBrowserLocalSettings')
 
     cy.withRetryableCtx(async (ctx) => {
       const launchProject = ctx._apis.projectApi.launchProject as SinonStub
