@@ -4,7 +4,7 @@ describe('zone.js', () => {
     cy
     .visit('/fixtures/zonejs.html')
     .window().then({ timeout: 30000 }, (win) => {
-      return new Promise((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
         const xhr = new win.XMLHttpRequest()
 
         xhr.open('HEAD', '/')
@@ -12,6 +12,7 @@ describe('zone.js', () => {
 
         xhr.onload = () => {
           try {
+            // @ts-expect-error - `Cypress.Log` is the internal LogUtils namespace at runtime, but the public types only declare it as a log instance
             Cypress.Log.toSerializedJSON(xhr)
 
             resolve()
