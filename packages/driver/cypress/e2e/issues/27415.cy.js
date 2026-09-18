@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/27415
-describe('issue 27415', () => {
+describe('repeated identical uncaught exceptions', () => {
   const dispatchError = (win, message) => {
     win.dispatchEvent(new win.ErrorEvent('error', {
       message,

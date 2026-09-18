@@ -1,4 +1,5 @@
-describe('issue 28527', { testIsolation: false, retries: 2 }, () => {
+// https://github.com/cypress-io/cypress/issues/28527
+describe('test retries with testIsolation disabled', { testIsolation: false, retries: 2 }, () => {
   before(() => {
     cy.visit('/fixtures/empty.html')
   })
@@ -13,7 +14,7 @@ describe('issue 28527', { testIsolation: false, retries: 2 }, () => {
 
   // there can only be one test in this file to ensure we are testing the scenario
   // where a test fails and the runner does not navigate to about:blank between retries
-  it('fails and then retries and verifies about:blank is not displayed', () => {
+  it('does not navigate to about:blank between retries', () => {
     cy.then(() => {
       // fail the first attempt to ensure we don't go to about:blank before the second attempt
       if (Cypress.currentRetry < 2) {

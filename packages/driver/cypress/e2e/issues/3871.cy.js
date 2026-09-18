@@ -1,6 +1,6 @@
 // https://github.com/cypress-io/cypress/issues/3871
-describe(`issue 3871 - Cypress invoke`, () => {
-  it(`should work on not nested properties`, () => {
+describe(`cy.invoke with dot-separated property paths`, () => {
+  it(`invokes a top-level function`, () => {
     cy.window().then((win) => {
       win.val = 40
       win.get = function () {
@@ -11,7 +11,7 @@ describe(`issue 3871 - Cypress invoke`, () => {
     })
   })
 
-  it(`should work on 1 level nested properties`, () => {
+  it(`invokes a function nested 1 level deep`, () => {
     cy.window().then((win) => {
       win.obj = {
         val: 41,
@@ -24,7 +24,7 @@ describe(`issue 3871 - Cypress invoke`, () => {
     })
   })
 
-  it(`should work on 2 level nested properties`, () => {
+  it(`invokes a function nested 2 levels deep`, () => {
     cy.window().then((win) => {
       win.obj = {
         innerObj: {
@@ -39,7 +39,7 @@ describe(`issue 3871 - Cypress invoke`, () => {
     })
   })
 
-  it(`should work on 3 level nested properties`, () => {
+  it(`invokes a function nested 3 levels deep`, () => {
     cy.window().then((win) => {
       win.obj = {
         innerObj: {

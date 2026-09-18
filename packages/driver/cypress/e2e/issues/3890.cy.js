@@ -1,7 +1,7 @@
 // @see https://github.com/cypress-io/cypress/issues/3890
 const { $ } = Cypress
 
-describe('issue 3890 overwriting cy.intercept command', () => {
+describe('overwriting cy.intercept with Cypress.Commands.overwrite', () => {
   beforeEach(function () {
     cy
     .visit('/fixtures/jquery.html')

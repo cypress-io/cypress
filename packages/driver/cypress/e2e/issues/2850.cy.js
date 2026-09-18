@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/2850
-describe('issue #2850: invoking cy.clock() before two visits', () => {
+describe('invoking cy.clock() before cy.visit() in consecutive tests', () => {
   it('works the first time', () => {
     cy.clock()
     cy.visit('/fixtures/generic.html')
@@ -31,7 +31,7 @@ describe('issue #2850: invoking cy.clock() before two visits', () => {
     })
   })
 
-  it('works the forth time', () => {
+  it('works the fourth time', () => {
     cy.clock()
     cy.visit('/fixtures/generic.html')
   })

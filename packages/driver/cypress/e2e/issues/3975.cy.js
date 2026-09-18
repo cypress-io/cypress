@@ -1,11 +1,12 @@
-describe('issue 3975 redirect bug', () => {
-  it('should visit the correct url', () => {
+// https://github.com/cypress-io/cypress/issues/3975
+describe('page that redirects from an XHR onload handler', () => {
+  it('lands on the redirected URL', () => {
     cy.visit('/fixtures/nested/3975_a.html')
     cy.get('h1').should('contain', 'Loaded')
     cy.url().should('include', 'b.html')
   })
 
-  it('visits the correct URL across pageloads', () => {
+  it('lands on the redirected URL across repeated visits', () => {
     cy.visit('/fixtures/nested/3975_a.html')
     cy.get('h1').should('contain', 'Loaded')
     cy.url().should('include', 'b.html')
@@ -14,7 +15,7 @@ describe('issue 3975 redirect bug', () => {
     cy.url().should('include', 'b.html')
   })
 
-  it('works with about:blank', () => {
+  it('intercepts XHR onload and preserves window.event on about:blank', () => {
     const win = cy.state('window')
     const x = new win.XMLHttpRequest()
 

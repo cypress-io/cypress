@@ -1,8 +1,8 @@
 const _ = Cypress._
 
 // https://github.com/cypress-io/cypress/issues/3253
-describe('issue #3253: scrollbar appearing full height including scrolling AUT', () => {
-  it('does not scroll html', () => {
+describe('Command Log taller than the runner', () => {
+  it('does not scroll or resize the top html element', () => {
     const html = window.top.document.documentElement
 
     const beforeScrollY = window.top.scrollY

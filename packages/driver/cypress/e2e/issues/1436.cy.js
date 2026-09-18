@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/1436
-describe('issue 1436', () => {
+describe('window.parent accessed from the AUT', () => {
   it('returns the AUT window, not Cypress top', () => {
     cy.visit('/fixtures/issue-1436.html')
     cy.window().then((win) => {

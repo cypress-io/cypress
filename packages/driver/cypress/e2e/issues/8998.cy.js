@@ -3,7 +3,7 @@
 // ancestor are reported as not visible — a behavior provided only by the legacy
 // ancestor-walking algorithm. The modern algorithm delegates to
 // Element.checkVisibility() which intentionally doesn't detect scroll clipping.
-it('issue 8998', { visibilityStrategy: 'legacy' }, () => {
+it('reports a scroll-clipped element inside a position: fixed ancestor as not visible', { visibilityStrategy: 'legacy' }, () => {
   cy.visit('fixtures/issue-8998.html')
   cy.get('.option').then((el) => {
     const x = Cypress.dom.isVisible(el[8])
