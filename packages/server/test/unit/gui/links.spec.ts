@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { openExternal as openExternalLink } from '../../../lib/gui/links'
 
 const openExternal = vi.hoisted(() => {
   return vi.fn()
@@ -11,8 +12,6 @@ vi.mock('electron', () => {
     },
   }
 })
-
-import { openExternal as openExternalLink } from '../../../lib/gui/links'
 
 describe('lib/gui/links', () => {
   beforeEach(() => {
