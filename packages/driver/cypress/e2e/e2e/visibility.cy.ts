@@ -1,5 +1,5 @@
 describe('visibility', () => {
-  const modes = ['modern', 'legacy']
+  const modes = ['modern', 'legacy'] as const
 
   for (const mode of modes) {
     describe(`${mode}`, {
