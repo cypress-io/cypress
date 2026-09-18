@@ -455,12 +455,16 @@ linux-x64:
     # Binary jobs no longer run on pull requests, so develop is where they break.
     # `terminal` on every entry means this waits for the whole binary fan-out to
     # settle however it settles; the job itself decides whether anything actually
-    # failed. Only the leaves are listed - a failure further up reaches them as
-    # not_run, which is inside `terminal`.
+    # failed.
     - notify-binary-failure:
         context: [ publish-binary, test-runner:npm-release ]
         filters: pipeline.git.branch == "develop"
         requires:
+          # the packaging jobs are listed too: when one of them breaks, the
+          # leaves below it are not_run rather than failed, so watching only the
+          # leaves would see nothing wrong
+          - create-and-trigger-packaging-artifacts: terminal
+          - get-published-artifacts: terminal
           - test-npm-module-on-minimum-node-version: terminal
           - test-types-cypress-and-jest: terminal
           - test-full-typescript-project: terminal

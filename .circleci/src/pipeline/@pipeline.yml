@@ -3073,11 +3073,25 @@ jobs:
       - run:
           name: Comment on the commit if a binary job failed
           command: |
-            JOBS=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
-              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job")
-            FAILED=$(echo "$JOBS" | jq -r '
-              (.items[]|select(.name=="notify-binary-failure").dependencies) as $d
-              | [.items[]|select(.id as $i|$d|index($i))|select(.status=="failed")|.name]
+            # This endpoint paginates and linux-x64 is already ~80 jobs, so a
+            # dropped page would silently report no failures at all.
+            ITEMS="[]"
+            PAGE=""
+            while :; do
+              RESP=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
+                "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?page-token=$PAGE")
+              ITEMS=$(jq -n --argjson a "$ITEMS" --argjson b "$(echo "$RESP" | jq '.items')" '$a + $b')
+              PAGE=$(echo "$RESP" | jq -r '.next_page_token // empty')
+              [[ -n "$PAGE" ]] || break
+            done
+
+            # `failed` is not the only way a job breaks - CircleCI reports
+            # timeouts and infrastructure errors under their own statuses.
+            # `canceled` and `not_run` stay off this list on purpose.
+            FAILED=$(jq -rn --argjson items "$ITEMS" '
+              ["failed","timedout","infrastructure_fail","terminated-unknown"] as $bad
+              | ($items[]|select(.name=="notify-binary-failure").dependencies) as $d
+              | [$items[]|select(.id as $i|$d|index($i))|select(.status as $s|$bad|index($s))|.name]
               | join(", ")')
 
             if [[ -z "$FAILED" ]]; then
