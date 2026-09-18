@@ -6305,7 +6305,9 @@ declare namespace Cypress {
   }
 
   interface CypressError extends Error {
-    docsUrl?: string
+    // an uncaught exception carries both the originating error's docs url and
+    // Cypress's own, so this is an array whenever more than one applies
+    docsUrl?: string | string[]
     codeFrame?: CodeFrame
   }
 

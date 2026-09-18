@@ -1,5 +1,7 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
 
+// `cy.foo()` is added per-test and so is absent from the Chainable interface,
+// which is what every `@ts-expect-error` below suppresses
 describe('return values', () => {
   beforeEach(function () {
     this.logs = []
@@ -60,6 +62,7 @@ describe('return values', () => {
   })
 
   it('can return undefined when invoking cy commands in custom command', (done) => {
+    // @ts-expect-error
     Cypress.Commands.add('foo', () => {
       cy.wrap(null).then(function () {
         assertLogLength(this.logs, 1)
@@ -69,6 +72,7 @@ describe('return values', () => {
       return undefined
     })
 
+    // @ts-expect-error
     return cy.foo()
   })
 
@@ -87,12 +91,14 @@ describe('return values', () => {
       done()
     })
 
+    // @ts-expect-error
     Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
       return 'bar'
     })
 
+    // @ts-expect-error
     return cy.foo()
   })
 
@@ -111,6 +117,7 @@ describe('return values', () => {
       done()
     })
 
+    // @ts-expect-error
     Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
@@ -119,6 +126,7 @@ describe('return values', () => {
       }
     })
 
+    // @ts-expect-error
     return cy.foo()
   })
 
