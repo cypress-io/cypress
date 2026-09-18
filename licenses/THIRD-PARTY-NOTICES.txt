@@ -1,0 +1,54 @@
+THIRD-PARTY NOTICES
+===================
+
+The Cypress binary bundles statically linked builds of FFmpeg and FFprobe, which
+are separate programs from Cypress and are not covered by Cypress's MIT license.
+They are licensed under the GNU General Public License version 3 (GPL-3.0) or
+the GNU Lesser General Public License version 2.1 (LGPL-2.1), depending on the
+platform. The license texts are included in this directory:
+
+  GPL-3.0.txt
+  LGPL-2.1.txt
+
+FFmpeg and FFprobe are made available through the @ffmpeg-installer and
+@ffprobe-installer npm packages. The table below lists, for each platform, the
+package version that is bundled and the license that the binary itself reports
+(its version banner, which is authoritative over the `license` field published
+by the installer package), along with where its source can be obtained.
+
+  Platform     Program  Package                             Version  License    Source
+  -----------  -------  ----------------------------------  -------  ---------  --------------------------------------------
+  linux-x64    ffmpeg   @ffmpeg-installer/linux-x64         4.1.0    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  linux-x64    ffprobe  @ffprobe-installer/linux-x64        5.2.0    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  linux-arm64  ffmpeg   @ffmpeg-installer/linux-arm64       4.1.4    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  linux-arm64  ffprobe  @ffprobe-installer/linux-arm64      5.2.0    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  linux-arm    ffmpeg   @ffmpeg-installer/linux-arm         4.1.3    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  linux-arm    ffprobe  @ffprobe-installer/linux-arm        5.2.0    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  linux-ia32   ffmpeg   @ffmpeg-installer/linux-ia32        4.1.0    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  linux-ia32   ffprobe  @ffprobe-installer/linux-ia32       5.2.0    GPL-3.0    https://johnvansickle.com/ffmpeg/
+  win32-x64    ffmpeg   @ffmpeg-installer/win32-x64         4.1.0    GPL-3.0    https://ffmpeg.org/
+  win32-x64    ffprobe  @ffprobe-installer/win32-x64        5.1.0    GPL-3.0    https://www.gyan.dev/ffmpeg/builds/
+  win32-ia32   ffmpeg   @ffmpeg-installer/win32-ia32        4.1.0    GPL-3.0    https://ffmpeg.org/
+  win32-ia32   ffprobe  @ffprobe-installer/win32-ia32       5.1.0    GPL-3.0    https://www.gyan.dev/ffmpeg/builds/
+  darwin-x64   ffmpeg   @ffmpeg-installer/darwin-x64        4.1.0    GPL-3.0    https://evermeet.cx/ffmpeg/
+  darwin-x64   ffprobe  @ffprobe-installer/darwin-x64       5.1.0    GPL-3.0    https://evermeet.cx/ffmpeg/
+  darwin-arm64 ffmpeg   @ffmpeg-installer/darwin-arm64      4.1.5    GPL-3.0    https://ffmpeg.org/
+  darwin-arm64 ffprobe  @ffprobe-installer/darwin-arm64     5.0.1    LGPL-2.1   https://ffmpeg.org/releases/ffmpeg-4.4.1.tar.xz
+
+The binaries are unmodified builds produced by the distributors named in the
+Source column. Where a distributor no longer publishes the matching sources,
+the upstream FFmpeg project is listed instead.
+
+Note on the darwin-arm64 ffmpeg build
+-------------------------------------
+
+@ffmpeg-installer/darwin-arm64@4.1.5 was compiled with the --enable-nonfree
+configuration flag and its own version banner reports that it is "not legally
+redistributable". That build, as published by its distributor, cannot be
+redistributed under the GPL. It is listed here so the notice is accurate; it
+should be replaced with a build that does not enable nonfree components before
+Cypress relies on it for distribution.
+
+FFmpeg and FFprobe are distributed in the hope that they will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the bundled license texts for details.

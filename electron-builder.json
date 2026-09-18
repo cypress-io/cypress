@@ -22,6 +22,7 @@
     "sign": "./scripts/windows-sign.js",
     "target": "dir"
   },
+  "afterExtract": "./scripts/after-extract-hook.js",
   "afterPack": "./scripts/after-pack-hook.js",
   "afterSign": "./scripts/after-sign-hook.js"
 }

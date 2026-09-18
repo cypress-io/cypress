@@ -2,6 +2,7 @@
 
 const la = require('lazy-ass')
 const fs = require('fs-extra')
+const path = require('path')
 const _ = require('lodash')
 const glob = require('glob')
 const chalk = require('chalk').default
@@ -10,7 +11,27 @@ const { stripIndent } = require('common-tags')
 
 const globAsync = Promise.promisify(glob)
 
+// The binary redistributes GPL/LGPL ffmpeg and ffprobe builds, and on macOS also Electron's
+// own notices, so those files have to be present in every built app. Assert they are, so a
+// change to the packaging step cannot silently ship a binary with the notices stripped.
+const testLicenseFiles = async (buildResourcePath) => {
+  const requiredFiles = [
+    'LICENSE',
+    'licenses/THIRD-PARTY-NOTICES.txt',
+    'licenses/GPL-3.0.txt',
+    'licenses/LGPL-2.1.txt',
+  ]
+
+  requiredFiles.forEach((file) => {
+    const filePath = path.join(buildResourcePath, file)
+
+    la(fs.existsSync(filePath), `Expected license file to be bundled in the binary: ${filePath}`)
+  })
+}
+
 const testStaticAssets = async (buildResourcePath) => {
+  await testLicenseFiles(buildResourcePath)
+
   await Promise.all([
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/cypress_runner.js`,
@@ -161,6 +182,7 @@ const testPackageStaticAssets = async (options = {}) => {
 
 module.exports = {
   testStaticAssets,
+  testLicenseFiles,
   testPackageStaticAssets,
 }
 
