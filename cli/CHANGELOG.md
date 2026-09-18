@@ -5,6 +5,10 @@
 
 - Fixed an issue where `cypress open` with both a `--browser` and a testing type flag launched the browser twice the first time Cypress showed its major-version welcome screen — on first open after upgrading, or after clearing app data. Fixes [#34868](https://github.com/cypress-io/cypress/issues/34868).
 
+**Misc:**
+
+- TypeScript now types the `docsUrl` property on the error passed to an [`uncaught:exception`](https://on.cypress.io/catalog-of-events) handler as `string | string[]`. An uncaught exception carries the docs url for your application's error alongside the Cypress one, so `docsUrl` can hold more than one url at a time. Addressed in [#34879](https://github.com/cypress-io/cypress/pull/34879).
+
 **Dependency Updates:**
 
 - Upgraded `proxy-addr` from `2.0.7` to `2.0.8` to address a [User Impersonation](https://security.snyk.io/vuln/SNYK-JS-PROXYADDR-19812342) (CVE-2026-90711) vulnerability reported in security scans. Addresses [#34858](https://github.com/cypress-io/cypress/issues/34858).
