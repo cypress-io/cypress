@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/3847
-describe('issue 3847', () => {
+describe('cy.get with an invalid selector', () => {
   // global variable
   let queryKey = '\'input\''
 
@@ -10,7 +10,7 @@ describe('issue 3847', () => {
     cy.visit('/fixtures/dom.html')
   })
 
-  it('options default { log: true } should be work without Unhandled rejection', (done) => {
+  it('fails with the selector syntax error when log is true', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.eql(error.message)
       expect(err.name).to.eql(error.name)
@@ -24,7 +24,7 @@ describe('issue 3847', () => {
   })
 
   // Unhandled rejection TypeError: Cannot read property 'error' of undefined
-  it('options { log: false } will not throw Unhandled rejection', (done) => {
+  it('fails with the selector syntax error instead of an unhandled rejection when log is false', (done) => {
     // error should seem like { log: true }
     cy.on('fail', (err) => {
       expect(err.message).to.eql(error.message)

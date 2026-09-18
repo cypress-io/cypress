@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/1119
-describe('issue 1119', () => {
+describe('cy.contains with a number argument', () => {
   it('logs "contains 0" on cy.contains(0)', () => {
     cy.state('document').write('<span>0</span>')
 

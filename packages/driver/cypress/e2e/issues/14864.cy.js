@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/14864
-describe('issue #14864 - keyup deferred after input microtasks', () => {
+describe('keyup is deferred until input handler microtasks run', () => {
   beforeEach(() => {
     cy.visit('/fixtures/issue-14864.html')
   })

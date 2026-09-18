@@ -4,7 +4,8 @@
 // delegates to the browser's Element.checkVisibility() API which
 // intentionally does not analyze 3D transforms, so this regression
 // coverage runs only under visibilityStrategy: 'legacy'.
-describe('issue #5682 - backface visibility', { visibilityStrategy: 'legacy' }, () => {
+// https://github.com/cypress-io/cypress/issues/5682
+describe('visibility of backface-visibility: hidden elements', { visibilityStrategy: 'legacy' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/issue-5682.html')
   })
@@ -75,7 +76,7 @@ describe('issue #5682 - backface visibility', { visibilityStrategy: 'legacy' }, 
       })
     })
 
-    it('issue case', () => {
+    it('swaps front and back visibility when a flip card container is clicked', () => {
       cy.get('.front').should('be.visible')
       cy.get('.back').should('not.be.visible')
       cy.get('.container').click()

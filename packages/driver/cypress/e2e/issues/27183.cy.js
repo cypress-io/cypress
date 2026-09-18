@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/27183
-describe('issue 27183', () => {
+describe('unhandled promise rejection with undefined', () => {
   // a promise rejected with `undefined` (e.g. `reject()`) used to surface the
   // misleading internal error "Cannot read property 'message' of undefined".
   // We should fail gracefully and still attribute it to the application code

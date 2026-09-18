@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/26206
-describe('issue 26206', () => {
+describe('removeAttribute after clicking an anchor with target=_top', () => {
   beforeEach(() => {
     cy.visit('fixtures/issue-26206.html')
   })

@@ -1,6 +1,6 @@
 // https://github.com/cypress-io/cypress/issues/23927
-describe('issue 23927', { browser: '!webkit' }, () => {
-  it('Fails gracefully if origin page throws undefined', () => {
+describe('cy.origin page that throws undefined', { browser: '!webkit' }, () => {
+  it('fails gracefully with an unknown error message', () => {
     cy.visit('http://barbaz.com:3500/fixtures/generic.html')
     cy.origin('http://foobar.com:3500', () => {
       Cypress.on('uncaught:exception', (err, runnable) => {

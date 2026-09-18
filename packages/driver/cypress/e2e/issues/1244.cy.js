@@ -1,4 +1,5 @@
-describe('issue 1244', () => {
+// https://github.com/cypress-io/cypress/issues/1244
+describe('links and forms with target=_top or _parent stay inside the AUT', () => {
   beforeEach(() => {
     cy.visit('/fixtures/issue-1244.html').then(() => {
       cy.on('window:before:unload', (e) => {

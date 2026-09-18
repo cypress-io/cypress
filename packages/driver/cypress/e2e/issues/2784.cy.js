@@ -1,5 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/2784
-describe('issue #2784', () => {
+describe('cross origin iframe embedded in the AUT', () => {
   it('does not throw when embedding a cross origin iframe', () => {
     cy.visit('/fixtures/generic.html')
     cy.document().then((doc) => {

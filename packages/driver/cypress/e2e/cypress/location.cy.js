@@ -228,7 +228,8 @@ describe('src/cypress/location', () => {
       expect(str).to.eq('https://www.google.com')
     })
 
-    it('issue: #255 two domains in the url', function () {
+    // https://github.com/cypress-io/cypress/issues/255
+    it('handles a second domain inside the query string', function () {
       const str = this.setup('email').getOrigin()
 
       expect(str).to.eq('http://localhost:3500')
@@ -278,7 +279,8 @@ describe('src/cypress/location', () => {
       expect(str).to.eq('https://google.com')
     })
 
-    it('issue: #255 two domains in the url', function () {
+    // https://github.com/cypress-io/cypress/issues/255
+    it('handles a second domain inside the query string', function () {
       const str = this.setup('email').getSuperDomainOrigin()
 
       expect(str).to.eq('http://localhost:3500')
