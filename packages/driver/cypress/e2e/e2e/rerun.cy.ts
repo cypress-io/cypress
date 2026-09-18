@@ -4,8 +4,10 @@
 
 // store these on our outer top window
 // so they are globally preserved
-if (window.top.runCount == null) {
-  window.top.runCount = 0
+const topWindow = window.top as Window & { runCount: number }
+
+if (topWindow.runCount == null) {
+  topWindow.runCount = 0
 }
 
 // This spec in the driver has some weird reloading that occurs. It triggers a simulation of
@@ -16,14 +18,14 @@ if (Cypress.config('browser').family === 'chromium') {
   // Copied from:
   // https://github.com/cypress-io/cypress-services/blob/825abbabaaa0a8ecf78e2ad543493a85a01a939f/packages/app-capture-protocol/src/cypress-events/track-cypress-events.ts#L17-L30
   const getCypressProtocolElement = () => {
-    let cypressProtocolElement = window.top.document.getElementById('__cypress-protocol')
+    let cypressProtocolElement = topWindow.document.getElementById('__cypress-protocol')
 
     // If element does not exist, create it
     if (!cypressProtocolElement) {
       cypressProtocolElement = document.createElement('div')
       cypressProtocolElement.id = '__cypress-protocol'
       cypressProtocolElement.style.display = 'none'
-      window.top.document.body.appendChild(cypressProtocolElement)
+      topWindow.document.body.appendChild(cypressProtocolElement)
     }
 
     return cypressProtocolElement
@@ -54,18 +56,20 @@ describe('rerun state bugs', () => {
   // but we get the hashchange coverage for free on this.
   it('stores viewport globally and does not hang on re-runs', () => {
     cy.viewport(500, 500).then(() => {
-      window.top.runCount++
-      if (window.top.runCount === 1) {
+      topWindow.runCount++
+      if (topWindow.runCount === 1) {
         // turn off mocha events for a second
+        // @ts-expect-error isTextTerminal is not a test config override
         Cypress.config('isTextTerminal', false)
 
         // cause a rerun event to occur by triggering a hash change
-        window.top.dispatchEvent(new Event('test:trigger:rerun'))
-      } else if (window.top.runCount === 2) {
+        topWindow.dispatchEvent(new Event('test:trigger:rerun'))
+      } else if (topWindow.runCount === 2) {
         // Second time, do nothing, with mocha events still disabled
       } else {
         // 3rd time around
         // let the mocha end events fire if they're supposed to
+        // @ts-expect-error isTextTerminal is not a test config override
         Cypress.config('isTextTerminal', isTextTerminal)
       }
     })
