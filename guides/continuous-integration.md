@@ -35,20 +35,26 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 
 | Stage | What It Does |
 |-------|--------------|
-| Multi-Platform Builds | Linux x64, Linux ARM64, macOS Intel, macOS Apple Silicon, Windows |
-| Binary Creation | Triggers the `cypress-publish-binary` pipeline to build Electron binaries |
-| Binary Verification | Tests the built binary against kitchensink, recipes, and real-world apps |
+| Linux x64 Build | Full build, packaging, and binary verification for Linux x64 |
+| Binary Creation | Triggers the `cypress-publish-binary` pipeline to build the Linux x64 Electron binaries |
+| Binary Verification | Tests the built Linux binary against kitchensink, recipes, and real-world apps |
 | Binary Failure Alerts | Comments on the commit, tagging its author, when a binary job fails |
 | Release Preparation | Validates release readiness, prepares npm packages |
+
+Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows do not build on every `develop` or `release/*` push — see "Multi-Platform Builds" below.
+
+#### Multi-Platform Builds
+
+Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI Scheduled Pipeline instead of every push — one schedule for `develop`, a second retargeted at whichever `release/*` branch is currently active. See the "Scheduled platform CI" section of [`.circleci/AGENTS.md`](../.circleci/AGENTS.md) for the schedule ids and parameters. A manual Trigger Pipeline run can also produce all four on demand, for any branch, via `run-platform-workflows=true` or `force-persist-artifacts=true`.
 
 ### Triggers
 
 | Trigger | Workflow | Notes |
 |---------|----------|-------|
 | PR opened/updated | Pull Request | Skipped for draft PRs |
-| Push to `develop` | Full | Runs complete test suite + binary builds |
-| Push to `release/*` | Full | Same as develop |
-| Manual (CircleCI UI) | Configurable | Can run full workflow on any branch |
+| Push to `develop` | Full | Linux x64 test suite + binary build; other platforms run from the develop schedule |
+| Push to `release/*` | Full | Same as develop; other platforms run from the release schedule |
+| Manual (CircleCI UI) | Configurable | Can run full workflow, or all four scheduled platforms, on any branch |
 
 ### Key Jobs
 
