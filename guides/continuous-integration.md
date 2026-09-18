@@ -43,16 +43,22 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 | Binary Failure Alerts | Pages `@app-foundations-oncall` in Slack when a binary job fails |
 | Release Preparation | Validates release readiness, prepares npm packages |
 
+Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows do not build on every `develop` or `release/*` push — see "Multi-Platform Builds" below.
+
+#### Multi-Platform Builds
+
+Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI Scheduled Pipeline instead of every push — one schedule for `develop`, a second retargeted at whichever `release/*` branch is currently active. See the "Scheduled platform CI" section of [`.circleci/AGENTS.md`](../.circleci/AGENTS.md) for the schedule ids and parameters. A manual Trigger Pipeline run can also produce all four on demand, for any branch, via `run-platform-workflows=true` or `force-persist-artifacts=true`.
+
 ### Triggers
 
 | Trigger | Workflow | Notes |
 |---------|----------|-------|
 | PR opened/updated | Pull Request | Skipped for draft PRs |
-| Push to `develop` | Full | Path-filtered by changed files; binary builds and release gating always run |
-| Push to `release/*` | Full | Runs the complete test suite and binary builds, unfiltered |
+| Push to `develop` | Full | Linux x64 is path-filtered by changed files; binary builds and release gating always run. Other platforms run from the develop schedule, not this push |
+| Push to `release/*` | Full | Linux x64 runs the complete test suite and binary builds, unfiltered. Other platforms run from the release schedule |
 | Push to `vN` | Full | Path-filtered like a `develop` push; all five platforms run |
 | Scheduled pipeline | Full | Nightly cron on `develop`, weekly build on `vN`; always unfiltered, even though they run on that branch |
-| Manual (CircleCI UI) | Configurable | Can run the full workflow on any branch; `run-all-jobs=true` forces everything |
+| Manual (CircleCI UI) | Configurable | Can run the full Linux x64 workflow, or all four scheduled platforms, on any branch; `run-all-jobs=true` forces everything on Linux x64 |
 
 ### Key Jobs
 
