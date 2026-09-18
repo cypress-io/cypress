@@ -309,10 +309,6 @@ export class ProjectActions {
     } catch (err) {
       // A launch that never happened should not use up the one-shot auto-launch
       this.globalLaunchCount--
-
-      // Surfacing the failure stays with the caller: the launchOpenProject mutation's error
-      // plugin and the config-load path's onLoadError both land it on diagnostics.error,
-      // which the launchpad renders as its baseError
       throw err
     }
 
