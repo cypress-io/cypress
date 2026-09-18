@@ -1,33 +1,50 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+const appendSwitch = vi.hoisted(() => {
+  return vi.fn()
+})
+
+const getSwitchValue = vi.hoisted(() => {
+  return vi.fn()
+})
+
+vi.mock('electron', () => {
+  return {
+    app: {
+      commandLine: {
+        appendSwitch,
+        getSwitchValue,
+      },
+    },
+  }
+})
+
 import { setRemoteDebuggingPort } from '../../../lib/util/electron-app'
-import { app } from 'electron'
 
 describe('/lib/util/electron-app', () => {
-  context('remote debugging port', () => {
+  describe('remote debugging port', () => {
     beforeEach(() => {
-      sinon.restore()
+      vi.clearAllMocks()
     })
 
     it('should not override port if previously set', async () => {
-      sinon.stub(app.commandLine, 'appendSwitch')
-      sinon.stub(app.commandLine, 'getSwitchValue').callsFake((args) => {
+      getSwitchValue.mockImplementation(() => {
         return '4567'
       })
 
       await setRemoteDebuggingPort()
 
-      expect(app.commandLine.appendSwitch).to.not.have.been.called
+      expect(appendSwitch).not.toHaveBeenCalled()
     })
 
     it('should assign random port if not previously set', async () => {
-      sinon.stub(app.commandLine, 'appendSwitch')
-
-      sinon.stub(app.commandLine, 'getSwitchValue').callsFake((args) => {
+      getSwitchValue.mockImplementation(() => {
         return undefined
       })
 
       await setRemoteDebuggingPort()
 
-      expect(app.commandLine.appendSwitch).to.have.been.calledWith('remote-debugging-port', sinon.match.string)
+      expect(appendSwitch).toHaveBeenCalledWith('remote-debugging-port', expect.any(String))
     })
   })
 })
