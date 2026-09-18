@@ -1856,6 +1856,9 @@ jobs:
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
+      - run:
+          name: Audit conditional job filters
+          command: yarn audit-ci-filters
 
   check-ts:
     <<: *defaults
