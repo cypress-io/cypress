@@ -221,6 +221,8 @@ describe('waitForDevServerSpecUpdate', () => {
   })
 
   it('resolves on spec update when bundler is unknown and no webpack JIT events fire', async () => {
+    vi.useFakeTimers()
+
     const events = new EventEmitter()
     const spec = { absolute: '/project/src/App.cy.jsx' }
 
@@ -229,16 +231,20 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    await tick()
+    await vi.advanceTimersByTimeAsync(0)
     expect(resolved).toBe(false)
 
     events.emit('dev-server:on-spec-updated')
+    await vi.advanceTimersByTimeAsync(50)
     await promise
 
     expect(resolved).toBe(true)
+    vi.useRealTimers()
   })
 
   it('resolves on spec update when setImmediate is not a function', async () => {
+    vi.useFakeTimers()
+
     const events = new EventEmitter()
     const spec = { absolute: '/project/src/App.cy.jsx' }
     const originalSetImmediate = globalThis.setImmediate
@@ -256,10 +262,11 @@ describe('waitForDevServerSpecUpdate', () => {
         resolved = true
       })
 
-      await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      await vi.advanceTimersByTimeAsync(0)
       expect(resolved).toBe(false)
 
       events.emit('dev-server:on-spec-updated')
+      await vi.advanceTimersByTimeAsync(50)
       await promise
 
       expect(resolved).toBe(true)
@@ -268,6 +275,32 @@ describe('waitForDevServerSpecUpdate', () => {
         configurable: true,
         value: originalSetImmediate,
       })
+
+      vi.useRealTimers()
     }
+  })
+
+  it('waits for webpack JIT events when bundler is unknown and IPC delivers them after spec-updated', async () => {
+    vi.useFakeTimers()
+
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:on-spec-updated')
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(resolved).toBe(false)
+
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
+    await promise
+
+    expect(resolved).toBe(true)
+    vi.useRealTimers()
   })
 })

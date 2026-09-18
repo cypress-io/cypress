@@ -130,12 +130,10 @@ export function waitForDevServerSpecUpdate (
       // instead of setImmediate, which the app Vite bundle stubs out.
       if (bundler === undefined) {
         setTimeout(() => {
-          setTimeout(() => {
-            if (!webpackWaitActive) {
-              tryResolve()
-            }
-          }, 0)
-        }, 0)
+          if (!webpackWaitActive) {
+            tryResolve()
+          }
+        }, 50)
 
         return
       }

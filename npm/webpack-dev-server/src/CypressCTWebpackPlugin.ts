@@ -30,6 +30,7 @@ export class CypressCTWebpackPlugin {
   private supportFile: string | false
   private compilation: Compilation | null = null
   private jitRecompileGeneration = 0
+  private queuedJitRecompileGenerations: number[] = []
   private pendingJitRecompileGenerations: number[] = []
   private webpack: Function
   private indexHtmlFile: string
@@ -56,6 +57,8 @@ export class CypressCTWebpackPlugin {
   }
 
   private beforeCompile = async (compilationParams: object, callback: Function) => {
+    this.pendingJitRecompileGenerations.push(...this.queuedJitRecompileGenerations.splice(0))
+
     if (!this.compilation) {
       callback()
 
@@ -105,7 +108,7 @@ export class CypressCTWebpackPlugin {
       this.files = specs
       const generation = ++this.jitRecompileGeneration
 
-      this.pendingJitRecompileGenerations.push(generation)
+      this.queuedJitRecompileGenerations.push(generation)
       this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation, neededForJustInTimeCompile })
 
       return
@@ -113,7 +116,7 @@ export class CypressCTWebpackPlugin {
 
     const generation = ++this.jitRecompileGeneration
 
-    this.pendingJitRecompileGenerations.push(generation)
+    this.queuedJitRecompileGenerations.push(generation)
     this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation, neededForJustInTimeCompile })
     this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
