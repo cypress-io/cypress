@@ -51,8 +51,6 @@ A regression test for a GitHub issue goes in the spec under `cypress/e2e/` for t
 it('can click a button inside a large div with tabindex=0 without scrolling', () => {
 ```
 
-There is no `issues/` folder. A spec only stands on its own when it depends on whole-file state (a single-test file, root-level hooks, or a spec path that is itself the thing under test); name it for the behavior and place it under `cypress/e2e/e2e/`.
-
 ## Integration Points
 
 - Runtime dependency of **@packages/runner** (bundled) and implicitly **@packages/app** (loaded via Module Federation).
