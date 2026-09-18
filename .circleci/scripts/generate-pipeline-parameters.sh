@@ -103,7 +103,7 @@ fi
 # so a branch check alone can't tell it apart from a real push - it must stay
 # unfiltered, or path-filtering would silently gut the nightly full sweep down
 # to the last merge's diff. Scoping filtering to genuine webhook pushes also
-# covers manual "Trigger Pipeline" reruns and run-windows-workflow=true
+# covers manual "Trigger Pipeline" reruns and run-platform-workflows=true
 # triggers for free, since those report a non-webhook trigger source too -
 # no separate check is needed for them.
 #

@@ -8,11 +8,18 @@ yarn workspace @packages/server start
 
 # NOTE: Full suite is slow (hundreds of tests); always target a specific file or grep pattern
 
-# Run a specific unit test file
-yarn workspace @packages/server test-unit -- <path-to-spec>
+# Unit tests are split across two runners by filename:
+#   *_spec.ts -> mocha (test-unit-mocha)   *.spec.ts -> vitest (test-unit-vitest)
+# `test-unit` runs both; the filename filter below only narrows the mocha half.
 
-# Filter unit tests by name pattern
-yarn workspace @packages/server test-unit -- --grep "handles request"
+# Run a specific mocha unit test file
+yarn workspace @packages/server test-unit-mocha -- <path-to-spec>
+
+# Filter mocha unit tests by name pattern
+yarn workspace @packages/server test-unit-mocha -- --grep "handles request"
+
+# Run a specific vitest unit test file
+yarn workspace @packages/server test-unit-vitest -- <path-to-spec>
 
 # Run a specific integration test file
 yarn workspace @packages/server test-integration -- <path-to-spec>
@@ -23,6 +30,10 @@ yarn workspace @packages/server test-integration -- --grep "video capture"
 # Build TypeScript to JS (production)
 yarn workspace @packages/server build-prod
 ```
+
+**Migrating a unit spec from mocha to vitest**
+
+Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/server-mocha-to-vitest/SKILL.md) first. It covers the runner contract and the conversions that pass while silently proving less than the mocha original. The migration is tracked in [cypress-io/cypress#34846](https://github.com/cypress-io/cypress/issues/34846).
 
 **Architecture**
 
