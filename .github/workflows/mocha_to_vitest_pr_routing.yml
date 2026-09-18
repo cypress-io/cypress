@@ -1,0 +1,188 @@
+name: 'Mocha to vitest: route migration PRs'
+
+# Bookkeeping for the incremental @packages/server mocha to vitest migration
+# (cypress-io/cypress#34846). The batches are opened by a Cursor automation whose
+# token is scoped to this repository, so it can neither request an org team as
+# reviewer nor write to an org project board. Labelling the pull request hands
+# that work to this workflow, which has the tokens for both.
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+
+permissions: {}
+
+concurrency:
+  group: mocha-to-vitest-routing-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  route:
+    name: Request review and update the App board
+    if: github.event.label.name == 'mocha-to-vitest' && github.repository == 'cypress-io/cypress'
+    runs-on: ubuntu-latest
+    env:
+      ORGANIZATION: 'cypress-io'
+      PROJECT_TITLE: 'App'
+      STATUS: 'In review'
+      REVIEWER_TEAM: 'app'
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_NODE_ID: ${{ github.event.pull_request.node_id }}
+    steps:
+      - name: Generate Cypress Bot App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
+          private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+          # Required to request a team (e.g. @cypress-io/app) as PR reviewer
+          permission-members: read
+
+      - name: Request review from the team
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          requested=$(gh api "/repos/$REPOSITORY/pulls/$PR_NUMBER/requested_reviewers" \
+            --jq '[.teams[].slug] | index(env.REVIEWER_TEAM)')
+
+          # Re-labelling a pull request replays this workflow, so treat an existing
+          # request as success rather than asking the team to review twice.
+          if [ "$requested" != "null" ]; then
+            echo "::notice::@$ORGANIZATION/$REVIEWER_TEAM is already a requested reviewer"
+            exit 0
+          fi
+
+          gh api --method POST "/repos/$REPOSITORY/pulls/$PR_NUMBER/requested_reviewers" \
+            -f "team_reviewers[]=$REVIEWER_TEAM"
+
+      - name: Resolve the project, status option, and current iteration
+        id: project-data
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $title: String!) {
+              organization(login: $org) {
+                projectsV2(first: 20, query: $title) {
+                  nodes {
+                    id
+                    title
+                    fields(first: 50) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          name
+                          options {
+                            id
+                            name
+                          }
+                        }
+                        ... on ProjectV2IterationField {
+                          id
+                          name
+                          configuration {
+                            iterations {
+                              id
+                              startDate
+                              duration
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org="$ORGANIZATION" -f title="$PROJECT_TITLE" > project_data.json
+
+          # projectsV2(query:) is a fuzzy search, so match the title exactly.
+          project=$(jq -c --arg title "$PROJECT_TITLE" \
+            '[.data.organization.projectsV2.nodes[] | select(.title == $title)] | first // empty' project_data.json)
+
+          if [ -z "$project" ]; then
+            echo "::warning::No project titled \"$PROJECT_TITLE\" was found. Skipping the board update."
+            echo 'found=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo 'found=true'
+            echo "project_id=$(jq -r '.id' <<< "$project")"
+            echo "status_field_id=$(jq -r '[.fields.nodes[] | select(.name == "Status")] | first.id // ""' <<< "$project")"
+            echo "status_option_id=$(jq -r --arg status "$STATUS" \
+              '[.fields.nodes[] | select(.name == "Status") | .options[] | select(.name == $status)] | first.id // ""' <<< "$project")"
+            echo "iteration_field_id=$(jq -r '[.fields.nodes[] | select(.configuration != null)] | first.id // ""' <<< "$project")"
+            echo "iteration_id=$(jq -r --argjson now "$(date -u +%s)" \
+              '[.fields.nodes[] | select(.configuration != null) | .configuration.iterations[]
+                | select((.startDate + "T00:00:00Z" | fromdateiso8601) <= $now
+                  and $now < ((.startDate + "T00:00:00Z" | fromdateiso8601) + (.duration * 86400)))]
+               | first.id // ""' <<< "$project")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Add the pull request to the project
+        id: add-item
+        if: steps.project-data.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          PROJECT_ID: ${{ steps.project-data.outputs.project_id }}
+        run: |
+          # Adding an item that is already on the board returns the existing item.
+          item_id=$(gh api graphql -f query='
+            mutation($project: ID!, $pr: ID!) {
+              addProjectV2ItemById(input: { projectId: $project, contentId: $pr }) {
+                item {
+                  id
+                }
+              }
+            }' -f project="$PROJECT_ID" -f pr="$PR_NODE_ID" --jq '.data.addProjectV2ItemById.item.id')
+
+          echo "item_id=$item_id" >> "$GITHUB_OUTPUT"
+
+      - name: Set the status
+        if: steps.add-item.outputs.item_id != '' && steps.project-data.outputs.status_option_id != ''
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          PROJECT_ID: ${{ steps.project-data.outputs.project_id }}
+          ITEM_ID: ${{ steps.add-item.outputs.item_id }}
+          FIELD_ID: ${{ steps.project-data.outputs.status_field_id }}
+          OPTION_ID: ${{ steps.project-data.outputs.status_option_id }}
+        run: |
+          gh api graphql -f query='
+            mutation($project: ID!, $item: ID!, $field: ID!, $value: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $field
+                value: { singleSelectOptionId: $value }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project="$PROJECT_ID" -f item="$ITEM_ID" -f field="$FIELD_ID" -f value="$OPTION_ID"
+
+      - name: Set the current iteration
+        if: steps.add-item.outputs.item_id != '' && steps.project-data.outputs.iteration_id != ''
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          PROJECT_ID: ${{ steps.project-data.outputs.project_id }}
+          ITEM_ID: ${{ steps.add-item.outputs.item_id }}
+          FIELD_ID: ${{ steps.project-data.outputs.iteration_field_id }}
+          ITERATION_ID: ${{ steps.project-data.outputs.iteration_id }}
+        run: |
+          gh api graphql -f query='
+            mutation($project: ID!, $item: ID!, $field: ID!, $value: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $field
+                value: { iterationId: $value }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project="$PROJECT_ID" -f item="$ITEM_ID" -f field="$FIELD_ID" -f value="$ITERATION_ID"

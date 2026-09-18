@@ -58,6 +58,14 @@ A spec with no hooks is fine. `automation/commands/key_press.spec.ts` needs none
 **Prove each mock intercepts.** Add a temporary `throw` or call count
 to the factory, run the spec, then remove it. A green run alone proves nothing.
 
+**Every static import goes at the top of the file**, in one block above any other statement,
+including the module under test. Vitest lifts `vi.mock` calls above the file's imports at
+transform time, and `vi.hoisted` lifts the factory's state above that, so pushing the import
+below the `vi.mock` block changes nothing at runtime and implies an ordering requirement that
+does not exist. The layout is: imports, then `vi.hoisted`, then `vi.mock`. Reach for a dynamic
+`await import()` only when you actually need to control load order — after `vi.resetModules()`
+for a SUT holding module-level state — and say why in a comment.
+
 **`vi.mock` specifiers must be the string the importer wrote**, resolved from your spec's
 location for relative paths. `vi.mock('../../../../lib/cloud/network/fetch')` from the spec
 matches the SUT's `import ... from '../network/fetch'` because both resolve to the same file.
@@ -181,5 +189,6 @@ they must match (loops that generate tests expand at runtime, so compare the sta
 ## Style
 
 Single quotes, no semicolons, 2-space indent, trailing commas, blank line before `return`,
-`import type` for type-only imports, no `console`. Prefer no comment; when one is needed, say
-why in one or two lines and describe the present code, never how it used to work.
+`import type` for type-only imports, all static imports in one block at the top of the file,
+no `console`. Prefer no comment; when one is needed, say why in one or two lines and describe
+the present code, never how it used to work.
