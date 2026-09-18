@@ -221,13 +221,13 @@ describe('Launchpad: Open Mode', () => {
     stubAvailableBrowsers()
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.withCtx((ctx, o) => {
-      // the count outlives openProject, so an earlier launch in this spec would disable the auto-launch
-      ctx.actions.project.launchCount = 0
-
       // A real launch takes seconds. Dismissing the welcome mounts OpenBrowser
       // inside that window, and its own auto-launch check must not launch again.
+      // The test holds the launch open until it has checked that.
       o.sinon.stub(ctx._apis.projectApi, 'launchProject').callsFake(() => {
-        return new Promise((resolve) => setTimeout(resolve, 1000))
+        return new Promise<void>((resolve) => {
+          o.testState.resolveLaunch = resolve
+        })
       })
     })
 
@@ -243,15 +243,18 @@ describe('Launchpad: Open Mode', () => {
     cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
     cy.wait('@openBrowserLocalSettings')
 
-    cy.withRetryableCtx(async (ctx) => {
-      const launchProject = ctx._apis.projectApi.launchProject as SinonStub
+    cy.withRetryableCtx((ctx, o) => {
+      expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+      expect(o.testState.resolveLaunch).to.be.a('function')
+    })
 
-      expect(launchProject).to.be.calledOnce
+    cy.withCtx((ctx, o) => {
+      o.testState.resolveLaunch()
+    })
 
-      // let the in-flight launch settle before asserting nothing else launched
-      await launchProject.firstCall.returnValue
-
-      expect(launchProject).to.be.calledOnce
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.project.launchCount).to.eq(1)
+      expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
     })
   })
 
