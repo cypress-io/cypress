@@ -26,7 +26,7 @@ describe('uncaught errors', () => {
       expect(err.message).to.include('sync error')
       expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
       expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
-      expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+      expect((err as Cypress.CypressError).docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
       expect(runnable === r).to.be.true
 
       return false
