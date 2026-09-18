@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const openExternal = vi.hoisted(() => vi.fn())
+const openExternal = vi.hoisted(() => {
+  return vi.fn()
+})
 
 vi.mock('electron', () => {
   return {

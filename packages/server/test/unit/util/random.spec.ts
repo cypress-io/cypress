@@ -1,28 +1,33 @@
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import randomstring from 'randomstring'
 import { id as randomId } from '../../../lib/util/random'
 
-context('.id', () => {
+describe('.id', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('returns random.generate string with length 5 by default', () => {
-    sinon.spy(randomstring, 'generate')
+    vi.spyOn(randomstring, 'generate')
 
     const id = randomId()
 
-    expect(id.length).to.eq(5)
+    expect(id.length).toBe(5)
 
-    expect(randomstring.generate).to.be.calledWith({
+    expect(randomstring.generate).toHaveBeenCalledWith({
       length: 5,
       capitalization: 'lowercase',
     })
   })
 
   it('passes the length parameter if supplied', () => {
-    sinon.spy(randomstring, 'generate')
+    vi.spyOn(randomstring, 'generate')
 
     const id = randomId(32)
 
-    expect(id.length).to.eq(32)
+    expect(id.length).toBe(32)
 
-    expect(randomstring.generate).to.be.calledWith({
+    expect(randomstring.generate).toHaveBeenCalledWith({
       length: 32,
       capitalization: 'lowercase',
     })
