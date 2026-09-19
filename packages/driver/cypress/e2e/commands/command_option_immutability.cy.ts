@@ -157,7 +157,6 @@ describe('command log', () => {
       })
 
       testOptions('nextUntil', { timeout: 1111 }, 1, (options) => {
-        // @ts-expect-error - options are read from the filter position, which the public overloads omit
         cy.get('#a').nextUntil('#b', options)
       })
 
@@ -174,7 +173,6 @@ describe('command log', () => {
       })
 
       testOptions('parentsUntil', { timeout: 1112 }, 1, (options) => {
-        // @ts-expect-error - options are read from the filter position, which the public overloads omit
         cy.get('#a').parentsUntil('body', options)
       })
 
@@ -189,7 +187,6 @@ describe('command log', () => {
       })
 
       testOptions('prevUntil', { timeout: 3111 }, 1, (options) => {
-        // @ts-expect-error - options are read from the filter position, which the public overloads omit
         cy.get('#b').prevUntil('#a', options)
       })
     })
@@ -220,7 +217,6 @@ describe('command log', () => {
       })
 
       testOptions('scrollIntoView', { offset: { top: 20 } }, 1, (options) => {
-        // @ts-expect-error - a partial offset is merged over the default; the public Offset requires both keys
         cy.get('form').scrollIntoView(options)
       })
 
@@ -313,7 +309,6 @@ describe('command log', () => {
     })
 
     testOptions('each', { timeout: 4000 }, 1, (options) => {
-      // @ts-expect-error - each accepts (options, fn); the public types only declare (fn)
       cy.getCookies().each(options, (c) => {})
     })
 
@@ -340,7 +335,6 @@ describe('command log', () => {
     })
 
     testOptions('spread', { timeout: 4000 }, 1, (options) => {
-      // @ts-expect-error - spread accepts (options, fn); the public types only declare (fn)
       cy.getCookies().spread(options, (c) => {})
     })
 
