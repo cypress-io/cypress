@@ -1,6 +1,9 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
-const testOptions = (commandName, options, order, f) => {
+// `const` keeps each options literal at its narrow type, so values like
+// `capture: 'viewport'` still satisfy the command's union rather than widening
+// to `string`.
+const testOptions = <const T>(commandName: string, options: T, order: number, f: (options: T) => void) => {
   it(commandName, () => {
     let usedOptions = _.clone(options)
     let expectedOptions = _.clone(options)
@@ -154,6 +157,7 @@ describe('command log', () => {
       })
 
       testOptions('nextUntil', { timeout: 1111 }, 1, (options) => {
+        // @ts-expect-error - options are read from the filter position, which the public overloads omit
         cy.get('#a').nextUntil('#b', options)
       })
 
@@ -170,6 +174,7 @@ describe('command log', () => {
       })
 
       testOptions('parentsUntil', { timeout: 1112 }, 1, (options) => {
+        // @ts-expect-error - options are read from the filter position, which the public overloads omit
         cy.get('#a').parentsUntil('body', options)
       })
 
@@ -184,6 +189,7 @@ describe('command log', () => {
       })
 
       testOptions('prevUntil', { timeout: 3111 }, 1, (options) => {
+        // @ts-expect-error - options are read from the filter position, which the public overloads omit
         cy.get('#b').prevUntil('#a', options)
       })
     })
@@ -214,6 +220,7 @@ describe('command log', () => {
       })
 
       testOptions('scrollIntoView', { offset: { top: 20 } }, 1, (options) => {
+        // @ts-expect-error - a partial offset is merged over the default; the public Offset requires both keys
         cy.get('form').scrollIntoView(options)
       })
 
@@ -275,6 +282,7 @@ describe('command log', () => {
       // Ignore cy.visit() because it is tested in beforeEach().
 
       testOptions('wait', { requestTimeout: 2000 }, 0, (options) => {
+        // @ts-expect-error - requestTimeout is not part of the public options for the numeric overload
         cy.wait(100, options)
       })
 
@@ -305,6 +313,7 @@ describe('command log', () => {
     })
 
     testOptions('each', { timeout: 4000 }, 1, (options) => {
+      // @ts-expect-error - each accepts (options, fn); the public types only declare (fn)
       cy.getCookies().each(options, (c) => {})
     })
 
@@ -331,6 +340,7 @@ describe('command log', () => {
     })
 
     testOptions('spread', { timeout: 4000 }, 1, (options) => {
+      // @ts-expect-error - spread accepts (options, fn); the public types only declare (fn)
       cy.getCookies().spread(options, (c) => {})
     })
 
