@@ -27,6 +27,8 @@ Runs on PRs targeting `develop` or `release/*` branches (excluding draft PRs).
 
 Runs on pushes to `develop` and `release/*` branches. Includes everything from the PR workflow plus:
 
+**Note:** a webhook push to `develop` is path-filtered the same way PRs are — only the job groups touched by the merge's changed files run. Everything else runs unfiltered: `release/*` pushes, and, on `develop`, the scheduled nightly cron and any manually triggered run. Filtering never skips the binary/packaging chain, `npm-release`, or `verify-release-readiness`.
+
 | Stage | What It Does |
 |-------|--------------|
 | Linux x64 Build | Full build, packaging, and binary verification for Linux x64 |
@@ -45,9 +47,10 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 | Trigger | Workflow | Notes |
 |---------|----------|-------|
 | PR opened/updated | Pull Request | Skipped for draft PRs |
-| Push to `develop` | Full | Linux x64 test suite + binary build; other platforms run from the develop schedule |
-| Push to `release/*` | Full | Same as develop; other platforms run from the release schedule |
-| Manual (CircleCI UI) | Configurable | Can run full workflow, or all four scheduled platforms, on any branch |
+| Push to `develop` | Full | Linux x64 is path-filtered by changed files; binary builds and release gating always run. Other platforms run from the develop schedule, not this push |
+| Push to `release/*` | Full | Linux x64 runs the complete test suite and binary builds, unfiltered. Other platforms run from the release schedule |
+| Scheduled pipeline | Full | Nightly cron; always unfiltered on `develop`, even though it runs on that branch |
+| Manual (CircleCI UI) | Configurable | Can run the full Linux x64 workflow, or all four scheduled platforms, on any branch; `run-all-jobs=true` forces everything on Linux x64 |
 
 ### Key Jobs
 

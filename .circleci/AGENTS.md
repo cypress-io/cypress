@@ -47,9 +47,10 @@ After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 ### Per-workflow gates
 
-- **`linux-x64`**: most develop CI (build, system tests, `v8-integration-tests`, packaging, etc.) — subject to path filtering unless overridden
-- **`windows`**: Windows build, binary artifacts, v8 integration tests, and selected integration/unit jobs
-- **`linux-arm64` / `darwin-*`**: platform builds, packaging, and v8 integration tests where supported
+The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `halt-if-skipped`), not in the workflow files, so they apply to every workflow below — not just the PR one.
+
+- **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-and-trigger-packaging-artifacts`, `get-published-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs, system tests, and `v8-integration-tests` are guarded, so a webhook push to `develop` runs only the ones its changed paths select.
+- **`windows` / `linux-arm64` / `darwin-*`**: none of these three run on a plain `develop` or `release/*` push — see "Scheduled platform CI" below for when they do. Inside them, `v8-integration-tests`, `driver-integration-memory-tests`, and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
 
 `linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop` and `release/*` they run only from a scheduled pipeline. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough.
 
