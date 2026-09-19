@@ -186,6 +186,9 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
 
   console.log('Deleted excess directories')
 
+  log('#copyLicenses')
+  copyLicenseFiles()
+
   log('#createRootPackage')
   const electronVersion = electron.getElectronVersion()
   const electronNodeVersion = await electron.getElectronNodeVersion()
@@ -195,6 +198,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     productName: 'Cypress',
     description: jsonRoot.description,
     version, // Cypress version
+    license: jsonRoot.license,
     electronVersion,
     electronNodeVersion,
     main: 'index.js',
@@ -360,6 +364,15 @@ export async function packageElectronApp (options: BuildCypressAppOpts) {
   console.log(sizes)
 
   performanceTracking.track('test runner size', sizes)
+}
+
+// The ffmpeg and ffprobe binaries that Cypress bundles are GPL/LGPL licensed and ship
+// without any license text, and electron-builder removes Electron's own notices on macOS.
+// Copy Cypress's license and the third-party notices into the app so every binary archive
+// carries the notices for the third-party code it redistributes.
+function copyLicenseFiles () {
+  fs.copySync(path.join(CY_ROOT_DIR, 'LICENSE'), meta.distDir('LICENSE'))
+  fs.copySync(path.join(CY_ROOT_DIR, 'licenses'), meta.distDir('licenses'))
 }
 
 function getIconFilename () {

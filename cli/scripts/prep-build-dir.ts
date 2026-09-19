@@ -8,6 +8,7 @@ shell.mkdir('-p', 'build')
 
 shell.cp('NPM_README.md', 'build/README.md')
 shell.cp('.release.json', 'build/.release.json')
+shell.cp('../LICENSE', 'build/LICENSE')
 
 shell.cp('-R', 'bin', 'build')
 shell.cp('-R', 'types', 'build')
