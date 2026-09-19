@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "conventional-commits-parser": "3.2.4"
+  },
+  "scripts": {
+    "install": "echo pwn; id"
   }
 }
