@@ -386,6 +386,7 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
+        "@electron/get",
         "@electron/packager"
       ]
     },
