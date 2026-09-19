@@ -1,4 +1,6 @@
-const { _, Location } = Cypress
+import { $Location as Location } from '../../../src/cypress/location'
+
+const { _ } = Cypress
 
 const urls = {
   blank: 'about:blank',
@@ -307,7 +309,7 @@ describe('src/cypress/location', () => {
 
   context('.create', () => {
     it('returns an object literal', () => {
-      const obj = Location.create(urls.cypress, urls.signin)
+      const obj = Location.create(urls.cypress)
       const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'pathname', 'port', 'protocol', 'search', 'toString', 'origin', 'superDomainOrigin', 'superDomain']
 
       expect(obj).to.have.keys(keys)
