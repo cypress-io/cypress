@@ -1,4 +1,5 @@
 // https://github.com/cypress-io/cypress/issues/761
+// https://github.com/cypress-io/cypress/issues/2968
 describe('aborting XHRs started in a previous test', () => {
   context('aborted when complete', () => {
     it('test 1 dispatches xhr, but completes in test 2', () => {
@@ -22,7 +23,7 @@ describe('aborting XHRs started in a previous test', () => {
   })
 
   context('aborted before complete', () => {
-    let xhr = null
+    let xhr: any = null
 
     // TODO: we lose a reference here to the xhr in test 2
     // so it shows up as "pending" forever because we reset
@@ -58,9 +59,9 @@ if (Cypress.isBrowser('chrome')) {
   describe('XHRs still pending when the page unloads in chrome >= 71', () => {
     // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. https://github.com/cypress-io/cypress/issues/24492
     it.skip('cancels pending requests that are incomplete', () => {
-      const logs = []
+      const logs: any[] = []
 
-      const xhrs = []
+      const xhrs: any[] = []
       const stub = cy.stub()
 
       cy.on('log:added', (attrs, log) => {
@@ -104,9 +105,9 @@ if (Cypress.isBrowser('chrome')) {
       })
       .wait('@getTimeout')
       .then((xhrProxy) => {
-      // after we unload we should cancel the
-      // pending XHR's and receive it here
-      // after waiting on it
+        // after we unload we should cancel the
+        // pending XHR's and receive it here
+        // after waiting on it
         expect(xhrProxy.state).to.eq('Errored')
 
         const [firstXhr, secondXhr] = xhrs

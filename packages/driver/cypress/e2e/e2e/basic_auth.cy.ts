@@ -1,3 +1,5 @@
+import { authCreds } from '../../fixtures/auth_creds'
+
 const run = () => {
   cy.window()
   .then({ timeout: 60000 }, (win) => {
@@ -16,7 +18,7 @@ const run = () => {
     expect($iframe.contents().text()).to.include('basic auth worked')
   })
   .window().then({ timeout: 60000 }, (win) => {
-    return new Cypress.Promise(((resolve, reject) => {
+    return new Cypress.Promise<Cypress.AUTWindow>(((resolve, reject) => {
       const xhr = new win.XMLHttpRequest()
 
       xhr.open('GET', '/basic_auth')
@@ -34,7 +36,7 @@ const run = () => {
     }))
   })
   .then({ timeout: 60000 }, (win) => {
-    return new Cypress.Promise(((resolve, reject) => {
+    return new Cypress.Promise<Cypress.AUTWindow>(((resolve, reject) => {
       // ensure other origins do not have auth headers attached
       const xhr = new win.XMLHttpRequest()
 
@@ -54,21 +56,17 @@ const run = () => {
   })
 }
 
-// cy.visit("http://admin:admin@the-internet.herokuapp.com/basic_auth")
-
+// https://github.com/cypress-io/cypress/issues/573
 describe('basic auth', () => {
   it('can visit with username/pw in url', () => {
-    cy.visit('http://cypress:password123@localhost:3500/basic_auth')
+    cy.visit(`http://${authCreds.username}:${authCreds.password}@localhost:3500/basic_auth`)
 
     run()
   })
 
   it('can visit with auth options', () => {
     cy.visit('http://localhost:3500/basic_auth', {
-      auth: {
-        username: 'cypress',
-        password: 'password123',
-      },
+      auth: authCreds,
     })
 
     run()

@@ -114,6 +114,28 @@ describe('uncaught errors', () => {
     cy.get('.trigger-unhandled-rejection').click()
   })
 
+  // https://github.com/cypress-io/cypress/issues/27183
+  // a promise rejected with `undefined` (e.g. `reject()`) used to surface the
+  // misleading internal error "Cannot read property 'message' of undefined".
+  // We should fail gracefully and still attribute it to the application code
+  // as an unhandled promise rejection.
+  it('fails gracefully when the app rejects a promise with undefined', (done) => {
+    cy.once('uncaught:exception', (err, runnable, promise) => {
+      expect(err.message).to.include('An unknown error has occurred: undefined')
+      expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+      expect(err.message).to.include('It was caused by an unhandled promise rejection.')
+      expect(err.message).not.to.include('Cannot read property')
+      expect(promise).to.be.a('promise')
+
+      done()
+
+      return false
+    })
+
+    cy.visit('/fixtures/errors.html')
+    cy.get('.trigger-undefined-rejection').click()
+  })
+
   // if we mutate the error, the app's listeners for 'error' or
   // 'unhandledrejection' will have our wrapped error instead of the original
   it('original error is not mutated for "error"', () => {
@@ -199,5 +221,47 @@ describe('uncaught errors', () => {
 
     cy.visit('/fixtures/errors.html')
     cy.get('.trigger-async-error').click()
+  })
+
+  // https://github.com/cypress-io/cypress/issues/27415
+  describe('repeated identical uncaught exceptions', () => {
+    const dispatchError = (win: Cypress.AUTWindow, message: string) => {
+      win.dispatchEvent(new win.ErrorEvent('error', {
+        message,
+        error: new win.Error(message),
+      }))
+    }
+
+    const uncaughtLogs: any[] = []
+
+    beforeEach(() => {
+      uncaughtLogs.length = 0
+
+      cy.on('uncaught:exception', (err) => (err.message.includes('Fake Error') ? false : undefined))
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'uncaught exception' && attrs.message.includes('Fake Error')) {
+          uncaughtLogs.push(log)
+        }
+      })
+
+      cy.visit('/fixtures/errors.html')
+    })
+
+    it('collapses repeated identical uncaught exceptions into one updating log', () => {
+      const message = 'Fake Error:ResizeObserver loop completed with undelivered notifications.'
+      const occurrenceCount = 25
+
+      cy.window().then((win) => {
+        for (let i = 0; i < occurrenceCount; i++) {
+          dispatchError(win, message)
+        }
+      })
+
+      cy.wrap(null).should(() => {
+        expect(uncaughtLogs, 'deduped uncaught exception logs').to.have.length(1)
+        expect(uncaughtLogs[0].get('message')).to.include(`(${occurrenceCount})`)
+      })
+    })
   })
 })
