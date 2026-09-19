@@ -30,8 +30,7 @@ describe('src/cy/commands/traversals', () => {
       name = fn
     }
 
-    // jQuery's numeric index signature resolves `$el[name]` to an element, so
-    // reach the traversal method this iteration names through an untyped view
+    // jQuery's numeric index signature resolves `$el[name]` to an element, not a method
     const traverse = ($el: JQuery): JQuery => ($el as any)[name](arg)
 
     context(`#${name}`, () => {

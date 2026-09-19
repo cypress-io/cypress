@@ -3,8 +3,8 @@
 const cyWaitTimeout = (n) => cy.wrap(new Promise((resolve) => window.setTimeout(resolve, n)))
 
 describe('driver/src/cy/timers', () => {
-  // Each test parks its callback, and whatever that callback writes, onto the AUT
-  // window so the assertions can read it back through `cy.window().its(...)`.
+  // The tests assign their callbacks and results onto the AUT window so that
+  // assertions can read them back through `cy.window().its(...)`.
   type TimerWindow = Cypress.AUTWindow & {
     bar?: string | null
     foo?: string | null
@@ -127,8 +127,7 @@ describe('driver/src/cy/timers', () => {
         win.bar = 'bar'
       })
 
-      // @ts-expect-error - the extra arguments are intentional; the assertions
-      // below check that requestAnimationFrame does not forward them
+      // @ts-expect-error - intentionally passing extra arguments that should not be forwarded
       const id1 = win.requestAnimationFrame(rafStub, 'foo', 'bar', 'baz')
 
       // the timer id is 1 by default since
@@ -341,8 +340,7 @@ describe('driver/src/cy/timers', () => {
         .then((win: TimerWindow) => {
           win.eval = cy.stub()
 
-          // @ts-expect-error - a non-function handler is the point of the test:
-          // the browser coerces it to a string and evals it
+          // @ts-expect-error - intentionally passing a non-function handler for the browser to eval
           win.setTimeout(value, 1)
 
           cyWaitTimeout(1)
