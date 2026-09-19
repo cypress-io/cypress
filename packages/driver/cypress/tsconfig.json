@@ -12,5 +12,5 @@
     "sourceMap": true,
     "moduleResolution": "node"
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "**/*.tsx"]
 }
