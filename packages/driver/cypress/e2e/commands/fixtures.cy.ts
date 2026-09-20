@@ -1,6 +1,7 @@
-const { stripAnsi } = require('@packages/errors')
+import { stripAnsi } from '@packages/errors'
 
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
+
 const { Promise } = Cypress
 
 const { fixturesFolder } = Cypress.config()
@@ -13,28 +14,30 @@ describe('src/cy/commands/fixtures', () => {
   // call all of the fixture triggers async to simulate
   // the real browser environment
   context('#fixture', () => {
+    let backend: sinon.SinonStub
+
     beforeEach(() => {
       // call through normally on everything
-      cy.stub(Cypress, 'backend').log(false).callThrough()
+      backend = cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('triggers \'fixture\' on Cypress', () => {
-      Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
+      backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
       cy.fixture('foo').as('f').then((obj) => {
         expect(obj).to.deep.eq({ foo: 'bar' })
-        expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {})
+        expect(backend).to.be.calledWith('get:fixture', 'foo', {})
       })
     })
 
     it('can support an array of fixtures')
 
     it('can have encoding as second argument', () => {
-      Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
+      backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
       cy.fixture('foo', 'ascii').then((obj) => {
         expect(obj).to.deep.eq({ foo: 'bar' })
-        expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {
+        expect(backend).to.be.calledWith('get:fixture', 'foo', {
           encoding: 'ascii',
         })
       })
@@ -42,21 +45,21 @@ describe('src/cy/commands/fixtures', () => {
 
     // https://github.com/cypress-io/cypress/issues/1558
     it('passes explicit null encoding through to server and decodes response', () => {
-      Cypress.backend.withArgs('get:fixture').resolves(Buffer.from('\n'))
+      backend.withArgs('get:fixture').resolves(Buffer.from('\n'))
 
       cy.fixture('foo', null).then((obj) => {
-        expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {
+        expect(backend).to.be.calledWith('get:fixture', 'foo', {
           encoding: null,
         })
       }).should('eql', Buffer.from('\n'))
     })
 
     it('can have encoding as second argument and options as third argument', () => {
-      Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
+      backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
       cy.fixture('foo', 'ascii', { timeout: 1000 }).then((obj) => {
         expect(obj).to.deep.eq({ foo: 'bar' })
-        expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {
+        expect(backend).to.be.calledWith('get:fixture', 'foo', {
           encoding: 'ascii',
         })
       })
@@ -105,7 +108,9 @@ describe('src/cy/commands/fixtures', () => {
         return null
       })
 
-      it('throws if fixturesFolder is set to false', { fixturesFolder: false }, function (done) {
+      // `fixturesFolder` is missing from the hand-curated `Pick` behind
+      // `TestConfigOverrides`, so the override needs an assertion to type-check
+      it('throws if fixturesFolder is set to false', { fixturesFolder: false } as Cypress.TestConfigOverrides, function (done) {
         cy.on('fail', () => {
           const { lastLog } = this
 
@@ -164,7 +169,7 @@ describe('src/cy/commands/fixtures', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.backend.withArgs('get:fixture').resolves(Promise.delay(1000))
+        backend.withArgs('get:fixture').resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -188,7 +193,7 @@ describe('src/cy/commands/fixtures', () => {
       it('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
       }, () => {
-        Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
+        backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -198,7 +203,7 @@ describe('src/cy/commands/fixtures', () => {
       })
 
       it('can override timeout', () => {
-        Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
+        backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -208,7 +213,7 @@ describe('src/cy/commands/fixtures', () => {
       })
 
       it('clears the current timeout and restores after success', () => {
-        Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
+        backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
         cy.timeout(100)
 
@@ -225,7 +230,7 @@ describe('src/cy/commands/fixtures', () => {
 
     describe('caching', () => {
       beforeEach(() => {
-        Cypress.backend
+        backend
         .withArgs('get:fixture', 'foo')
         .resolves({ foo: 'bar' })
         .withArgs('get:fixture', 'bar')
@@ -245,7 +250,7 @@ describe('src/cy/commands/fixtures', () => {
           })
         })
         .then(() => {
-          expect(Cypress.backend.withArgs('get:fixture')).to.be.calledTwice
+          expect(backend.withArgs('get:fixture')).to.be.calledTwice
         })
       })
 
@@ -263,7 +268,7 @@ describe('src/cy/commands/fixtures', () => {
             })
           })
           .then(() => {
-            expect(Cypress.backend.withArgs('get:fixture')).to.be.calledOnce
+            expect(backend.withArgs('get:fixture')).to.be.calledOnce
           })
         })
       })
@@ -309,7 +314,7 @@ describe('src/cy/commands/fixtures', () => {
       it('should cache `null` and `undefined` encodings separately', () => {
         const fixture = '\u0000'
 
-        Cypress.backend.withArgs('get:fixture', fixture, { encoding: null })
+        backend.withArgs('get:fixture', fixture, { encoding: null })
         .resolves(Buffer.from('binary-content'))
         .withArgs('get:fixture', fixture, {})
         .resolves({ reality: 'buffering...' })
@@ -333,7 +338,7 @@ describe('src/cy/commands/fixtures', () => {
           })
         })
 
-        cy.wrap(Cypress.backend.withArgs('get:fixture')).should('have.callCount', 2)
+        cy.wrap(backend.withArgs('get:fixture')).should('have.callCount', 2)
       })
     })
   })
