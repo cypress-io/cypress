@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
+
 const { _, $, dom } = Cypress
 
 describe('src/cy/commands/misc', () => {
@@ -108,6 +109,7 @@ describe('src/cy/commands/misc', () => {
     it('cy.wrap(undefined) should retry', () => {
       const stub = cy.stub()
 
+      // @ts-expect-error - intentionally omitting the subject
       cy.wrap().should(() => {
         stub()
 
@@ -207,11 +209,11 @@ describe('src/cy/commands/misc', () => {
     it('can extend the default timeout', () => {
       Cypress.config('defaultCommandTimeout', 100)
 
-      const timeoutPromise = new Promise((resolve, reject) => {
-        return setTimeout(() => {
+      const timeoutPromise = new Promise((resolve) => {
+        setTimeout(() => {
           resolve(null)
-        })
-      }, 200)
+        }, 200)
+      })
 
       cy.wrap(timeoutPromise, { timeout: 300 })
     })
@@ -315,7 +317,7 @@ describe('src/cy/commands/misc', () => {
       it('preserves a custom onFail already attached to the rejected error', function (done) {
         const customOnFail = cy.stub()
 
-        const err = new Error('error with custom onFail')
+        const err: Error & { onFail?: (err: Error) => void } = new Error('error with custom onFail')
 
         err.onFail = customOnFail
 
@@ -342,7 +344,7 @@ describe('src/cy/commands/misc', () => {
       })
 
       it('handles simple circular reference without throwing', function () {
-        const obj = {}
+        const obj: Record<string, unknown> = {}
 
         obj.self = obj
 
@@ -358,12 +360,15 @@ describe('src/cy/commands/misc', () => {
 
       it('handles nested circular reference (Node-like structure)', function () {
         class Node {
+          parent: Node | null
+          children: Node[]
+
           constructor () {
             this.parent = null
             this.children = []
           }
 
-          appendChild (child) {
+          appendChild (child: Node) {
             child.parent = this
             this.children.push(child)
 
@@ -386,7 +391,7 @@ describe('src/cy/commands/misc', () => {
       })
 
       it('handles circular reference in arrays', function () {
-        const arr = [1, 2, 3]
+        const arr: unknown[] = [1, 2, 3]
 
         arr.push(arr)
 
@@ -405,7 +410,7 @@ describe('src/cy/commands/misc', () => {
       })
 
       it('handles circular reference in objects with >2 keys', function () {
-        const obj = {
+        const obj: { a: number, b: number, c: Record<string, unknown> } = {
           a: 1,
           b: 2,
           c: {},
@@ -424,7 +429,7 @@ describe('src/cy/commands/misc', () => {
       })
 
       it('handles multiple circular references in same object', function () {
-        const obj = {
+        const obj: { a: Record<string, unknown>, b: Record<string, unknown> } = {
           a: {},
           b: {},
         }
@@ -443,7 +448,7 @@ describe('src/cy/commands/misc', () => {
       })
 
       it('handles circular reference through multiple levels', function () {
-        const obj = {
+        const obj: { level1: { level2: { level3: Record<string, unknown> } } } = {
           level1: {
             level2: {
               level3: {},
@@ -464,7 +469,7 @@ describe('src/cy/commands/misc', () => {
       })
 
       it('wrapped subject with circular reference can be chained', function () {
-        const obj = {}
+        const obj: Record<string, unknown> = {}
 
         obj.self = obj
 

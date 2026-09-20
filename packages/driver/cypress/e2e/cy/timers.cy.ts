@@ -3,6 +3,16 @@
 const cyWaitTimeout = (n) => cy.wrap(new Promise((resolve) => window.setTimeout(resolve, n)))
 
 describe('driver/src/cy/timers', () => {
+  // The tests assign their callbacks and results onto the AUT window so that
+  // assertions can read them back through `cy.window().its(...)`.
+  type TimerWindow = Cypress.AUTWindow & {
+    bar?: string | null
+    foo?: string | null
+    setBar?: () => void
+    setFoo?: (bar: string, baz: string) => void
+    stub?: sinon.SinonStub
+  }
+
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
   })
@@ -11,7 +21,7 @@ describe('driver/src/cy/timers', () => {
     cy
     .log('setTimeout should be called')
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       win.setBar = () => {
         win.bar = 'bar'
       }
@@ -24,7 +34,7 @@ describe('driver/src/cy/timers', () => {
       .then(() => {
         win.bar = null
 
-        const id2 = win.setTimeout(win.setBar, 2)
+        const id2 = win.setTimeout(win.setBar!, 2)
 
         expect(id2).to.eq(id1 + 1)
 
@@ -41,7 +51,7 @@ describe('driver/src/cy/timers', () => {
     cy
     .log('setTimeout should call target with two parameters')
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       win.foo = null
       win.setFoo = (bar, baz) => {
         win.foo = bar + baz
@@ -58,7 +68,7 @@ describe('driver/src/cy/timers', () => {
     cy
     .log('setInterval should be called')
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       win.setBar = () => {
         win.bar = 'bar'
       }
@@ -73,7 +83,7 @@ describe('driver/src/cy/timers', () => {
 
         win.bar = null
 
-        const id2 = win.setInterval(win.setBar, 2)
+        const id2 = win.setInterval(win.setBar!, 2)
 
         expect(id2).to.eq(id1 + 1)
 
@@ -90,7 +100,7 @@ describe('driver/src/cy/timers', () => {
     cy
     .log('setInterval should call target with two parameters')
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       win.foo = null
       win.setFoo = (bar, baz) => {
         win.foo = bar + baz
@@ -110,13 +120,14 @@ describe('driver/src/cy/timers', () => {
     cy
     .log('requestAnimationFrame should be called')
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       const rafStub = cy
       .stub()
       .callsFake(() => {
         win.bar = 'bar'
       })
 
+      // @ts-expect-error - intentionally passing extra arguments that should not be forwarded
       const id1 = win.requestAnimationFrame(rafStub, 'foo', 'bar', 'baz')
 
       // the timer id is 1 by default since
@@ -150,7 +161,7 @@ describe('driver/src/cy/timers', () => {
   it('delays calls to requestAnimationFrame when paused', () => {
     cy
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       win.bar = null
 
       const rafStub = cy
@@ -207,7 +218,7 @@ describe('driver/src/cy/timers', () => {
   it('delays calls to setTimeout when paused', () => {
     cy
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       win.bar = null
 
       win.setBar = () => {
@@ -217,7 +228,7 @@ describe('driver/src/cy/timers', () => {
       // prevent timers from firing, add to queue
       return cy.pauseTimers(true)
       .then(() => {
-        const id1 = win.setTimeout(win.setBar, 1)
+        const id1 = win.setTimeout(win.setBar!, 1)
 
         cyWaitTimeout(1)
         .log('setTimeout should NOT have fired when paused')
@@ -236,7 +247,7 @@ describe('driver/src/cy/timers', () => {
           return cy.pauseTimers(true)
         })
         .then(() => {
-          const id2 = win.setTimeout(win.setBar, 1)
+          const id2 = win.setTimeout(win.setBar!, 1)
 
           expect(id2).to.eq(id1 + 1)
 
@@ -257,7 +268,7 @@ describe('driver/src/cy/timers', () => {
     cy
     .log('setTimeout should be delayed until timers have been unpaused')
     .window()
-    .then((win) => {
+    .then((win: TimerWindow) => {
       win.bar = null
 
       win.setBar = () => {
@@ -282,7 +293,7 @@ describe('driver/src/cy/timers', () => {
         .then(() => {
           win.bar = null
 
-          const id2 = win.setInterval(win.setBar, 10)
+          const id2 = win.setInterval(win.setBar!, 10)
 
           expect(id2).to.eq(id1 + 1)
 
@@ -302,7 +313,7 @@ describe('driver/src/cy/timers', () => {
     it('string', () => {
       cy
       .window()
-      .then((win) => {
+      .then((win: TimerWindow) => {
         win.stub = cy.stub()
 
         win.setTimeout('this.stub()', 1)
@@ -314,7 +325,7 @@ describe('driver/src/cy/timers', () => {
       })
     })
 
-    const codes = [
+    const codes: [string, unknown][] = [
       ['undefined', undefined],
       ['boolean', true],
       ['number', 42],
@@ -326,8 +337,10 @@ describe('driver/src/cy/timers', () => {
       it(name, () => {
         cy
         .window()
-        .then((win) => {
+        .then((win: TimerWindow) => {
           win.eval = cy.stub()
+
+          // @ts-expect-error - intentionally passing a non-function handler for the browser to eval
           win.setTimeout(value, 1)
 
           cyWaitTimeout(1)
