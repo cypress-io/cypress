@@ -3,6 +3,7 @@
 
 **Misc:**
 
+- TypeScript now accepts an options object on six commands that already accepted one at runtime: [`.nextUntil()`](https://on.cypress.io/nextuntil), [`.parentsUntil()`](https://on.cypress.io/parentsuntil), and [`.prevUntil()`](https://on.cypress.io/prevuntil) take options in place of the filter argument; [`.each()`](https://on.cypress.io/each) and [`.spread()`](https://on.cypress.io/spread) take options before the callback; and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) takes an `offset` that sets a single axis, leaving the other at 0. These calls previously reported a type error. Addressed in [#34886](https://github.com/cypress-io/cypress/pull/34886).
 - TypeScript now types the `docsUrl` property on the error passed to an [`uncaught:exception`](https://on.cypress.io/catalog-of-events) handler as `string | string[]`. An uncaught exception carries the docs url for your application's error alongside the Cypress one, so `docsUrl` can hold more than one url at a time. Addressed in [#34879](https://github.com/cypress-io/cypress/pull/34879).
 
 **Dependency Updates:**

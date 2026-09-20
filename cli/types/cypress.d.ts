@@ -1333,6 +1333,17 @@ declare namespace Cypress {
      */
     each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
     each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    /**
+     * Iterate through an array like structure (arrays or objects with a length property).
+     *
+     * @see https://on.cypress.io/each
+     * @example
+     *    cy.getCookies().each({ timeout: 4000 }, (cookie) => {
+     *      // work with each cookie
+     *    })
+     */
+    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>>
+    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
 
     /**
      * Get A DOM element at a specific index in an array of elements.
@@ -1644,6 +1655,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/nextuntil
      */
     nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/nextuntil
+     */
+    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/nextuntil
+     */
+    nextUntil<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/nextuntil
+     */
+    nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
@@ -1756,6 +1785,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/parentsuntil
      */
     parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/parentsuntil
+     */
+    parentsUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/parentsuntil
+     */
+    parentsUntil<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/parentsuntil
+     */
+    parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
@@ -1843,6 +1890,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/prevuntil
+     */
+    prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/prevuntil
+     */
+    prevUntil<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/prevuntil
+     */
+    prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * An AI-powered command that generates Cypress commands from natural language test steps.
      *
@@ -2175,6 +2240,16 @@ declare namespace Cypress {
      *    })
      */
     spread(fn: (...args: any[]) => void): Chainable<Subject>
+    /**
+     * Expand an array into multiple arguments.
+     * @see https://on.cypress.io/spread
+     * @example
+     *    cy.getCookies().spread({ timeout: 4000 }, (cookie1, cookie2, cookie3) => {
+     *      // each cookie is now an individual argument
+     *    })
+     */
+    spread<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (...args: any[]) => S): Chainable<S>
+    spread(options: Partial<Timeoutable>, fn: (...args: any[]) => void): Chainable<Subject>
 
     /**
      * Run a task in Node via the plugins file.
@@ -3857,9 +3932,11 @@ declare namespace Cypress {
     /**
      * Amount to scroll after the element has been scrolled into view
      *
+     * An axis that is left out defaults to 0, so either key may be given alone.
+     *
      * @default {top: 0, left: 0}
      */
-    offset: Offset
+    offset: Partial<Offset>
   }
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
