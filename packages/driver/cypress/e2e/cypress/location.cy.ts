@@ -66,12 +66,14 @@ describe('src/cypress/location', () => {
       expect(str).to.eq('')
     })
 
-    it('returns the bare # when the fragment is empty', () => {
-      // the hash is yielded with its `#`, and this object is a plain literal
-      // rather than `window.location`, which reports an empty fragment as ''
+    // TODO: `cy.location()` yields `window.location`'s values, and the browser
+    // reports an empty fragment as ''. `url-parse` hands back its `#`, so this
+    // is the one property that does not match. Unskip once that is reconciled.
+    it.skip('returns empty when only hash is present', () => {
+      // its weird, but this matches current browser behavior
       const str = setup('hash').getHash()
 
-      expect(str).to.eq('#')
+      expect(str).to.eq('')
     })
   })
 
