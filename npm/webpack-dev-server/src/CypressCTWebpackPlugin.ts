@@ -153,7 +153,12 @@ export class CypressCTWebpackPlugin {
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation))
     _compiler.hooks.done.tap('CypressCTWebpackPlugin', () => {
       if (!this.pendingJitRecompileGenerations.length) {
-        this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: false })
+        // A JIT recompile may be queued but not yet moved into pending by
+        // beforeCompile. Suppress the in-flight compile's non-JIT success so
+        // watch-mode reruns don't start before the real recompile finishes.
+        if (!this.queuedJitRecompileGenerations.length) {
+          this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: false })
+        }
 
         return
       }
