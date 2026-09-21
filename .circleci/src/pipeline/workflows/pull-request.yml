@@ -90,78 +90,98 @@ jobs:
   # changed files don't require it to run.
   - cli-visual-tests:
       context: test-runner:percy
+      filters: &runCliTests pipeline.parameters.run-cli-tests == true
       requires:
         - ready-to-test
   - unit-tests:
+      filters: &runUnitTests pipeline.parameters.run-unit-tests == true
       requires:
         - ready-to-test
   - server-unit-tests:
+      filters: &runServerTests pipeline.parameters.run-server-tests == true
       requires:
         - ready-to-test
   - server-integration-tests:
+      filters: *runServerTests
       requires:
         - ready-to-test
   - server-performance-tests:
+      filters: *runServerTests
       requires:
         - ready-to-test
   - system-tests-node-modules-install:
       context: test-runner:performance-tracking
+      filters: pipeline.parameters.run-npm-vite-dev-server-tests == true or pipeline.parameters.run-npm-webpack-dev-server-tests == true or pipeline.parameters.run-system-tests == true or pipeline.parameters.run-v8-tests == true
       requires:
         - ready-to-test
   - system-tests-chrome:
       context: test-runner:performance-tracking
+      filters: &runSystemTests pipeline.parameters.run-system-tests == true
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:
       context: test-runner:performance-tracking
+      filters: *runSystemTests
       requires:
         - system-tests-node-modules-install
   - system-tests-firefox:
       context: test-runner:performance-tracking
+      filters: *runSystemTests
       requires:
         - system-tests-node-modules-install
   - system-tests-webkit:
       context: test-runner:performance-tracking
+      filters: *runSystemTests
       requires:
         - system-tests-node-modules-install
   - system-tests-non-root:
       context: test-runner:performance-tracking
       executor: non-root-docker-user
+      filters: *runSystemTests
       requires:
         - system-tests-node-modules-install
   - driver-integration-tests-chrome:
       context: test-runner:cypress-record-key
+      filters: &runDriverTests pipeline.parameters.run-driver-tests == true
       requires:
         - ready-to-test
   - h2-dual-stack-tests:
       context: test-runner:performance-tracking
+      filters: *runSystemTests
       requires:
         - ready-to-test
   - driver-integration-tests-chrome-inject-document-domain:
       context: test-runner:cypress-record-key
+      filters: *runDriverTests
       requires:
         - ready-to-test
   - driver-integration-tests-chrome-beta:
       context: test-runner:cypress-record-key
+      filters: *runDriverTests
       requires:
         - ready-to-test
   - driver-integration-tests-chrome-beta-inject-document-domain:
       context: test-runner:cypress-record-key
+      filters: *runDriverTests
       requires:
         - ready-to-test
   - driver-integration-tests-firefox:
       context: test-runner:cypress-record-key
+      filters: *runDriverTests
       requires:
         - ready-to-test
   - driver-integration-tests-electron:
       context: test-runner:cypress-record-key
+      filters: *runDriverTests
       requires:
         - ready-to-test
   - driver-integration-tests-webkit:
       context: test-runner:cypress-record-key
+      filters: *runDriverTests
       requires:
         - ready-to-test
   - driver-integration-memory-tests:
+      filters: *runDriverTests
       requires:
         - ready-to-test
   - run-frontend-shared-component-tests-chrome:
@@ -172,6 +192,7 @@ jobs:
           test-runner:percy
         ]
       percy: true
+      filters: &runFrontendSharedTests pipeline.parameters.run-frontend-shared-tests == true
       requires:
         - ready-to-test
   - run-launchpad-integration-tests-chrome:
@@ -182,6 +203,7 @@ jobs:
           test-runner:percy
         ]
       percy: true
+      filters: &runLaunchpadTests pipeline.parameters.run-launchpad-tests == true
       requires:
         - ready-to-test
   - run-launchpad-component-tests-chrome:
@@ -192,6 +214,7 @@ jobs:
           test-runner:percy
         ]
       percy: true
+      filters: *runLaunchpadTests
       requires:
         - ready-to-test
   - run-app-integration-tests-chrome:
@@ -202,14 +225,17 @@ jobs:
           test-runner:percy
         ]
       percy: true
+      filters: &runAppUiTests pipeline.parameters.run-app-ui-tests == true
       requires:
         - ready-to-test
   - run-webpack-dev-server-integration-tests:
       context: [ test-runner:cypress-record-key, test-runner:percy ]
+      filters: &runNpmWebpackDevServerTests pipeline.parameters.run-npm-webpack-dev-server-tests == true
       requires:
         - system-tests-node-modules-install
   - run-vite-dev-server-integration-tests:
       context: [ test-runner:cypress-record-key, test-runner:percy ]
+      filters: &runNpmViteDevServerTests pipeline.parameters.run-npm-vite-dev-server-tests == true
       requires:
         - system-tests-node-modules-install
   - run-app-component-tests-chrome:
@@ -220,63 +246,82 @@ jobs:
           test-runner:percy
         ]
       percy: true
+      filters: *runAppUiTests
       requires:
         - ready-to-test
   - run-reporter-component-tests-chrome:
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       percy: true
+      filters: &runReporterTests pipeline.parameters.run-reporter-tests == true
       requires:
         - ready-to-test
   - reporter-integration-tests:
       context: [ test-runner:cypress-record-key, test-runner:percy ]
+      filters: *runReporterTests
       requires:
         - ready-to-test
   - npm-webpack-dev-server:
+      filters: *runNpmWebpackDevServerTests
       requires:
         - system-tests-node-modules-install
   - npm-vite-dev-server:
+      filters: *runNpmViteDevServerTests
       requires:
         - ready-to-test
   - npm-vite-plugin-cypress-esm:
+      filters: &runNpmVitePluginEsmTests pipeline.parameters.run-npm-vite-plugin-esm-tests == true
       requires:
         - ready-to-test
   - npm-webpack-preprocessor:
+      filters: &runNpmWebpackPreprocessorTests pipeline.parameters.run-npm-webpack-preprocessor-tests == true
       requires:
         - ready-to-test
   - npm-webpack-batteries-included-preprocessor:
+      filters: &runNpmWebpackBatteriesTests pipeline.parameters.run-npm-webpack-batteries-tests == true
       requires:
         - ready-to-test
   - npm-vue:
+      filters: &runNpmVueTests pipeline.parameters.run-npm-vue-tests == true
       requires:
         - ready-to-test
   - npm-puppeteer-unit-tests:
+      filters: &runNpmPuppeteerTests pipeline.parameters.run-npm-puppeteer-tests == true
       requires:
         - ready-to-test
   - npm-puppeteer-cypress-tests:
+      filters: *runNpmPuppeteerTests
       requires:
         - ready-to-test
   - npm-react:
+      filters: &runNpmReactTests pipeline.parameters.run-npm-react-tests == true
       requires:
         - ready-to-test
   - npm-angular:
+      filters: &runNpmAngularTests pipeline.parameters.run-npm-angular-tests == true
       requires:
         - ready-to-test
   - npm-angular-zoneless:
+      filters: *runNpmAngularTests
       requires:
         - ready-to-test
   - npm-mount-utils:
+      filters: &runNpmMountUtilsTests pipeline.parameters.run-npm-mount-utils-tests == true
       requires:
         - ready-to-test
   - npm-grep:
+      filters: &runNpmGrepTests pipeline.parameters.run-npm-grep-tests == true
       requires:
         - ready-to-test
   - npm-eslint-plugin-dev:
+      filters: &runNpmEslintPluginTests pipeline.parameters.run-npm-eslint-plugin-tests == true
       requires:
         - ready-to-test
   - npm-cypress-schematic:
+      filters: &runNpmSchematicTests pipeline.parameters.run-npm-schematic-tests == true
       requires:
         - ready-to-test
   - v8-integration-tests:
+      filters: &runV8Tests pipeline.parameters.run-v8-tests == true
       requires:
         - system-tests-node-modules-install
 
@@ -291,6 +336,7 @@ jobs:
   # is deferred to #34508 (under #34353).
   - system-tests-chrome:
       name: system-tests-chrome-cdp-remediated
+      filters: *runSystemTests
       context: test-runner:performance-tracking
       disable-proxy: true
       require-opt-in: false
@@ -306,11 +352,13 @@ jobs:
       requires:
         - system-tests-node-modules-install
   - system-tests-cookies-cdp:
+      filters: *runSystemTests
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - run-launchpad-integration-tests-chrome:
       name: run-launchpad-integration-tests-chrome-cdp-remediated
+      filters: *runLaunchpadTests
       context:
         [
           test-runner:cypress-record-key,
@@ -327,6 +375,7 @@ jobs:
         - ready-to-test
   - run-app-integration-tests-chrome:
       name: run-app-integration-tests-chrome-cdp-remediated
+      filters: *runAppUiTests
       context:
         [
           test-runner:cypress-record-key,
@@ -349,6 +398,7 @@ jobs:
         - ready-to-test
   - driver-integration-tests-chrome:
       name: driver-integration-tests-chrome-cdp-remediated
+      filters: *runDriverTests
       context: test-runner:cypress-record-key
       disable-proxy: true
       require-opt-in: false
@@ -366,6 +416,7 @@ jobs:
       requires:
         - ready-to-test
   - unit-tests-proxy-disabled:
+      filters: *runUnitTests
       requires:
         - ready-to-test
 
@@ -376,24 +427,28 @@ jobs:
   # these full suites on until remediations cover the entire suite.
   - driver-integration-tests-chrome:
       name: driver-integration-tests-chrome-cdp
+      filters: pipeline.parameters.run-driver-tests == true and pipeline.parameters.run-proxy-disabled-tests == true
       context: test-runner:cypress-record-key
       disable-proxy: true
       requires:
         - ready-to-test
   - driver-integration-tests-chrome-inject-document-domain:
       name: driver-integration-tests-chrome-inject-document-domain-cdp
+      filters: pipeline.parameters.run-driver-tests == true and pipeline.parameters.run-proxy-disabled-tests == true
       context: test-runner:cypress-record-key
       disable-proxy: true
       requires:
         - ready-to-test
   - system-tests-chrome:
       name: system-tests-chrome-cdp
+      filters: pipeline.parameters.run-system-tests == true and pipeline.parameters.run-proxy-disabled-tests == true
       context: test-runner:performance-tracking
       disable-proxy: true
       requires:
         - system-tests-node-modules-install
   - run-app-integration-tests-chrome:
       name: run-app-integration-tests-chrome-cdp
+      filters: pipeline.parameters.run-app-ui-tests == true and pipeline.parameters.run-proxy-disabled-tests == true
       context:
         [
           test-runner:cypress-record-key,
@@ -405,6 +460,7 @@ jobs:
         - ready-to-test
   - run-launchpad-integration-tests-chrome:
       name: run-launchpad-integration-tests-chrome-cdp
+      filters: pipeline.parameters.run-launchpad-tests == true and pipeline.parameters.run-proxy-disabled-tests == true
       context:
         [
           test-runner:cypress-record-key,
@@ -467,6 +523,7 @@ jobs:
   - percy-finalize:
       context: test-runner:percy
       required_env_var: PERCY_TOKEN
+      filters: pipeline.parameters.percy-enabled == true and (pipeline.parameters.run-app-ui-tests == true or pipeline.parameters.run-cli-tests == true or pipeline.parameters.run-frontend-shared-tests == true or pipeline.parameters.run-launchpad-tests == true or pipeline.parameters.run-npm-vite-dev-server-tests == true or pipeline.parameters.run-npm-webpack-dev-server-tests == true or pipeline.parameters.run-reporter-tests == true)
       requires:
         - cli-visual-tests
         - reporter-integration-tests
