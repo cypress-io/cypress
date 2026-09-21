@@ -60,17 +60,13 @@ The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `h
 
 None of the four runs on every `develop` or `release/*` push. Windows moved for credit cost. The two `darwin-*` workflows moved to free leased self-hosted macOS hardware. `linux-arm64` costs almost nothing and moved for consistency, so all platform coverage lands in one sweep. Per-merge platform signal was not actionable anyway — `develop` passed 47 of 213 runs. A release branch is long-lived enough for a scheduled sweep to cover it the same way.
 
-**What exists today**: a CircleCI Scheduled Pipeline named "Windows Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` at 17:00 and 23:00 UTC and sets `run-windows-workflow=true`. `run-windows-workflow` no longer exists as a pipeline parameter — `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read `run-platform-workflows` now. Until the schedule is repointed at that parameter, every scheduled fire submits an unrecognized parameter and CircleCI rejects the pipeline at creation — loud, not silent, but `linux-arm64`, `darwin-x64`, and `darwin-arm64` still get zero `develop` coverage in the meantime, same as `windows`. There is no release-branch schedule yet at all: `release/*` pushes get zero platform coverage of any kind until one exists.
+**What exists today**: a CircleCI Scheduled Pipeline named "Platform Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` once per weekday at 02:00 UTC and sets `run-platform-workflows=true`. `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read that parameter. There is still no release-branch schedule: `release/*` pushes get zero platform coverage of any kind until one exists.
 
-**What must exist**, to match the gates in `@main.yml`:
+**Still needed**, to match the gates in `@main.yml`:
 
-- **Develop schedule** — repoint the existing schedule (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`):
-  - **Branch**: `develop`
-  - **Parameters to set**: `run-platform-workflows=true` only
-  - **Timetable**: 1×/weekday, Mon–Fri, at 23:00 UTC (drop the 17:00 slot, keep 23:00)
 - **Release schedule** — a second Scheduled Pipeline, targeting whichever `release/*` branch is currently active, setting `run-platform-workflows=true`. Repointing its branch to the new release branch is part of cutting a release; disabling it is part of shipping one. There is no default branch this can target permanently, since release branches are cut and retired.
-- **Owner** (both schedules): App Foundations team
+- **Owner**: App Foundations team
 
-Both are CircleCI project settings, not code — neither is visible anywhere in `.circleci/src`. Changing either requires CircleCI project-settings access (Project Settings → Triggers → Scheduled Pipelines), via the UI or `PATCH /api/v2/schedule/{id}`.
+This is a CircleCI project setting, not code — it isn't visible anywhere in `.circleci/src`. Changing it requires CircleCI project-settings access (Project Settings → Triggers → Scheduled Pipelines), via the UI or `PATCH /api/v2/schedule/{id}`.
 
 For an on-demand run of all four platform workflows outside either schedule (e.g. to validate a change before it reaches `develop`, or to recover a missed/failed release-branch build), use Trigger Pipeline with `run-platform-workflows=true`, or `force-persist-artifacts=true` — the latter works regardless of branch and needs only one flag. See the comment above the `linux-arm64` workflow in `@main.yml`.
