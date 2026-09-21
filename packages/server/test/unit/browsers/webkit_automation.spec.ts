@@ -1,5 +1,5 @@
-import { expect } from 'chai'
-import sinon from 'sinon'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 
 // Builds a minimal Playwright-like request object for exercising the
@@ -32,10 +32,14 @@ const WebKitAutomationCtor = WebKitAutomation as unknown as new (opts: {
 }) => WebKitAutomationInternals
 
 describe('lib/browsers/webkit-automation', () => {
-  context('#handleRequestEvents', () => {
-    let automation
+  describe('#handleRequestEvents', () => {
+    let automation: {
+      onBrowserPreRequest: Mock
+      onRequestEvent: Mock
+      onRemoveBrowserPreRequest: Mock
+    }
     let handlers: Record<string, (request: any) => void>
-    let page
+    let page: { on: (event: string, cb: (request: any) => void) => void }
 
     beforeEach(() => {
       handlers = {}
@@ -46,9 +50,9 @@ describe('lib/browsers/webkit-automation', () => {
       }
 
       automation = {
-        onBrowserPreRequest: sinon.stub(),
-        onRequestEvent: sinon.stub(),
-        onRemoveBrowserPreRequest: sinon.stub(),
+        onBrowserPreRequest: vi.fn(),
+        onRequestEvent: vi.fn(),
+        onRemoveBrowserPreRequest: vi.fn(),
       }
 
       const wkAutomation = new WebKitAutomationCtor({ automation, browser: {} })
@@ -58,11 +62,11 @@ describe('lib/browsers/webkit-automation', () => {
     })
 
     afterEach(() => {
-      sinon.restore()
+      vi.restoreAllMocks()
     })
 
     it('registers request, requestfinished, and requestfailed handlers', () => {
-      expect(handlers).to.have.keys('request', 'requestfinished', 'requestfailed')
+      expect(Object.keys(handlers).sort()).toEqual(['request', 'requestfailed', 'requestfinished'])
     })
 
     // https://github.com/cypress-io/cypress/issues/23810
@@ -75,20 +79,20 @@ describe('lib/browsers/webkit-automation', () => {
       // first the pre-request is emitted, assigning + caching a requestId
       handlers.request(request)
 
-      expect(automation.onBrowserPreRequest).to.have.been.calledOnce
-      const { requestId } = automation.onBrowserPreRequest.getCall(0).args[0]
+      expect(automation.onBrowserPreRequest).toHaveBeenCalledTimes(1)
+      const { requestId } = automation.onBrowserPreRequest.mock.calls[0][0]
 
       // then the request fails (e.g. due to forceNetworkError)
       handlers.requestfailed(request)
 
-      expect(automation.onRemoveBrowserPreRequest).to.have.been.calledOnceWith(requestId)
+      expect(automation.onRemoveBrowserPreRequest).toHaveBeenCalledWith(requestId)
     })
 
     it('ignores requestfailed for a request that never emitted a pre-request', () => {
       // a request with no mapped id (e.g. a filtered /__cypress request) is a no-op
       handlers.requestfailed(makePwRequest('https://www.foobar.com/bar'))
 
-      expect(automation.onRemoveBrowserPreRequest).not.to.have.been.called
+      expect(automation.onRemoveBrowserPreRequest).not.toHaveBeenCalled()
     })
   })
 })
