@@ -413,6 +413,12 @@ describe('src/cy/commands/screenshot', () => {
       .screenshot()
     })
 
+    // https://github.com/cypress-io/cypress/issues/2034
+    it('does not error with "offset out of range" when capturing an element', () => {
+      cy.visit('/fixtures/issue-2034.html')
+      cy.get('#blue').screenshot()
+    })
+
     describe('before/after events', () => {
       beforeEach(function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
