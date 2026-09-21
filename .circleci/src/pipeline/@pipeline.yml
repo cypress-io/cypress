@@ -3110,7 +3110,10 @@ jobs:
             LOGIN=$(curl -sS -H "$AUTH" \
               "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1" \
               | jq -r '.author.login // empty') || true
-            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($CIRCLE_BUILD_URL)"
+            # CIRCLE_BUILD_URL points at this notifier, which is green and tells
+            # the author nothing. Link the workflow holding the failed jobs.
+            WORKFLOW_URL="https://app.circleci.com/workflow/$CIRCLE_WORKFLOW_ID"
+            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($WORKFLOW_URL)"
 
             curl -sfS -X POST -H "$AUTH" \
               "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1/comments" \
