@@ -5,14 +5,36 @@ import * as terminalSize from '../../../lib/util/terminal-size'
 
 const ttys = [process.stdin.isTTY, process.stdout.isTTY, process.stderr.isTTY]
 
+const stdoutGetWindowSize = Object.getOwnPropertyDescriptor(process.stdout, 'getWindowSize')
+const stderrGetWindowSize = Object.getOwnPropertyDescriptor(process.stderr, 'getWindowSize')
+
+function restoreGetWindowSize () {
+  if (stdoutGetWindowSize) {
+    Object.defineProperty(process.stdout, 'getWindowSize', stdoutGetWindowSize)
+  } else {
+    Reflect.deleteProperty(process.stdout, 'getWindowSize')
+  }
+
+  if (stderrGetWindowSize) {
+    Object.defineProperty(process.stderr, 'getWindowSize', stderrGetWindowSize)
+  } else {
+    Reflect.deleteProperty(process.stderr, 'getWindowSize')
+  }
+}
+
 describe('lib/util/tty', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    restoreGetWindowSize()
+  })
+
   describe('getWindowSize', () => {
     it('polyfills stdout and stderr getWindowSize', () => {
       vi.spyOn(tty, 'isatty').mockReturnValue(true)
       vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 10, rows: 20 })
 
-      vi.spyOn(process.stdout, 'getWindowSize').mockReturnValue(undefined as unknown as [number, number])
-      vi.spyOn(process.stderr, 'getWindowSize').mockReturnValue(undefined as unknown as [number, number])
+      Reflect.deleteProperty(process.stdout, 'getWindowSize')
+      Reflect.deleteProperty(process.stderr, 'getWindowSize')
 
       ttyUtil.override()
 
@@ -34,8 +56,6 @@ describe('lib/util/tty', () => {
     })
 
     afterEach(() => {
-      vi.restoreAllMocks()
-
       // restore sanity
       process.stdin.isTTY = ttys[0]
       process.stdout.isTTY = ttys[1]
