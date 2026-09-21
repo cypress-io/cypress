@@ -4333,6 +4333,54 @@ describe('network stubbing', { retries: 15 }, function () {
         cy.wait('@netAlias').its('response.body').should('equal', 'my value')
       })
 
+      // Command overwrites persist for the rest of the spec, so these two run
+      // before any test in this context overwrites cy.intercept.
+      // https://github.com/cypress-io/cypress/issues/3890
+      it('stores intercept as an alias for a request made from the AUT window', () => {
+        // sanity test before overwriting cy.intercept in the next test
+        cy.visit('/fixtures/jquery.html').then((win) => {
+          $(win.document.head).find('script').remove()
+        })
+
+        cy
+        .intercept(/foo/, { body: 'my value' }).as('getFoo')
+        .window().then((win) => {
+          win.$.get('foo')
+
+          return null
+        })
+        .wait('@getFoo').its('response.body').should('equal', 'my value')
+      })
+
+      it('stores intercept as an alias for a request made from the AUT window after overwrite', () => {
+        let routeCalled
+
+        cy.visit('/fixtures/jquery.html').then((win) => {
+          $(win.document.head).find('script').remove()
+        })
+
+        Cypress.Commands.overwrite('intercept', (route, ...args) => {
+          routeCalled = true
+
+          return cy.log(`cy.intercept ${args.join(' ')}`)
+          .then(() => {
+            return route(...args)
+          })
+        })
+
+        cy
+        .intercept(/foo/, { body: 'my value' }).as('getFoo')
+        .window().then((win) => {
+          win.$.get('foo')
+
+          return null
+        })
+        .wait('@getFoo').its('response.body').should('equal', 'my value')
+        .then(() => {
+          expect(routeCalled, 'route overwrite was called').to.be.true
+        })
+      })
+
       it('works with an alias and function', () => {
         let myInterceptCalled
         const url = uniqueRoute('/foo')

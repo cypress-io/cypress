@@ -94,3 +94,10 @@ describe('cy.env()', () => {
     })
   })
 })
+
+// https://github.com/cypress-io/cypress/issues/18805
+describe('CYPRESS process env var', () => {
+  it('is set in the process that runs the config file', () => {
+    cy.task('cypress:env').should('eq', 'true')
+  })
+})
