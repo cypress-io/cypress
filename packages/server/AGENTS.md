@@ -31,6 +31,10 @@ yarn workspace @packages/server test-integration -- --grep "video capture"
 yarn workspace @packages/server build-prod
 ```
 
+**Migrating a unit spec from mocha to vitest**
+
+Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/server-mocha-to-vitest/SKILL.md) first. It covers the runner contract and the conversions that pass while silently proving less than the mocha original. The migration is tracked in [cypress-io/cypress#34846](https://github.com/cypress-io/cypress/issues/34846).
+
 **Architecture**
 
 - `lib/browsers/` — Browser launch, automation, and CDP/BiDi communication for Chrome, Firefox, Electron, and WebKit
