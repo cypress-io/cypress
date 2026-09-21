@@ -47,7 +47,7 @@ const normalizeCookies = (cookies: (SerializableAutomationCookie | AutomationCoo
   return _.map(cookies, normalizeCookieProps) as AutomationCookie[]
 }
 
-const getCookieUrl = (cookie: {
+export const getCookieUrl = (cookie: {
   secure?: boolean | null
   domain?: string | null
   path?: string | null
