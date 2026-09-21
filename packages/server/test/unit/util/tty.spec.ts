@@ -1,38 +1,41 @@
 import tty from 'tty'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import * as ttyUtil from '../../../lib/util/tty'
 import * as terminalSize from '../../../lib/util/terminal-size'
 
 const ttys = [process.stdin.isTTY, process.stdout.isTTY, process.stderr.isTTY]
 
 describe('lib/util/tty', () => {
-  context('getWindowSize', () => {
+  describe('getWindowSize', () => {
     it('polyfills stdout and stderr getWindowSize', () => {
-      sinon.stub(tty, 'isatty').returns(true)
-      sinon.stub(terminalSize, 'get').returns({ columns: 10, rows: 20 })
+      vi.spyOn(tty, 'isatty').mockReturnValue(true)
+      vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 10, rows: 20 })
 
-      sinon.stub(process.stdout, 'getWindowSize').value(undefined)
-      sinon.stub(process.stderr, 'getWindowSize').value(undefined)
+      vi.spyOn(process.stdout, 'getWindowSize').mockReturnValue(undefined as unknown as [number, number])
+      vi.spyOn(process.stderr, 'getWindowSize').mockReturnValue(undefined as unknown as [number, number])
 
       ttyUtil.override()
 
-      expect(process.stdout.getWindowSize()).to.deep.eq([10, 20])
-      expect(process.stderr.getWindowSize()).to.deep.eq([10, 20])
+      expect(process.stdout.getWindowSize()).toEqual([10, 20])
+      expect(process.stderr.getWindowSize()).toEqual([10, 20])
     })
   })
 
-  context('.override', () => {
+  describe('.override', () => {
     beforeEach(() => {
       process.env.FORCE_STDIN_TTY = '1'
       process.env.FORCE_STDOUT_TTY = '1'
       process.env.FORCE_STDERR_TTY = '1'
 
       // do this so can we see when its modified
-      process.stdin.isTTY = 'foo'
-      process.stdout.isTTY = 'foo'
-      process.stderr.isTTY = 'foo'
+      process.stdin.isTTY = 'foo' as unknown as boolean
+      process.stdout.isTTY = 'foo' as unknown as boolean
+      process.stderr.isTTY = 'foo' as unknown as boolean
     })
 
     afterEach(() => {
+      vi.restoreAllMocks()
+
       // restore sanity
       process.stdin.isTTY = ttys[0]
       process.stdout.isTTY = ttys[1]
@@ -46,25 +49,25 @@ describe('lib/util/tty', () => {
 
       ttyUtil.override()
 
-      expect(process.stdin.isTTY).to.eq('foo')
-      expect(process.stdout.isTTY).to.eq('foo')
+      expect(process.stdin.isTTY).toBe('foo')
+      expect(process.stdout.isTTY).toBe('foo')
 
-      expect(process.stderr.isTTY).to.eq('foo')
+      expect(process.stderr.isTTY).toBe('foo')
     })
 
     it('forces process.stderr.isTTY to be true', () => {
       ttyUtil.override()
 
-      expect(process.stdin.isTTY).to.be.true
-      expect(process.stdout.isTTY).to.be.true
+      expect(process.stdin.isTTY).toBe(true)
+      expect(process.stdout.isTTY).toBe(true)
 
-      expect(process.stderr.isTTY).to.be.true
+      expect(process.stderr.isTTY).toBe(true)
     })
 
     it('modifies isatty calls', () => {
       delete process.env.FORCE_STDERR_TTY
 
-      const isatty = sinon.spy(tty, 'isatty')
+      const isatty = vi.spyOn(tty, 'isatty')
 
       ttyUtil.override()
 
@@ -75,9 +78,9 @@ describe('lib/util/tty', () => {
       tty.isatty(1)
       tty.isatty(2)
 
-      expect(isatty.callCount).to.eq(1)
+      expect(isatty.mock.calls).toHaveLength(1)
 
-      expect(isatty.firstCall).to.be.calledWith(2)
+      expect(isatty.mock.calls[0][0]).toBe(2)
     })
   })
 })
