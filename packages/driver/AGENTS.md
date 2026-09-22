@@ -42,6 +42,15 @@ src/
 - `postinstall` runs `patch-package` to apply local patches to dependencies.
 - Cross-origin testing (`cy.origin`) relies on the `cross-origin/` spec bridge and a secondary `cypress.ts` bundle injected into cross-origin frames.
 
+## Regression tests for GitHub issues
+
+A regression test for a GitHub issue goes in the spec under `cypress/e2e/` for the command or behavior it exercises (`commands/actions/click.cy.ts`, `e2e/uncaught_errors.cy.ts`, and so on). Title it by the behavior it checks, not by the issue number, and put the issue URL as a comment directly above the test:
+
+```ts
+// https://github.com/cypress-io/cypress/issues/8279
+it('can click a button inside a large div with tabindex=0 without scrolling', () => {
+```
+
 ## Integration Points
 
 - Runtime dependency of **@packages/runner** (bundled) and implicitly **@packages/app** (loaded via Module Federation).
