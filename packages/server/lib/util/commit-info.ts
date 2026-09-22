@@ -65,7 +65,11 @@ function getGitCommands (): Record<keyof CommitInfo, GitCommand> {
     },
     message: {
       envVar: 'COMMIT_INFO_MESSAGE',
-      gitCmd: ['show', '-s', '--pretty=%B'],
+      // `git show` sets up a diff even when `-s` suppresses printing it, so in a
+      // partial clone it can lazily fetch objects from the promisor remote. In CI
+      // that fetch has no credentials and blocks on ssh's host-key prompt until the
+      // job times out. `git log -1` never prepares a diff, and yields the same body.
+      gitCmd: ['log', '-1', '--pretty=format:%B'],
     },
     email: {
       envVar: 'COMMIT_INFO_EMAIL',
