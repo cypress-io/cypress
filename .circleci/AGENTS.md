@@ -46,8 +46,10 @@ After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 ### What runs with only `&full-workflow-filters`
 
-- **`linux-x64`**: most develop CI (build, system tests, `v8-integration-tests`, packaging, the full binary build-and-verify chain, etc.) — subject to path filtering unless overridden
-- **`windows`**: Windows build, binary artifacts, v8 integration tests, and selected integration/unit jobs
-- **`linux-arm64` / `darwin-*`**: platform builds, packaging, and v8 integration tests where supported
+The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `halt-if-skipped`), not in the workflow files, so they apply to every workflow below — not just the PR one.
+
+- **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-build-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs, system tests, and `v8-integration-tests` are guarded, so a webhook push to `develop` runs only the ones its changed paths select.
+- **`windows`**: doesn't run on a plain `develop` or `release/*` push; it runs from a CircleCI Scheduled Pipeline instead (see the comment above the `windows` workflow in `@main.yml`). Its `v8-integration-tests`, `driver-integration-memory-tests`, and selected integration/unit jobs are guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside it is actually path-filtered once it runs.
+- **`linux-arm64` / `darwin-*`**: run on every `&full-workflow-filters` push, with the same `run-*` parameters as `linux-x64`.
 
 `npm-release` still runs only on `develop`, not on allowlisted feature branches.

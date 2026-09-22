@@ -183,6 +183,8 @@ jobs:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
                 RUN_PROXY_DISABLED_TESTS: << pipeline.parameters.run-proxy-disabled-tests >>
                 PERCY_ENABLED: << pipeline.parameters.percy-enabled >>
+                TRIGGER_SOURCE: "<< pipeline.trigger_source >>"
+                BASE_REVISION: "<< pipeline.git.base_revision >>"
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

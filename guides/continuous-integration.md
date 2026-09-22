@@ -33,6 +33,8 @@ caught by the develop build. See `notify-binary-failure` below.
 
 Runs on pushes to `develop` and `release/*` branches. Includes everything from the PR workflow plus:
 
+**Note:** a webhook push to `develop` is path-filtered the same way PRs are — only the job groups touched by the merge's changed files run. Everything else runs unfiltered: `release/*` pushes, and, on `develop`, the scheduled nightly cron and any manually triggered run. Filtering never skips the binary/packaging chain, `npm-release`, or `verify-release-readiness`.
+
 | Stage | What It Does |
 |-------|--------------|
 | Multi-Platform Builds | Linux x64, Linux ARM64, macOS Intel, macOS Apple Silicon, Windows |
@@ -46,9 +48,10 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 | Trigger | Workflow | Notes |
 |---------|----------|-------|
 | PR opened/updated | Pull Request | Skipped for draft PRs |
-| Push to `develop` | Full | Runs complete test suite + binary builds |
-| Push to `release/*` | Full | Same as develop |
-| Manual (CircleCI UI) | Configurable | Can run full workflow on any branch |
+| Push to `develop` | Full | Path-filtered by changed files; binary builds and release gating always run |
+| Push to `release/*` | Full | Runs the complete test suite and binary builds, unfiltered |
+| Scheduled pipeline | Full | Always unfiltered on `develop`, even though it runs on that branch |
+| Manual (CircleCI UI) | Configurable | Can run the full workflow on any branch; `run-all-jobs=true` forces everything |
 
 ### Key Jobs
 
