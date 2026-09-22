@@ -72,9 +72,6 @@ declare namespace Cypress {
   }
 
   interface Clock {
-    // The clock `cy.clock()` yields reports the state it installed, and accepts
-    // log options on the two methods the command wraps. None of that is part of
-    // the published `Clock`, so these merge in as extra overloads.
     details(): { now: number, methods: string[] }
     tick(ms?: number, options?: Partial<Loggable>): number
     restore(options?: Partial<Loggable>): void
