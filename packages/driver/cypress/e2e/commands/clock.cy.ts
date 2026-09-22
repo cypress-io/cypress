@@ -234,6 +234,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid inputs
         cy.clock('250')
       })
 
@@ -245,6 +246,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid inputs
         cy.clock(0, 'setTimeout')
       })
 
@@ -256,12 +258,14 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid inputs
         cy.clock(0, [42])
       })
     })
 
     context('arg for which functions to replace', () => {
       it('replaces specified functions', (done) => {
+        // @ts-expect-error - a null `now` keeps the current time, which the published types omit
         cy.clock(null, ['setTimeout']).then(function (clock) {
           this.window.setTimeout(() => {
             expect(this.setTimeoutSpy).to.be.calledOnce
@@ -274,6 +278,7 @@ describe('src/cy/commands/clock', () => {
       })
 
       it('does not replace other functions', function (done) {
+        // @ts-expect-error - a null `now` keeps the current time, which the published types omit
         cy.clock(null, ['setTimeout']).then((clock) => {
           const interval = this.window.setInterval(() => {
             this.window.clearInterval(interval)
@@ -323,6 +328,7 @@ describe('src/cy/commands/clock', () => {
 
     context('window changes', () => {
       it('binds to default window before visit', () => {
+        // @ts-expect-error - a null `now` keeps the current time, which the published types omit
         cy.clock(null, ['setTimeout']).then((clock) => {
           const onSetTimeout = cy.spy()
 
@@ -335,8 +341,8 @@ describe('src/cy/commands/clock', () => {
 
       it('re-binds to new window when window changes', () => {
         const newWindow = {
-          setTimeout () {},
-          clearTimeout () {},
+          setTimeout (_fn: TimerHandler, _ms?: number) {},
+          clearTimeout (_id?: number) {},
           Date: function Date () {},
           XMLHttpRequest: {
             prototype: {},
@@ -344,6 +350,7 @@ describe('src/cy/commands/clock', () => {
           Function,
         }
 
+        // @ts-expect-error - a null `now` keeps the current time, which the published types omit
         cy.clock(null, ['setTimeout']).then((clock) => {
           Cypress.emit('window:before:load', newWindow)
           const onSetTimeout = cy.spy()
@@ -366,7 +373,7 @@ describe('src/cy/commands/clock', () => {
           cy.clock()
           cy.visit('/fixtures/generic.html')
           cy.window().then((win) => {
-            // override the setTimeout function now
+            // @ts-expect-error - the AUT replacing setTimeout with an incompatible stub is what this reproduces
             win.setTimeout = () => {}
           })
         })
@@ -380,7 +387,7 @@ describe('src/cy/commands/clock', () => {
           cy.clock().then((clock) => {
             cy.visit('/fixtures/generic.html')
             cy.window().then((win) => {
-              // override the setTimeout function now
+              // @ts-expect-error - the AUT replacing setTimeout with an incompatible stub is what this reproduces
               win.setTimeout = () => { }
 
               // manually restore the clock
@@ -560,6 +567,7 @@ describe('src/cy/commands/clock', () => {
 
     it('defaults to 0ms', () => {
       cy.clock()
+      // @ts-expect-error - `cy.tick()` defaults to 0ms, which the published types omit
       .tick().then(function (clock) {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
@@ -576,6 +584,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - `cy.tick()` defaults to 0ms, which the published types omit
         cy.tick()
       })
 
@@ -587,6 +596,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid inputs
         cy.clock().tick('100')
       })
     })
