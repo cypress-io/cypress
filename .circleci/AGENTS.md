@@ -12,7 +12,7 @@ Add a branch when the change affects behavior that is only validated by main-bra
 
 - **Windows jobs** — the `windows` workflow (`windows-v8-integration-tests`, `windows-create-build-artifacts`, etc.)
 - **V8 snapshot / packaging tooling** — `v8-integration-tests` on Linux, macOS, and Windows; snapshot cache updates in `tooling/v8-snapshot/cache/`
-- **Full binary tests** — kitchensink, staging, and npm-module verification jobs (see optional gates below)
+- **Full binary tests** — kitchensink, staging, and npm-module verification jobs (see optional gates below). These no longer run on pull requests at all, so an allowlisted branch is the only way to exercise them before merge.
 
 If only unit/integration tests scoped to changed packages are sufficient, do **not** add the branch — use a normal PR branch instead.
 
@@ -38,6 +38,7 @@ This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-ar
 | Location | When you also need it |
 |----------|------------------------|
 | `pull-request.yml` exclusion list | Avoid the PR workflow running in parallel with the main workflows on the same branch |
+| `notify-binary-failure`'s `filters:` in `@main.yml` | Testing binary failure alerting on a branch — it is pinned to `develop`, so it never fires elsewhere |
 | `generate-pipeline-parameters.sh` branch override | Force every path-filtered job to run even when changed files would not normally select them (or trigger manually with `run-all-jobs=true`) |
 | `&mainBuildFilters` in `@main.yml` | Binary/kitchensink/staging jobs in `linux-x64` that have an extra branch filter beyond the workflow `when:` |
 
@@ -47,7 +48,7 @@ After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 ### Per-workflow gates
 
-- **`linux-x64`**: most develop CI (build, system tests, `v8-integration-tests`, packaging, etc.) — subject to path filtering unless overridden
+- **`linux-x64`**: most develop CI (build, system tests, `v8-integration-tests`, packaging, the full binary build-and-verify chain, etc.) — subject to path filtering unless overridden
 - **`windows`**: Windows build, binary artifacts, v8 integration tests, and selected integration/unit jobs
 - **`linux-arm64` / `darwin-*`**: platform builds, packaging, and v8 integration tests where supported
 
