@@ -15,13 +15,37 @@ describe('lib/util/tty', () => {
       vi.spyOn(tty, 'isatty').mockReturnValue(true)
       vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 10, rows: 20 })
 
-      vi.spyOn(process.stdout, 'getWindowSize').mockReturnValue(undefined as unknown as [number, number])
-      vi.spyOn(process.stderr, 'getWindowSize').mockReturnValue(undefined as unknown as [number, number])
+      const stdoutGetWindowSize = process.stdout.getWindowSize
+      const stderrGetWindowSize = process.stderr.getWindowSize
+
+      Object.defineProperty(process.stdout, 'getWindowSize', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      })
+
+      Object.defineProperty(process.stderr, 'getWindowSize', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      })
 
       ttyUtil.override()
 
       expect(process.stdout.getWindowSize()).toEqual([10, 20])
       expect(process.stderr.getWindowSize()).toEqual([10, 20])
+
+      if (stdoutGetWindowSize) {
+        process.stdout.getWindowSize = stdoutGetWindowSize
+      } else {
+        Reflect.deleteProperty(process.stdout, 'getWindowSize')
+      }
+
+      if (stderrGetWindowSize) {
+        process.stderr.getWindowSize = stderrGetWindowSize
+      } else {
+        Reflect.deleteProperty(process.stderr, 'getWindowSize')
+      }
     })
   })
 
