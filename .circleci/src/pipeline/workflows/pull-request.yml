@@ -471,53 +471,9 @@ jobs:
       requires:
         - ready-to-test
 
-  - create-build-artifacts:
-      context:
-        - test-runner:upload
-        - test-runner:commit-status-checks
-        - test-runner:build-binary
-      requires:
-        - node_modules_install
-        - internal-pr-build
-      filters:
-        branches:
-          ignore: /^pull\/[0-9]+/
   - test-kitchensink:
       requires:
         - ready-to-test
-  - test-npm-module-on-minimum-node-version:
-      requires:
-        - create-build-artifacts
-  - test-types-cypress-and-jest:
-      requires:
-        - create-build-artifacts
-  - test-full-typescript-project:
-      requires:
-        - create-build-artifacts
-  - test-binary-against-kitchensink:
-      requires:
-        - create-build-artifacts
-  - test-binary-as-specific-user:
-      name: "test binary as a non-root user"
-      executor: non-root-docker-user
-      requires:
-        - create-build-artifacts
-  - test-binary-as-specific-user:
-      name: "test binary as a root user"
-      requires:
-        - create-build-artifacts
-  - binary-system-tests:
-      requires:
-        - create-build-artifacts
-        - system-tests-node-modules-install
-  - yarn-pnp-preprocessor-system-test:
-      requires:
-        - create-build-artifacts
-        - system-tests-node-modules-install
-  - svelte-webpack-system-test:
-      requires:
-        - create-build-artifacts
-        - system-tests-node-modules-install
 
   # Finalization jobs
   - percy-finalize:
