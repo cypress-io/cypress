@@ -20,11 +20,15 @@ import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
 import { GracefulExit, getPeerWaitTimeoutMs } from './util/graceful-exit'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 import { resolveTrustedCertificateFingerprints } from './util/spki'
+import { createMtlsBridge } from './mtls'
+import type { MtlsBridgeLaunchOpts } from './mtls'
+import * as appData from './util/app_data'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject extends EventEmitter {
   private projectBase: ProjectBase | null = null
+  private _mtlsBridge?: MtlsBridgeLaunchOpts
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -92,6 +96,18 @@ export class OpenProject extends EventEmitter {
     // re-deriving it from config, so the two can never disagree.
     const useBrowserNetworkInterception = isBrowserNetworkMode(cfg, browser)
 
+    // The browser presents no client certificate of its own — CDP exposes no way to give it
+    // one — so configured origins are steered at a local bridge that performs the handshake
+    // from this process. Nothing starts when no certificate is configured.
+    await this._closeMtlsBridge()
+
+    if (useBrowserNetworkInterception && cfg.clientCertificates?.length) {
+      this._mtlsBridge = await createMtlsBridge({
+        clientCertificates: cfg.clientCertificates,
+        caFolder: appData.path('proxy'),
+      })
+    }
+
     const options: BrowserLaunchOpts = {
       browser: browser as FoundBrowser & { isHeadless: boolean },
       url,
@@ -117,6 +133,7 @@ export class OpenProject extends EventEmitter {
         // trusted must be handed to the browser as SPKI fingerprints. A bad entry throws a
         // Cypress error naming the offending `trustedCertificates` entry.
         trustedCertificateFingerprints: resolveTrustedCertificateFingerprints(cfg.trustedCertificates ?? [], cfg.projectRoot),
+        mtlsHostResolverRules: this._mtlsBridge?.hostResolverRules,
         ...translateEgressPolicyToLaunchOpts(cfg.hosts),
         hosts: cfg.hosts,
         shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
@@ -252,6 +269,11 @@ export class OpenProject extends EventEmitter {
     return this.projectBase?.resetBrowserState()
   }
 
+  private async _closeMtlsBridge () {
+    await this._mtlsBridge?.close()
+    this._mtlsBridge = undefined
+  }
+
   async closeOpenProjectAndBrowsers () {
     // Wait for the HTTP server to release its port before the next open
     // (cy-in-cy reopens on hardcoded 4455; Windows is especially sensitive).
@@ -260,6 +282,8 @@ export class OpenProject extends EventEmitter {
     } catch (e) {
       this._ctx?.logTraceError(e)
     }
+
+    await this._closeMtlsBridge()
 
     this.resetOpenProject()
 

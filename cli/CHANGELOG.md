@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Bugfixes:**
+
+- Fixed a regression in [16.0.0](#16-0-0) where a configured [`clientCertificates`](https://docs.cypress.io/app/references/configuration#clientCertificates) entry was not presented for requests the browser issued in Chrome, Chromium, and Edge, so an origin requiring mutual TLS showed a certificate prompt in `cypress open` and hung in `cypress run`. Fixes [#34807](https://github.com/cypress-io/cypress/issues/34807).
+
 **Misc:**
 
 - TypeScript now types the `docsUrl` property on the error passed to an [`uncaught:exception`](https://on.cypress.io/catalog-of-events) handler as `string | string[]`. An uncaught exception carries the docs url for your application's error alongside the Cypress one, so `docsUrl` can hold more than one url at a time. Addressed in [#34879](https://github.com/cypress-io/cypress/pull/34879).
