@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import * as capture from '../../lib/capture'
 
 describe('lib/capture', () => {
@@ -6,60 +8,72 @@ describe('lib/capture', () => {
     return capture.restore()
   })
 
-  context('process.stdout.write', () => {
-    beforeEach(function () {
-      this.write = sinon.spy(process.stdout, 'write')
-      this.captured = capture.stdout()
+  describe('process.stdout.write', () => {
+    let write: Mock
+    let captured: ReturnType<typeof capture.stdout>
+
+    beforeEach(() => {
+      write = vi.spyOn(process.stdout, 'write') as unknown as Mock
+      captured = capture.stdout()
     })
 
-    it('slurps up stdout', function () {
+    afterEach(() => {
+      write.mockRestore()
+    })
+
+    it('slurps up stdout', () => {
       console.log('foo')
       console.log('bar')
       process.stdout.write('baz')
 
-      expect(this.captured.data).to.deep.eq([
+      expect(captured.data).toEqual([
         'foo\n',
         'bar\n',
         'baz',
       ])
 
-      expect(this.captured.toString()).to.eq('foo\nbar\nbaz')
+      expect(captured.toString()).toEqual('foo\nbar\nbaz')
 
       // should still call through to write
-      expect(this.write).to.be.calledWith('foo\n')
-      expect(this.write).to.be.calledWith('bar\n')
+      expect(write).toHaveBeenCalledWith('foo\n')
+      expect(write).toHaveBeenCalledWith('bar\n')
 
-      expect(this.write).to.be.calledWith('baz')
+      expect(write).toHaveBeenCalledWith('baz')
     })
   })
 
-  context('process.log', () => {
-    beforeEach(function () {
-      this.log = process.log
-      this.logStub = (process.log = sinon.stub())
+  describe('process.log', () => {
+    let log: typeof process.log
+    let logStub: Mock
+    let captured: ReturnType<typeof capture.stdout>
 
-      this.captured = capture.stdout()
+    beforeEach(() => {
+      log = process.log
+      logStub = vi.fn()
+      process.log = logStub as typeof process.log
+
+      captured = capture.stdout()
     })
 
-    afterEach(function () {
-      process.log = this.log
+    afterEach(() => {
+      process.log = log
     })
 
-    it('slurps up logs', function () {
+    it('slurps up logs', () => {
       process.log('foo\n')
       process.log('bar\n')
 
-      expect(this.captured.data).to.deep.eq([
+      expect(captured.data).toEqual([
         'foo\n',
         'bar\n',
       ])
 
-      expect(this.captured.toString()).to.eq('foo\nbar\n')
+      expect(captured.toString()).toEqual('foo\nbar\n')
 
       // should still call through to write
-      expect(this.logStub).to.be.calledWith('foo\n')
+      expect(logStub).toHaveBeenCalledWith('foo\n')
 
-      expect(this.logStub).to.be.calledWith('bar\n')
+      expect(logStub).toHaveBeenCalledWith('bar\n')
     })
   })
 })
