@@ -361,6 +361,8 @@ describe('testConfigOverrides baseUrl @slow', () => {
   })
 })
 
+// `TestConfigOverrides` types only the options a test may override, so the calls naming
+// the ones this suite rejects are type errors as well as runtime ones.
 describe('cannot set override configuration options that', () => {
   afterEach(() => {
     window.top!.__cySkipValidateConfig = true
@@ -373,7 +375,7 @@ describe('cannot set override configuration options that', () => {
       done()
     })
 
-    // @ts-expect-error - read-only options are absent from `TestConfigOverrides`
+    // @ts-expect-error
     Cypress.config('chromeWebSecurity', false)
   })
 
@@ -415,13 +417,13 @@ describe('cannot set override configuration options that', () => {
       done()
     })
 
-    // @ts-expect-error - `env` was removed from `TestConfigOverrides` in Cypress 16
+    // @ts-expect-error
     Cypress.config('env', { FOO: 'bar' })
   })
 
   it('does not throw for non-Cypress config values', () => {
     expect(() => {
-      // @ts-expect-error - `TestConfigOverrides` enumerates Cypress' own options only
+      // @ts-expect-error
       Cypress.config('foo', 'bar')
     }).to.not.throw()
   })
