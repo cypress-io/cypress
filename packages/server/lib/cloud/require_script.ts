@@ -13,7 +13,13 @@ export const requireScript = <T>(script: string): T => {
   // @ts-expect-error
   mod._compile(script, mod.filename)
 
-  module.children.splice(module.children.indexOf(mod), 1)
+  if (module.children) {
+    const index = module.children.indexOf(mod)
+
+    if (index !== -1) {
+      module.children.splice(index, 1)
+    }
+  }
 
   return mod.exports as T
 }
