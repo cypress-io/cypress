@@ -43,8 +43,9 @@ parameters:
   run-platform-workflows:
     type: boolean
     default: false
-  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
-  # Default true so develop/release branches run everything without explicit params.
+  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PR
+  # branches and on webhook pushes to develop. Default true so that any pipeline
+  # whose continuation omits them runs everything.
   run-driver-tests:
     type: boolean
     default: true
@@ -1749,7 +1750,7 @@ commands:
             ssh-keyscan github.com >> ~/.ssh/known_hosts
 
   # Halts a job immediately if its guard parameter is false.
-  # Used to skip jobs that are not relevant to the changed files in a PR.
+  # Used to skip jobs that are not relevant to the changed files.
   # The job still exits with "success" so downstream jobs and all-jobs-passed
   # are not blocked.
   halt-if-skipped:
@@ -2128,6 +2129,11 @@ jobs:
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 3
 
+  # Unguarded: a release gate rather than a test group, and the only check on
+  # either release train. `test-npm-package-release-script` is the dry run of
+  # the @cypress/* publish that `npm-release` performs for real later in this
+  # same pipeline; `validate-binary-changelog.js` validates cli/CHANGELOG.md
+  # for the binary release. Neither depends on which paths changed.
   verify-release-readiness:
     <<: *defaults
     resource_class: medium.gen2
@@ -2135,8 +2141,6 @@ jobs:
     environment:
       GITHUB_TOKEN: $GH_TOKEN
     steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
@@ -3066,6 +3070,61 @@ jobs:
       - post-install-comment:
           package_url_path: ~/cypress/npm-package-url.json
           binary_url_path: ~/cypress/binary-url.json
+
+  # Alerts the author of the commit that broke the binary. Requires every binary
+  # job at `terminal`, so it wakes up however they finished, then asks the API
+  # which of them actually failed - a cancelled or skipped job is not a breakage.
+  # Scope comes from this job's own dependency list, so it follows the `requires:`
+  # block in the workflow rather than a second list of job names that would drift.
+  notify-binary-failure:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small.gen2
+    steps:
+      - run:
+          name: Comment on the commit if a binary job failed
+          command: |
+            # This endpoint paginates and linux-x64 is already ~80 jobs, so a
+            # dropped page would silently report no failures at all.
+            ITEMS="[]"
+            PAGE=""
+            while :; do
+              RESP=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
+                "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?page-token=$PAGE")
+              ITEMS=$(jq -n --argjson a "$ITEMS" --argjson b "$(echo "$RESP" | jq '.items')" '$a + $b')
+              PAGE=$(echo "$RESP" | jq -r '.next_page_token // empty')
+              [[ -n "$PAGE" ]] || break
+            done
+
+            # `failed` is not the only way a job breaks - CircleCI reports
+            # timeouts and infrastructure errors under their own statuses.
+            # `canceled` and `not_run` stay off this list on purpose.
+            FAILED=$(jq -rn --argjson items "$ITEMS" '
+              ["failed","timedout","infrastructure_fail","terminated-unknown"] as $bad
+              | ($items[]|select(.name=="notify-binary-failure").dependencies) as $d
+              | [$items[]|select(.id as $i|$d|index($i))|select(.status as $s|$bad|index($s))|.name]
+              | join(", ")')
+
+            if [[ -z "$FAILED" ]]; then
+              echo "No binary job failed; nothing to report."
+              exit 0
+            fi
+
+            REPO="$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+            AUTH="Authorization: token $GH_TOKEN"
+            # develop is squash-merged, so the commit author is the PR author.
+            # An unresolvable author still gets a comment, just without the tag.
+            LOGIN=$(curl -sS -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1" \
+              | jq -r '.author.login // empty') || true
+            # CIRCLE_BUILD_URL points at this notifier, which is green and tells
+            # the author nothing. Link the workflow holding the failed jobs.
+            WORKFLOW_URL="https://app.circleci.com/workflow/$CIRCLE_WORKFLOW_ID"
+            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($WORKFLOW_URL)"
+
+            curl -sfS -X POST -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1/comments" \
+              --data "$(jq -n --arg b "$BODY" '{body:$b}')"
 
   test-kitchensink:
     <<: *defaults
