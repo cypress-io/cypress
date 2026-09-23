@@ -15,10 +15,6 @@ export const getPathToTheme = () => {
   return path.join(__dirname, '..', 'theme')
 }
 
-export const getPathToRoot = () => {
-  return path.join(__dirname, '..')
-}
-
 export const setHostAndPath = async (host: string, path: string) => {
   const src = getPathToExtension('background.js')
 

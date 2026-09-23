@@ -1,4 +1,5 @@
-import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
+import type { HttpMiddleware } from '../../../lib/http'
+import { HttpStages, _runStage } from '../../../lib/http'
 import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { createProxyNetworkInterception } from '../../../lib/adapters/create-proxy-network-interception'
 

@@ -18,8 +18,6 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "stripInternal": true,
-    "ignoreDeprecations": "5.0",
-    "importsNotUsedAsValues": "error",
     "skipLibCheck": true
   },
   "include": [

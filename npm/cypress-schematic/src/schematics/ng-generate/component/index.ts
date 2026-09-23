@@ -1,4 +1,5 @@
-import { chain, externalSchematic, noop, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
+import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
+import { chain, externalSchematic, noop } from '@angular-devkit/schematics'
 import cypressTest from '../cypress-test'
 import { dirname, parse } from 'path'
 

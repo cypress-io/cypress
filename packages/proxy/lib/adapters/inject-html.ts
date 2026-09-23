@@ -1,7 +1,7 @@
 import iconv from 'iconv-lite'
 import { PassThrough } from 'stream'
 import { concatStream } from '@packages/network'
-import { getDomainNameFromUrl, DocumentDomainInjection } from '@packages/network-tools'
+import { getSuperDomain, DocumentDomainInjection } from '@packages/network-tools'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '../http'
 import * as rewriter from '../http/util/rewriter'
@@ -40,7 +40,7 @@ export async function injectHtml (mw: ResponseInterceptionMiddlewareCtx): Promis
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
       cspNonce: mw.res.injectionNonce,
-      domainName: getDomainNameFromUrl(mw.req.proxiedUrl),
+      domainName: getSuperDomain(mw.req.proxiedUrl),
       wantsInjection,
       wantsSecurityRemoved: mw.res.wantsSecurityRemoved,
       modifyObstructiveThirdPartyCode: mw.config.experimentalModifyObstructiveThirdPartyCode && !mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),

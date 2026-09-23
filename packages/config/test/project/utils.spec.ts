@@ -23,7 +23,7 @@ import {
 } from '../../src/project/utils'
 import { resetIssuedWarnings } from '../../src/browser'
 import path from 'node:path'
-import { Config } from '../../src/project/types'
+import type { Config } from '../../src/project/types'
 import fs from 'fs-extra'
 
 const debug = Debug('test')
@@ -1346,6 +1346,7 @@ describe('config/src/project/utils', () => {
           taskTimeout: { value: 60000, from: 'default' },
           testIsolation: { value: true, from: 'default' },
           trashAssetsBeforeRuns: { value: true, from: 'default' },
+          trustedCertificates: { value: [], from: 'default' },
           userAgent: { value: null, from: 'default' },
           video: { value: false, from: 'default' },
           videoCompression: { value: false, from: 'default' },
@@ -1478,6 +1479,7 @@ describe('config/src/project/utils', () => {
           taskTimeout: { value: 60000, from: 'default' },
           testIsolation: { value: true, from: 'default' },
           trashAssetsBeforeRuns: { value: true, from: 'default' },
+          trustedCertificates: { value: [], from: 'default' },
           userAgent: { value: null, from: 'default' },
           video: { value: false, from: 'default' },
           videoCompression: { value: false, from: 'default' },

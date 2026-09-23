@@ -7,7 +7,7 @@
  * https://github.com/angular/angular-cli/blob/master/packages/schematics/angular/utils/dependencies.ts
  */
 
-import { Tree } from '@angular-devkit/schematics'
+import type { Tree } from '@angular-devkit/schematics'
 import { JSONFile } from './jsonFile'
 
 const PKG_JSON_PATH = '/package.json'

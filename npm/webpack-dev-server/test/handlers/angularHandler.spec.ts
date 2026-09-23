@@ -2,10 +2,12 @@ import { expect, it, describe } from 'vitest'
 import * as fs from 'fs-extra'
 import cloneDeep from 'lodash/cloneDeep'
 import * as path from 'path'
-import {
-  angularHandler,
+import type {
   AngularWebpackDevServerConfig,
   BuildOptions,
+} from '../../src/helpers/angularHandler'
+import {
+  angularHandler,
   generateTsConfig,
   getAngularBuildOptions,
   getAngularCliModules,

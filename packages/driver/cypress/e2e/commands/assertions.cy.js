@@ -2236,11 +2236,11 @@ describe('src/cy/commands/assertions', () => {
         cy.wrap(undefined).should('have.value', 'somevalue')
       })
 
-      it('shows subject instead of undefined when a previous traversal errors', (done) => {
+      it('shows the searched content instead of undefined when a previous traversal errors', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'assert') {
             cy.removeAllListeners('log:added')
-            expect(log.get('message')).to.eq('expected **subject** to have class **updated**')
+            expect(log.get('message')).to.eq('expected **Does not exist** to have class **updated**')
             done()
           }
         })

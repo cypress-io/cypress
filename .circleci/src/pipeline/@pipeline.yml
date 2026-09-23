@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "152.0.7977.64"
-chrome-beta-version: &chrome-beta-version "153.0.8010.12"
+chrome-stable-version: &chrome-stable-version "153.0.8010.36"
+chrome-beta-version: &chrome-beta-version "154.0.8037.17"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "152.0.7977.64"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "153.0.8010.36"
 firefox-stable-version: &firefox-stable-version "154.0"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:24.15.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.15.0-yarn-berry
@@ -37,13 +37,15 @@ parameters:
   run-force-http1-tests:
     type: boolean
     default: false
-  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
-  # (can also be set manually to run the Windows workflow)
-  run-windows-workflow:
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`,
+  # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
+  # (can also be set manually to run those workflows)
+  run-platform-workflows:
     type: boolean
     default: false
-  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
-  # Default true so develop/release branches run everything without explicit params.
+  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PR
+  # branches and on webhook pushes to develop. Default true so that any pipeline
+  # whose continuation omits them runs everything.
   run-driver-tests:
     type: boolean
     default: true
@@ -1229,8 +1231,11 @@ commands:
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
 
             cd ~/cypress/..
-            # install some deps for get-next-version
-            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12 minimist@1.2.5
+            # get-next-version runs before the workspace dependencies are
+            # unpacked, so install what it needs at the versions
+            # cypress/package.json pins.
+            NEXT_VERSION_DEPS=$(node -p "const deps = require('./cypress/package.json').devDependencies; ['semver', 'conventional-recommended-bump', 'minimist'].map((name) => name + '@' + deps[name]).join(' ')")
+            npm i $NEXT_VERSION_DEPS
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
@@ -1745,7 +1750,7 @@ commands:
             ssh-keyscan github.com >> ~/.ssh/known_hosts
 
   # Halts a job immediately if its guard parameter is false.
-  # Used to skip jobs that are not relevant to the changed files in a PR.
+  # Used to skip jobs that are not relevant to the changed files.
   # The job still exits with "success" so downstream jobs and all-jobs-passed
   # are not blocked.
   halt-if-skipped:
@@ -1848,12 +1853,14 @@ jobs:
       - run:
           name: Linting 🧹
           command: |
-            yarn clean
             git clean -df
             yarn lint
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
+      - run:
+          name: Audit conditional job filters
+          command: yarn audit-ci-filters
 
   check-ts:
     <<: *defaults
@@ -2122,6 +2129,11 @@ jobs:
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 3
 
+  # Unguarded: a release gate rather than a test group, and the only check on
+  # either release train. `test-npm-package-release-script` is the dry run of
+  # the @cypress/* publish that `npm-release` performs for real later in this
+  # same pipeline; `validate-binary-changelog.js` validates cli/CHANGELOG.md
+  # for the binary release. Neither depends on which paths changed.
   verify-release-readiness:
     <<: *defaults
     resource_class: medium.gen2
@@ -2129,8 +2141,6 @@ jobs:
     environment:
       GITHUB_TOKEN: $GH_TOKEN
     steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
@@ -2163,7 +2173,8 @@ jobs:
       - restore_cached_workspace
       - run: yarn test-unit --scope=@packages/server
       - sanitize-verify-and-store-mocha-results:
-          expectedResultCount: 1
+          # one junit file each from the mocha and vitest runners
+          expectedResultCount: 2
 
   server-unit-tests-cloud-environment:
     <<: *defaults
@@ -2192,7 +2203,9 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - windows_reinstall_deps
-      - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
+      # `test-unit` chains both runners and the filename filter only narrows mocha,
+      # so target the mocha runner directly to keep this a single-spec job
+      - run: yarn workspace @packages/server test-unit-mocha cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
@@ -3057,6 +3070,61 @@ jobs:
       - post-install-comment:
           package_url_path: ~/cypress/npm-package-url.json
           binary_url_path: ~/cypress/binary-url.json
+
+  # Alerts the author of the commit that broke the binary. Requires every binary
+  # job at `terminal`, so it wakes up however they finished, then asks the API
+  # which of them actually failed - a cancelled or skipped job is not a breakage.
+  # Scope comes from this job's own dependency list, so it follows the `requires:`
+  # block in the workflow rather than a second list of job names that would drift.
+  notify-binary-failure:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small.gen2
+    steps:
+      - run:
+          name: Comment on the commit if a binary job failed
+          command: |
+            # This endpoint paginates and linux-x64 is already ~80 jobs, so a
+            # dropped page would silently report no failures at all.
+            ITEMS="[]"
+            PAGE=""
+            while :; do
+              RESP=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
+                "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?page-token=$PAGE")
+              ITEMS=$(jq -n --argjson a "$ITEMS" --argjson b "$(echo "$RESP" | jq '.items')" '$a + $b')
+              PAGE=$(echo "$RESP" | jq -r '.next_page_token // empty')
+              [[ -n "$PAGE" ]] || break
+            done
+
+            # `failed` is not the only way a job breaks - CircleCI reports
+            # timeouts and infrastructure errors under their own statuses.
+            # `canceled` and `not_run` stay off this list on purpose.
+            FAILED=$(jq -rn --argjson items "$ITEMS" '
+              ["failed","timedout","infrastructure_fail","terminated-unknown"] as $bad
+              | ($items[]|select(.name=="notify-binary-failure").dependencies) as $d
+              | [$items[]|select(.id as $i|$d|index($i))|select(.status as $s|$bad|index($s))|.name]
+              | join(", ")')
+
+            if [[ -z "$FAILED" ]]; then
+              echo "No binary job failed; nothing to report."
+              exit 0
+            fi
+
+            REPO="$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+            AUTH="Authorization: token $GH_TOKEN"
+            # develop is squash-merged, so the commit author is the PR author.
+            # An unresolvable author still gets a comment, just without the tag.
+            LOGIN=$(curl -sS -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1" \
+              | jq -r '.author.login // empty') || true
+            # CIRCLE_BUILD_URL points at this notifier, which is green and tells
+            # the author nothing. Link the workflow holding the failed jobs.
+            WORKFLOW_URL="https://app.circleci.com/workflow/$CIRCLE_WORKFLOW_ID"
+            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($WORKFLOW_URL)"
+
+            curl -sfS -X POST -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1/comments" \
+              --data "$(jq -n --arg b "$BODY" '{body:$b}')"
 
   test-kitchensink:
     <<: *defaults

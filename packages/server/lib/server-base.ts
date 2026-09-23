@@ -4,7 +4,8 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import * as ensureUrl from './util/ensure-url'
-import express, { Express } from 'express'
+import type { Express } from 'express'
+import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -14,7 +15,8 @@ import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest } from '@packages/network-interception'
-import { DriverInterceptRegistrationAdapter, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import type { NetStubbingState } from '@packages/net-stubbing'
+import { DriverInterceptRegistrationAdapter, netStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
@@ -25,17 +27,20 @@ import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
 import { render as renderTemplate } from './template_engine'
 import { ensureProp } from './util/class-helpers'
-import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
+import type { DestroyableHttpServer } from './util/server_destroy'
+import { allowDestroy } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
-import { InitializeRoutes, createCommonRoutes } from './routes'
+import type { InitializeRoutes } from './routes'
+import { createCommonRoutes } from './routes'
 import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
-import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
+import type { SerializableAutomationCookie } from './automation/cookie/jar'
+import { cookieJar } from './automation/cookie/jar'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
 import * as appData from './util/app_data'
@@ -54,11 +59,12 @@ import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
 const fullyQualifiedRe = /^https?:\/\//
+const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
@@ -671,7 +677,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     isAUTFrame?: (frameId: string) => Promise<boolean>,
     onAUTFrameNavigated?: (listener: (url: string) => void) => () => void,
   ) {
-    const config = this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config']
+    const openConfig = this.ensureProp(this._openConfig, 'open')
+    const config = openConfig as unknown as CreateProxyRuntimeDeps['config']
+
+    // Once per runtime — one per spec/tab — so a worker that escapes on every
+    // navigation warns once instead of flooding stdout. Every escape is still
+    // visible under DEBUG=cypress:server:browsers:interception-escape-detector.
+    let warnedInterceptionEscape = false
+
+    const reservedPathPrefixes = getCypressReservedPathPrefixes(openConfig)
 
     const runtime = createCdpFetchRuntime({
       client,
@@ -689,6 +703,31 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         throw new Error('getCurrentBrowser is not available')
       }),
       netStubbingState: this.netStubbingState,
+      onInterceptionEscape: ({ url }) => {
+        if (warnedInterceptionEscape) {
+          return
+        }
+
+        warnedInterceptionEscape = true
+
+        // Cypress's runner is served on the AUT's origin under paths Cypress
+        // reserves, so an escape there means the origin's worker answered for
+        // Cypress's own document — a different problem, with a different
+        // remedy, than an escaped AUT document. This runs synchronously off a
+        // CDP event with no catch above it, so an unparseable url reports the
+        // generic variant rather than throwing out of the listener.
+        let isRunnerDocument = false
+
+        try {
+          const { pathname } = new URL(url)
+
+          isRunnerDocument = reservedPathPrefixes.some((prefix) => pathname.startsWith(prefix))
+        } catch {
+          debug('could not parse escaped url %s', url)
+        }
+
+        errors.warning('BROWSER_NETWORK_INTERCEPTION_ESCAPE', url, isRunnerDocument)
+      },
     })
 
     // Publishing the mode here — rather than in setNetworkMode — is what keeps
@@ -858,6 +897,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   _createHttpServer (app): DestroyableHttpServer {
     const svr = http.createServer(httpUtils.lenientOptions, app)
+
+    // Our own internal-route loopback pools sockets against this server on an
+    // agent that never idles them out, so anything we close first comes back as
+    // an ECONNRESET on reuse. That pool only sees traffic when a spec's runner
+    // boots, so it sits idle for however long the previous spec ran — far past
+    // Node's 5s default. Outlast that rather than race it; the loopback's own
+    // retry covers a gap longer than this.
+    svr.keepAliveTimeout = KEEP_ALIVE_TIMEOUT
 
     allowDestroy(svr)
 

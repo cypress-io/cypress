@@ -14,7 +14,8 @@ import { HttpError } from '../network/http_error'
 import { SystemError } from '../network/system_error'
 import { PUBLIC_KEY_VERSION } from '../constants'
 import { createStreamingSignatureVerifier } from '../encryption'
-import { BundleError, BundleErrorStage, BundleKind } from './bundle_error'
+import type { BundleErrorStage, BundleKind } from './bundle_error'
+import { BundleError } from './bundle_error'
 import { isInsideDir } from './is_inside_dir'
 
 const pkg = require('@packages/root')

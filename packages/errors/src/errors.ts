@@ -5,8 +5,8 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import type { BreakingErrResult, TestingType } from '@packages/types'
-import { logError, parseResolvedPattern, pluralize } from './errorUtils'
+import type { BreakingErrResult, ProtocolCaptureMethod, TestingType } from '@packages/types'
+import { logError, parseResolvedPattern } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
@@ -43,6 +43,15 @@ It also looks like you also passed in an explicit ${fmt.flag('--ci-build-id')} f
 This is only necessary if you are NOT running in one of our supported CI providers.
 
 This flag must be unique for each new run, but must also be identical for each machine you are trying to --group or run in --parallel.\
+`
+}
+
+const testReplayDirectoryRecommendation = (): ReturnType<typeof errPartial> => {
+  return errPartial`\
+This can happen for many reasons. If this problem persists:
+
+- Try increasing the available disk space.
+- Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.\
 `
 }
 
@@ -153,7 +162,7 @@ export const AllCypressErrors = {
   CLOUD_API_RESPONSE_FAILED_RETRYING: (
     arg1: { tries: number, delay: string, response: Error },
   ) => {
-    const time = pluralize('time', arg1.tries)
+    const time = arg1.tries === 1 ? 'time' : 'times'
     const { delay } = arg1
     const message = normalizeNetworkErrorMessage(arg1.response)
 
@@ -564,11 +573,18 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
+  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error, captureMethod?: ProtocolCaptureMethod) => {
+    // `beforeSpec` is where the recording's SQLite database is opened and the capture script
+    // first writes beneath the temporary directory. The other initialization steps never touch
+    // the filesystem, so the advice would only mislead.
+    const recommendation = captureMethod === 'beforeSpec' ? testReplayDirectoryRecommendation() : null
+
     return errTemplate`\
         Warning: We encountered an error while initializing the Test Replay recording for this spec.
 
         These results will not display Test Replay recordings.
+
+        ${recommendation}
 
         This error will not affect or change the exit code.
 
@@ -580,10 +596,7 @@ export const AllCypressErrors = {
 
         These results will not display Test Replay recordings.
 
-        This can happen for many reasons. If this problem persists:
-
-        - Try increasing the available disk space.
-        - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
+        ${testReplayDirectoryRecommendation()}
 
         This error will not affect or change the exit code.
 
@@ -888,6 +901,16 @@ export const AllCypressErrors = {
 
       ${fmt.stackTrace(err)}
     `
+  },
+  TRUSTED_CERTIFICATES_LOAD_ERROR: (filePathOrLabel: string, err: Error) => {
+    return errTemplate`\
+      Cypress could not load a certificate you listed in ${fmt.highlight(`trustedCertificates`)}.
+
+      The entry was: ${fmt.highlightSecondary(filePathOrLabel)}
+
+      ${fmt.highlightSecondary(err.message)}
+
+      Each entry must supply exactly one of a ${fmt.highlightSecondary(`filePath`)} to a PEM file (relative paths resolve against your project root), an inline ${fmt.highlightSecondary(`pem`)} string, or a base64 SHA-256 ${fmt.highlightSecondary(`spki`)} fingerprint.`
   },
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
@@ -1227,6 +1250,26 @@ export const AllCypressErrors = {
   },
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
+  },
+  BROWSER_NETWORK_INTERCEPTION_ESCAPE: (url: string, isRunnerDocument: boolean) => {
+    // The partial carries its own trailing blank line and is interpolated
+    // inline below, so the paragraph that follows keeps its spacing whether or
+    // not there is a remedy to add.
+    const runnerDocumentRemedy = isRunnerDocument ? errPartial`
+        The escaped document is Cypress's own runner, which is served on the origin under test. A service worker that origin registered in an earlier session answered for it. If you have disabled ${fmt.highlight(`testIsolation`)}, re-enable it so Cypress clears that worker before loading the runner; otherwise, clear the browser profile or this origin's site data.
+
+        ` : null
+
+    return errTemplate`\
+        A document served by a service worker was not intercepted by Cypress:
+
+        ${fmt.url(url)}
+
+        The browser started the service worker and let it serve this document before Cypress could attach to it. The response kept its original headers and was invisible to ${fmt.highlight(`cy.intercept`)} and Test Replay. If the document carries framebusting headers, the visit will time out.
+
+        ${runnerDocumentRemedy}Only the first escaped document in a spec is reported here. If this causes failures, set ${fmt.highlight(`forceHttp1`)} to ${fmt.highlight(`true`)} in your Cypress configuration to route traffic through Cypress's HTTP proxy, or configure ${fmt.highlight(`retries`)} so an affected test re-runs after Cypress has attached to the worker.
+
+        Details: ${fmt.url(`https://github.com/cypress-io/cypress/issues/34674`)}`
   },
   BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: (browserName: string) => {
     return errTemplate`\

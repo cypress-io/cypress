@@ -1,4 +1,5 @@
-import { findApp, FindAppParams } from './util'
+import type { FindAppParams } from './util'
+import { findApp } from './util'
 import type { Browser, DetectedBrowser } from '@packages/types'
 import * as linuxHelper from '../linux'
 import Debug from 'debug'

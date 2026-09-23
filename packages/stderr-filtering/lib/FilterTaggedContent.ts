@@ -1,4 +1,5 @@
-import { Transform, Writable } from 'stream'
+import type { Writable } from 'stream'
+import { Transform } from 'stream'
 import { StringDecoder } from 'string_decoder'
 import { LineDecoder } from './LineDecoder'
 import Debug from 'debug'

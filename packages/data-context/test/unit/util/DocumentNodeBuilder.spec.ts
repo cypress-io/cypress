@@ -1,7 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { graphqlSchema } from '../../../graphql/schema'
 import dedent from 'dedent'
-import { FieldNode, GraphQLObjectType, OperationDefinitionNode, parse, print } from 'graphql'
+import type { FieldNode, GraphQLObjectType, OperationDefinitionNode } from 'graphql'
+import { parse, print } from 'graphql'
 import { DocumentNodeBuilder } from '../../../src'
 
 const CLOUD_VIEWER_QUERY = parse(`

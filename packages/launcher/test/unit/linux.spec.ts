@@ -181,6 +181,63 @@ describe('linux browser detection', () => {
     })
   })
 
+  describe('leaves profilePath unset when firefox is not a snap', () => {
+    const expectedFirefox = {
+      channel: 'stable',
+      name: 'firefox',
+      family: 'firefox',
+      displayName: 'Firefox',
+      majorVersion: '140',
+      path: 'firefox',
+      version: '140.0.1',
+    }
+
+    beforeEach(() => {
+      cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
+        if (cmd === 'firefox') {
+          setTimeout(() => {
+            cpSpawnMock.stdout.emit('data', 'Mozilla Firefox 140.0.1')
+          }, 0)
+        }
+      }
+
+      vi.mocked(os.homedir).mockReturnValue('/home/foo')
+    })
+
+    it('with a binary that is not a shim', async () => {
+      vi.stubEnv('PATH', '/bin')
+      mockFs({
+        '/bin/firefox': mockFs.file({ mode: 0o777, content: 'not a shim script' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).toEqual(expectedFirefox)
+    })
+
+    it('with a binary that is not on the PATH', async () => {
+      vi.stubEnv('PATH', '/bin')
+      mockFs({
+        '/usr/bin/firefox': mockFs.file({ mode: 0o777, content: 'exec /snap/bin/firefox\n' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).toEqual(expectedFirefox)
+    })
+
+    it('with a binary that is not executable', async () => {
+      vi.stubEnv('PATH', '/bin')
+      mockFs({
+        '/bin/firefox': mockFs.file({ mode: 0o644, content: 'exec /snap/bin/firefox\n' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).toEqual(expectedFirefox)
+    })
+  })
+
   // https://github.com/cypress-io/cypress/issues/6669
   it('detects browser if the --version stdout is multiline', async () => {
     cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {

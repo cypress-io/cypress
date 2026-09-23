@@ -43,6 +43,18 @@ module.exports = {
     'system-tests/lib/validations/**',
     // ignore as the file has invalid syntax
     'system-tests/projects/no-specs-babel-conflict/src/Invalid.jsx',
+    // Build output, ignored here rather than per package: a package's
+    // `.eslintignore` is re-based onto this directory with its patterns
+    // unchanged, so any entry containing a `/` silently matches nothing.
+    // `cjs`/`esm` are anchored to the workspace roots because system-tests
+    // fixtures ship handwritten sources under `esm/`.
+    '**/dist/**',
+    'npm/*/cjs/**',
+    'npm/*/esm/**',
+    'packages/*/cjs/**',
+    'packages/*/esm/**',
+    'tooling/*/cjs/**',
+    'tooling/*/esm/**',
   ],
   overrides: [
     {
@@ -81,6 +93,18 @@ module.exports = {
       },
     },
     {
+      // Sample user apps compiled by their own toolchains. Angular resolves a
+      // constructor parameter's type to a DI token at runtime, so a type-only
+      // import erases the token and the app fails to compile (NG2003).
+      files: [
+        'system-tests/project-fixtures/**',
+        'system-tests/projects/**',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'off',
+      },
+    },
+    {
       // `eslint-plugin-graphql` pays its per-file cost on every linted file, not
       // just the ones holding a `gql` template, and that cost dominates lint time.
       // Scope it to the packages that actually use `gql` — add a package here if
@@ -105,6 +129,13 @@ module.exports = {
   rules: {
     'no-duplicate-imports': 'off',
     'import/no-duplicates': 'error',
+    '@typescript-eslint/consistent-type-imports': ['error', {
+      prefer: 'type-imports',
+      // inline `{ type X }` specifiers break v8 snapshot bundling
+      fixStyle: 'separate-type-imports',
+      // inline `import()` type annotations are erased on emit regardless
+      disallowTypeAnnotations: false,
+    }],
     'prefer-spread': 'off',
     'prefer-rest-params': 'off',
     'no-useless-constructor': 'off',

@@ -1,7 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
-import { vi, describe, it, expect, beforeEach, Mock, MockedObject } from 'vitest'
+import type { Mock, MockedObject } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { getTitleFromAutomation, TitleNotYetAvailableError } from '../../../../../src/cy/commands/helpers/window'
 import Bluebird from 'bluebird'
 

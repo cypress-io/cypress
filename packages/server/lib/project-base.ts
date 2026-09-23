@@ -30,7 +30,8 @@ import type {
   VideoRecording,
   AutomationCommands,
 } from '@packages/types'
-import { DataContext, getCtx } from '@packages/data-context'
+import type { DataContext } from '@packages/data-context'
+import { getCtx } from '@packages/data-context'
 import { createHmac, randomUUID } from 'crypto'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
@@ -172,13 +173,21 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    new CyPromptLifecycleManager().initializeCyPromptManager({
-      cloudDataSource: this.ctx.cloud,
-      ctx: this.ctx,
-      record: this.options.record,
-      key: this.options.key,
-      projectId: cfg.projectId,
-    })
+    const isSimulatedOpenMode = !!process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+
+    // cy.prompt requires both an authenticated user and a projectId. In open mode
+    // the user can still log in or add a projectId to their config, so we download
+    // the bundle eagerly. A run's config is fixed, so without a projectId there is
+    // no way to reach a usable state and downloading the bundle is wasted work.
+    if (!cfg.isTextTerminal || isSimulatedOpenMode || cfg.projectId || process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+      new CyPromptLifecycleManager().initializeCyPromptManager({
+        cloudDataSource: this.ctx.cloud,
+        ctx: this.ctx,
+        record: this.options.record,
+        key: this.options.key,
+        projectId: cfg.projectId,
+      })
+    }
 
     if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()

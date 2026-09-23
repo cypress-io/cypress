@@ -27,12 +27,4 @@ describe('ProxyCommandLogAdapter', () => {
 
     expect(adapter.logInterception({ interception: {}, route: {} })).toBeUndefined()
   })
-
-  it('is exported from the @packages/proxy barrel', async () => {
-    const { ProxyCommandLogAdapter: exportedAdapter } = await import('@packages/proxy')
-
-    expect(exportedAdapter).toEqual(expect.any(Function))
-    expect(exportedAdapter.name).toBe('ProxyCommandLogAdapter')
-    expect(new exportedAdapter().notifyIncomingRequest).toEqual(expect.any(Function))
-  })
 })

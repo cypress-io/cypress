@@ -916,27 +916,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    const renamedConfigs = [
-      {
-        old: 'blacklistHosts',
-        new: 'blockHosts',
-      },
-    ]
-
-    renamedConfigs.forEach(function (config) {
-      // TODO: remove this skip once we have a renamed config option - there are none active now
-      it.skip(`logs error and exits when using an old configuration option: ${config.old}`, function () {
-        return cypress.start([
-          `--run-project=${this.todosPath}`,
-          `--config=${config.old}=''`,
-        ])
-        .then(() => {
-          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.old)
-          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.new)
-        })
-      })
-    })
-
     // TODO: make sure we have integration tests around this
     // for headed projects!
     // also make sure we test the rest of the integration functionality
@@ -945,8 +924,20 @@ describe('lib/cypress', () => {
     // this test should be revisited, as the error it's asserting on probably can never be
     // actually thrown by Cypress.
     it.skip('logs error and exits when project folder has read permissions only and cannot write cypress.config.js', function () {
-      // test disabled if running as root (such as inside docker) - root can write all things at all times
-      if (process.geteuid() === 0) {
+      // Root can write all things at all times, and `chmod 555` does not restrict writes on
+      // Windows, so this only asserts anything for a non-root POSIX user.
+      let euid
+
+      try {
+        // `process.geteuid` is absent on Windows and can fail elsewhere
+        // @see https://github.com/cypress-io/cypress/issues/17415
+        // eslint-disable-next-line no-restricted-properties
+        euid = process.geteuid?.()
+      } catch {
+        euid = undefined
+      }
+
+      if (euid === undefined || euid === 0) {
         return
       }
 

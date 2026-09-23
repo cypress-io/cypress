@@ -12,7 +12,7 @@ Add a branch when the change affects behavior that is only validated by main-bra
 
 - **Windows jobs** — the `windows` workflow (`windows-v8-integration-tests`, `windows-create-build-artifacts`, etc.)
 - **V8 snapshot / packaging tooling** — `v8-integration-tests` on Linux, macOS, and Windows; snapshot cache updates in `tooling/v8-snapshot/cache/`
-- **Full binary tests** — kitchensink, staging, and npm-module verification jobs (see optional gates below)
+- **Full binary tests** — kitchensink, staging, and npm-module verification jobs (see optional gates below). These no longer run on pull requests at all, so an allowlisted branch is the only way to exercise them before merge.
 
 If only unit/integration tests scoped to changed packages are sufficient, do **not** add the branch — use a normal PR branch instead.
 
@@ -29,13 +29,16 @@ If only unit/integration tests scoped to changed packages are sufficient, do **n
 
 Push your work to the branch name you add — do not repurpose an existing allowlisted branch (for example, do not change `update-v8-snapshot-cache-on-develop` to a different name).
 
-This gate turns on the main/multi-platform workflow graph — including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs. Note: `windows` specifically excludes plain `develop`/`release/*` pushes from this gate (it runs on those on a CircleCI Scheduled Pipeline instead — see the comment above the `windows` workflow in `@main.yml`); any other branch added here still turns Windows on immediately as before.
+This gate turns on the main/multi-platform workflow graph, including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs.
+
+This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-arm64` for plain `develop` or `release/*` pushes. On those two, all four run from a scheduled pipeline instead — see "Scheduled platform CI" below. Any other branch you add here turns all five on per-push.
 
 **Optional — only if you need more than main workflows + path-filtered jobs:**
 
 | Location | When you also need it |
 |----------|------------------------|
 | `pull-request.yml` exclusion list | Avoid the PR workflow running in parallel with the main workflows on the same branch |
+| `notify-binary-failure`'s `filters:` in `@main.yml` | Testing binary failure alerting on a branch — it is pinned to `develop`, so it never fires elsewhere |
 | `generate-pipeline-parameters.sh` branch override | Force every path-filtered job to run even when changed files would not normally select them (or trigger manually with `run-all-jobs=true`) |
 | `&mainBuildFilters` in `@main.yml` | Binary/kitchensink/staging jobs in `linux-x64` that have an extra branch filter beyond the workflow `when:` |
 
@@ -43,10 +46,28 @@ For typical v8 snapshot cache work, changes under `tooling/*` already enable `ru
 
 After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
-### What runs with only `&full-workflow-filters`
+### Per-workflow gates
 
-- **`linux-x64`**: most develop CI (build, system tests, `v8-integration-tests`, packaging, etc.) — subject to path filtering unless overridden
-- **`windows`**: Windows build, binary artifacts, v8 integration tests, and selected integration/unit jobs
-- **`linux-arm64` / `darwin-*`**: platform builds, packaging, and v8 integration tests where supported
+The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `halt-if-skipped`), not in the workflow files, so they apply to every workflow below — not just the PR one.
+
+- **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-and-trigger-packaging-artifacts`, `get-published-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs, system tests, and `v8-integration-tests` are guarded, so a webhook push to `develop` runs only the ones its changed paths select.
+- **`windows` / `linux-arm64` / `darwin-*`**: none of these three run on a plain `develop` or `release/*` push — see "Scheduled platform CI" below for when they do. Inside them, `v8-integration-tests`, `driver-integration-memory-tests`, and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
+
+`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop` and `release/*` they run only from a scheduled pipeline. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough.
 
 `npm-release` still runs only on `develop`, not on allowlisted feature branches.
+
+### Scheduled platform CI (develop and release/*)
+
+None of the four runs on every `develop` or `release/*` push. Windows moved for credit cost. The two `darwin-*` workflows moved to free leased self-hosted macOS hardware. `linux-arm64` costs almost nothing and moved for consistency, so all platform coverage lands in one sweep. Per-merge platform signal was not actionable anyway — `develop` passed 47 of 213 runs. A release branch is long-lived enough for a scheduled sweep to cover it the same way.
+
+**What exists today**: a CircleCI Scheduled Pipeline named "Platform Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` once per weekday at 02:00 UTC and sets `run-platform-workflows=true`. `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read that parameter. There is still no release-branch schedule: `release/*` pushes get zero platform coverage of any kind until one exists.
+
+**Still needed**, to match the gates in `@main.yml`:
+
+- **Release schedule** — a second Scheduled Pipeline, targeting whichever `release/*` branch is currently active, setting `run-platform-workflows=true`. Repointing its branch to the new release branch is part of cutting a release; disabling it is part of shipping one. There is no default branch this can target permanently, since release branches are cut and retired.
+- **Owner**: App Foundations team
+
+This is a CircleCI project setting, not code — it isn't visible anywhere in `.circleci/src`. Changing it requires CircleCI project-settings access (Project Settings → Triggers → Scheduled Pipelines), via the UI or `PATCH /api/v2/schedule/{id}`.
+
+For an on-demand run of all four platform workflows outside either schedule (e.g. to validate a change before it reaches `develop`, or to recover a missed/failed release-branch build), use Trigger Pipeline with `run-platform-workflows=true`, or `force-persist-artifacts=true` — the latter works regardless of branch and needs only one flag. See the comment above the `linux-arm64` workflow in `@main.yml`.

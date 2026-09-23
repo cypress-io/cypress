@@ -76,14 +76,11 @@ function _validateEntry (changelog, { commitMessage, prNumber, semanticType, ass
       return false
     }
 
+    // An entry is identified by the issue/PR links it cites. The resolve phrase
+    // ("Fixes", "Addressed in", ...) varies across existing entries, so it is
+    // advisory only and used just to render the expected-format example.
     const hasMatchingEntry = sectionDetails.some((detail) => {
-      const index = detail.lastIndexOf(resolveData.message)
-
-      if (index === undefined) return false // missing message
-
-      const resolveString = detail.substring(index)
-
-      return resolveData.links.every((link) => resolveString.includes(link))
+      return resolveData.links.every((link) => detail.includes(link))
     })
 
     if (hasMatchingEntry) {

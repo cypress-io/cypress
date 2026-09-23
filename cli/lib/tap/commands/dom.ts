@@ -26,34 +26,36 @@ export const extractDom = (
   selector: string,
   maxChars: number,
   at?: number,
-): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(connection, frame, selector, at, async (): Promise<FrameDomResult> => {
-  const { client, sessionId } = connection
-  const executionContextId = await createFrameIsolatedWorld(connection, frame)
+): Promise<FrameDomResult | FrameAmbiguousResult> => {
+  return withAmbiguous(connection, frame, selector, at, async (): Promise<FrameDomResult> => {
+    const { client, sessionId } = connection
+    const executionContextId = await createFrameIsolatedWorld(connection, frame)
 
-  const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
-    functionDeclaration: readDom.toString(),
-    executionContextId,
-    arguments: [{ value: selector }, { value: maxChars }, { value: at ?? 0 }],
-    returnByValue: true,
-  }, sessionId)
+    const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
+      functionDeclaration: readDom.toString(),
+      executionContextId,
+      arguments: [{ value: selector }, { value: maxChars }, { value: at ?? 0 }],
+      returnByValue: true,
+    }, sessionId)
 
-  if (exceptionDetails) {
-    throw new TapError('FRAME_READ_FAILED', { message: `reading the app-under-test DOM failed: ${exceptionDetails.exception?.description || exceptionDetails.text}` })
-  }
+    if (exceptionDetails) {
+      throw new TapError('FRAME_READ_FAILED', { message: `reading the app-under-test DOM failed: ${exceptionDetails.exception?.description || exceptionDetails.text}` })
+    }
 
-  const value = result.value as DomReadResult
+    const value = result.value as DomReadResult
 
-  // Only a selector the reader was given can come back rejected.
-  if (value.invalidSelector) {
-    throw invalidSelectorError(selector!)
-  }
+    // Only a selector the reader was given can come back rejected.
+    if (value.invalidSelector) {
+      throw invalidSelectorError(selector!)
+    }
 
-  return {
-    ...(value.found !== undefined ? { found: value.found } : {}),
-    ...(value.html !== undefined ? { html: value.html } : {}),
-    ...(value.truncated ? { truncated: true } : {}),
-  }
-})
+    return {
+      ...(value.found !== undefined ? { found: value.found } : {}),
+      ...(value.html !== undefined ? { html: value.html } : {}),
+      ...(value.truncated ? { truncated: true } : {}),
+    }
+  })
+}
 
 // The options are read before a session is resolved, so a value this command
 // cannot use is reported as itself rather than as whatever the search for a

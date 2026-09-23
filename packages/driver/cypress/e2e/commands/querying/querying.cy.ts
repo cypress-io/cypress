@@ -139,6 +139,12 @@ describe('src/cy/commands/querying', () => {
           cy.$$('body').append(cy.$$('<foobarbazquux>asdf</foobarbazquux>'))
         }).get('@foo').should('contain', 'asdf')
       })
+
+      // https://github.com/cypress-io/cypress/issues/4373
+      it('can get a custom element when the framework patches Node.prototype', () => {
+        cy.visit('/fixtures/issue-4373.html')
+        cy.get('lightning-badge')
+      })
     })
 
     describe('should(\'exist\')', {
@@ -783,6 +789,38 @@ describe('src/cy/commands/querying', () => {
         cy.get('.spinner\'')
       })
 
+      // https://github.com/cypress-io/cypress/issues/3847
+      describe('invalid selector', () => {
+        const selector = '\'input\''
+        // mirrors the error Sizzle throws
+        const error = new Error(`Syntax error, unrecognized expression: ${selector}`)
+
+        it('fails with the selector syntax error when log is true', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eql(error.message)
+            expect(err.name).to.eql(error.name)
+            done()
+
+            return false
+          })
+
+          cy.get(selector)
+        })
+
+        it('fails with the selector syntax error instead of an unhandled rejection when log is false', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eql(error.message)
+            expect(err.name).to.eql(error.name)
+            expect(err.message).not.to.match(/Unhandled\srejection\sTypeError/)
+            done()
+
+            return false
+          })
+
+          cy.get(selector, { log: false })
+        })
+      })
+
       it('throws on too many elements after timing out waiting for length', (done) => {
         const buttons = cy.$$('button')
 
@@ -1363,6 +1401,41 @@ describe('src/cy/commands/querying', () => {
           expect($el).to.be.null
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/25962
+      describe('describes the missing subject by its content', () => {
+        let assertMessage: string | undefined
+
+        beforeEach(() => {
+          assertMessage = undefined
+
+          cy.on('log:added', (attrs, log) => {
+            if (attrs.name === 'assert' && assertMessage === undefined) {
+              assertMessage = log.get('message')
+            }
+          })
+
+          return null
+        })
+
+        it('in an existence assertion', () => {
+          cy.contains('does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in an existence assertion with a filter', () => {
+          cy.contains('span', 'does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **span, does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in a length assertion', () => {
+          cy.contains('does-not-exist').should('have.length', 0).then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** to have a length of **0**')
+          })
+        })
+      })
     })
 
     describe('should(\'be.visible\')', () => {
@@ -1804,10 +1877,11 @@ space
       })
 
       // https://github.com/cypress-io/cypress/issues/1119
-      it('logs "0" on cy.contains(0)', function () {
+      it('logs "contains 0" on cy.contains(0)', function () {
         cy.state('document').write('<span>0</span>')
 
         cy.contains(0).then(() => {
+          expect(this.lastLog.get('name')).to.eq('contains')
           expect(this.lastLog.get('message')).to.eq('0')
         })
       })

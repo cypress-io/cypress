@@ -1,4 +1,5 @@
-import { expect, it, describe, beforeEach, vi, Mock } from 'vitest'
+import type { Mock } from 'vitest'
+import { expect, it, describe, beforeEach, vi } from 'vitest'
 import webpack from 'webpack'
 import Bluebird from 'bluebird'
 import preprocessor from '../../index'

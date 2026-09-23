@@ -1,12 +1,13 @@
 # @cypress/eslint-plugin-dev
 
-`@cypress/eslint-plugin-dev` is a published npm package providing shared ESLint rules and configurations used internally across Cypress development packages. It is intended exclusively for use within the Cypress monorepo and its internal tooling — it is not the user-facing Cypress ESLint plugin (which lives in a separate `eslint-plugin-cypress` repository).
+`@cypress/eslint-plugin-dev` is a private, unpublished package providing the shared eslintrc presets that the monorepo packages still on ESLint 8 lint against. It is not the user-facing Cypress ESLint plugin (which lives in a separate `eslint-plugin-cypress` repository).
+
+It is on its way out. `@packages/eslint-config` is the ESLint 9 flat config that every package is migrating to, and this package is deleted once nothing references it. Do not add rules here — add them there.
 
 ## Key Commands
 
 ```sh
 yarn lint           # ESLint on this package itself
-yarn lint-changed   # lint only files changed since the last commit
 yarn lint-fix       # ESLint with --fix
 yarn test -- <path-to-spec>                     # run a specific vitest spec file
 yarn test -- "<glob-pattern>"                   # run vitest specs matching a glob
@@ -16,12 +17,11 @@ yarn test -- "<glob-pattern>"                   # run vitest specs matching a gl
 
 - `lib/index.js` — main entry point; exports the ESLint plugin (rules and configs)
 - `lib/custom-rules/` — custom ESLint rules authored for Cypress internals
-- `lib/scripts/` — CLI scripts:
-  - `lint-changed.js` (also exposed as `lint-changed` binary) — lints only changed files
-  - `lint-pre-commit.js` (also exposed as `lint-pre-commit` binary) — pre-commit hook linting
 
 ## Gotchas / Notes
 
 - This is an internal development tool only. Do not recommend it to Cypress end users; they should use `eslint-plugin-cypress` instead.
-- The package exposes two CLI binaries (`lint-changed` and `lint-pre-commit`) which are used in git hooks and CI tooling across the monorepo.
+- The two custom rules are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so packages get identical behavior whichever config they are on. A change to one belongs in both until this package is gone.
+- The custom rules exist because stock ESLint has no equivalent. `arrow-body-multiline-braces` wraps `arrow-body-style` to report only on multiline arrows, and `skip-comment` requires an explanation on `.skip` rather than banning it the way `mocha/no-pending-tests` does. Exclusive tests are covered by `mocha/no-exclusive-tests`, so there is no custom rule for them.
+- The flat-config copy of `arrow-body-multiline-braces` cannot share this one's implementation: it reaches the built-in rule through `Linter#getRules()`, which throws under flat config. The two also differ on purpose in one respect — the flat-config copy reports without a fix, because `@stylistic/indent` is off there and the upstream fixer leaves the body mis-indented. This copy keeps the fixer, which is safe because the packages on it have no violations.
 - Peer dependencies cover ESLint 8.x only (`eslint: "^= 8.0.0"`); not compatible with ESLint 9 flat config in its consumer role.

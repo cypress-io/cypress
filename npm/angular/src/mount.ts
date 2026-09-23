@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal, provideZonelessChangeDetection } from '@angular/core'
+import type { SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, provideZonelessChangeDetection } from '@angular/core'
 import { toObservable } from '@angular/core/rxjs-interop'
-import {
+import type {
   ComponentFixture,
-  getTestBed,
   TestModuleMetadata,
+} from '@angular/core/testing'
+import {
+  getTestBed,
   TestBed,
   TestComponentRenderer,
 } from '@angular/core/testing'

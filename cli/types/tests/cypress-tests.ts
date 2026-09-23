@@ -44,6 +44,7 @@ namespace CypressConfigTests {
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
+  Cypress.config('keystrokeDelay') // $ExpectType number | null
 }
 
 namespace CypressEnvTests {
@@ -1269,6 +1270,9 @@ namespace CypressTraversalTests {
   cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).prevUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).prevUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('#myItem', { log: 'true' }) // $ExpectError
 
   cy.wrap({}).nextUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).nextUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1277,6 +1281,9 @@ namespace CypressTraversalTests {
   cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).nextUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).nextUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('#myItem', { log: 'true' }) // $ExpectError
 
   cy.wrap({}).parentsUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).parentsUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1285,6 +1292,23 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).parentsUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).parentsUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
+}
+
+namespace CypressOptionsBeforeCallbackTests {
+  cy.getCookies().each({ timeout: 4000 }, (cookie) => {})
+  cy.getCookies().spread({ timeout: 4000 }, (cookie1, cookie2) => {})
+  cy.getCookies().each({ timeout: 'soon' }, (cookie) => {}) // $ExpectError
+  cy.getCookies().spread({ timeout: 'soon' }, (cookie1) => {}) // $ExpectError
+}
+
+namespace CypressScrollIntoViewOffsetTests {
+  cy.get('form').scrollIntoView({ offset: { top: 20 } })
+  cy.get('form').scrollIntoView({ offset: { left: 20 } })
+  cy.get('form').scrollIntoView({ offset: { top: 20, left: 20 } })
+  cy.get('form').scrollIntoView({ offset: { top: '20' } }) // $ExpectError
 }
 
 namespace CypressRequireTests {
@@ -1304,19 +1328,22 @@ namespace CypressRequireTests {
   Cypress.require(123) // $ExpectError
 }
 
+// Regression guard: these globals are declared with `var` so they land on
+// `typeof globalThis`. The `window.` and `globalThis.` references below are the
+// only thing in this suite that fails if one is changed to `let` or `const`.
 namespace CypressGlobalsTests {
-  Cypress
-  cy
-  expect
-  assert
+  Cypress // $ExpectType Cypress & CyEventEmitter
+  cy // $ExpectType cy & CyEventEmitter
+  expect // $ExpectType ExpectStatic
+  assert // $ExpectType AssertStatic
 
-  window.Cypress
-  window.cy
-  window.expect
-  window.assert
+  window.Cypress // $ExpectType Cypress & CyEventEmitter
+  window.cy // $ExpectType cy & CyEventEmitter
+  window.expect // $ExpectType ExpectStatic
+  window.assert // $ExpectType AssertStatic
 
-  globalThis.Cypress
-  globalThis.cy
-  globalThis.expect
-  globalThis.assert
+  globalThis.Cypress // $ExpectType Cypress & CyEventEmitter
+  globalThis.cy // $ExpectType cy & CyEventEmitter
+  globalThis.expect // $ExpectType ExpectStatic
+  globalThis.assert // $ExpectType AssertStatic
 }

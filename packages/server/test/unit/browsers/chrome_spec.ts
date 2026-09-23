@@ -25,19 +25,21 @@ const mitmOpts = {
 }
 
 // Helper function to create consistent mock preferences for testing
-const createMockDefaultPreferences = () => ({
-  default: {
-    fake_preference: {
-      value: 'value',
+const createMockDefaultPreferences = () => {
+  return {
+    default: {
+      fake_preference: {
+        value: 'value',
+      },
     },
-  },
-  defaultSecure: {},
-  localState: {
-    fake_local_state: {
-      value: 'value',
+    defaultSecure: {},
+    localState: {
+      fake_local_state: {
+        value: 'value',
+      },
     },
-  },
-})
+  }
+}
 
 // Helper function to mock _getDefaultChromePreferences with consistent fake preferences
 const mockGetDefaultChromePreferences = () => {
@@ -55,6 +57,8 @@ describe('lib/browsers/chrome', () => {
         },
         close: sinon.stub().resolves(),
         on: sinon.stub(),
+        whenChildTargetHandled: sinon.stub().resolves(),
+        reenableChildTargetInterception: sinon.stub().resolves(),
       }
 
       this.browserCriClient = {
@@ -123,7 +127,7 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('ServiceWorker.enable')
 
-        expect(utils.initializeCDP).to.be.calledOnce
+        expect(utils.initializeCDP).to.have.been.calledOnceWith(this.pageCriClient, this.automation, false)
       })
     })
 
@@ -132,6 +136,71 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
+        expect(utils.initializeCDP).to.have.been.calledOnceWith(this.pageCriClient, this.automation, true)
+      })
+    })
+
+    // #34674: a service worker auto-attaches on both the browser and page
+    // connections; the browser connection defers releasing it until the page
+    // connection confirms session-scoped Fetch interception is in place.
+    it('wires waitForChildTargetInterception to the page client on the browser (CDP) network path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.waitForChildTargetInterception).to.be.a('function')
+
+        this.browserCriClient.waitForChildTargetInterception('target-id')
+
+        expect(this.pageCriClient.whenChildTargetHandled).to.have.been.calledWith('target-id')
+      })
+    })
+
+    // #34674: a paused service worker's browser-level attach handler consults
+    // this field - if it were only set after navigation started, an attach
+    // racing the navigation could read it as unset and skip the wait.
+    it('wires waitForChildTargetInterception before navigating', function () {
+      let wasSetBeforeNavigate = false
+      const self = this
+
+      this.pageCriClient.send = sinon.stub().callsFake((command) => {
+        if (command === 'Page.navigate' && typeof self.browserCriClient.waitForChildTargetInterception === 'function') {
+          wasSetBeforeNavigate = true
+        }
+
+        return Promise.resolve()
+      })
+
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(wasSetBeforeNavigate).to.be.true
+      })
+    })
+
+    it('does not wire waitForChildTargetInterception on the MITM path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.waitForChildTargetInterception).to.be.undefined
+      })
+    })
+
+    // #34674: a crash-reloaded target's confirmation can't be trusted as-is
+    // (no way to tell a stale one from a fresh one), so the browser
+    // connection asks the page connection to re-enable interception outright
+    // instead of merely reading whatever it has on file.
+    it('wires reenableChildTargetInterception to the page client on the browser (CDP) network path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.reenableChildTargetInterception).to.be.a('function')
+
+        this.browserCriClient.reenableChildTargetInterception('target-id')
+
+        expect(this.pageCriClient.reenableChildTargetInterception).to.have.been.calledWith('target-id')
+      })
+    })
+
+    it('does not wire reenableChildTargetInterception on the MITM path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.reenableChildTargetInterception).to.be.undefined
       })
     })
 
@@ -186,6 +255,61 @@ describe('lib/browsers/chrome', () => {
           '--remote-debugging-address=127.0.0.1',
           '--user-data-dir=/profile/dir',
           '--disk-cache-dir=/profile/dir/CypressCache',
+        ])
+      })
+    })
+
+    it('merges a --disable-features arg added in before:browser:launch with its own', function () {
+      sinon.stub(plugins, 'has').returns(true)
+      plugins.execute.resolves(null)
+      plugins.execute.withArgs('before:browser:launch').callsFake((event, browser, launchOptions) => {
+        launchOptions.args.push('--disable-features=OptimizationGuideModelDownloading')
+
+        return Promise.resolve(launchOptions)
+      })
+
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
+      .then(() => {
+        const args = launch.launch.firstCall.args[3]
+        const disableFeatures = args.filter((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.have.length(1)
+
+        const features = disableFeatures[0].slice('--disable-features='.length).split(',')
+
+        expect(features).to.include.members([
+          'OptimizationGuideModelDownloading',
+          'LocalNetworkAccessChecks',
+          'HttpsUpgrades',
+          'Translate',
+        ])
+      })
+    })
+
+    it('merges a --host-resolver-rules arg added in before:browser:launch with the rules derived from hosts', function () {
+      sinon.stub(plugins, 'has').returns(true)
+      plugins.execute.resolves(null)
+      plugins.execute.withArgs('before:browser:launch').callsFake((event, browser, launchOptions) => {
+        launchOptions.args.push('--host-resolver-rules=MAP example.com 10.0.0.1')
+
+        return Promise.resolve(launchOptions)
+      })
+
+      const options = { ...openOpts, hosts: { 'foobar.com': '127.0.0.1' } }
+
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', options, this.automation)
+      .then(() => {
+        const args = launch.launch.firstCall.args[3]
+        const hostResolverRules = args.filter((arg) => arg.startsWith('--host-resolver-rules='))
+
+        expect(hostResolverRules).to.have.length(1)
+
+        const rules = hostResolverRules[0].slice('--host-resolver-rules='.length).split(',')
+
+        // user-supplied rules come first so they win over the ones from `hosts`
+        expect(rules).to.deep.eq([
+          'MAP example.com 10.0.0.1',
+          'MAP foobar.com 127.0.0.1',
         ])
       })
     })
@@ -616,6 +740,7 @@ describe('lib/browsers/chrome', () => {
       const browserCriClient = {
         attachToTargetUrl: sinon.stub().resolves(pageCriClient),
         resetBrowserTargets: sinon.stub().resolves(),
+        close: sinon.stub().resolves(),
       }
       const cdpAutomation = {
         _listenForFrameTreeChanges: sinon.stub(),
@@ -656,6 +781,7 @@ describe('lib/browsers/chrome', () => {
       const browserCriClient = {
         attachToTargetUrl: sinon.stub().resolves(pageCriClient),
         resetBrowserTargets: sinon.stub().resolves(),
+        close: sinon.stub().resolves(),
       }
       const cdpAutomation = {
         _listenForFrameTreeChanges: sinon.stub(),
@@ -680,6 +806,74 @@ describe('lib/browsers/chrome', () => {
 
       expect(cdpAutomation._listenForFrameTreeChanges).not.to.have.been.called
       expect(onPageCriClientReady).not.to.have.been.called
+    })
+
+    // connectToExisting runs once per spec against a browser that already has a
+    // client attached, so both of these drive it twice
+    function setupReconnect (firstClose: sinon.SinonStub = sinon.stub().resolves()) {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const makeBrowserCriClient = (close: sinon.SinonStub) => {
+        return {
+          attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+          resetBrowserTargets: sinon.stub().resolves(),
+          close,
+        }
+      }
+      const first = makeBrowserCriClient(firstClose)
+      const second = makeBrowserCriClient(sinon.stub().resolves())
+      const create = sinon.stub(BrowserCriClient, 'create')
+      .onFirstCall().resolves(first as any)
+      .onSecondCall().resolves(second as any)
+
+      sinon.stub(chrome, '_setAutomation').resolves({ _listenForFrameTreeChanges: sinon.stub(), isAUTFrame: sinon.stub() } as any)
+      sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
+
+      const connect = () => {
+        return chrome.connectToExisting(
+          { displayName: 'Chrome' } as any,
+          { ...mitmOpts, url: 'http://localhost:3000/__/' },
+          { use: sinon.stub() } as any,
+        )
+      }
+
+      return { first, second, create, connect }
+    }
+
+    it('closes the previous browser cri client before connecting again', async function () {
+      const { first, second, connect } = setupReconnect()
+
+      await connect()
+      expect(first.close).not.to.have.been.called
+
+      await connect()
+      expect(first.close).to.have.been.calledOnce
+      expect(second.close).not.to.have.been.called
+      expect(chrome._getBrowserCriClient()).to.equal(second)
+    })
+
+    // a close still in flight can clear the CDP url after the new connection sets it
+    it('waits for the previous client to close before connecting again', async function () {
+      const closing = Promise.withResolvers<void>()
+      const { first, create, connect } = setupReconnect(sinon.stub().returns(closing.promise))
+
+      await connect()
+
+      const reconnecting = connect()
+
+      await new Promise((resolve) => setImmediate(resolve))
+      // proves the reconnect is parked on the close - the assertion below would
+      // otherwise also hold before it ever got there
+      expect(first.close, 'never reached the close').to.have.been.calledOnce
+      expect(create, 'connected again while the previous close was still pending').to.have.been.calledOnce
+
+      closing.resolve()
+      await reconnecting
+
+      expect(create).to.have.been.calledTwice
     })
   })
 
@@ -740,6 +934,75 @@ describe('lib/browsers/chrome', () => {
       expect(onInitializeNewBrowserTabCalled).to.be.true
       expect(cdpSocketServer.attachCDPClient).to.be.calledWith(pageCriClient)
       expect(protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+    })
+  })
+
+  describe('#attachListeners', () => {
+    const clearParams = { origin: '*', storageTypes: 'service_workers,cache_storage' }
+
+    function setup (options: object) {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        targetId: '1234',
+        whenChildTargetHandled: sinon.stub().resolves(),
+        reenableChildTargetInterception: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+
+      const cdpAutomation = {
+        _listenForFrameTreeChanges: sinon.stub(),
+        _handlePausedRequests: sinon.stub().resolves(),
+        isAUTFrame: sinon.stub().resolves(false),
+        onAUTFrameNavigated: sinon.stub(),
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient as any)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation as any)
+      sinon.stub(chrome, '_handleDownloads').resolves()
+      sinon.stub(chrome, '_navigateUsingCRI').resolves()
+      sinon.stub(utils, 'initializeCDP').resolves()
+
+      const attach = () => {
+        return chrome.attachListeners(
+          'https://example.com/__/#/specs/runner',
+          pageCriClient as any,
+          { use: sinon.stub() } as any,
+          { ...options } as any,
+          { displayName: 'Chrome' } as any,
+        )
+      }
+
+      return { pageCriClient, attach }
+    }
+
+    it('clears persisted service worker state before the runner navigation', async function () {
+      const { pageCriClient, attach } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true })
+
+      await attach()
+
+      expect(pageCriClient.send).to.have.been.calledWith('Storage.clearDataForOrigin', clearParams)
+      expect(pageCriClient.send.withArgs('Storage.clearDataForOrigin')).to.have.been.calledBefore(chrome._navigateUsingCRI as any)
+    })
+
+    it('does not clear persisted service worker state on the MITM path', async function () {
+      const { pageCriClient, attach } = setup({ ...mitmOpts, shouldClearPersistedServiceWorkers: true })
+
+      await attach()
+
+      expect(pageCriClient.send).not.to.have.been.calledWith('Storage.clearDataForOrigin')
+    })
+
+    it('does not clear persisted service worker state when testIsolation is disabled', async function () {
+      const { pageCriClient, attach } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: false })
+
+      await attach()
+
+      expect(pageCriClient.send).not.to.have.been.calledWith('Storage.clearDataForOrigin')
     })
   })
 
@@ -1134,6 +1397,111 @@ describe('lib/browsers/chrome', () => {
 
         expect(disableFeatures).to.include('HttpsUpgrades')
       })
+    })
+
+    context('service worker auto preload', () => {
+      it('disables ServiceWorkerAutoPreload on the browser (CDP) network path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: true })
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.include('ServiceWorkerAutoPreload')
+        expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
+      })
+
+      it('keeps it on the MITM path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: false })
+
+        expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
+        expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('ServiceWorkerAutoPreload')
+      })
+    })
+
+    context('certificate errors', () => {
+      it('keeps the blanket ignore flag on the browser (CDP) network path without trusted certs', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: true })
+
+        expect(args).to.include('--ignore-certificate-errors')
+        expect(args.find((arg) => arg.startsWith('--ignore-certificate-errors-spki-list'))).to.be.undefined
+      })
+
+      it('adds an spki-list alongside the blanket ignore flag on the browser (CDP) network path when trusted certs are present', () => {
+        const args = chrome._getArgs({}, {
+          useBrowserNetworkInterception: true,
+          trustedCertificateFingerprints: ['AAAA', 'BBBB'],
+        })
+
+        expect(args).to.include('--ignore-certificate-errors')
+        expect(args).to.include('--ignore-certificate-errors-spki-list=AAAA,BBBB')
+      })
+
+      it('keeps the blanket ignore flag on the MITM path', () => {
+        const args = chrome._getArgs({}, {
+          useBrowserNetworkInterception: false,
+          trustedCertificateFingerprints: ['AAAA'],
+        })
+
+        expect(args).to.include('--ignore-certificate-errors')
+        expect(args.find((arg) => arg.startsWith('--ignore-certificate-errors-spki-list'))).to.be.undefined
+      })
+    })
+  })
+
+  describe('#_normalizeDisableFeatures', () => {
+    it('returns args unchanged when no disable features args are present', () => {
+      const args = ['--foo', '--bar=baz']
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(args)
+    })
+
+    it('returns args unchanged when a single disable features arg is present', () => {
+      const args = ['--foo', '--disable-features=Translate,HttpsUpgrades']
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(args)
+    })
+
+    it('keeps Cypress features when a user arg from before:browser:launch is appended', () => {
+      const args = [
+        '--disable-features=Translate,LocalNetworkAccessChecks',
+        '--foo',
+        '--disable-features=OptimizationGuideModelDownloading',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--foo',
+        '--disable-features=Translate,LocalNetworkAccessChecks,OptimizationGuideModelDownloading',
+      ])
+    })
+
+    it('deduplicates features present in more than one arg', () => {
+      const args = [
+        '--disable-features=Translate,HttpsUpgrades',
+        '--disable-features=HttpsUpgrades,MediaRouter',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--disable-features=Translate,HttpsUpgrades,MediaRouter',
+      ])
+    })
+
+    it('does not let a trailing empty arg clobber the merged features', () => {
+      const args = [
+        '--disable-features=Translate',
+        '--disable-features=',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--disable-features=Translate',
+      ])
+    })
+
+    it('drops the switch entirely when every value is empty', () => {
+      const args = [
+        '--foo',
+        '--disable-features=',
+        '--disable-features=',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(['--foo'])
     })
   })
 

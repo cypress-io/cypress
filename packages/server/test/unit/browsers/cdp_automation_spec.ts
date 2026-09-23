@@ -1,6 +1,7 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import { ProtocolManagerShape, REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER, SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import type { ProtocolManagerShape } from '@packages/types'
+import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER, SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import { normalizeResourceType } from '../../../lib/browsers/cdp-protocol/normalize-resource-type'
 import { CDPDisconnectedError } from '../../../lib/browsers/cdp-protocol/cri-errors'

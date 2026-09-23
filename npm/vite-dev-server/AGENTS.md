@@ -28,7 +28,7 @@ yarn test -- "<glob-pattern>"          # run vitest specs matching a glob
 
 - Published as an ES module (`"type": "module"` in package.json). Importing from CommonJS contexts requires special handling.
 - Supports Vite 8 simultaneously via aliased dev dependencies (`vite-8`) and dynamic version detection at runtime.
-- The package runs its own integration tests using a "cypress-in-cypress" approach (`cypress:run`/`cypress:open` scripts) that set special environment variables (`CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT`).
+- Integration tests use the cypress-in-cypress pattern via the `cypress:run` / `cypress:open` scripts, which set the env vars for you. See [`packages/app/AGENTS.md`](../../packages/app/AGENTS.md) for what they are and why there are two.
 
 ## Integration Points
 

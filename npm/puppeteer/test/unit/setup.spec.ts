@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, Mock } from 'vitest'
+import type { Mock } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import type { PuppeteerNode, Browser } from 'puppeteer-core'
 import { setup } from '../../src/plugin'
 import { activateMainTab } from '../../src/plugin/activateMainTab'

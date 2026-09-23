@@ -3,7 +3,8 @@
  */
 import os from 'os'
 import followRedirects from 'follow-redirects'
-import axios, { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
+import axios from 'axios'
 import pkg from '@packages/root'
 import { strictAgent } from '@packages/network'
 

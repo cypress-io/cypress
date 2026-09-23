@@ -6,7 +6,7 @@ This is the WebExtension responsible for automating the browser
 
 ### Watching
 
-Kicks off the gulp watcher that rebuilds the app/lib directories on change.
+Kicks off a `chokidar` watcher that rebuilds the app/lib directories on change.
 
 ```bash
 yarn workspace @packages/extension watch
@@ -36,12 +36,14 @@ yarn workspace @packages/extension test-debug
 
 ### In Chrome
 
+Chrome loads the v3 bundle, whose background script runs in a service worker.
+
 1. Open Chrome
 2. Go into Extensions (`chrome://extensions`)
 3. Check **Developer Mode** (top right of screen)
 4. Click **Load unpacked extension...** (top left of screen)
-5. Choose **packages/extension/dist** directory (v2)
-6. Click **background page** to debug `background.js` (inspect views `background page`)
+5. Choose **packages/extension/app-dist/v3** directory
+6. Click **service worker** to debug `service-worker.js` (inspect views `service worker`)
 7. Click **Reload (⌘R)** to pull in changes to `manifest.json`
 
 ### In Firefox

@@ -1,8 +1,8 @@
 import { vi, describe, it, expect } from 'vitest'
 
-import { Plugin } from 'vite-8'
-import { ViteDevServerConfig } from '../../src/devServer'
-import { Vite } from '../../src/getVite'
+import type { Plugin } from 'vite-8'
+import type { ViteDevServerConfig } from '../../src/devServer'
+import type { Vite } from '../../src/getVite'
 import { CypressSourcemap } from '../../src/plugins'
 
 describe('sourcemap plugin', () => {

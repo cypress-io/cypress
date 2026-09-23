@@ -1,5 +1,5 @@
 import Suite from '../../../src/runnables/suite-model'
-import TestModel from '../../../src/test/test-model'
+import type TestModel from '../../../src/test/test-model'
 
 const suiteWithChildren = (children: Array<Partial<TestModel | Suite>>) => {
   const suite = new Suite({ id: '1', title: '', hooks: [], suites: [], tests: [] }, 0)

@@ -611,7 +611,7 @@ describe('lib/browsers/electron', () => {
     it('handles download links via cdp', function () {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
-        expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation)
+        expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation, false)
       })
     })
 
@@ -720,8 +720,14 @@ describe('lib/browsers/electron', () => {
         })
       })
 
-      // Electron always resolves to the proxy path, so it keeps Fetch ownership for
-      // AUT header injection even if a launch asks for the browser-side path.
+      // Even if a launch asks for the browser-side path, Electron's own AUT
+      // header injection stays on the MITM automation - it does not hand Fetch
+      // ownership to the network runtime the way chrome.ts does. The flag
+      // still reaches initializeCDP - electron.ts's initializeCDP call reads
+      // it the same way chrome.ts does - so in a real launch the window
+      // bootstrap script would be included; this test pins the argument
+      // reaching it (initializeCDP itself is stubbed in this suite, so no
+      // script is actually assembled here).
       it('keeps Fetch ownership when the browser-side network path is requested', async function () {
         const onPageCriClientReady = sinon.stub().resolves()
 
@@ -738,6 +744,8 @@ describe('lib/browsers/electron', () => {
             resourceType: 'Document',
           }],
         })
+
+        expect(utils.initializeCDP).to.have.been.calledWith(this.pageCriClient, this.automation, true)
       })
 
       it('does not add header when not a document', async function () {

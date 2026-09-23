@@ -675,5 +675,4 @@ export default {
   isHiddenByAncestors,
   getReasonIsHidden,
   isW3CFocusable,
-  isW3CRendered,
 }

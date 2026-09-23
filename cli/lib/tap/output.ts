@@ -1,4 +1,4 @@
-import commander from 'commander'
+import type commander from 'commander'
 import chalk from 'chalk'
 import Debug from 'debug'
 

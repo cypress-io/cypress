@@ -22,7 +22,7 @@ yarn tsd          # build + run tsd type assertion tests
 ## Gotchas / Notes
 
 - Type-checking uses `vue-tsc` (not plain `tsc`) and also runs `tsd` assertions in the `test-tsd/` directory. Run `yarn check-ts` to execute both.
-- The `postbuild` step syncs `dist/` to `cli/vue/` — build before testing against the Cypress binary.
+- `postbuild` re-exports this package into `cli/vue/` — build before testing against the Cypress binary. See [`npm/AGENTS.md`](../AGENTS.md).
 - Peer dependency on `@cypress/webpack-dev-server` is optional (used in webpack-based setups).
 
 ## Integration Points

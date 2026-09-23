@@ -36,7 +36,7 @@ Note: you should not ever need to build the .js files manually. `@packages/ts` p
 yarn workspace @packages/server build-prod
 ```
 
-* `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
+* `yarn test-unit` executes unit tests in [`test/unit`](./test/unit) on both runners: mocha owns `*_spec.ts` (`yarn test-unit-mocha`) and vitest owns `*.spec.ts` (`yarn test-unit-vitest`)
 * `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
 * `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
 
@@ -50,9 +50,11 @@ yarn test-watch /test/path/to/spec.js
 
 ```bash
 yarn test <path/to/test>
-yarn test test/unit/api_spec.js
+yarn test test/unit/cache_spec.ts
 ## or
-yarn test-unit api_spec ## shorthand, uses globbing to find spec
+yarn test-unit-mocha cache_spec ## shorthand, uses globbing to find spec
+## vitest specs (*.spec.ts)
+yarn test-unit-vitest test/unit/routes.spec.ts
 ```
 
 ### Running individual integration tests

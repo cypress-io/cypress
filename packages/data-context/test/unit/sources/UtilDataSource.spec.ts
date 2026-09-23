@@ -2,7 +2,7 @@
 import fetch from 'cross-fetch'
 import { createTestDataContext } from '../helper'
 import { UtilDataSource } from '../../../src/sources/UtilDataSource'
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { strictAgent } from '@packages/network'
 
 // Mock cross-fetch

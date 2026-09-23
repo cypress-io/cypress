@@ -12,12 +12,14 @@ import * as session from './session'
 import { cookieJar } from './automation/cookie/jar'
 import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
-import { DataContext, getCtx } from '@packages/data-context'
+import type { DataContext } from '@packages/data-context'
+import { getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
 import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
 import { GracefulExit, getPeerWaitTimeoutMs } from './util/graceful-exit'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
+import { resolveTrustedCertificateFingerprints } from './util/spki'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -111,8 +113,13 @@ export class OpenProject extends EventEmitter {
       ...(useBrowserNetworkInterception ? {
         proxyServer: undefined,
         proxyBypassList: undefined,
+        // The browser (CDP) path makes origin fetches itself, so certs the user has marked
+        // trusted must be handed to the browser as SPKI fingerprints. A bad entry throws a
+        // Cypress error naming the offending `trustedCertificates` entry.
+        trustedCertificateFingerprints: resolveTrustedCertificateFingerprints(cfg.trustedCertificates ?? [], cfg.projectRoot),
         ...translateEgressPolicyToLaunchOpts(cfg.hosts),
         hosts: cfg.hosts,
+        shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },

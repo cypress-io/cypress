@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { ProjectActions } from '../../../src/actions/ProjectActions'
 import { createTestDataContext } from '../helper'
-import { SpecWithRelativeRoot, TestingType } from '@packages/types'
+import type { SpecWithRelativeRoot, TestingType } from '@packages/types'
 
 describe('ProjectActions', () => {
   let ctx: DataContext

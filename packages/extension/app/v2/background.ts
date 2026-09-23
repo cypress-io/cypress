@@ -14,7 +14,7 @@ const checkIfFirefox = async () => {
   return name === 'Firefox'
 }
 
-const connect = function (host: string, path: string, extraOpts?: any) {
+const connect = function (host: string, path: string) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info: any) => {
       if (info.cause !== 'overwrite') {
@@ -71,7 +71,7 @@ const connect = function (host: string, path: string, extraOpts?: any) {
     })
   }
 
-  const ws = clientConnect(host, path, extraOpts)
+  const ws = clientConnect(host, path)
 
   ws.on('automation:request', (id: number, msg: string, data: any) => {
     switch (msg) {
@@ -82,7 +82,7 @@ const connect = function (host: string, path: string, extraOpts?: any) {
     }
   })
 
-  ws.on('automation:config', async (config: any) => {
+  ws.on('automation:config', async () => {
     const isFirefox = await checkIfFirefox()
 
     listenToCookieChanges()
