@@ -15,6 +15,9 @@ describe('lib/capture', () => {
     beforeEach(() => {
       write = vi.spyOn(process.stdout, 'write') as unknown as Mock
       captured = capture.stdout()
+      vi.spyOn(console, 'log').mockImplementation((msg: unknown) => {
+        process.stdout.write(`${String(msg)}\n`)
+      })
     })
 
     afterEach(() => {

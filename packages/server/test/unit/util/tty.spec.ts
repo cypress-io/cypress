@@ -15,15 +15,13 @@ describe('lib/util/tty', () => {
       vi.spyOn(tty, 'isatty').mockReturnValue(true)
       vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 10, rows: 20 })
 
-      Object.defineProperty(process.stdout, 'getWindowSize', {
-        configurable: true,
-        value: undefined,
-      })
-
-      Object.defineProperty(process.stderr, 'getWindowSize', {
-        configurable: true,
-        value: undefined,
-      })
+      for (const name of ['stdout', 'stderr'] as const) {
+        Object.defineProperty(process[name], 'getWindowSize', {
+          configurable: true,
+          writable: true,
+          value: undefined,
+        })
+      }
 
       ttyUtil.override()
 
