@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
+
 const { _, $, dom } = Cypress
 
 describe('src/cy/commands/traversals', () => {
@@ -29,12 +30,17 @@ describe('src/cy/commands/traversals', () => {
       name = fn
     }
 
+    // jQuery's numeric index signature resolves `$el[name]` to an element, not a method
+    const traverse = ($el: JQuery): JQuery => ($el as any)[name](arg)
+
     context(`#${name}`, () => {
       it('proxies through to jquery and returns new subject', () => {
-        const el = cy.$$('#list')[name](arg)
+        const el = traverse(cy.$$('#list'))
 
         cy.get('#list')[name](arg).then(($el) => {
-          expect($el).to.match(el)
+          // chai-jquery types `match` as taking a selector, but it delegates to
+          // `$el.is()`, which also accepts another jQuery object
+          expect($el).to.match(el as any)
         })
       })
 
@@ -52,7 +58,7 @@ describe('src/cy/commands/traversals', () => {
         })
 
         it('throws on too many elements after timing out waiting for length', (done) => {
-          const el = cy.$$('#list')[name](arg)
+          const el = traverse(cy.$$('#list'))
 
           dom.stringify(cy.$$('#list'), 'short')
 
@@ -66,7 +72,7 @@ describe('src/cy/commands/traversals', () => {
         })
 
         it('throws on too few elements after timing out waiting for length', (done) => {
-          const el = cy.$$('#list')[name](arg)
+          const el = traverse(cy.$$('#list'))
 
           dom.stringify(cy.$$('#list'), 'short')
 
@@ -308,7 +314,7 @@ describe('src/cy/commands/traversals', () => {
   })
 
   it('does not log using first w/options', () => {
-    const logs = []
+    const logs: Cypress.Log[] = []
 
     cy.on('log:added', (attrs, log) => {
       if (attrs.name !== 'assert') {

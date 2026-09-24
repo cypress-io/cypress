@@ -1,6 +1,9 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
-const testOptions = (commandName, options, order, f) => {
+// `const` keeps each options literal at its narrow type, so values like
+// `capture: 'viewport'` still satisfy the command's union rather than widening
+// to `string`.
+const testOptions = <const T>(commandName: string, options: T, order: number, f: (options: T) => void) => {
   it(commandName, () => {
     let usedOptions = _.clone(options)
     let expectedOptions = _.clone(options)
@@ -275,6 +278,7 @@ describe('command log', () => {
       // Ignore cy.visit() because it is tested in beforeEach().
 
       testOptions('wait', { requestTimeout: 2000 }, 0, (options) => {
+        // @ts-expect-error - requestTimeout is not part of the public options for the numeric overload
         cy.wait(100, options)
       })
 

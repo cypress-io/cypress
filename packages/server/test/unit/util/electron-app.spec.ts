@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setRemoteDebuggingPort } from '../../../lib/util/electron-app'
 
 const appendSwitch = vi.hoisted(() => {
   return vi.fn()
@@ -18,8 +19,6 @@ vi.mock('electron', () => {
     },
   }
 })
-
-import { setRemoteDebuggingPort } from '../../../lib/util/electron-app'
 
 describe('/lib/util/electron-app', () => {
   describe('remote debugging port', () => {

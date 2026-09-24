@@ -769,6 +769,34 @@ namespace CypressClockTests {
   cy.clock(+new Date(), ['Date'])
   // Date object
   cy.clock(new Date(2019, 3, 2))
+  // null starts the clock at 0
+  cy.clock(null, ['setTimeout', 'clearTimeout'])
+  cy.clock(null, ['setTimeout'], { log: false })
+  // every function the clock can override
+  cy.clock(null, [
+    'setTimeout',
+    'clearTimeout',
+    'setInterval',
+    'clearInterval',
+    'Date',
+    'requestAnimationFrame',
+    'cancelAnimationFrame',
+    'requestIdleCallback',
+    'cancelIdleCallback',
+    'performance',
+    'Intl',
+    'queueMicrotask',
+  ])
+  const clockFunctions: Cypress.ClockFunction[] = ['requestAnimationFrame', 'performance']
+
+  cy.clock(0, clockFunctions)
+  cy.clock(null, ['setImmediate']) // $ExpectError
+  cy.clock(null, ['notATimer']) // $ExpectError
+  cy.clock('2019-04-02') // $ExpectError
+  // tick returns the new now
+  cy.clock().then((clock) => {
+    clock.tick(1000) // $ExpectType number
+  })
   // restoring the clock
   cy.clock().then((clock) => {
     clock.restore()
@@ -1270,6 +1298,9 @@ namespace CypressTraversalTests {
   cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).prevUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).prevUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('#myItem', { log: 'true' }) // $ExpectError
 
   cy.wrap({}).nextUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).nextUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1278,6 +1309,9 @@ namespace CypressTraversalTests {
   cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).nextUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).nextUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('#myItem', { log: 'true' }) // $ExpectError
 
   cy.wrap({}).parentsUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).parentsUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1286,6 +1320,23 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).parentsUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).parentsUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
+}
+
+namespace CypressOptionsBeforeCallbackTests {
+  cy.getCookies().each({ timeout: 4000 }, (cookie) => {})
+  cy.getCookies().spread({ timeout: 4000 }, (cookie1, cookie2) => {})
+  cy.getCookies().each({ timeout: 'soon' }, (cookie) => {}) // $ExpectError
+  cy.getCookies().spread({ timeout: 'soon' }, (cookie1) => {}) // $ExpectError
+}
+
+namespace CypressScrollIntoViewOffsetTests {
+  cy.get('form').scrollIntoView({ offset: { top: 20 } })
+  cy.get('form').scrollIntoView({ offset: { left: 20 } })
+  cy.get('form').scrollIntoView({ offset: { top: 20, left: 20 } })
+  cy.get('form').scrollIntoView({ offset: { top: '20' } }) // $ExpectError
 }
 
 namespace CypressRequireTests {
