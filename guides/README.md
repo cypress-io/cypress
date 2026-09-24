@@ -21,7 +21,6 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 * [Error handling](./error-handling.md)
 * [ESLint Migration Guide: Monorepo Alignment](./eslint-migration.md)
 * [GraphQL Subscriptions - Overview and Test Guide](./graphql-subscriptions.md)
-* [Multi-tab testing (design draft)](./multi-tab-testing-design-draft.md)
 * [Patching packages](./patch-package.md)
 * [Protocol development](./protocol-development.md)
 * [Purging Specific URLs from Cloudflare cache](./purging-cloudflare-cache.md)
