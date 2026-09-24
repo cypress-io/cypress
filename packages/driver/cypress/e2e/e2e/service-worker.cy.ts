@@ -1,6 +1,42 @@
+export {} // make typescript see this as a module
+
+// The scripts below are stringified and run inside the service worker, so `self` is typed
+// as its global scope. The webworker lib conflicts with the dom lib program-wide, so the
+// members the scripts use are declared structurally here, as in @packages/proxy's injector.
+// Listeners also accept `undefined`, since the tests register and remove it deliberately.
+interface ExtendableEvent extends Event {
+  waitUntil (f: Promise<unknown>): void
+}
+
+interface FetchEvent extends ExtendableEvent {
+  readonly request: Request
+  respondWith (r: Response | PromiseLike<Response>): void
+}
+
+interface ServiceWorkerGlobalScopeEventMap {
+  activate: ExtendableEvent
+  fetch: FetchEvent
+  install: ExtendableEvent
+}
+
+type ServiceWorkerListener<K extends keyof ServiceWorkerGlobalScopeEventMap> =
+  | ((event: ServiceWorkerGlobalScopeEventMap[K]) => unknown)
+  | { handleEvent (event: ServiceWorkerGlobalScopeEventMap[K]): unknown }
+  | null
+  | undefined
+
+interface ServiceWorkerGlobalScope {
+  clients: { claim (): Promise<void> }
+  onfetch: ((event: FetchEvent) => unknown) | null | undefined
+  addEventListener<K extends keyof ServiceWorkerGlobalScopeEventMap> (type: K, listener: ServiceWorkerListener<K>, options?: boolean | AddEventListenerOptions): void
+  removeEventListener<K extends keyof ServiceWorkerGlobalScopeEventMap> (type: K, listener: ServiceWorkerListener<K>, options?: boolean | EventListenerOptions): void
+}
+
+declare const self: ServiceWorkerGlobalScope
+
 // decrease the timeouts to ensure we don't hit the 2s correlation timeout
 describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000 }, () => {
-  let sessionId
+  let sessionId: string | null
 
   const getSessionId = async () => {
     if (!sessionId) {
@@ -38,7 +74,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     await Cypress.automation('remote:debugger:protocol', { command: 'Target.detachFromTarget', params: { sessionId } })
   }
 
-  const validateFetchHandlers = ({ listenerCount, onFetchHandlerType }) => {
+  const validateFetchHandlers = ({ listenerCount, onFetchHandlerType }: { listenerCount: number, onFetchHandlerType?: string }) => {
     // skip validation in non-Chromium and electron browsers
     // non-Chromium browsers do not fully support the remote debugger protocol
     // possibly remove the electron check on https://github.com/cypress-io/cypress/issues/2118 is resolved
@@ -60,7 +96,10 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
   const unregisterServiceWorker = () => {
     const timeout = 10_000
 
-    cy.wrap(navigator.serviceWorker.getRegistrations(), { timeout }).then((registrations) => {
+    type Registrations = readonly ServiceWorkerRegistration[]
+
+    // `cy.wrap` cannot infer what a promise resolves to, so it is stated here
+    cy.wrap<Promise<Registrations>, Registrations>(navigator.serviceWorker.getRegistrations(), { timeout }).then((registrations) => {
       cy.wrap(
         Promise.all(registrations.map((registration) => registration.unregister())),
         { timeout },
@@ -116,7 +155,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     it('supports using addEventListener with delayed handleEvent', () => {
       const script = () => {
-        const obj = {}
+        const obj = {} as { handleEvent: (event: FetchEvent) => void }
 
         self.addEventListener('fetch', obj)
         obj.handleEvent = function (event) {
