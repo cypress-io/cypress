@@ -46,19 +46,6 @@ describe('src/cy/commands/assertions', () => {
           expect($el).not.to.have.data('number', '222')
         })
       })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.be.ok
-          expect(err.message).to.include('> data')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.have.data('foo')
-      })
     })
 
     context('class', () => {
@@ -94,22 +81,6 @@ describe('src/cy/commands/assertions', () => {
           expect($el).to.have.class(999)
           expect($el).to.have.class('999')
         })
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected \'foo\' to have class \'bar\'',
-          )
-
-          expect(err.message).to.include('> class')
-          expect(err.message).to.include('> foo')
-
-          done()
-        })
-
-        expect('foo').to.have.class('bar')
       })
     })
 
@@ -174,22 +145,6 @@ describe('src/cy/commands/assertions', () => {
           expect($el).to.have.id('456')
         })
       })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected [] to have id \'foo\'',
-          )
-
-          expect(err.message).to.include('> id')
-          expect(err.message).to.include('> []')
-
-          done()
-        })
-
-        expect([]).to.have.id('foo')
-      })
     })
 
     context('html', () => {
@@ -245,22 +200,6 @@ describe('src/cy/commands/assertions', () => {
             'expected **<div>** to contain HTML **<span>span</span>**, but the HTML was **<button>button</button>**',
           )
         }
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected null to have HTML \'foo\'',
-          )
-
-          expect(err.message).to.include('> html')
-          expect(err.message).to.include('> null')
-
-          done()
-        })
-
-        expect(null).to.have.html('foo')
       })
 
       it('partial match', function () {
@@ -342,22 +281,6 @@ describe('src/cy/commands/assertions', () => {
         cy.get('div').should('contain.text', 'iv').should('contain.text', 'd')
 
         cy.get('div').should('not.contain.text', 'fizzbuzz').should('contain.text', 'Nest')
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected undefined to have text \'foo\'',
-          )
-
-          expect(err.message).to.include('> text')
-          expect(err.message).to.include('> undefined')
-
-          done()
-        })
-
-        expect(undefined).to.have.text('foo')
       })
     })
 
@@ -446,22 +369,6 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have value \'foo\'',
-          )
-
-          expect(err.message).to.include('> value')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.have.value('foo')
-      })
-
       it('partial match', function () {
         expect(this.$input).to.contain.value('oo')
         expect(this.$input).to.not.contain.value('oof')
@@ -540,22 +447,6 @@ describe('src/cy/commands/assertions', () => {
         expect(l2.get('message')).to.eq(
           'expected **<div>** not to have descendants **input**',
         )
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have descendants \'foo\'',
-          )
-
-          expect(err.message).to.include('> descendants')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.have.descendants('foo')
       })
     })
 

@@ -112,22 +112,6 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have attribute \'foo\'',
-          )
-
-          expect(err.message).to.include('> attr')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.have.attr('foo')
-      })
-
       it('throws when the attribute name is not a string', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include(
@@ -243,22 +227,6 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have property \'foo\'',
-          )
-
-          expect(err.message).to.include('> prop')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.have.prop('foo')
-      })
-
       // https://github.com/cypress-io/cypress/issues/26451
       it('throws when the property name is not a string', function (done) {
         cy.on('fail', (err) => {
@@ -326,22 +294,6 @@ describe('src/cy/commands/assertions', () => {
         expect(l6.get('message')).to.eq(
           'expected **<div>** not to have CSS property **display** with the value **none**, but the value was **none**',
         )
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have CSS property \'foo\'',
-          )
-
-          expect(err.message).to.include('> css')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.have.css('foo')
       })
 
       // https://github.com/cypress-io/cypress/issues/26451

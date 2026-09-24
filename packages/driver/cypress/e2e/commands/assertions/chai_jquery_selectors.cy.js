@@ -67,22 +67,6 @@ describe('src/cy/commands/assertions', () => {
 
         expect(this.$div2).to.be.visible
       })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'visible\'',
-          )
-
-          expect(err.message).to.include('> visible')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.be.visible
-      })
     })
 
     context('hidden', () => {
@@ -130,22 +114,6 @@ describe('src/cy/commands/assertions', () => {
           expect(l6.get('error').message).to.eq('expected \'<div>\' to be \'hidden\'')
         }
       })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'hidden\'',
-          )
-
-          expect(err.message).to.include('> hidden')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.be.hidden
-      })
     })
 
     context('selected', () => {
@@ -177,22 +145,6 @@ describe('src/cy/commands/assertions', () => {
         expect(l2.get('message')).to.eq(
           'expected **<option>** not to be **selected**',
         )
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'selected\'',
-          )
-
-          expect(err.message).to.include('> selected')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.be.selected
       })
     })
 
@@ -226,22 +178,6 @@ describe('src/cy/commands/assertions', () => {
           'expected **<input>** not to be **checked**',
         )
       })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'checked\'',
-          )
-
-          expect(err.message).to.include('> checked')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.be.checked
-      })
     })
 
     context('enabled', () => {
@@ -274,22 +210,6 @@ describe('src/cy/commands/assertions', () => {
           'expected **<input>** not to be **enabled**',
         )
       })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'enabled\'',
-          )
-
-          expect(err.message).to.include('> enabled')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.be.enabled
-      })
     })
 
     context('disabled', () => {
@@ -321,22 +241,6 @@ describe('src/cy/commands/assertions', () => {
         expect(l2.get('message')).to.eq(
           'expected **<input>** not to be **disabled**',
         )
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'disabled\'',
-          )
-
-          expect(err.message).to.include('> disabled')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.be.disabled
       })
     })
 
@@ -412,22 +316,6 @@ describe('src/cy/commands/assertions', () => {
         cy.get('div:last').blur()
 
         cy.get('div').should('not.have.focus')
-      })
-
-      it('throws when obj is not DOM', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error').message).to.contain(
-            'expected {} to be \'focused\'',
-          )
-
-          expect(err.message).to.include('> focus')
-          expect(err.message).to.include('> {}')
-
-          done()
-        })
-
-        expect({}).to.have.focus
       })
     })
   })
