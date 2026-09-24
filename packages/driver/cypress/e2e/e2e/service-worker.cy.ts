@@ -2,8 +2,7 @@ export {} // make typescript see this as a module
 
 // The scripts below are stringified and run inside the service worker, so `self` is typed
 // as its global scope. The webworker lib conflicts with the dom lib program-wide, so the
-// members the scripts use are declared structurally here, as in @packages/proxy's injector.
-// Listeners also accept `undefined`, since the tests register and remove it deliberately.
+// members the scripts use are declared structurally here.
 interface ExtendableEvent extends Event {
   waitUntil (f: Promise<unknown>): void
 }
@@ -19,6 +18,7 @@ interface ServiceWorkerGlobalScopeEventMap {
   install: ExtendableEvent
 }
 
+// The tests pass `undefined` as a listener and assign it to `onfetch` on purpose
 type ServiceWorkerListener<K extends keyof ServiceWorkerGlobalScopeEventMap> =
   | ((event: ServiceWorkerGlobalScopeEventMap[K]) => unknown)
   | { handleEvent (event: ServiceWorkerGlobalScopeEventMap[K]): unknown }
