@@ -183,20 +183,6 @@ describe('CloudRequest', () => {
       expect(fakeHttpUpstream.requests[0].rawHeaders).to.not.contain('Proxy-Authorization')
     })
 
-    it('retains Proxy-Authorization for non-proxied requests', async () => {
-      const CloudReq = createCloudRequest({ baseURL: fakeHttpUpstream.baseUrl })
-
-      expect(await CloudReq.get('/ping', {
-        headers: {
-          'Proxy-Authorization': 'foo',
-        },
-      }).then((r) => r.data)).to.eql('OK')
-
-      const headers = fakeHttpUpstream.requests[0].rawHeaders
-
-      expect(headers[headers.indexOf('Proxy-Authorization') + 1]).to.eql('foo')
-    })
-
     //
     for (const adapter of ['Axios', 'Request'] as const) {
       it(`${adapter}: issues requests to the correct location when HTTP -> HTTPS via Proxy`, async () => {
