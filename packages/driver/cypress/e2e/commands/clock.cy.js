@@ -76,6 +76,19 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    it('cancels an idle callback that was scheduled with a timeout', { browser: '!webkit' }, function () {
+      cy.clock().then(function (clock) {
+        const callback = cy.stub()
+
+        const id = this.window.requestIdleCallback(callback, { timeout: 500 })
+
+        this.window.cancelIdleCallback(id)
+        clock.tick(1000)
+
+        expect(callback).not.to.be.called
+      })
+    })
+
     it('takes Date now arg', () => {
       // April 15, 2017
       const now = new Date(2017, 3, 15)
