@@ -3,7 +3,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) replaced `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cancelIdleCallback` is now replaced by default alongside `requestIdleCallback`, and it can also be listed explicitly in the functions passed to `cy.clock()`, which previously threw an error.
+- Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) replaced `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cancelIdleCallback` is now replaced by default alongside `requestIdleCallback`, and it can also be listed explicitly in the functions passed to `cy.clock()`, which previously threw an error. Idle callbacks scheduled while the clock is installed now also run after any other timers due at the same time, and receive an `IdleDeadline` argument, matching how browsers run them.
 
 **Misc:**
 
@@ -13,6 +13,7 @@
 **Dependency Updates:**
 
 - Upgraded `proxy-addr` from `2.0.7` to `2.0.8` to address a [User Impersonation](https://security.snyk.io/vuln/SNYK-JS-PROXYADDR-19812342) (CVE-2026-90711) vulnerability reported in security scans. Addresses [#34858](https://github.com/cypress-io/cypress/issues/34858).
+- Upgraded `@sinonjs/fake-timers` from `14.0.0` to `15.1.2`, which [`cy.clock()`](https://on.cypress.io/clock) uses to replace time functions in your application.
 
 ## 16.1.0
 
