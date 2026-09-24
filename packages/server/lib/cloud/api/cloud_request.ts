@@ -43,6 +43,8 @@ export const createCloudRequest = (options: CreateCloudRequestOptions = {}): Axi
     baseURL,
     httpAgent: strictAgent,
     httpsAgent: strictAgent,
+    // strictAgent applies HTTP(S)_PROXY itself; axios would otherwise tunnel HTTPS through its own agent, bypassing it
+    proxy: false,
     headers: {
       'x-os-name': os.platform(),
       'x-cypress-version': pkg.version,

@@ -322,7 +322,8 @@ describe('CloudRequest', () => {
             // different from Request Promise (changed):
             // 'Accept-Encoding', 'gzip, deflate',
             'Accept-Encoding', 'gzip, compress, deflate, br',
-            'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
+            // different from Request Promise (changed):
+            'Host', `localhost:${fakeHttpsUpstreamAuth.port}`,
             'Authorization', UPSTREAM_AUTH,
             'Connection', 'close',
           ])
