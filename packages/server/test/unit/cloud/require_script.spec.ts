@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, it, expect } from 'vitest'
 import { requireScript } from '../../../lib/cloud/require_script'
 
 describe('require_script', () => {
@@ -16,6 +16,6 @@ describe('require_script', () => {
 
     const studio = new StudioManager({ studioPath: '/path/to/studio' })
 
-    expect(studio.studioPath).to.equal('/path/to/studio')
+    expect(studio.studioPath).toBe('/path/to/studio')
   })
 })
