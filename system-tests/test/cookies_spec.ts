@@ -506,3 +506,59 @@ describe('OAuth/SSO redirect-back cookie', () => {
     spec: 'oauth_redirect_cookie.cy.js',
   })
 })
+
+describe('cookie jar stays in sync after cookies are set outside the proxy', () => {
+  const onServer = (app) => {
+    app.use(parser())
+
+    // Renders the `sid` the server received, so a spec can assert on what arrived on
+    // the wire rather than on what the browser believes it holds.
+    const renderSid = (res, sid: string, extra = '') => {
+      return res
+      .type('html')
+      .send(`<html><body><div id="sid">sid: ${sid || 'none'}</div>${extra}</body></html>`)
+    }
+
+    // Seeding `sid` on the first visit is what primes the server-side cookie jar,
+    // since that navigation response is the one the proxy sees.
+    app.get('/rotated_cookie', (req, res) => {
+      const sid = req.cookies.sid || 'anon'
+
+      if (!req.cookies.sid) {
+        res.cookie('sid', sid, { httpOnly: true, sameSite: 'lax' })
+      }
+
+      return renderSid(res, sid, '<a id="account" href="/rotated_cookie/account">account</a>')
+    })
+
+    // cy.request() issues this from Node, so the proxy never sees the Set-Cookie.
+    app.post('/rotated_cookie/login', (req, res) => {
+      res.cookie('sid', 'auth', { httpOnly: true, sameSite: 'lax' })
+
+      return res.sendStatus(200)
+    })
+
+    app.get('/rotated_cookie/account', (req, res) => {
+      return renderSid(res, req.cookies.sid)
+    })
+  }
+
+  systemTests.setup({
+    servers: [{
+      onServer,
+      port: httpPort,
+    }],
+    settings: {
+      e2e: {},
+    },
+  })
+
+  // https://github.com/cypress-io/cypress/issues/34891
+  it('sends cookies set by cy.request and cy.setCookie on the next navigation', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
+    config: {
+      baseUrl: `http://localhost:${httpPort}`,
+    },
+    spec: 'rotated_cookie.cy.ts',
+  })
+})
