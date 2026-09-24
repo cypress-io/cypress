@@ -303,7 +303,9 @@ chai.use((chai, u) => {
           escapeBackslashes(text),
         )
 
-        const selector = `:contains('${escText}'), [type='submit'][value~='${escText}']`
+        // match submit elements by a substring of their value, consistent with
+        // cy.contains (see https://github.com/cypress-io/cypress/issues/34305)
+        const selector = `:contains('${escText}'), [type='submit'][value*='${escText}']`
 
         // the assert checks below only work if $dom.isJquery(obj)
         // https://github.com/cypress-io/cypress/issues/3549
