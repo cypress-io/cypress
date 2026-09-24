@@ -3,7 +3,11 @@ import _ from 'lodash'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
-const _reset = (): Pick<Cypress.ScreenshotDefaultsOptions, 'capture' | 'scale' | 'disableTimersAndAnimations' | 'screenshotOnRunFailure' | 'blackout' | 'overwrite' | 'onBeforeScreenshot' | 'onAfterScreenshot'> => {
+// `clip` and `padding` are optional because only `defaults()` sets them; every
+// other option has a value to reset to.
+type ScreenshotDefaults = Omit<Cypress.ScreenshotDefaultsOptions, 'clip' | 'padding'> & Partial<Pick<Cypress.ScreenshotDefaultsOptions, 'clip' | 'padding'>>
+
+const _reset = (): ScreenshotDefaults => {
   return {
     capture: 'fullPage',
     scale: false,

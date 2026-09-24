@@ -1,31 +1,21 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import tty from 'tty'
-import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import * as ttyUtil from '../../../lib/util/tty'
 import * as terminalSize from '../../../lib/util/terminal-size'
 
 const ttys = [process.stdin.isTTY, process.stdout.isTTY, process.stderr.isTTY]
-
-const stdoutGetWindowSize = Object.getOwnPropertyDescriptor(process.stdout, 'getWindowSize')
-const stderrGetWindowSize = Object.getOwnPropertyDescriptor(process.stderr, 'getWindowSize')
-
-function restoreGetWindowSize () {
-  if (stdoutGetWindowSize) {
-    Object.defineProperty(process.stdout, 'getWindowSize', stdoutGetWindowSize)
-  } else {
-    Reflect.deleteProperty(process.stdout, 'getWindowSize')
-  }
-
-  if (stderrGetWindowSize) {
-    Object.defineProperty(process.stderr, 'getWindowSize', stderrGetWindowSize)
-  } else {
-    Reflect.deleteProperty(process.stderr, 'getWindowSize')
-  }
-}
+const originalIsatty = tty.isatty
 
 describe('lib/util/tty', () => {
   afterEach(() => {
     vi.restoreAllMocks()
-    restoreGetWindowSize()
+    vi.unstubAllEnvs()
+
+    tty.isatty = originalIsatty
+
+    // Streams inherit getWindowSize from tty.WriteStream, so dropping the own property restores the original
+    Reflect.deleteProperty(process.stdout, 'getWindowSize')
+    Reflect.deleteProperty(process.stderr, 'getWindowSize')
   })
 
   describe('getWindowSize', () => {
@@ -33,8 +23,8 @@ describe('lib/util/tty', () => {
       vi.spyOn(tty, 'isatty').mockReturnValue(true)
       vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 10, rows: 20 })
 
-      Reflect.deleteProperty(process.stdout, 'getWindowSize')
-      Reflect.deleteProperty(process.stderr, 'getWindowSize')
+      Object.defineProperty(process.stdout, 'getWindowSize', { value: undefined, configurable: true, writable: true })
+      Object.defineProperty(process.stderr, 'getWindowSize', { value: undefined, configurable: true, writable: true })
 
       ttyUtil.override()
 
@@ -45,27 +35,25 @@ describe('lib/util/tty', () => {
 
   describe('.override', () => {
     beforeEach(() => {
-      process.env.FORCE_STDIN_TTY = '1'
-      process.env.FORCE_STDOUT_TTY = '1'
-      process.env.FORCE_STDERR_TTY = '1'
+      vi.stubEnv('FORCE_STDIN_TTY', '1')
+      vi.stubEnv('FORCE_STDOUT_TTY', '1')
+      vi.stubEnv('FORCE_STDERR_TTY', '1')
 
-      // do this so can we see when its modified
       process.stdin.isTTY = 'foo' as unknown as boolean
       process.stdout.isTTY = 'foo' as unknown as boolean
       process.stderr.isTTY = 'foo' as unknown as boolean
     })
 
     afterEach(() => {
-      // restore sanity
       process.stdin.isTTY = ttys[0]
       process.stdout.isTTY = ttys[1]
       process.stderr.isTTY = ttys[2]
     })
 
     it('is noop when not forcing in env', () => {
-      delete process.env.FORCE_STDIN_TTY
-      delete process.env.FORCE_STDOUT_TTY
-      delete process.env.FORCE_STDERR_TTY
+      vi.stubEnv('FORCE_STDIN_TTY', undefined)
+      vi.stubEnv('FORCE_STDOUT_TTY', undefined)
+      vi.stubEnv('FORCE_STDERR_TTY', undefined)
 
       ttyUtil.override()
 
@@ -85,20 +73,17 @@ describe('lib/util/tty', () => {
     })
 
     it('modifies isatty calls', () => {
-      delete process.env.FORCE_STDERR_TTY
+      vi.stubEnv('FORCE_STDERR_TTY', undefined)
 
       const isatty = vi.spyOn(tty, 'isatty')
 
       ttyUtil.override()
 
-      // should slurp up the first two calls
-      // and only proxy through the 3rd call
-      // for stderr
       tty.isatty(0)
       tty.isatty(1)
       tty.isatty(2)
 
-      expect(isatty.mock.calls).toHaveLength(1)
+      expect(isatty.mock.calls.length).toBe(1)
 
       expect(isatty.mock.calls[0][0]).toBe(2)
     })

@@ -1,5 +1,5 @@
-import * as objUtils from '../../../lib/util/obj_utils'
 import { describe, it, expect } from 'vitest'
+import * as objUtils from '../../../lib/util/obj_utils'
 
 const { each, remapKeys, renameKey, setValue, remove } = objUtils
 

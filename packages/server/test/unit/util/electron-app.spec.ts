@@ -1,24 +1,24 @@
-import { beforeEach, describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setRemoteDebuggingPort } from '../../../lib/util/electron-app'
 
-const electronMocks = vi.hoisted(() => {
-  return {
-    appendSwitch: vi.fn(),
-    getSwitchValue: vi.fn(),
-  }
+const appendSwitch = vi.hoisted(() => {
+  return vi.fn()
+})
+
+const getSwitchValue = vi.hoisted(() => {
+  return vi.fn()
 })
 
 vi.mock('electron', () => {
   return {
     app: {
       commandLine: {
-        appendSwitch: electronMocks.appendSwitch,
-        getSwitchValue: electronMocks.getSwitchValue,
+        appendSwitch,
+        getSwitchValue,
       },
     },
   }
 })
-
-import { setRemoteDebuggingPort } from '../../../lib/util/electron-app'
 
 describe('/lib/util/electron-app', () => {
   describe('remote debugging port', () => {
@@ -27,22 +27,23 @@ describe('/lib/util/electron-app', () => {
     })
 
     it('should not override port if previously set', async () => {
-      electronMocks.getSwitchValue.mockReturnValue('4567')
+      getSwitchValue.mockImplementation(() => {
+        return '4567'
+      })
 
       await setRemoteDebuggingPort()
 
-      expect(electronMocks.appendSwitch).not.toHaveBeenCalled()
+      expect(appendSwitch).not.toHaveBeenCalled()
     })
 
     it('should assign random port if not previously set', async () => {
-      electronMocks.getSwitchValue.mockReturnValue(undefined)
+      getSwitchValue.mockImplementation(() => {
+        return undefined
+      })
 
       await setRemoteDebuggingPort()
 
-      expect(electronMocks.appendSwitch).toHaveBeenCalledWith(
-        'remote-debugging-port',
-        expect.any(String),
-      )
+      expect(appendSwitch).toHaveBeenCalledWith('remote-debugging-port', expect.any(String))
     })
   })
 })

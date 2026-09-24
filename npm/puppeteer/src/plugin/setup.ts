@@ -17,14 +17,14 @@ function messageHandlerError (err: any) {
 
   if (typeof err === 'string') {
     errObject.message = err
-  } else if (typeof err === 'object') {
+  } else if (err && typeof err === 'object') {
     Object.assign(errObject, {
       name: err.name,
       message: err.message,
       stack: err.stack,
     })
   } else {
-    errObject.message = err
+    errObject.message = String(err)
   }
 
   return {
@@ -111,32 +111,41 @@ export function setup (options: SetupOptions) {
 
       let result: any
       let error: any
+      let didThrow = false
 
       try {
         result = await messageHandler(browser, ...args)
       } catch (err: any) {
         error = err
-      } finally {
-        // - Only implemented for Chromium right now. Support for Firefox/webkit
-        //   could be added later
-        // - Electron doesn't have tabs
-        // - Focus doesn't matter for headless browsers and old headless Chrome
-        //   doesn't run the extension
-        const isHeadedChromium = cypressBrowser.isHeaded && cypressBrowser.family === 'chromium' && cypressBrowser.name !== 'electron'
-
-        if (isHeadedChromium) {
-          try {
-            await activateMainTab(browser)
-          } catch (e) {
-            return messageHandlerError(pluginError('Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.'))
-          }
-        }
-
-        await browser.disconnect()
+        didThrow = true
       }
 
-      if (error) {
+      // - Only implemented for Chromium right now. Support for Firefox/webkit
+      //   could be added later
+      // - Electron doesn't have tabs
+      // - Focus doesn't matter for headless browsers and old headless Chrome
+      //   doesn't run the extension
+      const isHeadedChromium = cypressBrowser.isHeaded && cypressBrowser.family === 'chromium' && cypressBrowser.name !== 'electron'
+      let didFailToActivateMainTab = false
+
+      if (isHeadedChromium) {
+        try {
+          await activateMainTab(browser)
+        } catch (e) {
+          didFailToActivateMainTab = true
+        }
+      }
+
+      await browser.disconnect()
+
+      // The handler's own error is the root cause, so it takes precedence
+      // over a failure to refocus the main tab afterwards
+      if (didThrow) {
         return messageHandlerError(error)
+      }
+
+      if (didFailToActivateMainTab) {
+        return messageHandlerError(pluginError('Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.'))
       }
 
       // cy.task() errors if `undefined` is returned, so return null in that case
