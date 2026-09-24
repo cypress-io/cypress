@@ -1,19 +1,24 @@
-const LimitedMap = require('@packages/driver/src/util/limited_map').default
+import LimitedMap from '@packages/driver/src/util/limited_map'
+import type $UtilsModule from '@packages/driver/src/cypress/utils'
+
 const { encodeBase64Unicode } = Cypress.utils
-const $utils = Cypress.utils
+
+// `Cypress.utils` is declared with only the handful of helpers other packages
+// reach for, while this spec covers the whole module.
+const $utils = Cypress.utils as unknown as typeof $UtilsModule
 
 describe('driver/src/cypress/utils', () => {
   context('.reduceProps', () => {
     it('reduces obj to only include props in props', () => {
-      let obj = {
+      const obj = {
         foo: 'foo',
         bar: 'bar',
         baz: 'baz',
       }
 
-      obj = $utils.reduceProps(obj, ['foo', 'bar'])
+      const reduced = $utils.reduceProps(obj, ['foo', 'bar'])
 
-      expect(obj).to.deep.eq({ foo: 'foo', bar: 'bar' })
+      expect(reduced).to.deep.eq({ foo: 'foo', bar: 'bar' })
     })
   })
 
@@ -67,7 +72,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('circular', function () {
-        const obj = {}
+        const obj: Record<string, any> = {}
 
         obj.obj = obj
 
@@ -76,7 +81,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('circular in nested objects', function () {
-        const obj = {
+        const obj: Record<string, any> = {
           a: {
             b: {},
           },
@@ -88,7 +93,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('circular in objects with exactly 2 keys (problematic case)', function () {
-        const obj = {
+        const obj: Record<string, any> = {
           parent: null,
           children: [],
         }
@@ -99,7 +104,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('circular in objects with >2 keys', function () {
-        const obj = {
+        const obj: Record<string, any> = {
           a: 1,
           b: 2,
           c: {},
@@ -131,7 +136,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('multiple circular references in same object', function () {
-        const obj = {
+        const obj: Record<string, any> = {
           a: {},
           b: {},
         }
@@ -143,7 +148,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('circular reference through multiple levels', function () {
-        const obj = {
+        const obj: Record<string, any> = {
           level1: {
             level2: {
               level3: {},
@@ -159,7 +164,7 @@ describe('driver/src/cypress/utils', () => {
 
     context('Circular Arrays', () => {
       it('circular reference in arrays', function () {
-        const arr = []
+        const arr: any[] = []
 
         arr.push(arr)
 
@@ -167,7 +172,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('circular reference in nested arrays', function () {
-        const arr = [[], []]
+        const arr: any[][] = [[], []]
 
         arr[0].push(arr)
 
@@ -175,7 +180,7 @@ describe('driver/src/cypress/utils', () => {
       })
 
       it('circular reference in arrays with length > 3', function () {
-        const arr = [1, 2, 3, 4]
+        const arr: any[] = [1, 2, 3, 4]
 
         arr.push(arr)
 
