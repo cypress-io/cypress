@@ -1,5 +1,18 @@
-const $stackUtils = require('@packages/driver/src/cypress/stack_utils').default
-const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils').default
+import $stackUtils from '@packages/driver/src/cypress/stack_utils'
+import $sourceMapUtils from '@packages/driver/src/cypress/source_map_utils'
+
+// `getSourceStack` returns a bare `{}` when there is no stack to parse, so the
+// inferred union hides the results from the calls that do pass one.
+type SourceStack = {
+  parsed: any[]
+  sourceMapped: string
+}
+
+// `Cypress.config()`'s setter overload only accepts test config overrides,
+// while these tests swap the runtime values that `stack_utils` reads.
+const setConfig = (key: 'platform' | 'repoRoot', value: string | null) => {
+  (Cypress.config as (k: string, v: unknown) => void)(key, value)
+}
 
 describe('driver/src/cypress/stack_utils', () => {
   context('.replacedStack', () => {
@@ -34,8 +47,8 @@ describe('driver/src/cypress/stack_utils', () => {
 
     after(() => {
       // restore config values to prevent bleeding into subsequent tests
-      Cypress.config('platform', actualPlatform)
-      Cypress.config('repoRoot', actualRepoRoot)
+      setConfig('platform', actualPlatform)
+      setConfig('repoRoot', actualRepoRoot)
     })
 
     it('returns relativeFile if absoluteFile is empty', () => {
@@ -51,22 +64,22 @@ describe('driver/src/cypress/stack_utils', () => {
     })
 
     it('returns relativeFile if absoluteFile does not start with `repoRoot`', () => {
-      Cypress.config('repoRoot', 'User/ruby/test-repo')
+      setConfig('repoRoot', 'User/ruby/test-repo')
       const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
 
       expect(result).to.equal(relativeFile)
     })
 
     it('returns the relative path from root if the absoluteFile starts with `repoRoot`', () => {
-      Cypress.config('repoRoot', repoRoot)
+      setConfig('repoRoot', repoRoot)
       const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
 
       expect(result).to.equal(relativePathFromRoot)
     })
 
     it('uses posix on windows', () => {
-      Cypress.config('repoRoot', 'C:/Users/Administrator/Documents/GitHub/cypress')
-      Cypress.config('platform', 'win32')
+      setConfig('repoRoot', 'C:/Users/Administrator/Documents/GitHub/cypress')
+      setConfig('platform', 'win32')
       const absoluteFile = 'C:\\Users\\Administrator\\Documents\\GitHub\\cypress\\packages\\app/cypress/e2e/reporter_header.cy.ts'
       const relativeFile = 'cypress/e2e/reporter_header.cy.ts'
       const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
@@ -147,7 +160,7 @@ describe('driver/src/cypress/stack_utils', () => {
     })
 
     it('relativeFile is relative to the repo root when `absoluteFile` starts with `repoRoot`', () => {
-      Cypress.config('repoRoot', '/dev')
+      setConfig('repoRoot', '/dev')
       cy.stub($sourceMapUtils, 'getSourceContents').returns(sourceCode)
       const codeFrame = $stackUtils.getCodeFrame(originalErr)
 
@@ -161,7 +174,7 @@ describe('driver/src/cypress/stack_utils', () => {
 
       cy.fixture('error-stack-with-http-links.txt')
       .then((stack) => {
-        return $stackUtils.getSourceStack(stack, projectRoot)
+        return $stackUtils.getSourceStack(stack, projectRoot) as SourceStack
       })
       .its('parsed')
       .then((parsed) => {
@@ -183,17 +196,18 @@ describe('driver/src/cypress/stack_utils', () => {
   })
 
   context('.getSourceStack', () => {
-    let generatedStack
+    let generatedStack: string
+    let getSourcePosition: sinon.SinonStub
     const projectRoot = '/dev/app'
 
     beforeEach(() => {
-      cy.stub($sourceMapUtils, 'getSourcePosition').returns({
+      getSourcePosition = cy.stub($sourceMapUtils, 'getSourcePosition').returns({
         file: 'some_other_file.ts',
         line: 2,
         column: 1,
       })
 
-      $sourceMapUtils.getSourcePosition.onCall(1).returns({
+      getSourcePosition.onCall(1).returns({
         file: 'cypress/integration/features/source_map_spec.cy.ts',
         line: 4,
         column: 3,
@@ -206,7 +220,7 @@ describe('driver/src/cypress/stack_utils', () => {
     })
 
     it('receives generated stack and returns object with source stack and parsed source stack', () => {
-      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot) as SourceStack
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (some_other_file.ts:2:1)
@@ -242,7 +256,7 @@ describe('driver/src/cypress/stack_utils', () => {
     })
 
     it('works when first line is the error message', () => {
-      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot) as SourceStack
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (some_other_file.ts:2:1)
@@ -252,7 +266,7 @@ describe('driver/src/cypress/stack_utils', () => {
 
     it('works when first line is not the error message', () => {
       generatedStack = generatedStack.split('\n').slice(1).join('\n')
-      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot) as SourceStack
 
       expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:1)
     at Context.<anonymous> (cypress/integration/features/source_map_spec.cy.ts:4:3)\
@@ -261,7 +275,7 @@ describe('driver/src/cypress/stack_utils', () => {
 
     it('works when first several lines are the error message', () => {
       generatedStack = `Some\nmore\nlines\n\n${generatedStack}`
-      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot) as SourceStack
 
       expect(sourceStack.sourceMapped).to.equal(`Some
 more
@@ -274,19 +288,19 @@ Error: spec iframe stack
     })
 
     it('strips webpack protocol from relativeFile and maintains it in originalFile', () => {
-      $sourceMapUtils.getSourcePosition.returns({
+      getSourcePosition.returns({
         file: 'cypress:///some_other_file.ts',
         line: 2,
         column: 1,
       })
 
-      $sourceMapUtils.getSourcePosition.onCall(1).returns({
+      getSourcePosition.onCall(1).returns({
         file: 'webpack:///cypress/integration/features/source_map_spec.cy.ts',
         line: 4,
         column: 3,
       })
 
-      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot) as SourceStack
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (cypress:///some_other_file.ts:2:1)
@@ -322,19 +336,19 @@ Error: spec iframe stack
     })
 
     it('strips webpack protocol and maintains absolute path', () => {
-      $sourceMapUtils.getSourcePosition.returns({
+      getSourcePosition.returns({
         file: 'cypress:////root/absolute/path/some_other_file.ts',
         line: 2,
         column: 1,
       })
 
-      $sourceMapUtils.getSourcePosition.onCall(1).returns({
+      getSourcePosition.onCall(1).returns({
         file: 'webpack:////root/absolute/path/cypress/integration/features/source_map_spec.cy.ts',
         line: 4,
         column: 3,
       })
 
-      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot) as SourceStack
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:1)
@@ -388,7 +402,7 @@ Error: spec iframe stack
           at eval (<anonymous>)
       `
       const projectRoot = '/Users/cypress/git/cypress-example'
-      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)!
 
       expect(details.function, 'function name').to.equal('Suite.eval')
       expect(details.fileUrl, 'file url').to.equal('http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js')
@@ -465,7 +479,7 @@ Error: spec iframe stack
       `
 
       const projectRoot = '/Users/cypress/git/cypress-example'
-      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)!
 
       expect(details.originalFile).to.equal('webpack:///cypress/integration/spec%with space &^$ emoji👍_你好.js')
       expect(details.relativeFile).to.equal('cypress/integration/spec%with space &^$ emoji👍_你好.js')
@@ -486,7 +500,7 @@ Error: spec iframe stack
       `
 
       const projectRoot = '/Users/cypress/git/cypress-example'
-      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)!
 
       expect(details.originalFile).to.equal('/root/path/cypress/integration/spec.js')
       expect(details.relativeFile).to.equal('/root/path/cypress/integration/spec.js')
