@@ -1124,6 +1124,12 @@ declare namespace Cypress {
      * * `setInterval`
      * * `clearInterval`
      * * `Date` Objects
+     * * `requestAnimationFrame`
+     * * `cancelAnimationFrame`
+     * * `requestIdleCallback`
+     * * `cancelIdleCallback`
+     * * `performance`
+     * * `Intl`
      *
      * The clock starts at the unix epoch (timestamp of 0).
      * This means that when you instantiate new Date in your application,
@@ -1168,13 +1174,14 @@ declare namespace Cypress {
     clock(now: number | Date, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock but only overrides specific functions.
+     * Passing `null` for `now` starts the clock at the unix epoch (timestamp of 0).
      *
      * @see https://on.cypress.io/clock
      * @example
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number | Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
+    clock(now: number | Date | null, functions?: ClockFunction[], options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -6584,6 +6591,22 @@ declare namespace Cypress {
   }
 
   /**
+   * Names of the global functions that `cy.clock()` can override in the browser.
+   */
+  type ClockFunction =
+    | 'setTimeout'
+    | 'clearTimeout'
+    | 'setInterval'
+    | 'clearInterval'
+    | 'Date'
+    | 'requestAnimationFrame'
+    | 'cancelAnimationFrame'
+    | 'requestIdleCallback'
+    | 'cancelIdleCallback'
+    | 'performance'
+    | 'Intl'
+
+  /**
    * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
    */
   interface Clock {
@@ -6591,9 +6614,10 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
+     * @returns The clock's new `now`, in ms since the unix epoch
      * @see https://on.cypress.io/tick
      */
-    tick(time: number): void
+    tick(time: number): number
     /**
      * Restore all overridden native functions.
      * This is automatically called between tests, so should not generally be needed.
