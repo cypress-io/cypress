@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Bugfixes:**
+
+- Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) replaced `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cancelIdleCallback` is now replaced by default alongside `requestIdleCallback`, and it can also be listed explicitly in the functions passed to `cy.clock()`, which previously threw an error.
+
 **Misc:**
 
 - TypeScript now accepts an options object on six commands that already accepted one at runtime: [`.nextUntil()`](https://on.cypress.io/nextuntil), [`.parentsUntil()`](https://on.cypress.io/parentsuntil), and [`.prevUntil()`](https://on.cypress.io/prevuntil) take options in place of the filter argument; [`.each()`](https://on.cypress.io/each) and [`.spread()`](https://on.cypress.io/spread) take options before the callback; and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) takes an `offset` that sets a single axis, leaving the other at 0. These calls previously reported a type error. Addressed in [#34886](https://github.com/cypress-io/cypress/pull/34886).
