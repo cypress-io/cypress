@@ -1,5 +1,9 @@
 /* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
 
+// Cypress resolves user-defined config values alongside its own, but `Cypress.Config`
+// enumerates only the options Cypress owns. Read the user-defined ones back through here.
+const userConfig = () => Cypress.config() as Record<string, any>
+
 describe('per-test config', () => {
   const testState = {
     ranFirefox: false,
@@ -188,23 +192,23 @@ describe('per-test config', () => {
     describe('config in suite', {
       foo: true,
       defaultCommandTimeout: 200,
-    }, () => {
+    } as Cypress.SuiteConfigOverrides, () => {
       it('has config.foo', () => {
-        expect(Cypress.config().foo).ok
-        expect(Cypress.config().defaultCommandTimeout).eq(200)
+        expect(userConfig().foo).ok
+        expect(userConfig().defaultCommandTimeout).eq(200)
       })
 
       describe('inner suite', {
         bar: true,
-      }, () => {
+      } as Cypress.SuiteConfigOverrides, () => {
         it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
+          expect(userConfig().bar).ok
         })
 
         it('has config.bar and config.foo', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
-          expect(Cypress.config().defaultCommandTimeout).eq(200)
+          expect(userConfig().bar).ok
+          expect(userConfig().foo).ok
+          expect(userConfig().defaultCommandTimeout).eq(200)
         })
       })
     })
@@ -213,11 +217,11 @@ describe('per-test config', () => {
   describe('in double nested suite', () => {
     describe('config in suite', {
       foo: true,
-    }, () => {
-      describe('inner suite', { bar: true }, () => {
+    } as Cypress.SuiteConfigOverrides, () => {
+      describe('inner suite', { bar: true } as Cypress.SuiteConfigOverrides, () => {
         it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
+          expect(userConfig().bar).ok
+          expect(userConfig().foo).ok
         })
       })
     })
@@ -225,30 +229,30 @@ describe('per-test config', () => {
 
   describe('in multiple nested suites', {
     foo: false,
-  }, () => {
+  } as Cypress.SuiteConfigOverrides, () => {
     describe('config in suite', {
       foo: true,
-    }, () => {
-      describe('inner suite 1', { bar: true }, () => {
+    } as Cypress.SuiteConfigOverrides, () => {
+      describe('inner suite 1', { bar: true } as Cypress.SuiteConfigOverrides, () => {
         it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
+          expect(userConfig().bar).ok
+          expect(userConfig().foo).ok
         })
       })
 
-      describe('inner suite 2', { baz: true }, () => {
+      describe('inner suite 2', { baz: true } as Cypress.SuiteConfigOverrides, () => {
         it('has config.baz', () => {
-          expect(Cypress.config().bar).not.ok
-          expect(Cypress.config().baz).ok
-          expect(Cypress.config().foo).ok
+          expect(userConfig().bar).not.ok
+          expect(userConfig().baz).ok
+          expect(userConfig().foo).ok
         })
       })
 
       describe('inner suite 3', () => {
         it('has only config.foo', () => {
-          expect(Cypress.config().bar).not.ok
-          expect(Cypress.config().baz).not.ok
-          expect(Cypress.config().foo).ok
+          expect(userConfig().bar).not.ok
+          expect(userConfig().baz).not.ok
+          expect(userConfig().foo).ok
         })
       })
     })
@@ -257,19 +261,19 @@ describe('per-test config', () => {
   describe('in multiple nested suites', () => {
     describe('config in suite', {
       foo: true,
-    }, () => {
-      describe('inner suite 1', { bar: true }, () => {
+    } as Cypress.SuiteConfigOverrides, () => {
+      describe('inner suite 1', { bar: true } as Cypress.SuiteConfigOverrides, () => {
         it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
+          expect(userConfig().bar).ok
+          expect(userConfig().foo).ok
         })
       })
 
-      describe('inner suite 2', { baz: true }, () => {
+      describe('inner suite 2', { baz: true } as Cypress.SuiteConfigOverrides, () => {
         it('has config.bar', () => {
-          expect(Cypress.config().bar).not.ok
-          expect(Cypress.config().baz).ok
-          expect(Cypress.config().foo).ok
+          expect(userConfig().bar).not.ok
+          expect(userConfig().baz).ok
+          expect(userConfig().foo).ok
         })
       })
     })
@@ -286,7 +290,7 @@ describe('per-test config', () => {
   })
 
   describe('config changes after run', () => {
-    let defaultCommandTimeout
+    let defaultCommandTimeout: number
 
     it('1/2', {
       defaultCommandTimeout: 1234,
@@ -357,23 +361,26 @@ describe('testConfigOverrides baseUrl @slow', () => {
   })
 })
 
+// `TestConfigOverrides` types only the options a test may override, so the calls naming
+// the ones this suite rejects are type errors as well as runtime ones.
 describe('cannot set override configuration options that', () => {
   afterEach(() => {
-    window.top.__cySkipValidateConfig = true
+    window.top!.__cySkipValidateConfig = true
   })
 
   it('throws if mutating read-only config with Cypress.config()', (done) => {
-    window.top.__cySkipValidateConfig = false
+    window.top!.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
       expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` because it is a read-only configuration option')
       done()
     })
 
+    // @ts-expect-error
     Cypress.config('chromeWebSecurity', false)
   })
 
   it('throws if mutating viewportWidth with Cypress.config() during test execution', (done) => {
-    window.top.__cySkipValidateConfig = false
+    window.top!.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
       expect(err.message).to.include('`Cypress.config()` cannot override `viewportWidth` during test execution')
       done()
@@ -383,7 +390,7 @@ describe('cannot set override configuration options that', () => {
   })
 
   it('throws if mutating viewportHeight with Cypress.config() during test execution', (done) => {
-    window.top.__cySkipValidateConfig = false
+    window.top!.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
       expect(err.message).to.include('`Cypress.config()` cannot override `viewportHeight` during test execution')
       done()
@@ -393,7 +400,7 @@ describe('cannot set override configuration options that', () => {
   })
 
   it('throws if mutating blockHosts with Cypress.config() during test execution', (done) => {
-    window.top.__cySkipValidateConfig = false
+    window.top!.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
       expect(err.message).to.include('`Cypress.config()` cannot override `blockHosts` during test execution')
       done()
@@ -403,29 +410,32 @@ describe('cannot set override configuration options that', () => {
   })
 
   it('throws if mutating env with Cypress.config()', (done) => {
-    window.top.__cySkipValidateConfig = false
+    window.top!.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
       expect(err.message).to.include('Overriding the `env` configuration was removed in Cypress version 16.0.0')
       expect(err.message).to.include('https://on.cypress.io/cypress-env-migration')
       done()
     })
 
+    // @ts-expect-error
     Cypress.config('env', { FOO: 'bar' })
   })
 
   it('does not throw for non-Cypress config values', () => {
     expect(() => {
+      // @ts-expect-error
       Cypress.config('foo', 'bar')
     }).to.not.throw()
   })
 })
 
-function hasOnly (test) {
-  let curSuite = test.parent
+function hasOnly (test: Mocha.Test | undefined) {
+  let curSuite = test?.parent
   let hasOnly = false
 
   while (curSuite) {
-    if (curSuite._onlySuites.length || curSuite._onlyTests.length) {
+    // Mocha tracks `.only` registrations on private fields, reachable only by element access.
+    if (curSuite['_onlySuites'].length || curSuite['_onlyTests'].length) {
       hasOnly = true
     }
 
