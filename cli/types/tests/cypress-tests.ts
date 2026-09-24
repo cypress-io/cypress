@@ -785,6 +785,7 @@ namespace CypressClockTests {
     'cancelIdleCallback',
     'performance',
     'Intl',
+    'queueMicrotask',
   ])
   const clockFunctions: Cypress.ClockFunction[] = ['requestAnimationFrame', 'performance']
 

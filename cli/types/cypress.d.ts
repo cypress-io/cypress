@@ -6605,6 +6605,7 @@ declare namespace Cypress {
     | 'cancelIdleCallback'
     | 'performance'
     | 'Intl'
+    | 'queueMicrotask'
 
   /**
    * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
