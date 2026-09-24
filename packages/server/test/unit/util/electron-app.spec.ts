@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setRemoteDebuggingPort } from '../../../lib/util/electron-app'
 
-const appendSwitch = vi.hoisted(() => vi.fn())
-const getSwitchValue = vi.hoisted(() => vi.fn())
+const appendSwitch = vi.hoisted(() => {
+  return vi.fn()
+})
+
+const getSwitchValue = vi.hoisted(() => {
+  return vi.fn()
+})
 
 vi.mock('electron', () => {
   return {
@@ -18,12 +23,13 @@ vi.mock('electron', () => {
 describe('/lib/util/electron-app', () => {
   describe('remote debugging port', () => {
     beforeEach(() => {
-      appendSwitch.mockReset()
-      getSwitchValue.mockReset()
+      vi.clearAllMocks()
     })
 
     it('should not override port if previously set', async () => {
-      getSwitchValue.mockImplementation(() => '4567')
+      getSwitchValue.mockImplementation(() => {
+        return '4567'
+      })
 
       await setRemoteDebuggingPort()
 
@@ -31,7 +37,9 @@ describe('/lib/util/electron-app', () => {
     })
 
     it('should assign random port if not previously set', async () => {
-      getSwitchValue.mockImplementation(() => undefined)
+      getSwitchValue.mockImplementation(() => {
+        return undefined
+      })
 
       await setRemoteDebuggingPort()
 
