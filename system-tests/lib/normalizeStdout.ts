@@ -132,6 +132,10 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
 // call so the `g` flag's lastIndex is never shared between callers.
 export const teardownBudgetNoticeRe = () => /^(?:Failed to gracefully exit after|The ".*" teardown step did not finish within).*\n?/gm
 
+// ServerBase#open guard errors can leak to stdout when a prior run's teardown races the next
+// launch under CI load. ensureProp falls back to propName "null" when the stack line doesn't match.
+export const serverBaseOpenRaceNoticeRe = () => /^(?:Error: )?ServerBase#\w+ must first be called before accessing 'this\.[^']+'\n?/gm
+
 export const normalizeStdout = function (str: string, options: any = {}) {
   const { normalizeStdoutAvailableBrowsers } = options
 
@@ -193,6 +197,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // and go with CI load. The exit code the harness asserts is what matters here. `system-tests.ts`
   // tallies them so the trend stays visible without being able to fail a snapshot.
   .replace(teardownBudgetNoticeRe(), '')
+  // Same story for ServerBase#open guard errors that occasionally print ahead of the run header.
+  .replace(serverBaseOpenRaceNoticeRe(), '')
   // Strip the Electron deprecation warning so run-mode snapshots don't need to capture it
   .replace(electronDeprecationWarningRe, '')
   // Strip the forceHttp1 deprecation warning so run-mode snapshots don't need to capture it
