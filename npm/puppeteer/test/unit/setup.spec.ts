@@ -370,6 +370,89 @@ describe('#setup', () => {
       )
     })
 
+    it('disconnects the browser if activateMainTab rejects', async () => {
+      vi.mocked(activateMainTab).mockRejectedValueOnce(undefined)
+
+      let taskResult: any = null
+
+      on.mockImplementation(async (event, handler) => {
+        if (event === 'after:browser:launch') {
+          return handler({ family: 'chromium', isHeaded: true }, { webSocketDebuggerUrl: 'ws://debugger' })
+        }
+
+        if (event === 'task') {
+          taskResult = await handler.__cypressPuppeteer__({ name: testTask, args: [] })
+
+          return taskResult
+        }
+      })
+
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+
+      await flushPromises()
+
+      expect(mockBrowser.disconnect).toHaveBeenCalled()
+      expect(taskResult.__error__.message).toEqual(
+        'Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.',
+      )
+    })
+
+    it('returns the message handler error rather than the activateMainTab error if both fail', async () => {
+      vi.mocked(activateMainTab).mockRejectedValueOnce(undefined)
+      testTaskHandler.mockRejectedValue(new Error('handler error'))
+
+      let taskResult: any = null
+
+      on.mockImplementation(async (event, handler) => {
+        if (event === 'after:browser:launch') {
+          return handler({ family: 'chromium', isHeaded: true }, { webSocketDebuggerUrl: 'ws://debugger' })
+        }
+
+        if (event === 'task') {
+          taskResult = await handler.__cypressPuppeteer__({ name: testTask, args: [] })
+
+          return taskResult
+        }
+      })
+
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+
+      await flushPromises()
+
+      expect(mockBrowser.disconnect).toHaveBeenCalled()
+      expect(taskResult.__error__.message).toEqual('handler error')
+    })
+
+    it.each([
+      [undefined, 'undefined'],
+      [null, 'null'],
+      [0, '0'],
+      ['', ''],
+    ])('returns error object if message handler rejects with %j', async (rejection, expectedMessage) => {
+      testTaskHandler.mockRejectedValue(rejection)
+
+      let taskResult: any = null
+
+      on.mockImplementation(async (event, handler) => {
+        if (event === 'after:browser:launch') {
+          return handler({ family: 'chromium', isHeaded: false }, { webSocketDebuggerUrl: 'ws://debugger' })
+        }
+
+        if (event === 'task') {
+          taskResult = await handler.__cypressPuppeteer__({ name: testTask, args: [] })
+
+          return taskResult
+        }
+      })
+
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+
+      await flushPromises()
+
+      expect(taskResult.__error__).toBeInstanceOf(Object)
+      expect(taskResult.__error__.message).toEqual(expectedMessage)
+    })
+
     it('does not try to activate main tab when the browser is headless', async () => {
       on.mockImplementation(async (event, handler) => {
         if (event === 'after:browser:launch') {
