@@ -13,7 +13,9 @@ export const requireScript = <T>(script: string): T => {
   // @ts-expect-error
   mod._compile(script, mod.filename)
 
-  module.children.splice(module.children.indexOf(mod), 1)
+  if (module.children) {
+    module.children.splice(module.children.indexOf(mod), 1)
+  }
 
   return mod.exports as T
 }
