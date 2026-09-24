@@ -1197,6 +1197,16 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
+      // TODO(webkit): fix+unskip for experimental webkit
+      // https://github.com/cypress-io/cypress/issues/7170
+      it('appends to the existing value when the input is already focused', { browser: '!webkit' }, () => {
+        cy.visit('fixtures/issue-7170.html')
+        cy.get('button').click()
+        cy.get('input')
+        .type('2')
+        .should('have.value', '12')
+      })
+
       it('can input decimal', () => {
         cy.get('#number-without-value')
         .type('2.0')
@@ -3136,6 +3146,15 @@ describe('src/cy/commands/actions/type - #type', () => {
           ])
         })
       })
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/14864
+  describe('input handler that updates the value asynchronously', () => {
+    it('defers keyup until the handler microtasks have run', () => {
+      cy.visit('/fixtures/issue-14864.html')
+      cy.get('input').type('/')
+      cy.get('#feedback').should('have.text', 'You typed Slash')
     })
   })
 
