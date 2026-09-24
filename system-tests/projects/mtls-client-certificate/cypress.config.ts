@@ -18,8 +18,19 @@ export default {
         },
       ],
     },
+    {
+      url: `https://localhost:${process.env.MTLS_PORT_2}`,
+      ca: ['certs/origin-ca.crt'],
+      certs: [
+        {
+          cert: 'certs/client.crt',
+          key: 'certs/client.key',
+        },
+      ],
+    },
   ],
   expose: {
     MTLS_ORIGIN: `https://localhost:${process.env.MTLS_PORT}`,
+    MTLS_ORIGIN_2: `https://localhost:${process.env.MTLS_PORT_2}`,
   },
 }

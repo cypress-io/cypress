@@ -17,7 +17,9 @@ let dir: string
 let origin: http2.Http2SecureServer
 let originPort: number
 let bridge: MtlsBridge
+let listener: BridgeListener
 let listenPort: number
+let secureContextFor: MtlsBridgeOptions['secureContextFor']
 
 const read = (f: string) => fs.readFileSync(path.join(dir, f))
 
@@ -100,7 +102,7 @@ beforeAll(async () => {
 
   await startOrigin()
 
-  const listener: BridgeListener = {
+  listener = {
     hostname: 'localhost',
     port: originPort,
     sourceUrls: [`https://localhost:${originPort}`],
@@ -111,11 +113,9 @@ beforeAll(async () => {
     },
   }
 
-  bridge = new MtlsBridge({
-    listeners: [listener],
-    connectUpstream,
-    secureContextFor: async () => tls.createSecureContext({ key: read('forged.key'), cert: read('forged.crt') }),
-  })
+  secureContextFor = async () => tls.createSecureContext({ key: read('forged.key'), cert: read('forged.crt') })
+
+  bridge = new MtlsBridge({ listeners: [listener], connectUpstream, secureContextFor })
 
   const bound = await bridge.listen()
 
@@ -186,6 +186,36 @@ describe('MtlsBridge', () => {
     })
 
     expect(JSON.parse(body)).toMatchObject({ peerCN: 'cypress-client', alpn: 'http/1.1' })
+  })
+
+  // Closing a listener without taking its connections down would wait out every live one,
+  // so a browser holding a session open would stall shutdown for as long as it kept it.
+  // The session has to be fully established: a connection the listener has not accepted yet
+  // is not one `close` would wait for, so it would prove nothing.
+  it('closes while a session to a listener is still open', async () => {
+    const closing = new MtlsBridge({ listeners: [listener], connectUpstream, secureContextFor })
+    const [bound] = await closing.listen()
+
+    const socket = tls.connect({
+      host: '127.0.0.1',
+      port: bound.listenPort,
+      servername: 'localhost',
+      ALPNProtocols: ['h2'],
+      ca: read('forged.crt'),
+    })
+
+    await new Promise<void>((resolve, reject) => {
+      socket.once('secureConnect', () => resolve())
+      socket.once('error', reject)
+    })
+
+    const timeout = new Promise((_resolve, reject) => {
+      setTimeout(() => reject(new Error('close() did not resolve while a connection was open')), 2000).unref()
+    })
+
+    await Promise.race([closing.close(), timeout])
+
+    socket.destroy()
   })
 
   it('asks the upstream adapter for the origin the listener stands for', async () => {

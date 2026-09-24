@@ -250,7 +250,13 @@ export class CombinedAgent {
   }
 }
 
-const getProxyOrTargetOverrideForUrl = (href: string) => {
+/**
+ * Resolves the proxy a request to `href` would actually be routed through, or an empty
+ * string when it would be dialed directly. This is the resolution `shouldProxyForUrl`
+ * answers as a boolean, so anything needing the proxy itself must come through here rather
+ * than `getProxyForUrl`, which does not know about the override below.
+ */
+export const getProxyOrTargetOverrideForUrl = (href: string): string => {
   // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will
   // force the parent Cypress server to treat the child Cypress server like a proxy without
   // having HTTP_PROXY set and will force traffic ONLY bound to that origin to behave

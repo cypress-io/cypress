@@ -99,9 +99,13 @@ export class OpenProject extends EventEmitter {
     // The browser presents no client certificate of its own — CDP exposes no way to give it
     // one — so configured origins are steered at a local bridge that performs the handshake
     // from this process. Nothing starts when no certificate is configured.
-    await this._closeMtlsBridge()
-
-    if (useBrowserNetworkInterception && cfg.clientCertificates?.length) {
+    //
+    // The bridge outlives this launch on purpose. Its ports reach the browser as
+    // `--host-resolver-rules`, which is read once at launch, and a later spec reuses that
+    // browser rather than relaunching it — so rebinding here would leave every spec after
+    // the first steered at a port that no longer exists. One bridge per project keeps the
+    // ports the browser was told about valid for as long as that browser runs.
+    if (useBrowserNetworkInterception && cfg.clientCertificates?.length && !this._mtlsBridge) {
       this._mtlsBridge = await createMtlsBridge({
         clientCertificates: cfg.clientCertificates,
         caFolder: appData.path('proxy'),
@@ -360,6 +364,8 @@ export class OpenProject extends EventEmitter {
 
   async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
     // ensure switching to a new project in cy-in-cy tests and from the launchpad starts with a clean slate
+    // — including any bridge, whose listeners stand for the previous project's origins
+    await this._closeMtlsBridge()
     this.reset()
     this._ctx = getCtx()
     debug('open_project create %s', path)

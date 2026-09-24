@@ -1,8 +1,7 @@
 import net from 'net'
 import tls from 'tls'
 import url from 'url'
-import { getProxyForUrl } from 'proxy-from-env'
-import { buildConnectReqHead, createProxySock, isResponseStatusCode200, shouldProxyForUrl } from '@packages/network'
+import { buildConnectReqHead, createProxySock, getProxyOrTargetOverrideForUrl, isResponseStatusCode200 } from '@packages/network'
 import type { UpstreamConnectOptions, UpstreamConnection } from './mtls-bridge'
 
 const HEADERS_END = Buffer.from('\r\n\r\n')
@@ -21,7 +20,10 @@ export function connectUpstream (options: UpstreamConnectOptions): Promise<Upstr
     return new Promise<UpstreamConnection>((resolve, reject) => {
       const secure = tls.connect({
         socket,
-        servername: hostname,
+        // A browser sends no SNI for an IP-literal URL, and Node deprecates setting one
+        // (DEP0123) because RFC 6066 does not permit it, so the dial leaves it off for the
+        // same reason the browser would have.
+        servername: net.isIP(hostname) ? undefined : hostname,
         // An empty list is not the same as no ALPN: the browser offered none, so none is
         // offered upstream either.
         ALPNProtocols: alpnProtocols.length ? alpnProtocols : undefined,
@@ -38,7 +40,7 @@ export function connectUpstream (options: UpstreamConnectOptions): Promise<Upstr
 
 function dial (hostname: string, port: number): Promise<net.Socket> {
   const href = `https://${hostname}:${port}`
-  const proxy = shouldProxyForUrl(href) ? getProxyForUrl(href) : undefined
+  const proxy = getProxyOrTargetOverrideForUrl(href)
 
   if (!proxy) {
     return new Promise((resolve, reject) => {

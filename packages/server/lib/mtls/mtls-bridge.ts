@@ -3,6 +3,7 @@ import tls from 'tls'
 import Debug from 'debug'
 import type { Duplex } from 'stream'
 import type { SecureContext } from 'tls'
+import { allowDestroy } from '@packages/network'
 import { scanClientHello } from './client-hello'
 import type { BoundBridgeListener, BridgeListener, ClientCertificateMaterial } from './bridge-plan'
 
@@ -34,6 +35,9 @@ export interface MtlsBridgeOptions {
   secureContextFor (servername: string): Promise<SecureContext>
 }
 
+/** What `allowDestroy` adds to a `net.Server`: close, and take live connections with it. */
+type DestroyableServer = net.Server & { destroy (cb: () => void): void }
+
 /**
  * Terminates the browser's TLS connection and re-originates it from Node, which is the only
  * process holding the configured private key.
@@ -43,7 +47,7 @@ export interface MtlsBridgeOptions {
  * frames pass through opaquely and CDP-level interception is untouched.
  */
 export class MtlsBridge {
-  private servers: net.Server[] = []
+  private servers: DestroyableServer[] = []
 
   constructor (private options: MtlsBridgeOptions) {}
 
@@ -51,21 +55,32 @@ export class MtlsBridge {
     return Promise.all(this.options.listeners.map((listener) => this.listenOne(listener)))
   }
 
+  /**
+   * `close` alone would only stop the server accepting and then wait out every live
+   * connection, so a browser holding a kept-alive session to a listener would stall
+   * shutdown indefinitely. The connections are taken down with it.
+   */
   async close (): Promise<void> {
     await Promise.all(this.servers.map((server) => {
-      return new Promise<void>((resolve) => server.close(() => resolve()))
+      return new Promise<void>((resolve) => server.destroy(() => resolve()))
     }))
 
     this.servers = []
   }
 
   private listenOne (listener: BridgeListener): Promise<BoundBridgeListener> {
-    const server = net.createServer((socket) => this.onConnection(socket, listener))
+    const server = allowDestroy(net.createServer((socket) => this.onConnection(socket, listener))) as DestroyableServer
 
     this.servers.push(server)
 
     return new Promise((resolve, reject) => {
-      server.once('error', reject)
+      // A `net.Server` with no `error` listener throws, so this one outlives the bind it
+      // rejects on. Rejecting a settled promise afterwards is a no-op.
+      server.on('error', (err) => {
+        debug('listener error for %s: %o', listener.hostname, err)
+        reject(err)
+      })
+
       server.listen(0, '127.0.0.1', () => {
         const { port } = server.address() as net.AddressInfo
 
@@ -136,6 +151,10 @@ export class MtlsBridge {
       alpnProtocols,
       material: listener.material,
     })
+
+    // Registered before the next await so an upstream connection is not orphaned when the
+    // forged identity fails, and so a browser that simply goes away releases it too.
+    browserSocket.on('close', () => upstream.socket.destroy())
 
     const secureContext = await this.options.secureContextFor(servername)
 
