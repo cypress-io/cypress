@@ -769,6 +769,34 @@ namespace CypressClockTests {
   cy.clock(+new Date(), ['Date'])
   // Date object
   cy.clock(new Date(2019, 3, 2))
+  // null starts the clock at 0
+  cy.clock(null, ['setTimeout', 'clearTimeout'])
+  cy.clock(null, ['setTimeout'], { log: false })
+  // every function the clock can override
+  cy.clock(null, [
+    'setTimeout',
+    'clearTimeout',
+    'setInterval',
+    'clearInterval',
+    'Date',
+    'requestAnimationFrame',
+    'cancelAnimationFrame',
+    'requestIdleCallback',
+    'cancelIdleCallback',
+    'performance',
+    'Intl',
+    'queueMicrotask',
+  ])
+  const clockFunctions: Cypress.ClockFunction[] = ['requestAnimationFrame', 'performance']
+
+  cy.clock(0, clockFunctions)
+  cy.clock(null, ['setImmediate']) // $ExpectError
+  cy.clock(null, ['notATimer']) // $ExpectError
+  cy.clock('2019-04-02') // $ExpectError
+  // tick returns the new now
+  cy.clock().then((clock) => {
+    clock.tick(1000) // $ExpectType number
+  })
   // restoring the clock
   cy.clock().then((clock) => {
     clock.restore()
