@@ -1,9 +1,13 @@
-import { calculateTestStatus } from '../../../src/cypress/mocha.ts'
+import { calculateTestStatus } from '../../../src/cypress/mocha'
+
+// `calculateTestStatus` takes a Mocha test augmented with Cypress' retry bookkeeping.
+// That type is internal to `mocha.ts`, so read it back off the function signature.
+type CypressTest = Parameters<typeof calculateTestStatus>[0]
 
 describe('mocha custom methods', () => {
   describe('calculateTestStatus', () => {
     let totalRetries = 2
-    const createMockTest = (state = 'passed', prevAttempts = []) => {
+    const createMockTest = (state: CypressTest['state'] = 'passed', prevAttempts: CypressTest[] = []) => {
       const mockTestContext = {
         currentRetry () {
           return prevAttempts.length
@@ -15,7 +19,8 @@ describe('mocha custom methods', () => {
         prevAttempts,
       }
 
-      return Cypress._.cloneDeep(mockTestContext)
+      // Only the members `calculateTestStatus` reads are stubbed, not the whole Mocha test.
+      return Cypress._.cloneDeep(mockTestContext) as unknown as CypressTest
     }
 
     it('should never attempt to retry a test that passes on the first try, regardless of strategy', function () {
