@@ -2,8 +2,7 @@ const { assertLogLength } = require('../../../support/utils')
 
 // Every chai-jQuery assertion routes a non-DOM subject through the same guard in
 // `assertDom` (packages/driver/src/cypress/assertions/assert.ts), which fails the
-// assertion and names both the method and the subject it was handed. One row per
-// assertion keeps that shared behavior described in one place.
+// assertion and names both the method and the subject it was handed.
 const nonDomCases = [
   {
     name: 'data',
@@ -11,7 +10,7 @@ const nonDomCases = [
     assertion: (obj) => expect(obj).to.have.data('foo'),
     method: 'data',
     inspected: '{}',
-    // this message is not pinned down, only that one was set
+    // the one assertion whose message this suite doesn't pin down
     logMessage: null,
   },
   {
