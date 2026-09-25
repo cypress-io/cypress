@@ -36,7 +36,11 @@ export default (Commands, Cypress, cy) => {
         const getClosest = (node) => {
           const closestNode = node.closest(arg1)
 
-          if (closestNode) return nodes.concat(closestNode)
+          if (closestNode) {
+            nodes.push(closestNode)
+
+            return nodes
+          }
 
           const root = node.getRootNode()
 
@@ -46,7 +50,7 @@ export default (Commands, Cypress, cy) => {
         }
 
         return getClosest(el)
-      }, [])
+      }, [] as Element[])
 
       return sortedUnique(nodes)
     }
