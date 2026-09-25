@@ -607,6 +607,10 @@ export class ProjectBase extends EE {
         this.emit('socket:connected', id)
       },
 
+      onActivity: () => {
+        this.emit('activity')
+      },
+
       onTestsReceivedAndMaybeRecord: async (runnables: unknown[], cb: () => void) => {
         debug('received runnables %o', runnables)
 

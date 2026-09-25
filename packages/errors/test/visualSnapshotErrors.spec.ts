@@ -650,6 +650,12 @@ describe('visual error templates', () => {
         default: ['Chrome', 'code', 'signal'],
       }
     },
+    BROWSER_HUNG: () => {
+      return {
+        default: ['Chrome', 120000, 'hung renderer > blocks the main thread'],
+        noTest: ['Chrome', 120000],
+      }
+    },
     AUTOMATION_SERVER_DISCONNECTED: () => {
       return {
         default: [],

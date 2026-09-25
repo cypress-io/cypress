@@ -153,6 +153,7 @@ export class SocketBase implements SocketBroadcaster {
       onResetServerState () {},
       onTestsReceivedAndMaybeRecord () {},
       onMocha () {},
+      onActivity () {},
       onConnect () {},
       onRequest () {},
       onResolveUrl () {},
@@ -297,6 +298,8 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('automation:request', (message: keyof AutomationCommands, data, cb) => {
           debug('automation:request %s %o', message, data)
 
+          options.onActivity()
+
           return automationRequest(message, data)
           .then((resp) => {
             return cb({ response: resp })
@@ -359,6 +362,8 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         socket.on('mocha', (...args: unknown[]) => {
+          options.onActivity()
+
           return options.onMocha(...args)
         })
 
@@ -504,6 +509,8 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         socket.on('backend:request', (eventName: string, ...args) => {
+          options.onActivity()
+
           const userAgent = socket.request?.headers['user-agent'] || getCtx().coreData.app.browserUserAgent
 
           // cb is always the last argument

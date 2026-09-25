@@ -4,6 +4,7 @@ import Debug from 'debug'
 import utils from './utils'
 import * as errors from '../errors'
 import { cypressSessions } from '../cypress-sessions'
+import { getActiveBrowserCriClient } from './browser-cri-client'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
@@ -146,6 +147,32 @@ const browsers = {
   // note: does not guarantee that `browser` is still running
   getBrowserInstance () {
     return instance
+  },
+
+  // Confirms whether the browser renderer is still alive after the run has gone
+  // silent. Only meaningful for CDP browsers (Chromium family, including
+  // Electron); the caller gates on browser family before calling. With no live
+  // browser or CDP connection there is nothing healthy to wait on, so the run is
+  // treated as hung.
+  async probeRendererResponsive (timeoutMs: number): Promise<'alive' | 'hung'> {
+    const browserCriClient = getActiveBrowserCriClient()
+
+    if (!instance || !browserCriClient) {
+      return 'hung'
+    }
+
+    return browserCriClient.probeRendererResponsive(timeoutMs)
+  },
+
+  // Recover from a browser that has hung. Flags the active CDP connection as
+  // crashed so afterSpec teardown no-ops its CDP calls instead of hanging on the
+  // frozen renderer, then kills the frozen process so its resources are freed and
+  // the next spec relaunches a clean browser. Bounded by timeoutMs so recovering
+  // from a hang can never itself hang waiting on the frozen process to exit.
+  async markBrowserHung () {
+    getActiveBrowserCriClient()?.markCrashed()
+
+    await kill({ isProcessExit: false, timeoutMs: 5000 })
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
