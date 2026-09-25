@@ -10,16 +10,15 @@ jobs:
     permissions:
       pull-requests: write
     env:
-      CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: develop
     # Prevent from running this workflow on forks
     if: github.repository == 'cypress-io/cypress'
     steps:
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
-          app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
+          client-id: ${{ secrets.CYPRESS_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
