@@ -1,6 +1,5 @@
 // @ts-check
 const debug = require('debug')('cypress:ts')
-const path = require('path')
 
 // in development we should have TypeScript hook installed
 // in production or staging we are likely to be running
@@ -21,10 +20,7 @@ module.exports = function (scopeDir) {
         // https://github.com/TypeStrong/ts-node#programmatic-usage
         const project = require('path').join(__dirname, 'tsconfig.json')
 
-        process.env.TS_CACHED_TRANSPILE_CACHE = path.join(__dirname, 'node_modules', '.ts-cache')
-
         tsNode.register({
-          compiler: 'typescript-cached-transpile',
           project,
           transpileOnly: true,
           preferTsExts: true, // Helps when the files are compiled locally, resolves the TS file
