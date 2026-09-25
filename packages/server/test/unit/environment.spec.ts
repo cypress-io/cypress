@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest'
 import Promise from 'bluebird'
 import pkg from '@packages/root'
 import { fs } from '../../lib/util/fs'
@@ -14,19 +15,20 @@ describe('lib/environment', () => {
     afterEach(() => {
       delete pkg.env
       delete process.env['CYPRESS_INTERNAL_ENV']
+      vi.restoreAllMocks()
     })
 
-    after(() => {
+    afterAll(() => {
       process.env['CYPRESS_INTERNAL_ENV'] = env
     })
 
-    context('#existing process.env.CYPRESS_INTERNAL_ENV', () => {
+    describe('#existing process.env.CYPRESS_INTERNAL_ENV', () => {
       it('is production', () => {
         process.env['CYPRESS_INTERNAL_ENV'] = 'production'
 
         const calculatedEnv = calculateCypressInternalEnv()
 
-        expect(calculatedEnv).to.eq('production')
+        expect(calculatedEnv).toBe('production')
       })
 
       it('is development', () => {
@@ -34,7 +36,7 @@ describe('lib/environment', () => {
 
         const calculatedEnv = calculateCypressInternalEnv()
 
-        expect(calculatedEnv).to.eq('development')
+        expect(calculatedEnv).toBe('development')
       })
 
       it('is staging', () => {
@@ -42,17 +44,17 @@ describe('lib/environment', () => {
 
         const calculatedEnv = calculateCypressInternalEnv()
 
-        expect(calculatedEnv).to.eq('staging')
+        expect(calculatedEnv).toBe('staging')
       })
     })
 
-    context('uses package.json env', () => {
+    describe('uses package.json env', () => {
       it('is production', () => {
         pkg.env = 'production'
 
         const calculatedEnv = calculateCypressInternalEnv()
 
-        expect(calculatedEnv).to.eq('production')
+        expect(calculatedEnv).toBe('production')
       })
 
       it('is staging', () => {
@@ -60,7 +62,7 @@ describe('lib/environment', () => {
 
         const calculatedEnv = calculateCypressInternalEnv()
 
-        expect(calculatedEnv).to.eq('staging')
+        expect(calculatedEnv).toBe('staging')
       })
 
       it('is test', () => {
@@ -68,38 +70,38 @@ describe('lib/environment', () => {
 
         const calculatedEnv = calculateCypressInternalEnv()
 
-        expect(calculatedEnv).to.eq('test')
+        expect(calculatedEnv).toBe('test')
       })
     })
 
-    context('it uses development by default', () => {
+    describe('it uses development by default', () => {
       beforeEach(() => {
-        return sinon.stub(fs, 'readJsonSync').returns({})
+        vi.spyOn(fs, 'readJsonSync').mockReturnValue({})
       })
 
       it('is development', () => {
         const calculatedEnv = calculateCypressInternalEnv()
 
-        expect(calculatedEnv).to.eq('development')
+        expect(calculatedEnv).toBe('development')
       })
     })
   })
 
   describe('configureLongStackTraces', () => {
     beforeEach(() => {
-      sinon.stub(Promise, 'config')
+      vi.spyOn(Promise, 'config')
     })
 
     afterEach(() => {
-      Promise.config.restore()
+      vi.restoreAllMocks()
     })
 
     it('configures long stack traces if "development" is passed in as the environment', () => {
       configureLongStackTraces('development')
 
-      expect(Error.stackTraceLimit).to.eq(Infinity)
+      expect(Error.stackTraceLimit).toBe(Infinity)
 
-      expect(Promise.config).to.have.been.calledWith({
+      expect(Promise.config).toHaveBeenCalledWith({
         cancellation: true,
         longStackTraces: true,
       })
@@ -108,9 +110,9 @@ describe('lib/environment', () => {
     it('disables long stack traces in bluebird if value other than "development" is passed in as the environment', () => {
       configureLongStackTraces('production')
 
-      expect(Error.stackTraceLimit).to.eq(Infinity)
+      expect(Error.stackTraceLimit).toBe(Infinity)
 
-      expect(Promise.config).to.have.been.calledWith({
+      expect(Promise.config).toHaveBeenCalledWith({
         cancellation: true,
         longStackTraces: false,
       })
