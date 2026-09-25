@@ -1,115 +1,102 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import os from 'os'
-import sinon from 'sinon'
-import mockedEnv from 'mocked-env'
 import { appendElectronSwitches } from '../../lib/append_electron_switches'
 
 describe('lib/append_electron_switches', () => {
   beforeEach(() => {
-    sinon.stub(os, 'platform').returns('linux')
+    vi.spyOn(os, 'platform').mockReturnValue('linux')
   })
 
   afterEach(() => {
-    sinon.restore()
+    vi.restoreAllMocks()
+    vi.unstubAllEnvs()
   })
 
-  context('disables hardware acceleration on Linux', () => {
+  describe('disables hardware acceleration on Linux', () => {
     it('disables hardware acceleration', async () => {
+      const disableHardwareAcceleration = vi.fn()
+      const appendSwitch = vi.fn()
       const mockApp = {
-        disableHardwareAcceleration: sinon.stub(),
+        disableHardwareAcceleration,
         commandLine: {
-          appendSwitch: sinon.stub(),
+          appendSwitch,
         },
       } as unknown as Electron.App
 
       appendElectronSwitches(mockApp)
-      expect(mockApp.disableHardwareAcceleration).to.have.been.called
+      expect(disableHardwareAcceleration).toHaveBeenCalled()
     })
   })
 
-  context('parses ELECTRON_EXTRA_LAUNCH_ARGS', () => {
-    let restore = null
-
-    afterEach(() => {
-      if (restore) {
-        return restore()
-      }
-    })
-
+  describe('parses ELECTRON_EXTRA_LAUNCH_ARGS', () => {
     it('sets launch args', async () => {
-      restore = mockedEnv({
-        ELECTRON_EXTRA_LAUNCH_ARGS: '--foo --bar=baz --quux=true',
-      })
+      vi.stubEnv('ELECTRON_EXTRA_LAUNCH_ARGS', '--foo --bar=baz --quux=true')
 
+      const appendSwitch = vi.fn()
       const mockApp = {
-        disableHardwareAcceleration: sinon.stub(),
+        disableHardwareAcceleration: vi.fn(),
         commandLine: {
-          appendSwitch: sinon.stub(),
+          appendSwitch,
         },
       } as unknown as Electron.App
 
       appendElectronSwitches(mockApp)
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--foo')
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--bar', 'baz')
-
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--quux', 'true')
+      expect(appendSwitch).toHaveBeenCalledWith('--foo')
+      expect(appendSwitch).toHaveBeenCalledWith('--bar', 'baz')
+      expect(appendSwitch).toHaveBeenCalledWith('--quux', 'true')
     })
 
     it('sets launch args with zero', async () => {
-      restore = mockedEnv({
-        ELECTRON_EXTRA_LAUNCH_ARGS: '--foo --bar=baz --quux=0',
-      })
+      vi.stubEnv('ELECTRON_EXTRA_LAUNCH_ARGS', '--foo --bar=baz --quux=0')
 
+      const appendSwitch = vi.fn()
       const mockApp = {
-        disableHardwareAcceleration: sinon.stub(),
+        disableHardwareAcceleration: vi.fn(),
         commandLine: {
-          appendSwitch: sinon.stub(),
+          appendSwitch,
         },
       } as unknown as Electron.App
 
       appendElectronSwitches(mockApp)
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--foo')
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--bar', 'baz')
-
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--quux', '0')
+      expect(appendSwitch).toHaveBeenCalledWith('--foo')
+      expect(appendSwitch).toHaveBeenCalledWith('--bar', 'baz')
+      expect(appendSwitch).toHaveBeenCalledWith('--quux', '0')
     })
 
     it('sets launch args with false', async () => {
-      restore = mockedEnv({
-        ELECTRON_EXTRA_LAUNCH_ARGS: '--foo --bar=baz --quux=false',
-      })
+      vi.stubEnv('ELECTRON_EXTRA_LAUNCH_ARGS', '--foo --bar=baz --quux=false')
 
+      const appendSwitch = vi.fn()
       const mockApp = {
-        disableHardwareAcceleration: sinon.stub(),
+        disableHardwareAcceleration: vi.fn(),
         commandLine: {
-          appendSwitch: sinon.stub(),
+          appendSwitch,
         },
       } as unknown as Electron.App
 
       appendElectronSwitches(mockApp)
 
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--foo')
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--bar', 'baz')
-
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--quux', 'false')
+      expect(appendSwitch).toHaveBeenCalledWith('--foo')
+      expect(appendSwitch).toHaveBeenCalledWith('--bar', 'baz')
+      expect(appendSwitch).toHaveBeenCalledWith('--quux', 'false')
     })
 
     it('sets launch args with multiple values inside quotes', async () => {
-      restore = mockedEnv({
-        ELECTRON_EXTRA_LAUNCH_ARGS: `--foo --ipsum=0 --bar=--baz=quux --lorem='--ipsum=dolor --sit=amet'`,
-      })
+      vi.stubEnv('ELECTRON_EXTRA_LAUNCH_ARGS', `--foo --ipsum=0 --bar=--baz=quux --lorem='--ipsum=dolor --sit=amet'`)
 
+      const appendSwitch = vi.fn()
       const mockApp = {
-        disableHardwareAcceleration: sinon.stub(),
+        disableHardwareAcceleration: vi.fn(),
         commandLine: {
-          appendSwitch: sinon.stub(),
+          appendSwitch,
         },
       } as unknown as Electron.App
 
       appendElectronSwitches(mockApp)
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--foo')
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--ipsum', '0')
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--bar', '--baz=quux')
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--lorem', '--ipsum=dolor --sit=amet')
+      expect(appendSwitch).toHaveBeenCalledWith('--foo')
+      expect(appendSwitch).toHaveBeenCalledWith('--ipsum', '0')
+      expect(appendSwitch).toHaveBeenCalledWith('--bar', '--baz=quux')
+      expect(appendSwitch).toHaveBeenCalledWith('--lorem', '--ipsum=dolor --sit=amet')
     })
   })
 })
