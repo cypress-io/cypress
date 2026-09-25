@@ -108,6 +108,52 @@ describe('lib/util/activity_monitor', () => {
     expect(onInactivity).to.have.been.calledTwice
   })
 
+  it('aborts the signal passed to onInactivity when stopped mid-check', async () => {
+    let signal: AbortSignal | undefined
+    let resolveCheck: (hung: boolean) => void
+    const onInactivity = sinon.stub().callsFake((s: AbortSignal) => {
+      signal = s
+
+      return new Promise<boolean>((res) => {
+        resolveCheck = res
+      })
+    })
+    const monitor = new ActivityMonitor({ timeout: 1000, onInactivity })
+
+    monitor.start()
+
+    await clock.tickAsync(1000)
+    expect(signal!.aborted).to.be.false
+
+    // the spec ended while the liveness check was still running
+    monitor.stop()
+    expect(signal!.aborted).to.be.true
+
+    resolveCheck!(false)
+    await clock.tickAsync(5000)
+
+    // a stopped monitor does not resume watching after the check resolves
+    expect(onInactivity).to.have.been.calledOnce
+  })
+
+  it('passes a fresh, unaborted signal to each check', async () => {
+    const signals: AbortSignal[] = []
+    const onInactivity = sinon.stub().callsFake(async (s: AbortSignal) => {
+      signals.push(s)
+
+      return false
+    })
+    const monitor = new ActivityMonitor({ timeout: 1000, onInactivity })
+
+    monitor.start()
+
+    await clock.tickAsync(2000)
+
+    expect(signals).to.have.length(2)
+    expect(signals[0]).not.to.eq(signals[1])
+    expect(signals.every((s) => !s.aborted)).to.be.true
+  })
+
   it('does not fire after stop()', async () => {
     const onInactivity = sinon.stub().resolves(true)
     const monitor = new ActivityMonitor({ timeout: 1000, onInactivity })

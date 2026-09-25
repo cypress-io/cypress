@@ -9,8 +9,10 @@ interface ActivityMonitorOptions {
   // Called once the run has been silent for `timeout` ms. Resolving `true`
   // means the run is confirmed hung and monitoring stays stopped; resolving
   // `false` means the run is really still alive (e.g. an unresponsive-looking
-  // but healthy renderer mid-`cy.wait`) and monitoring resumes.
-  onInactivity: () => Promise<boolean>
+  // but healthy renderer mid-`cy.wait`) and monitoring resumes. `signal` is
+  // aborted if `stop()` is called while this is still running, meaning the
+  // spec already ended and the result must not be acted on.
+  onInactivity: (signal: AbortSignal) => Promise<boolean>
 }
 
 // Tracks whether a run is making progress by watching the stream of
@@ -20,8 +22,9 @@ interface ActivityMonitorOptions {
 // not on duration, so a legitimately long test is never mistaken for a hang.
 export class ActivityMonitor {
   private timeout: number
-  private onInactivity: () => Promise<boolean>
+  private onInactivity: (signal: AbortSignal) => Promise<boolean>
   private timer: NodeJS.Timeout | undefined
+  private abortController: AbortController | undefined
   private active = false
   private confirming = false
 
@@ -38,6 +41,7 @@ export class ActivityMonitor {
   stop () {
     this.active = false
     this.clear()
+    this.abortController?.abort()
   }
 
   // Whether the monitor is currently watching for silence.
@@ -80,13 +84,16 @@ export class ActivityMonitor {
 
     let hung = true
 
+    this.abortController = new AbortController()
+
     try {
-      hung = await this.onInactivity()
+      hung = await this.onInactivity(this.abortController.signal)
     } catch (err) {
       debug('inactivity handler threw, treating the run as hung: %o', err)
     }
 
     this.confirming = false
+    this.abortController = undefined
 
     if (!this.active) {
       return

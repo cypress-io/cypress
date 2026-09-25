@@ -511,10 +511,22 @@ async function listenForProjectEnd (project: ProjectBase, browser: Browser, exit
   // would let them opt in.
   const canDetectHang = browser.family === 'chromium'
 
+  // earlyExitTerminator is replaced after every spec, so hold this spec's: a
+  // late probe result must never fail the spec that runs after it.
+  const terminator = earlyExitTerminator
+
   const activityMonitor = new ActivityMonitor({
     timeout: BROWSER_ACTIVITY_TIMEOUT,
-    onInactivity: async () => {
+    onInactivity: async (signal) => {
       const liveness = await browserUtils.probeRendererResponsive(BROWSER_ACTIVITY_PROBE_TIMEOUT)
+
+      // The spec ended while the probe was in flight, and the next spec may
+      // already be reusing this browser, so don't kill it.
+      if (signal.aborted) {
+        debug('activity monitor: spec ended during probe, ignoring result')
+
+        return true
+      }
 
       // 'alive' means the run is just quiet (e.g. a long `cy.wait`), not hung.
       if (liveness === 'alive') {
@@ -523,13 +535,13 @@ async function listenForProjectEnd (project: ProjectBase, browser: Browser, exit
         return false
       }
 
-      const err = errors.get('BROWSER_HUNG', browser.displayName, BROWSER_ACTIVITY_TIMEOUT, earlyExitTerminator.pendingTestTitle)
+      const err = errors.get('BROWSER_HUNG', browser.displayName, BROWSER_ACTIVITY_TIMEOUT, terminator.pendingTestTitle)
 
       debug('activity monitor: browser confirmed hung, exiting spec early')
 
       // exitEarly logs the error itself, so don't log it here too.
       await browserUtils.markBrowserHung()
-      earlyExitTerminator.exitEarly(err)
+      terminator.exitEarly(err)
 
       return true
     },
@@ -572,7 +584,7 @@ async function listenForProjectEnd (project: ProjectBase, browser: Browser, exit
           res(results)
         })
       }),
-      earlyExitTerminator.waitForEarlyExit(project),
+      terminator.waitForEarlyExit(project),
     ]).then((results) => {
       if (exit === false) {
         console.log('not exiting due to options.exit being false')
