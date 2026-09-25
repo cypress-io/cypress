@@ -3,6 +3,15 @@ describe('src/cy/commands/traversals - shadow dom', () => {
     cy.visit('/fixtures/shadow-dom.html')
   })
 
+  const getLightThenShadowSubject = (shadowSelector) => {
+    return cy.get('#non-shadow-element').then(($lightEl) => {
+      return cy
+      .get('#shadow-element-3')
+      .find(shadowSelector, { includeShadowDom: true })
+      .then(($shadowEl) => cy.$$([$lightEl[0], $shadowEl[0]]))
+    })
+  }
+
   context('#closest', () => {
     it('retrieves itself when it is the closest matching element within shadow dom', () => {
       cy
@@ -90,6 +99,24 @@ describe('src/cy/commands/traversals - shadow dom', () => {
         expect($parents.length).to.eq(1)
         expect($parents[0]).to.have.id('shadow-element-9')
       })
+    })
+
+    it('handles multiple elements in subject when a light dom element comes before a shadow dom element', () => {
+      getLightThenShadowSubject('p')
+      .closest('.filter-me')
+      .then(($parents) => {
+        expect($parents.length).to.eq(2)
+        expect($parents[0]).to.match('body')
+        expect($parents[1]).to.have.id('parent-of-shadow-container-1')
+      })
+    })
+
+    it('does not exist when no element matches beyond shadow boundaries', () => {
+      cy
+      .get('#shadow-element-3')
+      .find('p', { includeShadowDom: true })
+      .closest('#does-not-exist')
+      .should('not.exist')
     })
   })
 
@@ -248,6 +275,14 @@ describe('src/cy/commands/traversals - shadow dom', () => {
       })
     })
 
+    it('does not exist when parent does not match selector within shadow root', () => {
+      cy
+      .get('#shadow-element-3')
+      .find('p', { includeShadowDom: true })
+      .parent('#does-not-exist')
+      .should('not.exist')
+    })
+
     it('retrieves parent when element is shadow root', () => {
       cy
       .get('#shadow-element-3')
@@ -288,6 +323,25 @@ describe('src/cy/commands/traversals - shadow dom', () => {
       .then(($parents) => {
         expect($parents.length).to.eq(1)
         expect($parents[0]).to.have.id('shadow-element-9')
+      })
+    })
+
+    it('handles multiple elements in subject when a light dom element comes before a shadow dom element', () => {
+      getLightThenShadowSubject('div')
+      .parent()
+      .then(($parents) => {
+        expect($parents.length).to.eq(2)
+        expect($parents[0]).to.match('body')
+        expect($parents[1]).to.have.id('shadow-element-3')
+      })
+    })
+
+    it('filters by selector when a light dom element comes before a shadow dom element', () => {
+      getLightThenShadowSubject('div')
+      .parent('cy-test-element')
+      .then(($parents) => {
+        expect($parents.length).to.eq(1)
+        expect($parents[0]).to.have.id('shadow-element-3')
       })
     })
   })
@@ -340,6 +394,20 @@ describe('src/cy/commands/traversals - shadow dom', () => {
           expect($parents[7]).to.have.id('parent-of-shadow-container-2')
           expect($parents[8]).to.match('body')
           expect($parents[9]).to.match('html')
+        })
+      })
+
+      it('handles multiple elements in subject when a light dom element comes before a shadow dom element', () => {
+        getLightThenShadowSubject('p')
+        .parents()
+        .then(($parents) => {
+          expect($parents.length).to.eq(6)
+          expect($parents[0]).to.have.class('shadow-div')
+          expect($parents[1]).to.have.id('shadow-element-3')
+          expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+          expect($parents[3]).to.have.id('parent-of-shadow-container-0')
+          expect($parents[4]).to.match('body')
+          expect($parents[5]).to.match('html')
         })
       })
     })
@@ -499,6 +567,18 @@ describe('src/cy/commands/traversals - shadow dom', () => {
           expect($parents[5]).to.have.id('shadow-element-8')
           expect($parents[6]).to.have.id('parent-of-shadow-container-3')
           expect($parents[7]).to.have.id('parent-of-shadow-container-2')
+        })
+      })
+
+      it('handles multiple elements in subject when a light dom element comes before a shadow dom element', () => {
+        getLightThenShadowSubject('p')
+        .parentsUntil('body')
+        .then(($parents) => {
+          expect($parents.length).to.eq(4)
+          expect($parents[0]).to.have.class('shadow-div')
+          expect($parents[1]).to.have.id('shadow-element-3')
+          expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+          expect($parents[3]).to.have.id('parent-of-shadow-container-0')
         })
       })
     })

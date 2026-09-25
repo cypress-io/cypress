@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Bugfixes:**
+
+- Fixed an issue where [`.closest()`](https://on.cypress.io/closest), [`.parent()`](https://on.cypress.io/parent), [`.parents()`](https://on.cypress.io/parents), and [`.parentsUntil()`](https://on.cypress.io/parentsuntil) did not look past a shadow root for an element inside the shadow DOM when an element outside the shadow DOM came before it in the subject. Matches beyond the shadow boundary were missed, and the command could time out. [`.closest()`](https://on.cypress.io/closest) also no longer fails with `Maximum call stack size exceeded` when no element beyond a shadow boundary matches the selector, and [`.parent(selector)`](https://on.cypress.io/parent) now filters by the selector for elements inside the shadow DOM. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Misc:**
 
 - TypeScript now accepts an options object on six commands that already accepted one at runtime: [`.nextUntil()`](https://on.cypress.io/nextuntil), [`.parentsUntil()`](https://on.cypress.io/parentsuntil), and [`.prevUntil()`](https://on.cypress.io/prevuntil) take options in place of the filter argument; [`.each()`](https://on.cypress.io/each) and [`.spread()`](https://on.cypress.io/spread) take options before the callback; and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) takes an `offset` that sets a single axis, leaving the other at 0. These calls previously reported a type error. Addressed in [#34886](https://github.com/cypress-io/cypress/pull/34886).
