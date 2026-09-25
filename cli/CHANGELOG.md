@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.1.1
+
+**Bugfixes:**
+
+- Fixed an issue where `cypress run` could hang indefinitely when Chrome, Chromium, Edge, or Electron stopped responding, such as when the application under test blocked the browser's main thread, until the process was killed or the CI job timed out. When a spec shows no test activity for 2 minutes and the browser then fails to respond to a check within 5 seconds, Cypress now fails the running test with an error that names it, skips the remaining tests in that spec, and continues the run with the next spec in a new browser. Set the `CYPRESS_BROWSER_ACTIVITY_TIMEOUT` and `CYPRESS_BROWSER_ACTIVITY_PROBE_TIMEOUT` environment variables, in milliseconds, to change these two limits. Firefox and WebKit keep their previous behavior. Partially addresses [#22631](https://github.com/cypress-io/cypress/issues/22631).
+
 ## 16.1.0
 
 **Performance:**

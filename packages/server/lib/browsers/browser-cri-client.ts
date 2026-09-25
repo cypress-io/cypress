@@ -15,6 +15,15 @@ import { EXTRA_TARGET_HEADER } from './constants'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
+// The most recently created browser cri client, so the run loop can reach the
+// active CDP connection to probe renderer liveness without threading it
+// through every layer. Chromium and Electron both drive their browsers through
+// this class; Firefox (BiDi) and WebKit (Playwright) do not, so the probe is
+// unavailable there and hang detection falls back to silence alone.
+let activeBrowserCriClient: BrowserCriClient | undefined
+
+export const getActiveBrowserCriClient = (): BrowserCriClient | undefined => activeBrowserCriClient
+
 type BrowserCriClientOptions = {
   browserClient: CriClient
   versionInfo: CRI.VersionResult
@@ -271,6 +280,51 @@ export class BrowserCriClient {
     this.fullyManageTabs = options.fullyManageTabs
     this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
     this.onExtraTargetCriClientReady = options.onExtraTargetCriClientReady
+
+    activeBrowserCriClient = this
+  }
+
+  /**
+   * Checks whether the renderer's main JS thread is still responsive by running
+   * a trivial expression in the currently attached page. A hung renderer never
+   * services the evaluation, so the caller must bound this with its own timeout.
+   *
+   * @param timeoutMs how long to wait for the renderer to answer
+   * @returns 'alive' if the renderer answered in time, otherwise 'hung'
+   */
+  async probeRendererResponsive (timeoutMs: number): Promise<'alive' | 'hung'> {
+    const target = this.currentlyAttachedTarget
+
+    // No page attached, or one we already know is gone - nothing healthy to wait on.
+    if (!target || target.closed || target.crashed) {
+      debug('renderer probe: no live target (closed=%o crashed=%o)', target?.closed, target?.crashed)
+
+      return 'hung'
+    }
+
+    let timer: NodeJS.Timeout | undefined
+
+    const timeout = new Promise<'hung'>((resolve) => {
+      timer = setTimeout(() => resolve('hung'), timeoutMs)
+    })
+
+    // `send` can itself hang forever on a dead renderer (see markCrashed), which
+    // is exactly why it races the timeout rather than being awaited directly.
+    const probe = target.send('Runtime.evaluate', { expression: '1', returnByValue: true })
+    .then((): 'alive' => 'alive')
+    .catch((err): 'hung' => {
+      debug('renderer probe errored, treating as hung: %o', err)
+
+      return 'hung'
+    })
+
+    try {
+      return await Promise.race([probe, timeout])
+    } finally {
+      if (timer) {
+        clearTimeout(timer)
+      }
+    }
   }
 
   /**
@@ -1070,5 +1124,9 @@ export class BrowserCriClient {
     await this.browserClient.close()
 
     this.closed = true
+
+    if (activeBrowserCriClient === this) {
+      activeBrowserCriClient = undefined
+    }
   }
 }

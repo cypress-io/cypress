@@ -18,6 +18,15 @@ export const fatalErrorToAttemptError = (error: Error): ReporterTestError => {
   }
 }
 
+// Cypress errors from `errors.get()` capture their stack from a separate, empty
+// Error, so `error.stack` does not contain the message. Rebuild the usual
+// "Name: message" header so the message is always part of displayError.
+const fatalErrorToDisplayError = (error: Error): string => {
+  const stackLines = error.stack ? stackUtils.stackWithoutMessage(error.stack) : ''
+
+  return stripAnsi(stackLines ? `${error.name}: ${error.message}\n${stackLines}` : error.message)
+}
+
 const parseReporterTimestamp = (value?: Date | string): number | undefined => {
   if (!value) {
     return undefined
@@ -30,6 +39,8 @@ const parseReporterTimestamp = (value?: Date | string): number | undefined => {
   return Date.parse(value)
 }
 
+const formatTitlePath = (title: string[]) => title.join(' > ')
+
 export const patchRunResultsAfterCrash = (
   error: Error,
   reporterResults: ReporterResults,
@@ -40,6 +51,16 @@ export const patchRunResultsAfterCrash = (
   const wallClockDuration = wallClockStartedAt ?
     endTime - wallClockStartedAt : 0
   const endTimeStamp = new Date(endTime).toJSON()
+
+  const tests = reporterResults?.tests || []
+  const crashedIndex = tests.findIndex((test) => test.testId === mostRecentRunnable?.id)
+  // Tests after the crashed one never ran and are reported as skipped with no
+  // reason, so give them one that names the test the spec ended on.
+  const skippedDisplayError = crashedIndex === -1 ? null : [
+    `This test did not run because the spec ended early during "${formatTitlePath(tests[crashedIndex].title)}":`,
+    '',
+    stripAnsi(error.message).split('\n')[0],
+  ].join('\n')
 
   // in crash situations, the most recent report will not have the triggering test
   // so the results are manually patched, which produces the expected exit=1 and
@@ -61,7 +82,14 @@ export const patchRunResultsAfterCrash = (
       duration: wallClockDuration,
       failures: (reporterResults?.reporterStats?.failures ?? 0) + 1,
     },
-    tests: (reporterResults?.tests || []).map((test) => {
+    tests: tests.map((test, index) => {
+      if (crashedIndex !== -1 && index > crashedIndex && test.state === 'skipped') {
+        return {
+          ...test,
+          displayError: skippedDisplayError,
+        }
+      }
+
       if (test.testId === mostRecentRunnable?.id) {
         const prevAttempts = test.attempts.slice(0, -1)
         const lastAttempt = test.attempts[test.attempts.length - 1]
@@ -70,7 +98,7 @@ export const patchRunResultsAfterCrash = (
         return {
           ...test,
           state: 'failed',
-          displayError: stripAnsi(error.stack || error.message),
+          displayError: fatalErrorToDisplayError(error),
           attempts: [...prevAttempts, {
             ...lastAttempt,
             state: 'failed',
@@ -126,6 +154,18 @@ export class EarlyExitTerminator {
     })
 
     return this.terminator.promise
+  }
+
+  // Title path of the test that was running, e.g. "suite > test". Undefined if
+  // no test has started yet in this spec.
+  get pendingTestTitle (): string | undefined {
+    if (!this.pendingRunnable) {
+      return undefined
+    }
+
+    const test = this.intermediateStats?.tests?.find((t) => t.testId === this.pendingRunnable.id)
+
+    return test ? formatTitlePath(test.title) : this.pendingRunnable.title
   }
 
   exitEarly (error) {

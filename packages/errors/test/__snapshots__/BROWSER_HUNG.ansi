@@ -1,0 +1,12 @@
+[31mWe detected that the [33mChrome[39m[31m browser stopped responding for over [33m120000ms[39m[31m and did not recover.[39m
+[31m[39m
+[31mThe test that was running: [33mhung renderer > blocks the main thread[39m[31m[39m
+[31m[39m
+[31mWe have failed the current spec but will continue running the next spec.[39m
+[31m[39m
+[31mThis can happen for many different reasons:[39m
+[31m[39m
+[31m- You wrote an endless loop and you must fix your own code[39m
+[31m- A page under test hung the browser's main thread (e.g. a runaway render or synchronous work)[39m
+[31m- You are running lots of tests on a memory intense application[39m
+[31m- You are running in a memory starved VM environment[39m

@@ -29,6 +29,7 @@ import { telemetry } from '@packages/telemetry'
 import type { CypressRunResult } from './results'
 import { createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { ActivityMonitor } from '../util/activity_monitor'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
@@ -48,6 +49,45 @@ let isRunCancelled = false
 
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
+// setTimeout treats NaN (e.g. from "2m") and anything above this as ~1ms, which
+// would probe the renderer continuously, so those values fall back to the default.
+const MAX_TIMEOUT_MS = 2147483647
+
+// Values below `minMs` are raised to it: a probe timeout shorter than a healthy
+// renderer can answer in would kill working browsers, and a very short activity
+// timeout would probe almost continuously.
+const msFromEnv = (name: string, defaultMs: number, minMs: number) => {
+  const raw = process.env[name]
+
+  if (raw === undefined) {
+    return defaultMs
+  }
+
+  const value = Number(raw)
+
+  if (!(value > 0 && value <= MAX_TIMEOUT_MS)) {
+    debug('ignoring invalid %s=%o, using %dms', name, raw, defaultMs)
+
+    return defaultMs
+  }
+
+  if (value < minMs) {
+    debug('%s=%o is below the %dms minimum, using %dms', name, raw, minMs, minMs)
+
+    return minMs
+  }
+
+  return value
+}
+
+// How long a spec may go without any driver->server activity before we suspect
+// the browser has hung and probe the renderer to confirm. Generous by default so
+// a legitimately quiet stretch (e.g. a long `cy.wait`) is never mistaken for a
+// hang; the renderer probe is what ultimately distinguishes idle from dead.
+const BROWSER_ACTIVITY_TIMEOUT = msFromEnv('CYPRESS_BROWSER_ACTIVITY_TIMEOUT', 120000, 5000)
+// How long the renderer has to answer the liveness probe before we call it hung.
+const BROWSER_ACTIVITY_PROBE_TIMEOUT = msFromEnv('CYPRESS_BROWSER_ACTIVITY_PROBE_TIMEOUT', 5000, 1000)
 
 // WebKit records video through Playwright, which ties each recording to a single page and only
 // finalizes the file when that page closes (https://github.com/cypress-io/cypress/issues/23815).
@@ -454,8 +494,67 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
-async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
+async function listenForProjectEnd (project: ProjectBase, browser: Browser, exit: boolean): Promise<any> {
   if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Promise.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+
+  // Detect a browser that has hung mid-spec. Unlike a crash, a hang emits no CDP
+  // event and never exits, so nothing else unblocks the wait below - Node would
+  // otherwise sit on `project.once('end')` forever. The monitor treats a total
+  // absence of driver->server traffic as a suspected hang, confirms it with a
+  // renderer liveness probe, then short-circuits through the same early-exit path
+  // a crash uses so the run fails this spec and moves on.
+  //
+  // The probe is what tells a hung renderer apart from a slow one, so this only
+  // applies to the Chromium family (Chrome, Edge, Electron). Firefox and WebKit
+  // have no such probe yet and we won't kill a browser on unverifiable silence -
+  // a per-driver probe (Playwright evaluate for WebKit, BiDi script for Firefox)
+  // would let them opt in.
+  const canDetectHang = browser.family === 'chromium'
+
+  const activityMonitor = new ActivityMonitor({
+    timeout: BROWSER_ACTIVITY_TIMEOUT,
+    onInactivity: async () => {
+      const liveness = await browserUtils.probeRendererResponsive(BROWSER_ACTIVITY_PROBE_TIMEOUT)
+
+      // 'alive' means the run is just quiet (e.g. a long `cy.wait`), not hung.
+      if (liveness === 'alive') {
+        debug('activity monitor: renderer still responsive, resuming')
+
+        return false
+      }
+
+      const err = errors.get('BROWSER_HUNG', browser.displayName, BROWSER_ACTIVITY_TIMEOUT, earlyExitTerminator.pendingTestTitle)
+
+      debug('activity monitor: browser confirmed hung, exiting spec early')
+
+      // exitEarly logs the error itself, so don't log it here too.
+      await browserUtils.markBrowserHung()
+      earlyExitTerminator.exitEarly(err)
+
+      return true
+    },
+  })
+
+  // Arm the monitor on the first sign of activity rather than now. This function
+  // runs in parallel with the browser launch, and the silence clock must not
+  // include launch time. Waiting for the first driver->server message also means
+  // the browser has connected and its page target exists before any probe can
+  // run, so the probe never fires against a not-yet-attached target. A browser
+  // that never produces a first activity (a launch-time hang) is covered by the
+  // separate browser-connect timeout, not here.
+  const onActivity = () => {
+    if (activityMonitor.started) {
+      activityMonitor.bump()
+
+      return
+    }
+
+    activityMonitor.start()
+  }
+
+  if (canDetectHang) {
+    project.on('activity', onActivity)
+  }
 
   // if exit is false, we need to intercept the resolution of tests - whether
   // an early exit with intermediate results, or a full run.
@@ -482,6 +581,9 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
       }
     }).catch((err) => {
       reject(err)
+    }).finally(() => {
+      activityMonitor.stop()
+      project.removeListener('activity', onActivity)
     })
   })
 }
@@ -630,7 +732,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
 
   const { project, browser, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
 
-  const results = await listenForProjectEnd(project, exit)
+  const results = await listenForProjectEnd(project, browser, exit)
 
   debug('received project end')
 
@@ -907,8 +1009,9 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
-      // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
+    if (results?.error?.includes('We detected that the Chrome process just crashed with code') || results?.error?.includes('stopped responding')) {
+      // If the browser crashed or hung, it is being relaunched, so make sure
+      // isFirstSpecInBrowser is set to true for the next spec.
       isFirstSpecInBrowser = true
     } else {
       isFirstSpecInBrowser = false

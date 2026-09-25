@@ -1,9 +1,10 @@
 // Intentionally omit spec_helper: it pulls in lib/cache before this file's imports; that chain
 // fails under some Node/ts-node setups. Chai's `expect` is sufficient for this pure unit test.
 import { expect } from 'chai'
+import { EventEmitter } from 'events'
 
 import type { ReporterResults } from '../../../lib/types/reporter'
-import { patchRunResultsAfterCrash } from '../../../lib/util/graceful_crash_handling'
+import { EarlyExitTerminator, patchRunResultsAfterCrash } from '../../../lib/util/graceful_crash_handling'
 
 const baseReporterResults = (): ReporterResults => {
   return {
@@ -105,6 +106,20 @@ describe('lib/util/graceful_crash_handling', () => {
       expect(out.tests[0].attempts[0].error?.stack).to.not.include('\u001b[')
     })
 
+    it('includes the message in displayError when the stack does not contain it', () => {
+      const fatal = new Error('We detected that the Chrome browser stopped responding.')
+
+      // errors.get() captures the stack from a separate, empty Error
+      fatal.stack = 'Error: \n    at ActivityMonitor.onInactivity (run.ts:1:1)'
+
+      const out = patchRunResultsAfterCrash(fatal, baseReporterResults(), { id: 'r1' })
+
+      expect(out.tests[0].displayError).to.eq([
+        'Error: We detected that the Chrome browser stopped responding.',
+        '    at ActivityMonitor.onInactivity (run.ts:1:1)',
+      ].join('\n'))
+    })
+
     it('does not throw and does not patch tests when mostRecentRunnable is undefined', () => {
       const fatal = new Error('boom')
       const results = baseReporterResults()
@@ -175,6 +190,91 @@ describe('lib/util/graceful_crash_handling', () => {
       expect(out.tests[0].attempts[0].error).to.deep.include({ message: 'first flake' })
       expect(out.tests[0].attempts[1].state).to.eq('failed')
       expect(out.tests[0].attempts[1].error?.message).to.eq('tab crashed')
+    })
+
+    describe('tests skipped after the crashed test', () => {
+      const withTests = (...tests: Array<{ testId: string, title: string[], state: string }>): ReporterResults => {
+        const results = baseReporterResults()
+        const template = results.tests[0]
+
+        results.tests = tests.map((test) => ({ ...template, ...test }))
+
+        return results
+      }
+
+      it('sets displayError naming the crashed test and the first line of the error', () => {
+        const fatal = new Error('We detected that the Chrome browser stopped responding.\n\nMore detail')
+
+        const out = patchRunResultsAfterCrash(fatal, withTests(
+          { testId: 'r1', title: ['Suite', 'hangs'], state: 'skipped' },
+          { testId: 'r2', title: ['Suite', 'after'], state: 'skipped' },
+        ), { id: 'r1' })
+
+        expect(out.tests[1].state).to.eq('skipped')
+        expect(out.tests[1].displayError).to.eq([
+          'This test did not run because the spec ended early during "Suite > hangs":',
+          '',
+          'We detected that the Chrome browser stopped responding.',
+        ].join('\n'))
+      })
+
+      it('does not set displayError on tests before the crashed test or on pending tests', () => {
+        const out = patchRunResultsAfterCrash(new Error('crashed'), withTests(
+          { testId: 'r1', title: ['Suite', 'skipped by hook'], state: 'skipped' },
+          { testId: 'r2', title: ['Suite', 'hangs'], state: 'skipped' },
+          { testId: 'r3', title: ['Suite', 'it.skip'], state: 'pending' },
+        ), { id: 'r2' })
+
+        expect(out.tests[0].displayError).to.be.null
+        expect(out.tests[2].displayError).to.be.null
+      })
+
+      it('does not set displayError when the crashed test is unknown', () => {
+        const out = patchRunResultsAfterCrash(new Error('crashed'), withTests(
+          { testId: 'r1', title: ['Suite', 'a'], state: 'skipped' },
+        ), { id: 'nope' })
+
+        expect(out.tests[0].displayError).to.be.null
+      })
+    })
+  })
+
+  describe('EarlyExitTerminator#pendingTestTitle', () => {
+    const startTerminator = () => {
+      const project = new EventEmitter()
+      const terminator = new EarlyExitTerminator()
+
+      terminator.waitForEarlyExit(project as any)
+
+      return { project, terminator }
+    }
+
+    it('is undefined before any test has started', () => {
+      const { terminator } = startTerminator()
+
+      expect(terminator.pendingTestTitle).to.be.undefined
+    })
+
+    it('joins the reporter title path of the running test', () => {
+      const { project, terminator } = startTerminator()
+
+      project.emit('test:before:run', {
+        runnable: { id: 'r1', title: 'fails on crash' },
+        previousResults: baseReporterResults(),
+      })
+
+      expect(terminator.pendingTestTitle).to.eq('Suite > fails on crash')
+    })
+
+    it('falls back to the runnable title when the reporter has no matching test', () => {
+      const { project, terminator } = startTerminator()
+
+      project.emit('test:before:run', {
+        runnable: { id: 'r2', title: 'not reported yet' },
+        previousResults: baseReporterResults(),
+      })
+
+      expect(terminator.pendingTestTitle).to.eq('not reported yet')
     })
   })
 })

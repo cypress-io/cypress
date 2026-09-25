@@ -826,6 +826,26 @@ export const AllCypressErrors = {
         - There are problems with your GPU / GPU drivers
         - There are browser bugs`
   },
+  BROWSER_HUNG: (browserName: string, timeout: number, testTitle?: string) => {
+    // The partial carries its own trailing blank line so the paragraph that
+    // follows keeps its spacing whether or not a test was running.
+    const runningTest = testTitle ? errPartial`
+        The test that was running: ${fmt.highlight(testTitle)}
+
+        ` : null
+
+    return errTemplate`\
+        We detected that the ${fmt.highlight(browserName)} browser stopped responding for over ${fmt.highlight(`${timeout}ms`)} and did not recover.
+
+        ${runningTest}We have failed the current spec but will continue running the next spec.
+
+        This can happen for many different reasons:
+
+        - You wrote an endless loop and you must fix your own code
+        - A page under test hung the browser's main thread (e.g. a runaway render or synchronous work)
+        - You are running lots of tests on a memory intense application
+        - You are running in a memory starved VM environment`
+  },
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`
   },
