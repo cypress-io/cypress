@@ -453,6 +453,37 @@ linux-x64:
           - get-published-artifacts
           - system-tests-node-modules-install
 
+    # Binary jobs no longer run on pull requests, so develop is where they break.
+    # `terminal` on every entry means this waits for the whole binary fan-out to
+    # settle however it settles; the job itself decides whether anything actually
+    # failed.
+    - notify-binary-failure:
+        context: [ publish-binary, test-runner:npm-release ]
+        filters: pipeline.git.branch == "develop"
+        requires:
+          # the packaging jobs are listed too: when one of them breaks, the
+          # leaves below it are not_run rather than failed, so watching only the
+          # leaves would see nothing wrong
+          - create-and-trigger-packaging-artifacts: terminal
+          - get-published-artifacts: terminal
+          - test-npm-module-on-minimum-node-version: terminal
+          - test-types-cypress-and-jest: terminal
+          - test-full-typescript-project: terminal
+          - test-binary-against-kitchensink: terminal
+          - test-npm-module-and-verify-binary: terminal
+          - test-binary-against-staging: terminal
+          - test-binary-against-kitchensink-chrome: terminal
+          - test-binary-against-kitchensink-firefox: terminal
+          - test-binary-against-recipes: terminal
+          - test-binary-against-recipes-chrome: terminal
+          - test-binary-against-recipes-firefox: terminal
+          - test-binary-against-cypress-realworld-app: terminal
+          - "test binary as a non-root user": terminal
+          - "test binary as a root user": terminal
+          - binary-system-tests: terminal
+          - yarn-pnp-preprocessor-system-test: terminal
+          - svelte-webpack-system-test: terminal
+
 # linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop or
 # release/* push. The two darwin workflows compete for leased self-hosted
 # macOS hardware, and per-merge platform signal isn't actionable at that
