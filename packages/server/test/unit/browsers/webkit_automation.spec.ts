@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Mock } from 'vitest'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 
@@ -66,7 +66,7 @@ describe('lib/browsers/webkit-automation', () => {
     })
 
     it('registers request, requestfinished, and requestfailed handlers', () => {
-      expect(Object.keys(handlers).sort()).toEqual(['request', 'requestfailed', 'requestfinished'])
+      expect(Object.keys(handlers).sort()).toEqual(['request', 'requestfailed', 'requestfinished'].sort())
     })
 
     // https://github.com/cypress-io/cypress/issues/23810
