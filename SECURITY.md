@@ -32,7 +32,7 @@ Run against seeded accounts and disposable data wherever you can. `cy.request()`
 
 ### Treat config, plugins and specs as code that runs on your machine
 
-Opening or running a project in Cypress runs its config file, and every plugin that file loads, in Node with your user's privileges. Spec code runs in the browser but reaches your machine too: `cy.task()` runs whatever Node code the config registers for it, and `cy.readFile()` and `cy.writeFile()` can read and write any file your user can. Review third-party plugins before installing them, look through an unfamiliar project's config before opening it, and give a Cypress plugin the same scrutiny you would any other dependency with access to your machine.
+Opening or running a project in Cypress runs its config file, and every plugin that file loads, in Node.js with your user's privileges. Spec code runs in the browser but reaches your machine too: `cy.task()` runs whatever Node code the config registers for it, and `cy.readFile()` and `cy.writeFile()` can read and write any file your user can. Review third-party plugins before installing them, look through an unfamiliar project's config before opening it, and give a Cypress plugin the same scrutiny you would any other dependency with access to your machine.
 
 ### Know what you take on when you redirect the install
 
