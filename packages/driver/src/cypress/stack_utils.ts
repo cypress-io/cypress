@@ -285,7 +285,7 @@ const getCodeFrameStackLine = (err, stackIndex) => {
   return err.parsedStack[stackIndex]
 }
 
-const getCodeFrame = (err, stackIndex) => {
+const getCodeFrame = (err, stackIndex?) => {
   if (err.codeFrame) return err.codeFrame
 
   const stackLine = getCodeFrameStackLine(err, stackIndex)
@@ -455,7 +455,7 @@ const reconstructStack = (parsedStack) => {
   }).join('\n').trimEnd()
 }
 
-const getSourceStack = (stack, projectRoot?) => {
+const getSourceStack = (stack?, projectRoot?) => {
   if (!_.isString(stack)) return {}
 
   const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)

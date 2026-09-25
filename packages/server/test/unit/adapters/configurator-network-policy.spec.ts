@@ -1,6 +1,6 @@
+import { describe, it, expect } from 'vitest'
 import { ConfiguratorNetworkPolicyAdapter } from '../../../lib/adapters/configurator-network-policy'
 import { createBlockedHosts } from '@packages/network-interception'
-import '../../spec_helper'
 
 describe('lib/adapters/configurator-network-policy', () => {
   it('delegates add and getPolicies to the underlying registry', () => {
@@ -12,6 +12,6 @@ describe('lib/adapters/configurator-network-policy', () => {
 
     adapter.add(policy)
 
-    expect(adapter.getPolicies()).to.deep.equal([policy])
+    expect(adapter.getPolicies()).toEqual([policy])
   })
 })
