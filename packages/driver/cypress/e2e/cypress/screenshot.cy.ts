@@ -1,4 +1,6 @@
-const { Screenshot } = Cypress
+export {} // make typescript see this as a module
+
+const Screenshot = Cypress.Screenshot as unknown as InternalScreenshot
 
 const DEFAULTS = {
   capture: 'fullPage',
@@ -10,6 +12,8 @@ const DEFAULTS = {
 }
 
 describe('src/cypress/screenshot', () => {
+  const $el = Cypress.$('<div />')
+
   beforeEach(() => {
     // reset state since this is a singleton
     Screenshot.reset()
@@ -18,11 +22,11 @@ describe('src/cypress/screenshot', () => {
   it('has defaults', () => {
     expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
     expect(() => {
-      Screenshot.onBeforeScreenshot()
+      Screenshot.onBeforeScreenshot($el)
     }).not.to.throw()
 
     expect(() => {
-      Screenshot.onAfterScreenshot()
+      Screenshot.onAfterScreenshot($el, {})
     }).not.to.throw()
   })
 
@@ -41,11 +45,11 @@ describe('src/cypress/screenshot', () => {
       Screenshot.defaults({})
       expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
       expect(() => {
-        Screenshot.onBeforeScreenshot()
+        Screenshot.onBeforeScreenshot($el)
       }).not.to.throw()
 
       expect(() => {
-        Screenshot.onAfterScreenshot()
+        Screenshot.onAfterScreenshot($el, {})
       }).not.to.throw()
     })
 
@@ -125,7 +129,7 @@ describe('src/cypress/screenshot', () => {
       const onBeforeScreenshot = cy.stub()
 
       Screenshot.defaults({ onBeforeScreenshot })
-      Screenshot.onBeforeScreenshot()
+      Screenshot.onBeforeScreenshot($el)
 
       expect(onBeforeScreenshot).to.be.called
     })
@@ -134,7 +138,7 @@ describe('src/cypress/screenshot', () => {
       const onAfterScreenshot = cy.stub()
 
       Screenshot.defaults({ onAfterScreenshot })
-      Screenshot.onAfterScreenshot()
+      Screenshot.onAfterScreenshot($el, {})
 
       expect(onAfterScreenshot).to.be.called
     })
@@ -142,6 +146,7 @@ describe('src/cypress/screenshot', () => {
     describe('errors', () => {
       it('throws if not passed an object', () => {
         const fn = () => {
+          // @ts-expect-error - intentionally omitting the required argument
           Screenshot.defaults()
         }
 
