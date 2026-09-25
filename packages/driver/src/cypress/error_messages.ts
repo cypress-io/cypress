@@ -3,6 +3,7 @@ import { stripIndent } from 'common-tags'
 import capitalize from 'underscore.string/capitalize'
 import $stackUtils from './stack_utils'
 import $utils from './utils'
+import { textLikeInputTypes } from '../dom/elements/elementHelpers'
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -203,16 +204,10 @@ export default {
 
           > \`{{node}}\`
 
-        A clearable element matches one of the following selectors:
-          'a[href]'
-          'area[href]'
-          'input'
-          'select'
-          'textarea'
-          'button'
-          'iframe'
-          '[tabindex]'
-          '[contenteditable]'`,
+        A clearable element is one of the following:
+          - a \`<textarea>\`
+          - an \`<input>\` with no \`type\`, or with a \`type\` of ${textLikeInputTypes.map((type) => `\`${type}\``).join(', ')}
+          - an element made editable by \`contenteditable\`, or any element in a document with \`designMode\` set to \`on\``,
       docsUrl: 'https://on.cypress.io/clear',
     },
   },

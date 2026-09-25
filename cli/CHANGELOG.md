@@ -4,6 +4,16 @@
 **Bugfixes:**
 
 - Fixed an issue where `cypress run` could hang indefinitely when Chrome, Chromium, Edge, or Electron stopped responding, such as when the application under test blocked the browser's main thread, until the process was killed or the CI job timed out. When a spec shows no test activity for 2 minutes and the browser then fails to respond to a check within 5 seconds, Cypress now fails the running test with an error that names it, skips the remaining tests in that spec, and continues the run with the next spec in a new browser. Set the `CYPRESS_BROWSER_ACTIVITY_TIMEOUT` and `CYPRESS_BROWSER_ACTIVITY_PROBE_TIMEOUT` environment variables, in milliseconds, to change these two limits. Firefox and WebKit keep their previous behavior. Partially addresses [#22631](https://github.com/cypress-io/cypress/issues/22631).
+**Misc:**
+
+- TypeScript now accepts an options object on six commands that already accepted one at runtime: [`.nextUntil()`](https://on.cypress.io/nextuntil), [`.parentsUntil()`](https://on.cypress.io/parentsuntil), and [`.prevUntil()`](https://on.cypress.io/prevuntil) take options in place of the filter argument; [`.each()`](https://on.cypress.io/each) and [`.spread()`](https://on.cypress.io/spread) take options before the callback; and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) takes an `offset` that sets a single axis, leaving the other at 0. These calls previously reported a type error. Addressed in [#34886](https://github.com/cypress-io/cypress/pull/34886).
+- TypeScript now accepts every function [`cy.clock()`](https://on.cypress.io/clock) can override in the browser, such as `requestAnimationFrame`, `requestIdleCallback`, `performance`, `Intl`, and `queueMicrotask`, and accepts `null` as the first argument, as in `cy.clock(null, ['setTimeout', 'clearTimeout'])`. These calls previously reported a type error. The `tick()` method on the yielded clock is now typed as returning the clock's new time in milliseconds instead of `void`. Addressed in [#34912](https://github.com/cypress-io/cypress/pull/34912).
+- TypeScript now types the `docsUrl` property on the error passed to an [`uncaught:exception`](https://on.cypress.io/catalog-of-events) handler as `string | string[]`. An uncaught exception carries the docs url for your application's error alongside the Cypress one, so `docsUrl` can hold more than one url at a time. Addressed in [#34879](https://github.com/cypress-io/cypress/pull/34879).
+- The error shown when [`.clear()`](https://on.cypress.io/clear) is called on an element it can't clear now lists the elements `.clear()` accepts: a `<textarea>`, a text-like `<input>` such as `text`, `email`, or `number`, or an element made editable by `contenteditable` or `designMode`. Addressed in [#34914](https://github.com/cypress-io/cypress/pull/34914).
+
+**Dependency Updates:**
+
+- Upgraded `proxy-addr` from `2.0.7` to `2.0.8` to address a [User Impersonation](https://security.snyk.io/vuln/SNYK-JS-PROXYADDR-19812342) (CVE-2026-90711) vulnerability reported in security scans. Addresses [#34858](https://github.com/cypress-io/cypress/issues/34858).
 
 ## 16.1.0
 
@@ -24,6 +34,7 @@
 - Fixed an issue where a variant of A/B tested content in the Cypress app that was weighted never to be shown could become the only variant shown. Fixes [#34814](https://github.com/cypress-io/cypress/issues/34814).
 - Fixed a regression in [12.0.0](#12-0-0) where an assertion on a [`cy.contains()`](https://on.cypress.io/contains) command that matched no element did not say what was searched for, reporting `expected undefined not to exist in the DOM` in the Command Log. The searched content is now shown, such as `expected Saving not to exist in the DOM`. Fixes [#25962](https://github.com/cypress-io/cypress/issues/25962).
 - Fixed a regression in [16.0.0](#16-0-0) where [`blockHosts`](https://on.cypress.io/configuration#blockHosts) was not enforced in Chrome, Chromium, and Edge. Requests to a blocked host reached the network instead of failing with a `503` status. Scripts and other resources from those hosts still loaded. Fixes [#34785](https://github.com/cypress-io/cypress/issues/34785).
+- Fixed a regression in [16.0.0](#16-0-0) where the headless Electron browser window was sized smaller than requested on Windows during `cypress run`, so failure screenshots and recorded videos were smaller than the expected 1280x720. Setting `preferences.width` and `preferences.height` in [`before:browser:launch`](https://on.cypress.io/before-browser-launch) had no effect on the result. Fixes [#34771](https://github.com/cypress-io/cypress/issues/34771).
 
 **Misc:**
 

@@ -28,19 +28,20 @@ interface InternalCheckOptions extends Partial<Cypress.CheckClearOptions> {
   interval?: number
 }
 
-interface InternalKeyboard extends Partial<Keyboard> {
-  getMap: () => object
-  reset: () => void
-  Keys: {
-    TAB: 'Tab'
-  }
-}
+// `Cypress.Keyboard` is published with only the documented `defaults()` and
+// `Keys`, so internal callers cast to this. Merging it onto `Cypress.Cypress`
+// does not work: a duplicate member needs an identical type, and the mismatch
+// is an error inside a .d.ts, which `skipLibCheck` drops.
+type InternalKeyboard = typeof import('../src/cy/keyboard').default
+
+// `Cypress.Screenshot` is published with only the documented `defaults()`, so
+// internal callers cast to this for the same reason.
+type InternalScreenshot = typeof import('../src/cypress/screenshot').default
 
 declare namespace Cypress {
   interface Cypress {
     browserMajorVersion: () => number
     backend: (eventName: string, ...args: any[]) => Promise<any>
-    Keyboard: InternalKeyboard
     // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
     ProxyLogging: any
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
@@ -74,7 +75,12 @@ declare namespace Cypress {
     command(name: string, ...args: any[]): Chainable<any>
   }
 
+  interface cy {
+    isStopped: () => boolean
+  }
+
   interface CypressUtils {
+    encodeBase64Unicode: (str: string) => string
     getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
     isInstanceOf: (instance: any, constructor: any) => boolean
     log: (...msgs: any[]) => void
