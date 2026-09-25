@@ -1,6 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Bugfixes:**
+
+- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 **Misc:**
 
 - TypeScript now accepts an options object on six commands that already accepted one at runtime: [`.nextUntil()`](https://on.cypress.io/nextuntil), [`.parentsUntil()`](https://on.cypress.io/parentsuntil), and [`.prevUntil()`](https://on.cypress.io/prevuntil) take options in place of the filter argument; [`.each()`](https://on.cypress.io/each) and [`.spread()`](https://on.cypress.io/spread) take options before the callback; and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) takes an `offset` that sets a single axis, leaving the other at 0. These calls previously reported a type error. Addressed in [#34886](https://github.com/cypress-io/cypress/pull/34886).
