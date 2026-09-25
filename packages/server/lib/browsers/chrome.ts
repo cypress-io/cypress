@@ -468,6 +468,13 @@ export = {
       args.push(`${HOST_RESOLVER_RULES}${rules}`)
     }
 
+    // Pushed after the `hosts` rules so that the merge in `_normalizeHostResolverRules`
+    // orders these first and they win for an origin that appears in both. The bridge
+    // resolves the real address itself, so a `hosts` entry for that origin still applies.
+    if (options.mtlsHostResolverRules) {
+      args.push(`${HOST_RESOLVER_RULES}${options.mtlsHostResolverRules}`)
+    }
+
     // Blink's cache-aware font loading hard-fails uncached @font-face loads
     // (net::ERR_FAILED) when a CDP Fetch response-stage pause is attached,
     // which the CDP transport always enables (crbug.com/1196004). Web fonts do

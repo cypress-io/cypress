@@ -1344,6 +1344,41 @@ describe('lib/browsers/chrome', () => {
       expect(args.find((arg) => arg.startsWith('--host-resolver-rules'))).to.be.undefined
     })
 
+    // `_normalizeHostResolverRules` merges the args later and puts the last one first, where
+    // the first matching rule wins — so the bridge must be pushed after `hosts` to win for an
+    // origin named by both.
+    it('orders bridge rules after hosts rules so the merge lets the bridge win', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        hosts: { 'secure.com': '10.0.0.1' },
+        mtlsHostResolverRules: 'MAP secure.com:443 127.0.0.1:9001',
+      })
+
+      const rules = args.filter((arg) => arg.startsWith('--host-resolver-rules='))
+
+      expect(rules).to.deep.equal([
+        '--host-resolver-rules=MAP secure.com 10.0.0.1',
+        '--host-resolver-rules=MAP secure.com:443 127.0.0.1:9001',
+      ])
+
+      expect(chrome._normalizeHostResolverRules(args)).to.include(
+        '--host-resolver-rules=MAP secure.com:443 127.0.0.1:9001,MAP secure.com 10.0.0.1',
+      )
+    })
+
+    it('omits bridge rules when no client certificate is configured', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        hosts: { 'foobar.com': '127.0.0.1' },
+      })
+
+      expect(args.filter((arg) => arg.startsWith('--host-resolver-rules='))).to.deep.equal([
+        '--host-resolver-rules=MAP foobar.com 127.0.0.1',
+      ])
+    })
+
     it('brackets IPv6 literals in host resolver rules', () => {
       const args = chrome._getArgs({
         majorVersion: '89',

@@ -1,0 +1,8 @@
+[31mCypress could not apply your [33mclientCertificates[39m[31m configuration.[39m
+[31m[39m
+[31mMore than one certificate is configured for [95mexample.com:443[39m[31m:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mhttps://example.com/one[39m[31m[39m
+[31m[90m - [39m[31m[94mhttps://example.com/two[39m[31m[39m
+[31m[39m
+[31mA browser opens one connection per origin and presents a single client certificate on it, before any path is known. Configure one certificate per origin.[39m

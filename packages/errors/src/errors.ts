@@ -912,6 +912,16 @@ export const AllCypressErrors = {
 
       Each entry must supply exactly one of a ${fmt.highlightSecondary(`filePath`)} to a PEM file (relative paths resolve against your project root), an inline ${fmt.highlightSecondary(`pem`)} string, or a base64 SHA-256 ${fmt.highlightSecondary(`spki`)} fingerprint.`
   },
+  CLIENT_CERTIFICATES_CONFLICT: (origin: string, urls: string[]) => {
+    return errTemplate`\
+      Cypress could not apply your ${fmt.highlight(`clientCertificates`)} configuration.
+
+      More than one certificate is configured for ${fmt.highlightSecondary(origin)}:
+
+      ${fmt.listItems(urls)}
+
+      A browser opens one connection per origin and presents a single client certificate on it, before any path is known. Configure one certificate per origin.`
+  },
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
