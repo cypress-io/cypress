@@ -99,7 +99,9 @@ export class CypressCTWebpackPlugin {
     const neededForJustInTimeCompile = !!options?.neededForJustInTimeCompile
 
     if (_.isEqual(specs, this.files)) {
-      this.devServerEvents.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile })
+      if (!this.queuedJitRecompileGenerations.length && !this.pendingJitRecompileGenerations.length) {
+        this.devServerEvents.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile })
+      }
 
       return
     }
