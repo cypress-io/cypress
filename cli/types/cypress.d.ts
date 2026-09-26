@@ -1338,8 +1338,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/each
      */
-    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
-    each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
+    each(fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
      *
@@ -1349,8 +1349,8 @@ declare namespace Cypress {
      *      // work with each cookie
      *    })
      */
-    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>>
-    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>>
+    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
 
     /**
      * Get A DOM element at a specific index in an array of elements.

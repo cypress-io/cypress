@@ -2066,16 +2066,19 @@ export default {
   },
 
   then: {
-    callback_mixes_sync_and_async: stripIndent`\
-      ${cmd('then')} failed because you are mixing up async and sync code.
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because you are mixing up async and sync code.
 
-      In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
 
-      Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
 
-      You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
 
-      The value you synchronously returned was: \`{{value}}\``,
+        The value you synchronously returned was: \`{{value}}\``,
+      docsUrl: 'https://on.cypress.io/{{cmd}}',
+    },
   },
 
   trigger: {
