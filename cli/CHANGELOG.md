@@ -3,7 +3,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) replaced `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cancelIdleCallback` is now replaced by default alongside `requestIdleCallback`, and it can also be listed explicitly in the functions passed to `cy.clock()`, which previously threw an error.
+- Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error.
 
 **Misc:**
 
