@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Bugfixes:**
+
+- Fixed an issue where `cypress run` changed the browser that `cypress open` selects by default for a project to whichever browser the run used, such as the one passed with `--browser`. `cypress run` also no longer saves anything to Cypress's user data on startup, which could log you out of `cypress open` when several `cypress run` processes started at the same time on one machine, as with parallel runs on a CI machine. Fixed in [#34924](https://github.com/cypress-io/cypress/pull/34924).
+
 **Misc:**
 
 - TypeScript now accepts an options object on six commands that already accepted one at runtime: [`.nextUntil()`](https://on.cypress.io/nextuntil), [`.parentsUntil()`](https://on.cypress.io/parentsuntil), and [`.prevUntil()`](https://on.cypress.io/prevuntil) take options in place of the filter argument; [`.each()`](https://on.cypress.io/each) and [`.spread()`](https://on.cypress.io/spread) take options before the callback; and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) takes an `offset` that sets a single axis, leaving the other at 0. These calls previously reported a type error. Addressed in [#34886](https://github.com/cypress-io/cypress/pull/34886).
