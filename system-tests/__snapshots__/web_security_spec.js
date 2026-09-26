@@ -34,8 +34,6 @@ exports['e2e web security / when enabled / fails'] = `
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 
-Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
-
 Use \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\`.
 
 \`cy.origin('https://www.foo.com:44665', () => {\`
@@ -51,8 +49,6 @@ https://on.cypress.io/cy-visit-succeeded-but-commands-fail
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 
-Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
-
 Use \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\`.
 
 \`cy.origin('https://www.foo.com:44665', () => {\`
@@ -67,8 +63,6 @@ https://on.cypress.io/cy-visit-succeeded-but-commands-fail
      CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://www.foo.com:44665\`.
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-
-Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
 
 Use \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\`.
 

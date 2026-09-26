@@ -947,13 +947,13 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled }) {
+    cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled, isSameSuperDomainOrigin }) {
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-        ${isInjectDocumentDomainEnabled ? '' : `
+        ${isInjectDocumentDomainEnabled || !isSameSuperDomainOrigin ? '' : `
         Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
         `}
         Use ${cmd('origin')} to wrap the commands run on \`${autOrigin}\`.
