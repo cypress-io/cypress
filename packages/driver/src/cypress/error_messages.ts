@@ -954,7 +954,7 @@ export default {
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
         ${isInjectDocumentDomainEnabled ? '' : `
-        Because \`injectDocumentDomain\` is disabled (the default), commands that run after the application navigates to a different origin must be wrapped in ${cmd('origin')}, even when the new origin is a subdomain of the same domain.
+        Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
         `}
         Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
 

@@ -13,7 +13,7 @@ vi.mock('../../../src/util/commandAUTCommunication', () => {
 
 describe('ensure', () => {
   describe('commandCanCommunicateWithAUT', () => {
-    const hint = 'Because `injectDocumentDomain` is disabled (the default), commands that run after the application navigates to a different origin must be wrapped in `cy.origin()`, even when the new origin is a subdomain of the same domain.'
+    const hint = 'Because `injectDocumentDomain` is disabled (the default), a subdomain of the same domain counts as a different origin.'
 
     let injectDocumentDomain: boolean
     let cy
@@ -49,7 +49,7 @@ describe('ensure', () => {
       expect(ensure.commandCanCommunicateWithAUT(cy)).toBe(true)
     })
 
-    it('explains that cy.origin() is required for any origin change when injectDocumentDomain is disabled', () => {
+    it('explains that a subdomain counts as a different origin when injectDocumentDomain is disabled', () => {
       injectDocumentDomain = false
 
       const err = getError()
