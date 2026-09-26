@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- Improved the performance of [`.closest()`](https://on.cypress.io/closest) on subjects with many elements inside the shadow DOM. A subject of 1,000 shadow DOM elements now resolves about 2× faster, and a subject of 20,000 about 16× faster. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- Improved the performance of [`.closest()`](https://on.cypress.io/closest) on subjects with many elements inside the shadow DOM. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 
 **Misc:**
 
