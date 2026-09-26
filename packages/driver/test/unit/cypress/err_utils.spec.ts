@@ -239,6 +239,45 @@ describe('err_utils', () => {
     }
   })
 
+  describe('modifyErrMsg', () => {
+    beforeEach(() => {
+      // @ts-expect-error
+      global.Cypress = {
+        config: vi.fn(),
+        isBrowser: vi.fn().mockReturnValue(false),
+      }
+    })
+
+    it('appends to the message of a standard error', () => {
+      const err = new Error('original')
+
+      errUtils.modifyErrMsg(err, ' appended', (msg1, msg2) => `${msg1}${msg2}`)
+
+      expect(err.message).toBe('original appended')
+      expect(err.stack).toContain('original appended')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34818
+    it('appends to the message of a DOMException', () => {
+      const err = new DOMException('Permission denied to access property "document" on cross-origin object', 'SecurityError')
+
+      errUtils.modifyErrMsg(err, ' appended', (msg1, msg2) => `${msg1}${msg2}`)
+
+      expect(err.message).toBe('Permission denied to access property "document" on cross-origin object appended')
+      expect(err.name).toBe('SecurityError')
+    })
+
+    it('returns the original error untouched when its message cannot be written', () => {
+      const err = Object.freeze(new DOMException('cross-origin', 'SecurityError'))
+
+      expect(() => {
+        errUtils.modifyErrMsg(err, ' appended', (msg1, msg2) => `${msg1}${msg2}`)
+      }).not.toThrow()
+
+      expect(err.message).toBe('cross-origin')
+    })
+  })
+
   describe('errByPath token replacement', () => {
     beforeEach(() => {
       errUtils.extendErrorMessages({
