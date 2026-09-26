@@ -18,6 +18,8 @@ export default (Commands, Cypress, cy) => {
     return cy.$$(_($el).reverse().uniq().reverse().value())
   }
 
+  const hasShadowElements = (subject) => _.some(subject, $dom.isWithinShadowRoot)
+
   const getEl = (traversal, includeShadowDom, subject, arg1, arg2) => {
     if (traversal === 'find' && includeShadowDom) {
       const roots = subject.map((i, el) => $dom.findAllShadowRoots(el))
@@ -29,9 +31,7 @@ export default (Commands, Cypress, cy) => {
       return elementsWithShadow.find(arg1, arg2)
     }
 
-    const hasShadowElements = _.some(subject, $dom.isWithinShadowRoot)
-
-    if (traversal === 'closest' && hasShadowElements) {
+    if (traversal === 'closest' && hasShadowElements(subject)) {
       const nodes = _.reduce(subject, (nodes, el) => {
         const getClosest = (node) => {
           const closestNode = node.closest(arg1)
@@ -55,13 +55,13 @@ export default (Commands, Cypress, cy) => {
       return sortedUnique(nodes)
     }
 
-    if (traversal === 'parent' && hasShadowElements) {
+    if (traversal === 'parent' && hasShadowElements(subject)) {
       const $parents = sortedUnique(subject.map((i, el) => $elements.getParentNode(el)))
 
       return arg1 ? $parents.filter(arg1) : $parents
     }
 
-    if (traversal === 'parents' && hasShadowElements) {
+    if (traversal === 'parents' && hasShadowElements(subject)) {
       let $parents = subject.map((i, el) => $elements.getAllParents(el))
 
       if (subject.length > 1) {
@@ -71,7 +71,7 @@ export default (Commands, Cypress, cy) => {
       return arg1 ? $parents.filter(arg1) : $parents
     }
 
-    if (traversal === 'parentsUntil' && hasShadowElements) {
+    if (traversal === 'parentsUntil' && hasShadowElements(subject)) {
       let $parents = subject.map((i, el) => $elements.getAllParents(el, arg1))
 
       if (subject.length > 1) {
