@@ -72,7 +72,9 @@ export class File {
     // If multiple users write to a specific directory is os.tmpdir, permission errors can arise.
     // Instead, we make a user specific directory with os.tmpdir.
     this._lockFileDir = path.join(os.tmpdir(), `cypress-${getUid()}`)
-    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
+    // Not `.lock`: older Cypress versions left plain files under that name, and
+    // proper-lockfile can't clear a stale one because it expects a directory.
+    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.plock`)
 
     this._queue = new pQueue({ concurrency: 1 })
 

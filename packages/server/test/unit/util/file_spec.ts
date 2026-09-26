@@ -194,6 +194,28 @@ describe('lib/util/file', () => {
       })
     })
 
+    it('ignores a stale plain-file lock left by older Cypress versions', function () {
+      const legacyLockPath = this.fileUtil._lockFilePath.replace(/\.plock$/, '.lock')
+      const longAgo = new Date(Date.now() - 60000)
+
+      return fs.ensureDirAsync(this.fileUtil._lockFileDir)
+      .then(() => {
+        return fs.writeFileAsync(legacyLockPath, '')
+      }).then(() => {
+        return fs.utimesAsync(legacyLockPath, longAgo, longAgo)
+      }).then(() => {
+        return this.fileUtil.set('foo', 'bar')
+      }).then(() => {
+        this.fileUtil._lastRead = 0
+
+        return this.fileUtil.get('foo')
+      }).then((value) => {
+        expect(value).to.equal('bar')
+      }).finally(() => {
+        return fs.removeAsync(legacyLockPath)
+      })
+    })
+
     it('resolves empty object when contents file has invalid json', function () {
       return fs.ensureDirAsync(this.dir)
       .then(() => {
