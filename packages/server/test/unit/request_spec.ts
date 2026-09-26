@@ -162,6 +162,47 @@ describe('lib/request', () => {
     })
   })
 
+  context('#setRequestCookieHeader', () => {
+    const callSetRequestCookieHeader = function (fn, browserCookies, existingHeader?, headers: Record<string, string> = {}) {
+      const req = { headers }
+
+      fn.withArgs('get:cookies').resolves(browserCookies)
+
+      // @ts-expect-error - setRequestCookieHeader is private
+      return request.setRequestCookieHeader(req, 'http://localhost:1234/', fn, existingHeader)
+      .then(() => req.headers)
+    }
+
+    it('sets the Cookie header from the browser cookies', function () {
+      return callSetRequestCookieHeader(this.fn, [{ name: 'foo', value: 'bar' }])
+      .then((headers) => {
+        expect(headers.cookie).to.eq('foo=bar')
+      })
+    })
+
+    it('merges the browser cookies with an existing Cookie header', function () {
+      return callSetRequestCookieHeader(this.fn, [{ name: 'foo', value: 'bar' }], 'baz=quux')
+      .then((headers) => {
+        expect(headers.cookie).to.eq('baz=quux;foo=bar')
+      })
+    })
+
+    it('clears a stale Cookie header when the browser reports no cookies', function () {
+      return callSetRequestCookieHeader(this.fn, [], undefined, { Cookie: 'foo=bar' })
+      .then((headers) => {
+        expect(headers).not.to.have.property('Cookie')
+        expect(headers).not.to.have.property('cookie')
+      })
+    })
+
+    it('preserves an explicitly-set Cookie header when the browser reports no cookies', function () {
+      return callSetRequestCookieHeader(this.fn, [], 'baz=quux')
+      .then((headers) => {
+        expect(headers.cookie).to.eq('baz=quux')
+      })
+    })
+  })
+
   context('#normalizeResponse', () => {
     beforeEach(function () {
       this.push = sinon.stub()
@@ -874,6 +915,41 @@ describe('lib/request', () => {
           return request.sendPromise({}, this.fn, {
             url: 'http://localhost:1234/',
           })
+        })
+      })
+
+      it('clears a stale Cookie header once the browser reports no cookies', function () {
+        // simulates a redirect chain where the browser's cookie jar starts
+        // out non-empty and then becomes legitimately empty (e.g. a /logout
+        // response deletes the session cookie) partway through
+        this.fn.withArgs('get:cookies')
+        .onCall(0).resolves([{ name: 'session', value: 'abc' }])
+        .onCall(1).resolves([{ name: 'session', value: 'abc' }])
+        .onCall(2).resolves([])
+
+        let thirdRequestHeaders: Record<string, string> | undefined
+
+        nock('http://localhost:1234')
+        .get('/')
+        .reply(302, '', {
+          location: '/second',
+        })
+        .get('/second')
+        .reply(302, '', {
+          location: '/third',
+        })
+        .get('/third')
+        .reply(function () {
+          thirdRequestHeaders = this.req.headers
+
+          return [200, '']
+        })
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:1234/',
+        })
+        .then(() => {
+          expect(thirdRequestHeaders).not.to.have.property('cookie')
         })
       })
     })

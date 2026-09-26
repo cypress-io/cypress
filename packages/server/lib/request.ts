@@ -121,6 +121,36 @@ const caseInsensitiveSet = function (obj, property, val) {
   obj[lowercaseProperty] = val
 }
 
+const caseInsensitiveDelete = function (obj, property) {
+  const lowercaseProperty = property.toLowerCase()
+
+  for (let key of Object.keys(obj)) {
+    if (key.toLowerCase() === lowercaseProperty) {
+      delete obj[key]
+    }
+  }
+}
+
+// combines whatever Cookie header value the caller already set with the
+// cookies the browser reports for this url, returning undefined if neither has one
+const mergeCookieHeaderValue = function (existingHeader: string | undefined, browserCookies: string) {
+  if (existingHeader && browserCookies) {
+    // order does not matter here
+    // @see https://tools.ietf.org/html/rfc6265#section-4.2.2
+    return `${existingHeader};${browserCookies}`
+  }
+
+  if (existingHeader) {
+    return existingHeader
+  }
+
+  if (browserCookies) {
+    return browserCookies
+  }
+
+  return undefined
+}
+
 type AutomationFn = (event: string, data?: any) => Promise<any>
 
 interface RequestOpts {
@@ -543,21 +573,20 @@ export class Request {
     return automationFn('get:cookies', { url: reqUrl })
     .then((cookies) => {
       debug('got cookies from browser %o', { reqUrl, cookies })
-      let header = cookies.map((cookie) => {
+
+      const browserCookies = cookies.map((cookie) => {
         return `${cookie.name}=${cookie.value}`
-      }).join('; ') || undefined
+      }).join('; ')
 
-      if (header) {
-        if (existingHeader) {
-          // existingHeader = whatever Cookie header the user is already trying to set
-          debug('there is an existing cookie header, merging %o', { header, existingHeader })
-          // order does not not matter here
-          // @see https://tools.ietf.org/html/rfc6265#section-4.2.2
-          header = [existingHeader, header].join(';')
-        }
+      const cookieHeaderValue = mergeCookieHeaderValue(existingHeader, browserCookies)
 
-        return caseInsensitiveSet(req.headers, 'Cookie', header)
+      if (!cookieHeaderValue) {
+        // neither the browser nor the caller has a cookie for this url
+        // so clear any stale Cookie header left over from a previous redirect
+        return caseInsensitiveDelete(req.headers, 'Cookie')
       }
+
+      return caseInsensitiveSet(req.headers, 'Cookie', cookieHeaderValue)
     })
   }
 
