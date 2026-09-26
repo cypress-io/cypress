@@ -2,6 +2,7 @@ import '../../spec_helper'
 
 import os from 'os'
 import path from 'path'
+import { promises as nodeFs } from 'fs'
 import Promise from 'bluebird'
 import lockFileModule from 'lockfile'
 import { fs } from '../../../lib/util/fs'
@@ -143,6 +144,36 @@ describe('lib/util/file', () => {
     })
   })
 
+  context('#transaction (locking)', () => {
+    beforeEach(function () {
+      this.fileUtil = new FileUtil({ path: this.path })
+    })
+
+    it('holds one lock across the whole transaction', function () {
+      sinon.spy(lockFile, 'lockAsync')
+      sinon.spy(lockFile, 'unlockAsync')
+
+      return this.fileUtil.transaction((tx) => {
+        return tx.get('items', [])
+        .then((items) => {
+          return tx.set('items', items.concat('foo'))
+        })
+        .then(() => {
+          return tx.set('other', true)
+        })
+      })
+      .then(() => {
+        expect(lockFile.lockAsync).to.be.calledOnce
+        expect(lockFile.unlockAsync).to.be.calledOnce
+
+        return fs.readJsonAsync(this.path)
+      })
+      .then((contents) => {
+        expect(contents).to.eql({ items: ['foo'], other: true })
+      })
+    })
+  })
+
   context('#get', () => {
     beforeEach(function () {
       this.fileUtil = new FileUtil({ path: this.path })
@@ -213,52 +244,16 @@ describe('lib/util/file', () => {
       })
     })
 
-    it('rejects with a lock error when it can\'t get lock on file on initial read', function () {
-      const original = lockError()
-
+    it('resolves the file contents while another process holds the lock', function () {
       return fs.ensureDirAsync(this.dir)
       .then(() => {
         return fs.writeJsonAsync(this.path, { foo: 'bar' })
       }).then(() => {
-        sinon.stub(lockFile, 'lockAsync').rejects(original)
+        sinon.stub(lockFile, 'lockAsync').rejects(lockError())
 
         return this.fileUtil.get()
-      }).then(() => {
-        throw new Error('should have rejected')
-      }, (err) => {
-        expect(err.message).to.include(this.path)
-        expect(err.message).to.include('another Cypress process appears to hold its lock')
-        expect(err.cause).to.equal(original)
-      })
-    })
-
-    it('reads from disk again after a lock failure instead of resolving the empty cache', function () {
-      return fs.ensureDirAsync(this.dir)
-      .then(() => {
-        return fs.writeJsonAsync(this.path, { foo: 'bar' })
-      }).then(() => {
-        const lockStub = sinon.stub(lockFile, 'lockAsync').rejects(lockError())
-
-        return this.fileUtil.get()
-        .catch(() => {
-          lockStub.restore()
-
-          return this.fileUtil.get()
-        })
       }).then((contents) => {
         expect(contents).to.eql({ foo: 'bar' })
-      })
-    })
-
-    it('does not unlock when it can\'t get lock on file', function () {
-      sinon.stub(lockFile, 'lockAsync').rejects(lockError())
-      sinon.spy(lockFile, 'unlockAsync')
-
-      return this.fileUtil.get()
-      .then(() => {
-        throw new Error('should have rejected')
-      }, () => {
-        expect(lockFile.unlockAsync).not.to.be.called
       })
     })
 
@@ -297,25 +292,15 @@ describe('lib/util/file', () => {
       })
     })
 
-    it('locks file while reading', function () {
+    it('does not lock the file while reading', function () {
       sinon.spy(lockFile, 'lockAsync')
 
       return this.fileUtil.get().then(() => {
-        expect(lockFile.lockAsync).to.be.called
+        expect(lockFile.lockAsync).not.to.be.called
       })
     })
 
-    it('unlocks file when finished reading', function () {
-      sinon.spy(lockFile, 'unlockAsync')
-
-      return this.fileUtil.get().then(() => {
-        expect(lockFile.unlockAsync).to.be.called
-      })
-    })
-
-    it('unlocks file if the lock was acquired and reading then fails', function () {
-      sinon.spy(lockFile, 'lockAsync')
-      sinon.spy(lockFile, 'unlockAsync')
+    it('rejects when reading fails for a reason other than a missing or invalid file', function () {
       sinon.stub(fs, 'readJsonAsync').rejects(new Error('fail!'))
 
       return this.fileUtil.get()
@@ -323,21 +308,7 @@ describe('lib/util/file', () => {
         throw new Error('should have rejected')
       }, (err) => {
         expect(err.message).to.eq('fail!')
-        expect(lockFile.lockAsync).to.be.calledOnce
-        expect(lockFile.unlockAsync).to.be.calledOnce
       })
-    })
-
-    it('times out and carries on if unlocking times out', function () {
-      sinon.stub(lockFile, 'lockAsync').resolves()
-      sinon.stub(lockFile, 'unlockAsync').callsFake(() => {
-        return Promise.delay(1e9)
-      })
-
-      sinon.stub(fs, 'readJsonAsync').resolves({})
-      sinon.stub(env, 'get').withArgs('FILE_UNLOCK_TIMEOUT').returns(100)
-
-      return this.fileUtil.get()
     })
   })
 
@@ -439,16 +410,62 @@ describe('lib/util/file', () => {
     it('unlocks file if the lock was acquired and writing then fails', function () {
       sinon.spy(lockFile, 'lockAsync')
       sinon.spy(lockFile, 'unlockAsync')
-      sinon.stub(fs, 'outputJsonAsync').rejects(new Error('fail!'))
+      sinon.stub(nodeFs, 'writeFile').rejects(new Error('fail!'))
 
       return this.fileUtil.set('foo', 'bar')
       .then(() => {
         throw new Error('should have rejected')
       }, (err) => {
         expect(err.message).to.eq('fail!')
-        // one lock for the read, one for the write
-        expect(lockFile.lockAsync).to.be.calledTwice
-        expect(lockFile.unlockAsync).to.be.calledTwice
+        expect(lockFile.lockAsync).to.be.calledOnce
+        expect(lockFile.unlockAsync).to.be.calledOnce
+      })
+    })
+
+    it('times out and carries on if unlocking times out', function () {
+      sinon.stub(lockFile, 'lockAsync').resolves()
+      sinon.stub(lockFile, 'unlockAsync').callsFake(() => {
+        return Promise.delay(1e9)
+      })
+
+      sinon.stub(env, 'get').withArgs('FILE_UNLOCK_TIMEOUT').returns(100)
+
+      return this.fileUtil.set('foo', 'bar')
+    })
+
+    it('replaces the file with a rename and leaves no temp file behind', function () {
+      sinon.spy(fs, 'rename')
+
+      return this.fileUtil.set('foo', 'bar')
+      .then(() => {
+        expect(fs.rename).to.be.calledOnceWith(`${this.path}.${process.pid}.tmp`, this.path)
+
+        return fs.readdirAsync(this.dir)
+      }).then((files) => {
+        expect(files).to.eql(['file.json'])
+      })
+    })
+
+    it('leaves the file unchanged and removes the temp file when the rename fails', function () {
+      return fs.ensureDirAsync(this.dir)
+      .then(() => {
+        return fs.writeJsonAsync(this.path, { foo: 'bar' })
+      }).then(() => {
+        sinon.stub(fs, 'rename').rejects(new Error('fail!'))
+
+        return this.fileUtil.set('foo', 'changed')
+      }).then(() => {
+        throw new Error('should have rejected')
+      }, (err) => {
+        expect(err.message).to.eq('fail!')
+
+        return fs.readdirAsync(this.dir)
+      }).then((files) => {
+        expect(files).to.eql(['file.json'])
+
+        return fs.readJsonAsync(this.path)
+      }).then((contents) => {
+        expect(contents).to.eql({ foo: 'bar' })
       })
     })
 
@@ -460,7 +477,7 @@ describe('lib/util/file', () => {
         }).then(() => {
           sinon.stub(lockFile, 'lockAsync').rejects(lockError())
           sinon.spy(lockFile, 'unlockAsync')
-          sinon.spy(fs, 'outputJsonAsync')
+          sinon.spy(nodeFs, 'writeFile')
         })
       })
 
@@ -470,7 +487,7 @@ describe('lib/util/file', () => {
           throw new Error('should have rejected')
         }, (err) => {
           expect(err.message).to.include('another Cypress process appears to hold its lock')
-          expect(fs.outputJsonAsync).not.to.be.called
+          expect(nodeFs.writeFile).not.to.be.called
           expect(lockFile.unlockAsync).not.to.be.called
 
           return fs.readJsonAsync(this.path)
@@ -487,24 +504,8 @@ describe('lib/util/file', () => {
           throw new Error('should have rejected')
         }, (err) => {
           expect(err.message).to.include('another Cypress process appears to hold its lock')
-          expect(fs.outputJsonAsync).not.to.be.called
+          expect(nodeFs.writeFile).not.to.be.called
           expect(lockFile.unlockAsync).not.to.be.called
-
-          return fs.readJsonAsync(this.path)
-        }).then((contents) => {
-          expect(contents).to.eql({ foo: 'bar', baz: 'qux' })
-        })
-      })
-
-      it('does not write an empty object from set() after a failed get()', function () {
-        return this.fileUtil.get()
-        .catch(() => {
-          return this.fileUtil.set('foo', 'changed')
-        })
-        .then(() => {
-          throw new Error('should have rejected')
-        }, () => {
-          expect(fs.outputJsonAsync).not.to.be.called
 
           return fs.readJsonAsync(this.path)
         }).then((contents) => {
@@ -527,7 +528,7 @@ describe('lib/util/file', () => {
 
       return holder._lock()
       .then((unlock) => {
-        return waiter.get()
+        return waiter.set('foo', 'bar')
         .then(() => {
           throw new Error('should have rejected')
         }, (err) => {
@@ -549,6 +550,26 @@ describe('lib/util/file', () => {
       })
     })
 
+    it('merges into what another instance wrote, not a stale cached read', function () {
+      const first = new FileUtil({ path: this.path })
+      const second = new FileUtil({ path: this.path })
+
+      return first.get()
+      .then(() => {
+        return second.set('fromSecond', true)
+      })
+      .then(() => {
+        // still within the debounce window of first's read
+        return first.set('fromFirst', true)
+      })
+      .then(() => {
+        return fs.readJsonAsync(this.path)
+      })
+      .then((contents) => {
+        expect(contents).to.eql({ fromSecond: true, fromFirst: true })
+      })
+    })
+
     it('takes over a stale lock left by a process that died', function () {
       const fileUtil = new FileUtil({ path: this.path })
 
@@ -567,10 +588,13 @@ describe('lib/util/file', () => {
         // so move the clock forward instead
         sinon.useFakeTimers({ now: Date.now() + 60 * 1000, toFake: ['Date'] })
 
-        return fileUtil.get()
+        return fileUtil.set('baz', 'qux')
+      })
+      .then(() => {
+        return fs.readJsonAsync(this.path)
       })
       .then((contents) => {
-        expect(contents).to.eql({ foo: 'bar' })
+        expect(contents).to.eql({ foo: 'bar', baz: 'qux' })
 
         return fs.pathExistsAsync(fileUtil._lockFilePath)
       })

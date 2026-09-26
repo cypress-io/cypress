@@ -142,14 +142,14 @@ export const cache = {
   },
 
   removeProjectPreferences (projectTitle: string): Promise<void> {
-   return fileUtil.get('PROJECT_PREFERENCES', {}).then((preferences) => {
-    const updatedPreferences = {
-      ...preferences,
-      [projectTitle]: null,
-    }
-
-    return fileUtil.set({ PROJECT_PREFERENCES: updatedPreferences })
-   })
+    return fileUtil.transaction((tx: Transaction) => {
+      return tx.get('PROJECT_PREFERENCES', {}).then((preferences) => {
+        return tx.set('PROJECT_PREFERENCES', {
+          ...preferences,
+          [projectTitle]: null,
+        })
+      })
+    })
   },
 
   getCohorts (): Promise<Record<string, Cohort>> {
