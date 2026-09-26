@@ -12,9 +12,10 @@ interface CypressCTWebpackPluginOptions {
   devServerEvents: EventEmitter
   webpack: Function
   indexHtmlFile: string
+  isRunMode?: boolean
 }
 
-type CypressCTContextOptions = Omit<CypressCTWebpackPluginOptions, 'devServerEvents' | 'webpack'>
+type CypressCTContextOptions = Omit<CypressCTWebpackPluginOptions, 'devServerEvents' | 'webpack' | 'isRunMode'>
 
 export interface CypressCTWebpackContext {
   _cypress: CypressCTContextOptions
@@ -29,11 +30,13 @@ export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
   private compilation: Compilation | null = null
+  private compiler: Compiler | null = null
   private webpack: Function
   private indexHtmlFile: string
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
+  private readonly isRunMode: boolean
 
   constructor (options: CypressCTWebpackPluginOptions) {
     this.files = options.files
@@ -42,6 +45,7 @@ export class CypressCTWebpackPlugin {
     this.devServerEvents = options.devServerEvents
     this.webpack = options.webpack
     this.indexHtmlFile = options.indexHtmlFile
+    this.isRunMode = options.isRunMode ?? false
   }
 
   private addLoaderContext = (loaderContext: object, module: any) => {
@@ -79,14 +83,18 @@ export class CypressCTWebpackPlugin {
   }
 
   /*
-   * `webpack --watch` watches the existing specs and their dependencies for changes.
-   * When new specs are created, we need to trigger a recompilation to add the new specs
-   * as dependencies. This hook informs webpack that `component-index.html` has been "updated on disk",
-   * causing a recompilation (and pulling the new specs in as dependencies). We use the component
-   * index file because we know that it will be there since the project is using Component Testing.
+   * The spec entry is built by a non-cacheable loader that reads `this.files`, so any new
+   * compilation picks up the updated spec list. This hook only has to start one.
    *
-   * We were using `browser.js` before to cause a recompilation but we ran into an
-   * issue with MacOS Ventura that will not allow us to write to files inside of our application bundle.
+   * In run mode, the compile is started in memory through the compiler's `Watching`. Run mode
+   * with `justInTimeCompile` changes the spec list before every spec, and `component-index.html`
+   * is shared by every Cypress process on the machine, so touching it would make each
+   * process's watcher recompile for specs it never asked for.
+   *
+   * In open mode, `component-index.html` is marked as "updated on disk" instead, which makes
+   * the file watcher recompile and pull newly created specs in as dependencies. The component
+   * index file is used because it is always present in a Component Testing project and sits
+   * outside the Cypress application bundle, which macOS Ventura will not let us write to.
    *
    * See https://github.com/cypress-io/cypress/issues/24398
    */
@@ -96,6 +104,15 @@ export class CypressCTWebpackPlugin {
     }
 
     this.files = specs
+
+    const watching = this.compiler?.watching
+
+    if (this.isRunMode && watching) {
+      watching.invalidate()
+
+      return
+    }
+
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
     // eslint-disable-next-line no-restricted-syntax
@@ -125,6 +142,7 @@ export class CypressCTWebpackPlugin {
   apply (compiler: unknown): void {
     const _compiler = compiler as Compiler
 
+    this.compiler = _compiler
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation))

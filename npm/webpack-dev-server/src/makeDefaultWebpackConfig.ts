@@ -96,6 +96,7 @@ export function makeCypressWebpackConfig (
         supportFile,
         webpack,
         indexHtmlFile,
+        isRunMode,
       }),
       ...(isWebpackBundleAnalyzerEnabled() ? [new BundleAnalyzerPlugin()] : []),
     ],

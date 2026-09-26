@@ -205,6 +205,82 @@ describe('#devServer', { timeout: 5000 }, () => {
     await closeServer(close)
   })
 
+  describe('`run` mode with justInTimeCompile', () => {
+    const jitRunModeConfig = () => {
+      return {
+        ...cypressConfig,
+        isTextTerminal: true,
+        justInTimeCompile: true,
+        devServerPublicPathRoute: '/__cypress/src',
+      } as Cypress.PluginConfigOptions
+    }
+
+    const indexHtmlFilePath = path.join(root, 'test/component-index.html')
+
+    const startJitServer = async () => {
+      const devServerEvents = new EventEmitter()
+      let compileCount = 0
+
+      devServerEvents.on('dev-server:compile:success', () => compileCount++)
+
+      const initialCompile = once(devServerEvents, 'dev-server:compile:success')
+      const { port, close } = await devServer({
+        webpackConfig: {},
+        cypressConfig: jitRunModeConfig(),
+        specs: createSpecs('foo.spec.js'),
+        devServerEvents,
+      })
+
+      await initialCompile
+
+      return { devServerEvents, port: port as number, close, getCompileCount: () => compileCount }
+    }
+
+    const changeSpecs = (devServerEvents: EventEmitter, name: string) => {
+      devServerEvents.emit('dev-server:specs:changed', {
+        specs: createSpecs(name),
+        options: { neededForJustInTimeCompile: true },
+      })
+    }
+
+    it('recompiles in memory and serves the new spec without touching the component index', { timeout: 10000 }, async () => {
+      const { devServerEvents, port, close, getCompileCount } = await startJitServer()
+      const oldmtime = fs.statSync(indexHtmlFilePath).mtimeMs
+
+      const recompiled = once(devServerEvents, 'dev-server:compile:success')
+
+      changeSpecs(devServerEvents, 'bar.spec.js')
+      await recompiled
+
+      const response = await requestSpecFile('/__cypress/src/spec-0.js', port)
+
+      expect(response).toContain('const bar = () => {}')
+      expect(getCompileCount()).toEqual(2)
+      expect(fs.statSync(indexHtmlFilePath).mtimeMs).toEqual(oldmtime)
+
+      await closeServer(close)
+    })
+
+    it('does not cause another dev server on the same project to recompile', { timeout: 10000 }, async () => {
+      const serverA = await startJitServer()
+      const serverB = await startJitServer()
+      const serverBCompileCount = serverB.getCompileCount()
+
+      const recompiled = once(serverA.devServerEvents, 'dev-server:compile:success')
+
+      changeSpecs(serverA.devServerEvents, 'bar.spec.js')
+      await recompiled
+
+      // Give server B's watcher time to react to any file change server A caused
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      expect(serverB.getCompileCount()).toEqual(serverBCompileCount)
+
+      await closeServer(serverA.close)
+      await closeServer(serverB.close)
+    })
+  })
+
   ;[{
     title: 'does not watch/recompile files in `run` mode',
     isRunMode: true,
