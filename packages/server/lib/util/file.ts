@@ -16,6 +16,8 @@ const debugVerbose = debugModule('cypress-verbose:server:util:file')
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
 const LOCK_RETRY_INTERVAL = 100
+// matches proper-lockfile's default `stale`, so both lock formats age out alike
+const LEGACY_LOCK_STALE = 10000
 
 function getUid () {
   try {
@@ -31,6 +33,7 @@ function getUid () {
 export class File {
   _lockFileDir!: string
   _lockFilePath!: string
+  _legacyLockFilePath!: string
   _queue!: pQueue
   _cache!: Record<string, any>
   _lastRead!: number
@@ -74,7 +77,9 @@ export class File {
     this._lockFileDir = path.join(os.tmpdir(), `cypress-${getUid()}`)
     // Not `.lock`: older Cypress versions left plain files under that name, and
     // proper-lockfile can't clear a stale one because it expects a directory.
+    // Those versions may still be running, so `_lock` waits out a fresh `.lock` too.
     this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.plock`)
+    this._legacyLockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
 
     this._queue = new pQueue({ concurrency: 1 })
 
@@ -280,6 +285,9 @@ export class File {
     return fs
     .ensureDirAsync(this._lockFileDir)
     .then(() => {
+      return this._waitForLegacyLock(Date.now() + LOCK_TIMEOUT)
+    })
+    .then(() => {
       return lockFile.lock(this.path, {
         ...this._lockOptions(),
         // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
@@ -303,6 +311,26 @@ export class File {
     })
     .finally(() => {
       return debugVerbose('getting lock succeeded or failed for %s', this.path)
+    })
+  }
+
+  // Best effort: an older version could still take its lock between this check
+  // and ours, but it narrows cross-version races to that instant.
+  _waitForLegacyLock (deadline: number): Promise<void> {
+    return fs.statAsync(this._legacyLockFilePath)
+    .catch(() => null)
+    .then((stat) => {
+      if (!stat || (Date.now() - stat.mtime.getTime()) > LEGACY_LOCK_STALE) {
+        return
+      }
+
+      if (Date.now() >= deadline) {
+        throw Object.assign(new Error(`Lock file is already being held by an older Cypress version: ${this._legacyLockFilePath}`), { code: 'ELOCKED' })
+      }
+
+      return Promise.delay(LOCK_RETRY_INTERVAL).then(() => {
+        return this._waitForLegacyLock(deadline)
+      })
     })
   }
 

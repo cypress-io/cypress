@@ -195,7 +195,7 @@ describe('lib/util/file', () => {
     })
 
     it('ignores a stale plain-file lock left by older Cypress versions', function () {
-      const legacyLockPath = this.fileUtil._lockFilePath.replace(/\.plock$/, '.lock')
+      const legacyLockPath = this.fileUtil._legacyLockFilePath
       const longAgo = new Date(Date.now() - 60000)
 
       return fs.ensureDirAsync(this.fileUtil._lockFileDir)
@@ -211,6 +211,49 @@ describe('lib/util/file', () => {
         return this.fileUtil.get('foo')
       }).then((value) => {
         expect(value).to.equal('bar')
+      }).finally(() => {
+        return fs.removeAsync(legacyLockPath)
+      })
+    })
+
+    it('waits for a fresh lock held by an older Cypress version to be released', function () {
+      const legacyLockPath = this.fileUtil._legacyLockFilePath
+      let released = false
+
+      return fs.ensureDirAsync(this.fileUtil._lockFileDir)
+      .then(() => {
+        return fs.writeFileAsync(legacyLockPath, '')
+      }).then(() => {
+        Promise.delay(300).then(() => {
+          released = true
+
+          return fs.removeAsync(legacyLockPath)
+        })
+
+        return this.fileUtil.set('foo', 'bar')
+      }).then(() => {
+        expect(released).to.be.true
+
+        return fs.readJsonAsync(this.path)
+      }).then((contents) => {
+        expect(contents).to.eql({ foo: 'bar' })
+      }).finally(() => {
+        return fs.removeAsync(legacyLockPath)
+      })
+    })
+
+    it('resolves empty object when an older Cypress version holds the lock throughout', function () {
+      const legacyLockPath = this.fileUtil._legacyLockFilePath
+
+      return fs.ensureDirAsync(this.dir)
+      .then(() => {
+        return fs.writeJsonAsync(this.path, { foo: 'bar' })
+      }).then(() => {
+        return fs.writeFileAsync(legacyLockPath, '')
+      }).then(() => {
+        return this.fileUtil.get()
+      }).then((contents) => {
+        expect(contents).to.eql({})
       }).finally(() => {
         return fs.removeAsync(legacyLockPath)
       })
