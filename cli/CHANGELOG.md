@@ -4,7 +4,6 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
-- The error shown when a command runs after your application navigates to a different origin outside of [`cy.origin()`](https://on.cypress.io/origin) now explains that, while [`injectDocumentDomain`](https://on.cypress.io/inject-document-domain-configuration) is disabled (the default), `cy.origin()` is required for every change of origin, including a move to a subdomain of the same domain. This explanation was intended to appear but never did.
 
 **Misc:**
 
@@ -12,6 +11,7 @@
 - TypeScript now accepts every function [`cy.clock()`](https://on.cypress.io/clock) can override in the browser, such as `requestAnimationFrame`, `requestIdleCallback`, `performance`, `Intl`, and `queueMicrotask`, and accepts `null` as the first argument, as in `cy.clock(null, ['setTimeout', 'clearTimeout'])`. These calls previously reported a type error. The `tick()` method on the yielded clock is now typed as returning the clock's new time in milliseconds instead of `void`. Addressed in [#34912](https://github.com/cypress-io/cypress/pull/34912).
 - TypeScript now types the `docsUrl` property on the error passed to an [`uncaught:exception`](https://on.cypress.io/catalog-of-events) handler as `string | string[]`. An uncaught exception carries the docs url for your application's error alongside the Cypress one, so `docsUrl` can hold more than one url at a time. Addressed in [#34879](https://github.com/cypress-io/cypress/pull/34879).
 - The error shown when [`.clear()`](https://on.cypress.io/clear) is called on an element it can't clear now lists the elements `.clear()` accepts: a `<textarea>`, a text-like `<input>` such as `text`, `email`, or `number`, or an element made editable by `contenteditable` or `designMode`. Addressed in [#34914](https://github.com/cypress-io/cypress/pull/34914).
+- The error shown when a command runs after your application navigates to a different origin outside of [`cy.origin()`](https://on.cypress.io/origin) now explains that, while [`injectDocumentDomain`](https://on.cypress.io/inject-document-domain-configuration) is disabled (the default), `cy.origin()` is required for every change of origin, including a move to a subdomain of the same domain. This explanation was intended to appear but never did.
 
 **Dependency Updates:**
 
