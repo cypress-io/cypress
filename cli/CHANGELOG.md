@@ -3,7 +3,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where `cypress run` changed the browser that `cypress open` selects by default for a project to whichever browser the run used, such as the one passed with `--browser`. `cypress open` now selects the browser you last chose in `cypress open`. `cypress run` also no longer saves anything to Cypress's user data on startup, which could log you out of `cypress open` when several `cypress run` processes started at the same time on one machine, as with parallel runs on a CI machine. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- Fixed an issue where `cypress run` changed the browser that `cypress open` selects by default for a project to whichever browser the run used, such as the one passed with `--browser`. `cypress run` also no longer saves anything to Cypress's user data on startup, which could log you out of `cypress open` when several `cypress run` processes started at the same time on one machine, as with parallel runs on a CI machine. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Misc:**
 
