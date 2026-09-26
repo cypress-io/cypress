@@ -56,7 +56,7 @@ describe('ensure', () => {
 
       expect(err.message).toContain(`but the application is at origin \`http://www.foobar.com:3500\`.`)
       expect(err.message).toContain(hint)
-      expect(err.message).toContain('Using `cy.origin()` to wrap the commands run on `http://www.foobar.com:3500` will likely fix this issue.')
+      expect(err.message).toContain('Use `cy.origin()` to wrap the commands run on `http://www.foobar.com:3500`.')
     })
 
     it('omits the injectDocumentDomain explanation when injectDocumentDomain is enabled', () => {
@@ -66,7 +66,7 @@ describe('ensure', () => {
 
       expect(err.message).toContain(`but the application is at origin \`http://www.foobar.com:3500\`.`)
       expect(err.message).not.toContain('injectDocumentDomain')
-      expect(err.message).toContain('Using `cy.origin()` to wrap the commands run on `http://www.foobar.com:3500` will likely fix this issue.')
+      expect(err.message).toContain('Use `cy.origin()` to wrap the commands run on `http://www.foobar.com:3500`.')
     })
   })
 })

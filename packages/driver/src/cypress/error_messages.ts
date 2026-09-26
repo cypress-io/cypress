@@ -956,7 +956,7 @@ export default {
         ${isInjectDocumentDomainEnabled ? '' : `
         Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
         `}
-        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+        Use ${cmd('origin')} to wrap the commands run on \`${autOrigin}\`.
 
         \`cy.origin('${autOrigin}', () => {\`
         \`  <commands targeting ${autOrigin} go here>\`
