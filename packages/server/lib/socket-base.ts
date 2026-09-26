@@ -665,7 +665,9 @@ export class SocketBase implements SocketBroadcaster {
           const opts = state.__options
           const stateWithoutOptions = _.omit(state, '__options')
 
-          options.onSavedStateChanged(stateWithoutOptions, opts)
+          Promise.resolve(options.onSavedStateChanged(stateWithoutOptions, opts)).catch((err) => {
+            debug('failed to save app state: %o', err)
+          })
 
           // we only use the 'ack' here in tests
           if (cb) {

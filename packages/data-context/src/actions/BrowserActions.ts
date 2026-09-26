@@ -1,5 +1,8 @@
 import type { FoundBrowser } from '@packages/types'
 import type { DataContext } from '..'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:data-context:actions:BrowserActions')
 
 export class BrowserActions {
   constructor (private ctx: DataContext) {}
@@ -37,6 +40,8 @@ export class BrowserActions {
         name: browser.name,
         channel: browser.channel,
       },
+    }).catch((err) => {
+      debug('failed to save the last browser to the user cache: %o', err)
     })
   }
 

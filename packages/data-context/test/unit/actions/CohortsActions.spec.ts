@@ -50,5 +50,19 @@ describe('CohortsActions', () => {
       expect(ctx.config.cohortsApi.insertCohort).toHaveBeenNthCalledWith(1, { name: cohortConfig.name, cohort: expect.any(String) })
       expect(cohortConfig.cohorts.includes(pickedCohort.cohort)).toBe(true)
     })
+
+    it('should still return the picked cohort when saving it fails', async () => {
+      const cohortConfig = {
+        name: 'loginBanner',
+        cohorts: ['A', 'B'],
+      }
+
+      jest.spyOn(ctx._apis.cohortsApi, 'insertCohort').mockRejectedValue(new Error('another Cypress process appears to hold its lock'))
+
+      const pickedCohort = await actions.determineCohort(cohortConfig.name, cohortConfig.cohorts)
+
+      expect(pickedCohort.name).toEqual(cohortConfig.name)
+      expect(cohortConfig.cohorts.includes(pickedCohort.cohort)).toBe(true)
+    })
   })
 })

@@ -41,7 +41,10 @@ export class CohortsActions {
       }
 
       debug('Inserting cohort for %o', pickedCohort)
-      await this.ctx._apis.cohortsApi.insertCohort(pickedCohort)
+      await this.ctx._apis.cohortsApi.insertCohort(pickedCohort).catch((err) => {
+        debug('Failed to save cohort %o: %o', pickedCohort, err)
+      })
+
       cohortSelected = pickedCohort
     } else {
       cohortSelected = cohortFromCache

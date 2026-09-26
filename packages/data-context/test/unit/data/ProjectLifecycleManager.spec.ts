@@ -19,7 +19,7 @@ function createDataContext (modeOptions?: Parameters<typeof createTestDataContex
   const context = createTestDataContext('open', modeOptions)
 
   jest.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
-  context._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
+  context._apis.projectApi.insertProjectPreferencesToCache = jest.fn(() => Promise.resolve())
   jest.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
   jest.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
 

@@ -395,12 +395,18 @@ export class DataContext {
       this.logTraceError(e)
     })
 
+    // Local settings and recent projects are only displayed, so a failure to
+    // read them must not stop open mode from starting
     const toAwait: Promise<any>[] = [
-      this.actions.localSettings.refreshLocalSettings(),
+      this.actions.localSettings.refreshLocalSettings().catch((e) => {
+        this.logTraceError(e)
+      }),
     ]
 
     // load projects from cache on start
-    toAwait.push(this.actions.project.loadProjects())
+    toAwait.push(this.actions.project.loadProjects().catch((e) => {
+      this.logTraceError(e)
+    }))
 
     await Promise.all(toAwait)
   }

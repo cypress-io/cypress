@@ -11,6 +11,8 @@ import { File as FileUtil } from '../../../lib/util/file'
 
 const lockFile = Promise.promisifyAll(lockFileModule)
 
+const lockError = () => ({ name: '', message: '', code: 'EEXIST' })
+
 /** Introspect GracefulExit for regressions on File teardown registration (not public API). */
 function countUnlockLockfileSteps (): number {
   const singleton = (GracefulExit as unknown as { singleton: { steps: Map<string, { name: string }> } }).singleton
@@ -33,23 +35,62 @@ describe('lib/util/file', () => {
     }).to.throw('Must specify path to file when creating new FileUtil()')
   })
 
-  it('unlocks file on exit', function () {
-    const unlockSpy = sinon.spy(lockFile, 'unlockSync')
+  it('unlocks a held lock on exit', function () {
+    const fileUtil = new FileUtil({ path: this.path })
     let teardownStep: () => Promise<void>
-    const addStepStub = sinon.stub(GracefulExit, 'addStep').callsFake((fn: () => Promise<void> | void) => {
+
+    sinon.spy(lockFile, 'unlockSync')
+    sinon.stub(GracefulExit, 'removeStep')
+    sinon.stub(GracefulExit, 'addStep').callsFake((fn: () => Promise<void> | void) => {
       teardownStep = fn as () => Promise<void>
 
       return 'test-step'
     })
 
+    return fileUtil._lock()
+    .then(() => {
+      return teardownStep!()
+    })
+    .then(() => {
+      expect(lockFile.unlockSync).to.be.calledWith(fileUtil._lockFilePath)
+
+      return fs.pathExistsAsync(fileUtil._lockFilePath)
+    })
+    .then((exists) => {
+      expect(exists).to.be.false
+    })
+  })
+
+  it('does not unlock on exit once the lock was released', function () {
+    const fileUtil = new FileUtil({ path: this.path })
+    let teardownStep: () => Promise<void>
+
+    sinon.spy(lockFile, 'unlockSync')
+    sinon.stub(GracefulExit, 'removeStep')
+    sinon.stub(GracefulExit, 'addStep').callsFake((fn: () => Promise<void> | void) => {
+      teardownStep = fn as () => Promise<void>
+
+      return 'test-step'
+    })
+
+    return fileUtil._lock()
+    .then((unlock) => {
+      return unlock()
+    })
+    .then(() => {
+      return teardownStep!()
+    })
+    .then(() => {
+      expect(lockFile.unlockSync).not.to.be.called
+    })
+  })
+
+  it('does not register a GracefulExit step until a lock is acquired', function () {
+    sinon.spy(GracefulExit, 'addStep')
+
     new FileUtil({ path: this.path })
 
-    return teardownStep!().then(() => {
-      expect(lockFile.unlockSync).to.be.called
-    }).finally(() => {
-      addStepStub.restore()
-      unlockSpy.restore()
-    })
+    expect(GracefulExit.addStep).not.to.be.called
   })
 
   it('does not leave orphaned GracefulExit unlock steps when ephemeral File instances are discarded', function () {
@@ -172,16 +213,52 @@ describe('lib/util/file', () => {
       })
     })
 
-    it('resolves empty object when it can\'t get lock on file on initial read', function () {
+    it('rejects with a lock error when it can\'t get lock on file on initial read', function () {
+      const original = lockError()
+
       return fs.ensureDirAsync(this.dir)
       .then(() => {
         return fs.writeJsonAsync(this.path, { foo: 'bar' })
       }).then(() => {
-        sinon.stub(lockFile, 'lockAsync').rejects({ name: '', message: '', code: 'EEXIST' })
+        sinon.stub(lockFile, 'lockAsync').rejects(original)
 
         return this.fileUtil.get()
+      }).then(() => {
+        throw new Error('should have rejected')
+      }, (err) => {
+        expect(err.message).to.include(this.path)
+        expect(err.message).to.include('another Cypress process appears to hold its lock')
+        expect(err.cause).to.equal(original)
+      })
+    })
+
+    it('reads from disk again after a lock failure instead of resolving the empty cache', function () {
+      return fs.ensureDirAsync(this.dir)
+      .then(() => {
+        return fs.writeJsonAsync(this.path, { foo: 'bar' })
+      }).then(() => {
+        const lockStub = sinon.stub(lockFile, 'lockAsync').rejects(lockError())
+
+        return this.fileUtil.get()
+        .catch(() => {
+          lockStub.restore()
+
+          return this.fileUtil.get()
+        })
       }).then((contents) => {
-        expect(contents).to.eql({})
+        expect(contents).to.eql({ foo: 'bar' })
+      })
+    })
+
+    it('does not unlock when it can\'t get lock on file', function () {
+      sinon.stub(lockFile, 'lockAsync').rejects(lockError())
+      sinon.spy(lockFile, 'unlockAsync')
+
+      return this.fileUtil.get()
+      .then(() => {
+        throw new Error('should have rejected')
+      }, () => {
+        expect(lockFile.unlockAsync).not.to.be.called
       })
     })
 
@@ -236,12 +313,18 @@ describe('lib/util/file', () => {
       })
     })
 
-    it('unlocks file even if reading fails', function () {
+    it('unlocks file if the lock was acquired and reading then fails', function () {
+      sinon.spy(lockFile, 'lockAsync')
       sinon.spy(lockFile, 'unlockAsync')
       sinon.stub(fs, 'readJsonAsync').rejects(new Error('fail!'))
 
-      return this.fileUtil.get().catch(() => {
-        expect(lockFile.unlockAsync).to.be.called
+      return this.fileUtil.get()
+      .then(() => {
+        throw new Error('should have rejected')
+      }, (err) => {
+        expect(err.message).to.eq('fail!')
+        expect(lockFile.lockAsync).to.be.calledOnce
+        expect(lockFile.unlockAsync).to.be.calledOnce
       })
     })
 
@@ -353,12 +436,146 @@ describe('lib/util/file', () => {
       })
     })
 
-    it('unlocks file even if writing fails', function () {
+    it('unlocks file if the lock was acquired and writing then fails', function () {
+      sinon.spy(lockFile, 'lockAsync')
       sinon.spy(lockFile, 'unlockAsync')
       sinon.stub(fs, 'outputJsonAsync').rejects(new Error('fail!'))
 
-      return this.fileUtil.set('foo', 'bar').catch(() => {
-        expect(lockFile.unlockAsync).to.be.called
+      return this.fileUtil.set('foo', 'bar')
+      .then(() => {
+        throw new Error('should have rejected')
+      }, (err) => {
+        expect(err.message).to.eq('fail!')
+        // one lock for the read, one for the write
+        expect(lockFile.lockAsync).to.be.calledTwice
+        expect(lockFile.unlockAsync).to.be.calledTwice
+      })
+    })
+
+    context('when the lock can\'t be acquired', () => {
+      beforeEach(function () {
+        return fs.ensureDirAsync(this.dir)
+        .then(() => {
+          return fs.writeJsonAsync(this.path, { foo: 'bar', baz: 'qux' })
+        }).then(() => {
+          sinon.stub(lockFile, 'lockAsync').rejects(lockError())
+          sinon.spy(lockFile, 'unlockAsync')
+          sinon.spy(fs, 'outputJsonAsync')
+        })
+      })
+
+      it('rejects without writing from set()', function () {
+        return this.fileUtil.set('foo', 'changed')
+        .then(() => {
+          throw new Error('should have rejected')
+        }, (err) => {
+          expect(err.message).to.include('another Cypress process appears to hold its lock')
+          expect(fs.outputJsonAsync).not.to.be.called
+          expect(lockFile.unlockAsync).not.to.be.called
+
+          return fs.readJsonAsync(this.path)
+        }).then((contents) => {
+          expect(contents).to.eql({ foo: 'bar', baz: 'qux' })
+        })
+      })
+
+      it('rejects without writing from transaction()', function () {
+        return this.fileUtil.transaction((tx) => {
+          return tx.set('foo', 'changed')
+        })
+        .then(() => {
+          throw new Error('should have rejected')
+        }, (err) => {
+          expect(err.message).to.include('another Cypress process appears to hold its lock')
+          expect(fs.outputJsonAsync).not.to.be.called
+          expect(lockFile.unlockAsync).not.to.be.called
+
+          return fs.readJsonAsync(this.path)
+        }).then((contents) => {
+          expect(contents).to.eql({ foo: 'bar', baz: 'qux' })
+        })
+      })
+
+      it('does not write an empty object from set() after a failed get()', function () {
+        return this.fileUtil.get()
+        .catch(() => {
+          return this.fileUtil.set('foo', 'changed')
+        })
+        .then(() => {
+          throw new Error('should have rejected')
+        }, () => {
+          expect(fs.outputJsonAsync).not.to.be.called
+
+          return fs.readJsonAsync(this.path)
+        }).then((contents) => {
+          expect(contents).to.eql({ foo: 'bar', baz: 'qux' })
+        })
+      })
+    })
+  })
+
+  context('across instances sharing a lock file', () => {
+    it('does not remove the lock held by another instance when it times out', function () {
+      const holder = new FileUtil({ path: this.path })
+      const waiter = new FileUtil({ path: this.path })
+      const lockAsync = lockFile.lockAsync
+
+      // shorten the wait so the waiter times out quickly
+      sinon.stub(lockFile, 'lockAsync').callsFake((lockPath, opts) => {
+        return lockAsync.call(lockFile, lockPath, { ...opts, wait: 200 })
+      })
+
+      return holder._lock()
+      .then((unlock) => {
+        return waiter.get()
+        .then(() => {
+          throw new Error('should have rejected')
+        }, (err) => {
+          expect(err.message).to.include('another Cypress process appears to hold its lock')
+
+          return fs.pathExistsAsync(holder._lockFilePath)
+        })
+        .then((exists) => {
+          expect(exists, 'holder\'s lock file').to.be.true
+
+          return unlock()
+        })
+      })
+      .then(() => {
+        return fs.pathExistsAsync(holder._lockFilePath)
+      })
+      .then((exists) => {
+        expect(exists).to.be.false
+      })
+    })
+
+    it('takes over a stale lock left by a process that died', function () {
+      const fileUtil = new FileUtil({ path: this.path })
+
+      return fs.ensureDirAsync(this.dir)
+      .then(() => {
+        return fs.writeJsonAsync(this.path, { foo: 'bar' })
+      })
+      .then(() => {
+        return fs.ensureDirAsync(fileUtil._lockFileDir)
+      })
+      .then(() => {
+        return fs.writeFileAsync(fileUtil._lockFilePath, '')
+      })
+      .then(() => {
+        // lockfile ages locks by ctime on POSIX, which can't be backdated,
+        // so move the clock forward instead
+        sinon.useFakeTimers({ now: Date.now() + 60 * 1000, toFake: ['Date'] })
+
+        return fileUtil.get()
+      })
+      .then((contents) => {
+        expect(contents).to.eql({ foo: 'bar' })
+
+        return fs.pathExistsAsync(fileUtil._lockFilePath)
+      })
+      .then((exists) => {
+        expect(exists).to.be.false
       })
     })
   })
@@ -392,7 +609,8 @@ describe('lib/util/file', () => {
       })
     })
 
-    it('unlocks file even if removing fails', function () {
+    it('unlocks file if the lock was acquired and removing then fails', function () {
+      sinon.spy(lockFile, 'lockAsync')
       sinon.spy(lockFile, 'unlockAsync')
       sinon.stub(fs, 'removeAsync').rejects(new Error('fail!'))
 
@@ -402,7 +620,23 @@ describe('lib/util/file', () => {
       }).catch((err) => {
         expect(err.message).to.eq('fail!')
 
-        expect(lockFile.unlockAsync).to.be.called
+        expect(lockFile.lockAsync).to.be.calledOnce
+        expect(lockFile.unlockAsync).to.be.calledOnce
+      })
+    })
+
+    it('does not unlock or remove when it can\'t get lock on file', function () {
+      sinon.stub(lockFile, 'lockAsync').rejects(lockError())
+      sinon.spy(lockFile, 'unlockAsync')
+      sinon.spy(fs, 'removeAsync')
+
+      return this.fileUtil.remove()
+      .then(() => {
+        throw new Error('should have rejected')
+      }, (err) => {
+        expect(err.message).to.include('another Cypress process appears to hold its lock')
+        expect(fs.removeAsync).not.to.be.called
+        expect(lockFile.unlockAsync).not.to.be.called
       })
     })
   })

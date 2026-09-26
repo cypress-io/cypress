@@ -9,7 +9,6 @@ import { fs } from './fs'
 import * as env from './env'
 import pQueue from 'p-queue'
 import { GracefulExit } from './graceful-exit'
-import type { ExitStepKey } from './graceful-exit'
 
 const lockFile = Promise.promisifyAll(lockFileModule)
 
@@ -17,6 +16,18 @@ const debugVerbose = debugModule('cypress-verbose:server:util:file')
 
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
+// A lock is held only for one small JSON read, write or remove, which takes
+// milliseconds. A lock file this old was left by a process that died while
+// holding it, so it is safe to take over. The margin is generous because taking
+// over a live holder's lock is the corruption the lock exists to prevent, while
+// waiting slightly longer on a dead one only fails reads for a few more seconds.
+const LOCK_STALE = 10000
+
+type Unlock = () => Promise<void>
+
+function lockTimeoutError (filePath: string, lockFilePath: string, cause: Error) {
+  return new Error(`Could not access ${filePath} because another Cypress process appears to hold its lock (${lockFilePath}). The file was left unchanged.`, { cause })
+}
 
 function getUid () {
   try {
@@ -35,8 +46,6 @@ export class File {
   _queue!: pQueue
   _cache!: Record<string, any>
   _lastRead!: number
-  /** Set while a lock may be held; removed in `_unlock` so GracefulExit steps do not accumulate per unused File. */
-  _gracefulExitStepKey: ExitStepKey | null = null
   path: string
 
   static noopFile = {
@@ -59,14 +68,6 @@ export class File {
 
     this.path = options.path
     this.initialize()
-
-    // Preserve prior behavior of invoking GracefulExit.addStep from the constructor (see file_spec),
-    // but do not leave a registered step until we actually take a lock — avoids orphaned teardown steps.
-    const ctorExitKey = GracefulExit.addStep(async () => {
-      return lockFile.unlockSync(this._lockFilePath)
-    }, 'unlock lockfile')
-
-    GracefulExit.removeStep(ctorExitKey)
   }
 
   initialize () {
@@ -82,11 +83,6 @@ export class File {
   }
 
   __resetForTest () {
-    if (this._gracefulExitStepKey) {
-      GracefulExit.removeStep(this._gracefulExitStepKey)
-      this._gracefulExitStepKey = null
-    }
-
     this._queue.clear()
     lockFile.unlockSync(this._lockFilePath)
     this.initialize()
@@ -119,14 +115,11 @@ export class File {
     debugVerbose('remove %s', this.path)
     this._cache = {}
 
-    return this._lock()
-    .then(() => {
+    return this._withLock(() => {
       return fs.removeAsync(this.path)
     })
     .finally(() => {
       debugVerbose('remove succeeded or failed for %s', this.path)
-
-      return this._unlock()
     })
   }
 
@@ -162,34 +155,34 @@ export class File {
       .tap((contents) => {
         this._cache = contents
       })
+      .tapCatch(() => {
+        // the cache no longer reflects the file, so the next call must read it again
+        this._lastRead = 0
+      })
     }
 
     return Promise.resolve(this._cache)
   }
 
   _read () {
-    return this._lock()
-    .then(() => {
+    return this._withLock(() => {
       debugVerbose('read %s', this.path)
 
       return fs.readJsonAsync(this.path, 'utf8')
-    })
-    .catch((err) => {
-      // default to {} in certain cases, otherwise bubble up error
-      if (
-        (err.code === 'ENOENT') || // file doesn't exist
-        (err.code === 'EEXIST') || // file contains invalid JSON
-        (err.name === 'SyntaxError') // can't get lock on file
-      ) {
-        return {}
-      }
+      .catch((err) => {
+        // default to {} in certain cases, otherwise bubble up error
+        if (
+          (err.code === 'ENOENT') || // file doesn't exist
+          (err.name === 'SyntaxError') // file contains invalid JSON
+        ) {
+          return {}
+        }
 
-      throw err
+        throw err
+      })
     })
     .finally(() => {
       debugVerbose('read succeeded or failed for %s', this.path)
-
-      return this._unlock()
     })
   }
 
@@ -230,6 +223,9 @@ export class File {
 
       return this._write()
     })
+    .tapCatch(() => {
+      this._lastRead = 0
+    })
   }
 
   _addToQueue (operation) {
@@ -240,8 +236,7 @@ export class File {
   }
 
   _write () {
-    return this._lock()
-    .then(() => {
+    return this._withLock(() => {
       debugVerbose('write %s', this.path)
 
       // @ts-expect-error
@@ -249,25 +244,54 @@ export class File {
     })
     .finally(() => {
       debugVerbose('write succeeded or failed for %s', this.path)
-
-      return this._unlock()
     })
   }
 
-  _lock () {
+  // releases the lock only if this call acquired it, so a call that timed out
+  // waiting can never delete a lock another process holds
+  _withLock<T> (fn: () => T | PromiseLike<T>): Promise<T> {
+    return this._lock().then((unlock) => {
+      return Promise.try(fn).finally(unlock)
+    })
+  }
+
+  _lock (): Promise<Unlock> {
     debugVerbose('attempt to get lock on %s', this.path)
 
     return fs
     .ensureDirAsync(this._lockFileDir)
     .then(() => {
-      // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
-      return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
+      // polls every 100ms up to LOCK_TIMEOUT to obtain the lock, taking over a
+      // lock file older than LOCK_STALE, otherwise rejects with EEXIST
+      return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT, stale: LOCK_STALE })
+    })
+    .catch((err) => {
+      if (err.code === 'EEXIST') {
+        throw lockTimeoutError(this.path, this._lockFilePath, err)
+      }
+
+      throw err
     })
     .then(() => {
-      if (!this._gracefulExitStepKey) {
-        this._gracefulExitStepKey = GracefulExit.addStep(async () => {
-          return lockFile.unlockSync(this._lockFilePath)
-        }, 'unlock lockfile')
+      let held = true
+
+      const exitStepKey = GracefulExit.addStep(async () => {
+        if (held) {
+          held = false
+          lockFile.unlockSync(this._lockFilePath)
+        }
+      }, 'unlock lockfile')
+
+      return () => {
+        GracefulExit.removeStep(exitStepKey)
+
+        if (!held) {
+          return Promise.resolve()
+        }
+
+        held = false
+
+        return this._unlock()
       }
     })
     .finally(() => {
@@ -285,11 +309,6 @@ export class File {
       debugVerbose(`unlock timeout error for %s`, this._lockFilePath)
     })
     .finally(() => {
-      if (this._gracefulExitStepKey) {
-        GracefulExit.removeStep(this._gracefulExitStepKey)
-        this._gracefulExitStepKey = null
-      }
-
       return debugVerbose('unlock succeeded or failed for %s', this.path)
     })
   }

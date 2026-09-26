@@ -90,7 +90,7 @@ export class VersionsDataSource {
       this._currentTestingType = this.ctx.coreData.currentTestingType
       this.ctx.update((d) => {
         if (d.versionData) {
-          d.versionData.latestVersion = this.#getLatestVersion()
+          d.versionData.latestVersion = this.#getLatestVersion().catch((e) => pkg.version)
         }
       })
     }

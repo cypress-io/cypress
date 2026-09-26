@@ -261,6 +261,16 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
     return win.isDestroyed()
   }
 
+  const saveWindowState = (newState) => {
+    return savedState.create(projectRoot, isTextTerminal)
+    .then((state) => {
+      return state.set(newState)
+    })
+    .catch((err) => {
+      debug('failed to save window state: %o', err)
+    })
+  }
+
   win.on('resize', _.debounce(() => {
     if (isDestroyed()) {
       return
@@ -275,10 +285,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
     newState[keys.x] = x
     newState[keys.y] = y
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
-      return state.set(newState)
-    })
+    return saveWindowState(newState)
   },
    500))
 
@@ -293,10 +300,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
     newState[keys.x] = x
     newState[keys.y] = y
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
-      return state.set(newState)
-    })
+    return saveWindowState(newState)
   },
    500))
 
@@ -305,10 +309,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
 
     newState[keys.devTools] = true
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
-      return state.set(newState)
-    })
+    return saveWindowState(newState)
   })
 
   win.webContents.on('devtools-closed', () => {
@@ -316,9 +317,6 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
 
     newState[keys.devTools] = false
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
-      return state.set(newState)
-    })
+    return saveWindowState(newState)
   })
 }

@@ -34,7 +34,7 @@ export interface ProjectApiShape {
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<ProjectShape[]>
-  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
+  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): Promise<void>
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
@@ -44,7 +44,7 @@ export interface ProjectApiShape {
   getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): AllowedState | undefined
-  setPromptShown(slug: string): void
+  setPromptShown(slug: string): Promise<unknown> | undefined
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
@@ -350,8 +350,8 @@ export class ProjectActions {
     await this.api.clearAllProjectPreferences()
   }
 
-  setPromptShown (slug: string) {
-    this.api.setPromptShown(slug)
+  async setPromptShown (slug: string) {
+    await this.api.setPromptShown(slug)
   }
 
   setSpecs (specs: SpecWithRelativeRoot[]) {
@@ -383,7 +383,7 @@ export class ProjectActions {
       throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
+    return this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
   async setSpecsFoundBySpecPattern ({ projectRoot, testingType, specPattern, configSpecPattern, excludeSpecPattern, additionalIgnorePattern }: FindSpecs<string | string[] | undefined>) {

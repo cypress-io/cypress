@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where running several Cypress processes on the same machine at once, such as parallel `cypress run` commands, could erase the data Cypress saves between sessions. You could then find yourself logged out of Cypress Cloud, with your recent projects and project preferences gone, the next time you ran `cypress open`. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
 
 **Misc:**

@@ -189,8 +189,8 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Save the prompt-shown state for this project',
       args: { slug: nonNull('String') },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.setPromptShown(args.slug)
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.setPromptShown(args.slug)
 
         return true
       },

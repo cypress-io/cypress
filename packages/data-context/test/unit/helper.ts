@@ -84,7 +84,7 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     cohortsApi: {
       getCohorts: jest.fn().mockResolvedValue(undefined),
       getCohort: jest.fn().mockResolvedValue(undefined),
-      insertCohort: jest.fn(),
+      insertCohort: jest.fn().mockResolvedValue(undefined),
       determineCohort: jest.fn().mockResolvedValue(undefined),
     } as unknown as CohortsApiShape,
   })
