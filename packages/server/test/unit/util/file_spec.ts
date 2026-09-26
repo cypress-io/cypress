@@ -3,13 +3,11 @@ import '../../spec_helper'
 import os from 'os'
 import path from 'path'
 import Promise from 'bluebird'
-import lockFileModule from 'lockfile'
+import lockFile from 'proper-lockfile'
 import { fs } from '../../../lib/util/fs'
 import * as env from '../../../lib/util/env'
 import { GracefulExit } from '../../../lib/util/graceful-exit'
 import { File as FileUtil } from '../../../lib/util/file'
-
-const lockFile = Promise.promisifyAll(lockFileModule)
 
 /** Introspect GracefulExit for regressions on File teardown registration (not public API). */
 function countUnlockLockfileSteps (): number {
@@ -177,7 +175,7 @@ describe('lib/util/file', () => {
       .then(() => {
         return fs.writeJsonAsync(this.path, { foo: 'bar' })
       }).then(() => {
-        sinon.stub(lockFile, 'lockAsync').rejects({ name: '', message: '', code: 'EEXIST' })
+        sinon.stub(lockFile, 'lock').rejects({ name: '', message: '', code: 'ELOCKED' })
 
         return this.fileUtil.get()
       }).then((contents) => {
@@ -188,7 +186,7 @@ describe('lib/util/file', () => {
     it('resolves cached contents when it can\'t get lock on file after an initial read', function () {
       return this.fileUtil.set('foo', 'bar')
       .then(() => {
-        sinon.stub(lockFile, 'lockAsync').rejects({ name: '', message: '', code: 'EEXIST' })
+        sinon.stub(lockFile, 'lock').rejects({ name: '', message: '', code: 'ELOCKED' })
 
         return this.fileUtil.get()
       }).then((contents) => {
@@ -221,33 +219,33 @@ describe('lib/util/file', () => {
     })
 
     it('locks file while reading', function () {
-      sinon.spy(lockFile, 'lockAsync')
+      sinon.spy(lockFile, 'lock')
 
       return this.fileUtil.get().then(() => {
-        expect(lockFile.lockAsync).to.be.called
+        expect(lockFile.lock).to.be.called
       })
     })
 
     it('unlocks file when finished reading', function () {
-      sinon.spy(lockFile, 'unlockAsync')
+      sinon.spy(lockFile, 'unlock')
 
       return this.fileUtil.get().then(() => {
-        expect(lockFile.unlockAsync).to.be.called
+        expect(lockFile.unlock).to.be.called
       })
     })
 
     it('unlocks file even if reading fails', function () {
-      sinon.spy(lockFile, 'unlockAsync')
+      sinon.spy(lockFile, 'unlock')
       sinon.stub(fs, 'readJsonAsync').rejects(new Error('fail!'))
 
       return this.fileUtil.get().catch(() => {
-        expect(lockFile.unlockAsync).to.be.called
+        expect(lockFile.unlock).to.be.called
       })
     })
 
     it('times out and carries on if unlocking times out', function () {
-      sinon.stub(lockFile, 'lockAsync').resolves()
-      sinon.stub(lockFile, 'unlockAsync').callsFake(() => {
+      sinon.stub(lockFile, 'lock').resolves()
+      sinon.stub(lockFile, 'unlock').callsFake(() => {
         return Promise.delay(1e9)
       })
 
@@ -338,27 +336,27 @@ describe('lib/util/file', () => {
     })
 
     it('locks file while writing', function () {
-      sinon.spy(lockFile, 'lockAsync')
+      sinon.spy(lockFile, 'lock')
 
       return this.fileUtil.set('foo', 'bar').then(() => {
-        expect(lockFile.lockAsync).to.be.called
+        expect(lockFile.lock).to.be.called
       })
     })
 
     it('unlocks file when finished writing', function () {
-      sinon.spy(lockFile, 'unlockAsync')
+      sinon.spy(lockFile, 'unlock')
 
       return this.fileUtil.set('foo', 'bar').then(() => {
-        expect(lockFile.unlockAsync).to.be.called
+        expect(lockFile.unlock).to.be.called
       })
     })
 
     it('unlocks file even if writing fails', function () {
-      sinon.spy(lockFile, 'unlockAsync')
+      sinon.spy(lockFile, 'unlock')
       sinon.stub(fs, 'outputJsonAsync').rejects(new Error('fail!'))
 
       return this.fileUtil.set('foo', 'bar').catch(() => {
-        expect(lockFile.unlockAsync).to.be.called
+        expect(lockFile.unlock).to.be.called
       })
     })
   })
@@ -376,24 +374,24 @@ describe('lib/util/file', () => {
     })
 
     it('locks file while removing', function () {
-      sinon.spy(lockFile, 'lockAsync')
+      sinon.spy(lockFile, 'lock')
 
       return this.fileUtil.remove().then(() => {
-        expect(lockFile.lockAsync).to.be.called
+        expect(lockFile.lock).to.be.called
       })
     })
 
     it('unlocks file when finished removing', function () {
-      sinon.spy(lockFile, 'unlockAsync')
+      sinon.spy(lockFile, 'unlock')
 
       return this.fileUtil.remove()
       .then(() => {
-        expect(lockFile.unlockAsync).to.be.called
+        expect(lockFile.unlock).to.be.called
       })
     })
 
     it('unlocks file even if removing fails', function () {
-      sinon.spy(lockFile, 'unlockAsync')
+      sinon.spy(lockFile, 'unlock')
       sinon.stub(fs, 'removeAsync').rejects(new Error('fail!'))
 
       return this.fileUtil.remove()
@@ -402,7 +400,7 @@ describe('lib/util/file', () => {
       }).catch((err) => {
         expect(err.message).to.eq('fail!')
 
-        expect(lockFile.unlockAsync).to.be.called
+        expect(lockFile.unlock).to.be.called
       })
     })
   })

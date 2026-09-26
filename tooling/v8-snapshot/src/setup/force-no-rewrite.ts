@@ -12,8 +12,6 @@
 export default [
   // recursion due to process.emit overwrites which is incorrectly rewritten
   '*/node_modules/signal-exit/index.js',
-  // wx is rewritten to __get_wx__ but not available for Node.js > 0.6
-  '*/node_modules/lockfile/lockfile.js',
   // rewrites dns.lookup which conflicts with our rewrite
   '*/node_modules/evil-dns/evil-dns.js',
   // `address instanceof (__get_URL2__())` -- right hand side not an object

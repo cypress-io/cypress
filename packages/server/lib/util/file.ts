@@ -4,19 +4,18 @@ import md5 from 'md5'
 import path from 'path'
 import debugModule from 'debug'
 import Promise from 'bluebird'
-import lockFileModule from 'lockfile'
+import lockFile from 'proper-lockfile'
 import { fs } from './fs'
 import * as env from './env'
 import pQueue from 'p-queue'
 import { GracefulExit } from './graceful-exit'
 import type { ExitStepKey } from './graceful-exit'
 
-const lockFile = Promise.promisifyAll(lockFileModule)
-
 const debugVerbose = debugModule('cypress-verbose:server:util:file')
 
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
+const LOCK_RETRY_INTERVAL = 100
 
 function getUid () {
   try {
@@ -63,7 +62,7 @@ export class File {
     // Preserve prior behavior of invoking GracefulExit.addStep from the constructor (see file_spec),
     // but do not leave a registered step until we actually take a lock — avoids orphaned teardown steps.
     const ctorExitKey = GracefulExit.addStep(async () => {
-      return lockFile.unlockSync(this._lockFilePath)
+      return this._unlockSync()
     }, 'unlock lockfile')
 
     GracefulExit.removeStep(ctorExitKey)
@@ -88,8 +87,27 @@ export class File {
     }
 
     this._queue.clear()
-    lockFile.unlockSync(this._lockFilePath)
+    this._unlockSync()
     this.initialize()
+  }
+
+  _lockOptions () {
+    return {
+      lockfilePath: this._lockFilePath,
+      // the file being guarded may not exist yet, so don't resolve its realpath
+      realpath: false,
+    }
+  }
+
+  _unlockSync () {
+    try {
+      lockFile.unlockSync(this.path, this._lockOptions())
+    } catch (err) {
+      // ENOTACQUIRED means this process doesn't hold the lock, so there is nothing to release
+      if (err.code !== 'ENOTACQUIRED') {
+        throw err
+      }
+    }
   }
 
   transaction (fn) {
@@ -178,8 +196,8 @@ export class File {
       // default to {} in certain cases, otherwise bubble up error
       if (
         (err.code === 'ENOENT') || // file doesn't exist
-        (err.code === 'EEXIST') || // file contains invalid JSON
-        (err.name === 'SyntaxError') // can't get lock on file
+        (err.code === 'ELOCKED') || // can't get lock on file
+        (err.name === 'SyntaxError') // file contains invalid JSON
       ) {
         return {}
       }
@@ -260,13 +278,24 @@ export class File {
     return fs
     .ensureDirAsync(this._lockFileDir)
     .then(() => {
-      // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
-      return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
+      return lockFile.lock(this.path, {
+        ...this._lockOptions(),
+        // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
+        retries: {
+          retries: LOCK_TIMEOUT / LOCK_RETRY_INTERVAL,
+          minTimeout: LOCK_RETRY_INTERVAL,
+          maxTimeout: LOCK_RETRY_INTERVAL,
+        },
+        // the default handler throws, which would crash the process over a lock we can live without
+        onCompromised: (err) => {
+          debugVerbose('lock compromised for %s: %o', this.path, err)
+        },
+      })
     })
     .then(() => {
       if (!this._gracefulExitStepKey) {
         this._gracefulExitStepKey = GracefulExit.addStep(async () => {
-          return lockFile.unlockSync(this._lockFilePath)
+          return this._unlockSync()
         }, 'unlock lockfile')
       }
     })
@@ -278,11 +307,13 @@ export class File {
   _unlock () {
     debugVerbose('attempt to unlock %s', this.path)
 
-    return lockFile
-    .unlockAsync(this._lockFilePath)
-    .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
+    return Promise.resolve(lockFile.unlock(this.path, this._lockOptions()))
+    .timeout(Number(env.get('FILE_UNLOCK_TIMEOUT')) || LOCK_TIMEOUT)
     .catch(Promise.TimeoutError, () => { // ignore timeouts
       debugVerbose(`unlock timeout error for %s`, this._lockFilePath)
+    })
+    .catch((err) => err.code === 'ENOTACQUIRED', () => { // the lock was never obtained
+      debugVerbose(`unlock skipped, lock not held for %s`, this._lockFilePath)
     })
     .finally(() => {
       if (this._gracefulExitStepKey) {
