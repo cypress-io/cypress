@@ -947,15 +947,15 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
+    cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled }) {
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-        ${isSkipDomainInjectionEnabled ? `
-        Unless \`injectDocumentDomain\` is disabled, a ${cmd('origin')} command is required.
-        ` : ''}
+        ${isInjectDocumentDomainEnabled ? '' : `
+        Because \`injectDocumentDomain\` is disabled (the default), commands that run after the application navigates to a different origin must be wrapped in ${cmd('origin')}, even when the new origin is a subdomain of the same domain.
+        `}
         Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
 
         \`cy.origin('${autOrigin}', () => {\`
