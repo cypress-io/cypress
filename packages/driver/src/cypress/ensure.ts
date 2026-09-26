@@ -250,13 +250,6 @@ const isScrollable = ($el, name, onFail?): true | void => {
   })
 }
 
-/**
-  * commandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
-  * If we can not communicate, throw an error.
-  * Intended to use within retry loops.
-  * err: optional error to pass end to be appended to if the assertion happened while the aut was cross origin.
-  * @returns true or throws an error
-  */
 const isSameSuperDomainOrigin = (origin: string, otherOrigin: string): boolean => {
   try {
     return getSuperDomainOrigin(origin) === getSuperDomainOrigin(otherOrigin)
@@ -266,6 +259,13 @@ const isSameSuperDomainOrigin = (origin: string, otherOrigin: string): boolean =
   }
 }
 
+/**
+  * commandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
+  * If we can not communicate, throw an error.
+  * Intended to use within retry loops.
+  * err: optional error to pass end to be appended to if the assertion happened while the aut was cross origin.
+  * @returns true or throws an error
+  */
 const commandCanCommunicateWithAUT = (cy: $Cy, err?): boolean => {
   if (!isRunnerAbleToCommunicateWithAut()) {
     const commandOrigin = window.location.origin
