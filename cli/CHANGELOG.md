@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Performance:**
+
+- Component tests that use webpack no longer cause extra rebuilds in other Cypress processes testing the same project on the same machine, such as several `cypress run --record --parallel` processes sharing one CI machine. Previously, each spec that one process started made every other process rebuild its bundle too, which used extra CPU and could delay a spec while it waited for a rebuild it didn't need. During `cypress run` with [`justInTimeCompile`](https://on.cypress.io/configuration) enabled (the default), changes to files in your project also no longer trigger a rebuild. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
