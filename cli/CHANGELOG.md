@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
+- Fixed an issue where several `cypress run` processes sharing a machine and project, such as multiple [`--parallel`](https://on.cypress.io/parallelization) runs on one CI machine, could save a screenshot under the same file name, so one silently overwrote the other and both runs reported the same file. Each screenshot now gets its own file, numbered ` (1)`, ` (2)`, and so on, as it already did within a single run. The same applies to videos when [`trashAssetsBeforeRuns`](https://on.cypress.io/configuration#Folders--Files) is `false`. Screenshots taken with the [`overwrite`](https://on.cypress.io/screenshot) option, and videos when `trashAssetsBeforeRuns` is `true`, still replace the existing file. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Misc:**
 
