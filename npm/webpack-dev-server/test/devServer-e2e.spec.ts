@@ -261,6 +261,29 @@ describe('#devServer', { timeout: 5000 }, () => {
       await closeServer(close)
     })
 
+    it('does not recompile when a spec dependency changes', { timeout: 10000 }, async () => {
+      const dependencyPath = path.join(root, 'test/fixtures/dependency.js')
+      const originalContent = await fs.readFile(dependencyPath)
+      const { devServerEvents, close, getCompileCount } = await startJitServer()
+
+      try {
+        const recompiled = once(devServerEvents, 'dev-server:compile:success')
+
+        changeSpecs(devServerEvents, 'bar.spec.js')
+        await recompiled
+
+        const compileCount = getCompileCount()
+
+        await fs.writeFile(dependencyPath, `window.TEST = true;${originalContent}`)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        expect(getCompileCount()).toEqual(compileCount)
+      } finally {
+        await fs.writeFile(dependencyPath, originalContent)
+        await closeServer(close)
+      }
+    })
+
     it('does not cause another dev server on the same project to recompile', { timeout: 10000 }, async () => {
       const serverA = await startJitServer()
       const serverB = await startJitServer()

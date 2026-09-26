@@ -317,7 +317,7 @@ describe('makeWebpackConfig', () => {
             devServerConfig.cypressConfig.isTextTerminal = true
           })
 
-          it('enables watching', async () => {
+          it('disables watching', async () => {
             const actual = await makeWebpackConfig({
               devServerConfig,
               sourceWebpackModulesResult: createModuleMatrixResult({
@@ -326,7 +326,7 @@ describe('makeWebpackConfig', () => {
               }),
             })
 
-            expect(actual.watchOptions?.ignored).toEqual(/node_modules/)
+            expect(actual.watchOptions?.ignored).toEqual('**/*')
           })
         })
       })

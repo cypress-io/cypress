@@ -105,10 +105,8 @@ export class CypressCTWebpackPlugin {
 
     this.files = specs
 
-    const watching = this.compiler?.watching
-
-    if (this.isRunMode && watching) {
-      watching.invalidate()
+    if (this.isRunMode) {
+      this.compiler?.watching.invalidate()
 
       return
     }

@@ -19,7 +19,6 @@ export function makeCypressWebpackConfig (
   const {
     devServerConfig: {
       cypressConfig: {
-        justInTimeCompile,
         port,
         projectRoot,
         devServerPublicPathRoute,
@@ -108,12 +107,9 @@ export function makeCypressWebpackConfig (
   }
 
   if (isRunMode) {
-    // if justInTimeCompile is configured, we need to watch for file changes as the spec entries are going to be updated per test
-    const ignored = justInTimeCompile ? /node_modules/ : '**/*'
-
-    // Disable file watching when executing tests in `run` mode
+    // Files don't change during a run, and justInTimeCompile spec changes recompile in memory without the watcher
     finalConfig.watchOptions = {
-      ignored,
+      ignored: '**/*',
     }
   }
 
