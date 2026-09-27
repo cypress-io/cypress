@@ -1,4 +1,4 @@
-import { expect, it, describe, beforeEach, afterAll } from 'vitest'
+import { expect, it, describe, beforeEach, afterAll, vi } from 'vitest'
 import path from 'path'
 import { once, EventEmitter } from 'events'
 import http from 'http'
@@ -273,5 +273,146 @@ describe('#devServer', { timeout: 5000 }, () => {
     expect(response).toEqual('const foo = () => {}\n')
 
     await closeServer(close)
+  })
+})
+
+describe('#devServer spec list updates during pre-compilation', { timeout: 15000 }, () => {
+  const makeConfig = (overrides: Partial<Cypress.PluginConfigOptions>) => {
+    return {
+      projectRoot: root,
+      supportFile: '',
+      devServerPublicPathRoute: '/__cypress/src',
+      indexHtmlFile: 'test/component-index.html',
+      ...overrides,
+    } as any as Cypress.PluginConfigOptions
+  }
+
+  const waitForCompiles = (devServerEvents: EventEmitter, count: number) => {
+    return new Promise<void>((resolve) => {
+      let seen = 0
+      const onSuccess = () => {
+        if (++seen === count) {
+          devServerEvents.off('dev-server:compile:success', onSuccess)
+          resolve()
+        }
+      }
+
+      devServerEvents.on('dev-server:compile:success', onSuccess)
+    })
+  }
+
+  // Holds the first `fs.pathExists` call open so `beforeCompile` stays suspended
+  // until the test releases it, making the window for a concurrent spec update deterministic.
+  const holdFirstPathExists = () => {
+    const realPathExists = fs.pathExists
+    let release!: () => void
+    let signalEntered!: () => void
+    const released = new Promise<void>((resolve) => release = resolve)
+    const entered = new Promise<void>((resolve) => signalEntered = resolve)
+    let held = false
+
+    const spy = vi.spyOn(fs, 'pathExists').mockImplementation((async (file: string) => {
+      if (!held) {
+        held = true
+        signalEntered()
+        await released
+      }
+
+      return realPathExists(file)
+    }) as any)
+
+    return { entered, release, restore: () => spy.mockRestore() }
+  }
+
+  beforeEach(() => {
+    restoreLoadHook()
+  })
+
+  afterAll(() => {
+    restoreLoadHook()
+  })
+
+  ;[{
+    title: 'open mode',
+    cypressConfig: makeConfig({ isTextTerminal: false }),
+  }, {
+    title: 'run mode with justInTimeCompile',
+    cypressConfig: makeConfig({ isTextTerminal: true, justInTimeCompile: true }),
+  }].forEach(({ title, cypressConfig }) => {
+    it(`serves the newest spec list when specs change while missing files are being filtered in ${title}`, async () => {
+      const devServerEvents = new EventEmitter()
+      const { close, port } = await devServer({
+        webpackConfig: {},
+        cypressConfig,
+        specs: createSpecs('foo.spec.js'),
+        devServerEvents,
+      })
+
+      await once(devServerEvents, 'dev-server:compile:success')
+
+      const pathExists = holdFirstPathExists()
+
+      try {
+        devServerEvents.emit('dev-server:specs:changed', {
+          specs: createSpecs('[...bar].spec.js'),
+          options: { neededForJustInTimeCompile: true },
+        })
+
+        await pathExists.entered
+
+        devServerEvents.emit('dev-server:specs:changed', {
+          specs: createSpecs('foo bar.spec.js'),
+          options: { neededForJustInTimeCompile: true },
+        })
+
+        const compiled = waitForCompiles(devServerEvents, 2)
+
+        pathExists.release()
+        await compiled
+
+        const served = await requestSpecFile('/__cypress/src/spec-0.js', port as number)
+
+        expect(served).toContain('this is a spec with a path containing a space')
+        expect(served).not.toContain(`it('...bar'`)
+      } finally {
+        pathExists.restore()
+        await closeServer(close)
+      }
+    })
+  })
+
+  it('leaves specs deleted from disk out of the bundle', async () => {
+    const deletedSpec = path.join(root, 'test/fixtures/deleted-before-compile.spec.js')
+
+    await fs.writeFile(deletedSpec, `it('deleted before compile', () => {})\n`)
+
+    const devServerEvents = new EventEmitter()
+    const { close, port } = await devServer({
+      webpackConfig: {},
+      cypressConfig: makeConfig({ isTextTerminal: false }),
+      specs: [...createSpecs('foo.spec.js'), ...createSpecs('deleted-before-compile.spec.js')],
+      devServerEvents,
+    })
+
+    try {
+      await once(devServerEvents, 'dev-server:compile:success')
+
+      const initial = await requestSpecFile('/__cypress/src/main.js', port as number)
+
+      expect(initial).toContain('deleted-before-compile.spec.js')
+
+      const recompiled = once(devServerEvents, 'dev-server:compile:success')
+
+      await fs.remove(deletedSpec)
+      await recompiled
+
+      const updated = await requestSpecFile('/__cypress/src/main.js', port as number)
+
+      expect(updated).toContain('foo.spec.js')
+      expect(updated).not.toContain('deleted-before-compile.spec.js')
+    } finally {
+      await fs.remove(deletedSpec)
+      await closeServer(close)
+    }
   })
 })
