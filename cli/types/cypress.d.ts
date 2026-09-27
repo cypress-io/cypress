@@ -1252,7 +1252,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific corner / side.
      *
@@ -1262,7 +1262,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -1276,7 +1276,7 @@ declare namespace Cypress {
     cy.get('button').dblclick(15, 40)
     ```
      */
-    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(x: number, y: number, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
@@ -2972,6 +2972,18 @@ declare namespace Cypress {
      * @default false
      */
     cmdKey: boolean
+  }
+
+  /**
+   * Object to change the default behavior of .dblclick().
+   */
+  interface DblClickOptions extends ClickOptions {
+    /**
+     * Serially double click multiple elements
+     *
+     * @default true
+     */
+    multiple: boolean
   }
 
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
