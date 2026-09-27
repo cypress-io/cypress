@@ -4,7 +4,6 @@ import { DEFAULT_SELECTOR_PRIORITIES } from '../../../src/cypress/element_select
 const { $: $cypress } = Cypress.$Cypress
 const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI & {
   _reset(): void
-  getSelectorPriority(): Cypress.SelectorPriority[]
   _getSelector($el: any): string | null
 }
 

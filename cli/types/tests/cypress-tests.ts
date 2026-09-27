@@ -742,6 +742,19 @@ namespace CypressScreenshotTests {
   })
 }
 
+namespace CypressElementSelectorTests {
+  Cypress.ElementSelector.defaults({
+    selectorPriority: ['data-cy', 'attribute:aria-label', 'id', 'nth-child'],
+  })
+  Cypress.ElementSelector.getSelectorPriority() // $ExpectType SelectorPriority[]
+  Cypress.ElementSelector.defaults({
+    selectorPriority: Cypress.ElementSelector.getSelectorPriority().filter((priority) => priority !== 'class'),
+  })
+  Cypress.ElementSelector.defaults({
+    selectorPriority: ['data-cy', 'invalid'], // $ExpectError
+  })
+}
+
 namespace CypressShadowDomTests {
   cy.get('my-component').shadow()
 }

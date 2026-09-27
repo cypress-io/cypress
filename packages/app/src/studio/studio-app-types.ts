@@ -148,11 +148,6 @@ CyEventEmitter & {
       file: string
     }
   }
-  // External typings do not expose the `getSelectorPriority` function on the ElementSelector object
-  ElementSelector: {
-    defaults(options: Partial<Cypress.ElementSelectorDefaultsOptions>): void
-    getSelectorPriority?: () => Cypress.SelectorPriority[]
-  }
 }
 
 export type LocalRecommendationId = string

@@ -718,6 +718,13 @@ declare namespace Cypress {
      */
     ElementSelector: {
       defaults(options: Partial<ElementSelectorDefaultsOptions>): void
+      /**
+       * Returns the selector priority currently used to generate selectors:
+       * the value last passed to `defaults({ selectorPriority })`, or the
+       * built-in default priority if it has not been set.
+       * @see https://on.cypress.io/element-selector-api
+       */
+      getSelectorPriority(): SelectorPriority[]
     }
 
     /**
