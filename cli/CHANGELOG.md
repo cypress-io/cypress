@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
+- [`cy.get()`](https://on.cypress.io/get) now fails right away when you ask for index `0` of a [`cy.intercept()`](https://on.cypress.io/intercept) alias, such as `cy.get('@getUsers.0')`. Previously, Cypress retried until the command timed out before it showed the error, even though retrying could never succeed. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 
 **Misc:**
 
