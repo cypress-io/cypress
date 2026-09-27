@@ -5,6 +5,9 @@
   "fa": {
     "hello": "سلام دنیا"
   },
+  "it": {
+    "hello": "Ciao mondo!"
+  },  
   "ja": {
     "hello": "こんにちは、世界"
   },
