@@ -445,8 +445,20 @@ cy.get('.someSelector')
   .each(($el, index, list) => {
     $el // $ExpectType JQuery<HTMLElement>
     index // $ExpectType number
-    list // $ExpectType HTMLElement[]
+    list // $ExpectType JQuery<HTMLElement>
+    list.first() // $ExpectType JQuery<HTMLElement>
+    list.index($el) // $ExpectType number
   })
+
+cy.get('.someSelector')
+  .each({ timeout: 4000 }, ($el, index, list) => {
+    list // $ExpectType JQuery<HTMLElement>
+    list.filter(':visible') // $ExpectType JQuery<HTMLElement>
+  })
+
+cy.wrap([1, 2, 3]).each((num: number, index: number, list: number[]) => {
+  list // $ExpectType number[]
+})
 
 cy.wrap(['bar', 'baz'])
   .spread((first, second) => {
