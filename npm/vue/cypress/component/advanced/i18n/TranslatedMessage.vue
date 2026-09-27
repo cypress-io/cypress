@@ -8,6 +8,9 @@
   "fa": {
     "hello": "سلام دنیا"
   },
+  "en": {
+    "hello": "Ciao mondo!"
+  },
   "ja": {
     "hello": "こんにちは、世界"
   },
@@ -26,6 +29,7 @@
     >
       <option>en</option>
       <option>fa</option>
+      <option>it</option>
       <option>ja</option>
       <option>ru</option>
     </select>
