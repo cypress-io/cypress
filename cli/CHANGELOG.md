@@ -12,6 +12,7 @@
 - TypeScript now types the `docsUrl` property on the error passed to an [`uncaught:exception`](https://on.cypress.io/catalog-of-events) handler as `string | string[]`. An uncaught exception carries the docs url for your application's error alongside the Cypress one, so `docsUrl` can hold more than one url at a time. Addressed in [#34879](https://github.com/cypress-io/cypress/pull/34879).
 - The error shown when [`.clear()`](https://on.cypress.io/clear) is called on an element it can't clear now lists the elements `.clear()` accepts: a `<textarea>`, a text-like `<input>` such as `text`, `email`, or `number`, or an element made editable by `contenteditable` or `designMode`. Addressed in [#34914](https://github.com/cypress-io/cypress/pull/34914).
 - When a command runs after your application navigates to another subdomain of the same domain outside of [`cy.origin()`](https://on.cypress.io/origin), the error now explains that, while [`injectDocumentDomain`](https://on.cypress.io/inject-document-domain-configuration) is disabled (the default), a subdomain counts as a different origin, so commands run there also need `cy.origin()`. This explanation was intended to appear but never did.
+- The TypeScript documentation for the `multiple` option of [`.dblclick()`](https://on.cypress.io/dblclick) now shows its default as `true`, matching how `.dblclick()` behaves. Addressed in [#34929](https://github.com/cypress-io/cypress/pull/34929).
 
 **Dependency Updates:**
 
