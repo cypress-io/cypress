@@ -302,6 +302,122 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/32460
+  context('#go page load', () => {
+    it('yields the AUT window after going back', () => {
+      cy.visit('/fixtures/generic.html')
+      cy.visit('/fixtures/jquery.html')
+
+      cy.go('back').then((win) => {
+        expect(win).to.eq(cy.state('window'))
+        expect(win.location.pathname).to.eq('/fixtures/generic.html')
+      })
+    })
+
+    it('yields the AUT window after going forward', () => {
+      cy.visit('/fixtures/generic.html')
+      cy.visit('/fixtures/jquery.html')
+      cy.go('back')
+
+      cy.go('forward').then((win) => {
+        expect(win).to.eq(cy.state('window'))
+        expect(win.location.pathname).to.eq('/fixtures/jquery.html')
+      })
+    })
+
+    it('does not resolve until the page it navigates to has loaded', () => {
+      let loadedAt
+
+      cy.visit('/slow-load?ms=1000')
+      cy.visit('/fixtures/generic.html')
+      cy.then(() => {
+        cy.on('window:load', () => {
+          loadedAt = Date.now()
+        })
+      })
+
+      cy.go('back').then((win) => {
+        expect(loadedAt, 'window:load fired before cy.go() resolved').to.be.a('number')
+        expect(win.location.pathname).to.eq('/slow-load')
+        expect(win.document.readyState).to.eq('complete')
+        expect(win.document.querySelector('img').complete).to.be.true
+      })
+    })
+
+    it('fails when given a timeout shorter than the page load', (done) => {
+      cy.visit('/fixtures/generic.html')
+      cy.visit('/fixtures/jquery.html')
+      .then(() => {
+        let failed = false
+
+        // the page keeps loading after the failure, so wait for it
+        // before finishing to keep it from leaking into the next test
+        cy.on('window:load', () => {
+          done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
+        })
+
+        cy.on('fail', (err) => {
+          failed = true
+
+          expect(err.message).to.include('Your page did not fire its `load` event within `1ms`.')
+        })
+
+        cy.go('back', { timeout: 1 })
+      })
+    })
+
+    it('fails when the page it navigates to does not load within pageLoadTimeout', { pageLoadTimeout: 500 }, (done) => {
+      cy.visit('/slow-load?ms=2000', { timeout: 5000 })
+      cy.visit('/fixtures/generic.html')
+      .then(() => {
+        let failed = false
+
+        cy.on('window:load', () => {
+          done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
+        })
+
+        cy.on('fail', (err) => {
+          failed = true
+
+          expect(err.message).to.include('Your page did not fire its `load` event within `500ms`.')
+        })
+
+        cy.go('back')
+      })
+    })
+
+    const sameDocumentNavigations = {
+      'a hash change': (win) => {
+        win.location.hash = 'foo'
+      },
+      'history.pushState': (win) => {
+        win.history.pushState({}, '', '/fixtures/generic.html?pushed')
+      },
+    }
+
+    _.each(sameDocumentNavigations, (navigate, name) => {
+      it(`resolves without waiting for a page load when going back over ${name}`, () => {
+        const onLoad = cy.stub()
+
+        cy.visit('/fixtures/generic.html')
+        // a navigation started before the `load` event finishes replaces the
+        // current history entry instead of adding one, so let it finish first
+        cy.window().then((win) => new Promise((resolve) => win.setTimeout(resolve)))
+        cy.window().then((originalWin) => {
+          navigate(originalWin)
+          cy.on('window:load', onLoad)
+
+          // a page load never comes, so waiting on one would time out
+          cy.go('back', { timeout: 1000 }).then((win) => {
+            expect(win).to.eq(originalWin)
+            expect(win.location.href).to.eq('http://localhost:3500/fixtures/generic.html')
+            expect(onLoad).not.to.be.called
+          })
+        })
+      })
+    })
+  })
+
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
   context.skip('#go', () => {
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
