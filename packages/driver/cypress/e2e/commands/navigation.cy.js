@@ -344,6 +344,27 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    it('waits for a slow navigation request before checking whether the page unloaded', { browser: '!webkit' }, () => {
+      cy.visit('/fixtures/generic.html')
+      cy.visit('/fixtures/jquery.html')
+      cy.then(() => {
+        const automation = Cypress.automation.bind(Cypress)
+
+        cy.stub(Cypress, 'automation').callsFake((eventName, ...args) => {
+          if (eventName === 'navigate:aut:history') {
+            return Promise.delay(300).then(() => automation(eventName, ...args))
+          }
+
+          return automation(eventName, ...args)
+        })
+      })
+
+      cy.go('back').then((win) => {
+        expect(win.location.pathname).to.eq('/fixtures/generic.html')
+        expect(win.document.readyState).to.eq('complete')
+      })
+    })
+
     it('fails when the page it navigates to does not load within pageLoadTimeout', { pageLoadTimeout: 500 }, (done) => {
       cy.visit('/slow-load?ms=2000', { timeout: 5000 })
       cy.visit('/fixtures/generic.html')
