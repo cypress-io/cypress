@@ -66,6 +66,22 @@ describe('src/cy/commands/connectors', () => {
             return new Promise(() => {})
           })
         })
+
+        it('throws when mixing up async + sync return values', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.spread()` failed because you are mixing up async and sync code.')
+            expect(err.message).to.include('The value you synchronously returned was: `foo`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/spread')
+
+            done()
+          })
+
+          cy.noop([1, 2]).spread(() => {
+            cy.log('hi')
+
+            return 'foo'
+          })
+        })
       })
     })
 
@@ -265,6 +281,7 @@ describe('src/cy/commands/connectors', () => {
             assertLogLength(this.logs, 1)
             expect(lastLog.get('error')).to.eq(err)
             expect(err.message).to.include('`cy.then()` failed because you are mixing up async and sync code.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/then')
 
             done()
           })
@@ -2004,6 +2021,22 @@ describe('src/cy/commands/connectors', () => {
 
           cy.get('ul').each(($ul) => {
             return new Promise((resolve) => {})
+          })
+        })
+
+        it('throws when mixing up async + sync return values', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.each()` failed because you are mixing up async and sync code.')
+            expect(err.message).to.include('The value you synchronously returned was: `sync value`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
+
+            done()
+          })
+
+          cy.wrap([1, 2]).each(() => {
+            cy.log('hi')
+
+            return 'sync value'
           })
         })
 

@@ -34,7 +34,7 @@ exports['e2e web security / when enabled / fails'] = `
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 
-Using \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\` will likely fix this issue.
+Use \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\`.
 
 \`cy.origin('https://www.foo.com:44665', () => {\`
 \`  <commands targeting https://www.foo.com:44665 go here>\`
@@ -49,7 +49,7 @@ https://on.cypress.io/cy-visit-succeeded-but-commands-fail
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 
-Using \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\` will likely fix this issue.
+Use \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\`.
 
 \`cy.origin('https://www.foo.com:44665', () => {\`
 \`  <commands targeting https://www.foo.com:44665 go here>\`
@@ -64,7 +64,7 @@ https://on.cypress.io/cy-visit-succeeded-but-commands-fail
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 
-Using \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\` will likely fix this issue.
+Use \`cy.origin()\` to wrap the commands run on \`https://www.foo.com:44665\`.
 
 \`cy.origin('https://www.foo.com:44665', () => {\`
 \`  <commands targeting https://www.foo.com:44665 go here>\`
