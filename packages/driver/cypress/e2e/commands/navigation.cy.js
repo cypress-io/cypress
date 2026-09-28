@@ -387,7 +387,8 @@ describe('src/cy/commands/navigation', () => {
           navigate(originalWin)
           cy.on('window:load', onLoad)
 
-          // a page load never comes, so waiting on one would time out
+          // no page load comes, so if cy.go() waited for one this would fail
+          // after 1s instead of after pageLoadTimeout
           cy.go('back', { timeout: 1000 }).then((win) => {
             expect(win).to.eq(originalWin)
             expect(win.location.href).to.eq('http://localhost:3500/fixtures/generic.html')
@@ -611,8 +612,6 @@ describe('src/cy/commands/navigation', () => {
         .then(() => {
           let failed = false
 
-          // the page keeps loading after the failure, so wait for it
-          // before finishing to keep it from leaking into the next test
           cy.on('window:load', () => {
             done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
           })

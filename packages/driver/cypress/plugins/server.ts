@@ -73,10 +73,10 @@ const createApp = (port) => {
     })
   })
 
-  // A page whose `load` event is held back by an image that takes `ms` to arrive.
-  // The page is `no-store` so history navigation back to it fetches it again, and
+  // a page whose `load` event is held back by an image that takes `ms` to arrive;
+  // the page is `no-store` so history navigation back to it fetches it again, and
   // each fetch points at a new image url because the browser reuses an image it
-  // already holds for the same url, `no-store` or not.
+  // already holds for the same url, `no-store` or not
   let slowImageId = 0
 
   app.get('/slow-load', (req: QueryRequest, res) => {
