@@ -1,6 +1,8 @@
 import {
   getConsoleProps,
+  getPostMessageLocalStorage,
   navigateAboutBlank,
+  setPostMessageLocalStorage,
 } from '../../../../src/cy/commands/sessions/utils'
 
 describe('src/cy/commands/sessions/utils.ts', () => {
@@ -205,6 +207,56 @@ describe('src/cy/commands/sessions/utils.ts', () => {
         expect(spy).to.have.been.calledTwice
         expect(spy.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
         expect(spy.args[1]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
+      })
+    })
+  })
+
+  describe('warnings for origins that do not respond', () => {
+    const origin = 'http://www.foobar.com:3500'
+
+    // Iframes in a detached document never load, so no origin posts a
+    // message back and the helpers hit their response timeout.
+    const createUnresponsiveSpecWindow = () => {
+      return {
+        document: document.implementation.createHTMLDocument(''),
+        location: { href: 'http://localhost:3500/' },
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }
+    }
+
+    const expectWarning = (spy, message) => {
+      expect(spy).to.have.been.calledWithMatch({ name: 'warning', message })
+    }
+
+    it('names sessionStorage when clearing sessionStorage times out', () => {
+      const spy = cy.spy(Cypress, 'log').log(false)
+
+      cy.then(async () => {
+        await setPostMessageLocalStorage(createUnresponsiveSpecWindow(), [{ origin, sessionStorage: { clear: true } }])
+
+        expectWarning(spy, `Cypress continued without clearing sessionStorage on origin(s) that did not respond within 2 seconds: ${origin}`)
+      })
+    })
+
+    it('names localStorage when setting localStorage times out', () => {
+      const spy = cy.spy(Cypress, 'log').log(false)
+
+      cy.then(async () => {
+        await setPostMessageLocalStorage(createUnresponsiveSpecWindow(), [{ origin, localStorage: { clear: true, value: { foo: 'bar' } } }])
+
+        expectWarning(spy, `Cypress continued without updating localStorage on origin(s) that did not respond within 2 seconds: ${origin}`)
+      })
+    })
+
+    it('names both storage types when reading storage times out', () => {
+      const spy = cy.spy(Cypress, 'log').log(false)
+
+      cy.then(async () => {
+        const results = await getPostMessageLocalStorage(createUnresponsiveSpecWindow(), [origin])
+
+        expect(results).to.deep.eq([])
+        expectWarning(spy, `Cypress continued without reading localStorage and sessionStorage on origin(s) that did not respond within 2 seconds: ${origin}`)
       })
     })
   })

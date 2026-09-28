@@ -10,6 +10,15 @@ const debug = Debug('cypress:driver:sessions')
 // before giving up and continuing with incomplete session data.
 const postMessageStorageTimeoutMs = 2000
 
+const storageTypes = ['localStorage', 'sessionStorage'] as const
+
+const logUnresponsiveOriginsWarning = (action: string, types: readonly string[], origins: string[]) => {
+  Cypress.log({
+    name: 'warning',
+    message: `Cypress continued without ${action} ${types.join(' and ')} on origin(s) that did not respond within ${postMessageStorageTimeoutMs / 1000} seconds: ${origins.join(', ')}`,
+  })
+}
+
 const getSessionDetailsByDomain = (sessState: Cypress.SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
@@ -96,12 +105,15 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
     $iframeContainer.remove()
   })
   .catch((err) => {
-    debug('did not receive set:storage:complete from origin(s) %o within %dms: %o', _.xor(origins, successOrigins), postMessageStorageTimeoutMs, err)
+    const failedOrigins = _.xor(origins, successOrigins)
 
-    Cypress.log({
-      name: 'warning',
-      message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
-    })
+    debug('did not receive set:storage:complete from origin(s) %o within %dms: %o', failedOrigins, postMessageStorageTimeoutMs, err)
+
+    const failedOptions = _.filter(originOptions, (v) => failedOrigins.includes(v.origin))
+    const failedTypes = storageTypes.filter((type) => _.some(failedOptions, type))
+    const isClearOnly = _.every(failedOptions, (v) => _.every(storageTypes, (type) => _.isEmpty(v[type]?.value)))
+
+    logUnresponsiveOriginsWarning(isClearOnly ? 'clearing' : 'updating', failedTypes.length ? failedTypes : storageTypes, failedOrigins)
   })
 }
 
@@ -191,12 +203,11 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
     $iframeContainer.remove()
   })
   .catch((err) => {
-    debug('did not receive localStorage data from origin(s) %o within %dms: %o', _.xor(origins, successOrigins), postMessageStorageTimeoutMs, err)
+    const failedOrigins = _.xor(origins, successOrigins)
 
-    Cypress.log({
-      name: 'warning',
-      message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
-    })
+    debug('did not receive localStorage data from origin(s) %o within %dms: %o', failedOrigins, postMessageStorageTimeoutMs, err)
+
+    logUnresponsiveOriginsWarning('reading', storageTypes, failedOrigins)
 
     return []
   })
