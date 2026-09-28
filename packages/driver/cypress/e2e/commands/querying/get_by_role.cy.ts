@@ -1,0 +1,503 @@
+describe('src/cy/commands/querying/get_by_role', () => {
+  beforeEach(() => {
+    cy.visit('/fixtures/a11y/roles.html')
+  })
+
+  const ids = ($el: JQuery) => $el.toArray().map((el) => el.id)
+
+  context('roles', () => {
+    it('finds elements by the role implied by their tag', () => {
+      cy.get('#implicit').getByRole('button').then(($el) => {
+        expect(ids($el)).to.deep.eq(['implicit-button', 'submit-input'])
+      })
+    })
+
+    it('finds elements whose role depends on their attributes', () => {
+      cy.get('#implicit').within(() => {
+        cy.getByRole('textbox').then(($el) => {
+          expect(ids($el)).to.deep.eq(['text-input', 'untyped-input'])
+        })
+
+        cy.getByRole('searchbox').should('have.id', 'search-input')
+        cy.getByRole('checkbox').should('have.id', 'checkbox-input')
+        cy.getByRole('combobox').should('have.id', 'single-select')
+        cy.getByRole('listbox').should('have.id', 'multi-select')
+        cy.getByRole('img').should('have.id', 'logo')
+        cy.getByRole('presentation').should('have.id', 'decorative')
+      })
+    })
+
+    it('only gives a link role to an anchor with an href', () => {
+      cy.get('nav').getByRole('link').should('have.length', 2)
+    })
+
+    it('finds landmarks', () => {
+      cy.getByRole('banner').should('match', 'header')
+      cy.getByRole('navigation').should('match', 'nav')
+      cy.getByRole('main').should('match', 'main')
+      cy.getByRole('contentinfo').should('match', 'footer')
+      cy.getByRole('region').should('have.length', 6)
+    })
+
+    it('finds elements by an explicit role', () => {
+      cy.get('#explicit').within(() => {
+        cy.getByRole('button').should('have.id', 'div-button')
+        cy.getByRole('tab').should('have.id', 'tab-button')
+        cy.getByRole('heading', { name: 'Div heading' }).should('have.id', 'div-heading')
+      })
+    })
+
+    it('lets an explicit role replace the implicit one', () => {
+      cy.get('#explicit').getByRole('button').should('not.have.id', 'tab-button')
+    })
+
+    it('only uses the first token of a role attribute', () => {
+      cy.getByRole('switch').should('have.id', 'multi-role')
+      cy.get('#explicit').getByRole('checkbox').should('not.exist')
+    })
+
+    it('yields every match, in document order', () => {
+      cy.getByRole('heading').then(($el) => {
+        expect($el.toArray().map((el) => el.textContent)).to.deep.eq([
+          'Account settings',
+          'Implicit roles',
+          'Explicit roles',
+          'Div heading',
+          'Accessible names',
+          'Visibility',
+          'Shadow DOM',
+          'Dynamic content',
+        ])
+      })
+    })
+
+    it('does not match the subject itself', () => {
+      cy.get('#implicit-button').getByRole('button').should('not.exist')
+    })
+  })
+
+  context('names', () => {
+    it('matches a name from the element content, with whitespace collapsed', () => {
+      cy.getByRole('button', { name: 'Save changes' }).should('have.id', 'name-content')
+    })
+
+    it('matches a name from aria-label', () => {
+      cy.getByRole('button', { name: 'Close dialog' }).should('have.id', 'name-aria-label')
+    })
+
+    it('matches a name from aria-labelledby', () => {
+      cy.getByRole('button', { name: 'Delete account' }).should('have.id', 'name-labelledby')
+    })
+
+    it('matches a name from a wrapping label', () => {
+      cy.getByRole('textbox', { name: 'Email' }).should('have.id', 'name-wrapping-label')
+    })
+
+    it('matches a name from a label with a for attribute', () => {
+      cy.getByRole('textbox', { name: 'Username' }).should('have.id', 'name-label-for-textbox')
+    })
+
+    it('matches a name from alt text', () => {
+      cy.getByRole('img', { name: 'Company logo' }).should('have.id', 'logo')
+    })
+
+    it('matches a name from title', () => {
+      cy.getByRole('button', { name: 'Help' }).should('have.id', 'name-title')
+    })
+
+    it('matches a name built from nested content', () => {
+      cy.getByRole('button', { name: 'Download report' }).should('have.id', 'name-nested')
+    })
+
+    it('leaves content hidden from the accessibility tree out of the name', () => {
+      cy.getByRole('button', { name: 'Send' }).should('have.id', 'name-hidden-content')
+    })
+
+    it('requires a string to match the whole name, case-sensitively', () => {
+      cy.getByRole('button', { name: 'Save' }).should('not.exist')
+      cy.getByRole('button', { name: 'save changes' }).should('not.exist')
+    })
+
+    it('matches a name against a regular expression', () => {
+      cy.getByRole('button', { name: /^save/i }).should('have.id', 'name-content')
+      cy.get('#names').getByRole('button', { name: /o/ }).should('have.length', 3)
+    })
+
+    it('matches a name with a function that receives the name and the element', () => {
+      const matcher = cy.stub().callsFake((name: string, element: Element) => name.startsWith('Close') && element.tagName === 'BUTTON')
+
+      cy.getByRole('button', { name: matcher }).should('have.id', 'name-aria-label').then(() => {
+        expect(matcher).to.be.calledWith('Close dialog')
+      })
+    })
+
+    it('matches a number as a string', () => {
+      cy.get('#names').invoke('append', '<button id="numeric">42</button>')
+      cy.getByRole('button', { name: 42 }).should('have.id', 'numeric')
+    })
+  })
+
+  context('hidden elements', () => {
+    it('skips elements hidden from the accessibility tree', () => {
+      cy.get('#visibility').getByRole('button').then(($el) => {
+        expect(ids($el)).to.deep.eq(['visually-hidden-button', 'zero-opacity-button'])
+      })
+    })
+
+    it('includes elements that are only visually hidden, unlike cy.get()', () => {
+      cy.getByRole('button', { name: 'Visually hidden' }).should('have.id', 'visually-hidden-button')
+    })
+
+    it('includes elements hidden from the accessibility tree when hidden is true', () => {
+      cy.get('#visibility').getByRole('button', { hidden: true }).then(($el) => {
+        expect(ids($el)).to.deep.eq([
+          'aria-hidden-button',
+          'aria-hidden-parent-button',
+          'hidden-attr-button',
+          'display-none-button',
+          'visibility-hidden-button',
+          'visually-hidden-button',
+          'zero-opacity-button',
+        ])
+      })
+    })
+
+    it('matches the name of an element inside a hidden container', () => {
+      cy.getByRole('button', { name: 'Inside aria hidden', hidden: true }).should('have.id', 'aria-hidden-parent-button')
+    })
+  })
+
+  context('native elements', () => {
+    it('skips elements that only have the role through a role attribute', () => {
+      cy.get('#explicit').getByRole('button').should('have.id', 'div-button')
+      cy.get('#explicit').getByRole('button', { native: true }).should('not.exist')
+    })
+
+    it('finds elements whose tag gives them the role', () => {
+      cy.get('#implicit').getByRole('button', { native: true }).then(($el) => {
+        expect(ids($el)).to.deep.eq(['implicit-button', 'submit-input'])
+      })
+    })
+
+    it('skips a role attribute that gives an element a role its tag does not', () => {
+      cy.getByRole('heading', { name: 'Div heading' }).should('have.id', 'div-heading')
+      cy.getByRole('heading', { name: 'Div heading', native: true }).should('not.exist')
+    })
+  })
+
+  context('shadow DOM', () => {
+    it('does not search shadow roots by default', () => {
+      cy.getByRole('button', { name: 'Shadow button' }).should('not.exist')
+    })
+
+    it('searches shadow roots, including nested ones, with includeShadowDom', () => {
+      cy.getByRole('button', { name: 'Shadow button', includeShadowDom: true }).should('have.id', 'shadow-button')
+      cy.getByRole('link', { name: 'Nested shadow link', includeShadowDom: true }).should('have.length', 1)
+    })
+
+    it('treats a shadow tree under an aria-hidden host as hidden', () => {
+      cy.getByRole('button', { name: 'Hidden shadow button', includeShadowDom: true }).should('not.exist')
+      cy.getByRole('button', { name: 'Hidden shadow button', includeShadowDom: true, hidden: true }).should('have.length', 1)
+    })
+
+    it('uses the includeShadowDom config option', { includeShadowDom: true }, () => {
+      cy.getByRole('button', { name: 'Shadow button' }).should('have.id', 'shadow-button')
+    })
+
+    it('searches from a shadow root yielded by .shadow()', () => {
+      cy.get('#shadow-host').shadow().getByRole('button').should('have.id', 'shadow-button')
+    })
+  })
+
+  context('scope', () => {
+    it('searches inside .within()', () => {
+      cy.get('#explicit').within(() => {
+        cy.getByRole('heading').then(($el) => {
+          expect($el.toArray().map((el) => el.textContent)).to.deep.eq(['Explicit roles', 'Div heading'])
+        })
+      })
+    })
+
+    it('searches the descendants of every subject element', () => {
+      cy.get('#implicit, #explicit').getByRole('button').should('have.length', 3)
+    })
+
+    it('can be chained off window or document, searching the whole page', () => {
+      cy.document().getByRole('banner').should('have.length', 1)
+      cy.window().getByRole('banner').should('have.length', 1)
+    })
+  })
+
+  context('retries', () => {
+    it('retries until an element appears', () => {
+      cy.getByRole('button', { name: 'Add alert' }).click()
+      cy.getByRole('alert').should('have.text', 'Changes saved')
+    })
+
+    it('retries until an element is removed', () => {
+      cy.getByRole('status').should('exist')
+      cy.getByRole('button', { name: 'Remove status' }).click()
+      cy.getByRole('status').should('not.exist')
+    })
+
+    it('retries until the name changes', () => {
+      cy.get('#implicit-button').then(($button) => {
+        setTimeout(() => {
+          $button.text('Renamed button')
+        }, 200)
+      })
+
+      cy.getByRole('button', { name: 'Renamed button' }).should('have.id', 'implicit-button')
+    })
+
+    // A `status` never takes its name from its content, only from `aria-label`
+    // or `aria-labelledby`.
+    it('does not name a status from its content', () => {
+      cy.getByRole('status', { name: 'Saving' }).should('not.exist')
+      cy.get('#status').invoke('attr', 'aria-label', 'Saving')
+      cy.getByRole('status', { name: 'Saving' }).should('have.id', 'status')
+    })
+
+    it('retries until an element stops being hidden', () => {
+      cy.get('#aria-hidden-button').then(($button) => {
+        setTimeout(() => {
+          $button.removeAttr('aria-hidden')
+        }, 200)
+      })
+
+      cy.getByRole('button', { name: 'Aria hidden' }).should('have.id', 'aria-hidden-button')
+    })
+
+    it('re-queries the page when a later command needs a fresh subject', () => {
+      cy.getByRole('status').as('status')
+      cy.get('#status').invoke('attr', 'role', 'log')
+      cy.get('#dynamic-container').invoke('append', '<div id="new-status" role="status">New</div>')
+      cy.get('@status').should('have.id', 'new-status')
+    })
+  })
+
+  context('logging', () => {
+    beforeEach(function () {
+      this.logs = []
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'getByRole') {
+          this.lastLog = log
+          this.logs.push(log)
+        }
+      })
+    })
+
+    it('logs the role and options', function () {
+      cy.getByRole('button', { name: 'Help' }).then(function ($el) {
+        const { lastLog } = this
+
+        expect(lastLog.get('message')).to.eq('button, {name: Help}')
+        expect(lastLog.get('type')).to.eq('parent')
+        expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+      })
+    })
+
+    it('logs only the role when there are no options', function () {
+      cy.getByRole('banner').then(function () {
+        expect(this.lastLog.get('message')).to.eq('banner')
+      })
+    })
+
+    it('logs as a child command when chained', function () {
+      cy.get('#explicit').getByRole('tab').then(function () {
+        expect(this.lastLog.get('type')).to.eq('child')
+      })
+    })
+
+    it('does not log with log: false', function () {
+      cy.getByRole('banner', { log: false }).then(function () {
+        expect(this.lastLog).to.be.undefined
+      })
+    })
+
+    it('includes the query in the console props', function () {
+      cy.get('#explicit').getByRole('button', { name: 'Div button' }).then(function ($el) {
+        const consoleProps = this.lastLog.invoke('consoleProps')
+
+        expect(consoleProps.name).to.eq('getByRole')
+        expect(consoleProps.props).to.deep.eq({
+          Role: 'button',
+          Options: { name: 'Div button' },
+          'Applied To': cy.$$('#explicit').get(0),
+          Yielded: $el.get(0),
+          Elements: 1,
+        })
+      })
+    })
+  })
+
+  context('errors', {
+    defaultCommandTimeout: 100,
+  }, () => {
+    const expectError = (message: string | RegExp, done: Mocha.Done, check?: (err: Cypress.CypressError) => void) => {
+      cy.on('fail', (err) => {
+        if (typeof message === 'string') {
+          expect(err.message).to.include(message)
+        } else {
+          expect(err.message).to.match(message)
+        }
+
+        check?.(err)
+        done()
+      })
+    }
+
+    it('throws when the role is not a string', (done) => {
+      expectError('`cy.getByRole()` requires a role as its first argument, such as `\'button\'` or `\'heading\'`. You passed: `/button/`', done, (err) => {
+        expect(err.docsUrl).to.eq('https://on.cypress.io/getbyrole')
+      })
+
+      // @ts-expect-error
+      cy.getByRole(/button/)
+    })
+
+    it('throws when the role is empty', (done) => {
+      expectError('`cy.getByRole()` requires a role as its first argument', done)
+
+      cy.getByRole('  ')
+    })
+
+    it('throws when the options are not an object', (done) => {
+      expectError('`cy.getByRole()` only accepts an options object as its second argument. You passed: `Help`', done)
+
+      // @ts-expect-error
+      cy.getByRole('button', 'Help')
+    })
+
+    it('throws on an option it does not accept, listing the ones it does', (done) => {
+      expectError('`cy.getByRole()` does not accept the `description` option. It accepts: `name`, `hidden`, `native`, `timeout`, `log`, `includeShadowDom`.', done)
+
+      // @ts-expect-error
+      cy.getByRole('button', { description: 'x' })
+    })
+
+    it('points to a Cypress alternative for an option it leaves out', (done) => {
+      expectError('`cy.getByRole()` does not accept the `level` option. To narrow the results by `level`, chain `.filter(\'h2, [aria-level=2]\')` instead. It accepts:', done)
+
+      // @ts-expect-error
+      cy.getByRole('heading', { level: 2 })
+    })
+
+    it('throws when name is not a matcher', (done) => {
+      expectError('`cy.getByRole()` only accepts a string, number, regular expression, or function for its `name` option. You passed: `{}`', done)
+
+      // @ts-expect-error
+      cy.getByRole('button', { name: {} })
+    })
+
+    it('throws when hidden is not a boolean', (done) => {
+      expectError('`cy.getByRole()` only accepts a `boolean` for its `hidden` option. You passed: `yes`', done)
+
+      // @ts-expect-error
+      cy.getByRole('button', { hidden: 'yes' })
+    })
+
+    it('throws when timeout is not a number', (done) => {
+      expectError('`cy.getByRole()` only accepts a `number` for its `timeout` option. You passed: `abc`', done)
+
+      // @ts-expect-error
+      cy.getByRole('button', { timeout: 'abc' })
+    })
+
+    it('describes what it looked for and lists the accessible roles when nothing matches', (done) => {
+      expectError('Expected to find an accessible element with the role "button" and name "Missing" within the element: <section#explicit>, but never did.', done, (err) => {
+        expect(err.message).to.include('Here are the accessible roles that were found, with the accessible name of each element:')
+        expect(err.message).to.include('  - button: "Div button"')
+        expect(err.message).to.include('  - tab: "Tab button"')
+        expect(err.message).to.include('  - heading: "Explicit roles", "Div heading"')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/getbyrole')
+      })
+
+      cy.get('#explicit').getByRole('button', { name: 'Missing' })
+    })
+
+    it('shows a regular expression name as written', (done) => {
+      expectError('Expected to find an accessible element with the role "button" and name /missing/i', done)
+
+      cy.getByRole('button', { name: /missing/i })
+    })
+
+    it('leaves out "accessible" when hidden is true', (done) => {
+      expectError('Expected to find an element with the role "slider", but never did.', done, (err) => {
+        expect(err.message).to.include('Here are the roles that were found')
+      })
+
+      cy.getByRole('slider', { hidden: true })
+    })
+
+    it('suggests hidden: true when every element with a role is hidden', (done) => {
+      expectError('No accessible elements with a role were found, but some elements may be hidden from the accessibility tree. To include them, pass `{ hidden: true }`.', done)
+
+      cy.get('#visibility > div[aria-hidden]').getByRole('button')
+    })
+
+    it('throws when native is used with a role that HTML has no element for', (done) => {
+      expectError('`cy.getByRole()` was passed `native: true`, but HTML has no native element with the role `tab`, so only a `role` attribute can give an element that role. Remove `native: true` to find it.', done)
+
+      cy.getByRole('tab', { native: true })
+    })
+
+    it('throws when native is not a boolean', (done) => {
+      expectError('`cy.getByRole()` only accepts a `boolean` for its `native` option. You passed: `yes`', done)
+
+      // @ts-expect-error
+      cy.getByRole('button', { native: 'yes' })
+    })
+
+    it('explains when native is why nothing matched', (done) => {
+      expectError('Expected to find an accessible native element with the role "button" within the element: <section#explicit>, but never did.', done, (err) => {
+        expect(err.message).to.include('Some elements have the role "button" only through a `role` attribute, so `native: true` skipped them. The native elements for this role are: `<input>`, `<button>`.')
+        expect(err.message).to.include('  - button: "Div button"')
+      })
+
+      cy.get('#explicit').getByRole('button', { native: true })
+    })
+
+    it('says so when there are no roles at all', (done) => {
+      expectError('No elements with a role were found.', done)
+
+      cy.get('#names > span').first().getByRole('button', { hidden: true })
+    })
+
+    it('limits how many names it lists for a role', (done) => {
+      expectError(/- button: "Plain button", "Submit input", "Div button", "Save changes", "Close dialog" and \d+ more/, done)
+
+      cy.getByRole('slider')
+    })
+
+    it('does not list the element it was chained off, which it never matches', (done) => {
+      expectError('Expected to find an accessible element with the role "navigation" within the element: <nav>, but never did.', done, (err) => {
+        expect(err.message).to.include('  - link: "Profile", "Billing"')
+        expect(err.message).not.to.include('- navigation:')
+      })
+
+      cy.get('nav').getByRole('navigation')
+    })
+
+    it('describes a shadow root it searched by its host', (done) => {
+      expectError('Expected to find an accessible element with the role "button" and name "Missing" within the shadow root of the element: <div#shadow-host>, but never did.', done, (err) => {
+        expect(err.message).to.include('  - button: "Shadow button"')
+      })
+
+      cy.get('#shadow-host').shadow().getByRole('button', { name: 'Missing' })
+    })
+
+    it('describes an element that was expected not to exist', (done) => {
+      expectError('Expected not to find an accessible element with the role "banner", but continuously found it.', done)
+
+      cy.getByRole('banner').should('not.exist')
+    })
+
+    it('fails when chained off a subject that is not an element', (done) => {
+      expectError('`cy.getByRole()` failed because it requires', done)
+
+      cy.wrap('text').getByRole('button')
+    })
+  })
+})

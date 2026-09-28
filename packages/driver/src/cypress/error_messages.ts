@@ -609,6 +609,30 @@ export default {
     },
   },
 
+  // Shared by every `cy.getBy*()` query. Each query passes its own `cmd` and `docsUrl`.
+  get_by: {
+    docsUrl: '{{docsUrl}}',
+    invalid_matcher: `${cmd('{{cmd}}')} requires its first argument to be a string, number, regular expression, or function. You passed: \`{{matcher}}\``,
+    invalid_options: `${cmd('{{cmd}}')} only accepts an options object as its second argument. You passed: \`{{options}}\``,
+    invalid_option: `${cmd('{{cmd}}')} does not accept the \`{{option}}\` option.{{hint}} It accepts: {{accepted}}.`,
+    invalid_option_boolean: `${cmd('{{cmd}}')} only accepts a \`boolean\` for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_matcher: `${cmd('{{cmd}}')} only accepts a string, number, regular expression, or function for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_timeout: `${cmd('{{cmd}}')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
+    not_found: 'Expected to find {{description}}{{scope}}, but never did.{{hints}}',
+    found: 'Expected not to find {{description}}{{scope}}, but continuously found it.',
+
+    getByRole: {
+      docsUrl: 'https://on.cypress.io/getbyrole',
+      invalid_role: `${cmd('getByRole')} requires a role as its first argument, such as \`'button'\` or \`'heading'\`. You passed: \`{{matcher}}\``,
+      option_hint: ' To narrow the results by `{{option}}`, chain {{alternative}} instead.',
+      roles_hint: 'Here are the {{accessible}}roles that were found, with the accessible name of each element:\n\n{{roles}}',
+      no_roles: 'No elements with a role were found.',
+      no_accessible_roles: 'No accessible elements with a role were found, but some elements may be hidden from the accessibility tree. To include them, pass `{ hidden: true }`.',
+      no_native_element: `${cmd('getByRole')} was passed \`native: true\`, but HTML has no native element with the role \`{{role}}\`, so only a \`role\` attribute can give an element that role. Remove \`native: true\` to find it.`,
+      native_hint: 'Some elements have the role "{{role}}" only through a `role` attribute, so `native: true` skipped them. The native elements for this role are: {{tags}}.',
+    },
+  },
+
   getCookie: {
     invalid_argument: {
       message: `${cmd('getCookie')} must be passed a string argument for name.`,

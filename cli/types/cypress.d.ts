@@ -1482,6 +1482,23 @@ declare namespace Cypress {
     get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>
 
     /**
+     * Get every element with the given ARIA role, optionally narrowed to
+     * those whose accessible name matches `name`. Elements hidden from the
+     * accessibility tree are skipped unless `hidden` is `true`.
+     *
+     * Chained off an element, it searches that element's descendants.
+     *
+     * @see https://on.cypress.io/getbyrole
+     * @example
+     *    // Widgets that HTML has no element for
+     *    cy.getByRole('tab', { name: 'Billing' }).click()
+     *    cy.get('nav').getByRole('menuitem', { name: /delete/i })
+     *    // A native <button>, never a <div role="button">
+     *    cy.getByRole('button', { name: 'Save', native: true })
+     */
+    getByRole<E extends Node = HTMLElement>(role: import('./aria-query').ARIARole | (string & {}), options?: Partial<GetByRoleOptions>): Chainable<JQuery<E>>
+
+    /**
      * Get a browser cookie by its name.
      *
      * @see https://on.cypress.io/getcookie
@@ -2791,6 +2808,33 @@ declare namespace Cypress {
      * @see https://on.cypress.io/configuration#Timeouts
      */
     timeout: number
+  }
+
+  interface GetByRoleOptions extends Loggable, Timeoutable, Shadow {
+    /**
+     * Only match elements whose accessible name matches: the text a screen
+     * reader announces for the element, taken from its label, its content,
+     * `aria-label` or `aria-labelledby`. A string must match the whole name, a
+     * regular expression is tested against it, and a function is called with
+     * the name and the element.
+     */
+    name: string | number | RegExp | ((name: string, element: Element | null) => boolean)
+    /**
+     * Include elements that are hidden from the accessibility tree, such as
+     * those with `aria-hidden="true"`, `display: none` or `visibility: hidden`.
+     *
+     * @default false
+     */
+    hidden: boolean
+    /**
+     * Only match elements whose tag gives them the role, like `<button>`,
+     * skipping elements that only have it through a `role` attribute, like
+     * `<div role="button">`. Throws for roles that HTML has no element for,
+     * such as `tab`, since only a `role` attribute can give an element those.
+     *
+     * @default false
+     */
+    native: boolean
   }
 
   /**

@@ -92,7 +92,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.contains(defaultMessages.runs.connect.buttonUser).click()
 
-      cy.findByRole('dialog', { name: 'Continue in your browser' }).should('be.visible')
+      cy.getByRole('dialog', { name: 'Continue in your browser' }).should('be.visible')
 
       cy.withCtx((ctx, o) => {
         // validate utmSource
@@ -297,13 +297,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.contains('button', 'Connect to Cypress Cloud').click()
 
-      cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').should('be.visible')
+      cy.getByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').should('be.visible')
 
-      cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
-        cy.findByRole('button', { name: 'Connect project' }).click()
+      cy.getByRole('dialog', { name: 'Login successful' }).within(() => {
+        cy.getByRole('button', { name: 'Connect project', native: true }).click()
       })
 
-      cy.findByRole('dialog', { name: 'Create project' }).should('be.visible')
+      cy.getByRole('dialog', { name: 'Create project' }).should('be.visible')
     })
   })
 

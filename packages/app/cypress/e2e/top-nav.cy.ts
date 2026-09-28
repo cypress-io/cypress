@@ -195,7 +195,7 @@ describe('App Top Nav Workflows', () => {
           cy.findByText('Latest').should('be.visible')
         })
 
-        cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' })
+        cy.findByTestId('cypress-update-popover').getByRole('button', { name: 'Update to 10.1.0', native: true })
 
         cy.findByTestId('current-hint').within(() => {
           cy.validateExternalLink({ name: '10.0.0', href: 'https://on.cypress.io/changelog#10-0-0' })
@@ -209,7 +209,7 @@ describe('App Top Nav Workflows', () => {
       })
 
       it('hides dropdown when version in header is clicked', () => {
-        cy.findByTestId('cypress-update-popover').findAllByRole('button').first().as('topNavVersionButton').click()
+        cy.findByTestId('cypress-update-popover').getByRole('button', { native: true }).first().as('topNavVersionButton').click()
 
         cy.get('@topNavVersionButton').should('have.attr', 'aria-expanded', 'true')
 
@@ -221,15 +221,15 @@ describe('App Top Nav Workflows', () => {
       it('shows upgrade modal when update button is pressed', () => {
         cy.findByTestId('top-nav-version-list').contains('v10.0.0 • Upgrade').click()
 
-        cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' }).click()
+        cy.findByTestId('cypress-update-popover').getByRole('button', { name: 'Update to 10.1.0', native: true }).click()
 
-        cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
+        cy.getByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
           cy.contains('You are currently running Version 10.0.0 of Cypress').should('be.visible')
           cy.findByDisplayValue('npm install -D cypress@10.1.0').should('be.visible')
-          cy.findByRole('button', { name: 'Close' }).click()
+          cy.getByRole('button', { name: 'Close', native: true }).click()
         })
 
-        cy.findAllByRole('dialog').should('not.exist')
+        cy.getByRole('dialog').should('not.exist')
       })
     })
 
@@ -271,15 +271,15 @@ describe('App Top Nav Workflows', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
 
-      cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
+      cy.findByTestId('app-header-bar').getByRole('button', { name: 'Docs', native: true }).filter('[aria-expanded="false"]').as('docsButton')
     })
 
     it('shows popover with additional doc links', () => {
       cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
 
-      cy.findByRole('heading', { name: 'Getting started', level: 2 })
-      cy.findByRole('heading', { name: 'References', level: 2 })
-      cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
+      cy.getByRole('heading', { name: 'Getting started', native: true }).filter('h2')
+      cy.getByRole('heading', { name: 'References', native: true }).filter('h2')
+      cy.getByRole('heading', { name: 'Run in CI/CD', native: true }).filter('h2')
 
       const expectedLinks = [
         {
@@ -320,17 +320,17 @@ describe('App Top Nav Workflows', () => {
         o.sinon.stub(ctx.actions.project, 'setPromptShown')
       })
 
-      cy.findByRole('button', { name: 'Set up CI' }).click()
+      cy.getByRole('button', { name: 'Set up CI', native: true }).click()
       cy.findByText('Configure CI').should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).click()
+      cy.getByRole('button', { name: 'Close', native: true }).click()
 
       cy.withCtx((ctx) => {
         expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('ci1')
       })
 
-      cy.findByRole('button', { name: 'Run tests faster' }).click()
+      cy.getByRole('button', { name: 'Run tests faster', native: true }).click()
       cy.findByText('Run tests faster in CI').should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).click()
+      cy.getByRole('button', { name: 'Close', native: true }).click()
 
       cy.withCtx((ctx) => {
         expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('orchestration1')
@@ -348,7 +348,7 @@ describe('App Top Nav Workflows', () => {
         cy.visitApp()
         cy.specsPageIsVisible()
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and logout', expanded: false }).as('profileButton')
+        cy.findByTestId('app-header-bar').getByRole('button', { name: 'Profile and logout', native: true }).filter('[aria-expanded="false"]').as('profileButton')
       })
 
       it('shows user in top nav when logged in', () => {
@@ -374,7 +374,7 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
-        cy.findByRole('button', { name: 'Log out' }).click()
+        cy.getByRole('button', { name: 'Log out', native: true }).click()
 
         cy.findByTestId('app-header-bar').findByText('Log in').should('be.visible')
       })
@@ -405,7 +405,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
-          cy.findByRole('button', { name: 'Log in' })
+          cy.getByRole('button', { name: 'Log in', native: true })
         })
       })
     })
@@ -443,23 +443,23 @@ describe('App Top Nav Workflows', () => {
       function logIn ({ expectedNextStepText, displayName }) {
         cy.findByTestId('app-header-bar').within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
-          cy.findByRole('button', { name: 'Log in' }).click()
+          cy.getByRole('button', { name: 'Log in', native: true }).click()
         })
 
-        cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
-          cy.findByRole('button', { name: /Opening browser|Waiting for browser/ })
+        cy.getByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
+          cy.getByRole('button', { name: /Opening browser|Waiting for browser/, native: true })
           .should('be.visible')
           .and('be.disabled')
         })
 
-        cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
+        cy.getByRole('dialog', { name: 'Login successful' }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
           cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile' })
 
           // The dialog can be closed at this point by either the header close button or the Continue button
           // The Continue button is tested here
-          cy.findByRole('button', { name: 'Close' }).should('be.visible').and('not.be.disabled')
-          cy.findByRole('button', { name: expectedNextStepText }).click()
+          cy.getByRole('button', { name: 'Close', native: true }).should('be.visible').and('not.be.disabled')
+          cy.getByRole('button', { name: expectedNextStepText, native: true }).click()
         })
       }
       context('with no project id', () => {
@@ -490,7 +490,7 @@ describe('App Top Nav Workflows', () => {
             expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
           })
 
-          cy.findByRole('dialog', { name: 'Create project' }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Create project' }).should('be.visible')
         })
       })
 
@@ -555,10 +555,10 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).click()
+            cy.getByRole('button', { name: 'Log in', native: true }).click()
           })
 
-          cy.findByRole('dialog').within(() => {
+          cy.getByRole('dialog').within(() => {
             cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
             cy.contains(loginText.titleBrowserError).should('be.visible')
             cy.contains(loginText.bodyBrowserError).should('be.visible')
@@ -585,10 +585,10 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).click()
+            cy.getByRole('button', { name: 'Log in', native: true }).click()
           })
 
-          cy.findByRole('dialog').within(() => {
+          cy.getByRole('dialog').within(() => {
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
@@ -613,7 +613,7 @@ describe('App Top Nav Workflows', () => {
 
           cy.get('@tryAgain').click()
 
-          cy.findByRole('dialog', { name: loginText.titleInitial }).within(() => {
+          cy.getByRole('dialog', { name: loginText.titleInitial }).within(() => {
             cy.contains(loginText.actionWaiting).should('be.visible')
           })
         })
@@ -633,10 +633,10 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
+            cy.getByRole('button', { name: 'Log in', native: true }).as('loginButton').click()
           })
 
-          cy.findByRole('dialog').within(() => {
+          cy.getByRole('dialog').within(() => {
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
@@ -644,7 +644,7 @@ describe('App Top Nav Workflows', () => {
 
           // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-          cy.findByRole('dialog', { name: loginText.titleFailed }).within(() => {
+          cy.getByRole('dialog', { name: loginText.titleFailed }).within(() => {
             cy.contains('button', loginText.actionTryAgain).should('be.visible')
             cy.contains('button', loginText.actionCancel).click()
           })
@@ -667,7 +667,7 @@ describe('App Top Nav Workflows', () => {
             expect(ctx._apis.authApi.logIn).to.have.been.called
           })
 
-          cy.findByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
+          cy.getByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
         })
 
         it('closing modal correctly clears error state', () => {
@@ -685,10 +685,10 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
+            cy.getByRole('button', { name: 'Log in', native: true }).as('loginButton').click()
           })
 
-          cy.findByRole('dialog').within(() => {
+          cy.getByRole('dialog').within(() => {
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
@@ -713,7 +713,7 @@ describe('App Top Nav Workflows', () => {
             expect(ctx._apis.authApi.logIn).to.have.been.called
           })
 
-          cy.findByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
+          cy.getByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
         })
       })
     })
@@ -812,7 +812,7 @@ describe('App Top Nav Workflows', () => {
         cy.specsPageIsVisible()
 
         cy.findByTestId('enable-notifications-banner').should('be.visible')
-        cy.findByRole('button', { name: 'Dismiss banner' }).click()
+        cy.getByRole('button', { name: 'Dismiss banner', native: true }).click()
         verifyBannerDoesNotExist()
 
         cy.reload()

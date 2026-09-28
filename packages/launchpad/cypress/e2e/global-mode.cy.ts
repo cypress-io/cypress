@@ -45,7 +45,7 @@ describe('Launchpad: Global Mode', () => {
       })
 
       cy.contains('Welcome to Cypress!').should('be.visible')
-      cy.findByRole('link', { name: 'Projects' })
+      cy.getByRole('link', { name: 'Projects' })
       .should('have.attr', 'aria-disabled', 'false')
       .click()
 
@@ -170,7 +170,7 @@ describe('Launchpad: Global Mode', () => {
     it('updates "Projects" link when a project is selected and allows navigating back', () => {
       const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
         // The timeout is increased to account for variability in configuration load times in CI.
-        return cy.findByRole('link', { name, timeout: 10000 }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
+        return cy.getByRole('link', { name, timeout: 10000 }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
       }
 
       const resetSpies = () => {

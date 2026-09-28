@@ -7,8 +7,9 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
   it('Shows create from component card for Vue projects', () => {
     cy.get('@ComponentCard')
     .within(() => {
-      cy.findByRole('button', {
+      cy.getByRole('button', {
         name: 'Create from component',
+        native: true,
       }).should('be.visible')
       .and('not.be.disabled')
     })
@@ -17,10 +18,10 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
   it('Can be closed with the x button', () => {
     cy.get('@ComponentCard').click()
 
-    cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
+    cy.getByRole('button', { name: 'Close', native: true }).as('DialogCloseButton')
 
     cy.get('@DialogCloseButton').click()
-    cy.findByRole('dialog', {
+    cy.getByRole('dialog', {
       name: 'Choose a component',
     }).should('not.exist')
   })
@@ -51,16 +52,16 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
 
     cy.findByText('HelloWorld').should('be.visible').click()
 
-    cy.findByRole('dialog', {
+    cy.getByRole('dialog', {
       name: defaultMessages.createSpec.successPage.header,
     }).as('SuccessDialog').within(() => {
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).should('be.visible')
+      cy.getByRole('button', { name: 'Close', native: true }).should('be.visible')
 
-      cy.findByRole('link', { name: 'Okay, run the spec' })
+      cy.getByRole('link', { name: 'Okay, run the spec', native: true })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`)
 
-      cy.findByRole('button', { name: 'Create another spec' }).click()
+      cy.getByRole('button', { name: 'Create another spec', native: true }).click()
     })
 
     // 'Create from component' card appears again when the user selects "create another spec"
@@ -72,13 +73,13 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
 
     cy.findByText('HelloWorld').should('be.visible').click()
 
-    cy.findByRole('dialog', {
+    cy.getByRole('dialog', {
       name: defaultMessages.createSpec.successPage.header,
     }).as('SuccessDialog').within(() => {
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).should('be.visible')
+      cy.getByRole('button', { name: 'Close', native: true }).should('be.visible')
 
-      cy.findByRole('link', { name: 'Okay, run the spec' })
+      cy.getByRole('link', { name: 'Okay, run the spec', native: true })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
     })
 
@@ -92,8 +93,9 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
   it('Shows create from component card for React projects', () => {
     cy.get('@ComponentCard')
     .within(() => {
-      cy.findByRole('button', {
+      cy.getByRole('button', {
         name: 'Create from component',
+        native: true,
       }).should('be.visible')
       .and('not.be.disabled')
     })
@@ -102,10 +104,10 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
   it('Can be closed with the x button', () => {
     cy.get('@ComponentCard').click()
 
-    cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
+    cy.getByRole('button', { name: 'Close', native: true }).as('DialogCloseButton')
 
     cy.get('@DialogCloseButton').click()
-    cy.findByRole('dialog', {
+    cy.getByRole('dialog', {
       name: 'Choose a component',
     }).should('not.exist')
   })
@@ -160,16 +162,16 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
     // Click on 'app' component
     cy.findByTestId('react-component-row').should('contain', 'App').click()
 
-    cy.findByRole('dialog', {
+    cy.getByRole('dialog', {
       name: defaultMessages.createSpec.successPage.header,
     }).as('SuccessDialog').within(() => {
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).should('be.visible')
+      cy.getByRole('button', { name: 'Close', native: true }).should('be.visible')
 
-      cy.findByRole('link', { name: 'Okay, run the spec' })
+      cy.getByRole('link', { name: 'Okay, run the spec', native: true })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`)
 
-      cy.findByRole('button', { name: 'Create another spec' }).click()
+      cy.getByRole('button', { name: 'Create another spec', native: true }).click()
     })
 
     // 'Create from component' card appears again when the user selects "create another spec"
@@ -185,17 +187,17 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
     // Click on 'app' component
     cy.findByTestId('react-component-row').should('contain', 'App').click()
 
-    cy.findByRole('dialog', {
+    cy.getByRole('dialog', {
       name: defaultMessages.createSpec.successPage.header,
     }).as('SuccessDialog').within(() => {
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).should('be.visible')
+      cy.getByRole('button', { name: 'Close', native: true }).should('be.visible')
 
       // There appears to be a race condition here where sometimes we try to run the spec
       // before the file has been written to. Waiting here for 1 second resolves the issue.
       cy.wait(2000)
 
-      cy.findByRole('link', { name: 'Okay, run the spec' })
+      cy.getByRole('link', { name: 'Okay, run the spec', native: true })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
     })
 

@@ -314,7 +314,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       })
 
       cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
-      cy.findByRole('list').within(() =>
+      cy.getByRole('list', { native: true }).within(() =>
         ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
 
       cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')

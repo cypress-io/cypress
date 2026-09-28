@@ -843,6 +843,35 @@ namespace CypressContainsTests {
   cy.contains('my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
 }
 
+namespace CypressGetByRoleTests {
+  cy.getByRole('button') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.getByRole<HTMLInputElement>('textbox') // $ExpectType Chainable<JQuery<HTMLInputElement>>
+  cy.getByRole('doc-chapter')
+  cy.getByRole('button', { name: 'Submit' })
+  cy.getByRole('button', { name: /submit/i })
+  cy.getByRole('button', { name: 42 })
+  cy.getByRole('button', {
+    name: (name, element) => {
+      name // $ExpectType string
+      element // $ExpectType Element | null
+
+      return name.startsWith('Sub')
+    },
+  })
+  cy.getByRole('button', { hidden: true, log: false, timeout: 100, includeShadowDom: true })
+  cy.getByRole('button', { name: 'Save', native: true })
+  cy.getByRole('button', { native: 'yes' }) // $ExpectError
+  cy.get('form').getByRole('button').click()
+  cy.getByRole() // $ExpectError
+  cy.getByRole(/button/) // $ExpectError
+  cy.getByRole('button', { name: {} }) // $ExpectError
+  cy.getByRole('button', { hidden: 'yes' }) // $ExpectError
+  cy.getByRole('heading', { level: 2 }) // $ExpectError
+
+  const options: Partial<Cypress.GetByRoleOptions> = { name: 'Submit', hidden: true }
+  cy.getByRole('button', options)
+}
+
 // https://github.com/cypress-io/cypress/pull/5574
 namespace CypressLocationTests {
   cy.location('path') // $ExpectError
