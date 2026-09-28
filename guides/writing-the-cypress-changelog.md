@@ -4,22 +4,7 @@ Cypress prefers hand tailored release notes over auto generated release notes, p
 
 ## When to Add an Entry
 
-The changelog should include anything that was merged into the `develop` branch of the Cypress repo that is a user-affecting change. This includes:
-- `breaking` - A breaking change that will require an MVB
-- `dependency` - A change to a dependency that impacts the user
-- `deprecation` - An API deprecation notice for users
-- `feat` - A new feature
-- `fix` - A bug fix or regression fix
-- `misc` - A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
-- `perf` - A code change that improves performance
-
-These prefixes do **not** require an entry:
-- `chore` - Changes to the build process or auxiliary tools and libraries
-- `docs` - Documentation only changes
-- `refactor` - A code change that neither fixes a bug nor adds a feature
-- `revert` - Reverts a previous commit
-- `test` - Adding missing or correcting existing tests
-- `internal` - Work that is real and may well ship publicly later, but is not reachable by users yet — typically behind a feature flag, an internal-only build, or a gated rollout. Its entry is written in the release that actually exposes it, as `feat` or `fix` at that point.
+The changelog should include anything that was merged into the `develop` branch of the Cypress repo that is a user-affecting change. Every prefix that [`CONTRIBUTING.md`](../CONTRIBUTING.md#pull-requests) lists under user-facing impact requires an entry, and the rest do not. `CONTRIBUTING.md` is the source of truth for what each prefix means.
 
 Choosing `fix` asserts the change ships to users, so do not then skip the entry because the impact looks internal. Use `chore` or `refactor` if the change truly has no user-facing effect, or `internal` if it is user-facing but not yet reachable.
 

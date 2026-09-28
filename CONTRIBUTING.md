@@ -587,6 +587,7 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
     - `refactor` - A code change that neither fixes a bug nor adds a feature
     - `revert` - Reverts a previous commit
     - `test` - Adding missing or correcting existing tests
+    - `internal` - Work that is real and may well ship publicly later, but is not reachable by users yet — typically behind a feature flag, an internal-only build, or a gated rollout. Its entry is written in the release that actually exposes it, as `feat` or `fix` at that point.
 - For user-facing changes that will be released with the next Cypress version, be sure to add a changelog entry to the appropriate section in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md). See [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) for more details.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
