@@ -627,6 +627,8 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('only logs once on error', function (done) {
+        cy.timeout(1000)
+
         cy
         .visit('/fixtures/generic.html')
         .visit('/fixtures/jquery.html')
