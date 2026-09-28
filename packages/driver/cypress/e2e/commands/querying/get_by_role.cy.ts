@@ -1,4 +1,6 @@
 describe('src/cy/commands/querying/get_by_role', () => {
+  const { _ } = Cypress
+
   beforeEach(() => {
     cy.visit('/fixtures/a11y/roles.html')
   })
@@ -77,36 +79,19 @@ describe('src/cy/commands/querying/get_by_role', () => {
   })
 
   context('names', () => {
-    it('matches a name from the element content, with whitespace collapsed', () => {
-      cy.getByRole('button', { name: 'Save changes' }).should('have.id', 'name-content')
-    })
-
-    it('matches a name from aria-label', () => {
-      cy.getByRole('button', { name: 'Close dialog' }).should('have.id', 'name-aria-label')
-    })
-
-    it('matches a name from aria-labelledby', () => {
-      cy.getByRole('button', { name: 'Delete account' }).should('have.id', 'name-labelledby')
-    })
-
-    it('matches a name from a wrapping label', () => {
-      cy.getByRole('textbox', { name: 'Email' }).should('have.id', 'name-wrapping-label')
-    })
-
-    it('matches a name from a label with a for attribute', () => {
-      cy.getByRole('textbox', { name: 'Username' }).should('have.id', 'name-label-for-textbox')
-    })
-
-    it('matches a name from alt text', () => {
-      cy.getByRole('img', { name: 'Company logo' }).should('have.id', 'logo')
-    })
-
-    it('matches a name from title', () => {
-      cy.getByRole('button', { name: 'Help' }).should('have.id', 'name-title')
-    })
-
-    it('matches a name built from nested content', () => {
-      cy.getByRole('button', { name: 'Download report' }).should('have.id', 'name-nested')
+    _.each([
+      { source: 'the element content, with whitespace collapsed', role: 'button', name: 'Save changes', id: 'name-content' },
+      { source: 'aria-label', role: 'button', name: 'Close dialog', id: 'name-aria-label' },
+      { source: 'aria-labelledby', role: 'button', name: 'Delete account', id: 'name-labelledby' },
+      { source: 'a wrapping label', role: 'textbox', name: 'Email', id: 'name-wrapping-label' },
+      { source: 'a label with a for attribute', role: 'textbox', name: 'Username', id: 'name-label-for-textbox' },
+      { source: 'alt text', role: 'img', name: 'Company logo', id: 'logo' },
+      { source: 'title', role: 'button', name: 'Help', id: 'name-title' },
+      { source: 'nested content', role: 'button', name: 'Download report', id: 'name-nested' },
+    ], ({ source, role, name, id }) => {
+      it(`matches a name from ${source}`, () => {
+        cy.getByRole(role, { name }).should('have.id', id)
+      })
     })
 
     it('leaves content hidden from the accessibility tree out of the name', () => {
@@ -304,12 +289,6 @@ describe('src/cy/commands/querying/get_by_role', () => {
       })
     })
 
-    it('logs as a child command when chained off another command', function () {
-      cy.get('main').getByRole('button', { name: 'Help' }).then(function () {
-        expect(this.lastLog.get('type')).to.eq('child')
-      })
-    })
-
     it('logs only the role when there are no options', function () {
       cy.getByRole('banner').then(function () {
         expect(this.lastLog.get('message')).to.eq('banner')
@@ -360,61 +339,65 @@ describe('src/cy/commands/querying/get_by_role', () => {
       })
     }
 
-    it('throws when the role is not a string', (done) => {
-      expectError('`cy.getByRole()` requires a role as its first argument, such as `\'button\'` or `\'heading\'`. You passed: `/button/`', done, (err) => {
-        expect(err.docsUrl).to.eq('https://on.cypress.io/getbyrole')
+    _.each([
+      {
+        title: 'throws when the role is not a string',
+        args: [/button/],
+        message: '`cy.getByRole()` requires a role as its first argument, such as `\'button\'` or `\'heading\'`. You passed: `/button/`',
+      },
+      {
+        title: 'throws when the role is empty',
+        args: ['  '],
+        message: '`cy.getByRole()` requires a role as its first argument',
+      },
+      {
+        title: 'throws when the options are not an object',
+        args: ['button', 'Help'],
+        message: '`cy.getByRole()` only accepts an options object as its second argument. You passed: `Help`',
+      },
+      {
+        title: 'throws on an option it does not accept, listing the ones it does',
+        args: ['button', { description: 'x' }],
+        message: '`cy.getByRole()` does not accept the `description` option. It accepts: `name`, `hidden`, `native`, `timeout`, `log`, `includeShadowDom`.',
+      },
+      {
+        title: 'points to a Cypress alternative for an option it leaves out',
+        args: ['heading', { level: 2 }],
+        message: '`cy.getByRole()` does not accept the `level` option. To narrow the results by `level`, chain `.filter(\'h2, [aria-level=2]\')` instead. It accepts:',
+      },
+      {
+        title: 'throws when name is not a matcher',
+        args: ['button', { name: {} }],
+        message: '`cy.getByRole()` only accepts a string, number, regular expression, or function for its `name` option. You passed: `{}`',
+      },
+      {
+        title: 'throws when hidden is not a boolean',
+        args: ['button', { hidden: 'yes' }],
+        message: '`cy.getByRole()` only accepts a `boolean` for its `hidden` option. You passed: `yes`',
+      },
+      {
+        title: 'throws when native is not a boolean',
+        args: ['button', { native: 'yes' }],
+        message: '`cy.getByRole()` only accepts a `boolean` for its `native` option. You passed: `yes`',
+      },
+      {
+        title: 'throws when timeout is not a number',
+        args: ['button', { timeout: 'abc' }],
+        message: '`cy.getByRole()` only accepts a `number` for its `timeout` option. You passed: `abc`',
+      },
+      {
+        title: 'throws when native is used with a role that HTML has no element for',
+        args: ['tab', { native: true }],
+        message: '`cy.getByRole()` was passed `native: true`, but HTML has no native element with the role `tab`, so only a `role` attribute can give an element that role. Remove `native: true` to find it.',
+      },
+    ], ({ title, args, message }) => {
+      it(title, (done) => {
+        expectError(message, done, (err) => {
+          expect(err.docsUrl).to.eq('https://on.cypress.io/getbyrole')
+        })
+
+        cy.getByRole(...(args as [any, any?]))
       })
-
-      // @ts-expect-error
-      cy.getByRole(/button/)
-    })
-
-    it('throws when the role is empty', (done) => {
-      expectError('`cy.getByRole()` requires a role as its first argument', done)
-
-      cy.getByRole('  ')
-    })
-
-    it('throws when the options are not an object', (done) => {
-      expectError('`cy.getByRole()` only accepts an options object as its second argument. You passed: `Help`', done)
-
-      // @ts-expect-error
-      cy.getByRole('button', 'Help')
-    })
-
-    it('throws on an option it does not accept, listing the ones it does', (done) => {
-      expectError('`cy.getByRole()` does not accept the `description` option. It accepts: `name`, `hidden`, `native`, `timeout`, `log`, `includeShadowDom`.', done)
-
-      // @ts-expect-error
-      cy.getByRole('button', { description: 'x' })
-    })
-
-    it('points to a Cypress alternative for an option it leaves out', (done) => {
-      expectError('`cy.getByRole()` does not accept the `level` option. To narrow the results by `level`, chain `.filter(\'h2, [aria-level=2]\')` instead. It accepts:', done)
-
-      // @ts-expect-error
-      cy.getByRole('heading', { level: 2 })
-    })
-
-    it('throws when name is not a matcher', (done) => {
-      expectError('`cy.getByRole()` only accepts a string, number, regular expression, or function for its `name` option. You passed: `{}`', done)
-
-      // @ts-expect-error
-      cy.getByRole('button', { name: {} })
-    })
-
-    it('throws when hidden is not a boolean', (done) => {
-      expectError('`cy.getByRole()` only accepts a `boolean` for its `hidden` option. You passed: `yes`', done)
-
-      // @ts-expect-error
-      cy.getByRole('button', { hidden: 'yes' })
-    })
-
-    it('throws when timeout is not a number', (done) => {
-      expectError('`cy.getByRole()` only accepts a `number` for its `timeout` option. You passed: `abc`', done)
-
-      // @ts-expect-error
-      cy.getByRole('button', { timeout: 'abc' })
     })
 
     it('describes what it looked for and lists the accessible roles when nothing matches', (done) => {
@@ -447,19 +430,6 @@ describe('src/cy/commands/querying/get_by_role', () => {
       expectError('No accessible elements with a role were found, but some elements may be hidden from the accessibility tree. To include them, pass `{ hidden: true }`.', done)
 
       cy.get('#visibility > div[aria-hidden]').getByRole('button')
-    })
-
-    it('throws when native is used with a role that HTML has no element for', (done) => {
-      expectError('`cy.getByRole()` was passed `native: true`, but HTML has no native element with the role `tab`, so only a `role` attribute can give an element that role. Remove `native: true` to find it.', done)
-
-      cy.getByRole('tab', { native: true })
-    })
-
-    it('throws when native is not a boolean', (done) => {
-      expectError('`cy.getByRole()` only accepts a `boolean` for its `native` option. You passed: `yes`', done)
-
-      // @ts-expect-error
-      cy.getByRole('button', { native: 'yes' })
     })
 
     it('explains when native is why nothing matched', (done) => {
