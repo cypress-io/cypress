@@ -578,8 +578,8 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
     - `dependency` - A change to a dependency that impacts the user
     - `deprecation` - An API deprecation notice for users
     - `feat` - A new feature
-    - `fix` - A bug fix or regression fix
-    - `misc` - A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
+    - `fix` - A bug fix or regression fix. Use it only when Cypress behaves differently after the change, not when only the wording of a message changes.
+    - `misc` - A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works. This includes rewording an error, warning, or Command Log message, even when the old text was wrong or misleading.
     - `perf` - A code change that improves performance
   - Change that improves the codebase or system but has no user-facing impact:
     - `chore` - Changes to the build process or auxiliary tools and libraries such as documentation generation

@@ -23,8 +23,6 @@ These prefixes do **not** require an entry:
 
 Choosing `fix` asserts the change ships to users, so do not then skip the entry because the impact looks internal. Use `chore` or `refactor` if the change truly has no user-facing effect, or `internal` if it is user-facing but not yet reachable.
 
-A change that only rewords an error, warning, or Command Log message is `misc`, not `fix`, even when the old text was wrong or misleading. Use `fix` only when the behavior behind the message changes, such as an error that fired when it shouldn't have.
-
 This changelog describes the **binary**. Validation only considers changed files under `cli/` or `packages/` (excluding `cli/CHANGELOG.md` itself), so a pull request touching only `npm/`, `system-tests/`, `scripts/`, `tooling/`, or docs needs no entry — and should probably not carry a user-facing prefix. The `npm/*` packages are versioned and published independently by semantic-release and never appear here.
 
 ## Writing Guidelines
