@@ -66,6 +66,22 @@ describe('src/cy/commands/connectors', () => {
             return new Promise(() => {})
           })
         })
+
+        it('throws when mixing up async + sync return values', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.spread()` failed because you are mixing up async and sync code.')
+            expect(err.message).to.include('The value you synchronously returned was: `foo`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/spread')
+
+            done()
+          })
+
+          cy.noop([1, 2]).spread(() => {
+            cy.log('hi')
+
+            return 'foo'
+          })
+        })
       })
     })
 
@@ -265,6 +281,7 @@ describe('src/cy/commands/connectors', () => {
             assertLogLength(this.logs, 1)
             expect(lastLog.get('error')).to.eq(err)
             expect(err.message).to.include('`cy.then()` failed because you are mixing up async and sync code.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/then')
 
             done()
           })
@@ -516,6 +533,65 @@ describe('src/cy/commands/connectors', () => {
           }
 
           cy.wrap(obj).invoke('foo.bar.baz').should('eq', 'baz')
+        })
+
+        // https://github.com/cypress-io/cypress/issues/3871
+        describe('dot-separated property paths on the remote window', () => {
+          it('invokes a top-level function', () => {
+            cy.window().then((win) => {
+              win.val = 40
+              win.get = function () {
+                return this.val
+              }
+
+              cy.window().invoke('get').should('eq', 40)
+            })
+          })
+
+          it('invokes a function nested 1 level deep', () => {
+            cy.window().then((win) => {
+              win.obj = {
+                val: 41,
+                get () {
+                  return this.val
+                },
+              }
+
+              cy.window().invoke('obj.get').should('eq', 41)
+            })
+          })
+
+          it('invokes a function nested 2 levels deep', () => {
+            cy.window().then((win) => {
+              win.obj = {
+                innerObj: {
+                  val: 42,
+                  get () {
+                    return this.val
+                  },
+                },
+              }
+
+              cy.window().invoke('obj.innerObj.get').should('eq', 42)
+            })
+          })
+
+          it('invokes a function nested 3 levels deep', () => {
+            cy.window().then((win) => {
+              win.obj = {
+                innerObj: {
+                  innerInnerObj: {
+                    val: 43,
+                    get () {
+                      return this.val
+                    },
+                  },
+                },
+              }
+
+              cy.window().invoke('obj.innerObj.innerInnerObj.get').should('eq', 43)
+            })
+          })
         })
 
         it('handles properties on the prototype', () => {
@@ -1945,6 +2021,22 @@ describe('src/cy/commands/connectors', () => {
 
           cy.get('ul').each(($ul) => {
             return new Promise((resolve) => {})
+          })
+        })
+
+        it('throws when mixing up async + sync return values', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.each()` failed because you are mixing up async and sync code.')
+            expect(err.message).to.include('The value you synchronously returned was: `sync value`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
+
+            done()
+          })
+
+          cy.wrap([1, 2]).each(() => {
+            cy.log('hi')
+
+            return 'sync value'
           })
         })
 

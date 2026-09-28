@@ -43,5 +43,7 @@ the suite you care about ran at all:
 - `npm/webpack-preprocessor` — `test` is a webpack-5 matrix script that rewrites
   `package.json` and reinstalls deps. Use `test-unit` / `test-e2e` to check a change.
 
-The Cypress-based suites launch a real browser and do not run in the sandbox. Give the
-user the exact command instead of running it.
+The Cypress-based suites launch a real browser. Run them when Xvfb is available
+(`command -v Xvfb`), after `yarn build`, prefixed with `env -u ELECTRON_RUN_AS_NODE`;
+[Cloud agent environments](../../AGENTS.md#cloud-agent-environments) covers the display
+and browser for each host. Where Xvfb is missing, give the user the exact command instead.

@@ -217,12 +217,8 @@
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "@babel/helper-define-map",
-        "@babel/plugin-transform-object-rest-spread",
         "@svgr/webpack",
         "assert",
-        "browser-resolve",
-        "webpack-cli",
         "buffer",
         "process",
         "url"
@@ -745,7 +741,6 @@
     "@types/*",
     "eslint-*",
     "prettier",
-    "chai",
     "sinon",
     "cypress",
     "@cypress/*",
