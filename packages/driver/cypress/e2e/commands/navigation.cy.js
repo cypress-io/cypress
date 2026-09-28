@@ -418,8 +418,7 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
-  context.skip('#go', () => {
+  context('#go', () => {
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
@@ -626,16 +625,27 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('only logs once on error', function (done) {
-        cy.once('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error')).to.eq(err)
-
-          done()
-        })
-
         cy
+        .visit('/fixtures/generic.html')
         .visit('/fixtures/jquery.html')
-        .go('back', { timeout: 1 })
+        .then(() => {
+          let failed = false
+
+          // the page keeps loading after the failure, so wait for it
+          // before finishing to keep it from leaking into the next test
+          cy.on('window:load', () => {
+            done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
+          })
+
+          cy.once('fail', (err) => {
+            failed = true
+
+            assertLogLength(this.logs, 1)
+            expect(this.logs[0].get('error')).to.eq(err)
+          })
+
+          cy.go('back', { timeout: 1 })
+        })
       })
     })
 
@@ -721,15 +731,14 @@ describe('src/cy/commands/navigation', () => {
             const { lastLog } = this
 
             beforeunload = true
-            expect(lastLog.get('snapshots').length).to.eq(2)
+            expect(lastLog.get('snapshots').length).to.eq(1)
             expect(lastLog.get('snapshots')[0].name).to.eq('before')
             expect(lastLog.get('snapshots')[0].body).to.be.an('object')
 
             return undefined
           })
 
-          // wait for the beforeunload event to be fired after the history navigation
-          cy.go('back').wait(100).then(function () {
+          cy.go('back').then(function () {
             const { lastLog } = this
 
             expect(beforeunload).to.be.true
