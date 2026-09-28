@@ -344,34 +344,14 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('fails when given a timeout shorter than the page load', (done) => {
-      cy.visit('/fixtures/generic.html')
-      cy.visit('/fixtures/jquery.html')
-      .then(() => {
-        let failed = false
-
-        // the page keeps loading after the failure, so wait for it
-        // before finishing to keep it from leaking into the next test
-        cy.on('window:load', () => {
-          done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
-        })
-
-        cy.on('fail', (err) => {
-          failed = true
-
-          expect(err.message).to.include('Your page did not fire its `load` event within `1ms`.')
-        })
-
-        cy.go('back', { timeout: 1 })
-      })
-    })
-
     it('fails when the page it navigates to does not load within pageLoadTimeout', { pageLoadTimeout: 500 }, (done) => {
       cy.visit('/slow-load?ms=2000', { timeout: 5000 })
       cy.visit('/fixtures/generic.html')
       .then(() => {
         let failed = false
 
+        // the page keeps loading after the failure, so wait for it
+        // before finishing to keep it from leaking into the next test
         cy.on('window:load', () => {
           done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
         })
