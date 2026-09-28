@@ -107,7 +107,9 @@ export default (Commands, Cypress, cy) => {
     describe (role, { name, hidden = false, native = false }) {
       const nameHint = name === undefined ? '' : ` and name ${describeMatcher(name)}`
 
-      return `${hidden ? 'an' : 'an accessible'}${native ? ' native' : ''} element with the role "${role}"${nameHint}`
+      const noun = _.compact([!hidden && 'accessible', native && 'native', 'element']).join(' ')
+
+      return `${noun.startsWith('native') ? 'a' : 'an'} ${noun} with the role "${role}"${nameHint}`
     },
 
     onNotFound (roots, role, { hidden = false, native = false }, cache) {

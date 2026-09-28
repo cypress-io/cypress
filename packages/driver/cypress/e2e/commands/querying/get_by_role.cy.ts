@@ -441,6 +441,12 @@ describe('src/cy/commands/querying/get_by_role', () => {
       cy.get('#explicit').getByRole('button', { native: true })
     })
 
+    it('uses "a" for a native element that may be hidden', (done) => {
+      expectError('Expected to find a native element with the role "button" within the element: <section#explicit>, but never did.', done)
+
+      cy.get('#explicit').getByRole('button', { native: true, hidden: true })
+    })
+
     it('says so when there are no roles at all', (done) => {
       expectError('No elements with a role were found.', done)
 
