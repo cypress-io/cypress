@@ -61,6 +61,7 @@ Thanks for taking the time to contribute! :smile:
   - [Committing Code](#committing-code)
     - [Branches](#branches)
     - [Pull Requests](#pull-requests)
+      - [Pull Request Title Prefixes](#pull-request-title-prefixes)
     - [AI-Assisted Contributions](#ai-assisted-contributions)
     - [Write Some Tests](#write-some-tests)
     - [Dependencies](#dependencies)
@@ -572,22 +573,7 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
   - When in doubt, split. Reviewers can merge a short PR quickly; a large PR with mixed concerns slows everyone down.
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`.
 - PRs can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
-- Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format using one of the following definitions. Once committed to develop, this prefix will determine the appropriate 'next version' of Cypress or the corresponding npm module.
-  - Changes has user-facing impact:
-    - `breaking` - A breaking change that will require an MVB
-    - `dependency` - A change to a dependency that impacts the user
-    - `deprecation` - An API deprecation notice for users
-    - `feat` - A new feature
-    - `fix` - A bug fix or regression fix. Use it only when Cypress behaves differently after the change, not when only the wording of a message changes.
-    - `misc` - A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works. This includes rewording an error, warning, or Command Log message, even when the old text was wrong or misleading.
-    - `perf` - A code change that improves performance
-  - Change that improves the codebase or system but has no user-facing impact:
-    - `chore` - Changes to the build process or auxiliary tools and libraries such as documentation generation
-    - `docs` -  Documentation only changes
-    - `refactor` - A code change that neither fixes a bug nor adds a feature
-    - `revert` - Reverts a previous commit
-    - `test` - Adding missing or correcting existing tests
-    - `internal` - Work that is real and may well ship publicly later, but is not reachable by users yet — typically behind a feature flag, an internal-only build, or a gated rollout. Its entry is written in the release that actually exposes it, as `feat` or `fix` at that point.
+- Prefix the title of the Pull Request with one of the [Pull Request Title Prefixes](#pull-request-title-prefixes).
 - For user-facing changes that will be released with the next Cypress version, be sure to add a changelog entry to the appropriate section in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md). See [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) for more details.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
@@ -612,6 +598,26 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 
 1. When converting files to another language and there is a clear commit history needed to maintain from the file conversion.
 2. When merging a `release/*` branch to `develop`. Individual PRs were already squashed when they were merged to the release branch, and we want that history intact on develop.
+
+#### Pull Request Title Prefixes
+
+Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format using one of the following definitions. Once committed to develop, this prefix will determine the appropriate 'next version' of Cypress or the corresponding npm module.
+
+- Changes has user-facing impact:
+  - `breaking` - A breaking change that will require an MVB
+  - `dependency` - A change to a dependency that impacts the user
+  - `deprecation` - An API deprecation notice for users
+  - `feat` - A new feature
+  - `fix` - A bug fix or regression fix. Use it only when Cypress behaves differently after the change, not when only the wording of a message changes.
+  - `misc` - A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works. This includes rewording an error, warning, or Command Log message, even when the old text was wrong or misleading.
+  - `perf` - A code change that improves performance
+- Change that improves the codebase or system but has no user-facing impact:
+  - `chore` - Changes to the build process or auxiliary tools and libraries such as documentation generation
+  - `docs` -  Documentation only changes
+  - `refactor` - A code change that neither fixes a bug nor adds a feature
+  - `revert` - Reverts a previous commit
+  - `test` - Adding missing or correcting existing tests
+  - `internal` - Work that is real and may well ship publicly later, but is not reachable by users yet — typically behind a feature flag, an internal-only build, or a gated rollout. Its entry is written in the release that actually exposes it, as `feat` or `fix` at that point.
 
 ### AI-Assisted Contributions
 

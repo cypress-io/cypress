@@ -4,7 +4,7 @@ Cypress prefers hand tailored release notes over auto generated release notes, p
 
 ## When to Add an Entry
 
-The changelog should include anything that was merged into the `develop` branch of the Cypress repo that is a user-affecting change. Every prefix that [`CONTRIBUTING.md`](../CONTRIBUTING.md#pull-requests) lists under user-facing impact requires an entry, and the rest do not. `CONTRIBUTING.md` is the source of truth for what each prefix means.
+The changelog should include anything that was merged into the `develop` branch of the Cypress repo that is a user-affecting change. Every prefix that [`CONTRIBUTING.md`](../CONTRIBUTING.md#pull-request-title-prefixes) lists under user-facing impact requires an entry, and the rest do not. `CONTRIBUTING.md` is the source of truth for what each prefix means.
 
 This changelog describes the **binary**. Validation only considers changed files under `cli/` or `packages/` (excluding `cli/CHANGELOG.md` itself), so a pull request touching only `npm/`, `system-tests/`, `scripts/`, `tooling/`, or docs needs no entry — and should probably not carry a user-facing prefix. The `npm/*` packages are versioned and published independently by semantic-release and never appear here.
 
