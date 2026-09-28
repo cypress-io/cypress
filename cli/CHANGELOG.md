@@ -5,6 +5,10 @@
 
 - Added the [`cy.getByRole()`](https://on.cypress.io/getbyrole) query, which finds elements by their ARIA role, such as `tab`, `menuitem`, or `navigation`, and optionally by their accessible name: the text a screen reader announces for an element, taken from its content, its label, `aria-label`, or `aria-labelledby`. For example, `cy.getByRole('tab', { name: 'Billing' })`. The name can be a string that matches the whole name, a regular expression, or a function. Elements hidden from the accessibility tree, such as those with `aria-hidden="true"` or `display: none`, are skipped unless you pass `{ hidden: true }`. Pass `{ native: true }` to match only elements whose HTML tag gives them the role, such as a `<button>`, so a test fails if the page uses a `<div role="button">` instead. Like [`cy.get()`](https://on.cypress.io/get), it yields every match, retries until its assertions pass, and can be chained off another command or used inside [`.within()`](https://on.cypress.io/within). When nothing matches, the error lists the roles and accessible names that are on the page. Addressed in [#34937](https://github.com/cypress-io/cypress/pull/34937).
 
+**Performance:**
+
+- Improved the performance of [`.closest()`](https://on.cypress.io/closest) on subjects with many elements inside the shadow DOM. Fixed in [#34925](https://github.com/cypress-io/cypress/pull/34925).
+
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
@@ -22,6 +26,7 @@
 
 **Dependency Updates:**
 
+- Upgraded `axios` from `1.15.2` to `1.20.0` to address [Prototype Pollution](https://github.com/advisories/GHSA-35jp-ww65-95wh) (CVE-2026-44494), [NO_PROXY Bypass](https://github.com/advisories/GHSA-pjwm-pj3p-43mv) (CVE-2026-44492), [Header Injection](https://github.com/advisories/GHSA-898c-q2cr-xwhg) (CVE-2026-44490), and [ReDoS](https://github.com/advisories/GHSA-hfxv-24rg-xrqf) (CVE-2026-44496) vulnerabilities reported in security scans. Also upgraded `form-data` from `4.0.5` to `4.0.6`, the minimum version `axios` `1.20.0` requires, which addresses a [CRLF Injection](https://github.com/advisories/GHSA-hmw2-7cc7-3qxx) (CVE-2026-12143) vulnerability reported in security scans. Addresses [#34863](https://github.com/cypress-io/cypress/issues/34863).
 - Upgraded `proxy-addr` from `2.0.7` to `2.0.8` to address a [User Impersonation](https://security.snyk.io/vuln/SNYK-JS-PROXYADDR-19812342) (CVE-2026-90711) vulnerability reported in security scans. Addresses [#34858](https://github.com/cypress-io/cypress/issues/34858).
 
 ## 16.1.0
