@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
+**Performance:**
+
+- Improved the performance of [`.closest()`](https://on.cypress.io/closest) on subjects with many elements inside the shadow DOM. Fixed in [#34925](https://github.com/cypress-io/cypress/pull/34925).
+
 **Bugfixes:**
 
 - Fixed a regression in [15.0.0](#15-0-0) where [`cy.go()`](https://on.cypress.io/go) finished before the page it navigated to had loaded. The next command could run against the page being navigated away from, so tests that went back or forward could fail intermittently. `cy.go()` also yielded `undefined` instead of the window, and ignored its `timeout` option and [`pageLoadTimeout`](https://on.cypress.io/configuration#Timeouts). `cy.go()` now waits for the page to load, yields the window, and fails if the page does not load within the timeout. Fixes [#32460](https://github.com/cypress-io/cypress/issues/32460).
@@ -19,6 +23,7 @@
 
 **Dependency Updates:**
 
+- Upgraded `axios` from `1.15.2` to `1.20.0` to address [Prototype Pollution](https://github.com/advisories/GHSA-35jp-ww65-95wh) (CVE-2026-44494), [NO_PROXY Bypass](https://github.com/advisories/GHSA-pjwm-pj3p-43mv) (CVE-2026-44492), [Header Injection](https://github.com/advisories/GHSA-898c-q2cr-xwhg) (CVE-2026-44490), and [ReDoS](https://github.com/advisories/GHSA-hfxv-24rg-xrqf) (CVE-2026-44496) vulnerabilities reported in security scans. Also upgraded `form-data` from `4.0.5` to `4.0.6`, the minimum version `axios` `1.20.0` requires, which addresses a [CRLF Injection](https://github.com/advisories/GHSA-hmw2-7cc7-3qxx) (CVE-2026-12143) vulnerability reported in security scans. Addresses [#34863](https://github.com/cypress-io/cypress/issues/34863).
 - Upgraded `proxy-addr` from `2.0.7` to `2.0.8` to address a [User Impersonation](https://security.snyk.io/vuln/SNYK-JS-PROXYADDR-19812342) (CVE-2026-90711) vulnerability reported in security scans. Addresses [#34858](https://github.com/cypress-io/cypress/issues/34858).
 
 ## 16.1.0
