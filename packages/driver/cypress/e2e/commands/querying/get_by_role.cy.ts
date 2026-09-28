@@ -195,6 +195,12 @@ describe('src/cy/commands/querying/get_by_role', () => {
       cy.getByRole('link', { name: 'Nested shadow link', includeShadowDom: true }).should('have.length', 1)
     })
 
+    it('yields shadow matches in document order, at their host', () => {
+      cy.get('main').getByRole('button', { name: /^(Shadow button|Add alert)$/, includeShadowDom: true }).then(($el) => {
+        expect(ids($el)).to.deep.eq(['shadow-button', 'add-alert'])
+      })
+    })
+
     it('treats a shadow tree under an aria-hidden host as hidden', () => {
       cy.getByRole('button', { name: 'Hidden shadow button', includeShadowDom: true }).should('not.exist')
       cy.getByRole('button', { name: 'Hidden shadow button', includeShadowDom: true, hidden: true }).should('have.length', 1)
@@ -295,6 +301,12 @@ describe('src/cy/commands/querying/get_by_role', () => {
         expect(lastLog.get('message')).to.eq('button, {name: Help}')
         expect(lastLog.get('type')).to.eq('parent')
         expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+      })
+    })
+
+    it('logs as a child command when chained off another command', function () {
+      cy.get('main').getByRole('button', { name: 'Help' }).then(function () {
+        expect(this.lastLog.get('type')).to.eq('child')
       })
     })
 

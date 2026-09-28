@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
+import { compareTreeOrder } from '../../../dom/elements/shadow'
 import $errUtils from '../../../cypress/error_utils'
 import $utils from '../../../cypress/utils'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
@@ -109,7 +110,7 @@ export const addGetByQuery = <TMatcher, TOptions extends object>(Commands, Cypre
 
     const log = Cypress.log({
       message: displayName,
-      type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      type: this.hasPreviouslyLinkedCommand() ? 'child' : 'parent',
       hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
@@ -194,6 +195,12 @@ export const addGetByQuery = <TMatcher, TOptions extends object>(Commands, Cypre
             matched.push(element)
           }
         }
+      }
+
+      // Each root is searched in turn, so matches from a shadow root or a later
+      // subject element can land out of document order.
+      if (roots.length > 1) {
+        matched.sort(compareTreeOrder)
       }
 
       $lastScope = $scope

@@ -20,7 +20,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
 
   it('.getByRole()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      cy.getByRole('button', { name: 'Submit' }).should('have.length', 1)
+      cy.getByRole('button', { name: 'get ajax' }).should('have.length', 1)
     })
   })
 
@@ -83,7 +83,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         done()
       })
 
-      cy.getByRole('button', { name: 'Submit' })
+      cy.getByRole('button', { name: 'get ajax' })
     })
 
     it('.within()', (done) => {
@@ -190,7 +190,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
 
     it('.getByRole()', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.getByRole('button', { name: 'Submit' })
+        cy.getByRole('button', { name: 'get ajax' })
       })
 
       cy.shouldWithTimeout(() => {
@@ -205,7 +205,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BODY')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Role).to.equal('button')
-        expect(consoleProps.props.Options).to.deep.equal({ name: 'Submit' })
+        expect(consoleProps.props.Options).to.deep.equal({ name: 'get ajax' })
         expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('BUTTON')
       })
     })

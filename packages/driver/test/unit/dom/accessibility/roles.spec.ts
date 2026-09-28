@@ -58,6 +58,21 @@ describe('dom/accessibility/roles', () => {
       expect(hasRole($('#el'), 'checkbox')).toBe(false)
     })
 
+    it.each([
+      ['empty', ''],
+      ['blank', '   '],
+    ])('keeps the implicit role when the role attribute is %s', (_name, role) => {
+      render(`<button id="el" role="${role}"></button>`)
+
+      expect(getRoles($('#el'))).toEqual(['button'])
+    })
+
+    it('ignores whitespace around the first token of an explicit role', () => {
+      render('<div id="el" role="  switch checkbox"></div>')
+
+      expect(getRoles($('#el'))).toEqual(['switch'])
+    })
+
     it('prefers an explicit role over the implicit one', () => {
       render('<button id="el" role="tab"></button>')
 

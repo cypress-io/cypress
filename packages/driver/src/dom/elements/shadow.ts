@@ -78,3 +78,39 @@ const findShadowRoots = (root: Node): Node[] => {
 
   return collectRoots(roots)
 }
+
+// The shadow hosts that lead from the document down to `node`, outermost
+// first, followed by `node` itself.
+const getHostPath = (node: Node): Node[] => {
+  const path = [node]
+
+  for (let root = node.getRootNode(); isShadowRoot(root); root = (root as ShadowRoot).host.getRootNode()) {
+    path.unshift((root as ShadowRoot).host)
+  }
+
+  return path
+}
+
+// A sort comparator for document order, with the contents of a shadow tree
+// placed at its host. `compareDocumentPosition` alone can't order nodes in
+// different trees, so each node is first lifted to the tree the two share.
+export const compareTreeOrder = (left: Node, right: Node): number => {
+  if (left === right) {
+    return 0
+  }
+
+  const leftPath = getHostPath(left)
+  const rightPath = getHostPath(right)
+  const index = leftPath.findIndex((node, i) => node !== rightPath[i])
+
+  // One node hosts the shadow tree the other is in, so it comes first.
+  if (index === -1) {
+    return -1
+  }
+
+  if (index >= rightPath.length) {
+    return 1
+  }
+
+  return leftPath[index].compareDocumentPosition(rightPath[index]) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+}

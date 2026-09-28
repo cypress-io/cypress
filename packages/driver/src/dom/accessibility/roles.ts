@@ -65,7 +65,7 @@ let implicitRoleRules: ImplicitRoleRule[] | undefined
 
 const getImplicitRoleRules = () => {
   if (!implicitRoleRules) {
-    implicitRoleRules = elementRoles.entries()
+    implicitRoleRules = Array.from(elementRoles.entries())
     .map(([entry, roles]) => makeRule(entry, Array.from(roles)))
     .sort((left, right) => right.specificity - left.specificity)
   }
@@ -73,7 +73,7 @@ const getImplicitRoleRules = () => {
   return implicitRoleRules
 }
 
-export const getImplicitRoles = (element: Element): string[] => {
+const getImplicitRoles = (element: Element): string[] => {
   for (const { match, roles } of getImplicitRoleRules()) {
     if (match(element)) {
       return [...roles]
@@ -84,13 +84,14 @@ export const getImplicitRoles = (element: Element): string[] => {
 }
 
 // Later tokens in a `role` attribute are fallbacks for user agents that don't
-// support the first, so only the first one counts.
+// support the first, so only the first one counts. A blank `role` attribute
+// sets no role, so the element keeps its implicit one, as it does in browsers.
 export const getRoles = (element: Element, cache = new AccessibilityCache()): string[] => {
   return cache.memoRoles(element, () => {
-    const explicitRole = element.getAttribute('role')
+    const [explicitRole] = (element.getAttribute('role') ?? '').trim().split(/\s+/)
 
-    if (explicitRole !== null) {
-      return explicitRole.split(' ').slice(0, 1)
+    if (explicitRole) {
+      return [explicitRole]
     }
 
     return getImplicitRoles(element)
@@ -118,7 +119,7 @@ export const getRoleSelector = (role: string) => {
   return [`*[role~="${escapeQuotes(escapeBackslashes(role))}"]`, ...getNativeTagNames(role)].join(',')
 }
 
-export const isSubtreeInaccessible = (element: Element, cache = new AccessibilityCache()): boolean => {
+const isSubtreeInaccessible = (element: Element, cache = new AccessibilityCache()): boolean => {
   return cache.memoSubtreeInaccessible(element, () => {
     return (element as HTMLElement).hidden === true
       || element.getAttribute('aria-hidden') === 'true'

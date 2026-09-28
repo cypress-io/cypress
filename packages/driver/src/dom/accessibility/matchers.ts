@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 const whitespaceRe = /\s+/g
 
-export type MatcherFunction = (content: string, element: Element | null) => boolean
+type MatcherFunction = (content: string, element: Element | null) => boolean
 
 export type Matcher = string | RegExp | number | MatcherFunction
 
