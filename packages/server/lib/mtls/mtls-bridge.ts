@@ -145,12 +145,30 @@ export class MtlsBridge {
     servername: string,
     alpnProtocols: string[],
   ): Promise<void> {
+    // Recorded before the handshake starts: the browser can go away while it is still in
+    // flight, and a listener registered afterwards would never hear the 'close' it already
+    // missed, orphaning an established connection to the origin.
+    let browserGone = false
+
+    browserSocket.once('close', () => {
+      browserGone = true
+    })
+
     const upstream = await this.options.connectUpstream({
       hostname: servername,
       port: listener.port,
       alpnProtocols,
       material: listener.material,
     })
+
+    // Belt and braces: the paths below generally clean up on their own, but none of them is
+    // guaranteed to run once the browser has already gone.
+    if (browserGone || browserSocket.destroyed) {
+      debug('browser left during the %s handshake; dropping the origin connection', servername)
+      upstream.socket.destroy()
+
+      return
+    }
 
     // Registered before the next await so an upstream connection is not orphaned when the
     // forged identity fails, and so a browser that simply goes away releases it too.
