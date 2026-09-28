@@ -947,16 +947,16 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
+    cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled, isSameSuperDomainOrigin }) {
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-        ${isSkipDomainInjectionEnabled ? `
-        Unless \`injectDocumentDomain\` is disabled, a ${cmd('origin')} command is required.
-        ` : ''}
-        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+        ${isInjectDocumentDomainEnabled || !isSameSuperDomainOrigin ? '' : `
+        Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
+        `}
+        Use ${cmd('origin')} to wrap the commands run on \`${autOrigin}\`.
 
         \`cy.origin('${autOrigin}', () => {\`
         \`  <commands targeting ${autOrigin} go here>\`
@@ -2066,16 +2066,19 @@ export default {
   },
 
   then: {
-    callback_mixes_sync_and_async: stripIndent`\
-      ${cmd('then')} failed because you are mixing up async and sync code.
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because you are mixing up async and sync code.
 
-      In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
 
-      Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
 
-      You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
 
-      The value you synchronously returned was: \`{{value}}\``,
+        The value you synchronously returned was: \`{{value}}\``,
+      docsUrl: 'https://on.cypress.io/{{cmd}}',
+    },
   },
 
   trigger: {

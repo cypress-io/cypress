@@ -515,6 +515,9 @@ cy.get('foo').click({
 
 cy.get('foo').rightclick()
 cy.get('foo').dblclick()
+cy.get('li').dblclick({ multiple: false })
+cy.get('li').dblclick('topRight', { multiple: false })
+cy.get('li').dblclick(15, 40, { multiple: false })
 
 // cy.$$() is not jQuery(). It only queries.
 // $ExpectError

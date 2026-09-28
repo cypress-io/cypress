@@ -54,7 +54,7 @@ This changelog describes the **binary**. Validation only considers changed files
     | `perf` | Performance | [Example](https://docs.cypress.io/app/references/changelog#7-2-0) |
     | `feat` | Features | [Example](https://docs.cypress.io/app/references/changelog#8-6-0) |
     | `fix` | Bugfixes | [Example](https://docs.cypress.io/app/references/changelog#9-1-0) |
-    | `misc` | Misc | We don't use this section as much as we used to, but if there is a change that is not necessarily a feature or a bugfix, it would go here. (Like the design of the browser picker changed). [Example](https://docs.cypress.io/app/references/changelog#6-7-0) |
+    | `misc` | Misc | A user-facing change to how Cypress looks or describes itself, such as a redesigned UI like the browser picker, a correction to the public TypeScript types, or new wording in an error message. [Example](https://docs.cypress.io/app/references/changelog#6-7-0) |
     | `dependency` | Dependency Updates | A list of dependencies that were updated, downgraded, or removed as well as the version it was changed from. [Example](https://docs.cypress.io/app/references/changelog#7-2-0) |
 4. You may have several changes around a feature that make sense to group. Feel free to do so to make more sense to users consuming the changelog. [Example](https://docs.cypress.io/app/references/changelog#8-7-0)
 5. Do not refer to 'we' when writing a changelog item. We want to phrase the changelog in a way that emphasizes how the user is impacted. Additionally 'we' may not have addressed the issue, an outside contributor may have.
