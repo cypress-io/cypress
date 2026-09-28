@@ -8,7 +8,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
-- The Command Log warning shown when a cross-origin page doesn't respond within 2 seconds while Cypress reads, clears, or restores storage now names the storage type involved (`localStorage`, `sessionStorage`, or both), lists the origins that didn't respond, and states that Cypress continued without them. Previously it read `failed to access session localStorage data on origin(s)` for every command, including [`cy.clearAllSessionStorage()`](https://on.cypress.io/clearallsessionstorage), [`cy.getAllSessionStorage()`](https://on.cypress.io/getallsessionstorage), and [`cy.session()`](https://on.cypress.io/session). Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- The Command Log warning shown when a cross-origin page doesn't respond within 2000ms while Cypress reads, clears, or restores storage now names the storage type involved (`localStorage`, `sessionStorage`, or both), lists the origins that didn't respond, and states that Cypress continued without them. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 
 **Misc:**
 

@@ -231,6 +231,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
+- **Durations in user-facing messages** — Show durations under 10 seconds in milliseconds (`2000ms`, matching errors like `Timed out retrying after 4000ms`). Only switch to seconds, minutes, and so on at 10000ms or more.
 
 ### Code Comments
 

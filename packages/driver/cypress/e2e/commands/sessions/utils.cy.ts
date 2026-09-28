@@ -235,7 +235,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       cy.then(async () => {
         await setPostMessageLocalStorage(createUnresponsiveSpecWindow(), [{ origin, sessionStorage: { clear: true } }])
 
-        expectWarning(spy, `Cypress continued without clearing sessionStorage on origin(s) that did not respond within 2 seconds: ${origin}`)
+        expectWarning(spy, `Cypress continued without clearing sessionStorage on origin(s) that did not respond within 2000ms: ${origin}`)
       })
     })
 
@@ -245,7 +245,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       cy.then(async () => {
         await setPostMessageLocalStorage(createUnresponsiveSpecWindow(), [{ origin, localStorage: { clear: true, value: { foo: 'bar' } } }])
 
-        expectWarning(spy, `Cypress continued without updating localStorage on origin(s) that did not respond within 2 seconds: ${origin}`)
+        expectWarning(spy, `Cypress continued without updating localStorage on origin(s) that did not respond within 2000ms: ${origin}`)
       })
     })
 
@@ -256,7 +256,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
         const results = await getPostMessageLocalStorage(createUnresponsiveSpecWindow(), [origin])
 
         expect(results).to.deep.eq([])
-        expectWarning(spy, `Cypress continued without reading localStorage and sessionStorage on origin(s) that did not respond within 2 seconds: ${origin}`)
+        expectWarning(spy, `Cypress continued without reading localStorage and sessionStorage on origin(s) that did not respond within 2000ms: ${origin}`)
       })
     })
   })

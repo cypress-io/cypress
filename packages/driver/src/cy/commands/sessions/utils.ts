@@ -15,7 +15,7 @@ const storageTypes = ['localStorage', 'sessionStorage'] as const
 const logUnresponsiveOriginsWarning = (action: string, types: readonly string[], origins: string[]) => {
   Cypress.log({
     name: 'warning',
-    message: `Cypress continued without ${action} ${types.join(' and ')} on origin(s) that did not respond within ${postMessageStorageTimeoutMs / 1000} seconds: ${origins.join(', ')}`,
+    message: `Cypress continued without ${action} ${types.join(' and ')} on origin(s) that did not respond within ${postMessageStorageTimeoutMs}ms: ${origins.join(', ')}`,
   })
 }
 
