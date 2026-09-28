@@ -1,15 +1,13 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.1
 
-**Bugfixes:**
-
-- Fixed a regression in [16.0.0](#16-0-0) where a configured [`clientCertificates`](https://docs.cypress.io/app/references/configuration#clientCertificates) entry was not presented for requests the browser issued in Chrome, Chromium, and Edge, so an origin requiring mutual TLS showed a certificate prompt in `cypress open` and hung in `cypress run`. Fixes [#34807](https://github.com/cypress-io/cypress/issues/34807).
 **Performance:**
 
 - Improved the performance of [`.closest()`](https://on.cypress.io/closest) on subjects with many elements inside the shadow DOM. Fixed in [#34925](https://github.com/cypress-io/cypress/pull/34925).
 
 **Bugfixes:**
 
+- Fixed a regression in [16.0.0](#16-0-0) where a configured [`clientCertificates`](https://docs.cypress.io/app/references/configuration#clientCertificates) entry was not presented for requests the browser issued in Chrome, Chromium, and Edge, so an origin requiring mutual TLS showed a certificate prompt in `cypress open` and hung in `cypress run`. Fixes [#34807](https://github.com/cypress-io/cypress/issues/34807).
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
 
 **Misc:**
