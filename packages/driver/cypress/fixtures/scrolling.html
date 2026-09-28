@@ -16,6 +16,16 @@
         body, h5 {
           margin: 0;
         }
+
+        /* Styling the scrollbar forces classic, space-taking scrollbars in Chromium and WebKit, even where the OS default is overlay */
+        #scroll-to-visible-scrollbars::-webkit-scrollbar {
+          width: 15px;
+          height: 15px;
+        }
+
+        #scroll-to-visible-scrollbars::-webkit-scrollbar-thumb {
+          background: #888;
+        }
       </style>
 
       <button>button</button>
@@ -64,6 +74,11 @@
 
       <div id="scroll-to-both" style="height: 100px; width: 100px; overflow: auto;">
         <div style="width: 500px; height: 500px">Both Scroll</div>
+      </div>
+
+      <!-- padding is less than the scrollbar width, so the CSS-size formula undershoots on both axes -->
+      <div id="scroll-to-visible-scrollbars" style="height: 100px; width: 100px; padding: 5px; overflow: scroll;">
+        <div style="width: 500px; height: 500px">Visible Scrollbars</div>
       </div>
 
       <div id="nonscroll-becomes-scrollable">
