@@ -59,6 +59,36 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    // WebKit does not implement requestIdleCallback
+    it('fakes cancelIdleCallback alongside requestIdleCallback by default', { browser: '!webkit' }, function () {
+      cy.clock().then(function (clock) {
+        const callback = cy.stub()
+
+        expect(clock.details().methods).to.include('requestIdleCallback')
+        expect(clock.details().methods).to.include('cancelIdleCallback')
+
+        const id = this.window.requestIdleCallback(callback)
+
+        this.window.cancelIdleCallback(id)
+        clock.tick(1000)
+
+        expect(callback).not.to.be.called
+      })
+    })
+
+    it('cancels an idle callback that was scheduled with a timeout', { browser: '!webkit' }, function () {
+      cy.clock().then(function (clock) {
+        const callback = cy.stub()
+
+        const id = this.window.requestIdleCallback(callback, { timeout: 500 })
+
+        this.window.cancelIdleCallback(id)
+        clock.tick(1000)
+
+        expect(callback).not.to.be.called
+      })
+    })
+
     it('takes Date now arg', () => {
       // April 15, 2017
       const now = new Date(2017, 3, 15)
@@ -358,6 +388,45 @@ describe('src/cy/commands/clock', () => {
       it('binds to window if called before visit', () => {
         cy.clock()
         cy.visit('/fixtures/dom.html')// should not throw
+      })
+
+      // https://github.com/cypress-io/cypress/issues/2850
+      describe('called before cy.visit() in consecutive tests', () => {
+        it('works the first time', () => {
+          cy.clock()
+          cy.visit('/fixtures/generic.html')
+          cy.window().then((win) => {
+            // override the setTimeout function now
+            win.setTimeout = () => {}
+          })
+        })
+
+        it('works the second time', () => {
+          cy.clock()
+          cy.visit('/fixtures/generic.html')
+        })
+
+        it('works the third time', () => {
+          cy.clock().then((clock) => {
+            cy.visit('/fixtures/generic.html')
+            cy.window().then((win) => {
+              // override the setTimeout function now
+              win.setTimeout = () => { }
+
+              // manually restore the clock
+              clock.restore()
+            })
+
+            cy.clock().then((clock2) => {
+              clock2.restore()
+            })
+          })
+        })
+
+        it('works the fourth time', () => {
+          cy.clock()
+          cy.visit('/fixtures/generic.html')
+        })
       })
     })
 
