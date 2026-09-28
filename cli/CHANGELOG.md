@@ -8,7 +8,6 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
-- [`cy.contains()`](https://on.cypress.io/contains) now shows as a parent command in the Command Log when it starts a chain, as in `cy.contains('Save')`. It previously always showed as a child command, with a `-` before its name, as if it were chained off the command before it. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Misc:**
 
@@ -20,6 +19,7 @@
 - The error shown when a [`.each()`](https://on.cypress.io/each) or [`.spread()`](https://on.cypress.io/spread) callback both runs Cypress commands and returns a synchronous value now names the command you called and links to its documentation, instead of saying that `cy.then()` failed. The same error from [`.then()`](https://on.cypress.io/then) now links to the `.then()` documentation. Addressed in [#34933](https://github.com/cypress-io/cypress/pull/34933).
 - When a command runs after your application navigates to another subdomain of the same domain outside of [`cy.origin()`](https://on.cypress.io/origin), the error now explains that, while [`injectDocumentDomain`](https://on.cypress.io/inject-document-domain-configuration) is disabled (the default), a subdomain counts as a different origin, so commands run there also need `cy.origin()`. This explanation was intended to appear but never did. Addressed in [#34930](https://github.com/cypress-io/cypress/pull/34930).
 - The TypeScript documentation for the `multiple` option of [`.dblclick()`](https://on.cypress.io/dblclick) now shows its default as `true`, matching how `.dblclick()` behaves. Addressed in [#34929](https://github.com/cypress-io/cypress/pull/34929).
+- [`cy.contains()`](https://on.cypress.io/contains) now shows as a parent command in the Command Log when it starts a chain, as in `cy.contains('Save')`. It previously always showed as a child command, with a `-` before its name, as if it were chained off the command before it. Addressed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Dependency Updates:**
 
