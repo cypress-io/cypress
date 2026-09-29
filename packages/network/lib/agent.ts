@@ -199,19 +199,6 @@ export class CombinedAgent {
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
     _.merge(req, lenientOptions)
 
-    // If the path property is a fully qualified URL, which is what as Axios appears to set,
-    // parse the URL and set the href, path, and port based on this path
-    if (typeof options.path === 'string' && /^http(s)?:\/\//.test(options.path)) {
-      const pathUrl = new URL(options.path)
-
-      options.href = options.path
-      options.path = pathUrl.pathname
-
-      if (pathUrl.port) {
-        options.port = Number(pathUrl.port)
-      }
-    }
-
     const isHttps = isRequestHttps(options)
 
     // Ensure that HTTPS requests are using 443

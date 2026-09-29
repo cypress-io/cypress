@@ -62,12 +62,14 @@ describe('lib/tap/aut/scripts countMatches', () => {
 })
 
 describe('lib/tap/aut/scripts readElementInfo', () => {
-  const fakeElement = (overrides: Record<string, unknown> = {}) => ({
-    tagName: 'INPUT',
-    attributes: [{ name: 'data-testid', value: 'username' }, { name: 'name', value: 'username' }],
-    getBoundingClientRect: () => ({ x: 8.4, y: 40.6, width: 200.2, height: 30.9 }),
-    ...overrides,
-  })
+  const fakeElement = (overrides: Record<string, unknown> = {}) => {
+    return {
+      tagName: 'INPUT',
+      attributes: [{ name: 'data-testid', value: 'username' }, { name: 'name', value: 'username' }],
+      getBoundingClientRect: () => ({ x: 8.4, y: 40.6, width: 200.2, height: 30.9 }),
+      ...overrides,
+    }
+  }
 
   it('reports the tag, attributes, rounded box, and every reported style verbatim', () => {
     // Zero-valued (`margin: 0px`, `opacity: 0`) and empty (`content`) styles
@@ -80,9 +82,11 @@ describe('lib/tap/aut/scripts readElementInfo', () => {
       content: '',
     }
 
-    vi.stubGlobal('getComputedStyle', () => ({
-      getPropertyValue: (name: string) => computed[name] ?? '',
-    }))
+    vi.stubGlobal('getComputedStyle', () => {
+      return {
+        getPropertyValue: (name: string) => computed[name] ?? '',
+      }
+    })
 
     const result = readElementInfo.call(fakeElement() as any, ['display', 'color', 'margin', 'opacity', 'content'])
 

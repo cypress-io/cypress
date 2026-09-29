@@ -97,11 +97,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@cypress/dev': cypressDevPlugin,
     },
     rules: {
-      // A warning rather than an error: 30 sites in packages already on this
-      // config predate the rule. The rule reports without offering a fix, so
-      // those sites have to be reindented by hand; once they are, raise this
-      // to 'error'.
-      '@cypress/dev/arrow-body-multiline-braces': ['warn', 'always'],
+      '@cypress/dev/arrow-body-multiline-braces': ['error', 'always'],
     },
   },
   {
@@ -126,8 +122,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   {
     rules: {
       'no-console': 'error',
+      'prefer-spread': 'error',
       'no-restricted-properties': [
-        'warn',
+        'error',
         {
           object: 'process',
           property: 'geteuid',
@@ -205,7 +202,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'no-unsafe-finally': 'off',
       'no-async-promise-executor': 'off',
       'no-unsafe-optional-chaining': 'off',
-      'prefer-spread': 'warn',
 
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
@@ -271,7 +267,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   {
     ignores: [
       '.releaserc.js',
+      'cjs/**/*',
       'dist/**/*',
+      'esm/**/*',
       '**/__snapshots__/**/*',
       'test/.mocharc.js',
     ],

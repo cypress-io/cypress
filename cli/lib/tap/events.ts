@@ -47,12 +47,14 @@ interface TapTrace {
   errorCode?: string
 }
 
-const newTrace = (command = 'none', flags: string[] = []): TapTrace => ({
-  messageId: randomUUID(),
-  startedAt: Date.now(),
-  command,
-  flags,
-})
+const newTrace = (command = 'none', flags: string[] = []): TapTrace => {
+  return {
+    messageId: randomUUID(),
+    startedAt: Date.now(),
+    command,
+    flags,
+  }
+}
 
 let trace = newTrace()
 

@@ -7,14 +7,12 @@ import type { TapErrorCode, LiveSessionState } from '@packages/cypress-sessions'
 import type { TapCliOptions } from '../types'
 import { posixify } from '../../util'
 
-/** What `cypress tap run` returns once a spec is launched. */
+/** What `cypress tap run` returns once a spec is requested. Poll `status` for progress. */
 export interface TapRunResult {
-  /** Project-relative path of the launched spec. */
+  /** Project-relative path of the requested spec. */
   spec: string
-  /** Testing type the run launched under. */
-  testingType: string
-  /** Display name of the browser the run launched in. */
-  browser: string
+  /** The spec has been requested; not a live run-state — poll `status` for that. */
+  status: 'running'
 }
 
 const RUN_SPEC_TIMEOUT_MS = 60_000
@@ -52,8 +50,7 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
     if (result?.__typename === 'RunSpecResponse') {
       const launched: TapRunResult = {
         spec: posixify(result.spec.relative),
-        testingType: result.testingType,
-        browser: result.browser.displayName,
+        status: 'running',
       }
 
       renderOutcome('run', launched, options.json)

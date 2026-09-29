@@ -58,19 +58,23 @@ const browserColor = (session: SessionRow) => {
 // accept via `--session` — and an attached browser reads green by its name, an
 // absent one (or testing type) as a muted dash.
 export const sessionColumns = (sessions: SessionRow[]): string[] => {
-  const rows = sessions.map((session) => [
-    String(session.pid),
-    session.projectRoot,
-    session.testingType ?? '—',
-    browserCell(session),
-  ])
+  const rows = sessions.map((session) => {
+    return [
+      String(session.pid),
+      session.projectRoot,
+      session.testingType ?? '—',
+      browserCell(session),
+    ]
+  })
 
-  return columns(['PID', 'PROJECT', 'TYPE', 'BROWSER'], rows, (cells, index) => [
-    chalk.bold(cells[0]),
-    cells[1],
-    cells[2],
-    browserColor(sessions[index])(cells[3]),
-  ])
+  return columns(['PID', 'PROJECT', 'TYPE', 'BROWSER'], rows, (cells, index) => {
+    return [
+      chalk.bold(cells[0]),
+      cells[1],
+      cells[2],
+      browserColor(sessions[index])(cells[3]),
+    ]
+  })
 }
 
 // The reachable open-mode sessions under a counted heading.

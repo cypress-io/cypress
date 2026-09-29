@@ -103,6 +103,7 @@ import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
 import DebugBranchError from './empty/DebugBranchError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- rendered in the template, which the rule cannot see; a type-only import would drop the binding at runtime
 import DebugRunNavigation from './DebugRunNavigation.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'

@@ -1,17 +1,52 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.0.1
+## 16.1.1
+
+**Performance:**
+
+- Improved the performance of [`.closest()`](https://on.cypress.io/closest) on subjects with many elements inside the shadow DOM. Fixed in [#34925](https://github.com/cypress-io/cypress/pull/34925).
+
+**Bugfixes:**
+
+- Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
+
+**Misc:**
+
+- TypeScript now accepts an options object on six commands that already accepted one at runtime: [`.nextUntil()`](https://on.cypress.io/nextuntil), [`.parentsUntil()`](https://on.cypress.io/parentsuntil), and [`.prevUntil()`](https://on.cypress.io/prevuntil) take options in place of the filter argument; [`.each()`](https://on.cypress.io/each) and [`.spread()`](https://on.cypress.io/spread) take options before the callback; and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) takes an `offset` that sets a single axis, leaving the other at 0. These calls previously reported a type error. Addressed in [#34886](https://github.com/cypress-io/cypress/pull/34886).
+- TypeScript now accepts every function [`cy.clock()`](https://on.cypress.io/clock) can override in the browser, such as `requestAnimationFrame`, `requestIdleCallback`, `performance`, `Intl`, and `queueMicrotask`, and accepts `null` as the first argument, as in `cy.clock(null, ['setTimeout', 'clearTimeout'])`. These calls previously reported a type error. The `tick()` method on the yielded clock is now typed as returning the clock's new time in milliseconds instead of `void`. Addressed in [#34912](https://github.com/cypress-io/cypress/pull/34912).
+- TypeScript now types the `docsUrl` property on the error passed to an [`uncaught:exception`](https://on.cypress.io/catalog-of-events) handler as `string | string[]`. An uncaught exception carries the docs url for your application's error alongside the Cypress one, so `docsUrl` can hold more than one url at a time. Addressed in [#34879](https://github.com/cypress-io/cypress/pull/34879).
+- TypeScript now types the third argument of a [`.each()`](https://on.cypress.io/each) callback on DOM elements as the jQuery collection being iterated, which is what Cypress passes at runtime, instead of an array of elements. Addressed in [#34933](https://github.com/cypress-io/cypress/pull/34933).
+- The error shown when [`.clear()`](https://on.cypress.io/clear) is called on an element it can't clear now lists the elements `.clear()` accepts: a `<textarea>`, a text-like `<input>` such as `text`, `email`, or `number`, or an element made editable by `contenteditable` or `designMode`. Addressed in [#34914](https://github.com/cypress-io/cypress/pull/34914).
+- The error shown when a [`.each()`](https://on.cypress.io/each) or [`.spread()`](https://on.cypress.io/spread) callback both runs Cypress commands and returns a synchronous value now names the command you called and links to its documentation, instead of saying that `cy.then()` failed. The same error from [`.then()`](https://on.cypress.io/then) now links to the `.then()` documentation. Addressed in [#34933](https://github.com/cypress-io/cypress/pull/34933).
+- When a command runs after your application navigates to another subdomain of the same domain outside of [`cy.origin()`](https://on.cypress.io/origin), the error now explains that, while [`injectDocumentDomain`](https://on.cypress.io/inject-document-domain-configuration) is disabled (the default), a subdomain counts as a different origin, so commands run there also need `cy.origin()`. This explanation was intended to appear but never did. Addressed in [#34930](https://github.com/cypress-io/cypress/pull/34930).
+- The TypeScript documentation for the `multiple` option of [`.dblclick()`](https://on.cypress.io/dblclick) now shows its default as `true`, matching how `.dblclick()` behaves. Addressed in [#34929](https://github.com/cypress-io/cypress/pull/34929).
+- [`cy.contains()`](https://on.cypress.io/contains) now shows as a parent command in the Command Log when it starts a chain, as in `cy.contains('Save')`. It previously always showed as a child command, with a `-` before its name, as if it were chained off the command before it. Addressed in [#34939](https://github.com/cypress-io/cypress/pull/34939).
+
+**Dependency Updates:**
+
+- Upgraded `axios` from `1.15.2` to `1.20.0` to address [Prototype Pollution](https://github.com/advisories/GHSA-35jp-ww65-95wh) (CVE-2026-44494), [NO_PROXY Bypass](https://github.com/advisories/GHSA-pjwm-pj3p-43mv) (CVE-2026-44492), [Header Injection](https://github.com/advisories/GHSA-898c-q2cr-xwhg) (CVE-2026-44490), and [ReDoS](https://github.com/advisories/GHSA-hfxv-24rg-xrqf) (CVE-2026-44496) vulnerabilities reported in security scans. Also upgraded `form-data` from `4.0.5` to `4.0.6`, the minimum version `axios` `1.20.0` requires, which addresses a [CRLF Injection](https://github.com/advisories/GHSA-hmw2-7cc7-3qxx) (CVE-2026-12143) vulnerability reported in security scans. Addresses [#34863](https://github.com/cypress-io/cypress/issues/34863).
+- Upgraded `proxy-addr` from `2.0.7` to `2.0.8` to address a [User Impersonation](https://security.snyk.io/vuln/SNYK-JS-PROXYADDR-19812342) (CVE-2026-90711) vulnerability reported in security scans. Addresses [#34858](https://github.com/cypress-io/cypress/issues/34858).
+
+## 16.1.0
 
 **Performance:**
 
 - Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
 
+**Features:**
+
+- Added the [`trustedCertificates`](https://docs.cypress.io/app/references/configuration#trustedCertificates) configuration option. On the native browser network path (Chrome, Chromium, and Edge), declare a certificate your application under test presents — a self-signed development certificate, an internal certificate authority, or a precomputed SPKI fingerprint — and Chrome treats connections to that origin as trusted rather than merely tolerating its certificate errors. Static assets from the origin are then cached across navigations as they are in production; previously nothing from an untrusted-certificate origin was ever written to the browser's disk cache, so asset-heavy specs re-downloaded every asset on each [`cy.visit()`](https://on.cypress.io/visit). Origins you do not declare continue to load exactly as before. Firefox, WebKit, Electron, and [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) runs are unaffected. Addresses [#34760](https://github.com/cypress-io/cypress/issues/34760).
+
 **Bugfixes:**
 
+- `cypress tap run` now reports that the spec is running and to use `cypress tap status` for progress, instead of printing the launched spec's testing type and browser. [#34777](https://github.com/cypress-io/cypress/pull/34777)
 - Fixed a regression in [16.0.0](#16-0-0) where a run in Chrome, Chromium, or Edge could stop producing output partway through and hang indefinitely, with no error, no failing test, and no timeout, until the CI job was killed for exceeding its no-output limit. Fixes [#34778](https://github.com/cypress-io/cypress/issues/34778).
 - Fixed an issue where adding a `--disable-features` argument in [`before:browser:launch`](https://docs.cypress.io/api/node-events/browser-launch-api) silently dropped every feature Cypress disables in Chrome, Chromium, and Edge, because the browser honors only the last occurrence of that argument. Cypress now merges its own values with yours. Fixes [#34775](https://github.com/cypress-io/cypress/issues/34775).
 - Fixed a regression in [16.0.0](#16-0-0) where, in `cypress open` on Chrome, Chromium, and Edge, testing a site that registers an origin-wide service worker could render the site's own content — such as its 404 page — in place of the Cypress app after clicking a spec or reloading the browser tab. A service worker registered by the site under test can no longer answer for Cypress's own pages and assets. Fixes [#34789](https://github.com/cypress-io/cypress/issues/34789). Addressed in [#34762](https://github.com/cypress-io/cypress/pull/34762).
 - Fixed an issue where a variant of A/B tested content in the Cypress app that was weighted never to be shown could become the only variant shown. Fixes [#34814](https://github.com/cypress-io/cypress/issues/34814).
 - Fixed an issue where an error whose `message` cannot be overwritten — such as the `DOMException` a browser throws for a cross-origin access or a Content Security Policy violation — was reported as `TypeError: setting getter-only property "message"` from inside Cypress, hiding the error that actually failed the test. Fixes [#34818](https://github.com/cypress-io/cypress/issues/34818).
+- Fixed a regression in [12.0.0](#12-0-0) where an assertion on a [`cy.contains()`](https://on.cypress.io/contains) command that matched no element did not say what was searched for, reporting `expected undefined not to exist in the DOM` in the Command Log. The searched content is now shown, such as `expected Saving not to exist in the DOM`. Fixes [#25962](https://github.com/cypress-io/cypress/issues/25962).
+- Fixed a regression in [16.0.0](#16-0-0) where [`blockHosts`](https://on.cypress.io/configuration#blockHosts) was not enforced in Chrome, Chromium, and Edge. Requests to a blocked host reached the network instead of failing with a `503` status. Scripts and other resources from those hosts still loaded. Fixes [#34785](https://github.com/cypress-io/cypress/issues/34785).
+- Fixed a regression in [16.0.0](#16-0-0) where the headless Electron browser window was sized smaller than requested on Windows during `cypress run`, so failure screenshots and recorded videos were smaller than the expected 1280x720. Setting `preferences.width` and `preferences.height` in [`before:browser:launch`](https://on.cypress.io/before-browser-launch) had no effect on the result. Fixes [#34771](https://github.com/cypress-io/cypress/issues/34771).
 
 **Misc:**
 

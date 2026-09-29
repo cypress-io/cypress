@@ -18,11 +18,13 @@ vi.mock('@cypress/webpack-preprocessor', async (importOriginal) => {
   }
 })
 
-vi.mock('get-tsconfig', () => ({
-  default: {
-    getTsconfig: vi.fn(),
-  },
-}))
+vi.mock('get-tsconfig', () => {
+  return {
+    default: {
+      getTsconfig: vi.fn(),
+    },
+  }
+})
 
 describe('webpack-batteries-included-preprocessor', () => {
   let preprocessor: typeof import('../../index')

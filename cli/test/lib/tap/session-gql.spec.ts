@@ -4,10 +4,12 @@ import { querySessionGraphql } from '../../../lib/tap/session-gql'
 import { verifySessionRecord } from '../../../lib/cypress-sessions'
 import type { LiveSessionState } from '../../../lib/cypress-sessions'
 
-vi.mock('../../../lib/cypress-sessions', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../../lib/cypress-sessions')>()),
-  verifySessionRecord: vi.fn(),
-}))
+vi.mock('../../../lib/cypress-sessions', async (importOriginal) => {
+  return {
+    ...(await importOriginal<typeof import('../../../lib/cypress-sessions')>()),
+    verifySessionRecord: vi.fn(),
+  }
+})
 
 const session: LiveSessionState = {
   schemaVersion: 1,

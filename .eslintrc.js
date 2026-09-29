@@ -43,6 +43,18 @@ module.exports = {
     'system-tests/lib/validations/**',
     // ignore as the file has invalid syntax
     'system-tests/projects/no-specs-babel-conflict/src/Invalid.jsx',
+    // Build output, ignored here rather than per package: a package's
+    // `.eslintignore` is re-based onto this directory with its patterns
+    // unchanged, so any entry containing a `/` silently matches nothing.
+    // `cjs`/`esm` are anchored to the workspace roots because system-tests
+    // fixtures ship handwritten sources under `esm/`.
+    '**/dist/**',
+    'npm/*/cjs/**',
+    'npm/*/esm/**',
+    'packages/*/cjs/**',
+    'packages/*/esm/**',
+    'tooling/*/cjs/**',
+    'tooling/*/esm/**',
   ],
   overrides: [
     {

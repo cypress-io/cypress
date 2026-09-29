@@ -876,6 +876,10 @@
     "./packages/server/lib/util/fs.ts",
     "./packages/server/lib/util/glob.ts",
     "./packages/server/lib/video_capture.ts",
+    "./packages/server/node_modules/axios/node_modules/agent-base/dist/src/index.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/agent.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/index.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/parse-proxy-response.js",
     "./packages/server/node_modules/body-parser/index.js",
     "./packages/server/node_modules/body-parser/node_modules/debug/src/browser.js",
     "./packages/server/node_modules/body-parser/node_modules/debug/src/index.js",
@@ -3769,6 +3773,7 @@
     "./packages/server/lib/util/server_destroy.ts",
     "./packages/server/lib/util/shell.ts",
     "./packages/server/lib/util/socket_allowed.ts",
+    "./packages/server/lib/util/spki.ts",
     "./packages/server/lib/util/status_code.ts",
     "./packages/server/lib/util/stream_buffer.ts",
     "./packages/server/lib/util/system.ts",
@@ -3777,6 +3782,7 @@
     "./packages/server/lib/util/tests_utils.ts",
     "./packages/server/lib/util/trash.ts",
     "./packages/server/lib/util/tty.ts",
+    "./packages/server/node_modules/axios/node_modules/agent-base/dist/src/promisify.js",
     "./packages/server/node_modules/body-parser/lib/read.js",
     "./packages/server/node_modules/body-parser/lib/types/json.js",
     "./packages/server/node_modules/body-parser/lib/types/raw.js",
@@ -3934,5 +3940,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "5294c23b7e3dbfb033b1e62507383734f8a556565179c2d4169d87b9f894c2d0"
+  "deferredHash": "fd405a3a2bdffebd681e5e4e8a00f23cabe80c18714273d538cf9b7ffd29d0fc"
 }

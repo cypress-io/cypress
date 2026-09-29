@@ -54,7 +54,7 @@ async function parseChangelog ({ changelogContent = null } = {}) {
           throw new Error(`Expected line number ${index + 1} to be a valid section header. Received ${section}. Expected one of ...\n  - ${userFacingSections.join('\n  - ')}`)
         }
 
-        if (result === currentSection || sections[section]) {
+        if (section === currentSection || sections[section]) {
           throw new Error(`Duplicate section header of "${section}" on line number ${index + 1}. Condense change content under a single section header.`)
         }
 

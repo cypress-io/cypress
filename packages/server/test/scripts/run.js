@@ -99,6 +99,20 @@ if (!isWindows()) {
   commandAndArguments.args = commandAndArguments.args.concat(run)
 }
 
+const globInDir = options['glob-in-dir'] && String(options['glob-in-dir']).replace(/\\/g, '/')
+
+if (globInDir && globInDir.endsWith('test/unit')) {
+  // Unit specs named `*.spec.*` belong to vitest (see vitest.config.ts). The
+  // include glob above is left for the shell to expand into directories that
+  // mocha recurses, so the exclusion has to be a mocha `--ignore`, quoted on
+  // POSIX so the shell hands the glob through intact.
+  ['*.spec.js', '*.spec.ts'].forEach((pattern) => {
+    const ignore = path.posix.join(globInDir, '**', pattern)
+
+    commandAndArguments.args.push('--ignore', isWindows() ? ignore : `'${ignore}'`)
+  })
+}
+
 if (options.fgrep) {
   commandAndArguments.args.push(
     '--fgrep',

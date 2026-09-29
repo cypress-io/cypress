@@ -204,6 +204,82 @@ it('blur the activeElement when clicking the body', () => {
   })
 })
 
+// https://github.com/cypress-io/cypress/issues/1909
+it('receives the blur event when the activeElement is programmatically changed', () => {
+  let blurred = false
+
+  cy.visit('http://localhost:3500/fixtures/mui.html')
+
+  cy
+  .get('[label="Age"] [role="button"]')
+  .click()
+
+  cy
+  .get('.MuiMenuItem-selected-63')
+  .then(($el) => {
+    $el.on('blur', () => {
+      blurred = true
+    })
+  })
+
+  cy
+  .get('ul[role="listbox"]')
+  .contains('Twenty')
+  .click()
+  .then(() => {
+    expect(blurred).to.be.true
+  })
+})
+
+describe('document.hasFocus()', { retries: 0 }, () => {
+  const autIframeHasFocus = () => Object.getOwnPropertyDescriptor(top.Document.prototype, 'hasFocus').value.call(top.frames[1].document)
+
+  // https://github.com/cypress-io/cypress/issues/1939
+  it('has focus when running headlessly', () => {
+    if (Cypress.browser.isHeadless) {
+      // top (aka Cypress frame) should always be in focus
+      // when running headlessly. if we aren't running headlessly
+      // it may not be in focus if the user has clicked away.
+      // we don't want this test to potentially fail in that case
+      expect(top.document.hasFocus()).to.be.true
+    }
+  })
+
+  // https://github.com/cypress-io/cypress/issues/1940
+  it('sets the AUT document.hasFocus to top.document.hasFocus', () => {
+    // the AUT's hasFocus() method should always return whatever
+    // the top does.
+    cy.visit('/timeout')
+    .then(() => {
+      if (Cypress.browser.isHeadless) {
+        return cy.document().invoke('hasFocus').should('be.true')
+      }
+
+      if (top.document.hasFocus()) {
+        return cy.document().invoke('hasFocus').should('be.true')
+      }
+
+      cy.document().invoke('hasFocus').should('be.false')
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/2190
+  it('continues to have focus through top navigation', () => {
+    cy
+    .visit('http://localhost:3501/fixtures/generic.html')
+    .then(() => {
+      if (Cypress.browser.isHeadless) {
+        // top (aka Cypress frame) should always be in focus
+        // when running headlessly. if we aren't running headlessly
+        // it may not be in focus if the user has clicked away.
+        // we don't want this test to potentially fail in that case
+        // it's OK if the autIframe has focus too, since that means the window still has focus
+        expect(top.document.hasFocus() || autIframeHasFocus()).to.be.true
+      }
+    })
+  })
+})
+
 describe('polyfill programmatic blur events', () => {
   // restore these props for the rest of the tests
   let stubElementFocus

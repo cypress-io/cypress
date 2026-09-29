@@ -192,9 +192,6 @@
     "packages/ts": {
       "project": [
         "*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "typescript-cached-transpile"
       ]
     },
     "packages/extension": {
@@ -217,12 +214,8 @@
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "@babel/helper-define-map",
-        "@babel/plugin-transform-object-rest-spread",
         "@svgr/webpack",
         "assert",
-        "browser-resolve",
-        "webpack-cli",
         "buffer",
         "process",
         "url"
@@ -745,7 +738,6 @@
     "@types/*",
     "eslint-*",
     "prettier",
-    "chai",
     "sinon",
     "cypress",
     "@cypress/*",
@@ -758,10 +750,11 @@
     "@vue/compiler-dom",
     "@vue/compiler-sfc",
     "edgedriver",
-    "react-15.6.1",
     "react-16.0.0",
-    "react-dom-15.6.1",
+    "react-19.1.1",
     "react-dom-16.0.0",
+    "react-dom-19.1.1",
+    "scheduler-0.26.0",
     "text-mask-addons",
     "vanilla-text-mask",
     "zone.js"

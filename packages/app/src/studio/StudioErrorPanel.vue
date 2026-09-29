@@ -79,5 +79,6 @@ const props = withDefaults(defineProps<{
       'secondary-stroke-color': 'red-500',
     })
   },
+  learnMoreUrl: undefined,
 })
 </script>
