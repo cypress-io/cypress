@@ -1252,7 +1252,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific corner / side.
      *
@@ -1262,7 +1262,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -1276,7 +1276,7 @@ declare namespace Cypress {
     cy.get('button').dblclick(15, 40)
     ```
      */
-    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(x: number, y: number, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
@@ -1338,8 +1338,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/each
      */
-    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
-    each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
+    each(fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
      *
@@ -1349,8 +1349,8 @@ declare namespace Cypress {
      *      // work with each cookie
      *    })
      */
-    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>>
-    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>>
+    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
 
     /**
      * Get A DOM element at a specific index in an array of elements.
@@ -2972,6 +2972,18 @@ declare namespace Cypress {
      * @default false
      */
     cmdKey: boolean
+  }
+
+  /**
+   * Object to change the default behavior of .dblclick().
+   */
+  interface DblClickOptions extends ClickOptions {
+    /**
+     * Serially double click multiple elements
+     *
+     * @default true
+     */
+    multiple: boolean
   }
 
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
