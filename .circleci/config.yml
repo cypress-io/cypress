@@ -24,9 +24,10 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
-  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
-  # (can also be set manually to run the Windows workflow)
-  run-windows-workflow:
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`,
+  # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
+  # (can also be set manually to run those workflows)
+  run-platform-workflows:
     type: boolean
     default: false
   # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
@@ -181,6 +182,8 @@ jobs:
               environment:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
                 PERCY_ENABLED: << pipeline.parameters.percy-enabled >>
+                TRIGGER_SOURCE: "<< pipeline.trigger_source >>"
+                BASE_REVISION: "<< pipeline.git.base_revision >>"
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

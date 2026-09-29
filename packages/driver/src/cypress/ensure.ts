@@ -5,6 +5,7 @@ import $utils from './utils'
 import $errUtils from './error_utils'
 import type { $Cy } from './cy'
 import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
+import { getSuperDomainOrigin } from '@packages/network-tools'
 
 // verbose since subject validation runs on every retry of a query
 const debugVerbose = Debug('cypress-verbose:driver:ensure')
@@ -249,6 +250,15 @@ const isScrollable = ($el, name, onFail?): true | void => {
   })
 }
 
+const isSameSuperDomainOrigin = (origin: string, otherOrigin: string): boolean => {
+  try {
+    return getSuperDomainOrigin(origin) === getSuperDomainOrigin(otherOrigin)
+  } catch (err) {
+    // an opaque origin, such as a sandboxed or data: URL, reports 'null' and can't be parsed
+    return false
+  }
+}
+
 /**
   * commandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
   * If we can not communicate, throw an error.
@@ -258,10 +268,14 @@ const isScrollable = ($el, name, onFail?): true | void => {
   */
 const commandCanCommunicateWithAUT = (cy: $Cy, err?): boolean => {
   if (!isRunnerAbleToCommunicateWithAut()) {
+    const commandOrigin = window.location.origin
+    const autOrigin = cy.state('autLocation').origin
+
     const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
-      commandOrigin: window.location.origin,
-      autOrigin: cy.state('autLocation').origin,
+      commandOrigin,
+      autOrigin,
       isInjectDocumentDomainEnabled: Cypress.config('injectDocumentDomain'),
+      isSameSuperDomainOrigin: isSameSuperDomainOrigin(commandOrigin, autOrigin),
     })
 
     if (err) {
