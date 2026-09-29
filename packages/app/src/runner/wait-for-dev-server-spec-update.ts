@@ -50,8 +50,17 @@ export function waitForDevServerSpecUpdate (
     let resolved = false
     let webpackWaitActive = bundler === 'webpack'
     let expectedJitRecompileGeneration: number | undefined
+    let unknownBundlerFallbackTimeout: ReturnType<typeof setTimeout> | undefined
+
+    const clearUnknownBundlerFallback = () => {
+      if (unknownBundlerFallbackTimeout !== undefined) {
+        clearTimeout(unknownBundlerFallbackTimeout)
+        unknownBundlerFallbackTimeout = undefined
+      }
+    }
 
     const cleanup = () => {
+      clearUnknownBundlerFallback()
       events.off('dev-server:compile:success', onCompileSuccess)
       events.off('dev-server:specs:unchanged', onSpecsUnchanged)
       events.off('dev-server:jit-recompile:queued', onJitRecompileQueued)
@@ -102,6 +111,7 @@ export function waitForDevServerSpecUpdate (
         return
       }
 
+      clearUnknownBundlerFallback()
       webpackWaitActive = true
       tryResolve()
     }
@@ -115,6 +125,7 @@ export function waitForDevServerSpecUpdate (
         return
       }
 
+      clearUnknownBundlerFallback()
       webpackWaitActive = true
       expectedJitRecompileGeneration = generation
       events.on('dev-server:compile:success', onCompileSuccess)
@@ -129,11 +140,12 @@ export function waitForDevServerSpecUpdate (
       // events forwarded over IPC can arrive after the server ack. Use setTimeout
       // instead of setImmediate, which the app Vite bundle stubs out.
       if (bundler === undefined) {
-        setTimeout(() => {
+        clearUnknownBundlerFallback()
+        unknownBundlerFallbackTimeout = setTimeout(() => {
           if (!webpackWaitActive) {
             tryResolve()
           }
-        }, 50)
+        }, 200)
 
         return
       }

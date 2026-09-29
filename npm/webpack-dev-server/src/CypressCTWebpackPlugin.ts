@@ -101,6 +101,13 @@ export class CypressCTWebpackPlugin {
     if (_.isEqual(specs, this.files)) {
       if (!this.queuedJitRecompileGenerations.length && !this.pendingJitRecompileGenerations.length) {
         this.devServerEvents.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile })
+      } else if (neededForJustInTimeCompile) {
+        const generation = this.pendingJitRecompileGenerations[this.pendingJitRecompileGenerations.length - 1]
+          ?? this.queuedJitRecompileGenerations[this.queuedJitRecompileGenerations.length - 1]
+
+        if (generation !== undefined) {
+          this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation, neededForJustInTimeCompile: true })
+        }
       }
 
       return

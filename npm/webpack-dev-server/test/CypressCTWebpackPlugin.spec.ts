@@ -170,6 +170,57 @@ describe('CypressCTWebpackPlugin', () => {
     expect(specsUnchangedEvents).toEqual([{ neededForJustInTimeCompile: true }])
   })
 
+  it('re-emits jit-recompile:queued for duplicate JIT spec updates while a recompile is in flight', () => {
+    const devServerEvents = new EventEmitter()
+    const jitQueuedEvents: Array<{ generation: number, neededForJustInTimeCompile?: boolean }> = []
+    const specs = [{ absolute: '/project/src/A.cy.tsx' } as Cypress.Spec]
+
+    devServerEvents.on('dev-server:jit-recompile:queued', (data) => {
+      jitQueuedEvents.push(data)
+    })
+
+    const plugin = new CypressCTWebpackPlugin({
+      files: specs,
+      projectRoot: '/project',
+      supportFile: false,
+      devServerEvents,
+      webpack: { NormalModule: { getCompilationHooks: vi.fn(() => ({ loader: { tap: vi.fn() } })) } },
+      indexHtmlFile: 'index.html',
+    })
+
+    let compilationCallback: (compilation: object) => void
+    const compiler = {
+      hooks: {
+        beforeCompile: { tapAsync: vi.fn() },
+        compilation: { tap: vi.fn((_name: string, cb: (compilation: object) => void) => {
+          compilationCallback = cb
+        }) },
+        done: { tap: vi.fn() },
+      },
+    }
+
+    plugin.apply(compiler as any)
+
+    compilationCallback!({
+      inputFileSystem: { utimesSync: vi.fn() },
+    })
+
+    devServerEvents.emit('dev-server:specs:changed', {
+      specs: [{ absolute: '/project/src/B.cy.tsx' } as Cypress.Spec],
+      options: { neededForJustInTimeCompile: true },
+    })
+
+    devServerEvents.emit('dev-server:specs:changed', {
+      specs: [{ absolute: '/project/src/B.cy.tsx' } as Cypress.Spec],
+      options: { neededForJustInTimeCompile: true },
+    })
+
+    expect(jitQueuedEvents).toEqual([
+      { generation: 1, neededForJustInTimeCompile: true },
+      { generation: 1, neededForJustInTimeCompile: true },
+    ])
+  })
+
   it('does not emit non-JIT compile success when a JIT recompile is queued but not yet compiling', () => {
     const devServerEvents = new EventEmitter()
     const compileSuccessEvents: Array<{ jitRecompile?: boolean, jitRecompileGeneration?: number }> = []

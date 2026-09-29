@@ -235,7 +235,7 @@ describe('waitForDevServerSpecUpdate', () => {
     expect(resolved).toBe(false)
 
     events.emit('dev-server:on-spec-updated')
-    await vi.advanceTimersByTimeAsync(50)
+    await vi.advanceTimersByTimeAsync(200)
     await promise
 
     expect(resolved).toBe(true)
@@ -266,7 +266,7 @@ describe('waitForDevServerSpecUpdate', () => {
       expect(resolved).toBe(false)
 
       events.emit('dev-server:on-spec-updated')
-      await vi.advanceTimersByTimeAsync(50)
+      await vi.advanceTimersByTimeAsync(200)
       await promise
 
       expect(resolved).toBe(true)
@@ -302,5 +302,50 @@ describe('waitForDevServerSpecUpdate', () => {
 
     expect(resolved).toBe(true)
     vi.useRealTimers()
+  })
+
+  it('waits for webpack JIT when bundler is unknown and IPC delivers JIT after spec-updated ack', async () => {
+    vi.useFakeTimers()
+
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:on-spec-updated')
+    await vi.advanceTimersByTimeAsync(100)
+
+    expect(resolved).toBe(false)
+
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
+    await promise
+
+    expect(resolved).toBe(true)
+    vi.useRealTimers()
+  })
+
+  it('waits for an in-flight JIT recompile when a second spec update matches current files', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any, { bundler: 'webpack' }).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
+    await tick()
+
+    expect(resolved).toBe(false)
+
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
+    await promise
+
+    expect(resolved).toBe(true)
   })
 })
