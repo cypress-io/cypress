@@ -18,12 +18,14 @@
         }
 
         /* Styling the scrollbar forces classic, space-taking scrollbars in Chromium and WebKit, even where the OS default is overlay */
-        #scroll-to-visible-scrollbars::-webkit-scrollbar {
+        #scroll-to-visible-scrollbars::-webkit-scrollbar,
+        #scroll-into-view-visible-scrollbars::-webkit-scrollbar {
           width: 15px;
           height: 15px;
         }
 
-        #scroll-to-visible-scrollbars::-webkit-scrollbar-thumb {
+        #scroll-to-visible-scrollbars::-webkit-scrollbar-thumb,
+        #scroll-into-view-visible-scrollbars::-webkit-scrollbar-thumb {
           background: #888;
         }
       </style>
@@ -61,6 +63,13 @@
         <div style="width: 500px; height: 500px; position: relative;">
           Both Scroll
           <h5 style="position: absolute; top: 300px; left: 300px">both here</h5>
+        </div>
+      </div>
+
+      <div id="scroll-into-view-visible-scrollbars" style="height: 100px; width: 100px; overflow: scroll;">
+        <div style="width: 500px; height: 500px; position: relative;">
+          <div id="end-small" style="position: absolute; top: 490px; left: 490px; width: 10px; height: 10px;"></div>
+          <div id="end-large" style="position: absolute; top: 450px; left: 450px; width: 50px; height: 50px;"></div>
         </div>
       </div>
 

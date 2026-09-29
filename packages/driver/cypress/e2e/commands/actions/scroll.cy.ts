@@ -816,6 +816,40 @@ describe('src/cy/commands/actions/scroll', () => {
       })
     })
 
+    describe('element at the end of a container with visible scrollbars', () => {
+      beforeEach(function () {
+        this.container = cy.$$('#scroll-into-view-visible-scrollbars').get(0)
+        this.range = scrollRange(this.container)
+
+        expect(this.container.scrollTop).to.eq(0)
+        expect(this.container.scrollLeft).to.eq(0)
+      })
+
+      const expectFullyInView = (container: HTMLElement, el: HTMLElement) => {
+        const containerRect = container.getBoundingClientRect()
+        const elRect = el.getBoundingClientRect()
+
+        expect(elRect.bottom, 'element bottom').to.be.at.most(containerRect.top + container.clientTop + container.clientHeight)
+        expect(elRect.right, 'element right').to.be.at.most(containerRect.left + container.clientLeft + container.clientWidth)
+      }
+
+      it('scrolls an element smaller than the scrollbar fully into view', function () {
+        cy.get('#end-small').scrollIntoView().then(function ($el) {
+          expect(this.container.scrollTop).to.eq(this.range.y)
+          expect(this.container.scrollLeft).to.eq(this.range.x)
+          expectFullyInView(this.container, $el.get(0))
+        })
+      })
+
+      it('scrolls a larger element fully into view', function () {
+        cy.get('#end-large').scrollIntoView().then(function ($el) {
+          expect(this.container.scrollTop).to.eq(this.range.y)
+          expect(this.container.scrollLeft).to.eq(this.range.x)
+          expectFullyInView(this.container, $el.get(0))
+        })
+      })
+    })
+
     it('calls jQuery scroll to', () => {
       const scrollTo = cy.spy($.fn, 'scrollTo')
 
