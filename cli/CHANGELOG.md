@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where requests to an origin that serves only HTTP/2 either failed with a `403: Forbidden` or hung until they timed out, depending on the origin. Cypress advertised no protocol over ALPN when opening a TLS connection, leaving such an origin nothing to negotiate against. Cypress now advertises `http/1.1`. Origins that serve both protocols are unaffected. Fixed in [#34951](https://github.com/cypress-io/cypress/pull/34951).
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
 
 **Misc:**
