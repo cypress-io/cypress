@@ -354,7 +354,11 @@ class HttpsAgent extends https.Agent {
   }
 
   createConnection (options: HttpsRequestOptions, cb?: any): any {
-    options.ALPNProtocols = ALPNProtocols
+    // Safe to set after the socket pool has keyed this request: `https.Agent.getName()`
+    // ignores ALPNProtocols, and every connection advertises the same list. Making the
+    // list conditional would need it folded into the key, or sockets would be reused
+    // across differing negotiations.
+    options.ALPNProtocols = [...ALPNProtocols]
 
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)

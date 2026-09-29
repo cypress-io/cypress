@@ -927,18 +927,39 @@ describe('lib/agent', function () {
       expect(createConnection).toHaveBeenCalledWith(expect.objectContaining({ ALPNProtocols: ['http/1.1'] }))
     })
 
-    it('advertises http/1.1 over ALPN when tunnelling through an upstream proxy', function () {
-      vi.stubEnv('HTTPS_PROXY', 'https://foo.bar:1234')
-      vi.stubEnv('NO_PROXY', '')
+    // the origin leg of a tunnel is established in a later call frame than the one that
+    // sets ALPNProtocols, so drive the real tunnel rather than stubbing it out
+    it('advertises http/1.1 over ALPN on the origin leg of an upstream proxy tunnel', async function () {
+      const upstream = allowDestroy(net.createServer((socket) => {
+        socket.once('data', () => socket.write('HTTP/1.1 200 OK\r\n\r\n'))
+      }))
 
-      const { httpsAgent } = new CombinedAgent()
-      const createUpstreamProxyConnection = vi.spyOn(httpsAgent as any, 'createUpstreamProxyConnection').mockReturnValue(undefined)
-      const options = { href: 'https://foo.bar/', host: 'foo.bar', port: 443 } as any
+      await new Promise<void>((resolve) => upstream.listen(0, '127.0.0.1', resolve))
 
-      httpsAgent.createConnection(options, () => {})
+      try {
+        const { port } = upstream.address() as net.AddressInfo
 
-      expect(createUpstreamProxyConnection).toHaveBeenCalled()
-      expect(options.ALPNProtocols).toEqual(['http/1.1'])
+        vi.stubEnv('HTTPS_PROXY', `http://127.0.0.1:${port}`)
+        vi.stubEnv('NO_PROXY', '')
+
+        const createConnection = vi.spyOn(https.Agent.prototype, 'createConnection').mockReturnValue(new net.Socket() as any)
+        const { httpsAgent } = new CombinedAgent()
+        const options = {
+          href: 'https://foo.bar/',
+          uri: url.parse('https://foo.bar/'),
+          _agentKey: 'foo.bar:443:',
+        } as any
+
+        await new Promise<void>((resolve) => httpsAgent.createConnection(options, () => resolve()))
+
+        expect(createConnection).toHaveBeenCalledWith(expect.objectContaining({
+          ALPNProtocols: ['http/1.1'],
+          socket: expect.anything(),
+        }))
+      } finally {
+        // the tunnel socket stays open, and close() alone waits on it
+        await new Promise((resolve) => (upstream as any).destroy(resolve))
+      }
     })
   })
 

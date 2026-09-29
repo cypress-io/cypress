@@ -12,7 +12,7 @@ const debug = debugModule('cypress:network:connect')
 // leaves an HTTP/2-only origin nothing to negotiate against, so it either refuses
 // the handshake or holds the socket open until the request times out. Advertising
 // http/1.1 explicitly turns that into a fast, legible failure.
-export const ALPNProtocols = ['http/1.1']
+export const ALPNProtocols: readonly string[] = Object.freeze(['http/1.1'])
 
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
@@ -84,7 +84,7 @@ function createSocket (opts: RetryingOptions, onConnect: () => void): net.Socket
   })
 
   if (opts.useTls) {
-    return tls.connect({ ...netOpts, ALPNProtocols }, onConnect)
+    return tls.connect({ ...netOpts, ALPNProtocols: [...ALPNProtocols] }, onConnect)
   }
 
   return net.connect(netOpts, onConnect)
