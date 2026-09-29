@@ -3167,6 +3167,20 @@ describe('network stubbing', { retries: 15 }, function () {
       .wait('@get')
     })
 
+    it('sends a res.statusCode assigned in a response handler to the app', function () {
+      cy.intercept('/json-content-type*', function (req) {
+        req.continue((res) => {
+          res.statusCode = 503
+        })
+      }).as('get')
+      .then(() => fetch('/json-content-type'))
+      .then(async (res) => {
+        expect(res.status).to.eq(503)
+        expect(await res.json()).to.deep.eq({})
+      })
+      .wait('@get').its('response.statusCode').should('eq', 503)
+    })
+
     // https://github.com/cypress-io/cypress/issues/17084
     it('does not overwrite the json-related content-type header', () => {
       cy.intercept('/json-content-type', (req) => {

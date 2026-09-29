@@ -17,6 +17,28 @@ const debug = Debug('cypress:net-stubbing:server:intercept-response')
 type InterceptResponseMiddleware = ResponseMiddleware extends (this: infer T) => any ? T : never
 
 /**
+ * Headers reach the client because `res.headers` is the same object as
+ * `incomingRes.headers` and is merged in place; `statusCode` and
+ * `statusMessage` are primitives, so they must be copied back explicitly.
+ */
+function applyStatusChanges (incomingRes: InterceptResponseMiddleware['incomingRes'], modifiedRes: CyHttpMessages.IncomingResponse) {
+  const statusCodeChanged = modifiedRes.statusCode !== incomingRes.statusCode
+  const statusMessageChanged = modifiedRes.statusMessage !== incomingRes.statusMessage
+
+  if (statusCodeChanged) {
+    incomingRes.statusCode = Number(modifiedRes.statusCode)
+  }
+
+  if (statusMessageChanged) {
+    incomingRes.statusMessage = modifiedRes.statusMessage
+  } else if (statusCodeChanged) {
+    // The origin's reason phrase describes the origin's status. Clearing it lets
+    // the default phrase for the new status apply, as with `res.send({ statusCode })`.
+    incomingRes.statusMessage = ''
+  }
+}
+
+/**
  * Legacy response intercept orchestration — invoked via {@link ForResponseInterception}.
  */
 export async function handleInterceptResponse (mw: InterceptResponseMiddleware): Promise<void> {
@@ -77,6 +99,8 @@ export async function handleInterceptResponse (mw: InterceptResponseMiddleware):
   })
 
   mergeChanges(request.res as any, modifiedRes)
+
+  applyStatusChanges(mw.incomingRes, modifiedRes)
 
   const bodyStream = await getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
 
