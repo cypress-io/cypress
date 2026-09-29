@@ -8,6 +8,12 @@ import os from 'os'
 
 const debug = debugModule('cypress:network:connect')
 
+// Cypress' outbound stack speaks HTTP/1.1 only. Sending no ALPN extension at all
+// leaves an HTTP/2-only origin nothing to negotiate against, so it either refuses
+// the handshake or holds the socket open until the request times out. Advertising
+// http/1.1 explicitly turns that into a fast, legible failure.
+export const ALPNProtocols = ['http/1.1']
+
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
   return new Promise<net.Address>((resolve, reject) => {
@@ -78,7 +84,7 @@ function createSocket (opts: RetryingOptions, onConnect: () => void): net.Socket
   })
 
   if (opts.useTls) {
-    return tls.connect(netOpts, onConnect)
+    return tls.connect({ ...netOpts, ALPNProtocols }, onConnect)
   }
 
   return net.connect(netOpts, onConnect)

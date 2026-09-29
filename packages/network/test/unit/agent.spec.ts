@@ -895,7 +895,7 @@ describe('lib/agent', function () {
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
-          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234 }, expect.any(Function))
+          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234, ALPNProtocols: ['http/1.1'] }, expect.any(Function))
           resolve()
         })
       })
@@ -910,6 +910,35 @@ describe('lib/agent', function () {
           resolve()
         })
       })
+    })
+  })
+
+  describe('HttpsAgent#createConnection', function () {
+    afterEach(function () {
+      vi.restoreAllMocks()
+    })
+
+    it('advertises http/1.1 over ALPN', function () {
+      const createConnection = vi.spyOn(https.Agent.prototype, 'createConnection').mockReturnValue(new net.Socket() as any)
+      const options = { href: 'https://foo.bar/', host: 'foo.bar', port: 443 } as any
+
+      new CombinedAgent().httpsAgent.createConnection(options, () => {})
+
+      expect(createConnection).toHaveBeenCalledWith(expect.objectContaining({ ALPNProtocols: ['http/1.1'] }))
+    })
+
+    it('advertises http/1.1 over ALPN when tunnelling through an upstream proxy', function () {
+      vi.stubEnv('HTTPS_PROXY', 'https://foo.bar:1234')
+      vi.stubEnv('NO_PROXY', '')
+
+      const { httpsAgent } = new CombinedAgent()
+      const createUpstreamProxyConnection = vi.spyOn(httpsAgent as any, 'createUpstreamProxyConnection').mockReturnValue(undefined)
+      const options = { href: 'https://foo.bar/', host: 'foo.bar', port: 443 } as any
+
+      httpsAgent.createConnection(options, () => {})
+
+      expect(createUpstreamProxyConnection).toHaveBeenCalled()
+      expect(options.ALPNProtocols).toEqual(['http/1.1'])
     })
   })
 
