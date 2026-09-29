@@ -1,23 +1,18 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { asyncRetry } from '../../../lib/util/async_retry'
-import sinon from 'sinon'
-import chai from 'chai'
-import sinonChai from '@cypress/sinon-chai'
-
-chai.use(sinonChai)
-const { expect } = chai
 
 describe('asyncRetry', () => {
-  let asyncFn
+  let asyncFn: ReturnType<typeof vi.fn>
   const resolution = { result: 'success' }
 
   beforeEach(() => {
-    asyncFn = sinon.stub()
+    asyncFn = vi.fn()
   })
 
   describe('base retry behavior', () => {
     describe('when succeeds on the first try', () => {
       beforeEach(() => {
-        asyncFn.onFirstCall().resolves(resolution)
+        asyncFn.mockResolvedValueOnce(resolution)
       })
 
       it('resolves with the expected resolution, only having called the original fn once', async () => {
@@ -25,14 +20,16 @@ describe('asyncRetry', () => {
           maxAttempts: 3,
         })()
 
-        expect(res).to.eq(resolution)
-        expect(asyncFn).to.have.been.calledOnce
+        expect(res).toBe(resolution)
+        expect(asyncFn).toHaveBeenCalledTimes(1)
       })
     })
 
     describe('when succeeds on the second try', () => {
       beforeEach(() => {
-        asyncFn.onFirstCall().rejects(new Error('first call rejection')).onSecondCall().resolves(resolution)
+        asyncFn
+        .mockRejectedValueOnce(new Error('first call rejection'))
+        .mockResolvedValueOnce(resolution)
       })
 
       it('resolves with the expected resolution, only having called the original fn twice', async () => {
@@ -40,17 +37,17 @@ describe('asyncRetry', () => {
           maxAttempts: 2,
         })()
 
-        expect(res).to.eq(resolution)
-        expect(asyncFn).to.have.been.calledTwice
+        expect(res).toBe(resolution)
+        expect(asyncFn).toHaveBeenCalledTimes(2)
       })
     })
 
     describe('when succeeds on the third try, with max attempts as 2', () => {
       beforeEach(() => {
         asyncFn
-        .onFirstCall().rejects(new Error('first call rejection'))
-        .onSecondCall().rejects(new Error('second call rejection'))
-        .onThirdCall().resolves()
+        .mockRejectedValueOnce(new Error('first call rejection'))
+        .mockRejectedValueOnce(new Error('second call rejection'))
+        .mockResolvedValueOnce(undefined)
       })
 
       it('rejects with an aggregate error, having called original fn only twice', async () => {
@@ -59,22 +56,22 @@ describe('asyncRetry', () => {
         try {
           await asyncRetry(asyncFn, { maxAttempts: 2 })()
         } catch (e) {
-          thrown = e
+          thrown = e as AggregateError
         }
-        expect(thrown).not.to.be.undefined
-        expect(thrown?.errors.length).to.be.eq(2)
-        expect(thrown?.errors[0].message).to.eq('first call rejection')
-        expect(thrown?.errors[1].message).to.eq('second call rejection')
-        expect(asyncFn).to.have.been.calledTwice
+        expect(thrown).toBeDefined()
+        expect(thrown?.errors.length).toBe(2)
+        expect(thrown?.errors[0].message).toBe('first call rejection')
+        expect(thrown?.errors[1].message).toBe('second call rejection')
+        expect(asyncFn).toHaveBeenCalledTimes(2)
       })
     })
 
     describe('when fails on the first try, and a retry is not warranted', () => {
-      let err
+      let err: Error
 
       beforeEach(() => {
         err = new Error('some error')
-        asyncFn.rejects(err)
+        asyncFn.mockRejectedValue(err)
       })
 
       it('throws a non-aggregate error', async () => {
@@ -83,63 +80,60 @@ describe('asyncRetry', () => {
         try {
           await asyncRetry(asyncFn, { maxAttempts: 1 })()
         } catch (e) {
-          thrown = e
+          thrown = e as Error & { errors?: any[] }
         }
 
-        expect(thrown?.message).to.eq(err.message)
-        expect(thrown?.errors).to.be.undefined
+        expect(thrown?.message).toBe(err.message)
+        expect(thrown?.errors).toBeUndefined()
       })
     })
   })
 
   describe('retry delay', () => {
-    let clock: sinon.SinonFakeTimers
-
     beforeEach(() => {
-      asyncFn.rejects(new Error('reject to test retry delay'))
-      clock = sinon.useFakeTimers()
+      asyncFn.mockRejectedValue(new Error('reject to test retry delay'))
+      vi.useFakeTimers()
     })
 
     afterEach(() => {
-      sinon.restore()
+      vi.useRealTimers()
     })
 
     it('waits for a duration returned by retryDelay between each retry', async () => {
       const delay = 500
       const asyncP = asyncRetry(asyncFn, { maxAttempts: 2, retryDelay: () => delay })().catch((e) => {})
 
-      await clock.tickAsync(1)
-      expect(asyncFn).to.have.been.calledOnce
-      await clock.tickAsync(delay)
-      expect(asyncFn).to.have.been.calledTwice
-      await clock.tickAsync(delay)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(asyncFn).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(delay)
+      expect(asyncFn).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(delay)
       await asyncP
-      expect(asyncFn).to.have.been.calledTwice
+      expect(asyncFn).toHaveBeenCalledTimes(2)
     })
   })
 
   describe('onRetry option', () => {
-    let clock: sinon.SinonFakeTimers
     let err: Error
 
     beforeEach(() => {
       err = new Error('Some Error')
-      asyncFn.rejects(err)
-      clock = sinon.useFakeTimers()
+      asyncFn.mockRejectedValue(err)
+      vi.useFakeTimers()
     })
 
     afterEach(() => {
-      sinon.restore()
+      vi.useRealTimers()
     })
 
     it('is called with the delay and the error that occurred, before the next retry', async () => {
-      const onRetryFn = sinon.stub<[number, unknown], void>()
+      const onRetryFn = vi.fn()
       const delay = 500
       const p = asyncRetry(asyncFn, { maxAttempts: 2, retryDelay: () => delay, onRetry: onRetryFn })().catch((e) => {})
 
-      await clock.tickAsync(1)
-      expect(onRetryFn).to.have.been.calledOnceWith(delay, err)
-      await clock.runAllAsync()
+      await vi.advanceTimersByTimeAsync(1)
+      expect(onRetryFn).toHaveBeenCalledWith(delay, err)
+      await vi.runAllTimersAsync()
       await p
     })
   })
