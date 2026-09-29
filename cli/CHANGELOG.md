@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.1.2
+
+**Bugfixes:**
+
+- Fixed an issue where an error whose `message` cannot be overwritten — such as the `DOMException` a browser throws for a cross-origin access or a Content Security Policy violation — was reported as `TypeError: setting getter-only property "message"` from inside Cypress, hiding the error that actually failed the test. Fixes [#34818](https://github.com/cypress-io/cypress/issues/34818).
+
 ## 16.1.1
 
 **Performance:**
