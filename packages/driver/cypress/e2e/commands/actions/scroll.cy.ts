@@ -1,8 +1,7 @@
 // @ts-expect-error - this is declared multiple times
 const { _, $ } = Cypress
 
-// The range the browser lets an element scroll, which excludes visible
-// scrollbars and includes padding, unlike its CSS width and height
+// `client*` leaves out visible scrollbars, which CSS sizes include
 const scrollRange = (el: HTMLElement) => {
   return {
     x: el.scrollWidth - el.clientWidth,
@@ -40,7 +39,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
       // #scroll-to-both is square, so one range covers both axes
       this.fullScroll = scrollRange(this.scrollBoth.get(0)).y
-      // browsers round up the pixel value so we need to round it
+      // jQuery.scrollTo rounds each step to whole pixels
       this.halfScroll = Math.round(this.fullScroll / 2)
     })
 

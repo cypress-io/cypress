@@ -179,9 +179,8 @@ $scrollTo.max = function (elem, axis) {
   let scroll = `scroll${Dim}`
 
   if (!isWin(elem)) {
-    // Differs from upstream, which subtracts the CSS content size. That size
-    // includes the space a visible scrollbar takes and excludes padding, so
-    // it doesn't match the range the browser actually lets the element scroll.
+    // Uses `client*` rather than upstream's CSS size because it leaves out a
+    // visible scrollbar and counts padding, matching the range the browser allows.
     return elem[scroll] - elem[`client${Dim}`]
   }
 
