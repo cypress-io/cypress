@@ -17,7 +17,7 @@ The `npm/` directory contains the publicly published npm packages for the Cypres
 ### Bundler Integrations
 
 - **@cypress/webpack-dev-server** — Implements the object-syntax `devServer` API for Cypress component testing backed by Webpack Dev Server
-- **@cypress/vite-dev-server** — Implements the object-syntax `devServer` API for Cypress component testing backed by Vite (supports Vite 5, 6, and 7)
+- **@cypress/vite-dev-server** — Implements the object-syntax `devServer` API for Cypress component testing backed by Vite (peer dependency `vite@^8`)
 - **@cypress/webpack-preprocessor** — Cypress file preprocessor for bundling test files via Webpack 5; requires peer deps (`@babel/core`, `babel-loader`, etc.) to be installed by the consumer
 - **@cypress/webpack-batteries-included-preprocessor** — Wrapper around `@cypress/webpack-preprocessor` that bundles Babel and TypeScript loaders so consumers do not need to configure them separately
 - **@cypress/vite-plugin-cypress-esm** — Vite plugin (alpha) that wraps ES modules in a `Proxy` to allow mutation/mocking of ESM namespaces in component tests
@@ -25,28 +25,36 @@ The `npm/` directory contains the publicly published npm packages for the Cypres
 ### Plugins & Dev Tooling
 
 - **@cypress/grep** — Plugin for filtering Cypress tests by substring or tags at runtime, with options for spec pre-filtering and test burning
-- **@cypress/puppeteer** — Plugin for accessing Puppeteer's browser API (`page`, `browser`) from within Cypress test commands via a `cy.puppeteer()` style interface
+- **@cypress/puppeteer** — Plugin (beta) that runs Puppeteer message handlers registered in `setupNodeEvents` when a spec calls `cy.puppeteer(name, ...args)`; each handler receives a Puppeteer `Browser` connected to the Cypress-launched Chromium browser
 - **@cypress/schematic** — Official Angular CLI schematic and builder for scaffolding Cypress configuration into Angular projects (`ng add @cypress/schematic`)
 - **@cypress/eslint-plugin-dev** — Private, unpublished. The eslintrc presets the monorepo packages still on ESLint 8 lint against; being retired in favour of `@packages/eslint-config`
 
 ## Workspace Commands
 
-Each package manages its own build. From within a package directory:
+Each package manages its own build, and script names are not uniform — check the package's `package.json` before running anything. From within a package directory:
 
 ```sh
 yarn build          # compile TypeScript / run rollup (varies by package)
-yarn check-ts       # type-check without emitting
+yarn check-ts       # type-check without emitting (not every package has it, e.g. grep, schematic)
 yarn lint           # run ESLint
-yarn test -- <path-to-spec>          # run vitest targeting a specific file (unit test packages)
-yarn test -- "<glob-pattern>"        # run vitest specs matching a glob (unit test packages)
-yarn cy:run -- --spec <path-to-spec> # run a specific spec (adapter packages)
+yarn test -- <path-to-spec>          # vitest packages: target a specific file
+yarn test -- "<glob-pattern>"        # vitest packages: target specs matching a glob
 ```
 
-From the monorepo root using Nx:
+What `yarn test` runs depends on the package:
+
+- **vitest** — `grep`, `puppeteer`, `schematic`, `vite-dev-server`, `webpack-dev-server`, `webpack-batteries-included-preprocessor`, `eslint-plugin-dev`
+- **Cypress** — `react` and `vue` (`yarn cy:run -- --spec <path-to-spec>`), `vite-plugin-cypress-esm` (`yarn cypress:run`)
+- **Custom script** — `webpack-preprocessor` runs `tsx ./scripts/test-webpack-5.ts` (it also has `test-unit` and `test-e2e`)
+- **No `test` script** — `angular`, `svelte`, `mount-utils`
+
+Packages with their own Cypress e2e suite use `cypress:open` / `cypress:run` (`grep`, `puppeteer`, `vite-dev-server`, `webpack-dev-server`, `vite-plugin-cypress-esm`); only `react` and `vue` use `cy:open` / `cy:run`.
+
+From the monorepo root:
 
 ```sh
-yarn nx build @cypress/<pkg>      # build a single package
-yarn nx run-many -t build --projects=tag:npm   # build all npm packages
+yarn workspace @cypress/<pkg> build              # build a single package
+yarn lerna run build --scope '@cypress/*'        # build all npm packages
 ```
 
 ## Notes
@@ -55,5 +63,5 @@ yarn nx run-many -t build --projects=tag:npm   # build all npm packages
 - `@cypress/webpack-dev-server` and `@cypress/vite-dev-server` are bundled with the Cypress binary and generally do not need to be installed separately by end users; the object-syntax `devServer` config in `cypress.config.ts` is the primary API.
 - `@cypress/webpack-batteries-included-preprocessor` requires `@cypress/webpack-preprocessor` as a peer dependency and must be installed alongside it.
 - `@cypress/eslint-plugin-dev` is private and no longer published — it is for internal Cypress development only, and the packages that consume it are migrating to `@packages/eslint-config`. Do not recommend it to end users; the user-facing ESLint plugin lives at `eslint-plugin-cypress` (a separate repository).
-- `@cypress/xpath` (also in this directory) is deprecated and no longer maintained.
+- `npm/xpath/` holds only a README: `@cypress/xpath` is deprecated and no longer maintained, and there is no source or `package.json` here.
 - Releases are triggered automatically by semantic commit messages on `develop`; there is no manual publish step for individual packages.

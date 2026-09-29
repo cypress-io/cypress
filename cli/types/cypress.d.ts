@@ -1124,6 +1124,12 @@ declare namespace Cypress {
      * * `setInterval`
      * * `clearInterval`
      * * `Date` Objects
+     * * `requestAnimationFrame`
+     * * `cancelAnimationFrame`
+     * * `requestIdleCallback`
+     * * `cancelIdleCallback`
+     * * `performance`
+     * * `Intl`
      *
      * The clock starts at the unix epoch (timestamp of 0).
      * This means that when you instantiate new Date in your application,
@@ -1168,13 +1174,14 @@ declare namespace Cypress {
     clock(now: number | Date, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock but only overrides specific functions.
+     * Passing `null` for `now` starts the clock at the unix epoch (timestamp of 0).
      *
      * @see https://on.cypress.io/clock
      * @example
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number | Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
+    clock(now: number | Date | null, functions?: ClockFunction[], options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -1245,7 +1252,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific corner / side.
      *
@@ -1255,7 +1262,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -1269,7 +1276,7 @@ declare namespace Cypress {
     cy.get('button').dblclick(15, 40)
     ```
      */
-    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(x: number, y: number, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
@@ -1331,8 +1338,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/each
      */
-    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
-    each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
+    each(fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
      *
@@ -1342,8 +1349,8 @@ declare namespace Cypress {
      *      // work with each cookie
      *    })
      */
-    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>>
-    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>>
+    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
 
     /**
      * Get A DOM element at a specific index in an array of elements.
@@ -2965,6 +2972,18 @@ declare namespace Cypress {
      * @default false
      */
     cmdKey: boolean
+  }
+
+  /**
+   * Object to change the default behavior of .dblclick().
+   */
+  interface DblClickOptions extends ClickOptions {
+    /**
+     * Serially double click multiple elements
+     *
+     * @default true
+     */
+    multiple: boolean
   }
 
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
@@ -6584,6 +6603,23 @@ declare namespace Cypress {
   }
 
   /**
+   * Names of the global functions that `cy.clock()` can override in the browser.
+   */
+  type ClockFunction =
+    | 'setTimeout'
+    | 'clearTimeout'
+    | 'setInterval'
+    | 'clearInterval'
+    | 'Date'
+    | 'requestAnimationFrame'
+    | 'cancelAnimationFrame'
+    | 'requestIdleCallback'
+    | 'cancelIdleCallback'
+    | 'performance'
+    | 'Intl'
+    | 'queueMicrotask'
+
+  /**
    * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
    */
   interface Clock {
@@ -6591,9 +6627,10 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
+     * @returns The clock's new `now`, in ms since the unix epoch
      * @see https://on.cypress.io/tick
      */
-    tick(time: number): void
+    tick(time: number): number
     /**
      * Restore all overridden native functions.
      * This is automatically called between tests, so should not generally be needed.

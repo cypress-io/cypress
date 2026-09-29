@@ -34,6 +34,10 @@ interface InternalCheckOptions extends Partial<Cypress.CheckClearOptions> {
 // is an error inside a .d.ts, which `skipLibCheck` drops.
 type InternalKeyboard = typeof import('../src/cy/keyboard').default
 
+// `Cypress.Screenshot` is published with only the documented `defaults()`, so
+// internal callers cast to this for the same reason.
+type InternalScreenshot = typeof import('../src/cypress/screenshot').default
+
 declare namespace Cypress {
   interface Cypress {
     browserMajorVersion: () => number

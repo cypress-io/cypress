@@ -445,8 +445,20 @@ cy.get('.someSelector')
   .each(($el, index, list) => {
     $el // $ExpectType JQuery<HTMLElement>
     index // $ExpectType number
-    list // $ExpectType HTMLElement[]
+    list // $ExpectType JQuery<HTMLElement>
+    list.first() // $ExpectType JQuery<HTMLElement>
+    list.index($el) // $ExpectType number
   })
+
+cy.get('.someSelector')
+  .each({ timeout: 4000 }, ($el, index, list) => {
+    list // $ExpectType JQuery<HTMLElement>
+    list.filter(':visible') // $ExpectType JQuery<HTMLElement>
+  })
+
+cy.wrap([1, 2, 3]).each((num: number, index: number, list: number[]) => {
+  list // $ExpectType number[]
+})
 
 cy.wrap(['bar', 'baz'])
   .spread((first, second) => {
@@ -769,6 +781,34 @@ namespace CypressClockTests {
   cy.clock(+new Date(), ['Date'])
   // Date object
   cy.clock(new Date(2019, 3, 2))
+  // null starts the clock at 0
+  cy.clock(null, ['setTimeout', 'clearTimeout'])
+  cy.clock(null, ['setTimeout'], { log: false })
+  // every function the clock can override
+  cy.clock(null, [
+    'setTimeout',
+    'clearTimeout',
+    'setInterval',
+    'clearInterval',
+    'Date',
+    'requestAnimationFrame',
+    'cancelAnimationFrame',
+    'requestIdleCallback',
+    'cancelIdleCallback',
+    'performance',
+    'Intl',
+    'queueMicrotask',
+  ])
+  const clockFunctions: Cypress.ClockFunction[] = ['requestAnimationFrame', 'performance']
+
+  cy.clock(0, clockFunctions)
+  cy.clock(null, ['setImmediate']) // $ExpectError
+  cy.clock(null, ['notATimer']) // $ExpectError
+  cy.clock('2019-04-02') // $ExpectError
+  // tick returns the new now
+  cy.clock().then((clock) => {
+    clock.tick(1000) // $ExpectType number
+  })
   // restoring the clock
   cy.clock().then((clock) => {
     clock.restore()

@@ -882,6 +882,10 @@
     "./packages/server/lib/util/fs.ts",
     "./packages/server/lib/util/glob.ts",
     "./packages/server/lib/video_capture.ts",
+    "./packages/server/node_modules/axios/node_modules/agent-base/dist/src/index.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/agent.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/index.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/parse-proxy-response.js",
     "./packages/server/node_modules/body-parser/index.js",
     "./packages/server/node_modules/body-parser/node_modules/debug/src/browser.js",
     "./packages/server/node_modules/body-parser/node_modules/debug/src/index.js",
@@ -3777,6 +3781,7 @@
     "./packages/server/lib/util/tests_utils.ts",
     "./packages/server/lib/util/trash.ts",
     "./packages/server/lib/util/tty.ts",
+    "./packages/server/node_modules/axios/node_modules/agent-base/dist/src/promisify.js",
     "./packages/server/node_modules/body-parser/lib/read.js",
     "./packages/server/node_modules/body-parser/lib/types/json.js",
     "./packages/server/node_modules/body-parser/lib/types/raw.js",
@@ -3934,5 +3939,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "2cd3b60d72f6bcf7af33dfc662b82352b498270f21a30a1b80951d92becbec78"
+  "deferredHash": "50149e88a0cea1fe571a7f8bdfe175205e5b40a57d518d36c75ac195657a858c"
 }
