@@ -200,15 +200,13 @@ const getUserInvocationStack = (err, state) => {
   return undefined
 }
 
-// `DOMException`, which browsers throw for cross-origin access and CSP
-// violations, inherits `message` as a getter-only accessor, so a plain
-// assignment throws. Decorating is best effort: an error we could not
-// annotate is better than one replaced by the failure to annotate it.
-// https://github.com/cypress-io/cypress/issues/34818
 const setErrProp = (err, prop: string, value: any): boolean => {
   try {
     err[prop] = value
   } catch {
+    // `DOMException`, which browsers throw for cross-origin access and CSP
+    // violations, inherits `message` as a getter-only accessor, so a plain
+    // assignment throws. An own property shadows the accessor.
     try {
       Object.defineProperty(err, prop, { value, writable: true, configurable: true })
     } catch {
@@ -219,6 +217,9 @@ const setErrProp = (err, prop: string, value: any): boolean => {
   return true
 }
 
+// Decorating is best effort: an error that could not be annotated is better
+// than one replaced by the failure to annotate it.
+// https://github.com/cypress-io/cypress/issues/34818
 const modifyErrMsg = (err, newErrMsg, cb) => {
   setErrProp(err, 'stack', $stackUtils.normalizedStack(err))
 
