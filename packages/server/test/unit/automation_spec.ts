@@ -120,6 +120,21 @@ describe('lib/automation', () => {
       })
     })
 
+    it('refreshes a cookie whose domain carries a leading dot', function () {
+      const domainUrl = 'http://www.example.com/'
+
+      cookieJar.setCookie('sid=anon; Domain=example.com; Path=/; SameSite=Lax', domainUrl, undefined)
+
+      const dotted = { ...sessionCookie('auth'), domain: '.example.com' }
+
+      return this.automation.normalize('set:cookie', dotted, acceptCookie)
+      .then(() => {
+        const stored = cookieJar.getCookies(domainUrl).map((cookie) => `${cookie.key}=${cookie.value}`)
+
+        expect(stored).to.deep.eq(['sid=auth'])
+      })
+    })
+
     it('drops the synced cookie from the jar once it expires', function () {
       cookieJar.setCookie('sid=anon; Path=/; SameSite=Lax', url, undefined)
 

@@ -51,7 +51,11 @@ const syncSetCookieToJar = (cookie: SerializableAutomationCookie) => {
       return
     }
 
-    const toughCookie = automationCookieToToughCookie(cookie, hostname)
+    // tough-cookie's store keys on the dot-stripped domain and `getCookies` only
+    // searches those keys, so a `.example.com` domain — which `cy.setCookie()` forwards
+    // verbatim — would write to a key nothing reads, leaving the stale value to win.
+    // `getCookieUrl` strips the dot for the same reason
+    const toughCookie = automationCookieToToughCookie({ ...cookie, domain: cookie.domain?.replace(/^\./, '') }, hostname)
 
     // a set:cookie payload carries no maxAge, which the conversion turns into
     // 'Infinity'. tough-cookie reads maxAge ahead of expires, so the jar copy would
