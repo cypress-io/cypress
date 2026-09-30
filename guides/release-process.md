@@ -148,7 +148,14 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 
-12. Create a new docker image using the new cypress version in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images). Create a PR in which you update [factory/.env](https://github.com/cypress-io/cypress-docker-images/blob/master/factory/.env#L20) to use the new cypress version. Ensure the docker image is reviewed and has passing tests before proceeding.
+12. Create new Docker images in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) with the new Cypress version and the latest stable browsers. Create one PR in which you update [factory/.env](https://github.com/cypress-io/cypress-docker-images/blob/master/factory/.env):
+    - `CYPRESS_VERSION` — the new Cypress version.
+    - `CHROME_VERSION` and `CHROME_FOR_TESTING_VERSION` — look each up separately. They come from different sources, so their latest stable versions often differ.
+    - `EDGE_VERSION`
+    - `FIREFOX_VERSION` — Firefox ships a new major version every 2 weeks, so expect this to have changed since the last release.
+    - `GECKODRIVER_VERSION` — only if a newer release exists.
+
+    Find each version at the link in the comment above it in `factory/.env`. If a browser is already on its latest stable version, say so in the PR description so reviewers know it was checked. Don't change `FACTORY_VERSION` or the factory CHANGELOG for these updates. Ensure the Docker images are reviewed and have passing tests before proceeding.
 
 13. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
 
