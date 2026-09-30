@@ -68,7 +68,7 @@
     "recast": "0.23.11",
     "send": "0.19.0",
     "server-destroy": "1.0.1",
-    "simple-git": "^3.32.3",
+    "simple-git": "^4.0.2",
     "stringify-object": "^3.0.0",
     "tsx": "4.23.12",
     "underscore.string": "^3.3.6",

@@ -4,6 +4,7 @@
 **Dependency Updates:**
 
 - Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
+- Upgraded `simple-git` from `3.36.0` to `4.0.2` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335531) vulnerability and two Arbitrary Command Injection vulnerabilities ([SNYK-JS-SIMPLEGIT-20335524](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335524), [SNYK-JS-SIMPLEGIT-20335540](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335540)) reported in security scans. This also upgrades its `@simple-git/argv-parser` dependency from `1.1.1` to `2.0.1`, which addresses a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGITARGVPARSER-20335528) vulnerability reported in security scans. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
 
 ## 16.1.1
 
