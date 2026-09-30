@@ -3,7 +3,7 @@
 
 **Misc:**
 
-- TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Keys the object doesn't have, such as `toString`, `assign`, and `reload`, now report a type error instead of failing at runtime with `Location object does not have key`. If your code passes one of these keys, it already failed when run and will now fail to compile. Addressed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 ## 16.1.1
 
