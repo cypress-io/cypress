@@ -847,6 +847,14 @@ namespace CypressContainsTests {
 namespace CypressLocationTests {
   cy.location('path') // $ExpectError
   cy.location('pathname') // $ExpectType Chainable<string>
+  cy.location('searchParams') // $ExpectType Chainable<URLSearchParams>
+  cy.location() // $ExpectType Chainable<AUTLocation>
+  cy.location().then((loc) => {
+    loc // $ExpectType AUTLocation
+    loc.searchParams.get('q') // $ExpectType string | null
+  })
+  cy.location('toString') // $ExpectError
+  cy.location('assign') // $ExpectError
 }
 
 // https://github.com/cypress-io/cypress/issues/17399
