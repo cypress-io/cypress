@@ -752,9 +752,15 @@ export = {
       // serve last session's responses from. Cookies and local storage stay
       // untouched: clearing those would log the profile out of every site it
       // has visited.
+      //
+      // Scoped to that one origin because clearing every origin also reaches
+      // the Cypress extension's storage: on the fresh profile `cypress run`
+      // launches with, it deletes the extension's service worker registration
+      // whenever Chromium has already written it, and the extension stops
+      // responding for the rest of the session.
       if (options.shouldClearPersistedServiceWorkers) {
         await pageCriClient.send('Storage.clearDataForOrigin', {
-          origin: '*',
+          origin: new URL(url).origin,
           storageTypes: 'service_workers,cache_storage',
         })
       }

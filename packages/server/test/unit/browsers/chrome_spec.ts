@@ -938,9 +938,9 @@ describe('lib/browsers/chrome', () => {
   })
 
   describe('#attachListeners', () => {
-    const clearParams = { origin: '*', storageTypes: 'service_workers,cache_storage' }
+    const clearParams = { origin: 'https://example.com', storageTypes: 'service_workers,cache_storage' }
 
-    function setup (options: object) {
+    function setup (options: object, url = 'https://example.com/__/#/specs/runner') {
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
@@ -969,7 +969,7 @@ describe('lib/browsers/chrome', () => {
 
       const attach = () => {
         return chrome.attachListeners(
-          'https://example.com/__/#/specs/runner',
+          url,
           pageCriClient as any,
           { use: sinon.stub() } as any,
           { ...options } as any,
@@ -987,6 +987,32 @@ describe('lib/browsers/chrome', () => {
 
       expect(pageCriClient.send).to.have.been.calledWith('Storage.clearDataForOrigin', clearParams)
       expect(pageCriClient.send.withArgs('Storage.clearDataForOrigin')).to.have.been.calledBefore(chrome._navigateUsingCRI as any)
+    })
+
+    it('clears only the runner origin, leaving the Cypress extension and other origins alone', async function () {
+      const { pageCriClient, attach } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true })
+
+      await attach()
+
+      const clearedOrigins = pageCriClient.send.getCalls()
+      .filter((call) => call.args[0] === 'Storage.clearDataForOrigin')
+      .map((call) => call.args[1].origin)
+
+      expect(clearedOrigins).to.deep.eq(['https://example.com'])
+    })
+
+    it('clears an http runner origin including its port', async function () {
+      const { pageCriClient, attach } = setup(
+        { ...openOpts, shouldClearPersistedServiceWorkers: true },
+        'http://localhost:3000/__/#/specs/runner?file=cypress/e2e/spec.cy.ts',
+      )
+
+      await attach()
+
+      expect(pageCriClient.send).to.have.been.calledWith('Storage.clearDataForOrigin', {
+        origin: 'http://localhost:3000',
+        storageTypes: 'service_workers,cache_storage',
+      })
     })
 
     it('does not clear persisted service worker state on the MITM path', async function () {
