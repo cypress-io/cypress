@@ -1179,6 +1179,12 @@ export default {
 
           Intercepted response: ${format(res)}`, 10)
       },
+      invalid_status: ({ prop, value, requirement }) => {
+        return cyStripIndent(`\
+          \`res.${prop}\` was set to an invalid value in a response handler. \`res.${prop}\` must be ${requirement}.
+
+          You set: ${format(value)}`, 10)
+      },
       multiple_send_calls: ({ res }) => {
         return cyStripIndent(`\
           \`res.send()\` was called multiple times in a response handler, but the response can only be sent once.

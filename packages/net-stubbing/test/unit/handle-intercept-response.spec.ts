@@ -64,6 +64,30 @@ describe('handleInterceptResponse', () => {
     expect(incomingRes.statusMessage).toEqual('Down For Maintenance')
   })
 
+  it.each([1000, 42, 200.5, '5xx'])('keeps the origin status when a response handler sets statusCode to %o', async (statusCode) => {
+    const { mw, incomingRes, next } = createMiddlewareCtx((res) => {
+      res.statusCode = statusCode
+    })
+
+    await handleInterceptResponse(mw as any)
+
+    expect(next).toHaveBeenCalledOnce()
+    expect(incomingRes.statusCode).toEqual(200)
+    expect(incomingRes.statusMessage).toEqual('OK')
+  })
+
+  it('keeps the origin status when a response handler sets a statusMessage containing a line break', async () => {
+    const { mw, incomingRes } = createMiddlewareCtx((res) => {
+      res.statusCode = 503
+      res.statusMessage = 'Bad\r\nInjected: header'
+    })
+
+    await handleInterceptResponse(mw as any)
+
+    expect(incomingRes.statusCode).toEqual(200)
+    expect(incomingRes.statusMessage).toEqual('OK')
+  })
+
   it('keeps the origin status and reason phrase when a response handler does not change them', async () => {
     const { mw, incomingRes } = createMiddlewareCtx((res) => {
       res.headers['x-foo'] = 'bar'

@@ -3562,6 +3562,44 @@ describe('network stubbing', { retries: 15 }, function () {
         })
       })
 
+      it('fails test if res.statusCode is set to an invalid status code in res handler', function (done) {
+        const url = uniqueRoute('/foo')
+
+        testFail((err) => {
+          expect(err.message).to.include('`res.statusCode` must be an integer between 100 and 999 (inclusive).')
+
+          done()
+        })
+
+        cy.intercept(`${url}*`, (req) => {
+          req.continue((res) => {
+            res.statusCode = 1000
+          })
+        })
+        .then(() => {
+          $.get(url)
+        })
+      })
+
+      it('fails test if res.statusMessage is set to a string with a line break in res handler', function (done) {
+        const url = uniqueRoute('/foo')
+
+        testFail((err) => {
+          expect(err.message).to.include('`res.statusMessage` must be a string without line breaks or other control characters.')
+
+          done()
+        })
+
+        cy.intercept(`${url}*`, (req) => {
+          req.continue((res) => {
+            res.statusMessage = 'Bad\r\nInjected: header'
+          })
+        })
+        .then(() => {
+          $.get(url)
+        })
+      })
+
       it('fails test if network error occurs retrieving response and response is intercepted', function (done) {
         testFail((err) => {
           expect(err.message)

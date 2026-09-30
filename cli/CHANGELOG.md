@@ -8,7 +8,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
-- Fixed an issue where assigning `res.statusCode` or `res.statusMessage` in a [`cy.intercept()`](https://on.cypress.io/intercept) response handler, such as a `req.continue()` callback, was recorded on the intercepted response but not sent to your application, which still received the status from the server. Setting only `res.statusCode` now sends the standard reason phrase for the new status instead of the server's. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- Fixed an issue where assigning `res.statusCode` or `res.statusMessage` in a [`cy.intercept()`](https://on.cypress.io/intercept) response handler, such as a `req.continue()` callback, was recorded on the intercepted response but not sent to your application, which still received the status from the server. Setting only `res.statusCode` now sends the standard reason phrase for the new status instead of the server's. Assigning a `res.statusCode` outside 100 to 999, or a `res.statusMessage` containing a line break, now fails the test with an error. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Misc:**
 
