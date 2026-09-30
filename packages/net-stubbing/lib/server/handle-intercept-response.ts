@@ -6,6 +6,8 @@ import { getEncoding } from 'istextorbinary'
 import type { ResponseMiddleware } from '@packages/proxy'
 import {
   SERIALIZABLE_RES_PROPS,
+  isValidStatusCode,
+  isValidStatusMessage,
   mergeDeletedHeaders,
   mergeWithPreservedBuffers,
 } from '@packages/network-interception'
@@ -16,25 +18,18 @@ const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
 type InterceptResponseMiddleware = ResponseMiddleware extends (this: infer T) => any ? T : never
 
-// Mirrors the reason-phrase characters Node's http module accepts.
-const INVALID_STATUS_MESSAGE_CHAR = /[^\t\x20-\x7e\x80-\xff]/
-
 /**
  * Headers reach the client because `res.headers` is the same object as
  * `incomingRes.headers` and is merged in place; `statusCode` and
  * `statusMessage` are primitives, so they must be copied back explicitly.
  */
 function applyStatusChanges (incomingRes: InterceptResponseMiddleware['incomingRes'], modifiedRes: CyHttpMessages.IncomingResponse) {
-  const statusCode = Number(modifiedRes.statusCode)
-  const { statusMessage } = modifiedRes
+  const { statusCode, statusMessage } = modifiedRes
 
   // The driver rejects invalid values first; this keeps one that slips past
   // from making Node throw mid-response.
-  if (
-    !Number.isInteger(statusCode) || statusCode < 100 || statusCode > 999
-    || (statusMessage != null && (typeof statusMessage !== 'string' || INVALID_STATUS_MESSAGE_CHAR.test(statusMessage)))
-  ) {
-    debug('ignoring invalid status from response handler %o', { statusCode: modifiedRes.statusCode, statusMessage })
+  if (!isValidStatusCode(statusCode) || (statusMessage != null && !isValidStatusMessage(statusMessage))) {
+    debug('ignoring invalid status from response handler %o', { statusCode, statusMessage })
 
     return
   }

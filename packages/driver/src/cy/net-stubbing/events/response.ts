@@ -5,6 +5,8 @@ import type {
 } from '@packages/network-interception'
 import {
   SERIALIZABLE_RES_PROPS,
+  isValidStatusCode,
+  isValidStatusMessage,
 } from '@packages/network-interception'
 import {
   validateStaticResponse,
@@ -17,9 +19,6 @@ import Bluebird from 'bluebird'
 import { parseJsonBody, stringifyJsonBody } from './utils'
 
 type Result = HandlerResult<CyHttpMessages.IncomingResponse>
-
-// Mirrors the reason-phrase characters Node's http module accepts.
-const INVALID_STATUS_MESSAGE_CHAR = /[^\t\x20-\x7e\x80-\xff]/
 
 export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
   const { data: res, requestId, subscription } = frame
@@ -116,13 +115,13 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   // The server writes a changed status straight onto the response it sends,
   // where Node throws on anything it can't serialize.
   const validateStatus = () => {
-    if (userRes.statusCode !== res.statusCode && !(Number.isInteger(userRes.statusCode) && _.inRange(userRes.statusCode, 100, 1000))) {
+    if (userRes.statusCode !== res.statusCode && !isValidStatusCode(userRes.statusCode)) {
       $errUtils.throwErrByPath('net_stubbing.response_handling.invalid_status', {
         args: { prop: 'statusCode', value: userRes.statusCode, requirement: 'an integer between 100 and 999 (inclusive)' },
       })
     }
 
-    if (userRes.statusMessage !== res.statusMessage && !_.isNil(userRes.statusMessage) && (!_.isString(userRes.statusMessage) || INVALID_STATUS_MESSAGE_CHAR.test(userRes.statusMessage))) {
+    if (userRes.statusMessage !== res.statusMessage && !_.isNil(userRes.statusMessage) && !isValidStatusMessage(userRes.statusMessage)) {
       $errUtils.throwErrByPath('net_stubbing.response_handling.invalid_status', {
         args: { prop: 'statusMessage', value: userRes.statusMessage, requirement: 'a string without line breaks or other control characters' },
       })

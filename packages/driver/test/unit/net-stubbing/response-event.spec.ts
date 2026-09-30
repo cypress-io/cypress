@@ -45,6 +45,12 @@ describe('onResponse', () => {
     })).rejects.toThrow('`res.statusCode` must be an integer between 100 and 999 (inclusive).')
   })
 
+  it('fails when res.send is called with a non-integer statusCode', async () => {
+    await expect(runResponseHandler((res) => {
+      res.send({ statusCode: 200.5 })
+    })).rejects.toThrow('`statusCode` must be an integer between 100 and 999 (inclusive).')
+  })
+
   it('fails when res.statusMessage is set to a string with a line break', async () => {
     await expect(runResponseHandler((res) => {
       res.statusMessage = 'Bad\r\nInjected: header'

@@ -2790,7 +2790,7 @@ describe('network stubbing', { retries: 15 }, function () {
         const url = uniqueRoute('/foo')
 
         testFail((err) => {
-          expect(err.message).to.contain('must be a number between 100 and 999 (inclusive).')
+          expect(err.message).to.contain('must be an integer between 100 and 999 (inclusive).')
 
           done()
         })
@@ -3547,7 +3547,7 @@ describe('network stubbing', { retries: 15 }, function () {
         const url = uniqueRoute('/foo')
 
         testFail((err) => {
-          expect(err.message).to.include('must be a number between 100 and 999 (inclusive).')
+          expect(err.message).to.include('must be an integer between 100 and 999 (inclusive).')
 
           done()
         })

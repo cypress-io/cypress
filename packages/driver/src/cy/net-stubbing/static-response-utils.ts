@@ -7,6 +7,9 @@ import type {
   FixtureOpts,
 } from '@packages/network-interception'
 import {
+  isValidStatusCode,
+} from '@packages/network-interception'
+import {
   caseInsensitiveHas,
 } from '@packages/net-stubbing/lib/util'
 import $errUtils from '../../cypress/error_utils'
@@ -35,10 +38,8 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
     err('`fixture` must be a string containing a path and, optionally, an encoding separated by a comma (for example, "foo.txt,ascii").')
   }
 
-  // statusCode must be a three-digit integer
-  // @see https://tools.ietf.org/html/rfc2616#section-6.1.1
-  if (statusCode && !(_.isNumber(statusCode) && _.inRange(statusCode, 100, 1000))) {
-    err('`statusCode` must be a number between 100 and 999 (inclusive).')
+  if (statusCode && !isValidStatusCode(statusCode)) {
+    err('`statusCode` must be an integer between 100 and 999 (inclusive).')
   }
 
   if (headers && _.keys(_.omitBy(headers, _.isString)).length) {
