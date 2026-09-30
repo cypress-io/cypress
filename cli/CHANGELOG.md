@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.1.2
 
+**Misc:**
+
+- TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
+
 **Dependency Updates:**
 
 - Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
