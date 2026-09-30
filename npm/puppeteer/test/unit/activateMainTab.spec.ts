@@ -44,6 +44,7 @@ describe('activateMainTab', () => {
 
     mockPage = {
       evaluate: vi.fn().mockImplementation((fn, ...args) => fn(...args)),
+      bringToFront: vi.fn().mockResolvedValue(undefined),
     }
 
     mockBrowser = {
@@ -73,25 +74,69 @@ describe('activateMainTab', () => {
     expect(window.postMessage).toHaveBeenCalledExactlyOnceWith({ message: 'cypress:extension:activate:main:tab' })
   })
 
-  it('sends a tab activation request to the plugin, and rejects if it times out', async () => {
+  it('rejects the activation message with an error naming the timeout if the extension does not respond', async () => {
     vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
 
-    return new Promise<void>(async (resolve) => {
-      mockPage.evaluate = vi.fn().mockImplementation(async (fn, ...args) => {
-        try {
-          await fn(...args)
-        } catch (error) {
-          expect(window.removeEventListener).toHaveBeenCalledExactlyOnceWith('message', expect.any(Function))
-          expect(error).toBeUndefined()
-          resolve()
-        }
-      })
+    let evaluateResult: Promise<unknown> | undefined
 
-        const activationPromise = activateMainTab(mockBrowser as Browser)
+    mockPage.evaluate = vi.fn().mockImplementation((fn, ...args) => {
+      evaluateResult = fn(...args)
 
-        await vi.advanceTimersByTimeAsync(ACTIVATION_TIMEOUT + 1)
-        await activationPromise
+      return evaluateResult
     })
+
+    const activationPromise = activateMainTab(mockBrowser as Browser)
+
+    await vi.advanceTimersByTimeAsync(ACTIVATION_TIMEOUT + 1)
+    await activationPromise
+
+    await expect(evaluateResult).rejects.toThrow(`The Cypress extension did not respond within ${ACTIVATION_TIMEOUT}ms.`)
+    expect(window.removeEventListener).toHaveBeenCalledExactlyOnceWith('message', expect.any(Function))
+  })
+
+  it('does not bring the page to the front when the extension responds', async () => {
+    vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
+    mockPage.evaluate = vi.fn().mockResolvedValue(undefined)
+
+    await activateMainTab(mockBrowser as Browser)
+
+    expect(mockPage.bringToFront).not.toHaveBeenCalled()
+  })
+
+  it('brings the page to the front over CDP when the extension times out', async () => {
+    vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
+
+    const activationPromise = activateMainTab(mockBrowser as Browser)
+
+    await vi.advanceTimersByTimeAsync(ACTIVATION_TIMEOUT + 1)
+
+    await expect(activationPromise).resolves.toBeUndefined()
+    expect(mockPage.bringToFront).toHaveBeenCalledOnce()
+  })
+
+  it('brings the page to the front over CDP when evaluating the activation message fails', async () => {
+    vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
+    mockPage.evaluate = vi.fn().mockRejectedValue(new Error('Execution context was destroyed'))
+
+    await expect(activateMainTab(mockBrowser as Browser)).resolves.toBeUndefined()
+    expect(mockPage.bringToFront).toHaveBeenCalledOnce()
+  })
+
+  it('rejects with both errors if the extension and the CDP fallback both fail', async () => {
+    vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
+    mockPage.evaluate = vi.fn().mockRejectedValue(new Error('The Cypress extension did not respond within 2000ms.'))
+    mockPage.bringToFront = vi.fn().mockRejectedValue(new Error('Target closed'))
+
+    await expect(activateMainTab(mockBrowser as Browser)).rejects.toThrow(
+      'The Cypress extension did not respond within 2000ms. Bringing the main tab to the front over CDP also failed: Target closed',
+    )
+  })
+
+  it('does nothing if the browser has no pages', async () => {
+    vi.mocked(mockBrowser.pages).mockResolvedValue([])
+
+    await expect(activateMainTab(mockBrowser as Browser)).resolves.toBeUndefined()
+    expect(mockPage.evaluate).not.toHaveBeenCalled()
   })
 
   describe('when cy in cy', () => {

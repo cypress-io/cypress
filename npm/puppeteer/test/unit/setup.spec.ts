@@ -370,6 +370,33 @@ describe('#setup', () => {
       )
     })
 
+    it('includes the underlying activateMainTab error in the error message', async () => {
+      vi.mocked(activateMainTab).mockRejectedValueOnce(new Error('The Cypress extension did not respond within 2000ms. Bringing the main tab to the front over CDP also failed: Target closed'))
+
+      let taskResult: any = null
+
+      on.mockImplementation(async (event, handler) => {
+        if (event === 'after:browser:launch') {
+          return handler({ family: 'chromium', isHeaded: true }, { webSocketDebuggerUrl: 'ws://debugger' })
+        }
+
+        if (event === 'task') {
+          taskResult = await handler.__cypressPuppeteer__({ name: testTask, args: [] })
+
+          return taskResult
+        }
+      })
+
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+
+      await flushPromises()
+
+      expect(taskResult.__error__.message).toEqual(
+        'Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.\n\n'
+        + 'The Cypress extension did not respond within 2000ms. Bringing the main tab to the front over CDP also failed: Target closed',
+      )
+    })
+
     it('disconnects the browser if activateMainTab rejects', async () => {
       vi.mocked(activateMainTab).mockRejectedValueOnce(undefined)
 

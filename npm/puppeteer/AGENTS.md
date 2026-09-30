@@ -24,7 +24,7 @@ yarn cypress:run -- --spec cypress/e2e/multi-tab.cy.ts   # already passes --brow
 - `src/plugin/` — Node-side code, compiled to `dist/plugin/` (the package `main`):
   - `index.ts` — public entry; only re-exports `setup` and `retry`
   - `setup.ts` — validates options, listens to `after:browser:launch` to capture the browser and its `webSocketDebuggerUrl`, and registers the `__cypressPuppeteer__` task. Each task call runs `puppeteer.connect()`, invokes the handler, reactivates the main tab when needed, then `browser.disconnect()`s
-  - `activateMainTab.ts` — runs in the first page via `page.evaluate`, posting `cypress:extension:activate:main:tab` and waiting up to 2s (`ACTIVATION_TIMEOUT`) for the Cypress extension to reply
+  - `activateMainTab.ts` — runs in the first page via `page.evaluate`, posting `cypress:extension:activate:main:tab` and waiting up to 2s (`ACTIVATION_TIMEOUT`) for the Cypress extension to reply. If the extension doesn't reply or `evaluate` fails, it falls back to `page.bringToFront()` over CDP, and only rejects if that fails too
   - `retry.ts` — user-facing `retry(fn, { timeout = 4000, delayBetweenTries = 200 })`
   - `util.ts` — `pluginError()` helper
 - `src/support/index.ts` — browser-side; adds `cy.puppeteer()` as a wrapper around `cy.task('__cypressPuppeteer__', { name, args }, { log: false })` and rethrows `__error__` results

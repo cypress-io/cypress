@@ -61,7 +61,7 @@ Each time `cy.puppeteer()` runs, the plugin:
 
 1. Connects Puppeteer to the browser Cypress launched.
 2. Calls your message handler with that Puppeteer [`Browser`](https://pptr.dev/api/puppeteer.browser) instance and any arguments you passed.
-3. In headed Chromium browsers other than Electron, brings the main Cypress tab back to the front through the Cypress extension, so your test can keep running after you've worked with other tabs.
+3. In headed Chromium browsers other than Electron, brings the main Cypress tab back to the front through the Cypress extension, so your test can keep running after you've worked with other tabs. If the extension doesn't respond, the plugin brings the tab to the front through the Chrome DevTools Protocol instead, which can also move the browser window in front of other apps.
 4. Disconnects Puppeteer from the browser. The browser itself stays open.
 5. Yields your handler's return value to the Cypress command chain.
 
@@ -365,7 +365,7 @@ Chrome 137 removed support for loading extensions from the command line, and the
 
 ### `Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.`
 
-After each handler runs in a headed Chromium browser, the plugin asks the Cypress extension to bring the main Cypress tab back to the front. This error means the extension didn't respond within 2 seconds. A few things to check:
+After each handler runs in a headed Chromium browser, the plugin asks the Cypress extension to bring the main Cypress tab back to the front. If the extension doesn't respond within 2 seconds, the plugin falls back to the Chrome DevTools Protocol. This error means both failed. The underlying reason appears below the message. A few things to check:
 
 - If you're using Google Chrome 137 or later, switch to Chrome for Testing or Chromium. [See download instructions](https://www.chromium.org/getting-involved/download-chromium/).
 - Make sure the Cypress extension is enabled in the browser Cypress launched by visiting `chrome://extensions/`.

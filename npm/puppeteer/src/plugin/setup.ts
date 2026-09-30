@@ -127,12 +127,14 @@ export function setup (options: SetupOptions) {
       //   doesn't run the extension
       const isHeadedChromium = cypressBrowser.isHeaded && cypressBrowser.family === 'chromium' && cypressBrowser.name !== 'electron'
       let didFailToActivateMainTab = false
+      let activateMainTabError: any
 
       if (isHeadedChromium) {
         try {
           await activateMainTab(browser)
         } catch (e) {
           didFailToActivateMainTab = true
+          activateMainTabError = e
         }
       }
 
@@ -145,7 +147,9 @@ export function setup (options: SetupOptions) {
       }
 
       if (didFailToActivateMainTab) {
-        return messageHandlerError(pluginError('Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.'))
+        const reason = activateMainTabError?.message || (activateMainTabError ? String(activateMainTabError) : '')
+
+        return messageHandlerError(pluginError(`Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.${reason ? `\n\n${reason}` : ''}`))
       }
 
       // cy.task() errors if `undefined` is returned, so return null in that case

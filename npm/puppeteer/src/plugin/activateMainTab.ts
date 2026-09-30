@@ -27,20 +27,29 @@ const sendActivationMessage = (activationTimeout: number) => {
 
     timeout = setTimeout(() => {
       window.removeEventListener('message', onMessage)
-      reject()
+      reject(new Error(`The Cypress extension did not respond within ${activationTimeout}ms.`))
     }, activationTimeout)
   })
 }
 
 export const activateMainTab = async (browser: Browser) => {
-  // - Only implemented for Chromium right now. Support for Firefox/webkit
-  //   could be added later
-  // - Electron doesn't have tabs
-  // - Focus doesn't matter for headless browsers and old headless Chrome
-  //   doesn't run the extension
   const [page] = await browser.pages()
 
-  if (page) {
-    return page.evaluate(sendActivationMessage, ACTIVATION_TIMEOUT)
+  if (!page) {
+    return
+  }
+
+  try {
+    await page.evaluate(sendActivationMessage, ACTIVATION_TIMEOUT)
+  } catch (extensionError: any) {
+    // The extension's service worker can be missing or unreachable for a whole
+    // headed session, so it never replies. Bringing the tab to the front over
+    // CDP doesn't depend on the extension, but it can also take OS window
+    // focus, so it's only the fallback.
+    try {
+      await page.bringToFront()
+    } catch (cdpError: any) {
+      throw new Error(`${extensionError?.message ?? String(extensionError)} Bringing the main tab to the front over CDP also failed: ${cdpError?.message ?? String(cdpError)}`)
+    }
   }
 }
