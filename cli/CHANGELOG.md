@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.1.2
+
+**Bugfixes:**
+
+- Fixed a regression in [16.1.0](#16-1-0) where, in Chrome, Chromium, and Edge run headed, the Cypress browser extension could stop responding for the rest of the run. This caused [`@cypress/puppeteer`](https://github.com/cypress-io/cypress/tree/develop/npm/puppeteer) to fail with `Cannot communicate with the Cypress Chrome extension`. Fixed in [#PR_NUMBER](https://github.com/cypress-io/cypress/pull/PR_NUMBER).
+
 ## 16.1.1
 
 **Performance:**

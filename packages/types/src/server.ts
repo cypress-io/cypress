@@ -125,7 +125,7 @@ export type BrowserLaunchOpts = {
    */
   trustedCertificateFingerprints?: string[]
   /**
-   * Whether to drop every origin's persisted service worker and cache storage
+   * Whether to drop the runner origin's persisted service worker and cache storage
    * ahead of each runner-document navigation on the browser network path — both
    * at launch and when moving to the next spec. Resolved at launch from
    * project-level `testIsolation`, because this runs before any spec code and so
