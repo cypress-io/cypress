@@ -3,7 +3,7 @@
 
 **Dependency Updates:**
 
-- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`.
+- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
 
 ## 16.1.1
 
