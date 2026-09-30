@@ -1,5 +1,9 @@
 import childProcess from 'child_process'
 import path from 'path'
+import { fileURLToPath } from 'node:url'
+import { describe, it } from 'vitest'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const PROJECT_ROOT = path.join(path.dirname(require.resolve('@tooling/system-tests/package.json')), 'projects/kill-child-process')
 // With require_async_child being converted to TypeScript, we need to use the .ts extension to ensure the correct file is loaded.
