@@ -5,6 +5,10 @@
 
 - TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
 
+**Dependency Updates:**
+
+- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) (CVE-2026-102422) vulnerability reported in security scans.
+
 ## 16.1.1
 
 **Performance:**
