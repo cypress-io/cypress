@@ -41,20 +41,18 @@ const syncSetCookieToJar = (cookie: SerializableAutomationCookie) => {
   try {
     const { hostname, pathname } = new URL(url)
 
-    // refresh only a cookie the jar already tracks. seeding one it has never held
-    // would shadow a same-origin `document.cookie` write, which reaches the browser
-    // but not the jar, on the next navigation — the staleness this sync exists to undo.
-    // the lookup goes over https so it is not scheme-restricted: `getCookies` withholds
-    // a Secure cookie from an http url, and this url's scheme follows the incoming
+    // refresh only a cookie the jar already tracks. seeding one it has never held would
+    // shadow a same-origin `document.cookie` write, which reaches the browser but not
+    // the jar. the lookup goes over https so it is not scheme-restricted: `getCookies`
+    // withholds a Secure cookie from an http url, and this url's scheme follows the
     // cookie's own `secure` flag, which `cy.setCookie()` leaves false by default
     if (!cookieJar.getCookies(`https://${hostname}${pathname}`).some(({ key }) => key === cookie.name)) {
       return
     }
 
-    // tough-cookie's store keys on the dot-stripped domain and `getCookies` only
-    // searches those keys, so a `.example.com` domain — which `cy.setCookie()` forwards
-    // verbatim — would write to a key nothing reads, leaving the stale value to win.
-    // `getCookieUrl` strips the dot for the same reason
+    // tough-cookie's store keys on the dot-stripped domain and `getCookies` only searches
+    // those keys, so a `.example.com` domain — which `cy.setCookie()` forwards verbatim —
+    // would write to a key nothing reads. `getCookieUrl` strips the dot for the same reason
     const toughCookie = automationCookieToToughCookie({ ...cookie, domain: cookie.domain?.replace(/^\./, '') }, hostname)
 
     // a set:cookie payload carries no maxAge, which the conversion turns into
