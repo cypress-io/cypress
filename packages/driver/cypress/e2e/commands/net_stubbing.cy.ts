@@ -982,7 +982,14 @@ describe('network stubbing', { retries: 15 }, function () {
             {
               statusCode: -1,
             },
-            'must be a number',
+            'must be an integer',
+          ],
+          [
+            'statusCode not an integer',
+            {
+              statusCode: 200.5,
+            },
+            'must be an integer',
           ],
           // @see https://github.com/cypress-io/cypress/issues/33183
           [
