@@ -107,6 +107,12 @@ export class MtlsBridge {
 
       browserSocket.removeListener('data', onData)
 
+      // Pause in the same tick. Removing the last 'data' listener does not leave flowing
+      // mode, so anything the browser sends while the origin handshake runs — TLS 1.3 sends
+      // a change_cipher_spec straight after the ClientHello — would be read off the socket
+      // and dropped on the floor before the replay below.
+      browserSocket.pause()
+
       // A resolver rule captures a whole origin, so a plaintext connection to it arrives
       // here too. There is no certificate to present on one, so fail it rather than
       // quietly proxying it.
@@ -175,8 +181,6 @@ export class MtlsBridge {
     browserSocket.on('close', () => upstream.socket.destroy())
 
     const secureContext = await this.options.secureContextFor(servername)
-
-    browserSocket.pause()
 
     // The browser is offered exactly what the origin selected, so a downgrade upstream is
     // reflected rather than hidden. An origin that negotiated no ALPN leaves it unset.

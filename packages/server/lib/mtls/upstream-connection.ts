@@ -23,7 +23,7 @@ export function connectUpstream (options: UpstreamConnectOptions): Promise<Upstr
         // A browser sends no SNI for an IP-literal URL, and Node deprecates setting one
         // (DEP0123) because RFC 6066 does not permit it, so the dial leaves it off for the
         // same reason the browser would have.
-        servername: net.isIP(hostname) ? undefined : hostname,
+        servername: net.isIP(unbracket(hostname)) ? undefined : hostname,
         // An empty list is not the same as no ALPN: the browser offered none, so none is
         // offered upstream either.
         ALPNProtocols: alpnProtocols.length ? alpnProtocols : undefined,
@@ -38,13 +38,21 @@ export function connectUpstream (options: UpstreamConnectOptions): Promise<Upstr
   })
 }
 
+/**
+ * `URL.hostname` keeps the brackets around an IPv6 literal, but `net.isIP` and `net.connect`
+ * both want it bare. The bracketed form stays in the URL used for proxy resolution.
+ */
+function unbracket (hostname: string): string {
+  return hostname.startsWith('[') && hostname.endsWith(']') ? hostname.slice(1, -1) : hostname
+}
+
 function dial (hostname: string, port: number): Promise<net.Socket> {
   const href = `https://${hostname}:${port}`
   const proxy = getProxyOrTargetOverrideForUrl(href)
 
   if (!proxy) {
     return new Promise((resolve, reject) => {
-      const socket = net.connect(port, hostname, () => resolve(socket))
+      const socket = net.connect(port, unbracket(hostname), () => resolve(socket))
 
       socket.once('error', reject)
     })
