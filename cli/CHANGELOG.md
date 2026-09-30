@@ -5,6 +5,10 @@
 
 - Fixed a regression in [16.1.0](#16-1-0) where, in Chrome, Chromium, and Edge run headed, the Cypress browser extension could stop responding for the rest of the run. This caused [`@cypress/puppeteer`](https://github.com/cypress-io/cypress/tree/develop/npm/puppeteer) to fail with `Cannot communicate with the Cypress Chrome extension`. Fixed in [#34958](https://github.com/cypress-io/cypress/pull/34958).
 
+**Misc:**
+
+- TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
+
 ## 16.1.1
 
 **Performance:**
