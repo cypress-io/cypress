@@ -70,9 +70,13 @@ const syncSetCookieToJar = (cookie: SerializableAutomationCookie) => {
     }
 
     // browsers treat an unspecified SameSite as Lax, which is what `CookieJar.parse`
-    // applies to cookies arriving on a response. without it the jar copy is attached
-    // to cross-site requests the browser would withhold it from
-    toughCookie.sameSite = toughCookie.sameSite ?? 'lax'
+    // applies to cookies arriving on a response. `cy.setCookie()` also accepts the
+    // extension vocabulary's literal 'unspecified', which means the same thing but
+    // which tough-cookie does not recognise and so treats as None. without this the
+    // jar copy is attached to cross-site requests the browser would withhold it from
+    if (!toughCookie.sameSite || cookie.sameSite === 'unspecified') {
+      toughCookie.sameSite = 'lax'
+    }
 
     // no request drives this write, so there is no same-site context to apply
     cookieJar.setCookie(toughCookie, url, undefined)

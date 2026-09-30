@@ -146,15 +146,20 @@ describe('lib/automation', () => {
       })
     })
 
-    it('defaults an unspecified SameSite to lax, the way a browser does', function () {
-      cookieJar.setCookie('sid=anon; Path=/; SameSite=Lax', url, undefined)
+    // `cy.setCookie()` accepts both an omitted sameSite and the extension
+    // vocabulary's literal 'unspecified'; the browser treats each as Lax
+    ;[
+      { label: 'a missing', sameSite: undefined },
+      { label: 'an explicit \'unspecified\'', sameSite: 'unspecified' },
+    ].forEach(({ label, sameSite }) => {
+      it(`treats ${label} SameSite as lax, the way a browser does`, function () {
+        cookieJar.setCookie('sid=anon; Path=/; SameSite=Lax', url, undefined)
 
-      const noSameSite = { ...sessionCookie('auth'), sameSite: undefined }
-
-      return this.automation.normalize('set:cookie', noSameSite, acceptCookie)
-      .then(() => {
-        expect(jarCookies('strict')).to.deep.eq(['sid=auth'])
-        expect(jarCookies('none')).to.deep.eq([])
+        return this.automation.normalize('set:cookie', { ...sessionCookie('auth'), sameSite }, acceptCookie)
+        .then(() => {
+          expect(jarCookies('strict')).to.deep.eq(['sid=auth'])
+          expect(jarCookies('none')).to.deep.eq([])
+        })
       })
     })
 
