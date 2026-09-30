@@ -7,7 +7,7 @@
 
 **Dependency Updates:**
 
-- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) (CVE-2026-102422) vulnerability reported in security scans.
+- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) (CVE-2026-102422) vulnerability reported in security scans. Addressed in [#34962](https://github.com/cypress-io/cypress/pull/34962).
 
 ## 16.1.1
 
