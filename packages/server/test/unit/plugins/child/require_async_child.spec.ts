@@ -1,5 +1,9 @@
 import childProcess from 'child_process'
 import path from 'path'
+import { fileURLToPath } from 'node:url'
+import { describe, it } from 'vitest'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const PROJECT_ROOT = path.join(path.dirname(require.resolve('@tooling/system-tests/package.json')), 'projects/kill-child-process')
 // With require_async_child being converted to TypeScript, we need to use the .ts extension to ensure the correct file is loaded.
@@ -9,8 +13,6 @@ const CONFIG_FILE = path.join(PROJECT_ROOT, 'cypress.config.js')
 
 describe('require_async_child', () => {
   it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', function (done) {
-    this.timeout(15_000)
-
     const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE, '--shouldLoadAsEsm', 'false'], {
       env: {
         ...process.env,
@@ -60,7 +62,7 @@ describe('require_async_child', () => {
         child.disconnect()
       }
     })
-  })
+  }, 15_000)
 
   it('disconnects if the parent ipc is closed', (done) => {
     const child = childProcess.fork(path.join(__dirname, 'run_child_fixture.ts'), {
@@ -114,5 +116,5 @@ describe('require_async_child', () => {
     })
 
     child.send({ msg: 'spawn', data: { projectRoot: PROJECT_ROOT } })
-  })
+  }, 15_000)
 })
