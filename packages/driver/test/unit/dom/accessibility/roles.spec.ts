@@ -226,6 +226,20 @@ describe('dom/accessibility/roles', () => {
     })
   })
 
+  describe('getAccessibleName with a hidden aria-labelledby target', () => {
+    it('includes the hidden content of a target that is itself hidden', () => {
+      render('<button id="el" aria-labelledby="label">x</button><span id="label" aria-hidden="true"><span style="display: none">Export</span></span>')
+
+      expect(getAccessibleName($('#el'))).toBe('Export')
+    })
+
+    it('leaves out the hidden content of a visible target', () => {
+      render('<button id="el" aria-labelledby="label">x</button><span id="label">Shown <span style="display: none">Hidden</span></span>')
+
+      expect(getAccessibleName($('#el'))).toBe('Shown')
+    })
+  })
+
   describe('getAccessibleDescription', () => {
     it('reads aria-describedby', () => {
       render('<button id="el" aria-describedby="desc">Delete</button><p id="desc">This cannot be undone</p>')

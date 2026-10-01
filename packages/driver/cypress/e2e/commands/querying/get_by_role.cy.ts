@@ -88,6 +88,8 @@ describe('src/cy/commands/querying/get_by_role', () => {
       { source: 'alt text', role: 'img', name: 'Company logo', id: 'logo' },
       { source: 'title', role: 'button', name: 'Help', id: 'name-title' },
       { source: 'nested content', role: 'button', name: 'Download report', id: 'name-nested' },
+      // https://github.com/testing-library/cypress-testing-library/issues/290
+      { source: 'the hidden content of a hidden aria-labelledby target', role: 'button', name: 'Archive', id: 'name-hidden-labelledby' },
     ], ({ source, role, name, id }) => {
       it(`matches a name from ${source}`, () => {
         cy.getByRole(role, { name }).should('have.id', id)
