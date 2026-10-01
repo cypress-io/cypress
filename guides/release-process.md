@@ -177,13 +177,11 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - Run `yarn workspace @packages/example deploy`. This adds changes from `cypress-example-kitchensink` to a commit in the `gh-pages` branch, which will deploy to production with its own CI.
     - Check the deployed site at `https://example.cypress.io` to ensure the new changes deployed correctly.
 
-17. Once the release is complete, create a Github tag off of the release commit which bumped the version:
+17. Once the release is complete, tag the commit that was released: the `<commit sha>` passed to `prepare-release-artifacts` in step 6.
     ```shell
-    git checkout develop
-    git pull origin develop
-    git log --pretty=oneline
-    # copy sha of the version bump commit
-    git tag -a vX.Y.Z -m vX.Y.Z <sha>
+    git fetch origin develop
+    git log -1 --oneline origin/develop # confirm it matches the step 6 sha
+    git tag -a vX.Y.Z -m vX.Y.Z <commit sha>
     git push origin vX.Y.Z
     ```
 
