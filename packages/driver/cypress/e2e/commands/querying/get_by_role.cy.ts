@@ -415,6 +415,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
         expect(err.message).to.include('  - button: "Div button"')
         expect(err.message).to.include('  - tab: "Tab button"')
         expect(err.message).to.include('  - heading: "Explicit roles", "Div heading"')
+        expect(err.message).not.to.include('native: false')
         expect(err.docsUrl).to.eq('https://on.cypress.io/getbyrole')
       })
 
@@ -460,6 +461,12 @@ describe('src/cy/commands/querying/get_by_role', () => {
       })
 
       cy.get('#explicit').getByRole('button')
+    })
+
+    it('suggests native: false only when an element with a role attribute would match the name', (done) => {
+      expectError('Some elements have the role "button" only through a `role` attribute, so they were skipped.', done)
+
+      cy.get('#explicit').getByRole('button', { name: 'Div button' })
     })
 
     it('uses "a" for a native element that may be hidden', (done) => {

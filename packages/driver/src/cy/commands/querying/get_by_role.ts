@@ -40,11 +40,29 @@ const formatNames = (names: string[]) => {
 // matching nothing.
 const isNativeOnly = (role: string, native?: boolean) => native ?? getNativeTagNames(role).length > 0
 
-// Explains a failure caused by `native`: elements with the role exist, but
-// only through a `role` attribute.
-const getNativeHint = (roots: GetByRoot[], role: string, cache: AccessibilityCache) => {
+// Cheapest check first: most candidates are ruled out by role alone, and
+// computing a name walks the element's whole subtree.
+const matchesRole = (element: Element, role: string, { name, hidden = false, native }: GetByRoleOptions, cache: AccessibilityCache) => {
+  if (!hasRole(element, role, cache) || (isNativeOnly(role, native) && !hasNativeRole(element, role))) {
+    return false
+  }
+
+  if (!hidden && isInaccessible(element, cache)) {
+    return false
+  }
+
+  // The name computation already collapses whitespace, so a function
+  // matcher receives the name exactly as computed.
+  return name === undefined || matches(getAccessibleName(element, cache), element, name, { normalizer: identityNormalizer })
+}
+
+// Explains a failure caused by `native`: an element would have matched, but
+// it only has the role through a `role` attribute.
+const getNativeHint = (roots: GetByRoot[], role: string, options: GetByRoleOptions, cache: AccessibilityCache) => {
   const skipped = roots.some((root) => {
-    return Array.from(root.querySelectorAll(getRoleSelector(role))).some((element) => hasRole(element, role, cache) && !hasNativeRole(element, role))
+    return Array.from(root.querySelectorAll(getRoleSelector(role))).some((element) => {
+      return !hasNativeRole(element, role) && matchesRole(element, role, { ...options, native: false }, cache)
+    })
   })
 
   if (!skipped) {
@@ -93,21 +111,7 @@ export default (Commands, Cypress, cy) => {
 
     candidates: (role) => getRoleSelector(role),
 
-    // Cheapest check first: most candidates are ruled out by role alone, and
-    // computing a name walks the element's whole subtree.
-    match (element, role, { name, hidden = false, native }, cache) {
-      if (!hasRole(element, role, cache) || (isNativeOnly(role, native) && !hasNativeRole(element, role))) {
-        return false
-      }
-
-      if (!hidden && isInaccessible(element, cache)) {
-        return false
-      }
-
-      // The name computation already collapses whitespace, so a function
-      // matcher receives the name exactly as computed.
-      return name === undefined || matches(getAccessibleName(element, cache), element, name, { normalizer: identityNormalizer })
-    },
+    match: matchesRole,
 
     describe (role, { name, hidden = false, native }) {
       const nameHint = name === undefined ? '' : ` and name ${describeMatcher(name)}`
@@ -117,8 +121,9 @@ export default (Commands, Cypress, cy) => {
       return `${noun.startsWith('native') ? 'a' : 'an'} ${noun} with the role "${role}"${nameHint}`
     },
 
-    onNotFound (roots, role, { hidden = false, native }, cache) {
-      const nativeHint = isNativeOnly(role, native) ? getNativeHint(roots, role, cache) : ''
+    onNotFound (roots, role, options, cache) {
+      const { hidden = false, native } = options
+      const nativeHint = isNativeOnly(role, native) ? getNativeHint(roots, role, options, cache) : ''
       const roles = summarizeRoles(roots, { hidden }, cache)
 
       if (!roles.length) {
