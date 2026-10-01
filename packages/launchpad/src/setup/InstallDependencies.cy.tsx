@@ -55,7 +55,6 @@ describe('<InstallDependencies />', () => {
 
     cy.getByRole('button', {
       name: defaultMessages.setupPage.step.back,
-      native: true,
     })
     .should('be.visible')
     .click()

@@ -1486,15 +1486,22 @@ declare namespace Cypress {
      * those whose accessible name matches `name`. Elements hidden from the
      * accessibility tree are skipped unless `hidden` is `true`.
      *
+     * For a role that HTML has an element for, only that element matches by
+     * default: `'button'` finds a `<button>`, not a `<div role="button">`.
+     * Pass `native: false` to also match elements that get the role from a
+     * `role` attribute.
+     *
      * Chained off an element, it searches that element's descendants.
      *
      * @see https://on.cypress.io/getbyrole
      * @example
+     *    // A native <button>, never a <div role="button">
+     *    cy.getByRole('button', { name: 'Save' }).click()
      *    // Widgets that HTML has no element for
      *    cy.getByRole('tab', { name: 'Billing' }).click()
      *    cy.get('nav').getByRole('menuitem', { name: /delete/i })
-     *    // A native <button>, never a <div role="button">
-     *    cy.getByRole('button', { name: 'Save', native: true })
+     *    // A dialog rendered as <div role="dialog"> by a component library
+     *    cy.getByRole('dialog', { name: 'Settings', native: false })
      */
     getByRole<E extends Node = HTMLElement>(role: import('./aria-query').ARIARole | (string & {}), options?: Partial<GetByRoleOptions>): Chainable<JQuery<E>>
 
@@ -2829,10 +2836,13 @@ declare namespace Cypress {
     /**
      * Only match elements whose tag gives them the role, like `<button>`,
      * skipping elements that only have it through a `role` attribute, like
-     * `<div role="button">`. Throws for roles that HTML has no element for,
-     * such as `tab`, since only a `role` attribute can give an element those.
+     * `<div role="button">`. Set it to `false` to match both.
      *
-     * @default false
+     * Roles that HTML has no element for, such as `tab` or `menuitem`, can
+     * only come from a `role` attribute, so they are always matched that way.
+     * Passing `native: true` with one of those roles throws.
+     *
+     * @default true for roles that HTML has an element for
      */
     native: boolean
   }

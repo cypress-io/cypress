@@ -25,7 +25,7 @@ function assertCorrectRunsLink (specFileName: string, status: string) {
   // we avoid the full `cy.validateExternalLink` here because that command
   // clicks the link, which focuses the link causing tooltips to appear,
   // which produces problems elsewhere testing tooltip behavior
-  cy.getByRole('link', { name: specFileName, native: true })
+  cy.getByRole('link', { name: specFileName })
   .should('have.attr', 'href', makeTestingCloudLink(status))
   .should('have.attr', 'data-cy', 'external') // to confirm the ExternalLink component is used
 }
@@ -61,7 +61,7 @@ function specShouldShow (specFileName: string, runDotsClasses: string[], latestR
   if (runDotsClasses?.length) {
     assertCorrectRunsLink(`${specFileName} test results`, latestRunStatus)
   } else {
-    cy.getByRole('link', { name: `${specFileName} test results`, native: true }).should('not.exist')
+    cy.getByRole('link', { name: `${specFileName} test results` }).should('not.exist')
   }
 }
 
@@ -245,7 +245,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
         expect(ctx._apis.authApi.logIn).to.have.been.called
       })
 
-      cy.getByRole('dialog', { name: 'Continue in your browser' }).within(() => {
+      cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).within(() => {
         cy.get('[aria-label="Close"]').click()
       })
 
@@ -258,7 +258,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       .should('have.text', 'Log in to Cypress Cloud')
       .click()
 
-      cy.getByRole('dialog', { name: 'Continue in your browser' }).within(() => {
+      cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).within(() => {
         cy.get('[aria-label="Close"]').click()
       })
 
@@ -290,7 +290,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       .should('have.text', 'Connect your project')
       .click()
 
-      cy.getByRole('dialog', { name: 'Create project' }).within(() => {
+      cy.getByRole('dialog', { name: 'Create project', native: false }).within(() => {
         cy.get('[aria-label="Close"]').click({ force: true })
       })
 
@@ -303,7 +303,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       .should('have.text', 'Connect your project')
       .click()
 
-      cy.getByRole('dialog', { name: 'Create project' }).within(() => {
+      cy.getByRole('dialog', { name: 'Create project', native: false }).within(() => {
         cy.get('[aria-label="Close"]').click({ force: true })
       })
 

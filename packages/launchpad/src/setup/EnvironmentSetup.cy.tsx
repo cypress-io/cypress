@@ -16,7 +16,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
 
     cy.getByRole('button', {
       name: 'Pick a framework',
-      native: true,
     }).filter('[aria-expanded="false"]')
     .should('have.attr', 'aria-haspopup', 'true')
     .click()
@@ -30,10 +29,10 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       cy.wrap($secondLi).find('svg').should('have.attr', 'data-cy', 'vue-logo')
     })
 
-    cy.getByRole('button', { name: 'Next step', native: true })
+    cy.getByRole('button', { name: 'Next step' })
     .should('be.disabled')
 
-    cy.getByRole('link', { name: 'Browse our list of third-party framework integrations', native: true })
+    cy.getByRole('link', { name: 'Browse our list of third-party framework integrations' })
     .should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Select+Framework+Dropdown&utm_source=Binary%3A+Launchpad&utm_campaign=Browse+third-party+frameworks')
 
     cy.percySnapshot()
@@ -56,10 +55,9 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
 
     cy.getByRole('button', {
       name: 'Pick a framework',
-      native: true,
     }).filter('[aria-expanded="false"]').click()
 
-    cy.getByRole('option', { name: 'React.js (detected)' }).should('be.visible').click()
+    cy.getByRole('option', { name: 'React.js (detected)', native: false }).should('be.visible').click()
   })
 
   it('shows the description of bundler', () => {

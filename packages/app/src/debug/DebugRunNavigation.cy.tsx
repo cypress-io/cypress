@@ -241,7 +241,7 @@ describe('<DebugRunNavigation />', () => {
     cy.findByTestId('debug-toggle').click()
 
     cy.contains('We found more than 100 runs.').should('be.visible')
-    cy.getByRole('link', { name: 'Go to Cypress Cloud to see all runs', native: true }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf/?utm_medium=Debug+Tab&utm_campaign=Run+Navigation+Limit&utm_source=Binary%3A+Launchpad')
+    cy.getByRole('link', { name: 'Go to Cypress Cloud to see all runs' }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf/?utm_medium=Debug+Tab&utm_campaign=Run+Navigation+Limit&utm_source=Binary%3A+Launchpad')
   })
 
   describe('Switch to latest run button', () => {

@@ -614,7 +614,7 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
   }
 
   return logInternal('validateExternalLink', () => {
-    cy.wrap(subject, { log: false }).getByRole('link', { name: name || href, native: true }).as('Link')
+    cy.wrap(subject, { log: false }).getByRole('link', { name: name || href }).as('Link')
     .should('have.attr', 'href', href)
     .click()
 

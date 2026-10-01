@@ -30,7 +30,7 @@ describe('RecordRunModal', () => {
 
     cy.mount(<RecordRunModalVue onCancel={closeStub} utmMedium="Nav" />)
 
-    cy.getByRole('button', { name: defaultMessages.actions.close, native: true }).click().then(() => {
+    cy.getByRole('button', { name: defaultMessages.actions.close }).click().then(() => {
       expect(closeStub).to.have.been.called
     })
   })

@@ -35,8 +35,13 @@ const formatNames = (names: string[]) => {
   return remaining > 0 ? `${shown.join(', ')} and ${remaining} more` : shown.join(', ')
 }
 
-// Explains a failure caused by `native: true`: elements with the role exist,
-// but only through a `role` attribute.
+// `native` defaults to on wherever HTML has an element for the role. A widget
+// role such as `tab` has none, so for those it defaults to off rather than
+// matching nothing.
+const isNativeOnly = (role: string, native?: boolean) => native ?? getNativeTagNames(role).length > 0
+
+// Explains a failure caused by `native`: elements with the role exist, but
+// only through a `role` attribute.
 const getNativeHint = (roots: GetByRoot[], role: string, cache: AccessibilityCache) => {
   const skipped = roots.some((root) => {
     return Array.from(root.querySelectorAll(getRoleSelector(role))).some((element) => hasRole(element, role, cache) && !hasNativeRole(element, role))
@@ -90,8 +95,8 @@ export default (Commands, Cypress, cy) => {
 
     // Cheapest check first: most candidates are ruled out by role alone, and
     // computing a name walks the element's whole subtree.
-    match (element, role, { name, hidden = false, native = false }, cache) {
-      if (!hasRole(element, role, cache) || (native && !hasNativeRole(element, role))) {
+    match (element, role, { name, hidden = false, native }, cache) {
+      if (!hasRole(element, role, cache) || (isNativeOnly(role, native) && !hasNativeRole(element, role))) {
         return false
       }
 
@@ -104,16 +109,16 @@ export default (Commands, Cypress, cy) => {
       return name === undefined || matches(getAccessibleName(element, cache), element, name, { normalizer: identityNormalizer })
     },
 
-    describe (role, { name, hidden = false, native = false }) {
+    describe (role, { name, hidden = false, native }) {
       const nameHint = name === undefined ? '' : ` and name ${describeMatcher(name)}`
 
-      const noun = _.compact([!hidden && 'accessible', native && 'native', 'element']).join(' ')
+      const noun = _.compact([!hidden && 'accessible', isNativeOnly(role, native) && 'native', 'element']).join(' ')
 
       return `${noun.startsWith('native') ? 'a' : 'an'} ${noun} with the role "${role}"${nameHint}`
     },
 
-    onNotFound (roots, role, { hidden = false, native = false }, cache) {
-      const nativeHint = native ? getNativeHint(roots, role, cache) : ''
+    onNotFound (roots, role, { hidden = false, native }, cache) {
+      const nativeHint = isNativeOnly(role, native) ? getNativeHint(roots, role, cache) : ''
       const roles = summarizeRoles(roots, { hidden }, cache)
 
       if (!roles.length) {

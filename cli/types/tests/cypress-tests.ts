@@ -860,6 +860,7 @@ namespace CypressGetByRoleTests {
   })
   cy.getByRole('button', { hidden: true, log: false, timeout: 100, includeShadowDom: true })
   cy.getByRole('button', { name: 'Save', native: true })
+  cy.getByRole('dialog', { native: false })
   cy.getByRole('button', { native: 'yes' }) // $ExpectError
   cy.get('form').getByRole('button').click()
   cy.getByRole() // $ExpectError

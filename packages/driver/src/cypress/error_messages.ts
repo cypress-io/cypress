@@ -629,7 +629,7 @@ export default {
       no_roles: 'No elements with a role were found.',
       no_accessible_roles: 'No accessible elements with a role were found, but some elements may be hidden from the accessibility tree. To include them, pass `{ hidden: true }`.',
       no_native_element: `${cmd('getByRole')} was passed \`native: true\`, but HTML has no native element with the role \`{{role}}\`, so only a \`role\` attribute can give an element that role. Remove \`native: true\` to find it.`,
-      native_hint: 'Some elements have the role "{{role}}" only through a `role` attribute, so `native: true` skipped them. The native elements for this role are: {{tags}}.',
+      native_hint: 'Some elements have the role "{{role}}" only through a `role` attribute, so they were skipped. The native elements for this role are: {{tags}}. To include elements with a `role` attribute, pass `{ native: false }`.',
     },
   },
 

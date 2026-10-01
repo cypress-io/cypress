@@ -169,6 +169,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
       cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.get('[data-cy-testingtype=e2e]').within(() => {
@@ -177,11 +178,13 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
       cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('not.exist')
 
       cy.get('@switchTestingType').click()
       cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.get('[data-cy-testingtype=e2e]').within(() => {
@@ -331,6 +334,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
       cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.get('[data-cy-testingtype=component]').within(() => {
@@ -339,11 +343,13 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
       cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('not.exist')
 
       cy.get('@switchTestingType').click()
       cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.withCtx((ctx, o) => {

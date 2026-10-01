@@ -54,7 +54,7 @@ describe('EnableNotificationsBanner', () => {
 
       cy.mount(<EnableNotificationsBanner />)
 
-      cy.getByRole('button', { name: 'Dismiss banner', native: true }).click()
+      cy.getByRole('button', { name: 'Dismiss banner' }).click()
     })
   })
 })

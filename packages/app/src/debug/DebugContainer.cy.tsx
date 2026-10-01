@@ -51,7 +51,7 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setProjectFlag('isUsingGit', true)
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
-      cy.getByRole('button', { name: 'Connect to Cypress Cloud', native: true }).should('be.visible')
+      cy.getByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
     it('is logged in with no project', () => {
@@ -63,7 +63,7 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
-      cy.getByRole('button', { name: 'Connect a Cypress Cloud project', native: true }).should('be.visible')
+      cy.getByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
     it('has no runs', () => {
@@ -211,19 +211,19 @@ describe('<DebugContainer />', () => {
     context('over limit', () => {
       it('handled usage exceeded', () => {
         mountTestRun('overLimit')
-        cy.getByRole('link', { name: 'Contact admin', native: true }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
 
       it('handles retention exceeded', () => {
         mountTestRun('overLimitRetention')
-        cy.getByRole('link', { name: 'Contact admin', native: true }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
 
       it('does not show passing message if run is hidden', () => {
         mountTestRun('overLimitPassed')
         cy.contains('Well Done!').should('not.exist')
         cy.contains('All your tests passed.').should('not.exist')
-        cy.getByRole('link', { name: 'Contact admin', native: true }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
     })
 

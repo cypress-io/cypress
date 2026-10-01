@@ -71,7 +71,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('h2', text.login.titleInitial).should('be.visible')
       cy.contains('a', text.login.cloud).should('be.visible').should('have.attr', 'href', 'https://on.cypress.io/dashboard-introduction')
 
-      cy.getByRole('button', { name: text.login.actionOpening, native: true })
+      cy.getByRole('button', { name: text.login.actionOpening })
       .should('be.visible')
       .and('be.disabled')
     })
@@ -100,7 +100,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       // Mutation fires on mount — no button click required
       cy.get('@loginSpy').should('have.been.called')
 
-      cy.getByRole('button', { name: text.login.actionOpening, native: true })
+      cy.getByRole('button', { name: text.login.actionOpening })
       .should('be.visible')
       .and('be.disabled')
     })
@@ -132,7 +132,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
       cy.get('@loginSpy').should('not.have.been.called')
 
-      cy.getByRole('button', { name: text.login.actionWaiting, native: true })
+      cy.getByRole('button', { name: text.login.actionWaiting })
       .should('be.visible')
       .and('be.disabled')
     })
@@ -143,7 +143,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       })
 
       cy.contains('h2', text.login.titleInitial).should('be.visible')
-      cy.getByRole('button', { name: text.login.actionSignup, native: true }).should('be.visible')
+      cy.getByRole('button', { name: text.login.actionSignup }).should('be.visible')
     })
 
     it('shows correct "waiting for login" status', () => {
@@ -157,7 +157,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
       // The LoginModal immediately shows the "Waiting..." button
       // if the browser already opened
-      cy.getByRole('button', { name: text.login.actionWaiting, native: true })
+      cy.getByRole('button', { name: text.login.actionWaiting })
       .should('be.visible')
       .and('be.disabled')
     })
@@ -232,7 +232,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('emits an event to close the modal when "Continue" button is clicked', () => {
     mountSuccess()
-    cy.getByRole('button', { name: text.login.actionContinue, native: true }).click().then(() => {
+    cy.getByRole('button', { name: text.login.actionContinue }).click().then(() => {
       cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('close'))
       .should('have.length', 1)
     })
@@ -251,7 +251,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.goOffline()
 
       cy.contains('You have no internet connection')
-      cy.getByRole('button', { name: text.login.actionLogin, native: true })
+      cy.getByRole('button', { name: text.login.actionLogin })
       .should('be.visible')
       .and('be.disabled')
     })
@@ -264,7 +264,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.goOffline()
 
       cy.contains('You have no internet connection')
-      cy.getByRole('button', { name: text.login.actionLogin, native: true })
+      cy.getByRole('button', { name: text.login.actionLogin })
       .should('be.visible')
       .and('be.disabled')
 
@@ -273,10 +273,10 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('h2', text.login.titleInitial).should('be.visible')
 
       // begin the login process
-      cy.getByRole('button', { name: text.login.actionLogin, native: true }).click()
+      cy.getByRole('button', { name: text.login.actionLogin }).click()
 
       // ensure we reach "browser is opening" status on the CTA
-      cy.getByRole('button', { name: text.login.actionOpening, native: true })
+      cy.getByRole('button', { name: text.login.actionOpening })
       .should('be.visible')
       .and('be.disabled')
     })

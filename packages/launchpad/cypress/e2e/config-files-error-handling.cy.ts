@@ -27,7 +27,7 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
@@ -50,7 +50,7 @@ describe('Config files error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
   })
@@ -121,7 +121,7 @@ describe('Launchpad: Error System Tests', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
@@ -134,7 +134,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
 
     // Try again while the config is still invalid
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.wait('@resetErrorsAndLoadConfig')
 
@@ -145,7 +145,7 @@ describe('Launchpad: Error System Tests', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress')
   })
@@ -230,7 +230,7 @@ describe('setupNodeEvents', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
   })
@@ -258,7 +258,7 @@ describe('setupNodeEvents', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { baseUrl: 'http://ocalhost:3000', e2e: { supportFile: false } }`)
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
     cy.wait('@resetErrorsAndLoadConfig')
     cy.get('[data-cy-testingType=e2e]').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
@@ -268,7 +268,7 @@ describe('setupNodeEvents', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'http://localhost:3000', supportFile: false } }`)
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
     cy.wait('@resetErrorsAndLoadConfig')
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
@@ -301,7 +301,7 @@ describe('setupNodeEvents', () => {
         }`)
     })
 
-    cy.getByRole('button', { name: 'Try again', native: true }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
     .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)

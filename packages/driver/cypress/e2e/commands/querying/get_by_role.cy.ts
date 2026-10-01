@@ -43,14 +43,14 @@ describe('src/cy/commands/querying/get_by_role', () => {
 
     it('finds elements by an explicit role', () => {
       cy.get('#explicit').within(() => {
-        cy.getByRole('button').should('have.id', 'div-button')
+        cy.getByRole('button', { native: false }).should('have.id', 'div-button')
         cy.getByRole('tab').should('have.id', 'tab-button')
-        cy.getByRole('heading', { name: 'Div heading' }).should('have.id', 'div-heading')
+        cy.getByRole('heading', { name: 'Div heading', native: false }).should('have.id', 'div-heading')
       })
     })
 
     it('lets an explicit role replace the implicit one', () => {
-      cy.get('#explicit').getByRole('button').should('not.have.id', 'tab-button')
+      cy.get('#explicit').getByRole('button', { native: false }).should('not.have.id', 'tab-button')
     })
 
     it('only uses the first token of a role attribute', () => {
@@ -59,7 +59,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('yields every match, in document order', () => {
-      cy.getByRole('heading').then(($el) => {
+      cy.getByRole('heading', { native: false }).then(($el) => {
         expect($el.toArray().map((el) => el.textContent)).to.deep.eq([
           'Account settings',
           'Implicit roles',
@@ -153,20 +153,29 @@ describe('src/cy/commands/querying/get_by_role', () => {
   })
 
   context('native elements', () => {
-    it('skips elements that only have the role through a role attribute', () => {
-      cy.get('#explicit').getByRole('button').should('have.id', 'div-button')
+    it('skips elements that only have the role through a role attribute by default', () => {
+      cy.get('#explicit').getByRole('button').should('not.exist')
       cy.get('#explicit').getByRole('button', { native: true }).should('not.exist')
     })
 
+    it('includes elements that only have the role through a role attribute with native: false', () => {
+      cy.get('#explicit').getByRole('button', { native: false }).should('have.id', 'div-button')
+    })
+
     it('finds elements whose tag gives them the role', () => {
-      cy.get('#implicit').getByRole('button', { native: true }).then(($el) => {
+      cy.get('#implicit').getByRole('button').then(($el) => {
         expect(ids($el)).to.deep.eq(['implicit-button', 'submit-input'])
       })
     })
 
     it('skips a role attribute that gives an element a role its tag does not', () => {
-      cy.getByRole('heading', { name: 'Div heading' }).should('have.id', 'div-heading')
-      cy.getByRole('heading', { name: 'Div heading', native: true }).should('not.exist')
+      cy.getByRole('heading', { name: 'Div heading' }).should('not.exist')
+      cy.getByRole('heading', { name: 'Div heading', native: false }).should('have.id', 'div-heading')
+    })
+
+    it('matches role attributes for a role that HTML has no element for', () => {
+      cy.getByRole('tab').should('have.id', 'tab-button')
+      cy.getByRole('tab', { native: false }).should('have.id', 'tab-button')
     })
   })
 
@@ -203,14 +212,14 @@ describe('src/cy/commands/querying/get_by_role', () => {
   context('scope', () => {
     it('searches inside .within()', () => {
       cy.get('#explicit').within(() => {
-        cy.getByRole('heading').then(($el) => {
+        cy.getByRole('heading', { native: false }).then(($el) => {
           expect($el.toArray().map((el) => el.textContent)).to.deep.eq(['Explicit roles', 'Div heading'])
         })
       })
     })
 
     it('searches the descendants of every subject element', () => {
-      cy.get('#implicit, #explicit').getByRole('button').should('have.length', 3)
+      cy.get('#implicit, #explicit').getByRole('button', { native: false }).should('have.length', 3)
     })
 
     it('can be chained off window or document, searching the whole page', () => {
@@ -226,9 +235,9 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('retries until an element is removed', () => {
-      cy.getByRole('status').should('exist')
+      cy.getByRole('status', { native: false }).should('exist')
       cy.getByRole('button', { name: 'Remove status' }).click()
-      cy.getByRole('status').should('not.exist')
+      cy.getByRole('status', { native: false }).should('not.exist')
     })
 
     it('retries until the name changes', () => {
@@ -244,9 +253,9 @@ describe('src/cy/commands/querying/get_by_role', () => {
     // A `status` never takes its name from its content, only from `aria-label`
     // or `aria-labelledby`.
     it('does not name a status from its content', () => {
-      cy.getByRole('status', { name: 'Saving' }).should('not.exist')
+      cy.getByRole('status', { name: 'Saving', native: false }).should('not.exist')
       cy.get('#status').invoke('attr', 'aria-label', 'Saving')
-      cy.getByRole('status', { name: 'Saving' }).should('have.id', 'status')
+      cy.getByRole('status', { name: 'Saving', native: false }).should('have.id', 'status')
     })
 
     it('retries until an element stops being hidden', () => {
@@ -260,7 +269,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('re-queries the page when a later command needs a fresh subject', () => {
-      cy.getByRole('status').as('status')
+      cy.getByRole('status', { native: false }).as('status')
       cy.get('#status').invoke('attr', 'role', 'log')
       cy.get('#dynamic-container').invoke('append', '<div id="new-status" role="status">New</div>')
       cy.get('@status').should('have.id', 'new-status')
@@ -308,13 +317,13 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('includes the query in the console props', function () {
-      cy.get('#explicit').getByRole('button', { name: 'Div button' }).then(function ($el) {
+      cy.get('#explicit').getByRole('button', { name: 'Div button', native: false }).then(function ($el) {
         const consoleProps = this.lastLog.invoke('consoleProps')
 
         expect(consoleProps.name).to.eq('getByRole')
         expect(consoleProps.props).to.deep.eq({
           Role: 'button',
-          Options: { name: 'Div button' },
+          Options: { name: 'Div button', native: false },
           'Applied To': cy.$$('#explicit').get(0),
           Yielded: $el.get(0),
           Elements: 1,
@@ -401,7 +410,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('describes what it looked for and lists the accessible roles when nothing matches', (done) => {
-      expectError('Expected to find an accessible element with the role "button" and name "Missing" within the element: <section#explicit>, but never did.', done, (err) => {
+      expectError('Expected to find an accessible native element with the role "button" and name "Missing" within the element: <section#explicit>, but never did.', done, (err) => {
         expect(err.message).to.include('Here are the accessible roles that were found, with the accessible name of each element:')
         expect(err.message).to.include('  - button: "Div button"')
         expect(err.message).to.include('  - tab: "Tab button"')
@@ -413,7 +422,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('shows a regular expression name as written', (done) => {
-      expectError('Expected to find an accessible element with the role "button" and name /missing/i', done)
+      expectError('Expected to find an accessible native element with the role "button" and name /missing/i', done)
 
       cy.getByRole('button', { name: /missing/i })
     })
@@ -423,7 +432,19 @@ describe('src/cy/commands/querying/get_by_role', () => {
         expect(err.message).to.include('Here are the roles that were found')
       })
 
-      cy.getByRole('slider', { hidden: true })
+      cy.getByRole('slider', { hidden: true, native: false })
+    })
+
+    it('leaves out "native" when native is false', (done) => {
+      expectError('Expected to find an accessible element with the role "button" and name "Missing", but never did.', done)
+
+      cy.getByRole('button', { name: 'Missing', native: false })
+    })
+
+    it('leaves out "native" for a role that HTML has no element for', (done) => {
+      expectError('Expected to find an accessible element with the role "tab" and name "Missing", but never did.', done)
+
+      cy.getByRole('tab', { name: 'Missing' })
     })
 
     it('suggests hidden: true when every element with a role is hidden', (done) => {
@@ -432,19 +453,19 @@ describe('src/cy/commands/querying/get_by_role', () => {
       cy.get('#visibility > div[aria-hidden]').getByRole('button')
     })
 
-    it('explains when native is why nothing matched', (done) => {
+    it('explains when skipping role attributes is why nothing matched', (done) => {
       expectError('Expected to find an accessible native element with the role "button" within the element: <section#explicit>, but never did.', done, (err) => {
-        expect(err.message).to.include('Some elements have the role "button" only through a `role` attribute, so `native: true` skipped them. The native elements for this role are: `<input>`, `<button>`.')
+        expect(err.message).to.include('Some elements have the role "button" only through a `role` attribute, so they were skipped. The native elements for this role are: `<input>`, `<button>`. To include elements with a `role` attribute, pass `{ native: false }`.')
         expect(err.message).to.include('  - button: "Div button"')
       })
 
-      cy.get('#explicit').getByRole('button', { native: true })
+      cy.get('#explicit').getByRole('button')
     })
 
     it('uses "a" for a native element that may be hidden', (done) => {
       expectError('Expected to find a native element with the role "button" within the element: <section#explicit>, but never did.', done)
 
-      cy.get('#explicit').getByRole('button', { native: true, hidden: true })
+      cy.get('#explicit').getByRole('button', { hidden: true })
     })
 
     it('says so when there are no roles at all', (done) => {
@@ -460,7 +481,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('does not list the element it was chained off, which it never matches', (done) => {
-      expectError('Expected to find an accessible element with the role "navigation" within the element: <nav>, but never did.', done, (err) => {
+      expectError('Expected to find an accessible native element with the role "navigation" within the element: <nav>, but never did.', done, (err) => {
         expect(err.message).to.include('  - link: "Profile", "Billing"')
         expect(err.message).not.to.include('- navigation:')
       })
@@ -469,7 +490,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('describes a shadow root it searched by its host', (done) => {
-      expectError('Expected to find an accessible element with the role "button" and name "Missing" within the shadow root of the element: <div#shadow-host>, but never did.', done, (err) => {
+      expectError('Expected to find an accessible native element with the role "button" and name "Missing" within the shadow root of the element: <div#shadow-host>, but never did.', done, (err) => {
         expect(err.message).to.include('  - button: "Shadow button"')
       })
 
@@ -477,7 +498,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
     })
 
     it('describes an element that was expected not to exist', (done) => {
-      expectError('Expected not to find an accessible element with the role "banner", but continuously found it.', done)
+      expectError('Expected not to find an accessible native element with the role "banner", but continuously found it.', done)
 
       cy.getByRole('banner').should('not.exist')
     })

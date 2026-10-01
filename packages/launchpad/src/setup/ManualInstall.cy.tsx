@@ -43,13 +43,13 @@ describe('<ManualInstall />', () => {
 
     cy.findByText(defaultMessages.setupWizard.installDependencies.pasteCommand).should('be.visible')
     cy.findByDisplayValue(installCommand).should('be.visible')
-    cy.getByRole('button', { name: 'Copy', native: true }).click()
-    cy.getByRole('button', { name: 'Copied!', native: true }).should('be.visible')
+    cy.getByRole('button', { name: 'Copy' }).click()
+    cy.getByRole('button', { name: 'Copied!' }).should('be.visible')
 
     cy.wrap(stubCopy).should('have.been.calledWith', installCommand)
 
     const validatePackage = (packageName: string) => {
-      cy.getByRole('link', { name: packageName, native: true })
+      cy.getByRole('link', { name: packageName })
       .should('have.attr', 'href', `https://www.npmjs.com/package/${packageName}`)
 
       cy.contains(framework.description.split('<span')[0])
