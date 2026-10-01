@@ -297,6 +297,25 @@ declare namespace Cypress {
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
 
   /**
+   * The object yielded by `cy.location()`, describing the current URL of the Application Under Test (AUT).
+   * It is a plain object, not the AUT's `window.location`, so it has no methods such as `assign()` or `reload()`.
+   *
+   * @see https://on.cypress.io/location
+   */
+  interface AUTLocation {
+    hash: string
+    host: string
+    hostname: string
+    href: string
+    origin: string
+    pathname: string
+    port: string
+    protocol: string
+    search: string
+    searchParams: URLSearchParams
+  }
+
+  /**
    * The interface for user-defined properties in Window object under test.
    */
   interface ApplicationWindow { } // tslint:disable-line
@@ -1600,15 +1619,15 @@ declare namespace Cypress {
     last<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Get the global `window.location` object of the page that is currently active.
+     * Yield a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
      *    cy.location() // Get location object
      */
-    location(options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location(options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation>
     /**
-     * Get a part of the global `window.location` object of the page that is currently active.
+     * Yield one property of a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
@@ -1617,7 +1636,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location<K extends keyof Location>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<Location[K]>
+    location<K extends keyof AUTLocation>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation[K]>
 
     /**
      * Print a message to the Cypress Command Log.

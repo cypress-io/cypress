@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import path from 'path'
 import os from 'os'
-import simpleGit from 'simple-git'
+import { simpleGit } from 'simple-git'
 import fs from 'fs-extra'
 import chokidar from 'chokidar'
 
