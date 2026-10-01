@@ -177,7 +177,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - Run `yarn workspace @packages/example deploy`. This adds changes from `cypress-example-kitchensink` to a commit in the `gh-pages` branch, which will deploy to production with its own CI.
     - Check the deployed site at `https://example.cypress.io` to ensure the new changes deployed correctly.
 
-17. Once the release is complete, tag the commit that was released: the `<commit sha>` passed to `prepare-release-artifacts` in step 6. Because `develop` is locked during the release, this is also the latest commit on `develop`. There is no version-bump commit to look for, since the version in `package.json` stays `0.0.0-development`.
+17. Once the release is complete, tag the commit that was released: the `<commit sha>` passed to `prepare-release-artifacts` in step 6. Because `develop` is locked during the release, this is also the latest commit on `develop`.
     ```shell
     git fetch origin develop
     git log -1 --oneline origin/develop # confirm it matches the step 6 sha
