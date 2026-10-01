@@ -7,12 +7,18 @@ import type { ClientCertificateEntry } from './bridge-plan'
 import { clientCertificates as certStore } from '@packages/network'
 import { createForgedIdentity } from './forged-identity'
 import { connectUpstream } from './upstream-connection'
+import * as errors from '../errors'
 
 const debug = Debug('cypress:server:mtls')
 
 export interface MtlsBridgeLaunchOpts {
   /** Appended to the browser's `--host-resolver-rules`. */
   hostResolverRules: string
+  /**
+   * The steered origins' hostnames. An upstream proxy would otherwise take these hosts
+   * before the resolver rules are consulted, so they have to bypass it.
+   */
+  hostnames: string[]
   close: () => Promise<void>
 }
 
@@ -67,6 +73,7 @@ export async function createMtlsBridge (options: {
 
   return {
     hostResolverRules: formatHostResolverRules(bound),
+    hostnames: bound.map(({ hostname }) => hostname),
     close: () => bridge.close(),
   }
 }
@@ -81,7 +88,9 @@ export function toBridgeEntries (clientCertificates: { url: string }[]): ClientC
     const material = certStore.clientCertificateStoreSingleton.getClientCertificatesForConfiguredUrl(item.url)
 
     if (!material) {
-      return []
+      // The store is loaded from this same config, so this should not happen — but the one
+      // thing this fix must never do is accept a certificate and then quietly not present it.
+      return errors.throwErr('CLIENT_CERTIFICATES_NOT_LOADED', item.url)
     }
 
     return [{

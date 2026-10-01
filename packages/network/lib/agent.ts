@@ -238,10 +238,10 @@ export class CombinedAgent {
 }
 
 /**
- * Resolves the proxy a request to `href` would actually be routed through, or an empty
- * string when it would be dialed directly. This is the resolution `shouldProxyForUrl`
- * answers as a boolean, so anything needing the proxy itself must come through here rather
- * than `getProxyForUrl`, which does not know about the override below.
+ * Returns the proxy URL a request to `href` would go through, or an empty string if it
+ * would be dialed directly. Use this instead of `getProxyForUrl` when you need the proxy
+ * itself, since `getProxyForUrl` doesn't know about the `HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS`
+ * override below.
  */
 export const getProxyOrTargetOverrideForUrl = (href: string): string => {
   // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will

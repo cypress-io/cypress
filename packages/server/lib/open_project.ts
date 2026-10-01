@@ -138,7 +138,7 @@ export class OpenProject extends EventEmitter {
         // Cypress error naming the offending `trustedCertificates` entry.
         trustedCertificateFingerprints: resolveTrustedCertificateFingerprints(cfg.trustedCertificates ?? [], cfg.projectRoot),
         mtlsHostResolverRules: this._mtlsBridge?.hostResolverRules,
-        ...translateEgressPolicyToLaunchOpts(cfg.hosts),
+        ...translateEgressPolicyToLaunchOpts(cfg.hosts, this._mtlsBridge?.hostnames),
         hosts: cfg.hosts,
         shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {

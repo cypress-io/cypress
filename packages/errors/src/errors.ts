@@ -920,7 +920,15 @@ export const AllCypressErrors = {
 
       ${fmt.listItems(urls)}
 
-      A browser opens one connection per origin and presents a single client certificate on it, before any path is known. Configure one certificate per origin.`
+      A browser opens one connection per origin and presents a single client certificate on it, before any path is known. Configure one certificate per origin.
+
+      Setting ${fmt.highlightSecondary(`forceHttp1: true`)} routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.`
+  },
+  CLIENT_CERTIFICATES_NOT_LOADED: (url: string) => {
+    return errTemplate`\
+      Cypress could not load the certificate configured in ${fmt.highlight(`clientCertificates`)} for ${fmt.highlightSecondary(url)}.
+
+      The entry was accepted during validation but no certificate was available for it when the browser launched, so Cypress stopped rather than run without presenting it.`
   },
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
