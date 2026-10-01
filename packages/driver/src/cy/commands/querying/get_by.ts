@@ -10,7 +10,10 @@ import { AccessibilityCache, isValidMatcher } from '../../../dom/accessibility'
 
 export type GetByRoot = Element | ShadowRoot
 
-type OptionKind = 'boolean' | 'matcher'
+// Derived from each option's type, so a definition can't declare a kind that
+// disagrees with the option it validates.
+// `any`, as in `GetByDefinition<any, any>`, allows either kind.
+type OptionKind<T> = 0 extends (1 & T) ? 'boolean' | 'matcher' : [NonNullable<T>] extends [boolean] ? 'boolean' : 'matcher'
 
 type SharedOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Shadow>
 
@@ -20,7 +23,7 @@ export interface GetByDefinition<TMatcher, TOptions extends object> {
   // Shown in the console props, e.g. `Role`.
   matcherLabel: string
   // The options this query accepts beyond `timeout`, `log` and `includeShadowDom`.
-  options: Record<keyof TOptions, OptionKind>
+  options: { [K in keyof TOptions]-?: OptionKind<TOptions[K]> }
   // Options this query leaves out on purpose, mapped to the chain that gets the
   // same result, so the error can suggest it.
   unsupportedOptionHints?: Record<string, string>

@@ -13,13 +13,22 @@ interface ImplicitRoleRule {
   specificity: number
 }
 
+// The attribute constraints aria-query 5.3.0 uses. `@types/aria-query`
+// declares `'unset' | '>1'`, which doesn't match the data, so these are read
+// through this type, and a unit test fails if aria-query adds another.
+type AttributeConstraint = 'undefined' | 'set' | '>1'
+
+const getConstraints = (attribute: { constraints?: unknown }) => (attribute.constraints ?? []) as AttributeConstraint[]
+
 // aria-query's element-level `constraints`, such as "scoped to the body
 // element", describe DOM context a selector can't express, so they're ignored:
-// every `<header>` is a `banner` and every `<td>` is a `cell`.
+// every `<header>` is a `banner` and every `<td>` is a `cell`. The `>1`
+// attribute constraint can't be expressed either, so `makeRule` checks it.
 const makeElementSelector = ({ name, attributes = [] }: ElementRoleEntry) => {
-  return `${name}${attributes.map(({ name: attributeName, value, constraints = [] }) => {
-    const shouldNotExist = (constraints as string[]).includes('undefined')
-    const shouldBeNonEmpty = (constraints as string[]).includes('set')
+  return `${name}${attributes.map((attribute) => {
+    const { name: attributeName, value } = attribute
+    const shouldNotExist = getConstraints(attribute).includes('undefined')
+    const shouldBeNonEmpty = getConstraints(attribute).includes('set')
 
     if (value !== undefined) {
       return `[${attributeName}="${value}"]`
@@ -47,7 +56,7 @@ const makeRule = (entry: ElementRoleEntry, roles: string[]): ImplicitRoleRule =>
   // `combobox` otherwise, including `size="1"`. A selector can't compare
   // numbers, so this is checked on the parsed `size` property.
   const selectSize = entry.name === 'select' ? attributes.find((attribute) => attribute.name === 'size') : undefined
-  const needsSizeAboveOne = (selectSize?.constraints as string[] | undefined)?.includes('>1')
+  const needsSizeAboveOne = selectSize ? getConstraints(selectSize).includes('>1') : false
   const selector = makeElementSelector({
     ...entry,
     attributes: attributes.filter((attribute) => attribute !== typeText && attribute !== selectSize),
@@ -55,6 +64,12 @@ const makeRule = (entry: ElementRoleEntry, roles: string[]): ImplicitRoleRule =>
 
   return {
     match: (element) => {
+      // Checked by tag name rather than `instanceof`, which fails for elements
+      // from the AUT's iframe, before reading a property only that tag has.
+      if (element.localName !== entry.name) {
+        return false
+      }
+
       if (typeText && (element as HTMLInputElement).type !== 'text') {
         return false
       }

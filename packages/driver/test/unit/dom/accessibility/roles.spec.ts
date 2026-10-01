@@ -1,3 +1,4 @@
+import { elementRoles } from 'aria-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AccessibilityCache } from '../../../../src/dom/accessibility/cache'
@@ -105,6 +106,30 @@ describe('dom/accessibility/roles', () => {
       render('<custom-widget id="el"></custom-widget>')
 
       expect(getRoles($('#el'))).toEqual([])
+    })
+  })
+
+  describe('implicit role rules', () => {
+    // roles.ts turns these constraints into selectors and property checks, so
+    // a new one in an aria-query upgrade would otherwise be silently ignored.
+    it('handles every attribute constraint aria-query uses', () => {
+      const constraints = new Set<string>()
+
+      for (const [entry] of elementRoles.entries()) {
+        for (const attribute of entry.attributes ?? []) {
+          for (const constraint of (attribute.constraints ?? []) as string[]) {
+            constraints.add(constraint)
+          }
+        }
+      }
+
+      expect([...constraints].sort()).toEqual(['>1', 'set', 'undefined'])
+    })
+
+    it('does not give an element a role meant for another tag', () => {
+      render('<div id="el" type="text" size="4"></div>')
+
+      expect(getRoles($('#el'))).toEqual(['generic'])
     })
   })
 
@@ -231,6 +256,12 @@ describe('dom/accessibility/roles', () => {
       render('<button id="el" aria-labelledby="label">x</button><span id="label" aria-hidden="true"><span style="display: none">Export</span></span>')
 
       expect(getAccessibleName($('#el'))).toBe('Export')
+    })
+
+    it('leaves out hidden content again in a nested reference to a visible node', () => {
+      render('<button id="el" aria-labelledby="a">x</button><div id="a" hidden><span aria-labelledby="b">Inner</span></div><span id="b">Visible <span style="display: none">Secret</span></span>')
+
+      expect(getAccessibleName($('#el'))).not.toContain('Secret')
     })
 
     it('leaves out the hidden content of a visible target', () => {

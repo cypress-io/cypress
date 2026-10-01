@@ -14,15 +14,12 @@ import {
   matches,
   summarizeRoles,
 } from '../../../dom/accessibility'
-import type { AccessibilityCache, Matcher } from '../../../dom/accessibility'
+import type { AccessibilityCache } from '../../../dom/accessibility'
 import { addGetByQuery } from './get_by'
 import type { GetByRoot } from './get_by'
 
-interface GetByRoleOptions {
-  name?: Matcher
-  hidden?: boolean
-  native?: boolean
-}
+// The public option types, so the runtime validation can't drift from them.
+type GetByRoleOptions = Partial<Pick<Cypress.GetByRoleOptions, 'name' | 'hidden' | 'native'>>
 
 // Keeps the error readable on large pages.
 const MAX_ROLES_IN_HINT = 20

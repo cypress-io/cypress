@@ -1,25 +1,28 @@
 diff --git a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
-index 585aa65..68faccc 100644
+index 585aa65..00a5fa5 100644
 --- a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
 +++ b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
-@@ -397,13 +397,28 @@ function computeTextAlternative(root) {
+@@ -397,13 +397,31 @@ function computeTextAlternative(root) {
      }
      return null;
    }
-+  // accname step 2A: a hidden node is skipped unless it is part of an
-+  // aria-labelledby or aria-describedby traversal whose directly referenced
-+  // node was hidden. Inside such a traversal, hidden descendants count too.
++  // Cypress patch, accname 1.2 step 2A: a hidden node is skipped unless it is
++  // part of an aria-labelledby or aria-describedby traversal whose directly
++  // referenced node is hidden. Each referenced node starts its own traversal,
++  // so a nested reference to a visible node skips its hidden descendants again.
++  // https://w3c.github.io/accname/#step2A
 +  var inHiddenReferencedTraversal = false;
    function computeTextAlternative(current, context) {
-+    if (!hidden && context.isReferenced && !inHiddenReferencedTraversal && isHidden(current, getComputedStyle)) {
-+      inHiddenReferencedTraversal = true;
-+      try {
-+        return computeTextAlternativeStep(current, context);
-+      } finally {
-+        inHiddenReferencedTraversal = false;
-+      }
++    if (!context.isReferenced) {
++      return computeTextAlternativeStep(current, context);
 +    }
-+    return computeTextAlternativeStep(current, context);
++    var outerTraversal = inHiddenReferencedTraversal;
++    inHiddenReferencedTraversal = !hidden && isHidden(current, getComputedStyle);
++    try {
++      return computeTextAlternativeStep(current, context);
++    } finally {
++      inHiddenReferencedTraversal = outerTraversal;
++    }
 +  }
 +  function computeTextAlternativeStep(current, context) {
      if (consultedNodes.has(current)) {
@@ -33,27 +36,30 @@ index 585aa65..68faccc 100644
        return "";
      }
 diff --git a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
-index 8f905f1..8d7ff63 100644
+index 8f905f1..eb2a355 100644
 --- a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
 +++ b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
-@@ -396,13 +396,28 @@ export function computeTextAlternative(root) {
+@@ -396,13 +396,31 @@ export function computeTextAlternative(root) {
      }
      return null;
    }
-+  // accname step 2A: a hidden node is skipped unless it is part of an
-+  // aria-labelledby or aria-describedby traversal whose directly referenced
-+  // node was hidden. Inside such a traversal, hidden descendants count too.
++  // Cypress patch, accname 1.2 step 2A: a hidden node is skipped unless it is
++  // part of an aria-labelledby or aria-describedby traversal whose directly
++  // referenced node is hidden. Each referenced node starts its own traversal,
++  // so a nested reference to a visible node skips its hidden descendants again.
++  // https://w3c.github.io/accname/#step2A
 +  var inHiddenReferencedTraversal = false;
    function computeTextAlternative(current, context) {
-+    if (!hidden && context.isReferenced && !inHiddenReferencedTraversal && isHidden(current, getComputedStyle)) {
-+      inHiddenReferencedTraversal = true;
-+      try {
-+        return computeTextAlternativeStep(current, context);
-+      } finally {
-+        inHiddenReferencedTraversal = false;
-+      }
++    if (!context.isReferenced) {
++      return computeTextAlternativeStep(current, context);
 +    }
-+    return computeTextAlternativeStep(current, context);
++    var outerTraversal = inHiddenReferencedTraversal;
++    inHiddenReferencedTraversal = !hidden && isHidden(current, getComputedStyle);
++    try {
++      return computeTextAlternativeStep(current, context);
++    } finally {
++      inHiddenReferencedTraversal = outerTraversal;
++    }
 +  }
 +  function computeTextAlternativeStep(current, context) {
      if (consultedNodes.has(current)) {
