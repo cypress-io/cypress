@@ -117,9 +117,11 @@ export const getNativeTagNames = (role: string): string[] => {
 }
 
 // Whether `element` has `role` because of its tag, like `<button>`, rather than
-// only through a `role` attribute, like `<div role="button">`.
+// only through a `role` attribute, like `<div role="button">`. Every native
+// element for the role counts, not just the element's implicit role: a `<td>`
+// is a `cell` by default but a `gridcell` inside a grid.
 export const hasNativeRole = (element: Element, role: string) => {
-  return !element.hasAttribute('role') || getImplicitRoles(element).includes(role)
+  return !element.hasAttribute('role') || getImplicitRoleRules().some((rule) => rule.roles.includes(role) && rule.match(element))
 }
 
 // Over-matches, since a tag that can imply a role doesn't always, so every

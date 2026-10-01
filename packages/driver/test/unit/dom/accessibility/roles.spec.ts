@@ -116,6 +116,13 @@ describe('dom/accessibility/roles', () => {
 
       expect(hasNativeRole($('#el'), 'button')).toBe(expected)
     })
+
+    it('counts a native element whose implicit role is a different one it can have', () => {
+      render('<table role="grid"><tr><td id="el" role="gridcell">x</td></tr></table><div id="div" role="gridcell">x</div>')
+
+      expect(hasNativeRole($('#el'), 'gridcell')).toBe(true)
+      expect(hasNativeRole($('#div'), 'gridcell')).toBe(false)
+    })
   })
 
   describe('getRoleSelector', () => {
