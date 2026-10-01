@@ -218,6 +218,15 @@ describe('src/cy/commands/querying/get_by_role', () => {
       })
     })
 
+    // https://github.com/testing-library/cypress-testing-library/issues/201
+    it('searches a chained subject rather than the .within() scope', () => {
+      cy.get('main').within(() => {
+        cy.get('#implicit').getByRole('button').then(($el) => {
+          expect(ids($el)).to.deep.eq(['implicit-button', 'submit-input'])
+        })
+      })
+    })
+
     it('searches the descendants of every subject element', () => {
       cy.get('#implicit, #explicit').getByRole('button', { native: false }).should('have.length', 3)
     })
@@ -358,6 +367,16 @@ describe('src/cy/commands/querying/get_by_role', () => {
         title: 'throws when the role is empty',
         args: ['  '],
         message: '`cy.getByRole()` requires a role as its first argument',
+      },
+      {
+        title: 'throws when the role has more than one word',
+        args: ['switch checkbox'],
+        message: '`cy.getByRole()` was passed the role `switch checkbox`, but a role is a single word with no spaces, such as `\'button\'`. Query one role at a time.',
+      },
+      {
+        title: 'throws when the role has a line break',
+        args: ['button\n'],
+        message: 'but a role is a single word with no spaces',
       },
       {
         title: 'throws when the options are not an object',

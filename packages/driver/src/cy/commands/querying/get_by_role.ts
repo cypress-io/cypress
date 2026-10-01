@@ -101,6 +101,14 @@ export default (Commands, Cypress, cy) => {
           args: { matcher: $utils.stringifyActual(role) },
         })
       }
+
+      // A role is a single token, so one with whitespace could never match,
+      // and a newline would also break the attribute selector.
+      if (/\s/.test(role as string)) {
+        $errUtils.throwErrByPath('get_by.getByRole.role_with_whitespace', {
+          args: { role: $utils.stringifyActual(role) },
+        })
+      }
     },
 
     validate (role, { native }) {
