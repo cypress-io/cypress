@@ -42,15 +42,24 @@ const makeRule = (entry: ElementRoleEntry, roles: string[]): ImplicitRoleRule =>
   // `input[type="text"]` must also match an `<input>` whose type is missing or
   // invalid, since the browser treats both as text inputs. Matching on the
   // `type` property instead of the attribute covers that.
-  const typeTextIndex = attributes.findIndex((attribute) => attribute.name === 'type' && attribute.value === 'text')
+  const typeText = attributes.find((attribute) => attribute.name === 'type' && attribute.value === 'text')
+  // A `<select>` is a `listbox` when its `size` is greater than 1 and a
+  // `combobox` otherwise, including `size="1"`. A selector can't compare
+  // numbers, so this is checked on the parsed `size` property.
+  const selectSize = entry.name === 'select' ? attributes.find((attribute) => attribute.name === 'size') : undefined
+  const needsSizeAboveOne = (selectSize?.constraints as string[] | undefined)?.includes('>1')
   const selector = makeElementSelector({
     ...entry,
-    attributes: typeTextIndex >= 0 ? attributes.filter((_attribute, index) => index !== typeTextIndex) : attributes,
+    attributes: attributes.filter((attribute) => attribute !== typeText && attribute !== selectSize),
   })
 
   return {
     match: (element) => {
-      if (typeTextIndex >= 0 && (element as HTMLInputElement).type !== 'text') {
+      if (typeText && (element as HTMLInputElement).type !== 'text') {
+        return false
+      }
+
+      if (selectSize && ((element as HTMLSelectElement).size > 1) !== needsSizeAboveOne) {
         return false
       }
 
