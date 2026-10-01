@@ -1,16 +1,20 @@
 import childProcess from 'child_process'
 import path from 'path'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
+import { describe, expect, it } from 'vitest'
 
-const PROJECT_ROOT = path.join(path.dirname(require.resolve('@tooling/system-tests/package.json')), 'projects/kill-child-process')
+const requireCjs = createRequire(import.meta.url)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const PROJECT_ROOT = path.join(path.dirname(requireCjs.resolve('@tooling/system-tests/package.json')), 'projects/kill-child-process')
 // With require_async_child being converted to TypeScript, we need to use the .ts extension to ensure the correct file is loaded.
 // This is also a true integration test of tsx and running the require_async_child file (though this lives in the unit test directory)
-const REQUIRE_ASYNC_CHILD_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child.ts')
+const REQUIRE_ASYNC_CHILD_PATH = requireCjs.resolve('@packages/server/lib/plugins/child/require_async_child.ts')
 const CONFIG_FILE = path.join(PROJECT_ROOT, 'cypress.config.js')
 
 describe('require_async_child', () => {
-  it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', function (done) {
-    this.timeout(15_000)
-
+  it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', { timeout: 15_000 }, (done) => {
     const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE, '--shouldLoadAsEsm', 'false'], {
       env: {
         ...process.env,
@@ -20,7 +24,7 @@ describe('require_async_child', () => {
     })
 
     let settled = false
-    const finish = (err) => {
+    const finish = (err?: Error) => {
       if (settled) {
         return
       }
