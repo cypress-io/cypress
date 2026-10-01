@@ -55,11 +55,28 @@ describe('dom/accessibility/roles', () => {
       expect(getRoles($('#el'))).toEqual([role])
     })
 
-    it('uses only the first token of an explicit role', () => {
+    it('uses only the first valid token of an explicit role', () => {
       render('<div id="el" role="switch checkbox"></div>')
 
       expect(getRoles($('#el'))).toEqual(['switch'])
       expect(hasRole($('#el'), 'checkbox')).toBe(false)
+    })
+
+    it.each([
+      ['an unknown role', 'foo button', 'button'],
+      ['an abstract role', 'widget button', 'button'],
+      ['several invalid roles', 'foo widget doc-chapter', 'doc-chapter'],
+    ])('skips %s before a valid one', (_name, role, expected) => {
+      render(`<div id="el" role="${role}"></div>`)
+
+      expect(getRoles($('#el'))).toEqual([expected])
+    })
+
+    it('keeps the implicit role when no token is a valid role', () => {
+      render('<button id="el" role="foo widget"></button>')
+
+      expect(getRoles($('#el'))).toEqual(['button'])
+      expect(hasRole($('#el'), 'foo')).toBe(false)
     })
 
     it.each([

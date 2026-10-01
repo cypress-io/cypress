@@ -53,7 +53,7 @@ describe('src/cy/commands/querying/get_by_role', () => {
       cy.get('#explicit').getByRole('button', { native: false }).should('not.have.id', 'tab-button')
     })
 
-    it('only uses the first token of a role attribute', () => {
+    it('only uses the first valid token of a role attribute', () => {
       cy.getByRole('switch').should('have.id', 'multi-role')
       cy.get('#explicit').getByRole('checkbox').should('not.exist')
     })

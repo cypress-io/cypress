@@ -1,4 +1,4 @@
-import { elementRoles, roleElements } from 'aria-query'
+import { elementRoles, roleElements, roles as roleDefinitions } from 'aria-query'
 import type { ARIARoleDefinitionKey, ARIARoleRelationConcept } from 'aria-query'
 import { computeAccessibleDescription, computeAccessibleName } from 'dom-accessibility-api'
 import { escapeBackslashes, escapeQuotes } from '../../util/escape'
@@ -92,12 +92,20 @@ const getImplicitRoles = (element: Element): string[] => {
   return []
 }
 
-// Later tokens in a `role` attribute are fallbacks for user agents that don't
-// support the first, so only the first one counts. A blank `role` attribute
-// sets no role, so the element keeps its implicit one, as it does in browsers.
+// Abstract roles such as `widget` only organize the ARIA taxonomy, so authors
+// can't give them to elements.
+const isValidRole = (role: string) => {
+  const definition = roleDefinitions.get(role as ARIARoleDefinitionKey)
+
+  return !!definition && !definition.abstract
+}
+
+// A `role` attribute lists fallbacks in order, and browsers use the first
+// valid one: `role="switch checkbox"` is a switch, and `role="foo button"` is a
+// button. With no valid token, the element keeps its implicit role.
 export const getRoles = (element: Element, cache = new AccessibilityCache()): string[] => {
   return cache.memoRoles(element, () => {
-    const [explicitRole] = (element.getAttribute('role') ?? '').trim().split(/\s+/)
+    const explicitRole = (element.getAttribute('role') ?? '').split(/\s+/).find(isValidRole)
 
     if (explicitRole) {
       return [explicitRole]
