@@ -8,6 +8,10 @@ import type { QueryFunction } from './state'
 
 const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 
+// Built-ins added after many projects already defined a command by the same
+// name. A project's own definition replaces the built-in instead of throwing.
+const REPLACEABLE_BUILT_INS = ['getByRole']
+
 const builtInCommands = [
   // `default` is necessary if a file uses `export default` syntax.
   // @ts-ignore
@@ -95,7 +99,7 @@ export default {
 
         // .hover & .mount are special case commands. allow as builtins so users
         // may add them without throwing an error
-        if (addingBuiltIns && !PLACEHOLDER_COMMANDS.includes(name)) {
+        if (addingBuiltIns && !PLACEHOLDER_COMMANDS.includes(name) && !REPLACEABLE_BUILT_INS.includes(name)) {
           builtInCommandNames[name] = true
         }
 
@@ -109,6 +113,8 @@ export default {
         // normalize type by how they validate their
         // previous subject (unless they're explicitly set)
         const type = options.type ?? getTypeByPrevSubject(prevSubject)
+
+        delete queries[name]
 
         commands[name] = {
           name,
@@ -160,14 +166,15 @@ export default {
           internalError('miscellaneous.reserved_command_query', { name })
         }
 
-        if (cy[name]) {
+        if (cy[name] && !REPLACEABLE_BUILT_INS.includes(name)) {
           internalError('miscellaneous.invalid_new_query', { name })
         }
 
-        if (addingBuiltIns) {
+        if (addingBuiltIns && !REPLACEABLE_BUILT_INS.includes(name)) {
           builtInCommandNames[name] = true
         }
 
+        delete commands[name]
         queries[name] = fn
         cy.addQuery({ name, fn })
       },
