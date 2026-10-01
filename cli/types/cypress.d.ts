@@ -2857,6 +2857,11 @@ declare namespace Cypress {
      * skipping elements that only have it through a `role` attribute, like
      * `<div role="button">`. Set it to `false` to match both.
      *
+     * Some widely used patterns get their role from a `role` attribute even
+     * though HTML has an element for it, so they need `native: false`: an
+     * `<input role="combobox">` (the native combobox is a `<select>` or an
+     * `<input list>`) and an `<svg role="img">` (the native one is an `<img>`).
+     *
      * Roles that HTML has no element for, such as `tab` or `menuitem`, can
      * only come from a `role` attribute, so they are always matched that way.
      * Passing `native: true` with one of those roles throws.

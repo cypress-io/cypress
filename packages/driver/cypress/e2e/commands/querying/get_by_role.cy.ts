@@ -375,6 +375,11 @@ describe('src/cy/commands/querying/get_by_role', () => {
         message: '`cy.getByRole()` does not accept the `level` option. To narrow the results by `level`, chain `.filter(\'h2, [aria-level=2]\')` instead. It accepts:',
       },
       {
+        title: 'points to filters for both native and ARIA checked state',
+        args: ['checkbox', { checked: true }],
+        message: '`cy.getByRole()` does not accept the `checked` option. To narrow the results by `checked`, chain `.filter(\':checked\')` for a native checkbox or radio, or `.filter(\'[aria-checked=true]\')` for an element with a `role` attribute instead.',
+      },
+      {
         title: 'throws when name is not a matcher',
         args: ['button', { name: {} }],
         message: '`cy.getByRole()` only accepts a string, number, regular expression, or function for its `name` option. You passed: `{}`',

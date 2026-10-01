@@ -85,7 +85,7 @@ export default (Commands, Cypress, cy) => {
       native: 'boolean',
     },
     unsupportedOptionHints: {
-      checked: '`.should(\'be.checked\')` or `.filter(\':checked\')`',
+      checked: '`.filter(\':checked\')` for a native checkbox or radio, or `.filter(\'[aria-checked=true]\')` for an element with a `role` attribute',
       selected: '`.filter(\':selected\')` or `.filter(\'[aria-selected=true]\')`',
       pressed: '`.filter(\'[aria-pressed=true]\')`',
       expanded: '`.filter(\'[aria-expanded=true]\')`',
