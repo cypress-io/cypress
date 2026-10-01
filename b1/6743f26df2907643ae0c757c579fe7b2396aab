@@ -1,0 +1,19 @@
+guides/release-process.md
+  s_2cb0269bf45ecc::t_9b1a183563d46a 180,182-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b16743f26df2907643ae0c757c579fe7b2396aab",
+  "prompts": {},
+  "sessions": {
+    "s_2cb0269bf45ecc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b200e45-9b76-4ab5-9f74-90c9e884c784",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
