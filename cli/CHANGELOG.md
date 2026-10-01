@@ -4,10 +4,16 @@
 **Bugfixes:**
 
 - Fixed an issue where [`.scrollTo()`](https://on.cypress.io/scrollto) and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) stopped short of the end of a scrollable element with always-visible scrollbars. Positions such as `bottom`, `right`, `bottomRight`, and `'100%'` landed short by the width of the scrollbar, and `center` or `'50%'` landed off-center by half of it. Fixed in [#34948](https://github.com/cypress-io/cypress/pull/34948).
+- Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
 
 **Misc:**
 
 - TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
+
+**Dependency Updates:**
+
+- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
+- Upgraded `simple-git` from `3.36.0` to `4.0.2` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335531) vulnerability and two Arbitrary Command Injection vulnerabilities ([SNYK-JS-SIMPLEGIT-20335524](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335524), [SNYK-JS-SIMPLEGIT-20335540](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335540)) reported in security scans. This also upgrades its `@simple-git/argv-parser` dependency from `1.1.1` to `2.0.1`, which addresses a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGITARGVPARSER-20335528) vulnerability reported in security scans. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
 
 ## 16.1.1
 
