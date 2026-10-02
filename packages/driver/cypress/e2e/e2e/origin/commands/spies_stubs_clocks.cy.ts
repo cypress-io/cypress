@@ -19,7 +19,7 @@ function findAgentInstrumentAndEventLogs (
   return [agentLog, eventLog]
 }
 
-context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
+context('cy.origin spies, stubs, and clock', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

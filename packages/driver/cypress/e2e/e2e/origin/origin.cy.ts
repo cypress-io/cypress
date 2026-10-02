@@ -1,4 +1,4 @@
-describe('cy.origin', { browser: '!webkit' }, () => {
+describe('cy.origin', () => {
   it('successfully visits after creating 30 spec bridges', () => {
     // Make ~30 spec bridges
     for (let index = 0; index < 30; index++) {

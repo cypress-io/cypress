@@ -1,6 +1,6 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin storage', { browser: '!webkit' }, () => {
+context('cy.origin storage', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

@@ -13,7 +13,7 @@ const xhrGet = (url) => {
   xhr.send()
 }
 
-context('cy.origin waiting', { browser: '!webkit' }, () => {
+context('cy.origin waiting', () => {
   before(() => {
     cy.origin('http://www.foobar.com:3500', () => {
       window.xhrGet = (url) => {

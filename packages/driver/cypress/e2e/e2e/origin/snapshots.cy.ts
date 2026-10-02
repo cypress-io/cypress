@@ -1,7 +1,7 @@
 // import to bind shouldWithTimeout into global cy commands
 import '../../../support/utils'
 
-describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
+describe('cy.origin - snapshots', () => {
   it('does not create snapshots after the document has unloaded and the AUT has navigated cross-origin', () => {
     cy.visit('/fixtures/generic.html')
     cy.visit('http://www.foobar.com:3500/fixtures/generic.html')

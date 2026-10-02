@@ -1,6 +1,6 @@
 const { assertLogLength } = require('../../../support/utils')
 
-describe('cy.origin Cypress API', { browser: '!webkit' }, () => {
+describe('cy.origin Cypress API', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

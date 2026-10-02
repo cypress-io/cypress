@@ -1,7 +1,7 @@
 import { authCreds } from '../../../../fixtures/auth_creds'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin navigation', { browser: '!webkit' }, () => {
+context('cy.origin navigation', () => {
   it('.go()', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

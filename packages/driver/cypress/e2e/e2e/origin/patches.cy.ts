@@ -9,7 +9,7 @@ function restoreBackendRequestHandlerStubIfNeeded () {
   }
 }
 
-describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout: 10000 }, () => {
+describe('src/cross-origin/patches', { defaultCommandTimeout: 10000 }, () => {
   context('submit', () => {
     beforeEach(() => {
       cy.visit('/fixtures/primary-origin.html')

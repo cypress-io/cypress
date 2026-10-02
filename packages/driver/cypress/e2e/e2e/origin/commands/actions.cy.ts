@@ -1,6 +1,6 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin actions', { browser: '!webkit' }, () => {
+context('cy.origin actions', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
   })

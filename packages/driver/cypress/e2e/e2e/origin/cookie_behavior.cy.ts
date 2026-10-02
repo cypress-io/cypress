@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-describe('Cookie Behavior', { browser: '!webkit' }, () => {
+describe('Cookie Behavior', () => {
   const serverConfig = {
     http: {
       sameOriginPort: 3500,

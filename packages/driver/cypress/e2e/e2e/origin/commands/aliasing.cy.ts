@@ -1,6 +1,6 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin aliasing', { browser: '!webkit' }, () => {
+context('cy.origin aliasing', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
   })

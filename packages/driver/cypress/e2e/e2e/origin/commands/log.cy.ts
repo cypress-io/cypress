@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../../support/utils'
 
-context('cy.origin log', { browser: '!webkit' }, () => {
+context('cy.origin log', () => {
   let logs: any = []
   let lastTestLogId = ''
 

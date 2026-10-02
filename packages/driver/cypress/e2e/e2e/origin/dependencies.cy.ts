@@ -1,6 +1,6 @@
 import type { LoDashStatic } from 'lodash'
 
-describe('cy.origin dependencies', { browser: '!webkit' }, () => {
+describe('cy.origin dependencies', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

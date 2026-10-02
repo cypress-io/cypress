@@ -1,4 +1,4 @@
-describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
+describe('cy.origin - uncaught errors', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="errors-link"]').click()

@@ -1,4 +1,4 @@
-describe('cy.origin', { browser: '!webkit' }, () => {
+describe('cy.origin', () => {
   beforeEach(() => {
     cy.visit('')
   })
@@ -350,7 +350,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
   })
 })
 
-describe('cy.origin - external hosts', { browser: '!webkit' }, () => {
+describe('cy.origin - external hosts', () => {
   describe('successes', () => {
     it('succeeds on a complete origin from https using https', () => {
       cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
