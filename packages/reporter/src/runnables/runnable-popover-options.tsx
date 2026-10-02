@@ -12,6 +12,7 @@ import Switch from '../lib/switch'
 import appState from '../lib/app-state'
 import Tooltip from '../lib/tooltip'
 import { getReporterBody, getReporterDocument } from '../lib/reporter-document'
+import scroller from '../lib/scroller'
 
 interface Props {
   events?: Events
@@ -113,7 +114,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     }
 
     const handleScroll = () => {
-      if (isOpen) {
+      if (isOpen && scroller.shouldDismissPopoverOnScroll()) {
         setIsOpen(false)
       }
     }
