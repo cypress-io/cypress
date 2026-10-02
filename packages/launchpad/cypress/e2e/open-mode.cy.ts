@@ -216,22 +216,44 @@ describe('Launchpad: Open Mode', () => {
     cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
   })
 
-  it('auto-launches the browser when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
+  it('auto-launches the browser exactly once when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
     cy.scaffoldProject('launchpad')
     stubAvailableBrowsers()
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      // A real launch takes seconds. Dismissing the welcome mounts OpenBrowser
+      // inside that window, and its own auto-launch check must not launch again.
+      // The test holds the launch open until it has checked that.
+      o.sinon.stub(ctx._apis.projectApi, 'launchProject').callsFake(() => {
+        return new Promise<void>((resolve) => {
+          o.testState.resolveLaunch = resolve
+        })
+      })
     })
 
+    // OpenBrowser decides whether to auto-launch from this query's response
+    cy.intercept('query-OpenBrowser_LocalSettings').as('openBrowserLocalSettings')
+
     // Need to visit after args have been configured, todo: fix in #18776
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
+    cy.skipWelcome()
 
     cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
     cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+    cy.wait('@openBrowserLocalSettings')
+
+    cy.withRetryableCtx((ctx, o) => {
+      expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+      expect(o.testState.resolveLaunch).to.be.a('function')
+    })
+
+    cy.withCtx((ctx, o) => {
+      o.testState.resolveLaunch()
+    })
 
     cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.project.launchCount).to.eq(1)
       expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
     })
   })
