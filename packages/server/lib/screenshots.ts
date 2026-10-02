@@ -39,11 +39,6 @@ interface SavedDetails {
   path?: string
 }
 
-// TODO: when we parallelize these builds we'll need
-// a semaphore to access the file system when we write
-// screenshots since its possible two screenshots with
-// the same name will be written to the file system
-
 // when debugging logs automatically prefix the
 // screenshot id to the debug logs for easier association
 debug = _.wrap(debug, (fn, str, ...args) => {
