@@ -1289,6 +1289,10 @@ commands:
         description: Server start command for repo
         type: string
         default: "CI=true yarn start"
+      wait-on:
+        description: URLs to wait on before running tests (passed to wait-on)
+        type: string
+        default: ""
     steps:
       - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
@@ -1322,10 +1326,19 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: yarn types
       - run:
-          # NOTE: we do not need to wait for the vite dev server to start
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
           background: true
+      - when:
+          condition:
+            not:
+              equal: [ "", <<parameters.wait-on>> ]
+          steps:
+            - run:
+                name: "Waiting on server to boot: <<parameters.wait-on>>"
+                command: |
+                  npm i -g wait-on
+                  npx wait-on <<parameters.wait-on>> --timeout 120000
       - when:
           condition: <<parameters.folder>>
           steps:
@@ -3435,6 +3448,7 @@ jobs:
       - test-binary-against-rwa:
           repo: cypress-realworld-app
           browser: chrome
+          wait-on: 'http://127.0.0.1:3000 http://127.0.0.1:3001'
 
   test-binary-as-specific-user:
     <<: *defaults
