@@ -457,7 +457,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       nodeProxy: this.nodeProxy,
       // Lazy: the CDP Fetch runtime swaps NetworkProxy at each launch, so the
       // routes must read whichever instance is current rather than capture one.
-      getNetworkProxy: () => this.networkProxy,
+      getNetworkProxy: () => this._networkProxy,
       isBrowserNetworkMode: this.isBrowserNetworkMode,
       onError,
       getSpec,
