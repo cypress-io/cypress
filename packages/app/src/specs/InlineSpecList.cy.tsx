@@ -1,13 +1,14 @@
 import type { Specs_InlineSpecListFragment } from '../generated/graphql-test'
-import { Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
+import { Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, TreeExpansionCache_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
+import { getSeparator } from './tree/useCollapsibleTree'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 let specs: Array<any> = []
 
 describe('InlineSpecList', () => {
-  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: {specFilter?: string, experimentalRunAllSpecs?: boolean} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
+  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs, specsListTreeExpansion }: {specFilter?: string, experimentalRunAllSpecs?: boolean, specsListTreeExpansion?: Record<string, boolean>} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
     onResult: (ctx) => {
       if (!ctx.currentProject?.specs) {
         return ctx
@@ -15,7 +16,11 @@ describe('InlineSpecList', () => {
 
       specs = ctx.currentProject.specs = specs.map((spec) => ({ __typename: 'Spec', ...spec, id: spec.relative }))
       if (specFilter) {
-        ctx.currentProject.savedState = { specFilter }
+        ctx.currentProject.savedState = { ...ctx.currentProject.savedState, specFilter }
+      }
+
+      if (specsListTreeExpansion) {
+        ctx.currentProject.savedState = { ...ctx.currentProject.savedState, specsListTreeExpansion }
       }
 
       if (experimentalRunAllSpecs) {
@@ -192,6 +197,81 @@ describe('InlineSpecList', () => {
       cy.wrap(setSpecFilterStub).should('have.been.calledWith', 'te')
       cy.get('@searchField').type('{backspace}{backspace}')
       cy.wrap(setSpecFilterStub).should('have.been.calledWith', '')
+    })
+  })
+
+  describe('with a saved tree expansion state', () => {
+    beforeEach(() => {
+      cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
+    })
+
+    it('starts with directories collapsed per the saved tree expansion state', () => {
+      // getSeparator() reads window.__CYPRESS_CONFIG__, which the support file only sets in a
+      // beforeEach — calling it at describe-body scope runs before that hook and throws.
+      const componentsKey = ['src', 'components'].join(getSeparator())
+
+      mountInlineSpecList({ specsListTreeExpansion: { [componentsKey]: false } })
+
+      cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+      cy.contains('button', 'src').should('have.attr', 'aria-expanded', 'true')
+    })
+
+    it('calls gql mutation to save updated tree expansion state', () => {
+      const componentsKey = ['src', 'components'].join(getSeparator())
+
+      mountInlineSpecList()
+
+      const setTreeExpansionStub = cy.stub()
+
+      cy.stubMutationResolver(TreeExpansionCache_SetPreferencesDocument, (defineResult, variables) => {
+        setTreeExpansionStub(JSON.parse(variables.value)?.specsListTreeExpansion)
+      })
+
+      cy.contains('button', 'components').click()
+      cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+
+      cy.wrap(setTreeExpansionStub).should('have.been.calledWith', { [componentsKey]: false })
+    })
+
+    it('drops directories the project no longer has from the saved tree expansion state', () => {
+      const componentsKey = ['src', 'components'].join(getSeparator())
+      const removedKey = ['src', 'removed'].join(getSeparator())
+
+      mountInlineSpecList({ specsListTreeExpansion: { [removedKey]: false } })
+
+      const setTreeExpansionStub = cy.stub()
+
+      cy.stubMutationResolver(TreeExpansionCache_SetPreferencesDocument, (defineResult, variables) => {
+        setTreeExpansionStub(JSON.parse(variables.value)?.specsListTreeExpansion)
+      })
+
+      cy.contains('button', 'components').click()
+
+      // without this the saved state would keep an entry for every directory ever collapsed,
+      // and a directory that is deleted and later recreated would come back collapsed
+      cy.wrap(setTreeExpansionStub).should('have.been.calledWith', { [componentsKey]: false })
+    })
+
+    it('does not overwrite the saved tree expansion state while filtering', () => {
+      const componentsKey = ['src', 'components'].join(getSeparator())
+
+      mountInlineSpecList({ specsListTreeExpansion: { [componentsKey]: false } })
+
+      const setTreeExpansionStub = cy.stub()
+
+      cy.stubMutationResolver(TreeExpansionCache_SetPreferencesDocument, (defineResult, variables) => {
+        setTreeExpansionStub(JSON.parse(variables.value)?.specsListTreeExpansion)
+      })
+
+      // a filtered tree ignores the saved state so that every match stays visible
+      cy.get('input').type('Spec')
+      cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'true')
+      cy.wrap(setTreeExpansionStub).should('not.have.been.called')
+
+      // and clearing the filter brings the saved state back rather than a wiped one
+      cy.get('input').clear()
+      cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+      cy.wrap(setTreeExpansionStub).should('not.have.been.called')
     })
   })
 
