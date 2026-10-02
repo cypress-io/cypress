@@ -1,7 +1,7 @@
 import childProcess from 'child_process'
 import path from 'path'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
+import { describe, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -12,112 +12,121 @@ const REQUIRE_ASYNC_CHILD_PATH = require.resolve('@packages/server/lib/plugins/c
 const CONFIG_FILE = path.join(PROJECT_ROOT, 'cypress.config.js')
 
 describe('require_async_child', () => {
-  it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', (done) => {
-    const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE, '--shouldLoadAsEsm', 'false'], {
-      env: {
-        ...process.env,
-        // Match real config-child loading (see run_child_fixture / ProjectConfigIpc)
-        NODE_OPTIONS: '--import tsx',
-      },
-    })
+  it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', () => {
+    return new Promise<void>((resolve, reject) => {
+      const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE, '--shouldLoadAsEsm', 'false'], {
+        env: {
+          ...process.env,
+          // Match real config-child loading (see run_child_fixture / ProjectConfigIpc)
+          NODE_OPTIONS: '--import tsx',
+        },
+      })
 
-    let settled = false
-    const finish = (err?: unknown) => {
-      if (settled) {
-        return
+      let settled = false
+      const finish = (err?: unknown) => {
+        if (settled) {
+          return
+        }
+
+        settled = true
+        clearTimeout(watchdog)
+
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
       }
 
-      settled = true
-      clearTimeout(watchdog)
-      done(err)
-    }
+      const watchdog = setTimeout(() => {
+        child.kill('SIGKILL')
+        finish(new Error('timed out waiting for require_async_child to exit after IPC disconnect'))
+      }, 12_000)
 
-    const watchdog = setTimeout(() => {
-      child.kill('SIGKILL')
-      finish(new Error('timed out waiting for require_async_child to exit after IPC disconnect'))
-    }, 12_000)
+      child.on('exit', (code, signal) => {
+        if (settled) {
+          return
+        }
 
-    child.on('exit', (code, signal) => {
-      if (settled) {
-        return
-      }
+        if (signal) {
+          return finish(new Error(`Expected exit without signal after graceful IPC disconnect, got signal ${signal}`))
+        }
 
-      if (signal) {
-        return finish(new Error(`Expected exit without signal after graceful IPC disconnect, got signal ${signal}`))
-      }
+        if (code !== 0) {
+          return finish(new Error(`Expected exit code 0 after disconnect teardown (process.exit()), got ${code}`))
+        }
 
-      if (code !== 0) {
-        return finish(new Error(`Expected exit code 0 after disconnect teardown (process.exit()), got ${code}`))
-      }
+        finish()
+      })
 
-      finish()
-    })
+      child.on('error', finish)
 
-    child.on('error', finish)
-
-    child.on('message', (msg: { event?: string }) => {
-      if (msg?.event === 'ready') {
-        // Closing the IPC channel triggers `process.on('disconnect')` in require_async_child,
-        // which must call process.exit() so the child cannot run orphaned.
-        child.disconnect()
-      }
+      child.on('message', (msg: { event?: string }) => {
+        if (msg?.event === 'ready') {
+          // Closing the IPC channel triggers `process.on('disconnect')` in require_async_child,
+          // which must call process.exit() so the child cannot run orphaned.
+          child.disconnect()
+        }
+      })
     })
   }, 15_000)
 
-  it('disconnects if the parent ipc is closed', (done) => {
-    const child = childProcess.fork(path.join(__dirname, 'run_child_fixture.ts'), {
-      env: {
-        // Match real config-child loading
-        NODE_OPTIONS: '--import tsx',
-      },
-    })
+  it('disconnects if the parent ipc is closed', () => {
+    return new Promise<void>((resolve, reject) => {
+      const child = childProcess.fork(path.join(__dirname, 'run_child_fixture.ts'), {
+        env: {
+          // Match real config-child loading
+          NODE_OPTIONS: '--import tsx',
+        },
+      })
 
-    let childPid: number | undefined
+      let childPid: number | undefined
 
-    child.on('message', (msg: {
-      childPid?: number
-      childMessage?: { event: string, args?: unknown[] }
-    }) => {
-      if (msg.childPid) {
-        childPid = msg.childPid
-        child.send({ msg: 'toChild', data: { event: 'loadConfig', args: [] } })
-      } else if (msg.childMessage?.event === 'loadConfig:reply') {
-        child.send({
-          msg: 'toChild',
-          data: {
-            event: 'setupTestingType',
-            args: ['e2e', {
-              ...JSON.parse(msg.childMessage.args![0] as string).initialConfig,
-              configFile: CONFIG_FILE,
-              projectRoot: PROJECT_ROOT,
-              testingType: 'e2e',
-              env: {},
-            }],
-          },
-        })
-      } else if (msg.childMessage?.event === 'setupTestingType:reply') {
-        setTimeout(() => {
-          // Kill the fixture process, which should signal that the child should also exit
-          child.kill()
-        }, 100)
-      }
-    })
-
-    child.on('disconnect', () => {
-      setTimeout(() => {
-        try {
-          process.kill(Number(childPid), 0)
-          done(new Error('Child is running'))
-        } catch (e: NodeJS.ErrnoException) {
-          if (e.code === 'EPERM' || e.code === 'ESRCH') {
-            return done()
-          }
-
-          done(e)
+      child.on('message', (msg: {
+        childPid?: number
+        childMessage?: { event: string, args?: unknown[] }
+      }) => {
+        if (msg.childPid) {
+          childPid = msg.childPid
+          child.send({ msg: 'toChild', data: { event: 'loadConfig', args: [] } })
+        } else if (msg.childMessage?.event === 'loadConfig:reply') {
+          child.send({
+            msg: 'toChild',
+            data: {
+              event: 'setupTestingType',
+              args: ['e2e', {
+                ...JSON.parse((msg.childMessage.args![0] as { initialConfig: string }).initialConfig),
+                configFile: CONFIG_FILE,
+                projectRoot: PROJECT_ROOT,
+                testingType: 'e2e',
+                env: {},
+              }],
+            },
+          })
+        } else if (msg.childMessage?.event === 'setupTestingType:reply') {
+          setTimeout(() => {
+            // Kill the fixture process, which should signal that the child should also exit
+            child.kill()
+          }, 100)
         }
-      }, 1000)
-    })
+      })
 
-    child.send({ msg: 'spawn', data: { projectRoot: PROJECT_ROOT } })
+      child.on('disconnect', () => {
+        setTimeout(() => {
+          try {
+            process.kill(Number(childPid), 0)
+            reject(new Error('Child is running'))
+          } catch (e: NodeJS.ErrnoException) {
+            if (e.code === 'EPERM' || e.code === 'ESRCH') {
+              return resolve()
+            }
+
+            reject(e)
+          }
+        }, 1000)
+      })
+
+      child.send({ msg: 'spawn', data: { projectRoot: PROJECT_ROOT } })
+    })
   })
 })
