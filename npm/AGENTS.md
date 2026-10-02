@@ -25,7 +25,7 @@ The `npm/` directory contains the publicly published npm packages for the Cypres
 ### Plugins & Dev Tooling
 
 - **@cypress/grep** — Plugin for filtering Cypress tests by substring or tags at runtime, with options for spec pre-filtering and test burning
-- **@cypress/puppeteer** — Plugin (beta) that runs Puppeteer message handlers registered in `setupNodeEvents` when a spec calls `cy.puppeteer(name, ...args)`; each handler receives a Puppeteer `Browser` connected to the Cypress-launched Chromium browser
+- **@cypress/puppeteer** — Plugin that runs Puppeteer message handlers registered in `setupNodeEvents` when a spec calls `cy.puppeteer(name, ...args)`; each handler receives a Puppeteer `Browser` connected to the Cypress-launched Chromium browser
 - **@cypress/schematic** — Official Angular CLI schematic and builder for scaffolding Cypress configuration into Angular projects (`ng add @cypress/schematic`)
 - **@cypress/eslint-plugin-dev** — Private, unpublished. The eslintrc presets the monorepo packages still on ESLint 8 lint against; being retired in favour of `@packages/eslint-config`
 
