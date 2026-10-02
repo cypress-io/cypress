@@ -1,5 +1,9 @@
 import childProcess from 'child_process'
 import path from 'path'
+import { fileURLToPath } from 'node:url'
+import { describe, expect, it } from 'vitest'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const PROJECT_ROOT = path.join(path.dirname(require.resolve('@tooling/system-tests/package.json')), 'projects/kill-child-process')
 // With require_async_child being converted to TypeScript, we need to use the .ts extension to ensure the correct file is loaded.
@@ -8,9 +12,7 @@ const REQUIRE_ASYNC_CHILD_PATH = require.resolve('@packages/server/lib/plugins/c
 const CONFIG_FILE = path.join(PROJECT_ROOT, 'cypress.config.js')
 
 describe('require_async_child', () => {
-  it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', function (done) {
-    this.timeout(15_000)
-
+  it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', (done) => {
     const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE, '--shouldLoadAsEsm', 'false'], {
       env: {
         ...process.env,
@@ -20,7 +22,7 @@ describe('require_async_child', () => {
     })
 
     let settled = false
-    const finish = (err) => {
+    const finish = (err?: unknown) => {
       if (settled) {
         return
       }
@@ -53,14 +55,14 @@ describe('require_async_child', () => {
 
     child.on('error', finish)
 
-    child.on('message', (msg) => {
+    child.on('message', (msg: { event?: string }) => {
       if (msg?.event === 'ready') {
         // Closing the IPC channel triggers `process.on('disconnect')` in require_async_child,
         // which must call process.exit() so the child cannot run orphaned.
         child.disconnect()
       }
     })
-  })
+  }, 15_000)
 
   it('disconnects if the parent ipc is closed', (done) => {
     const child = childProcess.fork(path.join(__dirname, 'run_child_fixture.ts'), {
@@ -70,19 +72,22 @@ describe('require_async_child', () => {
       },
     })
 
-    let childPid
+    let childPid: number | undefined
 
-    child.on('message', (msg) => {
+    child.on('message', (msg: {
+      childPid?: number
+      childMessage?: { event: string, args?: unknown[] }
+    }) => {
       if (msg.childPid) {
         childPid = msg.childPid
         child.send({ msg: 'toChild', data: { event: 'loadConfig', args: [] } })
-      } else if (msg.childMessage.event === 'loadConfig:reply') {
+      } else if (msg.childMessage?.event === 'loadConfig:reply') {
         child.send({
           msg: 'toChild',
           data: {
             event: 'setupTestingType',
             args: ['e2e', {
-              ...JSON.parse(msg.childMessage.args[0].initialConfig),
+              ...JSON.parse(msg.childMessage.args![0] as string).initialConfig,
               configFile: CONFIG_FILE,
               projectRoot: PROJECT_ROOT,
               testingType: 'e2e',
@@ -90,7 +95,7 @@ describe('require_async_child', () => {
             }],
           },
         })
-      } else if (msg.childMessage.event === 'setupTestingType:reply') {
+      } else if (msg.childMessage?.event === 'setupTestingType:reply') {
         setTimeout(() => {
           // Kill the fixture process, which should signal that the child should also exit
           child.kill()
@@ -103,7 +108,7 @@ describe('require_async_child', () => {
         try {
           process.kill(Number(childPid), 0)
           done(new Error('Child is running'))
-        } catch (e) {
+        } catch (e: NodeJS.ErrnoException) {
           if (e.code === 'EPERM' || e.code === 'ESRCH') {
             return done()
           }
