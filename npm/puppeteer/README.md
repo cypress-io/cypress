@@ -1,12 +1,11 @@
-# @cypress/puppeteer [beta]
+# @cypress/puppeteer
 
 Use [Puppeteer's browser API](https://pptr.dev/api) from your Cypress tests with a single command.
-
-> This plugin is in public beta, and we'd love your feedback to help improve it. Please share it in [this discussion](https://github.com/cypress-io/cypress/discussions/28410).
 
 ## Table of Contents
 
 - [Installation](#installation)
+- [Upgrading to 1.0](#upgrading-to-10)
 - [Compatibility](#compatibility)
 - [How it works](#how-it-works)
 - [Usage](#usage)
@@ -43,6 +42,36 @@ To get types for `cy.puppeteer()`, add the support types to your `tsconfig.json`
 ```
 
 The `setup` and `retry` functions ship with their own type definitions, so no extra configuration is needed for your Cypress config file.
+
+## Upgrading to 1.0
+
+Version 1.0 upgrades the bundled `puppeteer-core` from v21 to v24. The plugin's own API hasn't changed: `setup`, `retry`, and `cy.puppeteer()` work the same way. Your message handlers, however, receive a Puppeteer `Browser` directly, so Puppeteer's breaking changes between v21 and v24 can affect the code inside them.
+
+We made this upgrade so the plugin stays compatible with current Chrome releases, picks up Puppeteer's more reliable connection handling, and no longer installs a version of the `ws` package with a known vulnerability (CVE-2024-37890).
+
+### Does this affect me?
+
+Only if your message handlers use a Puppeteer API that changed. These are the changes most likely to show up in handlers:
+
+| Puppeteer v21 | Puppeteer v24 |
+| --- | --- |
+| `page.waitForTimeout(ms)` | Removed. Wait for a specific condition with `page.waitForSelector()` or `page.waitForFunction()`, or use `new Promise((resolve) => setTimeout(resolve, ms))`. |
+| `page.$x(expression)` and `page.waitForXPath(expression)` | Removed. Use the `::-p-xpath()` selector, for example `page.$$('::-p-xpath(//h2)')` or `page.waitForSelector('::-p-xpath(//h2)')`. |
+| `browser.createIncognitoBrowserContext()` | Renamed to `browser.createBrowserContext()`. |
+| `puppeteer.devices` | Removed. Import `KnownDevices` from `puppeteer-core` instead. |
+| `addEventListener()` and `removeEventListener()` on Puppeteer objects | Removed. Use `on()` and `off()`. |
+| Screenshot and PDF methods are typed as returning a Node.js `Buffer` | They're typed as returning a `Uint8Array`. In TypeScript, wrap the result in `Buffer.from()` if you need `Buffer` methods. |
+| `HTTPRequest.url()` and `HTTPResponse.url()` leave out the URL fragment | They include the fragment, such as `#section`. |
+
+For the complete list, see the breaking changes for versions 22.0.0, 23.0.0, and 24.0.0 in the [puppeteer-core changelog](https://github.com/puppeteer/puppeteer/blob/main/packages/puppeteer-core/CHANGELOG.md).
+
+### What to do next
+
+1. Search your message handlers for the APIs in the table above and update them.
+2. If you pass your own Puppeteer module with the [`puppeteer` option](#options), upgrade it to v24 as well.
+3. Run your specs that call `cy.puppeteer()`.
+
+If you can't update your handlers yet, stay on the previous release with `npm install --save-dev @cypress/puppeteer@0` until you're ready.
 
 ## Compatibility
 
