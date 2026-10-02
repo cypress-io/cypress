@@ -1,8 +1,8 @@
 diff --git a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
-index 585aa65..00a5fa5 100644
+index 585aa65..7dbafef 100644
 --- a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
 +++ b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
-@@ -397,13 +397,31 @@ function computeTextAlternative(root) {
+@@ -397,13 +397,32 @@ function computeTextAlternative(root) {
      }
      return null;
    }
@@ -11,6 +11,7 @@ index 585aa65..00a5fa5 100644
 +  // referenced node is hidden. Each referenced node starts its own traversal,
 +  // so a nested reference to a visible node skips its hidden descendants again.
 +  // https://w3c.github.io/accname/#step2A
++  // Remove once https://github.com/eps1lon/dom-accessibility-api/issues/1102 is fixed.
 +  var inHiddenReferencedTraversal = false;
    function computeTextAlternative(current, context) {
 +    if (!context.isReferenced) {
@@ -36,10 +37,10 @@ index 585aa65..00a5fa5 100644
        return "";
      }
 diff --git a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
-index 8f905f1..eb2a355 100644
+index 8f905f1..7003573 100644
 --- a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
 +++ b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
-@@ -396,13 +396,31 @@ export function computeTextAlternative(root) {
+@@ -396,13 +396,32 @@ export function computeTextAlternative(root) {
      }
      return null;
    }
@@ -48,6 +49,7 @@ index 8f905f1..eb2a355 100644
 +  // referenced node is hidden. Each referenced node starts its own traversal,
 +  // so a nested reference to a visible node skips its hidden descendants again.
 +  // https://w3c.github.io/accname/#step2A
++  // Remove once https://github.com/eps1lon/dom-accessibility-api/issues/1102 is fixed.
 +  var inHiddenReferencedTraversal = false;
    function computeTextAlternative(current, context) {
 +    if (!context.isReferenced) {

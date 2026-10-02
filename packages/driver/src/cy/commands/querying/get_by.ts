@@ -88,6 +88,118 @@ const validateOptions = (definition: GetByDefinition<any, any>, userOptions: unk
   })
 }
 
+const validateArgs = <TMatcher, TOptions extends object>(definition: GetByDefinition<TMatcher, TOptions>, matcher: TMatcher, userOptions: TOptions & SharedOptions): TOptions => {
+  if (definition.validateMatcher) {
+    definition.validateMatcher(matcher)
+  } else if (!isValidMatcher(matcher)) {
+    throwGetByErr(definition, 'invalid_matcher', { matcher: $utils.stringifyActual(matcher) })
+  }
+
+  validateOptions(definition, userOptions)
+
+  const options = _.omitBy(_.pick(userOptions, Object.keys(definition.options)), _.isUndefined) as TOptions
+
+  definition.validate?.(matcher, options)
+
+  return options
+}
+
+// Chained off an element or shadow root, the query searches that subject.
+// Otherwise it searches the `.within()` scope, or the whole body.
+const resolveScope = (cy, subject, withinSubject): JQuery<GetByRoot> => {
+  if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
+    return cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
+  }
+
+  return subject
+}
+
+const getSearchRoots = ($scope: JQuery<GetByRoot>, includeShadowDom: boolean): GetByRoot[] => {
+  const scopeRoots: GetByRoot[] = $scope.toArray()
+
+  return includeShadowDom
+    ? _.flatMap(scopeRoots, (root) => [root, ...$dom.findAllShadowRoots(root) as ShadowRoot[]])
+    : scopeRoots
+}
+
+// Narrows each root to the elements matching `selector`, then keeps the ones
+// `isMatch` accepts, each element once and in document order.
+const findMatches = (roots: GetByRoot[], selector: string, isMatch: (element: Element, cache: AccessibilityCache) => boolean): Element[] => {
+  const cache = new AccessibilityCache()
+  const seen = new Set<Element>()
+  const matched: Element[] = []
+
+  for (const root of roots) {
+    for (const element of Array.from(root.querySelectorAll(selector))) {
+      if (seen.has(element)) {
+        continue
+      }
+
+      seen.add(element)
+
+      if (isMatch(element, cache)) {
+        matched.push(element)
+      }
+    }
+  }
+
+  // Each root is searched in turn, so matches from a shadow root or a later
+  // subject element can land out of document order.
+  if (roots.length > 1) {
+    matched.sort(compareTreeOrder)
+  }
+
+  return matched
+}
+
+// A shadow root has no tag to show, so it's described by its host.
+const describeScope = ($scope: JQuery<GetByRoot> | undefined) => {
+  if (!$scope || $scope.is('body')) {
+    return ''
+  }
+
+  const scope = $scope.toArray()
+
+  if (scope.every($elements.isShadowRoot)) {
+    return ` within the shadow root of the element: ${$dom.stringify(scope.map((root) => (root as ShadowRoot).host), 'short')}`
+  }
+
+  return ` within the element: ${$dom.stringify($scope, 'short')}`
+}
+
+interface Search {
+  $scope: JQuery<GetByRoot>
+  roots: GetByRoot[]
+}
+
+// Rewrites an existence failure to say what the query looked for and where,
+// plus any hint the definition has about why nothing matched.
+const explainMiss = <TMatcher, TOptions extends object>(err, definition: GetByDefinition<TMatcher, TOptions>, matcher: TMatcher, options: TOptions, lastSearch: Search | undefined) => {
+  if (err.type !== 'existence') {
+    return
+  }
+
+  let hints = ''
+
+  if (!err.negated && definition.onNotFound) {
+    const hint = definition.onNotFound(lastSearch?.roots ?? [], matcher, options, new AccessibilityCache())
+
+    hints = hint ? `\n\n${hint}` : ''
+  }
+
+  const { message, docsUrl } = $errUtils.cypressErrByPath(err.negated ? 'get_by.found' : 'get_by.not_found', {
+    args: {
+      description: definition.describe(matcher, options),
+      scope: describeScope(lastSearch?.$scope),
+      hints,
+      docsUrl: definition.docsUrl,
+    },
+  })
+
+  err.message = message
+  err.docsUrl = docsUrl
+}
+
 /**
  * Registers a `cy.getBy*()` query. The definition supplies what is specific
  * to the query (which elements are candidates and how one is matched); this
@@ -96,17 +208,7 @@ const validateOptions = (definition: GetByDefinition<any, any>, userOptions: unk
  */
 export const addGetByQuery = <TMatcher, TOptions extends object>(Commands, Cypress, cy, definition: GetByDefinition<TMatcher, TOptions>) => {
   Commands.addQuery(definition.name, function getByQuery (matcher: TMatcher, userOptions: TOptions & SharedOptions = {} as TOptions & SharedOptions) {
-    if (definition.validateMatcher) {
-      definition.validateMatcher(matcher)
-    } else if (!isValidMatcher(matcher)) {
-      throwGetByErr(definition, 'invalid_matcher', { matcher: $utils.stringifyActual(matcher) })
-    }
-
-    validateOptions(definition, userOptions)
-
-    const options = _.omitBy(_.pick(userOptions, Object.keys(definition.options)), _.isUndefined) as TOptions
-
-    definition.validate?.(matcher, options)
+    const options = validateArgs(definition, matcher, userOptions)
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
     const displayName = $utils.stringify(_.isEmpty(options) ? [matcher] : [matcher, options])
     const withinSubject = cy.state('withinSubjectChain')
@@ -119,95 +221,21 @@ export const addGetByQuery = <TMatcher, TOptions extends object>(Commands, Cypre
       consoleProps: () => ({}),
     })
 
-    // The scope of the most recent attempt, kept so the error can describe
-    // where the query looked.
-    let $lastScope: JQuery<GetByRoot> | undefined
-    let lastRoots: GetByRoot[] = []
-
-    const getScopePhrase = () => {
-      if (!$lastScope || $lastScope.is('body')) {
-        return ''
-      }
-
-      // A shadow root has no tag to show, so it's described by its host.
-      const scope = $lastScope.toArray()
-
-      if (scope.every($elements.isShadowRoot)) {
-        return ` within the shadow root of the element: ${$dom.stringify(scope.map((root) => (root as ShadowRoot).host), 'short')}`
-      }
-
-      return ` within the element: ${$dom.stringify($lastScope, 'short')}`
-    }
+    // Kept from the most recent attempt so a failure can describe it.
+    let lastSearch: Search | undefined
 
     this.set('timeout', userOptions.timeout)
-    this.set('onFail', (err) => {
-      if (err.type !== 'existence') {
-        return
-      }
-
-      let hints = ''
-
-      if (!err.negated && definition.onNotFound) {
-        const hint = definition.onNotFound(lastRoots, matcher, options, new AccessibilityCache())
-
-        hints = hint ? `\n\n${hint}` : ''
-      }
-
-      const { message, docsUrl } = $errUtils.cypressErrByPath(err.negated ? 'get_by.found' : 'get_by.not_found', {
-        args: {
-          description: definition.describe(matcher, options),
-          scope: getScopePhrase(),
-          hints,
-          docsUrl: definition.docsUrl,
-        },
-      })
-
-      err.message = message
-      err.docsUrl = docsUrl
-    })
+    this.set('onFail', (err) => explainMiss(err, definition, matcher, options, lastSearch))
 
     return (subject) => {
       Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
 
-      let $scope = subject
+      const $scope = resolveScope(cy, subject, withinSubject)
+      const roots = getSearchRoots($scope, includeShadowDom)
+      const matched = findMatches(roots, definition.candidates(matcher, options), (element, cache) => definition.match(element, matcher, options, cache))
 
-      if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
-        $scope = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
-      }
-
-      const scopeRoots: GetByRoot[] = $scope.toArray()
-      const roots = includeShadowDom
-        ? _.flatMap(scopeRoots, (root) => [root, ...$dom.findAllShadowRoots(root) as ShadowRoot[]])
-        : scopeRoots
-
-      const cache = new AccessibilityCache()
-      const selector = definition.candidates(matcher, options)
-      const seen = new Set<Element>()
-      const matched: Element[] = []
-
-      for (const root of roots) {
-        for (const element of Array.from(root.querySelectorAll(selector))) {
-          if (seen.has(element)) {
-            continue
-          }
-
-          seen.add(element)
-
-          if (definition.match(element, matcher, options, cache)) {
-            matched.push(element)
-          }
-        }
-      }
-
-      // Each root is searched in turn, so matches from a shadow root or a later
-      // subject element can land out of document order.
-      if (roots.length > 1) {
-        matched.sort(compareTreeOrder)
-      }
-
-      $lastScope = $scope
-      lastRoots = roots
+      lastSearch = { $scope, roots }
 
       const $el = cy.$$(matched)
 
