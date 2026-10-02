@@ -5,6 +5,8 @@
 
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
 
+- Fixed an issue where [`cy.wait()`](https://on.cypress.io/wait) could time out waiting for a route's response even when the response arrived within [`responseTimeout`](https://on.cypress.io/configuration#Timeouts), because time spent waiting for the request counted against the response timeout budget. Fixed in [#34940](https://github.com/cypress-io/cypress/pull/34940).
+
 **Misc:**
 
 - TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
