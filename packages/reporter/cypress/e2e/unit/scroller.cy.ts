@@ -215,5 +215,25 @@ describe('scroller', () => {
       fireContainerScroll(container)
       expect(onUserScroll).not.to.have.been.called
     })
+
+    it('suppresses popover dismiss while applying programmatic scroll', () => {
+      const container = getContainer({ scrollTop: 50 })
+      let dismissibleWhileScrolling: boolean | undefined
+
+      Object.defineProperty(container, 'scrollTop', {
+        get () {
+          return 50
+        },
+        set () {
+          dismissibleWhileScrolling = scroller.shouldDismissPopoverOnScroll()
+        },
+      })
+
+      scroller.setContainer(container)
+      scroller.scrollIntoView(getElement({ offsetTop: 600 }))
+
+      expect(dismissibleWhileScrolling).to.be.false
+      expect(scroller.shouldDismissPopoverOnScroll()).to.be.true
+    })
   })
 })
