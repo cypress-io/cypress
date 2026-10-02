@@ -79,4 +79,30 @@ describe('lib/util/egress-policy', () => {
       proxyBypassList: 'example.com,*.foobar.com',
     })
   })
+
+  // Chromium picks the proxy from the URL's host before resolving it, so a steered origin
+  // would be sent to the proxy by name and the mTLS bridge never reached. The bridge makes
+  // the proxied connection itself instead.
+  it('bypasses the proxy for origins steered at the mTLS bridge', () => {
+    process.env.HTTP_PROXY = 'http://proxy.example:8080'
+
+    expect(translateEgressPolicyToLaunchOpts(null, ['secure.example.com', '*.internal.example'])).to.deep.equal({
+      proxyServer: 'http://proxy.example:8080',
+      proxyBypassList: 'secure.example.com,*.internal.example',
+    })
+  })
+
+  it('does not repeat a bridged origin already covered by NO_PROXY or hosts', () => {
+    process.env.HTTP_PROXY = 'http://proxy.example:8080'
+    process.env.NO_PROXY = 'secure.example.com'
+
+    expect(translateEgressPolicyToLaunchOpts({ 'secure.example.com': '127.0.0.1' }, ['secure.example.com'])).to.deep.equal({
+      proxyServer: 'http://proxy.example:8080',
+      proxyBypassList: 'secure.example.com',
+    })
+  })
+
+  it('adds no bypass list for bridged origins when no proxy is configured', () => {
+    expect(translateEgressPolicyToLaunchOpts(null, ['secure.example.com'])).to.deep.equal({})
+  })
 })

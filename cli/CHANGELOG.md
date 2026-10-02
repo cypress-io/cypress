@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed a regression in [16.0.0](#16-0-0) where a configured [`clientCertificates`](https://docs.cypress.io/app/references/configuration#clientCertificates) entry was not presented for requests the browser issued in Chrome, Chromium, and Edge, so an origin requiring mutual TLS showed a certificate prompt in `cypress open` and hung in `cypress run`. Fixes [#34807](https://github.com/cypress-io/cypress/issues/34807).
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
 
 **Misc:**
