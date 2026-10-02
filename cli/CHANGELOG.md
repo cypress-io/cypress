@@ -22,6 +22,7 @@
 
 **Bugfixes:**
 
+- Fixed a regression in [15.0.0](#15-0-0) where [`cy.go()`](https://on.cypress.io/go) finished before the page it navigated to had loaded. The next command could run against the page being navigated away from, so tests that went back or forward could fail intermittently. `cy.go()` also yielded `undefined` instead of the window, and ignored its `timeout` option and [`pageLoadTimeout`](https://on.cypress.io/configuration#Timeouts). `cy.go()` now waits for the page to load, yields the window, and fails if the page does not load within the timeout. Fixes [#32460](https://github.com/cypress-io/cypress/issues/32460).
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
 
 **Misc:**
