@@ -4,7 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
-- Fixed a regression in [16.0.0](#16-0-0) where a run whose tests all passed could exit with code 1 and print `ServerBase#open must first be called before accessing 'this.null'` if the browser made a request while Cypress was shutting down. This was most likely with [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) enabled. Fixed in [#34977](https://github.com/cypress-io/cypress/pull/34977).
+- Fixed a regression in [16.0.0](#16-0-0) where a run whose tests all passed could exit with code 1 and print `ServerBase#open must first be called before accessing 'this.null'` if the browser made a request while Cypress was shutting down. Fixed in [#34977](https://github.com/cypress-io/cypress/pull/34977).
 
 **Misc:**
 
