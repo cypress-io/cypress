@@ -145,5 +145,11 @@ describe('formattedMessage', () => {
 
       expect(result).to.equal(`message\nhere <code>code block</code> with <em>formatting</em>`)
     })
+
+    it('renders newlines as line breaks for command messages', () => {
+      const result = formattedMessage('I\'m the first line!\nI\'m the second line', 'log')
+
+      expect(result).to.equal(`I'm the first line!<br>\nI'm the second line`)
+    })
   })
 })
