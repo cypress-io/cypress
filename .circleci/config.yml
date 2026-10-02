@@ -1,194 +1,118 @@
-orbs:
-    continuation: circleci/continuation@1.1.0
-    circleci-cli: circleci/circleci-cli@0.1.9
-setup: true
 version: 2.1
 
-workflows:
-    setup-workflow:
-        jobs:
-            - pack-workflows
-            - launch-primary-workflow:
-                requires:
-                  - pack-workflows
-
-parameters:
-  publish-binary-branch:
-    type: string
-    default: main
-  force-persist-artifacts:
-    type: boolean
-    default: false
-  # Set to true when triggering the pipeline manually to bypass path filtering
-  # and run all CI jobs regardless of which files changed.
-  run-all-jobs:
-    type: boolean
-    default: false
-  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`,
-  # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
-  # (can also be set manually to run those workflows)
-  run-platform-workflows:
-    type: boolean
-    default: false
-  # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
-  # Trigger Pipeline when a visual review is needed. Requires PERCY_TOKEN.
-  percy-enabled:
-    type: boolean
-    default: false
-  # Opt-in full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy)
-  # path on Chrome. Enable via Trigger Pipeline when investigating that path.
-  run-force-http1-tests:
-    type: boolean
-    default: false
+executors:
+  cy:
+    docker:
+      - image: cypress/base-internal:24.15.0-trixie
+    resource_class: medium.gen2
 
 commands:
-  persist:
+  pnpm-setup:
     steps:
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .circleci/packed
-  persist-to-workspace-and-exit-early:
-    steps:
-      - run:
-          name: Check cache status and exit early if needed
-          command: |
-            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
-              echo "📦 Cache hit - packed configurations exist"
-              echo "✅ Persisting packed configurations to workspace and halting job"
-              echo "CACHE_HIT=true" >> $BASH_ENV
-            else
-              echo "📦 Cache miss - continuing with packaging"
-              echo "CACHE_HIT=false" >> $BASH_ENV
-              mkdir -p .circleci/packed # persist empty dir to workspace
-            fi
-      - persist
-      - run:
-          name: End job if cache hit
-          command: |
-            if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
-              echo "✅ Cache hit - packed configurations exist"
-              circleci-agent step halt
-            else
-              echo "📦 Cache miss - continuing with packaging"
-            fi
-  pack-workflows:
-    steps:
-      - circleci-cli/install
-      - run:
-          name: Pack workflows
-          command: |
-            ./scripts/pack-ci.sh --all
-
-  # Retrieving and saving packed workflows based on the checksum of the hash
-  # of the yml files in ./.circleci/src
-  calc-src-checksum:
-    steps:
-      - run:
-          name: Generate config checksum for cache lookup
-          # this is saved to a file, so that we can use {{ checksum }} - which
-          # can only operate on the contents of a single file, not a list of
-          # files or a directory.
-          command: |
-            find .circleci/src -name "*.yml" -type f | \
-              sort | \
-              xargs cat | \
-              md5sum | \
-              cut -d' ' -f1 > /tmp/config_checksum.txt
-  restore-src-checksum-cache:
-    steps:
-      - calc-src-checksum
-      - restore_cache:
-            keys:
-              - circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }}
-            paths:
-                - .circleci/packed
-  save-src-checksum-cache:
-    steps:
-      - calc-src-checksum
-      - save_cache:
-          key: circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }}
-          paths:
-            - .circleci/packed
-
-  cancel-draft-prs:
-    steps:
-      - when:
-          condition:
-            not:
-              or:
-                - equal: [<<pipeline.trigger_source>>, 'api']
-                - equal: [<<pipeline.git.branch>>, 'develop']
-                - matches:
-                    pattern: /^release\/.*/
-                    value: <<pipeline.git.branch>>
-          steps:
-            - run:
-                name: Cancel CI
-                command: |
-                  cancel_build() {
-                    circleci-agent step halt
-                  }
-
-                  if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-                    DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
-
-                    if [[ "${DRAFT}" == true ]]; then
-                      echo "Skipping CI; PR is in draft - to trigger CI , click the 'Trigger Pipeline' button in the CircleCI UI."
-                      cancel_build
-                    fi
-
-                    echo "Always run CI for PR that is ready for review."
-                    exit 0
-                  fi
-
-                  # otherwise, the build is not a PR so we cancel it 
-                  cancel_build
+      - run: npm i -g pnpm@9.15.9
+      - run: node .circleci/exp/pnpm-prep.js
+      - run: pnpm import 2>&1 | tail -3
 
 jobs:
-  pack-workflows:
-    docker:
-        - image: cimg/base:stable
-    resource_class: small.gen2
+  prep-yarn:
+    executor: cy
     steps:
-        - cancel-draft-prs
-        - checkout:
-            method: blobless
-        - restore-src-checksum-cache
-        - persist-to-workspace-and-exit-early
-        - pack-workflows
-        - save-src-checksum-cache
-        - persist
+      - checkout
+      - run: cd ~ && npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
+      - run:
+          command: PERCY_POSTINSTALL_BROWSER=true yarn --prefer-offline --frozen-lockfile --ignore-scripts --cache-folder ~/.yarn
+          no_output_timeout: 20m
+      - run: |
+          node scripts/circle-cache.js --action prepare
+          mkdir -p /tmp/node_modules_cache
+          mv node_modules /tmp/node_modules_cache/root_node_modules
+          mv cli/node_modules /tmp/node_modules_cache/cli_node_modules
+          mv system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
+          mv globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
+          du -sh /tmp/node_modules_cache
+      - save_cache:
+          key: exp-yarn-nm-v1-<< pipeline.number >>
+          paths: [/tmp/node_modules_cache]
 
-  launch-primary-workflow:
-      docker:
-          - image: cimg/base:stable
-      resource_class: small.gen2
-      steps:
-          - cancel-draft-prs
-          - checkout:
-              method: blobless
-          - attach_workspace:
-              at: .
-          - run:
-              name: Check for primary workflow definition
-              command: |
-                if [ ! -f .circleci/packed/pipeline.yml ]; then
-                    echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
-                    exit 1
-                fi
-          - run:
-              name: Generate path-filtered pipeline parameters
-              environment:
-                RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
-                PERCY_ENABLED: << pipeline.parameters.percy-enabled >>
-                TRIGGER_SOURCE: "<< pipeline.trigger_source >>"
-                BASE_REVISION: "<< pipeline.git.base_revision >>"
-              command: |
-                bash .circleci/scripts/generate-pipeline-parameters.sh \
-                  > /tmp/pipeline-parameters.json
-                echo "Generated parameters:"
-                cat /tmp/pipeline-parameters.json
-          - continuation/continue:
-              configuration_path: .circleci/packed/pipeline.yml
-              parameters: /tmp/pipeline-parameters.json
+  prep-pnpm:
+    executor: cy
+    steps:
+      - checkout
+      - pnpm-setup
+      - run:
+          command: pnpm install --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store
+          no_output_timeout: 20m
+      - run: du -sh ~/.pnpm-store node_modules
+      - save_cache:
+          key: exp-pnpm-store-v1-<< pipeline.number >>
+          paths: [~/.pnpm-store]
+      - run: |
+          ls -d node_modules cli/node_modules system-tests/node_modules scripts/node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules 2>/dev/null > /tmp/nm_paths
+          mkdir -p /tmp/pnpm_linked
+          tar cf - -T /tmp/nm_paths | tar xf - -C /tmp/pnpm_linked
+          du -sh /tmp/pnpm_linked
+      - save_cache:
+          key: exp-pnpm-linked-v1-<< pipeline.number >>
+          paths: [/tmp/pnpm_linked]
+
+  measure-yarn:
+    parameters: {n: {type: integer}}
+    executor: cy
+    steps:
+      - checkout
+      - restore_cache:
+          name: TIMED yarn node_modules restore
+          key: exp-yarn-nm-v1-<< pipeline.number >>
+      - run:
+          name: TIMED yarn unpack
+          command: |
+            cd ~ && npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0 >/dev/null
+            cd ~/project
+            mv /tmp/node_modules_cache/root_node_modules node_modules
+            mv /tmp/node_modules_cache/cli_node_modules cli/node_modules
+            mv /tmp/node_modules_cache/system-tests_node_modules system-tests/node_modules
+            mv /tmp/node_modules_cache/globbed_node_modules globbed_node_modules
+            node scripts/circle-cache.js --action unpack
+
+  measure-pnpm-store:
+    parameters: {n: {type: integer}}
+    executor: cy
+    steps:
+      - checkout
+      - pnpm-setup
+      - restore_cache:
+          name: TIMED pnpm store restore
+          key: exp-pnpm-store-v1-<< pipeline.number >>
+      - run:
+          name: TIMED pnpm offline link
+          command: pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store
+
+  measure-pnpm-linked:
+    parameters: {n: {type: integer}}
+    executor: cy
+    steps:
+      - checkout
+      - restore_cache:
+          name: TIMED pnpm linked node_modules restore
+          key: exp-pnpm-linked-v1-<< pipeline.number >>
+      - run:
+          name: TIMED pnpm linked unpack
+          command: |
+            cd /tmp/pnpm_linked
+            find . -name node_modules -prune -print | while read p; do mkdir -p ~/project/$(dirname $p); mv $p ~/project/$p; done
+            du -sh ~/project/node_modules
+
+workflows:
+  timing:
+    jobs:
+      - prep-yarn
+      - prep-pnpm
+      - measure-yarn:
+          requires: [prep-yarn]
+          matrix: {parameters: {n: [1, 2, 3]}}
+      - measure-pnpm-store:
+          requires: [prep-pnpm]
+          matrix: {parameters: {n: [1, 2, 3]}}
+      - measure-pnpm-linked:
+          requires: [prep-pnpm]
+          matrix: {parameters: {n: [1, 2, 3]}}
