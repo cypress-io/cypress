@@ -698,6 +698,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const cy = this
 
     this.commandFns[name] = fn
+    delete this.queryFns[name]
 
     const wrap = function (firstCall) {
       if (type === 'parent') {
@@ -814,6 +815,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const cy = this
 
     this.queryFns[name] = fn
+    delete this.commandFns[name]
 
     const callback = (chainer, userInvocationStack, args, privilegeVerification) => {
       // dont enqueue / inject any new commands if

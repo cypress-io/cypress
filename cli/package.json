@@ -81,6 +81,7 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
+    "@types/aria-query": "5.0.4",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.43",

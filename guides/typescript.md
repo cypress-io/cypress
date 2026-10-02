@@ -121,6 +121,16 @@ foo({
 })
 ```
 
+#### Type Assertions
+
+Prefer a runtime check that narrows the type over an `as` assertion, since an assertion silences the compiler without checking anything:
+
+- Declare a predicate's return type as a type guard (`(value: unknown): value is ShadowRoot`) so callers narrow without casting.
+- Declare a function that throws on invalid input as an assertion function (`asserts value is Options`), so the code after the call sees the validated type. TypeScript only narrows through an assertion function declared with `function` or given an explicit type, such as a method on a typed interface.
+- Use `'prop' in value` to narrow before reading a property that only some subtypes have.
+
+When an assertion has to stay, such as the `string[]` that `Object.keys` returns, add a one-line comment that starts "Safe because" and says what guarantees the type.
+
 #### DRY
 
 If you find yourself defining more than two very similar interfaces or types, consider what can be DRY'd. Is it purely the types, or is there further refactoring that should be done? When DRY, prefer defining the type as close to the implementation that depends on that type as possible. Define parameter bags next to the function they're an argument for, and export them only when necessary. New interfaces should almost never need to be declared for intermediary variables in a function - if you find yourself doing this, there are probably structural refactors that should be considered before DRYing the type definitions.
