@@ -15,8 +15,8 @@ const browsers = [
 
 let ctx: DataContext
 
-function createDataContext (modeOptions?: Parameters<typeof createTestDataContext>[1]) {
-  const context = createTestDataContext('open', modeOptions)
+function createDataContext (modeOptions?: Parameters<typeof createTestDataContext>[1], mode: Parameters<typeof createTestDataContext>[0] = 'open') {
+  const context = createTestDataContext(mode, modeOptions)
 
   jest.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
   context._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
@@ -222,6 +222,36 @@ describe('ProjectLifecycleManager', () => {
 
       await expect(ctx.lifecycleManager.setInitialActiveBrowser()).resolves.toBeUndefined()
       expect(ctx.coreData.activeBrowser).toBeNull()
+    })
+
+    describe('in run mode', () => {
+      it('uses lastBrowser without writing it back to the cache', async () => {
+        ctx = createDataContext({}, 'run')
+        jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
+
+        await ctx.lifecycleManager.setInitialActiveBrowser()
+
+        expect(ctx.coreData.activeBrowser).toEqual(expect.objectContaining({ name: 'chrome', displayName: 'Chrome Beta' }))
+        expect(ctx._apis.projectApi.insertProjectPreferencesToCache).not.toHaveBeenCalled()
+      })
+
+      it('uses the --browser option without writing it to the cache', async () => {
+        ctx = createDataContext({
+          project: 'foo',
+          testingType: 'e2e',
+          browser: 'firefox',
+          isBrowserGivenByCli: true,
+        }, 'run')
+
+        jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+
+        await ctx.lifecycleManager.setInitialActiveBrowser()
+
+        expect(ctx.coreData.activeBrowser).toEqual(browsers[3])
+        expect(ctx._apis.projectApi.insertProjectPreferencesToCache).not.toHaveBeenCalled()
+      })
     })
   })
 

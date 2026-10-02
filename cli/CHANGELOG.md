@@ -23,6 +23,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
+- Fixed an issue where `cypress run` changed the browser that `cypress open` selects by default for a project to whichever browser the run used, such as the one passed with `--browser`. `cypress run` also no longer saves anything to Cypress's user data on startup, which could log you out of `cypress open` when several `cypress run` processes started at the same time on one machine, as with parallel runs on a CI machine. Fixed in [#34924](https://github.com/cypress-io/cypress/pull/34924).
 
 **Misc:**
 
