@@ -9,23 +9,38 @@ const debug = Debug('cypress:server:socket-ct')
 
 export class SocketCt extends SocketBase {
   #destroyAutPromise?: PromiseWithResolvers<void>
+  #studioCompileRerunPending = false
 
   constructor (config: Record<string, any>) {
     super(config)
 
     // should we use this option at all for component testing 😕?
-    if (config.watchForFileChanges) {
-      devServer.emitter.on('dev-server:compile:success', ({ specFile }) => {
-        this.toRunner('dev-server:compile:success', { specFile })
-      })
-    }
+    devServer.emitter.on('dev-server:specs:unchanged', (data?: { neededForJustInTimeCompile?: boolean }) => {
+      this.toRunner('dev-server:specs:unchanged', data)
+    })
+
+    devServer.emitter.on('dev-server:jit-recompile:queued', (data: { generation: number, neededForJustInTimeCompile?: boolean }) => {
+      this.toRunner('dev-server:jit-recompile:queued', data)
+    })
+
+    // Always forward compile success so JIT spec updates can wait for webpack
+    // even when watchForFileChanges is disabled.
+    devServer.emitter.on('dev-server:compile:success', ({ specFile, jitRecompile, jitRecompileGeneration }) => {
+      const studioCompileRerun = this.#studioCompileRerunPending && !jitRecompile
+
+      if (studioCompileRerun) {
+        this.#studioCompileRerunPending = false
+      }
+
+      this.toRunner('dev-server:compile:success', { specFile, jitRecompile, jitRecompileGeneration, studioCompileRerun })
+    })
   }
 
   onBeforeSave (config) {
     // even if the user has turned off file watching
     // we want to force a reload on save
     if (!config.watchForFileChanges) {
-      devServer.emitter.on('dev-server:compile:success', this.onCloudTestFileChange)
+      this.#studioCompileRerunPending = true
     }
   }
 
@@ -33,13 +48,8 @@ export class SocketCt extends SocketBase {
     // even if the user has turned off file watching
     // we want to force a reload on save
     if (error && !config.watchForFileChanges) {
-      devServer.emitter.off('dev-server:compile:success', this.onCloudTestFileChange)
+      this.#studioCompileRerunPending = false
     }
-  }
-
-  onCloudTestFileChange = ({ specFile }) => {
-    this.toRunner('dev-server:compile:success', { specFile })
-    devServer.emitter.off('dev-server:compile:success', this.onCloudTestFileChange)
   }
 
   startListening (server: DestroyableHttpServer, automation: Automation, config, options) {
