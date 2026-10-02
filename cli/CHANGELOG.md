@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`.scrollTo()`](https://on.cypress.io/scrollto) and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) stopped short of the end of a scrollable element with always-visible scrollbars. Positions such as `bottom`, `right`, `bottomRight`, and `'100%'` landed short by the width of the scrollbar, and `center` or `'50%'` landed off-center by half of it. Fixed in [#34948](https://github.com/cypress-io/cypress/pull/34948).
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
 
 **Misc:**
