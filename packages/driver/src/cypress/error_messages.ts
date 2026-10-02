@@ -612,7 +612,6 @@ export default {
   // Shared by every `cy.getBy*()` query. Each query passes its own `cmd` and `docsUrl`.
   get_by: {
     docsUrl: '{{docsUrl}}',
-    invalid_matcher: `${cmd('{{cmd}}')} requires its first argument to be a string, number, regular expression, or function. You passed: \`{{matcher}}\``,
     invalid_options: `${cmd('{{cmd}}')} only accepts an options object as its second argument. You passed: \`{{options}}\``,
     invalid_option: `${cmd('{{cmd}}')} does not accept the \`{{option}}\` option.{{hint}} It accepts: {{accepted}}.`,
     invalid_option_boolean: `${cmd('{{cmd}}')} only accepts a \`boolean\` for its \`{{option}}\` option. You passed: \`{{value}}\``,

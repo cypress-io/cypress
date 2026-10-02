@@ -92,16 +92,16 @@ export default (Commands, Cypress, cy) => {
       value: '`.filter(\'[aria-valuenow=50]\')`',
     },
 
-    validateMatcher (role) {
+    validateMatcher (role): asserts role is string {
       if (!_.isString(role) || _.isBlank(role)) {
-        $errUtils.throwErrByPath('get_by.getByRole.invalid_role', {
+        return $errUtils.throwErrByPath('get_by.getByRole.invalid_role', {
           args: { matcher: $utils.stringifyActual(role) },
         })
       }
 
       // A role is a single token, so one with whitespace could never match,
       // and a newline would also break the attribute selector.
-      if (/\s/.test(role as string)) {
+      if (/\s/.test(role)) {
         $errUtils.throwErrByPath('get_by.getByRole.role_with_whitespace', {
           args: { role: $utils.stringifyActual(role) },
         })

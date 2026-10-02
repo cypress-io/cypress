@@ -12,6 +12,8 @@ export class AccessibilityCache {
     let style = this.styles.get(element)
 
     if (!style) {
+      // Safe because only connected elements are queried, and a connected
+      // element's document always has a window.
       style = (element.ownerDocument.defaultView as Window).getComputedStyle(element)
       this.styles.set(element, style)
     }

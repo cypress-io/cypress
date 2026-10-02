@@ -1,6 +1,8 @@
 import $ from 'jquery'
 
-export const isShadowRoot = (maybeRoot) => {
+// Checked by its string tag rather than `instanceof`, which fails for a shadow
+// root from the AUT's iframe.
+export const isShadowRoot = (maybeRoot: any): maybeRoot is ShadowRoot => {
   return maybeRoot?.toString() === '[object ShadowRoot]'
 }
 
@@ -84,8 +86,8 @@ const findShadowRoots = (root: Node): Node[] => {
 const getHostPath = (node: Node): Node[] => {
   const path = [node]
 
-  for (let root = node.getRootNode(); isShadowRoot(root); root = (root as ShadowRoot).host.getRootNode()) {
-    path.unshift((root as ShadowRoot).host)
+  for (let root = node.getRootNode(); isShadowRoot(root); root = root.host.getRootNode()) {
+    path.unshift(root.host)
   }
 
   return path

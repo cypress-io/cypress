@@ -27,17 +27,17 @@ export interface GetByDefinition<TMatcher, TOptions extends object> {
   // Options this query leaves out on purpose, mapped to the chain that gets the
   // same result, so the error can suggest it.
   unsupportedOptionHints?: Record<string, string>
-  // Throws when the matcher is invalid. Defaults to accepting any `Matcher`.
-  validateMatcher?: (matcher: unknown) => void
+  // Throws when the matcher is invalid.
+  validateMatcher: (matcher: unknown) => asserts matcher is TMatcher
   // Throws when the matcher and options are each valid but can't be combined.
-  validate?: (matcher: TMatcher, options: TOptions) => void
+  validate?: (matcher: TMatcher, options: Partial<TOptions>) => void
   // A cheap CSS selector that every matching element also matches.
-  candidates: (matcher: TMatcher, options: TOptions) => string
-  match: (element: Element, matcher: TMatcher, options: TOptions, cache: AccessibilityCache) => boolean
+  candidates: (matcher: TMatcher, options: Partial<TOptions>) => string
+  match: (element: Element, matcher: TMatcher, options: Partial<TOptions>, cache: AccessibilityCache) => boolean
   // A noun phrase for errors, e.g. `an accessible element with the role "button"`.
-  describe: (matcher: TMatcher, options: TOptions) => string
+  describe: (matcher: TMatcher, options: Partial<TOptions>) => string
   // Extra help appended to the error when nothing was found in `roots`.
-  onNotFound?: (roots: GetByRoot[], matcher: TMatcher, options: TOptions, cache: AccessibilityCache) => string | undefined
+  onNotFound?: (roots: GetByRoot[], matcher: TMatcher, options: Partial<TOptions>, cache: AccessibilityCache) => string | undefined
 }
 
 const SHARED_OPTIONS = ['timeout', 'log', 'includeShadowDom']
@@ -48,14 +48,17 @@ const throwGetByErr = (definition: GetByDefinition<any, any>, path: string, args
   })
 }
 
-const validateOptions = (definition: GetByDefinition<any, any>, userOptions: unknown) => {
-  if (!_.isPlainObject(userOptions)) {
-    throwGetByErr(definition, 'invalid_options', { options: $utils.stringifyActual(userOptions) })
+const isOptionsObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value)
+
+function validateOptions<TOptions extends object> (definition: GetByDefinition<any, TOptions>, userOptions: unknown): asserts userOptions is TOptions & SharedOptions {
+  if (!isOptionsObject(userOptions)) {
+    return throwGetByErr(definition, 'invalid_options', { options: $utils.stringifyActual(userOptions) })
   }
 
-  const accepted = [...Object.keys(definition.options), ...SHARED_OPTIONS]
+  const kinds: Record<string, 'boolean' | 'matcher' | undefined> = definition.options
+  const accepted = [...Object.keys(kinds), ...SHARED_OPTIONS]
 
-  _.each(userOptions as Record<string, unknown>, (value, option) => {
+  _.each(userOptions, (value, option) => {
     if (!accepted.includes(option)) {
       const alternative = definition.unsupportedOptionHints?.[option]
       const hint = alternative ? $errUtils.errByPath(`get_by.${definition.name}.option_hint`, { option, alternative }).message : ''
@@ -76,7 +79,7 @@ const validateOptions = (definition: GetByDefinition<any, any>, userOptions: unk
     }
 
     // Every shared option other than `timeout` is a boolean.
-    const kind = option === 'timeout' ? undefined : definition.options[option] ?? 'boolean'
+    const kind = option === 'timeout' ? undefined : kinds[option] ?? 'boolean'
 
     if (kind === 'boolean' && !_.isBoolean(value)) {
       throwGetByErr(definition, 'invalid_option_boolean', { option, value: $utils.stringifyActual(value) })
@@ -88,20 +91,13 @@ const validateOptions = (definition: GetByDefinition<any, any>, userOptions: unk
   })
 }
 
-const validateArgs = <TMatcher, TOptions extends object>(definition: GetByDefinition<TMatcher, TOptions>, matcher: TMatcher, userOptions: TOptions & SharedOptions): TOptions => {
-  if (definition.validateMatcher) {
-    definition.validateMatcher(matcher)
-  } else if (!isValidMatcher(matcher)) {
-    throwGetByErr(definition, 'invalid_matcher', { matcher: $utils.stringifyActual(matcher) })
-  }
+// The options the definition declares, leaving out any set to `undefined` so
+// they aren't shown in the command log.
+const pickOptions = <TOptions extends object>(definition: GetByDefinition<any, TOptions>, userOptions: TOptions & SharedOptions): Partial<TOptions> => {
+  // Safe because `definition.options` is a mapped type over exactly `keyof TOptions`.
+  const keys = Object.keys(definition.options) as Array<keyof TOptions>
 
-  validateOptions(definition, userOptions)
-
-  const options = _.omitBy(_.pick(userOptions, Object.keys(definition.options)), _.isUndefined) as TOptions
-
-  definition.validate?.(matcher, options)
-
-  return options
+  return _.pick(userOptions, keys.filter((key) => userOptions[key] !== undefined))
 }
 
 // Chained off an element or shadow root, the query searches that subject.
@@ -118,7 +114,7 @@ const getSearchRoots = ($scope: JQuery<GetByRoot>, includeShadowDom: boolean): G
   const scopeRoots: GetByRoot[] = $scope.toArray()
 
   return includeShadowDom
-    ? _.flatMap(scopeRoots, (root) => [root, ...$dom.findAllShadowRoots(root) as ShadowRoot[]])
+    ? _.flatMap(scopeRoots, (root) => [root, ...$dom.findAllShadowRoots(root).filter($elements.isShadowRoot)])
     : scopeRoots
 }
 
@@ -161,7 +157,7 @@ const describeScope = ($scope: JQuery<GetByRoot> | undefined) => {
   const scope = $scope.toArray()
 
   if (scope.every($elements.isShadowRoot)) {
-    return ` within the shadow root of the element: ${$dom.stringify(scope.map((root) => (root as ShadowRoot).host), 'short')}`
+    return ` within the shadow root of the element: ${$dom.stringify(scope.map((root) => root.host), 'short')}`
   }
 
   return ` within the element: ${$dom.stringify($scope, 'short')}`
@@ -174,7 +170,7 @@ interface Search {
 
 // Rewrites an existence failure to say what the query looked for and where,
 // plus any hint the definition has about why nothing matched.
-const explainMiss = <TMatcher, TOptions extends object>(err, definition: GetByDefinition<TMatcher, TOptions>, matcher: TMatcher, options: TOptions, lastSearch: Search | undefined) => {
+const explainMiss = <TMatcher, TOptions extends object>(err, definition: GetByDefinition<TMatcher, TOptions>, matcher: TMatcher, options: Partial<TOptions>, lastSearch: Search | undefined) => {
   if (err.type !== 'existence') {
     return
   }
@@ -207,8 +203,14 @@ const explainMiss = <TMatcher, TOptions extends object>(err, definition: GetByDe
  * child command, `.within()`, `includeShadowDom`, retries, logging and errors.
  */
 export const addGetByQuery = <TMatcher, TOptions extends object>(Commands, Cypress, cy, definition: GetByDefinition<TMatcher, TOptions>) => {
-  Commands.addQuery(definition.name, function getByQuery (matcher: TMatcher, userOptions: TOptions & SharedOptions = {} as TOptions & SharedOptions) {
-    const options = validateArgs(definition, matcher, userOptions)
+  Commands.addQuery(definition.name, function getByQuery (matcher: unknown, userOptions: unknown = {}) {
+    definition.validateMatcher(matcher)
+    validateOptions(definition, userOptions)
+
+    const options = pickOptions(definition, userOptions)
+
+    definition.validate?.(matcher, options)
+
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
     const displayName = $utils.stringify(_.isEmpty(options) ? [matcher] : [matcher, options])
     const withinSubject = cy.state('withinSubjectChain')

@@ -65,7 +65,8 @@ const makeRule = (entry: ElementRoleEntry, roles: string[]): ImplicitRoleRule =>
   return {
     match: (element) => {
       // Checked by tag name rather than `instanceof`, which fails for elements
-      // from the AUT's iframe, before reading a property only that tag has.
+      // from the AUT's iframe, before reading a property only that tag has. That
+      // makes the element casts below safe.
       if (element.localName !== entry.name) {
         return false
       }
@@ -110,6 +111,7 @@ const getImplicitRoles = (element: Element): string[] => {
 // Abstract roles such as `widget` only organize the ARIA taxonomy, so authors
 // can't give them to elements.
 const isValidRole = (role: string) => {
+  // Safe because `Map.get` returns `undefined` for a key that isn't a role.
   const definition = roleDefinitions.get(role as ARIARoleDefinitionKey)
 
   return !!definition && !definition.abstract
@@ -136,6 +138,7 @@ export const hasRole = (element: Element, role: string, cache?: AccessibilityCac
 
 // Empty for widget roles such as `tab` or `menuitem`, which HTML has no element for.
 export const getNativeTagNames = (role: string): string[] => {
+  // Safe because `Map.get` returns `undefined` for a key that isn't a role.
   return Array.from(new Set(Array.from(roleElements.get(role as ARIARoleDefinitionKey) ?? [], ({ name }) => name)))
 }
 
@@ -155,7 +158,7 @@ export const getRoleSelector = (role: string) => {
 
 const isSubtreeInaccessible = (element: Element, cache = new AccessibilityCache()): boolean => {
   return cache.memoSubtreeInaccessible(element, () => {
-    return (element as HTMLElement).hidden === true
+    return 'hidden' in element && element.hidden === true
       || element.getAttribute('aria-hidden') === 'true'
       || cache.getComputedStyle(element).display === 'none'
   })
