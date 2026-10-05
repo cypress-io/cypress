@@ -126,6 +126,22 @@ describe('dom/accessibility/roles', () => {
       expect([...constraints].sort()).toEqual(['>1', 'set', 'undefined'])
     })
 
+    it.each([
+      ['a table', 'cell', '<table>'],
+      ['a grid', 'gridcell', '<table role="grid">'],
+      ['a treegrid', 'gridcell', '<table role="treegrid">'],
+    ])('gives a cell in %s the role %s', (_name, role, table) => {
+      render(`${table}<tr><td id="el">x</td></tr></table>`)
+
+      expect(getRoles($('#el'))).toEqual([role])
+    })
+
+    it('gives a cell in a presentational table no role', () => {
+      render('<table role="presentation"><tr><td id="el">x</td></tr></table>')
+
+      expect(getRoles($('#el'))).toEqual([])
+    })
+
     it('does not give an element a role meant for another tag', () => {
       render('<div id="el" type="text" size="4"></div>')
 
@@ -248,6 +264,26 @@ describe('dom/accessibility/roles', () => {
       render(html)
 
       expect(getAccessibleName($('#el'))).toBe(name)
+    })
+  })
+
+  describe('getAccessibleName of a hidden element', () => {
+    it.each([
+      ['aria-hidden', '<button id="el" aria-hidden="true">Save</button>'],
+      ['the hidden attribute', '<button id="el" hidden>Save</button>'],
+      ['display: none', '<button id="el" style="display: none">Save</button>'],
+      ['visibility: hidden', '<button id="el" style="visibility: hidden">Save</button>'],
+      ['a hidden container', '<div aria-hidden="true"><button id="el">Save</button></div>'],
+    ])('names an element hidden with %s as if it were shown', (_name, html) => {
+      render(html)
+
+      expect(getAccessibleName($('#el'))).toBe('Save')
+    })
+
+    it('still leaves out the hidden content of a visible element', () => {
+      render('<button id="el">Save<span aria-hidden="true"> icon</span></button>')
+
+      expect(getAccessibleName($('#el'))).toBe('Save')
     })
   })
 

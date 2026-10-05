@@ -20,10 +20,12 @@ type AttributeConstraint = 'undefined' | 'set' | '>1'
 
 const getConstraints = (attribute: { constraints?: unknown }) => (attribute.constraints ?? []) as AttributeConstraint[]
 
-// aria-query's element-level `constraints`, such as "scoped to the body
-// element", describe DOM context a selector can't express, so they're ignored:
-// every `<header>` is a `banner` and every `<td>` is a `cell`. The `>1`
-// attribute constraint can't be expressed either, so `makeRule` checks it.
+// Most of aria-query's element-level `constraints`, such as "scoped to the
+// body element", describe DOM context a selector can't express, so they're
+// ignored: every `<header>` is a `banner`. `makeRule` checks the ones that
+// name the role of the ancestor table, so a `<td>` is a `cell` in a table but a
+// `gridcell` in a grid, and the `>1` attribute constraint, which a selector
+// can't express either.
 const makeElementSelector = ({ name, attributes = [] }: ElementRoleEntry) => {
   return `${name}${attributes.map((attribute) => {
     const { name: attributeName, value } = attribute
@@ -46,8 +48,17 @@ const makeElementSelector = ({ name, attributes = [] }: ElementRoleEntry) => {
   }).join('')}`
 }
 
+const TABLE_ROLE_CONSTRAINT = /^ancestor table element has (\S+) role$/
+
+// The roles the closest `<table>` must have for the rule to apply. The
+// constraints are alternatives: a `<td>` is a `gridcell` in a grid or a treegrid.
+const getTableRoles = (entry: ElementRoleEntry): string[] => {
+  return (entry.constraints ?? []).flatMap((constraint) => TABLE_ROLE_CONSTRAINT.exec(constraint)?.[1] ?? [])
+}
+
 const makeRule = (entry: ElementRoleEntry, roles: string[]): ImplicitRoleRule => {
   const attributes = entry.attributes ?? []
+  const tableRoles = getTableRoles(entry)
   // `input[type="text"]` must also match an `<input>` whose type is missing or
   // invalid, since the browser treats both as text inputs. Matching on the
   // `type` property instead of the attribute covers that.
@@ -77,6 +88,14 @@ const makeRule = (entry: ElementRoleEntry, roles: string[]): ImplicitRoleRule =>
 
       if (selectSize && ((element as HTMLSelectElement).size > 1) !== needsSizeAboveOne) {
         return false
+      }
+
+      if (tableRoles.length) {
+        const table = element.closest('table')
+
+        if (!table || !getRoles(table).some((role) => tableRoles.includes(role))) {
+          return false
+        }
       }
 
       return element.matches(selector)
@@ -193,8 +212,11 @@ const textAlternativeOptions = (cache: AccessibilityCache) => {
   }
 }
 
+// A hidden element is named as if it were shown, so `{ hidden: true }` can
+// still match it by name. Its whole subtree is hidden too, so all of that
+// content counts, as it does for a hidden `aria-labelledby` target.
 export const getAccessibleName = (element: Element, cache = new AccessibilityCache()) => {
-  return computeAccessibleName(element, textAlternativeOptions(cache))
+  return computeAccessibleName(element, { ...textAlternativeOptions(cache), hidden: isInaccessible(element, cache) })
 }
 
 export const getAccessibleDescription = (element: Element, cache = new AccessibilityCache()) => {

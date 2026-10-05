@@ -152,6 +152,11 @@ describe('src/cy/commands/querying/get_by_role', () => {
     it('matches the name of an element inside a hidden container', () => {
       cy.getByRole('button', { name: 'Inside aria hidden', hidden: true }).should('have.id', 'aria-hidden-parent-button')
     })
+
+    it('matches the name of an element that is itself hidden', () => {
+      cy.getByRole('button', { name: 'Aria hidden', hidden: true }).should('have.id', 'aria-hidden-button')
+      cy.getByRole('button', { name: 'Visibility hidden', hidden: true }).should('have.id', 'visibility-hidden-button')
+    })
   })
 
   context('native elements', () => {
@@ -277,6 +282,12 @@ describe('src/cy/commands/querying/get_by_role', () => {
       })
 
       cy.getByRole('button', { name: 'Aria hidden' }).should('have.id', 'aria-hidden-button')
+    })
+
+    it('gives a cell in a grid the gridcell role', () => {
+      cy.get('#dynamic-container').invoke('append', '<table role="grid"><tr><td id="grid-cell">Cell</td></tr></table>')
+      cy.getByRole('gridcell', { name: 'Cell' }).should('have.id', 'grid-cell')
+      cy.getByRole('cell', { name: 'Cell' }).should('not.exist')
     })
 
     it('re-queries the page when a later command needs a fresh subject', () => {
