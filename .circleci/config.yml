@@ -158,26 +158,26 @@ jobs:
       - run:
           name: TIMED link auto
           command: |
-            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --reporter=append-only --loglevel=info 2>&1 | grep -v cyclic | grep -iE "import|link|cop|clon|Done" | tail -5
+            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --reporter=append-only --loglevel=info 2>&1 | { grep -v cyclic || true; } | { grep -iE "import|link|cop|clon|Done" || true; } | tail -5
             echo "nlink of node_modules/.pnpm files:"; find node_modules/.pnpm -type f | awk 'NR<=2000' | xargs stat -c %h | sort | uniq -c
       - run: rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
       - run:
           name: TIMED link hardlink
           command: |
-            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=hardlink 2>&1 | grep -v cyclic | tail -3
+            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=hardlink 2>&1 | { grep -v cyclic || true; } | tail -3
             echo "nlink:"; find node_modules/.pnpm -type f | awk 'NR<=2000' | xargs stat -c %h | sort | uniq -c
       - run: rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
       - run:
           name: TIMED link copy
-          command: pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=copy 2>&1 | grep -v cyclic | tail -3
+          command: pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=copy 2>&1 | { grep -v cyclic || true; } | tail -3
       - run:
           name: TIMED link hardlink no-verify
           command: |
             rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
-            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=hardlink --config.verify-store-integrity=false 2>&1 | grep -v cyclic | tail -3
+            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=hardlink --config.verify-store-integrity=false 2>&1 | { grep -v cyclic || true; } | tail -3
 
 workflows:
   import-diag:
     jobs:
       - import-diag:
-          matrix: {parameters: {n: [1, 2]}}
+          matrix: {parameters: {n: [1, 2, 3]}}
