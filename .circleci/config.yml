@@ -140,23 +140,44 @@ jobs:
           key: exp-pnpm-warmstore-<< parameters.label >>-<< parameters.n >>-v1-<< pipeline.number >>
           paths: [~/.pnpm-store]
 
+  import-diag:
+    parameters: {n: {type: integer}}
+    executor: cy
+    steps:
+      - checkout
+      - pnpm-setup
+      - restore_cache:
+          name: restore exact store (from pipeline 86833)
+          key: exp-pnpm-store-v1-86833
+      - run:
+          name: filesystem facts
+          command: |
+            stat -c 'dev=%d %n' ~/.pnpm-store ~/project /tmp
+            df -h ~/.pnpm-store ~/project | cat
+            find ~/.pnpm-store -type f | head -2000 | xargs stat -c %h | sort | uniq -c
+      - run:
+          name: TIMED link auto
+          command: |
+            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --reporter=append-only --loglevel=info 2>&1 | grep -v cyclic | grep -iE "import|link|cop|clon|Done" | tail -5
+            echo "nlink of node_modules/.pnpm files:"; find node_modules/.pnpm -type f | head -2000 | xargs stat -c %h | sort | uniq -c
+      - run: rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
+      - run:
+          name: TIMED link hardlink
+          command: |
+            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=hardlink 2>&1 | grep -v cyclic | tail -3
+            echo "nlink:"; find node_modules/.pnpm -type f | head -2000 | xargs stat -c %h | sort | uniq -c
+      - run: rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
+      - run:
+          name: TIMED link copy
+          command: pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=copy 2>&1 | grep -v cyclic | tail -3
+      - run:
+          name: TIMED link hardlink no-verify
+          command: |
+            rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
+            pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=hardlink --config.verify-store-integrity=false 2>&1 | grep -v cyclic | tail -3
+
 workflows:
-  warm-prep:
+  import-diag:
     jobs:
-      - prep-old-store:
-          name: prep-old-<< matrix.label >>
-          matrix:
-            parameters:
-              sha: ['88472712e8', '07f0726bca']
-              label: [small, large]
-            exclude:
-              - {sha: '88472712e8', label: large}
-              - {sha: '07f0726bca', label: small}
-      - warm-prep:
-          name: warm-prep-small-<< matrix.n >>
-          requires: [prep-old-small]
-          matrix: {parameters: {label: [small], n: [1, 2, 3]}}
-      - warm-prep:
-          name: warm-prep-large-<< matrix.n >>
-          requires: [prep-old-large]
-          matrix: {parameters: {label: [large], n: [1, 2, 3]}}
+      - import-diag:
+          matrix: {parameters: {n: [1, 2]}}
