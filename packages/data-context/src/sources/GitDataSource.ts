@@ -1,5 +1,5 @@
 import execa from 'execa'
-import simpleGit from 'simple-git'
+import { simpleGit } from 'simple-git'
 import type { StatusResult, DefaultLogFields } from 'simple-git'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
