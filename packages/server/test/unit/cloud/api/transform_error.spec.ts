@@ -13,11 +13,10 @@ describe('transformError', () => {
   let transformError: (err: AxiosError | Error & { error?: any, statusCode: number, isApiError?: boolean }) => never
 
   beforeEach(() => {
-    const responseUse = vi.fn()
     const mockAxiosInstance: Partial<AxiosInstance> = {
       interceptors: {
         response: {
-          use: responseUse,
+          use: vi.fn(),
           eject: vi.fn(),
           clear: vi.fn(),
         },
@@ -32,7 +31,7 @@ describe('transformError', () => {
     // @ts-expect-error
     installErrorTransform(mockAxiosInstance)
 
-    const [, secondArg] = responseUse.mock.calls[0]
+    const [, secondArg] = (mockAxiosInstance.interceptors?.response.use as ReturnType<typeof vi.fn>).mock.calls[0]
 
     transformError = secondArg
   })
@@ -59,7 +58,7 @@ describe('transformError', () => {
           thrown = e
         }
         expect(thrown).toBeDefined()
-        expect(thrown.message).toEqual(expectedDataMessage)
+        expect(thrown.message).toBe(expectedDataMessage)
         expect(thrown.isApiError).toBe(true)
       })
     })
@@ -73,7 +72,7 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown.message).toEqual(err.message)
+        expect(thrown.message).toBe(err.message)
         expect(thrown.isApiError).toBe(true)
       })
     })
@@ -102,7 +101,7 @@ describe('transformError', () => {
           thrown = e
         }
         expect(thrown).toBeDefined()
-        expect(thrown.message).toEqual(expectedDataMessage)
+        expect(thrown.message).toBe(expectedDataMessage)
         expect(thrown.isApiError).toBe(true)
       })
     })
@@ -116,7 +115,7 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown.message).toEqual(err.message)
+        expect(thrown.message).toBe(err.message)
         expect(thrown.isApiError).toBe(true)
       })
     })

@@ -143,7 +143,7 @@ describe('CloudRequest Encryption', () => {
 
       throw new Error('Unreachable')
     } catch (e) {
-      expect(e.message).toEqual('Cannot issue encrypted request to /foo without request body')
+      expect(e.message).toBe('Cannot issue encrypted request to /foo without request body')
     }
   })
 
@@ -151,14 +151,14 @@ describe('CloudRequest Encryption', () => {
     // Good
     const data = await TestReq.get('/signed', { encrypt: 'signed' }).then((d) => d.data)
 
-    expect(data).toEqual(fs.readFileSync(__filename, 'utf8'))
+    expect(data).toBe(fs.readFileSync(__filename, 'utf8'))
 
     // Bad
     try {
       await TestReq.get('/invalid-signing', { encrypt: 'signed' })
       throw new Error('Unreachable')
     } catch (e) {
-      expect(e.message).toEqual('Unable to verify response signature for /invalid-signing')
+      expect(e.message).toBe('Unable to verify response signature for /invalid-signing')
     }
   })
 
@@ -167,7 +167,7 @@ describe('CloudRequest Encryption', () => {
       await TestReq.get('/ping', { encrypt: 'signed' })
       throw new Error('Unreachable')
     } catch (e) {
-      expect(e.message).toEqual('Expected signed response for /ping')
+      expect(e.message).toBe('Expected signed response for /ping')
     }
   })
 
@@ -201,7 +201,7 @@ describe('CloudRequest Encryption', () => {
     } catch (e) {
       expect(e.isApiError).toBe(true)
 
-      expect(e.message).toEqual(dedent`
+      expect(e.message).toBe(dedent`
         400
 
         {
@@ -227,7 +227,7 @@ describe('CloudRequest Encryption', () => {
 
       throw new Error('Unreachable')
     } catch (e) {
-      expect(e.message).toEqual('Unable to verify response signature for /invalid-signed-post')
+      expect(e.message).toBe('Unable to verify response signature for /invalid-signed-post')
     }
   })
 })
