@@ -102,17 +102,61 @@ jobs:
             find . -name node_modules -prune -print | while read p; do mkdir -p ~/project/$(dirname $p); mv $p ~/project/$p; done
             du -sh ~/project/node_modules
 
+  prep-old-store:
+    parameters: {sha: {type: string}, label: {type: string}}
+    executor: cy
+    steps:
+      - checkout
+      - run: npm i -g pnpm@9.15.9
+      - run:
+          name: Build store from << parameters.label >> lockfile (<< parameters.sha >>)
+          command: |
+            mkdir ~/old && git archive << parameters.sha >> | tar -x -C ~/old
+            cp -r .circleci/exp ~/old/.circleci/
+            cd ~/old && node .circleci/exp/pnpm-prep.js && pnpm import 2>&1 | tail -2
+            pnpm install --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store
+            du -sh ~/.pnpm-store
+      - save_cache:
+          key: exp-pnpm-oldstore-<< parameters.label >>-v1-<< pipeline.number >>
+          paths: [~/.pnpm-store]
+
+  warm-prep:
+    parameters: {label: {type: string}, n: {type: integer}}
+    executor: cy
+    steps:
+      - checkout
+      - pnpm-setup
+      - restore_cache:
+          name: TIMED restore previous store
+          key: exp-pnpm-oldstore-<< parameters.label >>-v1-<< pipeline.number >>
+      - run:
+          name: TIMED pnpm install (online, warm store)
+          command: pnpm install --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --reporter=append-only --loglevel=info 2>&1 | grep -v "cyclic workspace" | grep -iE "progress|reused|downloaded|import|hard ?link|copied|cloned|added|Done|ERR" | tail -15
+      - run:
+          name: TIMED pnpm store prune
+          command: pnpm store prune --store-dir ~/.pnpm-store 2>&1 | tail -3; du -sh ~/.pnpm-store
+      - save_cache:
+          name: TIMED save store
+          key: exp-pnpm-warmstore-<< parameters.label >>-<< parameters.n >>-v1-<< pipeline.number >>
+          paths: [~/.pnpm-store]
+
 workflows:
-  timing:
+  warm-prep:
     jobs:
-      - prep-yarn
-      - prep-pnpm
-      - measure-yarn:
-          requires: [prep-yarn]
-          matrix: {parameters: {n: [1, 2, 3]}}
-      - measure-pnpm-store:
-          requires: [prep-pnpm]
-          matrix: {parameters: {n: [1, 2, 3]}}
-      - measure-pnpm-linked:
-          requires: [prep-pnpm]
-          matrix: {parameters: {n: [1, 2, 3]}}
+      - prep-old-store:
+          name: prep-old-<< matrix.label >>
+          matrix:
+            parameters:
+              sha: ['88472712e8', '07f0726bca']
+              label: [small, large]
+            exclude:
+              - {sha: '88472712e8', label: large}
+              - {sha: '07f0726bca', label: small}
+      - warm-prep:
+          name: warm-prep-small-<< matrix.n >>
+          requires: [prep-old-small]
+          matrix: {parameters: {label: [small], n: [1, 2, 3]}}
+      - warm-prep:
+          name: warm-prep-large-<< matrix.n >>
+          requires: [prep-old-large]
+          matrix: {parameters: {label: [large], n: [1, 2, 3]}}
