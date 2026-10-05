@@ -650,6 +650,11 @@ describe('visual error templates', () => {
         default: ['Chrome', 'code', 'signal'],
       }
     },
+    RUN_INACTIVITY_TIMEOUT: () => {
+      return {
+        default: ['10 minutes'],
+      }
+    },
     AUTOMATION_SERVER_DISCONNECTED: () => {
       return {
         default: [],

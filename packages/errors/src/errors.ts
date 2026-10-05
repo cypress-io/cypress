@@ -826,6 +826,14 @@ export const AllCypressErrors = {
         - There are problems with your GPU / GPU drivers
         - There are browser bugs`
   },
+  RUN_INACTIVITY_TIMEOUT: (duration: string) => {
+    return errTemplate`\
+        Cypress received no activity from the browser for ${fmt.highlight(duration)} while running this spec.
+
+        We have failed the current spec but will continue running the next spec.
+
+        This usually means a test is waiting on something that never finishes, such as a reply from the browser or a page that never loads.`
+  },
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`
   },

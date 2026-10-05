@@ -650,6 +650,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return this.doneEarly()
   }
 
+  cancelPendingCommands () {
+    this.queue.cancelPending()
+  }
+
   // reset is called before each test
   reset (test) {
     try {

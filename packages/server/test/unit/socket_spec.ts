@@ -260,6 +260,37 @@ describe('lib/socket', () => {
       })
     })
 
+    describe('driver activity', () => {
+      it('reports activity for each mocha event', function (done) {
+        this.options.onDriverActivity = () => done()
+
+        return this.client.emit('mocha', 'start')
+      })
+
+      it('reports activity for the runner\'s run:activity ping', function (done) {
+        this.options.onDriverActivity = () => done()
+
+        return this.client.emit('run:activity')
+      })
+
+      it('reports activity when a backend request arrives and when it is answered', function (done) {
+        let reports = 0
+
+        this.options.onDriverActivity = () => {
+          reports += 1
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'foo', () => {
+          // the second report is made right after the reply is sent
+          setImmediate(() => {
+            expect(reports).to.eq(2)
+
+            done()
+          })
+        })
+      })
+    })
+
     describe('on(backend:request, get:fixture)', () => {
       it('returns the fixture object', function (done) {
         const cb = function (resp) {

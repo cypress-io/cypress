@@ -44,6 +44,9 @@ interface AddGlobalListenerOptions {
 }
 
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
+// how often run mode tells the server that tests are still running
+const RUN_ACTIVITY_INTERVAL_MS = 15_000
+
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame dev-server:on-spec-update'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies dev-server:on-spec-updated'.split(' ')
@@ -580,6 +583,25 @@ export class EventManager {
       })
     })
 
+    // Most commands never reach the server, so in run mode tell it the tests are still
+    // making progress. It fails a spec that goes quiet for too long.
+    let lastRunActivityAt = 0
+
+    const reportRunActivity = () => {
+      if (Cypress.config('isInteractive')) {
+        return
+      }
+
+      const now = Date.now()
+
+      if (now - lastRunActivityAt < RUN_ACTIVITY_INTERVAL_MS) {
+        return
+      }
+
+      lastRunActivityAt = now
+      this.ws.emit('run:activity')
+    }
+
     Cypress.on('collect:run:state', () => {
       if (Cypress.config('hideCommandLog')) {
         // TODO: Need more refactoring to use native Promise here since
@@ -595,6 +617,8 @@ export class EventManager {
     })
 
     Cypress.on('log:added', (log) => {
+      reportRunActivity()
+
       // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
       if (!Cypress.runner) {
         return
@@ -608,6 +632,8 @@ export class EventManager {
     })
 
     Cypress.on('log:changed', (log) => {
+      reportRunActivity()
+
       // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
       if (!Cypress.runner) {
         return
