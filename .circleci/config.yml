@@ -15,6 +15,7 @@ commands:
 
   rec-pnpm-setup:
     steps:
+      - run: node .circleci/exp/pnpm-prep.js
       - run:
           name: Install pnpm package manager (recommended installer)
           command: |
@@ -23,7 +24,6 @@ commands:
             export PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
             pnpm --version
             pnpm config set store-dir .pnpm-store
-      - run: node .circleci/exp/pnpm-prep.js
       - run: pnpm import 2>&1 | tail -3
 
 jobs:
