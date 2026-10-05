@@ -4,7 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
-- Fixed an issue where requests to an origin that serves only HTTP/2 either failed with a `403: Forbidden` or hung until they timed out, depending on the origin. Cypress advertised no protocol over ALPN when opening a TLS connection, leaving such an origin nothing to negotiate against. Cypress now advertises `http/1.1`. Origins that serve both protocols are unaffected. Fixed in [#34951](https://github.com/cypress-io/cypress/pull/34951).
+- Requests to an origin that serves only HTTP/2 now fail immediately at the TLS handshake instead of returning a misleading `403: Forbidden` or hanging until they time out. Cypress advertised no protocol over ALPN when opening a TLS connection, leaving such an origin nothing to negotiate against; it now advertises `http/1.1`. Origins that serve both protocols are unaffected. Where such an origin previously answered with a `403`, [`cy.request()`](https://on.cypress.io/request) with `failOnStatusCode: false` yielded a response object and now reports a network error instead. Fixed in [#34951](https://github.com/cypress-io/cypress/pull/34951).
 
 **Misc:**
 
