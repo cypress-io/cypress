@@ -112,9 +112,11 @@ export const logQuery = (command, Cypress, matcher: unknown, options: object, { 
 // Chained off an element or shadow root, the query searches that subject.
 // Otherwise it searches the `.within()` scope, or the whole body. With
 // `includeShadowDom`, every shadow root inside the scope is searched too.
+// `cy.wrap()` can yield a bare element or shadow root rather than a jQuery
+// collection, so the subject is wrapped either way.
 export const searchScope = (cy, subject, withinSubject, includeShadowDom: boolean): Search => {
-  const isScope = subject && ($dom.isElement(subject) || $elements.isShadowRoot(subject[0]))
-  const $scope: JQuery<GetByRoot> = isScope ? subject : cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
+  const isScope = subject && ($dom.isElement(subject) || $elements.isShadowRoot(subject) || $elements.isShadowRoot(subject[0]))
+  const $scope: JQuery<GetByRoot> = isScope ? cy.$$(subject) : cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
   const scopeRoots: GetByRoot[] = $scope.toArray()
 
   const roots = includeShadowDom

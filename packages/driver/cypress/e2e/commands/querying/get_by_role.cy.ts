@@ -214,6 +214,12 @@ describe('src/cy/commands/querying/get_by_role', () => {
     it('searches from a shadow root yielded by .shadow()', () => {
       cy.get('#shadow-host').shadow().getByRole('button').should('have.id', 'shadow-button')
     })
+
+    it('searches a bare shadow root yielded by cy.wrap()', () => {
+      cy.get('#shadow-host').then(($host) => {
+        cy.wrap($host[0].shadowRoot).getByRole('button').should('have.id', 'shadow-button')
+      })
+    })
   })
 
   context('scope', () => {
@@ -236,6 +242,14 @@ describe('src/cy/commands/querying/get_by_role', () => {
 
     it('searches the descendants of every subject element', () => {
       cy.get('#implicit, #explicit').getByRole('button', { native: false }).should('have.length', 3)
+    })
+
+    it('searches a bare element yielded by cy.wrap()', () => {
+      cy.get('#implicit').then(($el) => {
+        cy.wrap($el[0]).getByRole('button').then(($buttons) => {
+          expect(ids($buttons)).to.deep.eq(['implicit-button', 'submit-input'])
+        })
+      })
     })
 
     it('can be chained off window or document, searching the whole page', () => {
