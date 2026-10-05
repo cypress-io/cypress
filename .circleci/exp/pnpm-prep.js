@@ -16,7 +16,10 @@ for (const [k, v] of Object.entries(p.resolutions || {})) {
 delete p.resolutions
 p.pnpm = { overrides: o }
 fs.writeFileSync('package.json', JSON.stringify(p, null, 2))
-fs.writeFileSync('pnpm-workspace.yaml', `packages:\n${p.workspaces.packages.map((x) => `  - "${x}"`).join('\n')}\n`)
+// Newer pnpm majors read settings only from pnpm-workspace.yaml; older ones from .npmrc/package.json
+const overrides = Object.entries(o).map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)}`).join('\n')
+
+fs.writeFileSync('pnpm-workspace.yaml', `packages:\n${p.workspaces.packages.map((x) => `  - "${x}"`).join('\n')}\nlinkWorkspacePackages: true\noverrides:\n${overrides}\n`)
 fs.appendFileSync('.npmrc', 'link-workspace-packages=true\nlockfile=true\npackage-lock=true\n')
 for (const f of execSync('ls npm/*/package.json packages/*/package.json cli/package.json tooling/*/package.json').toString().trim().split('\n')) {
   const q = JSON.parse(fs.readFileSync(f))
