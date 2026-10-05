@@ -59,7 +59,8 @@ describe('runner/cypress retries.ui.spec', {
     // a test that passes on retry is collapsed, so open it to reach its attempts
     cy.reporter().contains('passes on the retry after failing to start').click()
     cy.reporter().contains('Attempt 1').click()
-    cy.reporter().find('.attempt-1').contains('waiting for `test:before:run:async` to finish before running this test')
+    // the reporter renders the message as markdown, so the event name is in a <code> element
+    cy.reporter().find('.attempt-1').should('contain.text', 'waiting for test:before:run:async to finish before running this test')
   })
 
   it('can toggle failed prev attempt open and log its error', { viewportHeight: 1200 }, () => {
