@@ -13,6 +13,19 @@ commands:
       - run: node .circleci/exp/pnpm-prep.js
       - run: pnpm import 2>&1 | tail -3
 
+  rec-pnpm-setup:
+    steps:
+      - run:
+          name: Install pnpm package manager (recommended installer)
+          command: |
+            curl -fsSL https://get.pnpm.io/install.sh | SHELL=bash sh -
+            echo 'export PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"' >> "$BASH_ENV"
+            export PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
+            pnpm --version
+            pnpm config set store-dir .pnpm-store
+      - run: node .circleci/exp/pnpm-prep.js
+      - run: pnpm import 2>&1 | tail -3
+
 jobs:
   prep-yarn:
     executor: cy
@@ -176,8 +189,57 @@ jobs:
             rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
             pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir ~/.pnpm-store --package-import-method=hardlink --config.verify-store-integrity=false 2>&1 | { grep -v cyclic || true; } | tail -3
 
+  rec-prep:
+    executor: cy
+    environment: {PNPM_HOME: /root/.local/share/pnpm}
+    steps:
+      - checkout
+      - rec-pnpm-setup
+      - run:
+          command: pnpm install --ignore-scripts
+          no_output_timeout: 20m
+      - run: pnpm store path; du -sh .pnpm-store
+      - save_cache:
+          key: rec-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-<< pipeline.number >>
+          paths: [.pnpm-store]
+
+  rec-measure:
+    parameters: {n: {type: integer}}
+    executor: cy
+    environment: {PNPM_HOME: /root/.local/share/pnpm}
+    steps:
+      - checkout
+      - rec-pnpm-setup
+      - restore_cache:
+          name: TIMED Restore pnpm Package Cache
+          keys:
+            - rec-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-<< pipeline.number >>
+      - run:
+          name: config facts
+          command: |
+            pnpm store path
+            pnpm config get package-import-method
+            stat -c 'dev=%d %n' .pnpm-store . 
+      - run:
+          name: TIMED pnpm install (auto)
+          command: |
+            pnpm install --ignore-scripts 2>&1 | { grep -v cyclic || true; } | tail -3
+            echo "nlink:"; find node_modules/.pnpm -type f | awk 'NR<=2000' | xargs stat -c %h | sort -n | uniq -c | sort -rn | head -4
+      - run: rm -rf node_modules */node_modules packages/*/node_modules npm/*/node_modules tooling/*/node_modules
+      - run:
+          name: TIMED pnpm install (forced hardlink)
+          command: |
+            pnpm install --ignore-scripts --package-import-method=hardlink 2>&1 | { grep -v cyclic || true; } | tail -3
+            echo "nlink:"; find node_modules/.pnpm -type f | awk 'NR<=2000' | xargs stat -c %h | sort -n | uniq -c | sort -rn | head -4
+      - save_cache:
+          name: TIMED Save pnpm Package Cache (should skip, key exists)
+          key: rec-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-<< pipeline.number >>
+          paths: [.pnpm-store]
+
 workflows:
-  import-diag:
+  recommended-pnpm:
     jobs:
-      - import-diag:
+      - rec-prep
+      - rec-measure:
+          requires: [rec-prep]
           matrix: {parameters: {n: [1, 2, 3]}}
