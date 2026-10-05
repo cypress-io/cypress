@@ -49,8 +49,8 @@ const matchesRole = (element: Element, role: string, { name, hidden = false, nat
     return false
   }
 
-  // The name computation already collapses whitespace, so a function
-  // matcher receives the name exactly as computed.
+  // The name computation already trims the name and collapses runs of
+  // whitespace, so it's matched as computed, as Testing Library does.
   return name === undefined || matches(getAccessibleName(element, cache), element, name, { normalizer: identityNormalizer })
 }
 

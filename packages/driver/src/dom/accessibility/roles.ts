@@ -22,10 +22,9 @@ const getConstraints = (attribute: { constraints?: unknown }) => (attribute.cons
 
 // Most of aria-query's element-level `constraints`, such as "scoped to the
 // body element", describe DOM context a selector can't express, so they're
-// ignored: every `<header>` is a `banner`. `makeRule` checks the ones that
-// name the role of the ancestor table, so a `<td>` is a `cell` in a table but a
-// `gridcell` in a grid, and the `>1` attribute constraint, which a selector
-// can't express either.
+// ignored: every `<header>` is a `banner`. `makeRule` checks the ones that name
+// the role of the ancestor table, so a `<td>` is a `cell` in a table but a
+// `gridcell` in a grid.
 const makeElementSelector = ({ name, attributes = [] }: ElementRoleEntry) => {
   return `${name}${attributes.map((attribute) => {
     const { name: attributeName, value } = attribute
@@ -50,8 +49,8 @@ const makeElementSelector = ({ name, attributes = [] }: ElementRoleEntry) => {
 
 const TABLE_ROLE_CONSTRAINT = /^ancestor table element has (\S+) role$/
 
-// The roles the closest `<table>` must have for the rule to apply. The
-// constraints are alternatives: a `<td>` is a `gridcell` in a grid or a treegrid.
+// The roles the closest `<table>` can have for the rule to apply. Any one of
+// them is enough.
 const getTableRoles = (entry: ElementRoleEntry): string[] => {
   return (entry.constraints ?? []).flatMap((constraint) => TABLE_ROLE_CONSTRAINT.exec(constraint)?.[1] ?? [])
 }
@@ -129,9 +128,11 @@ const getImplicitRoles = (element: Element): string[] => {
 
 // Abstract roles such as `widget` only organize the ARIA taxonomy, so authors
 // can't give them to elements.
+// Safe because aria-query's maps return `undefined` for a key that isn't a role.
+const asRoleKey = (role: string) => role as ARIARoleDefinitionKey
+
 const isValidRole = (role: string) => {
-  // Safe because `Map.get` returns `undefined` for a key that isn't a role.
-  const definition = roleDefinitions.get(role as ARIARoleDefinitionKey)
+  const definition = roleDefinitions.get(asRoleKey(role))
 
   return !!definition && !definition.abstract
 }
@@ -157,8 +158,7 @@ export const hasRole = (element: Element, role: string, cache?: AccessibilityCac
 
 // Empty for widget roles such as `tab` or `menuitem`, which HTML has no element for.
 export const getNativeTagNames = (role: string): string[] => {
-  // Safe because `Map.get` returns `undefined` for a key that isn't a role.
-  return Array.from(new Set(Array.from(roleElements.get(role as ARIARoleDefinitionKey) ?? [], ({ name }) => name)))
+  return Array.from(new Set(Array.from(roleElements.get(asRoleKey(role)) ?? [], ({ name }) => name)))
 }
 
 // Whether `element` has `role` because of its tag, like `<button>`, rather than
