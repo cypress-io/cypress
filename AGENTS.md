@@ -226,6 +226,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **No `console`** — `no-console: 'error'`; use the logger utilities instead.
 - **TypeScript**: `strict: true` base, but `noImplicitAny: false` (implicit `any` allowed for pragmatic reasons).
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
+- **Type guards over `as`** — Narrow with a type guard, an `asserts` function or an `in` check rather than an `as` assertion, and explain any assertion that remains with a "Safe because" comment. See [Type Assertions](./guides/typescript.md#type-assertions).
 - **Unused vars**: Prefix with `_` to suppress (`argsIgnorePattern: '^_'`).
 - **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.

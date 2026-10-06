@@ -17,6 +17,46 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
     })
   })
 
+  it('.go() back onto a secondary origin from the primary origin', () => {
+    let goLog
+
+    cy.on('log:added', (attrs, log) => {
+      if (attrs.name === 'go') {
+        goLog = log
+      }
+    })
+
+    cy.visit('/fixtures/primary-origin.html')
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+    cy.visit('/fixtures/generic.html')
+
+    cy.go('back').then((win) => {
+      expect(win).to.eq(cy.state('window'))
+      expect(() => win.document).to.throw()
+
+      const consoleProps = goLog.invoke('consoleProps')
+
+      expect(consoleProps.props.Yielded).to.eq(win)
+      // @ts-expect-error - `Cypress.Log` is the internal LogUtils namespace at runtime, but the public types only declare it as a log instance
+      expect(() => Cypress.Log.toSerializedConsoleProps(consoleProps)).not.to.throw()
+    })
+
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.location('pathname').should('equal', '/fixtures/secondary-origin.html')
+    })
+  })
+
+  it('.go() back onto the primary origin from a secondary origin', () => {
+    cy.visit('/fixtures/primary-origin.html')
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.go('back')
+    })
+
+    cy.location('pathname').should('equal', '/fixtures/primary-origin.html')
+  })
+
   it('.reload()', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="dom-link"]').click()
@@ -419,8 +459,7 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
       })
     })
 
-    // TODO: Investigate this flaky test.
-    it.skip('.go()', { retries: 15 }, () => {
+    it('.go()', () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 

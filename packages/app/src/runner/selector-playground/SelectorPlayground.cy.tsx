@@ -65,7 +65,7 @@ describe('SelectorPlayground', () => {
     expect(selectorPlaygroundStore.method).to.eq('get')
 
     cy.get('[aria-label="Selector methods"]').click()
-    cy.findByRole('menuitem', { name: 'cy.contains' }).click().then(() => {
+    cy.getByRole('menuitem', { name: 'cy.contains' }).click().then(() => {
       expect(selectorPlaygroundStore.method).to.eq('contains')
       expect(autIframe.toggleSelectorHighlight).to.have.been.called
     })
@@ -241,12 +241,12 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-selector"]').should('have.value', '.get-selector')
 
     cy.get('[aria-label="Selector methods"]').click()
-    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
+    cy.getByRole('menuitem', { name: 'cy.contains' }).click()
 
     cy.get('[data-cy="playground-selector"]').should('have.value', '.contains-selector')
 
     cy.get('[aria-label="Selector methods"]').click()
-    cy.findByRole('menuitem', { name: 'cy.get' }).click()
+    cy.getByRole('menuitem', { name: 'cy.get' }).click()
 
     cy.get('[data-cy="playground-selector"]').should('have.value', '.get-selector')
   })
