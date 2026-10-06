@@ -79,6 +79,7 @@ function getAlias (selector, log, cy) {
       if (match && match[1] === '0') {
         $errUtils.throwErrByPath('get.alias_zero', {
           args: { alias: aliasObj.alias },
+          errProps: { retry: false },
         })
       }
 
