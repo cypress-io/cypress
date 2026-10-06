@@ -39,7 +39,8 @@ src/
 - The driver is consumed by `@packages/runner` (webpack bundle) and ultimately served to the browser. It is **not** built in isolation; changes are picked up by running `yarn watch` from the repo root or `yarn workspace @packages/runner watch`.
 - `workspaces.nohoist: ["*"]` is set so that all dependencies are installed locally inside `packages/driver/node_modules` rather than hoisted — this prevents version conflicts with browser-targeted packages.
 - Cypress tests for the driver itself use a local Express server (spawned automatically in `e2e.setupNodeEvents`) rather than a manually started dev server.
-- `postinstall` runs `patch-package` to apply local patches to dependencies.
+- `postinstall` runs `patch-package` to apply local patches to dependencies. File an upstream issue for each patch and link it from a comment in the patch and from the PR, and note in the PR any way the patch makes Cypress behave differently from other tools built on the same library.
+- Elements and shadow roots in the AUT come from its iframe, a different realm from the driver, so `instanceof HTMLInputElement` or `instanceof ShadowRoot` is `false` for them. Check `element.localName` or the object's string tag instead, as `isShadowRoot` in `src/dom/elements/shadow.ts` does.
 - Cross-origin testing (`cy.origin`) relies on the `cross-origin/` spec bridge and a secondary `cypress.ts` bundle injected into cross-origin frames.
 
 ## Regression tests for GitHub issues
