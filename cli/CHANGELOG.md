@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where `cypress run` could stop printing output and never finish when a test was retried after one of its hooks timed out on the previous attempt. Fixed in [#34997](https://github.com/cypress-io/cypress/pull/34997).
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
 
 **Misc:**
