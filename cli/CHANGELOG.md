@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- A test now fails, instead of waiting indefinitely, when preparing the browser for it, including any [`test:before:run:async`](https://on.cypress.io/catalog-of-events) handlers, does not finish within [`pageLoadTimeout`](https://on.cypress.io/configuration#Timeouts). Cleanup between tests that does not finish within `pageLoadTimeout` is skipped with a warning, and the next test runs. Fixed in [#34999](https://github.com/cypress-io/cypress/pull/34999).
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
 
 **Misc:**
