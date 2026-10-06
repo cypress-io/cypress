@@ -1,0 +1,5 @@
+[31mCypress received no activity from the browser for [33m10 minutes[39m[31m while running this spec.[39m
+[31m[39m
+[31mWe have failed the current spec but will continue running the next spec.[39m
+[31m[39m
+[31mThis usually means a test is waiting on something that never finishes, such as a reply from the browser or a page that never loads.[39m

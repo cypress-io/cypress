@@ -29,6 +29,7 @@ import { telemetry } from '@packages/telemetry'
 import type { CypressRunResult } from './results'
 import { createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { getRunInactivityTimeout, watchForInactivity } from '../util/run_inactivity_watchdog'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
@@ -454,8 +455,17 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
-async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
+async function listenForProjectEnd (project: ProjectBase, exit: boolean, config: Cfg): Promise<any> {
   if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Promise.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+
+  // a run with exit: false stays open on purpose once its tests finish
+  const stopWatchingForInactivity = exit === false ? _.noop : watchForInactivity({
+    emitter: project,
+    timeoutMs: getRunInactivityTimeout(config),
+    onInactive: (duration) => {
+      earlyExitTerminator.exitEarly(errors.get('RUN_INACTIVITY_TIMEOUT', duration))
+    },
+  })
 
   // if exit is false, we need to intercept the resolution of tests - whether
   // an early exit with intermediate results, or a full run.
@@ -474,7 +484,7 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
         })
       }),
       earlyExitTerminator.waitForEarlyExit(project),
-    ]).then((results) => {
+    ]).finally(stopWatchingForInactivity).then((results) => {
       if (exit === false) {
         console.log('not exiting due to options.exit being false')
       } else {
@@ -630,7 +640,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
 
   const { project, browser, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
 
-  const results = await listenForProjectEnd(project, exit)
+  const results = await listenForProjectEnd(project, exit, config)
 
   debug('received project end')
 

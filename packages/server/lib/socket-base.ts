@@ -153,6 +153,7 @@ export class SocketBase implements SocketBroadcaster {
       onResetServerState () {},
       onTestsReceivedAndMaybeRecord () {},
       onMocha () {},
+      onDriverActivity () {},
       onConnect () {},
       onRequest () {},
       onResolveUrl () {},
@@ -296,12 +297,15 @@ export class SocketBase implements SocketBroadcaster {
 
         socket.on('automation:request', (message: keyof AutomationCommands, data, cb) => {
           debug('automation:request %s %o', message, data)
+          options.onDriverActivity()
 
           return automationRequest(message, data)
           .then((resp) => {
             return cb({ response: resp })
           }).catch((err) => {
             return cb({ error: errors.cloneErr(err) })
+          }).finally(() => {
+            options.onDriverActivity()
           })
         })
 
@@ -359,7 +363,14 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         socket.on('mocha', (...args: unknown[]) => {
+          options.onDriverActivity()
+
           return options.onMocha(...args)
+        })
+
+        // sent by the runner while commands run, since most commands never reach the server
+        socket.on('run:activity', () => {
+          options.onDriverActivity()
         })
 
         socket.on('recorder:frame', (data) => {
@@ -510,6 +521,7 @@ export class SocketBase implements SocketBroadcaster {
           const cb = args.pop()
 
           debug('backend:request %o', { eventName, args })
+          options.onDriverActivity()
 
           const backendRequest = () => {
             switch (eventName) {
@@ -615,6 +627,8 @@ export class SocketBase implements SocketBroadcaster {
             return cb({ response: resp })
           }).catch((err) => {
             return cb({ error: errors.cloneErr(err) })
+          }).finally(() => {
+            options.onDriverActivity()
           })
         })
 
