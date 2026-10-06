@@ -1,6 +1,7 @@
 require('../spec_helper')
 
 const _ = require('lodash')
+const path = require('path')
 let r = require('@cypress/request')
 const rp = require('@cypress/request-promise')
 const compression = require('compression')
@@ -35,6 +36,11 @@ const dedent = require('dedent')
 const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
 
 zlib = Promise.promisifyAll(zlib)
+
+const repoPackageJson = path.resolve(__dirname, '../../../../package.json')
+
+// Express decodes the %2F after routing, so each ../ reaches the handler intact
+const traversalTo = (absolutePath) => `${'..%2F'.repeat(20)}${encodeURIComponent(absolutePath)}`
 
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
@@ -493,6 +499,39 @@ describe('Routes', () => {
         expect(res.statusCode).to.eq(200)
 
         expect(res.body).to.match(/\.reporter/)
+      })
+    })
+
+    it('refuses a path that escapes the runner dist', function () {
+      return this.rp(`http://localhost:8443/__cypress/runner/${traversalTo(repoPackageJson)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(403)
+      })
+    })
+  })
+
+  context('GET /__cypress/assets/*', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('refuses a path that escapes the app dist', function () {
+      return this.rp(`http://localhost:8443/__cypress/assets/${traversalTo(repoPackageJson)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(403)
+      })
+    })
+  })
+
+  context('GET /__cypress/bundled/*', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('refuses a path that escapes the bundles folder', function () {
+      return this.rp(`http://localhost:8443/__cypress/bundled/${traversalTo(repoPackageJson)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(403)
       })
     })
   })
