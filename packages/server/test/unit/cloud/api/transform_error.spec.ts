@@ -1,9 +1,7 @@
-import { expect } from 'chai'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { installErrorTransform } from '../../../../lib/cloud/api/axios_middleware/transform_error'
 import type { AxiosResponse, AxiosInstance } from 'axios'
 import { AxiosError } from 'axios'
-import type { SinonSpy } from 'sinon'
-import sinon from 'sinon'
 
 describe('transformError', () => {
   const status = 400
@@ -18,14 +16,14 @@ describe('transformError', () => {
     const mockAxiosInstance: Partial<AxiosInstance> = {
       interceptors: {
         response: {
-          use: sinon.spy(),
-          eject: sinon.spy(),
-          clear: sinon.spy(),
+          use: vi.fn(),
+          eject: vi.fn(),
+          clear: vi.fn(),
         },
         request: {
-          use: sinon.spy(),
-          eject: sinon.spy(),
-          clear: sinon.spy(),
+          use: vi.fn(),
+          eject: vi.fn(),
+          clear: vi.fn(),
         },
       },
     }
@@ -33,7 +31,7 @@ describe('transformError', () => {
     // @ts-expect-error
     installErrorTransform(mockAxiosInstance)
 
-    const [, secondArg] = (mockAxiosInstance.interceptors?.response.use as SinonSpy).firstCall.args
+    const [, secondArg] = (mockAxiosInstance.interceptors?.response.use as ReturnType<typeof vi.fn>).mock.calls[0]
 
     transformError = secondArg
   })
@@ -59,9 +57,9 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown).not.to.be.undefined
-        expect(thrown.message).to.eq(expectedDataMessage)
-        expect(thrown.isApiError).to.be.true
+        expect(thrown).toBeDefined()
+        expect(thrown.message).toBe(expectedDataMessage)
+        expect(thrown.isApiError).toBe(true)
       })
     })
 
@@ -74,8 +72,8 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown.message).to.eq(err.message)
-        expect(thrown.isApiError).to.be.true
+        expect(thrown.message).toBe(err.message)
+        expect(thrown.isApiError).toBe(true)
       })
     })
   })
@@ -102,9 +100,9 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown).to.not.be.undefined
-        expect(thrown.message).to.eq(expectedDataMessage)
-        expect(thrown.isApiError).to.be.true
+        expect(thrown).toBeDefined()
+        expect(thrown.message).toBe(expectedDataMessage)
+        expect(thrown.isApiError).toBe(true)
       })
     })
 
@@ -117,8 +115,8 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown.message).to.eq(err.message)
-        expect(thrown.isApiError).to.be.true
+        expect(thrown.message).toBe(err.message)
+        expect(thrown.isApiError).toBe(true)
       })
     })
   })
