@@ -86,12 +86,32 @@ export function planBridgeListeners (entries: ClientCertificateEntry[]): BridgeL
 }
 
 /**
+ * How many hosts a pattern can match: fewer is more specific. A pattern with no wildcard
+ * matches exactly one host, and `*` matches everything.
+ */
+function wildcardBreadth (hostname: string): number {
+  if (!hostname.includes('*')) {
+    return 0
+  }
+
+  // `*` is broader than `*.example.com`, which is broader than `*.a.example.com`
+  return hostname === '*' ? Number.MAX_SAFE_INTEGER : 1 / hostname.length
+}
+
+/**
  * Renders listeners as a Chromium `--host-resolver-rules` value, steering only the
  * configured origins at the bridge. The pattern carries the origin port so a plain HTTP
  * port on the same host is left alone.
+ *
+ * Chromium applies the first matching rule, and a wildcard also matches a host an exact
+ * entry names, so the most specific pattern has to come first. Otherwise a catch-all listed
+ * ahead of an override would steer that origin to the wrong listener and present the wrong
+ * certificate — and nothing else would catch it, because the two are different origins and
+ * so never collide in `planBridgeListeners`.
  */
 export function formatHostResolverRules (listeners: BoundBridgeListener[]): string {
-  return listeners
+  return [...listeners]
+  .sort((a, b) => wildcardBreadth(a.hostname) - wildcardBreadth(b.hostname))
   .map(({ hostname, port, listenPort }) => `MAP ${hostname}:${port} 127.0.0.1:${listenPort}`)
   .join(',')
 }

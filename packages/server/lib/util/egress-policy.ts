@@ -17,7 +17,7 @@ export type EgressPolicyLaunchOpts = {
  */
 export function translateEgressPolicyToLaunchOpts (
   hosts?: { [host: string]: string } | null,
-  mtlsHostnames: string[] = [],
+  mtlsOrigins: { hostname: string, port: number }[] = [],
 ): EgressPolicyLaunchOpts {
   const httpProxy = process.env.HTTP_PROXY
   const httpsProxy = process.env.HTTPS_PROXY
@@ -52,7 +52,15 @@ export function translateEgressPolicyToLaunchOpts (
   // `hosts` entry unless that entry also bypasses the proxy. The same applies to an
   // origin steered at the mTLS bridge: without this the browser sends it to the proxy
   // by name and the bridge is never reached. The bridge dials the proxy itself.
-  const remapped = [...Object.keys(hosts ?? {}), ...mtlsHostnames]
+  //
+  // The mTLS rules carry their port, because only that origin is bridged. Bypassing the
+  // bare host would take the host's other ports and schemes off the proxy too, and those
+  // are not steered anywhere — they would be dialed directly and fail wherever direct
+  // egress is blocked.
+  const remapped = [
+    ...Object.keys(hosts ?? {}),
+    ...mtlsOrigins.map(({ hostname, port }) => `${hostname}:${port}`),
+  ]
 
   remapped.forEach((host) => {
     if (!bypassRules.includes(host)) {

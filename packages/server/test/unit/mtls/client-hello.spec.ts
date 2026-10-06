@@ -62,6 +62,26 @@ describe('scanClientHello', () => {
     expect(scanClientHello(Buffer.alloc(0))).toEqual({ kind: 'incomplete' })
   })
 
+  // Anything can connect to a bridge listener — a port scanner, a health probe. The scan
+  // runs inside the socket's data handler, so a throw here is an uncaught exception that
+  // takes down the whole run rather than just that connection.
+  it('refuses a record that declares more than it carries, without throwing', () => {
+    // a complete 4-byte handshake record whose vectors run past the end of the record
+    const truncated = Buffer.from([0x16, 0x03, 0x01, 0x00, 0x04, 0x01, 0x00, 0x00, 0x00])
+
+    expect(() => scanClientHello(truncated)).not.toThrow()
+    expect(scanClientHello(truncated)).toEqual({ kind: 'not-tls' })
+  })
+
+  it('refuses a record whose vectors overrun it at any position', () => {
+    const hello = Buffer.from([0x16, 0x03, 0x01, 0x00, 0x04, 0x01, 0x00, 0x00, 0x00])
+
+    // walk every truncation of a well-formed-looking header; none may throw
+    for (let length = 5; length <= hello.length; length++) {
+      expect(() => scanClientHello(hello.subarray(0, length))).not.toThrow()
+    }
+  })
+
   it('recognizes plain HTTP so the connection can be passed through', () => {
     expect(scanClientHello(Buffer.from('GET / HTTP/1.1\r\n\r\n'))).toEqual({ kind: 'not-tls' })
   })

@@ -15,10 +15,11 @@ export interface MtlsBridgeLaunchOpts {
   /** Appended to the browser's `--host-resolver-rules`. */
   hostResolverRules: string
   /**
-   * The steered origins' hostnames. An upstream proxy would otherwise take these hosts
-   * before the resolver rules are consulted, so they have to bypass it.
+   * The steered origins. An upstream proxy would otherwise take these before the resolver
+   * rules are consulted, so they have to bypass it — scoped to the exact origin, since
+   * that is all the bridge stands in for.
    */
-  hostnames: string[]
+  origins: { hostname: string, port: number }[]
   close: () => Promise<void>
 }
 
@@ -73,7 +74,7 @@ export async function createMtlsBridge (options: {
 
   return {
     hostResolverRules: formatHostResolverRules(bound),
-    hostnames: bound.map(({ hostname }) => hostname),
+    origins: bound.map(({ hostname, port }) => ({ hostname, port })),
     close: () => bridge.close(),
   }
 }

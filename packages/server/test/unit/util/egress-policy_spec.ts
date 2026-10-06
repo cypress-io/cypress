@@ -83,26 +83,42 @@ describe('lib/util/egress-policy', () => {
   // Chromium picks the proxy from the URL's host before resolving it, so a steered origin
   // would be sent to the proxy by name and the mTLS bridge never reached. The bridge makes
   // the proxied connection itself instead.
-  it('bypasses the proxy for origins steered at the mTLS bridge', () => {
+  // Only `hostname:port` is steered at the bridge, so bypassing the bare host would take
+  // the host's other ports and schemes off the proxy as well - they would then be dialed
+  // directly and fail wherever direct egress is blocked.
+  it('bypasses the proxy only for the bridged origin, port included', () => {
     process.env.HTTP_PROXY = 'http://proxy.example:8080'
 
-    expect(translateEgressPolicyToLaunchOpts(null, ['secure.example.com', '*.internal.example'])).to.deep.equal({
+    expect(translateEgressPolicyToLaunchOpts(null, [
+      { hostname: 'secure.example.com', port: 443 },
+      { hostname: '*.internal.example', port: 8443 },
+    ])).to.deep.equal({
       proxyServer: 'http://proxy.example:8080',
-      proxyBypassList: 'secure.example.com,*.internal.example',
+      proxyBypassList: 'secure.example.com:443,*.internal.example:8443',
     })
+  })
+
+  // A `url: '*'` entry would otherwise add a bare `*` rule and take every request the
+  // browser makes off the proxy, while only port 443 is actually bridged.
+  it('does not take all traffic off the proxy for a catch-all entry', () => {
+    process.env.HTTP_PROXY = 'http://proxy.example:8080'
+
+    const { proxyBypassList } = translateEgressPolicyToLaunchOpts(null, [{ hostname: '*', port: 443 }])
+
+    expect(proxyBypassList).to.equal('*:443')
   })
 
   it('does not repeat a bridged origin already covered by NO_PROXY or hosts', () => {
     process.env.HTTP_PROXY = 'http://proxy.example:8080'
-    process.env.NO_PROXY = 'secure.example.com'
+    process.env.NO_PROXY = 'secure.example.com:443'
 
-    expect(translateEgressPolicyToLaunchOpts({ 'secure.example.com': '127.0.0.1' }, ['secure.example.com'])).to.deep.equal({
+    expect(translateEgressPolicyToLaunchOpts({}, [{ hostname: 'secure.example.com', port: 443 }])).to.deep.equal({
       proxyServer: 'http://proxy.example:8080',
-      proxyBypassList: 'secure.example.com',
+      proxyBypassList: 'secure.example.com:443',
     })
   })
 
   it('adds no bypass list for bridged origins when no proxy is configured', () => {
-    expect(translateEgressPolicyToLaunchOpts(null, ['secure.example.com'])).to.deep.equal({})
+    expect(translateEgressPolicyToLaunchOpts(null, [{ hostname: 'secure.example.com', port: 443 }])).to.deep.equal({})
   })
 })

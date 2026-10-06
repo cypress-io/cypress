@@ -68,6 +68,34 @@ describe('planBridgeListeners', () => {
 })
 
 describe('formatHostResolverRules', () => {
+  // Chromium applies the first matching rule, and a wildcard matches a more specific host,
+  // so a catch-all listed first would steer that host to the wrong listener and present the
+  // wrong certificate. Nothing else catches this: the two are different origins, so the
+  // conflict check never fires.
+  it('orders a more specific origin ahead of a wildcard that would match it', () => {
+    const rules = formatHostResolverRules([
+      { hostname: '*.example.com', port: 443, listenPort: 9001 },
+      { hostname: 'special.example.com', port: 443, listenPort: 9002 },
+    ]).split(',')
+
+    expect(rules[0]).toContain('special.example.com:443')
+    expect(rules[1]).toContain('*.example.com:443')
+  })
+
+  it('keeps wildcards ordered most specific first', () => {
+    const rules = formatHostResolverRules([
+      { hostname: '*', port: 443, listenPort: 9001 },
+      { hostname: '*.example.com', port: 443, listenPort: 9002 },
+      { hostname: 'special.example.com', port: 443, listenPort: 9003 },
+    ]).split(',')
+
+    expect(rules.map((rule) => rule.split(' ')[1])).toEqual([
+      'special.example.com:443',
+      '*.example.com:443',
+      '*:443',
+    ])
+  })
+
   it('maps each origin, port included, at its own local listener', () => {
     const rules = formatHostResolverRules([
       { hostname: 'a.com', port: 443, listenPort: 9001 },

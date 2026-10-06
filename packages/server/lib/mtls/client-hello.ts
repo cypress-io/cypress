@@ -59,13 +59,23 @@ export function scanClientHello (buf: Buffer): ClientHelloScan {
   p += 4 // handshake header
   p += 2 + 32 // legacy_version + random
 
-  const skipVector = (lengthBytes: 1 | 2): void => {
+  // Nothing stops a peer declaring a record longer than the vectors inside it describe, and
+  // a read past the end yields `undefined` -> NaN -> a throw from the next offset read. This
+  // runs in a socket data handler, so that throw would take the run down rather than the one
+  // connection. Each vector is bounded instead, and an overrun is simply not a ClientHello.
+  const skipVector = (lengthBytes: 1 | 2): boolean => {
+    if (p + lengthBytes > recordEnd) {
+      return false
+    }
+
     p += lengthBytes + (lengthBytes === 1 ? buf[p] : buf.readUInt16BE(p))
+
+    return p <= recordEnd
   }
 
-  skipVector(1) // session_id
-  skipVector(2) // cipher_suites
-  skipVector(1) // compression_methods
+  if (!skipVector(1) || !skipVector(2) || !skipVector(1)) {
+    return { kind: 'not-tls' }
+  }
 
   // TLS 1.2 permits a ClientHello with no extensions at all.
   if (p + 2 > recordEnd) {
@@ -82,6 +92,11 @@ export function scanClientHello (buf: Buffer): ClientHelloScan {
   while (p + 4 <= extensionsEnd) {
     const type = buf.readUInt16BE(p)
     const length = buf.readUInt16BE(p + 2)
+
+    if (p + 4 + length > extensionsEnd) {
+      break
+    }
+
     const body = buf.subarray(p + 4, p + 4 + length)
 
     if (type === EXT_SERVER_NAME) {
