@@ -73,6 +73,29 @@ const createApp = (port) => {
     })
   })
 
+  // a page whose `load` event is held back by an image that takes `ms` to arrive;
+  // the page is `no-store` so history navigation back to it fetches it again, and
+  // each fetch points at a new image url because the browser reuses an image it
+  // already holds for the same url, `no-store` or not
+  let slowImageId = 0
+
+  app.get('/slow-load', (req: QueryRequest, res) => {
+    slowImageId++
+
+    return res.set('cache-control', 'no-store')
+    .send(`<html><body>slow load<img src="/slow-image?ms=${Number(req.query.ms) || 0}&id=${slowImageId}"></body></html>`)
+  })
+
+  app.get('/slow-image', (req: QueryRequest, res) => {
+    return Promise
+    .delay(Number(req.query.ms) || 0)
+    .then(() => {
+      return res.set('cache-control', 'no-store')
+      .type('gif')
+      .send(Buffer.from('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'))
+    })
+  })
+
   app.get('/custom-headers', (req, res) => {
     return res.set('x-foo', 'bar')
     .send('<html><body>hello there</body></html>')

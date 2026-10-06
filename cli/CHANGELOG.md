@@ -1,9 +1,24 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.1.2
+## 16.2.0
+
+**Features:**
+
+- Added the [`cy.getByRole()`](https://on.cypress.io/getbyrole) query, which finds elements by their ARIA role and, optionally, their accessible name, for example `cy.getByRole('tab', { name: 'Billing' })`. Elements hidden from the accessibility tree are skipped unless you pass `{ hidden: true }`. For a role that HTML has an element for, only that element matches by default, so `cy.getByRole('button')` finds a `<button>` but not a `<div role="button">`. Pass `{ native: false }` to also match elements with a `role` attribute. Like [`cy.get()`](https://on.cypress.io/get), it yields every match and retries until its assertions pass. When nothing matches, the error lists the roles and accessible names on the page. Addressed in [#34937](https://github.com/cypress-io/cypress/pull/34937).
 
 **Bugfixes:**
 
+- Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
+- Fixed a regression in [15.0.0](#15-0-0) where [`cy.go()`](https://on.cypress.io/go) finished before the page it navigated to had loaded. The next command could run against the page being navigated away from, so tests that went back or forward could fail intermittently. `cy.go()` also yielded `undefined` instead of the window, and ignored its `timeout` option and [`pageLoadTimeout`](https://on.cypress.io/configuration#Timeouts). `cy.go()` now waits for the page to load, yields the window, and fails if the page does not load within the timeout. Fixes [#32460](https://github.com/cypress-io/cypress/issues/32460).
 - Fixed an issue where an error whose `message` cannot be overwritten — such as the `DOMException` a browser throws for a cross-origin access or a Content Security Policy violation — was reported as `TypeError: setting getter-only property "message"` from inside Cypress, hiding the error that actually failed the test. Fixes [#34818](https://github.com/cypress-io/cypress/issues/34818).
+
+**Misc:**
+
+- TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
+
+**Dependency Updates:**
+
+- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
+- Upgraded `simple-git` from `3.36.0` to `4.0.2` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335531) vulnerability and two Arbitrary Command Injection vulnerabilities ([SNYK-JS-SIMPLEGIT-20335524](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335524), [SNYK-JS-SIMPLEGIT-20335540](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335540)) reported in security scans. This also upgrades its `@simple-git/argv-parser` dependency from `1.1.1` to `2.0.1`, which addresses a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGITARGVPARSER-20335528) vulnerability reported in security scans. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
 
 ## 16.1.1
 
