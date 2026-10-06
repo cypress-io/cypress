@@ -947,6 +947,17 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
+    test_lifecycle_timed_out ({ event, ms }) {
+      return stripIndent`\
+        Cypress timed out after \`${ms}ms\` waiting for \`${event}\` to finish before running this test.
+
+        Before each test Cypress resets the browser and its server and runs any \`${event}\` handlers. One of these steps never finished, which can happen when the browser stops responding to Cypress or a handler never resolves.
+
+        This step is limited by the \`pageLoadTimeout\`.`
+    },
+    test_lifecycle_failed_between_tests ({ event, message }) {
+      return `\`${event}\` did not finish between tests and was skipped: ${message}\n\nThe next test may start with browser state left over from the previous test.`
+    },
     cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled, isSameSuperDomainOrigin }) {
       return {
         message: stripIndent`\
