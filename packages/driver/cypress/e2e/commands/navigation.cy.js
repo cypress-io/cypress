@@ -302,8 +302,125 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
-  context.skip('#go', () => {
+  // https://github.com/cypress-io/cypress/issues/32460
+  context('#go page load', () => {
+    it('yields the AUT window after going back', () => {
+      cy.visit('/fixtures/generic.html')
+      cy.visit('/fixtures/jquery.html')
+
+      cy.go('back').then((win) => {
+        expect(win).to.eq(cy.state('window'))
+        expect(win.location.pathname).to.eq('/fixtures/generic.html')
+      })
+    })
+
+    it('yields the AUT window after going forward', () => {
+      cy.visit('/fixtures/generic.html')
+      cy.visit('/fixtures/jquery.html')
+      cy.go('back')
+
+      cy.go('forward').then((win) => {
+        expect(win).to.eq(cy.state('window'))
+        expect(win.location.pathname).to.eq('/fixtures/jquery.html')
+      })
+    })
+
+    it('does not resolve until the page it navigates to has loaded', () => {
+      let loadedAt
+
+      cy.visit('/slow-load?ms=1000')
+      cy.visit('/fixtures/generic.html')
+      cy.then(() => {
+        cy.on('window:load', () => {
+          loadedAt = Date.now()
+        })
+      })
+
+      cy.go('back').then((win) => {
+        expect(loadedAt, 'window:load fired before cy.go() resolved').to.be.a('number')
+        expect(win.location.pathname).to.eq('/slow-load')
+        expect(win.document.readyState).to.eq('complete')
+        expect(win.document.querySelector('img').complete).to.be.true
+      })
+    })
+
+    it('waits for a slow navigation request before checking whether the page unloaded', { browser: '!webkit' }, () => {
+      cy.visit('/fixtures/generic.html')
+      cy.visit('/fixtures/jquery.html')
+      cy.then(() => {
+        const automation = Cypress.automation.bind(Cypress)
+
+        cy.stub(Cypress, 'automation').callsFake((eventName, ...args) => {
+          if (eventName === 'navigate:aut:history') {
+            return Promise.delay(300).then(() => automation(eventName, ...args))
+          }
+
+          return automation(eventName, ...args)
+        })
+      })
+
+      cy.go('back').then((win) => {
+        expect(win.location.pathname).to.eq('/fixtures/generic.html')
+        expect(win.document.readyState).to.eq('complete')
+      })
+    })
+
+    it('fails when the page it navigates to does not load within pageLoadTimeout', { pageLoadTimeout: 500 }, (done) => {
+      cy.visit('/slow-load?ms=2000', { timeout: 5000 })
+      cy.visit('/fixtures/generic.html')
+      .then(() => {
+        let failed = false
+
+        // the page keeps loading after the failure, so wait for it
+        // before finishing to keep it from leaking into the next test
+        cy.on('window:load', () => {
+          done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
+        })
+
+        cy.on('fail', (err) => {
+          failed = true
+
+          expect(err.message).to.include('Your page did not fire its `load` event within `500ms`.')
+        })
+
+        cy.go('back')
+      })
+    })
+
+    const sameDocumentNavigations = {
+      'a hash change': (win) => {
+        win.location.hash = 'foo'
+      },
+      'history.pushState': (win) => {
+        win.history.pushState({}, '', '/fixtures/generic.html?pushed')
+      },
+    }
+
+    _.each(sameDocumentNavigations, (navigate, name) => {
+      it(`resolves without waiting for a page load when going back over ${name}`, () => {
+        const onLoad = cy.stub()
+
+        cy.visit('/fixtures/generic.html')
+        // a navigation started before the `load` event finishes replaces the
+        // current history entry instead of adding one, so let it finish first
+        cy.window().then((win) => new Promise((resolve) => win.setTimeout(resolve)))
+        cy.window().then((originalWin) => {
+          navigate(originalWin)
+          cy.on('window:load', onLoad)
+
+          // no page load comes, so if cy.go() waited for one this would fail
+          // after 1s instead of after pageLoadTimeout
+          cy.go('back', { timeout: 1000 }).then((win) => {
+            expect(win).to.eq(originalWin)
+            expect(win.location.href).to.eq('http://localhost:3500/fixtures/generic.html')
+            expect(onLoad).not.to.be.called
+          })
+        })
+      })
+    })
+  })
+
+  context('#go', () => {
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
@@ -510,16 +627,27 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('only logs once on error', function (done) {
-        cy.once('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(this.logs[0].get('error')).to.eq(err)
-
-          done()
-        })
+        cy.timeout(1000)
 
         cy
+        .visit('/fixtures/generic.html')
         .visit('/fixtures/jquery.html')
-        .go('back', { timeout: 1 })
+        .then(() => {
+          let failed = false
+
+          cy.on('window:load', () => {
+            done(failed ? undefined : new Error('the page loaded before cy.go() failed'))
+          })
+
+          cy.once('fail', (err) => {
+            failed = true
+
+            assertLogLength(this.logs, 1)
+            expect(this.logs[0].get('error')).to.eq(err)
+          })
+
+          cy.go('back', { timeout: 1 })
+        })
       })
     })
 
@@ -605,15 +733,14 @@ describe('src/cy/commands/navigation', () => {
             const { lastLog } = this
 
             beforeunload = true
-            expect(lastLog.get('snapshots').length).to.eq(2)
+            expect(lastLog.get('snapshots').length).to.eq(1)
             expect(lastLog.get('snapshots')[0].name).to.eq('before')
             expect(lastLog.get('snapshots')[0].body).to.be.an('object')
 
             return undefined
           })
 
-          // wait for the beforeunload event to be fired after the history navigation
-          cy.go('back').wait(100).then(function () {
+          cy.go('back').then(function () {
             const { lastLog } = this
 
             expect(beforeunload).to.be.true

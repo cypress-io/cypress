@@ -8,6 +8,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
+- Fixed a regression in [15.0.0](#15-0-0) where [`cy.go()`](https://on.cypress.io/go) finished before the page it navigated to had loaded. The next command could run against the page being navigated away from, so tests that went back or forward could fail intermittently. `cy.go()` also yielded `undefined` instead of the window, and ignored its `timeout` option and [`pageLoadTimeout`](https://on.cypress.io/configuration#Timeouts). `cy.go()` now waits for the page to load, yields the window, and fails if the page does not load within the timeout. Fixes [#32460](https://github.com/cypress-io/cypress/issues/32460).
 
 **Misc:**
 
