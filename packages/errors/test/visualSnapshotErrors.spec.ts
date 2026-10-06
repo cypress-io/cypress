@@ -692,6 +692,12 @@ describe('visual error templates', () => {
         default: ['/path/to/cypress.config.js', err],
       }
     },
+    TRUSTED_CERTIFICATES_LOAD_ERROR: () => {
+      return {
+        default: ['certs/server.crt.pem', makeErr()],
+        pem: ['trustedCertificates[0].pem', makeErr()],
+      }
+    },
     SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 
@@ -930,7 +936,8 @@ describe('visual error templates', () => {
     },
     BROWSER_NETWORK_INTERCEPTION_ESCAPE: () => {
       return {
-        default: ['https://www.example.com/dashboard'],
+        default: ['https://www.example.com/dashboard', false],
+        runnerDocument: ['https://www.example.com/__/#/specs/runner?file=cypress/e2e/spec.cy.js', true],
       }
     },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {

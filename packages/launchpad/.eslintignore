@@ -1,4 +1,3 @@
-**/dist
 **/dist-*
 **/*.d.ts
 **/*.gen.ts

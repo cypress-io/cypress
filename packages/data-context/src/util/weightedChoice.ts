@@ -17,18 +17,11 @@ const weightedChoice = (weights: number[], values: any[]) => {
     throw new Error('The length of the weights and values must be the same and greater than zero')
   }
 
+  // `?? 0` rather than a falsy check on the previous total: a weight of 0 is a
+  // valid instruction never to pick that value, so it must extend the array
+  // like any other weight instead of ending it.
   const cumulativeWeights = weights.reduce<number[]>((acc, curr) => {
-    if (acc.length === 0) {
-      return [curr]
-    }
-
-    const last = acc[acc.length - 1]
-
-    if (!last) {
-      return acc
-    }
-
-    return [...acc, last + curr]
+    return [...acc, (acc[acc.length - 1] ?? 0) + curr]
   }, [])
 
   const randomNumber = Math.random() * (cumulativeWeights[cumulativeWeights.length - 1] ?? 1)

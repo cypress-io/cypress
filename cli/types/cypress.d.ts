@@ -297,6 +297,25 @@ declare namespace Cypress {
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
 
   /**
+   * The object yielded by `cy.location()`, describing the current URL of the Application Under Test (AUT).
+   * It is a plain object, not the AUT's `window.location`, so it has no methods such as `assign()` or `reload()`.
+   *
+   * @see https://on.cypress.io/location
+   */
+  interface AUTLocation {
+    hash: string
+    host: string
+    hostname: string
+    href: string
+    origin: string
+    pathname: string
+    port: string
+    protocol: string
+    search: string
+    searchParams: URLSearchParams
+  }
+
+  /**
    * The interface for user-defined properties in Window object under test.
    */
   interface ApplicationWindow { } // tslint:disable-line
@@ -561,7 +580,7 @@ declare namespace Cypress {
      * @example isBrowser(['firefox', 'edge']) will be true only for the browsers 'firefox' and 'edge'
      * @example isBrowser('!firefox') will be true for every browser other than 'firefox'
      * @example isBrowser({ family: '!chromium'}) will be true for every browser not matching { family: 'chromium' }
-     * @param matcher browser name or matcher object to check.
+     * @param name browser name or matcher object to check.
      */
     isBrowser(name: IsBrowserMatcher): boolean
 
@@ -1055,7 +1074,7 @@ declare namespace Cypress {
       * to clear localStorage inside a single test. Yields `localStorage` object.
       *
       * @see https://on.cypress.io/clearlocalstorage
-      * @param {options} [object] - options object
+      * @param {object} [options] - options object
       * @example
        ```
        // Removes all local storage items, without logging
@@ -1071,7 +1090,7 @@ declare namespace Cypress {
       *
       * @see https://on.cypress.io/clearlocalstorage
       * @param {string} [key] - name of a particular item to remove (optional).
-      * @param {options} [object] - options object
+      * @param {object} [options] - options object
       * @example
        ```
        // Removes item "todos" without logging
@@ -1124,6 +1143,12 @@ declare namespace Cypress {
      * * `setInterval`
      * * `clearInterval`
      * * `Date` Objects
+     * * `requestAnimationFrame`
+     * * `cancelAnimationFrame`
+     * * `requestIdleCallback`
+     * * `cancelIdleCallback`
+     * * `performance`
+     * * `Intl`
      *
      * The clock starts at the unix epoch (timestamp of 0).
      * This means that when you instantiate new Date in your application,
@@ -1168,13 +1193,14 @@ declare namespace Cypress {
     clock(now: number | Date, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock but only overrides specific functions.
+     * Passing `null` for `now` starts the clock at the unix epoch (timestamp of 0).
      *
      * @see https://on.cypress.io/clock
      * @example
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number | Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
+    clock(now: number | Date | null, functions?: ClockFunction[], options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -1245,7 +1271,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific corner / side.
      *
@@ -1255,7 +1281,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -1269,7 +1295,7 @@ declare namespace Cypress {
     cy.get('button').dblclick(15, 40)
     ```
      */
-    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(x: number, y: number, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
@@ -1331,8 +1357,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/each
      */
-    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
-    each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
+    each(fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
+    /**
+     * Iterate through an array like structure (arrays or objects with a length property).
+     *
+     * @see https://on.cypress.io/each
+     * @example
+     *    cy.getCookies().each({ timeout: 4000 }, (cookie) => {
+     *      // work with each cookie
+     *    })
+     */
+    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>>
+    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
 
     /**
      * Get A DOM element at a specific index in an array of elements.
@@ -1464,6 +1501,30 @@ declare namespace Cypress {
     get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>
 
     /**
+     * Get every element with the given ARIA role, optionally narrowed to
+     * those whose accessible name matches `name`. Elements hidden from the
+     * accessibility tree are skipped unless `hidden` is `true`.
+     *
+     * For a role that HTML has an element for, only that element matches by
+     * default: `'button'` finds a `<button>`, not a `<div role="button">`.
+     * Pass `native: false` to also match elements that get the role from a
+     * `role` attribute.
+     *
+     * Chained off an element, it searches that element's descendants.
+     *
+     * @see https://on.cypress.io/getbyrole
+     * @example
+     *    // A native <button>, never a <div role="button">
+     *    cy.getByRole('button', { name: 'Save' }).click()
+     *    // Widgets that HTML has no element for
+     *    cy.getByRole('tab', { name: 'Billing' }).click()
+     *    cy.get('nav').getByRole('menuitem', { name: /delete/i })
+     *    // A dialog rendered as <div role="dialog"> by a component library
+     *    cy.getByRole('dialog', { name: 'Settings', native: false })
+     */
+    getByRole<E extends Node = HTMLElement>(role: import('./aria-query').ARIARole | (string & {}), options?: Partial<GetByRoleOptions>): Chainable<JQuery<E>>
+
+    /**
      * Get a browser cookie by its name.
      *
      * @see https://on.cypress.io/getcookie
@@ -1558,15 +1619,15 @@ declare namespace Cypress {
     last<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Get the global `window.location` object of the page that is currently active.
+     * Yield a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
      *    cy.location() // Get location object
      */
-    location(options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location(options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation>
     /**
-     * Get a part of the global `window.location` object of the page that is currently active.
+     * Yield one property of a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
@@ -1575,7 +1636,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location<K extends keyof Location>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<Location[K]>
+    location<K extends keyof AUTLocation>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation[K]>
 
     /**
      * Print a message to the Cypress Command Log.
@@ -1644,6 +1705,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/nextuntil
      */
     nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/nextuntil
+     */
+    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/nextuntil
+     */
+    nextUntil<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/nextuntil
+     */
+    nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
@@ -1756,6 +1835,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/parentsuntil
      */
     parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/parentsuntil
+     */
+    parentsUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/parentsuntil
+     */
+    parentsUntil<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/parentsuntil
+     */
+    parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
@@ -1843,6 +1940,24 @@ declare namespace Cypress {
      * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/prevuntil
+     */
+    prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/prevuntil
+     */
+    prevUntil<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided, without a filter.
+     *
+     * @see https://on.cypress.io/prevuntil
+     */
+    prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * An AI-powered command that generates Cypress commands from natural language test steps.
      *
@@ -2175,6 +2290,16 @@ declare namespace Cypress {
      *    })
      */
     spread(fn: (...args: any[]) => void): Chainable<Subject>
+    /**
+     * Expand an array into multiple arguments.
+     * @see https://on.cypress.io/spread
+     * @example
+     *    cy.getCookies().spread({ timeout: 4000 }, (cookie1, cookie2, cookie3) => {
+     *      // each cookie is now an individual argument
+     *    })
+     */
+    spread<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (...args: any[]) => S): Chainable<S>
+    spread(options: Partial<Timeoutable>, fn: (...args: any[]) => void): Chainable<Subject>
 
     /**
      * Run a task in Node via the plugins file.
@@ -2711,6 +2836,41 @@ declare namespace Cypress {
     timeout: number
   }
 
+  interface GetByRoleOptions extends Loggable, Timeoutable, Shadow {
+    /**
+     * Only match elements whose accessible name matches: the text a screen
+     * reader announces for the element, taken from its label, its content,
+     * `aria-label` or `aria-labelledby`. A string must match the whole name, a
+     * regular expression is tested against it, and a function is called with
+     * the name and the element.
+     */
+    name: string | number | RegExp | ((name: string, element: Element | null) => boolean)
+    /**
+     * Include elements that are hidden from the accessibility tree, such as
+     * those with `aria-hidden="true"`, `display: none` or `visibility: hidden`.
+     *
+     * @default false
+     */
+    hidden: boolean
+    /**
+     * Only match elements whose tag gives them the role, like `<button>`,
+     * skipping elements that only have it through a `role` attribute, like
+     * `<div role="button">`. Set it to `false` to match both.
+     *
+     * Some widely used patterns get their role from a `role` attribute even
+     * though HTML has an element for it, so they need `native: false`: an
+     * `<input role="combobox">` (the native combobox is a `<select>` or an
+     * `<input list>`) and an `<svg role="img">` (the native one is an `<img>`).
+     *
+     * Roles that HTML has no element for, such as `tab` or `menuitem`, can
+     * only come from a `role` attribute, so they are always matched that way.
+     * Passing `native: true` with one of those roles throws.
+     *
+     * @default true for roles that HTML has an element for
+     */
+    native: boolean
+  }
+
   /**
    * Options that check case sensitivity
    */
@@ -2892,6 +3052,18 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  /**
+   * Object to change the default behavior of .dblclick().
+   */
+  interface DblClickOptions extends ClickOptions {
+    /**
+     * Serially double click multiple elements
+     *
+     * @default true
+     */
+    multiple: boolean
+  }
+
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
     /**
      * Domain to set cookies on or get cookies from
@@ -2940,6 +3112,19 @@ declare namespace Cypress {
      */
     certs: PEMCert[] | PFXCert[]
   }
+
+  /**
+   * A certificate the browser's own network stack should trust when it would
+   * otherwise reject it (e.g. a self-signed cert). Supply exactly one of a path
+   * to a PEM file, an inline PEM string, or a precomputed base64 SHA-256 SPKI
+   * fingerprint. A path is resolved against the project root, so an absolute
+   * path is used as-is. A PEM file or string holding several certificates
+   * trusts every certificate in the bundle.
+   */
+  type TrustedCertificate =
+    | { filePath: string }
+    | { pem: string }
+    | { spki: string }
 
   type RetryStrategyWithModeSpecs = RetryStrategy & {
     openMode: boolean // defaults to false
@@ -3324,6 +3509,19 @@ declare namespace Cypress {
      * An array of objects defining the certificates
      */
     clientCertificates: ClientCertificate[]
+
+    /**
+     * Certificates the browser should treat as genuinely trusted rather than merely
+     * tolerating their errors (e.g. a self-signed development cert). On the native browser
+     * network path this lets the browser cache the origin's assets across navigations.
+     * Each entry supplies exactly one of a path to a PEM file (relative paths resolve
+     * against the project root), an inline PEM string, or a base64 SHA-256 SPKI
+     * fingerprint. Every certificate in a PEM bundle is trusted, not just the first.
+     * Unlike `clientCertificates`, entries are not scoped to a URL: the browser accepts
+     * a trusted key for any hostname that presents it.
+     * @default []
+     */
+    trustedCertificates: TrustedCertificate[]
 
     /**
      * Handle Cypress plugins
@@ -3831,9 +4029,11 @@ declare namespace Cypress {
     /**
      * Amount to scroll after the element has been scrolled into view
      *
+     * An axis that is left out defaults to 0, so either key may be given alone.
+     *
      * @default {top: 0, left: 0}
      */
-    offset: Offset
+    offset: Partial<Offset>
   }
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
@@ -4035,14 +4235,14 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
-     * @param {AUTWindow} contentWindow the remote page's window object
+     * @param {AUTWindow} win the remote page's window object
      */
     onBeforeLoad(win: AUTWindow): void
 
     /**
      * Called once your page has fired its load event.
      *
-     * @param {AUTWindow} contentWindow the remote page's window object
+     * @param {AUTWindow} win the remote page's window object
      */
     onLoad(win: AUTWindow): void
 
@@ -6279,7 +6479,9 @@ declare namespace Cypress {
   }
 
   interface CypressError extends Error {
-    docsUrl?: string
+    // an uncaught exception carries both the originating error's docs url and
+    // Cypress's own, so this is an array whenever more than one applies
+    docsUrl?: string | string[]
     codeFrame?: CodeFrame
   }
 
@@ -6479,6 +6681,23 @@ declare namespace Cypress {
   }
 
   /**
+   * Names of the global functions that `cy.clock()` can override in the browser.
+   */
+  type ClockFunction =
+    | 'setTimeout'
+    | 'clearTimeout'
+    | 'setInterval'
+    | 'clearInterval'
+    | 'Date'
+    | 'requestAnimationFrame'
+    | 'cancelAnimationFrame'
+    | 'requestIdleCallback'
+    | 'cancelIdleCallback'
+    | 'performance'
+    | 'Intl'
+    | 'queueMicrotask'
+
+  /**
    * The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate new Date in your application, it will have a time of January 1st, 1970.
    */
   interface Clock {
@@ -6486,9 +6705,10 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
+     * @returns The clock's new `now`, in ms since the unix epoch
      * @see https://on.cypress.io/tick
      */
-    tick(time: number): void
+    tick(time: number): number
     /**
      * Restore all overridden native functions.
      * This is automatically called between tests, so should not generally be needed.

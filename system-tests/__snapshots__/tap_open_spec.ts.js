@@ -112,10 +112,9 @@ PID  PROJECT  TYPE  BROWSER
 `
 
 exports['run launched'] = `
-▶ cypress/e2e/aut-content.cy.js
+● cypress/e2e/aut-content.cy.js is running
 
-  testing type  e2e
-  browser       Chrome
+use tap status to check progress
 `
 
 exports['reporter failed command log'] = `
@@ -642,10 +641,9 @@ SPECS (15)
   cypress/e2e/unbuildable.cy.js  <modified>
 
 $ cypress tap --session <pid> run cypress/e2e/failing.cy.js
-▶ cypress/e2e/failing.cy.js
+● cypress/e2e/failing.cy.js is running
 
-  testing type  e2e
-  browser  Chrome
+use tap status to check progress
 
 $ cypress tap --session <pid> status
 PID  PROJECT  TYPE  BROWSER

@@ -79,6 +79,7 @@ function getAlias (selector, log, cy) {
       if (match && match[1] === '0') {
         $errUtils.throwErrByPath('get.alias_zero', {
           args: { alias: aliasObj.alias },
+          errProps: { retry: false },
         })
       }
 
@@ -269,10 +270,11 @@ export default (Commands, Cypress, cy, state) => {
     // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
+    const displayName = $utils.stringify(_.compact([filter, text]))
 
     const log = Cypress.log({
-      message: $utils.stringify(_.compact([filter, text])),
-      type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      message: displayName,
+      type: this.hasPreviouslyLinkedCommand() ? 'child' : 'parent',
       hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
@@ -352,6 +354,11 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       $el = $dom.getFirstDeepestElement($el)
+
+      // Each jQuery call above returns a fresh collection, dropping the `selector`
+      // assertions use to name a missing subject. Prefer the searched content over
+      // the `:cy-contains` selector, which is an implementation detail.
+      $el.selector = displayName
 
       log && cy.state('current') === this && log.set({
         $el,

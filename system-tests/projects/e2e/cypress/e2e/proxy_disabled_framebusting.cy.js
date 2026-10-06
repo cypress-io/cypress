@@ -26,5 +26,22 @@ describe('framebusting protections', () => {
       .then((reg) => reg.navigationPreload.getState())
       .should('have.property', 'enabled', expectedNavigationPreloadEnabled)
     })
+
+    // sw-ready guarantees the worker controls this page, so a same-origin
+    // fetch reaches its fetch handler. /__/assets/e2e-poison.js is under
+    // Cypress's reserved client route and the worker answers it with a marker
+    // body (see static/framebusting/sw.js): on the browser network path the
+    // injected wrapper declines runner-namespace requests, so the marker cannot
+    // come back and Cypress's own asset route answers instead. Under
+    // forceHttp1 the rule is inert, so the marker must come back - pinning the
+    // rule, not the network path, as the cause of the difference.
+    //
+    // The path is one Express owns (the runner's static asset route) rather
+    // than an invented one: a clientRoute path no route handler owns loops back
+    // through the proxy a second time and its 404 never reaches the browser.
+    cy.env(['expectedRunnerNamespacePoisoned']).then(({ expectedRunnerNamespacePoisoned }) => {
+      cy.window().then((win) => win.fetch('/__/assets/e2e-poison.js').then((res) => res.text()))
+      .should(expectedRunnerNamespacePoisoned ? 'equal' : 'not.equal', 'SW-POISON')
+    })
   })
 })

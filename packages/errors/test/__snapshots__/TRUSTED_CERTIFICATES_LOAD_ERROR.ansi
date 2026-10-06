@@ -1,0 +1,7 @@
+[31mCypress could not load a certificate you listed in [33mtrustedCertificates[39m[31m.[39m
+[31m[39m
+[31mThe entry was: [95mcerts/server.crt.pem[39m[31m[39m
+[31m[39m
+[31m[95mfail whale[39m[31m[39m
+[31m[39m
+[31mEach entry must supply exactly one of a [95mfilePath[39m[31m to a PEM file (relative paths resolve against your project root), an inline [95mpem[39m[31m string, or a base64 SHA-256 [95mspki[39m[31m fingerprint.[39m

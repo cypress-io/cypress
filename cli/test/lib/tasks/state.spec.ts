@@ -121,7 +121,7 @@ describe('lib/tasks/state', function () {
     const actualPath = (await vi.importActual<typeof import('path')>('path')).default
 
     vi.mocked(path.resolve).mockImplementation((...args) => {
-      return actualPath.resolve.apply(actualPath, args)
+      return actualPath.resolve(...args)
     })
   })
 

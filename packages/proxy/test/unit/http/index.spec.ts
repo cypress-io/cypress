@@ -701,5 +701,42 @@ describe('http', function () {
 
       expect(http.preRequests.pendingRequests.length).toEqual(1)
     })
+
+    // The synthetic res auto-destroys once a middleware finishes it. If the pipeline
+    // reads that as a browser cancel, the CDP transport releases the paused request
+    // to the origin.
+    it('resolves a response finished by request middleware instead of treating it as canceled', async function () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => false,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {
+            EndRequest () {
+              this.res.set('x-cypress-matched-blocked-host', 'localhost:3500')
+              this.res.status(503).end()
+              this.end()
+            },
+          },
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+      const next = vi.fn()
+
+      const response = await http.createLegacyProxyPipeline(codec)(request, next)
+
+      expect(response.statusCode).toEqual(503)
+      expect(response.headers).toEqual({ 'x-cypress-matched-blocked-host': 'localhost:3500' })
+      expect(next, 'origin fetch').not.toHaveBeenCalled()
+    })
   })
 })

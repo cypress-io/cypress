@@ -445,8 +445,20 @@ cy.get('.someSelector')
   .each(($el, index, list) => {
     $el // $ExpectType JQuery<HTMLElement>
     index // $ExpectType number
-    list // $ExpectType HTMLElement[]
+    list // $ExpectType JQuery<HTMLElement>
+    list.first() // $ExpectType JQuery<HTMLElement>
+    list.index($el) // $ExpectType number
   })
+
+cy.get('.someSelector')
+  .each({ timeout: 4000 }, ($el, index, list) => {
+    list // $ExpectType JQuery<HTMLElement>
+    list.filter(':visible') // $ExpectType JQuery<HTMLElement>
+  })
+
+cy.wrap([1, 2, 3]).each((num: number, index: number, list: number[]) => {
+  list // $ExpectType number[]
+})
 
 cy.wrap(['bar', 'baz'])
   .spread((first, second) => {
@@ -769,6 +781,34 @@ namespace CypressClockTests {
   cy.clock(+new Date(), ['Date'])
   // Date object
   cy.clock(new Date(2019, 3, 2))
+  // null starts the clock at 0
+  cy.clock(null, ['setTimeout', 'clearTimeout'])
+  cy.clock(null, ['setTimeout'], { log: false })
+  // every function the clock can override
+  cy.clock(null, [
+    'setTimeout',
+    'clearTimeout',
+    'setInterval',
+    'clearInterval',
+    'Date',
+    'requestAnimationFrame',
+    'cancelAnimationFrame',
+    'requestIdleCallback',
+    'cancelIdleCallback',
+    'performance',
+    'Intl',
+    'queueMicrotask',
+  ])
+  const clockFunctions: Cypress.ClockFunction[] = ['requestAnimationFrame', 'performance']
+
+  cy.clock(0, clockFunctions)
+  cy.clock(null, ['setImmediate']) // $ExpectError
+  cy.clock(null, ['notATimer']) // $ExpectError
+  cy.clock('2019-04-02') // $ExpectError
+  // tick returns the new now
+  cy.clock().then((clock) => {
+    clock.tick(1000) // $ExpectType number
+  })
   // restoring the clock
   cy.clock().then((clock) => {
     clock.restore()
@@ -803,10 +843,48 @@ namespace CypressContainsTests {
   cy.contains('my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
 }
 
+namespace CypressGetByRoleTests {
+  cy.getByRole('button') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.getByRole<HTMLInputElement>('textbox') // $ExpectType Chainable<JQuery<HTMLInputElement>>
+  cy.getByRole('doc-chapter')
+  cy.getByRole('button', { name: 'Submit' })
+  cy.getByRole('button', { name: /submit/i })
+  cy.getByRole('button', { name: 42 })
+  cy.getByRole('button', {
+    name: (name, element) => {
+      name // $ExpectType string
+      element // $ExpectType Element | null
+
+      return name.startsWith('Sub')
+    },
+  })
+  cy.getByRole('button', { hidden: true, log: false, timeout: 100, includeShadowDom: true })
+  cy.getByRole('button', { name: 'Save', native: true })
+  cy.getByRole('dialog', { native: false })
+  cy.getByRole('button', { native: 'yes' }) // $ExpectError
+  cy.get('form').getByRole('button').click()
+  cy.getByRole() // $ExpectError
+  cy.getByRole(/button/) // $ExpectError
+  cy.getByRole('button', { name: {} }) // $ExpectError
+  cy.getByRole('button', { hidden: 'yes' }) // $ExpectError
+  cy.getByRole('heading', { level: 2 }) // $ExpectError
+
+  const options: Partial<Cypress.GetByRoleOptions> = { name: 'Submit', hidden: true }
+  cy.getByRole('button', options)
+}
+
 // https://github.com/cypress-io/cypress/pull/5574
 namespace CypressLocationTests {
   cy.location('path') // $ExpectError
   cy.location('pathname') // $ExpectType Chainable<string>
+  cy.location('searchParams') // $ExpectType Chainable<URLSearchParams>
+  cy.location() // $ExpectType Chainable<AUTLocation>
+  cy.location().then((loc) => {
+    loc // $ExpectType AUTLocation
+    loc.searchParams.get('q') // $ExpectType string | null
+  })
+  cy.location('toString') // $ExpectError
+  cy.location('assign') // $ExpectError
 }
 
 // https://github.com/cypress-io/cypress/issues/17399
@@ -1270,6 +1348,9 @@ namespace CypressTraversalTests {
   cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).prevUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).prevUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('#myItem', { log: 'true' }) // $ExpectError
 
   cy.wrap({}).nextUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).nextUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1278,6 +1359,9 @@ namespace CypressTraversalTests {
   cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).nextUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).nextUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('#myItem', { log: 'true' }) // $ExpectError
 
   cy.wrap({}).parentsUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).parentsUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1286,6 +1370,23 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  cy.wrap({}).parentsUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).parentsUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
+}
+
+namespace CypressOptionsBeforeCallbackTests {
+  cy.getCookies().each({ timeout: 4000 }, (cookie) => {})
+  cy.getCookies().spread({ timeout: 4000 }, (cookie1, cookie2) => {})
+  cy.getCookies().each({ timeout: 'soon' }, (cookie) => {}) // $ExpectError
+  cy.getCookies().spread({ timeout: 'soon' }, (cookie1) => {}) // $ExpectError
+}
+
+namespace CypressScrollIntoViewOffsetTests {
+  cy.get('form').scrollIntoView({ offset: { top: 20 } })
+  cy.get('form').scrollIntoView({ offset: { left: 20 } })
+  cy.get('form').scrollIntoView({ offset: { top: 20, left: 20 } })
+  cy.get('form').scrollIntoView({ offset: { top: '20' } }) // $ExpectError
 }
 
 namespace CypressRequireTests {
@@ -1305,19 +1406,22 @@ namespace CypressRequireTests {
   Cypress.require(123) // $ExpectError
 }
 
+// Regression guard: these globals are declared with `var` so they land on
+// `typeof globalThis`. The `window.` and `globalThis.` references below are the
+// only thing in this suite that fails if one is changed to `let` or `const`.
 namespace CypressGlobalsTests {
-  Cypress
-  cy
-  expect
-  assert
+  Cypress // $ExpectType Cypress & CyEventEmitter
+  cy // $ExpectType cy & CyEventEmitter
+  expect // $ExpectType ExpectStatic
+  assert // $ExpectType AssertStatic
 
-  window.Cypress
-  window.cy
-  window.expect
-  window.assert
+  window.Cypress // $ExpectType Cypress & CyEventEmitter
+  window.cy // $ExpectType cy & CyEventEmitter
+  window.expect // $ExpectType ExpectStatic
+  window.assert // $ExpectType AssertStatic
 
-  globalThis.Cypress
-  globalThis.cy
-  globalThis.expect
-  globalThis.assert
+  globalThis.Cypress // $ExpectType Cypress & CyEventEmitter
+  globalThis.cy // $ExpectType cy & CyEventEmitter
+  globalThis.expect // $ExpectType ExpectStatic
+  globalThis.assert // $ExpectType AssertStatic
 }

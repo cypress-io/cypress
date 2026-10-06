@@ -21,8 +21,8 @@ describe('<CopyButton />', { viewportHeight: 80, viewportWidth: 120 }, () => {
       })
     })
 
-    cy.findByRole('button', { name: 'Copy' }).click()
-    cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
+    cy.getByRole('button', { name: 'Copy' }).click()
+    cy.getByRole('button', { name: 'Copied!' }).should('be.visible')
 
     cy.wrap(copyStub).should('have.been.calledWith', 'Foobar')
   })

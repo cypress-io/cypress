@@ -323,9 +323,11 @@ describe('lib/util/graceful-exit', () => {
 
     try {
       // rejects after its own bound expires, when flushSteps is no longer awaiting it
-      GracefulExit.addStep(() => new Promise((_resolve, reject) => {
-        setTimeout(() => reject(new Error('late teardown failure')), 150)
-      }), 'rejects-after-its-bound')
+      GracefulExit.addStep(() => {
+        return new Promise((_resolve, reject) => {
+          setTimeout(() => reject(new Error('late teardown failure')), 150)
+        })
+      }, 'rejects-after-its-bound')
 
       await GracefulExit.exitGracefully(0)
 

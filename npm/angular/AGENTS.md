@@ -18,7 +18,7 @@ yarn lint         # ESLint
 ## Gotchas / Notes
 
 - Peer dependencies require Angular 21+.
-- The `postbuild` script copies `dist/` to `cli/angular/` in the monorepo root. Build before testing in the Cypress binary.
+- `postbuild` re-exports this package into `cli/angular/` — build before testing against the Cypress binary. See [`npm/AGENTS.md`](../AGENTS.md).
 - Uses TypeScript ~5.9.2 (newer than most other npm packages in this workspace which use ~5.4.5).
 
 ## Integration Points

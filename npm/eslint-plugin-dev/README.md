@@ -2,45 +2,20 @@
 <div>
     <!-- <img src="docs/readme-logo.png"> -->
     <h1>[Internal] Cypress Developer ESLint Plugin</h1>
-    <a href="https://www.npmjs.com/package/@cypress/eslint-plugin-dev"><img src="https://img.shields.io/npm/v/@cypress/eslint-plugin-dev.svg?style=flat"></a>
-    <a href="https://circleci.com/gh/cypress-io/eslint-plugin-dev/tree/develop"><img src="https://img.shields.io/circleci/build/gh/cypress-io/eslint-plugin-dev.svg"></a>
 
 <p>Common ESLint rules shared by Cypress packages.</p>
 
 </div>
 
-> ⚠️ This package for _internal development_ of Cypress. Here's the [**Official Cypress ESLint Plugin**](https://github.com/cypress-io/eslint-plugin-cypress) meant for users of Cypress.
-
-
-## Installation
-
-```
-npm install --save-dev @cypress/eslint-plugin-dev
-```
+> ⚠️ This package is **private** and is not published. It exists to serve the packages in this monorepo that are still on eslintrc, and is retired as each of them moves to [`@packages/eslint-config`](../../packages/eslint-config), the ESLint 9 flat config that is the destination for all monorepo linting.
+>
+> Nothing outside this repository should depend on it. The plugin published to npm up to `7.0.0` stays available for anything already pinned to it, but no further versions ship. Looking for the plugin meant for _users_ of Cypress? That's the [**Official Cypress ESLint Plugin**](https://github.com/cypress-io/eslint-plugin-cypress).
 
 ## Usage
 
-> ⚠️ Currently does **not** support ESLint version 9
+> ⚠️ Supports ESLint 8 only. Flat config and ESLint 9 live in `@packages/eslint-config`.
 
-For Eslint 8, use version 6.x.x
-
-For Eslint 7 and below, use version 5.x.x
-
-1) install the following `devDependencies`:
-```sh
-@cypress/eslint-plugin-dev
-eslint-plugin-json-format
-@typescript-eslint/parser
-@typescript-eslint/eslint-plugin
-eslint-plugin-mocha
-eslint-plugin-import
-
-# if you have react/jsx files
-eslint-plugin-react
-@babel/eslint-parser
-```
-
-2) add the following to your root level `.eslintrc.json`:
+A package in this monorepo that still uses eslintrc picks this up through the root `.eslintrc.js`. To opt a directory into the test rules, add an `.eslintrc.json` alongside it:
 ```json
 {
   "plugins": [
@@ -63,26 +38,13 @@ eslint-plugin-react
 }
 ```
 
-3) add the following to your `.eslintignore`:
+A package's `.eslintignore` needs this line so hidden files are still linted, which is what lets the json config files get formatted:
 ```sh
 # don't ignore hidden files, useful for formatting json config files
 !.*
 ```
 
-4) (optional) Install and configure your text editor's ESLint Plugin Extension to lint and auto-fix files using ESLint, [detailed below](#editors)
-
-5) (optional) Install [`husky`](https://github.com/typicode/husky) and enable the lint `pre-commit` hook:
-
-`package.json`:
-```json
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-pre-commit"
-    }
-  },
-```
-> Note: the `lint-pre-commit` hook will automatically lint your staged files, and only `--fix` and `git add` them if there are no unstaged changes existing in that file (this protects partially staged files from being added in the hook).  
-To auto-fix all staged & unstaged files, run `./node_modules/.bin/lint-changed --fix`
+Staged files are linted on commit through `husky` and `lint-staged`, configured at the repo root. Editor setup is [detailed below](#editors).
 
 ## Presets
 
@@ -93,7 +55,7 @@ _Should usually be used at the root of the package._
 - auto-fixes `json` files and sorts your `package.json` via [`eslint-plugin-json-format`](https://github.com/bkucera/eslint-plugin-json-format)
 
 
-**requires you to install the following `devDependencies`**:
+**peer dependencies** (provided at the repo root):
 ```sh
 eslint-plugin-import
 eslint-plugin-json-format
@@ -105,7 +67,7 @@ eslint-plugin-json-format
 
 Test-specific configuration and rules. Should be used within the `test/` directory.
 
-**requires you to install the following `devDependencies`**:
+**peer dependencies** (provided at the repo root):
 ```sh
 eslint-plugin-mocha
 ```
@@ -114,7 +76,7 @@ eslint-plugin-mocha
 
 React and JSX-specific configuration and rules.
 
-**requires you to install the following `devDependencies`**:
+**peer dependencies** (provided at the repo root):
 ```sh
 @babel/eslint-parser
 eslint-plugin-react
@@ -150,7 +112,6 @@ name | description | options | example
 -|-|-|-
 `@cypress/dev/arrow-body-multiline-braces` | Enforces braces in arrow functions ONLY IN multiline function definitions | [`[always|never] always set this to 'always'`] | `'@cypress/dev/arrow-body-multiline-braces': ['error', 'always']`
 `@cypress/dev/skip-comment` | Enforces a comment (`// NOTE:`) explaining a `.skip` added to `it`, `describe`, or `context` test blocks | { commentTokens: `[array] tokens that indicate .skip explanation (default: ['NOTE:', 'TODO:', 'FIXME:']`)} | `'@cypress/dev/skip-comment': ['error', { commentTokens: ['TODO:'] }]`
-`@cypress/dev/no-return-before` | Disallows `return` statements before certain configurable tokens | { tokens: `[array] tokens that cannot be preceded by 'return' (default: ['it', 'describe', 'context', 'expect']`)} | `'@cypress/dev/no-return-before': ['error', { tokens: ['myfn'] }]`
 
 ## <a name="editors"></a>Editors
 

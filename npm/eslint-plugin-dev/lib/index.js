@@ -201,8 +201,6 @@ const baseRules = {
   'valid-typeof': 'error',
 }
 
-// '@cypress/dev/no-only': 'error',
-
 module.exports = {
   configs: {
     general: {

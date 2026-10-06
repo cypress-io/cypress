@@ -69,6 +69,24 @@ describe('lib/cloud/cy-prompt', () => {
 
       // TODO: (cy.prompt) test that the error is reported
     })
+
+    // the Cloud ships the cy prompt server as a class instance whose methods rely on `this`
+    it('invokes the method on the cy prompt server instance', () => {
+      sinon.stub(cyPrompt, 'initializeRoutes')
+
+      cyPromptManager.initializeRoutes({} as any)
+
+      expect(cyPrompt.initializeRoutes).to.be.calledOn(cyPrompt)
+    })
+
+    it('forwards each argument individually rather than as an array', () => {
+      const reset = sinon.stub(cyPrompt, 'reset')
+
+      cyPromptManager.reset('r1')
+
+      expect(reset).to.be.calledOn(cyPrompt)
+      expect(reset).to.be.calledWithExactly('r1')
+    })
   })
 
   describe('initializeRoutes', () => {

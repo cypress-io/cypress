@@ -11,15 +11,6 @@ describe('Counter', () => {
     .click()
     .contains('count: 2')
   })
-
-  it('counts clicks 2', () => {
-    mount(<Counter />)
-    cy.contains('count: 0')
-    .click()
-    .contains('count: 1')
-    .click()
-    .contains('count: 2')
-  })
 })
 
 describe('Counter mounted before each test', () => {

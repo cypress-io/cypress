@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>React</title>
+</head>
+<body>
+  <div id="react-container"></div>
+  <script>
+      window.onChangeEvents = 0
+
+      // React 19 dropped its UMD builds, so its CommonJS bundles are evaluated
+      // here against a minimal loader. Each module needs its own `exports`
+      // binding: the bundles read `exports` lazily, so a single shared global
+      // would resolve to whichever module happened to load last.
+      const registry = {}
+      const require = (name) => registry[name]
+      const process = { env: { NODE_ENV: 'development' } }
+
+      const loadModule = async (name, url) => {
+        const source = await fetch(url).then((res) => res.text())
+        const module = { exports: {} }
+
+        new Function('exports', 'module', 'require', 'process', source)(
+          module.exports, module, require, process,
+        )
+
+        registry[name] = module.exports
+      }
+
+      const render = async () => {
+        await loadModule('react', '/node_modules/react-19.1.1/cjs/react.development.js')
+        await loadModule('scheduler', '/node_modules/scheduler-0.26.0/cjs/scheduler.development.js')
+        await loadModule('react-dom', '/node_modules/react-dom-19.1.1/cjs/react-dom.development.js')
+        await loadModule('react-dom/client', '/node_modules/react-dom-19.1.1/cjs/react-dom-client.development.js')
+
+        const React = require('react')
+        const { createRoot } = require('react-dom/client')
+
+        createRoot(document.getElementById('react-container')).render(
+          React.createElement('div', {},
+            React.createElement('input', {
+              type: 'text',
+              onChange (e) { window.onChangeEvents++ }
+            }),
+            React.createElement('input', {
+              type: 'email',
+              onChange (e) { window.onChangeEvents++ }
+            }),
+            React.createElement('input', {
+              type: 'number',
+              onChange (e) { window.onChangeEvents++ }
+            })
+          )
+        )
+      }
+
+      render()
+  </script>
+</body>
+</html>

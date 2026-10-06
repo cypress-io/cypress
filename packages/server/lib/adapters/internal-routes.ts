@@ -88,6 +88,21 @@ export function isCloudBundleNamespace (pathname: string): boolean {
   return CLOUD_BUNDLE_NAMESPACES.some((namespace) => pathname.startsWith(namespace))
 }
 
+// Every path prefix Cypress reserves on an origin under test. Single source of
+// truth for the two consumers that must agree on it — the service worker
+// injector's decline list and the interception-escape warning's runner-document
+// label — so neither can drift from the other or from the routes above.
+//
+// The client route and namespace carry their trailing slash; the cloud bundle
+// namespaces stay bare so sibling namespaces (e.g. /__cypress-studio-ai) match.
+export function getCypressReservedPathPrefixes (config: Pick<InternalRouteConfig, 'clientRoute' | 'namespace'>): string[] {
+  return [
+    config.clientRoute ?? '/__/',
+    `/${config.namespace ?? '__cypress'}/`,
+    ...CLOUD_BUNDLE_NAMESPACES,
+  ]
+}
+
 // `isBrowserNetworkMode` is a property of the runtime that installed the caller,
 // not a value read at request time: each network runtime serves exactly one path.
 export function isInternalCypressRoute (pathname: string, config: InternalRouteConfig, isBrowserNetworkMode: boolean): boolean {

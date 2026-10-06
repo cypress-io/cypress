@@ -120,7 +120,6 @@
         "lib/modes/**/*.ts",
         "lib/browsers/**/*.ts",
         "lib/capture.ts",
-        "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
         "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
@@ -194,9 +193,6 @@
     "packages/ts": {
       "project": [
         "*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "typescript-cached-transpile"
       ]
     },
     "packages/extension": {
@@ -219,12 +215,8 @@
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "@babel/helper-define-map",
-        "@babel/plugin-transform-object-rest-spread",
         "@svgr/webpack",
         "assert",
-        "browser-resolve",
-        "webpack-cli",
         "buffer",
         "process",
         "url"
@@ -261,8 +253,8 @@
       "entry": [
         "src/main.ts",
         "src/cypress/commands.ts",
-        "cypress/plugins/server.js",
-        "cypress/plugins/index.js",
+        "cypress/plugins/server.ts",
+        "cypress/plugins/index.ts",
         "cypress.config.ts",
         "cypress/**/*.{ts,tsx,js,jsx}"
       ],
@@ -321,11 +313,13 @@
     },
     "packages/data-context": {
       "entry": [
+        "scripts/**/*.{ts,js}",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "graphql/**/*.{ts,tsx,js,jsx}",
+        "scripts/**/*.{ts,js}",
         "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ],
@@ -735,8 +729,6 @@
     "packages/frontend-shared/src/utils/time.ts",
     "packages/extension/app/v3/content.ts",
     "packages/extension/app/v3/service-worker.ts",
-    "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
-    "npm/eslint-plugin-dev/lib/scripts/lint-staged.js",
     "**/*.gen.ts",
     "**/*.gen.js",
     "**/project-fixtures/**",
@@ -748,7 +740,6 @@
     "@types/*",
     "eslint-*",
     "prettier",
-    "chai",
     "sinon",
     "cypress",
     "@cypress/*",
@@ -761,10 +752,11 @@
     "@vue/compiler-dom",
     "@vue/compiler-sfc",
     "edgedriver",
-    "react-15.6.1",
     "react-16.0.0",
-    "react-dom-15.6.1",
+    "react-19.1.1",
     "react-dom-16.0.0",
+    "react-dom-19.1.1",
+    "scheduler-0.26.0",
     "text-mask-addons",
     "vanilla-text-mask",
     "zone.js"
@@ -967,6 +959,9 @@
       "exports"
     ],
     "packages/driver/src/cy/commands/querying/focused.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/get_by_role.ts": [
       "exports"
     ],
     "packages/driver/src/cy/commands/querying/querying.ts": [

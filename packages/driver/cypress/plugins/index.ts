@@ -1,0 +1,102 @@
+import './server'
+import _ from 'lodash'
+import path from 'path'
+import fs from 'fs-extra'
+import Promise from 'bluebird'
+import wp from '@cypress/webpack-preprocessor'
+import Jimp from 'jimp'
+
+// required rather than imported: @packages/runner's check-ts is tslint only, so importing
+// its webpack config would make this package's tsc run the only gate on that file and on
+// @packages/web-config's base config, under stricter options than either package uses
+const webpackConfig = require('@packages/runner/webpack.config')
+
+async function getWebpackOptions () {
+  const webpackOptions = (await webpackConfig.default())[0]
+
+  // set mode to development which overrides
+  // the 'none' value of the base webpack config
+  // https://webpack.js.org/configuration/mode/
+  webpackOptions.mode = 'development'
+
+  // remove the evalDevToolPlugin which comes from the base
+  // webpack config - otherwise we won't get code frames
+  webpackOptions.plugins = _.reject(webpackOptions.plugins, { evalDevToolPlugin: true })
+
+  const babelLoader = _.find(webpackOptions.module.rules, (rule) => {
+    return _.includes(rule.use.loader, 'babel-loader')
+  })
+
+  // get rid of prismjs plugin. the driver doesn't need it
+  babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plugin) => {
+    return _.includes(plugin[0], 'babel-plugin-prismjs')
+  })
+
+  return webpackOptions
+}
+
+const setupNodeEvents: Cypress.PluginConfig = async (on, config) => {
+  const webpackOptions = await getWebpackOptions()
+
+  on('file:preprocessor', wp({ webpackOptions }))
+
+  on('task', {
+    'remove:file' (filePath) {
+      fs.removeSync(path.resolve(config.projectRoot, filePath))
+
+      return null
+    },
+    'return:arg' (arg) {
+      return arg
+    },
+    'return:foo' () {
+      return 'foo'
+    },
+    'return:bar' () {
+      return 'bar'
+    },
+    'return:baz' () {
+      return 'baz'
+    },
+    'cypress:env' () {
+      return process.env['CYPRESS']
+    },
+    'arg:is:undefined' (arg) {
+      if (arg === undefined) {
+        return 'arg was undefined'
+      }
+
+      throw new Error(`Expected arg to be undefined, but it was ${arg}`)
+    },
+    'wait' () {
+      return Promise.delay(2000)
+    },
+    async 'create:long:file' () {
+      const filePath = path.join(__dirname, '..', '_test-output', 'longtext.txt')
+      const longText = _.times(2000).map(() => {
+        return _.times(20).map(() => Math.random()).join(' ')
+      }).join('\n\n')
+
+      await fs.outputFile(filePath, longText)
+
+      return null
+    },
+    'check:screenshot:size' ({ filePath, width, height, devicePixelRatio }) {
+      return Jimp.read(filePath)
+      .then((image) => {
+        width = width * devicePixelRatio
+        height = height * devicePixelRatio
+
+        if (image.bitmap.width !== width || image.bitmap.height !== height) {
+          throw new Error(`Screenshot does not match dimensions! Expected: ${width} x ${height} but got ${image.bitmap.width} x ${image.bitmap.height}`)
+        }
+
+        return null
+      })
+    },
+  })
+
+  return config
+}
+
+export = setupNodeEvents

@@ -1599,6 +1599,19 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/565
+      it('scrolls a table cell under fixed and sticky headers into view in a small viewport', () => {
+        cy.viewport(400, 400)
+        cy.visit('/fixtures/issue-565.html')
+        cy.get('td:first').click()
+      })
+
+      // https://github.com/cypress-io/cypress/issues/8279
+      it('can click a button inside a large div with tabindex=0 without scrolling', () => {
+        cy.visit('/fixtures/issue-8279.html')
+        cy.get('#clickme').click()
+      })
+
       describe('scroll-behavior', () => {
         afterEach(() => {
           cy.get('html').invoke('css', 'scrollBehavior', 'inherit')

@@ -14,4 +14,6 @@ it('closes the chrome tab', () => {
       },
     })
   })
+  // never settle, so the test can't report a pass before the tab finishes closing
+  .then(() => new Promise(() => {}))
 })

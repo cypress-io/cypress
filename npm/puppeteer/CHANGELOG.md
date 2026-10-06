@@ -1,3 +1,17 @@
+# [@[secure]/puppeteer-v0.1.10](https://github.com/[secure]-io/[secure]/compare/@[secure]/puppeteer-v0.1.9...@[secure]/puppeteer-v0.1.10) (2026-09-30)
+
+
+### Bug Fixes
+
+* **puppeteer:** lowercase the [secure] type reference so types resolve on case-sensitive file systems ([#34954](https://github.com/[secure]-io/[secure]/issues/34954)) ([83ab206](https://github.com/[secure]-io/[secure]/commit/83ab20656626a93eb9079e7aee670d008f0821d3))
+
+# [@[secure]/puppeteer-v0.1.9](https://github.com/[secure]-io/[secure]/compare/@[secure]/puppeteer-v0.1.8...@[secure]/puppeteer-v0.1.9) (2026-09-24)
+
+
+### Bug Fixes
+
+* **puppeteer:** always disconnect, report falsy rejections, and fix retry timeout ([#34907](https://github.com/[secure]-io/[secure]/issues/34907)) ([aecb1cb](https://github.com/[secure]-io/[secure]/commit/aecb1cb6419a2a8a5e220639daa447cdb3143cb8))
+
 # [@cypress/puppeteer-v0.1.8](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.7...@cypress/puppeteer-v0.1.8) (2025-10-03)
 
 # [@cypress/puppeteer-v0.1.7](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.6...@cypress/puppeteer-v0.1.7) (2025-09-18)

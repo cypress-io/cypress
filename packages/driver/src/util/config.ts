@@ -86,7 +86,7 @@ export const preprocessConfig = (config: Cypress.Config) => {
 /**
  * Prepares config to initialize a cross-origin spec bridge.
  * isInteractive is read-only and must reflect the server-computed run/open mode value
- * from bootstrap, not testing overrides on the primary origin (e.g. defaults.js).
+ * from bootstrap, not testing overrides on the primary origin (e.g. defaults.ts).
  */
 export const preprocessConfigForSpecBridge = (
   config: Cypress.Config,

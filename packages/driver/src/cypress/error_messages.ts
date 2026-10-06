@@ -3,6 +3,7 @@ import { stripIndent } from 'common-tags'
 import capitalize from 'underscore.string/capitalize'
 import $stackUtils from './stack_utils'
 import $utils from './utils'
+import { textLikeInputTypes } from '../dom/elements/elementHelpers'
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -203,16 +204,10 @@ export default {
 
           > \`{{node}}\`
 
-        A clearable element matches one of the following selectors:
-          'a[href]'
-          'area[href]'
-          'input'
-          'select'
-          'textarea'
-          'button'
-          'iframe'
-          '[tabindex]'
-          '[contenteditable]'`,
+        A clearable element is one of the following:
+          - a \`<textarea>\`
+          - an \`<input>\` with no \`type\`, or with a \`type\` of ${textLikeInputTypes.map((type) => `\`${type}\``).join(', ')}
+          - an element made editable by \`contenteditable\`, or any element in a document with \`designMode\` set to \`on\``,
       docsUrl: 'https://on.cypress.io/clear',
     },
   },
@@ -614,6 +609,30 @@ export default {
     },
   },
 
+  // Shared by every `cy.getBy*()` query. Each query passes its own `cmd` and `docsUrl`.
+  get_by: {
+    docsUrl: '{{docsUrl}}',
+    invalid_options: `${cmd('{{cmd}}')} only accepts an options object as its second argument. You passed: \`{{options}}\``,
+    invalid_option: `${cmd('{{cmd}}')} does not accept the \`{{option}}\` option.{{hint}} It accepts: {{accepted}}.`,
+    invalid_option_boolean: `${cmd('{{cmd}}')} only accepts a \`boolean\` for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_matcher: `${cmd('{{cmd}}')} only accepts a string, number, regular expression, or function for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_timeout: `${cmd('{{cmd}}')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
+    not_found: 'Expected to find {{description}}{{scope}}, but never did.{{hints}}',
+    found: 'Expected not to find {{description}}{{scope}}, but continuously found it.',
+
+    getByRole: {
+      docsUrl: 'https://on.cypress.io/getbyrole',
+      invalid_role: `${cmd('getByRole')} requires a role as its first argument, such as \`'button'\` or \`'heading'\`. You passed: \`{{matcher}}\``,
+      option_hint: ' To narrow the results by `{{option}}`, chain {{alternative}} instead.',
+      roles_hint: 'Here are the {{accessible}}roles that were found, with the accessible name of each element:\n\n{{roles}}',
+      no_roles: 'No elements with a role were found.',
+      no_accessible_roles: 'No accessible elements with a role were found, but some elements may be hidden from the accessibility tree. To include them, pass `{ hidden: true }`.',
+      role_with_whitespace: `${cmd('getByRole')} was passed the role \`{{role}}\`, but a role is a single word with no spaces, such as \`'button'\`. Query one role at a time.`,
+      no_native_element: `${cmd('getByRole')} was passed \`native: true\`, but HTML has no native element with the role \`{{role}}\`, so only a \`role\` attribute can give an element that role. Remove \`native: true\` to find it.`,
+      native_hint: 'Some elements have the role "{{role}}" only through a `role` attribute, so they were skipped. The native elements for this role are: {{tags}}. To include elements with a `role` attribute, pass `{ native: false }`.',
+    },
+  },
+
   getCookie: {
     invalid_argument: {
       message: `${cmd('getCookie')} must be passed a string argument for name.`,
@@ -952,16 +971,16 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
+    cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled, isSameSuperDomainOrigin }) {
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-        ${isSkipDomainInjectionEnabled ? `
-        Unless \`injectDocumentDomain\` is disabled, a ${cmd('origin')} command is required.
-        ` : ''}
-        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+        ${isInjectDocumentDomainEnabled || !isSameSuperDomainOrigin ? '' : `
+        Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
+        `}
+        Use ${cmd('origin')} to wrap the commands run on \`${autOrigin}\`.
 
         \`cy.origin('${autOrigin}', () => {\`
         \`  <commands targeting ${autOrigin} go here>\`
@@ -2071,16 +2090,19 @@ export default {
   },
 
   then: {
-    callback_mixes_sync_and_async: stripIndent`\
-      ${cmd('then')} failed because you are mixing up async and sync code.
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because you are mixing up async and sync code.
 
-      In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
 
-      Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
 
-      You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
 
-      The value you synchronously returned was: \`{{value}}\``,
+        The value you synchronously returned was: \`{{value}}\``,
+      docsUrl: 'https://on.cypress.io/{{cmd}}',
+    },
   },
 
   trigger: {

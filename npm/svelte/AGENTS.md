@@ -18,7 +18,7 @@ yarn lint         # ESLint
 ## Gotchas / Notes
 
 - Requires Svelte 5+. Cypress 13 and earlier supported Svelte 4 and below.
-- The `postbuild` step syncs `dist/` to `cli/svelte/` — build before testing against the Cypress binary.
+- `postbuild` re-exports this package into `cli/svelte/` — build before testing against the Cypress binary. See [`npm/AGENTS.md`](../AGENTS.md).
 - There is no `test` script in this package's `package.json`; component tests are run via Cypress directly.
 - Marked with `"!cypress"` as an Nx implicit dependency to avoid circular build ordering issues.
 

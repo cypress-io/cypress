@@ -63,6 +63,7 @@ describe('e2e browser network framebusting', () => {
       pageLoadTimeout: 15000,
       env: {
         expectedNavigationPreloadEnabled: false,
+        expectedRunnerNamespacePoisoned: false,
       },
     },
   })
@@ -78,6 +79,7 @@ describe('e2e browser network framebusting', () => {
       pageLoadTimeout: 15000,
       env: {
         expectedNavigationPreloadEnabled: true,
+        expectedRunnerNamespacePoisoned: true,
       },
     },
   })

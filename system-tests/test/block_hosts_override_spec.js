@@ -34,9 +34,8 @@ describe('e2e blockHosts test config override', () => {
     },
   })
 
-  it('applies blockHosts test config overrides at runtime', function () {
-    return systemTests.exec(this, {
-      spec: 'block_hosts_override.cy.js',
-    })
+  systemTests.it('applies blockHosts test config overrides at runtime', {
+    browser: ['chrome', 'electron'],
+    spec: 'block_hosts_override.cy.js',
   })
 })

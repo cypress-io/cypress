@@ -902,6 +902,16 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}
     `
   },
+  TRUSTED_CERTIFICATES_LOAD_ERROR: (filePathOrLabel: string, err: Error) => {
+    return errTemplate`\
+      Cypress could not load a certificate you listed in ${fmt.highlight(`trustedCertificates`)}.
+
+      The entry was: ${fmt.highlightSecondary(filePathOrLabel)}
+
+      ${fmt.highlightSecondary(err.message)}
+
+      Each entry must supply exactly one of a ${fmt.highlightSecondary(`filePath`)} to a PEM file (relative paths resolve against your project root), an inline ${fmt.highlightSecondary(`pem`)} string, or a base64 SHA-256 ${fmt.highlightSecondary(`spki`)} fingerprint.`
+  },
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
@@ -1241,7 +1251,15 @@ export const AllCypressErrors = {
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },
-  BROWSER_NETWORK_INTERCEPTION_ESCAPE: (url: string) => {
+  BROWSER_NETWORK_INTERCEPTION_ESCAPE: (url: string, isRunnerDocument: boolean) => {
+    // The partial carries its own trailing blank line and is interpolated
+    // inline below, so the paragraph that follows keeps its spacing whether or
+    // not there is a remedy to add.
+    const runnerDocumentRemedy = isRunnerDocument ? errPartial`
+        The escaped document is Cypress's own runner, which is served on the origin under test. A service worker that origin registered in an earlier session answered for it. If you have disabled ${fmt.highlight(`testIsolation`)}, re-enable it so Cypress clears that worker before loading the runner; otherwise, clear the browser profile or this origin's site data.
+
+        ` : null
+
     return errTemplate`\
         A document served by a service worker was not intercepted by Cypress:
 
@@ -1249,7 +1267,7 @@ export const AllCypressErrors = {
 
         The browser started the service worker and let it serve this document before Cypress could attach to it. The response kept its original headers and was invisible to ${fmt.highlight(`cy.intercept`)} and Test Replay. If the document carries framebusting headers, the visit will time out.
 
-        Only the first escaped document in a spec is reported here. If this causes failures, set ${fmt.highlight(`forceHttp1`)} to ${fmt.highlight(`true`)} in your Cypress configuration to route traffic through Cypress's HTTP proxy, or configure ${fmt.highlight(`retries`)} so an affected test re-runs after Cypress has attached to the worker.
+        ${runnerDocumentRemedy}Only the first escaped document in a spec is reported here. If this causes failures, set ${fmt.highlight(`forceHttp1`)} to ${fmt.highlight(`true`)} in your Cypress configuration to route traffic through Cypress's HTTP proxy, or configure ${fmt.highlight(`retries`)} so an affected test re-runs after Cypress has attached to the worker.
 
         Details: ${fmt.url(`https://github.com/cypress-io/cypress/issues/34674`)}`
   },
