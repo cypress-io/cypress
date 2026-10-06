@@ -1,4 +1,19 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.1.2
+
+**Bugfixes:**
+
+- Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
+
+**Misc:**
+
+- TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
+
+**Dependency Updates:**
+
+- Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
+- Upgraded `simple-git` from `3.36.0` to `4.0.2` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335531) vulnerability and two Arbitrary Command Injection vulnerabilities ([SNYK-JS-SIMPLEGIT-20335524](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335524), [SNYK-JS-SIMPLEGIT-20335540](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335540)) reported in security scans. This also upgrades its `@simple-git/argv-parser` dependency from `1.1.1` to `2.0.1`, which addresses a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGITARGVPARSER-20335528) vulnerability reported in security scans. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
+
 ## 16.1.1
 
 **Performance:**
@@ -20,6 +35,7 @@
 - The error shown when a [`.each()`](https://on.cypress.io/each) or [`.spread()`](https://on.cypress.io/spread) callback both runs Cypress commands and returns a synchronous value now names the command you called and links to its documentation, instead of saying that `cy.then()` failed. The same error from [`.then()`](https://on.cypress.io/then) now links to the `.then()` documentation. Addressed in [#34933](https://github.com/cypress-io/cypress/pull/34933).
 - When a command runs after your application navigates to another subdomain of the same domain outside of [`cy.origin()`](https://on.cypress.io/origin), the error now explains that, while [`injectDocumentDomain`](https://on.cypress.io/inject-document-domain-configuration) is disabled (the default), a subdomain counts as a different origin, so commands run there also need `cy.origin()`. This explanation was intended to appear but never did. Addressed in [#34930](https://github.com/cypress-io/cypress/pull/34930).
 - The TypeScript documentation for the `multiple` option of [`.dblclick()`](https://on.cypress.io/dblclick) now shows its default as `true`, matching how `.dblclick()` behaves. Addressed in [#34929](https://github.com/cypress-io/cypress/pull/34929).
+- [`cy.contains()`](https://on.cypress.io/contains) now shows as a parent command in the Command Log when it starts a chain, as in `cy.contains('Save')`. It previously always showed as a child command, with a `-` before its name, as if it were chained off the command before it. Addressed in [#34939](https://github.com/cypress-io/cypress/pull/34939).
 
 **Dependency Updates:**
 

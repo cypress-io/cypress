@@ -4,6 +4,7 @@ import user from '../../../lib/cloud/user'
 import electron from 'electron'
 import * as machineId from '../../../lib/cloud/machine_id'
 import os from 'os'
+import path from 'path'
 import pkg from '@packages/root'
 import Promise from 'bluebird'
 import * as random from '../../../lib/util/random'
@@ -24,6 +25,12 @@ describe('lib/cloud/auth', function () {
 
   afterEach(function () {
     auth._internal.stopServer()
+  })
+
+  it('loads when electron cannot be resolved', function () {
+    const authWithoutElectron = proxyquire(path.resolve(__dirname, '../../../lib/cloud/auth'), { electron: null })
+
+    expect(authWithoutElectron._internal.launchNativeAuth).to.be.a('function')
   })
 
   describe('_internal.getOriginFromUrl', function () {
