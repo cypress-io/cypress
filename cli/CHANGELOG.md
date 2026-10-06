@@ -1,5 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.1.2
+## 16.2.0
+
+**Features:**
+
+- Added the [`cy.getByRole()`](https://on.cypress.io/getbyrole) query, which finds elements by their ARIA role and, optionally, their accessible name, for example `cy.getByRole('tab', { name: 'Billing' })`. Elements hidden from the accessibility tree are skipped unless you pass `{ hidden: true }`. For a role that HTML has an element for, only that element matches by default, so `cy.getByRole('button')` finds a `<button>` but not a `<div role="button">`. Pass `{ native: false }` to also match elements with a `role` attribute. Like [`cy.get()`](https://on.cypress.io/get), it yields every match and retries until its assertions pass. When nothing matches, the error lists the roles and accessible names on the page. Addressed in [#34937](https://github.com/cypress-io/cypress/pull/34937).
 
 **Bugfixes:**
 

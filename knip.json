@@ -959,6 +959,9 @@
     "packages/driver/src/cy/commands/querying/focused.ts": [
       "exports"
     ],
+    "packages/driver/src/cy/commands/querying/get_by_role.ts": [
+      "exports"
+    ],
     "packages/driver/src/cy/commands/querying/querying.ts": [
       "exports"
     ],
