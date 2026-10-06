@@ -1867,6 +1867,12 @@ space
         })
       })
 
+      it('sets type to parent when used as a parent command', () => {
+        cy.contains('foo').then(function () {
+          expect(this.lastLog.get('type')).to.eq('parent')
+        })
+      })
+
       it('logs when not exists', () => {
         cy.contains('does-not-exist').should('not.exist').then(function () {
           expect(this.lastLog.get('message')).to.eq('does-not-exist')

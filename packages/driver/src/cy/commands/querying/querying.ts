@@ -274,7 +274,7 @@ export default (Commands, Cypress, cy, state) => {
 
     const log = Cypress.log({
       message: displayName,
-      type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      type: this.hasPreviouslyLinkedCommand() ? 'child' : 'parent',
       hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),

@@ -297,6 +297,25 @@ declare namespace Cypress {
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
 
   /**
+   * The object yielded by `cy.location()`, describing the current URL of the Application Under Test (AUT).
+   * It is a plain object, not the AUT's `window.location`, so it has no methods such as `assign()` or `reload()`.
+   *
+   * @see https://on.cypress.io/location
+   */
+  interface AUTLocation {
+    hash: string
+    host: string
+    hostname: string
+    href: string
+    origin: string
+    pathname: string
+    port: string
+    protocol: string
+    search: string
+    searchParams: URLSearchParams
+  }
+
+  /**
    * The interface for user-defined properties in Window object under test.
    */
   interface ApplicationWindow { } // tslint:disable-line
@@ -1482,6 +1501,30 @@ declare namespace Cypress {
     get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>
 
     /**
+     * Get every element with the given ARIA role, optionally narrowed to
+     * those whose accessible name matches `name`. Elements hidden from the
+     * accessibility tree are skipped unless `hidden` is `true`.
+     *
+     * For a role that HTML has an element for, only that element matches by
+     * default: `'button'` finds a `<button>`, not a `<div role="button">`.
+     * Pass `native: false` to also match elements that get the role from a
+     * `role` attribute.
+     *
+     * Chained off an element, it searches that element's descendants.
+     *
+     * @see https://on.cypress.io/getbyrole
+     * @example
+     *    // A native <button>, never a <div role="button">
+     *    cy.getByRole('button', { name: 'Save' }).click()
+     *    // Widgets that HTML has no element for
+     *    cy.getByRole('tab', { name: 'Billing' }).click()
+     *    cy.get('nav').getByRole('menuitem', { name: /delete/i })
+     *    // A dialog rendered as <div role="dialog"> by a component library
+     *    cy.getByRole('dialog', { name: 'Settings', native: false })
+     */
+    getByRole<E extends Node = HTMLElement>(role: import('./aria-query').ARIARole | (string & {}), options?: Partial<GetByRoleOptions>): Chainable<JQuery<E>>
+
+    /**
      * Get a browser cookie by its name.
      *
      * @see https://on.cypress.io/getcookie
@@ -1576,15 +1619,15 @@ declare namespace Cypress {
     last<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Get the global `window.location` object of the page that is currently active.
+     * Yield a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
      *    cy.location() // Get location object
      */
-    location(options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location(options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation>
     /**
-     * Get a part of the global `window.location` object of the page that is currently active.
+     * Yield one property of a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
@@ -1593,7 +1636,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location<K extends keyof Location>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<Location[K]>
+    location<K extends keyof AUTLocation>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation[K]>
 
     /**
      * Print a message to the Cypress Command Log.
@@ -2791,6 +2834,41 @@ declare namespace Cypress {
      * @see https://on.cypress.io/configuration#Timeouts
      */
     timeout: number
+  }
+
+  interface GetByRoleOptions extends Loggable, Timeoutable, Shadow {
+    /**
+     * Only match elements whose accessible name matches: the text a screen
+     * reader announces for the element, taken from its label, its content,
+     * `aria-label` or `aria-labelledby`. A string must match the whole name, a
+     * regular expression is tested against it, and a function is called with
+     * the name and the element.
+     */
+    name: string | number | RegExp | ((name: string, element: Element | null) => boolean)
+    /**
+     * Include elements that are hidden from the accessibility tree, such as
+     * those with `aria-hidden="true"`, `display: none` or `visibility: hidden`.
+     *
+     * @default false
+     */
+    hidden: boolean
+    /**
+     * Only match elements whose tag gives them the role, like `<button>`,
+     * skipping elements that only have it through a `role` attribute, like
+     * `<div role="button">`. Set it to `false` to match both.
+     *
+     * Some widely used patterns get their role from a `role` attribute even
+     * though HTML has an element for it, so they need `native: false`: an
+     * `<input role="combobox">` (the native combobox is a `<select>` or an
+     * `<input list>`) and an `<svg role="img">` (the native one is an `<img>`).
+     *
+     * Roles that HTML has no element for, such as `tab` or `menuitem`, can
+     * only come from a `role` attribute, so they are always matched that way.
+     * Passing `native: true` with one of those roles throws.
+     *
+     * @default true for roles that HTML has an element for
+     */
+    native: boolean
   }
 
   /**
