@@ -28,6 +28,7 @@ import { SPEC_BRIDGE_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
+import { waitForDevServerSpecUpdate } from './wait-for-dev-server-spec-update'
 
 let _eventManager: EventManager | undefined
 
@@ -373,16 +374,36 @@ async function initialize () {
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
-async function updateDevServerWithSpec (spec: SpecFile) {
-  return new Promise<void>((resolve, _reject) => {
-    // currently, we don't have criteria to reject the promise
-    // as the dev-server can take a long time to compile, which is variable per user.
-    Cypress.once('dev-server:on-spec-updated', () => {
-      resolve()
-    })
+function getDevServerBundler (config: Cypress.Config & {
+  devServer?: { bundler?: string }
+  devServerConfig?: { bundler?: string, webpackConfig?: unknown, viteConfig?: unknown }
+}) {
+  const directBundler = config.devServer?.bundler ?? config.devServerConfig?.bundler
 
-    Cypress.emit('dev-server:on-spec-update', spec)
-  })
+  if (directBundler) {
+    return directBundler
+  }
+
+  if (config.devServerConfig && 'webpackConfig' in config.devServerConfig) {
+    return 'webpack'
+  }
+
+  if (config.devServerConfig && 'viteConfig' in config.devServerConfig) {
+    return 'vite'
+  }
+
+  return undefined
+}
+
+async function updateDevServerWithSpec (spec: SpecFile) {
+  const config = getRunnerConfigFromWindow() as Cypress.Config & {
+    devServer?: { bundler?: string }
+    devServerConfig?: { bundler?: string, webpackConfig?: unknown, viteConfig?: unknown }
+  }
+
+  const bundler = getDevServerBundler(config)
+
+  return waitForDevServerSpecUpdate(spec, Cypress, { bundler })
 }
 
 /**
