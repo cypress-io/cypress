@@ -79,7 +79,10 @@ export class HtmlDataSource {
     }
 
     // Environment variables are only available to the spec via cy.env() on the server.
+    // `rawJson` and `resolved` also carry them, and nothing in the browser reads either.
     delete cfg.env
+    delete cfg.rawJson
+    delete cfg.resolved
 
     // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
     // whenever the app is served/re-served
