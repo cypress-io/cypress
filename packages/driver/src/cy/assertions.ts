@@ -13,6 +13,18 @@ const stackTracesRe = / at .*\n/gm
 
 const IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
 
+// reads a property of the value under assertion, returning undefined instead
+// of throwing when the read fails, as it does with a SecurityError when the
+// value is a cross-origin window, such as the one `cy.go()` yields after
+// navigating to another origin
+const getProperty = (value, property: string) => {
+  try {
+    return value ? value[property] : undefined
+  } catch {
+    return undefined
+  }
+}
+
 const invokeWith = (value) => {
   return (fn) => {
     return fn(value)
@@ -157,7 +169,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       message = message.substring(0, message.search(butRe))
     }
 
-    if (value && value.isSinonProxy) {
+    if (getProperty(value, 'isSinonProxy')) {
       message = message.replace(stackTracesRe, '\n')
     }
 
@@ -207,7 +219,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       name: 'assert',
       message,
       passed,
-      selector: value ? value.selector : undefined,
+      selector: getProperty(value, 'selector'),
       timeout: 0,
       type (current, subject) {
         // if our current command has arguments assume
