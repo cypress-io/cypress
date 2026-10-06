@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- `cypress run` now fails the current spec and continues with the next one when the browser shows no activity for 10 minutes, or for twice the longest configured timeout if that is longer, instead of running until the CI provider stops the job. Fixed in [#35000](https://github.com/cypress-io/cypress/pull/35000).
 - Fixed a regression in [15.20.0](#15-20-0) where a cookie changed by [`cy.request()`](https://on.cypress.io/request) or [`cy.setCookie()`](https://on.cypress.io/setcookie) was sent to the server with its earlier value on the next navigation of the application under test, even though [`cy.getCookie()`](https://on.cypress.io/getcookie) reported the new one. Fixes [#34891](https://github.com/cypress-io/cypress/issues/34891).
 
 **Misc:**
