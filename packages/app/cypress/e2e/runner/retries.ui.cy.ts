@@ -38,6 +38,17 @@ describe('runner/cypress retries.ui.spec', {
     cy.reporter().find('.runnable-err-print').should('be.visible')
   })
 
+  it('passes on the retry after a beforeEach command timed out', () => {
+    loadSpec({
+      filePath: 'retries/before-each-command-timeout.retries.cy.ts',
+      passCount: 1,
+      failCount: 0,
+    })
+
+    cy.reporter().contains('Attempt 1').click()
+    cy.reporter().find('.attempt-1').contains('Cypress test was stopped while running this command.')
+  })
+
   it('can toggle failed prev attempt open and log its error', { viewportHeight: 1200 }, () => {
     loadSpec({
       filePath: 'retries/all-retry-one-failure.retries.cy.js',
