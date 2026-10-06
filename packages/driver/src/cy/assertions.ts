@@ -13,9 +13,10 @@ const stackTracesRe = / at .*\n/gm
 
 const IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
 
-// the value under assertion can be a cross-origin window, such as the one
-// `cy.go()` yields after navigating to another origin, and reading a property
-// of one throws a SecurityError
+// reads a property of the value under assertion, returning undefined instead
+// of throwing when the read fails, as it does with a SecurityError when the
+// value is a cross-origin window, such as the one `cy.go()` yields after
+// navigating to another origin
 const getProperty = (value, property: string) => {
   try {
     return value ? value[property] : undefined
