@@ -1,5 +1,6 @@
 import '../spec_helper'
 import _ from 'lodash'
+import os from 'os'
 import path from 'path'
 import Jimp from 'jimp'
 import sinon from 'sinon'
@@ -666,6 +667,103 @@ describe('lib/screenshots', () => {
       })
     })
 
+    const eexist = () => Object.assign(new Error('eexist'), { code: 'EEXIST' })
+
+    const data = {
+      specName: 'foo.js',
+      name: 'name',
+    }
+
+    it('claims the name with an exclusive create when overwrite is off', async () => {
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).to.eq('path/to/screenshots/foo.js/name.png')
+      expect(fs.outputFileAsync).to.be.calledOnceWith(p, '', { flag: 'wx' })
+    })
+
+    it('moves to the next suffix when the name already exists', async () => {
+      fs.outputFileAsync.onCall(0).rejects(eexist())
+
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).to.eq('path/to/screenshots/foo.js/name (1).png')
+      expect(fs.outputFileAsync).to.be.calledTwice
+      expect(fs.outputFileAsync.secondCall).to.be.calledWith(p, '', { flag: 'wx' })
+    })
+
+    it('keeps moving to the next suffix while names already exist', async () => {
+      fs.outputFileAsync.onCall(0).rejects(eexist())
+      fs.outputFileAsync.onCall(1).rejects(eexist())
+
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).to.eq('path/to/screenshots/foo.js/name (2).png')
+    })
+
+    it('reuses the base name without an exclusive create when overwrite is on', async () => {
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', true)
+
+      expect(p).to.eq('path/to/screenshots/foo.js/name.png')
+      expect(fs.outputFileAsync).to.be.calledOnceWith(p, '', {})
+    })
+
+    it('does not retry on an existing file when overwrite is on', async () => {
+      const err = eexist()
+
+      fs.outputFileAsync.onCall(0).rejects(err)
+
+      await expect(screenshots.getPath(data, 'png', 'path/to/screenshots', true)).to.be.rejectedWith(err)
+      expect(fs.outputFileAsync).to.be.calledOnce
+    })
+
+    it('rethrows errors other than EEXIST and ENAMETOOLONG when overwrite is off', async () => {
+      const err = Object.assign(new Error('eacces'), { code: 'EACCES' })
+
+      fs.outputFileAsync.onCall(0).rejects(err)
+
+      await expect(screenshots.getPath(data, 'png', 'path/to/screenshots', false)).to.be.rejectedWith(err)
+      expect(fs.outputFileAsync).to.be.calledOnce
+    })
+
+    it('reuses and truncates an existing file on disk when overwrite is on', async () => {
+      fs.outputFileAsync.restore()
+
+      const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-screenshots-'))
+      const existing = path.join(folder, 'foo.js', 'name.png')
+
+      try {
+        await fs.outputFile(existing, 'previous screenshot')
+
+        const p = await screenshots.getPath(data, 'png', folder, true)
+
+        expect(p).to.eq(existing)
+        expect(await fs.readFile(p, 'utf8')).to.eq('')
+      } finally {
+        await fs.remove(folder)
+      }
+    })
+
+    it('gives concurrent callers distinct names on disk', async () => {
+      fs.outputFileAsync.restore()
+
+      const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-screenshots-'))
+
+      try {
+        const paths = await Promise.all(_.times(10, () => {
+          return screenshots.getPath(data, 'png', folder, false)
+        }))
+
+        expect(_.uniq(paths)).to.have.length(10)
+        expect(paths).to.include(path.join(folder, 'foo.js', 'name.png'))
+
+        for (const p of paths) {
+          expect(await fs.pathExists(p), p).to.be.true
+        }
+      } finally {
+        await fs.remove(folder)
+      }
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/2403
     it('truncates long paths with unicode in them', async () => {
       const fullPath = await screenshots.getPath({
@@ -697,6 +795,27 @@ describe('lib/screenshots', () => {
       }, 'png', '/tmp')
 
       expect(path.basename(fullPath)).to.have.length(204)
+    })
+
+    // ENAMETOOLONG permanently lowers the module-level filename byte limit, so this runs after
+    // the test above that asserts the exact truncated length
+    it('handles EEXIST and ENAMETOOLONG in sequence', async () => {
+      const enametoolong = Object.assign(new Error('enametoolong'), { code: 'ENAMETOOLONG' })
+
+      fs.outputFileAsync.onCall(0).rejects(eexist())
+      fs.outputFileAsync.onCall(1).rejects(enametoolong)
+      fs.outputFileAsync.onCall(2).rejects(eexist())
+
+      const p = await screenshots.getPath({ specName: 'foo.js', name: 'a'.repeat(300) }, 'png', '/tmp', false)
+      const [first, second, third, fourth] = fs.outputFileAsync.getCalls().map((call) => path.basename(call.args[0]))
+
+      expect(first).to.match(/^a+\.png$/)
+      expect(second).to.match(/^a+ \(1\)\.png$/)
+      expect(third).to.match(/^a+ \(1\)\.png$/)
+      expect(third.length).to.eq(second.length - 1)
+      expect(fourth).to.match(/^a+ \(2\)\.png$/)
+      expect(path.basename(p)).to.eq(fourth)
+      expect(fs.outputFileAsync).to.have.callCount(4)
     })
 
     it('rejects with ENAMETOOLONG errors if name goes below MIN_PREFIX_LENGTH', async () => {
