@@ -1,22 +1,26 @@
-import '../spec_helper'
-
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { MockInstance } from 'vitest'
 import { cache } from '../../lib/cache'
 import { fs } from '../../lib/util/fs'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+beforeEach(async () => {
+  await cache.remove()
+})
 
 describe('lib/cache', () => {
   beforeEach(async () => {
     await cache.remove()
   })
 
-  context('projects', () => {
+  describe('projects', () => {
     describe('#insertProject', () => {
       it('inserts project by path', async () => {
         await cache.insertProject('foo/bar')
         const projects = await cache.__get('PROJECTS')
 
-        expect(projects).to.deep.eq(['foo/bar'])
+        expect(projects).toStrictEqual(['foo/bar'])
       })
 
       it('inserts project at the start', async () => {
@@ -24,7 +28,7 @@ describe('lib/cache', () => {
         await cache.insertProject('bar')
         const projects = await cache.__get('PROJECTS')
 
-        expect(projects).to.deep.eq(['bar', 'foo'])
+        expect(projects).toStrictEqual(['bar', 'foo'])
       })
 
       it('can insert multiple projects in a row', async () => {
@@ -33,7 +37,7 @@ describe('lib/cache', () => {
         await cache.insertProject('foo')
         const projects = await cache.__get('PROJECTS')
 
-        expect(projects).to.deep.eq(['foo', 'bar', 'baz'])
+        expect(projects).toStrictEqual(['foo', 'bar', 'baz'])
       })
 
       it('moves project to start if it already exists', async () => {
@@ -43,7 +47,7 @@ describe('lib/cache', () => {
         await cache.insertProject('bar')
         const projects = await cache.__get('PROJECTS')
 
-        expect(projects).to.deep.eq(['bar', 'baz', 'foo'])
+        expect(projects).toStrictEqual(['bar', 'baz', 'foo'])
       })
     })
 
@@ -53,51 +57,62 @@ describe('lib/cache', () => {
         await cache.removeProject('/Users/brian/app')
         const projects = await cache.__get('PROJECTS')
 
-        expect(projects).to.deep.eq([])
+        expect(projects).toStrictEqual([])
       })
     })
   })
 
   describe('#getProjectRoots', () => {
-    beforeEach(function () {
-      this.statAsync = sinon.stub(fs, 'statAsync')
+    let statAsync: MockInstance
+
+    // Mirrors sinon `withArgs(path)`: paths not listed answer undefined.
+    function statByPath (results: Record<string, () => Promise<unknown>>) {
+      statAsync.mockImplementation((path: string) => results[path]?.())
+    }
+
+    beforeEach(() => {
+      statAsync = vi.spyOn(fs, 'statAsync').mockImplementation(() => undefined as any)
     })
 
-    afterEach(function () {
-      this.statAsync.restore()
+    afterEach(() => {
+      statAsync.mockRestore()
     })
 
-    it('returns an array of paths', async function () {
-      this.statAsync.withArgs('/Users/brian/app').resolves()
-      this.statAsync.withArgs('/Users/sam/app2').resolves()
+    it('returns an array of paths', async () => {
+      statByPath({
+        '/Users/brian/app': () => Promise.resolve(),
+        '/Users/sam/app2': () => Promise.resolve(),
+      })
 
       await cache.insertProject('/Users/brian/app')
       await cache.insertProject('/Users/sam/app2')
       const paths = await cache.getProjectRoots()
 
-      expect(paths).to.deep.eq(['/Users/sam/app2', '/Users/brian/app'])
+      expect(paths).toStrictEqual(['/Users/sam/app2', '/Users/brian/app'])
     })
 
-    it('removes any paths which no longer exist on the filesystem', async function () {
-      this.statAsync.withArgs('/Users/brian/app').resolves()
-      this.statAsync.withArgs('/Users/sam/app2').rejects(new Error())
+    it('removes any paths which no longer exist on the filesystem', async () => {
+      statByPath({
+        '/Users/brian/app': () => Promise.resolve(),
+        '/Users/sam/app2': () => Promise.reject(new Error()),
+      })
 
       await cache.insertProject('/Users/brian/app')
       await cache.insertProject('/Users/sam/app2')
       const paths = await cache.getProjectRoots()
 
-      expect(paths).to.deep.eq(['/Users/brian/app'])
+      expect(paths).toStrictEqual(['/Users/brian/app'])
       // we have to wait on the write event because
       // of process.nextTick
       await delay(100)
       const projects = await cache.__get('PROJECTS')
 
-      expect(projects).to.deep.eq(['/Users/brian/app'])
+      expect(projects).toStrictEqual(['/Users/brian/app'])
     })
   })
 })
 
-context('project preferences', () => {
+describe('project preferences', () => {
   it('should insert a projects preferences into the cache', async () => {
     const testProjectTitle = 'launchpad'
     const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
@@ -105,7 +120,7 @@ context('project preferences', () => {
     await cache.insertProjectPreferences(testProjectTitle, testPreferences)
     const preferences = await cache.__get('PROJECT_PREFERENCES')
 
-    expect(preferences[testProjectTitle]).to.deep.equal(testPreferences)
+    expect(preferences[testProjectTitle]).toStrictEqual(testPreferences)
   })
 
   it('should insert multiple projects preferences into the cache', async () => {
@@ -118,8 +133,8 @@ context('project preferences', () => {
     await cache.insertProjectPreferences(anotherTestProjectTitle, anotherTestPreferene)
     const preferences = await cache.__get('PROJECT_PREFERENCES')
 
-    expect(preferences).to.have.property(testProjectTitle)
-    expect(preferences).to.have.property(anotherTestProjectTitle)
+    expect(preferences).toHaveProperty(testProjectTitle)
+    expect(preferences).toHaveProperty(anotherTestProjectTitle)
   })
 
   it('should clear the projects preferred preferences', async () => {
@@ -130,13 +145,15 @@ context('project preferences', () => {
     await cache.removeProjectPreferences(testProjectTitle)
     const preferences = await cache.__get('PROJECT_PREFERENCES')
 
-    expect(preferences[testProjectTitle]).to.equal(null)
+    expect(preferences[testProjectTitle]).toBeNull()
   })
 })
 
-context('#setUser / #getUser', () => {
-  beforeEach(function () {
-    this.user = {
+describe('#setUser / #getUser', () => {
+  let user
+
+  beforeEach(() => {
+    user = {
       id: 1,
       name: 'brian',
       email: 'a@b.com',
@@ -144,26 +161,26 @@ context('#setUser / #getUser', () => {
     }
   })
 
-  it('sets and gets user', async function () {
-    await cache.setUser(this.user)
-    const user = await cache.getUser()
+  it('sets and gets user', async () => {
+    await cache.setUser(user)
+    const cachedUser = await cache.getUser()
 
-    expect(user).to.deep.eq(this.user)
+    expect(cachedUser).toStrictEqual(user)
   })
 })
 
-context('#removeUser', () => {
-  it('sets user to empty object', async function () {
-    await cache.setUser(this.user)
+describe('#removeUser', () => {
+  it('sets user to empty object', async () => {
+    await cache.setUser(undefined as any)
     await cache.removeUser()
     const user = await cache.getUser()
 
-    expect(user).to.deep.eq({})
+    expect(user).toStrictEqual({})
   })
 })
 
-context('queues public methods', () => {
-  it('is able to write both values', async function () {
+describe('queues public methods', () => {
+  it('is able to write both values', async () => {
     await Promise.all([
       cache.setUser({ name: 'brian', authToken: 'auth-token-123' }),
       cache.insertProject('foo'),
@@ -171,7 +188,7 @@ context('queues public methods', () => {
 
     const json = await cache._read()
 
-    expect(json).to.deep.eq({
+    expect(json).toStrictEqual({
       USER: {
         name: 'brian',
         authToken: 'auth-token-123',
@@ -184,14 +201,14 @@ context('queues public methods', () => {
   })
 })
 
-context('cohorts', () => {
-  it('should get no cohorts when empty', async function () {
+describe('cohorts', () => {
+  it('should get no cohorts when empty', async () => {
     const cohorts = await cache.getCohorts()
 
-    expect(cohorts).to.deep.eq({})
+    expect(cohorts).toStrictEqual({})
   })
 
-  it('should insert a cohort', async function () {
+  it('should insert a cohort', async () => {
     const cohort = {
       name: 'cohort_id',
       cohort: 'A',
@@ -200,6 +217,6 @@ context('cohorts', () => {
     await cache.insertCohort(cohort)
     const cohorts = await cache.getCohorts()
 
-    expect(cohorts).to.deep.eq({ [cohort.name]: cohort })
+    expect(cohorts).toStrictEqual({ [cohort.name]: cohort })
   })
 })
