@@ -1,5 +1,4 @@
-const { expect } = require('../../../../spec_helper')
-
+import { describe, it, expect } from 'vitest'
 import type playwright from 'playwright-webkit'
 import { convertPlaywrightCookieToCyCookie, convertCyCookieToPlaywrightCookie } from '../../../../../lib/automation/cookie/converters/webkit'
 import type { CyCookie } from '../../../../../lib/automation/cookie/util'
@@ -32,12 +31,12 @@ const cyCookie = (props: Partial<CyCookie> = {}): CyCookie => {
   }
 }
 
-context('lib/automation/cookie/converters/webkit', () => {
-  context('.convertPlaywrightCookieToCyCookie', () => {
+describe('lib/automation/cookie/converters/webkit', () => {
+  describe('.convertPlaywrightCookieToCyCookie', () => {
     it('maps the playwright cookie shape to a CyCookie', () => {
       const cookie = convertPlaywrightCookieToCyCookie(playwrightCookie({ expires: 456 }))
 
-      expect(cookie).to.deep.eq({
+      expect(cookie).toStrictEqual({
         name: 'foo',
         value: 'f',
         domain: 'foo.com',
@@ -53,14 +52,14 @@ context('lib/automation/cookie/converters/webkit', () => {
     it('omits expirationDate for the -1 session sentinel', () => {
       const cookie = convertPlaywrightCookieToCyCookie(playwrightCookie({ expires: -1 }))
 
-      expect(cookie).to.not.have.property('expirationDate')
+      expect(cookie).not.toHaveProperty('expirationDate')
     })
 
     it('converts playwright sameSite to the extension vocabulary', () => {
-      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: 'None' })).sameSite).to.eq('no_restriction')
-      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: 'Lax' })).sameSite).to.eq('lax')
-      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: 'Strict' })).sameSite).to.eq('strict')
-      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: undefined })).sameSite).to.be.undefined
+      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: 'None' })).sameSite).toBe('no_restriction')
+      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: 'Lax' })).sameSite).toBe('lax')
+      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: 'Strict' })).sameSite).toBe('strict')
+      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ sameSite: undefined })).sameSite).toBeUndefined()
     })
 
     it('does not mutate the input cookie', () => {
@@ -68,16 +67,16 @@ context('lib/automation/cookie/converters/webkit', () => {
 
       const result = convertPlaywrightCookieToCyCookie(input)
 
-      expect(result).to.not.eq(input)
-      expect(input).to.deep.eq(playwrightCookie({ sameSite: 'None' }))
+      expect(result).not.toBe(input)
+      expect(input).toStrictEqual(playwrightCookie({ sameSite: 'None' }))
     })
   })
 
-  context('.convertCyCookieToPlaywrightCookie', () => {
+  describe('.convertCyCookieToPlaywrightCookie', () => {
     it('maps the CyCookie shape to a playwright cookie', () => {
       const cookie = convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'lax' }))
 
-      expect(cookie).to.deep.eq({
+      expect(cookie).toStrictEqual({
         name: 'foo',
         value: 'f',
         domain: 'foo.com',
@@ -90,10 +89,10 @@ context('lib/automation/cookie/converters/webkit', () => {
     })
 
     it('converts extension sameSite to the playwright vocabulary', () => {
-      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'no_restriction' })).sameSite).to.eq('None')
-      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'lax' })).sameSite).to.eq('Lax')
-      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'strict' })).sameSite).to.eq('Strict')
-      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: undefined })).sameSite).to.be.undefined
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'no_restriction' })).sameSite).toBe('None')
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'lax' })).sameSite).toBe('Lax')
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'strict' })).sameSite).toBe('Strict')
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: undefined })).sameSite).toBeUndefined()
     })
 
     it('does not mutate the input cookie', () => {
@@ -101,7 +100,7 @@ context('lib/automation/cookie/converters/webkit', () => {
 
       convertCyCookieToPlaywrightCookie(input)
 
-      expect(input).to.deep.eq(cyCookie({ sameSite: 'strict' }))
+      expect(input).toStrictEqual(cyCookie({ sameSite: 'strict' }))
     })
   })
 })
