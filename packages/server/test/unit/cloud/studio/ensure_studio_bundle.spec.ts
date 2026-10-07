@@ -1,24 +1,25 @@
-import { proxyquire, sinon } from '../../../spec_helper'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { ensureStudioBundle } from '../../../../lib/cloud/studio/ensure_studio_bundle'
+
+const { ensureSignedBundleStub } = vi.hoisted(() => {
+  return { ensureSignedBundleStub: vi.fn() }
+})
+
+vi.mock('../../../../lib/cloud/bundles/ensure_signed_bundle', () => {
+  return { ensureSignedBundle: ensureSignedBundleStub }
+})
 
 describe('ensureStudioBundle', () => {
-  let ensureStudioBundle: typeof import('../../../../lib/cloud/studio/ensure_studio_bundle').ensureStudioBundle
-  let ensureSignedBundleStub: sinon.SinonStub
-
   beforeEach(() => {
-    ensureSignedBundleStub = sinon.stub()
-
-    ensureStudioBundle = (proxyquire('../lib/cloud/studio/ensure_studio_bundle', {
-      '../bundles/ensure_signed_bundle': {
-        ensureSignedBundle: ensureSignedBundleStub,
-      },
-    })).ensureStudioBundle
+    ensureSignedBundleStub.mockReset()
   })
 
   it('delegates to ensureSignedBundle with kind=studio and unwraps the bundleDir', async () => {
     const mockManifest = { 'server/index.js': 'abc123' }
     const mockBundleDir = '/cache/bundles/studio/abc'
 
-    ensureSignedBundleStub.resolves({
+    ensureSignedBundleStub.mockResolvedValue({
       manifest: mockManifest,
       bundleDir: mockBundleDir,
     })
@@ -28,25 +29,25 @@ describe('ensureStudioBundle', () => {
       projectId: 'proj-1',
     })
 
-    expect(ensureSignedBundleStub).to.be.calledOnce
-    expect(ensureSignedBundleStub).to.be.calledWith({
+    expect(ensureSignedBundleStub).toHaveBeenCalledOnce()
+    expect(ensureSignedBundleStub).toHaveBeenCalledWith({
       url: 'https://cdn.cypress.io/studio/abc.tar',
       projectId: 'proj-1',
       kind: 'studio',
     })
 
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       manifest: mockManifest,
       studioPath: mockBundleDir,
     })
   })
 
   it('forwards an undefined projectId without injecting one', async () => {
-    ensureSignedBundleStub.resolves({ manifest: {}, bundleDir: '/cache/bundles/studio/x' })
+    ensureSignedBundleStub.mockResolvedValue({ manifest: {}, bundleDir: '/cache/bundles/studio/x' })
 
     await ensureStudioBundle({ studioUrl: 'https://cdn.cypress.io/studio/x.tar' })
 
-    expect(ensureSignedBundleStub).to.be.calledWith({
+    expect(ensureSignedBundleStub).toHaveBeenCalledWith({
       url: 'https://cdn.cypress.io/studio/x.tar',
       projectId: undefined,
       kind: 'studio',
@@ -56,9 +57,9 @@ describe('ensureStudioBundle', () => {
   it('propagates errors from ensureSignedBundle', async () => {
     const err = new Error('boom')
 
-    ensureSignedBundleStub.rejects(err)
+    ensureSignedBundleStub.mockRejectedValue(err)
 
     await expect(ensureStudioBundle({ studioUrl: 'https://cdn.cypress.io/studio/abc.tar' }))
-    .to.be.rejectedWith(err)
+    .rejects.toBe(err)
   })
 })
