@@ -345,7 +345,10 @@ describe('lib/request', () => {
       })
 
       it('retries 4x on a NXDOMAIN (ENOTFOUND)', async () => {
-        nock.enableNetConnect()
+        nock('http://will-never-exist.invalid.example.com')
+        .get('/')
+        .times(5)
+        .replyWithError({ code: 'ENOTFOUND', message: 'getaddrinfo ENOTFOUND will-never-exist.invalid.example.com' })
 
         const opts = {
           url: 'http://will-never-exist.invalid.example.com',
