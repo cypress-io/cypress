@@ -1,18 +1,18 @@
-import '../../spec_helper'
-import 'chai-as-promised' // for the types!
-import { expect } from 'chai'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import humanInterval from 'human-interval'
 import _ from 'lodash'
-import sinon from 'sinon'
-import snapshot from 'snap-shot-it'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import { connect } from '@packages/network'
 import * as protocol from '../../../lib/browsers/protocol'
 
 describe('lib/browsers/protocol', () => {
-  context('._getDelayMsForRetry', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('._getDelayMsForRetry', () => {
     it('retries as expected for up to 50 seconds', () => {
-      const log = sinon.spy(console, 'log')
+      const log = vi.spyOn(console, 'log')
 
       let delays = []
       let delay: number
@@ -23,23 +23,25 @@ describe('lib/browsers/protocol', () => {
         i++
       }
 
-      expect(_.sum(delays)).to.eq(humanInterval('50 seconds'))
+      expect(_.sum(delays)).toBe(humanInterval('50 seconds'))
 
-      log.getCalls().forEach((log, i) => {
-        const line = stripAnsi(log.args[0])
+      log.mock.calls.forEach((args, i) => {
+        const line = stripAnsi(args[0])
 
-        expect(line).to.include(`Still waiting to connect to Foobrowser, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).toContain(`Still waiting to connect to Foobrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
 
-      snapshot(delays)
+      expect(delays).toMatchSnapshot()
     })
   })
 
-  context('._connectAsync', () => {
+  describe('._connectAsync', () => {
     it('creates a retrying socket to test the connection', async function () {
-      const end = sinon.stub()
+      const end = vi.fn()
 
-      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
+      vi.spyOn(connect, 'createRetryingSocket').mockImplementation((_opts, cb) => {
+        cb(null, { end } as any)
+      })
 
       const opts = {
         host: '127.0.0.1',
@@ -47,7 +49,7 @@ describe('lib/browsers/protocol', () => {
       }
 
       await protocol._connectAsync(opts)
-      expect(end).to.be.calledOnce
+      expect(end).toHaveBeenCalledOnce()
     })
   })
 })

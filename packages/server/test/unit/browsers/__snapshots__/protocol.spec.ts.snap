@@ -1,4 +1,7 @@
-exports['lib/browsers/protocol ._getDelayMsForRetry retries as expected for up to 50 seconds 1'] = [
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lib/browsers/protocol > ._getDelayMsForRetry > retries as expected for up to 50 seconds 1`] = `
+[
   100,
   100,
   100,
@@ -61,5 +64,6 @@ exports['lib/browsers/protocol ._getDelayMsForRetry retries as expected for up t
   1000,
   1000,
   1000,
-  1000
+  1000,
 ]
+`;
