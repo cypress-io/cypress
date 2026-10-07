@@ -1,11 +1,22 @@
-import { proxyquire, sinon } from '../../../spec_helper'
+import { createRequire } from 'module'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ensureDir, mkdtemp, pathExists, readFile, remove, writeFile } from 'fs-extra'
 import { spawn } from 'child_process'
 import os from 'os'
 import path from 'path'
-import * as extractAtomic from '../../../../lib/cloud/extract_atomic'
+import { publishStagingToFinal } from '../../../../lib/cloud/bundles/publish_staging_to_final'
 
-const TS_REGISTER = require.resolve('@packages/ts/register')
+const { renameStub } = vi.hoisted(() => {
+  return { renameStub: vi.fn() }
+})
+
+vi.mock('../../../../lib/cloud/extract_atomic', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../lib/cloud/extract_atomic')>()
+
+  return { ...actual, renameAtomicWithRetry: renameStub }
+})
+
+const TS_REGISTER = createRequire(import.meta.url).resolve('@packages/ts/register')
 const WORKER_PATH = path.resolve(__dirname, '../../../support/cross_process_publish_worker.ts')
 
 const populateStaging = async (staging: string, files: Record<string, string>) => {
@@ -36,8 +47,13 @@ describe('publishStagingToFinal', () => {
   let tmp: string
   let staging: string
   let finalDir: string
+  let actualRenameAtomicWithRetry: typeof import('../../../../lib/cloud/extract_atomic').renameAtomicWithRetry
 
   beforeEach(async () => {
+    ({ renameAtomicWithRetry: actualRenameAtomicWithRetry } = await vi.importActual<typeof import('../../../../lib/cloud/extract_atomic')>('../../../../lib/cloud/extract_atomic'))
+    renameStub.mockReset()
+    renameStub.mockImplementation(actualRenameAtomicWithRetry)
+
     tmp = await mkdtemp(path.join(os.tmpdir(), 'cy-publish-'))
     staging = path.join(tmp, 'staging')
     finalDir = path.join(tmp, 'final')
@@ -51,14 +67,12 @@ describe('publishStagingToFinal', () => {
   it('publishes all files from staging into finalDir', async () => {
     await populateStaging(staging, FIXTURE_FILES)
 
-    const { publishStagingToFinal } = require('../../../../lib/cloud/bundles/publish_staging_to_final')
-
     await publishStagingToFinal(staging, finalDir)
 
     for (const [rel, expected] of Object.entries(FIXTURE_FILES)) {
       const actual = await readFile(path.join(finalDir, rel), 'utf8')
 
-      expect(actual).to.equal(expected)
+      expect(actual).toBe(expected)
     }
   })
 
@@ -66,44 +80,36 @@ describe('publishStagingToFinal', () => {
     await populateStaging(staging, FIXTURE_FILES)
 
     const renamedOrder: string[] = []
-    const renameSpy = sinon.stub().callsFake(async (src: string, dst: string) => {
-      await extractAtomic.renameAtomicWithRetry(src, dst)
-      renamedOrder.push(path.relative(finalDir, dst).split(path.sep).join('/'))
-    })
 
-    const { publishStagingToFinal } = proxyquire('../lib/cloud/bundles/publish_staging_to_final', {
-      '../extract_atomic': {
-        renameAtomicWithRetry: renameSpy,
-      },
+    renameStub.mockImplementation(async (src: string, dst: string) => {
+      await actualRenameAtomicWithRetry(src, dst)
+      renamedOrder.push(path.relative(finalDir, dst).split(path.sep).join('/'))
     })
 
     await publishStagingToFinal(staging, finalDir)
 
-    expect(renamedOrder.length).to.equal(Object.keys(FIXTURE_FILES).length)
-    expect(renamedOrder[renamedOrder.length - 1]).to.equal('manifest.json')
+    expect(renamedOrder.length).toBe(Object.keys(FIXTURE_FILES).length)
+    expect(renamedOrder[renamedOrder.length - 1]).toBe('manifest.json')
     // every non-manifest entry must precede manifest in the order
     const manifestIdx = renamedOrder.indexOf('manifest.json')
 
-    expect(manifestIdx).to.equal(renamedOrder.length - 1)
+    expect(manifestIdx).toBe(renamedOrder.length - 1)
   })
 
   it('drains in-flight renames before throwing when one rejects (no unhandled-rejection leakage)', async () => {
     await populateStaging(staging, FIXTURE_FILES)
 
-    const fastReject = sinon.stub().rejects(Object.assign(new Error('EACCES: denied'), { code: 'EACCES' }))
+    const fastReject = vi.fn().mockRejectedValue(Object.assign(new Error('EACCES: denied'), { code: 'EACCES' }))
     let slowResolved = false
-    const slowResolve = sinon.stub().callsFake(async () => {
+    const slowResolve = vi.fn(async (_src: string, _dst: string) => {
       await new Promise((r) => setTimeout(r, 50))
       slowResolved = true
     })
-    const renameStub = sinon.stub().callsFake(async (src: string, _dst: string) => {
+
+    renameStub.mockImplementation(async (src: string, _dst: string) => {
       if (src.endsWith('assets/file_000.txt')) return fastReject(src, _dst)
 
       return slowResolve(src, _dst)
-    })
-
-    const { publishStagingToFinal } = proxyquire('../lib/cloud/bundles/publish_staging_to_final', {
-      '../extract_atomic': { renameAtomicWithRetry: renameStub },
     })
 
     const unhandled: unknown[] = []
@@ -112,19 +118,17 @@ describe('publishStagingToFinal', () => {
     process.on('unhandledRejection', onUnhandled)
 
     try {
-      await expect(publishStagingToFinal(staging, finalDir)).to.be.rejectedWith(/EACCES/)
+      await expect(publishStagingToFinal(staging, finalDir)).rejects.toThrow(/EACCES/)
       await new Promise((r) => setTimeout(r, 100))
     } finally {
       process.off('unhandledRejection', onUnhandled)
     }
 
-    expect(slowResolved, 'slow renames should have settled before the function returned').to.equal(true)
-    expect(unhandled, 'no unhandled rejections from in-flight publishOne calls').to.deep.equal([])
+    expect(slowResolved, 'slow renames should have settled before the function returned').toBe(true)
+    expect(unhandled, 'no unhandled rejections from in-flight publishOne calls').toEqual([])
   })
 
-  it('cross-process: parallel publishers + reader sees no absent or partial bytes', async function () {
-    this.timeout(30000)
-
+  it('cross-process: parallel publishers + reader sees no absent or partial bytes', { timeout: 30000 }, async () => {
     const stagingA = path.join(tmp, 'staging-a')
     const stagingB = path.join(tmp, 'staging-b')
     const watchedFile = 'assets/file_010.txt'
@@ -179,18 +183,18 @@ describe('publishStagingToFinal', () => {
 
     if (childB.code !== 0) throw new Error(`child B exited with ${childB.code}: ${childB.stderr}`)
 
-    expect(enoentObserved, 'reader must never see ENOENT for an already-published file').to.equal(0)
-    expect(corruptObserved, 'reader must always read complete bytes').to.deep.equal([])
-    expect(reads, 'reader loop should run at least once').to.be.greaterThan(0)
+    expect(enoentObserved, 'reader must never see ENOENT for an already-published file').toBe(0)
+    expect(corruptObserved, 'reader must always read complete bytes').toEqual([])
+    expect(reads, 'reader loop should run at least once').toBeGreaterThan(0)
 
     // After both publishers exit, finalDir must contain every file from the bundle.
     for (const rel of Object.keys(FIXTURE_FILES)) {
       const dst = path.join(finalDir, rel)
 
-      expect(await pathExists(dst), `${rel} must exist in finalDir`).to.equal(true)
+      expect(await pathExists(dst), `${rel} must exist in finalDir`).toBe(true)
       const actual = await readFile(dst, 'utf8')
 
-      expect(actual, `${rel} content must match expected`).to.equal(FIXTURE_FILES[rel])
+      expect(actual, `${rel} content must match expected`).toBe(FIXTURE_FILES[rel])
     }
   })
 })
