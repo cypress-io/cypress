@@ -1170,9 +1170,6 @@ type DevState {
   When we have edited server related files, we may want to relaunch the client.
   """
   needsRelaunch: Boolean
-
-  """For debugging, the current application state"""
-  state: JSON
 }
 
 """Represents an editor on the local machine"""
@@ -1559,14 +1556,8 @@ input LocalTestCountsInput {
 }
 
 type Mutation {
-  """Internal use only, clears the cloud cache"""
-  _clearCloudCache: Boolean
-
   """Used internally to update the URQL cache in the CloudDataSource"""
   _cloudCacheInvalidate(args: JSON): Boolean
-
-  """Internal use only, clears the cloud cache"""
-  _showUrqlCache: JSON
 
   """Add project to projects array and cache it"""
   addProject(
