@@ -1,6 +1,4 @@
-import '../../spec_helper'
-
-import { expect } from 'chai'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { Request } from 'express'
 import { SocketAllowed } from '../../../lib/util/socket_allowed'
 import { EventEmitter } from 'events'
@@ -13,7 +11,7 @@ describe('lib/util/socket_allowed', function () {
     sw = new SocketAllowed()
   })
 
-  context('#add', () => {
+  describe('#add', () => {
     it('adds localPort to allowed list and removes it when closed', () => {
       const socket = new EventEmitter as Socket
 
@@ -27,27 +25,27 @@ describe('lib/util/socket_allowed', function () {
         },
       } as Request
 
-      expect(sw.allowedLocalPorts).to.deep.eq([])
-      expect(sw.isRequestAllowed(req)).to.be.false
+      expect(sw.allowedLocalPorts).toEqual([])
+      expect(sw.isRequestAllowed(req)).toBe(false)
 
       sw.add(socket)
-      expect(sw.allowedLocalPorts).to.deep.eq([socket.localPort])
-      expect(sw.isRequestAllowed(req)).to.be.true
+      expect(sw.allowedLocalPorts).toEqual([socket.localPort])
+      expect(sw.isRequestAllowed(req)).toBe(true)
 
       socket.emit('close')
-      expect(sw.allowedLocalPorts).to.deep.eq([])
-      expect(sw.isRequestAllowed(req)).to.be.false
+      expect(sw.allowedLocalPorts).toEqual([])
+      expect(sw.isRequestAllowed(req)).toBe(false)
     })
   })
 
-  context('#isRequestFromLocalhost', () => {
+  describe('#isRequestFromLocalhost', () => {
     it('allows loopback remote addresses without any port allow-list entry', () => {
-      expect(sw.allowedLocalPorts).to.deep.eq([])
+      expect(sw.allowedLocalPorts).toEqual([])
 
       for (const remoteAddress of ['127.0.0.1', '::1']) {
         const req = { socket: { remoteAddress } } as Request
 
-        expect(sw.isRequestFromLocalhost(req), remoteAddress).to.be.true
+        expect(sw.isRequestFromLocalhost(req), remoteAddress).toBe(true)
       }
     })
 
@@ -55,7 +53,7 @@ describe('lib/util/socket_allowed', function () {
       for (const remoteAddress of ['192.168.1.20', '10.0.0.5', undefined]) {
         const req = { socket: { remoteAddress } } as Request
 
-        expect(sw.isRequestFromLocalhost(req), String(remoteAddress)).to.be.false
+        expect(sw.isRequestFromLocalhost(req), String(remoteAddress)).toBe(false)
       }
     })
   })
