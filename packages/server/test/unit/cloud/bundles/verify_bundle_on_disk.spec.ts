@@ -1,8 +1,20 @@
-import { proxyquire, sinon } from '../../../spec_helper'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ensureDir, mkdtemp, remove, writeFile } from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import crypto from 'crypto'
+
+import { verifyBundleOnDisk as realVerifyBundleOnDisk } from '../../../../lib/cloud/bundles/verify_bundle_on_disk'
+
+const { verifySignatureStub } = vi.hoisted(() => {
+  return { verifySignatureStub: vi.fn() }
+})
+
+vi.mock('../../../../lib/cloud/encryption', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../lib/cloud/encryption')>()
+
+  return { ...actual, verifySignature: verifySignatureStub }
+})
 
 const sha256 = (content: string): string => {
   return crypto.createHash('sha256').update(Buffer.from(content)).digest('hex')
@@ -11,16 +23,12 @@ const sha256 = (content: string): string => {
 describe('verifyBundleOnDisk', () => {
   let tmp: string
   let finalDir: string
-  let verifySignatureStub: sinon.SinonStub
 
   const load = () => {
-    verifySignatureStub = sinon.stub().resolves(true)
+    verifySignatureStub.mockReset()
+    verifySignatureStub.mockResolvedValue(true)
 
-    const mod = proxyquire('../lib/cloud/bundles/verify_bundle_on_disk', {
-      '../encryption': { verifySignature: verifySignatureStub },
-    })
-
-    return mod.verifyBundleOnDisk as (dir: string) => Promise<Record<string, string> | null>
+    return realVerifyBundleOnDisk
   }
 
   // Writes files + a manifest enumerating each (with real sha256) + sig sidecar.
@@ -65,14 +73,14 @@ describe('verifyBundleOnDisk', () => {
       'client/index.js': '// client\n',
     })
 
-    expect(await verifyBundleOnDisk(finalDir)).to.deep.equal(manifest)
-    expect(verifySignatureStub).to.be.calledOnce
+    expect(await verifyBundleOnDisk(finalDir)).toEqual(manifest)
+    expect(verifySignatureStub).toHaveBeenCalledOnce()
   })
 
   it('returns null when manifest.json is absent', async () => {
     const verifyBundleOnDisk = load()
 
-    expect(await verifyBundleOnDisk(finalDir)).to.equal(null)
+    expect(await verifyBundleOnDisk(finalDir)).toBe(null)
   })
 
   it('returns null when the signature sidecar is absent', async () => {
@@ -80,16 +88,16 @@ describe('verifyBundleOnDisk', () => {
 
     await writeBundle({ 'server/index.js': 'a' }, { sig: null })
 
-    expect(await verifyBundleOnDisk(finalDir)).to.equal(null)
+    expect(await verifyBundleOnDisk(finalDir)).toBe(null)
   })
 
   it('returns null when the manifest signature fails to verify', async () => {
     const verifyBundleOnDisk = load()
 
-    verifySignatureStub.resolves(false)
+    verifySignatureStub.mockResolvedValue(false)
     await writeBundle({ 'server/index.js': 'a' })
 
-    expect(await verifyBundleOnDisk(finalDir)).to.equal(null)
+    expect(await verifyBundleOnDisk(finalDir)).toBe(null)
   })
 
   it('returns null when a listed file has been modified after the fact', async () => {
@@ -99,7 +107,7 @@ describe('verifyBundleOnDisk', () => {
     // Tamper post-publish: same path, different bytes.
     await writeFile(path.join(finalDir, 'server', 'index.js'), 'tampered')
 
-    expect(await verifyBundleOnDisk(finalDir)).to.equal(null)
+    expect(await verifyBundleOnDisk(finalDir)).toBe(null)
   })
 
   it('returns null when a listed file is missing from disk', async () => {
@@ -109,7 +117,7 @@ describe('verifyBundleOnDisk', () => {
       manifest: { 'server/index.js': sha256('a'), 'lib/extra.js': sha256('b') },
     })
 
-    expect(await verifyBundleOnDisk(finalDir)).to.equal(null)
+    expect(await verifyBundleOnDisk(finalDir)).toBe(null)
   })
 
   it('returns null when an unlisted file exists on disk (strict allowlist)', async () => {
@@ -119,7 +127,7 @@ describe('verifyBundleOnDisk', () => {
     // Attacker drops in an extra file not covered by the signed manifest.
     await writeFile(path.join(finalDir, 'evil.js'), 'pwned')
 
-    expect(await verifyBundleOnDisk(finalDir)).to.equal(null)
+    expect(await verifyBundleOnDisk(finalDir)).toBe(null)
   })
 
   it('returns null when a manifest entry escapes finalDir', async () => {
@@ -129,6 +137,6 @@ describe('verifyBundleOnDisk', () => {
       manifest: { 'server/index.js': sha256('a'), '../escape.js': sha256('a') },
     })
 
-    expect(await verifyBundleOnDisk(finalDir)).to.equal(null)
+    expect(await verifyBundleOnDisk(finalDir)).toBe(null)
   })
 })
