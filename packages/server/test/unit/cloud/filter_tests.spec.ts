@@ -1,6 +1,4 @@
-import '../../spec_helper'
-import { expect } from 'chai'
-
+import { describe, it, expect } from 'vitest'
 import { getEligibleTestTitles } from '../../../lib/cloud/filter_tests'
 
 const filterAction = (payload) => {
@@ -20,13 +18,13 @@ const filterAction = (payload) => {
 describe('lib/cloud/filter_tests', () => {
   describe('.getEligibleTestTitles', () => {
     it('returns undefined when there is no FILTER action', () => {
-      expect(getEligibleTestTitles(undefined)).to.be.undefined
-      expect(getEligibleTestTitles(null)).to.be.undefined
-      expect(getEligibleTestTitles([])).to.be.undefined
+      expect(getEligibleTestTitles(undefined)).toBeUndefined()
+      expect(getEligibleTestTitles(null)).toBeUndefined()
+      expect(getEligibleTestTitles([])).toBeUndefined()
       expect(getEligibleTestTitles([
         { action: 'SKIP', type: 'SPEC', clientId: null, payload: null },
         { action: 'MUTE', type: 'TEST', clientId: 'a', payload: null },
-      ])).to.be.undefined
+      ])).toBeUndefined()
     })
 
     it('returns the full titles of tests whose status is in the filter', () => {
@@ -42,7 +40,7 @@ describe('lib/cloud/filter_tests', () => {
       })]
 
       // passing + flaky-passing are excluded (they are not in the keep-list)
-      expect(getEligibleTestTitles(actions)).to.deep.equal([
+      expect(getEligibleTestTitles(actions)).toEqual([
         'suite a fails',
         'suite d skipped',
         'suite e new',
@@ -57,7 +55,7 @@ describe('lib/cloud/filter_tests', () => {
         ],
       })]
 
-      expect(getEligibleTestTitles(actions)).to.deep.equal(['outer inner the test'])
+      expect(getEligibleTestTitles(actions)).toEqual(['outer inner the test'])
     })
 
     it('strips the "(skipped due to browser)" suffix so titles match the runner', () => {
@@ -68,7 +66,7 @@ describe('lib/cloud/filter_tests', () => {
         ],
       })]
 
-      expect(getEligibleTestTitles(actions)).to.deep.equal(['suite a test'])
+      expect(getEligibleTestTitles(actions)).toEqual(['suite a test'])
     })
 
     it('returns an empty array when a FILTER action has no eligible tests', () => {
@@ -79,7 +77,7 @@ describe('lib/cloud/filter_tests', () => {
         ],
       })]
 
-      expect(getEligibleTestTitles(actions)).to.deep.equal([])
+      expect(getEligibleTestTitles(actions)).toEqual([])
     })
 
     it('ignores non-FILTER actions alongside a FILTER action', () => {
@@ -93,7 +91,7 @@ describe('lib/cloud/filter_tests', () => {
         }),
       ]
 
-      expect(getEligibleTestTitles(actions)).to.deep.equal(['suite a fails'])
+      expect(getEligibleTestTitles(actions)).toEqual(['suite a fails'])
     })
   })
 })
