@@ -1,9 +1,9 @@
-import '../../../spec_helper'
-
 import crypto from 'crypto'
 import * as jose from 'jose'
 import base64Url from 'base64url'
-import stealthyRequire from 'stealthy-require'
+import nock from 'nock'
+import type { Mock } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import _ from 'lodash'
 import os from 'os'
@@ -17,6 +17,7 @@ import { cache } from '../../../../lib/cache'
 import * as errors from '../../../../lib/errors'
 import * as machineId from '../../../../lib/cloud/machine_id'
 import Promise from 'bluebird'
+import { PROTOCOL_STUB_VALID } from '@tooling/system-tests/lib/protocol-stubs/protocolStubResponse'
 
 const API_BASEURL = 'http://localhost:1234'
 const API_PROD_BASEURL = 'https://api.cypress.io'
@@ -28,15 +29,21 @@ const AUTH_URLS = {
   'dashboardLogoutUrl': 'http://localhost:3000/logout',
 }
 
-const {
-  PROTOCOL_STUB_VALID,
-} = require('@tooling/system-tests/lib/protocol-stubs/protocolStubResponse')
-
-const makeError = (details = {}) => {
+const makeError = (details: Record<string, any> = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
 const OS_PLATFORM = 'linux'
+
+const rejectsExceptOnCall = (err: unknown, resolvingCall: number) => {
+  const fn = vi.fn().mockRejectedValue(err)
+
+  for (let i = 0; i < resolvingCall; i++) {
+    fn.mockRejectedValueOnce(err)
+  }
+
+  return fn.mockResolvedValueOnce(undefined)
+}
 
 const encryptRequest = encryption.encryptRequest
 
@@ -50,15 +57,15 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
    */
   let _secretKey
 
-  sinon.stub(encryption, 'encryptRequest').callsFake(async (params) => {
+  const encryptRequestSpy = vi.spyOn(encryption, 'encryptRequest').mockImplementation(async (params) => {
     if (reqBody) {
-      expect(params.body).to.deep.eq(reqBody)
+      expect(params.body).toEqual(reqBody)
     }
 
     const { secretKey, jwe } = await encryptRequest(params, { publicKey })
 
     if (fn) {
-      encryption.encryptRequest.restore()
+      encryptRequestSpy.mockRestore()
     }
 
     _secretKey = secretKey
@@ -74,7 +81,7 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
       ),
     )
 
-    expect(_secretKey.export().toString('utf8')).to.eq(decryptedSecretKey.export().toString('utf8'))
+    expect(_secretKey.export().toString('utf8')).toBe(decryptedSecretKey.export().toString('utf8'))
 
     const enc = new jose.GeneralEncrypt(
       Buffer.from(JSON.stringify(resBody)),
@@ -98,8 +105,18 @@ const preflightNock = (baseUrl) => {
   .post('/preflight')
 }
 
+const originalEnv = { ...process.env }
+let oldEnv: NodeJS.ProcessEnv | undefined
+
 describe('lib/cloud/api', () => {
   beforeEach(() => {
+    if (!nock.isActive()) {
+      nock.activate()
+    }
+
+    nock.disableNetConnect()
+    nock.enableNetConnect(/localhost/)
+
     api.setPreflightResult({ encrypt: false })
 
     preflightNock(API_BASEURL)
@@ -116,17 +133,17 @@ describe('lib/cloud/api', () => {
     .reply(200, AUTH_URLS)
 
     api.clearCache()
-    sinon.stub(os, 'platform').returns(OS_PLATFORM)
+    vi.spyOn(os, 'platform').mockReturnValue(OS_PLATFORM)
 
-    if (this.oldEnv) {
-      process.env = this.oldEnv
+    if (oldEnv) {
+      process.env = oldEnv
     }
 
-    this.oldEnv = Object.assign({}, process.env)
+    oldEnv = Object.assign({}, process.env)
 
-    process.env.DISABLE_API_RETRIES = true
+    process.env.DISABLE_API_RETRIES = 'true'
 
-    return sinon.stub(cache, 'getUser').resolves({
+    vi.spyOn(cache, 'getUser').mockResolvedValue({
       name: 'foo bar',
       email: 'foo@bar',
       //authToken: 'auth-token-123'
@@ -135,14 +152,19 @@ describe('lib/cloud/api', () => {
 
   afterEach(() => {
     api.resetPreflightResult()
-    sinon.restore()
+    vi.restoreAllMocks()
+
+    nock.cleanAll()
+    nock.enableNetConnect()
+
+    process.env = { ...originalEnv }
   })
 
   describe('.rp', () => {
     beforeEach(() => {
-      sinon.spy(agent, 'addRequest')
+      vi.spyOn(agent, 'addRequest')
 
-      return nock.enableNetConnect()
+      nock.enableNetConnect()
     }) // nock will prevent requests from reaching the agent
 
     it('makes calls using the correct agent', () => {
@@ -151,11 +173,11 @@ describe('lib/cloud/api', () => {
       return api.ping()
       .thenThrow()
       .catch(() => {
-        expect(agent.addRequest).to.be.calledOnce
+        expect(agent.addRequest).toHaveBeenCalledOnce()
 
-        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+        expect(agent.addRequest).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
           href: 'http://localhost:1234/ping',
-        })
+        }))
       })
     })
 
@@ -165,16 +187,16 @@ describe('lib/cloud/api', () => {
       return api.ping()
       .thenThrow()
       .catch(() => {
-        expect(agent.addRequest).to.be.calledOnce
+        expect(agent.addRequest).toHaveBeenCalledOnce()
 
-        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+        expect(agent.addRequest).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
           rejectUnauthorized: true,
-        })
+        }))
       })
     })
 
     describe('with a proxy defined', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         nock.cleanAll()
       })
 
@@ -185,11 +207,11 @@ describe('lib/cloud/api', () => {
         return api.ping()
         .thenThrow()
         .catch(() => {
-          expect(agent.addRequest).to.be.calledOnce
+          expect(agent.addRequest).toHaveBeenCalledOnce()
 
-          expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+          expect(agent.addRequest).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
             href: 'http://localhost:1234/ping',
-          })
+          }))
         })
       })
     })
@@ -205,7 +227,7 @@ describe('lib/cloud/api', () => {
 
       return api.ping()
       .then((resp) => {
-        expect(resp).to.eq('OK')
+        expect(resp).toBe('OK')
       })
     })
 
@@ -221,7 +243,7 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
   })
@@ -231,29 +253,25 @@ describe('lib/cloud/api', () => {
     let originalCypressConfigEnv = process.env.CYPRESS_CONFIG_ENV
     let originalCypressAPIUrl = process.env.CYPRESS_API_URL
 
-    beforeEach(function () {
-      this.timeout(30000)
-
+    beforeEach(async () => {
       nock.cleanAll()
-      sinon.restore()
-      sinon.stub(os, 'platform').returns(OS_PLATFORM)
+      vi.restoreAllMocks()
+      vi.spyOn(os, 'platform').mockReturnValue(OS_PLATFORM)
 
       process.env.CYPRESS_CONFIG_ENV = 'production'
       process.env.CYPRESS_API_URL = 'https://some.server.com'
 
       if (!prodApi) {
-        // Use stealthy-require to temporarily clear module cache and re-require
-        // with new environment variables. The routes module reads CYPRESS_CONFIG_ENV
-        // at module load time, so we need to re-evaluate it with the new env vars.
-        prodApi = stealthyRequire(require.cache, () => {
-          return require('../../../../lib/cloud/api').default
-        }, () => {
-          require('../../../../lib/cloud/encryption')
-        }, module)
+        // A fresh api instance under the production env; encryption stays shared so
+        // decryptReqBodyAndRespond's spy reaches it.
+        vi.resetModules()
+        vi.doMock('../../../../lib/cloud/encryption', () => encryption)
+        prodApi = (await import('../../../../lib/cloud/api')).default
+        vi.doUnmock('../../../../lib/cloud/encryption')
       }
 
       prodApi.resetPreflightResult()
-    })
+    }, 30000)
 
     afterEach(() => {
       if (originalCypressConfigEnv) {
@@ -287,7 +305,7 @@ describe('lib/cloud/api', () => {
 
       return prodApi.sendPreflight({ projectId: 'abc123' })
       .then((ret) => {
-        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -314,7 +332,7 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
-        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -341,16 +359,16 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
-        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
     it('sets timeout to 5 seconds when no CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set', () => {
-      sinon.stub(api.rp, 'post').resolves({})
+      vi.spyOn(api.rp, 'post').mockResolvedValue({})
 
       return api.sendPreflight({})
       .then(() => {
-        expect(api.rp.post).to.be.calledWithMatch({ timeout: 5000 })
+        expect(api.rp.post).toHaveBeenCalledWith(expect.objectContaining({ timeout: 5000 }))
       })
     })
 
@@ -360,7 +378,7 @@ describe('lib/cloud/api', () => {
 
       beforeEach(() => {
         prevEnv = process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT
-        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = String(configuredTimeout)
       })
 
       afterEach(() => {
@@ -388,7 +406,7 @@ describe('lib/cloud/api', () => {
 
         return prodApi.sendPreflight({ projectId: 'abc123' })
         .then((ret) => {
-          expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+          expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
         })
       })
     })
@@ -399,20 +417,20 @@ describe('lib/cloud/api', () => {
 
       beforeEach(() => {
         prevEnv = process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT
-        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = String(configuredTimeout)
       })
 
       afterEach(() => {
         process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = prevEnv
-        api.rp.post.restore()
+        vi.mocked(api.rp.post).mockRestore()
       })
 
       it('makes the initial request with the number set in the env', () => {
-        sinon.stub(api.rp, 'post').resolves({})
+        vi.spyOn(api.rp, 'post').mockResolvedValue({})
 
         return api.sendPreflight({})
         .then(() => {
-          expect(api.rp.post).to.be.calledWithMatch({ timeout: configuredTimeout })
+          expect(api.rp.post).toHaveBeenCalledWith(expect.objectContaining({ timeout: configuredTimeout }))
         })
       })
     })
@@ -438,7 +456,7 @@ describe('lib/cloud/api', () => {
           scopeProxy.done()
           scopeApi.done()
 
-          expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+          expect(err.message).toBe('Error: ESOCKETTIMEDOUT')
         })
       })
 
@@ -457,8 +475,8 @@ describe('lib/cloud/api', () => {
           scopeProxy.done()
           scopeApi.done()
 
-          expect(err).not.to.have.property('statusCode')
-          expect(err).to.contain({
+          expect(err).not.toHaveProperty('statusCode')
+          expect(err).toMatchObject({
             name: 'RequestError',
             message: 'Error: 2nd request error',
           })
@@ -480,7 +498,7 @@ describe('lib/cloud/api', () => {
           scopeProxy.done()
           scopeApi.done()
 
-          expect(err).to.contain({
+          expect(err).toMatchObject({
             name: 'StatusCodeError',
             statusCode: 500,
           })
@@ -504,7 +522,7 @@ describe('lib/cloud/api', () => {
           scopeProxy.done()
           scopeApi.done()
 
-          expect(err).to.contain({
+          expect(err).toMatchObject({
             name: 'StatusCodeError',
             statusCode: 404,
           })
@@ -526,9 +544,9 @@ describe('lib/cloud/api', () => {
           scopeProxy.done()
           scopeApi.done()
 
-          expect(err).not.to.have.property('statusCode')
-          expect(err).to.have.property('name', 'DecryptionError')
-          expect(err).to.have.property('message', 'JWE Recipients missing or incorrect type')
+          expect(err).not.toHaveProperty('statusCode')
+          expect(err).toHaveProperty('name', 'DecryptionError')
+          expect(err).toHaveProperty('message', 'JWE Recipients missing or incorrect type')
         })
       })
 
@@ -547,9 +565,9 @@ describe('lib/cloud/api', () => {
           scopeProxy.done()
           scopeApi.done()
 
-          expect(err).not.to.have.property('statusCode')
-          expect(err).to.have.property('name', 'DecryptionError')
-          expect(err).to.have.property('message', 'General JWE must be an object')
+          expect(err).not.toHaveProperty('statusCode')
+          expect(err).toHaveProperty('name', 'DecryptionError')
+          expect(err).toHaveProperty('message', 'General JWE must be an object')
         })
       })
 
@@ -568,9 +586,9 @@ describe('lib/cloud/api', () => {
           scopeProxy.done()
           scopeApi.done()
 
-          expect(err).not.to.have.property('statusCode')
-          expect(err).to.have.property('name', 'DecryptionError')
-          expect(err).to.have.property('message', 'General JWE must be an object')
+          expect(err).not.toHaveProperty('statusCode')
+          expect(err).toHaveProperty('name', 'DecryptionError')
+          expect(err).toHaveProperty('message', 'General JWE must be an object')
         })
       })
 
@@ -604,9 +622,9 @@ describe('lib/cloud/api', () => {
         })
         .catch((err) => {
           scopeProxy.done()
-          expect(scopeApi.isDone()).to.be.false
+          expect(scopeApi.isDone()).toBe(false)
 
-          expect(err).to.contain({
+          expect(err).toMatchObject({
             name: 'StatusCodeError',
             message: '412 - {"message":"Recording is not working","errors":["attempted to send invalid data"],"object":{"projectId":"cy12345"}}',
             statusCode: 412,
@@ -617,12 +635,15 @@ describe('lib/cloud/api', () => {
   })
 
   describe('.createRun', () => {
-    beforeEach(function () {
-      this.protocolManager = {
-        prepareAndSetupProtocol: sinon.stub(),
+    let protocolManager: { prepareAndSetupProtocol: Mock }
+    let buildProps
+
+    beforeEach(() => {
+      protocolManager = {
+        prepareAndSetupProtocol: vi.fn(),
       }
 
-      this.buildProps = {
+      buildProps = {
         group: null,
         parallel: null,
         ciBuildId: null,
@@ -653,7 +674,7 @@ describe('lib/cloud/api', () => {
       }
     })
 
-    it('POST /runs + returns runId', function () {
+    it('POST /runs + returns runId', () => {
       nock(API_BASEURL)
       .get('/capture-protocol/script/protocolStub.js')
       .reply(200, PROTOCOL_STUB_VALID.compressed, {
@@ -665,7 +686,7 @@ describe('lib/cloud/api', () => {
       .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
-      .post('/runs', this.buildProps)
+      .post('/runs', buildProps)
       .reply(200, {
         runId: 'new-run-id-123',
         capture: {
@@ -673,7 +694,6 @@ describe('lib/cloud/api', () => {
         },
       })
 
-      const protocolManager = this.protocolManager
       const project = {
         set protocolManager (val) {
           // don't override with the setter so that the protocol manager is always the same
@@ -697,18 +717,18 @@ describe('lib/cloud/api', () => {
       }
 
       return api.createRun({
-        ...this.buildProps,
+        ...buildProps,
         project,
       })
       .then((ret) => {
-        expect(ret).to.deep.eq({
+        expect(ret).toEqual({
           runId: 'new-run-id-123',
           capture: {
             url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
           },
         })
 
-        expect(this.protocolManager.prepareAndSetupProtocol).to.be.calledWith(
+        expect(protocolManager.prepareAndSetupProtocol).toHaveBeenCalledWith(
           PROTOCOL_STUB_VALID.value,
           {
             runId: 'new-run-id-123',
@@ -735,10 +755,10 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('POST /runs + returns runId with encryption', function () {
+    it('POST /runs + returns runId with encryption', () => {
       nock.cleanAll()
-      sinon.restore()
-      sinon.stub(os, 'platform').returns(OS_PLATFORM)
+      vi.restoreAllMocks()
+      vi.spyOn(os, 'platform').mockReturnValue(OS_PLATFORM)
 
       nock(API_BASEURL)
       .get('/capture-protocol/script/protocolStub.js')
@@ -761,7 +781,7 @@ describe('lib/cloud/api', () => {
         .matchHeader('x-cypress-version', pkg.version)
         .post('/runs')
         .reply(200, decryptReqBodyAndRespond({
-          reqBody: this.buildProps,
+          reqBody: buildProps,
           resBody: {
             runId: 'new-run-id-123',
             capture: {
@@ -771,7 +791,6 @@ describe('lib/cloud/api', () => {
         }))
       }))
 
-      const protocolManager = this.protocolManager
       const project = {
         set protocolManager (val) {
           // don't override with the setter so that the protocol manager is always the same
@@ -793,18 +812,18 @@ describe('lib/cloud/api', () => {
       }
 
       return api.createRun({
-        ...this.buildProps,
+        ...buildProps,
         project,
       })
       .then((ret) => {
-        expect(ret).to.deep.eq({
+        expect(ret).toEqual({
           runId: 'new-run-id-123',
           capture: {
             url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
           },
         })
 
-        expect(this.protocolManager.prepareAndSetupProtocol).to.be.calledWith(
+        expect(protocolManager.prepareAndSetupProtocol).toHaveBeenCalledWith(
           PROTOCOL_STUB_VALID.value,
           {
             runId: 'new-run-id-123',
@@ -831,7 +850,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('POST /runs does not call prepareAndSetupProtocol with invalid signature', function () {
+    it('POST /runs does not call prepareAndSetupProtocol with invalid signature', () => {
       nock(API_BASEURL)
       .get('/capture-protocol/script/protocolStub.js')
       .reply(200, PROTOCOL_STUB_VALID.compressed, {
@@ -843,7 +862,7 @@ describe('lib/cloud/api', () => {
       .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
-      .post('/runs', this.buildProps)
+      .post('/runs', buildProps)
       .reply(200, {
         runId: 'new-run-id-123',
         capture: {
@@ -851,7 +870,6 @@ describe('lib/cloud/api', () => {
         },
       })
 
-      const protocolManager = this.protocolManager
       const project = {
         set protocolManager (val) {
           // don't override with the setter so that the protocol manager is always the same
@@ -862,27 +880,27 @@ describe('lib/cloud/api', () => {
       }
 
       return api.createRun({
-        ...this.buildProps,
+        ...buildProps,
         project,
       })
       .then((ret) => {
-        expect(ret).to.deep.eq({
+        expect(ret).toEqual({
           runId: 'new-run-id-123',
           capture: {
             url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
           },
         })
 
-        expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
+        expect(protocolManager.prepareAndSetupProtocol).not.toHaveBeenCalled()
       })
     })
 
-    it('POST /runs failure formatting', function () {
+    it('POST /runs failure formatting', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
-      .post('/runs', this.buildProps)
+      .post('/runs', buildProps)
       .reply(422, {
         errors: {
           runId: ['is required'],
@@ -890,13 +908,13 @@ describe('lib/cloud/api', () => {
       })
 
       return api.createRun({
-        ...this.buildProps,
-        protocolManager: this.protocolManager,
+        ...buildProps,
+        protocolManager: protocolManager,
       })
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq(`\
+        expect(err.message).toBe(`\
 422
 
 {
@@ -908,7 +926,7 @@ describe('lib/cloud/api', () => {
 }\
 `)
 
-        expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
+        expect(protocolManager.prepareAndSetupProtocol).not.toHaveBeenCalled()
       })
     })
 
@@ -927,14 +945,13 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+        expect(err.message).toBe('Error: ESOCKETTIMEDOUT')
       })
     })
 
     it('sets timeout to 10 seconds', () => {
-      sinon.stub(api.rp, 'post').resolves({ runId: 'foo' })
+      vi.spyOn(api.rp, 'post').mockResolvedValue({ runId: 'foo' })
 
-      const protocolManager = this.protocolManager
       const project = {
         set protocolManager (val) {
           // don't override with the setter so that the protocol manager is always the same
@@ -946,31 +963,31 @@ describe('lib/cloud/api', () => {
 
       return api.createRun({ project })
       .then(() => {
-        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+        expect(api.rp.post).toHaveBeenCalledWith(expect.objectContaining({ timeout: 60000 }))
       })
     })
 
-    it('tags errors', function () {
+    it('tags errors', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '4')
       .matchHeader('authorization', 'Bearer auth-token-123')
       .matchHeader('accept-encoding', /gzip/)
-      .post('/runs', this.buildProps)
+      .post('/runs', buildProps)
       .reply(500, {})
 
       return api.createRun({
-        ...this.buildProps,
-        protocolManager: this.protocolManager,
+        ...buildProps,
+        protocolManager: protocolManager,
       })
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err).to.have.property('isApiError', true)
-        expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
+        expect(err).toHaveProperty('isApiError', true)
+        expect(protocolManager.prepareAndSetupProtocol).not.toHaveBeenCalled()
       })
     })
 
-    it('tags errors on /preflight', function () {
+    it('tags errors on /preflight', () => {
       preflightNock(API_BASEURL)
       .times(2)
       .reply(500, {})
@@ -980,14 +997,17 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
   })
 
   describe('.postInstanceTests', () => {
-    beforeEach(function () {
-      this.props = {
+    let props
+    let bodyProps
+
+    beforeEach(() => {
+      props = {
         runId: 'run-id-123',
         instanceId: 'instance-id-123',
         config: {},
@@ -995,24 +1015,24 @@ describe('lib/cloud/api', () => {
         hooks: [],
       }
 
-      this.bodyProps = _.omit(this.props, 'instanceId', 'runId')
+      bodyProps = _.omit(props, 'instanceId', 'runId')
     })
 
-    it('POSTs /instances/:id/tests', function () {
+    it('POSTs /instances/:id/tests', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
-      .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-cypress-run-id', props.runId)
       .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
-      .post('/instances/instance-id-123/tests', this.bodyProps)
+      .post('/instances/instance-id-123/tests', bodyProps)
       .reply(200)
 
-      return api.postInstanceTests(this.props)
+      return api.postInstanceTests(props)
     })
 
-    it('POSTs /instances/:id/tests strips arbitrarily large config values', function () {
-      this.props.config = {
+    it('POSTs /instances/:id/tests strips arbitrarily large config values', () => {
+      props.config = {
         projectId: 'abcd1234',
         customBloat: { nested: 'x'.repeat(5000) },
         _myPluginState: { foo: 'bar' },
@@ -1036,40 +1056,40 @@ describe('lib/cloud/api', () => {
         },
       }
 
-      this.props.config.rawJson = _.cloneDeep(this.props.config)
+      props.config.rawJson = _.cloneDeep(props.config)
 
-      const expectedConfig = filterRuntimeConfigForRecording(this.props.config)
+      const expectedConfig = filterRuntimeConfigForRecording(props.config)
 
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
-      .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-cypress-run-id', props.runId)
       .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/tests', {
-        ...this.bodyProps,
+        ...bodyProps,
         config: expectedConfig,
       })
       .reply(200)
 
-      expect(expectedConfig.projectId).to.eq('abcd1234')
-      expect(expectedConfig.env).to.eql({
+      expect(expectedConfig.projectId).toBe('abcd1234')
+      expect(expectedConfig.env).toEqual({
         NUMERIC_VALUE: `omitted: number`,
         TRUTHY_VALUE: `omitted: boolean`,
         SOME_REALLY_LONG_VALUE: `omitted: string`,
       })
 
-      expect(expectedConfig.resolved).to.be.undefined
-      expect(expectedConfig.devServer.webpackConfig).to.equal('omitted')
-      expect(expectedConfig.devServer.viteConfig).to.equal('omitted')
-      expect(expectedConfig.customBloat).to.be.undefined
-      expect(expectedConfig._myPluginState).to.be.undefined
+      expect(expectedConfig.resolved).toBeUndefined()
+      expect(expectedConfig.devServer.webpackConfig).toBe('omitted')
+      expect(expectedConfig.devServer.viteConfig).toBe('omitted')
+      expect(expectedConfig.customBloat).toBeUndefined()
+      expect(expectedConfig._myPluginState).toBeUndefined()
 
-      return api.postInstanceTests(this.props)
+      return api.postInstanceTests(props)
     })
 
-    it('POSTs /instances/:id/tests keeps allowlisted component config keys', function () {
-      this.props.config = {
+    it('POSTs /instances/:id/tests keeps allowlisted component config keys', () => {
+      props.config = {
         projectId: 'abcd1234',
         indexHtmlFile: 'cypress/support/component-index.html',
         devServerConfig: {
@@ -1080,11 +1100,11 @@ describe('lib/cloud/api', () => {
         },
       }
 
-      const expectedConfig = filterRuntimeConfigForRecording(this.props.config)
+      const expectedConfig = filterRuntimeConfigForRecording(props.config)
 
-      expect(expectedConfig.projectId).to.eq('abcd1234')
-      expect(expectedConfig.indexHtmlFile).to.eq('cypress/support/component-index.html')
-      expect(expectedConfig.devServerConfig).to.eql({
+      expect(expectedConfig.projectId).toBe('abcd1234')
+      expect(expectedConfig.indexHtmlFile).toBe('cypress/support/component-index.html')
+      expect(expectedConfig.devServerConfig).toEqual({
         framework: 'react',
         bundler: 'webpack',
         mode: 'omitted: string',
@@ -1093,17 +1113,17 @@ describe('lib/cloud/api', () => {
 
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
-      .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-cypress-run-id', props.runId)
       .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/tests', {
-        ...this.bodyProps,
+        ...bodyProps,
         config: expectedConfig,
       })
       .reply(200)
 
-      return api.postInstanceTests(this.props)
+      return api.postInstanceTests(props)
     })
 
     it('PUT /instances/:id failure formatting', () => {
@@ -1122,7 +1142,7 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq(`\
+        expect(err.message).toBe(`\
 422
 
 {
@@ -1152,40 +1172,43 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+        expect(err.message).toBe('Error: ESOCKETTIMEDOUT')
       })
     })
 
     it('sets timeout to 60 seconds', () => {
-      sinon.stub(api.rp, 'post').resolves()
+      vi.spyOn(api.rp, 'post').mockResolvedValue(undefined)
 
       return api.postInstanceTests({})
       .then(() => {
-        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+        expect(api.rp.post).toHaveBeenCalledWith(expect.objectContaining({ timeout: 60000 }))
       })
     })
 
-    it('tags errors', function () {
+    it('tags errors', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
       .matchHeader('authorization', 'Bearer auth-token-123')
       .matchHeader('accept-encoding', /gzip/)
-      .post('/instances/instance-id-123/tests', this.bodyProps)
+      .post('/instances/instance-id-123/tests', bodyProps)
       .reply(500, {})
 
-      return api.postInstanceTests(this.props)
+      return api.postInstanceTests(props)
       .then(() => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
   })
 
   describe('.postInstanceResults', () => {
-    beforeEach(function () {
-      this.updateProps = {
+    let updateProps
+    let postProps
+
+    beforeEach(() => {
+      updateProps = {
         runId: 'run-id-123',
         instanceId: 'instance-id-123',
         stats: {},
@@ -1195,20 +1218,20 @@ describe('lib/cloud/api', () => {
         reporterStats: {},
       }
 
-      this.postProps = _.pick(this.updateProps, 'stats', 'video', 'screenshots', 'reporterStats')
+      postProps = _.pick(updateProps, 'stats', 'video', 'screenshots', 'reporterStats')
     })
 
-    it('POSTs /instances/:id/results', function () {
+    it('POSTs /instances/:id/results', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
-      .matchHeader('x-cypress-run-id', this.updateProps.runId)
+      .matchHeader('x-cypress-run-id', updateProps.runId)
       .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
-      .post('/instances/instance-id-123/results', this.postProps)
+      .post('/instances/instance-id-123/results', postProps)
       .reply(200)
 
-      return api.postInstanceResults(this.updateProps)
+      return api.postInstanceResults(updateProps)
     })
 
     it('PUT /instances/:id failure formatting', () => {
@@ -1227,7 +1250,7 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq(`\
+        expect(err.message).toBe(`\
 422
 
 {
@@ -1257,33 +1280,33 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+        expect(err.message).toBe('Error: ESOCKETTIMEDOUT')
       })
     })
 
     it('sets timeout to 60 seconds', () => {
-      sinon.stub(api.rp, 'post').resolves()
+      vi.spyOn(api.rp, 'post').mockResolvedValue(undefined)
 
       return api.postInstanceResults({})
       .then(() => {
-        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+        expect(api.rp.post).toHaveBeenCalledWith(expect.objectContaining({ timeout: 60000 }))
       })
     })
 
-    it('tags errors', function () {
+    it('tags errors', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
       .matchHeader('authorization', 'Bearer auth-token-123')
       .matchHeader('accept-encoding', /gzip/)
-      .post('/instances/instance-id-123/results', this.postProps)
+      .post('/instances/instance-id-123/results', postProps)
       .reply(500, {})
 
-      return api.postInstanceResults(this.updateProps)
+      return api.postInstanceResults(updateProps)
       .then(() => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
   })
@@ -1322,7 +1345,7 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq(`\
+        expect(err.message).toBe(`\
 422
 
 {
@@ -1351,16 +1374,16 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+        expect(err.message).toBe('Error: ESOCKETTIMEDOUT')
       })
     })
 
     it('sets timeout to 60 seconds', () => {
-      sinon.stub(api.rp, 'put').resolves()
+      vi.spyOn(api.rp, 'put').mockResolvedValue(undefined)
 
       return api.updateInstanceStdout({})
       .then(() => {
-        expect(api.rp.put).to.be.calledWithMatch({ timeout: 60000 })
+        expect(api.rp.put).toHaveBeenCalledWith(expect.objectContaining({ timeout: 60000 }))
       })
     })
 
@@ -1381,7 +1404,7 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
   })
@@ -1389,7 +1412,7 @@ describe('lib/cloud/api', () => {
   describe('.getAuthUrls', () => {
     it('GET /auth + returns the urls', () => {
       return api.getAuthUrls().then((urls) => {
-        expect(urls).to.deep.eq(AUTH_URLS)
+        expect(urls).toEqual(AUTH_URLS)
       })
     })
 
@@ -1407,7 +1430,7 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
 
@@ -1417,14 +1440,14 @@ describe('lib/cloud/api', () => {
         // nock will throw if this makes a second HTTP call
         return api.getAuthUrls()
       }).then((urls) => {
-        expect(urls).to.deep.eq(AUTH_URLS)
+        expect(urls).toEqual(AUTH_URLS)
       })
     })
   })
 
   describe('.postLogout', () => {
     beforeEach(() => {
-      return sinon.stub(machineId, 'machineId').resolves('foo')
+      vi.spyOn(machineId, 'machineId').mockResolvedValue('foo')
     })
 
     it('POSTs /logout', () => {
@@ -1455,14 +1478,16 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
   })
 
   describe('.createCrashReport', () => {
-    beforeEach(function () {
-      this.setup = (body, authToken, delay = 0) => {
+    let setup: (body: Record<string, any>, authToken: string, delay?: number) => nock.Scope
+
+    beforeEach(() => {
+      setup = (body, authToken, delay = 0) => {
         return nock(API_BASEURL)
         .matchHeader('x-os-name', OS_PLATFORM)
         .matchHeader('x-cypress-version', pkg.version)
@@ -1473,30 +1498,30 @@ describe('lib/cloud/api', () => {
       }
     })
 
-    it('POSTs /exceptions', function () {
-      this.setup({ foo: 'bar' }, 'auth-token-123')
+    it('POSTs /exceptions', () => {
+      setup({ foo: 'bar' }, 'auth-token-123')
 
       return api.createCrashReport({ foo: 'bar' }, 'auth-token-123')
     })
 
-    it('by default times outs after 3 seconds', function () {
+    it('by default times outs after 3 seconds', () => {
       // return our own specific promise
       // so we can spy on the timeout function
       const p = Promise.resolve({})
 
-      sinon.spy(p, 'timeout')
-      sinon.stub(api.rp, 'post').returns(p)
+      vi.spyOn(p, 'timeout')
+      vi.spyOn(api.rp, 'post').mockReturnValue(p)
 
-      this.setup({ foo: 'bar' }, 'auth-token-123')
+      setup({ foo: 'bar' }, 'auth-token-123')
 
       return api.createCrashReport({ foo: 'bar' }, 'auth-token-123').then(() => {
-        expect(p.timeout).to.be.calledWith(3000)
+        expect(p.timeout).toHaveBeenCalledWith(3000)
       })
     })
 
-    it('times out after exceeding timeout', function () {
+    it('times out after exceeding timeout', () => {
       // force our connection to be delayed 5 seconds
-      this.setup({ foo: 'bar' }, 'auth-token-123', 5000)
+      setup({ foo: 'bar' }, 'auth-token-123', 5000)
 
       // and set the timeout to only be 50ms
       return api.createCrashReport({ foo: 'bar' }, 'auth-token-123', 50)
@@ -1519,7 +1544,7 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err).to.have.property('isApiError', true)
+        expect(err).toHaveProperty('isApiError', true)
       })
     })
   })
@@ -1528,72 +1553,63 @@ describe('lib/cloud/api', () => {
     beforeEach(() => {
       process.env.DISABLE_API_RETRIES = ''
 
-      return sinon.stub(Promise, 'delay').resolves()
+      vi.spyOn(Promise, 'delay').mockResolvedValue(undefined)
     })
 
     it('attempts passed-in function', () => {
-      const fn = sinon.stub()
+      const fn = vi.fn()
 
       return api.retryWithBackoff(fn).then(() => {
-        expect(fn).to.be.called
+        expect(fn).toHaveBeenCalled()
       })
     })
 
     it('retries if function times out', () => {
-      const fn = sinon.stub()
-      .rejects(new Promise.TimeoutError())
-
-      fn.onCall(1).resolves()
+      const fn = rejectsExceptOnCall(new Promise.TimeoutError(), 1)
 
       return api.retryWithBackoff(fn)
       .then(() => {
-        expect(fn).to.be.calledTwice
-        expect(fn.firstCall.args[0]).eq(0)
-        expect(fn.secondCall.args[0]).eq(1)
+        expect(fn).toHaveBeenCalledTimes(2)
+        expect(fn.mock.calls[0][0]).toBe(0)
+        expect(fn.mock.calls[1][0]).toBe(1)
       })
     })
 
     it('retries on 5xx errors', () => {
-      const fn1 = sinon.stub().rejects(makeError({ statusCode: 500 }))
+      const fn1 = rejectsExceptOnCall(makeError({ statusCode: 500 }), 1)
 
-      fn1.onCall(1).resolves()
-
-      const fn2 = sinon.stub().rejects(makeError({ statusCode: 599 }))
-
-      fn2.onCall(1).resolves()
+      const fn2 = rejectsExceptOnCall(makeError({ statusCode: 599 }), 1)
 
       return api.retryWithBackoff(fn1)
       .then(() => {
-        expect(fn1).to.be.calledTwice
+        expect(fn1).toHaveBeenCalledTimes(2)
 
         return api.retryWithBackoff(fn2)
       }).then(() => {
-        expect(fn2).to.be.calledTwice
+        expect(fn2).toHaveBeenCalledTimes(2)
       })
     })
 
     it('retries on error without status code', () => {
-      const fn = sinon.stub().rejects(makeError())
-
-      fn.onCall(1).resolves()
+      const fn = rejectsExceptOnCall(makeError(), 1)
 
       return api.retryWithBackoff(fn)
       .then(() => {
-        expect(fn).to.be.calledTwice
+        expect(fn).toHaveBeenCalledTimes(2)
       })
     })
 
     it('does not retry on non-5xx errors', () => {
-      const fn1 = sinon.stub().rejects(makeError({ message: '499 error', statusCode: 499 }))
+      const fn1 = vi.fn().mockRejectedValue(makeError({ message: '499 error', statusCode: 499 }))
 
-      const fn2 = sinon.stub().rejects(makeError({ message: '600 error', statusCode: 600 }))
+      const fn2 = vi.fn().mockRejectedValue(makeError({ message: '600 error', statusCode: 600 }))
 
       return api.retryWithBackoff(fn1)
       .then(() => {
         throw new Error('Should not resolve 499 error')
       })
       .catch((err) => {
-        expect(err.message).to.equal('499 error')
+        expect(err.message).toBe('499 error')
 
         return api.retryWithBackoff(fn2)
       })
@@ -1601,71 +1617,67 @@ describe('lib/cloud/api', () => {
         throw new Error('Should not resolve 600 error')
       })
       .catch((err) => {
-        expect(err.message).to.equal('600 error')
+        expect(err.message).toBe('600 error')
       })
     })
 
     it('does not retry if it is a non retriable cert error', () => {
-      const fn1 = sinon.stub().rejects(makeError({ message: '600 error', statusCode: 600, cause: { code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' } }))
+      const fn1 = vi.fn().mockRejectedValue(makeError({ message: '600 error', statusCode: 600, cause: { code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' } }))
 
       return api.retryWithBackoff(fn1)
       .then(() => {
         throw new Error('Should not resolve 600 error')
       })
       .catch((err) => {
-        expect(err.message).to.equal('600 error')
+        expect(err.message).toBe('600 error')
       })
     })
 
     it('backs off with strategy: 30s, 60s, 2m', () => {
-      const fn = sinon.stub().rejects(new Promise.TimeoutError())
-
-      fn.onCall(3).resolves()
+      const fn = rejectsExceptOnCall(new Promise.TimeoutError(), 3)
 
       return api.retryWithBackoff(fn).then(() => {
-        expect(Promise.delay).to.be.calledThrice
-        expect(Promise.delay.firstCall).to.be.calledWith(30 * 1000)
-        expect(Promise.delay.secondCall).to.be.calledWith(60 * 1000)
+        expect(Promise.delay).toHaveBeenCalledTimes(3)
+        expect(Promise.delay).toHaveBeenNthCalledWith(1, 30 * 1000)
+        expect(Promise.delay).toHaveBeenNthCalledWith(2, 60 * 1000)
 
-        expect(Promise.delay.thirdCall).to.be.calledWith(2 * 60 * 1000)
+        expect(Promise.delay).toHaveBeenNthCalledWith(3, 2 * 60 * 1000)
       })
     })
 
     it('fails after third retry fails', () => {
-      const fn = sinon.stub().rejects(makeError({ message: '500 error', statusCode: 500 }))
+      const fn = vi.fn().mockRejectedValue(makeError({ message: '500 error', statusCode: 500 }))
 
       return api.retryWithBackoff(fn)
       .then(() => {
         throw new Error('Should not resolve')
       }).catch((err) => {
-        expect(err.message).to.equal('500 error')
+        expect(err.message).toBe('500 error')
       })
     })
 
     it('calls errors.warning before each retry', () => {
       const err = makeError({ message: '500 error', statusCode: 500 })
 
-      sinon.spy(errors, 'warning')
-      const fn = sinon.stub().rejects(err)
-
-      fn.onCall(3).resolves()
+      vi.spyOn(errors, 'warning')
+      const fn = rejectsExceptOnCall(err, 3)
 
       return api.retryWithBackoff(fn).then(() => {
-        expect(errors.warning).to.be.calledThrice
-        expect(errors.warning.firstCall.args[0]).to.eql('CLOUD_API_RESPONSE_FAILED_RETRYING')
-        expect(errors.warning.firstCall.args[1]).to.eql({
+        expect(errors.warning).toHaveBeenCalledTimes(3)
+        expect(vi.mocked(errors.warning).mock.calls[0][0]).toEqual('CLOUD_API_RESPONSE_FAILED_RETRYING')
+        expect(vi.mocked(errors.warning).mock.calls[0][1]).toEqual({
           delay: '30 seconds',
           tries: 3,
           response: err,
         })
 
-        expect(errors.warning.secondCall.args[1]).to.eql({
+        expect(vi.mocked(errors.warning).mock.calls[1][1]).toEqual({
           delay: '1 minute',
           tries: 2,
           response: err,
         })
 
-        expect(errors.warning.thirdCall.args[1]).to.eql({
+        expect(vi.mocked(errors.warning).mock.calls[2][1]).toEqual({
           delay: '2 minutes',
           tries: 1,
           response: err,
@@ -1676,25 +1688,26 @@ describe('lib/cloud/api', () => {
     it('does not call errors.warning if displayRetryErrors is false', () => {
       const err = makeError({ message: '500 error', statusCode: 500 })
 
-      sinon.spy(errors, 'warning')
-      const fn = sinon.stub().rejects(err)
-
-      fn.onCall(3).resolves()
+      vi.spyOn(errors, 'warning')
+      const fn = rejectsExceptOnCall(err, 3)
 
       return api.retryWithBackoff(fn, { displayRetryErrors: false }).then(() => {
-        expect(errors.warning).to.not.be.called
+        expect(errors.warning).not.toHaveBeenCalled()
       })
     })
   })
 
   describe('.updateInstanceArtifacts', () => {
-    beforeEach(function () {
-      this.artifactOptions = {
+    let artifactOptions
+    let artifactProps
+
+    beforeEach(() => {
+      artifactOptions = {
         runId: 'run-id-123',
         instanceId: 'instance-id-123',
       }
 
-      this.artifactProps = {
+      artifactProps = {
         screenshots: [{
           url: `http://localhost:1234/screenshots/upload/instance-id-123/a877e957-f90e-4ba4-9fa8-569812f148c4.png`,
           uploadSize: 100,
@@ -1714,21 +1727,21 @@ describe('lib/cloud/api', () => {
       // TODO: add schema validation
     })
 
-    it('PUTs/instances/:id/artifacts', function () {
+    it('PUTs/instances/:id/artifacts', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
-      .matchHeader('x-cypress-run-id', this.artifactOptions.runId)
+      .matchHeader('x-cypress-run-id', artifactOptions.runId)
       .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123/artifacts', {
-        protocol: this.artifactProps.protocol,
-        screenshots: this.artifactProps.screenshots,
-        video: this.artifactProps.video,
+        protocol: artifactProps.protocol,
+        screenshots: artifactProps.screenshots,
+        video: artifactProps.video,
       })
       .reply(200)
 
-      return api.updateInstanceArtifacts(this.artifactOptions, this.artifactProps)
+      return api.updateInstanceArtifacts(artifactOptions, artifactProps)
     })
   })
 })
