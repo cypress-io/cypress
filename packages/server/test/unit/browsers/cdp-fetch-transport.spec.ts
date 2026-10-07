@@ -1,5 +1,6 @@
-const { expect, sinon } = require('../../spec_helper')
-
+import { isDeepStrictEqual } from 'util'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { Readable } from 'stream'
 import type { Protocol } from 'devtools-protocol'
 import { HttpIntercept } from '@packages/network-interception'
@@ -36,30 +37,81 @@ function createPausedRequest (options: {
   } as Protocol.Fetch.RequestPausedEvent
 }
 
+const anyArg = Symbol('anyArg')
+
+// expected arguments match a prefix of the call, so trailing arguments (e.g. a sessionId) are ignored
+function argsMatch (args: unknown[], expected: unknown[]) {
+  return expected.length <= args.length && expected.every((value, i) => value === anyArg || isDeepStrictEqual(args[i], value))
+}
+
+const callsMatching = (mock: Mock, expected: unknown[]) => mock.mock.calls.filter((call) => argsMatch(call, expected))
+
+const expectCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsMatching(mock, expected), `calls matching ${String(expected[0])}`).not.toHaveLength(0)
+}
+
+const expectNotCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsMatching(mock, expected), `calls matching ${String(expected[0])}`).toHaveLength(0)
+}
+
+const expectCalledOnceWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(mock).toHaveBeenCalledOnce()
+  expectCalledWith(mock, ...expected)
+}
+
+type SendRule = { args: unknown[], respond: () => unknown }
+
 function createClient () {
-  const send = sinon.stub().resolves({})
+  const rules: SendRule[] = []
+
+  // the most specific matching rule answers; among equally specific rules the latest one wins
+  const send = vi.fn((...args: unknown[]) => {
+    const rule = rules.filter((candidate) => argsMatch(args, candidate.args)).sort((a, b) => a.args.length - b.args.length).at(-1)
+
+    return rule ? rule.respond() : Promise.resolve({})
+  })
+
+  const sendWithArgs = (...args: unknown[]) => {
+    const define = (respond: () => unknown) => {
+      rules.push({ args, respond })
+    }
+
+    return {
+      resolves: (value: unknown) => define(() => Promise.resolve(value)),
+      rejects: (error: Error) => define(() => Promise.reject(error)),
+      returns: (value: unknown) => define(() => value),
+    }
+  }
 
   // resolveResponse eagerly fetches the body for every response pause;
   // give it a decodable default so tests that don't care about body content
   // don't have to stub it themselves
-  send.withArgs('Fetch.getResponseBody').resolves({ body: '', base64Encoded: false })
+  sendWithArgs('Fetch.getResponseBody').resolves({ body: '', base64Encoded: false })
 
   return {
     send,
-    on: sinon.stub(),
-    off: sinon.stub(),
+    sendWithArgs,
+    clearSendRules: () => {
+      rules.length = 0
+    },
+    on: vi.fn(),
+    off: vi.fn(),
   }
+}
+
+function handlersFor (client: ReturnType<typeof createClient>, event: string) {
+  return client.on.mock.calls.filter((call) => call[0] === event).map((call) => call[1])
 }
 
 // CDPNetworkExtraInfo (the Network.* extraInfo correlation) has its own spec;
 // the transport is tested against a stub of its interface.
 function createNetworkExtraInfo () {
   return {
-    start: sinon.stub(),
-    stop: sinon.stub(),
-    flush: sinon.stub(),
-    clear: sinon.stub(),
-    responseExtraInfo: sinon.stub().resolves(undefined),
+    start: vi.fn(),
+    stop: vi.fn(),
+    flush: vi.fn(),
+    clear: vi.fn(),
+    responseExtraInfo: vi.fn(async () => undefined),
   }
 }
 
@@ -100,8 +152,8 @@ function onLoadingFailed (client: ReturnType<typeof createClient>, event: {
   canceled?: boolean
   errorText?: string
 }, sessionId?: string) {
-  client.on.withArgs('Network.loadingFailed').getCalls().forEach((call) => {
-    call.args[1]({
+  handlersFor(client, 'Network.loadingFailed').forEach((handler) => {
+    handler({
       canceled: false,
       errorText: 'net::ERR_ABORTED',
       type: 'Fetch',
@@ -112,12 +164,10 @@ function onLoadingFailed (client: ReturnType<typeof createClient>, event: {
 
 async function startTransport (transport: CdpFetchTransport, client: ReturnType<typeof createClient>) {
   await transport.start()
-  client.send.resetHistory()
+  client.send.mockClear()
 
   return (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => {
-    return Promise.all(client.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
-      const handler = call.args[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void
-
+    return Promise.all(handlersFor(client, 'Fetch.requestPaused').map((handler: (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void) => {
       return handler(event, sessionId)
     }))
   }
@@ -180,61 +230,62 @@ function captureRawResponseIntercept () {
 }
 
 describe('CdpFetchTransport', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   describe('toNetworkError', () => {
     it('reports a refused connection the way Node does', () => {
       const err = toNetworkError('http://127.0.0.1:3333/should-err?_=1', 'ConnectionRefused') as Error & { code: string }
 
-      expect(err.message).to.equal('connect ECONNREFUSED 127.0.0.1:3333')
-      expect(err.code).to.equal('ECONNREFUSED')
+      expect(err.message).toBe('connect ECONNREFUSED 127.0.0.1:3333')
+      expect(err.code).toBe('ECONNREFUSED')
     })
 
     it('infers the default port from the scheme when the URL omits it', () => {
-      expect(toNetworkError('https://example.test/thing', 'ConnectionRefused').message)
-      .to.equal('connect ECONNREFUSED example.test:443')
+      expect(toNetworkError('https://example.test/thing', 'ConnectionRefused').message).toBe('connect ECONNREFUSED example.test:443')
 
-      expect(toNetworkError('http://example.test/thing', 'ConnectionRefused').message)
-      .to.equal('connect ECONNREFUSED example.test:80')
+      expect(toNetworkError('http://example.test/thing', 'ConnectionRefused').message).toBe('connect ECONNREFUSED example.test:80')
     })
 
     it('unbrackets an IPv6 literal, matching Node', () => {
-      expect(toNetworkError('http://[::1]:3333/x', 'ConnectionRefused').message)
-      .to.equal('connect ECONNREFUSED ::1:3333')
+      expect(toNetworkError('http://[::1]:3333/x', 'ConnectionRefused').message).toBe('connect ECONNREFUSED ::1:3333')
     })
 
     it('carries a timeout code the driver classifies as a responseTimeout failure', () => {
       const err = toNetworkError('http://example.test:8080/x', 'TimedOut') as Error & { code: string }
 
-      expect(err.message).to.equal('connect ETIMEDOUT example.test:8080')
-      expect(err.code).to.equal('ETIMEDOUT')
+      expect(err.message).toBe('connect ETIMEDOUT example.test:8080')
+      expect(err.code).toBe('ETIMEDOUT')
     })
 
     it('reports a DNS failure against the host alone', () => {
       const err = toNetworkError('http://nope.invalid/x', 'NameNotResolved') as Error & { code: string }
 
-      expect(err.message).to.equal('getaddrinfo ENOTFOUND nope.invalid')
-      expect(err.code).to.equal('ENOTFOUND')
+      expect(err.message).toBe('getaddrinfo ENOTFOUND nope.invalid')
+      expect(err.code).toBe('ENOTFOUND')
     })
 
     it('omits the address for reasons Node reports without one', () => {
       const err = toNetworkError('http://example.test/x', 'ConnectionReset') as Error & { code: string }
 
-      expect(err.message).to.equal('read ECONNRESET')
-      expect(err.code).to.equal('ECONNRESET')
+      expect(err.message).toBe('read ECONNRESET')
+      expect(err.code).toBe('ECONNRESET')
     })
 
     // Inventing a Node code for these would misreport what the browser saw.
     it('falls back to naming the CDP reason when there is no Node equivalent', () => {
       const err = toNetworkError('http://example.test/x', 'BlockedByClient') as Error & { code?: string }
 
-      expect(err.message).to.equal('CDP Fetch response failed for http://example.test/x: BlockedByClient')
-      expect(err.code).to.be.undefined
+      expect(err.message).toBe('CDP Fetch response failed for http://example.test/x: BlockedByClient')
+      expect(err.code).toBeUndefined()
     })
 
     it('still produces a coded error when the URL cannot be parsed', () => {
       const err = toNetworkError('not a url', 'ConnectionRefused') as Error & { code: string }
 
-      expect(err.message).to.equal('connect ECONNREFUSED')
-      expect(err.code).to.equal('ECONNREFUSED')
+      expect(err.message).toBe('connect ECONNREFUSED')
+      expect(err.code).toBe('ECONNREFUSED')
     })
   })
 
@@ -250,7 +301,7 @@ describe('CdpFetchTransport', () => {
 
       const request = codec.decodeRequest(transportRequest)
 
-      expect(request).to.deep.equal({
+      expect(request).toEqual({
         body: undefined,
         headers: {},
         id: 'network-1',
@@ -270,7 +321,7 @@ describe('CdpFetchTransport', () => {
         resourceType: 'xhr' as const,
       }
 
-      expect(codec.decodeRequest(transportRequest).resourceType).to.equal('xhr')
+      expect(codec.decodeRequest(transportRequest).resourceType).toBe('xhr')
     })
 
     it('encodes neutral request URL mutations onto the CDP transport context', () => {
@@ -289,7 +340,7 @@ describe('CdpFetchTransport', () => {
         url: 'https://example.test/mutated',
       })
 
-      expect(transportRequest.url).to.equal('https://example.test/mutated')
+      expect(transportRequest.url).toBe('https://example.test/mutated')
     })
 
     it('encodes neutral request header, method, and body mutations onto the CDP transport context', () => {
@@ -317,7 +368,7 @@ describe('CdpFetchTransport', () => {
         body: 'name=value',
       })
 
-      expect(transportRequest).to.deep.include({
+      expect(transportRequest).toEqual(expect.objectContaining({
         method: 'POST',
         postData: 'name=value',
         headers: {
@@ -326,7 +377,7 @@ describe('CdpFetchTransport', () => {
           authorization: 'Basic abc123',
           cookie: 'a=1; b=2',
         },
-      })
+      }))
     })
 
     // The net-stubbing pipeline hands every request back with a string body, so
@@ -349,7 +400,7 @@ describe('CdpFetchTransport', () => {
         body: '',
       })
 
-      expect(transportRequest).not.to.have.property('postData')
+      expect(transportRequest).not.toHaveProperty('postData')
     })
 
     it('encodes an emptied body when the pause carried one, so the change reaches the origin', () => {
@@ -369,7 +420,7 @@ describe('CdpFetchTransport', () => {
         body: '',
       })
 
-      expect(transportRequest.postData).to.equal('')
+      expect(transportRequest.postData).toBe('')
     })
 
     it('encodes a non-empty body onto a request the browser paused without one', () => {
@@ -388,7 +439,7 @@ describe('CdpFetchTransport', () => {
         body: 'added',
       })
 
-      expect(transportRequest).to.have.property('postData', 'added')
+      expect(transportRequest).toHaveProperty('postData', 'added')
     })
 
     it('decodes the body from postDataEntries so binary payloads keep their bytes', () => {
@@ -403,7 +454,7 @@ describe('CdpFetchTransport', () => {
         postDataEntries: [{ bytes: body.toString('base64') }],
       }
 
-      expect(codec.decodeRequest(transportRequest).body).to.deep.equal(body)
+      expect(codec.decodeRequest(transportRequest).body).toEqual(body)
     })
 
     it('concatenates every postDataEntries entry, as a multipart body arrives split', () => {
@@ -417,7 +468,7 @@ describe('CdpFetchTransport', () => {
         postDataEntries: parts.map((part) => ({ bytes: part.toString('base64') })),
       }
 
-      expect(codec.decodeRequest(transportRequest).body).to.deep.equal(Buffer.concat(parts))
+      expect(codec.decodeRequest(transportRequest).body).toEqual(Buffer.concat(parts))
     })
 
     it('falls back to postData when the pause carries no entries', () => {
@@ -430,7 +481,7 @@ describe('CdpFetchTransport', () => {
         postData: 'name=value',
       }
 
-      expect(codec.decodeRequest(transportRequest).body).to.equal('name=value')
+      expect(codec.decodeRequest(transportRequest).body).toBe('name=value')
     })
 
     // Chrome describes a body it never materialized (a ReadableStream upload)
@@ -447,7 +498,7 @@ describe('CdpFetchTransport', () => {
         postDataEntries: [{}],
       }
 
-      expect(codec.decodeRequest(transportRequest).body).to.be.undefined
+      expect(codec.decodeRequest(transportRequest).body).toBeUndefined()
     })
 
     it('does not re-encode a body the pipeline handed back untouched', () => {
@@ -466,8 +517,8 @@ describe('CdpFetchTransport', () => {
 
       codec.encodeRequest({ ...request, headers: { foo: 'bar' } })
 
-      expect(transportRequest).not.to.have.property('postDataBuffer')
-      expect(transportRequest.postData).to.equal(body.toString('utf8'))
+      expect(transportRequest).not.toHaveProperty('postDataBuffer')
+      expect(transportRequest.postData).toBe(body.toString('utf8'))
     })
 
     // net-stubbing hands a body back as a string whenever the content-type
@@ -490,8 +541,8 @@ describe('CdpFetchTransport', () => {
       // what handle-intercept-request does for a body it classifies as utf8
       codec.encodeRequest({ ...request, body: (request.body as Buffer).toString('utf8') })
 
-      expect(transportRequest).not.to.have.property('postDataBuffer')
-      expect(transportRequest.postData).to.equal('chrome-lossy-view')
+      expect(transportRequest).not.toHaveProperty('postDataBuffer')
+      expect(transportRequest.postData).toBe('chrome-lossy-view')
     })
 
     it('encodes an edited binary body as bytes', () => {
@@ -511,7 +562,7 @@ describe('CdpFetchTransport', () => {
 
       codec.encodeRequest({ ...request, body: edited })
 
-      expect(transportRequest.postDataBuffer).to.deep.equal(edited)
+      expect(transportRequest.postDataBuffer).toEqual(edited)
     })
 
     it('encodes an emptied body when only the entries recorded the pause body', () => {
@@ -530,7 +581,7 @@ describe('CdpFetchTransport', () => {
 
       codec.encodeRequest({ ...request, body: '' })
 
-      expect(transportRequest.postData).to.equal('')
+      expect(transportRequest.postData).toBe('')
     })
 
     it('encodes a binary body a handler emptied', () => {
@@ -549,8 +600,8 @@ describe('CdpFetchTransport', () => {
 
       codec.encodeRequest({ ...request, body: Buffer.alloc(0) })
 
-      expect(transportRequest.postDataBuffer).to.deep.equal(Buffer.alloc(0))
-      expect(transportRequest.postData).to.equal('')
+      expect(transportRequest.postDataBuffer).toEqual(Buffer.alloc(0))
+      expect(transportRequest.postData).toBe('')
     })
 
     it('round trips CDP response pauses through the neutral response shape', () => {
@@ -579,7 +630,7 @@ describe('CdpFetchTransport', () => {
 
       const response = codec.decodeResponse(transportResponse)
 
-      expect(response).to.deep.equal({
+      expect(response).toEqual({
         bodyStream: undefined,
         headers: {
           'content-type': 'text/plain',
@@ -595,7 +646,7 @@ describe('CdpFetchTransport', () => {
         url: 'https://example.test/response',
       })
 
-      expect(encoded.url).to.equal('https://example.test/response')
+      expect(encoded.url).toBe('https://example.test/response')
     })
 
     it('copies bodySkipped from the transport response onto the neutral response', () => {
@@ -620,7 +671,7 @@ describe('CdpFetchTransport', () => {
         bodySkipped: true,
       })
 
-      expect(response.bodySkipped).to.be.true
+      expect(response.bodySkipped).toBe(true)
     })
 
     // Shared by both cases below: decode a request/network-1 pair, then decode
@@ -656,7 +707,7 @@ describe('CdpFetchTransport', () => {
         captureStream,
       })
 
-      expect(response.captureStream).to.equal(captureStream)
+      expect(response.captureStream).toBe(captureStream)
     })
 
     it('leaves captureStream unset on the neutral response when the transport response has none', () => {
@@ -666,7 +717,7 @@ describe('CdpFetchTransport', () => {
 
       // pins the conditional spread — a `captureStream: undefined` key would
       // pass a bare undefined check
-      expect(response).to.not.have.property('captureStream')
+      expect(response).not.toHaveProperty('captureStream')
     })
 
     // SSE relies on this: an unchanged empty body must digest-match the empty
@@ -697,12 +748,12 @@ describe('CdpFetchTransport', () => {
 
       const encoded = codec.encodeResponse(response)
 
-      expect(encoded.fulfilled).to.be.false
-      expect(encoded.body).to.be.undefined
+      expect(encoded.fulfilled).toBe(false)
+      expect(encoded.body).toBeUndefined()
       // Unchanged headers are omitted so CDP keeps the browser's original set
       // rather than a reconstruction of it (same rule continueRequestHeaders
       // applies at the request stage).
-      expect(encoded.responseHeaders).to.be.undefined
+      expect(encoded.responseHeaders).toBeUndefined()
     })
 
     it('fulfills a skipped response when middleware sets a body', () => {
@@ -733,8 +784,8 @@ describe('CdpFetchTransport', () => {
         body: 'stubbed',
       })
 
-      expect(encoded.fulfilled).to.be.true
-      expect(encoded.body).to.equal(Buffer.from('stubbed').toString('base64'))
+      expect(encoded.fulfilled).toBe(true)
+      expect(encoded.body).toBe(Buffer.from('stubbed').toString('base64'))
     })
 
     // A body we cannot prove came from the origin has to be fulfilled, or a
@@ -769,12 +820,12 @@ describe('CdpFetchTransport', () => {
         body: 'origin',
       })
 
-      expect(encoded).to.deep.include({
+      expect(encoded).toEqual(expect.objectContaining({
         body: Buffer.from('origin').toString('base64'),
         fulfilled: true,
         responseCode: 200,
         responseStatusText: 'OK',
-      })
+      }))
     })
 
     it('encodes middleware short-circuits as fulfilled CDP responses', () => {
@@ -800,16 +851,16 @@ describe('CdpFetchTransport', () => {
         body: 'created',
       })
 
-      expect(encoded).to.deep.include({
+      expect(encoded).toEqual(expect.objectContaining({
         body: Buffer.from('created').toString('base64'),
         fulfilled: true,
         id: 'network-1',
         requestId: 'fetch-request',
         responseCode: 201,
         url: 'https://example.test/stubbed',
-      })
+      }))
 
-      expect(encoded.responseHeaders).to.deep.equal([{
+      expect(encoded.responseHeaders).toEqual([{
         name: 'content-type',
         value: 'text/plain',
       }, {
@@ -838,7 +889,7 @@ describe('CdpFetchTransport', () => {
           id: 'network-1',
           url: 'https://example.test/mutated',
         })
-      }).to.throw()
+      }).toThrow()
     })
   })
 
@@ -861,7 +912,7 @@ describe('CdpFetchTransport', () => {
 
       await transport.start()
 
-      expect(client.send).to.have.been.calledWith('Fetch.enable', FETCH_PATTERNS, undefined)
+      expectCalledWith(client.send, 'Fetch.enable', FETCH_PATTERNS, undefined)
     })
 
     it('enables a service worker session with the same patterns as its own session', async () => {
@@ -871,13 +922,13 @@ describe('CdpFetchTransport', () => {
       await transport.start()
       await transport.attachChildSession('sw-session')
 
-      const enableCalls = client.send.getCalls().filter((call) => call.args[0] === 'Fetch.enable')
+      const enableCalls = client.send.mock.calls.filter((call) => call[0] === 'Fetch.enable')
 
-      expect(enableCalls).to.have.length(2)
-      expect(enableCalls.map((call) => call.args[2])).to.deep.equal([undefined, 'sw-session'])
+      expect(enableCalls).toHaveLength(2)
+      expect(enableCalls.map((call) => call[2])).toEqual([undefined, 'sw-session'])
       // one pattern list for every session — not two that can drift apart
-      expect(enableCalls[1].args[1]).to.equal(enableCalls[0].args[1])
-      expect(enableCalls[1].args[1]).to.deep.equal(FETCH_PATTERNS)
+      expect(enableCalls[1][1]).toBe(enableCalls[0][1])
+      expect(enableCalls[1][1]).toEqual(FETCH_PATTERNS)
     })
 
     // The caller (CriClient) wires onChildTargetAttached before awaiting
@@ -891,9 +942,9 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const { transport } = createTransport(client)
 
-      await expect(transport.attachChildSession('sw-session')).to.be.rejected
+      await expect(transport.attachChildSession('sw-session')).rejects.toThrow()
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.enable')
+      expectNotCalledWith(client.send, 'Fetch.enable')
     })
 
     // The window above isn't the only shape this race takes: start() can
@@ -907,7 +958,7 @@ describe('CdpFetchTransport', () => {
 
       const ownEnable = Promise.withResolvers<any>()
 
-      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+      client.sendWithArgs('Fetch.enable', anyArg, undefined).returns(ownEnable.promise)
 
       const starting = transport.start()
       const attaching = transport.attachChildSession('sw-session')
@@ -916,14 +967,14 @@ describe('CdpFetchTransport', () => {
 
       // start() hasn't resolved yet - the child session's own enable must
       // not jump ahead of it
-      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+      expectNotCalledWith(client.send, 'Fetch.enable', anyArg, 'sw-session')
 
       ownEnable.resolve({})
 
       await starting
       await attaching
 
-      expect(client.send).to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+      expectCalledWith(client.send, 'Fetch.enable', anyArg, 'sw-session')
     })
 
     it('rejects an attach that was waiting on an in-flight start() that then fails', async () => {
@@ -932,7 +983,7 @@ describe('CdpFetchTransport', () => {
 
       const ownEnable = Promise.withResolvers<any>()
 
-      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+      client.sendWithArgs('Fetch.enable', anyArg, undefined).returns(ownEnable.promise)
 
       const starting = transport.start()
       const attaching = transport.attachChildSession('sw-session')
@@ -941,10 +992,10 @@ describe('CdpFetchTransport', () => {
 
       ownEnable.reject(new Error('ProtocolError: Inspected target closed'))
 
-      await expect(starting).to.be.rejected
-      await expect(attaching).to.be.rejected
+      await expect(starting).rejects.toThrow()
+      await expect(attaching).rejects.toThrow()
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+      expectNotCalledWith(client.send, 'Fetch.enable', anyArg, 'sw-session')
     })
 
     // stop() checks isStarted, which start() already flipped true before its
@@ -959,7 +1010,7 @@ describe('CdpFetchTransport', () => {
 
       const ownEnable = Promise.withResolvers<any>()
 
-      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+      client.sendWithArgs('Fetch.enable', anyArg, undefined).returns(ownEnable.promise)
 
       const starting = transport.start()
       const attaching = transport.attachChildSession('sw-session')
@@ -972,9 +1023,9 @@ describe('CdpFetchTransport', () => {
 
       await starting
 
-      await expect(attaching).to.be.rejected
+      await expect(attaching).rejects.toThrow()
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+      expectNotCalledWith(client.send, 'Fetch.enable', anyArg, 'sw-session')
     })
 
     // Narrower window than the one above: stop()'s own Fetch.disable can
@@ -989,7 +1040,7 @@ describe('CdpFetchTransport', () => {
 
       const ownEnable = Promise.withResolvers<any>()
 
-      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+      client.sendWithArgs('Fetch.enable', anyArg, undefined).returns(ownEnable.promise)
 
       const starting = transport.start()
       const attaching = transport.attachChildSession('sw-session')
@@ -998,7 +1049,7 @@ describe('CdpFetchTransport', () => {
 
       const fetchDisable = Promise.withResolvers<any>()
 
-      client.send.withArgs('Fetch.disable').returns(fetchDisable.promise)
+      client.sendWithArgs('Fetch.disable').returns(fetchDisable.promise)
 
       const stopping = transport.stop()
 
@@ -1011,9 +1062,9 @@ describe('CdpFetchTransport', () => {
       await starting
       await tick()
 
-      await expect(attaching).to.be.rejected
+      await expect(attaching).rejects.toThrow()
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+      expectNotCalledWith(client.send, 'Fetch.enable', anyArg, 'sw-session')
 
       fetchDisable.resolve({})
       await stopping
@@ -1025,11 +1076,10 @@ describe('CdpFetchTransport', () => {
 
       await transport.start()
 
-      client.send.withArgs('Fetch.enable', sinon.match.any, 'sw-session')
+      client.sendWithArgs('Fetch.enable', anyArg, 'sw-session')
       .rejects(new Error('ProtocolError: Inspected target closed'))
 
-      await expect(transport.attachChildSession('sw-session'))
-      .to.be.rejectedWith('Inspected target closed')
+      await expect(transport.attachChildSession('sw-session')).rejects.toThrow('Inspected target closed')
     })
 
     // The whole point of enabling per session rather than per transport: pauses
@@ -1050,7 +1100,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'sw-fetch-request',
       }, 'sw-session')
 
@@ -1063,7 +1113,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'sw-fetch-request',
         responseCode: 200,
       }, 'sw-session')
@@ -1082,14 +1132,14 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
       })
 
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
@@ -1124,18 +1174,18 @@ describe('CdpFetchTransport', () => {
 
     // A custom phrase must survive verbatim, not be replaced by the standard one.
     it('exposes the reason phrase the browser read off the wire as statusMessage', async () => {
-      expect(await interceptStatusMessage(200, 'Totally Fine')).to.equal('Totally Fine')
+      expect(await interceptStatusMessage(200, 'Totally Fine')).toBe('Totally Fine')
     })
 
     it('reports an empty statusMessage when the protocol carries no reason phrase', async () => {
-      expect(await interceptStatusMessage(200, '')).to.equal('')
+      expect(await interceptStatusMessage(200, '')).toBe('')
     })
 
     it('marks AUT frame documents for the intercept pipeline without sending the header upstream', async () => {
       const client = createClient()
-      const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
+      const isAUTFrame = vi.fn(async () => true)
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const seenIsAutFrameHeader = sinon.stub()
+      const seenIsAutFrameHeader = vi.fn()
       const { transport } = createTransport(client, { httpIntercept, isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
@@ -1155,10 +1205,10 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(isAUTFrame).to.have.been.calledOnceWith('frame-1')
-      expect(seenIsAutFrameHeader).to.have.been.calledWith('true')
+      expectCalledOnceWith(isAUTFrame, 'frame-1')
+      expectCalledWith(seenIsAutFrameHeader, 'true')
       // AUT marker must not leave the process toward the origin.
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
           name: 'X-Foo',
@@ -1172,7 +1222,7 @@ describe('CdpFetchTransport', () => {
 
     it('does not mark AUT-frame subresource requests (e.g. XHR) with the AUT frame header', async () => {
       const client = createClient()
-      const isAUTFrame = sinon.stub().resolves(true)
+      const isAUTFrame = vi.fn(async () => true)
       const { transport } = createTransport(client, { isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'XHR' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'XHR', responseStatusCode: 200 })
@@ -1182,8 +1232,8 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(isAUTFrame).not.to.have.been.called
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expect(isAUTFrame).not.toHaveBeenCalled()
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
       })
 
@@ -1224,12 +1274,12 @@ describe('CdpFetchTransport', () => {
         await handled
       }
 
-      expect(seenResourceTypes).to.deep.equal(['xhr', 'fetch', 'other'])
+      expect(seenResourceTypes).toEqual(['xhr', 'fetch', 'other'])
     })
 
     it('strips a previously injected AUT frame header on redirect re-pause', async () => {
       const client = createClient()
-      const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
+      const isAUTFrame = vi.fn(async () => true)
       const { transport } = createTransport(client, { isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
@@ -1244,7 +1294,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
           name: 'X-Foo',
@@ -1258,7 +1308,7 @@ describe('CdpFetchTransport', () => {
 
     it('keeps mutated request headers without re-adding the AUT frame header upstream', async () => {
       const client = createClient()
-      const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
+      const isAUTFrame = vi.fn(async () => true)
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept, isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
@@ -1283,7 +1333,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
           name: 'X-Foo',
@@ -1301,7 +1351,7 @@ describe('CdpFetchTransport', () => {
     it('marks extra-target requests for the intercept pipeline without sending the header upstream', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const seenExtraTargetHeader = sinon.stub()
+      const seenExtraTargetHeader = vi.fn()
       const { transport } = createTransport(client, { httpIntercept, isFromExtraTarget: true })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
@@ -1321,8 +1371,8 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(seenExtraTargetHeader).to.have.been.calledWith('true')
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(seenExtraTargetHeader, 'true')
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
           name: 'X-Foo',
@@ -1337,7 +1387,7 @@ describe('CdpFetchTransport', () => {
     it('does not mark requests with the extra-target header when isFromExtraTarget is unset', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const seenExtraTargetHeader = sinon.stub()
+      const seenExtraTargetHeader = vi.fn()
       const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
@@ -1353,8 +1403,8 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(seenExtraTargetHeader).to.have.been.calledWith(undefined)
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(seenExtraTargetHeader, undefined)
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
       })
 
@@ -1378,7 +1428,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
           name: 'X-Foo',
@@ -1409,9 +1459,9 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(seenIds).to.have.length(1)
-      expect(seenIds[0]).to.match(/^extra-[a-z0-9]+:network-1$/)
-      expect(seenIds[0]).not.to.equal('network-1')
+      expect(seenIds).toHaveLength(1)
+      expect(seenIds[0]).toMatch(/^extra-[a-z0-9]+:network-1$/)
+      expect(seenIds[0]).not.toBe('network-1')
 
       await onRequestPaused(response)
       await handled
@@ -1446,11 +1496,11 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(seenResponseHeaders).to.deep.equal({
+      expect(seenResponseHeaders).toEqual({
         'content-type': 'text/html',
       })
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -1471,7 +1521,7 @@ describe('CdpFetchTransport', () => {
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('<html>origin</html>').toString('base64'),
         base64Encoded: true,
       })
@@ -1496,7 +1546,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -1529,12 +1579,12 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     // Network.responseReceived derives mimeType/charset from the wire
@@ -1547,7 +1597,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('.x { color: red; }').toString('base64'),
         base64Encoded: true,
       })
@@ -1576,7 +1626,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -1587,7 +1637,7 @@ describe('CdpFetchTransport', () => {
         body: Buffer.from('.x { color: red; }').toString('base64'),
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
     })
 
     // Overrides other than content-type are recorded truthfully by CDP on
@@ -1598,7 +1648,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('.x { color: red; }').toString('base64'),
         base64Encoded: true,
       })
@@ -1627,7 +1677,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [
@@ -1636,7 +1686,7 @@ describe('CdpFetchTransport', () => {
         ],
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     it('matches request and response pauses by fetch request id', async () => {
@@ -1659,7 +1709,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'shared.0',
         responseCode: 200,
       })
@@ -1669,7 +1719,7 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const seenIds: string[] = []
-      const addPendingUrlWithoutPreRequest = sinon.stub()
+      const addPendingUrlWithoutPreRequest = vi.fn()
       const { transport } = createTransport(client, { httpIntercept, addPendingUrlWithoutPreRequest })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -1687,15 +1737,13 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(addPendingUrlWithoutPreRequest).to.have.been.calledOnceWith(
-        'https://example.test/cypress/fixtures/records.csv',
-      )
+      expectCalledOnceWith(addPendingUrlWithoutPreRequest, 'https://example.test/cypress/fixtures/records.csv')
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'download-pause-id',
       })
 
-      expect(seenIds).to.deep.equal(['download-pause-id'])
+      expect(seenIds).toEqual(['download-pause-id'])
 
       await onRequestPaused(createPausedRequest({
         requestId: 'download-pause-id',
@@ -1705,7 +1753,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'download-pause-id',
         responseCode: 200,
       })
@@ -1713,7 +1761,7 @@ describe('CdpFetchTransport', () => {
 
     it('does not pre-register urls when network id is present', async () => {
       const client = createClient()
-      const addPendingUrlWithoutPreRequest = sinon.stub()
+      const addPendingUrlWithoutPreRequest = vi.fn()
       const { transport } = createTransport(client, { addPendingUrlWithoutPreRequest })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -1724,7 +1772,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(addPendingUrlWithoutPreRequest).not.to.have.been.called
+      expect(addPendingUrlWithoutPreRequest).not.toHaveBeenCalled()
 
       await onRequestPaused(createPausedRequest({
         requestId: 'fetch-request',
@@ -1765,19 +1813,19 @@ describe('CdpFetchTransport', () => {
 
       await Promise.all([firstHandled, secondHandled])
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'first-request-pause-id',
         responseCode: 200,
       })
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'second-request-pause-id',
         responseCode: 201,
       })
     })
 
     it('does not let a timed out redirect hop reject a newer hop with a distinct fetch request id', async () => {
-      const clock = sinon.useFakeTimers()
+      vi.useFakeTimers()
       const client = createClient()
       const { transport } = createTransport(client)
       const onRequestPaused = await startTransport(transport, client)
@@ -1789,7 +1837,7 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await clock.tickAsync(1)
+      await vi.advanceTimersByTimeAsync(1)
 
       const secondHandled = onRequestPaused(createPausedRequest({
         requestId: 'second-request-pause-id',
@@ -1798,7 +1846,7 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await clock.tickAsync(29999)
+      await vi.advanceTimersByTimeAsync(29999)
       await firstHandled
 
       await onRequestPaused(createPausedRequest({
@@ -1810,7 +1858,7 @@ describe('CdpFetchTransport', () => {
 
       await secondHandled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'second-request-pause-id',
         responseCode: 200,
       })
@@ -1826,7 +1874,7 @@ describe('CdpFetchTransport', () => {
         responseStatusCode: 204,
       }))
 
-      expect(client.send).to.have.been.calledOnceWith('Fetch.continueResponse', {
+      expectCalledOnceWith(client.send, 'Fetch.continueResponse', {
         requestId: 'response-pause-id',
       })
     })
@@ -1841,12 +1889,12 @@ describe('CdpFetchTransport', () => {
         responseErrorReason: 'Aborted',
       }))
 
-      expect(client.send).to.have.been.calledOnceWith('Fetch.failRequest', {
+      expectCalledOnceWith(client.send, 'Fetch.failRequest', {
         requestId: 'response-pause-id',
         errorReason: 'Aborted',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
     })
 
     it('treats status code 0 as a response pause', async () => {
@@ -1869,7 +1917,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'shared.0',
         responseCode: 0,
         responsePhrase: 'unknown',
@@ -1890,7 +1938,7 @@ describe('CdpFetchTransport', () => {
       ]
 
       // devtools folds multiple Set-Cookie values into one newline-separated string
-      networkExtraInfo.responseExtraInfo.resolves({
+      networkExtraInfo.responseExtraInfo.mockResolvedValue({
         requestId: 'network-1',
         headers: {
           'Set-Cookie': 'foo1=bar1; Domain=foobar.com\nfoo2=bar2',
@@ -1914,15 +1962,15 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response, 'session-1')
       await handled
 
-      expect(networkExtraInfo.responseExtraInfo).to.have.been.calledOnceWith('network-1', 'session-1')
+      expectCalledOnceWith(networkExtraInfo.responseExtraInfo, 'network-1', 'session-1')
 
-      expect(seenResponseHeaders).to.deep.equal({
+      expect(seenResponseHeaders).toEqual({
         'content-type': 'text/plain',
         'set-cookie': ['foo1=bar1; Domain=foobar.com', 'foo2=bar2'],
       })
 
       // Middleware left the response untouched, so continueResponse omits responseHeaders.
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       }, 'session-1')
@@ -1937,7 +1985,7 @@ describe('CdpFetchTransport', () => {
 
       response.responseHeaders = [{ name: 'Content-Type', value: 'text/plain' }]
 
-      networkExtraInfo.responseExtraInfo.resolves({
+      networkExtraInfo.responseExtraInfo.mockResolvedValue({
         requestId: 'network-1',
         headers: {
           'Set-Cookie': 'foo1=bar1; Domain=foobar.com\nfoo2=bar2',
@@ -1961,12 +2009,12 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(seenResponseHeaders).to.deep.equal({
+      expect(seenResponseHeaders).toEqual({
         'content-type': 'text/plain',
         'set-cookie': ['foo1=bar1; Domain=foobar.com', 'foo2=bar2'],
       })
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -1992,7 +2040,7 @@ describe('CdpFetchTransport', () => {
 
       response.responseHeaders = [{ name: 'Content-Type', value: 'text/plain' }]
 
-      networkExtraInfo.responseExtraInfo.resolves({
+      networkExtraInfo.responseExtraInfo.mockResolvedValue({
         requestId: 'network-1',
         headers: {
           'x-other': '1',
@@ -2007,7 +2055,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       // Nothing changed the headers, so continueResponse omits the field.
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
@@ -2020,7 +2068,7 @@ describe('CdpFetchTransport', () => {
       let releaseMerge!: () => void
 
       // hold the merge open like a parked extraInfo waiter would
-      networkExtraInfo.responseExtraInfo.callsFake(() => {
+      networkExtraInfo.responseExtraInfo.mockImplementation(() => {
         return new Promise((resolve) => {
           releaseMerge = () => resolve(undefined)
         })
@@ -2049,7 +2097,7 @@ describe('CdpFetchTransport', () => {
       await responseHandled
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
       })
     })
@@ -2076,7 +2124,7 @@ describe('CdpFetchTransport', () => {
 
       // redirect hops reuse the network id — the next hop's Network events may
       // already be tracked, and wiping here would drop that hop's Set-Cookie
-      expect(networkExtraInfo.clear).not.to.have.been.called
+      expect(networkExtraInfo.clear).not.toHaveBeenCalled()
     })
 
     // The MITM path performs the upstream request itself, so cy.intercept sees
@@ -2117,8 +2165,8 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(capturedError?.message).to.equal('connect ECONNREFUSED 127.0.0.1:3333')
-      expect(capturedError?.code).to.equal('ECONNREFUSED')
+      expect(capturedError?.message).toBe('connect ECONNREFUSED 127.0.0.1:3333')
+      expect(capturedError?.code).toBe('ECONNREFUSED')
     })
 
     it('clears extraInfo tracking when the flow ends in a response error pause', async () => {
@@ -2142,7 +2190,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       // an errored flow gets no more pauses, so nothing else consumes its tracking
-      expect(networkExtraInfo.clear).to.have.been.calledWith('network-1')
+      expectCalledWith(networkExtraInfo.clear, 'network-1')
     })
 
     it('clears extraInfo tracking for unmatched response pauses', async () => {
@@ -2157,11 +2205,11 @@ describe('CdpFetchTransport', () => {
         responseStatusCode: 200,
       }))
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'unmatched-response',
       })
 
-      expect(networkExtraInfo.clear).to.have.been.calledWith('network-9')
+      expectCalledWith(networkExtraInfo.clear, 'network-9')
     })
 
     it('sends a URL override when middleware mutates the neutral request URL', async () => {
@@ -2183,7 +2231,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         url: 'https://example.test/mutated',
       })
@@ -2219,7 +2267,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       // postData is a CDP binary param: base64 of the utf8 body, not the body
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         method: 'POST',
         postData: Buffer.from('payload', 'utf8').toString('base64'),
@@ -2261,7 +2309,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
           name: 'accept',
@@ -2279,7 +2327,7 @@ describe('CdpFetchTransport', () => {
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 
-      client.send.withArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 200 }).rejects(new Error('continueResponse failed'))
+      client.sendWithArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 200 }).rejects(new Error('continueResponse failed'))
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
@@ -2291,12 +2339,12 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
       })
     })
@@ -2325,9 +2373,9 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 }))
       await handled
 
-      const continueArgs = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')?.args[1]
+      const continueArgs = client.send.mock.calls.find((call) => call[0] === 'Fetch.continueRequest')?.[1]
 
-      expect(continueArgs.postData).to.equal(binaryBody.toString('base64'))
+      expect(continueArgs.postData).toBe(binaryBody.toString('base64'))
     })
 
     it('fails the request pause when middleware requests a network error', async () => {
@@ -2350,12 +2398,12 @@ describe('CdpFetchTransport', () => {
         networkId: 'network-1',
       }))
 
-      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+      expectCalledWith(client.send, 'Fetch.failRequest', {
         requestId: 'fetch-request',
         errorReason: 'Failed',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest', {
+      expectNotCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
       })
     })
@@ -2384,12 +2432,12 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 }))
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+      expectCalledWith(client.send, 'Fetch.failRequest', {
         requestId: 'fetch-request',
         errorReason: 'Failed',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse', {
+      expectNotCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
       })
     })
@@ -2409,11 +2457,11 @@ describe('CdpFetchTransport', () => {
         networkId: 'network-1',
       }))
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
     })
 
     it('fulfills the request pause when middleware returns a response without calling next', async () => {
@@ -2438,7 +2486,7 @@ describe('CdpFetchTransport', () => {
         networkId: 'network-1',
       }))
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 201,
         responsePhrase: 'Created',
@@ -2449,18 +2497,18 @@ describe('CdpFetchTransport', () => {
         body: Buffer.from('created').toString('base64'),
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
     })
 
     it('continues the response pause without running the intercept pipeline when the eager body fetch fails', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const middlewareSawResponse = sinon.stub()
+      const middlewareSawResponse = vi.fn()
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
-      const unhandled = sinon.stub()
+      const unhandled = vi.fn()
 
-      client.send.withArgs('Fetch.getResponseBody').rejects(new Error('Invalid InterceptionId.'))
+      client.sendWithArgs('Fetch.getResponseBody').rejects(new Error('Invalid InterceptionId.'))
 
       httpIntercept.use(async (req, next) => {
         const response = await next(req)
@@ -2489,26 +2537,26 @@ describe('CdpFetchTransport', () => {
         await handled
         await new Promise((resolve) => setImmediate(resolve))
 
-        expect(unhandled).not.to.have.been.called
+        expect(unhandled).not.toHaveBeenCalled()
       } finally {
         process.removeListener('unhandledRejection', unhandled)
       }
 
       // the eager fetch rejects before deferred.resolve, so the response never
       // reaches the intercept pipeline
-      expect(middlewareSawResponse).not.to.have.been.called
+      expect(middlewareSawResponse).not.toHaveBeenCalled()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     it('hands middleware an empty body for redirect pauses instead of asking CDP for one', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const middlewareSawResponse = sinon.stub()
+      const middlewareSawResponse = vi.fn()
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -2542,19 +2590,19 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+      expectNotCalledWith(client.send, 'Fetch.getResponseBody')
 
       // Redirects are materialized and are not marked skipped:
       // MaybeSendRedirectToClient ends every 3xx-with-location before the
       // capture stage, so the marker would have no reader.
-      expect(middlewareSawResponse).to.have.been.calledWith({
+      expectCalledWith(middlewareSawResponse, {
         body: '',
         bodySkipped: undefined,
       })
 
       // Middleware left the redirect's headers untouched, so continueResponse
       // omits the field and CDP keeps the browser's original location header.
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 302,
       })
@@ -2566,7 +2614,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -2588,7 +2636,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+      expectCalledWith(client.send, 'Fetch.getResponseBody', {
         requestId: 'fetch-request',
       })
     })
@@ -2599,7 +2647,7 @@ describe('CdpFetchTransport', () => {
     it('skips the eager body fetch and continues untouched for a deny-listed (SSE) response pause', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const middlewareSawResponse = sinon.stub()
+      const middlewareSawResponse = vi.fn()
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -2633,14 +2681,14 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+      expectNotCalledWith(client.send, 'Fetch.getResponseBody')
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
 
-      expect(middlewareSawResponse).to.have.been.calledWith({
+      expectCalledWith(middlewareSawResponse, {
         body: '',
         bodySkipped: true,
       })
@@ -2664,9 +2712,9 @@ describe('CdpFetchTransport', () => {
         resourceType: 'Fetch',
       }, { headers: [{ name: 'content-type', value: 'text/event-stream' }] })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+      expectNotCalledWith(client.send, 'Fetch.getResponseBody')
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -2680,11 +2728,11 @@ describe('CdpFetchTransport', () => {
     // composition, since matchRoutes itself is out of scope for this phase.
     it('materializes the body when the shouldStreamBody option reports false, overriding the stream default', async () => {
       const client = createClient()
-      const shouldStreamBody = sinon.stub().returns(false)
+      const shouldStreamBody = vi.fn(() => false)
       const { transport } = createTransport(client, { shouldStreamBody })
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -2695,9 +2743,9 @@ describe('CdpFetchTransport', () => {
         networkId: 'network-1',
       }, { headers: [{ name: 'content-type', value: 'text/event-stream' }] })
 
-      expect(shouldStreamBody).to.have.been.calledWith(response)
+      expectCalledWith(shouldStreamBody, response)
 
-      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+      expectCalledWith(client.send, 'Fetch.getResponseBody', {
         requestId: 'fetch-request',
       })
     })
@@ -2710,11 +2758,11 @@ describe('CdpFetchTransport', () => {
     it('threads a request-stage route match through to shouldStreamBody as hasMatchingRoute', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const shouldStreamBody = sinon.stub().returns(false)
+      const shouldStreamBody = vi.fn(() => false)
       const { transport } = createTransport(client, { httpIntercept, shouldStreamBody })
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -2726,7 +2774,7 @@ describe('CdpFetchTransport', () => {
         networkId: 'network-1',
       })
 
-      expect(shouldStreamBody).to.have.been.calledWith(sinon.match.any, { hasMatchingRoute: true })
+      expectCalledWith(shouldStreamBody, anyArg, { hasMatchingRoute: true })
     })
 
     describe('body capture arming', () => {
@@ -2746,26 +2794,26 @@ describe('CdpFetchTransport', () => {
           networkId: 'network-1',
         }, {}, 'session-1')
 
-        expect(client.send).to.have.been.calledWith('Network.streamResourceContent', {
+        expectCalledWith(client.send, 'Network.streamResourceContent', {
           requestId: 'network-1',
         }, 'session-1')
 
         // The load-bearing invariant: nothing flows over Network.dataReceived
         // until the pause is released, so an arm sent after continueResponse
         // would lose the opening bytes.
-        const armIndex = client.send.getCalls().findIndex((call) => call.args[0] === 'Network.streamResourceContent')
-        const releaseIndex = client.send.getCalls().findIndex((call) => call.args[0] === 'Fetch.continueResponse')
+        const armIndex = client.send.mock.calls.findIndex((call) => call[0] === 'Network.streamResourceContent')
+        const releaseIndex = client.send.mock.calls.findIndex((call) => call[0] === 'Fetch.continueResponse')
 
-        expect(armIndex).to.be.greaterThan(-1)
-        expect(releaseIndex).to.be.greaterThan(armIndex)
+        expect(armIndex).toBeGreaterThan(-1)
+        expect(releaseIndex).toBeGreaterThan(armIndex)
 
-        expect(getResponse().captureStream).to.exist
+        expect(getResponse().captureStream).toEqual(expect.anything())
 
         const chunks: Buffer[] = []
 
         getResponse().captureStream.on('data', (chunk: Buffer) => chunks.push(chunk))
 
-        const dataReceivedHandler = client.on.withArgs('Network.dataReceived').getCall(0).args[1]
+        const dataReceivedHandler = handlersFor(client, 'Network.dataReceived')[0]
 
         dataReceivedHandler({
           requestId: 'network-1',
@@ -2774,7 +2822,7 @@ describe('CdpFetchTransport', () => {
 
         await tick()
 
-        expect(Buffer.concat(chunks).toString()).to.equal('captured-chunk')
+        expect(Buffer.concat(chunks).toString()).toBe('captured-chunk')
       })
 
       it('does not arm the capture pump when shouldCaptureBody is unset (default)', async () => {
@@ -2789,13 +2837,13 @@ describe('CdpFetchTransport', () => {
           networkId: 'network-1',
         })
 
-        expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+        expectNotCalledWith(client.send, 'Network.streamResourceContent')
       })
 
       it('resolves the response and still continues the pause when arming the capture pump fails', async () => {
         const client = createClient()
 
-        client.send.withArgs('Network.streamResourceContent').rejects(new Error('No resource with given identifier found'))
+        client.sendWithArgs('Network.streamResourceContent').rejects(new Error('No resource with given identifier found'))
 
         const { httpIntercept, getResponse } = captureRawResponseIntercept()
 
@@ -2811,9 +2859,9 @@ describe('CdpFetchTransport', () => {
           networkId: 'network-1',
         })
 
-        expect(getResponse().captureStream).to.be.undefined
+        expect(getResponse().captureStream).toBeUndefined()
 
-        expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        expectCalledWith(client.send, 'Fetch.continueResponse', {
           requestId: 'fetch-request',
           responseCode: 200,
         })
@@ -2821,7 +2869,7 @@ describe('CdpFetchTransport', () => {
 
       it('does not attempt to arm the capture pump when the pause carries no networkId', async () => {
         const client = createClient()
-        const addPendingUrlWithoutPreRequest = sinon.stub()
+        const addPendingUrlWithoutPreRequest = vi.fn()
         const { transport } = createTransport(client, {
           shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
@@ -2834,7 +2882,7 @@ describe('CdpFetchTransport', () => {
           url: 'https://example.test/cypress/fixtures/records.csv',
         })
 
-        expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+        expectNotCalledWith(client.send, 'Network.streamResourceContent')
       })
 
       // The one place bodySkipped-adjacent handling and disposition diverge:
@@ -2852,20 +2900,20 @@ describe('CdpFetchTransport', () => {
           networkId: 'network-1',
         }, { statusCode: 302, headers: [{ name: 'location', value: 'https://example.test/next' }] })
 
-        expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+        expectNotCalledWith(client.send, 'Network.streamResourceContent')
       })
 
       it('releases a freshly armed capture when reset() rejects the flow during the arm await', async () => {
         const client = createClient()
         const armGate = Promise.withResolvers<any>()
 
-        client.send.withArgs('Network.streamResourceContent').returns(armGate.promise)
+        client.sendWithArgs('Network.streamResourceContent').returns(armGate.promise)
 
         const { transport, bodyCapture } = createTransport(client, {
           shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
         })
-        const releaseSpy = sinon.spy(bodyCapture, 'release')
+        const releaseSpy = vi.spyOn(bodyCapture, 'release')
         const onRequestPaused = await startTransport(transport, client)
 
         const handled = onRequestPaused(createPausedRequest({
@@ -2891,10 +2939,10 @@ describe('CdpFetchTransport', () => {
 
         await responded
 
-        expect(releaseSpy).to.have.been.calledWith('network-1', undefined)
+        expectCalledWith(releaseSpy, 'network-1', undefined)
 
         // the orphaned pause is released rather than left wedging the browser
-        expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        expectCalledWith(client.send, 'Fetch.continueResponse', {
           requestId: 'fetch-request',
         })
       })
@@ -2907,13 +2955,13 @@ describe('CdpFetchTransport', () => {
         const client = createClient()
         const armGate = Promise.withResolvers<any>()
 
-        client.send.withArgs('Network.streamResourceContent').returns(armGate.promise)
+        client.sendWithArgs('Network.streamResourceContent').returns(armGate.promise)
 
         const { transport, bodyCapture } = createTransport(client, {
           shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
         })
-        const releaseSpy = sinon.spy(bodyCapture, 'release')
+        const releaseSpy = vi.spyOn(bodyCapture, 'release')
         const onRequestPaused = await startTransport(transport, client)
 
         const handled = onRequestPaused(createPausedRequest({
@@ -2938,9 +2986,9 @@ describe('CdpFetchTransport', () => {
 
         await responded
 
-        expect(releaseSpy).to.have.been.calledWith('network-1', undefined)
+        expectCalledWith(releaseSpy, 'network-1', undefined)
 
-        expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        expectCalledWith(client.send, 'Fetch.continueResponse', {
           requestId: 'fetch-request',
         })
       })
@@ -2948,22 +2996,22 @@ describe('CdpFetchTransport', () => {
       it('resets and stops the capture pump with the transport lifecycle', async () => {
         const client = createClient()
         const bodyCapture = new CdpBodyCapture(client as any)
-        const startSpy = sinon.spy(bodyCapture, 'start')
-        const stopSpy = sinon.spy(bodyCapture, 'stop')
-        const resetSpy = sinon.spy(bodyCapture, 'reset')
+        const startSpy = vi.spyOn(bodyCapture, 'start')
+        const stopSpy = vi.spyOn(bodyCapture, 'stop')
+        const resetSpy = vi.spyOn(bodyCapture, 'reset')
 
         const { transport } = createTransport(client, { bodyCapture })
 
         await transport.start()
-        expect(startSpy).to.have.been.calledOnce
+        expect(startSpy).toHaveBeenCalledOnce()
 
         transport.reset()
-        expect(resetSpy).to.have.been.calledOnce
+        expect(resetSpy).toHaveBeenCalledOnce()
 
         await transport.stop()
-        expect(stopSpy).to.have.been.calledOnce
+        expect(stopSpy).toHaveBeenCalledOnce()
         // stop() resets internally — the second call is expected, not a leak
-        expect(resetSpy).to.have.been.calledTwice
+        expect(resetSpy).toHaveBeenCalledTimes(2)
       })
     })
 
@@ -2974,11 +3022,11 @@ describe('CdpFetchTransport', () => {
       const onRequestPaused = await startTransport(transport, client)
       const slowBody = Promise.withResolvers<any>()
 
-      client.send.withArgs('Fetch.getResponseBody').returns(slowBody.promise)
+      client.sendWithArgs('Fetch.getResponseBody').returns(slowBody.promise)
 
       httpIntercept.use(async (req, next) => next(req))
 
-      const clock = sinon.useFakeTimers({ shouldAdvanceTime: false })
+      vi.useFakeTimers({ shouldAdvanceTime: false })
 
       try {
         const handled = onRequestPaused(createPausedRequest({
@@ -2986,7 +3034,7 @@ describe('CdpFetchTransport', () => {
           networkId: 'network-1',
         }))
 
-        await clock.tickAsync(0)
+        await vi.advanceTimersByTimeAsync(0)
 
         const responded = onRequestPaused(createPausedRequest({
           requestId: 'fetch-request',
@@ -2996,17 +3044,17 @@ describe('CdpFetchTransport', () => {
 
         // the pause already arrived, so a body slower than the 30s pause
         // timeout must not fail the flow
-        await clock.tickAsync(31000)
+        await vi.advanceTimersByTimeAsync(31000)
 
         slowBody.resolve({ body: '', base64Encoded: false })
 
         await responded
         await handled
       } finally {
-        clock.restore()
+        vi.useRealTimers()
       }
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
@@ -3018,7 +3066,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -3051,13 +3099,13 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+      expectCalledWith(client.send, 'Fetch.getResponseBody', {
         requestId: 'fetch-request',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.takeResponseBodyAsStream')
+      expectNotCalledWith(client.send, 'Fetch.takeResponseBodyAsStream')
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 202,
         responsePhrase: 'Accepted',
@@ -3075,7 +3123,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: '',
         base64Encoded: true,
       })
@@ -3110,11 +3158,11 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+      expectCalledWith(client.send, 'Fetch.getResponseBody', {
         requestId: 'fetch-request',
       })
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 204,
         responseHeaders: [{
@@ -3123,7 +3171,7 @@ describe('CdpFetchTransport', () => {
         }],
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     it('rejects the pending flow from a matching response failure pause', async () => {
@@ -3146,18 +3194,18 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+      expectCalledWith(client.send, 'Fetch.failRequest', {
         requestId: 'fetch-request',
         errorReason: 'Aborted',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
     })
 
     it('rejects the pending flow when failing the response pause throws', async () => {
       const client = createClient()
 
-      client.send.withArgs('Fetch.failRequest').rejects(new Error('failRequest failed'))
+      client.sendWithArgs('Fetch.failRequest').rejects(new Error('failRequest failed'))
       const { transport } = createTransport(client)
       const onRequestPaused = await startTransport(transport, client)
 
@@ -3176,7 +3224,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+      expectCalledWith(client.send, 'Fetch.failRequest', {
         requestId: 'fetch-request',
         errorReason: 'Aborted',
       })
@@ -3196,7 +3244,7 @@ describe('CdpFetchTransport', () => {
       await transport.stop()
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.disable')
+      expectCalledWith(client.send, 'Fetch.disable')
     })
 
     it('does not produce an unhandled rejection when reset fires before the request continues', async () => {
@@ -3215,7 +3263,7 @@ describe('CdpFetchTransport', () => {
       })
 
       const onRequestPaused = await startTransport(transport, client)
-      const unhandled = sinon.stub()
+      const unhandled = vi.fn()
 
       process.on('unhandledRejection', unhandled)
 
@@ -3231,7 +3279,7 @@ describe('CdpFetchTransport', () => {
 
         await new Promise((resolve) => setImmediate(resolve))
 
-        expect(unhandled).not.to.have.been.called
+        expect(unhandled).not.toHaveBeenCalled()
 
         releaseMiddleware()
         await handled
@@ -3251,18 +3299,18 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      client.send.resetHistory()
+      client.send.mockClear()
 
       transport.reset()
       await handled
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.disable')
-      expect(client.off).not.to.have.been.called
+      expectNotCalledWith(client.send, 'Fetch.disable')
+      expect(client.off).not.toHaveBeenCalled()
       // reset must release the layer's parked waiters, not unhook it
-      expect(networkExtraInfo.flush).to.have.been.calledOnce
-      expect(networkExtraInfo.stop).not.to.have.been.called
+      expect(networkExtraInfo.flush).toHaveBeenCalledOnce()
+      expect(networkExtraInfo.stop).not.toHaveBeenCalled()
 
-      client.send.resetHistory()
+      client.send.mockClear()
 
       const nextHandled = onRequestPaused(createPausedRequest({
         requestId: 'fetch-request-2',
@@ -3271,7 +3319,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request-2',
       })
 
@@ -3289,13 +3337,13 @@ describe('CdpFetchTransport', () => {
       const { transport, networkExtraInfo } = createTransport(client)
 
       await transport.start()
-      client.send.resetHistory()
+      client.send.mockClear()
 
       await transport.stop()
 
-      expect(client.send).to.have.been.calledWith('Fetch.disable')
-      expect(client.off).to.have.been.calledWith('Fetch.requestPaused')
-      expect(networkExtraInfo.stop).to.have.been.calledOnce
+      expectCalledWith(client.send, 'Fetch.disable')
+      expectCalledWith(client.off, 'Fetch.requestPaused')
+      expect(networkExtraInfo.stop).toHaveBeenCalledOnce()
     })
 
     it('does not register duplicate handlers on repeated start', async () => {
@@ -3305,7 +3353,7 @@ describe('CdpFetchTransport', () => {
       await transport.start()
       await transport.start()
 
-      expect(client.send).to.have.been.calledOnceWith('Fetch.enable', {
+      expectCalledOnceWith(client.send, 'Fetch.enable', {
         patterns: [{
           requestStage: 'Request',
         }, {
@@ -3313,7 +3361,7 @@ describe('CdpFetchTransport', () => {
         }],
       })
 
-      expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
+      expect(client.on.mock.calls.map((call) => call[0])).toEqual([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
         'Network.loadingFailed',
@@ -3322,29 +3370,28 @@ describe('CdpFetchTransport', () => {
         'Network.loadingFailed',
       ])
 
-      expect(networkExtraInfo.start).to.have.been.calledOnce
+      expect(networkExtraInfo.start).toHaveBeenCalledOnce()
     })
 
     it('rolls back handlers when Fetch.enable fails so start can be retried', async () => {
       const client = createClient()
 
-      client.send.onCall(0).rejects(new Error('enable failed'))
+      client.send.mockImplementationOnce(() => Promise.reject(new Error('enable failed')))
       const { transport, networkExtraInfo } = createTransport(client)
 
-      await expect(transport.start()).to.be.rejectedWith('enable failed')
+      await expect(transport.start()).rejects.toThrow('enable failed')
 
-      expect(client.off).to.have.been.calledWith('Fetch.requestPaused')
-      expect(networkExtraInfo.stop).to.have.been.calledOnce
+      expectCalledWith(client.off, 'Fetch.requestPaused')
+      expect(networkExtraInfo.stop).toHaveBeenCalledOnce()
 
-      client.send.resetBehavior()
-      client.send.resolves({})
-      client.send.resetHistory()
-      client.on.resetHistory()
-      client.off.resetHistory()
+      client.clearSendRules()
+      client.send.mockClear()
+      client.on.mockClear()
+      client.off.mockClear()
 
       await transport.start()
 
-      expect(client.send).to.have.been.calledOnceWith('Fetch.enable', {
+      expectCalledOnceWith(client.send, 'Fetch.enable', {
         patterns: [{
           requestStage: 'Request',
         }, {
@@ -3352,7 +3399,7 @@ describe('CdpFetchTransport', () => {
         }],
       })
 
-      expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
+      expect(client.on.mock.calls.map((call) => call[0])).toEqual([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
         'Network.loadingFailed',
@@ -3361,8 +3408,8 @@ describe('CdpFetchTransport', () => {
         'Network.loadingFailed',
       ])
 
-      expect(networkExtraInfo.start).to.have.been.calledTwice
-      expect(client.off).not.to.have.been.called
+      expect(networkExtraInfo.start).toHaveBeenCalledTimes(2)
+      expect(client.off).not.toHaveBeenCalled()
     })
 
     it('continues when middleware returns verbatim body bytes from getResponseBody', async () => {
@@ -3371,7 +3418,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client, { httpIntercept })
       const originBody = Buffer.from('origin-bytes')
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: originBody.toString('base64'),
         base64Encoded: true,
       })
@@ -3401,12 +3448,12 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     it('fulfills when middleware mutates the response body', async () => {
@@ -3414,7 +3461,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -3447,7 +3494,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -3464,7 +3511,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('aaaa').toString('base64'),
         base64Encoded: true,
       })
@@ -3497,7 +3544,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -3522,7 +3569,7 @@ describe('CdpFetchTransport', () => {
         { name: 'Content-Type', value: 'text/html' },
       ]
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -3550,7 +3597,7 @@ describe('CdpFetchTransport', () => {
 
       // the browser replays the origin's wire body, so the pause's encoding and
       // length headers win over the ones describing the decoded middleware view
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
@@ -3568,7 +3615,7 @@ describe('CdpFetchTransport', () => {
         }],
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     it('continues with a new status code when middleware mutates status but not body bytes', async () => {
@@ -3576,7 +3623,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -3607,12 +3654,12 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 418,
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     it('omits responseHeaders on continueResponse when middleware headers match the pause headers', async () => {
@@ -3637,7 +3684,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
@@ -3665,7 +3712,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
@@ -3706,7 +3753,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
       })
@@ -3740,7 +3787,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
@@ -3755,7 +3802,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
+      client.sendWithArgs('Fetch.getResponseBody').resolves({
         body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
@@ -3786,7 +3833,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
@@ -3811,7 +3858,7 @@ describe('CdpFetchTransport', () => {
     it('aborts a flow still paused in the middleware onion', async () => {
       const client = createClient()
       const { httpIntercept, parked } = parkedIntercept()
-      const onRequestCanceled = sinon.stub().callsFake(() => {
+      const onRequestCanceled = vi.fn(() => {
         parked.reject(new Error('request destroyed before browser pre-request was received'))
       })
 
@@ -3824,16 +3871,16 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest')
+      expectNotCalledWith(client.send, 'Fetch.continueRequest')
 
       onLoadingFailed(client, { requestId: 'network-1', canceled: true })
 
       await handled
 
-      expect(onRequestCanceled).to.have.been.calledOnceWith('network-1')
+      expectCalledOnceWith(onRequestCanceled, 'network-1')
       // the pause is released rather than left held; the request is already
       // gone, so CDP rejecting this is expected and swallowed
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
       })
     })
@@ -3850,7 +3897,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
       })
 
@@ -3860,14 +3907,14 @@ describe('CdpFetchTransport', () => {
 
       // no response pause ever arrived for this flow, so there is no pause left
       // to release — sending one would target a request id CDP no longer knows
-      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
     it('leaves a genuine network failure to the response error pause', async () => {
       const client = createClient()
       const { httpIntercept, parked } = parkedIntercept()
-      const onRequestCanceled = sinon.stub()
+      const onRequestCanceled = vi.fn()
       const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -3880,7 +3927,7 @@ describe('CdpFetchTransport', () => {
 
       onLoadingFailed(client, { requestId: 'network-1', canceled: false, errorText: 'net::ERR_CONNECTION_REFUSED' })
 
-      expect(onRequestCanceled).not.to.have.been.called
+      expect(onRequestCanceled).not.toHaveBeenCalled()
 
       parked.reject(new Error('unparked'))
       await tick()
@@ -3888,20 +3935,20 @@ describe('CdpFetchTransport', () => {
 
     it('ignores a cancellation for a request it never paused', async () => {
       const client = createClient()
-      const onRequestCanceled = sinon.stub()
+      const onRequestCanceled = vi.fn()
       const { transport } = createTransport(client, { onRequestCanceled })
 
       await startTransport(transport, client)
 
       onLoadingFailed(client, { requestId: 'never-paused', canceled: true })
 
-      expect(onRequestCanceled).not.to.have.been.called
+      expect(onRequestCanceled).not.toHaveBeenCalled()
     })
 
     it('scopes cancellation to the session the request paused on', async () => {
       const client = createClient()
       const { httpIntercept, parked } = parkedIntercept()
-      const onRequestCanceled = sinon.stub()
+      const onRequestCanceled = vi.fn()
       const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -3915,11 +3962,11 @@ describe('CdpFetchTransport', () => {
       // CDP request ids are only unique per session
       onLoadingFailed(client, { requestId: 'network-1', canceled: true })
 
-      expect(onRequestCanceled).not.to.have.been.called
+      expect(onRequestCanceled).not.toHaveBeenCalled()
 
       onLoadingFailed(client, { requestId: 'network-1', canceled: true }, 'service-worker-session')
 
-      expect(onRequestCanceled).to.have.been.calledOnceWith('network-1')
+      expectCalledOnceWith(onRequestCanceled, 'network-1')
 
       parked.reject(new Error('unparked'))
       await tick()
@@ -3928,7 +3975,7 @@ describe('CdpFetchTransport', () => {
     it('namespaces the canceled request id for an extra-target transport', async () => {
       const client = createClient()
       const { httpIntercept, parked } = parkedIntercept()
-      const onRequestCanceled = sinon.stub()
+      const onRequestCanceled = vi.fn()
       const { transport } = createTransport(client, { httpIntercept, onRequestCanceled, isFromExtraTarget: true })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -3942,7 +3989,7 @@ describe('CdpFetchTransport', () => {
       onLoadingFailed(client, { requestId: 'network-1', canceled: true })
 
       // must match the id the shared HttpIntercept was handed
-      expect(onRequestCanceled.firstCall.args[0]).to.match(/^extra-\d+:network-1$/)
+      expect(onRequestCanceled.mock.calls[0][0]).toMatch(/^extra-\d+:network-1$/)
 
       parked.reject(new Error('unparked'))
       await tick()
@@ -3950,7 +3997,7 @@ describe('CdpFetchTransport', () => {
 
     it('stops cancelling once the flow has completed', async () => {
       const client = createClient()
-      const onRequestCanceled = sinon.stub()
+      const onRequestCanceled = vi.fn()
       const { transport } = createTransport(client, { onRequestCanceled })
       const onRequestPaused = await startTransport(transport, client)
       const handled = onRequestPaused(createPausedRequest({
@@ -3970,7 +4017,7 @@ describe('CdpFetchTransport', () => {
 
       onLoadingFailed(client, { requestId: 'network-1', canceled: true })
 
-      expect(onRequestCanceled).not.to.have.been.called
+      expect(onRequestCanceled).not.toHaveBeenCalled()
     })
 
     it('unsubscribes from Network.loadingFailed on stop', async () => {
@@ -3980,7 +4027,7 @@ describe('CdpFetchTransport', () => {
       await transport.start()
       await transport.stop()
 
-      expect(client.off).to.have.been.calledWith('Network.loadingFailed')
+      expectCalledWith(client.off, 'Network.loadingFailed')
     })
   })
 })
