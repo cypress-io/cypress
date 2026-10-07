@@ -1,15 +1,23 @@
-import '../../spec_helper'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
+import commitInfoModule from '../../../lib/util/commit-info'
 
-import path from 'path'
-import { proxyquire } from '../../spec_helper'
-import mockedEnv from 'mocked-env'
+const execaState = vi.hoisted(() => ({ stub: undefined as unknown as Mock }))
 
-let execaStub: ReturnType<typeof sinon.stub>
-let commitInfo: typeof import('../../../lib/util/commit-info').commitInfo
-let getGitCommands: typeof import('../../../lib/util/commit-info').getGitCommands
-let getRemoteOrigin: typeof import('../../../lib/util/commit-info').getRemoteOrigin
-let sanitizeRemoteOrigin: typeof import('../../../lib/util/commit-info').sanitizeRemoteOrigin
-let resetEnv: (() => void) | null = null
+vi.mock('execa', () => {
+  return {
+    default: (...args: unknown[]) => execaState.stub(...args),
+  }
+})
+
+const { commitInfo, getGitCommands, getRemoteOrigin, sanitizeRemoteOrigin } = commitInfoModule
+const originalEnv = { ...process.env }
+
+let execaStub: Mock
+
+const setEnv = (vars: Record<string, string>) => {
+  process.env = { ...vars }
+}
 
 // Helper to get git command key string from property name
 function getCommandKey (property: keyof ReturnType<typeof getGitCommands>): string {
@@ -82,39 +90,25 @@ describe('lib/util/commit-info', () => {
     delete process.env.COMMIT_INFO_TIMESTAMP
     delete process.env.COMMIT_INFO_REMOTE
 
-    execaStub = sinon.stub().rejects(new Error('Git command not stubbed'))
-
-    const commitInfoPath = path.resolve(__dirname, '../../../lib/util/commit-info')
-
-    const commitInfoModule = proxyquire(commitInfoPath, {
-      execa: execaStub,
-    })
-
-    commitInfo = commitInfoModule.commitInfo
-    getGitCommands = commitInfoModule.getGitCommands
-    getRemoteOrigin = commitInfoModule.getRemoteOrigin
-    sanitizeRemoteOrigin = commitInfoModule.sanitizeRemoteOrigin
+    execaStub = vi.fn().mockRejectedValue(new Error('Git command not stubbed'))
+    execaState.stub = execaStub
   })
 
   afterEach(() => {
-    if (resetEnv) {
-      resetEnv()
-      resetEnv = null
-    }
-
-    sinon.restore()
+    process.env = { ...originalEnv }
+    vi.restoreAllMocks()
   })
 
-  context('with no environment variables', () => {
+  describe('with no environment variables', () => {
     beforeEach(() => {
-      resetEnv = mockedEnv({}, { clear: true })
+      setEnv({})
     })
 
     it('returns git commit information', () => {
-      execaStub.callsFake(createGitResponses())
+      execaStub.mockImplementation(createGitResponses())
 
       return commitInfo().then((info) => {
-        expect(info).to.deep.eq({
+        expect(info).toEqual({
           branch: 'test-branch',
           message: 'test message',
           email: 'test@example.com',
@@ -127,14 +121,14 @@ describe('lib/util/commit-info', () => {
     })
 
     it('returns nulls for failed git commands', () => {
-      execaStub.callsFake(createGitResponses({
+      execaStub.mockImplementation(createGitResponses({
         message: { reject: true },
         author: { reject: true },
         remote: { reject: true },
       }))
 
       return commitInfo().then((info) => {
-        expect(info).to.deep.eq({
+        expect(info).toEqual({
           branch: 'test-branch',
           message: null,
           email: 'test@example.com',
@@ -147,20 +141,20 @@ describe('lib/util/commit-info', () => {
     })
 
     it('returns null for branch when HEAD is detached', () => {
-      execaStub.callsFake(createGitResponses({
+      execaStub.mockImplementation(createGitResponses({
         branch: { stdout: 'HEAD' },
       }))
 
       return commitInfo().then((info) => {
-        expect(info.branch).to.be.null
-        expect(info.message).to.eq('test message')
+        expect(info.branch).toBeNull()
+        expect(info.message).toBe('test message')
       })
     })
   })
 
-  context('with environment variables', () => {
+  describe('with environment variables', () => {
     it('uses environment variables when provided', () => {
-      resetEnv = mockedEnv({
+      setEnv({
         COMMIT_INFO_BRANCH: 'env-branch',
         COMMIT_INFO_MESSAGE: 'env message',
         COMMIT_INFO_EMAIL: 'env@example.com',
@@ -168,14 +162,14 @@ describe('lib/util/commit-info', () => {
         COMMIT_INFO_SHA: 'env-sha-123',
         COMMIT_INFO_TIMESTAMP: '789',
         COMMIT_INFO_REMOTE: 'env-remote-url',
-      }, { clear: true })
+      })
 
-      execaStub.callsFake(() => {
+      execaStub.mockImplementation(() => {
         return Promise.reject(new Error('Git should not be called'))
       })
 
       return commitInfo().then((info) => {
-        expect(info).to.deep.eq({
+        expect(info).toEqual({
           branch: 'env-branch',
           message: 'env message',
           email: 'env@example.com',
@@ -188,158 +182,158 @@ describe('lib/util/commit-info', () => {
     })
 
     it('handles invalid timestamp in environment variable', () => {
-      resetEnv = mockedEnv({
+      setEnv({
         COMMIT_INFO_TIMESTAMP: 'not-a-number',
-      }, { clear: true })
+      })
 
-      execaStub.callsFake(createGitResponses())
+      execaStub.mockImplementation(createGitResponses())
 
       return commitInfo().then((info) => {
-        expect(info.timestamp).to.be.null
-        expect(info.branch).to.eq('test-branch')
+        expect(info.timestamp).toBeNull()
+        expect(info.branch).toBe('test-branch')
       })
     })
 
     it('prefers environment variables over git commands', () => {
-      resetEnv = mockedEnv({
+      setEnv({
         COMMIT_INFO_BRANCH: 'env-branch',
         COMMIT_INFO_MESSAGE: 'env message',
-      }, { clear: true })
+      })
 
-      execaStub.callsFake(createGitResponses({
+      execaStub.mockImplementation(createGitResponses({
         branch: { reject: true },
         message: { reject: true },
       }))
 
       return commitInfo().then((info) => {
-        expect(info.branch).to.eq('env-branch')
-        expect(info.message).to.eq('env message')
-        expect(info.email).to.eq('test@example.com')
-        expect(info.author).to.eq('Test Author')
+        expect(info.branch).toBe('env-branch')
+        expect(info.message).toBe('env message')
+        expect(info.email).toBe('test@example.com')
+        expect(info.author).toBe('Test Author')
       })
     })
   })
 
-  context('with custom folder', () => {
+  describe('with custom folder', () => {
     it('uses the provided folder path', () => {
       const customFolder = '/custom/path'
 
-      execaStub.callsFake((cmd: string, args: string[], options: any) => {
-        expect(options.cwd).to.eq(customFolder)
+      execaStub.mockImplementation((cmd: string, args: string[], options: any) => {
+        expect(options.cwd).toBe(customFolder)
 
         return createGitResponses()(cmd, args)
       })
 
       return commitInfo(customFolder).then(() => {
-        expect(execaStub.called).to.be.true
+        expect(execaStub).toHaveBeenCalled()
       })
     })
   })
 
-  context('sanitizeRemoteOrigin', () => {
+  describe('sanitizeRemoteOrigin', () => {
     it('strips username and password from an HTTPS remote', () => {
       expect(sanitizeRemoteOrigin('https://user:secret@github.com/org/repo.git'))
-      .to.eq('https://github.com/org/repo.git')
+      .toBe('https://github.com/org/repo.git')
     })
 
     it('strips only the password when username is absent', () => {
       expect(sanitizeRemoteOrigin('https://:secret@github.com/org/repo.git'))
-      .to.eq('https://github.com/org/repo.git')
+      .toBe('https://github.com/org/repo.git')
     })
 
     it('leaves an HTTPS remote without credentials unchanged', () => {
       expect(sanitizeRemoteOrigin('https://github.com/org/repo.git'))
-      .to.eq('https://github.com/org/repo.git')
+      .toBe('https://github.com/org/repo.git')
     })
 
     it('leaves an SCP-style SSH remote unchanged', () => {
       expect(sanitizeRemoteOrigin('git@github.com:org/repo.git'))
-      .to.eq('git@github.com:org/repo.git')
+      .toBe('git@github.com:org/repo.git')
     })
 
     it('leaves an ssh:// remote unchanged, preserving the git username', () => {
       expect(sanitizeRemoteOrigin('ssh://git@github.com/org/repo.git'))
-      .to.eq('ssh://git@github.com/org/repo.git')
+      .toBe('ssh://git@github.com/org/repo.git')
     })
 
     it('strips username and password from an ssh:// remote with embedded credentials', () => {
       expect(sanitizeRemoteOrigin('ssh://user:password@host/repo.git'))
-      .to.eq('ssh://host/repo.git')
+      .toBe('ssh://host/repo.git')
     })
 
     it('leaves a git:// remote unchanged', () => {
       expect(sanitizeRemoteOrigin('git://github.com/org/repo.git'))
-      .to.eq('git://github.com/org/repo.git')
+      .toBe('git://github.com/org/repo.git')
     })
 
     it('leaves an unparseable value unchanged', () => {
-      expect(sanitizeRemoteOrigin('not-a-url')).to.eq('not-a-url')
+      expect(sanitizeRemoteOrigin('not-a-url')).toBe('not-a-url')
     })
 
     it('strips credentials from a remote returned by git via commitInfo', () => {
-      execaStub.callsFake(createGitResponses({
+      execaStub.mockImplementation(createGitResponses({
         remote: { stdout: 'https://token:x-oauth-basic@github.com/org/repo.git' },
       }))
 
       return commitInfo().then((info) => {
-        expect(info.remote).to.eq('https://github.com/org/repo.git')
+        expect(info.remote).toBe('https://github.com/org/repo.git')
       })
     })
 
     it('strips credentials from a remote returned by getRemoteOrigin', () => {
-      execaStub.callsFake(createGitResponses({
+      execaStub.mockImplementation(createGitResponses({
         remote: { stdout: 'https://token:x-oauth-basic@github.com/org/repo.git' },
       }))
 
       return getRemoteOrigin().then((remote) => {
-        expect(remote).to.eq('https://github.com/org/repo.git')
+        expect(remote).toBe('https://github.com/org/repo.git')
       })
     })
 
     it('strips credentials from COMMIT_INFO_REMOTE env var', () => {
-      resetEnv = mockedEnv({
+      setEnv({
         COMMIT_INFO_REMOTE: 'https://user:pass@bitbucket.org/org/repo.git',
-      }, { clear: true })
+      })
 
-      execaStub.callsFake(() => Promise.reject(new Error('Git should not be called')))
+      execaStub.mockImplementation(() => Promise.reject(new Error('Git should not be called')))
 
       return commitInfo().then((info) => {
-        expect(info.remote).to.eq('https://bitbucket.org/org/repo.git')
+        expect(info.remote).toBe('https://bitbucket.org/org/repo.git')
       })
     })
   })
 
-  context('with large commit message', () => {
+  describe('with large commit message', () => {
     it('handles very large commit messages without truncation', () => {
       // Git has no hard limit on commit message size (tests show ~100MB can be accepted)
       // This test verifies we handle large messages gracefully
       // Using 50KB as a realistic upper bound for commit messages
       const largeMessage = 'A'.repeat(50 * 1024) // 50KB message
 
-      execaStub.callsFake(createGitResponses({
+      execaStub.mockImplementation(createGitResponses({
         message: { stdout: largeMessage },
       }))
 
       return commitInfo().then((info) => {
-        expect(info.message).to.eq(largeMessage)
-        expect(info.message!.length).to.eq(50 * 1024)
+        expect(info.message).toBe(largeMessage)
+        expect(info.message!.length).toBe(50 * 1024)
       })
     })
 
     it('handles large commit message from environment variable', () => {
       const largeMessage = 'B'.repeat(25 * 1024) // 25KB message
 
-      resetEnv = mockedEnv({
+      setEnv({
         COMMIT_INFO_MESSAGE: largeMessage,
-      }, { clear: true })
+      })
 
-      execaStub.callsFake(() => {
+      execaStub.mockImplementation(() => {
         return Promise.reject(new Error('Git should not be called'))
       })
 
       return commitInfo().then((info) => {
-        expect(info.message).to.eq(largeMessage)
-        expect(info.message!.length).to.eq(25 * 1024)
+        expect(info.message).toBe(largeMessage)
+        expect(info.message!.length).toBe(25 * 1024)
       })
     })
   })
