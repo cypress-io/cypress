@@ -1,4 +1,4 @@
-import { sinon } from '../../spec_helper'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
 import { getCloudMetadata } from '../../../lib/cloud/get_cloud_metadata'
 
@@ -9,8 +9,8 @@ describe('getCloudMetadata', () => {
 
   beforeEach(() => {
     mockCloudDataSource = {
-      getCloudUrl: sinon.stub().returns('https://cloud.cypress.io'),
-      additionalHeaders: sinon.stub().resolves({ 'x-cypress-cloud-header': 'test' }),
+      getCloudUrl: vi.fn(() => 'https://cloud.cypress.io'),
+      additionalHeaders: vi.fn(async () => ({ 'x-cypress-cloud-header': 'test' })),
     } as unknown as CloudDataSource
   })
 
@@ -34,9 +34,9 @@ describe('getCloudMetadata', () => {
 
     const cloudMetadata = await getCloudMetadata(mockCloudDataSource)
 
-    expect(mockCloudDataSource.getCloudUrl).to.have.been.calledWith('staging')
-    expect(mockCloudDataSource.additionalHeaders).to.have.been.called
-    expect(cloudMetadata).to.deep.equal({
+    expect(mockCloudDataSource.getCloudUrl).toHaveBeenCalledWith('staging')
+    expect(mockCloudDataSource.additionalHeaders).toHaveBeenCalled()
+    expect(cloudMetadata).toEqual({
       cloudUrl: 'https://cloud.cypress.io',
       cloudHeaders: { 'x-cypress-cloud-header': 'test' },
     })
@@ -47,9 +47,9 @@ describe('getCloudMetadata', () => {
 
     const cloudMetadata = await getCloudMetadata(mockCloudDataSource)
 
-    expect(mockCloudDataSource.getCloudUrl).to.have.been.calledWith('development')
-    expect(mockCloudDataSource.additionalHeaders).to.have.been.called
-    expect(cloudMetadata).to.deep.equal({
+    expect(mockCloudDataSource.getCloudUrl).toHaveBeenCalledWith('development')
+    expect(mockCloudDataSource.additionalHeaders).toHaveBeenCalled()
+    expect(cloudMetadata).toEqual({
       cloudUrl: 'https://cloud.cypress.io',
       cloudHeaders: { 'x-cypress-cloud-header': 'test' },
     })
@@ -61,9 +61,9 @@ describe('getCloudMetadata', () => {
 
     const cloudMetadata = await getCloudMetadata(mockCloudDataSource)
 
-    expect(mockCloudDataSource.getCloudUrl).to.have.been.calledWith('production')
-    expect(mockCloudDataSource.additionalHeaders).to.have.been.called
-    expect(cloudMetadata).to.deep.equal({
+    expect(mockCloudDataSource.getCloudUrl).toHaveBeenCalledWith('production')
+    expect(mockCloudDataSource.additionalHeaders).toHaveBeenCalled()
+    expect(cloudMetadata).toEqual({
       cloudUrl: 'https://cloud.cypress.io',
       cloudHeaders: { 'x-cypress-cloud-header': 'test' },
     })
