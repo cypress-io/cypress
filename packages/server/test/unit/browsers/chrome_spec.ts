@@ -1018,7 +1018,6 @@ describe('lib/browsers/chrome', () => {
         registration('1', 'http://127.0.0.1:7777/'),
         registration('2', 'http://127.0.0.1:7777/app/'),
         registration('3', 'https://www.example.org/scoped/'),
-        registration('4', 'https://deleted.example.org/', true),
       ])
 
       await attach()
@@ -1026,6 +1025,16 @@ describe('lib/browsers/chrome', () => {
       expect(clearedOrigins()).to.have.members(['https://example.com', 'http://127.0.0.1:7777', 'https://www.example.org'])
       expect(clearedOrigins()).to.have.length(3)
       expect(clearedOrigins().every((origin) => origin.startsWith('http'))).to.be.true
+    })
+
+    it('clears the origin of a registration that is being deleted, since its caches remain', async function () {
+      const { attach, clearedOrigins } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, [
+        registration('1', 'https://deleted.example.org/', true),
+      ])
+
+      await attach()
+
+      expect(clearedOrigins()).to.have.members(['https://example.com', 'https://deleted.example.org'])
     })
 
     it('clears the origin the runner later moves to when the launch url is on another origin', async function () {

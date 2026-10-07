@@ -292,14 +292,14 @@ const _collectPersistedServiceWorkerOrigins = (pageCriClient: CriClient): Promis
       resolve(origins)
     }
 
+    // deleted registrations count too: their caches outlive them
     const onSnapshot = ({ registrations }: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
       const origins = registrations
-      .filter((registration) => !registration.isDeleted)
       .map((registration) => new URL(registration.scopeURL))
       .filter(({ protocol }) => protocol === 'http:' || protocol === 'https:')
       .map(({ origin }) => origin)
 
-      finish(_.uniq(origins))
+      finish(origins)
     }
 
     // the snapshot arrives once per session, so never let a missing one hold up the launch
