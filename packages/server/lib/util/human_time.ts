@@ -5,7 +5,7 @@ dayjs.extend(duration)
 
 const parse = (ms) => {
   const duration = dayjs.duration(ms)
-  const hours = duration.hours()
+  const hours = Math.floor(duration.asHours())
   let mins = hours * 60
 
   return {

@@ -31,7 +31,8 @@ export const format = (durationInMs, padMinutes = true) => {
 
   const durationSecs = duration.seconds() ? `${duration.seconds()}` : ''
   const durationMins = duration.minutes() ? `${duration.minutes()}` : ''
-  const durationHrs = duration.hours() ? `${duration.hours()}` : ''
+  const hours = Math.floor(duration.asHours())
+  const durationHrs = hours ? `${hours}` : ''
 
   const total = _.compact([
     durationHrs,
