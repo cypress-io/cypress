@@ -36,6 +36,8 @@ interface MatchedSpecs {
   specPattern: string | string[]
 }
 
+const MASKED_ENV_VALUE = '*****'
+
 const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
 export function matchedSpecs ({
@@ -591,7 +593,8 @@ export class ProjectDataSource {
         return {
           field: key,
           from: key,
-          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, value])),
+          // The page under test can reach this field, and env values must only reach the spec through cy.env()
+          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, key === 'env' ? MASKED_ENV_VALUE : value])),
         }
       }
 

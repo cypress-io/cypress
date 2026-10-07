@@ -18,4 +18,6 @@ it('closes the chrome tab', () => {
     // test that finishes first prints a passing line the snapshot doesn't have
     return new Promise(() => {})
   })
+  // never settle, so the test can't report a pass before the tab finishes closing
+  .then(() => new Promise(() => {}))
 })

@@ -13,7 +13,8 @@ yarn workspace @packages/example deploy
 **Architecture**
 
 - `cypress/` — Example e2e spec files copied from `cypress-example-kitchensink` (do not edit here)
-- `lib/` — Supporting JS for the build/copy process
+- `lib/` — Supporting TypeScript for the build/copy process
+- `bin/` — TypeScript build scripts, run with `tsx`
 - `gulpfile.js` — Gulp tasks that drive the copy and asset-revision steps
 - `cypress.config.js` — Cypress config for running the example specs
 
@@ -23,6 +24,8 @@ yarn workspace @packages/example deploy
 - Running `deploy` publishes directly to the GitHub Pages production site; verify the `./build` directory first.
 - The `cypress/` and `app/` directories are outputs of the build step and must be committed after a kitchensink version bump.
 - To update the example content: bump `cypress-example-kitchensink` in `package.json`, run `yarn` and `yarn workspace @packages/example build`, then open a PR.
+- `lib/` is pulled into the `vue-tsc` type-check of `app`, `launchpad` and `frontend-shared` (via `data-context`'s codegen templates), which target ES modules. `export =` there fails those jobs with TS1203 even though this package's own `check-ts` passes — use `export default`, and run the root `yarn check-ts` rather than only this workspace's.
+- That default export is why `index.js` unwraps `.default`. The two go together: without the unwrap, `require('@packages/example')` yields `{ default: … }` and `getPathToE2E` is undefined for any CommonJS consumer. Keeping `module.exports` the plain object is what makes the package resolve identically under `ts-node`, `tsc` output, and the esbuild snapshot bundle.
 
 **Auto-Generated Files**
 
