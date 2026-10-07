@@ -1,11 +1,18 @@
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import utils from 'find-process/lib/utils'
-import { sinon } from '../../spec_helper'
 import { byPid } from '../../../lib/util/find_process'
 
 describe('lib/util/find_process', function () {
+  const platformDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!
+
+  afterEach(() => {
+    Object.defineProperty(process, 'platform', platformDescriptor)
+    vi.restoreAllMocks()
+  })
+
   // This is testing the patch for find-process to handle windows processes that have a mixture of carriage returns
   it('does not crash in windows with processes that deal with a mixture of carriage returns', async () => {
-    sinon.stub(process, 'platform').value('win32')
+    Object.defineProperty(process, 'platform', { ...platformDescriptor, value: 'win32' })
     // Create a table that matches what 'Get-CimInstance -className win32_process | select Name,ProcessId,ParentProcessId,CommandLine,ExecutablePath' does in powershell
     const process1 = 'Name : abc\r\nProcessId : 123\r\nParentProcessId : 456\r\nCommandLine : "c:\\path\\to\\abc.exe"\r\nExecutablePath : c:\\path\\to\\abc.exe'
     const process2 = 'Name : xyz\r\nProcessId : 789\r\nParentProcessId : 1011\r\nCommandLine : "c:\\path\\to\\xyz.exe"\r\nExecutablePath : c:\\path\\to\\xyz.exe'
@@ -15,7 +22,7 @@ describe('lib/util/find_process', function () {
     // Include all of this regex: (\r\n\r\n|\r\n\n|\n\r\n|\n\n)
     const returnString = `${process1}\r\n\r\n${process2}\r\n\n${process3}\n\r\n${process4}\n\n${process5}`
 
-    sinon.stub(utils, 'spawn').returns({
+    vi.spyOn(utils, 'spawn').mockReturnValue({
       stdout: {
         on: (event: string, callback: (data: string) => void) => {
           if (event === 'data') {
@@ -28,11 +35,11 @@ describe('lib/util/find_process', function () {
           callback(0)
         }
       },
-    })
+    } as any)
 
     const result1 = await byPid(123)
 
-    expect(result1).to.eql([{
+    expect(result1).toEqual([{
       pid: 123,
       ppid: 456,
       name: 'abc',
@@ -42,7 +49,7 @@ describe('lib/util/find_process', function () {
 
     const result2 = await byPid(789)
 
-    expect(result2).to.eql([{
+    expect(result2).toEqual([{
       pid: 789,
       ppid: 1011,
       name: 'xyz',
@@ -52,7 +59,7 @@ describe('lib/util/find_process', function () {
 
     const result3 = await byPid(1213)
 
-    expect(result3).to.eql([{
+    expect(result3).toEqual([{
       pid: 1213,
       ppid: 1415,
       name: 'def',
@@ -62,7 +69,7 @@ describe('lib/util/find_process', function () {
 
     const result4 = await byPid(1617)
 
-    expect(result4).to.eql([{
+    expect(result4).toEqual([{
       pid: 1617,
       ppid: 1819,
       name: 'ghi',
@@ -72,7 +79,7 @@ describe('lib/util/find_process', function () {
 
     const result5 = await byPid(2021)
 
-    expect(result5).to.eql([{
+    expect(result5).toEqual([{
       pid: 2021,
       ppid: 2223,
       name: 'jkl',
