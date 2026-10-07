@@ -1,4 +1,4 @@
-import '../../../spec_helper'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { ensureDir, mkdtemp, pathExists, remove, utimes, writeFile } from 'fs-extra'
 import os from 'os'
 import path from 'path'
@@ -29,8 +29,8 @@ describe('sweepOrphanStaging', () => {
 
     const removed = await sweepOrphanStaging(baseDir, 60 * 60 * 1000)
 
-    expect(removed).to.equal(1)
-    expect(await pathExists(stale)).to.equal(false)
+    expect(removed).toBe(1)
+    expect(await pathExists(stale)).toBe(false)
   })
 
   it('leaves staging dirs younger than the threshold alone', async () => {
@@ -41,8 +41,8 @@ describe('sweepOrphanStaging', () => {
 
     const removed = await sweepOrphanStaging(baseDir, 60 * 60 * 1000)
 
-    expect(removed).to.equal(0)
-    expect(await pathExists(fresh)).to.equal(true)
+    expect(removed).toBe(0)
+    expect(await pathExists(fresh)).toBe(true)
   })
 
   it('ignores non-staging entries even when old', async () => {
@@ -55,13 +55,13 @@ describe('sweepOrphanStaging', () => {
 
     const removed = await sweepOrphanStaging(baseDir, 60 * 60 * 1000)
 
-    expect(removed).to.equal(0)
-    expect(await pathExists(final)).to.equal(true)
+    expect(removed).toBe(0)
+    expect(await pathExists(final)).toBe(true)
   })
 
   it('returns 0 and swallows errors when baseDir does not exist', async () => {
     const removed = await sweepOrphanStaging(path.join(baseDir, 'does-not-exist'), 60 * 60 * 1000)
 
-    expect(removed).to.equal(0)
+    expect(removed).toBe(0)
   })
 })
