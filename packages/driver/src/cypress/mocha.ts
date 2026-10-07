@@ -410,11 +410,20 @@ const patchRunnerFail = () => {
   }
 }
 
+// Cypress re-runs the same hook object when it retries a test, and mocha ignores done()
+// while timedOut is still set from the previous attempt's runnable timeout, so the retried
+// hook could never finish. Clear it when mocha actually starts this attempt.
+function runFreshAttempt (this: Mocha.Runnable & { timedOut?: boolean }, ...args) {
+  this.timedOut = false
+
+  return runnableRun.apply(this, args)
+}
+
 const patchRunnableRun = (Cypress) => {
   Runnable.prototype.run = function (...args) {
     const runnable = this
 
-    Cypress.action('mocha:runnable:run', runnableRun, runnable, args)
+    Cypress.action('mocha:runnable:run', runFreshAttempt, runnable, args)
   }
 }
 

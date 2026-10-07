@@ -233,6 +233,24 @@ export class CommandQueue extends Queue<$Command> {
     this.state('isStable', true)
   }
 
+  // The runnable timer and mocha's uncaught-error handler end a runnable without settling
+  // its command chain. Cancel the chain so a late reply can't resume it under a later
+  // runnable. state('canceled') is left alone: it would make retrying commands in the
+  // remaining hooks give up after a single attempt.
+  cancelPending () {
+    const promise = this.state('promise')
+
+    if (!promise?.isPending()) {
+      return
+    }
+
+    this.state('cancel')()
+    this.cleanup()
+
+    // cleanup() re-arms the runnable's timer, which would otherwise fire into the next attempt
+    this.cy.clearTimeout()
+  }
+
   private runCommand (command: $Command) {
     const isQuery = command.get('query')
     const name = command.get('name')
