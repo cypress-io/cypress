@@ -1,6 +1,5 @@
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
-import chai, { expect } from 'chai'
+import type { Mock, MockInstance } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { agent, strictAgent } from '@packages/network'
 import type { CreateAxiosDefaults, AxiosInstance } from 'axios'
 import axios from 'axios'
@@ -20,29 +19,49 @@ import fetch from 'cross-fetch'
 import nock from 'nock'
 import fs from 'fs-extra'
 
-chai.use(sinonChai)
+// The logging assertions expect debug's TTY format, and a vitest worker's stderr is never a TTY.
+// debug fixes each instance's color mode at creation, so this has to run before the SUT is imported.
+await vi.hoisted(async () => {
+  const { default: debug } = await import('debug')
+
+  debug.inspectOpts.colors = true
+})
 
 describe('CloudRequest', () => {
+  afterAll(() => {
+    delete debugLib.inspectOpts.colors
+  })
+
   beforeEach(() => {
-    sinon.stub(axios, 'create').callThrough()
+    if (!nock.isActive()) {
+      nock.activate()
+    }
+
+    nock.disableNetConnect()
+    nock.enableNetConnect(/localhost/)
+
+    vi.spyOn(axios, 'create')
   })
 
   afterEach(() => {
-    sinon.restore()
+    vi.restoreAllMocks()
+
+    nock.cleanAll()
+    nock.enableNetConnect()
   })
 
   const getCreatedConfig = (): CreateAxiosDefaults => {
-    const { firstCall: { args: [config] } } = (axios.create as sinon.SinonStub)
+    const [config] = vi.mocked(axios.create).mock.calls[0]
 
-    return config
+    return config as CreateAxiosDefaults
   }
 
   it('instantiates with network combined agent', () => {
     createCloudRequest()
     const cfg = getCreatedConfig()
 
-    expect(cfg.httpAgent).to.eq(strictAgent)
-    expect(cfg.httpsAgent).to.eq(strictAgent)
+    expect(cfg.httpAgent).toBe(strictAgent)
+    expect(cfg.httpsAgent).toBe(strictAgent)
   })
 
   describe('Proxy Requests', () => {
@@ -64,12 +83,12 @@ describe('CloudRequest', () => {
     let fakeHttpsProxy: DestroyableProxy
     let fakeHttpsProxyAuth: DestroyableProxy
 
-    let addNormalAgentRequestSpy: sinon.SinonSpy<Parameters<typeof agent['addRequest']>, ReturnType<typeof agent['addRequest']>>
-    let addNormalAgentHttpRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpAgent['addRequest']>, ReturnType<typeof agent.httpAgent['addRequest']>>
-    let addNormalAgentHttpsRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpsAgent['addRequest']>, ReturnType<typeof agent.httpsAgent['addRequest']>>
-    let addStrictAgentRequestSpy: sinon.SinonSpy<Parameters<typeof strictAgent['addRequest']>, ReturnType<typeof strictAgent['addRequest']>>
-    let addStrictAgentHttpRequestSpy: sinon.SinonSpy<Parameters<typeof strictAgent.httpAgent['addRequest']>, ReturnType<typeof strictAgent.httpAgent['addRequest']>>
-    let addStrictAgentHttpsRequestSpy: sinon.SinonSpy<Parameters<typeof strictAgent.httpsAgent['addRequest']>, ReturnType<typeof strictAgent.httpsAgent['addRequest']>>
+    let addNormalAgentRequestSpy: MockInstance<typeof agent['addRequest']>
+    let addNormalAgentHttpRequestSpy: MockInstance<typeof agent.httpAgent['addRequest']>
+    let addNormalAgentHttpsRequestSpy: MockInstance<typeof agent.httpsAgent['addRequest']>
+    let addStrictAgentRequestSpy: MockInstance<typeof strictAgent['addRequest']>
+    let addStrictAgentHttpRequestSpy: MockInstance<typeof strictAgent.httpAgent['addRequest']>
+    let addStrictAgentHttpsRequestSpy: MockInstance<typeof strictAgent.httpsAgent['addRequest']>
     let currentAgentRequestSpy: typeof addNormalAgentRequestSpy | typeof addStrictAgentRequestSpy
     let currentAgentHttpRequestSpy: typeof addNormalAgentHttpRequestSpy | typeof addStrictAgentHttpRequestSpy
     let currentAgentHttpsRequestSpy: typeof addNormalAgentHttpsRequestSpy | typeof addStrictAgentHttpsRequestSpy
@@ -88,13 +107,13 @@ describe('CloudRequest', () => {
       delete process.env.NO_PROXY
       delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
 
-      addNormalAgentRequestSpy = sinon.spy(agent, 'addRequest')
-      addNormalAgentHttpRequestSpy = sinon.spy(agent.httpAgent, 'addRequest')
-      addNormalAgentHttpsRequestSpy = sinon.spy(agent.httpsAgent, 'addRequest')
+      addNormalAgentRequestSpy = vi.spyOn(agent, 'addRequest')
+      addNormalAgentHttpRequestSpy = vi.spyOn(agent.httpAgent, 'addRequest')
+      addNormalAgentHttpsRequestSpy = vi.spyOn(agent.httpsAgent, 'addRequest')
 
-      addStrictAgentRequestSpy = sinon.spy(strictAgent, 'addRequest')
-      addStrictAgentHttpRequestSpy = sinon.spy(strictAgent.httpAgent, 'addRequest')
-      addStrictAgentHttpsRequestSpy = sinon.spy(strictAgent.httpsAgent, 'addRequest')
+      addStrictAgentRequestSpy = vi.spyOn(strictAgent, 'addRequest')
+      addStrictAgentHttpRequestSpy = vi.spyOn(strictAgent.httpAgent, 'addRequest')
+      addStrictAgentHttpsRequestSpy = vi.spyOn(strictAgent.httpsAgent, 'addRequest')
 
       fakeHttpUpstream = await fakeServer({})
       fakeHttpUpstreamAuth = await fakeServer({ auth: { username: 'upstream', password: 'test' } })
@@ -179,8 +198,8 @@ describe('CloudRequest', () => {
     it('does a basic request', async () => {
       const CloudReq = createCloudRequest({ baseURL: fakeHttpUpstream.baseUrl })
 
-      expect(await CloudReq.get('/ping').then((r) => r.data)).to.eql('OK')
-      expect(fakeHttpUpstream.requests[0].rawHeaders).to.not.contain('Proxy-Authorization')
+      expect(await CloudReq.get('/ping').then((r) => r.data)).toEqual('OK')
+      expect(fakeHttpUpstream.requests[0].rawHeaders).not.toContain('Proxy-Authorization')
     })
 
     //
@@ -188,31 +207,31 @@ describe('CloudRequest', () => {
       it(`${adapter}: issues requests to the correct location when HTTP -> HTTPS via Proxy`, async () => {
         const result = await executeProxyRequest({ adapter, proxyServer: fakeHttpProxy, targetServer: fakeHttpsUpstream })
 
-        expect(result).to.eql('OK')
+        expect(result).toEqual('OK')
 
-        expect(fakeHttpProxy.requests.length).to.eq(1)
-        expect(fakeHttpProxy.requests[0].url).to.eq(`localhost:${fakeHttpsUpstream.port}`)
-        expect(fakeHttpProxy.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsUpstream.port}`])
-        expect(fakeHttpProxy.requests[0].method).to.eql('CONNECT')
+        expect(fakeHttpProxy.requests.length).toBe(1)
+        expect(fakeHttpProxy.requests[0].url).toBe(`localhost:${fakeHttpsUpstream.port}`)
+        expect(fakeHttpProxy.requests[0].rawHeaders).toEqual(['Host', `localhost:${fakeHttpsUpstream.port}`])
+        expect(fakeHttpProxy.requests[0].method).toEqual('CONNECT')
 
-        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
-        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(0)
-        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(1)
+        expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(0)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(1)
       })
 
       it(`${adapter}: issues requests to the correct location when using HTTPS -> HTTPS via Proxy`, async () => {
         const result = await executeProxyRequest({ adapter, proxyServer: fakeHttpsProxy, targetServer: fakeHttpsUpstream })
 
-        expect(result).to.eql('OK')
+        expect(result).toEqual('OK')
 
-        expect(fakeHttpsProxy.requests.length).to.eq(1)
-        expect(fakeHttpsProxy.requests[0].url).to.eq(`localhost:${fakeHttpsUpstream.port}`)
-        expect(fakeHttpsProxy.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsUpstream.port}`])
-        expect(fakeHttpsProxy.requests[0].method).to.eql('CONNECT')
+        expect(fakeHttpsProxy.requests.length).toBe(1)
+        expect(fakeHttpsProxy.requests[0].url).toBe(`localhost:${fakeHttpsUpstream.port}`)
+        expect(fakeHttpsProxy.requests[0].rawHeaders).toEqual(['Host', `localhost:${fakeHttpsUpstream.port}`])
+        expect(fakeHttpsProxy.requests[0].method).toEqual('CONNECT')
 
-        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
-        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(0)
-        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(1)
+        expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(0)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(1)
       })
 
       it(`${adapter}: issues requests to the correct location when doing HTTP -> HTTP proxy`, async () => {
@@ -223,12 +242,12 @@ describe('CloudRequest', () => {
           adapter,
         })
 
-        expect(result).to.eql({ ok: true })
+        expect(result).toEqual({ ok: true })
 
-        expect(fakeHttpProxy.requests.length).to.eq(1)
-        expect(fakeHttpProxy.requests[0].url).to.eq(`http://localhost:${fakeHttpUpstream.port}/ping`)
+        expect(fakeHttpProxy.requests.length).toBe(1)
+        expect(fakeHttpProxy.requests[0].url).toBe(`http://localhost:${fakeHttpUpstream.port}/ping`)
         if (adapter === 'Request') {
-          expect(fakeHttpProxy.requests[0].rawHeaders).to.eql([
+          expect(fakeHttpProxy.requests[0].rawHeaders).toEqual([
             'x-os-name', os.platform(),
             'x-cypress-version', pkg.version,
             'host', `localhost:${fakeHttpUpstream.port}`,
@@ -239,7 +258,7 @@ describe('CloudRequest', () => {
             'Connection', 'close',
           ])
         } else {
-          expect(fakeHttpProxy.requests[0].rawHeaders).to.eql([
+          expect(fakeHttpProxy.requests[0].rawHeaders).toEqual([
             // different from Request Promise (changed):
             'Accept', 'application/json, text/plain, */*',
             'Content-Type', 'application/json',
@@ -256,10 +275,10 @@ describe('CloudRequest', () => {
           ])
         }
 
-        expect(fakeHttpProxy.requests[0].method).to.eql('POST')
-        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
-        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(1)
-        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(0)
+        expect(fakeHttpProxy.requests[0].method).toEqual('POST')
+        expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(1)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(0)
       })
 
       it(`${adapter}: issues requests to the correct location when doing HTTP (auth) -> HTTPS (auth) proxy`, async () => {
@@ -270,21 +289,21 @@ describe('CloudRequest', () => {
           adapter,
         })
 
-        expect(result).to.eql({
+        expect(result).toEqual({
           ok: true,
           auth: UPSTREAM_AUTH,
         })
 
-        expect(fakeHttpProxyAuth.requests.length).to.eq(1)
-        expect(fakeHttpProxyAuth.requests[0].url).to.eq(`localhost:${fakeHttpsUpstreamAuth.port}`)
+        expect(fakeHttpProxyAuth.requests.length).toBe(1)
+        expect(fakeHttpProxyAuth.requests[0].url).toBe(`localhost:${fakeHttpsUpstreamAuth.port}`)
 
-        expect(lowerHeaders(fakeHttpProxyAuth.requests[0].rawHeaders)).to.eql([
+        expect(lowerHeaders(fakeHttpProxyAuth.requests[0].rawHeaders)).toEqual([
           'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
           'proxy-authorization', PROXY_AUTH,
         ])
 
         if (adapter === 'Request') {
-          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).to.eql([
+          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).toEqual([
             'x-os-name', os.platform(),
             'x-cypress-version', pkg.version,
             'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
@@ -296,7 +315,7 @@ describe('CloudRequest', () => {
             'Connection', 'close',
           ])
         } else {
-          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).to.eql([
+          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).toEqual([
             // different from Request Promise (changed):
             'Accept', 'application/json, text/plain, */*',
             'Content-Type', 'application/json',
@@ -315,11 +334,11 @@ describe('CloudRequest', () => {
           ])
         }
 
-        expect(fakeHttpProxyAuth.requests[0].method).to.eql('CONNECT')
-        expect(fakeHttpsUpstreamAuth.requests[0].method).to.eql('POST')
-        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
-        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(0)
-        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(1)
+        expect(fakeHttpProxyAuth.requests[0].method).toEqual('CONNECT')
+        expect(fakeHttpsUpstreamAuth.requests[0].method).toEqual('POST')
+        expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(0)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(1)
       })
     }
   })
@@ -327,11 +346,11 @@ describe('CloudRequest', () => {
   describe('createCloudRequest', () => {
     let fakeApp: DestroyableProxy
 
-    before(async () => {
+    beforeAll(async () => {
       fakeApp = await fakeServer({})
     })
 
-    after(() => fakeApp.teardown())
+    afterAll(() => fakeApp.teardown())
 
     let wasEnabled: string
 
@@ -342,7 +361,7 @@ describe('CloudRequest', () => {
     afterEach(() => {
       debugLib.enable(wasEnabled)
 
-      sinon.restore()
+      vi.restoreAllMocks()
     })
 
     it('can skip installing logging', async () => {
@@ -350,22 +369,22 @@ describe('CloudRequest', () => {
 
       const CloudRequest = createCloudRequest({ baseURL: fakeApp.baseUrl })
 
-      const logSpy = sinon.stub(process.stderr, 'write')
+      const logSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
 
       await CloudRequest.get('/ping')
-      const debugCalls = logSpy.getCalls().flatMap((c) => stripAnsi(String(c.args[0])).trim().replace(/\+(\d+)ms$/, '+?ms'))
+      const debugCalls = logSpy.mock.calls.flatMap((c) => stripAnsi(String(c[0])).trim().replace(/\+(\d+)ms$/, '+?ms'))
 
-      expect(debugCalls).to.eql([
+      expect(debugCalls).toEqual([
         'cypress:server:cloud:api get /ping +?ms',
         'cypress:server:cloud:api get /ping Success: 200 OK -> \n  cypress:server:cloud:api   Response: \'OK\' +?ms',
       ])
 
-      logSpy.reset()
+      logSpy.mockClear()
 
       const CloudRequestNoLogs = createCloudRequest({ baseURL: fakeApp.baseUrl, enableLogging: false })
 
       await CloudRequestNoLogs.get('/ping')
-      expect(logSpy.getCalls()).to.eql([])
+      expect(logSpy.mock.calls).toEqual([])
     })
 
     it('can skip installing the error transform', async () => {
@@ -376,8 +395,8 @@ describe('CloudRequest', () => {
         await CloudRequest.get('/error')
         throw new Error('Unreachable')
       } catch (e) {
-        expect(e.isApiError).to.eql(true)
-        expect(e.message).to.equal(dedent`
+        expect(e.isApiError).toEqual(true)
+        expect(e.message).toBe(dedent`
         404
         
         {
@@ -393,8 +412,8 @@ describe('CloudRequest', () => {
         await CloudRequestNoError.get('/error')
         throw new Error('Unreachable')
       } catch (e) {
-        expect(e.isApiError).to.eql(undefined)
-        expect(e.response.data).to.eql({ ok: false })
+        expect(e.isApiError).toEqual(undefined)
+        expect(e.response.data).toEqual({ ok: false })
       }
     })
   })
@@ -403,55 +422,57 @@ describe('CloudRequest', () => {
     const platform = 'sunos'
     const version = '0.0.0'
 
-    let versionStub
+    let platformStub: MockInstance<typeof os.platform>
+    let versionStub: MockInstance<() => string>
 
     beforeEach(() => {
-      sinon.stub(os, 'platform').returns(platform)
-      versionStub = sinon.stub(pkg, 'version').get(() => version)
+      platformStub = vi.spyOn(os, 'platform').mockReturnValue(platform)
+      versionStub = vi.spyOn(pkg, 'version', 'get').mockReturnValue(version)
     })
 
     afterEach(() => {
-      (os.platform as sinon.SinonStub).restore()
+      platformStub.mockRestore()
 
-      versionStub.restore()
+      versionStub.mockRestore()
     })
 
     it('sets exepcted platform, version, and user-agent headers', () => {
       createCloudRequest()
       const cfg = getCreatedConfig()
 
-      expect(cfg.headers).to.have.property('x-os-name', platform)
-      expect(cfg.headers).to.have.property('x-cypress-version', version)
-      expect(cfg.headers).to.have.property('User-Agent', 'cypress/0.0.0')
+      expect(cfg.headers).toHaveProperty('x-os-name', platform)
+      expect(cfg.headers).toHaveProperty('x-cypress-version', version)
+      expect(cfg.headers).toHaveProperty('User-Agent', 'cypress/0.0.0')
     })
   })
 
   describe('interceptors', () => {
-    let stubbedAxiosInstance: Partial<sinon.SinonStubbedInstance<AxiosInstance>>
+    let stubbedAxiosInstance: { interceptors: Record<'request' | 'response', Record<'use' | 'eject' | 'clear', Mock>> }
 
     beforeEach(() => {
       stubbedAxiosInstance = {
         interceptors: {
           request: {
-            use: sinon.stub(),
-            eject: sinon.stub(),
-            clear: sinon.stub(),
+            use: vi.fn(),
+            eject: vi.fn(),
+            clear: vi.fn(),
           },
           response: {
-            use: sinon.stub(),
-            eject: sinon.stub(),
-            clear: sinon.stub(),
+            use: vi.fn(),
+            eject: vi.fn(),
+            clear: vi.fn(),
           },
         },
       }
 
-      ;(axios.create as sinon.SinonStub).returns(stubbedAxiosInstance)
+      // Safe because createCloudRequest only touches `interceptors` on the instance
+      vi.mocked(axios.create).mockReturnValue(stubbedAxiosInstance as unknown as AxiosInstance)
 
       createCloudRequest()
     })
 
     it('registers error transformation interceptor', () => {
-      expect(stubbedAxiosInstance.interceptors?.response.use).to.have.been.calledWith(undefined, transformError)
+      expect(stubbedAxiosInstance.interceptors.response.use).toHaveBeenCalledWith(undefined, transformError)
     })
   })
 
@@ -460,7 +481,7 @@ describe('CloudRequest', () => {
       nock.restore()
 
       // @ts-ignore
-      const addRequestSpy = sinon.stub(strictAgent.httpsAgent, 'addRequest').callsFake((req, options) => {
+      const addRequestSpy = vi.spyOn(strictAgent.httpsAgent, 'addRequest').mockImplementation((req, options) => {
         // fake IncomingMessage
         const res = new PassThrough() as any
 
@@ -478,11 +499,11 @@ describe('CloudRequest', () => {
 
       const result1 = await CloudRequest.post('https://cloud.cypress.io/ping', {})
 
-      expect(result1.data).to.eql({ ok: true })
+      expect(result1.data).toEqual({ ok: true })
 
       const result2 = await createCloudRequest({ baseURL: 'https://api.cypress.io' }).post('/ping', {})
 
-      expect(result2.data).to.eql({ ok: true })
+      expect(result2.data).toEqual({ ok: true })
 
       const result3 = await fetch('https://cloud.cypress.io/ping', {
         method: 'POST',
@@ -491,9 +512,9 @@ describe('CloudRequest', () => {
         agent: strictAgent,
       })
 
-      expect(await result3.json()).to.eql({ ok: true })
+      expect(await result3.json()).toEqual({ ok: true })
 
-      expect(addRequestSpy).to.have.been.calledThrice
+      expect(addRequestSpy).toHaveBeenCalledTimes(3)
     })
   })
 
@@ -522,7 +543,7 @@ describe('CloudRequest', () => {
         createCloudRequest()
         const cfg = getCreatedConfig()
 
-        expect(cfg.baseURL).to.eq(app_config[env ?? 'development']?.api_url)
+        expect(cfg.baseURL).toBe(app_config[env ?? 'development']?.api_url)
       })
     })
 
@@ -550,7 +571,7 @@ describe('CloudRequest', () => {
         createCloudRequest()
         const cfg = getCreatedConfig()
 
-        expect(cfg.baseURL).to.eq(app_config[env ?? 'development']?.api_url)
+        expect(cfg.baseURL).toBe(app_config[env ?? 'development']?.api_url)
       })
     })
   })
