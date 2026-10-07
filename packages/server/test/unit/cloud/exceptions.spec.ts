@@ -1,6 +1,4 @@
-delete global.fs
-
-import '../../spec_helper'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import api from '../../../lib/cloud/api'
 import user from '../../../lib/cloud/user'
 import exception from '../../../lib/cloud/exception'
@@ -8,20 +6,27 @@ import * as system from '../../../lib/util/system'
 import pkg from '@packages/root'
 
 describe('lib/cloud/exceptions', () => {
+  const originalVersion = pkg.version
+
+  afterEach(() => {
+    pkg.version = originalVersion
+    vi.restoreAllMocks()
+  })
+
   describe('.getAuthToken', () => {
     it('returns authToken from cache', () => {
-      sinon.stub(user, 'get').resolves({ authToken: 'auth-token-123' })
+      vi.spyOn(user, 'get').mockResolvedValue({ authToken: 'auth-token-123' })
 
       return exception.getAuthToken().then((authToken) => {
-        expect(authToken).to.eq('auth-token-123')
+        expect(authToken).toBe('auth-token-123')
       })
     })
 
     it('returns undefined if no authToken', () => {
-      sinon.stub(user, 'get').resolves({})
+      vi.spyOn(user, 'get').mockResolvedValue({})
 
       return exception.getAuthToken().then((authToken) => {
-        expect(authToken).to.be.undefined
+        expect(authToken).toBeUndefined()
       })
     })
   })
@@ -30,42 +35,48 @@ describe('lib/cloud/exceptions', () => {
     it('returns an object literal', () => {
       const err = new Error()
 
-      expect(exception.getErr(err)).to.have.keys('name', 'message', 'stack')
+      expect(Object.keys(exception.getErr(err)).sort()).toEqual(['message', 'name', 'stack'])
     })
 
     describe('fields', () => {
-      beforeEach(function () {
+      let err
+
+      beforeEach(() => {
         try {
+          // @ts-expect-error
           return foo.bar()
-        } catch (err) {
-          this.err = err
+        } catch (e) {
+          err = e
         }
       })
 
-      it('has name', function () {
-        const obj = exception.getErr(this.err)
+      it('has name', () => {
+        const obj = exception.getErr(err)
 
-        expect(obj.name).to.eq(this.err.name)
+        expect(obj.name).toBe(err.name)
       })
 
-      it('has message', function () {
-        const obj = exception.getErr(this.err)
+      it('has message', () => {
+        const obj = exception.getErr(err)
 
-        expect(obj.message).to.eq(this.err.message)
+        expect(obj.message).toBe(err.message)
       })
 
-      it('has stack', function () {
-        const obj = exception.getErr(this.err)
+      it('has stack', () => {
+        const obj = exception.getErr(err)
 
-        expect(obj.stack).to.be.a('string')
+        expect(obj.stack).toBeTypeOf('string')
 
-        expect(obj.stack).to.include('foo is not defined')
+        expect(obj.stack).toContain('foo is not defined')
       })
     })
 
     describe('path stripping', () => {
-      beforeEach(function () {
-        this.err = {
+      let err
+      let windowsError
+
+      beforeEach(() => {
+        err = {
           name: 'Path not found: /Users/ruby/dev/',
           message: 'Could not find /Users/ruby/dev/foo.js',
           stack: `\
@@ -75,7 +86,7 @@ at bar /Users/ruby/dev/bar.js:92\
 `,
         }
 
-        this.windowsError = {
+        windowsError = {
           name: 'Path not found: \\Users\\ruby\\dev\\',
           message: 'Could not find \\Users\\ruby\\dev\\foo.js',
           stack: `\
@@ -86,26 +97,26 @@ at bar \\Users\\ruby\\dev\\bar.js:92\
         }
       })
 
-      it('strips paths from name, leaving file name and line number', function () {
-        expect(exception.getErr(this.err).name).to.equal('Path not found: <stripped-path>')
+      it('strips paths from name, leaving file name and line number', () => {
+        expect(exception.getErr(err).name).toBe('Path not found: <stripped-path>')
 
-        expect(exception.getErr(this.windowsError).name).to.equal('Path not found: <stripped-path>')
+        expect(exception.getErr(windowsError).name).toBe('Path not found: <stripped-path>')
       })
 
-      it('strips paths from message, leaving file name and line number', function () {
-        expect(exception.getErr(this.err).message).to.equal('Could not find <stripped-path>foo.js')
+      it('strips paths from message, leaving file name and line number', () => {
+        expect(exception.getErr(err).message).toBe('Could not find <stripped-path>foo.js')
 
-        expect(exception.getErr(this.windowsError).message).to.equal('Could not find <stripped-path>foo.js')
+        expect(exception.getErr(windowsError).message).toBe('Could not find <stripped-path>foo.js')
       })
 
-      it('strips paths from stack, leaving file name and line number', function () {
-        expect(exception.getErr(this.err).stack).to.equal(`\
+      it('strips paths from stack, leaving file name and line number', () => {
+        expect(exception.getErr(err).stack).toBe(`\
 Error at <stripped-path>index.js:102
 at foo <stripped-path>foo.js:4
 at bar <stripped-path>bar.js:92\
 `)
 
-        expect(exception.getErr(this.windowsError).stack).to.equal(`\
+        expect(exception.getErr(windowsError).stack).toBe(`\
 Error at <stripped-path>index.js:102
 at foo <stripped-path>foo.js:4
 at bar <stripped-path>bar.js:92\
@@ -115,57 +126,61 @@ at bar <stripped-path>bar.js:92\
       it('handles strippable properties being undefined gracefully', () => {
         expect(() => {
           return exception.getErr({})
-        }).not.to.throw()
+        }).not.toThrow()
       })
     })
   })
 
   describe('.getVersion', () => {
     it('returns version from package.json', () => {
-      sinon.stub(pkg, 'version').value('0.1.2')
+      pkg.version = '0.1.2'
 
-      expect(exception.getVersion()).to.eq('0.1.2')
+      expect(exception.getVersion()).toBe('0.1.2')
     })
   })
 
   describe('.getBody', () => {
-    beforeEach(function () {
-      this.err = new Error()
-      sinon.stub(pkg, 'version').value('0.1.2')
+    let err
 
-      return sinon.stub(system, 'info').resolves({
+    beforeEach(() => {
+      err = new Error()
+      pkg.version = '0.1.2'
+
+      vi.spyOn(system, 'info').mockResolvedValue({
         system: 'info',
       })
     })
 
-    it('sets err', function () {
-      return exception.getBody(this.err).then((body) => {
-        expect(body.err).to.be.an('object')
+    it('sets err', () => {
+      return exception.getBody(err).then((body) => {
+        expect(body.err).toBeTypeOf('object')
       })
     })
 
-    it('sets version', function () {
-      return exception.getBody(this.err).then((body) => {
-        expect(body.version).to.eq('0.1.2')
+    it('sets version', () => {
+      return exception.getBody(err).then((body) => {
+        expect(body.version).toBe('0.1.2')
       })
     })
 
-    it('sets system info', function () {
-      return exception.getBody(this.err).then((body) => {
-        expect(body.system).to.eq('info')
+    it('sets system info', () => {
+      return exception.getBody(err).then((body) => {
+        expect(body.system).toBe('info')
       })
     })
   })
 
   describe('.create', () => {
-    beforeEach(function () {
-      this.env = process.env['CYPRESS_INTERNAL_ENV']
+    let env
 
-      return sinon.stub(api, 'createCrashReport')
+    beforeEach(() => {
+      env = process.env['CYPRESS_INTERNAL_ENV']
+
+      vi.spyOn(api, 'createCrashReport').mockImplementation(() => undefined)
     })
 
-    afterEach(function () {
-      process.env['CYPRESS_INTERNAL_ENV'] = this.env
+    afterEach(() => {
+      process.env['CYPRESS_INTERNAL_ENV'] = env
     })
 
     describe('with CYPRESS_CRASH_REPORTS=0', () => {
@@ -180,7 +195,7 @@ at bar <stripped-path>bar.js:92\
       it('immediately resolves', () => {
         return exception.create()
         .then(() => {
-          expect(api.createCrashReport).to.not.be.called
+          expect(api.createCrashReport).not.toHaveBeenCalled()
         })
       })
     })
@@ -201,7 +216,7 @@ at bar <stripped-path>bar.js:92\
       it('immediately resolves', () => {
         return exception.create()
         .then(() => {
-          expect(api.createCrashReport).to.not.be.called
+          expect(api.createCrashReport).not.toHaveBeenCalled()
         })
       })
     })
@@ -214,35 +229,37 @@ at bar <stripped-path>bar.js:92\
       it('immediately resolves', () => {
         return exception.create()
         .then(() => {
-          expect(api.createCrashReport).to.not.be.called
+          expect(api.createCrashReport).not.toHaveBeenCalled()
         })
       })
     })
 
     describe('production', () => {
-      beforeEach(function () {
+      let err
+
+      beforeEach(() => {
         process.env['CYPRESS_INTERNAL_ENV'] = 'production'
 
-        this.err = { name: 'ReferenceError', message: 'undefined is not a function', stack: 'asfd' }
+        err = { name: 'ReferenceError', message: 'undefined is not a function', stack: 'asfd' }
 
-        sinon.stub(exception, 'getBody').resolves({
-          err: this.err,
+        vi.spyOn(exception, 'getBody').mockResolvedValue({
+          err,
           version: '0.1.2',
         })
 
-        return sinon.stub(exception, 'getAuthToken').resolves('auth-token-123')
+        vi.spyOn(exception, 'getAuthToken').mockResolvedValue('auth-token-123')
       })
 
-      it('sends body + authToken to api.createCrashReport', function () {
-        api.createCrashReport.resolves()
+      it('sends body + authToken to api.createCrashReport', () => {
+        vi.mocked(api.createCrashReport).mockResolvedValue(undefined)
 
         return exception.create().then(() => {
           const body = {
-            err: this.err,
+            err,
             version: '0.1.2',
           }
 
-          expect(api.createCrashReport).to.be.calledWith(body, 'auth-token-123')
+          expect(api.createCrashReport).toHaveBeenCalledWith(body, 'auth-token-123')
         })
       })
     })
@@ -252,7 +269,7 @@ at bar <stripped-path>bar.js:92\
     it('returns string as-is when error is already a string', () => {
       const stringError = 'Simple string error'
 
-      expect(exception.safeErrorSerialize(stringError)).to.eq('Simple string error')
+      expect(exception.safeErrorSerialize(stringError)).toBe('Simple string error')
     })
 
     it('serializes plain objects properly', () => {
@@ -264,7 +281,7 @@ at bar <stripped-path>bar.js:92\
 
       const result = exception.safeErrorSerialize(objectError)
 
-      expect(result).to.eq(JSON.stringify(objectError))
+      expect(result).toBe(JSON.stringify(objectError))
     })
 
     it('handles circular reference objects safely without throwing', () => {
@@ -278,7 +295,7 @@ at bar <stripped-path>bar.js:92\
 
       const result = exception.safeErrorSerialize(circularError)
 
-      expect(result).to.eq(JSON.stringify({
+      expect(result).toBe(JSON.stringify({
         message: 'Circular reference error',
         code: 'CIRCULAR_ERROR',
         self: '[Circular]',
@@ -296,21 +313,21 @@ at bar <stripped-path>bar.js:92\
       // serializeError should preserve Error properties
       const parsed = JSON.parse(result)
 
-      expect(parsed.message).to.eq('test error')
-      expect(parsed.name).to.eq('Error')
-      expect(parsed.code).to.eq('TEST_CODE')
-      expect(parsed.errno).to.eq(123)
+      expect(parsed.message).toBe('test error')
+      expect(parsed.name).toBe('Error')
+      expect(parsed.code).toBe('TEST_CODE')
+      expect(parsed.errno).toBe(123)
     })
 
     it('handles null and undefined gracefully', () => {
-      expect(exception.safeErrorSerialize(null)).to.eq('null')
-      expect(exception.safeErrorSerialize(undefined)).to.eq('undefined')
+      expect(exception.safeErrorSerialize(null)).toBe('null')
+      expect(exception.safeErrorSerialize(undefined)).toBe('undefined')
     })
 
     it('handles primitive types', () => {
-      expect(exception.safeErrorSerialize(42)).to.eq('42')
-      expect(exception.safeErrorSerialize(true)).to.eq('true')
-      expect(exception.safeErrorSerialize(false)).to.eq('false')
+      expect(exception.safeErrorSerialize(42)).toBe('42')
+      expect(exception.safeErrorSerialize(true)).toBe('true')
+      expect(exception.safeErrorSerialize(false)).toBe('false')
     })
 
     it('provides fallback for non-serializable objects', () => {
@@ -323,7 +340,7 @@ at bar <stripped-path>bar.js:92\
 
       const result = exception.safeErrorSerialize(problematicObject)
 
-      expect(result).to.match(/^\[Non-serializable object:/)
+      expect(result).toMatch(/^\[Non-serializable object:/)
     })
 
     it('handles deeply nested objects', () => {
@@ -342,7 +359,7 @@ at bar <stripped-path>bar.js:92\
 
       const result = exception.safeErrorSerialize(deepObject)
 
-      expect(result).to.eq(JSON.stringify(deepObject))
+      expect(result).toBe(JSON.stringify(deepObject))
     })
 
     it('handles arrays with mixed content', () => {
@@ -356,7 +373,7 @@ at bar <stripped-path>bar.js:92\
 
       const result = exception.safeErrorSerialize(arrayError)
 
-      expect(result).to.eq(JSON.stringify(arrayError))
+      expect(result).toBe(JSON.stringify(arrayError))
     })
   })
 })
