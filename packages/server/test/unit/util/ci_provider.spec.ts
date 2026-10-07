@@ -1,28 +1,43 @@
-import '../../spec_helper'
-import mockedEnv from 'mocked-env'
-
+import { afterEach, describe, expect, it } from 'vitest'
 import * as ciProvider from '../../../lib/util/ci_provider'
 
+// Replaces process.env with only `variables`; the returned function restores the original.
+const mockedEnv = (variables: Record<string, string | undefined>, _options: { clear: true }) => {
+  const originalEnv = process.env
+
+  process.env = {}
+
+  for (const [name, value] of Object.entries(variables)) {
+    if (value !== undefined) {
+      process.env[name] = value
+    }
+  }
+
+  return () => {
+    process.env = originalEnv
+  }
+}
+
 const expectsName = (name) => {
-  expect(ciProvider.provider(), 'CI providers detected name').to.eq(name)
+  expect(ciProvider.provider(), 'CI providers detected name').toBe(name)
 }
 
 const expectsCiParams = (params) => {
-  expect(ciProvider.ciParams(), 'CI providers detected CI params').to.deep.eq(params)
+  expect(ciProvider.ciParams(), 'CI providers detected CI params').toStrictEqual(params)
 }
 
 const expectsCommitParams = (params) => {
-  expect(ciProvider.commitParams(), 'CI providers detected commit params').to.deep.eq(params)
+  expect(ciProvider.commitParams(), 'CI providers detected commit params').toStrictEqual(params)
 }
 
 const expectsCommitDefaults = function (existing, expected) {
-  expect(expected).to.be.an('object')
+  expect(Object.prototype.toString.call(expected)).toBe('[object Object]')
 
-  expect(ciProvider.commitDefaults(existing), 'CI providers default git params').to.deep.eq(expected)
+  expect(ciProvider.commitDefaults(existing), 'CI providers default git params').toStrictEqual(expected)
 }
 
 describe('lib/util/ci_provider', () => {
-  let resetEnv = null
+  let resetEnv: (() => void) | null = null
 
   afterEach(() => {
     // we need to reset environment
@@ -87,7 +102,7 @@ describe('lib/util/ci_provider', () => {
     // This list is used in user-facing error messaging.
     const providers = ciProvider.detectableCiBuildIdProviders()
 
-    expect(providers).to.deep.eq([
+    expect(providers).toEqual([
       'appveyor',
       'argoCd',
       'argoWorkflows',
@@ -117,7 +132,7 @@ describe('lib/util/ci_provider', () => {
     ])
 
     // Confirm the returned list is already sorted (not just matching this test's ordering).
-    expect(providers).to.deep.eq([...providers].sort())
+    expect(providers).toEqual([...providers].sort())
   })
 
   it('appveyor', () => {
