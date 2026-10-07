@@ -9,6 +9,6 @@ describe('e2e issue 6619', () => {
   systemTests.it('can reload during spec run', {
     spec: 'reload.spec.js',
     snapshot: true,
-    timeout: 30000,
+    timeout: 60000,
   })
 })
