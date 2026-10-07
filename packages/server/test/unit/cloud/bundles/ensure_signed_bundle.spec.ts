@@ -1,8 +1,39 @@
-import { proxyquire, sinon } from '../../../spec_helper'
-import { ensureDir, mkdtemp, pathExists, readFile, remove, writeFile } from 'fs-extra'
+import type { Mock } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { chmod, ensureDir, mkdtemp, pathExists, readdir, readFile, remove, writeFile } from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import { BundleError } from '../../../../lib/cloud/bundles/bundle_error'
+import { ensureSignedBundle as realEnsureSignedBundle } from '../../../../lib/cloud/bundles/ensure_signed_bundle'
+
+const stubs = vi.hoisted(() => {
+  return {
+    streamDownloadVerifyExtract: vi.fn(),
+    verifySignature: vi.fn(),
+    verifyBundleOnDisk: undefined as Mock | undefined,
+  }
+})
+
+vi.mock('../../../../lib/cloud/bundles/stream_download_verify_extract', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../lib/cloud/bundles/stream_download_verify_extract')>()
+
+  return { ...actual, streamDownloadVerifyExtract: stubs.streamDownloadVerifyExtract }
+})
+
+vi.mock('../../../../lib/cloud/encryption', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../lib/cloud/encryption')>()
+
+  return { ...actual, verifySignature: stubs.verifySignature }
+})
+
+vi.mock('../../../../lib/cloud/bundles/verify_bundle_on_disk', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../lib/cloud/bundles/verify_bundle_on_disk')>()
+
+  return {
+    ...actual,
+    verifyBundleOnDisk: (finalDir: string) => (stubs.verifyBundleOnDisk ?? actual.verifyBundleOnDisk)(finalDir),
+  }
+})
 
 const FIXTURE_MANIFEST = { version: 1, entrypoint: 'server/index.js' }
 const MANIFEST_TEXT = JSON.stringify(FIXTURE_MANIFEST)
@@ -14,9 +45,9 @@ const writeFixtureToStaging = async (staging: string) => {
 }
 
 interface SetupResult {
-  ensureSignedBundle: typeof import('../../../../lib/cloud/bundles/ensure_signed_bundle').ensureSignedBundle
-  streamStub: sinon.SinonStub
-  verifySignatureStub: sinon.SinonStub
+  ensureSignedBundle: typeof realEnsureSignedBundle
+  streamStub: Mock
+  verifySignatureStub: Mock
 }
 
 describe('ensureSignedBundle', () => {
@@ -42,9 +73,12 @@ describe('ensureSignedBundle', () => {
   const setup = (overrides: Partial<{
     streamImpl: (opts: { staging: string }) => Promise<string>
     verifyResult: boolean
-    verifyOnDisk: sinon.SinonStub
+    verifyOnDisk: Mock
   }> = {}): SetupResult => {
-    const streamStub = sinon.stub().callsFake(async (opts: { staging: string }) => {
+    const streamStub = stubs.streamDownloadVerifyExtract
+
+    streamStub.mockReset()
+    streamStub.mockImplementation(async (opts: { staging: string }) => {
       if (overrides.streamImpl) return overrides.streamImpl(opts)
 
       await writeFixtureToStaging(opts.staging)
@@ -52,28 +86,18 @@ describe('ensureSignedBundle', () => {
       return 'fake-manifest-sig'
     })
 
-    const verifySignatureStub = sinon.stub().resolves(overrides.verifyResult ?? true)
+    const verifySignatureStub = stubs.verifySignature
 
-    const stubs: Record<string, unknown> = {
-      './stream_download_verify_extract': {
-        streamDownloadVerifyExtract: streamStub,
-      },
-      '../encryption': {
-        verifySignature: verifySignatureStub,
-      },
-    }
+    verifySignatureStub.mockReset()
+    verifySignatureStub.mockResolvedValue(overrides.verifyResult ?? true)
 
     // Only override the on-disk verifier when a test needs a deterministic
     // cache hit/miss; otherwise the real module runs (and a fresh cacheRoot is
     // always a miss).
-    if (overrides.verifyOnDisk) {
-      stubs['./verify_bundle_on_disk'] = { verifyBundleOnDisk: overrides.verifyOnDisk }
-    }
-
-    const ensureSignedBundleModule = proxyquire('../lib/cloud/bundles/ensure_signed_bundle', stubs)
+    stubs.verifyBundleOnDisk = overrides.verifyOnDisk
 
     return {
-      ensureSignedBundle: ensureSignedBundleModule.ensureSignedBundle,
+      ensureSignedBundle: realEnsureSignedBundle,
       streamStub,
       verifySignatureStub,
     }
@@ -90,21 +114,20 @@ describe('ensureSignedBundle', () => {
 
     const expectedBundleDir = path.join(cacheRoot, 'bundles', 'cy-prompt', 'abc123')
 
-    expect(result.bundleDir).to.equal(expectedBundleDir)
-    expect(result.manifest).to.deep.equal(FIXTURE_MANIFEST)
+    expect(result.bundleDir).toBe(expectedBundleDir)
+    expect(result.manifest).toEqual(FIXTURE_MANIFEST)
 
-    expect(await readFile(path.join(expectedBundleDir, 'manifest.json'), 'utf8')).to.equal(MANIFEST_TEXT)
-    expect(await readFile(path.join(expectedBundleDir, 'server', 'index.js'), 'utf8')).to.equal('// server entrypoint\n')
+    expect(await readFile(path.join(expectedBundleDir, 'manifest.json'), 'utf8')).toBe(MANIFEST_TEXT)
+    expect(await readFile(path.join(expectedBundleDir, 'server', 'index.js'), 'utf8')).toBe('// server entrypoint\n')
 
-    expect(streamStub).to.be.calledOnce
-    expect(verifySignatureStub).to.be.calledWith(MANIFEST_TEXT, 'fake-manifest-sig')
+    expect(streamStub).toHaveBeenCalledOnce()
+    expect(verifySignatureStub).toHaveBeenCalledWith(MANIFEST_TEXT, 'fake-manifest-sig')
 
     // Staging dir is cleaned up
     const baseDir = path.dirname(expectedBundleDir)
-    const fs = require('fs-extra')
-    const remaining: string[] = await fs.readdir(baseDir)
+    const remaining: string[] = await readdir(baseDir)
 
-    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).to.deep.equal([])
+    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).toEqual([])
   })
 
   it('persists the manifest signature sidecar alongside the published bundle', async () => {
@@ -117,11 +140,11 @@ describe('ensureSignedBundle', () => {
 
     const finalDir = path.join(cacheRoot, 'bundles', 'cy-prompt', 'sigfile')
 
-    expect(await readFile(path.join(finalDir, '.manifest-sig'), 'utf8')).to.equal('fake-manifest-sig')
+    expect(await readFile(path.join(finalDir, '.manifest-sig'), 'utf8')).toBe('fake-manifest-sig')
   })
 
   it('reuses a verified on-disk bundle and skips the download entirely', async () => {
-    const verifyOnDisk = sinon.stub().resolves(FIXTURE_MANIFEST)
+    const verifyOnDisk = vi.fn().mockResolvedValue(FIXTURE_MANIFEST)
     const { ensureSignedBundle, streamStub } = setup({ verifyOnDisk })
 
     const result = await ensureSignedBundle({
@@ -129,14 +152,14 @@ describe('ensureSignedBundle', () => {
       kind: 'cy-prompt',
     })
 
-    expect(result.bundleDir).to.equal(path.join(cacheRoot, 'bundles', 'cy-prompt', 'cached'))
-    expect(result.manifest).to.deep.equal(FIXTURE_MANIFEST)
-    expect(streamStub).not.to.be.called
-    expect(verifyOnDisk).to.be.calledOnce
+    expect(result.bundleDir).toBe(path.join(cacheRoot, 'bundles', 'cy-prompt', 'cached'))
+    expect(result.manifest).toEqual(FIXTURE_MANIFEST)
+    expect(streamStub).not.toHaveBeenCalled()
+    expect(verifyOnDisk).toHaveBeenCalledOnce()
   })
 
   it('falls through to download when the on-disk bundle fails verification', async () => {
-    const verifyOnDisk = sinon.stub().resolves(null)
+    const verifyOnDisk = vi.fn().mockResolvedValue(null)
     const { ensureSignedBundle, streamStub } = setup({ verifyOnDisk })
 
     await ensureSignedBundle({
@@ -144,7 +167,7 @@ describe('ensureSignedBundle', () => {
       kind: 'cy-prompt',
     })
 
-    expect(streamStub).to.be.calledOnce
+    expect(streamStub).toHaveBeenCalledOnce()
   })
 
   it('throws BundleError(stage=manifest) when the manifest signature fails to verify', async () => {
@@ -161,15 +184,15 @@ describe('ensureSignedBundle', () => {
       caught = err
     }
 
-    expect(BundleError.isBundleError(caught)).to.equal(true)
-    expect((caught as BundleError).stage).to.equal('manifest')
-    expect((caught as BundleError).kind).to.equal('studio')
+    expect(BundleError.isBundleError(caught)).toBe(true)
+    expect((caught as BundleError).stage).toBe('manifest')
+    expect((caught as BundleError).kind).toBe('studio')
 
     // finalDir was created (empty) but no files published
     const finalDir = path.join(cacheRoot, 'bundles', 'studio', 'badsig')
 
-    expect(await pathExists(path.join(finalDir, 'manifest.json'))).to.equal(false)
-    expect(await pathExists(path.join(finalDir, 'server', 'index.js'))).to.equal(false)
+    expect(await pathExists(path.join(finalDir, 'manifest.json'))).toBe(false)
+    expect(await pathExists(path.join(finalDir, 'server', 'index.js'))).toBe(false)
   })
 
   it('throws BundleError(stage=manifest) when manifest.json is missing from staging', async () => {
@@ -194,12 +217,12 @@ describe('ensureSignedBundle', () => {
       caught = err
     }
 
-    expect(BundleError.isBundleError(caught)).to.equal(true)
-    expect((caught as BundleError).stage).to.equal('manifest')
+    expect(BundleError.isBundleError(caught)).toBe(true)
+    expect((caught as BundleError).stage).toBe('manifest')
 
     const finalDir = path.join(cacheRoot, 'bundles', 'cy-prompt', 'no-manifest')
 
-    expect(await pathExists(path.join(finalDir, 'server', 'index.js'))).to.equal(false)
+    expect(await pathExists(path.join(finalDir, 'server', 'index.js'))).toBe(false)
   })
 
   it('propagates network errors raised by streamDownloadVerifyExtract without touching finalDir', async () => {
@@ -221,11 +244,11 @@ describe('ensureSignedBundle', () => {
       caught = err
     }
 
-    expect(caught).to.equal(networkError)
+    expect(caught).toBe(networkError)
 
     const finalDir = path.join(cacheRoot, 'bundles', 'studio', 'net-fail')
 
-    expect(await pathExists(path.join(finalDir, 'manifest.json'))).to.equal(false)
+    expect(await pathExists(path.join(finalDir, 'manifest.json'))).toBe(false)
   })
 
   it('cleans up staging dir even when publish fails', async () => {
@@ -241,9 +264,7 @@ describe('ensureSignedBundle', () => {
     await ensureDir(finalDir)
 
     // Make finalDir read-only so renames inside it fail with EACCES
-    const fs = require('fs-extra')
-
-    await fs.chmod(finalDir, 0o500)
+    await chmod(finalDir, 0o500)
 
     try {
       await ensureSignedBundle({
@@ -251,12 +272,12 @@ describe('ensureSignedBundle', () => {
         kind: 'cy-prompt',
       }).catch(() => { /* expected */ })
     } finally {
-      await fs.chmod(finalDir, 0o755)
+      await chmod(finalDir, 0o755)
     }
 
     const baseDir = path.dirname(finalDir)
-    const remaining: string[] = await fs.readdir(baseDir)
+    const remaining: string[] = await readdir(baseDir)
 
-    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).to.deep.equal([])
+    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).toEqual([])
   })
 })
