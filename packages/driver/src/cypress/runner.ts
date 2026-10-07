@@ -94,6 +94,20 @@ export const withLifecycleTimeout = (promise, event: string, Cypress) => {
   })
 }
 
+// A rejection carries whatever the handler threw, which is not always an Error. Reading
+// `.message` off `undefined` or `null` throws, and a `message` that is not a string can
+// throw again when the warning interpolates it. Either throw rejects this catch, so mocha
+// never continues to the next test.
+const describeErr = (err): string => {
+  try {
+    const message = err?.message
+
+    return message == null ? String(err) : String(message)
+  } catch {
+    return 'an unknown error'
+  }
+}
+
 // The test has already reported its result, so a failure here must not stop mocha from
 // moving on to the next test.
 export const settleBetweenTests = (promise, event: string, Cypress) => {
@@ -102,7 +116,7 @@ export const settleBetweenTests = (promise, event: string, Cypress) => {
     debugErrors('%s did not finish between tests: %o', event, err)
 
     $errUtils.warnByPath('miscellaneous.test_lifecycle_failed_between_tests', {
-      args: { event: publicEventName(event), message: err.message },
+      args: { event: publicEventName(event), message: describeErr(err) },
     })
   })
 }

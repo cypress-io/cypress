@@ -331,6 +331,25 @@ describe('test lifecycle steps', () => {
       })
     })
 
+    // A handler is free to reject with anything, and reading `.message` off a non-Error
+    // used to throw from the catch, leaving mocha with nothing to continue from.
+    it.each([
+      ['undefined', undefined, 'undefined'],
+      ['null', null, 'null'],
+      ['a string', 'boom', 'boom'],
+      ['an object with no message', { code: 'ENOENT' }, '[object Object]'],
+      ['a value that cannot be stringified', Object.create(null), 'an unknown error'],
+      ['a message that cannot be printed', { message: Object.create(null) }, 'an unknown error'],
+    ])('moves on with a warning when a step rejects with %s', async (_label, rejection, message) => {
+      const warnByPath = vi.spyOn($errUtils, 'warnByPath').mockImplementation(() => {})
+
+      await expect(settleBetweenTests(Promise.reject(rejection), 'runner:test:after:run:async', Cypress)).resolves.toBeUndefined()
+
+      expect(warnByPath).toHaveBeenCalledWith('miscellaneous.test_lifecycle_failed_between_tests', {
+        args: { event: 'test:after:run:async', message },
+      })
+    })
+
     it('does not warn when a step finishes', async () => {
       const warnByPath = vi.spyOn($errUtils, 'warnByPath').mockImplementation(() => {})
 
