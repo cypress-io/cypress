@@ -4,7 +4,8 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import * as mocha from 'mocha'
 
-import $Runner from '../../../src/cypress/runner'
+import $Runner, { settleBetweenTests, withLifecycleTimeout } from '../../../src/cypress/runner'
+import $errUtils from '../../../src/cypress/error_utils'
 
 // Match the import shape used by @packages/driver's cypress/mocha.ts
 // so we exercise the same Mocha constructor the driver consumes.
@@ -286,5 +287,75 @@ describe('@packages/driver/src/cypress/runner', () => {
     }
 
     expect(process.listenerCount('uncaughtException')).toBe(baseline)
+  })
+})
+
+describe('test lifecycle steps', () => {
+  const Cypress = { config: () => 20 }
+  const neverSettles = () => new Promise(() => {})
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('before each test', () => {
+    it('fails when a step does not finish within the pageLoadTimeout', async () => {
+      await expect(withLifecycleTimeout(neverSettles(), 'runner:test:before:run:async', Cypress))
+      .rejects.toThrow('Cypress timed out after `20ms` waiting for `test:before:run:async` to finish before running this test.')
+    })
+
+    it('passes through a step that finishes', async () => {
+      await expect(withLifecycleTimeout(Promise.resolve('done'), 'runner:test:before:run:async', Cypress))
+      .resolves.toEqual('done')
+    })
+  })
+
+  describe('between tests', () => {
+    it('moves on with a warning when a step does not finish', async () => {
+      const warnByPath = vi.spyOn($errUtils, 'warnByPath').mockImplementation(() => {})
+
+      await expect(settleBetweenTests(neverSettles(), 'runner:test:after:run:async', Cypress)).resolves.toBeUndefined()
+
+      expect(warnByPath).toHaveBeenCalledWith('miscellaneous.test_lifecycle_failed_between_tests', {
+        args: { event: 'test:after:run:async', message: expect.stringContaining('timed out after `20ms`') },
+      })
+    })
+
+    it('moves on with a warning when a step fails', async () => {
+      const warnByPath = vi.spyOn($errUtils, 'warnByPath').mockImplementation(() => {})
+
+      await expect(settleBetweenTests(Promise.reject(new Error('boom')), 'runner:test:before:after:run:async', Cypress)).resolves.toBeUndefined()
+
+      expect(warnByPath).toHaveBeenCalledWith('miscellaneous.test_lifecycle_failed_between_tests', {
+        args: { event: 'test:before:after:run:async', message: 'boom' },
+      })
+    })
+
+    // A handler is free to reject with anything, and reading `.message` off a non-Error
+    // used to throw from the catch, leaving mocha with nothing to continue from.
+    it.each([
+      ['undefined', undefined, 'undefined'],
+      ['null', null, 'null'],
+      ['a string', 'boom', 'boom'],
+      ['an object with no message', { code: 'ENOENT' }, '[object Object]'],
+      ['a value that cannot be stringified', Object.create(null), 'an unknown error'],
+      ['a message that cannot be printed', { message: Object.create(null) }, 'an unknown error'],
+    ])('moves on with a warning when a step rejects with %s', async (_label, rejection, message) => {
+      const warnByPath = vi.spyOn($errUtils, 'warnByPath').mockImplementation(() => {})
+
+      await expect(settleBetweenTests(Promise.reject(rejection), 'runner:test:after:run:async', Cypress)).resolves.toBeUndefined()
+
+      expect(warnByPath).toHaveBeenCalledWith('miscellaneous.test_lifecycle_failed_between_tests', {
+        args: { event: 'test:after:run:async', message },
+      })
+    })
+
+    it('does not warn when a step finishes', async () => {
+      const warnByPath = vi.spyOn($errUtils, 'warnByPath').mockImplementation(() => {})
+
+      await settleBetweenTests(Promise.resolve(), 'runner:test:after:run:async', Cypress)
+
+      expect(warnByPath).not.toHaveBeenCalled()
+    })
   })
 })

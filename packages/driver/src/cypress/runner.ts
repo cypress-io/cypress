@@ -78,27 +78,76 @@ const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
   return !!(runnable._fired && runnable._fired[event])
 }
 
+const publicEventName = (event: string) => event.replace(/^runner:/, '')
+
+// These lifecycle steps wait on replies from the browser and Cypress's server with no
+// command timeout running, so a reply that never arrives would hang the run with no output.
+export const withLifecycleTimeout = (promise, event: string, Cypress) => {
+  const ms = Cypress.config('pageLoadTimeout')
+
+  return Promise.resolve(promise)
+  .timeout(ms)
+  .catch(Promise.TimeoutError, () => {
+    $errUtils.throwErrByPath('miscellaneous.test_lifecycle_timed_out', {
+      args: { event: publicEventName(event), ms },
+    })
+  })
+}
+
+// A rejection carries whatever the handler threw, which is not always an Error. Reading
+// `.message` off `undefined` or `null` throws, and a `message` that is not a string can
+// throw again when the warning interpolates it. Either throw rejects this catch, so mocha
+// never continues to the next test.
+const describeErr = (err): string => {
+  try {
+    const message = err?.message
+
+    return message == null ? String(err) : String(message)
+  } catch {
+    return 'an unknown error'
+  }
+}
+
+// The test has already reported its result, so a failure here must not stop mocha from
+// moving on to the next test.
+export const settleBetweenTests = (promise, event: string, Cypress) => {
+  return withLifecycleTimeout(promise, event, Cypress)
+  .catch((err) => {
+    debugErrors('%s did not finish between tests: %o', event, err)
+
+    $errUtils.warnByPath('miscellaneous.test_lifecycle_failed_between_tests', {
+      args: { event: publicEventName(event), message: describeErr(err) },
+    })
+  })
+}
+
 const testBeforeRunAsync = (test, Cypress) => {
   return Promise.try(() => {
     if (!fired(TEST_BEFORE_RUN_ASYNC_EVENT, test)) {
-      return fire(TEST_BEFORE_RUN_ASYNC_EVENT, test, Cypress)
+      return withLifecycleTimeout(fire(TEST_BEFORE_RUN_ASYNC_EVENT, test, Cypress), TEST_BEFORE_RUN_ASYNC_EVENT, Cypress)
     }
+
+    return null
   })
 }
 
 const testBeforeAfterRunAsync = (test, Cypress, ...args) => {
   return Promise.try(() => {
     if (!fired(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test)) {
-      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, ...args)
+      return settleBetweenTests(fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, ...args), TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, Cypress)
     }
+
+    return null
   })
 }
 
 const testAfterRunAsync = (test, Cypress) => {
   return Promise.try(() => {
     if (!fired(TEST_AFTER_RUN_ASYNC_EVENT, test)) {
-      return fire(TEST_AFTER_RUN_ASYNC_EVENT, test, Cypress)
+      return settleBetweenTests(fire(TEST_AFTER_RUN_ASYNC_EVENT, test, Cypress), TEST_AFTER_RUN_ASYNC_EVENT, Cypress)
     }
+
+    return null
   })
 }
 
@@ -1819,7 +1868,6 @@ export default {
           return false
         }
 
-        // TODO: handle promise timeouts here!
         // whenever any runnable is about to run
         // we figure out what test its associated to
         // if its a hook, and then we fire the

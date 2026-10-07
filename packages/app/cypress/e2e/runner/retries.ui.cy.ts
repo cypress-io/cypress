@@ -38,6 +38,20 @@ describe('runner/cypress retries.ui.spec', {
     cy.reporter().find('.runnable-err-print').should('be.visible')
   })
 
+  it('fails a test that cannot start and keeps going when a step between tests never finishes', () => {
+    loadSpec({
+      filePath: 'retries/lifecycle-step-timeout.retries.cy.ts',
+      passCount: 3,
+      failCount: 0,
+    })
+
+    // a test that passes on retry is collapsed, so open it to reach its attempts
+    cy.reporter().contains('passes on the retry after failing to start').click()
+    cy.reporter().contains('Attempt 1').click()
+    // the reporter renders the message as markdown, so the event name is in a <code> element
+    cy.reporter().find('.attempt-1').should('contain.text', 'waiting for test:before:run:async to finish before running this test')
+  })
+
   it('can toggle failed prev attempt open and log its error', { viewportHeight: 1200 }, () => {
     loadSpec({
       filePath: 'retries/all-retry-one-failure.retries.cy.js',
