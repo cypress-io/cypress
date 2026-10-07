@@ -1,4 +1,4 @@
-import '../../spec_helper'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import os from 'os'
 import path from 'path'
 import { fs } from '../../../lib/util/fs'
@@ -14,7 +14,7 @@ describe('lib/util/profile_cleaner', () => {
   describe('.isCypressProcess', () => {
     it('finds cypress processes by name or cmd', () => {
       const isProc = (obj, bool) => {
-        expect(profileCleaner.isCypressProcess(obj), JSON.stringify(obj)).to.eq(bool)
+        expect(profileCleaner.isCypressProcess(obj), JSON.stringify(obj)).toBe(bool)
       }
 
       const processes = [
@@ -39,28 +39,30 @@ describe('lib/util/profile_cleaner', () => {
 
   describe('.removeInactiveByPid', () => {
     beforeEach(() => {
-      sinon.stub(findProcess, 'byPid')
-      .withArgs(53301)
-      .resolves([
-        {
-          pid: 53301,
-          ppid: 53300,
-          uid: 501,
-          gid: 20,
-          name: 'Cypress',
-          cmd: '/Users/bmann/Library/Caches/Cypress/3.0.3/Cypress.app/Contents/MacOS/Cypress --project /Users/bmann/Dev/cypress-dashboard --cwd /Users/bmann/Dev/cypress-dashboard',
-        },
-      ])
-      .withArgs(12345)
-      .resolves([
-        {
-          pid: 12345,
-          name: 'Foo',
-          cmd: 'node foo bar',
-        },
-      ])
-      .withArgs(9999)
-      .resolves([])
+      const processesByPid = {
+        53301: [
+          {
+            pid: 53301,
+            ppid: 53300,
+            uid: 501,
+            gid: 20,
+            name: 'Cypress',
+            cmd: '/Users/bmann/Library/Caches/Cypress/3.0.3/Cypress.app/Contents/MacOS/Cypress --project /Users/bmann/Dev/cypress-dashboard --cwd /Users/bmann/Dev/cypress-dashboard',
+          },
+        ],
+        12345: [
+          {
+            pid: 12345,
+            name: 'Foo',
+            cmd: 'node foo bar',
+          },
+        ],
+        9999: [],
+      }
+
+      vi.spyOn(findProcess, 'byPid').mockImplementation((pid) => {
+        return pid in processesByPid ? Promise.resolve(processesByPid[pid]) : undefined as any
+      })
 
       const createFolder = (folder) => {
         return fs.ensureDir(path.join(pidProfilesFolder, folder))
@@ -75,7 +77,7 @@ describe('lib/util/profile_cleaner', () => {
     })
 
     afterEach(() => {
-      sinon.restore()
+      vi.restoreAllMocks()
 
       return fs.removeAsync(pidProfilesFolder)
     })
@@ -87,7 +89,7 @@ describe('lib/util/profile_cleaner', () => {
         return fs
         .pathExists(pathToFolder)
         .then((bool) => {
-          expect(bool, `expected folder: ${pathToFolder} to exist? ${condition}`).to.eq(condition)
+          expect(bool, `expected folder: ${pathToFolder} to exist? ${condition}`).toBe(condition)
         })
       }
 
@@ -108,7 +110,7 @@ describe('lib/util/profile_cleaner', () => {
       return fs.ensureDir(emptyFolder)
       .then(() => profileCleaner.removeInactiveByPid(emptyFolder, 'run-'))
       .then((result) => {
-        expect(result).to.eql([])
+        expect(result).toEqual([])
       })
       .finally(() => fs.removeAsync(emptyFolder))
     })
@@ -137,19 +139,19 @@ describe('lib/util/profile_cleaner', () => {
         ])
       })
       .then(([existsA, existsB]) => {
-        expect(existsA).to.eq(false)
-        expect(existsB).to.eq(false)
+        expect(existsA).toBe(false)
+        expect(existsB).toBe(false)
       })
     })
 
     it('swallows errors when glob throws', () => {
-      sinon.stub(globModule, 'globAsync').rejects(new Error('glob error'))
+      vi.spyOn(globModule, 'globAsync').mockRejectedValue(new Error('glob error'))
 
       return profileCleaner.removeRootProfile(rootProfileFolder)
       .then((result) => {
-        expect(result).to.be.undefined
+        expect(result).toBeUndefined()
       })
-      .finally(() => sinon.restore())
+      .finally(() => vi.restoreAllMocks())
     })
   })
 })
