@@ -46,7 +46,7 @@ describe('postStudioSession', () => {
       projectId: '12345',
     })
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
       protocolUrl: 'http://localhost:1234/capture-protocol/script/def.js',
     })

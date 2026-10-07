@@ -198,7 +198,7 @@ describe('CloudRequest', () => {
     it('does a basic request', async () => {
       const CloudReq = createCloudRequest({ baseURL: fakeHttpUpstream.baseUrl })
 
-      expect(await CloudReq.get('/ping').then((r) => r.data)).toEqual('OK')
+      expect(await CloudReq.get('/ping').then((r) => r.data)).toStrictEqual('OK')
       expect(fakeHttpUpstream.requests[0].rawHeaders).not.toContain('Proxy-Authorization')
     })
 
@@ -207,31 +207,31 @@ describe('CloudRequest', () => {
       it(`${adapter}: issues requests to the correct location when HTTP -> HTTPS via Proxy`, async () => {
         const result = await executeProxyRequest({ adapter, proxyServer: fakeHttpProxy, targetServer: fakeHttpsUpstream })
 
-        expect(result).toEqual('OK')
+        expect(result).toStrictEqual('OK')
 
         expect(fakeHttpProxy.requests.length).toBe(1)
         expect(fakeHttpProxy.requests[0].url).toBe(`localhost:${fakeHttpsUpstream.port}`)
-        expect(fakeHttpProxy.requests[0].rawHeaders).toEqual(['Host', `localhost:${fakeHttpsUpstream.port}`])
-        expect(fakeHttpProxy.requests[0].method).toEqual('CONNECT')
+        expect(fakeHttpProxy.requests[0].rawHeaders).toStrictEqual(['Host', `localhost:${fakeHttpsUpstream.port}`])
+        expect(fakeHttpProxy.requests[0].method).toStrictEqual('CONNECT')
 
         expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
-        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(0)
-        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(1)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toStrictEqual(0)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toStrictEqual(1)
       })
 
       it(`${adapter}: issues requests to the correct location when using HTTPS -> HTTPS via Proxy`, async () => {
         const result = await executeProxyRequest({ adapter, proxyServer: fakeHttpsProxy, targetServer: fakeHttpsUpstream })
 
-        expect(result).toEqual('OK')
+        expect(result).toStrictEqual('OK')
 
         expect(fakeHttpsProxy.requests.length).toBe(1)
         expect(fakeHttpsProxy.requests[0].url).toBe(`localhost:${fakeHttpsUpstream.port}`)
-        expect(fakeHttpsProxy.requests[0].rawHeaders).toEqual(['Host', `localhost:${fakeHttpsUpstream.port}`])
-        expect(fakeHttpsProxy.requests[0].method).toEqual('CONNECT')
+        expect(fakeHttpsProxy.requests[0].rawHeaders).toStrictEqual(['Host', `localhost:${fakeHttpsUpstream.port}`])
+        expect(fakeHttpsProxy.requests[0].method).toStrictEqual('CONNECT')
 
         expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
-        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(0)
-        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(1)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toStrictEqual(0)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toStrictEqual(1)
       })
 
       it(`${adapter}: issues requests to the correct location when doing HTTP -> HTTP proxy`, async () => {
@@ -242,12 +242,12 @@ describe('CloudRequest', () => {
           adapter,
         })
 
-        expect(result).toEqual({ ok: true })
+        expect(result).toStrictEqual({ ok: true })
 
         expect(fakeHttpProxy.requests.length).toBe(1)
         expect(fakeHttpProxy.requests[0].url).toBe(`http://localhost:${fakeHttpUpstream.port}/ping`)
         if (adapter === 'Request') {
-          expect(fakeHttpProxy.requests[0].rawHeaders).toEqual([
+          expect(fakeHttpProxy.requests[0].rawHeaders).toStrictEqual([
             'x-os-name', os.platform(),
             'x-cypress-version', pkg.version,
             'host', `localhost:${fakeHttpUpstream.port}`,
@@ -258,7 +258,7 @@ describe('CloudRequest', () => {
             'Connection', 'close',
           ])
         } else {
-          expect(fakeHttpProxy.requests[0].rawHeaders).toEqual([
+          expect(fakeHttpProxy.requests[0].rawHeaders).toStrictEqual([
             // different from Request Promise (changed):
             'Accept', 'application/json, text/plain, */*',
             'Content-Type', 'application/json',
@@ -275,10 +275,10 @@ describe('CloudRequest', () => {
           ])
         }
 
-        expect(fakeHttpProxy.requests[0].method).toEqual('POST')
+        expect(fakeHttpProxy.requests[0].method).toStrictEqual('POST')
         expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
-        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(1)
-        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(0)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toStrictEqual(1)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toStrictEqual(0)
       })
 
       it(`${adapter}: issues requests to the correct location when doing HTTP (auth) -> HTTPS (auth) proxy`, async () => {
@@ -289,7 +289,7 @@ describe('CloudRequest', () => {
           adapter,
         })
 
-        expect(result).toEqual({
+        expect(result).toStrictEqual({
           ok: true,
           auth: UPSTREAM_AUTH,
         })
@@ -297,13 +297,13 @@ describe('CloudRequest', () => {
         expect(fakeHttpProxyAuth.requests.length).toBe(1)
         expect(fakeHttpProxyAuth.requests[0].url).toBe(`localhost:${fakeHttpsUpstreamAuth.port}`)
 
-        expect(lowerHeaders(fakeHttpProxyAuth.requests[0].rawHeaders)).toEqual([
+        expect(lowerHeaders(fakeHttpProxyAuth.requests[0].rawHeaders)).toStrictEqual([
           'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
           'proxy-authorization', PROXY_AUTH,
         ])
 
         if (adapter === 'Request') {
-          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).toEqual([
+          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).toStrictEqual([
             'x-os-name', os.platform(),
             'x-cypress-version', pkg.version,
             'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
@@ -315,7 +315,7 @@ describe('CloudRequest', () => {
             'Connection', 'close',
           ])
         } else {
-          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).toEqual([
+          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).toStrictEqual([
             // different from Request Promise (changed):
             'Accept', 'application/json, text/plain, */*',
             'Content-Type', 'application/json',
@@ -334,11 +334,11 @@ describe('CloudRequest', () => {
           ])
         }
 
-        expect(fakeHttpProxyAuth.requests[0].method).toEqual('CONNECT')
-        expect(fakeHttpsUpstreamAuth.requests[0].method).toEqual('POST')
+        expect(fakeHttpProxyAuth.requests[0].method).toStrictEqual('CONNECT')
+        expect(fakeHttpsUpstreamAuth.requests[0].method).toStrictEqual('POST')
         expect(currentAgentRequestSpy.mock.calls.length).toBe(1)
-        expect(currentAgentHttpRequestSpy.mock.calls.length).toEqual(0)
-        expect(currentAgentHttpsRequestSpy.mock.calls.length).toEqual(1)
+        expect(currentAgentHttpRequestSpy.mock.calls.length).toStrictEqual(0)
+        expect(currentAgentHttpsRequestSpy.mock.calls.length).toStrictEqual(1)
       })
     }
   })
@@ -374,7 +374,7 @@ describe('CloudRequest', () => {
       await CloudRequest.get('/ping')
       const debugCalls = logSpy.mock.calls.flatMap((c) => stripAnsi(String(c[0])).trim().replace(/\+(\d+)ms$/, '+?ms'))
 
-      expect(debugCalls).toEqual([
+      expect(debugCalls).toStrictEqual([
         'cypress:server:cloud:api get /ping +?ms',
         'cypress:server:cloud:api get /ping Success: 200 OK -> \n  cypress:server:cloud:api   Response: \'OK\' +?ms',
       ])
@@ -384,7 +384,7 @@ describe('CloudRequest', () => {
       const CloudRequestNoLogs = createCloudRequest({ baseURL: fakeApp.baseUrl, enableLogging: false })
 
       await CloudRequestNoLogs.get('/ping')
-      expect(logSpy.mock.calls).toEqual([])
+      expect(logSpy.mock.calls).toStrictEqual([])
     })
 
     it('can skip installing the error transform', async () => {
@@ -395,7 +395,7 @@ describe('CloudRequest', () => {
         await CloudRequest.get('/error')
         throw new Error('Unreachable')
       } catch (e) {
-        expect(e.isApiError).toEqual(true)
+        expect(e.isApiError).toStrictEqual(true)
         expect(e.message).toBe(dedent`
         404
         
@@ -412,8 +412,8 @@ describe('CloudRequest', () => {
         await CloudRequestNoError.get('/error')
         throw new Error('Unreachable')
       } catch (e) {
-        expect(e.isApiError).toEqual(undefined)
-        expect(e.response.data).toEqual({ ok: false })
+        expect(e.isApiError).toStrictEqual(undefined)
+        expect(e.response.data).toStrictEqual({ ok: false })
       }
     })
   })
@@ -499,11 +499,11 @@ describe('CloudRequest', () => {
 
       const result1 = await CloudRequest.post('https://cloud.cypress.io/ping', {})
 
-      expect(result1.data).toEqual({ ok: true })
+      expect(result1.data).toStrictEqual({ ok: true })
 
       const result2 = await createCloudRequest({ baseURL: 'https://api.cypress.io' }).post('/ping', {})
 
-      expect(result2.data).toEqual({ ok: true })
+      expect(result2.data).toStrictEqual({ ok: true })
 
       const result3 = await fetch('https://cloud.cypress.io/ping', {
         method: 'POST',
@@ -512,7 +512,7 @@ describe('CloudRequest', () => {
         agent: strictAgent,
       })
 
-      expect(await result3.json()).toEqual({ ok: true })
+      expect(await result3.json()).toStrictEqual({ ok: true })
 
       expect(addRequestSpy).toHaveBeenCalledTimes(3)
     })

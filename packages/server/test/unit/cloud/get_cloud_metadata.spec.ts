@@ -36,7 +36,7 @@ describe('getCloudMetadata', () => {
 
     expect(mockCloudDataSource.getCloudUrl).toHaveBeenCalledWith('staging')
     expect(mockCloudDataSource.additionalHeaders).toHaveBeenCalled()
-    expect(cloudMetadata).toEqual({
+    expect(cloudMetadata).toStrictEqual({
       cloudUrl: 'https://cloud.cypress.io',
       cloudHeaders: { 'x-cypress-cloud-header': 'test' },
     })
@@ -49,7 +49,7 @@ describe('getCloudMetadata', () => {
 
     expect(mockCloudDataSource.getCloudUrl).toHaveBeenCalledWith('development')
     expect(mockCloudDataSource.additionalHeaders).toHaveBeenCalled()
-    expect(cloudMetadata).toEqual({
+    expect(cloudMetadata).toStrictEqual({
       cloudUrl: 'https://cloud.cypress.io',
       cloudHeaders: { 'x-cypress-cloud-header': 'test' },
     })
@@ -63,7 +63,7 @@ describe('getCloudMetadata', () => {
 
     expect(mockCloudDataSource.getCloudUrl).toHaveBeenCalledWith('production')
     expect(mockCloudDataSource.additionalHeaders).toHaveBeenCalled()
-    expect(cloudMetadata).toEqual({
+    expect(cloudMetadata).toStrictEqual({
       cloudUrl: 'https://cloud.cypress.io',
       cloudHeaders: { 'x-cypress-cloud-header': 'test' },
     })

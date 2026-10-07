@@ -25,7 +25,7 @@ describe('lib/util/args', () => {
     it('casts numbers by default', () => {
       const options = minimist(['--ci-build-id', '1e100'])
 
-      expect(options).toEqual({
+      expect(options).toStrictEqual({
         _: [],
         'ci-build-id': 1e+100,
       })
@@ -36,7 +36,7 @@ describe('lib/util/args', () => {
         string: ['ci-build-id'],
       })
 
-      expect(options).toEqual({
+      expect(options).toStrictEqual({
         _: [],
         'ci-build-id': '1e100',
       })
@@ -50,7 +50,7 @@ describe('lib/util/args', () => {
         },
       })
 
-      expect(options).toEqual({
+      expect(options).toStrictEqual({
         _: [],
         'ci-build-id': '1e100',
         ciBuildId: '1e100',
@@ -77,7 +77,7 @@ describe('lib/util/args', () => {
       }
       const output = normalizeBackslashes(input)
 
-      expect(output).toEqual({
+      expect(output).toStrictEqual({
         appPath: '/foo/bar',
         somethingElse: 42,
       })
@@ -90,7 +90,7 @@ describe('lib/util/args', () => {
       const output = normalizeBackslashes(input)
 
       // empty project path remains
-      expect(output).toEqual(input)
+      expect(output).toStrictEqual(input)
     })
   })
 
@@ -297,7 +297,7 @@ describe('lib/util/args', () => {
     it('converts to object literal', () => {
       const options = toObject(['--env', 'foo=bar,version=0.12.1,host=localhost:8888,bar=qux='])
 
-      expect(options.config.env).toEqual({
+      expect(options.config.env).toStrictEqual({
         foo: 'bar',
         version: '0.12.1',
         host: 'localhost:8888',
@@ -322,7 +322,7 @@ describe('lib/util/args', () => {
     it('handles values containing exponential operators', () => {
       const options = toObject(['--env', 'foo=bar,hash=769e98018'])
 
-      expect(options.config.env).toEqual({
+      expect(options.config.env).toStrictEqual({
         foo: 'bar',
         hash: '769e98018',
       })
@@ -332,7 +332,7 @@ describe('lib/util/args', () => {
     it('handles values that are arrays', () => {
       const options = toObject(['--env', 'foo="[bar1,bar2,bar3]"'])
 
-      expect(options.config.env).toEqual({
+      expect(options.config.env).toStrictEqual({
         foo: '[bar1|bar2|bar3]',
       })
     })
@@ -348,7 +348,7 @@ describe('lib/util/args', () => {
 
       const options = toObject(['--reporterOptions', JSON.stringify(reporterOpts)])
 
-      expect(options.config.reporterOptions).toEqual(reporterOpts)
+      expect(options.config.reporterOptions).toStrictEqual(reporterOpts)
     })
 
     it('converts nested objects with mixed assignment usage', () => {
@@ -362,7 +362,7 @@ describe('lib/util/args', () => {
       // as a full blown object
       let options = toObject(['--reporterOptions', JSON.stringify(reporterOpts)])
 
-      expect(options.config.reporterOptions).toEqual(reporterOpts)
+      expect(options.config.reporterOptions).toStrictEqual(reporterOpts)
 
       // as mixed usage
       const nestedJSON = JSON.stringify(reporterOpts.jsonReporterOptions)
@@ -372,7 +372,7 @@ describe('lib/util/args', () => {
         `reporterEnabled=JSON,jsonReporterOptions=${nestedJSON}`,
       ])
 
-      expect(options.config.reporterOptions).toEqual({
+      expect(options.config.reporterOptions).toStrictEqual({
         reporterEnabled: 'JSON',
         jsonReporterOptions: {
           toConsole: true,
@@ -425,7 +425,7 @@ describe('lib/util/args', () => {
 
       const options = toObject(['--config', JSON.stringify(config)])
 
-      expect(options.config).toEqual(config)
+      expect(options.config).toStrictEqual(config)
     })
 
     it('converts nested usage with JSON stringification', () => {
@@ -441,7 +441,7 @@ describe('lib/util/args', () => {
       // as a full blown object
       let options = toObject(['--config', JSON.stringify(config)])
 
-      expect(options.config).toEqual(config)
+      expect(options.config).toStrictEqual(config)
 
       // as mixed usage
       const hosts = JSON.stringify(config.hosts)
@@ -458,7 +458,7 @@ describe('lib/util/args', () => {
 
       ])
 
-      expect(options.config).toEqual(config)
+      expect(options.config).toStrictEqual(config)
     })
 
     it('allows config properties', () => {
@@ -508,7 +508,7 @@ describe('lib/util/args', () => {
     })
 
     it('rejects values which have an corresponding underscore\'d key', () => {
-      expect(toArray(obj)).toEqual([
+      expect(toArray(obj)).toStrictEqual([
         `--config=${JSON.stringify({ foo: 'bar' })}`,
         '--project=foo/bar',
       ])
@@ -563,7 +563,7 @@ describe('lib/util/args', () => {
         version: 'version',
       })
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         '--apiKey=apiKey',
         '--appPath=appPath',
         '--browser=browser',
@@ -665,7 +665,7 @@ describe('lib/util/args', () => {
     })
 
     it('backs up env, config, reporterOptions, spec', () => {
-      expect(obj).toEqual({
+      expect(obj).toStrictEqual({
         cwd: getCwd(),
         _: [],
         config,
@@ -687,13 +687,13 @@ describe('lib/util/args', () => {
 
       const args = toArray(obj)
 
-      expect(args).toEqual([
+      expect(args).toStrictEqual([
         `--config=${mergedConfig}`,
         `--cwd=${getCwd()}`,
         `--spec=${JSON.stringify(specs)}`,
       ])
 
-      expect(toObject(args)).toEqual({
+      expect(toObject(args)).toStrictEqual({
         cwd: getCwd(),
         _: [],
         invokedFromCli: true,
@@ -705,7 +705,7 @@ describe('lib/util/args', () => {
     it('does not coerce --ci-build-id', () => {
       const result = toObject(['--ci-build-id', '1e100'])
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         ciBuildId: '1e100',
         cwd: getCwd(),
         _: [],
@@ -717,7 +717,7 @@ describe('lib/util/args', () => {
     it('moves testing-type specific config options', () => {
       const result = toObject(['--config', '{"baseUrl": "http://foobar.com", "specPattern":"**/*.test.js"}'])
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         cwd: getCwd(),
         _: [],
         invokedFromCli: false,
@@ -740,7 +740,7 @@ describe('lib/util/args', () => {
         '--updating',
       ]
 
-      expect(toObject(argv)).toEqual({
+      expect(toObject(argv)).toStrictEqual({
         cwd: getCwd(),
         _: [
           '/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress',
@@ -765,7 +765,7 @@ describe('lib/util/args', () => {
         '--updating',
       ]
 
-      expect(toObject(argv)).toEqual({
+      expect(toObject(argv)).toStrictEqual({
         cwd: getCwd(),
         _: [
           '/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress',

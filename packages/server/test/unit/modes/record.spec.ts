@@ -149,7 +149,7 @@ describe('lib/modes/record', () => {
 
           debug('git is %o', commit)
 
-          expect(commit).toEqual({
+          expect(commit).toStrictEqual({
             sha: commitData.sha,
             branch: commitData.branch,
             authorName: commitData.author,

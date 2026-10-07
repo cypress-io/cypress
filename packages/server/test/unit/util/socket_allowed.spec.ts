@@ -25,22 +25,22 @@ describe('lib/util/socket_allowed', function () {
         },
       } as Request
 
-      expect(sw.allowedLocalPorts).toEqual([])
+      expect(sw.allowedLocalPorts).toStrictEqual([])
       expect(sw.isRequestAllowed(req)).toBe(false)
 
       sw.add(socket)
-      expect(sw.allowedLocalPorts).toEqual([socket.localPort])
+      expect(sw.allowedLocalPorts).toStrictEqual([socket.localPort])
       expect(sw.isRequestAllowed(req)).toBe(true)
 
       socket.emit('close')
-      expect(sw.allowedLocalPorts).toEqual([])
+      expect(sw.allowedLocalPorts).toStrictEqual([])
       expect(sw.isRequestAllowed(req)).toBe(false)
     })
   })
 
   describe('#isRequestFromLocalhost', () => {
     it('allows loopback remote addresses without any port allow-list entry', () => {
-      expect(sw.allowedLocalPorts).toEqual([])
+      expect(sw.allowedLocalPorts).toStrictEqual([])
 
       for (const remoteAddress of ['127.0.0.1', '::1']) {
         const req = { socket: { remoteAddress } } as Request

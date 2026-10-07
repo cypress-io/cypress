@@ -7,7 +7,7 @@ describe('lib/util/chromium_flags', () => {
       const flags = ['one', 'two', 'three']
       const chromeFlags = formatChromeFlags(flags)
 
-      expect(chromeFlags).toEqual(['--one', '--two', '--three'])
+      expect(chromeFlags).toStrictEqual(['--one', '--two', '--three'])
     })
   })
 
@@ -16,14 +16,14 @@ describe('lib/util/chromium_flags', () => {
       const flags = ['one', 'two', 'three']
       const electronFlags = formatElectronFlags(flags)
 
-      expect(electronFlags).toEqual([{ name: 'one' }, { name: 'two' }, { name: 'three' }])
+      expect(electronFlags).toStrictEqual([{ name: 'one' }, { name: 'two' }, { name: 'three' }])
     })
 
     it('formats flags as objects with name/value pairs', () => {
       const flags = ['one=1', 'two=2', 'three']
       const electronFlags = formatElectronFlags(flags)
 
-      expect(electronFlags).toEqual([{ name: 'one', value: '1' }, { name: 'two', value: '2' }, { name: 'three' }])
+      expect(electronFlags).toStrictEqual([{ name: 'one', value: '1' }, { name: 'two', value: '2' }, { name: 'three' }])
     })
   })
 

@@ -44,7 +44,7 @@ describe('toBridgeEntries', () => {
   })
 
   it('returns nothing when no certificates are configured', () => {
-    expect(toBridgeEntries([])).toEqual([])
+    expect(toBridgeEntries([])).toStrictEqual([])
   })
 })
 

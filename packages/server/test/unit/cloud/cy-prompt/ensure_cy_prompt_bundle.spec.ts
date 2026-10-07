@@ -36,7 +36,7 @@ describe('ensureCyPromptBundle', () => {
       kind: 'cy-prompt',
     })
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       manifest: mockManifest,
       cyPromptPath: mockBundleDir,
     })

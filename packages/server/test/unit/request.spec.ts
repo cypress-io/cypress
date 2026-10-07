@@ -132,7 +132,7 @@ describe('lib/request', () => {
 
       expect(delaysRemaining).toHaveLength(0)
 
-      expect(retryFn.mock.calls).toEqual([
+      expect(retryFn.mock.calls).toStrictEqual([
         [{ delay: 0, attempt: 1 }],
         [{ delay: 999, attempt: 2 }],
         [{ delay: 100, attempt: 3 }],
@@ -194,14 +194,14 @@ describe('lib/request', () => {
       expect(opts.retryIntervals).toBe(retryIntervals)
       expect(opts.delaysRemaining).not.toBe(retryIntervals)
 
-      expect(opts.delaysRemaining).toEqual(retryIntervals)
+      expect(opts.delaysRemaining).toStrictEqual(retryIntervals)
     })
 
     it('retryIntervals to [] by default', () => {
       // @ts-expect-error - setDefaults is private
       const opts = Request.setDefaults({})
 
-      expect(opts.retryIntervals).toEqual([])
+      expect(opts.retryIntervals).toStrictEqual([])
     })
 
     it('delaysRemaining can be overridden', () => {
@@ -228,7 +228,7 @@ describe('lib/request', () => {
           headers: { foo: 'bar' },
           body: 'body',
         },
-      })).toEqual({
+      })).toStrictEqual({
         status: 404,
         statusText: 'Not Found',
         isOkStatusCode: false,
@@ -252,7 +252,7 @@ describe('lib/request', () => {
           headers: { foo: 'bar' },
           body: 'body',
         },
-      })).toEqual({
+      })).toStrictEqual({
         body: '<html>foo</html>',
         headers: { 'Content-Length': 50 },
         status: 200,
@@ -455,14 +455,16 @@ describe('lib/request', () => {
         body: 'foobarbaz',
       })
       .then((resp) => {
-        expect(Object.keys(resp).sort()).toEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'requestBody', 'requestHeaders'].sort())
+        expect(Object.keys(resp).sort()).toStrictEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'requestBody', 'requestHeaders'].sort())
 
         expect(resp.status).toBe(200)
         expect(resp.statusText).toBe('OK')
         expect(resp.body).toBe('hello')
-        expect(resp.headers).toEqual({ 'content-type': 'text/html' })
+        expect(resp.headers).toStrictEqual({ 'content-type': 'text/html' })
         expect(resp.isOkStatusCode).toBe(true)
         expect(resp.requestBody).toBe('foobarbaz')
+        // Node builds header objects with a null prototype, which toStrictEqual rejects,
+        // including the copies nested in allRequestResponses
         expect(resp.requestHeaders).toEqual({
           'accept': '*/*',
           'accept-encoding': 'gzip, deflate',
@@ -506,19 +508,21 @@ describe('lib/request', () => {
         cookies: false,
       })
       .then((resp) => {
-        expect(Object.keys(resp).sort()).toEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'redirects', 'requestBody', 'requestHeaders'].sort())
+        expect(Object.keys(resp).sort()).toStrictEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'redirects', 'requestBody', 'requestHeaders'].sort())
 
         expect(resp.status).toBe(200)
         expect(resp.statusText).toBe('OK')
         expect(resp.body).toBe('log in')
-        expect(resp.headers).toEqual({ 'content-type': 'text/html' })
+        expect(resp.headers).toStrictEqual({ 'content-type': 'text/html' })
         expect(resp.isOkStatusCode).toBe(true)
         expect(resp.requestBody).toBeUndefined()
-        expect(resp.redirects).toEqual([
+        expect(resp.redirects).toStrictEqual([
           '301: http://www.github.com/auth',
           '302: http://www.github.com/login',
         ])
 
+        // Node builds header objects with a null prototype, which toStrictEqual rejects,
+        // including the copies nested in allRequestResponses
         expect(resp.requestHeaders).toEqual({
           'accept': '*/*',
           'accept-encoding': 'gzip, deflate',
@@ -586,7 +590,7 @@ describe('lib/request', () => {
         cookies: false,
       })
       .then((resp) => {
-        expect(resp.body).toEqual({ status: 'ok' })
+        expect(resp.body).toStrictEqual({ status: 'ok' })
       })
     })
 
@@ -602,7 +606,7 @@ describe('lib/request', () => {
         cookies: false,
       })
       .then((resp) => {
-        expect(resp.body).toEqual({ status: 'ok' })
+        expect(resp.body).toStrictEqual({ status: 'ok' })
       })
     })
 

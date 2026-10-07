@@ -251,7 +251,7 @@ describe('lib/socket', () => {
         vi.spyOn(session, 'getSession').mockResolvedValue(foo)
 
         return client.emit('backend:request', 'get:session', 'quuz', (res) => {
-          expect(res.response).toEqual(foo)
+          expect(res.response).toStrictEqual(foo)
 
           return done()
         })
@@ -325,7 +325,7 @@ describe('lib/socket', () => {
       it('forwards every argument to onMocha', () => {
         return new Promise<void>((done) => {
           options.onMocha = function (...args) {
-            expect(args).toEqual(['test:before:run', { id: 'r3', title: 'does something' }])
+            expect(args).toStrictEqual(['test:before:run', { id: 'r3', title: 'does something' }])
 
             return done()
           }
@@ -337,7 +337,7 @@ describe('lib/socket', () => {
       it('forwards a single argument', () => {
         return new Promise<void>((done) => {
           options.onMocha = function (...args) {
-            expect(args).toEqual(['start'])
+            expect(args).toStrictEqual(['start'])
 
             return done()
           }
@@ -351,7 +351,7 @@ describe('lib/socket', () => {
       it('returns the fixture object', () => {
         return new Promise<void>((done) => {
           const cb = function (resp) {
-            expect(resp.response).toEqual([
+            expect(resp.response).toStrictEqual([
               { 'json': true },
             ])
 
@@ -378,7 +378,7 @@ describe('lib/socket', () => {
       it('passes Buffers through intact', () => {
         return new Promise<void>((done) => {
           const cb = function (resp) {
-            expect(resp.response).toEqual(Buffer.from('[{"json": true}]'))
+            expect(resp.response).toStrictEqual(Buffer.from('[{"json": true}]'))
 
             return done()
           }
@@ -394,7 +394,7 @@ describe('lib/socket', () => {
           options.onRequest = vi.fn().mockResolvedValue({ foo: 'bar' })
 
           return client.emit('backend:request', 'http:request', 'foo', (resp) => {
-            expect(resp.response).toEqual({ foo: 'bar' })
+            expect(resp.response).toStrictEqual({ foo: 'bar' })
 
             return done()
           })
@@ -408,7 +408,7 @@ describe('lib/socket', () => {
           options.onRequest = vi.fn().mockRejectedValue(err)
 
           return client.emit('backend:request', 'http:request', 'foo', (resp) => {
-            expect(resp.error).toEqual(errors.cloneErr(err))
+            expect(resp.error).toStrictEqual(errors.cloneErr(err))
 
             return done()
           })
@@ -444,7 +444,7 @@ describe('lib/socket', () => {
           ctx.coreData.cyPromptLifecycleManager.getCyPrompt.mockResolvedValue(mockCyPrompt)
 
           return client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
-            expect(resp.response).toEqual({ success: true })
+            expect(resp.response).toStrictEqual({ success: true })
 
             expectCalledWith(options.onCyPromptReady, mockCyPrompt.cyPromptManager)
 
@@ -465,7 +465,7 @@ describe('lib/socket', () => {
           ctx.coreData.cyPromptLifecycleManager.getCyPrompt.mockResolvedValue(mockCyPrompt)
 
           return client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
-            expect(resp.response).toEqual({ success: false })
+            expect(resp.response).toStrictEqual({ success: false })
 
             return done()
           })
@@ -482,7 +482,7 @@ describe('lib/socket', () => {
           ctx.coreData.cyPromptLifecycleManager.getCyPrompt.mockResolvedValue(mockCyPrompt)
 
           return client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
-            expect(resp.response).toEqual({
+            expect(resp.response).toStrictEqual({
               error: errors.cloneErr(mockCyPrompt.error),
             })
 
@@ -496,7 +496,7 @@ describe('lib/socket', () => {
           ctx.coreData.cyPromptLifecycleManager = undefined
 
           return client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
-            expect(resp.response).toEqual({ success: false })
+            expect(resp.response).toStrictEqual({ success: false })
 
             return done()
           })
@@ -511,7 +511,7 @@ describe('lib/socket', () => {
 
           client.emit('get:app:state', { type: 'global' }, (resp) => {
             expectCalledWith(options.getSavedState, { type: 'global' })
-            expect(resp.data).toEqual({ reporterWidth: 500 })
+            expect(resp.data).toStrictEqual({ reporterWidth: 500 })
 
             done()
           })
@@ -526,7 +526,7 @@ describe('lib/socket', () => {
 
           client.emit('get:app:state', { type: 'global' }, (resp) => {
             expectCalledWith(options.getSavedState, { type: 'global' })
-            expect(resp.error).toEqual(errors.cloneErr(err))
+            expect(resp.error).toStrictEqual(errors.cloneErr(err))
 
             done()
           })
@@ -791,7 +791,7 @@ describe('lib/socket', () => {
           client.emit('backend:request', 'save:session', sessionData, () => {
             const state = session.getState()
 
-            expect(state).toEqual({
+            expect(state).toStrictEqual({
               globalSessions: {},
               specSessions: {
                 'spec': sessionData,
@@ -813,7 +813,7 @@ describe('lib/socket', () => {
           client.emit('backend:request', 'save:session', sessionData, () => {
             const state = session.getState()
 
-            expect(state).toEqual({
+            expect(state).toStrictEqual({
               globalSessions: {
                 'global': sessionData,
               },
@@ -851,7 +851,7 @@ describe('lib/socket', () => {
           }
 
           client.emit('backend:request', 'clear:sessions', false, () => {
-            expect(state).toEqual({
+            expect(state).toStrictEqual({
               globalSessions: {
                 'global': { id: 'global' },
               },
@@ -876,7 +876,7 @@ describe('lib/socket', () => {
           }
 
           client.emit('backend:request', 'clear:sessions', true, () => {
-            expect(state).toEqual({
+            expect(state).toStrictEqual({
               globalSessions: {},
               specSessions: {},
             })
@@ -898,7 +898,7 @@ describe('lib/socket', () => {
 
           client.emit('backend:request', 'get:session', 'global', ({ response, error }) => {
             expect(error).toBeUndefined()
-            expect(response).toEqual({
+            expect(response).toStrictEqual({
               id: 'global',
             })
 
@@ -918,7 +918,7 @@ describe('lib/socket', () => {
 
           client.emit('backend:request', 'get:session', 'spec', ({ response, error }) => {
             expect(error).toBeUndefined()
-            expect(response).toEqual({
+            expect(response).toStrictEqual({
               id: 'spec',
             })
 
@@ -959,7 +959,7 @@ describe('lib/socket', () => {
           client.emit('backend:request', 'reset:cached:test:state', ({ error }) => {
             expect(error).toBeUndefined()
 
-            expect(state).toEqual({
+            expect(state).toStrictEqual({
               globalSessions: {
                 'global': { id: 'global' },
               },
@@ -989,12 +989,12 @@ describe('lib/socket', () => {
 
         await new Promise<void>((resolve) => {
           client.emit('get:cached:test:state', (runState, testState) => {
-            expect(runState).toEqual({
+            expect(runState).toStrictEqual({
               currentId: 'test',
               currentRetry: 0,
             })
 
-            expect(testState).toEqual({
+            expect(testState).toStrictEqual({
               activeSessions: {},
             })
 

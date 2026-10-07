@@ -110,7 +110,7 @@ describe('lib/util/profile_cleaner', () => {
       return fs.ensureDir(emptyFolder)
       .then(() => profileCleaner.removeInactiveByPid(emptyFolder, 'run-'))
       .then((result) => {
-        expect(result).toEqual([])
+        expect(result).toStrictEqual([])
       })
       .finally(() => fs.removeAsync(emptyFolder))
     })

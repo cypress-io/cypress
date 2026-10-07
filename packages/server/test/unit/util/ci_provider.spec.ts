@@ -102,7 +102,7 @@ describe('lib/util/ci_provider', () => {
     // This list is used in user-facing error messaging.
     const providers = ciProvider.detectableCiBuildIdProviders()
 
-    expect(providers).toEqual([
+    expect(providers).toStrictEqual([
       'appveyor',
       'argoCd',
       'argoWorkflows',
@@ -132,7 +132,7 @@ describe('lib/util/ci_provider', () => {
     ])
 
     // Confirm the returned list is already sorted (not just matching this test's ordering).
-    expect(providers).toEqual([...providers].sort())
+    expect(providers).toStrictEqual([...providers].sort())
   })
 
   it('appveyor', () => {

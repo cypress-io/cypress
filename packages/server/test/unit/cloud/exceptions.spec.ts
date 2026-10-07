@@ -35,7 +35,7 @@ describe('lib/cloud/exceptions', () => {
     it('returns an object literal', () => {
       const err = new Error()
 
-      expect(Object.keys(exception.getErr(err)).sort()).toEqual(['message', 'name', 'stack'])
+      expect(Object.keys(exception.getErr(err)).sort()).toStrictEqual(['message', 'name', 'stack'])
     })
 
     describe('fields', () => {

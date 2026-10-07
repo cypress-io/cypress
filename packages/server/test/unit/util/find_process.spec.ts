@@ -39,7 +39,7 @@ describe('lib/util/find_process', function () {
 
     const result1 = await byPid(123)
 
-    expect(result1).toEqual([{
+    expect(result1).toStrictEqual([{
       pid: 123,
       ppid: 456,
       name: 'abc',
@@ -49,7 +49,7 @@ describe('lib/util/find_process', function () {
 
     const result2 = await byPid(789)
 
-    expect(result2).toEqual([{
+    expect(result2).toStrictEqual([{
       pid: 789,
       ppid: 1011,
       name: 'xyz',
@@ -59,7 +59,7 @@ describe('lib/util/find_process', function () {
 
     const result3 = await byPid(1213)
 
-    expect(result3).toEqual([{
+    expect(result3).toStrictEqual([{
       pid: 1213,
       ppid: 1415,
       name: 'def',
@@ -69,7 +69,7 @@ describe('lib/util/find_process', function () {
 
     const result4 = await byPid(1617)
 
-    expect(result4).toEqual([{
+    expect(result4).toStrictEqual([{
       pid: 1617,
       ppid: 1819,
       name: 'ghi',
@@ -79,7 +79,7 @@ describe('lib/util/find_process', function () {
 
     const result5 = await byPid(2021)
 
-    expect(result5).toEqual([{
+    expect(result5).toStrictEqual([{
       pid: 2021,
       ppid: 2223,
       name: 'jkl',

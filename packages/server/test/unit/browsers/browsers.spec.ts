@@ -231,7 +231,7 @@ describe('lib/browsers/index', () => {
 
       return browsers.ensureAndGetByNameOrPath('foo', false, foundBrowsers as FoundBrowser[])
       .then((browser: TestBrowser) => {
-        expect(browser).toEqual({ name: 'foo', channel: 'stable' })
+        expect(browser).toStrictEqual({ name: 'foo', channel: 'stable' })
       })
     })
 

@@ -81,7 +81,7 @@ describe('gui/interactive', () => {
 
       const args = _.pick(trackState, 'width', 'height', 'x', 'y', 'devTools')
 
-      expect(args).toEqual({
+      expect(args).toStrictEqual({
         width: 'appWidth',
         height: 'appHeight',
         x: 'appX',

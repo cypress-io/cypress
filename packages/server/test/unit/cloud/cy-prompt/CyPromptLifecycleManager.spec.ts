@@ -224,7 +224,7 @@ describe('CyPromptLifecycleManager', () => {
       const getProjectOptions = cyPromptManagerSetupStub.mock.calls[0][0].getProjectOptions
       const projectOptions = await getProjectOptions()
 
-      expect(projectOptions).toEqual({
+      expect(projectOptions).toStrictEqual({
         isOpenMode: false,
         user: {
           authToken: 'test-token',
@@ -459,7 +459,7 @@ describe('CyPromptLifecycleManager', () => {
       const getProjectOptions = cyPromptManagerSetupStub.mock.calls[0][0].getProjectOptions
       const projectOptions = await getProjectOptions()
 
-      expect(projectOptions).toEqual({
+      expect(projectOptions).toStrictEqual({
         isOpenMode: false,
         user: {
           authToken: 'test-token',
@@ -521,7 +521,7 @@ describe('CyPromptLifecycleManager', () => {
       const getProjectOptions = cyPromptManagerSetupStub.mock.calls[0][0].getProjectOptions
       const projectOptions = await getProjectOptions()
 
-      expect(projectOptions).toEqual({
+      expect(projectOptions).toStrictEqual({
         isOpenMode: false,
         user: {
           authToken: 'test-token',

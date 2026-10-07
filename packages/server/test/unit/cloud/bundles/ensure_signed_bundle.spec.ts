@@ -115,7 +115,7 @@ describe('ensureSignedBundle', () => {
     const expectedBundleDir = path.join(cacheRoot, 'bundles', 'cy-prompt', 'abc123')
 
     expect(result.bundleDir).toBe(expectedBundleDir)
-    expect(result.manifest).toEqual(FIXTURE_MANIFEST)
+    expect(result.manifest).toStrictEqual(FIXTURE_MANIFEST)
 
     expect(await readFile(path.join(expectedBundleDir, 'manifest.json'), 'utf8')).toBe(MANIFEST_TEXT)
     expect(await readFile(path.join(expectedBundleDir, 'server', 'index.js'), 'utf8')).toBe('// server entrypoint\n')
@@ -127,7 +127,7 @@ describe('ensureSignedBundle', () => {
     const baseDir = path.dirname(expectedBundleDir)
     const remaining: string[] = await readdir(baseDir)
 
-    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).toEqual([])
+    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).toStrictEqual([])
   })
 
   it('persists the manifest signature sidecar alongside the published bundle', async () => {
@@ -153,7 +153,7 @@ describe('ensureSignedBundle', () => {
     })
 
     expect(result.bundleDir).toBe(path.join(cacheRoot, 'bundles', 'cy-prompt', 'cached'))
-    expect(result.manifest).toEqual(FIXTURE_MANIFEST)
+    expect(result.manifest).toStrictEqual(FIXTURE_MANIFEST)
     expect(streamStub).not.toHaveBeenCalled()
     expect(verifyOnDisk).toHaveBeenCalledOnce()
   })
@@ -278,6 +278,6 @@ describe('ensureSignedBundle', () => {
     const baseDir = path.dirname(finalDir)
     const remaining: string[] = await readdir(baseDir)
 
-    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).toEqual([])
+    expect(remaining.filter((n: string) => n.startsWith('.staging-'))).toStrictEqual([])
   })
 })

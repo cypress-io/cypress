@@ -31,13 +31,13 @@ describe('encryption', () => {
 
     const { plaintext } = await jose.generalDecrypt(jwe, privateKey)
 
-    expect(JSON.parse(plaintext)).toEqual(TEST_BODY)
+    expect(JSON.parse(plaintext)).toStrictEqual(TEST_BODY)
 
     const unwrappedKey = crypto.privateDecrypt(privateKey, Buffer.from(jwe.recipients[0].encrypted_key, 'base64'))
 
     expect(
       unwrappedKey.toString('base64'),
-    ).toEqual(secretKey.export().toString('base64'))
+    ).toStrictEqual(secretKey.export().toString('base64'))
   })
 
   it('is possible to use the secretKey to decrypt future responses', async () => {
@@ -60,7 +60,7 @@ describe('encryption', () => {
     const jweResponse = await enc.encrypt()
     const roundtripResponse = await encryption.decryptResponse(jweResponse, secretKey)
 
-    expect(roundtripResponse).toEqual(RESPONSE_BODY)
+    expect(roundtripResponse).toStrictEqual(RESPONSE_BODY)
   })
 
   // Regression: jose's default inflateRaw caps decompressed payloads at ~250KB,
@@ -100,6 +100,6 @@ describe('encryption', () => {
     const jweResponse = await enc.encrypt()
     const roundtripResponse = await encryption.decryptResponse(jweResponse, secretKey)
 
-    expect(roundtripResponse).toEqual(LARGE_RESPONSE)
+    expect(roundtripResponse).toStrictEqual(LARGE_RESPONSE)
   })
 })

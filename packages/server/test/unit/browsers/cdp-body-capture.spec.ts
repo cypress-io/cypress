@@ -70,7 +70,7 @@ describe('CdpBodyCapture', () => {
 
     capture.start()
 
-    expect(client.on.mock.calls.map((call) => call[0])).toEqual([
+    expect(client.on.mock.calls.map((call) => call[0])).toStrictEqual([
       'Network.dataReceived',
       'Network.loadingFinished',
       'Network.loadingFailed',
@@ -83,7 +83,7 @@ describe('CdpBodyCapture', () => {
 
     await closed
 
-    expect(client.off.mock.calls.map((call) => call[0])).toEqual([
+    expect(client.off.mock.calls.map((call) => call[0])).toStrictEqual([
       'Network.dataReceived',
       'Network.loadingFinished',
       'Network.loadingFailed',
