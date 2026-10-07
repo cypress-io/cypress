@@ -163,6 +163,10 @@ interface ICySnapshots extends Omit<
   'onCssModified' | 'onBeforeWindowLoad'
 > { }
 
+// How many times each runnable has started. Hooks are reused across tests and retries,
+// so this tells a completion from an earlier run apart from one for the current run.
+const runnableRuns = new WeakMap<object, number>()
+
 export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IAliases, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
@@ -985,6 +989,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return runnable.fn = fn
     }
 
+    const run = (runnableRuns.get(runnable) ?? 0) + 1
+
+    runnableRuns.set(runnable, run)
+
+    // Once a newer run of this runnable has started (a retry clears mocha's timedOut on the
+    // reused hook), mocha would count a late done() or promise from this run as a second
+    // completion of the new run and fail it, so those are dropped.
+    const isStaleRun = () => runnableRuns.get(runnable) !== run
+
     const cy = this
 
     runnable.fn = function () {
@@ -1012,6 +1025,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           const originalDone = arguments[0]
 
           arguments[0] = (done = function (err) {
+            if (isStaleRun()) {
+              return null
+            }
+
             // TODO: handle no longer error when ended early
             cy.doneEarly()
 
@@ -1074,7 +1091,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
             cy.warnMixingPromisesAndCommands()
           }
 
-          return ret
+          const customPromise = ret
+
+          return new Promise((resolve, reject) => {
+            customPromise.then((value) => {
+              if (!isStaleRun()) {
+                resolve(value)
+              }
+            }, (err) => {
+              if (!isStaleRun()) {
+                reject(err)
+              }
+            })
+          })
         }
 
         // if we're cy or we've enqueued commands
