@@ -1,5 +1,4 @@
-const { expect } = require('../../../../spec_helper')
-
+import { describe, it, expect } from 'vitest'
 import type { Protocol } from 'devtools-protocol'
 import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../../../../lib/automation/cookie/converters/cdp'
 import type { CyCookie } from '../../../../../lib/automation/cookie/util'
@@ -37,20 +36,20 @@ const cyCookie = (props: Partial<CyCookie> = {}): CyCookie => {
   }
 }
 
-context('lib/automation/cookie/converters/cdp', () => {
-  context('.convertCdpCookiesToCyCookies', () => {
+describe('lib/automation/cookie/converters/cdp', () => {
+  describe('.convertCdpCookiesToCyCookies', () => {
     it('renames expires to expirationDate', () => {
       const [cookie] = convertCdpCookiesToCyCookies([cdpCookie({ domain: 'localhost', expires: 456 })])
 
-      expect(cookie.expirationDate).to.eq(456)
-      expect(cookie).to.not.have.property('expires')
+      expect(cookie.expirationDate).toBe(456)
+      expect(cookie).not.toHaveProperty('expires')
     })
 
     it('drops the -1 session sentinel entirely', () => {
       const [cookie] = convertCdpCookiesToCyCookies([cdpCookie({ domain: 'localhost', expires: -1 })])
 
-      expect(cookie.expirationDate).to.be.undefined
-      expect(cookie).to.not.have.property('expires')
+      expect(cookie.expirationDate).toBeUndefined()
+      expect(cookie).not.toHaveProperty('expires')
     })
 
     it('stamps hostOnly on host-only-capable domains only', () => {
@@ -60,9 +59,9 @@ context('lib/automation/cookie/converters/cdp', () => {
         cdpCookie({ domain: 'localhost' }),
       ])
 
-      expect(hostOnly.hostOnly).to.be.true
-      expect(domainCookie).to.not.have.property('hostOnly')
-      expect(localhost).to.not.have.property('hostOnly')
+      expect(hostOnly.hostOnly).toBe(true)
+      expect(domainCookie).not.toHaveProperty('hostOnly')
+      expect(localhost).not.toHaveProperty('hostOnly')
     })
 
     it('converts CDP sameSite to the extension vocabulary', () => {
@@ -73,10 +72,10 @@ context('lib/automation/cookie/converters/cdp', () => {
         cdpCookie({ domain: 'localhost' }),
       ])
 
-      expect(none.sameSite).to.eq('no_restriction')
-      expect(lax.sameSite).to.eq('lax')
-      expect(strict.sameSite).to.eq('strict')
-      expect(unset.sameSite).to.be.undefined
+      expect(none.sameSite).toBe('no_restriction')
+      expect(lax.sameSite).toBe('lax')
+      expect(strict.sameSite).toBe('strict')
+      expect(unset.sameSite).toBeUndefined()
     })
 
     it('does not mutate the input cookies and drops CDP-only fields', () => {
@@ -84,18 +83,18 @@ context('lib/automation/cookie/converters/cdp', () => {
 
       const [result] = convertCdpCookiesToCyCookies([input])
 
-      expect(result).to.not.eq(input)
-      expect(input).to.deep.eq(cdpCookie({ domain: 'foo.com', expires: -1, sameSite: 'None' }))
-      expect(result).to.not.have.property('size')
-      expect(result).to.not.have.property('session')
+      expect(result).not.toBe(input)
+      expect(input).toStrictEqual(cdpCookie({ domain: 'foo.com', expires: -1, sameSite: 'None' }))
+      expect(result).not.toHaveProperty('size')
+      expect(result).not.toHaveProperty('session')
     })
   })
 
-  context('.convertCyCookieToCdpCookie', () => {
+  describe('.convertCyCookieToCdpCookie', () => {
     it('maps expirationDate to expires and strips undefined params', () => {
       const request = convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', expirationDate: 123 }))
 
-      expect(request).to.deep.eq({
+      expect(request).toStrictEqual({
         name: 'foo',
         value: 'f',
         domain: 'localhost',
@@ -109,33 +108,33 @@ context('lib/automation/cookie/converters/cdp', () => {
     it('defaults name and value to empty strings', () => {
       const request = convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', name: undefined as any, value: undefined as any }))
 
-      expect(request.name).to.eq('')
-      expect(request.value).to.eq('')
+      expect(request.name).toBe('')
+      expect(request.value).toBe('')
     })
 
     it('converts extension sameSite to the CDP vocabulary', () => {
-      expect(convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', sameSite: 'no_restriction' })).sameSite).to.eq('None')
-      expect(convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', sameSite: 'lax' })).sameSite).to.eq('Lax')
-      expect(convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', sameSite: 'strict' })).sameSite).to.eq('Strict')
+      expect(convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', sameSite: 'no_restriction' })).sameSite).toBe('None')
+      expect(convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', sameSite: 'lax' })).sameSite).toBe('Lax')
+      expect(convertCyCookieToCdpCookie(cyCookie({ domain: 'localhost', sameSite: 'strict' })).sameSite).toBe('Strict')
     })
 
     it('dot-prefixes a non-hostOnly registrable domain so subdomains receive the cookie', () => {
       const request = convertCyCookieToCdpCookie(cyCookie({ domain: 'foo.com', hostOnly: false }))
 
-      expect(request.domain).to.eq('.foo.com')
+      expect(request.domain).toBe('.foo.com')
     })
 
     it('preserves the domain verbatim for a hostOnly cookie', () => {
       const request = convertCyCookieToCdpCookie(cyCookie({ domain: 'foo.com', hostOnly: true }))
 
-      expect(request.domain).to.eq('foo.com')
+      expect(request.domain).toBe('foo.com')
     })
 
     it('swaps domain for url on __Host- prefixed cookies', () => {
       const request = convertCyCookieToCdpCookie(cyCookie({ name: '__Host-session', domain: 'foo.com', secure: true }))
 
-      expect(request.url).to.eq('https://foo.com')
-      expect(request).to.not.have.property('domain')
+      expect(request.url).toBe('https://foo.com')
+      expect(request).not.toHaveProperty('domain')
     })
 
     it('does not mutate the input cookie', () => {
@@ -143,7 +142,7 @@ context('lib/automation/cookie/converters/cdp', () => {
 
       convertCyCookieToCdpCookie(cookie)
 
-      expect(cookie).to.deep.eq(cyCookie({ domain: 'localhost', hostOnly: true }))
+      expect(cookie).toStrictEqual(cyCookie({ domain: 'localhost', hostOnly: true }))
     })
   })
 })
