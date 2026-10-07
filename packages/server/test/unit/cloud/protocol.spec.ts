@@ -1,25 +1,39 @@
-import { proxyquire, sinon } from '../../spec_helper'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import path from 'path'
 import os from 'os'
+import type { Mock } from 'vitest'
 import type { AppCaptureProtocolInterface, ProtocolManagerShape } from '@packages/types'
-import { expect } from 'chai'
 import { EventEmitter } from 'stream'
 import esbuild from 'esbuild'
 import fs from 'fs-extra'
-import type { SinonStub } from 'sinon'
+import _ from 'lodash'
+import { ProtocolManager, DB_SIZE_LIMIT, DEFAULT_STREAM_SAMPLING_INTERVAL } from '../../../lib/cloud/protocol'
 
-class TestClient extends EventEmitter {
-  send: SinonStub = sinon.stub()
+const { mockDb, mockDatabase, mockPutProtocolArtifact } = vi.hoisted(() => {
+  const mockDb = vi.fn()
+
+  return {
+    mockDb,
+    mockDatabase: vi.fn(() => mockDb),
+    mockPutProtocolArtifact: vi.fn(),
+  }
+})
+
+vi.mock('better-sqlite3', () => ({ default: mockDatabase }))
+
+vi.mock('../../../lib/cloud/api/put_protocol_artifact', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../lib/cloud/api/put_protocol_artifact')>()
+
+  return { ...actual, putProtocolArtifact: mockPutProtocolArtifact }
+})
+
+const stubPutProtocolArtifact = (expectedArgs: unknown[], result: () => Promise<void>) => {
+  mockPutProtocolArtifact.mockImplementation((...args) => (_.isEqual(args, expectedArgs) ? result() : undefined))
 }
 
-const mockDb = sinon.stub()
-const mockDatabase = sinon.stub().returns(mockDb)
-const mockPutProtocolArtifact = sinon.stub()
-
-const { ProtocolManager, DB_SIZE_LIMIT, DEFAULT_STREAM_SAMPLING_INTERVAL } = proxyquire('../lib/cloud/protocol', {
-  'better-sqlite3': mockDatabase,
-  './api/put_protocol_artifact': { putProtocolArtifact: mockPutProtocolArtifact },
-}) as typeof import('@packages/server/lib/cloud/protocol')
+class TestClient extends EventEmitter {
+  send: Mock = vi.fn()
+}
 
 const { outputFiles: [{ contents: stubProtocolRaw }] } = esbuild.buildSync({
   entryPoints: [path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.ts')],
@@ -52,40 +66,49 @@ describe('lib/cloud/protocol', () => {
     })
 
     protocol = (protocolManager as any)._protocol
-    expect((protocol as any)).not.to.be.undefined
+    expect((protocol as any)).not.toBeUndefined()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllEnvs()
+    mockDatabase.mockClear()
+    mockPutProtocolArtifact.mockReset()
   })
 
   it('should be able to connect to the browser', async () => {
     const mockCdpClient = new TestClient()
 
-    const connectToBrowserStub = sinon.stub(protocol, 'connectToBrowser').resolves()
+    const connectToBrowserStub = vi.spyOn(protocol, 'connectToBrowser').mockResolvedValue(undefined)
 
     await protocolManager.connectToBrowser(mockCdpClient as any)
 
-    const newCdpClient = connectToBrowserStub.getCall(0).args[0]
+    const newCdpClient = connectToBrowserStub.mock.calls[0][0]
 
     newCdpClient.send('Page.enable')
-    expect(mockCdpClient.send).to.be.calledWith('Page.enable')
+    expect(mockCdpClient.send).toHaveBeenCalledWith('Page.enable')
 
-    const mockSuccess = sinon.stub()
+    const mockSuccess = vi.fn()
 
     newCdpClient.on('Page.loadEventFired', mockSuccess)
 
-    const mockThrows = sinon.stub().throws()
+    const mockThrows = vi.fn(() => {
+      throw new Error()
+    })
 
     newCdpClient.on('Page.backForwardCacheNotUsed', mockThrows)
 
     mockCdpClient.emit('Page.loadEventFired')
 
-    expect(mockSuccess).to.be.called
-    expect((protocolManager as any)._errors).to.be.empty
+    expect(mockSuccess).toHaveBeenCalled()
+    expect((protocolManager as any)._errors).toHaveLength(0)
 
     mockCdpClient.emit('Page.backForwardCacheNotUsed', { test: 'test1' })
 
-    expect(mockThrows).to.be.called
-    expect((protocolManager as any)._errors).to.have.length(1)
-    expect((protocolManager as any)._errors[0].captureMethod).to.equal('cdpClient.on')
-    expect((protocolManager as any)._errors[0].args).to.deep.equal([
+    expect(mockThrows).toHaveBeenCalled()
+    expect((protocolManager as any)._errors).toHaveLength(1)
+    expect((protocolManager as any)._errors[0].captureMethod).toBe('cdpClient.on')
+    expect((protocolManager as any)._errors[0].args).toEqual([
       'Page.backForwardCacheNotUsed',
       {
         test: 'test1',
@@ -96,20 +119,20 @@ describe('lib/cloud/protocol', () => {
   it('should unregister listener when off() is called on wrapped CDP client', async () => {
     const mockCdpClient = new TestClient()
 
-    sinon.stub(protocol, 'connectToBrowser').resolves()
+    vi.spyOn(protocol, 'connectToBrowser').mockResolvedValue(undefined)
 
     await protocolManager.connectToBrowser(mockCdpClient as any)
 
-    const newCdpClient = (protocol.connectToBrowser as SinonStub).getCall(0).args[0]
-    const listener = sinon.stub()
+    const newCdpClient = vi.mocked(protocol.connectToBrowser).mock.calls[0][0] as any
+    const listener = vi.fn()
 
     newCdpClient.on('Page.loadEventFired', listener)
     mockCdpClient.emit('Page.loadEventFired')
-    expect(listener).to.have.been.calledOnce
+    expect(listener).toHaveBeenCalledOnce()
 
     newCdpClient.off('Page.loadEventFired', listener)
     mockCdpClient.emit('Page.loadEventFired')
-    expect(listener).to.have.been.calledOnce
+    expect(listener).toHaveBeenCalledOnce()
   })
 
   it('uses event+listener composite key so same listener on multiple events does not leak wrappers', async () => {
@@ -134,47 +157,47 @@ describe('lib/cloud/protocol', () => {
 
     let capturedWrappedClient: any
 
-    sinon.stub(protocolManager as any, 'invokeAsync').callsFake(async (_method: string, _opts: any, cdpClient: any) => {
+    vi.spyOn(protocolManager as any, 'invokeAsync').mockImplementation(async (_method: string, _opts: any, cdpClient: any) => {
       capturedWrappedClient = cdpClient
     })
 
     await protocolManager.connectToBrowser(mockCdpClient as any)
 
-    expect(capturedWrappedClient).to.exist
+    expect(capturedWrappedClient).toBeDefined()
 
-    const sharedListener = sinon.stub()
+    const sharedListener = vi.fn()
 
     capturedWrappedClient.on('Page.frameAttached', sharedListener)
     capturedWrappedClient.on('Page.frameDetached', sharedListener)
 
-    expect(onCalls).to.have.length(2)
+    expect(onCalls).toHaveLength(2)
 
     const wrapperForAttached = onCalls.find((c) => c.event === 'Page.frameAttached')!.listener
     const wrapperForDetached = onCalls.find((c) => c.event === 'Page.frameDetached')!.listener
 
-    expect(wrapperForAttached).to.not.equal(wrapperForDetached)
+    expect(wrapperForAttached).not.toBe(wrapperForDetached)
 
     capturedWrappedClient.off('Page.frameAttached', sharedListener)
-    expect(offCalls).to.have.length(1)
-    expect(offCalls[0].event).to.equal('Page.frameAttached')
-    expect(offCalls[0].listener).to.equal(wrapperForAttached)
+    expect(offCalls).toHaveLength(1)
+    expect(offCalls[0].event).toBe('Page.frameAttached')
+    expect(offCalls[0].listener).toBe(wrapperForAttached)
 
     capturedWrappedClient.off('Page.frameDetached', sharedListener)
-    expect(offCalls).to.have.length(2)
-    expect(offCalls[1].event).to.equal('Page.frameDetached')
-    expect(offCalls[1].listener).to.equal(wrapperForDetached)
+    expect(offCalls).toHaveLength(2)
+    expect(offCalls[1].event).toBe('Page.frameDetached')
+    expect(offCalls[1].listener).toBe(wrapperForDetached)
   })
 
   it('should call cleanup on existing protocol when setupProtocol is called again', () => {
-    const cleanupStub = sinon.stub(protocol, 'cleanup')
+    const cleanupStub = vi.spyOn(protocol, 'cleanup').mockImplementation(() => {})
 
     protocolManager.setupProtocol()
 
-    expect(cleanupStub).to.have.been.calledOnce
+    expect(cleanupStub).toHaveBeenCalledOnce()
   })
 
   it('should be able to initialize a new spec', () => {
-    sinon.stub(protocol, 'beforeSpec')
+    vi.spyOn(protocol, 'beforeSpec').mockImplementation(() => {})
 
     ;(protocolManager as any)._errors = [
       {
@@ -197,9 +220,9 @@ describe('lib/cloud/protocol', () => {
 
     protocolManager.beforeSpec(spec)
 
-    expect((protocolManager as any)._errors).to.be.empty
+    expect((protocolManager as any)._errors).toHaveLength(0)
 
-    expect(protocol.beforeSpec).to.be.calledWith({
+    expect(protocol.beforeSpec).toHaveBeenCalledWith({
       workingDirectory: path.join(os.tmpdir(), 'cypress', 'protocol'),
       archivePath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.tar'),
       dbPath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'),
@@ -207,24 +230,24 @@ describe('lib/cloud/protocol', () => {
       spec,
     })
 
-    expect(mockDatabase).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {
+    expect(mockDatabase).toHaveBeenCalledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {
       nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
-      verbose: sinon.match.func,
+      verbose: expect.any(Function),
     })
 
-    expect(protocolManager['_instanceId']).to.equal('instanceId')
-    expect(protocolManager['_specName']).to.equal('spec')
+    expect(protocolManager['_instanceId']).toBe('instanceId')
+    expect(protocolManager['_specName']).toBe('spec')
   })
 
   it('should be able to initialize a new test', async () => {
-    sinon.stub(protocol, 'beforeTest')
+    vi.spyOn(protocol, 'beforeTest').mockImplementation(() => {})
 
     await protocolManager.beforeTest({
       id: 'id',
       title: 'test',
     })
 
-    expect(protocol.beforeTest).to.be.calledWith({
+    expect(protocol.beforeTest).toHaveBeenCalledWith({
       id: 'id',
       title: 'test',
     })
@@ -232,38 +255,38 @@ describe('lib/cloud/protocol', () => {
 
   describe('.afterSpec', () => {
     it('invokes the protocol manager afterSpec fn', async () => {
-      sinon.stub(protocol, 'afterSpec')
+      vi.spyOn(protocol, 'afterSpec').mockImplementation(() => {})
 
       await protocolManager.afterSpec()
 
-      expect(protocol.afterSpec).to.be.called
+      expect(protocol.afterSpec).toHaveBeenCalled()
     })
   })
 
   it('should be able to handle pre-after test', async () => {
-    sinon.stub(protocol, 'preAfterTest')
+    vi.spyOn(protocol, 'preAfterTest').mockImplementation(() => {})
 
     await protocolManager.preAfterTest({ id: 'id', title: 'test' }, { nextTestHasTestIsolationOn: true })
 
-    expect(protocol.preAfterTest).to.be.calledWith({ id: 'id', title: 'test' }, { nextTestHasTestIsolationOn: true })
+    expect(protocol.preAfterTest).toHaveBeenCalledWith({ id: 'id', title: 'test' }, { nextTestHasTestIsolationOn: true })
   })
 
   it('should be able to clean up after a test', async () => {
-    sinon.stub(protocol, 'afterTest')
+    vi.spyOn(protocol, 'afterTest').mockImplementation(() => {})
 
     await protocolManager.afterTest({
       id: 'id',
       title: 'test',
     })
 
-    expect(protocol.afterTest).to.be.calledWith({
+    expect(protocol.afterTest).toHaveBeenCalledWith({
       id: 'id',
       title: 'test',
     })
   })
 
   it('should be able to add runnables', () => {
-    sinon.stub(protocol, 'addRunnables')
+    vi.spyOn(protocol, 'addRunnables').mockImplementation(() => {})
 
     const rootRunnable = {
       id: 'r1',
@@ -282,11 +305,11 @@ describe('lib/cloud/protocol', () => {
 
     protocolManager.addRunnables(rootRunnable)
 
-    expect(protocol.addRunnables).to.be.calledWith(rootRunnable)
+    expect(protocol.addRunnables).toHaveBeenCalledWith(rootRunnable)
   })
 
   it('should be able to add a command log', () => {
-    sinon.stub(protocol, 'commandLogAdded')
+    vi.spyOn(protocol, 'commandLogAdded').mockImplementation(() => {})
 
     const log = {
       id: 'log-https://example.cypress.io-17',
@@ -315,11 +338,11 @@ describe('lib/cloud/protocol', () => {
 
     protocolManager.commandLogAdded(log)
 
-    expect(protocol.commandLogAdded).to.be.calledWith(log)
+    expect(protocol.commandLogAdded).toHaveBeenCalledWith(log)
   })
 
   it('should be able to change a command log', () => {
-    sinon.stub(protocol, 'commandLogChanged')
+    vi.spyOn(protocol, 'commandLogChanged').mockImplementation(() => {})
 
     const log = {
       id: 'log-https://example.cypress.io-17',
@@ -348,11 +371,11 @@ describe('lib/cloud/protocol', () => {
 
     protocolManager.commandLogChanged(log)
 
-    expect(protocol.commandLogChanged).to.be.calledWith(log)
+    expect(protocol.commandLogChanged).toHaveBeenCalledWith(log)
   })
 
   it('should be able to handle changing the viewport', () => {
-    sinon.stub(protocol, 'viewportChanged')
+    vi.spyOn(protocol, 'viewportChanged').mockImplementation(() => {})
 
     const input = {
       viewport: {
@@ -364,11 +387,11 @@ describe('lib/cloud/protocol', () => {
 
     protocolManager.viewportChanged(input)
 
-    expect(protocol.viewportChanged).to.be.calledWith(input)
+    expect(protocol.viewportChanged).toHaveBeenCalledWith(input)
   })
 
   it('should be able to handle changing the url', () => {
-    sinon.stub(protocol, 'urlChanged')
+    vi.spyOn(protocol, 'urlChanged').mockImplementation(() => {})
 
     const input = {
       url: 'https://example.cypress.io',
@@ -377,11 +400,11 @@ describe('lib/cloud/protocol', () => {
 
     protocolManager.urlChanged(input)
 
-    expect(protocol.urlChanged).to.be.calledWith(input)
+    expect(protocol.urlChanged).toHaveBeenCalledWith(input)
   })
 
   it('should be able to handle the page loading', () => {
-    sinon.stub(protocol, 'pageLoading')
+    vi.spyOn(protocol, 'pageLoading').mockImplementation(() => {})
 
     const input = {
       loading: true,
@@ -390,70 +413,70 @@ describe('lib/cloud/protocol', () => {
 
     protocolManager.pageLoading(input)
 
-    expect(protocol.pageLoading).to.be.calledWith(input)
+    expect(protocol.pageLoading).toHaveBeenCalledWith(input)
   })
 
   describe('.resetTest', () => {
     it('should be able to reset the test with no current retry', () => {
-      sinon.stub(protocol, 'resetTest')
+      vi.spyOn(protocol, 'resetTest').mockImplementation(() => {})
 
       const testId = 'r3'
 
       protocolManager.resetTest(testId)
 
-      expect(protocol.resetTest).to.be.calledWith(testId)
+      expect(protocol.resetTest).toHaveBeenCalledWith(testId, undefined)
     })
 
     it('should be able to reset the test with a current retry', () => {
-      sinon.stub(protocol, 'resetTest')
+      vi.spyOn(protocol, 'resetTest').mockImplementation(() => {})
 
       const testId = 'r3'
       const currentRetry = 1
 
       protocolManager.resetTest(testId, currentRetry)
 
-      expect(protocol.resetTest).to.be.calledWith(testId, currentRetry)
+      expect(protocol.resetTest).toHaveBeenCalledWith(testId, currentRetry)
     })
   })
 
   // the Cloud ships the protocol as a class instance whose methods rely on `this`
   describe('invocation receiver', () => {
     it('invokes a synchronous method on the protocol instance', () => {
-      sinon.stub(protocol, 'resetTest')
+      vi.spyOn(protocol, 'resetTest').mockImplementation(() => {})
 
       protocolManager.resetTest('r3', 1)
 
-      expect(protocol.resetTest).to.be.calledOn(protocol)
+      expect(vi.mocked(protocol.resetTest).mock.contexts).toContain(protocol)
     })
 
     it('invokes an asynchronous method on the protocol instance', async () => {
-      sinon.stub(protocol, 'preAfterTest').resolves()
+      vi.spyOn(protocol, 'preAfterTest').mockResolvedValue(undefined)
 
       await protocolManager.preAfterTest({ id: 'id', title: 'test' }, { nextTestHasTestIsolationOn: true })
 
-      expect(protocol.preAfterTest).to.be.calledOn(protocol)
+      expect(vi.mocked(protocol.preAfterTest).mock.contexts).toContain(protocol)
     })
 
     it('forwards no arguments when the caller supplies none', () => {
-      const cleanup = sinon.stub(protocol, 'cleanup')
+      const cleanup = vi.spyOn(protocol, 'cleanup').mockImplementation(() => {})
 
       protocolManager.cleanup()
 
-      expect(cleanup).to.be.calledOn(protocol)
-      expect(cleanup.getCall(0).args).to.deep.eq([])
+      expect(cleanup.mock.contexts).toContain(protocol)
+      expect(cleanup.mock.calls[0]).toEqual([])
     })
   })
 
   describe('.reset', () => {
     it('closes the protocol manager', () => {
-      const mockClose = sinon.stub()
+      const mockClose = vi.fn()
 
       protocolManager['_db'] = {
         close: mockClose,
       }
 
       protocolManager['_dbPath'] = '/path/to/db'
-      sinon.stub(fs, 'unlink').resolves()
+      vi.spyOn(fs, 'unlink').mockResolvedValue(undefined)
       protocolManager['_archivePath'] = '/path/to/archive'
       protocolManager['_instanceId'] = 'abc123'
       protocolManager['_runId'] = '1'
@@ -461,30 +484,30 @@ describe('lib/cloud/protocol', () => {
 
       protocolManager.close()
 
-      expect(mockClose).to.be.called
-      expect(protocolManager['_db']).to.be.undefined
-      expect(protocolManager['_dbPath']).to.be.undefined
-      expect(fs.unlink).to.be.calledWith('/path/to/db')
-      expect(protocolManager['_archivePath']).to.be.undefined
-      expect(fs.unlink).to.be.calledWith('/path/to/archive')
-      expect(protocolManager['_instanceId']).to.be.undefined
-      expect(protocolManager['_runId']).to.be.undefined
-      expect(protocolManager['_errors']).to.be.empty
-      expect(protocolManager['_protocol']).to.be.undefined
+      expect(mockClose).toHaveBeenCalled()
+      expect(protocolManager['_db']).toBeUndefined()
+      expect(protocolManager['_dbPath']).toBeUndefined()
+      expect(fs.unlink).toHaveBeenCalledWith('/path/to/db')
+      expect(protocolManager['_archivePath']).toBeUndefined()
+      expect(fs.unlink).toHaveBeenCalledWith('/path/to/archive')
+      expect(protocolManager['_instanceId']).toBeUndefined()
+      expect(protocolManager['_runId']).toBeUndefined()
+      expect(protocolManager['_errors']).toHaveLength(0)
+      expect(protocolManager['_protocol']).toBeUndefined()
     })
 
     it('calls cleanup on protocol before clearing it', () => {
-      const cleanupStub = sinon.stub(protocol, 'cleanup')
+      const cleanupStub = vi.spyOn(protocol, 'cleanup').mockImplementation(() => {})
 
-      protocolManager['_db'] = { close: sinon.stub() }
+      protocolManager['_db'] = { close: vi.fn() }
       protocolManager['_dbPath'] = '/path/to/db'
       protocolManager['_archivePath'] = '/path/to/archive'
-      sinon.stub(fs, 'unlink').resolves()
+      vi.spyOn(fs, 'unlink').mockResolvedValue(undefined)
 
       protocolManager.close()
 
-      expect(cleanupStub).to.have.been.calledOnce
-      expect(protocolManager['_protocol']).to.be.undefined
+      expect(cleanupStub).toHaveBeenCalledOnce()
+      expect(protocolManager['_protocol']).toBeUndefined()
     })
   })
 
@@ -494,11 +517,11 @@ describe('lib/cloud/protocol', () => {
 
       protocolManager['_dbPath'] = mockDbPath
 
-      expect(protocolManager.dbPath).to.equal(mockDbPath)
+      expect(protocolManager.dbPath).toBe(mockDbPath)
     })
 
     it('returns undefined when no database path is set', () => {
-      expect(protocolManager.dbPath).to.be.undefined
+      expect(protocolManager.dbPath).toBeUndefined()
     })
   })
 
@@ -510,7 +533,6 @@ describe('lib/cloud/protocol', () => {
     let offset: number
     let size: number
     let instanceId: string
-    let clock
 
     describe('when protocol is initialized, and spec has finished', () => {
       const expectedAfterSpecDurations = {
@@ -531,16 +553,16 @@ describe('lib/cloud/protocol', () => {
         size = 100
         instanceId = 'abc123'
 
-        sinon.stub(protocol, 'getDbMetadata').returns({ offset, size })
-        sinon.stub(fs, 'unlink').withArgs(filePath).resolves()
+        vi.spyOn(protocol, 'getDbMetadata').mockReturnValue({ offset, size })
+        vi.spyOn(fs, 'unlink').mockImplementation(((p) => (p === filePath ? Promise.resolve() : undefined)) as any)
         protocolManager.beforeSpec({ instanceId, absolute: '/path/to/spec', relative: 'spec', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration', baseName: 'spec', name: 'spec', fileName: 'spec.ts' })
 
         expectedAfterSpecTotal = 225
 
-        clock = sinon.useFakeTimers()
-        sinon.stub(performance, 'timeOrigin').value(0)
-        sinon.stub(protocol, 'afterSpec').callsFake(async () => {
-          await clock.tickAsync(expectedAfterSpecTotal)
+        vi.useFakeTimers()
+        vi.spyOn(performance, 'timeOrigin', 'get').mockReturnValue(0)
+        vi.spyOn(protocol, 'afterSpec').mockImplementation(async () => {
+          await vi.advanceTimersByTimeAsync(expectedAfterSpecTotal)
 
           return expectedAfterSpecDurations
         })
@@ -549,7 +571,7 @@ describe('lib/cloud/protocol', () => {
       })
 
       afterEach(() => {
-        clock.restore()
+        vi.useRealTimers()
       })
 
       describe('when upload succeeds', () => {
@@ -561,35 +583,35 @@ describe('lib/cloud/protocol', () => {
 
         describe('with default sampling rate', () => {
           beforeEach(() => {
-            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval).resolves()
+            stubPutProtocolArtifact([filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval], () => Promise.resolve())
           })
 
           it('uses 5000ms as the default stream monitoring sample rate', async () => {
             await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
 
-            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval)
+            expect(mockPutProtocolArtifact).toHaveBeenCalledWith(filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval)
           })
 
           it('unlinks the db & returns fileSize, afterSpec durations, success=true, and the db metadata', async () => {
             const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
 
-            expect(res).not.to.be.undefined
-            expect(res).to.include({
+            expect(res).not.toBeUndefined()
+            expect(res).toMatchObject({
               fileSize,
               success: true,
             })
 
-            expect(res?.afterSpecDurations).to.include({
+            expect(res?.afterSpecDurations).toMatchObject({
               afterSpecTotal: expectedAfterSpecTotal,
               ...expectedAfterSpecDurations.durations,
             })
 
             // @ts-ignore
-            expect(res?.specAccess.offset).to.eq(offset)
+            expect(res?.specAccess.offset).toBe(offset)
             // @ts-ignore
-            expect(res?.specAccess.size).to.eq(size)
+            expect(res?.specAccess.size).toBe(size)
 
-            expect(fs.unlink).to.have.been.called
+            expect(fs.unlink).toHaveBeenCalled()
           })
         })
 
@@ -599,7 +621,7 @@ describe('lib/cloud/protocol', () => {
           beforeEach(() => {
             appCaptureProtocolInterval = 7500
 
-            protocol.uploadStallSamplingInterval = sinon.stub().callsFake(() => {
+            protocol.uploadStallSamplingInterval = vi.fn(() => {
               return appCaptureProtocolInterval
             })
           })
@@ -610,9 +632,9 @@ describe('lib/cloud/protocol', () => {
           })
 
           it('uses the sampling rate defined by protocol', async () => {
-            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval).resolves()
+            stubPutProtocolArtifact([filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval], () => Promise.resolve())
             await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
-            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
+            expect(mockPutProtocolArtifact).toHaveBeenCalledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
           })
 
           describe('and the user specifies a sampling rate env var', () => {
@@ -620,33 +642,33 @@ describe('lib/cloud/protocol', () => {
 
             beforeEach(() => {
               userDefinedInterval = 10000
-              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = '10000'
+              vi.stubEnv('CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL', '10000')
             })
 
             afterEach(() => {
-              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = undefined
+              vi.unstubAllEnvs()
             })
 
             it('uses the override value from the env var', async () => {
-              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval).resolves()
+              stubPutProtocolArtifact([filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval], () => Promise.resolve())
               await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
-              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval)
+              expect(mockPutProtocolArtifact).toHaveBeenCalledWith(filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval)
             })
           })
 
           describe('and the user specifies a sampling rate env var that parses to NaN', () => {
             beforeEach(() => {
-              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = 'not-a-number'
+              vi.stubEnv('CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL', 'not-a-number')
             })
 
             afterEach(() => {
-              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = undefined
+              vi.unstubAllEnvs()
             })
 
             it('uses the value from app capture protocol', async () => {
-              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval).resolves()
+              stubPutProtocolArtifact([filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval], () => Promise.resolve())
               await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
-              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
+              expect(mockPutProtocolArtifact).toHaveBeenCalledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
             })
           })
         })
@@ -658,19 +680,16 @@ describe('lib/cloud/protocol', () => {
         beforeEach(() => {
           err = new Error()
 
-          ;(mockPutProtocolArtifact as SinonStub).withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, DEFAULT_STREAM_SAMPLING_INTERVAL).rejects(err)
+          stubPutProtocolArtifact([filePath, DB_SIZE_LIMIT, uploadUrl, DEFAULT_STREAM_SAMPLING_INTERVAL], () => Promise.reject(err))
         })
 
         describe('and there is no local protocol path in env', () => {
-          let prevLocalProtocolPath
-
           beforeEach(() => {
-            prevLocalProtocolPath = process.env.CYPRESS_LOCAL_PROTOCOL_PATH
-            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = undefined
+            vi.stubEnv('CYPRESS_LOCAL_PROTOCOL_PATH', undefined)
           })
 
           afterEach(() => {
-            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = prevLocalProtocolPath
+            vi.unstubAllEnvs()
           })
 
           it('unlinks the db & rethrows the error', async () => {
@@ -680,23 +699,20 @@ describe('lib/cloud/protocol', () => {
               await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
             } catch (e) {
               threw = true
-              expect(e).to.eq(err)
+              expect(e).toBe(err)
             }
-            expect(threw).to.be.true
-            expect(fs.unlink).to.be.called
+            expect(threw).toBe(true)
+            expect(fs.unlink).toHaveBeenCalled()
           })
         })
 
         describe('and process.env.CYPRESS_LOCAL_PROTOCOL_PATH is truthy', () => {
-          let prevLocalProtocolPath
-
           beforeEach(() => {
-            prevLocalProtocolPath = process.env.CYPRESS_LOCAL_PROTOCOL_PATH
-            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = '/path'
+            vi.stubEnv('CYPRESS_LOCAL_PROTOCOL_PATH', '/path')
           })
 
           afterEach(() => {
-            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = prevLocalProtocolPath
+            vi.unstubAllEnvs()
           })
 
           it('unlinks the db and does not rethrow', async () => {
@@ -707,8 +723,8 @@ describe('lib/cloud/protocol', () => {
             } catch (e) {
               threw = true
             }
-            expect(threw).to.be.false
-            expect(fs.unlink).to.be.called
+            expect(threw).toBe(false)
+            expect(fs.unlink).toHaveBeenCalled()
           })
         })
       })
@@ -717,7 +733,7 @@ describe('lib/cloud/protocol', () => {
 
   describe('.captureError', () => {
     beforeEach(() => {
-      sinon.stub(protocolManager, 'dispatchErrors').resolves()
+      vi.spyOn(protocolManager as any, 'dispatchErrors').mockResolvedValue(undefined)
     })
 
     describe('when mode is `record`', () => {
@@ -730,9 +746,9 @@ describe('lib/cloud/protocol', () => {
 
         protocolManager['captureError'](err)
 
-        expect(protocolManager['_errors']).to.have.length(1)
-        expect(protocolManager['_errors'][0]).to.include(err)
-        expect(protocolManager['dispatchErrors']).not.to.have.been.called
+        expect(protocolManager['_errors']).toHaveLength(1)
+        expect(protocolManager['_errors'][0]).toMatchObject(err)
+        expect(protocolManager['dispatchErrors']).not.toHaveBeenCalled()
       })
     })
 
@@ -746,10 +762,10 @@ describe('lib/cloud/protocol', () => {
 
         protocolManager['captureError'](err)
 
-        expect(protocolManager['_errors']).to.have.length(0)
-        expect(protocolManager['dispatchErrors']).to.have.been.called
-        expect(protocolManager['dispatchErrors'].getCall(0).args[0]).to.deep.equal([err])
-        expect(protocolManager['dispatchErrors'].getCall(0).args[1]).to.deep.equal({
+        expect(protocolManager['_errors']).toHaveLength(0)
+        expect(protocolManager['dispatchErrors']).toHaveBeenCalled()
+        expect(protocolManager['dispatchErrors'].mock.calls[0][0]).toEqual([err])
+        expect(protocolManager['dispatchErrors'].mock.calls[0][1]).toEqual({
           osName: os.platform(),
           projectSlug: protocolManager['options']['projectId'],
           specName: protocolManager['_specName'],
