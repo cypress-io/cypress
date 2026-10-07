@@ -1,25 +1,26 @@
-import { proxyquire, expect } from '../../../spec_helper'
-import sinon from 'sinon'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { HttpError } from '../../../../lib/cloud/network/http_error'
 import { SystemError } from '../../../../lib/cloud/network/system_error'
 import { StreamStalledError } from '../../../../lib/cloud/upload/stream_stalled_error'
-import type { warning } from '../../../../lib/errors'
-import type { printProtocolUploadError } from '../../../../lib/cloud/artifacts/print_protocol_upload_error'
+import { printProtocolUploadError as print } from '../../../../lib/cloud/artifacts/print_protocol_upload_error'
+
+const { stubbedErrorWarning } = vi.hoisted(() => {
+  return { stubbedErrorWarning: vi.fn() }
+})
+
+vi.mock('../../../../lib/errors', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../lib/errors')>()
+
+  return {
+    ...actual,
+    warning: stubbedErrorWarning,
+  }
+})
 
 describe('printProtocolUploadError', () => {
-  let stubbedErrorWarning: sinon.SinonStub<Parameters<typeof warning>, ReturnType<typeof warning>>
-
-  let print: typeof printProtocolUploadError
-
   beforeEach(() => {
-    stubbedErrorWarning = sinon.stub<Parameters<typeof warning>, ReturnType<typeof warning>>()
-    const importPrintProtocolUploadError = proxyquire('../lib/cloud/artifacts/print_protocol_upload_error', {
-      '../../errors': {
-        warning: stubbedErrorWarning,
-      },
-    })
-
-    print = importPrintProtocolUploadError.printProtocolUploadError
+    stubbedErrorWarning.mockReset()
   })
 
   describe('when passed an aggregate error', () => {
@@ -28,7 +29,7 @@ describe('printProtocolUploadError', () => {
 
       error.errors = []
       print(error)
-      expect(stubbedErrorWarning).to.have.been.calledWith('CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR', error)
+      expect(stubbedErrorWarning).toHaveBeenCalledWith('CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR', error)
     })
   })
 
@@ -37,7 +38,7 @@ describe('printProtocolUploadError', () => {
       const error = new HttpError('Service Unavailable', 'http://some.url', 503, 'Service Unavailable', '', {} as Response)
 
       print(error)
-      expect(stubbedErrorWarning).to.have.been.calledWith('CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE', error)
+      expect(stubbedErrorWarning).toHaveBeenCalledWith('CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE', error)
     })
   })
 
@@ -46,7 +47,7 @@ describe('printProtocolUploadError', () => {
       const err = new SystemError(new Error('msg'), 'http://some.url', 'ECONNRESET', 101)
 
       print(err)
-      expect(stubbedErrorWarning).to.have.been.calledWith('CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE', err)
+      expect(stubbedErrorWarning).toHaveBeenCalledWith('CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE', err)
     })
   })
 
@@ -55,7 +56,7 @@ describe('printProtocolUploadError', () => {
       const err = new StreamStalledError(5000, 64 * 1024)
 
       print(err)
-      expect(stubbedErrorWarning).to.have.been.calledWith('CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE', err)
+      expect(stubbedErrorWarning).toHaveBeenCalledWith('CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE', err)
     })
   })
 
@@ -64,7 +65,7 @@ describe('printProtocolUploadError', () => {
       const err = new Error('message')
 
       print(err)
-      expect(stubbedErrorWarning).to.have.been.calledWith('CLOUD_PROTOCOL_UPLOAD_UNKNOWN_ERROR', err)
+      expect(stubbedErrorWarning).toHaveBeenCalledWith('CLOUD_PROTOCOL_UPLOAD_UNKNOWN_ERROR', err)
     })
   })
 })
