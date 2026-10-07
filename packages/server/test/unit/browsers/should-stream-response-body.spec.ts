@@ -1,6 +1,5 @@
-const { expect } = require('../../spec_helper')
-
 import type { Protocol } from 'devtools-protocol'
+import { describe, expect, it } from 'vitest'
 import { shouldStreamResponseBody, type ShouldStreamResponseBodyOptions } from '../../../lib/browsers/cdp-protocol/should-stream-response-body'
 
 interface EventOverrides {
@@ -41,7 +40,7 @@ type Case = [string, EventOverrides, ShouldStreamResponseBodyOptions | undefined
 function runCases (cases: Case[]) {
   for (const [description, overrides, options, expected] of cases) {
     it(description, () => {
-      expect(shouldStreamResponseBody(createEvent(overrides), options)).to.equal(expected)
+      expect(shouldStreamResponseBody(createEvent(overrides), options)).toBe(expected)
     })
   }
 }
@@ -93,7 +92,7 @@ describe('shouldStreamResponseBody', () => {
       expect(shouldStreamResponseBody(createEvent({
         responseHeaders: contentType('application/json'),
         requestHeaders: { accept: 'text/html,application/xhtml+xml,*/*' },
-      }))).to.equal(true)
+      }))).toBe(true)
     })
   })
 
@@ -153,7 +152,7 @@ describe('shouldStreamResponseBody', () => {
 
   describe('default options', () => {
     it('behaves as if all flags were off when no options argument is passed', () => {
-      expect(shouldStreamResponseBody(createEvent({ responseHeaders: contentType('text/javascript') }))).to.equal(true)
+      expect(shouldStreamResponseBody(createEvent({ responseHeaders: contentType('text/javascript') }))).toBe(true)
     })
 
     runCases([
@@ -168,6 +167,6 @@ describe('shouldStreamResponseBody', () => {
     expect(shouldStreamResponseBody(createEvent({
       resourceType: 'XHR',
       responseHeaders: contentType('application/x-ndjson'),
-    }))).to.equal(true)
+    }))).toBe(true)
   })
 })
