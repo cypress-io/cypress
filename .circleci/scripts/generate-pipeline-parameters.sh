@@ -422,8 +422,6 @@ while IFS= read -r file; do
       system_tests=true
       ;;
     packages/example/*)
-      # `lib/` is compiled into the binary and consumed by data-context's
-      # codegen, which is what the unit tests cover.
       unit_tests=true
       ;;
     packages/eslint-config/*|npm/xpath/*)
