@@ -110,6 +110,22 @@ describe('core/route-matching', function () {
       })
     })
 
+    it('does not match a shared path when the intercept url includes a unique query', function () {
+      const scopedMatcher = { method: 'POST', url: '/post-only?cypressBodyParsing=7' }
+
+      expect(doesRouteMatch(scopedMatcher, {
+        method: 'POST',
+        proxiedUrl: 'http://localhost:3500/post-only',
+        headers: {},
+      })).toBe(false)
+
+      expect(doesRouteMatch(scopedMatcher, {
+        method: 'POST',
+        proxiedUrl: 'http://localhost:3500/post-only?cypressBodyParsing=7',
+        headers: { 'content-type': 'application/json' },
+      })).toBe(true)
+    })
+
     it('matches on url as regexp', function () {
       tryMatch({
         proxiedUrl: 'https://google.com/foo',
