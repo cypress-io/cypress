@@ -2,8 +2,7 @@ import type { Command } from '../../../lib/browsers/cdp-protocol/cdp-command-que
 import { CDPCommandQueue } from '../../../lib/browsers/cdp-protocol/cdp-command-queue'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import _ from 'lodash'
-
-const { expect } = require('../../spec_helper')
+import { beforeEach, describe, expect, it } from 'vitest'
 
 function matchCommand (search: Partial<Command<any>>) {
   return (predicate: Partial<Command<any>>) => {
@@ -31,8 +30,8 @@ describe('CDPCommandQueue', () => {
       })
 
       it('reflects only the entry that was added', () => {
-        expect(queue.entries.find(matchCommand(enableAnimation)), 'queue should contain enableAnimation').not.to.be.undefined
-        expect(queue.entries.length).to.eq(1)
+        expect(queue.entries.find(matchCommand(enableAnimation)), 'queue should contain enableAnimation').not.toBeUndefined()
+        expect(queue.entries).toHaveLength(1)
       })
 
       describe('and another is added', () => {
@@ -41,9 +40,9 @@ describe('CDPCommandQueue', () => {
         })
 
         it('reflects only the entries that have been added', () => {
-          expect(queue.entries.find(matchCommand(enableAnimation))).not.to.be.undefined
-          expect(queue.entries.find(matchCommand(removeAttribute))).not.to.be.undefined
-          expect(queue.entries).to.have.lengthOf(2)
+          expect(queue.entries.find(matchCommand(enableAnimation))).not.toBeUndefined()
+          expect(queue.entries.find(matchCommand(removeAttribute))).not.toBeUndefined()
+          expect(queue.entries).toHaveLength(2)
         })
       })
 
@@ -53,30 +52,30 @@ describe('CDPCommandQueue', () => {
         })
 
         it('has no entries', () => {
-          expect(queue.entries.find(matchCommand(enableAnimation))).to.be.undefined
-          expect(queue.entries).to.have.lengthOf(0)
+          expect(queue.entries.find(matchCommand(enableAnimation))).toBeUndefined()
+          expect(queue.entries).toHaveLength(0)
         })
       })
     })
   })
 
   describe('.add', () => {
-    it('adds a command to the queue and returns a promise that is resolved when the command is resolved', () => {
+    it('adds a command to the queue and returns a promise that is resolved when the command is resolved', async () => {
       const sessionId = '1234'
       const queue = new CDPCommandQueue()
 
       const commandPromise = queue.add(enableAnimation.command, enableAnimation.params, sessionId)
       const enqueued = queue.entries[0]
 
-      expect(enqueued.command).to.eq(enableAnimation.command)
-      expect(_.isEqual(enqueued.params, enableAnimation.params), 'params are preserved').to.be.true
-      expect(enqueued.sessionId).to.eq(sessionId)
-      expect(enqueued.deferred).not.to.be.undefined
+      expect(enqueued.command).toBe(enableAnimation.command)
+      expect(_.isEqual(enqueued.params, enableAnimation.params), 'params are preserved').toBe(true)
+      expect(enqueued.sessionId).toBe(sessionId)
+      expect(enqueued.deferred).not.toBeUndefined()
 
       const resolution = { value: true }
 
       enqueued.deferred.resolve(resolution)
-      expect(commandPromise).to.eventually.equal(resolution)
+      await expect(commandPromise).resolves.toBe(resolution)
     })
   })
 
@@ -86,9 +85,9 @@ describe('CDPCommandQueue', () => {
 
       queue.add(enableAnimation.command, enableAnimation.params)
       queue.add(removeAttribute.command, removeAttribute.params)
-      expect(queue.entries).to.have.lengthOf(2)
+      expect(queue.entries).toHaveLength(2)
       queue.clear()
-      expect(queue.entries).to.have.lengthOf(0)
+      expect(queue.entries).toHaveLength(0)
     })
   })
 
@@ -102,9 +101,9 @@ describe('CDPCommandQueue', () => {
 
       queue.reject(err)
 
-      expect(queue.entries).to.have.lengthOf(0)
-      await expect(first).to.be.rejectedWith(err)
-      await expect(second).to.be.rejectedWith(err)
+      expect(queue.entries).toHaveLength(0)
+      await expect(first).rejects.toBe(err)
+      await expect(second).rejects.toBe(err)
     })
 
     it('does not affect commands added after the rejection', async () => {
@@ -113,13 +112,13 @@ describe('CDPCommandQueue', () => {
       const beforeReject = queue.add(enableAnimation.command, enableAnimation.params)
 
       queue.reject(new Error('connection closed'))
-      await expect(beforeReject).to.be.rejectedWith('connection closed')
+      await expect(beforeReject).rejects.toThrow('connection closed')
 
       const afterReject = queue.add(removeAttribute.command, removeAttribute.params)
 
-      expect(queue.entries).to.have.lengthOf(1)
+      expect(queue.entries).toHaveLength(1)
       queue.entries[0].deferred.resolve({ value: true })
-      await expect(afterReject).to.eventually.deep.equal({ value: true })
+      await expect(afterReject).resolves.toEqual({ value: true })
     })
   })
 
@@ -142,9 +141,9 @@ describe('CDPCommandQueue', () => {
         queue.add(addCommand.command, addCommand.params)
         const found = queue.extract(searchCommand)
 
-        expect(found.command).to.eq(searchCommand.command)
-        expect(found.params).to.eq(searchCommand.params)
-        expect(queue.entries).to.have.lengthOf(0)
+        expect(found.command).toBe(searchCommand.command)
+        expect(found.params).toBe(searchCommand.params)
+        expect(queue.entries).toHaveLength(0)
       })
     })
 
@@ -156,11 +155,11 @@ describe('CDPCommandQueue', () => {
 
       it('returns undefined, and does not modify the queue', () => {
         queue.add(addCommand.command, addCommand.params)
-        expect(queue.entries).to.have.lengthOf(1)
+        expect(queue.entries).toHaveLength(1)
         const found = queue.extract(searchCommand)
 
-        expect(found).to.be.undefined
-        expect(queue.entries).to.have.lengthOf(1)
+        expect(found).toBeUndefined()
+        expect(queue.entries).toHaveLength(1)
       })
     })
   })
@@ -173,8 +172,8 @@ describe('CDPCommandQueue', () => {
       queue.add(removeAttribute.command, removeAttribute.params)
       const next = queue.shift()
 
-      expect(next.command).to.eq(enableAnimation.command)
-      expect(queue.entries).to.have.lengthOf(1)
+      expect(next.command).toBe(enableAnimation.command)
+      expect(queue.entries).toHaveLength(1)
     })
   })
 
