@@ -1,60 +1,7 @@
-exports['output without any browsers'] = `
-Displaying Cypress info...
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-Detected no known browsers installed
-
-
-`
-
-exports['single chrome:stable'] = `
-Displaying Cypress info...
-
-Detected 1 browser installed:
-
-1. Chrome
-  - Name: chrome
-  - Channel: stable
-  - Version: 12.34.56
-  - Executable: /path/to/google-chrome
-
-Note: to run these browsers, pass <name>:<channel> to the '--browser' field
-
-Examples:
-- cypress run --browser chrome
-
-Learn More: https://on.cypress.io/launching-browsers
-
-`
-
-exports['two browsers'] = `
-Displaying Cypress info...
-
-Detected 2 browsers installed:
-
-1. Chrome
-  - Name: chrome
-  - Channel: stable
-  - Version: 12.34.56
-  - Executable: /path/to/google-chrome
-
-2. Firefox Dev
-  - Name: firefox
-  - Channel: dev
-  - Version: 79.0a1
-  - Executable: /path/to/firefox
-
-Note: to run these browsers, pass <name>:<channel> to the '--browser' field
-
-Examples:
-- cypress run --browser chrome
-- cypress run --browser firefox:dev
-
-Learn More: https://on.cypress.io/launching-browsers
-
-`
-
-exports['two browsers with firefox having profile folder'] = `
-Displaying Cypress info...
+exports[`lib/modes/info > adds profile for browser if folder exists > two browsers with firefox having profile folder 1`] = `
+"Displaying Cypress info...
 
 Detected 2 browsers installed:
 
@@ -78,5 +25,60 @@ Examples:
 - cypress run --browser firefox:dev
 
 Learn More: https://on.cypress.io/launching-browsers
+"
+`;
 
-`
+exports[`lib/modes/info > prints 1 found browser > single chrome:stable 1`] = `
+"Displaying Cypress info...
+
+Detected 1 browser installed:
+
+1. Chrome
+  - Name: chrome
+  - Channel: stable
+  - Version: 12.34.56
+  - Executable: /path/to/google-chrome
+
+Note: to run these browsers, pass <name>:<channel> to the '--browser' field
+
+Examples:
+- cypress run --browser chrome
+
+Learn More: https://on.cypress.io/launching-browsers
+"
+`;
+
+exports[`lib/modes/info > prints 2 found browsers > two browsers 1`] = `
+"Displaying Cypress info...
+
+Detected 2 browsers installed:
+
+1. Chrome
+  - Name: chrome
+  - Channel: stable
+  - Version: 12.34.56
+  - Executable: /path/to/google-chrome
+
+2. Firefox Dev
+  - Name: firefox
+  - Channel: dev
+  - Version: 79.0a1
+  - Executable: /path/to/firefox
+
+Note: to run these browsers, pass <name>:<channel> to the '--browser' field
+
+Examples:
+- cypress run --browser chrome
+- cypress run --browser firefox:dev
+
+Learn More: https://on.cypress.io/launching-browsers
+"
+`;
+
+exports[`lib/modes/info > prints no browsers > output without any browsers 1`] = `
+"Displaying Cypress info...
+
+Detected no known browsers installed
+
+"
+`;
