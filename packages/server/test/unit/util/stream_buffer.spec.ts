@@ -1,5 +1,4 @@
-import '../../spec_helper'
-
+import { describe, expect, it, vi } from 'vitest'
 import _ from 'lodash'
 import fs from 'fs'
 import stream from 'stream'
@@ -14,8 +13,16 @@ function drain (readable: NodeJS.ReadableStream): Promise<string> {
   })
 }
 
+function withDone (fn: (done: (err?: unknown) => void) => void) {
+  return () => {
+    return new Promise<void>((resolve, reject) => {
+      fn((err) => err ? reject(err) : resolve())
+    })
+  }
+}
+
 describe('lib/util/stream_buffer', () => {
-  it('reads out no matter when we write', function (done) {
+  it('reads out no matter when we write', withDone((done) => {
     done = _.after(2, done)
     const pt = new stream.PassThrough()
     const sb = streamBuffer()
@@ -33,91 +40,91 @@ describe('lib/util/stream_buffer', () => {
     const readable = sb.createReadStream()
 
     readable.once('data', (data2) => {
-      expect(data2.toString()).to.eq('1 2')
+      expect(data2.toString()).toBe('1 2')
 
       tickWrite(' 3')
 
       readable.once('data', (data3) => {
-        expect(data3.toString()).to.eq(' 3')
+        expect(data3.toString()).toBe(' 3')
 
         tickWrite(' 4')
 
         const readable2 = sb.createReadStream()
 
         readable.once('data', (data4) => {
-          expect(data4.toString()).to.eq(' 4')
+          expect(data4.toString()).toBe(' 4')
         })
 
         readable2.once('data', (data) => {
-          expect(data.toString()).to.eq('1 2 3 4')
+          expect(data.toString()).toBe('1 2 3 4')
 
           tickWrite(' 5')
 
           readable2.once('data', (data5) => {
-            expect(data5.toString()).to.eq(' 5')
+            expect(data5.toString()).toBe(' 5')
 
             done()
           })
 
           readable.once('data', (data5) => {
-            expect(data5.toString()).to.eq(' 5')
+            expect(data5.toString()).toBe(' 5')
 
             done()
           })
         })
       })
     })
-  })
+  }))
 
   it('on overflow, enlarges the internal buffer by the smallest power of 2 that can fit the chunk', () => {
     const sb = streamBuffer(64)
 
     sb.write('A'.repeat(65))
 
-    expect(sb._buffer().length).to.eq(128)
+    expect(sb._buffer().length).toBe(128)
 
     sb.end('A'.repeat(1024))
 
-    expect(sb._buffer().length).to.eq(2048)
+    expect(sb._buffer().length).toBe(2048)
 
     const readable = sb.createReadStream()
 
     return drain(readable)
     .then((buf) => {
-      expect(buf).to.eq('A'.repeat(1089))
+      expect(buf).toBe('A'.repeat(1089))
     })
   })
 
-  it('finishes when buffer stream closes while still allowing data to be drained', (done) => {
+  it('finishes when buffer stream closes while still allowing data to be drained', withDone((done) => {
     const sb = streamBuffer()
 
     sb.write('foo')
     sb.write('bar')
 
-    expect(sb._finished()).to.be.false
+    expect(sb._finished()).toBe(false)
 
     sb.end(() => {
-      expect(sb._finished()).to.be.true
+      expect(sb._finished()).toBe(true)
 
       const readable = sb.createReadStream()
 
       return drain(readable)
       .then((buf) => {
-        expect(buf).to.eq('foobar')
+        expect(buf).toBe('foobar')
 
         const readable2 = sb.createReadStream()
 
         return drain(readable2)
         .then((buf2) => {
-          expect(buf2).to.eq('foobar')
+          expect(buf2).toBe('foobar')
 
           done()
         })
       })
     })
-  })
+  }))
 
-  it('can be piped into and then read from', function (done) {
+  it('can be piped into and then read from', withDone((done) => {
     const expected = fs.readFileSync(__filename).toString()
     const rs = fs.createReadStream(__filename)
     const sb = streamBuffer()
@@ -129,21 +136,21 @@ describe('lib/util/stream_buffer', () => {
     rs.on('end', () => {
       return drain(readable)
       .then((buf) => {
-        expect(buf).to.eq(expected)
+        expect(buf).toBe(expected)
 
         done()
       })
     })
-  })
+  }))
 
-  it('readable recursively pushes until it returns false', (done) => {
+  it('readable recursively pushes until it returns false', withDone((done) => {
     const sb = streamBuffer()
     const readable = sb.createReadStream()
     const writeable = new stream.Writable({
       final () {
-        expect(readable.push).to.be.calledTwice
-        expect((readable.push as any).firstCall).to.be.calledWith(buf)
-        expect((readable.push as any).secondCall).to.be.calledWith(null)
+        expect(push).toHaveBeenCalledTimes(2)
+        expect(push.mock.calls[0][0]).toEqual(buf)
+        expect(push.mock.calls[1][0]).toBeNull()
         done()
       },
       write (chunk, enc, cb) {
@@ -151,7 +158,7 @@ describe('lib/util/stream_buffer', () => {
       },
     })
 
-    sinon.spy(readable, 'push')
+    const push = vi.spyOn(readable, 'push')
 
     readable.pipe(writeable)
 
@@ -159,15 +166,15 @@ describe('lib/util/stream_buffer', () => {
     const buf = Buffer.alloc(size, '!')
 
     sb.end(buf)
-  })
+  }))
 
-  it('readable pipes do not end until the writeable ends', function (done) {
+  it('readable pipes do not end until the writeable ends', withDone((done) => {
     const sb = streamBuffer()
     const readable = sb.createReadStream()
     const writeable = new stream.Writable({
       final () {
-        expect(sb.writable).to.be.false
-        expect((sb as any)._writableState).to.have.property('ended', true)
+        expect(sb.writable).toBe(false)
+        expect((sb as any)._writableState).toHaveProperty('ended', true)
         done()
       },
       write (chunk, enc, cb) {
@@ -187,9 +194,9 @@ describe('lib/util/stream_buffer', () => {
     const buf = Buffer.alloc(size, '!')
 
     sb.write(buf)
-  })
+  }))
 
-  it('can handle a massive req body', function (done) {
+  it('can handle a massive req body', withDone((done) => {
     const size = 16 * 1024 // 16 kb
     const repeat = 3
 
@@ -211,25 +218,25 @@ describe('lib/util/stream_buffer', () => {
 
       drain(readable)
       .then((buf) => {
-        expect(buf.length).to.eq(body.length * repeat)
+        expect(buf.length).toBe(body.length * repeat)
 
-        expect(buf).to.eq(body.toString().repeat(repeat))
+        expect(buf).toBe(body.toString().repeat(repeat))
         done()
       })
     })
 
     pt.end()
-  })
+  }))
 
-  it('silently discards writes after it has been destroyed, with no consumers', function (done) {
+  it('silently discards writes after it has been destroyed, with no consumers', withDone((done) => {
     const sb = streamBuffer()
 
     sb.write('foo')
     sb.unpipeAll()
     sb.write('bar', done)
-  })
+  }))
 
-  it('silently discards writes after it has been destroyed, with a consumer', function (done) {
+  it('silently discards writes after it has been destroyed, with a consumer', withDone((done) => {
     const sb = streamBuffer()
     const pt = new stream.PassThrough()
 
@@ -238,5 +245,5 @@ describe('lib/util/stream_buffer', () => {
     sb.write('foo')
     sb.unpipeAll()
     sb.write('bar', done)
-  })
+  }))
 })
