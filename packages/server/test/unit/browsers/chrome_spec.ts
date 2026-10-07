@@ -938,12 +938,29 @@ describe('lib/browsers/chrome', () => {
   })
 
   describe('#attachListeners', () => {
-    const clearParams = { origin: '*', storageTypes: 'service_workers,cache_storage' }
+    const clearParams = { origin: 'https://example.com', storageTypes: 'service_workers,cache_storage' }
 
-    function setup (options: object) {
+    const registration = (registrationId: string, scopeURL: string, isDeleted = false) => ({ registrationId, scopeURL, isDeleted })
+
+    function setup (options: object, url = 'https://example.com/__/#/specs/runner', snapshot: ReturnType<typeof registration>[] | null = []) {
+      const registrationListeners: Function[] = []
+
       const pageCriClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub(),
+        send: sinon.stub().callsFake(async (command: string) => {
+          // Chromium answers a session's first ServiceWorker.enable with one
+          // snapshot of every stored registration
+          if (command === 'ServiceWorker.enable' && snapshot) {
+            registrationListeners.slice().forEach((listener) => listener({ registrations: snapshot }))
+          }
+        }),
+        on: sinon.stub().callsFake((eventName: string, listener: Function) => {
+          if (eventName === 'ServiceWorker.workerRegistrationUpdated') registrationListeners.push(listener)
+        }),
+        off: sinon.stub().callsFake((eventName: string, listener: Function) => {
+          const index = registrationListeners.indexOf(listener)
+
+          if (eventName === 'ServiceWorker.workerRegistrationUpdated' && index > -1) registrationListeners.splice(index, 1)
+        }),
         targetId: '1234',
         whenChildTargetHandled: sinon.stub().resolves(),
         reenableChildTargetInterception: sinon.stub().resolves(),
@@ -969,7 +986,7 @@ describe('lib/browsers/chrome', () => {
 
       const attach = () => {
         return chrome.attachListeners(
-          'https://example.com/__/#/specs/runner',
+          url,
           pageCriClient as any,
           { use: sinon.stub() } as any,
           { ...options } as any,
@@ -977,7 +994,13 @@ describe('lib/browsers/chrome', () => {
         )
       }
 
-      return { pageCriClient, attach }
+      const clearedOrigins = () => {
+        return pageCriClient.send.getCalls()
+        .filter((call) => call.args[0] === 'Storage.clearDataForOrigin')
+        .map((call) => call.args[1].origin)
+      }
+
+      return { pageCriClient, attach, clearedOrigins, registrationListeners }
     }
 
     it('clears persisted service worker state before the runner navigation', async function () {
@@ -987,6 +1010,83 @@ describe('lib/browsers/chrome', () => {
 
       expect(pageCriClient.send).to.have.been.calledWith('Storage.clearDataForOrigin', clearParams)
       expect(pageCriClient.send.withArgs('Storage.clearDataForOrigin')).to.have.been.calledBefore(chrome._navigateUsingCRI as any)
+    })
+
+    it('clears every http(s) origin holding a registration, leaving the Cypress extension alone', async function () {
+      const { attach, clearedOrigins } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, [
+        registration('0', 'chrome-extension://caljajdfkjjjdehjdoimjkkakekklcck/'),
+        registration('1', 'http://127.0.0.1:7777/'),
+        registration('2', 'http://127.0.0.1:7777/app/'),
+        registration('3', 'https://www.example.org/scoped/'),
+      ])
+
+      await attach()
+
+      expect(clearedOrigins()).to.have.members(['https://example.com', 'http://127.0.0.1:7777', 'https://www.example.org'])
+      expect(clearedOrigins()).to.have.length(3)
+      expect(clearedOrigins().every((origin) => origin.startsWith('http'))).to.be.true
+    })
+
+    it('clears the origin of a registration that is being deleted, since its caches remain', async function () {
+      const { attach, clearedOrigins } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, [
+        registration('1', 'https://deleted.example.org/', true),
+      ])
+
+      await attach()
+
+      expect(clearedOrigins()).to.have.members(['https://example.com', 'https://deleted.example.org'])
+    })
+
+    it('clears the origin the runner later moves to when the launch url is on another origin', async function () {
+      const { attach, clearedOrigins } = setup(
+        { ...openOpts, shouldClearPersistedServiceWorkers: true },
+        'http://localhost:3000/__/#/specs/runner?file=cypress/e2e/spec.cy.ts',
+        [registration('1', 'http://127.0.0.1:7777/')],
+      )
+
+      await attach()
+
+      expect(clearedOrigins()).to.have.members(['http://localhost:3000', 'http://127.0.0.1:7777'])
+    })
+
+    it('stops listening for registration updates once the snapshot is read', async function () {
+      const { attach, registrationListeners } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, [registration('1', 'http://127.0.0.1:7777/')])
+
+      await attach()
+
+      expect(registrationListeners).to.be.empty
+    })
+
+    it('clears the runner origin and continues the launch when no registration snapshot arrives', async function () {
+      const clock = sinon.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+      try {
+        const { attach, clearedOrigins } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, null)
+
+        const attached = attach()
+
+        await clock.tickAsync(5000)
+        await attached
+
+        expect(clearedOrigins()).to.deep.eq(['https://example.com'])
+        expect(chrome._navigateUsingCRI).to.have.been.called
+      } finally {
+        clock.restore()
+      }
+    })
+
+    it('clears an http runner origin including its port', async function () {
+      const { pageCriClient, attach } = setup(
+        { ...openOpts, shouldClearPersistedServiceWorkers: true },
+        'http://localhost:3000/__/#/specs/runner?file=cypress/e2e/spec.cy.ts',
+      )
+
+      await attach()
+
+      expect(pageCriClient.send).to.have.been.calledWith('Storage.clearDataForOrigin', {
+        origin: 'http://localhost:3000',
+        storageTypes: 'service_workers,cache_storage',
+      })
     })
 
     it('does not clear persisted service worker state on the MITM path', async function () {
