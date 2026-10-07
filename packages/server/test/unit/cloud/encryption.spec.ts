@@ -1,8 +1,7 @@
-import '../../spec_helper'
+import { describe, it, expect } from 'vitest'
 import * as jose from 'jose'
 import crypto from 'crypto'
 import * as encryption from '../../../lib/cloud/encryption'
-import { expect } from 'chai'
 
 const TEST_BODY = {
   test: 'string',
@@ -32,13 +31,13 @@ describe('encryption', () => {
 
     const { plaintext } = await jose.generalDecrypt(jwe, privateKey)
 
-    expect(JSON.parse(plaintext)).to.eql(TEST_BODY)
+    expect(JSON.parse(plaintext)).toEqual(TEST_BODY)
 
     const unwrappedKey = crypto.privateDecrypt(privateKey, Buffer.from(jwe.recipients[0].encrypted_key, 'base64'))
 
     expect(
       unwrappedKey.toString('base64'),
-    ).to.eql(secretKey.export().toString('base64'))
+    ).toEqual(secretKey.export().toString('base64'))
   })
 
   it('is possible to use the secretKey to decrypt future responses', async () => {
@@ -61,7 +60,7 @@ describe('encryption', () => {
     const jweResponse = await enc.encrypt()
     const roundtripResponse = await encryption.decryptResponse(jweResponse, secretKey)
 
-    expect(roundtripResponse).to.eql(RESPONSE_BODY)
+    expect(roundtripResponse).toEqual(RESPONSE_BODY)
   })
 
   // Regression: jose's default inflateRaw caps decompressed payloads at ~250KB,
@@ -90,7 +89,7 @@ describe('encryption', () => {
       }),
     }
 
-    expect(JSON.stringify(LARGE_RESPONSE).length).to.be.greaterThan(400 * 1024)
+    expect(JSON.stringify(LARGE_RESPONSE).length).toBeGreaterThan(400 * 1024)
 
     const enc = new jose.GeneralEncrypt(
       Buffer.from(JSON.stringify(LARGE_RESPONSE)),
@@ -101,6 +100,6 @@ describe('encryption', () => {
     const jweResponse = await enc.encrypt()
     const roundtripResponse = await encryption.decryptResponse(jweResponse, secretKey)
 
-    expect(roundtripResponse).to.eql(LARGE_RESPONSE)
+    expect(roundtripResponse).toEqual(LARGE_RESPONSE)
   })
 })
