@@ -1,4 +1,4 @@
-import '../spec_helper'
+import { describe, expect, it } from 'vitest'
 import { getExperiments, formatExperiments } from '../../lib/experiments'
 
 describe('experiments', () => {
@@ -11,7 +11,7 @@ describe('experiments', () => {
       }
       const result = formatExperiments(exp)
 
-      expect(result).to.equal('featureA=true,featureB=false,featureC=true')
+      expect(result).toBe('featureA=true,featureB=false,featureC=true')
     })
   })
 
@@ -72,7 +72,7 @@ describe('experiments', () => {
         },
       }
 
-      expect(result).to.deep.equal(expected)
+      expect(result).toStrictEqual(expected)
     })
   })
 })
