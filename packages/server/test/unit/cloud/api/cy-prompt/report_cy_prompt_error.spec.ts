@@ -1,15 +1,15 @@
-import { expect } from 'chai'
-import { sinon } from '../../../../spec_helper'
+import type { Mock } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { reportCyPromptError } from '@packages/server/lib/cloud/api/cy-prompt/report_cy_prompt_error'
 
 describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
-  let cloudRequestStub: sinon.SinonStub
+  let cloudRequestStub: Mock
   let cloudApi: any
   let oldNodeEnv: string | undefined
 
   beforeEach(() => {
     oldNodeEnv = process.env.NODE_ENV
-    cloudRequestStub = sinon.stub()
+    cloudRequestStub = vi.fn()
     cloudApi = {
       cloudUrl: 'http://localhost:1234',
       cloudHeaders: { 'x-cypress-version': '1.2.3' },
@@ -20,7 +20,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
   })
 
   afterEach(() => {
-    sinon.restore()
+    vi.restoreAllMocks()
     delete process.env.CYPRESS_CRASH_REPORTS
     delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
     delete process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
@@ -34,7 +34,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
 
   describe('reportCyPromptError', () => {
     it('logs error when CYPRESS_LOCAL_CY_PROMPT_PATH is set', () => {
-      sinon.stub(console, 'error')
+      vi.spyOn(console, 'error').mockImplementation(() => {})
       process.env.CYPRESS_LOCAL_CY_PROMPT_PATH = '/path/to/cy-prompt'
       const error = new Error('test error')
 
@@ -47,14 +47,14 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
       })
 
       // eslint-disable-next-line no-console
-      expect(console.error).to.have.been.calledWith(
+      expect(console.error).toHaveBeenCalledWith(
         'Error in testMethod:',
         error,
       )
     })
 
     it('logs error when NODE_ENV is development', () => {
-      sinon.stub(console, 'error')
+      vi.spyOn(console, 'error').mockImplementation(() => {})
       process.env.NODE_ENV = 'development'
       const error = new Error('test error')
 
@@ -67,14 +67,14 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
       })
 
       // eslint-disable-next-line no-console
-      expect(console.error).to.have.been.calledWith(
+      expect(console.error).toHaveBeenCalledWith(
         'Error in testMethod:',
         error,
       )
     })
 
     it('logs error when CYPRESS_INTERNAL_E2E_TESTING_SELF is set', () => {
-      sinon.stub(console, 'error')
+      vi.spyOn(console, 'error').mockImplementation(() => {})
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       const error = new Error('test error')
 
@@ -87,7 +87,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
       })
 
       // eslint-disable-next-line no-console
-      expect(console.error).to.have.been.calledWith(
+      expect(console.error).toHaveBeenCalledWith(
         'Error in testMethod:',
         error,
       )
@@ -105,7 +105,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethod: 'testMethod',
       })
 
-      expect(cloudRequestStub).to.not.have.been.called
+      expect(cloudRequestStub).not.toHaveBeenCalled()
     })
 
     it('does not report error when CYPRESS_DISABLE_GUEST_TELEMETRY is set', () => {
@@ -120,7 +120,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethod: 'testMethod',
       })
 
-      expect(cloudRequestStub).to.not.have.been.called
+      expect(cloudRequestStub).not.toHaveBeenCalled()
     })
 
     it('converts non-Error objects to Error', () => {
@@ -134,26 +134,26 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethod: 'testMethod',
       })
 
-      expect(cloudRequestStub).to.be.calledWithMatch(
+      expect(cloudRequestStub).toHaveBeenCalledWith(
         'http://localhost:1234/cy-prompt/errors',
-        {
+        expect.objectContaining({
           cyPromptHash: 'abc123',
           projectSlug: 'test-project',
-          errors: [{
+          errors: [expect.objectContaining({
             name: 'Error',
             message: 'string error',
-            stack: sinon.match((stack) => stack.includes('<stripped-path>report_cy_prompt_error_spec.ts')),
+            stack: expect.stringContaining('<stripped-path>report_cy_prompt_error.spec.ts'),
             code: undefined,
             errno: undefined,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: undefined,
-          }],
-        },
-        {
-          headers: {
+          })],
+        }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
             'Content-Type': 'application/json',
-          },
-        },
+          }),
+        }),
       )
     })
 
@@ -173,12 +173,12 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethod: 'testMethod',
       })
 
-      expect(cloudRequestStub).to.be.calledWithMatch(
+      expect(cloudRequestStub).toHaveBeenCalledWith(
         'http://localhost:1234/cy-prompt/errors',
-        {
+        expect.objectContaining({
           cyPromptHash: 'abc123',
           projectSlug: 'test-project',
-          errors: [{
+          errors: [expect.objectContaining({
             name: 'Error',
             message: 'test error',
             stack: 'test stack',
@@ -186,13 +186,13 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
             errno: 123,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: undefined,
-          }],
-        },
-        {
-          headers: {
+          })],
+        }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
             'Content-Type': 'application/json',
-          },
-        },
+          }),
+        }),
       )
     })
 
@@ -209,26 +209,26 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethodArgs: args,
       })
 
-      expect(cloudRequestStub).to.be.calledWithMatch(
+      expect(cloudRequestStub).toHaveBeenCalledWith(
         'http://localhost:1234/cy-prompt/errors',
-        {
+        expect.objectContaining({
           cyPromptHash: 'abc123',
           projectSlug: 'test-project',
-          errors: [{
+          errors: [expect.objectContaining({
             name: 'Error',
             message: 'test error',
-            stack: sinon.match((stack) => stack.includes('<stripped-path>report_cy_prompt_error_spec.ts')),
+            stack: expect.stringContaining('<stripped-path>report_cy_prompt_error.spec.ts'),
             code: undefined,
             errno: undefined,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: JSON.stringify({ args: ['arg1', { key: '<stripped-path>file.js' }] }),
-          }],
-        },
-        {
-          headers: {
+          })],
+        }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
             'Content-Type': 'application/json',
-          },
-        },
+          }),
+        }),
       )
     })
 
@@ -247,26 +247,26 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethodArgs: [circularObj],
       })
 
-      expect(cloudRequestStub).to.be.calledWithMatch(
+      expect(cloudRequestStub).toHaveBeenCalledWith(
         'http://localhost:1234/cy-prompt/errors',
-        {
+        expect.objectContaining({
           cyPromptHash: 'abc123',
           projectSlug: 'test-project',
-          errors: [{
+          errors: [expect.objectContaining({
             name: 'Error',
             message: 'test error',
-            stack: sinon.match((stack) => stack.includes('<stripped-path>report_cy_prompt_error_spec.ts')),
+            stack: expect.stringContaining('<stripped-path>report_cy_prompt_error.spec.ts'),
             code: undefined,
             errno: undefined,
             cyPromptMethod: 'testMethod',
-            cyPromptMethodArgs: sinon.match(/Unknown args/),
-          }],
-        },
-        {
-          headers: {
+            cyPromptMethodArgs: expect.stringMatching(/Unknown args/),
+          })],
+        }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
             'Content-Type': 'application/json',
-          },
-        },
+          }),
+        }),
       )
     })
 
@@ -274,7 +274,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
       const error = new Error('test error')
       const postError = new Error('post error')
 
-      cloudRequestStub.rejects(postError)
+      cloudRequestStub.mockRejectedValue(postError)
 
       reportCyPromptError({
         cloudApi,
@@ -285,13 +285,15 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
       })
 
       // Just verify the post was called, don't check debug output
-      expect(cloudRequestStub).to.be.called
+      expect(cloudRequestStub).toHaveBeenCalled()
     })
 
     it('handles errors in payload construction', () => {
       const error = new Error('test error')
 
-      sinon.stub(JSON, 'stringify').throws(new Error('JSON error'))
+      vi.spyOn(JSON, 'stringify').mockImplementation(() => {
+        throw new Error('JSON error')
+      })
 
       reportCyPromptError({
         cloudApi,
@@ -302,7 +304,7 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
       })
 
       // Just verify the post was called, don't check debug output
-      expect(cloudRequestStub).to.be.called
+      expect(cloudRequestStub).toHaveBeenCalled()
     })
 
     it('folds the underlying cause into the reported stack', () => {
@@ -326,14 +328,14 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethod: 'testMethod',
       })
 
-      const payload = cloudRequestStub.firstCall.args[1]
+      const payload = cloudRequestStub.mock.calls[0][1]
       const { stack } = payload.errors[0]
 
-      expect(stack).to.include('Caused by:')
-      expect(stack).to.include('Object.rename')
-      expect(stack).to.include('code=EPERM')
-      expect(stack).to.include('errno=-4048')
-      expect(stack).to.include('syscall=rename')
+      expect(stack).toContain('Caused by:')
+      expect(stack).toContain('Object.rename')
+      expect(stack).toContain('code=EPERM')
+      expect(stack).toContain('errno=-4048')
+      expect(stack).toContain('syscall=rename')
     })
 
     it('extracts last error from AggregateError', () => {
@@ -350,26 +352,26 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         cyPromptMethod: 'testMethod',
       })
 
-      expect(cloudRequestStub).to.be.calledWithMatch(
+      expect(cloudRequestStub).toHaveBeenCalledWith(
         'http://localhost:1234/cy-prompt/errors',
-        {
+        expect.objectContaining({
           cyPromptHash: 'abc123',
           projectSlug: 'test-project',
-          errors: [{
+          errors: [expect.objectContaining({
             name: 'Error',
             message: 'Second error',
-            stack: sinon.match((stack) => stack.includes('<stripped-path>report_cy_prompt_error_spec.ts')),
+            stack: expect.stringContaining('<stripped-path>report_cy_prompt_error.spec.ts'),
             code: undefined,
             errno: undefined,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: undefined,
-          }],
-        },
-        {
-          headers: {
+          })],
+        }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
             'Content-Type': 'application/json',
-          },
-        },
+          }),
+        }),
       )
     })
   })
