@@ -147,8 +147,13 @@ cy.contains('[data-cy="ui-card"] button', 'Activate').click() // test the access
 
 Asserting `should('be.visible')` is useful when testing elements that the test won't interact with, as in certain situations it is possible for elements to be found in the DOM with the content we expect, but to still be unexpectedly hidden from the user with CSS or covered by another element. When interacting, that visibility check is already built in before `cy.click` or `cy.type` for example.
 
+### Finding elements by role
+Use the built-in `cy.getByRole()` rather than Testing Library's `findByRole`. For a role that HTML has an element for, such as `button`, `link`, or `heading`, it only matches that element by default: `cy.getByRole('button', { name: 'Log In' })` finds a `<button>`, not a `<div role="button">`. The ARIA role of `button` could be added to an element that does not have the expected keyboard behaviors implemented, and the test would still pass if that element matched. It is also a good accessibility practice to not use ARIA to recreate the existing functionality of HTML elements, but instead use the elements directly.
+
+Widget roles that HTML has no element for, such as `menuitem` or `tab`, need no option. Pass `native: false` for elements that get their role from a component library, such as the `dialog`, `radio`, and `option` elements rendered by Headless UI: `cy.getByRole('dialog', { name: 'Settings', native: false })`. To narrow by state, chain a filter: `.filter('[aria-expanded="false"]')`, `.filter('[aria-checked="true"]')`, or `.filter('h2')` for a heading level.
+
 ### Cypress-Testing-Library
-Feel free to use this often in tests if it makes the test easier to write or understand, except where using it provides less confidence than a plain Cypress selector. For example `cy.contains('button', 'Log In')` is slightly preferred to `cy.findByRole('button', {name: 'Log In' })`, because the ARIA role of `button` could be added to an element that does not have the expected keyboard behaviors implemented, and the test might still pass. It is also a good accessibility practice to not use ARIA to recreate the existing functionality of HTML elements, but instead use the elements directly. So using `findByRole` should not be necessary except for certain UI interactions like tabs or carousels, if we have those.
+Feel free to use its other queries, such as `findByTestId` or `findByLabelText`, often in tests if it makes the test easier to write or understand, except where using it provides less confidence than a plain Cypress selector.
 
 ### Visual Appearance
 Avoid specifying specific CSS color values in tests. Prefer Percy snapshots to validate that the approved appearance isn't changing unexpectedly.
