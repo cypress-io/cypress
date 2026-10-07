@@ -1,6 +1,16 @@
-import '../../spec_helper'
-
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GracefulExit } from '../../../lib/util/graceful-exit'
+
+// resetForTesting is a no-op unless IS_TEST is set
+;(globalThis as { IS_TEST?: boolean }).IS_TEST = true
+
+function stubExit () {
+  return vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
+}
+
+function stubLog () {
+  return vi.spyOn(console, 'log').mockImplementation(() => {})
+}
 
 /**
  * Other packages (e.g. firefox-profile) register SIGINT handlers that call
@@ -34,14 +44,15 @@ describe('lib/util/graceful-exit', () => {
   afterEach(() => {
     GracefulExit.resetForTesting()
     delete process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT
+    vi.restoreAllMocks()
   })
 
   it('isShuttingDown is false when idle', () => {
-    expect(GracefulExit.isShuttingDown).to.be.false
+    expect(GracefulExit.isShuttingDown).toBe(false)
   })
 
   it('isShuttingDown is true for a step that reads it before its first await', async () => {
-    const exitStub = sinon.stub(process, 'exit')
+    const exitStub = stubExit()
 
     let seenByStep: boolean | undefined
 
@@ -53,15 +64,15 @@ describe('lib/util/graceful-exit', () => {
 
     await GracefulExit.exitGracefully(0)
 
-    expect(seenByStep, 'a step cannot tell that the process is exiting').to.be.true
+    expect(seenByStep, 'a step cannot tell that the process is exiting').toBe(true)
 
-    exitStub.restore()
+    exitStub.mockRestore()
   })
 
   it('isShuttingDown is true while exitGracefully is in progress and false after teardown completes', async () => {
-    const exitStub = sinon.stub(process, 'exit')
+    const exitStub = stubExit()
 
-    expect(GracefulExit.isShuttingDown).to.be.false
+    expect(GracefulExit.isShuttingDown).toBe(false)
 
     let resolveStep: () => void
     const stepPromise = new Promise<void>((resolve) => {
@@ -74,31 +85,31 @@ describe('lib/util/graceful-exit', () => {
 
     const exitPromise = GracefulExit.exitGracefully(0)
 
-    expect(GracefulExit.isShuttingDown).to.be.true
+    expect(GracefulExit.isShuttingDown).toBe(true)
 
     resolveStep!()
 
     await exitPromise
 
-    expect(GracefulExit.isShuttingDown).to.be.false
-    expect(exitStub).to.have.been.calledOnce
+    expect(GracefulExit.isShuttingDown).toBe(false)
+    expect(exitStub).toHaveBeenCalledOnce()
 
-    exitStub.restore()
+    exitStub.mockRestore()
   })
 
   it('runs registered teardown steps then exits with the requested code', async () => {
-    const exitStub = sinon.stub(process, 'exit')
-    const step = sinon.stub().resolves()
+    const exitStub = stubExit()
+    const step = vi.fn().mockResolvedValue(undefined)
 
     GracefulExit.addStep(step as any, 'test-step')
     await GracefulExit.exitGracefully(0)
 
-    expect(step).to.have.been.calledOnce
-    expect(exitStub).to.have.been.calledWith(0)
+    expect(step).toHaveBeenCalledOnce()
+    expect(exitStub).toHaveBeenCalledWith(0)
   })
 
   it('keeps the requested exit code when a step throws', async () => {
-    const exitStub = sinon.stub(process, 'exit')
+    const exitStub = stubExit()
     let healthyStepFinished = false
 
     GracefulExit.addStep(async () => {
@@ -113,13 +124,13 @@ describe('lib/util/graceful-exit', () => {
 
     await GracefulExit.exitGracefully(0)
 
-    expect(healthyStepFinished, 'a failing step must not abort the others').to.be.true
-    expect(exitStub).to.have.been.calledWith(0)
+    expect(healthyStepFinished, 'a failing step must not abort the others').toBe(true)
+    expect(exitStub).toHaveBeenCalledWith(0)
   })
 
   it('reports the failing step without changing the exit code', async () => {
-    const exitStub = sinon.stub(process, 'exit')
-    const logStub = sinon.stub(console, 'log')
+    const exitStub = stubExit()
+    const logStub = stubLog()
 
     GracefulExit.addStep(async () => {
       throw new Error('step failed')
@@ -127,12 +138,12 @@ describe('lib/util/graceful-exit', () => {
 
     await GracefulExit.exitGracefully(0)
 
-    expect(logStub.args.flat().join('\n')).to.include('failing-step')
-    expect(exitStub).to.have.been.calledWith(0)
+    expect(logStub.mock.calls.flat().join('\n')).toContain('failing-step')
+    expect(exitStub).toHaveBeenCalledWith(0)
   })
 
   it('keeps a non-zero exit code when a step throws', async () => {
-    const exitStub = sinon.stub(process, 'exit')
+    const exitStub = stubExit()
 
     GracefulExit.addStep(async () => {
       throw new Error('step failed')
@@ -140,11 +151,11 @@ describe('lib/util/graceful-exit', () => {
 
     await GracefulExit.exitGracefully(4)
 
-    expect(exitStub).to.have.been.calledWith(4)
+    expect(exitStub).toHaveBeenCalledWith(4)
   })
 
   it('returns the same in-flight promise when exitGracefully is called twice', async () => {
-    const exitStub = sinon.stub(process, 'exit')
+    const exitStub = stubExit()
     let resolveStep: () => void
     const stepPromise = new Promise<void>((resolve) => {
       resolveStep = resolve
@@ -161,12 +172,12 @@ describe('lib/util/graceful-exit', () => {
 
     await Promise.all([p1, p2])
 
-    expect(exitStub).to.have.been.calledOnce
-    expect(exitStub).to.have.been.calledWith(3)
+    expect(exitStub).toHaveBeenCalledOnce()
+    expect(exitStub).toHaveBeenCalledWith(3)
   })
 
   it('debounces duplicate SIGINT soon after teardown starts (single graceful exit)', async () => {
-    const exitStub = sinon.stub(process, 'exit')
+    const exitStub = stubExit()
 
     await withoutForeignSigHandlers(async () => {
       GracefulExit.resetForTesting()
@@ -187,17 +198,15 @@ describe('lib/util/graceful-exit', () => {
 
       await new Promise((r) => setImmediate(r))
 
-      expect(exitStub).to.have.been.calledOnce
-      expect(exitStub).to.have.been.calledWith(130)
+      expect(exitStub).toHaveBeenCalledOnce()
+      expect(exitStub).toHaveBeenCalledWith(130)
     })
 
-    exitStub.restore()
+    exitStub.mockRestore()
   })
 
-  it('SIGINT after dedup window during hung teardown forces exit 1', async function () {
-    this.timeout(5000)
-
-    const exitStub = sinon.stub(process, 'exit')
+  it('SIGINT after dedup window during hung teardown forces exit 1', async () => {
+    const exitStub = stubExit()
 
     await withoutForeignSigHandlers(async () => {
       GracefulExit.resetForTesting()
@@ -212,19 +221,17 @@ describe('lib/util/graceful-exit', () => {
 
       await new Promise((r) => setTimeout(r, 50))
 
-      expect(exitStub).to.have.been.calledWith(1)
+      expect(exitStub).toHaveBeenCalledWith(1)
     })
 
-    exitStub.restore()
-  })
+    exitStub.mockRestore()
+  }, 5000)
 
-  it('force exits with the requested code and names the pending steps when the shared budget expires', async function () {
-    this.timeout(5000)
-
+  it('force exits with the requested code and names the pending steps when the shared budget expires', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '50'
 
-    const exitStub = sinon.stub(process, 'exit')
-    const logStub = sinon.stub(console, 'log')
+    const exitStub = stubExit()
+    const logStub = stubLog()
 
     // a step timeout longer than the shared budget leaves the force-exit as the only way out
     GracefulExit.addStep(() => new Promise(() => {}), 'hang', 10000)
@@ -233,27 +240,27 @@ describe('lib/util/graceful-exit', () => {
 
     await new Promise((r) => setTimeout(r, 200))
 
-    logStub.restore()
+    const logged = logStub.mock.calls.flat().join('\n')
 
-    expect(exitStub).to.have.been.calledWith(0)
-    expect(logStub.args.flat().join('\n')).to.contain('Still waiting on: hang')
+    logStub.mockRestore()
 
-    exitStub.restore()
-  })
+    expect(exitStub).toHaveBeenCalledWith(0)
+    expect(logged).toContain('Still waiting on: hang')
 
-  it('abandons a hung step on its own budget so the remaining steps still complete', async function () {
-    this.timeout(5000)
+    exitStub.mockRestore()
+  }, 5000)
 
+  it('abandons a hung step on its own budget so the remaining steps still complete', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '1000'
 
     const startedAt = Date.now()
     let exitedAfter: number | undefined
-    const exitStub = sinon.stub(process, 'exit').callsFake(() => {
+    const exitStub = vi.spyOn(process, 'exit').mockImplementation(() => {
       exitedAfter = exitedAfter ?? Date.now() - startedAt
 
       return undefined as never
     })
-    const logStub = sinon.stub(console, 'log')
+    const logStub = stubLog()
 
     let quickStepRan = false
 
@@ -267,27 +274,26 @@ describe('lib/util/graceful-exit', () => {
 
     await new Promise((r) => setTimeout(r, 1200))
 
-    logStub.restore()
+    const logged = logStub.mock.calls.flat().join('\n')
 
-    const logged = logStub.args.flat().join('\n')
+    logStub.mockRestore()
 
-    expect(quickStepRan, 'the quick step is not cut off by the hung one').to.be.true
+    expect(quickStepRan, 'the quick step is not cut off by the hung one').toBe(true)
     // 0.8 of the 1000ms budget, so teardown settles before the shared force-exit timer can fire
-    expect(exitedAfter).to.be.within(800, 999)
-    expect(exitStub).to.have.been.calledWith(0)
-    expect(logged).to.contain('The "hang" teardown step did not finish within 800ms')
-    expect(logged).not.to.contain('Failed to gracefully exit')
+    expect(exitedAfter).toBeGreaterThanOrEqual(800)
+    expect(exitedAfter).toBeLessThanOrEqual(999)
+    expect(exitStub).toHaveBeenCalledWith(0)
+    expect(logged).toContain('The "hang" teardown step did not finish within 800ms')
+    expect(logged).not.toContain('Failed to gracefully exit')
 
-    exitStub.restore()
-  })
+    exitStub.mockRestore()
+  }, 5000)
 
-  it('a reset cancels the step bounds of an in-flight teardown', async function () {
-    this.timeout(5000)
-
+  it('a reset cancels the step bounds of an in-flight teardown', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '200'
 
-    const exitStub = sinon.stub(process, 'exit')
-    const logStub = sinon.stub(console, 'log')
+    const exitStub = stubExit()
+    const logStub = stubLog()
 
     GracefulExit.addStep(() => new Promise(() => {}), 'hang')
 
@@ -297,23 +303,22 @@ describe('lib/util/graceful-exit', () => {
 
     await new Promise((r) => setTimeout(r, 400))
 
-    logStub.restore()
+    logStub.mockRestore()
 
     // a step timer that outlives the reset settles the abandoned flush, and its `finally` exits the
     // process for real once a spec restores the stub, taking the rest of the suite with it
-    expect(exitStub, 'a cancelled teardown still exited the process').not.to.have.been.called
+    expect(exitStub, 'a cancelled teardown still exited the process').not.toHaveBeenCalled()
 
-    exitStub.restore()
-  })
+    exitStub.mockRestore()
+  }, 5000)
 
-  it('does not leak an unhandled rejection when an abandoned step rejects later', async function () {
-    this.timeout(5000)
-
+  it('does not leak an unhandled rejection when an abandoned step rejects later', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '100'
 
-    const exitStub = sinon.stub(process, 'exit')
-    const logStub = sinon.stub(console, 'log')
+    const exitStub = stubExit()
+    const logStub = stubLog()
     const unhandled: unknown[] = []
+    let exitCalls: unknown[][] = []
     const onUnhandled = (reason: unknown) => unhandled.push(reason)
 
     // lib/unhandled_exceptions exits the process with code 1 on an unhandled rejection, which would
@@ -334,28 +339,27 @@ describe('lib/util/graceful-exit', () => {
       await new Promise((r) => setTimeout(r, 300))
     } finally {
       process.removeListener('unhandledRejection', onUnhandled)
-      logStub.restore()
-      exitStub.restore()
+      logStub.mockRestore()
+      exitCalls = exitStub.mock.calls.slice()
+      exitStub.mockRestore()
     }
 
-    expect(unhandled, 'an abandoned step leaked an unhandled rejection').to.be.empty
-    expect(exitStub).to.have.been.calledWith(0)
-    expect(exitStub).not.to.have.been.calledWith(1)
-  })
+    expect(unhandled, 'an abandoned step leaked an unhandled rejection').toEqual([])
+    expect(exitCalls).toContainEqual([0])
+    expect(exitCalls).not.toContainEqual([1])
+  }, 5000)
 
-  it('honors a step-specific timeout shorter than the shared budget', async function () {
-    this.timeout(5000)
-
+  it('honors a step-specific timeout shorter than the shared budget', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '2000'
 
     const startedAt = Date.now()
     let exitedAfter: number | undefined
-    const exitStub = sinon.stub(process, 'exit').callsFake(() => {
+    const exitStub = vi.spyOn(process, 'exit').mockImplementation(() => {
       exitedAfter = exitedAfter ?? Date.now() - startedAt
 
       return undefined as never
     })
-    const logStub = sinon.stub(console, 'log')
+    const logStub = stubLog()
 
     GracefulExit.addStep(() => new Promise(() => {}), 'best-effort', 100)
 
@@ -363,12 +367,15 @@ describe('lib/util/graceful-exit', () => {
 
     await new Promise((r) => setTimeout(r, 500))
 
-    logStub.restore()
+    const logged = logStub.mock.calls.flat().join('\n')
 
-    expect(exitedAfter).to.be.within(100, 400)
-    expect(exitStub).to.have.been.calledWith(0)
-    expect(logStub.args.flat().join('\n')).to.contain('The "best-effort" teardown step did not finish within 100ms')
+    logStub.mockRestore()
 
-    exitStub.restore()
-  })
+    expect(exitedAfter).toBeGreaterThanOrEqual(100)
+    expect(exitedAfter).toBeLessThanOrEqual(400)
+    expect(exitStub).toHaveBeenCalledWith(0)
+    expect(logged).toContain('The "best-effort" teardown step did not finish within 100ms')
+
+    exitStub.mockRestore()
+  }, 5000)
 })
