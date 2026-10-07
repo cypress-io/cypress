@@ -631,6 +631,10 @@ export class ProjectBase extends EE {
         cb()
       },
 
+      onDriverActivity: () => {
+        this.emit('driver:activity')
+      },
+
       onMocha: async (event, runnable) => {
         // bail if we dont have a
         // reporter instance
