@@ -1038,3 +1038,51 @@ describe('ProjectDataSource', () => {
     })
   })
 })
+
+describe('getResolvedConfigFields', () => {
+  let ctx: DataContext
+
+  beforeEach(() => {
+    ctx = createTestDataContext('open')
+    jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({
+      resolved: {
+        baseUrl: { value: 'http://localhost:3000', from: 'config' },
+        env: {
+          apiKey: { value: 'env-secret', from: 'config' },
+          fromProcess: { value: 'process-secret', from: 'env' },
+        },
+        expose: {
+          publicFlag: { value: 'exposed', from: 'config' },
+        },
+      },
+    } as any)
+  })
+
+  it('returns env keys without their values', async () => {
+    const fields = await ctx.project.getResolvedConfigFields()
+
+    expect(fields.find((f) => f.field === 'env')).toEqual({
+      field: 'env',
+      from: 'env',
+      value: { apiKey: '*****', fromProcess: '*****' },
+    })
+
+    expect(JSON.stringify(fields)).not.toContain('secret')
+  })
+
+  it('returns expose and other config values unchanged', async () => {
+    const fields = await ctx.project.getResolvedConfigFields()
+
+    expect(fields.find((f) => f.field === 'expose')).toEqual({
+      field: 'expose',
+      from: 'expose',
+      value: { publicFlag: 'exposed' },
+    })
+
+    expect(fields.find((f) => f.field === 'baseUrl')).toEqual({
+      field: 'baseUrl',
+      from: 'config',
+      value: 'http://localhost:3000',
+    })
+  })
+})

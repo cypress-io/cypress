@@ -1,3 +1,10 @@
+# [@[secure]/webpack-dev-server-v6.1.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.0.0...@[secure]/webpack-dev-server-v6.1.0) (2026-10-06)
+
+
+### Features
+
+* add cy.getByRole() query ([#34937](https://github.com/[secure]-io/[secure]/issues/34937)) ([9f0e4a9](https://github.com/[secure]-io/[secure]/commit/9f0e4a962eccde5c34faa09bf04576c769788303))
+
 # [@[secure]/webpack-dev-server-v6.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v5.6.3...@[secure]/webpack-dev-server-v6.0.0) (2026-08-26)
 
 
