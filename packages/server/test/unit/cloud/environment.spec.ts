@@ -1,18 +1,23 @@
-import '../../spec_helper'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import getEnvInformationForProjectRoot from '../../../lib/cloud/environment'
 import path from 'path'
 import base64url from 'base64url'
 import { exec } from 'child_process'
-import originalResolvePackagePath from 'resolve-package-path'
-import proxyquire from 'proxyquire'
+
+const resolvePackagePath = vi.hoisted(() => vi.fn())
+
+vi.mock('resolve-package-path', () => ({ default: resolvePackagePath }))
+
+const originalResolvePackagePath = (await vi.importActual<typeof import('resolve-package-path')>('resolve-package-path')).default
 
 describe('lib/cloud/environment', () => {
   beforeEach(() => {
-    delete process.env.CYPRESS_API_URL
-    process.env.CYPRESS_ENV_DEPENDENCIES = base64url.encode(JSON.stringify({
+    resolvePackagePath.mockImplementation(originalResolvePackagePath)
+    vi.stubEnv('CYPRESS_API_URL', undefined)
+    vi.stubEnv('CYPRESS_ENV_DEPENDENCIES', base64url.encode(JSON.stringify({
       maybeCheckProcessTreeIfPresent: ['foo'],
       neverCheckProcessTreeIfPresent: ['bar'],
-    }))
+    })))
   })
 
   let proc
@@ -50,14 +55,16 @@ describe('lib/cloud/environment', () => {
     if (proc) {
       proc.kill()
     }
+
+    vi.unstubAllEnvs()
   })
 
   it('should be able to get the environment for: present CYPRESS_API_URL and all tracked dependencies', async () => {
-    process.env.CYPRESS_API_URL = 'https://example.com'
+    vi.stubEnv('CYPRESS_API_URL', 'https://example.com')
 
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
-    expect(information).to.deep.eq({
+    expect(information).toEqual({
       envUrl: 'https://example.com',
       dependencies: { bar: { version: '2.0.0' }, foo: { version: '1.0.0' } },
       errors: [],
@@ -65,34 +72,38 @@ describe('lib/cloud/environment', () => {
   })
 
   it('should be able to get the environment for: present CYPRESS_API_URL and a thrown error when tracking dependencies', async () => {
-    process.env.CYPRESS_API_URL = 'https://example.com'
+    vi.stubEnv('CYPRESS_API_URL', 'https://example.com')
 
-    const resolvePackagePath = sinon.stub()
+    resolvePackagePath.mockImplementation((name: string, root: string) => {
+      if (name === 'foo') {
+        throw new Error('some error')
+      }
 
-    resolvePackagePath.withArgs('foo', sinon.match.any).throws(new Error('some error'))
-    resolvePackagePath.withArgs('bar', sinon.match.any).callsFake(originalResolvePackagePath)
-    const { default: getEnvInfo } = proxyquire('../../../lib/cloud/environment', {
-      'resolve-package-path': resolvePackagePath,
+      if (name === 'bar') {
+        return originalResolvePackagePath(name, root)
+      }
+
+      return undefined
     })
 
-    const { errors, ...information } = await getEnvInfo(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
+    const { errors, ...information } = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
-    expect(information).to.deep.eq({
+    expect(information).toEqual({
       envUrl: 'https://example.com',
       dependencies: { bar: { version: '2.0.0' } },
     })
 
-    expect(errors).to.have.length(1)
-    expect(errors[0].dependency).to.equal('foo')
-    expect(errors[0].message).to.equal('some error')
-    expect(errors[0].name).to.equal('Error')
-    expect(errors[0].stack).to.include('Error: some error')
+    expect(errors).toHaveLength(1)
+    expect(errors[0].dependency).toBe('foo')
+    expect(errors[0].message).toBe('some error')
+    expect(errors[0].name).toBe('Error')
+    expect(errors[0].stack).toContain('Error: some error')
   })
 
   it('should be able to get the environment for: absent CYPRESS_API_URL and all tracked dependencies', async () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
-    expect(information).to.deep.eq({
+    expect(information).toEqual({
       envUrl: undefined,
       dependencies: { bar: { version: '2.0.0' }, foo: { version: '1.0.0' } },
       errors: [],
@@ -102,14 +113,14 @@ describe('lib/cloud/environment', () => {
   it('should be able to get the environment for: absent CYPRESS_API_URL and partial dependencies not matching criteria', async () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-not-matching'), process.pid.toString())
 
-    expect(information).to.deep.eq({
+    expect(information).toEqual({
       envUrl: undefined,
       dependencies: { bar: { version: '2.0.0' } },
       errors: [],
     })
   })
 
-  context('absent CYPRESS_API_URL and partial dependencies matching criteria', () => {
+  describe('absent CYPRESS_API_URL and partial dependencies matching criteria', () => {
     it('should be able to get the environment for CYPRESS_API_URL defined in grandparent process', async () => {
       const pid = await spawnProcessTree({
         grandParentUrl: 'https://grandparent.com',
@@ -117,7 +128,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).to.deep.eq({
+      expect(information).toEqual({
         envUrl: process.platform !== 'win32' ? 'https://grandparent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -131,7 +142,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).to.deep.eq({
+      expect(information).toEqual({
         envUrl: process.platform !== 'win32' ? 'https://parent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -145,7 +156,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).to.deep.eq({
+      expect(information).toEqual({
         envUrl: process.platform !== 'win32' ? 'https://url.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -160,7 +171,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).to.deep.eq({
+      expect(information).toEqual({
         envUrl: process.platform !== 'win32' ? 'https://parent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -172,7 +183,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).to.deep.eq({
+      expect(information).toEqual({
         envUrl: undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
