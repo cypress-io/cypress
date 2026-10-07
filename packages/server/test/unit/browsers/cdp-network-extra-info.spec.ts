@@ -1,12 +1,11 @@
-const { expect, sinon } = require('../../spec_helper')
-
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Protocol } from 'devtools-protocol'
 import { CDPNetworkExtraInfo } from '../../../lib/browsers/cdp-protocol/cdp-network-extra-info'
 
 function createClient () {
   return {
-    on: sinon.stub(),
-    off: sinon.stub(),
+    on: vi.fn(),
+    off: vi.fn(),
   }
 }
 
@@ -16,7 +15,7 @@ function createLayer () {
 
   layer.start()
 
-  const handler = (eventName: string) => client.on.withArgs(eventName).firstCall.args[1]
+  const handler = (eventName: string) => client.on.mock.calls.find((call) => call[0] === eventName)![1]
 
   return {
     client,
@@ -55,6 +54,10 @@ function track (promise: Promise<Protocol.Network.ResponseReceivedExtraInfoEvent
 }
 
 describe('CDPNetworkExtraInfo', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   describe('start/stop', () => {
     it('registers the Network handlers on start and removes them on stop', () => {
       const client = createClient()
@@ -62,7 +65,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       layer.start()
 
-      expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
+      expect(client.on.mock.calls.map((call) => call[0])).toEqual([
         'Network.requestWillBeSentExtraInfo',
         'Network.responseReceived',
         'Network.responseReceivedExtraInfo',
@@ -72,7 +75,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       layer.stop()
 
-      expect(client.off.getCalls().map((call) => call.args[0])).to.deep.equal([
+      expect(client.off.mock.calls.map((call) => call[0])).toEqual([
         'Network.requestWillBeSentExtraInfo',
         'Network.responseReceived',
         'Network.responseReceivedExtraInfo',
@@ -82,7 +85,7 @@ describe('CDPNetworkExtraInfo', () => {
     })
 
     it('releases parked consumers and empties the map on stop', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo } = createLayer()
 
       requestExtraInfo({ requestId: 'request-1' })
@@ -91,20 +94,20 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.false
+      expect(held.resolved).toBe(false)
 
       layer.stop()
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
-      expect(entries().size).to.equal(0)
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
+      expect(entries().size).toBe(0)
     })
   })
 
   describe('responseExtraInfo', () => {
     it('skips the hold entirely when no extraInfo was promised', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, responseReceived } = createLayer()
 
       // no request twin and no responseReceived: the transaction never hit
@@ -114,12 +117,12 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('resolves from an entry the extraInfo event created before anything else asked', async () => {
@@ -134,19 +137,19 @@ describe('CDPNetworkExtraInfo', () => {
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
+      expect(event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
 
       // the consumed entry waits for its responseReceived (which fires only
       // after the pause is released) before it is dropped
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('holds after the request twin promises an extraInfo and resolves when it lands', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, responseReceived, responseExtraInfo } = createLayer()
 
       // the request twin is emitted at wire-send time — the only signal that
@@ -157,7 +160,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.false
+      expect(held.resolved).toBe(false)
 
       responseExtraInfo({
         requestId: 'request-1',
@@ -168,13 +171,13 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
-      expect(entries().size).to.equal(1)
+      expect(held.resolved).toBe(true)
+      expect(held.event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(entries().size).toBe(1)
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('does not open an entry for a request that never paused', async () => {
@@ -184,15 +187,15 @@ describe('CDPNetworkExtraInfo', () => {
       // ever consume an entry for them, so none should be opened
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
 
       loadingFinished({ requestId: 'request-1' })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('settles the entry when responseReceived reports hasExtraInfo false on an open entry', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, responseReceived } = createLayer()
 
       // hasExtraInfo is the documented authority: it settles an entry the
@@ -204,9 +207,9 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
-      expect(entries().size).to.equal(0)
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
+      expect(entries().size).toBe(0)
     })
 
     it('settles an entry whose extraInfo arrived before any consumer asked', async () => {
@@ -222,11 +225,11 @@ describe('CDPNetworkExtraInfo', () => {
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
+      expect(event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
 
       loadingFinished({ requestId: 'request-1' })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
@@ -238,15 +241,15 @@ describe('CDPNetworkExtraInfo', () => {
       // responseReceived ever follow
       requestExtraInfo({ requestId: 'request-1' })
 
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       loadingFailed({ requestId: 'request-1', errorText: 'net::ERR_ABORTED' })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('releases a consumer parked on a request that dies on the wire', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, loadingFailed } = createLayer()
 
       requestExtraInfo({ requestId: 'request-1' })
@@ -255,14 +258,14 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.false
+      expect(held.resolved).toBe(false)
 
       loadingFailed({ requestId: 'request-1', errorText: 'net::ERR_CONNECTION_RESET' })
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
-      expect(entries().size).to.equal(0)
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
+      expect(entries().size).toBe(0)
     })
 
     it('drops a consumed entry when loadingFinished arrives instead of responseReceived', async () => {
@@ -278,15 +281,15 @@ describe('CDPNetworkExtraInfo', () => {
 
       await layer.responseExtraInfo('request-1')
 
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       loadingFinished({ requestId: 'request-1' })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('cannot clobber a payload the consumer is already awaiting', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, responseExtraInfo, loadingFailed } = createLayer()
 
       requestExtraInfo({ requestId: 'request-1' })
@@ -309,8 +312,8 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
-      expect(entries().size).to.equal(0)
+      expect(held.event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(entries().size).toBe(0)
     })
 
     it('ignores terminal events for requests it never tracked', () => {
@@ -319,7 +322,7 @@ describe('CDPNetworkExtraInfo', () => {
       loadingFinished({ requestId: 'never-seen' })
       loadingFailed({ requestId: 'never-seen-either', errorText: 'net::ERR_FAILED' })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
@@ -334,31 +337,31 @@ describe('CDPNetworkExtraInfo', () => {
         },
       })
 
-      expect(entryFor('request-1')).to.include({ settled: true, consumed: false, responseReceived: false })
+      expect(entryFor('request-1')).toMatchObject({ settled: true, consumed: false, responseReceived: false })
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
-      expect(entryFor('request-1')).to.include({ consumed: true, responseReceived: false })
+      expect(event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(entryFor('request-1')).toMatchObject({ consumed: true, responseReceived: false })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('twin then consume then extraInfo: the consume holds and the event settles it', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, entryFor, responseReceived, responseExtraInfo, requestExtraInfo } = createLayer()
 
       requestExtraInfo({ requestId: 'request-1' })
 
-      expect(entryFor('request-1')).to.include({ expectsExtraInfo: true, settled: false, consumed: false, responseReceived: false })
+      expect(entryFor('request-1')).toMatchObject({ expectsExtraInfo: true, settled: false, consumed: false, responseReceived: false })
 
       const held = track(layer.responseExtraInfo('request-1'))
 
       await tick()
 
-      expect(held.resolved).to.be.false
+      expect(held.resolved).toBe(false)
 
       responseExtraInfo({
         requestId: 'request-1',
@@ -370,16 +373,16 @@ describe('CDPNetworkExtraInfo', () => {
       await tick()
 
       // the event only resolves the deferred — consumption belongs to the pause
-      expect(held.event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
-      expect(entryFor('request-1')).to.include({ settled: true, consumed: true, responseReceived: false })
+      expect(held.event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(entryFor('request-1')).toMatchObject({ settled: true, consumed: true, responseReceived: false })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('consume first with no signals: returns immediately and responseReceived sweeps', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, entryFor, responseReceived } = createLayer()
 
       const held = track(layer.responseExtraInfo('request-1'))
@@ -387,19 +390,19 @@ describe('CDPNetworkExtraInfo', () => {
       await tick()
 
       // no hold at all — nothing promised an extraInfo
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
-      expect(entryFor('request-1')).to.include({ consumed: true, responseReceived: false })
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
+      expect(entryFor('request-1')).toMatchObject({ consumed: true, responseReceived: false })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
   describe('timeout backstop', () => {
     it('resolves without the event when a twin-promised extraInfo never arrives', async () => {
-      const clock = sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, responseReceived } = createLayer()
 
       // e.g. the connection died mid-response — the twin promised an
@@ -408,25 +411,25 @@ describe('CDPNetworkExtraInfo', () => {
 
       const held = track(layer.responseExtraInfo('request-1'))
 
-      await clock.tickAsync(99)
+      await vi.advanceTimersByTimeAsync(99)
 
-      expect(held.resolved).to.be.false
+      expect(held.resolved).toBe(false)
 
-      await clock.tickAsync(1)
+      await vi.advanceTimersByTimeAsync(1)
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
 
       // the consumed entry waits for its responseReceived sweep
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('deletes the entry when the wait times out so nothing dangles in the map', async () => {
-      const clock = sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, responseReceived } = createLayer()
 
       // both signals promised an extraInfo that never arrives — the timeout
@@ -437,11 +440,11 @@ describe('CDPNetworkExtraInfo', () => {
 
       const held = track(layer.responseExtraInfo('request-1'))
 
-      await clock.tickAsync(100)
+      await vi.advanceTimersByTimeAsync(100)
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
-      expect(entries().size).to.equal(0)
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
+      expect(entries().size).toBe(0)
     })
 
     it('does not delete an entry recreated after this consumer was released', async () => {
@@ -466,19 +469,19 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
 
       // the recreated entry must have survived the released consumer's cleanup
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).to.deep.equal({ 'set-cookie': 'late=1' })
+      expect(event?.headers).toEqual({ 'set-cookie': 'late=1' })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
 
     it('drops the entry instead of recreating one when responseReceived lands after the consume', async () => {
@@ -493,17 +496,17 @@ describe('CDPNetworkExtraInfo', () => {
 
       await layer.responseExtraInfo('request-1')
 
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       // the post-release responseReceived is the flow's last signal — it must
       // complete the entry's lifecycle, not strand a fresh entry in the map
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
 
       await tick()
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
@@ -523,11 +526,11 @@ describe('CDPNetworkExtraInfo', () => {
 
       const redirectEvent = await layer.responseExtraInfo('request-1')
 
-      expect(redirectEvent?.headers).to.deep.equal({ 'set-cookie': 'redirect=1' })
+      expect(redirectEvent?.headers).toEqual({ 'set-cookie': 'redirect=1' })
 
       // the redirect response never gets its own responseReceived — its
       // consumed entry waits to be replaced by the next response's events
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       requestExtraInfo({ requestId: 'request-1' })
       responseExtraInfo({
@@ -537,22 +540,22 @@ describe('CDPNetworkExtraInfo', () => {
         },
       })
 
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       const finalEvent = await layer.responseExtraInfo('request-1')
 
-      expect(finalEvent?.headers).to.deep.equal({ 'set-cookie': 'final=1' })
+      expect(finalEvent?.headers).toEqual({ 'set-cookie': 'final=1' })
 
       // responseReceived fires once, for the final response of the chain
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
   describe('late extraInfo across redirect hops', () => {
     it('does not merge a previous hop\'s cookies when its extraInfo arrived after the timeout', async () => {
-      const clock = sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, responseExtraInfo, responseReceived } = createLayer()
 
       // hop 1: the twin promises an extraInfo that misses the backstop window
@@ -560,10 +563,10 @@ describe('CDPNetworkExtraInfo', () => {
 
       const firstHeld = track(layer.responseExtraInfo('request-1'))
 
-      await clock.tickAsync(100)
+      await vi.advanceTimersByTimeAsync(100)
 
-      expect(firstHeld.resolved).to.be.true
-      expect(firstHeld.event).to.be.undefined
+      expect(firstHeld.resolved).toBe(true)
+      expect(firstHeld.event).toBeUndefined()
 
       // …and lands afterwards, settling an entry nothing consumed
       responseExtraInfo({
@@ -585,17 +588,17 @@ describe('CDPNetworkExtraInfo', () => {
 
       const finalEvent = await layer.responseExtraInfo('request-1')
 
-      expect(finalEvent?.headers).to.deep.equal({ 'set-cookie': 'final=1' })
+      expect(finalEvent?.headers).toEqual({ 'set-cookie': 'final=1' })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
   describe('session scoping', () => {
     it('does not surface an event from a different session with a colliding request id', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, responseReceived, responseExtraInfo } = createLayer()
 
       // a service-worker session reuses the page flow's request id
@@ -612,24 +615,24 @@ describe('CDPNetworkExtraInfo', () => {
 
       // the other session's event neither satisfies nor holds the root
       // session's consume — no signals exist under the root key
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
 
       const event = await layer.responseExtraInfo('request-1', 'service-worker-session')
 
-      expect(event?.headers).to.deep.equal({ 'set-cookie': 'evil=1' })
+      expect(event?.headers).toEqual({ 'set-cookie': 'evil=1' })
 
       // each session's responseReceived sweeps its own consumed entry
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })
       responseReceived({ requestId: 'request-1', hasExtraInfo: true }, 'service-worker-session')
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
   describe('clear', () => {
     it('releases a parked consumer and drops its entry', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo } = createLayer()
 
       requestExtraInfo({ requestId: 'request-1' })
@@ -638,14 +641,14 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.false
+      expect(held.resolved).toBe(false)
 
       layer.clear('request-1')
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
-      expect(entries().size).to.equal(0)
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
+      expect(entries().size).toBe(0)
     })
 
     it('drops a settled entry the flow never consumed', async () => {
@@ -659,17 +662,17 @@ describe('CDPNetworkExtraInfo', () => {
         },
       })
 
-      expect(entries().size).to.equal(1)
+      expect(entries().size).toBe(1)
 
       layer.clear('request-1')
 
-      expect(entries().size).to.equal(0)
+      expect(entries().size).toBe(0)
     })
   })
 
   describe('flush', () => {
     it('releases every parked consumer and empties the map', async () => {
-      sinon.useFakeTimers()
+      vi.useFakeTimers()
       const { layer, entries, requestExtraInfo, responseExtraInfo } = createLayer()
 
       requestExtraInfo({ requestId: 'request-1' })
@@ -687,17 +690,17 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(firstHeld.resolved).to.be.false
-      expect(secondHeld.resolved).to.be.false
+      expect(firstHeld.resolved).toBe(false)
+      expect(secondHeld.resolved).toBe(false)
 
       layer.flush()
       await tick()
 
-      expect(firstHeld.resolved).to.be.true
-      expect(firstHeld.event).to.be.undefined
-      expect(secondHeld.resolved).to.be.true
-      expect(secondHeld.event).to.be.undefined
-      expect(entries().size).to.equal(0)
+      expect(firstHeld.resolved).toBe(true)
+      expect(firstHeld.event).toBeUndefined()
+      expect(secondHeld.resolved).toBe(true)
+      expect(secondHeld.event).toBeUndefined()
+      expect(entries().size).toBe(0)
 
       // the settled entry is gone too — a later consumer has no signals and
       // resolves immediately without it
@@ -705,8 +708,8 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
+      expect(held.resolved).toBe(true)
+      expect(held.event).toBeUndefined()
     })
   })
 })
