@@ -1,4 +1,4 @@
-import { proxyquire, sinon } from '../../../spec_helper'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkdtemp, remove } from 'fs-extra'
 import { Readable } from 'stream'
 import os from 'os'
@@ -6,19 +6,24 @@ import path from 'path'
 import { BundleError } from '../../../../lib/cloud/bundles/bundle_error'
 import { SystemError } from '../../../../lib/cloud/network/system_error'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
+import { streamDownloadVerifyExtract } from '../../../../lib/cloud/bundles/stream_download_verify_extract'
 
-const proxyquireWithFastDelay = (fetchStub: sinon.SinonStub) => {
-  // Collapse the retry delay so the budget burns in milliseconds.
-  const { asyncRetry } = require('../../../../lib/util/async_retry')
+const { fetchStub } = vi.hoisted(() => {
+  return { fetchStub: vi.fn() }
+})
 
-  return proxyquire('../lib/cloud/bundles/stream_download_verify_extract', {
-    'cross-fetch': fetchStub,
-    '../../util/async_retry': {
-      asyncRetry,
-      linearDelay: () => () => 1,
-    },
-  })
-}
+vi.mock('cross-fetch', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('cross-fetch')>()
+
+  return { ...actual, default: fetchStub }
+})
+
+// Collapse the retry delay so the budget burns in milliseconds.
+vi.mock('../../../../lib/util/async_retry', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../lib/util/async_retry')>()
+
+  return { ...actual, linearDelay: () => () => 1 }
+})
 
 const callIt = async (fn: any, kind: 'cy-prompt' | 'studio', staging: string) => {
   let caught: any
@@ -42,6 +47,7 @@ describe('streamDownloadVerifyExtract', () => {
   let tmp: string
 
   beforeEach(async () => {
+    fetchStub.mockReset()
     tmp = await mkdtemp(path.join(os.tmpdir(), 'cy-stream-test-'))
   })
 
@@ -52,26 +58,26 @@ describe('streamDownloadVerifyExtract', () => {
   describe('error tagging + retry', () => {
     it('wraps fetch timeout as BundleError(stage=network, cause: SystemError ETIMEDOUT) and burns full retry budget', async () => {
       const abortError = Object.assign(new Error('The user aborted a request.'), { name: 'AbortError' })
-      const fetchStub = sinon.stub().rejects(abortError)
 
-      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      fetchStub.mockRejectedValue(abortError)
+
       const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
       // Full retry budget consumed via cause-based shouldRetry
-      expect(fetchStub.callCount).to.equal(3)
+      expect(fetchStub).toHaveBeenCalledTimes(3)
 
       const errs = collectErrors(caught)
 
-      expect(errs.length).to.equal(3)
+      expect(errs.length).toBe(3)
       for (const e of errs) {
-        expect(BundleError.isBundleError(e)).to.equal(true)
-        expect((e as BundleError).stage).to.equal('network')
-        expect((e as BundleError).kind).to.equal('cy-prompt')
+        expect(BundleError.isBundleError(e)).toBe(true)
+        expect((e as BundleError).stage).toBe('network')
+        expect((e as BundleError).kind).toBe('cy-prompt')
 
         const cause = (e as Error & { cause?: unknown }).cause
 
-        expect(SystemError.isSystemError(cause as any), `${e?.message} cause should be SystemError`).to.equal(true)
-        expect((cause as SystemError).code).to.equal('ETIMEDOUT')
+        expect(SystemError.isSystemError(cause as any), `${e?.message} cause should be SystemError`).toBe(true)
+        expect((cause as SystemError).code).toBe('ETIMEDOUT')
       }
     })
 
@@ -83,22 +89,22 @@ describe('streamDownloadVerifyExtract', () => {
         statusText: 'Not Found',
         text: async () => 'not found',
       }
-      const fetchStub = sinon.stub().resolves(response)
 
-      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      fetchStub.mockResolvedValue(response)
+
       const caught = await callIt(streamDownloadVerifyExtract, 'studio', path.join(tmp, 'staging'))
 
       // 4xx is not retryable per isRetryableError, so only one attempt
-      expect(fetchStub.callCount).to.equal(1)
+      expect(fetchStub).toHaveBeenCalledTimes(1)
 
-      expect(BundleError.isBundleError(caught)).to.equal(true)
-      expect((caught as BundleError).stage).to.equal('network')
-      expect((caught as BundleError).kind).to.equal('studio')
+      expect(BundleError.isBundleError(caught)).toBe(true)
+      expect((caught as BundleError).stage).toBe('network')
+      expect((caught as BundleError).kind).toBe('studio')
 
       const cause = (caught as Error & { cause?: unknown }).cause
 
-      expect(HttpError.isHttpError(cause as any)).to.equal(true)
-      expect((cause as HttpError).status).to.equal(404)
+      expect(HttpError.isHttpError(cause as any)).toBe(true)
+      expect((cause as HttpError).status).toBe(404)
     })
 
     it('retries on HTTP 500 (idempotent GET) and burns full retry budget', async () => {
@@ -109,13 +115,12 @@ describe('streamDownloadVerifyExtract', () => {
         statusText: 'Internal Server Error',
         text: async () => 'boom',
       }
-      const fetchStub = sinon.stub().resolves(response)
 
-      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      fetchStub.mockResolvedValue(response)
 
       await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
-      expect(fetchStub.callCount).to.equal(3)
+      expect(fetchStub).toHaveBeenCalledTimes(3)
     })
 
     it('wraps a retryable HTTP 503 as BundleError(stage=network, cause: HttpError) and burns full retry budget', async () => {
@@ -126,13 +131,12 @@ describe('streamDownloadVerifyExtract', () => {
         statusText: 'Service Unavailable',
         text: async () => 'busy',
       }
-      const fetchStub = sinon.stub().resolves(response)
 
-      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      fetchStub.mockResolvedValue(response)
 
       await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
-      expect(fetchStub.callCount).to.equal(3)
+      expect(fetchStub).toHaveBeenCalledTimes(3)
     })
 
     it('wraps a filesystem-class syscall (ENOSPC) from the pipeline as BundleError(stage=extract) and does NOT retry', async () => {
@@ -161,23 +165,22 @@ describe('streamDownloadVerifyExtract', () => {
         body: makeBody(),
       }
 
-      const fetchStub = sinon.stub().callsFake(async () => ({ ...response, body: makeBody() }))
+      fetchStub.mockImplementation(async () => ({ ...response, body: makeBody() }))
 
-      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
       const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
       // Filesystem syscall is non-transient — must not retry
-      expect(fetchStub.callCount).to.equal(1)
+      expect(fetchStub).toHaveBeenCalledTimes(1)
 
-      expect(BundleError.isBundleError(caught)).to.equal(true)
-      expect((caught as BundleError).stage).to.equal('extract')
-      expect((caught as BundleError).kind).to.equal('cy-prompt')
+      expect(BundleError.isBundleError(caught)).toBe(true)
+      expect((caught as BundleError).stage).toBe('extract')
+      expect((caught as BundleError).kind).toBe('cy-prompt')
 
       // Cause is the raw error, NOT a SystemError (which would flag retryable)
       const cause = (caught as Error & { cause?: unknown }).cause
 
-      expect(SystemError.isSystemError(cause as any)).to.equal(false)
-      expect((cause as any).code).to.equal('ENOSPC')
+      expect(SystemError.isSystemError(cause as any)).toBe(false)
+      expect((cause as any).code).toBe('ENOSPC')
     })
 
     it('still treats network-class syscalls (ECONNRESET) mid-pipeline as stage=network and retries', async () => {
@@ -206,24 +209,23 @@ describe('streamDownloadVerifyExtract', () => {
         body: makeBody(),
       }
 
-      const fetchStub = sinon.stub().callsFake(async () => ({ ...response, body: makeBody() }))
+      fetchStub.mockImplementation(async () => ({ ...response, body: makeBody() }))
 
-      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
       const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
       // Network-class syscall → retryable → full retry budget
-      expect(fetchStub.callCount).to.equal(3)
+      expect(fetchStub).toHaveBeenCalledTimes(3)
 
       const errs = collectErrors(caught)
 
       for (const e of errs) {
-        expect(BundleError.isBundleError(e)).to.equal(true)
-        expect((e as BundleError).stage).to.equal('network')
+        expect(BundleError.isBundleError(e)).toBe(true)
+        expect((e as BundleError).stage).toBe('network')
 
         const cause = (e as Error & { cause?: unknown }).cause
 
-        expect(SystemError.isSystemError(cause as any)).to.equal(true)
-        expect((cause as SystemError).code).to.equal('ECONNRESET')
+        expect(SystemError.isSystemError(cause as any)).toBe(true)
+        expect((cause as SystemError).code).toBe('ECONNRESET')
       }
     })
 
@@ -245,27 +247,26 @@ describe('streamDownloadVerifyExtract', () => {
         body: makeBody(),
       }
 
-      const fetchStub = sinon.stub().callsFake(async () => {
+      fetchStub.mockImplementation(async () => {
         // fresh body per attempt in case asyncRetry retries
         return { ...response, body: makeBody() }
       })
 
-      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
       const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
       // Tar parse error is not retryable (no errno/code, not Http/SystemError)
-      expect(fetchStub.callCount).to.equal(1)
+      expect(fetchStub).toHaveBeenCalledTimes(1)
 
-      expect(BundleError.isBundleError(caught)).to.equal(true)
-      expect((caught as BundleError).stage).to.equal('extract')
-      expect((caught as BundleError).kind).to.equal('cy-prompt')
+      expect(BundleError.isBundleError(caught)).toBe(true)
+      expect((caught as BundleError).stage).toBe('extract')
+      expect((caught as BundleError).kind).toBe('cy-prompt')
 
       // The original (tar) error is preserved as cause
       const cause = (caught as Error & { cause?: unknown }).cause
 
-      expect(cause).to.be.instanceOf(Error)
-      expect(SystemError.isSystemError(cause as any)).to.equal(false)
-      expect(HttpError.isHttpError(cause as any)).to.equal(false)
+      expect(cause).toBeInstanceOf(Error)
+      expect(SystemError.isSystemError(cause as any)).toBe(false)
+      expect(HttpError.isHttpError(cause as any)).toBe(false)
     })
   })
 })
