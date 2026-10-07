@@ -1,6 +1,12 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, beforeAll, afterAll } from 'vitest'
+import fs from 'fs'
 import net from 'net'
+import os from 'os'
+import path from 'path'
+import tls from 'tls'
+import { randomUUID } from 'crypto'
 import type { AddressInfo } from 'net'
+import { generateMtlsCertificates } from '@packages/network/test/helpers/mtls-certs'
 import { connectUpstream } from '../../../lib/mtls/upstream-connection'
 
 /**
@@ -9,7 +15,7 @@ import { connectUpstream } from '../../../lib/mtls/upstream-connection'
  */
 type ProxyBehavior = (socket: net.Socket, request: string) => void
 
-const servers: net.Server[] = []
+const servers: (net.Server | tls.Server)[] = []
 
 function startProxy (behave: ProxyBehavior): Promise<number> {
   const server = net.createServer((socket) => {
@@ -83,4 +89,69 @@ describe('connectUpstream through an upstream proxy', () => {
 
     await expect(dialThrough(port)).rejects.toThrow(/closed the connection without answering CONNECT/)
   })
+})
+
+/**
+ * Every case above kills the tunnel before TLS starts, and the system test runs without a
+ * proxy — so without this nothing proves that an mTLS handshake survives a CONNECT at all,
+ * which is the configuration most users with a client certificate are actually in.
+ */
+describe('connectUpstream completes mutual TLS through a CONNECT proxy', () => {
+  let dir: string
+
+  const read = (f: string) => fs.readFileSync(path.join(dir, f))
+
+  beforeAll(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), `mtls-connect-${randomUUID()}`))
+    generateMtlsCertificates(dir)
+  }, 120000)
+
+  afterAll(() => fs.rmSync(dir, { recursive: true, force: true }))
+
+  it('presents the client certificate to the origin on the far side of the tunnel', async () => {
+    const origin = tls.createServer({
+      key: read('origin.key'),
+      cert: read('origin.crt'),
+      ca: read('client-ca.crt'),
+      requestCert: true,
+      rejectUnauthorized: true,
+      ALPNProtocols: ['http/1.1'],
+    }, (socket) => socket.write(`peer=${socket.getPeerCertificate()?.subject?.CN ?? 'none'}`))
+
+    servers.push(origin)
+    const originPort = await new Promise<number>((resolve) => {
+      origin.listen(0, '127.0.0.1', () => resolve((origin.address() as AddressInfo).port))
+    })
+
+    // a proxy that answers CONNECT and then actually tunnels, rather than hanging up
+    const proxyPort = await startProxy((client, request) => {
+      const port = Number(request.split('\r\n')[0].split(' ')[1].split(':').pop())
+      const tunnel = net.connect(port, '127.0.0.1', () => {
+        client.write('HTTP/1.1 200 Connection Established\r\n\r\n')
+        client.pipe(tunnel).pipe(client)
+      })
+
+      tunnel.on('error', () => client.destroy())
+      client.on('error', () => tunnel.destroy())
+    })
+
+    process.env.HTTP_PROXY = `http://127.0.0.1:${proxyPort}`
+    process.env.HTTPS_PROXY = process.env.HTTP_PROXY
+
+    const connection = await connectUpstream({
+      hostname: 'localhost',
+      port: originPort,
+      alpnProtocols: ['h2', 'http/1.1'],
+      material: { ca: [read('origin-ca.crt')], cert: [read('client.crt')], key: [{ pem: read('client.key') }] },
+    })
+
+    const greeting = await new Promise<string>((resolve) => {
+      connection.socket.once('data', (chunk) => resolve(chunk.toString()))
+    })
+
+    expect(greeting).toEqual('peer=cypress-client')
+    expect(connection.alpnProtocol).toEqual('http/1.1')
+
+    connection.socket.destroy()
+  }, 30000)
 })

@@ -68,7 +68,12 @@ export async function createMtlsBridge (options: {
     secureContextFor: identity.secureContextFor,
   })
 
-  const bound = await bridge.listen()
+  const bound = await bridge.listen().catch(async (err) => {
+    // some listeners may already be bound; nothing else holds this bridge
+    await bridge.close()
+
+    throw err
+  })
 
   debug('bridging %d origin(s): %o', bound.length, bound)
 

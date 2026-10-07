@@ -24,7 +24,14 @@ export async function createForgedIdentity (caFolder: string) {
       let context = contexts.get(servername)
 
       if (!context) {
-        context = mint(servername)
+        // Minting writes to the shared CA folder, so a transient EACCES or file lock would
+        // otherwise be cached as a permanent failure for this servername.
+        context = mint(servername).catch((err) => {
+          contexts.delete(servername)
+
+          throw err
+        })
+
         contexts.set(servername, context)
       }
 

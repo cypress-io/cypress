@@ -29,6 +29,7 @@ const debug = Debug('cypress:server:open_project')
 export class OpenProject extends EventEmitter {
   private projectBase: ProjectBase | null = null
   private _mtlsBridge?: MtlsBridgeLaunchOpts
+  private _mtlsBridgeReady?: Promise<MtlsBridgeLaunchOpts | undefined>
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -105,12 +106,17 @@ export class OpenProject extends EventEmitter {
     // browser rather than relaunching it — so rebinding here would leave every spec after
     // the first steered at a port that no longer exists. One bridge per project keeps the
     // ports the browser was told about valid for as long as that browser runs.
-    if (useBrowserNetworkInterception && cfg.clientCertificates?.length && !this._mtlsBridge) {
-      this._mtlsBridge = await createMtlsBridge({
+    // the in-flight promise is stored, not the resolved value: two overlapping launches
+    // would otherwise both pass the guard and bind a second full set of listeners, and the
+    // loser would be orphaned still bound, with the browser possibly steered at it
+    if (useBrowserNetworkInterception && cfg.clientCertificates?.length && !this._mtlsBridgeReady) {
+      this._mtlsBridgeReady = createMtlsBridge({
         clientCertificates: cfg.clientCertificates,
         caFolder: appData.path('proxy'),
       })
     }
+
+    this._mtlsBridge = await this._mtlsBridgeReady
 
     const options: BrowserLaunchOpts = {
       browser: browser as FoundBrowser & { isHeadless: boolean },
@@ -276,6 +282,7 @@ export class OpenProject extends EventEmitter {
   private async _closeMtlsBridge () {
     await this._mtlsBridge?.close()
     this._mtlsBridge = undefined
+    this._mtlsBridgeReady = undefined
   }
 
   async closeOpenProjectAndBrowsers () {

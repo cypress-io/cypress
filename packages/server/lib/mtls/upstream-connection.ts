@@ -13,10 +13,42 @@ const HEADERS_END = Buffer.from('\r\n\r\n')
  * and the server registers the user's entries at open, so a Node-side dial already resolves
  * them. An upstream proxy does not come for free, so it is established with CONNECT.
  */
+/**
+ * An origin or CONNECT proxy can complete TCP and then go silent. Without a deadline this
+ * promise never settles, and everything that would clean up — the browser's `close` handler,
+ * the `browserGone` check — is registered after the caller's await, so the socket and the
+ * promise leak for the life of the process while the browser retries. Rejecting instead lets
+ * the caller destroy the browser socket, so the browser sees a reset rather than a stall.
+ */
+const UPSTREAM_DEADLINE_MS = 30_000
+
 export function connectUpstream (options: UpstreamConnectOptions): Promise<UpstreamConnection> {
   const { material, hostname, port, alpnProtocols } = options
 
-  return dial(hostname, port).then((socket) => {
+  // held so the deadline can take down whichever socket exists when it fires
+  let pending: net.Socket | undefined
+  let timedOut = false
+
+  const deadline = new Promise<never>((_resolve, reject) => {
+    const timer = setTimeout(() => {
+      timedOut = true
+      pending?.destroy()
+      reject(new Error(`Timed out after ${UPSTREAM_DEADLINE_MS}ms connecting to ${hostname}:${port}`))
+    }, UPSTREAM_DEADLINE_MS)
+
+    // the run should not be held open by a dial that already succeeded
+    timer.unref()
+  })
+
+  const connecting = dial(hostname, port).then((socket) => {
+    if (timedOut) {
+      socket.destroy()
+
+      throw new Error(`Timed out connecting to ${hostname}:${port}`)
+    }
+
+    pending = socket
+
     return new Promise<UpstreamConnection>((resolve, reject) => {
       const secure = tls.connect({
         socket,
@@ -33,9 +65,12 @@ export function connectUpstream (options: UpstreamConnectOptions): Promise<Upstr
         pfx: material.pfx?.map((p) => ({ buf: p.buf, passphrase: p.passphrase })),
       }, () => resolve({ socket: secure, alpnProtocol: secure.alpnProtocol }))
 
+      pending = secure
       secure.once('error', reject)
     })
   })
+
+  return Promise.race([connecting, deadline])
 }
 
 /**
