@@ -1,22 +1,63 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import {
   MEASURE_NAMES,
   TELEMETRY_GROUP_NAMES,
 } from '../../../../../lib/cloud/studio/telemetry/TelemetryManager'
-import { expect } from 'chai'
-import { proxyquire, sinon } from '../../../../spec_helper'
+
+type TelemetryReporterModule = typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter')
+
+const state = vi.hoisted(() => {
+  return {
+    telemetryManager: undefined as any,
+    mockPost: undefined as unknown as Mock,
+  }
+})
+
+vi.mock('../../../../../lib/cloud/get_cloud_metadata', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../../lib/cloud/get_cloud_metadata')>()
+
+  return {
+    ...actual,
+    getCloudMetadata: vi.fn(async () => {
+      return {
+        cloudUrl: 'https://cloud.cypress.io',
+        cloudHeaders: {
+          'x-cypress-version': 'test-version',
+        },
+      }
+    }),
+  }
+})
+
+vi.mock('../../../../../lib/cloud/api/cloud_request', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../../lib/cloud/api/cloud_request')>()
+
+  return {
+    ...actual,
+    CloudRequest: {
+      post: (...args: unknown[]) => state.mockPost(...args),
+    },
+  }
+})
+
+vi.mock('../../../../../lib/cloud/studio/telemetry/TelemetryManager', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryManager')>()
+
+  return {
+    ...actual,
+    get telemetryManager () {
+      return state.telemetryManager
+    },
+  }
+})
 
 describe('TelemetryReporter', () => {
-  // noPreserveCache() mutates the global proxyquire instance; scope it so it
-  // doesn't leak into specs loaded after this one.
-  before(() => proxyquire.noPreserveCache())
-  after(() => proxyquire.preserveCache())
-
-  let TelemetryReporter: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').TelemetryReporter
-  let initializeTelemetryReporter: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').initializeTelemetryReporter
-  let reportTelemetry: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').reportTelemetry
-  let consoleErrorStub: sinon.SinonStub
+  let TelemetryReporter: TelemetryReporterModule['TelemetryReporter']
+  let initializeTelemetryReporter: TelemetryReporterModule['initializeTelemetryReporter']
+  let reportTelemetry: TelemetryReporterModule['reportTelemetry']
   let originalNodeEnv: string | undefined
-  let mockPost: sinon.SinonStub
+  let mockPost: Mock
   let telemetryManager: any
 
   const mockOptions = {
@@ -33,38 +74,26 @@ describe('TelemetryReporter', () => {
     },
   }
 
-  beforeEach(() => {
-    sinon.reset()
+  beforeEach(async () => {
     originalNodeEnv = process.env.NODE_ENV
-    consoleErrorStub = sinon.stub(console, 'error').callsFake(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
 
     telemetryManager = {
-      getMeasures: sinon.stub().returns({
+      getMeasures: vi.fn().mockReturnValue({
         [MEASURE_NAMES.INITIALIZATION_DURATION]: 100,
         [MEASURE_NAMES.CAN_ACCESS_STUDIO_AI_DURATION]: 200,
       }),
-      clearMeasureGroup: sinon.stub().resolves(),
+      clearMeasureGroup: vi.fn().mockResolvedValue(undefined),
     }
 
-    mockPost = sinon.stub().resolves()
-    const TelemetryReporterDefinition = proxyquire('../lib/cloud/studio/telemetry/TelemetryReporter', {
-      '../../get_cloud_metadata': {
-        getCloudMetadata: sinon.stub().resolves({
-          cloudUrl: 'https://cloud.cypress.io',
-          cloudHeaders: {
-            'x-cypress-version': 'test-version',
-          },
-        }),
-      },
-      '../../api/cloud_request': {
-        CloudRequest: {
-          post: mockPost,
-        },
-      },
-      './TelemetryManager': {
-        telemetryManager,
-      },
-    }) as typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter')
+    mockPost = vi.fn().mockResolvedValue(undefined)
+
+    state.telemetryManager = telemetryManager
+    state.mockPost = mockPost
+
+    // TelemetryReporter holds its singleton in a static field; re-import for a fresh one per test
+    vi.resetModules()
+    const TelemetryReporterDefinition: TelemetryReporterModule = await import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter')
 
     TelemetryReporter = TelemetryReporterDefinition.TelemetryReporter
     initializeTelemetryReporter = TelemetryReporterDefinition.initializeTelemetryReporter
@@ -81,14 +110,14 @@ describe('TelemetryReporter', () => {
       delete process.env.NODE_ENV
     }
 
-    consoleErrorStub.restore()
+    vi.restoreAllMocks()
   })
 
   describe('getInstance', () => {
     it('throws error if not initialized', async () => {
       expect(() => {
         TelemetryReporter.getInstance()
-      }).to.throw('TelemetryReporter not initialized')
+      }).toThrow('TelemetryReporter not initialized')
     })
 
     it('returns the same instance on multiple calls', async () => {
@@ -96,7 +125,7 @@ describe('TelemetryReporter', () => {
       const instance1 = TelemetryReporter.getInstance()
       const instance2 = TelemetryReporter.getInstance()
 
-      expect(instance1).to.equal(instance2)
+      expect(instance1).toBe(instance2)
     })
   })
 
@@ -113,7 +142,7 @@ describe('TelemetryReporter', () => {
       // Await the post promise to resolve
       await new Promise((resolve) => setTimeout(resolve, 5))
 
-      expect(mockPost).to.have.been.calledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'https://cloud.cypress.io/studio/telemetry',
         {
           projectSlug: 'test-project',
@@ -136,7 +165,7 @@ describe('TelemetryReporter', () => {
     it('handles cloud request errors gracefully', async () => {
       const cloudError = new Error('Cloud request failed')
 
-      mockPost.rejects(cloudError)
+      mockPost.mockRejectedValue(cloudError)
 
       TelemetryReporter.getInstance().reportTelemetry(
         TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO,
@@ -146,11 +175,13 @@ describe('TelemetryReporter', () => {
       await new Promise((resolve) => setTimeout(resolve, 5))
 
       // Verify the error was handled gracefully (no uncaught exceptions)
-      expect(mockPost).to.have.been.called
+      expect(mockPost).toHaveBeenCalled()
     })
 
     it('handles telemetry manager errors gracefully', async () => {
-      telemetryManager.getMeasures.throws(new Error('Failed to get measures'))
+      telemetryManager.getMeasures.mockImplementation(() => {
+        throw new Error('Failed to get measures')
+      })
 
       TelemetryReporter.getInstance().reportTelemetry(
         TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO,
@@ -160,7 +191,7 @@ describe('TelemetryReporter', () => {
       await new Promise(setImmediate)
 
       // Verify the error was handled gracefully (no uncaught exceptions)
-      expect(mockPost).to.not.have.been.called
+      expect(mockPost).not.toHaveBeenCalled()
     })
   })
 
@@ -176,7 +207,7 @@ describe('TelemetryReporter', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 5))
 
-      expect(mockPost).to.have.been.calledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'https://cloud.cypress.io/studio/telemetry',
         {
           projectSlug: 'test-project',
@@ -197,7 +228,7 @@ describe('TelemetryReporter', () => {
         },
       )
 
-      expect(telemetryManager.clearMeasureGroup).to.have.been.calledWith(
+      expect(telemetryManager.clearMeasureGroup).toHaveBeenCalledWith(
         TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO,
       )
     })
