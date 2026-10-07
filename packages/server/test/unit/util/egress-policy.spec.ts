@@ -1,4 +1,4 @@
-import '../../spec_helper'
+import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 import { translateEgressPolicyToLaunchOpts } from '../../../lib/util/egress-policy'
 
 describe('lib/util/egress-policy', () => {
@@ -14,7 +14,7 @@ describe('lib/util/egress-policy', () => {
     delete process.env.NO_PROXY
   })
 
-  after(() => {
+  afterAll(() => {
     Object.entries(originalEnv).forEach(([name, value]) => {
       if (value === undefined) {
         delete process.env[name]
@@ -27,13 +27,13 @@ describe('lib/util/egress-policy', () => {
   it('returns no launch options without an upstream proxy', () => {
     process.env.NO_PROXY = 'example.com'
 
-    expect(translateEgressPolicyToLaunchOpts()).to.deep.equal({})
+    expect(translateEgressPolicyToLaunchOpts()).toStrictEqual({})
   })
 
   it('leaves the bypass list off so implicit loopback rules apply', () => {
     process.env.HTTP_PROXY = 'http://proxy.example:8080'
 
-    expect(translateEgressPolicyToLaunchOpts()).to.deep.equal({
+    expect(translateEgressPolicyToLaunchOpts()).toStrictEqual({
       proxyServer: 'http://proxy.example:8080',
     })
   })
@@ -43,7 +43,7 @@ describe('lib/util/egress-policy', () => {
     process.env.HTTPS_PROXY = 'http://secure-proxy.example:8443'
     process.env.NO_PROXY = 'localhost, example.com'
 
-    expect(translateEgressPolicyToLaunchOpts()).to.deep.equal({
+    expect(translateEgressPolicyToLaunchOpts()).toStrictEqual({
       proxyServer: 'http=http://proxy.example:8080;https=http://secure-proxy.example:8443',
       proxyBypassList: 'localhost,example.com',
     })
@@ -52,7 +52,7 @@ describe('lib/util/egress-policy', () => {
   it('maps HTTPS_PROXY to the https scheme when HTTP_PROXY is unset', () => {
     process.env.HTTPS_PROXY = 'http://secure-proxy.example:8443'
 
-    expect(translateEgressPolicyToLaunchOpts()).to.deep.equal({
+    expect(translateEgressPolicyToLaunchOpts()).toStrictEqual({
       proxyServer: 'https=http://secure-proxy.example:8443',
     })
   })
@@ -61,7 +61,7 @@ describe('lib/util/egress-policy', () => {
     process.env.HTTP_PROXY = 'http://proxy.example:8080'
     process.env.NO_PROXY = 'localhost,<-loopback>,example.com'
 
-    expect(translateEgressPolicyToLaunchOpts()).to.deep.equal({
+    expect(translateEgressPolicyToLaunchOpts()).toStrictEqual({
       proxyServer: 'http://proxy.example:8080',
       proxyBypassList: 'localhost,example.com',
     })
@@ -74,7 +74,7 @@ describe('lib/util/egress-policy', () => {
     expect(translateEgressPolicyToLaunchOpts({
       'example.com': '127.0.0.1',
       '*.foobar.com': '127.0.0.1',
-    })).to.deep.equal({
+    })).toStrictEqual({
       proxyServer: 'http://proxy.example:8080',
       proxyBypassList: 'example.com,*.foobar.com',
     })
@@ -92,7 +92,7 @@ describe('lib/util/egress-policy', () => {
     expect(translateEgressPolicyToLaunchOpts(null, [
       { hostname: 'secure.example.com', port: 443 },
       { hostname: '*.internal.example', port: 8443 },
-    ])).to.deep.equal({
+    ])).toStrictEqual({
       proxyServer: 'http://proxy.example:8080',
       proxyBypassList: 'secure.example.com:443,*.internal.example:8443',
     })
@@ -105,20 +105,20 @@ describe('lib/util/egress-policy', () => {
 
     const { proxyBypassList } = translateEgressPolicyToLaunchOpts(null, [{ hostname: '*', port: 443 }])
 
-    expect(proxyBypassList).to.equal('*:443')
+    expect(proxyBypassList).toBe('*:443')
   })
 
   it('does not repeat a bridged origin already covered by NO_PROXY or hosts', () => {
     process.env.HTTP_PROXY = 'http://proxy.example:8080'
     process.env.NO_PROXY = 'secure.example.com:443'
 
-    expect(translateEgressPolicyToLaunchOpts({}, [{ hostname: 'secure.example.com', port: 443 }])).to.deep.equal({
+    expect(translateEgressPolicyToLaunchOpts({}, [{ hostname: 'secure.example.com', port: 443 }])).toStrictEqual({
       proxyServer: 'http://proxy.example:8080',
       proxyBypassList: 'secure.example.com:443',
     })
   })
 
   it('adds no bypass list for bridged origins when no proxy is configured', () => {
-    expect(translateEgressPolicyToLaunchOpts(null, [{ hostname: 'secure.example.com', port: 443 }])).to.deep.equal({})
+    expect(translateEgressPolicyToLaunchOpts(null, [{ hostname: 'secure.example.com', port: 443 }])).toStrictEqual({})
   })
 })
