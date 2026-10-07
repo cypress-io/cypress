@@ -1,5 +1,4 @@
-import '../../spec_helper'
-
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import os from 'os'
 import path from 'path'
 import fs from 'fs-extra'
@@ -35,6 +34,16 @@ HwkiKPCEXNrdp11z9JK1iztUh/3p
 -----END CERTIFICATE-----
 `
 
+function thrownBy (fn: () => unknown): any {
+  try {
+    fn()
+  } catch (err) {
+    return err
+  }
+
+  throw new Error('expected function to throw')
+}
+
 const LEAF_FINGERPRINT = 'FATqPodQyOdF/d9ZiS7za/C4uyu1X3a+xiWhG3DF0RY='
 const SECOND_FINGERPRINT = 'uH9YgbDZndcCZqx0feO5DCRNOmmMJdOOElQVeoBVdPI='
 
@@ -43,13 +52,13 @@ describe('lib/util/spki', () => {
     it('produces a 44-char base64 SHA-256 SPKI fingerprint ending in =', () => {
       const fingerprint = generateSpkiFingerprint(LEAF_PEM)
 
-      expect(fingerprint).to.eq(LEAF_FINGERPRINT)
-      expect(fingerprint).to.have.length(44)
-      expect(fingerprint.endsWith('=')).to.be.true
+      expect(fingerprint).toBe(LEAF_FINGERPRINT)
+      expect(fingerprint).toHaveLength(44)
+      expect(fingerprint.endsWith('=')).toBe(true)
     })
 
     it('throws on malformed PEM', () => {
-      expect(() => generateSpkiFingerprint('not a cert')).to.throw()
+      expect(() => generateSpkiFingerprint('not a cert')).toThrow()
     })
   })
 
@@ -70,8 +79,8 @@ describe('lib/util/spki', () => {
       const fromFile = resolveTrustedCertificateFingerprints([{ filePath: 'leaf.pem' }], projectRoot)
       const fromPem = resolveTrustedCertificateFingerprints([{ pem: LEAF_PEM }], projectRoot)
 
-      expect(fromFile).to.deep.eq([LEAF_FINGERPRINT])
-      expect(fromFile).to.deep.eq(fromPem)
+      expect(fromFile).toEqual([LEAF_FINGERPRINT])
+      expect(fromFile).toEqual(fromPem)
     })
 
     it('resolves an absolute filePath', () => {
@@ -79,13 +88,13 @@ describe('lib/util/spki', () => {
 
       fs.writeFileSync(absolute, LEAF_PEM)
 
-      expect(resolveTrustedCertificateFingerprints([{ filePath: absolute }], os.tmpdir())).to.deep.eq([LEAF_FINGERPRINT])
+      expect(resolveTrustedCertificateFingerprints([{ filePath: absolute }], os.tmpdir())).toEqual([LEAF_FINGERPRINT])
     })
 
     it('passes through an spki entry untouched', () => {
       const result = resolveTrustedCertificateFingerprints([{ spki: LEAF_FINGERPRINT }], projectRoot)
 
-      expect(result).to.deep.eq([LEAF_FINGERPRINT])
+      expect(result).toEqual([LEAF_FINGERPRINT])
     })
 
     it('fingerprints every certificate in a pem bundle', () => {
@@ -96,8 +105,8 @@ describe('lib/util/spki', () => {
       const fromFile = resolveTrustedCertificateFingerprints([{ filePath: 'bundle.pem' }], projectRoot)
       const fromPem = resolveTrustedCertificateFingerprints([{ pem: bundle }], projectRoot)
 
-      expect(fromFile).to.deep.eq([LEAF_FINGERPRINT, SECOND_FINGERPRINT])
-      expect(fromFile).to.deep.eq(fromPem)
+      expect(fromFile).toEqual([LEAF_FINGERPRINT, SECOND_FINGERPRINT])
+      expect(fromFile).toEqual(fromPem)
     })
 
     it('dedupes identical fingerprints from different input shapes', () => {
@@ -109,23 +118,25 @@ describe('lib/util/spki', () => {
         { spki: LEAF_FINGERPRINT },
       ], projectRoot)
 
-      expect(result).to.deep.eq([LEAF_FINGERPRINT])
+      expect(result).toEqual([LEAF_FINGERPRINT])
     })
 
     it('returns an empty array for no entries', () => {
-      expect(resolveTrustedCertificateFingerprints([], projectRoot)).to.deep.eq([])
+      expect(resolveTrustedCertificateFingerprints([], projectRoot)).toEqual([])
     })
 
     it('throws a Cypress error naming the path when a filePath cannot be read', () => {
-      expect(() => resolveTrustedCertificateFingerprints([{ filePath: 'missing.pem' }], projectRoot))
-      .to.throw(/missing\.pem/)
-      .and.to.have.property('isCypressErr', true)
+      const err = thrownBy(() => resolveTrustedCertificateFingerprints([{ filePath: 'missing.pem' }], projectRoot))
+
+      expect(err.message).toMatch(/missing\.pem/)
+      expect(err).toHaveProperty('isCypressErr', true)
     })
 
     it('throws a Cypress error naming the entry when a pem is malformed', () => {
-      expect(() => resolveTrustedCertificateFingerprints([{ pem: 'garbage' }], projectRoot))
-      .to.throw(/trustedCertificates\[0\]\.pem/)
-      .and.to.have.property('isCypressErr', true)
+      const err = thrownBy(() => resolveTrustedCertificateFingerprints([{ pem: 'garbage' }], projectRoot))
+
+      expect(err.message).toMatch(/trustedCertificates\[0\]\.pem/)
+      expect(err).toHaveProperty('isCypressErr', true)
     })
   })
 })
