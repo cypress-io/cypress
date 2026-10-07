@@ -1,10 +1,9 @@
-import { proxyquire, sinon } from '../../../spec_helper'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import path from 'path'
 import type { CyPromptServerShape } from '@packages/types'
-import { expect } from 'chai'
 import esbuild from 'esbuild'
-import type { CyPromptManager as CyPromptManagerShape } from '@packages/server/lib/cloud/cy-prompt/CyPromptManager'
 import os from 'os'
+import { CyPromptManager } from '../../../../lib/cloud/cy-prompt/CyPromptManager'
 
 const { outputFiles: [{ contents: stubCyPromptRaw }] } = esbuild.buildSync({
   entryPoints: [path.join(__dirname, '..', '..', '..', 'support', 'fixtures', 'cloud', 'cy-prompt', 'test-cy-prompt.ts')],
@@ -16,14 +15,10 @@ const { outputFiles: [{ contents: stubCyPromptRaw }] } = esbuild.buildSync({
 const stubCyPrompt = new TextDecoder('utf-8').decode(stubCyPromptRaw)
 
 describe('lib/cloud/cy-prompt', () => {
-  let cyPromptManager: CyPromptManagerShape
+  let cyPromptManager: CyPromptManager
   let cyPrompt: CyPromptServerShape
-  let CyPromptManager: typeof import('@packages/server/lib/cloud/cy-prompt/CyPromptManager').CyPromptManager
 
   beforeEach(async () => {
-    CyPromptManager = (proxyquire('../lib/cloud/cy-prompt/CyPromptManager', {
-    }) as typeof import('@packages/server/lib/cloud/cy-prompt/CyPromptManager')).CyPromptManager
-
     cyPromptManager = new CyPromptManager()
     await cyPromptManager.setup({
       script: stubCyPrompt,
@@ -49,109 +44,111 @@ describe('lib/cloud/cy-prompt', () => {
 
     cyPrompt = (cyPromptManager as any)._cyPromptServer
 
-    sinon.stub(os, 'platform').returns('darwin')
-    sinon.stub(os, 'arch').returns('x64')
+    vi.spyOn(os, 'platform').mockReturnValue('darwin')
+    vi.spyOn(os, 'arch').mockReturnValue('x64')
   })
 
   afterEach(() => {
-    sinon.restore()
+    vi.restoreAllMocks()
   })
 
   describe('synchronous method invocation', () => {
     it('reports an error when a synchronous method fails', () => {
       const error = new Error('foo')
 
-      sinon.stub(cyPrompt, 'initializeRoutes').throws(error)
+      vi.spyOn(cyPrompt, 'initializeRoutes').mockImplementation(() => {
+        throw error
+      })
 
       cyPromptManager.initializeRoutes({} as any)
 
-      expect(cyPromptManager.status).to.eq('IN_ERROR')
+      expect(cyPromptManager.status).toBe('IN_ERROR')
 
       // TODO: (cy.prompt) test that the error is reported
     })
 
     // the Cloud ships the cy prompt server as a class instance whose methods rely on `this`
     it('invokes the method on the cy prompt server instance', () => {
-      sinon.stub(cyPrompt, 'initializeRoutes')
+      const initializeRoutes = vi.spyOn(cyPrompt, 'initializeRoutes').mockImplementation(() => {})
 
       cyPromptManager.initializeRoutes({} as any)
 
-      expect(cyPrompt.initializeRoutes).to.be.calledOn(cyPrompt)
+      expect(initializeRoutes.mock.contexts).toContain(cyPrompt)
     })
 
     it('forwards each argument individually rather than as an array', () => {
-      const reset = sinon.stub(cyPrompt, 'reset')
+      const reset = vi.spyOn(cyPrompt, 'reset').mockImplementation(() => {})
 
       cyPromptManager.reset('r1')
 
-      expect(reset).to.be.calledOn(cyPrompt)
-      expect(reset).to.be.calledWithExactly('r1')
+      expect(reset.mock.contexts).toContain(cyPrompt)
+      expect(reset).toHaveBeenCalledWith('r1')
     })
   })
 
   describe('initializeRoutes', () => {
     it('initializes routes', () => {
-      sinon.stub(cyPrompt, 'initializeRoutes')
-      const mockRouter = sinon.stub()
+      vi.spyOn(cyPrompt, 'initializeRoutes').mockImplementation(() => {})
+      const mockRouter = vi.fn()
 
-      cyPromptManager.initializeRoutes(mockRouter)
+      cyPromptManager.initializeRoutes(mockRouter as any)
 
-      expect(cyPrompt.initializeRoutes).to.be.calledWith(mockRouter)
+      expect(cyPrompt.initializeRoutes).toHaveBeenCalledWith(mockRouter)
     })
   })
 
   describe('addSocketListeners', () => {
     it('adds socket listeners', () => {
-      sinon.stub(cyPrompt, 'addSocketListeners')
-      const mockSocket = sinon.stub()
+      vi.spyOn(cyPrompt, 'addSocketListeners').mockImplementation(() => {})
+      const mockSocket = vi.fn()
 
-      cyPromptManager.addSocketListeners(mockSocket)
+      cyPromptManager.addSocketListeners(mockSocket as any)
 
-      expect(cyPrompt.addSocketListeners).to.be.calledWith(mockSocket)
+      expect(cyPrompt.addSocketListeners).toHaveBeenCalledWith(mockSocket)
     })
   })
 
   describe('connectToBrowser', () => {
     it('connects to the browser', () => {
       const mockCriClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub().resolves(),
+        send: vi.fn().mockResolvedValue(undefined),
+        on: vi.fn().mockResolvedValue(undefined),
       }
 
-      sinon.stub(cyPrompt, 'connectToBrowser')
+      vi.spyOn(cyPrompt, 'connectToBrowser').mockImplementation(() => {})
 
-      cyPromptManager.connectToBrowser(mockCriClient)
+      cyPromptManager.connectToBrowser(mockCriClient as any)
 
-      expect(cyPrompt.connectToBrowser).to.be.calledWith(mockCriClient)
+      expect(cyPrompt.connectToBrowser).toHaveBeenCalledWith(mockCriClient)
     })
 
     it('does not call connectToBrowser when cy prompt server is not defined', () => {
       // Set _cyPromptServer to undefined
       (cyPromptManager as any)._cyPromptServer = undefined
 
-      const invokeSyncSpy = sinon.spy(cyPromptManager, 'invokeSync')
+      const invokeSyncSpy = vi.spyOn(cyPromptManager as any, 'invokeSync')
 
       cyPromptManager.connectToBrowser({} as any)
 
-      expect(invokeSyncSpy).to.not.be.called
+      expect(invokeSyncSpy).not.toHaveBeenCalled()
     })
   })
 
   describe('reset', () => {
     it('calls reset', () => {
-      sinon.stub(cyPrompt, 'reset')
+      vi.spyOn(cyPrompt, 'reset').mockImplementation(() => {})
 
       cyPromptManager.reset()
 
-      expect(cyPrompt.reset).to.be.called
+      expect(cyPrompt.reset).toHaveBeenCalled()
     })
 
     it('calls resert with an id', () => {
-      sinon.stub(cyPrompt, 'reset')
+      vi.spyOn(cyPrompt, 'reset').mockImplementation(() => {})
 
       cyPromptManager.reset('r1')
 
-      expect(cyPrompt.reset).to.be.calledWith('r1')
+      expect(cyPrompt.reset).toHaveBeenCalledWith('r1')
     })
   })
 })
