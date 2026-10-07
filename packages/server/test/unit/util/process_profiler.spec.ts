@@ -1,21 +1,21 @@
-import '../../spec_helper'
-
+// The SUT bare-requires lib/browsers and lib/plugins, which only a ts require hook can load
+import '@packages/ts/register'
+import { createRequire } from 'module'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import _ from 'lodash'
 import type si from 'systeminformation'
-import { expect } from 'chai'
 import {
   groupCyProcesses,
   _renameBrowserGroup,
   _aggregateGroups,
   _reset,
 } from '../../../lib/util/process_profiler'
-import sinon from 'sinon'
-import snapshot from 'snap-shot-it'
-import { clearCtx, setCtx } from '@packages/data-context'
 
-const browsers = require('../../../lib/browsers').default
-const plugins = require('../../../lib/plugins')
-const { makeDataContext } = require('../../../lib/makeDataContext')
+// Same CJS instances the SUT's bare require() sees, including the DataContext that getPluginPid checks
+const requireCjs = createRequire(import.meta.url)
+const browsers = requireCjs('../../../lib/browsers').default
+const plugins = requireCjs('../../../lib/plugins')
+const { clearCtx, getCtx, setCtx, makeDataContext } = requireCjs('../../../lib/makeDataContext')
 
 const BROWSER_PID = 11111
 const SUB_BROWSER_PID = 11112
@@ -114,22 +114,28 @@ const PROCESSES: Partial<si.Systeminformation.ProcessesProcessData>[] = [
 ]
 
 describe('lib/util/process_profiler', function () {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await clearCtx()
+    setCtx(makeDataContext({}))
     _reset()
   })
 
-  context('.groupCyProcesses', () => {
+  afterEach(async () => {
+    await getCtx()._reset()
+    await clearCtx()
+    vi.restoreAllMocks()
+  })
+
+  describe('.groupCyProcesses', () => {
     it('groups correctly', () => {
-      sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
-      sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ pid: BROWSER_PID })
+      vi.spyOn(plugins, 'getPluginPid').mockReturnValue(PLUGIN_PID)
 
       // @ts-ignore
       const groupedProcesses = groupCyProcesses({ list: PROCESSES })
 
       const checkGroup = (pid, group) => {
-        expect(_.find(groupedProcesses, { pid }))
-        .to.have.property('group')
-        .eq(group)
+        expect(_.find(groupedProcesses, { pid })).toHaveProperty('group', group)
       }
 
       checkGroup(BROWSER_PID, 'browser')
@@ -152,27 +158,27 @@ describe('lib/util/process_profiler', function () {
     // has not been set (or has been torn down), which previously caused
     // `getPluginPid` to throw "Expected DataContext to already have been set"
     it('does not throw when the DataContext has not been set', async () => {
-      sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ pid: BROWSER_PID })
 
-      // tear down the context that spec_helper sets up so getPluginPid
+      // tear down the context that beforeEach sets up so getPluginPid
       // exercises the real, un-stubbed code path with no context
       await clearCtx()
 
       try {
-        expect(plugins.getPluginPid()).to.be.undefined
+        expect(plugins.getPluginPid()).toBeUndefined()
 
         // @ts-ignore
-        expect(() => groupCyProcesses({ list: PROCESSES })).not.to.throw()
+        expect(() => groupCyProcesses({ list: PROCESSES })).not.toThrow()
       } finally {
-        // restore a context so spec_helper's afterEach teardown can run cleanly
+        // restore a context so the afterEach teardown can run cleanly
         setCtx(makeDataContext({}))
       }
     })
   })
 
-  context('._renameBrowserGroup', () => {
+  describe('._renameBrowserGroup', () => {
     it('renames browser-grouped processes to correct name', () => {
-      sinon.stub(browsers, 'getBrowserInstance').returns({ browser: { displayName: 'FooBrowser' } })
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ browser: { displayName: 'FooBrowser' } })
 
       const processes = [
         { group: 'foo' },
@@ -189,14 +195,14 @@ describe('lib/util/process_profiler', function () {
       ]
 
       // @ts-ignore
-      expect(_renameBrowserGroup(processes)).to.deep.eq(expected)
+      expect(_renameBrowserGroup(processes)).toEqual(expected)
     })
   })
 
-  context('._aggregateGroups', () => {
+  describe('._aggregateGroups', () => {
     it('aggregates groups as expected', () => {
-      sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
-      sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ pid: BROWSER_PID })
+      vi.spyOn(plugins, 'getPluginPid').mockReturnValue(PLUGIN_PID)
 
       const processes = _.cloneDeep(PROCESSES)
       .map((proc) => {
@@ -214,8 +220,7 @@ describe('lib/util/process_profiler', function () {
       // @ts-ignore
       _.find(result, { pids: String(MAIN_PID) }).pids = '111111111'
 
-      // @ts-ignore
-      snapshot(result)
+      expect(result).toMatchSnapshot()
     })
   })
 })
