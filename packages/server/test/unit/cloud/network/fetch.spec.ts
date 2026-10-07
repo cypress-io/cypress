@@ -1,11 +1,19 @@
-import sinon from 'sinon'
-import { expect } from 'chai'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Response } from 'cross-fetch'
-import proxyquire from 'proxyquire'
-import type { fetch, putFetch, postFetch } from '../../../../lib/cloud/network/fetch'
+import { fetch as fetchImpl, putFetch as putFetchImpl, postFetch as postFetchImpl } from '../../../../lib/cloud/network/fetch'
 import { ParseError } from '../../../../lib/cloud/network/parse_error'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
 import { SystemError } from '../../../../lib/cloud/network/system_error'
+
+const { stubbedCrossFetch } = vi.hoisted(() => {
+  return { stubbedCrossFetch: vi.fn() }
+})
+
+vi.mock('cross-fetch', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('cross-fetch')>()
+
+  return { ...actual, default: stubbedCrossFetch }
+})
 
 describe('cloud/network/fetch', () => {
   const url = 'https://some.test/url'
@@ -14,40 +22,33 @@ describe('cloud/network/fetch', () => {
   const nonJsonText = 'some text response'
   const badJsonErr = 'Unexpected token < in JSON at position 0'
   let resolveVal
-  let stubbedCrossFetch: sinon.SinonStub
-  let fetchImpl: typeof fetch
-  let putFetchImpl: typeof putFetch
-  let postFetchImpl: typeof postFetch
 
   beforeEach(() => {
-    stubbedCrossFetch = sinon.stub()
-    const importFetch = proxyquire.noCallThru()('../../../../lib/cloud/network/fetch', {
-      'cross-fetch': stubbedCrossFetch,
-    })
+    stubbedCrossFetch.mockReset()
+  })
 
-    fetchImpl = importFetch.fetch
-    putFetchImpl = importFetch.putFetch
-    postFetchImpl = importFetch.postFetch
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   describe('when fetch resolves', () => {
     beforeEach(() => {
       resolveVal = new Response()
-      sinon.stub(resolveVal, 'url').get(() => url)
-      stubbedCrossFetch.resolves(resolveVal)
+      vi.spyOn(resolveVal, 'url', 'get').mockReturnValue(url)
+      stubbedCrossFetch.mockResolvedValue(resolveVal)
     })
 
     describe('when fetch resolves with a json-parseable response', () => {
       beforeEach(() => {
-        sinon.stub(resolveVal, 'json').resolves(jsonObj)
-        sinon.stub(resolveVal, 'text').resolves(jsonText)
+        vi.spyOn(resolveVal, 'json').mockResolvedValue(jsonObj)
+        vi.spyOn(resolveVal, 'text').mockResolvedValue(jsonText)
       })
 
       describe('and parse is json', () => {
         it('resolves with the parsed object', async () => {
           const res = await fetchImpl<{ 'content': string }>(url, { parse: 'json' })
 
-          expect(res).to.eq(jsonObj)
+          expect(res).toBe(jsonObj)
         })
       })
 
@@ -55,15 +56,15 @@ describe('cloud/network/fetch', () => {
         it('resolves with the response text as a string', async () => {
           const res = await fetchImpl(url, { parse: 'text' })
 
-          expect(res).to.eq(jsonText)
+          expect(res).toBe(jsonText)
         })
       })
     })
 
     describe('when fetch resolves with a non-json-parseable response', () => {
       beforeEach(() => {
-        sinon.stub(resolveVal, 'json').rejects(new Error(badJsonErr))
-        sinon.stub(resolveVal, 'text').resolves(nonJsonText)
+        vi.spyOn(resolveVal, 'json').mockRejectedValue(new Error(badJsonErr))
+        vi.spyOn(resolveVal, 'text').mockResolvedValue(nonJsonText)
       })
 
       describe('and parse json is used', () => {
@@ -75,8 +76,8 @@ describe('cloud/network/fetch', () => {
           } catch (e) {
             err = e
           }
-          expect(err.message).to.eq(badJsonErr)
-          expect(ParseError.isParseError(err)).to.be.true
+          expect(err.message).toBe(badJsonErr)
+          expect(ParseError.isParseError(err)).toBe(true)
         })
       })
 
@@ -84,17 +85,17 @@ describe('cloud/network/fetch', () => {
         it('resolves with the response text as a string', async () => {
           const res = await fetchImpl(url, { parse: 'text' })
 
-          expect(res).to.eq(nonJsonText)
+          expect(res).toBe(nonJsonText)
         })
       })
     })
 
     describe('when fetch resolves with a response indicative of an http error', () => {
       beforeEach(() => {
-        sinon.stub(resolveVal, 'status').get(() => 400)
-        sinon.stub(resolveVal, 'statusText').get(() => 'Bad Request')
-        sinon.stub(resolveVal, 'text').resolves(`<error><ref>4125</ref><kind>BadRequest</kind></error>`)
-        sinon.stub(resolveVal, 'json').rejects(badJsonErr)
+        vi.spyOn(resolveVal, 'status', 'get').mockReturnValue(400)
+        vi.spyOn(resolveVal, 'statusText', 'get').mockReturnValue('Bad Request')
+        vi.spyOn(resolveVal, 'text').mockResolvedValue(`<error><ref>4125</ref><kind>BadRequest</kind></error>`)
+        vi.spyOn(resolveVal, 'json').mockRejectedValue(badJsonErr)
       })
 
       it('throws an HttpError', async () => {
@@ -105,8 +106,8 @@ describe('cloud/network/fetch', () => {
         } catch (e) {
           err = e
         }
-        expect(err).not.to.be.undefined
-        expect(HttpError.isHttpError(err)).to.be.true
+        expect(err).not.toBeUndefined()
+        expect(HttpError.isHttpError(err)).toBe(true)
       })
     })
   })
@@ -119,7 +120,7 @@ describe('cloud/network/fetch', () => {
       err = new Error(networkErrMsg)
 
       err.code = 'ECONNRESET'
-      stubbedCrossFetch.rejects(err)
+      stubbedCrossFetch.mockRejectedValue(err)
     })
 
     it('throws a SystemError', async () => {
@@ -130,7 +131,7 @@ describe('cloud/network/fetch', () => {
       } catch (e) {
         err = e
       }
-      expect(SystemError.isSystemError(err)).to.be.true
+      expect(SystemError.isSystemError(err)).toBe(true)
     })
   })
 
@@ -143,21 +144,13 @@ describe('cloud/network/fetch', () => {
     beforeEach(() => {
       abortError = new Error('connection stall')
       fetchError = new Error('User aborted the request')
-      mockAbortController = sinon.createStubInstance(AbortController)
-      mockSignal = sinon.createStubInstance(AbortSignal)
-      sinon.stub(mockAbortController, 'signal').get(() => {
-        return mockSignal
-      })
+      mockAbortController = Object.create(AbortController.prototype)
+      mockSignal = Object.create(AbortSignal.prototype)
+      Object.defineProperty(mockAbortController, 'signal', { get: () => mockSignal })
+      Object.defineProperty(mockSignal, 'aborted', { get: () => true })
+      Object.defineProperty(mockSignal, 'reason', { get: () => abortError })
 
-      sinon.stub(mockSignal, 'aborted').get(() => {
-        return true
-      })
-
-      sinon.stub(mockSignal, 'reason').get(() => {
-        return abortError
-      })
-
-      stubbedCrossFetch.rejects(fetchError)
+      stubbedCrossFetch.mockRejectedValue(fetchError)
     })
 
     it('rethrows the signal reason', async () => {
@@ -169,35 +162,35 @@ describe('cloud/network/fetch', () => {
         error = e
       }
 
-      expect(error).to.eq(abortError)
+      expect(error).toBe(abortError)
     })
   })
 
   describe('putFetch', () => {
     beforeEach(() => {
       resolveVal = new Response()
-      stubbedCrossFetch.resolves(resolveVal)
-      sinon.stub(resolveVal, 'json').resolves(jsonObj)
+      stubbedCrossFetch.mockResolvedValue(resolveVal)
+      vi.spyOn(resolveVal, 'json').mockResolvedValue(jsonObj)
     })
 
     it('should call crossFetch with the correct options', async () => {
       const res = await putFetchImpl(url, { parse: 'json' })
 
-      expect(res).to.eq(jsonObj)
+      expect(res).toBe(jsonObj)
     })
   })
 
   describe('postFetch', () => {
     beforeEach(() => {
       resolveVal = new Response()
-      stubbedCrossFetch.resolves(resolveVal)
-      sinon.stub(resolveVal, 'json').resolves(jsonObj)
+      stubbedCrossFetch.mockResolvedValue(resolveVal)
+      vi.spyOn(resolveVal, 'json').mockResolvedValue(jsonObj)
     })
 
     it('should call crossFetch with the correct options', async () => {
       const res = await postFetchImpl(url, { parse: 'json' })
 
-      expect(res).to.eq(jsonObj)
+      expect(res).toBe(jsonObj)
     })
   })
 })
