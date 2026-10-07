@@ -1,9 +1,16 @@
-import '../../spec_helper'
-import { expect } from 'chai'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
 import type { RunModeVideoApi } from '@packages/types'
 import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
+
+// sinon's calledBefore: the first call of `first` precedes the last call of `second`
+const expectCalledBefore = (first: Mock, second: Mock) => {
+  expect(first).toHaveBeenCalled()
+  expect(second).toHaveBeenCalled()
+  expect(first.mock.invocationCallOrder[0]).toBeLessThan(second.mock.invocationCallOrder.at(-1)!)
+}
 
 // builds a minimal mock of the Playwright objects WebKitAutomation interacts with
 function createMockBrowser () {
@@ -15,7 +22,7 @@ function createMockBrowser () {
     const autFrame: any = {
       name: () => `Your project: 'some-project'`,
       url: () => 'http://localhost:3000/index.html',
-      title: sinon.stub().resolves('My App'),
+      title: vi.fn(async () => 'My App'),
       childFrames: () => [],
     }
 
@@ -26,24 +33,24 @@ function createMockBrowser () {
     const page: any = {
       context: () => context,
       mainFrame: () => mainFrame,
-      addInitScript: sinon.stub().resolves(),
-      on: sinon.stub(),
-      video: sinon.stub(),
-      close: sinon.stub().resolves(),
-      goto: sinon.stub().resolves(),
-      screenshot: sinon.stub().resolves(Buffer.from('')),
-      bringToFront: sinon.stub().resolves(),
+      addInitScript: vi.fn(async () => {}),
+      on: vi.fn(),
+      video: vi.fn(),
+      close: vi.fn(async () => {}),
+      goto: vi.fn(async () => {}),
+      screenshot: vi.fn(async () => Buffer.from('')),
+      bringToFront: vi.fn(async () => {}),
     }
 
     const context: any = {
-      newPage: sinon.stub().resolves(page),
-      exposeBinding: sinon.stub().resolves(),
-      route: sinon.stub().resolves(),
-      cookies: sinon.stub().resolves([]),
-      clearCookies: sinon.stub().resolves(),
-      addCookies: sinon.stub().resolves(),
+      newPage: vi.fn(async () => page),
+      exposeBinding: vi.fn(async () => {}),
+      route: vi.fn(async () => {}),
+      cookies: vi.fn(async () => []),
+      clearCookies: vi.fn(async () => {}),
+      addCookies: vi.fn(async () => {}),
       browser: () => browser,
-      close: sinon.stub().resolves(),
+      close: vi.fn(async () => {}),
       pages: () => [page],
     }
 
@@ -54,8 +61,8 @@ function createMockBrowser () {
   }
 
   const browser: any = {
-    newContext: sinon.stub().callsFake(async () => makeContextAndPage()),
-    close: sinon.stub().resolves(),
+    newContext: vi.fn(async () => makeContextAndPage()),
+    close: vi.fn(async () => {}),
   }
 
   return {
@@ -72,17 +79,17 @@ describe('lib/browsers/webkit-automation', () => {
   let capturedController: any
 
   beforeEach(() => {
-    automation = { use: sinon.stub(), onDownloadLinkClicked: sinon.stub() }
+    automation = { use: vi.fn(), onDownloadLinkClicked: vi.fn() }
     mock = createMockBrowser()
     capturedController = undefined
 
     videoApi = {
-      useVideoController: sinon.stub().callsFake((controller) => {
+      useVideoController: vi.fn((controller) => {
         capturedController = controller
       }),
       videoName: '/tmp/videos/spec.mp4',
       compressedVideoName: '/tmp/videos/spec-compressed.mp4',
-      onError: sinon.stub(),
+      onError: vi.fn(),
     } as unknown as RunModeVideoApi
   })
 
@@ -99,19 +106,19 @@ describe('lib/browsers/webkit-automation', () => {
     })
   }
 
-  context('automation socket', () => {
+  describe('automation socket', () => {
     it('attaches a bridge for the new page before navigating', async () => {
-      const cdpSocketServer = { attachCDPClient: sinon.stub().resolves() }
+      const cdpSocketServer = { attachCDPClient: vi.fn(async () => {}) }
 
       await createAutomation({ cdpSocketServer })
 
-      expect(cdpSocketServer.attachCDPClient).to.be.calledWith(sinon.match.instanceOf(WebKitCDPBridge))
+      expect(cdpSocketServer.attachCDPClient).toHaveBeenCalledWith(expect.any(WebKitCDPBridge))
       // the bridge's window bindings must exist before the runner loads and connects
-      expect(cdpSocketServer.attachCDPClient).to.be.calledBefore(mock.getLastPage().goto)
+      expectCalledBefore(cdpSocketServer.attachCDPClient, mock.getLastPage().goto)
     })
   })
 
-  context('devicePixelRatio', () => {
+  describe('devicePixelRatio', () => {
     // https://github.com/cypress-io/cypress/issues/23808
     // Headless WebKit forces a standard devicePixelRatio so screenshots are
     // consistent regardless of host DPI, mirroring headless Chrome. Headed
@@ -119,23 +126,23 @@ describe('lib/browsers/webkit-automation', () => {
     it('forces deviceScaleFactor to 1 when headless', async () => {
       await createAutomation({ isHeadless: true })
 
-      expect(mock.browser.newContext).to.be.called
-      expect(mock.browser.newContext.firstCall.args[0]).to.include({ deviceScaleFactor: 1 })
+      expect(mock.browser.newContext).toHaveBeenCalled()
+      expect(mock.browser.newContext.mock.calls[0][0]).toMatchObject({ deviceScaleFactor: 1 })
     })
 
     it('does not set deviceScaleFactor when headed', async () => {
       await createAutomation({ isHeadless: false })
 
-      expect(mock.browser.newContext).to.be.called
-      expect(mock.browser.newContext.firstCall.args[0]).not.to.have.property('deviceScaleFactor')
+      expect(mock.browser.newContext).toHaveBeenCalled()
+      expect(mock.browser.newContext.mock.calls[0][0]).not.toHaveProperty('deviceScaleFactor')
     })
   })
 
-  context('video recording', () => {
+  describe('video recording', () => {
     it('registers a video controller that cannot be restarted', async () => {
       await createAutomation()
 
-      expect(capturedController, 'a video controller should be registered').to.exist
+      expect(capturedController, 'a video controller should be registered').toEqual(expect.anything())
 
       let error: Error | undefined
 
@@ -147,52 +154,52 @@ describe('lib/browsers/webkit-automation', () => {
 
       // WebKit cannot record video across specs on the same page, so restart must not silently
       // succeed - the run loop relies on this to recreate the tab per spec instead (see #23815).
-      expect(error?.message).to.include('Cannot restart WebKit video')
+      expect(error?.message).toContain('Cannot restart WebKit video')
     })
 
     it('endVideoCapture closes the page and saves the video to the spec video path', async () => {
       await createAutomation()
 
-      const pwVideo = { saveAs: sinon.stub().resolves() }
+      const pwVideo = { saveAs: vi.fn(async () => {}) }
 
-      mock.getLastPage().video.returns(pwVideo)
+      mock.getLastPage().video.mockReturnValue(pwVideo)
 
       await capturedController.endVideoCapture()
 
-      expect(mock.getLastPage().close, 'page should be closed to flush the video').to.be.called
-      expect(pwVideo.saveAs).to.be.calledWith(videoApi.videoName)
+      expect(mock.getLastPage().close, 'page should be closed to flush the video').toHaveBeenCalled()
+      expect(pwVideo.saveAs).toHaveBeenCalledWith(videoApi.videoName)
     })
   })
 
-  context('userAgent', () => {
+  describe('userAgent', () => {
     it('passes the configured userAgent to every context it creates', async () => {
       const userAgent = 'Mozilla/5.0 (custom) Cypress'
 
       const wk = await createAutomation({ userAgent })
 
-      expect(mock.browser.newContext).to.be.calledWithMatch({ userAgent })
+      expect(mock.browser.newContext).toHaveBeenCalledWith(expect.objectContaining({ userAgent }))
 
       // the userAgent should persist when the tab is recycled for the next spec (see #33349)
       await wk.onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
 
-      expect(mock.browser.newContext.lastCall).to.be.calledWithMatch({ userAgent })
+      expect(mock.browser.newContext.mock.lastCall[0]).toMatchObject({ userAgent })
     })
 
     it('does not set a userAgent when none is configured', async () => {
       await createAutomation({})
 
-      expect(mock.browser.newContext).to.be.calledOnce
-      expect(mock.browser.newContext.firstCall.args[0]).to.not.have.property('userAgent')
+      expect(mock.browser.newContext).toHaveBeenCalledOnce()
+      expect(mock.browser.newContext.mock.calls[0][0]).not.toHaveProperty('userAgent')
     })
   })
 
-  context('focus:browser:window', () => {
+  describe('focus:browser:window', () => {
     it('brings the active page to the front', async () => {
       const wk = await createAutomation()
 
       await wk.onRequest('focus:browser:window', {})
 
-      expect(mock.getLastPage().bringToFront).to.be.calledOnce
+      expect(mock.getLastPage().bringToFront).toHaveBeenCalledOnce()
     })
 
     it('resolves without error when there are no open pages', async () => {
@@ -204,13 +211,13 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
-  context('get:aut:url / get:aut:title', () => {
+  describe('get:aut:url / get:aut:title', () => {
     it('returns the AUT frame url for get:aut:url', async () => {
       const wk = await createAutomation()
 
       const url = await wk.onRequest('get:aut:url', {})
 
-      expect(url).to.eq('http://localhost:3000/index.html')
+      expect(url).toBe('http://localhost:3000/index.html')
     })
 
     it('returns the AUT frame title for get:aut:title', async () => {
@@ -218,7 +225,7 @@ describe('lib/browsers/webkit-automation', () => {
 
       const title = await wk.onRequest('get:aut:title', {})
 
-      expect(title).to.eq('My App')
+      expect(title).toBe('My App')
     })
 
     it('falls back to the first child frame when the AUT frame cannot be identified by name', async () => {
@@ -227,21 +234,21 @@ describe('lib/browsers/webkit-automation', () => {
       const firstChild: any = {
         name: () => '',
         url: () => 'http://localhost:3000/fallback.html',
-        title: sinon.stub().resolves('Fallback'),
+        title: vi.fn(async () => 'Fallback'),
         childFrames: () => [],
       }
 
       mock.getLastPage().mainFrame = () => ({ childFrames: () => [firstChild] })
 
-      expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
-      expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+      expect(await wk.onRequest('get:aut:url', {})).toBe('http://localhost:3000/fallback.html')
+      expect(await wk.onRequest('get:aut:title', {})).toBe('Fallback')
     })
 
     const runnerFrame = (name: string): any => {
       return {
         name: () => name,
         url: () => 'about:blank',
-        title: sinon.stub().resolves(''),
+        title: vi.fn(async () => ''),
         childFrames: () => [],
       }
     }
@@ -252,7 +259,7 @@ describe('lib/browsers/webkit-automation', () => {
       const aut: any = {
         name: () => '',
         url: () => 'http://localhost:3000/fallback.html',
-        title: sinon.stub().resolves('Fallback'),
+        title: vi.fn(async () => 'Fallback'),
         childFrames: () => [],
       }
 
@@ -269,8 +276,8 @@ describe('lib/browsers/webkit-automation', () => {
         }
       }
 
-      expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
-      expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+      expect(await wk.onRequest('get:aut:url', {})).toBe('http://localhost:3000/fallback.html')
+      expect(await wk.onRequest('get:aut:title', {})).toBe('Fallback')
     })
 
     it('fails rather than picking a runner frame when the AUT frame is gone', async () => {
@@ -296,7 +303,7 @@ describe('lib/browsers/webkit-automation', () => {
         error = err
       }
 
-      expect(error?.message).to.include('Could not find AUT frame')
+      expect(error?.message).toContain('Could not find AUT frame')
     })
 
     it('throws when no AUT frame can be found', async () => {
@@ -312,30 +319,30 @@ describe('lib/browsers/webkit-automation', () => {
         error = err
       }
 
-      expect(error?.message).to.include('Could not find AUT frame')
+      expect(error?.message).toContain('Could not find AUT frame')
     })
   })
 
-  context('reset:browser:tabs:for:next:spec', () => {
+  describe('reset:browser:tabs:for:next:spec', () => {
     it('closes the browser when the tab should not be kept open', async () => {
       const wk = await createAutomation()
 
       await wk.onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: false })
 
-      expect(mock.browser.close).to.be.calledOnce
+      expect(mock.browser.close).toHaveBeenCalledOnce()
     })
 
     it('recreates the context/page when the tab should be kept open', async () => {
       const wk = await createAutomation()
 
-      const newContextCallsBefore = mock.browser.newContext.callCount
+      const newContextCallsBefore = mock.browser.newContext.mock.calls.length
       const previousContext = mock.getLastContext()
 
       await wk.onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
 
       // a fresh context + page is created for the next spec, and the previous context is torn down
-      expect(mock.browser.newContext.callCount).to.eq(newContextCallsBefore + 1)
-      expect(previousContext.close).to.be.called
+      expect(mock.browser.newContext).toHaveBeenCalledTimes(newContextCallsBefore + 1)
+      expect(previousContext.close).toHaveBeenCalled()
     })
   })
 })
