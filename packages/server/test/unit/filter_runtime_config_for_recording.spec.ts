@@ -1,11 +1,11 @@
-import '../spec_helper'
+import { describe, expect, it } from 'vitest'
 import _ from 'lodash'
 import { filterRuntimeConfigForRecording } from '../../lib/config'
 import { getCloudRecordingConfigKeys } from '@packages/config'
 
 describe('lib/config filterRuntimeConfigForRecording', () => {
   it('returns an empty object for an empty config', () => {
-    expect(filterRuntimeConfigForRecording({})).to.eql({})
+    expect(filterRuntimeConfigForRecording({})).toStrictEqual({})
   })
 
   it('removes rawJson, resolved, and keys not in the cloud recording allowlist', () => {
@@ -19,13 +19,13 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
       arbitraryUserKey: { nested: true },
     })
 
-    expect(filtered.rawJson).to.be.undefined
-    expect(filtered.resolved).to.be.undefined
-    expect(filtered.socketId).to.be.undefined
-    expect(filtered.clientRoute).to.be.undefined
-    expect(filtered.arbitraryUserKey).to.be.undefined
-    expect(filtered.projectId).to.eq('abc')
-    expect(filtered.baseUrl).to.eq('http://localhost')
+    expect(filtered.rawJson).toBeUndefined()
+    expect(filtered.resolved).toBeUndefined()
+    expect(filtered.socketId).toBeUndefined()
+    expect(filtered.clientRoute).toBeUndefined()
+    expect(filtered.arbitraryUserKey).toBeUndefined()
+    expect(filtered.projectId).toBe('abc')
+    expect(filtered.baseUrl).toBe('http://localhost')
   })
 
   it('replaces env values with type placeholders', () => {
@@ -38,7 +38,7 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
       },
     })
 
-    expect(filtered.env).to.eql({
+    expect(filtered.env).toStrictEqual({
       STR: 'omitted: string',
       NUM: 'omitted: number',
       BOOL: 'omitted: boolean',
@@ -54,7 +54,7 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
       },
     })
 
-    expect(filtered.expose).to.eql({
+    expect(filtered.expose).toStrictEqual({
       API_URL: 'omitted: string',
       FLAG: 'omitted: boolean',
     })
@@ -70,7 +70,7 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
       },
     })
 
-    expect(filtered.devServer).to.eql({
+    expect(filtered.devServer).toStrictEqual({
       bundler: 'webpack',
       framework: 'react',
       webpackConfig: 'omitted',
@@ -88,7 +88,7 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
       },
     })
 
-    expect(filtered.devServerConfig).to.eql({
+    expect(filtered.devServerConfig).toStrictEqual({
       bundler: 'vite',
       framework: 'vue',
       viteConfig: 'omitted: object',
@@ -98,19 +98,19 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
 
   it('redacts non-object devServerConfig with a type placeholder string', () => {
     expect(filterRuntimeConfigForRecording({ devServerConfig: null }).devServerConfig)
-    .to.eq('omitted: object')
+    .toBe('omitted: object')
 
     expect(filterRuntimeConfigForRecording({ devServerConfig: 'oops' }).devServerConfig)
-    .to.eq('omitted: string')
+    .toBe('omitted: string')
 
     expect(filterRuntimeConfigForRecording({ devServerConfig: [] }).devServerConfig)
-    .to.eq('omitted: object')
+    .toBe('omitted: object')
   })
 
   it('does not set devServerConfig when undefined', () => {
     const filtered = filterRuntimeConfigForRecording({ projectId: 'x' })
 
-    expect(filtered).not.to.have.property('devServerConfig')
+    expect(filtered).not.toHaveProperty('devServerConfig')
   })
 
   it('keeps indexHtmlFile and allowlisted public keys only', () => {
@@ -121,10 +121,10 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
       notARealOption: 'drop-me',
     })
 
-    expect(filtered.indexHtmlFile).to.eq('cypress/support/component-index.html')
-    expect(filtered.specPattern).to.eq('**/*.cy.ts')
-    expect(filtered.video).to.eq(true)
-    expect(filtered.notARealOption).to.be.undefined
+    expect(filtered.indexHtmlFile).toBe('cypress/support/component-index.html')
+    expect(filtered.specPattern).toBe('**/*.cy.ts')
+    expect(filtered.video).toBe(true)
+    expect(filtered.notARealOption).toBeUndefined()
   })
 
   it('output keys are a subset of getCloudRecordingConfigKeys()', () => {
@@ -140,7 +140,7 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
     })
 
     _.each(_.keys(filtered), (key) => {
-      expect(allow.has(key), `unexpected key on filtered config: ${key}`).to.equal(true)
+      expect(allow.has(key), `unexpected key on filtered config: ${key}`).toBe(true)
     })
   })
 })
