@@ -1,7 +1,10 @@
+// The SUT bare-requires lib/cloud/routes.ts, which only a ts require hook can load
+import '@packages/ts/register'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { SystemError } from '../../../../../lib/cloud/network/system_error'
-import { proxyquire } from '../../../../spec_helper'
 import { ParseKinds } from '../../../../../lib/cloud/network/fetch'
-import sinon from 'sinon'
+import { postStudioSession } from '../../../../../lib/cloud/api/studio/post_studio_session'
 
 const standardHeaders = {
   'x-os-name': 'test-os',
@@ -9,24 +12,32 @@ const standardHeaders = {
   'x-machine-id': 'test-machine-id',
 }
 
-describe('postStudioSession', () => {
-  let postStudioSession: typeof import('@packages/server/lib/cloud/api/studio/post_studio_session').postStudioSession
-  let postFetchStub: sinon.SinonStub = sinon.stub()
+const { postFetchStub } = vi.hoisted(() => {
+  return { postFetchStub: vi.fn() }
+})
 
+vi.mock('../../../../../lib/cloud/network/fetch', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../../lib/cloud/network/fetch')>()
+
+  return {
+    ...actual,
+    postFetch: postFetchStub,
+  }
+})
+
+vi.mock('../../../../../lib/cloud/api/get_standard_headers', () => {
+  return {
+    getStandardHeaders: vi.fn(async () => standardHeaders),
+  }
+})
+
+describe('postStudioSession', () => {
   beforeEach(() => {
-    postFetchStub.reset()
-    postStudioSession = (proxyquire('@packages/server/lib/cloud/api/studio/post_studio_session', {
-      '../../network/fetch': {
-        postFetch: postFetchStub,
-      },
-      '../get_standard_headers': {
-        getStandardHeaders: sinon.stub().resolves(standardHeaders),
-      },
-    }) as typeof import('@packages/server/lib/cloud/api/studio/post_studio_session')).postStudioSession
+    postFetchStub.mockReset()
   })
 
   it('should post a studio session', async () => {
-    postFetchStub.resolves({
+    postFetchStub.mockResolvedValue({
       studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
       protocolUrl: 'http://localhost:1234/capture-protocol/script/def.js',
     })
@@ -35,13 +46,13 @@ describe('postStudioSession', () => {
       projectId: '12345',
     })
 
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
       protocolUrl: 'http://localhost:1234/capture-protocol/script/def.js',
     })
 
-    expect(postFetchStub).to.have.been.calledOnce
-    expect(postFetchStub).to.have.been.calledWith(
+    expect(postFetchStub).toHaveBeenCalledOnce()
+    expect(postFetchStub).toHaveBeenCalledWith(
       'http://localhost:1234/studio/session',
       {
         parse: ParseKinds.JSON,
@@ -55,12 +66,12 @@ describe('postStudioSession', () => {
   })
 
   it('should throw an error if we receive a retryable error more than twice', async () => {
-    postFetchStub.rejects(new SystemError(new Error('Failed to create studio session'), 'http://localhost:1234/studio/session', 'ECONNRESET', 100))
+    postFetchStub.mockRejectedValue(new SystemError(new Error('Failed to create studio session'), 'http://localhost:1234/studio/session', 'ECONNRESET', 100))
 
     await expect(postStudioSession({
       projectId: '12345',
-    })).to.be.rejected
+    })).rejects.toThrow()
 
-    expect(postFetchStub).to.have.been.calledThrice
+    expect(postFetchStub).toHaveBeenCalledTimes(3)
   })
 })
