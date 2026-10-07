@@ -1,8 +1,9 @@
 import EventEmitter from 'node:events'
 import type { Client as WebDriverClient } from 'webdriver'
-import { expect } from 'chai'
-import sinon from 'sinon'
-import { toInteger } from 'lodash'
+import { inspect, isDeepStrictEqual } from 'node:util'
+import { isEqual, isMatch, toInteger } from 'lodash'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/browsers/bidi_automation'
 import type { Automation } from '../../../lib/automation'
@@ -17,62 +18,87 @@ const flushPromises = () => {
 }
 
 // Helper function to wait for async operations to complete
-const waitForAsyncOperation = async (stub: sinon.SinonStub) => {
-  if (stub.called) {
-    await stub.firstCall.returnValue
+const waitForAsyncOperation = async (stub: Mock) => {
+  if (stub.mock.calls.length) {
+    await stub.mock.results[0].value
   }
 }
 
+// sinon's calledWith: some call whose leading arguments deep-equal `expected`
+const expectCalledWith = (stub: unknown, ...expected: unknown[]) => {
+  const { calls } = (stub as Mock).mock
+  const matched = calls.some((call) => isDeepStrictEqual(call.slice(0, expected.length), expected))
+
+  expect(matched, `expected a call starting with ${inspect(expected, { depth: null })}, got ${inspect(calls, { depth: null })}`).toBe(true)
+}
+
+type ArgsMatcher = (args: unknown[]) => boolean
+
+const withArg = (expected: unknown): ArgsMatcher => (args) => isEqual(args[0], expected)
+const withArgMatching = (partial: object): ArgsMatcher => (args) => isMatch(args[0] as object, partial)
+
+// sinon's withArgs routing: the newest matching route answers, unmatched calls return undefined
+const routedStub = () => {
+  const routes: { matches: ArgsMatcher, respond: () => unknown }[] = []
+  const stub = vi.fn((...args: any[]): any => [...routes].reverse().find((route) => route.matches(args))?.respond())
+
+  return Object.assign(stub, {
+    route: (matches: ArgsMatcher, respond: () => unknown) => {
+      routes.push({ matches, respond })
+    },
+  })
+}
+
 describe('lib/browsers/bidi_automation', () => {
-  context('BidiAutomation', () => {
+  describe('BidiAutomation', () => {
     let mockWebdriverClient: WebDriverClient
     let mockAutomationClient: Automation
 
     beforeEach(() => {
       mockWebdriverClient = new EventEmitter() as WebDriverClient
       mockAutomationClient = {
-        onRequestEvent: sinon.stub(),
-        onBrowserPreRequest: sinon.stub().resolves(),
-        onRemoveBrowserPreRequest: sinon.stub().resolves(),
-        use: sinon.stub(),
+        onRequestEvent: vi.fn(),
+        onBrowserPreRequest: vi.fn().mockResolvedValue(undefined),
+        onRemoveBrowserPreRequest: vi.fn().mockResolvedValue(undefined),
+        use: vi.fn(),
       } as unknown as Automation
     })
 
     it('binds BIDI_EVENTS when a new instance is created', () => {
-      mockWebdriverClient.on = sinon.stub()
+      mockWebdriverClient.on = vi.fn()
 
       BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
 
-      expect(mockWebdriverClient.on).to.have.been.calledWith('network.beforeRequestSent')
-      expect(mockWebdriverClient.on).to.have.been.calledWith('network.responseStarted')
-      expect(mockWebdriverClient.on).to.have.been.calledWith('network.responseCompleted')
-      expect(mockWebdriverClient.on).to.have.been.calledWith('network.fetchError')
-      expect(mockWebdriverClient.on).to.have.been.calledWith('browsingContext.contextCreated')
-      expect(mockWebdriverClient.on).to.have.been.calledWith('browsingContext.contextDestroyed')
+      expectCalledWith(mockWebdriverClient.on, 'network.beforeRequestSent')
+      expectCalledWith(mockWebdriverClient.on, 'network.responseStarted')
+      expectCalledWith(mockWebdriverClient.on, 'network.responseCompleted')
+      expectCalledWith(mockWebdriverClient.on, 'network.fetchError')
+      expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextCreated')
+      expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextDestroyed')
     })
 
     it('unbinds BIDI_EVENTS when close() is called', () => {
-      mockWebdriverClient.off = sinon.stub()
+      mockWebdriverClient.off = vi.fn()
 
       const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
 
       bidiAutomationInstance.close()
 
-      expect(mockWebdriverClient.off).to.have.been.calledWith('network.beforeRequestSent')
-      expect(mockWebdriverClient.off).to.have.been.calledWith('network.responseStarted')
-      expect(mockWebdriverClient.off).to.have.been.calledWith('network.responseCompleted')
-      expect(mockWebdriverClient.off).to.have.been.calledWith('network.fetchError')
-      expect(mockWebdriverClient.off).to.have.been.calledWith('browsingContext.contextCreated')
-      expect(mockWebdriverClient.off).to.have.been.calledWith('browsingContext.contextDestroyed')
+      expectCalledWith(mockWebdriverClient.off, 'network.beforeRequestSent')
+      expectCalledWith(mockWebdriverClient.off, 'network.responseStarted')
+      expectCalledWith(mockWebdriverClient.off, 'network.responseCompleted')
+      expectCalledWith(mockWebdriverClient.off, 'network.fetchError')
+      expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextCreated')
+      expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextDestroyed')
     })
 
     describe('BrowsingContext', () => {
       describe('contextCreated / contextDestroyed', () => {
         beforeEach(() => {
-          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'mockInterceptId' })
-          mockWebdriverClient.networkRemoveIntercept = sinon.stub().resolves()
+          mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'mockInterceptId' })
+          mockWebdriverClient.networkRemoveIntercept = vi.fn().mockResolvedValue(undefined)
           // the AUT is identified by its window.name, seeded with AUT_FRAME_NAME_IDENTIFIER
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
         })
 
         it('does nothing if parent context is not initially assigned', async () => {
@@ -89,10 +115,10 @@ describe('lib/browsers/bidi_automation', () => {
           await flushPromises()
 
           // @ts-expect-error
-          expect(bidiAutomationInstance.autContextId).to.be.undefined
+          expect(bidiAutomationInstance.autContextId).toBeUndefined()
           // @ts-expect-error
-          expect(bidiAutomationInstance.interceptId).to.be.undefined
-          expect(mockWebdriverClient.networkAddIntercept).not.to.have.been.called
+          expect(bidiAutomationInstance.interceptId).toBeUndefined()
+          expect(mockWebdriverClient.networkAddIntercept).not.toHaveBeenCalled()
 
           mockWebdriverClient.emit('browsingContext.contextDestroyed', {
             parent: '123',
@@ -104,13 +130,13 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          expect(mockWebdriverClient.networkRemoveIntercept).not.to.have.been.called
+          expect(mockWebdriverClient.networkRemoveIntercept).not.toHaveBeenCalled()
         })
 
         it('does not set the AUT context for a non-AUT child frame (e.g. the reporter iframe)', async () => {
           // the reporter iframe is also a direct child of the top-level context, but its
           // window.name does not carry the AUT identifier, so it must be ignored
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: 'Cypress Reporter' } })
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ result: { value: 'Cypress Reporter' } })
 
           const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
 
@@ -127,10 +153,10 @@ describe('lib/browsers/bidi_automation', () => {
           await flushPromises()
 
           // @ts-expect-error
-          expect(bidiAutomationInstance.autContextId).to.be.undefined
+          expect(bidiAutomationInstance.autContextId).toBeUndefined()
           // @ts-expect-error
-          expect(bidiAutomationInstance.interceptId).to.be.undefined
-          expect(mockWebdriverClient.networkAddIntercept).not.to.have.been.called
+          expect(bidiAutomationInstance.interceptId).toBeUndefined()
+          expect(mockWebdriverClient.networkAddIntercept).not.toHaveBeenCalled()
         })
 
         describe('correctly sets the AUT frame and intercepts requests from the frame when the top frame is set.', () => {
@@ -152,13 +178,13 @@ describe('lib/browsers/bidi_automation', () => {
             await flushPromises()
 
             // Wait for the networkAddIntercept Promise to resolve if it was called
-            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as sinon.SinonStub)
+            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as Mock)
 
             // @ts-expect-error
-            expect(bidiAutomationInstance.autContextId).to.equal('456')
+            expect(bidiAutomationInstance.autContextId).toBe('456')
             // @ts-expect-error
-            expect(bidiAutomationInstance.interceptId).to.equal('mockInterceptId')
-            expect(mockWebdriverClient.networkAddIntercept).to.have.been.calledWith({ phases: ['beforeRequestSent'], contexts: ['123'] })
+            expect(bidiAutomationInstance.interceptId).toBe('mockInterceptId')
+            expectCalledWith(mockWebdriverClient.networkAddIntercept, { phases: ['beforeRequestSent'], contexts: ['123'] })
 
             // mock the destruction of the AUT context
             mockWebdriverClient.emit('browsingContext.contextDestroyed', {
@@ -172,11 +198,11 @@ describe('lib/browsers/bidi_automation', () => {
             await flushPromises()
 
             // @ts-expect-error
-            expect(bidiAutomationInstance.autContextId).to.equal(undefined)
+            expect(bidiAutomationInstance.autContextId).toBe(undefined)
 
-            expect(mockWebdriverClient.networkRemoveIntercept).not.to.have.been.called
+            expect(mockWebdriverClient.networkRemoveIntercept).not.toHaveBeenCalled()
             // @ts-expect-error
-            expect(bidiAutomationInstance.topLevelContextId).to.equal('123')
+            expect(bidiAutomationInstance.topLevelContextId).toBe('123')
           })
 
           it('Additionally, tears down top frame when the contexts are destroyed', async () => {
@@ -197,13 +223,13 @@ describe('lib/browsers/bidi_automation', () => {
             await flushPromises()
 
             // Wait for the networkAddIntercept Promise to resolve if it was called
-            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as sinon.SinonStub)
+            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as Mock)
 
             // @ts-expect-error
-            expect(bidiAutomationInstance.autContextId).to.equal('456')
+            expect(bidiAutomationInstance.autContextId).toBe('456')
             // @ts-expect-error
-            expect(bidiAutomationInstance.interceptId).to.equal('mockInterceptId')
-            expect(mockWebdriverClient.networkAddIntercept).to.have.been.calledWith({ phases: ['beforeRequestSent'], contexts: ['123'] })
+            expect(bidiAutomationInstance.interceptId).toBe('mockInterceptId')
+            expectCalledWith(mockWebdriverClient.networkAddIntercept, { phases: ['beforeRequestSent'], contexts: ['123'] })
 
             // Then, mock the destruction of the tab
             mockWebdriverClient.emit('browsingContext.contextDestroyed', {
@@ -216,16 +242,16 @@ describe('lib/browsers/bidi_automation', () => {
 
             await flushPromises()
 
-            expect(mockWebdriverClient.networkRemoveIntercept).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.networkRemoveIntercept, {
               intercept: 'mockInterceptId',
             })
 
             // @ts-expect-error
-            expect(bidiAutomationInstance.topLevelContextId).to.be.undefined
+            expect(bidiAutomationInstance.topLevelContextId).toBeUndefined()
             // @ts-expect-error
-            expect(bidiAutomationInstance.interceptId).to.be.undefined
+            expect(bidiAutomationInstance.interceptId).toBeUndefined()
             // @ts-expect-error
-            expect(bidiAutomationInstance.autContextId).to.equal(undefined)
+            expect(bidiAutomationInstance.autContextId).toBe(undefined)
           })
         })
       })
@@ -236,10 +262,10 @@ describe('lib/browsers/bidi_automation', () => {
         let mockRequest: NetworkBeforeRequestSentParametersModified
 
         beforeEach(() => {
-          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'mockInterceptId' })
-          mockWebdriverClient.networkContinueRequest = sinon.stub().resolves()
+          mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'mockInterceptId' })
+          mockWebdriverClient.networkContinueRequest = vi.fn().mockResolvedValue(undefined)
           // the AUT is identified by its window.name, seeded with AUT_FRAME_NAME_IDENTIFIER
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
 
           mockRequest = {
             context: '123',
@@ -317,7 +343,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          expect(mockAutomationClient.onBrowserPreRequest).to.have.been.calledWith({
+          expectCalledWith(mockAutomationClient.onBrowserPreRequest, {
             requestId: 'request1',
             method: 'GET',
             url: 'https://www.foobar.com',
@@ -331,7 +357,7 @@ describe('lib/browsers/bidi_automation', () => {
             cdpRequestWillBeSentReceivedTimestamp: 0,
           })
 
-          expect(mockWebdriverClient.networkContinueRequest).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.networkContinueRequest, {
             request: 'request1',
             headers: [
               {
@@ -360,7 +386,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          expect(mockAutomationClient.onBrowserPreRequest).to.have.been.calledWith({
+          expectCalledWith(mockAutomationClient.onBrowserPreRequest, {
             requestId: 'request1',
             method: 'GET',
             url: 'https://www.foobar.com',
@@ -376,7 +402,7 @@ describe('lib/browsers/bidi_automation', () => {
             cdpRequestWillBeSentReceivedTimestamp: 0,
           })
 
-          expect(mockWebdriverClient.networkContinueRequest).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.networkContinueRequest, {
             request: 'request1',
             headers: [
               {
@@ -416,15 +442,17 @@ describe('lib/browsers/bidi_automation', () => {
         it('swallows "no such request" messages if thrown via killing the Cypress app and removes the related prerequest', async () => {
           BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
 
-          mockWebdriverClient.networkContinueRequest = sinon.stub().throws('no such request')
+          mockWebdriverClient.networkContinueRequest = vi.fn(() => {
+            throw new Error('no such request')
+          })
 
           expect(() => {
             mockWebdriverClient.emit('network.beforeRequestSent', mockRequest)
-          }).not.to.throw()
+          }).not.toThrow()
 
           await flushPromises()
 
-          expect(mockAutomationClient.onRemoveBrowserPreRequest).to.have.been.calledWith('request1')
+          expectCalledWith(mockAutomationClient.onRemoveBrowserPreRequest, 'request1')
         })
 
         it('strips hashes out of the url when adding the prerequest', async () => {
@@ -436,7 +464,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          expect(mockAutomationClient.onBrowserPreRequest).to.have.been.calledWith({
+          expectCalledWith(mockAutomationClient.onBrowserPreRequest, {
             requestId: 'request1',
             method: 'GET',
             url: 'https://www.foobar.com?foo=bar',
@@ -526,7 +554,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             await flushPromises()
 
-            expect(mockAutomationClient.onRemoveBrowserPreRequest).to.have.been.calledWith('request123')
+            expectCalledWith(mockAutomationClient.onRemoveBrowserPreRequest, 'request123')
           })
         })
 
@@ -539,7 +567,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          expect(mockAutomationClient.onRequestEvent).to.have.been.calledWith('response:received', {
+          expectCalledWith(mockAutomationClient.onRequestEvent, 'response:received', {
             requestId: 'request123',
             status: 200,
             headers: {},
@@ -602,7 +630,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          expect(mockAutomationClient.onRemoveBrowserPreRequest).to.have.been.calledWith('request123')
+          expectCalledWith(mockAutomationClient.onRemoveBrowserPreRequest, 'request123')
         })
       })
     })
@@ -620,7 +648,7 @@ describe('lib/browsers/bidi_automation', () => {
         describe('get:cookies', () => {
           describe('returns cookies that match filter via', () => {
             it('data.url / domain', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.www.foobar.com',
                   expiry: 123456789,
@@ -655,7 +683,7 @@ describe('lib/browsers/bidi_automation', () => {
                 url: 'http://www.foobar.com:3500/index.html',
               })
 
-              expect(cookies).to.deep.equal([{
+              expect(cookies).toStrictEqual([{
                 domain: '.www.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -667,7 +695,7 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value1',
               }])
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {
+              expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {
                 // this would filter out secure cookies and prevent sending them in a secure context
                 secure: false,
               } })
@@ -678,7 +706,7 @@ describe('lib/browsers/bidi_automation', () => {
             // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1618113
             // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1648993
             it('data.url / loopback host does not filter out secure cookies', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: 'localhost',
                   expiry: 123456789,
@@ -713,7 +741,7 @@ describe('lib/browsers/bidi_automation', () => {
               })
 
               // the secure cookie is returned even though this is an http url
-              expect(cookies).to.deep.equal([{
+              expect(cookies).toStrictEqual([{
                 domain: 'localhost',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -736,11 +764,11 @@ describe('lib/browsers/bidi_automation', () => {
               }])
 
               // the secure filter is NOT applied for loopback hosts
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+              expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
             })
 
             it('data.url / path', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.www.foobar.com',
                   expiry: 123456789,
@@ -803,7 +831,7 @@ describe('lib/browsers/bidi_automation', () => {
                 url: 'http://app.www.foobar.com:3500/foo/bar/index.html',
               })
 
-              expect(cookies).to.deep.equal([{
+              expect(cookies).toStrictEqual([{
                 domain: '.www.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -835,14 +863,14 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value3',
               }])
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {
+              expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {
                 // this would filter out secure cookies and prevent sending them in a secure context
                 secure: false,
               } })
             })
 
             it('cookie name', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.www.foobar.com',
                   expiry: 123456789,
@@ -876,7 +904,7 @@ describe('lib/browsers/bidi_automation', () => {
                 name: 'key1',
               })
 
-              expect(cookies).to.deep.equal([{
+              expect(cookies).toStrictEqual([{
                 domain: '.www.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -898,7 +926,7 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value1',
               }])
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageGetCookies, {
                 filter: {
                   name: 'key1',
                 },
@@ -906,7 +934,7 @@ describe('lib/browsers/bidi_automation', () => {
             })
 
             it('cookie path', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.www.foobar.com',
                   expiry: 123456789,
@@ -940,7 +968,7 @@ describe('lib/browsers/bidi_automation', () => {
                 path: '/',
               })
 
-              expect(cookies).to.deep.equal([{
+              expect(cookies).toStrictEqual([{
                 domain: '.www.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -962,13 +990,13 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value1',
               }])
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+              expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
             })
           })
 
           describe('domain hierarchy', () => {
             it('returns superdomain related cookies (ex: foobar.com is a super domain of www.foobar.com', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.www.foobar.com',
                   expiry: 123456789,
@@ -1002,7 +1030,7 @@ describe('lib/browsers/bidi_automation', () => {
                 url: 'https://www.foobar.com',
               })
 
-              expect(cookies).to.deep.equal([{
+              expect(cookies).toStrictEqual([{
                 domain: '.www.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -1024,11 +1052,11 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value2',
               }])
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+              expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
             })
 
             it('does NOT return subdomain cookies (ex: www.foobar.com is a sub domain of foobar.com', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                 // this cookie should be filtered out
                   domain: '.www.foobar.com',
@@ -1063,7 +1091,7 @@ describe('lib/browsers/bidi_automation', () => {
                 url: 'https://foobar.com',
               })
 
-              expect(cookies).to.deep.equal([{
+              expect(cookies).toStrictEqual([{
                 domain: '.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -1075,23 +1103,23 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value2',
               }])
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+              expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
             })
           })
 
           it('returns no cookies if no match on the filter', async () => {
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [],
             })
 
             const cookies = await bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', undefined)
 
-            expect(cookies).to.deep.equal([])
-            expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+            expect(cookies).toStrictEqual([])
+            expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
           })
 
           it('returns all cookies if there is no filter', async () => {
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [{
                 domain: '.www.foobar.com',
                 expiry: 123456789,
@@ -1123,7 +1151,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             const cookies = await bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {})
 
-            expect(cookies).to.deep.equal([{
+            expect(cookies).toStrictEqual([{
               domain: '.www.foobar.com',
               expirationDate: 123456789,
               httpOnly: false,
@@ -1145,23 +1173,23 @@ describe('lib/browsers/bidi_automation', () => {
               value: 'value2',
             }])
 
-            expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+            expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
           })
 
           // TODO: do we try/catch this and return an empty array and log the error?
           it('Throws error if for some reason fetching cookies fails', async () => {
             const mockError = new Error('fetching cookies failed!')
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
+            mockWebdriverClient.storageGetCookies = vi.fn().mockRejectedValue(mockError)
 
-            await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {})).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {})).rejects.toBe(mockError)
           })
         })
 
         describe('get:cookie', () => {
           describe('returns cookies that match filter via', () => {
             it('cookie name', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.www.foobar.com',
                   expiry: 123456789,
@@ -1182,7 +1210,7 @@ describe('lib/browsers/bidi_automation', () => {
                 name: 'key1',
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 domain: '.www.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -1194,7 +1222,7 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value1',
               })
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageGetCookies, {
                 filter: {
                   name: 'key1',
                 },
@@ -1202,7 +1230,7 @@ describe('lib/browsers/bidi_automation', () => {
             })
 
             it('cookie path', async () => {
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.www.foobar.com',
                   expiry: 123456789,
@@ -1223,7 +1251,7 @@ describe('lib/browsers/bidi_automation', () => {
                 path: '/foobar',
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 domain: '.www.foobar.com',
                 expirationDate: 123456789,
                 httpOnly: false,
@@ -1235,12 +1263,12 @@ describe('lib/browsers/bidi_automation', () => {
                 value: 'value1',
               })
 
-              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+              expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
             })
           })
 
           it('returns the first matching cookie', async () => {
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [{
                 domain: '.www.foobar.com',
                 expiry: 123456789,
@@ -1274,7 +1302,7 @@ describe('lib/browsers/bidi_automation', () => {
               path: '/foobar',
             })
 
-            expect(cookie).to.deep.equal({
+            expect(cookie).toStrictEqual({
               domain: '.www.foobar.com',
               expirationDate: 123456789,
               httpOnly: false,
@@ -1286,28 +1314,28 @@ describe('lib/browsers/bidi_automation', () => {
               value: 'value1',
             })
 
-            expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+            expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
           })
 
           it('returns null if no cookie is found', async () => {
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [],
             })
 
             const cookies = await bidiAutomationInstance.automationMiddleware.onRequest('get:cookie', {})
 
-            expect(cookies).to.equal(null)
+            expect(cookies).toBe(null)
 
-            expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+            expectCalledWith(mockWebdriverClient.storageGetCookies, { filter: {} })
           })
 
           // TODO: do we try/catch this and return an empty array and log the error?
           it('Throws error if for some reason fetching cookies fails', async () => {
             const mockError = new Error('fetching cookies failed!')
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
+            mockWebdriverClient.storageGetCookies = vi.fn().mockRejectedValue(mockError)
 
-            await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookie', {})).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookie', {})).rejects.toBe(mockError)
           })
         })
 
@@ -1324,9 +1352,9 @@ describe('lib/browsers/bidi_automation', () => {
               expirationDate: 1234567890.123,
             }
 
-            mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+            mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [{
                 domain: '.foobar.com',
                 expiry: 1234567890,
@@ -1345,7 +1373,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
-            expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageSetCookie, {
               cookie: {
                 name: 'testCookie',
                 value: { type: 'string', value: 'testValue' },
@@ -1358,7 +1386,7 @@ describe('lib/browsers/bidi_automation', () => {
               },
             })
 
-            expect(cookie).to.deep.equal({
+            expect(cookie).toStrictEqual({
               name: 'testCookie',
               value: 'testValue',
               domain: '.foobar.com',
@@ -1385,9 +1413,9 @@ describe('lib/browsers/bidi_automation', () => {
 
             const mockError = new Error('setting cookie failed!')
 
-            mockWebdriverClient.storageSetCookie = sinon.stub().rejects(mockError)
+            mockWebdriverClient.storageSetCookie = vi.fn().mockRejectedValue(mockError)
 
-            await expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cookie)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cookie)).rejects.toBe(mockError)
           })
 
           describe('parsing', () => {
@@ -1402,9 +1430,9 @@ describe('lib/browsers/bidi_automation', () => {
                 httpOnly: true,
               }
 
-              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+              mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.foobar.com',
                   httpOnly: true,
@@ -1423,7 +1451,7 @@ describe('lib/browsers/bidi_automation', () => {
 
               const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
-              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageSetCookie, {
                 cookie: {
                   name: 'testCookie',
                   value: { type: 'string', value: 'testValue' },
@@ -1436,7 +1464,7 @@ describe('lib/browsers/bidi_automation', () => {
                 },
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 name: 'testCookie',
                 value: 'testValue',
                 domain: '.foobar.com',
@@ -1461,9 +1489,9 @@ describe('lib/browsers/bidi_automation', () => {
                 expirationDate: -Infinity,
               }
 
-              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+              mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.foobar.com',
                   httpOnly: true,
@@ -1482,7 +1510,7 @@ describe('lib/browsers/bidi_automation', () => {
 
               const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
-              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageSetCookie, {
                 cookie: {
                   name: 'testCookie',
                   value: { type: 'string', value: 'testValue' },
@@ -1495,7 +1523,7 @@ describe('lib/browsers/bidi_automation', () => {
                 },
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 name: 'testCookie',
                 value: 'testValue',
                 domain: '.foobar.com',
@@ -1520,9 +1548,9 @@ describe('lib/browsers/bidi_automation', () => {
                 expirationDate: 12345.67894,
               }
 
-              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+              mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.foobar.com',
                   httpOnly: true,
@@ -1541,7 +1569,7 @@ describe('lib/browsers/bidi_automation', () => {
 
               const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
-              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageSetCookie, {
                 cookie: {
                   name: 'testCookie',
                   value: { type: 'string', value: 'testValue' },
@@ -1554,7 +1582,7 @@ describe('lib/browsers/bidi_automation', () => {
                 },
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 name: 'testCookie',
                 value: 'testValue',
                 domain: '.foobar.com',
@@ -1579,9 +1607,9 @@ describe('lib/browsers/bidi_automation', () => {
                 expirationDate: Infinity,
               }
 
-              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+              mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.foobar.com',
                   httpOnly: true,
@@ -1600,7 +1628,7 @@ describe('lib/browsers/bidi_automation', () => {
 
               const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
-              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageSetCookie, {
                 cookie: {
                   name: 'testCookie',
                   value: { type: 'string', value: 'testValue' },
@@ -1613,7 +1641,7 @@ describe('lib/browsers/bidi_automation', () => {
                 },
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 name: 'testCookie',
                 value: 'testValue',
                 domain: '.foobar.com',
@@ -1638,9 +1666,9 @@ describe('lib/browsers/bidi_automation', () => {
                 expirationDate: null,
               }
 
-              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+              mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.foobar.com',
                   httpOnly: true,
@@ -1659,7 +1687,7 @@ describe('lib/browsers/bidi_automation', () => {
 
               const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
-              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageSetCookie, {
                 cookie: {
                   name: 'testCookie',
                   value: { type: 'string', value: 'testValue' },
@@ -1672,7 +1700,7 @@ describe('lib/browsers/bidi_automation', () => {
                 },
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 name: 'testCookie',
                 value: 'testValue',
                 domain: '.foobar.com',
@@ -1697,9 +1725,9 @@ describe('lib/browsers/bidi_automation', () => {
                 expirationDate: 1234567890.123,
               }
 
-              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+              mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+              mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
                 cookies: [{
                   domain: '.foobar.com',
                   expiry: 1234567890,
@@ -1718,7 +1746,7 @@ describe('lib/browsers/bidi_automation', () => {
 
               const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
-              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+              expectCalledWith(mockWebdriverClient.storageSetCookie, {
                 cookie: {
                   name: 'testCookie',
                   value: { type: 'string', value: 'testValue' },
@@ -1731,7 +1759,7 @@ describe('lib/browsers/bidi_automation', () => {
                 },
               })
 
-              expect(cookie).to.deep.equal({
+              expect(cookie).toStrictEqual({
                 name: 'testCookie',
                 value: 'testValue',
                 domain: '.foobar.com',
@@ -1771,13 +1799,13 @@ describe('lib/browsers/bidi_automation', () => {
               },
             ]
 
-            mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+            mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
             const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('add:cookies', cookies)
 
-            expect(returnValue).to.be.undefined
+            expect(returnValue).toBeUndefined()
 
-            expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageSetCookie, {
               cookie: {
                 name: 'testCookie1',
                 value: { type: 'string', value: 'testValue1' },
@@ -1790,7 +1818,7 @@ describe('lib/browsers/bidi_automation', () => {
               },
             })
 
-            expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageSetCookie, {
               cookie: {
                 name: 'testCookie2',
                 value: { type: 'string', value: 'testValue2' },
@@ -1830,9 +1858,9 @@ describe('lib/browsers/bidi_automation', () => {
 
             const mockError = new Error('adding cookies failed!')
 
-            mockWebdriverClient.storageSetCookie = sinon.stub().rejects(mockError)
+            mockWebdriverClient.storageSetCookie = vi.fn().mockRejectedValue(mockError)
 
-            await expect(bidiAutomationInstance.automationMiddleware.onRequest('add:cookies', cookies)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('add:cookies', cookies)).rejects.toBe(mockError)
           })
         })
 
@@ -1861,15 +1889,15 @@ describe('lib/browsers/bidi_automation', () => {
               },
             ]
 
-            mockWebdriverClient.storageDeleteCookies = sinon.stub().resolves()
+            mockWebdriverClient.storageDeleteCookies = vi.fn().mockResolvedValue(undefined)
 
-            mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+            mockWebdriverClient.storageSetCookie = vi.fn().mockResolvedValue(undefined)
 
             const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookies', cookies)
 
-            expect(returnValue).to.be.undefined
+            expect(returnValue).toBeUndefined()
 
-            expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageSetCookie, {
               cookie: {
                 name: 'testCookie1',
                 value: { type: 'string', value: 'testValue1' },
@@ -1882,7 +1910,7 @@ describe('lib/browsers/bidi_automation', () => {
               },
             })
 
-            expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageSetCookie, {
               cookie: {
                 name: 'testCookie2',
                 value: { type: 'string', value: 'testValue2' },
@@ -1896,7 +1924,7 @@ describe('lib/browsers/bidi_automation', () => {
             })
 
             // deletes all cookies before adding new ones, which is the main difference between set:cookies and add:cookies
-            expect(mockWebdriverClient.storageDeleteCookies).to.have.been.calledWith({})
+            expectCalledWith(mockWebdriverClient.storageDeleteCookies, {})
           })
 
           it('throws an error if setting any cookie fails', async () => {
@@ -1925,13 +1953,13 @@ describe('lib/browsers/bidi_automation', () => {
 
             const mockError = new Error('setting cookie failed!')
 
-            mockWebdriverClient.storageDeleteCookies = sinon.stub().resolves()
+            mockWebdriverClient.storageDeleteCookies = vi.fn().mockResolvedValue(undefined)
 
-            mockWebdriverClient.storageSetCookie = sinon.stub().rejects(mockError)
+            mockWebdriverClient.storageSetCookie = vi.fn().mockRejectedValue(mockError)
 
-            await expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookies', cookies)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookies', cookies)).rejects.toBe(mockError)
 
-            expect(mockWebdriverClient.storageDeleteCookies).to.have.been.calledWith({})
+            expectCalledWith(mockWebdriverClient.storageDeleteCookies, {})
           })
         })
 
@@ -1947,7 +1975,7 @@ describe('lib/browsers/bidi_automation', () => {
               sameSite: 'no_restriction',
             }
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [{
                 name: 'testCookie',
                 value: {
@@ -1963,11 +1991,11 @@ describe('lib/browsers/bidi_automation', () => {
               }],
             })
 
-            mockWebdriverClient.storageDeleteCookies = sinon.stub().resolves()
+            mockWebdriverClient.storageDeleteCookies = vi.fn().mockResolvedValue(undefined)
 
             const clearedCookie = await bidiAutomationInstance.automationMiddleware.onRequest('clear:cookie', cookieToClear)
 
-            expect(mockWebdriverClient.storageDeleteCookies).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageDeleteCookies, {
               filter: {
                 name: 'testCookie',
                 value: {
@@ -1982,7 +2010,7 @@ describe('lib/browsers/bidi_automation', () => {
               },
             })
 
-            expect(clearedCookie).to.deep.equal({
+            expect(clearedCookie).toStrictEqual({
               name: 'testCookie',
               value: 'testValue',
               domain: '.foobar.com',
@@ -2006,13 +2034,13 @@ describe('lib/browsers/bidi_automation', () => {
               sameSite: 'no_restriction',
             }
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [],
             })
 
             const result = await bidiAutomationInstance.automationMiddleware.onRequest('clear:cookie', cookie)
 
-            expect(result).to.be.undefined
+            expect(result).toBeUndefined()
           })
 
           it('throws an error if clearing a cookie fails', async () => {
@@ -2028,9 +2056,9 @@ describe('lib/browsers/bidi_automation', () => {
 
             const mockError = new Error('clearing cookie failed!')
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
+            mockWebdriverClient.storageGetCookies = vi.fn().mockRejectedValue(mockError)
 
-            await expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookie', cookie)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookie', cookie)).rejects.toBe(mockError)
           })
         })
 
@@ -2054,7 +2082,7 @@ describe('lib/browsers/bidi_automation', () => {
               sameSite: 'lax',
             }]
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [{
                 name: 'testCookie',
                 value: {
@@ -2082,11 +2110,11 @@ describe('lib/browsers/bidi_automation', () => {
               }],
             })
 
-            mockWebdriverClient.storageDeleteCookies = sinon.stub().resolves()
+            mockWebdriverClient.storageDeleteCookies = vi.fn().mockResolvedValue(undefined)
 
             const clearedCookie = await bidiAutomationInstance.automationMiddleware.onRequest('clear:cookies', cookiesToClear)
 
-            expect(mockWebdriverClient.storageDeleteCookies).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageDeleteCookies, {
               filter: {
                 name: 'testCookie',
                 value: {
@@ -2101,7 +2129,7 @@ describe('lib/browsers/bidi_automation', () => {
               },
             })
 
-            expect(mockWebdriverClient.storageDeleteCookies).to.have.been.calledWith({
+            expectCalledWith(mockWebdriverClient.storageDeleteCookies, {
               filter: {
 
                 name: 'testCookie2',
@@ -2118,7 +2146,7 @@ describe('lib/browsers/bidi_automation', () => {
               },
             })
 
-            expect(clearedCookie).to.deep.equal([{
+            expect(clearedCookie).toStrictEqual([{
               name: 'testCookie',
               value: 'testValue',
               domain: '.foobar.com',
@@ -2153,13 +2181,13 @@ describe('lib/browsers/bidi_automation', () => {
               sameSite: 'no_restriction',
             }]
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({
               cookies: [],
             })
 
             const result = await bidiAutomationInstance.automationMiddleware.onRequest('clear:cookies', cookies)
 
-            expect(result).to.deep.equal([])
+            expect(result).toStrictEqual([])
           })
 
           it('throws an error if clearing a cookie fails', async () => {
@@ -2175,9 +2203,9 @@ describe('lib/browsers/bidi_automation', () => {
 
             const mockError = new Error('clearing cookies failed!')
 
-            mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
+            mockWebdriverClient.storageGetCookies = vi.fn().mockRejectedValue(mockError)
 
-            await expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookies', cookies)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookies', cookies)).rejects.toBe(mockError)
           })
         })
       })
@@ -2185,29 +2213,29 @@ describe('lib/browsers/bidi_automation', () => {
       it('returns "true" when "is:automation:client:connected"', async () => {
         const isAutomationClientConnected = await bidiAutomationInstance.automationMiddleware.onRequest('is:automation:client:connected', undefined)
 
-        expect(isAutomationClientConnected).to.be.true
+        expect(isAutomationClientConnected).toBe(true)
       })
 
       describe('take:screenshot', () => {
         it('successfully takes a screenshot', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
             contexts: [{ context: '123' }],
           })
 
-          mockWebdriverClient.browsingContextActivate = sinon.stub().resolves()
-          mockWebdriverClient.browsingContextCaptureScreenshot = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextActivate = vi.fn().mockResolvedValue(undefined)
+          mockWebdriverClient.browsingContextCaptureScreenshot = vi.fn().mockResolvedValue({
             data: 'iVBORw0KGgoAAAANSUhEUgAAAAUA',
           })
 
           const screenshot = await bidiAutomationInstance.automationMiddleware.onRequest('take:screenshot', {})
 
-          expect(screenshot).to.equal('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA')
-          expect(mockWebdriverClient.browsingContextGetTree).to.have.been.calledWith({})
-          expect(mockWebdriverClient.browsingContextActivate).to.have.been.calledWith({
+          expect(screenshot).toBe('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA')
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, {})
+          expectCalledWith(mockWebdriverClient.browsingContextActivate, {
             context: '123',
           })
 
-          expect(mockWebdriverClient.browsingContextCaptureScreenshot).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.browsingContextCaptureScreenshot, {
             context: '123',
             format: {
               type: 'png',
@@ -2217,66 +2245,66 @@ describe('lib/browsers/bidi_automation', () => {
         it('throws an error if taking a screenshot fails', async () => {
           const mockError = new Error('taking screenshot failed!')
 
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
             contexts: [{ context: '123' }],
           })
 
-          mockWebdriverClient.browsingContextActivate = sinon.stub().resolves()
-          mockWebdriverClient.browsingContextCaptureScreenshot = sinon.stub().rejects(mockError)
+          mockWebdriverClient.browsingContextActivate = vi.fn().mockResolvedValue(undefined)
+          mockWebdriverClient.browsingContextCaptureScreenshot = vi.fn().mockRejectedValue(mockError)
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('take:screenshot', {})).to.be.rejectedWith(mockError)
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('take:screenshot', {})).rejects.toBe(mockError)
         })
       })
 
       it('throws a AutomationNotImplemented error when "reset:browser:state" is emitted to inform the default automation client (web extension) to handle it', async () => {
-        await expect(bidiAutomationInstance.automationMiddleware.onRequest('reset:browser:state', {})).to.be.rejectedWith(`Automation command 'reset:browser:state' not implemented by BiDiAutomation`)
+        await expect(bidiAutomationInstance.automationMiddleware.onRequest('reset:browser:state', {})).rejects.toThrow(`Automation command 'reset:browser:state' not implemented by BiDiAutomation`)
       })
 
       describe('reset:browser:tabs:for:next:spec', () => {
         it('successfully recreates the test tab (shouldKeepTabOpen=true) closes all other tabs', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
             contexts: [{ context: '123' }],
           })
 
-          mockWebdriverClient.browsingContextCreate = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextCreate = vi.fn().mockResolvedValue({
             context: '456',
           })
 
-          mockWebdriverClient.browsingContextClose = sinon.stub().resolves()
+          mockWebdriverClient.browsingContextClose = vi.fn().mockResolvedValue(undefined)
 
           const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('reset:browser:tabs:for:next:spec', {
             shouldKeepTabOpen: true,
           })
 
-          expect(returnValue).to.be.undefined
-          expect(mockWebdriverClient.browsingContextGetTree).to.have.been.calledWith({})
-          expect(mockWebdriverClient.browsingContextCreate).to.have.been.calledWith({
+          expect(returnValue).toBeUndefined()
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, {})
+          expectCalledWith(mockWebdriverClient.browsingContextCreate, {
             type: 'tab',
           })
 
-          expect(mockWebdriverClient.browsingContextClose).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.browsingContextClose, {
             context: '123',
           })
         })
 
         it('successfully closes all tabs (shouldKeepTabOpen=false)', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
             contexts: [{ context: '123' }],
           })
 
-          mockWebdriverClient.browsingContextCreate = sinon.stub().resolves()
+          mockWebdriverClient.browsingContextCreate = vi.fn().mockResolvedValue(undefined)
 
-          mockWebdriverClient.browsingContextClose = sinon.stub().resolves()
+          mockWebdriverClient.browsingContextClose = vi.fn().mockResolvedValue(undefined)
 
           const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('reset:browser:tabs:for:next:spec', {
             shouldKeepTabOpen: false,
           })
 
-          expect(returnValue).to.be.undefined
-          expect(mockWebdriverClient.browsingContextGetTree).to.have.been.calledWith({})
-          expect(mockWebdriverClient.browsingContextCreate).to.have.not.been.called
+          expect(returnValue).toBeUndefined()
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, {})
+          expect(mockWebdriverClient.browsingContextCreate).not.toHaveBeenCalled()
 
-          expect(mockWebdriverClient.browsingContextClose).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.browsingContextClose, {
             context: '123',
           })
         })
@@ -2285,17 +2313,17 @@ describe('lib/browsers/bidi_automation', () => {
       describe('focus:browser:window', () => {
         // TODO: might need to rewrite this test and just pass in the AUT context id that exists in the class
         it('focuses the browser window (AUT should be first window)', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
             contexts: [{ context: '123' }],
           })
 
-          mockWebdriverClient.browsingContextActivate = sinon.stub().resolves()
+          mockWebdriverClient.browsingContextActivate = vi.fn().mockResolvedValue(undefined)
 
           const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('focus:browser:window', {})
 
-          expect(returnValue).to.be.undefined
-          expect(mockWebdriverClient.browsingContextGetTree).to.have.been.calledWith({})
-          expect(mockWebdriverClient.browsingContextActivate).to.have.been.calledWith({
+          expect(returnValue).toBeUndefined()
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, {})
+          expectCalledWith(mockWebdriverClient.browsingContextActivate, {
             context: '123',
           })
         })
@@ -2303,33 +2331,33 @@ describe('lib/browsers/bidi_automation', () => {
 
       describe('perform:user:gesture', () => {
         it('synthesizes a trusted pointer click in the top-level context to grant transient activation', async () => {
-          mockWebdriverClient.inputPerformActions = sinon.stub().resolves()
-          mockWebdriverClient.inputReleaseActions = sinon.stub().resolves()
+          mockWebdriverClient.inputPerformActions = vi.fn().mockResolvedValue(undefined)
+          mockWebdriverClient.inputReleaseActions = vi.fn().mockResolvedValue(undefined)
 
           bidiAutomationInstance.setTopLevelContextId('123')
 
           const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})
 
-          expect(returnValue).to.be.undefined
-          expect(mockWebdriverClient.inputPerformActions).to.have.been.calledOnce
+          expect(returnValue).toBeUndefined()
+          expect(mockWebdriverClient.inputPerformActions).toHaveBeenCalledOnce()
 
           // the `id` is non-deterministic (timestamped) so assert on the meaningful shape directly
-          const performArgs = (mockWebdriverClient.inputPerformActions as sinon.SinonStub).firstCall.args[0]
+          const performArgs = (mockWebdriverClient.inputPerformActions as Mock).mock.calls[0][0]
 
-          expect(performArgs.context).to.equal('123')
-          expect(performArgs.actions).to.have.length(1)
-          expect(performArgs.actions[0]).to.include({
+          expect(performArgs.context).toBe('123')
+          expect(performArgs.actions).toHaveLength(1)
+          expect(performArgs.actions[0]).toMatchObject({
             type: 'pointer',
           })
 
-          expect(performArgs.actions[0].parameters).to.deep.equal({ pointerType: 'mouse' })
-          expect(performArgs.actions[0].actions).to.deep.equal([
+          expect(performArgs.actions[0].parameters).toStrictEqual({ pointerType: 'mouse' })
+          expect(performArgs.actions[0].actions).toStrictEqual([
             { type: 'pointerMove', x: 0, y: 0 },
             { type: 'pointerDown', button: 0 },
             { type: 'pointerUp', button: 0 },
           ])
 
-          expect(mockWebdriverClient.inputReleaseActions).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.inputReleaseActions, {
             context: '123',
           })
         })
@@ -2337,13 +2365,13 @@ describe('lib/browsers/bidi_automation', () => {
         it('fails gracefully if no top-level context is initialized', async () => {
           bidiAutomationInstance.setTopLevelContextId(undefined)
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})).to.be.rejectedWith('Cannot perform user gesture: no top-level context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})).rejects.toThrow('Cannot perform user gesture: no top-level context initialized')
         })
       })
 
       describe('get:aut:url', () => {
         it('gets the application url', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
             contexts: [{ context: '123', url: 'http://localhost:3500/fixtures/dom.html' }],
           })
 
@@ -2352,31 +2380,31 @@ describe('lib/browsers/bidi_automation', () => {
 
           const url = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
 
-          expect(mockWebdriverClient.browsingContextGetTree).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, {
             root: '123',
           })
 
-          expect(url).to.equal('http://localhost:3500/fixtures/dom.html')
+          expect(url).toBe('http://localhost:3500/fixtures/dom.html')
         })
 
         it('fails gracefully if no AUT context is initialized', async () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
         })
       })
 
       describe('reload:aut:frame', () => {
         it('uses scriptEvaluate to reload the AUT window', async () => {
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves()
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue(undefined)
 
           //@ts-expect-error
           bidiAutomationInstance.autContextId = '123'
 
           await bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', { forceReload: false })
 
-          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.scriptEvaluate, {
             expression: `window.location.reload(false)`,
             target: {
               context: '123',
@@ -2386,14 +2414,14 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('uses scriptEvaluate to reload the AUT window with the force option', async () => {
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves()
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue(undefined)
 
           //@ts-expect-error
           bidiAutomationInstance.autContextId = '123'
 
           await bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', { forceReload: true })
 
-          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.scriptEvaluate, {
             expression: `window.location.reload(true)`,
             target: {
               context: '123',
@@ -2406,20 +2434,20 @@ describe('lib/browsers/bidi_automation', () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', undefined)).to.be.rejectedWith('Cannot reload AUT frame: no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', undefined)).rejects.toThrow('Cannot reload AUT frame: no AUT context initialized')
         })
       })
 
       describe('navigate:aut:history', () => {
         it('uses scriptEvaluate to navigate the AUT window history', async () => {
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves()
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue(undefined)
 
           //@ts-expect-error
           bidiAutomationInstance.autContextId = '123'
 
           await bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', { historyNumber: -1 })
 
-          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.scriptEvaluate, {
             expression: `window.history.go(-1)`,
             target: {
               context: '123',
@@ -2432,13 +2460,13 @@ describe('lib/browsers/bidi_automation', () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', undefined)).to.be.rejectedWith('Cannot navigate AUT frame history: no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', undefined)).rejects.toThrow('Cannot navigate AUT frame history: no AUT context initialized')
         })
       })
 
       describe('get:aut:title', () => {
         it('uses scriptEvaluate to get the AUT title', async () => {
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({
             result: {
               value: 'test title',
             },
@@ -2449,7 +2477,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           const title = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)
 
-          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+          expectCalledWith(mockWebdriverClient.scriptEvaluate, {
             expression: `window.document.title`,
             target: {
               context: '123',
@@ -2457,20 +2485,20 @@ describe('lib/browsers/bidi_automation', () => {
             awaitPromise: false,
           })
 
-          expect(title).to.equal('test title')
+          expect(title).toBe('test title')
         })
 
         it('fails gracefully if no AUT context is initialized', async () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)).to.be.rejectedWith('Cannot get AUT title no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)).rejects.toThrow('Cannot get AUT title no AUT context initialized')
         })
       })
 
       it('throws an error if an event passed in does not exist', async () => {
         // @ts-expect-error
-        await expect(bidiAutomationInstance.automationMiddleware.onRequest('foo:bar:baz', {})).to.be.rejectedWith('Automation command \'foo:bar:baz\' not implemented by BiDiAutomation')
+        await expect(bidiAutomationInstance.automationMiddleware.onRequest('foo:bar:baz', {})).rejects.toThrow('Automation command \'foo:bar:baz\' not implemented by BiDiAutomation')
       })
 
       describe('AUT context resolution', () => {
@@ -2485,13 +2513,13 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('waits for the AUT context to be identified instead of failing during the identification window', async () => {
-          const getTree = sinon.stub()
+          const getTree = routedStub()
 
-          getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [] }] })
-          getTree.withArgs({ root: 'aut' }).resolves({ contexts: [{ context: 'aut', url: 'http://localhost:3500/index.html' }] })
+          getTree.route(withArg({ root: 'top' }), async () => ({ contexts: [{ context: 'top', children: [] }] }))
+          getTree.route(withArg({ root: 'aut' }), async () => ({ contexts: [{ context: 'aut', url: 'http://localhost:3500/index.html' }] }))
           mockWebdriverClient.browsingContextGetTree = getTree
-          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: AUT_NAME } })
-          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ result: { value: AUT_NAME } })
+          mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'intercept-1' })
 
           const request = bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
 
@@ -2499,42 +2527,42 @@ describe('lib/browsers/bidi_automation', () => {
             mockWebdriverClient.emit('browsingContext.contextCreated', { context: 'aut', parent: 'top' })
           }, 50)
 
-          expect(await request).to.equal('http://localhost:3500/index.html')
+          expect(await request).toBe('http://localhost:3500/index.html')
         })
 
         it('heals a missed contextCreated by re-deriving the AUT from the browsing context tree', async () => {
-          const getTree = sinon.stub()
+          const getTree = routedStub()
 
-          getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [{ context: 'reporter' }, { context: 'aut' }] }] })
-          getTree.withArgs({ root: 'aut' }).resolves({ contexts: [{ context: 'aut', url: 'http://localhost:3500/healed.html' }] })
+          getTree.route(withArg({ root: 'top' }), async () => ({ contexts: [{ context: 'top', children: [{ context: 'reporter' }, { context: 'aut' }] }] }))
+          getTree.route(withArg({ root: 'aut' }), async () => ({ contexts: [{ context: 'aut', url: 'http://localhost:3500/healed.html' }] }))
           mockWebdriverClient.browsingContextGetTree = getTree
 
-          const scriptEvaluate = sinon.stub()
+          const scriptEvaluate = routedStub()
 
-          scriptEvaluate.withArgs(sinon.match({ target: { context: 'reporter' } })).resolves({ result: { value: 'reporter-frame' } })
-          scriptEvaluate.withArgs(sinon.match({ target: { context: 'aut' } })).resolves({ result: { value: AUT_NAME } })
+          scriptEvaluate.route(withArgMatching({ target: { context: 'reporter' } }), async () => ({ result: { value: 'reporter-frame' } }))
+          scriptEvaluate.route(withArgMatching({ target: { context: 'aut' } }), async () => ({ result: { value: AUT_NAME } }))
           mockWebdriverClient.scriptEvaluate = scriptEvaluate
-          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+          mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'intercept-1' })
 
           const url = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
 
-          expect(url).to.equal('http://localhost:3500/healed.html')
+          expect(url).toBe('http://localhost:3500/healed.html')
           // the healed AUT still needs the top-level request intercept
-          expect(mockWebdriverClient.networkAddIntercept).to.have.been.calledWith({ phases: ['beforeRequestSent'], contexts: ['top'] })
+          expectCalledWith(mockWebdriverClient.networkAddIntercept, { phases: ['beforeRequestSent'], contexts: ['top'] })
         })
 
         it('resolves a request issued in the gap between the AUT context being destroyed and recreated', async () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = 'old-aut'
 
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [] }] })
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [{ context: 'top', children: [] }] })
 
-          const scriptEvaluate = sinon.stub()
+          const scriptEvaluate = routedStub()
 
-          scriptEvaluate.withArgs(sinon.match({ expression: 'window.name' })).resolves({ result: { value: AUT_NAME } })
-          scriptEvaluate.withArgs(sinon.match({ expression: 'window.location.reload(false)' })).resolves()
+          scriptEvaluate.route(withArgMatching({ expression: 'window.name' }), async () => ({ result: { value: AUT_NAME } }))
+          scriptEvaluate.route(withArgMatching({ expression: 'window.location.reload(false)' }), async () => undefined)
           mockWebdriverClient.scriptEvaluate = scriptEvaluate
-          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+          mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'intercept-1' })
 
           mockWebdriverClient.emit('browsingContext.contextDestroyed', { context: 'old-aut', parent: 'top' })
 
@@ -2546,7 +2574,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           await request
 
-          expect(scriptEvaluate).to.have.been.calledWith({
+          expectCalledWith(scriptEvaluate, {
             expression: 'window.location.reload(false)',
             target: {
               context: 'new-aut',
@@ -2556,29 +2584,29 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('fails with the original error when the AUT context never resolves within the bounded wait', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [] }] })
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [{ context: 'top', children: [] }] })
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
         })
 
         it('stays bounded by the timeout when the tree query hangs', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().returns(new Promise(() => {}))
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockReturnValue(new Promise(() => {}))
 
           const start = Date.now()
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
-          expect(Date.now() - start).to.be.lessThan(1000)
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
+          expect(Date.now() - start).toBeLessThan(1000)
         })
 
         it('discards an identification that lands after the top-level context was destroyed', async () => {
           let resolveName!: (value: unknown) => void
 
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [{ context: 'aut' }] }] })
-          mockWebdriverClient.scriptEvaluate = sinon.stub().returns(new Promise((res) => {
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [{ context: 'top', children: [{ context: 'aut' }] }] })
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockReturnValue(new Promise((res) => {
             resolveName = res
           }))
 
-          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+          mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'intercept-1' })
 
           const request = bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
 
@@ -2587,31 +2615,33 @@ describe('lib/browsers/bidi_automation', () => {
             resolveName({ result: { value: AUT_NAME } })
           }, 30)
 
-          await expect(request).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+          await expect(request).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
 
           //@ts-expect-error
-          expect(bidiAutomationInstance.autContextId).to.be.undefined
-          expect(mockWebdriverClient.networkAddIntercept).not.to.have.been.called
+          expect(bidiAutomationInstance.autContextId).toBeUndefined()
+          expect(mockWebdriverClient.networkAddIntercept).not.toHaveBeenCalled()
         })
 
         it('discards an identification whose candidate frame was destroyed during the window.name read and identifies the recreated frame', async () => {
           let resolveName!: (value: unknown) => void
 
-          const getTree = sinon.stub()
+          const getTree = routedStub()
 
-          getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [{ context: 'aut' }] }] })
-          getTree.withArgs({ root: 'new-aut' }).resolves({ contexts: [{ context: 'new-aut', url: 'http://localhost:3500/recreated.html' }] })
+          getTree.route(withArg({ root: 'top' }), async () => ({ contexts: [{ context: 'top', children: [{ context: 'aut' }] }] }))
+          getTree.route(withArg({ root: 'new-aut' }), async () => ({ contexts: [{ context: 'new-aut', url: 'http://localhost:3500/recreated.html' }] }))
           mockWebdriverClient.browsingContextGetTree = getTree
 
-          const scriptEvaluate = sinon.stub()
+          const scriptEvaluate = routedStub()
 
-          scriptEvaluate.withArgs(sinon.match({ target: { context: 'aut' } })).returns(new Promise((res) => {
+          const pendingName = new Promise((res) => {
             resolveName = res
-          }))
+          })
 
-          scriptEvaluate.withArgs(sinon.match({ target: { context: 'new-aut' } })).resolves({ result: { value: AUT_NAME } })
+          scriptEvaluate.route(withArgMatching({ target: { context: 'aut' } }), () => pendingName)
+
+          scriptEvaluate.route(withArgMatching({ target: { context: 'new-aut' } }), async () => ({ result: { value: AUT_NAME } }))
           mockWebdriverClient.scriptEvaluate = scriptEvaluate
-          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+          mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'intercept-1' })
 
           const request = bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
 
@@ -2619,7 +2649,7 @@ describe('lib/browsers/bidi_automation', () => {
             // the frame is torn down while its window.name read is in flight;
             // the read still resolving with the AUT name must not record it
             mockWebdriverClient.emit('browsingContext.contextDestroyed', { context: 'aut', parent: 'top' })
-            getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [] }] })
+            getTree.route(withArg({ root: 'top' }), async () => ({ contexts: [{ context: 'top', children: [] }] }))
             resolveName({ result: { value: AUT_NAME } })
           }, 30)
 
@@ -2627,13 +2657,13 @@ describe('lib/browsers/bidi_automation', () => {
             mockWebdriverClient.emit('browsingContext.contextCreated', { context: 'new-aut', parent: 'top' })
           }, 60)
 
-          expect(await request).to.equal('http://localhost:3500/recreated.html')
+          expect(await request).toBe('http://localhost:3500/recreated.html')
           //@ts-expect-error
-          expect(bidiAutomationInstance.autContextId).to.equal('new-aut')
+          expect(bidiAutomationInstance.autContextId).toBe('new-aut')
         })
 
         it('fails a waiting request when the top-level context is destroyed instead of waiting out the timeout', async () => {
-          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [] }] })
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [{ context: 'top', children: [] }] })
 
           const start = Date.now()
           const request = bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
@@ -2642,8 +2672,8 @@ describe('lib/browsers/bidi_automation', () => {
             mockWebdriverClient.emit('browsingContext.contextDestroyed', { context: 'top' })
           }, 30)
 
-          await expect(request).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
-          expect(Date.now() - start).to.be.lessThan(400)
+          await expect(request).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
+          expect(Date.now() - start).toBeLessThan(400)
         })
 
         it('fails immediately when there is no top-level context to recover from', async () => {
@@ -2651,8 +2681,8 @@ describe('lib/browsers/bidi_automation', () => {
 
           const start = Date.now()
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
-          expect(Date.now() - start).to.be.lessThan(100)
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
+          expect(Date.now() - start).toBeLessThan(100)
         })
       })
     })
