@@ -1,5 +1,4 @@
-const { sinon, expect } = require('../../../spec_helper')
-
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
 import { StreamStalledError } from '../../../../lib/cloud/upload/stream_stalled_error'
 import { Readable, Writable } from 'stream'
@@ -9,7 +8,6 @@ describe('StreamTimeoutController', () => {
   const maxActivityDwellTime = 500
 
   let monitor: StreamActivityMonitor
-  let clock: sinon.SinonFakeTimers
   let fakeWebReadableStream: ReadableStream<string>
   let fakeNodeReadableStream: Readable
   let streamSink: Writable
@@ -20,7 +18,7 @@ describe('StreamTimeoutController', () => {
   beforeEach(() => {
     writtenValues = ''
     monitor = new StreamActivityMonitor(maxActivityDwellTime)
-    clock = sinon.useFakeTimers()
+    vi.useFakeTimers()
 
     // oddly, it's easier to asynchronously emit data from a ReadableStream than
     // it is to asynchronously emit data from a Readable, so to test this we are
@@ -42,7 +40,7 @@ describe('StreamTimeoutController', () => {
   })
 
   afterEach(() => {
-    clock.restore()
+    vi.useRealTimers()
   })
 
   describe('when monitoring a stream', () => {
@@ -57,32 +55,32 @@ describe('StreamTimeoutController', () => {
      * queries in Windows, for example, is 15 seconds.
      */
     it('does not signal an abort if no initial activity happens within maxStartDwellTime', async () => {
-      await clock.tickAsync(maxStartDwellTime + 1)
-      expect(monitor.getController().signal.aborted).to.be.false
-      expect(monitor.getController().signal.reason).to.be.undefined
+      await vi.advanceTimersByTimeAsync(maxStartDwellTime + 1)
+      expect(monitor.getController().signal.aborted).toBe(false)
+      expect(monitor.getController().signal.reason).toBeUndefined()
     })
 
     it('signals an abort if activity fails to happen after maxActivityDwellTime', async () => {
       streamController.enqueue('some data')
-      await clock.tickAsync(maxActivityDwellTime + 1)
-      expect(monitor.getController().signal.aborted).to.be.true
-      expect(monitor.getController().signal.reason).to.be.an.instanceOf(StreamStalledError)
+      await vi.advanceTimersByTimeAsync(maxActivityDwellTime + 1)
+      expect(monitor.getController().signal.aborted).toBe(true)
+      expect(monitor.getController().signal.reason).toBeInstanceOf(StreamStalledError)
     })
 
     it('does not signal an abort if initial activity happens within maxStartDwellTime', async () => {
-      await clock.tickAsync(maxStartDwellTime - 10)
+      await vi.advanceTimersByTimeAsync(maxStartDwellTime - 10)
       streamController.enqueue('some data')
-      expect(monitor.getController().signal.aborted).not.to.be.true
-      expect(monitor.getController().signal.reason).to.be.undefined
+      expect(monitor.getController().signal.aborted).not.toBe(true)
+      expect(monitor.getController().signal.reason).toBeUndefined()
     })
 
     it('does not signal an abort if subsequent activity happens within maxActivityDwellTime', async () => {
       streamController.enqueue('some data')
-      await clock.tickAsync(maxActivityDwellTime - 10)
+      await vi.advanceTimersByTimeAsync(maxActivityDwellTime - 10)
       streamController.enqueue('some more data')
-      await clock.tickAsync(maxActivityDwellTime - 10)
-      expect(monitor.getController().signal.aborted).not.to.be.true
-      expect(monitor.getController().signal.reason).to.be.undefined
+      await vi.advanceTimersByTimeAsync(maxActivityDwellTime - 10)
+      expect(monitor.getController().signal.aborted).not.toBe(true)
+      expect(monitor.getController().signal.reason).toBeUndefined()
     })
 
     it('passes data through', async () => {
@@ -90,8 +88,8 @@ describe('StreamTimeoutController', () => {
 
       streamController.enqueue(value)
       streamController.enqueue(value)
-      await clock.tickAsync(maxActivityDwellTime)
-      expect(writtenValues).to.equal(value + value)
+      await vi.advanceTimersByTimeAsync(maxActivityDwellTime)
+      expect(writtenValues).toBe(value + value)
     })
   })
 })
