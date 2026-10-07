@@ -22,21 +22,23 @@ const HEADERS_END = Buffer.from('\r\n\r\n')
  */
 const UPSTREAM_DEADLINE_MS = 30_000
 
-export function connectUpstream (options: UpstreamConnectOptions): Promise<UpstreamConnection> {
+export function connectUpstream (options: UpstreamConnectOptions, deadlineMs = UPSTREAM_DEADLINE_MS): Promise<UpstreamConnection> {
   const { material, hostname, port, alpnProtocols } = options
 
   // held so the deadline can take down whichever socket exists when it fires
   let pending: net.Socket | undefined
   let timedOut = false
 
+  let timer: NodeJS.Timeout
+
   const deadline = new Promise<never>((_resolve, reject) => {
-    const timer = setTimeout(() => {
+    timer = setTimeout(() => {
       timedOut = true
       pending?.destroy()
-      reject(new Error(`Timed out after ${UPSTREAM_DEADLINE_MS}ms connecting to ${hostname}:${port}`))
-    }, UPSTREAM_DEADLINE_MS)
+      reject(new Error(`Timed out after ${deadlineMs}ms connecting to ${hostname}:${port}`))
+    }, deadlineMs)
 
-    // the run should not be held open by a dial that already succeeded
+    // a dial that already succeeded should not hold the run open
     timer.unref()
   })
 
@@ -70,7 +72,9 @@ export function connectUpstream (options: UpstreamConnectOptions): Promise<Upstr
     })
   })
 
-  return Promise.race([connecting, deadline])
+  // Cleared once the race settles either way. A timer left running would fire on a healthy
+  // connection and destroy it mid-session, since `pending` is by then the live TLS socket.
+  return Promise.race([connecting, deadline]).finally(() => clearTimeout(timer))
 }
 
 /**

@@ -110,9 +110,20 @@ export class OpenProject extends EventEmitter {
     // would otherwise both pass the guard and bind a second full set of listeners, and the
     // loser would be orphaned still bound, with the browser possibly steered at it
     if (useBrowserNetworkInterception && cfg.clientCertificates?.length && !this._mtlsBridgeReady) {
-      this._mtlsBridgeReady = createMtlsBridge({
+      const ready = createMtlsBridge({
         clientCertificates: cfg.clientCertificates,
         caFolder: appData.path('proxy'),
+      })
+
+      this._mtlsBridgeReady = ready
+
+      // A rejection must not be cached: a transient bind or CA failure would otherwise be
+      // replayed to every later launch, so the run could never recover without reopening
+      // the project. The await below still surfaces this attempt's failure to the caller.
+      ready.catch(() => {
+        if (this._mtlsBridgeReady === ready) {
+          this._mtlsBridgeReady = undefined
+        }
       })
     }
 

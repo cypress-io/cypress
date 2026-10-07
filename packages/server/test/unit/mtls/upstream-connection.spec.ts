@@ -154,4 +154,55 @@ describe('connectUpstream completes mutual TLS through a CONNECT proxy', () => {
 
     connection.socket.destroy()
   }, 30000)
+
+  describe('connectUpstream deadline', () => {
+    // The deadline must stop guarding once the handshake succeeds. A timer left running
+    // destroys the live TLS socket when it fires, so every bridged connection would be torn
+    // down mid-session — dropping the HTTP/2 session and any request in flight on it.
+    it('leaves a connected socket alone once the deadline passes', async () => {
+      const origin = tls.createServer({
+        key: read('origin.key'),
+        cert: read('origin.crt'),
+        ca: read('client-ca.crt'),
+        requestCert: true,
+        rejectUnauthorized: true,
+      })
+
+      servers.push(origin)
+      const originPort = await new Promise<number>((resolve) => {
+        origin.listen(0, '127.0.0.1', () => resolve((origin.address() as AddressInfo).port))
+      })
+
+      const connection = await connectUpstream({
+        hostname: 'localhost',
+        port: originPort,
+        alpnProtocols: [],
+        material: { ca: [read('origin-ca.crt')], cert: [read('client.crt')], key: [{ pem: read('client.key') }] },
+      }, 150)
+
+      expect(connection.socket.destroyed).toBe(false)
+
+      await new Promise((resolve) => setTimeout(resolve, 400))
+
+      expect(connection.socket.destroyed, 'the deadline destroyed a live connection').toBe(false)
+
+      connection.socket.destroy()
+    })
+
+    it('rejects when the origin accepts the connection and then says nothing', async () => {
+      const silent = net.createServer(() => {})
+
+      servers.push(silent)
+      const port = await new Promise<number>((resolve) => {
+        silent.listen(0, '127.0.0.1', () => resolve((silent.address() as AddressInfo).port))
+      })
+
+      await expect(connectUpstream({
+        hostname: 'localhost',
+        port,
+        alpnProtocols: [],
+        material: {},
+      }, 150)).rejects.toThrow(/Timed out after 150ms/)
+    })
+  })
 })
