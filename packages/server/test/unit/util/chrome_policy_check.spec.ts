@@ -1,9 +1,8 @@
+import { describe, expect, it, vi } from 'vitest'
 import _ from 'lodash'
 import { stripIndent } from 'common-tags'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import { getRunner } from '../../../lib/util/chrome_policy_check'
-
-import '../../spec_helper'
 
 describe('lib/util/chrome_policy_check', () => {
   describe('.getRunner returns a function', () => {
@@ -26,13 +25,13 @@ describe('lib/util/chrome_policy_check', () => {
         },
       })
 
-      const cb = sinon.stub()
+      const cb = vi.fn()
 
       run(cb)
 
-      expect(cb).to.be.calledOnce
+      expect(cb).toHaveBeenCalledOnce()
 
-      expect(stripAnsi(cb.getCall(0).args[0].message)).to.eq(stripIndent(`\
+      expect(stripAnsi(cb.mock.calls[0][0].message)).toBe(stripIndent(`\
 Cypress detected policy settings on your computer that may cause issues.
 
 The following policies were detected that may prevent Cypress from automating Chrome:
@@ -49,11 +48,11 @@ For more information, see https://on.cypress.io/bad-browser-policy\
         enumerateValues: _.constant([]),
       })
 
-      const cb = sinon.stub()
+      const cb = vi.fn()
 
       run(cb)
 
-      expect(cb).to.not.be.called
+      expect(cb).not.toHaveBeenCalled()
     })
 
     it('fails silently if enumerateValues throws', () => {
@@ -63,11 +62,11 @@ For more information, see https://on.cypress.io/bad-browser-policy\
         },
       })
 
-      const cb = sinon.stub()
+      const cb = vi.fn()
 
       run(cb)
 
-      expect(cb).to.not.be.called
+      expect(cb).not.toHaveBeenCalled()
     })
   })
 })
