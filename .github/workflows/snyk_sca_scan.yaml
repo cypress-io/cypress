@@ -49,7 +49,24 @@ jobs:
       - name: Perform SCA Scan
         continue-on-error: false
         run: |
-          snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=.nx,system-tests,tooling,docker,Dockerfile --severity-threshold=critical --org=cypress-opensource
+          for attempt in 1 2 3; do
+            log_file=$(mktemp)
+
+            if snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=.nx,system-tests,tooling,docker,Dockerfile --severity-threshold=critical --org=cypress-opensource 2>&1 | tee "$log_file"; then
+              rm "$log_file"
+              exit 0
+            else
+              status=${PIPESTATUS[0]}
+            fi
+
+            if [ "$status" -ne 2 ] || ! grep -q "504 Gateway Timeout" "$log_file" || [ "$attempt" -eq 3 ]; then
+              rm "$log_file"
+              exit "$status"
+            fi
+
+            rm "$log_file"
+            sleep $((attempt * 30))
+          done
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_API: https://api.snyk.io
