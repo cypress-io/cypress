@@ -1,13 +1,14 @@
-import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
-import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
-import { expect, proxyquire, sinon } from '../../spec_helper'
-import * as protocol from '../../../lib/browsers/protocol'
-import { stripAnsi } from '@packages/errors'
+import Bluebird from 'bluebird'
 import net from 'net'
+import { isDeepStrictEqual } from 'util'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock, MockInstance } from 'vitest'
 import type { ProtocolManagerShape } from '@packages/types'
-import { CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
+import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
+import * as protocol from '../../../lib/browsers/protocol'
 import { cypressSessions } from '../../../lib/cypress-sessions'
 
 const HOST = '127.0.0.1'
@@ -19,60 +20,144 @@ type GetClientParams = {
   fullyManageTabs?: boolean
 }
 
-describe('lib/browsers/browser-cri-client', function () {
-  let browserCriClient: {
-    BrowserCriClient: {
-      create: typeof BrowserCriClient.create
+type AsymmetricMatcher = { asymmetricMatch: (actual: unknown) => boolean }
+
+const isAsymmetricMatcher = (value: unknown): value is AsymmetricMatcher => {
+  return typeof value === 'object' && value !== null && 'asymmetricMatch' in value && typeof value.asymmetricMatch === 'function'
+}
+
+const anyArg: AsymmetricMatcher = { asymmetricMatch: () => true }
+
+const fieldsMatching = (fields: Record<string, unknown>): AsymmetricMatcher => {
+  return {
+    asymmetricMatch: (actual) => {
+      return typeof actual === 'object' && actual !== null && Object.entries(fields).every(([key, value]) => isDeepStrictEqual(actual[key], value))
+    },
+  }
+}
+
+// sinon's calledWith and withArgs match a prefix of the recorded arguments,
+// where vitest's toHaveBeenCalledWith requires the exact arity
+const argsMatch = (actual: unknown[], expected: unknown[]) => {
+  return expected.length <= actual.length && expected.every((value, i) => {
+    return isAsymmetricMatcher(value) ? value.asymmetricMatch(actual[i]) : isDeepStrictEqual(actual[i], value)
+  })
+}
+
+const callsWith = (mock: Mock, ...expected: unknown[]) => {
+  return mock.mock.calls.filter((call) => argsMatch(call, expected))
+}
+
+const expectCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsWith(mock, ...expected), `calls matching ${String(expected[0])}`).not.toHaveLength(0)
+}
+
+const expectNotCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsWith(mock, ...expected), `calls matching ${String(expected[0])}`).toHaveLength(0)
+}
+
+const expectCalledOnceWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(mock).toHaveBeenCalledTimes(1)
+  expectCalledWith(mock, ...expected)
+}
+
+type Behavior = (...args: any[]) => unknown
+type Route = { expected: unknown[], behavior?: Behavior }
+
+// sinon withArgs semantics: the longest matching argument prefix wins, ties go
+// to the latest registration, and a route without a behavior uses the default
+const stub = (defaultBehavior?: Behavior) => {
+  const routes: Route[] = []
+  const fn = vi.fn((...args: unknown[]) => {
+    const route = routes
+    .filter(({ expected }) => argsMatch(args, expected))
+    .sort((a, b) => a.expected.length - b.expected.length)
+    .pop()
+
+    return (route?.behavior ?? defaultBehavior)?.(...args)
+  })
+
+  const withArgs = (...expected: unknown[]) => {
+    const route: Route = { expected }
+
+    routes.push(route)
+
+    const set = (behavior: Behavior) => {
+      route.behavior = behavior
+
+      return fn
+    }
+
+    return {
+      returns: (value?: unknown) => set(() => value),
+      resolves: (value?: unknown) => set(async () => value),
+      rejects: (err: unknown) => set(async () => { throw err }),
+      throws: (err: unknown) => set(() => { throw err }),
+      callsFake: set,
     }
   }
-  let send: sinon.SinonStub
-  let on: sinon.SinonStub
-  let off: sinon.SinonStub
-  let close: sinon.SinonStub
-  let removeSessionEnablements: sinon.SinonStub
-  let criClientCreateStub: sinon.SinonStub
-  let criImport: sinon.SinonStub & {
-    Version: sinon.SinonStub
+
+  return Object.assign(fn, { withArgs })
+}
+
+type Stub = ReturnType<typeof stub>
+
+const cdp = vi.hoisted(() => {
+  return { state: { criImport: undefined as any } }
+})
+
+vi.mock('chrome-remote-interface', () => {
+  return {
+    default: Object.assign((...args: unknown[]) => cdp.state.criImport(...args), {
+      Version: (...args: unknown[]) => cdp.state.criImport.Version(...args),
+    }),
   }
-  let onError: sinon.SinonStub
-  let onServiceWorkerClientEvent: sinon.SinonStub
+})
+
+const realCriClientCreate = CriClient.create
+
+describe('lib/browsers/browser-cri-client', function () {
+  let send: Stub
+  let on: Mock
+  let off: Mock
+  let close: Mock
+  let removeSessionEnablements: Mock
+  let criClientCreate: Stub
+  let criImport: Stub & {
+    Version: Stub
+  }
+  let connectAsync: MockInstance
+  let onError: Mock
+  let onServiceWorkerClientEvent: Mock
   let getClient: (options?: GetClientParams) => ReturnType<typeof BrowserCriClient.create>
 
   beforeEach(function () {
-    sinon.stub(protocol, '_connectAsync')
+    connectAsync = vi.spyOn(protocol, '_connectAsync').mockReturnValue(Bluebird.resolve())
 
-    criImport = sinon.stub()
+    criImport = Object.assign(stub(), { Version: stub() })
 
-    criImport.Version = sinon.stub()
     criImport.Version.withArgs({ host: HOST, port: PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
-    criImport.Version.withArgs({ host: HOST, port: THROWS_PORT, useHostName: true })
-    .onFirstCall().throws()
-    .onSecondCall().throws()
-    .onThirdCall().resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
+    criImport.Version.withArgs({ host: HOST, port: THROWS_PORT, useHostName: true }).callsFake(vi.fn()
+    .mockImplementationOnce(() => { throw new Error() })
+    .mockImplementationOnce(() => { throw new Error() })
+    .mockResolvedValueOnce({ webSocketDebuggerUrl: 'http://web/socket/url' }))
 
-    on = sinon.stub()
-    off = sinon.stub()
-    send = sinon.stub()
-    close = sinon.stub()
-    removeSessionEnablements = sinon.stub()
-    onError = sinon.stub()
-    onServiceWorkerClientEvent = sinon.stub()
-    // the browser-level client wraps onAsynchronousError and passes an
-    // onCriConnectionClosed handler, so match loosely on the stable fields
-    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager: undefined, fullyManageTabs: undefined })).resolves({
-      send,
-      on,
-      off,
-      close,
-      removeSessionEnablements,
-    })
+    cdp.state.criImport = criImport
 
-    browserCriClient = proxyquire('../lib/browsers/browser-cri-client', {
-      'chrome-remote-interface': criImport,
-    })
+    on = vi.fn()
+    off = vi.fn()
+    send = stub()
+    close = vi.fn()
+    removeSessionEnablements = vi.fn()
+    onError = vi.fn()
+    onServiceWorkerClientEvent = vi.fn()
+    criClientCreate = stub()
+    vi.spyOn(CriClient, 'create').mockImplementation(criClientCreate)
 
     getClient = ({ protocolManager, fullyManageTabs } = {}) => {
-      criClientCreateStub = criClientCreateStub.withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager, fullyManageTabs })).resolves({
+      // the browser-level client wraps onAsynchronousError and passes an
+      // onCriConnectionClosed handler, so match loosely on the stable fields
+      criClientCreate.withArgs(fieldsMatching({ target: 'http://web/socket/url', protocolManager, fullyManageTabs })).resolves({
         send,
         on,
         off,
@@ -80,29 +165,34 @@ describe('lib/browsers/browser-cri-client', function () {
         removeSessionEnablements,
       })
 
-      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs, onServiceWorkerClientEvent })
+      return BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs, onServiceWorkerClientEvent })
     }
   })
 
-  context('.create', function () {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('.create', function () {
     it('returns an instance of the Browser CRI client', async function () {
       const client = await getClient()
 
-      expect(client.attachToTargetUrl).to.be.instanceOf(Function)
+      expect(client.attachToTargetUrl).toBeInstanceOf(Function)
     })
 
     it('throws an error when _connectAsync fails', async function () {
-      (protocol._connectAsync as any).restore()
-      sinon.stub(protocol, '_connectAsync').throws()
+      connectAsync.mockImplementation(() => {
+        throw new Error()
+      })
 
-      await expect(getClient()).to.be.rejected
+      await expect(getClient()).rejects.toThrow()
     })
 
     it('attempts to connect to multiple hosts', async function () {
-      (protocol._connectAsync as any).restore()
+      connectAsync.mockRestore()
       const socket = new net.Socket()
 
-      sinon.stub(net, 'connect').callsFake((opts, onConnect) => {
+      vi.spyOn(net, 'connect').mockImplementation((opts: any, onConnect: any) => {
         process.nextTick(() => {
           // throw an error on 127.0.0.1 so ::1 can connect
           if (opts.host === '127.0.0.1') {
@@ -117,75 +207,77 @@ describe('lib/browsers/browser-cri-client', function () {
 
       criImport.Version.withArgs({ host: '::1', port: THROWS_PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-      await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })
+      await BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })
 
-      expect(criImport.Version).to.be.calledOnce
+      expect(criImport.Version).toHaveBeenCalledTimes(1)
     })
 
     it('retries when Version fails', async function () {
-      sinon.stub(protocol, '_getDelayMsForRetry')
-      .onFirstCall().returns(100)
-      .onSecondCall().returns(100)
-      .onThirdCall().returns(100)
+      vi.spyOn(protocol, '_getDelayMsForRetry')
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(100)
 
-      const client = await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })
+      const client = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })
 
-      expect(client.attachToTargetUrl).to.be.instanceOf(Function)
+      expect(client.attachToTargetUrl).toBeInstanceOf(Function)
 
-      expect(criImport.Version).to.be.calledThrice
+      expect(criImport.Version).toHaveBeenCalledTimes(3)
     })
 
     it('throws when Version fails more than allowed', async function () {
-      sinon.stub(protocol, '_getDelayMsForRetry')
-      .onFirstCall().returns(100)
-      .onSecondCall().returns(undefined)
+      vi.spyOn(protocol, '_getDelayMsForRetry')
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(undefined)
 
-      await expect(browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })).to.be.rejected
+      await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })).rejects.toThrow()
 
-      expect(criImport.Version).to.be.calledTwice
+      expect(criImport.Version).toHaveBeenCalledTimes(2)
     })
 
     it('advertises the browser websocket url to cypress sessions once connected', async function () {
-      const setCdpBrowserWsUrl = sinon.stub(cypressSessions, 'setCdpBrowserWsUrl')
+      const setCdpBrowserWsUrl = vi.spyOn(cypressSessions, 'setCdpBrowserWsUrl').mockImplementation(() => {})
 
       await getClient()
 
-      expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url')
+      expectCalledWith(setCdpBrowserWsUrl as unknown as Mock, 'http://web/socket/url')
     })
 
     it('clears the cypress sessions cdp url when the browser connection is lost', async function () {
-      const setCdpBrowserWsUrl = sinon.stub(cypressSessions, 'setCdpBrowserWsUrl')
+      const setCdpBrowserWsUrl = vi.spyOn(cypressSessions, 'setCdpBrowserWsUrl').mockImplementation(() => {})
 
       await getClient()
 
-      const createArgs = criClientCreateStub.getCall(0).args[0]
+      const createArgs = criClientCreate.mock.calls[0][0] as any
 
-      setCdpBrowserWsUrl.resetHistory()
+      setCdpBrowserWsUrl.mockClear()
 
       // a graceful disconnect, or reconnection halting due to closure
       createArgs.onCriConnectionClosed()
-      expect(setCdpBrowserWsUrl).to.be.calledWith(null)
+      expect(setCdpBrowserWsUrl).toHaveBeenCalledWith(null)
 
-      setCdpBrowserWsUrl.resetHistory()
+      setCdpBrowserWsUrl.mockClear()
 
       // the browser crashed or was quit externally: reconnection ultimately failed
       const err = new Error('reconnect failed')
 
       createArgs.onAsynchronousError(err)
-      expect(setCdpBrowserWsUrl).to.be.calledWith(null)
+      expect(setCdpBrowserWsUrl).toHaveBeenCalledWith(null)
       // the original error handler still runs
-      expect(onError).to.be.calledWith(err)
+      expectCalledWith(onError, err)
     })
   })
 
-  context('service worker bindings', function () {
+  describe('service worker bindings', function () {
     it('subscribes the browser client to the session binding', async function () {
       const client = await getClient({ fullyManageTabs: true })
 
       client.addServiceWorkerBinding('session-1')
 
-      expect(on).to.be.calledWith('Runtime.bindingCalled.session-1', sinon.match.func)
-      expect(client.serviceWorkerBindings.has('session-1')).to.be.true
+      expectCalledWith(on, 'Runtime.bindingCalled.session-1', expect.any(Function))
+      expect(client.serviceWorkerBindings.has('session-1')).toBe(true)
     })
 
     it('delivers the session binding events to the service worker event handler', async function () {
@@ -193,12 +285,12 @@ describe('lib/browsers/browser-cri-client', function () {
 
       client.addServiceWorkerBinding('session-1')
 
-      const cb = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+      const cb = callsWith(on, 'Runtime.bindingCalled.session-1')[0][1]
       const event = { type: 'hasFetchHandler', scope: 'http://localhost:8080/', payload: { hasFetchHandler: true } }
 
       cb({ name: serviceWorkerClientEventHandlerName, payload: JSON.stringify(event) })
 
-      expect(onServiceWorkerClientEvent).to.be.calledWith(event)
+      expectCalledWith(onServiceWorkerClientEvent, event)
     })
 
     it('replaces an existing binding without stranding its listener', async function () {
@@ -206,12 +298,12 @@ describe('lib/browsers/browser-cri-client', function () {
 
       client.addServiceWorkerBinding('session-1')
 
-      const firstListener = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+      const firstListener = callsWith(on, 'Runtime.bindingCalled.session-1')[0][1]
 
       client.addServiceWorkerBinding('session-1')
 
-      expect(off).to.be.calledOnceWith('Runtime.bindingCalled.session-1', firstListener)
-      expect(client.serviceWorkerBindings.size).to.eq(1)
+      expectCalledOnceWith(off, 'Runtime.bindingCalled.session-1', firstListener)
+      expect(client.serviceWorkerBindings.size).toBe(1)
     })
 
     it('unsubscribes the browser client when the session detaches', async function () {
@@ -219,56 +311,56 @@ describe('lib/browsers/browser-cri-client', function () {
 
       client.addServiceWorkerBinding('session-1')
 
-      const cb = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+      const cb = callsWith(on, 'Runtime.bindingCalled.session-1')[0][1]
 
-      await on.withArgs('Target.detachedFromTarget').args[0][1]({ sessionId: 'session-1' })
+      await callsWith(on, 'Target.detachedFromTarget')[0][1]({ sessionId: 'session-1' })
 
-      expect(off).to.be.calledWith('Runtime.bindingCalled.session-1', cb)
-      expect(client.serviceWorkerBindings.has('session-1')).to.be.false
+      expectCalledWith(off, 'Runtime.bindingCalled.session-1', cb)
+      expect(client.serviceWorkerBindings.has('session-1')).toBe(false)
     })
 
     it('does not accumulate bindings across attach/detach cycles', async function () {
       const client = await getClient({ fullyManageTabs: true })
-      const detach = on.withArgs('Target.detachedFromTarget').args[0][1]
+      const detach = callsWith(on, 'Target.detachedFromTarget')[0][1]
 
       for (let i = 0; i < 10; i++) {
         client.addServiceWorkerBinding(`session-${i}`)
         await detach({ sessionId: `session-${i}` })
       }
 
-      expect(client.serviceWorkerBindings.size).to.eq(0)
-      expect(off).to.have.callCount(10)
+      expect(client.serviceWorkerBindings.size).toBe(0)
+      expect(off).toHaveBeenCalledTimes(10)
     })
 
     it('ignores a detach for a session with no binding', async function () {
       const client = await getClient({ fullyManageTabs: true })
 
-      await on.withArgs('Target.detachedFromTarget').args[0][1]({ sessionId: 'never-attached' })
+      await callsWith(on, 'Target.detachedFromTarget')[0][1]({ sessionId: 'never-attached' })
 
-      expect(off).not.to.be.called
+      expect(off).not.toHaveBeenCalled()
     })
   })
 
-  context('._onAttachToTarget', () => {
+  describe('._onAttachToTarget', () => {
     let options: any
 
     beforeEach(() => {
       options = {
         browserClient: {
-          send: sinon.stub(),
-          on: sinon.stub(),
+          send: stub(),
+          on: vi.fn(),
         },
         browserCriClient: {
-          addExtraTargetClient: sinon.stub(),
-          addServiceWorkerBinding: sinon.stub(),
-          getExtraTargetClient: sinon.stub().returns(undefined),
+          addExtraTargetClient: vi.fn(),
+          addServiceWorkerBinding: vi.fn(),
+          getExtraTargetClient: vi.fn(() => undefined),
           currentlyAttachedTarget: {
             targetId: 'main-target-id',
           },
           resettingBrowserTargets: false,
           sessionTargetInfo: new Map(),
         },
-        CriConstructor: sinon.stub(),
+        CriConstructor: vi.fn(),
         event: {
           sessionId: 'session-id',
           targetInfo: {
@@ -288,7 +380,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserClient.send).not.to.be.called
+      expect(options.browserClient.send).not.toHaveBeenCalled()
     })
 
     it('gets url from Target.getTargets if not in event', async () => {
@@ -305,7 +397,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserClient.send).to.be.calledWith('Target.getTargets')
+      expectCalledWith(options.browserClient.send, 'Target.getTargets')
     })
 
     // The backfill is the one awaited send in this handler whose rejection
@@ -320,9 +412,9 @@ describe('lib/browsers/browser-cri-client', function () {
       options.browserClient.send.withArgs('Target.getTargets').rejects(new Error('target closed'))
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
 
-      await expect(BrowserCriClient._onAttachToTarget(options as any)).to.be.fulfilled
+      await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('is a noop sending Runtime.runIfWaitingForDebugger if resetting browser targets', async () => {
@@ -331,8 +423,8 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).not.to.be.called
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).not.toHaveBeenCalled()
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('is a noop sending Runtime.runIfWaitingForDebugger if target is the main Cypress tab', async () => {
@@ -341,8 +433,8 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).not.to.be.called
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).not.toHaveBeenCalled()
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('is a noop sending Runtime.runIfWaitingForDebugger if target is not a tab or window', async () => {
@@ -351,8 +443,8 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).not.to.be.called
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).not.toHaveBeenCalled()
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('is a noop sending Runtime.runIfWaitingForDebugger if target is DevTools', async () => {
@@ -361,8 +453,8 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).not.to.be.called
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).not.toHaveBeenCalled()
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('is a noop sending Runtime.runIfWaitingForDebugger if target is the Launchpad', async () => {
@@ -371,8 +463,8 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).not.to.be.called
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).not.toHaveBeenCalled()
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('is a noop sending Runtime.runIfWaitingForDebugger if part of a chrome extension', async () => {
@@ -381,52 +473,55 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).not.to.be.called
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).not.toHaveBeenCalled()
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('is a noop sending Runtime.runIfWaitingForDebugger if connecting to target errors', async () => {
-      options.CriConstructor.rejects(new Error('failed to connect'))
+      options.CriConstructor.mockRejectedValue(new Error('failed to connect'))
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).to.be.called
-      expect(options.browserCriClient.addExtraTargetClient).not.to.be.called
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).toHaveBeenCalled()
+      expect(options.browserCriClient.addExtraTargetClient).not.toHaveBeenCalled()
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
     it('connects to target and sends Fetch.enable', async () => {
       const criClient = {
-        send: sinon.stub(),
-        on: sinon.stub(),
+        send: stub(),
+        on: vi.fn(),
       }
 
-      options.CriConstructor.returns(criClient)
+      options.CriConstructor.mockReturnValue(criClient)
       options.browserClient.send.withArgs('Fetch.enable').resolves()
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.CriConstructor).to.be.called
-      expect(options.browserCriClient.addExtraTargetClient).to.be.calledWith(options.event.targetInfo, criClient)
-      expect(criClient.send).to.be.calledWith('Fetch.enable')
-      expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
-      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      expect(options.CriConstructor).toHaveBeenCalled()
+      expectCalledWith(options.browserCriClient.addExtraTargetClient, options.event.targetInfo, criClient)
+      expectCalledWith(criClient.send, 'Fetch.enable')
+      expectCalledWith(criClient.on, 'Fetch.requestPaused', expect.any(Function))
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
-    it('does not throw if Fetch.enable on extra target throws', () => {
+    it('does not throw if Fetch.enable on extra target throws', async () => {
+      const fetchEnableFailed = Object.assign(new Error(''), { name: 'Fetch.enable failed' })
       const extraTargetCriClient = {
-        send: sinon.stub().withArgs('Fetch.enable').rejects('Fetch.enable failed'),
-        on: sinon.stub(),
+        send: vi.fn(async () => {
+          throw fetchEnableFailed
+        }),
+        on: vi.fn(),
       }
 
-      options.CriConstructor.resolves(extraTargetCriClient)
+      options.CriConstructor.mockResolvedValue(extraTargetCriClient)
 
       options.browserClient.send.withArgs('Fetch.enable').resolves()
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
 
-      expect(BrowserCriClient._onAttachToTarget(options as any)).to.be.fulfilled
+      await BrowserCriClient._onAttachToTarget(options as any)
     })
 
     it('adds the service worker fetch event binding', async () => {
@@ -434,8 +529,8 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserCriClient.addServiceWorkerBinding).to.be.calledWith(options.event.sessionId)
-      expect(options.browserClient.send).to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
+      expectCalledWith(options.browserCriClient.addServiceWorkerBinding, options.event.sessionId)
+      expectCalledWith(options.browserClient.send, 'Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
     // a detach landing mid-attach only releases bindings already tracked
@@ -444,14 +539,13 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      // stub-level calledBefore compares against the stub's *last* call, and
-      // send is called several times here, so the ordering only holds if it is
       // pinned to the first send - the first point this can yield
-      const registered = options.browserCriClient.addServiceWorkerBinding.getCall(0)
-      const firstSend = options.browserClient.send.getCall(0)
+      const registered = options.browserCriClient.addServiceWorkerBinding.mock.invocationCallOrder[0]
+      const firstSend = options.browserClient.send.mock.invocationCallOrder[0]
 
-      expect(firstSend, 'expected a CDP command to have been sent').not.to.be.null
-      expect(registered.calledBefore(firstSend)).to.be.true
+      expect(firstSend, 'expected a CDP command to have been sent').toBeDefined()
+      expect(registered, 'expected the binding to have been added').toBeDefined()
+      expect(registered).toBeLessThan(firstSend)
     })
 
     it('does not add the service worker fetch event binding for non-service_worker targets', async () => {
@@ -459,28 +553,28 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserCriClient.addServiceWorkerBinding).not.to.be.called
-      expect(options.browserClient.send).not.to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
+      expect(options.browserCriClient.addServiceWorkerBinding).not.toHaveBeenCalled()
+      expectNotCalledWith(options.browserClient.send, 'Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
     it('adds X-Cypress-Is-From-Extra-Target header to requests from extra target', async () => {
       const criClient = {
-        send: sinon.stub(),
-        on: sinon.stub(),
+        send: stub(),
+        on: vi.fn(),
       }
 
-      options.CriConstructor.returns(criClient)
+      options.CriConstructor.mockReturnValue(criClient)
       options.browserClient.send.withArgs('Fetch.enable').resolves()
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
       criClient.send.withArgs('Fetch.continueRequest').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
-      await criClient.on.lastCall.args[1]({
+      await criClient.on.mock.lastCall![1]({
         requestId: 'request-id',
         request: { headers: { 'X-Another-Custom-Header': 'value' } },
       })
 
-      expect(criClient.send).to.be.calledWith('Fetch.continueRequest', {
+      expectCalledWith(criClient.send, 'Fetch.continueRequest', {
         requestId: 'request-id',
         headers: [
           { name: 'X-Another-Custom-Header', value: 'value' },
@@ -491,74 +585,77 @@ describe('lib/browsers/browser-cri-client', function () {
 
     it('delegates Fetch ownership to onExtraTargetCriClientReady when provided', async () => {
       const criClient = {
-        send: sinon.stub(),
-        on: sinon.stub(),
+        send: stub(),
+        on: vi.fn(),
       }
-      const detach = sinon.stub().resolves()
-      const onExtraTargetCriClientReady = sinon.stub().resolves(detach)
-      const tracked = { client: criClient, targetInfo: options.event.targetInfo }
+      const detach = vi.fn(async () => {})
+      const onExtraTargetCriClientReady = vi.fn(async () => detach)
+      const tracked: any = { client: criClient, targetInfo: options.event.targetInfo }
 
-      options.CriConstructor.returns(criClient)
+      options.CriConstructor.mockReturnValue(criClient)
       options.browserCriClient.onExtraTargetCriClientReady = onExtraTargetCriClientReady
-      options.browserCriClient.getExtraTargetClient.returns(tracked)
+      options.browserCriClient.getExtraTargetClient.mockReturnValue(tracked)
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(onExtraTargetCriClientReady).to.be.calledOnceWith(criClient)
-      expect(tracked.detach).to.equal(detach)
-      expect(criClient.send).not.to.be.calledWith('Fetch.enable')
-      expect(criClient.on).not.to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+      expectCalledOnceWith(onExtraTargetCriClientReady, criClient)
+      expect(tracked.detach).toBe(detach)
+      expectNotCalledWith(criClient.send, 'Fetch.enable')
+      expectNotCalledWith(criClient.on, 'Fetch.requestPaused', expect.any(Function))
     })
 
     it('releases the transport when the extra target is destroyed during attach', async () => {
       const criClient = {
-        send: sinon.stub(),
-        on: sinon.stub(),
+        send: stub(),
+        on: vi.fn(),
       }
       // a detach that never settles models an extra target whose own CDP
       // connection is already gone — if _onAttachToTarget awaited this, the
       // test would time out instead of completing
-      const detach = sinon.stub().returns(new Promise(() => {}))
-      const onExtraTargetCriClientReady = sinon.stub().resolves(detach)
+      const detach = vi.fn(() => new Promise(() => {}))
+      const onExtraTargetCriClientReady = vi.fn(async () => detach)
 
-      options.CriConstructor.returns(criClient)
+      options.CriConstructor.mockReturnValue(criClient)
       options.browserCriClient.onExtraTargetCriClientReady = onExtraTargetCriClientReady
       // Target destroyed mid-await — tracker entry already removed
-      options.browserCriClient.getExtraTargetClient.returns(undefined)
+      options.browserCriClient.getExtraTargetClient.mockReturnValue(undefined)
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(onExtraTargetCriClientReady).to.be.calledOnceWith(criClient)
-      expect(detach).to.be.calledOnce
-      expect(criClient.send).not.to.be.calledWith('Fetch.enable')
-      expect(criClient.on).not.to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+      expectCalledOnceWith(onExtraTargetCriClientReady, criClient)
+      expect(detach).toHaveBeenCalledTimes(1)
+      expectNotCalledWith(criClient.send, 'Fetch.enable')
+      expectNotCalledWith(criClient.on, 'Fetch.requestPaused', expect.any(Function))
     })
 
     it('falls back to header-only continue when onExtraTargetCriClientReady throws', async () => {
       const criClient = {
-        send: sinon.stub(),
-        on: sinon.stub(),
+        send: stub(),
+        on: vi.fn(),
       }
 
-      options.CriConstructor.returns(criClient)
-      options.browserCriClient.onExtraTargetCriClientReady = sinon.stub().rejects(new Error('attach failed'))
+      options.CriConstructor.mockReturnValue(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = vi.fn(async () => {
+        throw new Error('attach failed')
+      })
+
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
       criClient.send.withArgs('Fetch.enable').resolves()
       criClient.send.withArgs('Fetch.continueRequest').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(criClient.send).to.be.calledWith('Fetch.enable')
-      expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+      expectCalledWith(criClient.send, 'Fetch.enable')
+      expectCalledWith(criClient.on, 'Fetch.requestPaused', expect.any(Function))
 
-      await criClient.on.lastCall.args[1]({
+      await criClient.on.mock.lastCall![1]({
         requestId: 'request-id',
         request: { headers: {} },
       })
 
-      expect(criClient.send).to.be.calledWith('Fetch.continueRequest', {
+      expectCalledWith(criClient.send, 'Fetch.continueRequest', {
         requestId: 'request-id',
         headers: [
           { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
@@ -568,34 +665,34 @@ describe('lib/browsers/browser-cri-client', function () {
 
     it('falls back to header-only continue when onExtraTargetCriClientReady returns undefined', async () => {
       const criClient = {
-        send: sinon.stub(),
-        on: sinon.stub(),
+        send: stub(),
+        on: vi.fn(),
       }
 
-      options.CriConstructor.returns(criClient)
-      options.browserCriClient.onExtraTargetCriClientReady = sinon.stub().resolves(undefined)
+      options.CriConstructor.mockReturnValue(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = vi.fn(async () => undefined)
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
       criClient.send.withArgs('Fetch.enable').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(criClient.send).to.be.calledWith('Fetch.enable')
-      expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+      expectCalledWith(criClient.send, 'Fetch.enable')
+      expectCalledWith(criClient.on, 'Fetch.requestPaused', expect.any(Function))
     })
 
     it('ignores any errors from continuing request', async () => {
       const criClient = {
-        send: sinon.stub(),
-        on: sinon.stub(),
+        send: stub(),
+        on: vi.fn(),
       }
 
-      options.CriConstructor.returns(criClient)
+      options.CriConstructor.mockReturnValue(criClient)
       options.browserClient.send.withArgs('Fetch.enable').resolves()
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
       criClient.send.withArgs('Fetch.continueRequest').rejects(new Error('continuing request failed'))
 
       await BrowserCriClient._onAttachToTarget(options as any)
-      await criClient.on.lastCall.args[1]({ requestId: 'request-id', request: { url: '' } })
+      await criClient.on.mock.lastCall![1]({ requestId: 'request-id', request: { url: '' } })
       // error is caught or else the test would fail
     })
 
@@ -612,7 +709,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserCriClient.sessionTargetInfo.get('session-id')).to.equal(options.event.targetInfo)
+      expect(options.browserCriClient.sessionTargetInfo.get('session-id')).toBe(options.event.targetInfo)
     })
 
     // Ordering proof, same shape as elsewhere in this file: the mapping must
@@ -621,14 +718,14 @@ describe('lib/browsers/browser-cri-client', function () {
     // for this session before this attach has awaited anything.
     it('records the session -> TargetInfo mapping before the first await (Network.enable)', async () => {
       options.event.targetInfo.type = 'iframe'
-      options.browserClient.send.withArgs('Network.enable', sinon.match.any, 'session-id').returns(new Promise(() => {}))
+      options.browserClient.send.withArgs('Network.enable', anyArg, 'session-id').returns(new Promise(() => {}))
 
       // not awaited - the handler is left suspended inside Network.enable
       BrowserCriClient._onAttachToTarget(options as any)
 
       await new Promise((resolve) => setImmediate(resolve))
 
-      expect(options.browserCriClient.sessionTargetInfo.get('session-id')).to.equal(options.event.targetInfo)
+      expect(options.browserCriClient.sessionTargetInfo.get('session-id')).toBe(options.event.targetInfo)
     })
 
     // sessionTargetInfo is written with the event's TargetInfo before the url
@@ -638,14 +735,14 @@ describe('lib/browsers/browser-cri-client', function () {
     // on every idle-restart.
     it('reflects the url backfilled from Target.getTargets in a crash-reload classification, not the attach event\'s empty one', async () => {
       const browserClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub(),
-        removeSessionEnablements: sinon.stub(),
+        send: stub(async () => {}),
+        on: vi.fn(),
+        removeSessionEnablements: vi.fn(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
-        addServiceWorkerBinding: sinon.stub(),
-        removeServiceWorkerBinding: sinon.stub(),
+        addServiceWorkerBinding: vi.fn(),
+        removeServiceWorkerBinding: vi.fn(),
       }
 
       await BrowserCriClient._manageTabs({
@@ -653,12 +750,12 @@ describe('lib/browsers/browser-cri-client', function () {
         browserCriClient,
         browserName: 'Chrome',
         host: 'localhost',
-        onAsynchronousError: sinon.stub(),
+        onAsynchronousError: vi.fn(),
         port: 1234,
         childTargetInterceptionTimeoutMs: 5,
       } as any)
 
-      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
+      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
 
       const sessionId = 'ext-session'
       const targetId = 'ext-target-id'
@@ -679,14 +776,14 @@ describe('lib/browsers/browser-cri-client', function () {
         port: 1234,
       } as any)
 
-      browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+      browserCriClient.waitForChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
       await crashHandler({}, sessionId)
 
       // classified as the extension service worker from the backfilled url,
       // so it's released immediately rather than holding the full timeout
-      expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expect(browserCriClient.waitForChildTargetInterception).not.toHaveBeenCalled()
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
     // Same as above but for a target that attaches already running
@@ -696,14 +793,14 @@ describe('lib/browsers/browser-cri-client', function () {
     // fresh attach again).
     it('reflects the url backfilled from Target.getTargets even for a target attaching with waitingForDebugger: false', async () => {
       const browserClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub(),
-        removeSessionEnablements: sinon.stub(),
+        send: stub(async () => {}),
+        on: vi.fn(),
+        removeSessionEnablements: vi.fn(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
-        addServiceWorkerBinding: sinon.stub(),
-        removeServiceWorkerBinding: sinon.stub(),
+        addServiceWorkerBinding: vi.fn(),
+        removeServiceWorkerBinding: vi.fn(),
       }
 
       await BrowserCriClient._manageTabs({
@@ -711,12 +808,12 @@ describe('lib/browsers/browser-cri-client', function () {
         browserCriClient,
         browserName: 'Chrome',
         host: 'localhost',
-        onAsynchronousError: sinon.stub(),
+        onAsynchronousError: vi.fn(),
         port: 1234,
         childTargetInterceptionTimeoutMs: 5,
       } as any)
 
-      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
+      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
 
       const sessionId = 'ext-session'
       const targetId = 'ext-target-id'
@@ -737,12 +834,12 @@ describe('lib/browsers/browser-cri-client', function () {
         port: 1234,
       } as any)
 
-      browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+      browserCriClient.waitForChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
       await crashHandler({}, sessionId)
 
-      expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expect(browserCriClient.waitForChildTargetInterception).not.toHaveBeenCalled()
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
     // #34674: a paused service worker attaches on both this (browser-level)
@@ -758,54 +855,56 @@ describe('lib/browsers/browser-cri-client', function () {
       it('awaits it before releasing a paused service worker', async () => {
         const interceptionConfirmed = Promise.withResolvers<void>()
 
-        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(interceptionConfirmed.promise)
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(() => interceptionConfirmed.promise)
 
         const attached = BrowserCriClient._onAttachToTarget(options as any)
 
         await new Promise((resolve) => setImmediate(resolve))
 
-        expect(options.browserCriClient.waitForChildTargetInterception).to.have.been.calledWith('target-id')
-        expect(options.browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+        expectCalledWith(options.browserCriClient.waitForChildTargetInterception, 'target-id')
+        expectNotCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger')
 
         interceptionConfirmed.resolve()
         await attached
 
-        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
       })
 
       it('releases the worker once the timeout elapses without confirmation', async () => {
         options.childTargetInterceptionTimeoutMs = 5
-        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
         await BrowserCriClient._onAttachToTarget(options as any)
 
-        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
       })
 
       it('releases the worker if the waiter rejects', async () => {
-        options.browserCriClient.waitForChildTargetInterception = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(async () => {
+          throw new Error('ProtocolError: Inspected target closed')
+        })
 
         await BrowserCriClient._onAttachToTarget(options as any)
 
-        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
       })
 
       it('releases immediately when no waiter is registered (field absent)', async () => {
-        expect(options.browserCriClient.waitForChildTargetInterception).to.be.undefined
+        expect(options.browserCriClient.waitForChildTargetInterception).toBeUndefined()
 
         await BrowserCriClient._onAttachToTarget(options as any)
 
-        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
       })
 
       it('is never consulted for a non-service-worker target (iframe)', async () => {
         options.event.targetInfo.type = 'iframe'
-        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
         await BrowserCriClient._onAttachToTarget(options as any)
 
-        expect(options.browserCriClient.waitForChildTargetInterception).not.to.have.been.called
-        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expect(options.browserCriClient.waitForChildTargetInterception).not.toHaveBeenCalled()
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
       })
 
       // The page connection never attaches the Cypress extension's own
@@ -813,48 +912,48 @@ describe('lib/browsers/browser-cri-client', function () {
       // on every MV3 idle-restart, stalling the extension's own automation.
       it('is never consulted for the extension service worker, and releases immediately', async () => {
         options.event.targetInfo.url = 'chrome-extension://abc123/background.js'
-        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
         await BrowserCriClient._onAttachToTarget(options as any)
 
-        expect(options.browserCriClient.waitForChildTargetInterception).not.to.have.been.called
-        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expect(options.browserCriClient.waitForChildTargetInterception).not.toHaveBeenCalled()
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
       })
 
       it('is never consulted for an extra target (popup/page)', async () => {
         options.event.targetInfo.type = 'page'
         const criClient = {
-          send: sinon.stub(),
-          on: sinon.stub(),
+          send: stub(),
+          on: vi.fn(),
         }
 
-        options.CriConstructor.returns(criClient)
+        options.CriConstructor.mockReturnValue(criClient)
         options.browserClient.send.withArgs('Fetch.enable').resolves()
-        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
         await BrowserCriClient._onAttachToTarget(options as any)
 
-        expect(options.browserCriClient.waitForChildTargetInterception).not.to.have.been.called
-        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expect(options.browserCriClient.waitForChildTargetInterception).not.toHaveBeenCalled()
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
       })
     })
   })
 
-  context('._manageTabs', () => {
+  describe('._manageTabs', () => {
     // Exercises the real Target.detachedFromTarget and
     // Inspector.targetReloadedAfterCrash listeners _manageTabs registers,
     // rather than calling private handlers directly - there's no other way
     // to reach them.
     async function setup (childTargetInterceptionTimeoutMs?: number) {
       const browserClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub(),
-        removeSessionEnablements: sinon.stub(),
+        send: stub(async () => {}),
+        on: vi.fn(),
+        removeSessionEnablements: vi.fn(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
-        addServiceWorkerBinding: sinon.stub(),
-        removeServiceWorkerBinding: sinon.stub(),
+        addServiceWorkerBinding: vi.fn(),
+        removeServiceWorkerBinding: vi.fn(),
       }
 
       await BrowserCriClient._manageTabs({
@@ -862,13 +961,13 @@ describe('lib/browsers/browser-cri-client', function () {
         browserCriClient,
         browserName: 'Chrome',
         host: 'localhost',
-        onAsynchronousError: sinon.stub(),
+        onAsynchronousError: vi.fn(),
         port: 1234,
         ...(childTargetInterceptionTimeoutMs !== undefined ? { childTargetInterceptionTimeoutMs } : {}),
       } as any)
 
-      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
-      const detachHandler = browserClient.on.withArgs('Target.detachedFromTarget').args[0][1]
+      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
+      const detachHandler = callsWith(browserClient.on, 'Target.detachedFromTarget')[0][1]
 
       return { browserClient, browserCriClient, crashHandler, detachHandler }
     }
@@ -882,7 +981,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
         detachHandler({ sessionId, targetId: 'sw-target-id' })
 
-        expect(browserCriClient.sessionTargetInfo.has(sessionId)).to.be.false
+        expect(browserCriClient.sessionTargetInfo.has(sessionId)).toBe(false)
       })
 
       it('releases the enablements recorded for the session', async () => {
@@ -890,7 +989,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
         detachHandler({ sessionId: 'sw-session', targetId: 'sw-target-id' })
 
-        expect(browserClient.removeSessionEnablements).to.be.calledOnceWith('sw-session')
+        expectCalledOnceWith(browserClient.removeSessionEnablements, 'sw-session')
       })
     })
 
@@ -914,19 +1013,19 @@ describe('lib/browsers/browser-cri-client', function () {
 
         const interceptionReenabled = Promise.withResolvers<void>()
 
-        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(interceptionReenabled.promise)
+        browserCriClient.reenableChildTargetInterception = vi.fn(() => interceptionReenabled.promise)
 
         const released = crashHandler({}, sessionId)
 
         await new Promise((resolve) => setImmediate(resolve))
 
-        expect(browserCriClient.reenableChildTargetInterception).to.have.been.calledWith(targetId)
-        expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+        expectCalledWith(browserCriClient.reenableChildTargetInterception, targetId)
+        expectNotCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger')
 
         interceptionReenabled.resolve()
         await released
 
-        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('releases immediately when the session has no recorded TargetInfo', async () => {
@@ -934,7 +1033,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
         await crashHandler({}, 'unmapped-session')
 
-        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'unmapped-session')
+        expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'unmapped-session')
       })
 
       it('releases immediately for a mapped extension service worker', async () => {
@@ -942,12 +1041,12 @@ describe('lib/browsers/browser-cri-client', function () {
         const sessionId = 'ext-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'ext-target', type: 'service_worker', url: 'chrome-extension://abc123/background.js' })
-        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        browserCriClient.reenableChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
         await crashHandler({}, sessionId)
 
-        expect(browserCriClient.reenableChildTargetInterception).not.to.have.been.called
-        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expect(browserCriClient.reenableChildTargetInterception).not.toHaveBeenCalled()
+        expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       // MITM parity: on that path nothing ever sets reenableChildTargetInterception,
@@ -961,7 +1060,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
         await crashHandler({}, sessionId)
 
-        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('releases a mapped, non-service-worker session immediately without consulting the field', async () => {
@@ -969,12 +1068,12 @@ describe('lib/browsers/browser-cri-client', function () {
         const sessionId = 'page-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'page-target', type: 'page', url: 'https://example.test/' })
-        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        browserCriClient.reenableChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
         await crashHandler({}, sessionId)
 
-        expect(browserCriClient.reenableChildTargetInterception).not.to.have.been.called
-        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expect(browserCriClient.reenableChildTargetInterception).not.toHaveBeenCalled()
+        expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('releases the crashed service worker once the interception-confirmation timeout elapses', async () => {
@@ -982,11 +1081,11 @@ describe('lib/browsers/browser-cri-client', function () {
         const sessionId = 'sw-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
-        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        browserCriClient.reenableChildTargetInterception = vi.fn(() => new Promise(() => {}))
 
         await crashHandler({}, sessionId)
 
-        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
       it('releases immediately when the re-enable call rejects', async () => {
@@ -994,18 +1093,20 @@ describe('lib/browsers/browser-cri-client', function () {
         const sessionId = 'sw-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
-        browserCriClient.reenableChildTargetInterception = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+        browserCriClient.reenableChildTargetInterception = vi.fn(async () => {
+          throw new Error('ProtocolError: Inspected target closed')
+        })
 
         await crashHandler({}, sessionId)
 
-        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
     })
   })
 
-  context('cross-connection interception hold with a real page CriClient (#34674)', function () {
+  describe('cross-connection interception hold with a real page CriClient (#34674)', function () {
     // Exercises the hold through an actual page-side CriClient - built the
-    // same way cri-client_spec.ts builds one - wired as
+    // same way cri-client.spec.ts builds one - wired as
     // waitForChildTargetInterception and reenableChildTargetInterception,
     // rather than stubs standing in for what those calls actually require.
     const DEBUGGER_URL = 'http://foo'
@@ -1013,42 +1114,32 @@ describe('lib/browsers/browser-cri-client', function () {
     const targetId = 'sw-target-id'
 
     let pageClient: CriClient
-    let pageCriStub: { on: sinon.SinonStub, off: sinon.SinonStub, send: sinon.SinonStub, close: sinon.SinonStub }
+    let pageCriStub: { on: Mock, off: Mock, send: Mock, close: Mock }
 
     const firePageCDPEvent = (method: string, params: object, eventSessionId?: string) => {
-      pageCriStub.on.withArgs('event').args[0][1]({ method, params, sessionId: eventSessionId })
+      callsWith(pageCriStub.on, 'event')[0][1]({ method, params, sessionId: eventSessionId })
     }
 
     const drain = () => new Promise((resolve) => setImmediate(resolve))
 
     beforeEach(async () => {
       pageCriStub = {
-        on: sinon.stub(),
-        off: sinon.stub(),
-        send: sinon.stub().resolves(),
-        close: sinon.stub().resolves(),
+        on: vi.fn(),
+        off: vi.fn(),
+        send: vi.fn(async () => {}),
+        close: vi.fn(async () => {}),
       }
 
-      const criImportForPage = sinon.stub()
-      .withArgs({ target: DEBUGGER_URL, local: true })
-      .resolves(pageCriStub)
+      cdp.state.criImport = vi.fn(async () => pageCriStub)
 
-      const CDPConnectionRef = proxyquire('../lib/browsers/cdp-protocol/cdp-connection', {
-        'chrome-remote-interface': criImportForPage,
-      }).CDPConnection
-
-      const { CriClient: RealCriClient } = proxyquire('../lib/browsers/cdp-protocol/cri-client', {
-        './cdp-connection': { CDPConnection: CDPConnectionRef },
-      })
-
-      pageClient = await RealCriClient.create({
+      pageClient = await realCriClientCreate.call(CriClient, {
         target: DEBUGGER_URL,
         host: HOST,
         fullyManageTabs: true,
-        onAsynchronousError: sinon.stub(),
+        onAsynchronousError: vi.fn(),
       })
 
-      pageClient.onChildTargetAttached = sinon.stub().resolves()
+      pageClient.onChildTargetAttached = vi.fn(async () => {})
 
       firePageCDPEvent('Target.attachedToTarget', {
         waitingForDebugger: true,
@@ -1058,14 +1149,14 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await drain()
 
-      await expect(pageClient.whenChildTargetHandled(targetId)).to.be.fulfilled
+      await pageClient.whenChildTargetHandled(targetId)
     })
 
     async function setupBrowserConnection (childTargetInterceptionTimeoutMs?: number) {
       const browserClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub(),
-        removeSessionEnablements: sinon.stub(),
+        send: stub(async () => {}),
+        on: vi.fn(),
+        removeSessionEnablements: vi.fn(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
@@ -1080,12 +1171,12 @@ describe('lib/browsers/browser-cri-client', function () {
         browserCriClient,
         browserName: 'Chrome',
         host: 'localhost',
-        onAsynchronousError: sinon.stub(),
+        onAsynchronousError: vi.fn(),
         port: 1234,
         ...(childTargetInterceptionTimeoutMs !== undefined ? { childTargetInterceptionTimeoutMs } : {}),
       } as any)
 
-      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
+      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
 
       return { browserClient, crashHandler }
     }
@@ -1101,7 +1192,7 @@ describe('lib/browsers/browser-cri-client', function () {
       // off the re-enable call, not by waiting out even a sliver of this
       const { browserClient, crashHandler } = await setupBrowserConnection(1_000_000)
 
-      pageClient.onChildTargetAttached = sinon.stub().resolves()
+      pageClient.onChildTargetAttached = vi.fn(async () => {})
 
       // the page connection's own crash-reload handling completes first,
       // independent of anything the browser connection does
@@ -1110,10 +1201,10 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await crashHandler({}, sessionId)
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       // once from the page connection's own crash handling, once from the
       // browser connection's re-enable call
-      expect(pageClient.onChildTargetAttached).to.have.been.calledTwice
+      expect(pageClient.onChildTargetAttached).toHaveBeenCalledTimes(2)
     })
 
     // Case (b): browser-first - nothing has happened on the page
@@ -1125,18 +1216,18 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const reEnabled = Promise.withResolvers<void>()
 
-      pageClient.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+      pageClient.onChildTargetAttached = vi.fn(() => reEnabled.promise)
 
       const released = crashHandler({}, sessionId)
 
       await drain()
 
-      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+      expectNotCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger')
 
       reEnabled.resolve()
       await released
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
     // Case (c): a second crash triggers its own fresh re-enable and resolves
@@ -1144,30 +1235,30 @@ describe('lib/browsers/browser-cri-client', function () {
     it('triggers a fresh re-enable for a second crash and resolves on that crash\'s own hook', async () => {
       const { browserClient, crashHandler } = await setupBrowserConnection()
 
-      pageClient.onChildTargetAttached = sinon.stub().resolves()
+      pageClient.onChildTargetAttached = vi.fn(async () => {})
 
       await crashHandler({}, sessionId)
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
-      expect(pageClient.onChildTargetAttached).to.have.been.calledOnce
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expect(pageClient.onChildTargetAttached).toHaveBeenCalledTimes(1)
 
-      browserClient.send.resetHistory()
+      browserClient.send.mockClear()
 
       const secondReEnabled = Promise.withResolvers<void>()
 
-      pageClient.onChildTargetAttached = sinon.stub().returns(secondReEnabled.promise)
+      pageClient.onChildTargetAttached = vi.fn(() => secondReEnabled.promise)
 
       const released = crashHandler({}, sessionId)
 
       await drain()
 
-      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
-      expect(pageClient.onChildTargetAttached).to.have.been.calledOnce
+      expectNotCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger')
+      expect(pageClient.onChildTargetAttached).toHaveBeenCalledTimes(1)
 
       secondReEnabled.resolve()
       await released
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
     // Case (d): the page connection's own Inspector.targetReloadedAfterCrash
@@ -1179,7 +1270,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const reEnabled = Promise.withResolvers<void>()
 
-      pageClient.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+      pageClient.onChildTargetAttached = vi.fn(() => reEnabled.promise)
 
       // firePageCDPEvent('Inspector.targetReloadedAfterCrash', ...) is
       // deliberately never called here
@@ -1187,13 +1278,13 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await drain()
 
-      expect(pageClient.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
-      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+      expectCalledOnceWith(pageClient.onChildTargetAttached as Mock, sessionId)
+      expectNotCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger')
 
       reEnabled.resolve()
       await released
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
     // Case (e): the re-enable call itself rejects - unknown target, or the
@@ -1204,21 +1295,23 @@ describe('lib/browsers/browser-cri-client', function () {
       // off the rejection, not by waiting out even a sliver of this
       const { browserClient, crashHandler } = await setupBrowserConnection(1_000_000)
 
-      pageClient.onChildTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+      pageClient.onChildTargetAttached = vi.fn(async () => {
+        throw new Error('ProtocolError: Inspected target closed')
+      })
 
       await crashHandler({}, sessionId)
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
     it('releases via the timeout when the re-enable hook never resolves', async () => {
       const { browserClient, crashHandler } = await setupBrowserConnection(5)
 
-      pageClient.onChildTargetAttached = sinon.stub().returns(new Promise(() => {}))
+      pageClient.onChildTargetAttached = vi.fn(() => new Promise<void>(() => {}))
 
       await crashHandler({}, sessionId)
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
     // Case (f): #34674's residual window, closed. A hook invocation already
@@ -1233,10 +1326,9 @@ describe('lib/browsers/browser-cri-client', function () {
       const staleInvocation = Promise.withResolvers<void>()
       const crashInvocation = Promise.withResolvers<void>()
 
-      const onChildTargetAttached = sinon.stub()
-
-      onChildTargetAttached.onCall(0).returns(staleInvocation.promise)
-      onChildTargetAttached.onCall(1).returns(crashInvocation.promise)
+      const onChildTargetAttached = vi.fn()
+      .mockReturnValueOnce(staleInvocation.promise)
+      .mockReturnValueOnce(crashInvocation.promise)
 
       pageClient.onChildTargetAttached = onChildTargetAttached
 
@@ -1248,52 +1340,52 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await drain()
 
-      expect(onChildTargetAttached).to.have.been.calledTwice
-      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+      expect(onChildTargetAttached).toHaveBeenCalledTimes(2)
+      expectNotCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger')
 
       // resolving the stale, pre-crash invocation must not satisfy this
       // crash's own hold
       staleInvocation.resolve()
       await drain()
 
-      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+      expectNotCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger')
 
       crashInvocation.resolve()
       await released
 
-      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expectCalledWith(browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
   })
 
-  context('._onTargetDestroyed', () => {
+  describe('._onTargetDestroyed', () => {
     describe('when not the currently attached target', () => {
       let options: any
 
       beforeEach(() => {
         options = {
           browserCriClient: {
-            hasExtraTargetClient: sinon.stub().returns(true),
-            getExtraTargetClient: sinon.stub(),
-            removeExtraTargetClient: sinon.stub(),
+            hasExtraTargetClient: vi.fn(() => true),
+            getExtraTargetClient: vi.fn(),
+            removeExtraTargetClient: vi.fn(),
             currentlyAttachedTarget: {
               targetId: 'main-target-id',
-              close: sinon.stub().resolves(),
+              close: vi.fn(async () => {}),
             },
             currentlyAttachedProtocolTarget: {
-              close: sinon.stub().resolves(),
+              close: vi.fn(async () => {}),
             },
             currentlyAttachedCyPromptTarget: {
-              close: sinon.stub().resolves(),
+              close: vi.fn(async () => {}),
             },
             currentlyAttachedStudioTarget: {
-              close: sinon.stub().resolves(),
+              close: vi.fn(async () => {}),
             },
             resettingBrowserTargets: false,
             sessionTargetInfo: new Map(),
-            removeServiceWorkerBinding: sinon.stub(),
+            removeServiceWorkerBinding: vi.fn(),
           },
           browserClient: {
-            removeSessionEnablements: sinon.stub(),
+            removeSessionEnablements: vi.fn(),
           },
           event: {
             targetId: 'target-id',
@@ -1302,280 +1394,282 @@ describe('lib/browsers/browser-cri-client', function () {
       })
 
       it('releases the per-session state of the destroyed target', () => {
-        options.browserCriClient.hasExtraTargetClient.returns(false)
+        options.browserCriClient.hasExtraTargetClient.mockReturnValue(false)
         options.browserCriClient.sessionTargetInfo.set('sw-session', { targetId: 'target-id', type: 'service_worker' })
         options.browserCriClient.sessionTargetInfo.set('other-session', { targetId: 'other-target-id', type: 'service_worker' })
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.removeServiceWorkerBinding).to.be.calledOnceWith('sw-session')
-        expect(options.browserClient.removeSessionEnablements).to.be.calledOnceWith('sw-session')
+        expectCalledOnceWith(options.browserCriClient.removeServiceWorkerBinding, 'sw-session')
+        expectCalledOnceWith(options.browserClient.removeSessionEnablements, 'sw-session')
       })
 
       it('is noop if target is not currently tracked', () => {
-        options.browserCriClient.hasExtraTargetClient.returns(false)
+        options.browserCriClient.hasExtraTargetClient.mockReturnValue(false)
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.getExtraTargetClient).not.to.be.called
-        expect(options.browserCriClient.currentlyAttachedTarget.close).not.to.be.called
-        expect(options.browserCriClient.currentlyAttachedProtocolTarget.close).not.to.be.called
-        expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).not.to.be.called
-        expect(options.browserCriClient.currentlyAttachedStudioTarget.close).not.to.be.called
+        expect(options.browserCriClient.getExtraTargetClient).not.toHaveBeenCalled()
+        expect(options.browserCriClient.currentlyAttachedTarget.close).not.toHaveBeenCalled()
+        expect(options.browserCriClient.currentlyAttachedProtocolTarget.close).not.toHaveBeenCalled()
+        expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).not.toHaveBeenCalled()
+        expect(options.browserCriClient.currentlyAttachedStudioTarget.close).not.toHaveBeenCalled()
       })
 
       it('closes the extra target client', () => {
-        const client = { close: sinon.stub().resolves() }
+        const client = { close: vi.fn(async () => {}) }
 
-        options.browserCriClient.getExtraTargetClient.returns({ client })
+        options.browserCriClient.getExtraTargetClient.mockReturnValue({ client })
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(client.close).to.be.called
+        expect(client.close).toHaveBeenCalled()
       })
 
       it('detaches the extra target Fetch transport when present', () => {
-        const detach = sinon.stub().resolves()
-        const client = { close: sinon.stub().resolves() }
+        const detach = vi.fn(async () => {})
+        const client = { close: vi.fn(async () => {}) }
 
-        options.browserCriClient.getExtraTargetClient.returns({ client, detach })
+        options.browserCriClient.getExtraTargetClient.mockReturnValue({ client, detach })
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(detach).to.be.called
-        expect(client.close).to.be.called
+        expect(detach).toHaveBeenCalled()
+        expect(client.close).toHaveBeenCalled()
       })
 
       it('ignores errors closing the extra target client', () => {
-        const client = { close: sinon.stub().rejects(new Error('closing failed')) }
+        const client = {
+          close: vi.fn(async () => {
+            throw new Error('closing failed')
+          }),
+        }
 
-        options.browserCriClient.getExtraTargetClient.returns({ client })
+        options.browserCriClient.getExtraTargetClient.mockReturnValue({ client })
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.removeExtraTargetClient).to.be.calledWith('target-id')
+        expectCalledWith(options.browserCriClient.removeExtraTargetClient, 'target-id')
         // error is caught or else the test would fail
       })
 
       it('removes the extra target client from the tracker', () => {
-        const client = { close: sinon.stub().resolves() }
+        const client = { close: vi.fn(async () => {}) }
 
-        options.browserCriClient.getExtraTargetClient.returns({ client })
+        options.browserCriClient.getExtraTargetClient.mockReturnValue({ client })
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.removeExtraTargetClient).to.be.calledWith('target-id')
+        expectCalledWith(options.browserCriClient.removeExtraTargetClient, 'target-id')
       })
 
       it('closes the studio target', () => {
         options.browserCriClient.gracefulShutdown = true
         options.event.targetId = 'main-target-id'
-        options.browserCriClient.currentlyAttachedStudioTarget.close.resolves()
+        options.browserCriClient.currentlyAttachedStudioTarget.close.mockResolvedValue(undefined)
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.currentlyAttachedStudioTarget.close).to.be.called
+        expect(options.browserCriClient.currentlyAttachedStudioTarget.close).toHaveBeenCalled()
       })
 
       it('ignores errors closing the studio target', () => {
         options.browserCriClient.gracefulShutdown = true
         options.event.targetId = 'main-target-id'
-        options.browserCriClient.currentlyAttachedStudioTarget.close.rejects(new Error('closing failed'))
+        options.browserCriClient.currentlyAttachedStudioTarget.close.mockRejectedValue(new Error('closing failed'))
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.currentlyAttachedStudioTarget.close).to.be.called
+        expect(options.browserCriClient.currentlyAttachedStudioTarget.close).toHaveBeenCalled()
       })
 
       it('closes the cyPrompt target', () => {
         options.browserCriClient.gracefulShutdown = true
         options.event.targetId = 'main-target-id'
-        options.browserCriClient.currentlyAttachedCyPromptTarget.close.resolves()
+        options.browserCriClient.currentlyAttachedCyPromptTarget.close.mockResolvedValue(undefined)
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).to.be.called
+        expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).toHaveBeenCalled()
       })
 
       it('ignores errors closing the cyPrompt target', () => {
         options.browserCriClient.gracefulShutdown = true
         options.event.targetId = 'main-target-id'
-        options.browserCriClient.currentlyAttachedCyPromptTarget.close.rejects(new Error('closing failed'))
+        options.browserCriClient.currentlyAttachedCyPromptTarget.close.mockRejectedValue(new Error('closing failed'))
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).to.be.called
+        expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).toHaveBeenCalled()
       })
 
       // Target.targetDestroyed carries no sessionId, unlike detachedFromTarget
       // - this is the fallback sweep for whichever session(s) were recorded
       // against the destroyed targetId (#34674).
       it('evicts any session -> TargetInfo mapping recorded for the destroyed target', () => {
-        options.browserCriClient.hasExtraTargetClient.returns(false)
+        options.browserCriClient.hasExtraTargetClient.mockReturnValue(false)
         options.browserCriClient.sessionTargetInfo.set('sw-session', { targetId: 'target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
         options.browserCriClient.sessionTargetInfo.set('other-session', { targetId: 'some-other-target-id', type: 'page', url: 'https://example.test/' })
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
-        expect(options.browserCriClient.sessionTargetInfo.has('sw-session')).to.be.false
-        expect(options.browserCriClient.sessionTargetInfo.has('other-session')).to.be.true
+        expect(options.browserCriClient.sessionTargetInfo.has('sw-session')).toBe(false)
+        expect(options.browserCriClient.sessionTargetInfo.has('other-session')).toBe(true)
       })
     })
   })
 
-  context('#attachToTargetUrl', function () {
+  describe('#attachToTargetUrl', function () {
     it('creates a page client when the passed in url is found', async function () {
       const mockProtocolClient = {}
       const mockPageClient = {
-        clone: sinon.stub().onFirstCall().returns(mockProtocolClient),
+        clone: vi.fn().mockReturnValueOnce(mockProtocolClient),
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
       const client = await browserClient.attachToTargetUrl('http://foo.com')
 
-      expect(client).to.be.equal(mockPageClient)
-      expect(browserClient.currentlyAttachedProtocolTarget).to.be.equal(mockProtocolClient)
+      expect(client).toBe(mockPageClient)
+      expect(browserClient.currentlyAttachedProtocolTarget).toBe(mockProtocolClient)
     })
 
     it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs', async function () {
       const mockProtocolClient = {}
       const mockPageClient = {
-        clone: sinon.stub().onFirstCall().returns(mockProtocolClient),
+        clone: vi.fn().mockReturnValueOnce(mockProtocolClient),
       }
       const protocolManager: any = {
-        connectToBrowser: sinon.stub().resolves(),
+        connectToBrowser: vi.fn(async () => {}),
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      send.withArgs('Target.setDiscoverTargets', { discover: true })
-      on.withArgs('Target.targetDestroyed', sinon.match.func)
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
       const client = await browserClient.attachToTargetUrl('http://foo.com')
 
-      expect(client).to.be.equal(mockPageClient)
-      expect(browserClient.currentlyAttachedProtocolTarget).to.be.equal(mockProtocolClient)
-      expect(protocolManager.connectToBrowser).to.be.calledWith(browserClient.currentlyAttachedProtocolTarget)
+      expect(client).toBe(mockPageClient)
+      expect(browserClient.currentlyAttachedProtocolTarget).toBe(mockProtocolClient)
+      expectCalledWith(protocolManager.connectToBrowser, browserClient.currentlyAttachedProtocolTarget)
     })
 
     it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs and attaching to target throws', async function () {
       const mockProtocolClient = {}
       const mockPageClient = {
-        clone: sinon.stub().onFirstCall().returns(mockProtocolClient),
+        clone: vi.fn().mockReturnValueOnce(mockProtocolClient),
       }
       const protocolManager: any = {
-        connectToBrowser: sinon.stub().resolves(),
+        connectToBrowser: vi.fn(async () => {}),
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      send.withArgs('Target.setDiscoverTargets', { discover: true })
-      on.withArgs('Target.targetDestroyed', sinon.match.func)
 
       send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
 
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
       const client = await browserClient.attachToTargetUrl('http://foo.com')
 
-      expect(client).to.be.equal(mockPageClient)
-      expect(browserClient.currentlyAttachedProtocolTarget).to.be.equal(mockProtocolClient)
-      expect(protocolManager.connectToBrowser).to.be.calledWith(browserClient.currentlyAttachedProtocolTarget)
+      expect(client).toBe(mockPageClient)
+      expect(browserClient.currentlyAttachedProtocolTarget).toBe(mockProtocolClient)
+      expectCalledWith(protocolManager.connectToBrowser, browserClient.currentlyAttachedProtocolTarget)
 
       // This would throw if the error was not caught
-      await on.withArgs('Target.attachedToTarget').args[0][1]({ targetInfo: { type: 'worker' } })
+      await callsWith(on, 'Target.attachedToTarget')[0][1]({ targetInfo: { type: 'worker' } })
     })
 
     it('retries when the passed in url is not found', async function () {
-      sinon.stub(protocol, '_getDelayMsForRetry')
-      .onFirstCall().returns(100)
-      .onSecondCall().returns(100)
-      .onThirdCall().returns(100)
+      vi.spyOn(protocol, '_getDelayMsForRetry')
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(100)
 
       const mockProtocolClient = {}
       const mockPageClient = {
-        clone: sinon.stub().returns(mockProtocolClient),
+        clone: vi.fn(() => mockProtocolClient),
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
       const client = await browserClient.attachToTargetUrl('http://foo.com')
 
-      expect(client).to.be.equal(mockPageClient)
-      expect(browserClient.currentlyAttachedProtocolTarget).to.be.equal(mockProtocolClient)
+      expect(client).toBe(mockPageClient)
+      expect(browserClient.currentlyAttachedProtocolTarget).toBe(mockProtocolClient)
     })
 
     it('throws when the passed in url is not found after retrying', async function () {
-      sinon.stub(protocol, '_getDelayMsForRetry')
-      .onFirstCall().returns(100)
-      .onSecondCall().returns(undefined)
+      vi.spyOn(protocol, '_getDelayMsForRetry')
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(undefined)
 
       const mockPageClient = {}
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
-      await expect(browserClient.attachToTargetUrl('http://baz.com')).to.be.rejected
+      await expect(browserClient.attachToTargetUrl('http://baz.com')).rejects.toThrow()
     })
   })
 
-  context('#resetBrowserTargets', function () {
+  describe('#resetBrowserTargets', function () {
     it('closes the currently attached target while keeping a tab open', async function () {
       const mockCurrentlyAttachedTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [{
             eventName: 'Network.requestWillBeSent',
-            cb: sinon.stub(),
+            cb: vi.fn(),
           }],
         },
       }
 
       const mockCurrentlyAttachedProtocolTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [{
             eventName: 'Network.requestWillBeSent',
-            cb: sinon.stub(),
+            cb: vi.fn(),
           }],
         },
       }
 
       const mockCurrentlyAttachedCyPromptTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [{
             eventName: 'Network.requestWillBeSent',
-            cb: sinon.stub(),
+            cb: vi.fn(),
           }],
         },
       }
 
       const mockCurrentlyAttachedStudioTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [{
             eventName: 'Network.requestWillBeSent',
-            cb: sinon.stub(),
+            cb: vi.fn(),
           }],
         },
       }
@@ -1594,10 +1688,10 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const mockUpdatedCurrentlyAttachedTarget = {
         targetId: '101',
-        clone: sinon.stub()
-          .onFirstCall().returns(mockUpdatedCurrentlyAttachedProtocolTarget)
-          .onSecondCall().returns(mockUpdatedCurrentlyAttachedCyPromptTarget)
-          .onThirdCall().returns(mockUpdatedCurrentlyAttachedStudioTarget),
+        clone: vi.fn()
+        .mockReturnValueOnce(mockUpdatedCurrentlyAttachedProtocolTarget)
+        .mockReturnValueOnce(mockUpdatedCurrentlyAttachedCyPromptTarget)
+        .mockReturnValueOnce(mockUpdatedCurrentlyAttachedStudioTarget),
       }
 
       send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
@@ -1605,31 +1699,31 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const browserClient = await getClient() as any
 
-      criClientCreateStub.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: browserClient.browserClient }).resolves(mockUpdatedCurrentlyAttachedTarget)
+      criClientCreate.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: browserClient.browserClient }).resolves(mockUpdatedCurrentlyAttachedTarget)
 
       browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
       browserClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
       browserClient.currentlyAttachedCyPromptTarget = mockCurrentlyAttachedCyPromptTarget
       browserClient.currentlyAttachedStudioTarget = mockCurrentlyAttachedStudioTarget
-      browserClient.browserClient.off = sinon.stub()
+      browserClient.browserClient.off = vi.fn()
 
       await browserClient.resetBrowserTargets(true)
 
-      expect(mockCurrentlyAttachedTarget.close).to.be.called
-      expect(browserClient.currentlyAttachedTarget).to.eql(mockUpdatedCurrentlyAttachedTarget)
-      expect(browserClient.currentlyAttachedProtocolTarget).to.eql(mockUpdatedCurrentlyAttachedProtocolTarget)
-      expect(browserClient.currentlyAttachedCyPromptTarget).to.eql(mockUpdatedCurrentlyAttachedCyPromptTarget)
-      expect(browserClient.currentlyAttachedStudioTarget).to.eql(mockUpdatedCurrentlyAttachedStudioTarget)
-      expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedTarget.queue.subscriptions[0].cb)
-      expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedProtocolTarget.queue.subscriptions[0].cb)
-      expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedCyPromptTarget.queue.subscriptions[0].cb)
-      expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedStudioTarget.queue.subscriptions[0].cb)
+      expect(mockCurrentlyAttachedTarget.close).toHaveBeenCalled()
+      expect(browserClient.currentlyAttachedTarget).toEqual(mockUpdatedCurrentlyAttachedTarget)
+      expect(browserClient.currentlyAttachedProtocolTarget).toEqual(mockUpdatedCurrentlyAttachedProtocolTarget)
+      expect(browserClient.currentlyAttachedCyPromptTarget).toEqual(mockUpdatedCurrentlyAttachedCyPromptTarget)
+      expect(browserClient.currentlyAttachedStudioTarget).toEqual(mockUpdatedCurrentlyAttachedStudioTarget)
+      expectCalledWith(browserClient.browserClient.off, 'Network.requestWillBeSent', mockCurrentlyAttachedTarget.queue.subscriptions[0].cb)
+      expectCalledWith(browserClient.browserClient.off, 'Network.requestWillBeSent', mockCurrentlyAttachedProtocolTarget.queue.subscriptions[0].cb)
+      expectCalledWith(browserClient.browserClient.off, 'Network.requestWillBeSent', mockCurrentlyAttachedCyPromptTarget.queue.subscriptions[0].cb)
+      expectCalledWith(browserClient.browserClient.off, 'Network.requestWillBeSent', mockCurrentlyAttachedStudioTarget.queue.subscriptions[0].cb)
     })
 
     it('closes the currently attached target without keeping a tab open', async function () {
       const mockCurrentlyAttachedTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [],
         },
@@ -1637,7 +1731,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const mockCurrentlyAttachedProtocolTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [],
         },
@@ -1645,7 +1739,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const mockCurrentlyAttachedCyPromptTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [],
         },
@@ -1653,7 +1747,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const mockCurrentlyAttachedStudioTarget = {
         targetId: '100',
-        close: sinon.stub().resolves(sinon.stub().resolves()),
+        close: vi.fn(async () => vi.fn(async () => {})),
         queue: {
           subscriptions: [],
         },
@@ -1670,86 +1764,86 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await browserClient.resetBrowserTargets(false)
 
-      expect(mockCurrentlyAttachedTarget.close).to.be.called
-      expect(mockCurrentlyAttachedProtocolTarget.close).to.be.called
-      expect(mockCurrentlyAttachedCyPromptTarget.close).to.be.called
-      expect(mockCurrentlyAttachedStudioTarget.close).to.be.called
-      expect(browserClient.currentlyAttachedTarget).to.be.undefined
-      expect(browserClient.currentlyAttachedProtocolTarget).to.be.undefined
-      expect(browserClient.currentlyAttachedCyPromptTarget).to.be.undefined
-      expect(browserClient.currentlyAttachedStudioTarget).to.be.undefined
+      expect(mockCurrentlyAttachedTarget.close).toHaveBeenCalled()
+      expect(mockCurrentlyAttachedProtocolTarget.close).toHaveBeenCalled()
+      expect(mockCurrentlyAttachedCyPromptTarget.close).toHaveBeenCalled()
+      expect(mockCurrentlyAttachedStudioTarget.close).toHaveBeenCalled()
+      expect(browserClient.currentlyAttachedTarget).toBeUndefined()
+      expect(browserClient.currentlyAttachedProtocolTarget).toBeUndefined()
+      expect(browserClient.currentlyAttachedCyPromptTarget).toBeUndefined()
+      expect(browserClient.currentlyAttachedStudioTarget).toBeUndefined()
     })
 
     it('throws when there is no currently attached target', async function () {
       const browserClient = await getClient() as any
 
-      await expect(browserClient.resetBrowserTargets()).to.be.rejected
+      await expect(browserClient.resetBrowserTargets()).rejects.toThrow()
     })
   })
 
-  context('#closeExtraTargets', () => {
+  describe('#closeExtraTargets', () => {
     it('closes any extra tracked targets', async () => {
       const browserClient = await getClient() as any
 
-      browserClient.browserClient.send = sinon.stub().resolves()
+      browserClient.browserClient.send = vi.fn(async () => {})
 
       browserClient.addExtraTargetClient({ targetId: 'target-id-1' }, {})
       browserClient.addExtraTargetClient({ targetId: 'target-id-2' }, {})
 
       await browserClient.closeExtraTargets()
 
-      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
-      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-2' })
+      expectCalledWith(browserClient.browserClient.send, 'Target.closeTarget', { targetId: 'target-id-1' })
+      expectCalledWith(browserClient.browserClient.send, 'Target.closeTarget', { targetId: 'target-id-2' })
     })
 
     it('ignores errors', async () => {
       const browserClient = await getClient() as any
 
-      browserClient.browserClient.send = sinon.stub().resolves()
-      browserClient.browserClient.send.onFirstCall().rejects(new Error('failed to close target'))
+      browserClient.browserClient.send = vi.fn(async () => {})
+      browserClient.browserClient.send.mockRejectedValueOnce(new Error('failed to close target'))
 
       browserClient.addExtraTargetClient({ targetId: 'target-id-1' }, {})
       browserClient.addExtraTargetClient({ targetId: 'target-id-2' }, {})
 
       await browserClient.closeExtraTargets()
 
-      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
-      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-2' })
+      expectCalledWith(browserClient.browserClient.send, 'Target.closeTarget', { targetId: 'target-id-1' })
+      expectCalledWith(browserClient.browserClient.send, 'Target.closeTarget', { targetId: 'target-id-2' })
       // error is caught or else the test would fail
     })
 
     it('does not wait on the extra target Fetch transport detaching', async () => {
       const browserClient = await getClient() as any
 
-      browserClient.browserClient.send = sinon.stub().resolves()
+      browserClient.browserClient.send = vi.fn(async () => {})
 
       browserClient.addExtraTargetClient({ targetId: 'target-id-1' }, {})
       // a detach that never settles models an extra target whose own CDP
       // connection is already gone
-      browserClient.getExtraTargetClient('target-id-1').detach = sinon.stub().returns(new Promise(() => {}))
+      browserClient.getExtraTargetClient('target-id-1').detach = vi.fn(() => new Promise(() => {}))
 
       await browserClient.closeExtraTargets()
 
-      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
+      expectCalledWith(browserClient.browserClient.send, 'Target.closeTarget', { targetId: 'target-id-1' })
     })
   })
 
-  context('#close', function () {
+  describe('#close', function () {
     it('closes the currently attached target if it exists and the browser client', async function () {
       const mockCurrentlyAttachedTarget = {
-        close: sinon.stub().resolves(),
+        close: vi.fn(async () => {}),
       }
 
       const mockCurrentlyAttachedProtocolTarget = {
-        close: sinon.stub().resolves(),
+        close: vi.fn(async () => {}),
       }
 
       const mockCurrentlyAttachedCyPromptTarget = {
-        close: sinon.stub().resolves(),
+        close: vi.fn(async () => {}),
       }
 
       const mockCurrentlyAttachedStudioTarget = {
-        close: sinon.stub().resolves(),
+        close: vi.fn(async () => {}),
       }
 
       const browserClient = await getClient() as any
@@ -1761,10 +1855,10 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await browserClient.close()
 
-      expect(mockCurrentlyAttachedTarget.close).to.be.called
-      expect(mockCurrentlyAttachedProtocolTarget.close).to.be.called
-      expect(mockCurrentlyAttachedCyPromptTarget.close).to.be.called
-      expect(mockCurrentlyAttachedStudioTarget.close).to.be.called
+      expect(mockCurrentlyAttachedTarget.close).toHaveBeenCalled()
+      expect(mockCurrentlyAttachedProtocolTarget.close).toHaveBeenCalled()
+      expect(mockCurrentlyAttachedCyPromptTarget.close).toHaveBeenCalled()
+      expect(mockCurrentlyAttachedStudioTarget.close).toHaveBeenCalled()
     })
 
     it('just the browser client with no currently attached target', async function () {
@@ -1772,7 +1866,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await browserClient.close()
 
-      expect(close).to.be.called
+      expect(close).toHaveBeenCalled()
     })
   })
 })
