@@ -1,4 +1,4 @@
-import snapshot from 'snap-shot-it'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import widestLine from 'widest-line'
 import * as env from '../../../lib/util/env'
@@ -6,7 +6,7 @@ import * as terminal from '../../../lib/util/terminal'
 import * as terminalSize from '../../../lib/util/terminal-size'
 
 const sanitizeSnapshot = (str) => {
-  return snapshot(stripAnsi(str))
+  expect(stripAnsi(str)).toMatchSnapshot()
 }
 
 const render = function (...tables) {
@@ -22,33 +22,39 @@ const expectLength = function (str, length) {
   const lineLength = widestLine(str.split('\n')[0])
 
   // first line should always be 100 chars
-  expect(lineLength).to.eq(length)
+  expect(lineLength).toBe(length)
 }
 
 describe('lib/util/terminal', () => {
-  context('.getMaximumColumns', () => {
-    it('uses max 100 when exceeds terminalSize', () => {
-      sinon.stub(terminalSize, 'get').returns({ columns: 1000 })
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
 
-      expect(terminal.getMaximumColumns()).to.eq(100)
+  describe('.getMaximumColumns', () => {
+    it('uses max 100 when exceeds terminalSize', () => {
+      vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 1000 } as any)
+
+      expect(terminal.getMaximumColumns()).toBe(100)
     })
 
     it('uses terminalSize when less than 100', () => {
-      sinon.stub(terminalSize, 'get').returns({ columns: 99 })
+      vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 99 } as any)
 
-      expect(terminal.getMaximumColumns()).to.eq(99)
+      expect(terminal.getMaximumColumns()).toBe(99)
     })
 
     it('overrides terminalSize when in CI', () => {
-      sinon.stub(env, 'get').withArgs('CI').returns('1')
+      vi.spyOn(env, 'get').mockImplementation((key) => {
+        return key === 'CI' ? '1' : undefined
+      })
 
-      expect(terminal.getMaximumColumns()).to.eq(100)
+      expect(terminal.getMaximumColumns()).toBe(100)
     })
   })
 
-  context('.table', () => {
+  describe('.table', () => {
     beforeEach(() => {
-      return sinon.stub(terminalSize, 'get').returns({ columns: 100 })
+      vi.spyOn(terminalSize, 'get').mockReturnValue({ columns: 100 } as any)
     })
 
     it('draws multiple specs summary table', () => {
@@ -85,7 +91,7 @@ describe('lib/util/terminal', () => {
 
       expectLength(str, 100)
 
-      return sanitizeSnapshot(str)
+      sanitizeSnapshot(str)
     })
 
     it('draws single spec summary table', () => {
@@ -107,7 +113,7 @@ describe('lib/util/terminal', () => {
 
       const str = render(table)
 
-      return sanitizeSnapshot(str)
+      sanitizeSnapshot(str)
     })
 
     it('draws a page divider', () => {
@@ -131,7 +137,7 @@ describe('lib/util/terminal', () => {
 
       expectLength(str, 100)
 
-      return sanitizeSnapshot(str)
+      sanitizeSnapshot(str)
     })
   })
 })
