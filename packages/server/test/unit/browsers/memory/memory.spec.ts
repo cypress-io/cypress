@@ -1,167 +1,252 @@
-import os from 'os'
-import si from 'systeminformation'
-import fs from 'fs-extra'
-import browsers from '../../../../lib/browsers'
-import { proxyquire, expect, sinon } from '../../../spec_helper'
-import { Automation } from '../../../../lib/automation'
+// The SUT calls its own exports internally, which only the CJS build routes through
+// the exports object, so it is loaded with the ts require hook to keep those stubs effective
+import '@packages/ts/register'
+import { createRequire } from 'module'
+import _ from 'lodash'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock, MockInstance } from 'vitest'
+import type osModule from 'os'
+import type siModule from 'systeminformation'
+import type fsModule from 'fs-extra'
+import type browsersModule from '../../../../lib/browsers'
+
+type MemoryModule = typeof import('../../../../lib/browsers/memory')
+
+// Same CJS instances the SUT's require() sees
+const requireCjs = createRequire(import.meta.url)
+const os: typeof osModule = requireCjs('os')
+const si: typeof siModule = requireCjs('systeminformation')
+const fs: typeof fsModule = requireCjs('fs-extra')
+const browsers: typeof browsersModule = requireCjs('../../../../lib/browsers').default
+
+const memoryPath = requireCjs.resolve('../../../../lib/browsers/memory')
+const requireFromMemory = createRequire(memoryPath)
+
+// Loads a fresh copy of the SUT, so its module-level env reads and state start over
+const loadMemory = (stubs: Record<string, unknown> = {}): MemoryModule => {
+  const previous = new Map<string, NodeModule | undefined>()
+
+  for (const [name, exports] of Object.entries(stubs)) {
+    const resolved = requireFromMemory.resolve(name)
+
+    previous.set(resolved, requireCjs.cache[resolved])
+    requireCjs.cache[resolved] = { exports } as NodeModule
+  }
+
+  previous.set(memoryPath, requireCjs.cache[memoryPath])
+  delete requireCjs.cache[memoryPath]
+
+  try {
+    return requireCjs(memoryPath)
+  } finally {
+    for (const [resolved, mod] of previous) {
+      if (mod) {
+        requireCjs.cache[resolved] = mod
+      } else {
+        delete requireCjs.cache[resolved]
+      }
+    }
+  }
+}
+
+type AnyMock = Mock<(...args: any[]) => any> | MockInstance<(...args: any[]) => any>
+
+const matchesLeadingArgs = (args: unknown[], expected: unknown[]) => _.isEqual(args.slice(0, expected.length), expected)
+
+type Answer = [unknown[], () => unknown]
+
+const argMatchers = new WeakMap<AnyMock, Answer[]>()
+
+// sinon `withArgs`: a call whose leading args match gets that behavior, any other call returns undefined
+const argMatcher = (mock: AnyMock) => {
+  const answers = argMatchers.get(mock) ?? []
+
+  if (!argMatchers.has(mock)) {
+    argMatchers.set(mock, answers)
+    mock.mockImplementation((...args: unknown[]) => answers.find(([expected]) => matchesLeadingArgs(args, expected))?.[1]())
+  }
+
+  const add = (answer: Answer) => {
+    answers.push(answer)
+  }
+
+  return {
+    withArgs: (...expected: unknown[]) => {
+      return {
+        resolves: (value?: unknown) => add([expected, () => Promise.resolve(value)]),
+        rejects: (err: Error) => add([expected, () => Promise.reject(err)]),
+        throws: (err: Error) => {
+          add([expected, () => {
+            throw err
+          }])
+        },
+      }
+    },
+  }
+}
+
+const callsWith = (mock: AnyMock, ...expected: unknown[]) => mock.mock.calls.filter((args) => matchesLeadingArgs(args, expected))
+
+const createAutomation = () => ({ request: vi.fn() }) as any
+
+const originalEnv = { ...process.env }
 
 describe('lib/browsers/memory', () => {
-  let memory: typeof import('../../../../lib/browsers/memory')
+  let memory: MemoryModule
 
-  before(() => {
-    delete require.cache[require.resolve('../../../../lib/browsers/memory')]
+  beforeAll(() => {
     process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
 
-    memory = require('../../../../lib/browsers/memory')
+    memory = loadMemory()
   })
 
   beforeEach(() => {
-    sinon.useFakeTimers()
+    vi.useFakeTimers({ now: 0 })
   })
 
   afterEach(async () => {
     await memory.default.endProfiling()
+
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+    process.env = { ...originalEnv }
   })
 
-  after(() => {
-    sinon.restore()
-  })
-
-  context('#getJsHeapSizeLimit', () => {
+  describe('#getJsHeapSizeLimit', () => {
     it('retrieves the jsHeapSizeLimit from performance.memory', async () => {
-      const automation = sinon.createStubInstance(Automation)
+      const automation = createAutomation()
 
-      automation.request.withArgs('get:heap:size:limit', null, null).resolves({ result: { value: 50 } })
+      argMatcher(automation.request).withArgs('get:heap:size:limit', null, null).resolves({ result: { value: 50 } })
 
-      expect(await memory.getJsHeapSizeLimit(automation)).to.eq(50)
+      expect(await memory.getJsHeapSizeLimit(automation)).toBe(50)
     })
 
     it('defaults the jsHeapSizeLimit to four gibibytes', async () => {
-      const automation = sinon.createStubInstance(Automation)
+      const automation = createAutomation()
 
-      automation.request.withArgs('get:heap:size:limit', null, null).throws(new Error('performance not available'))
+      argMatcher(automation.request).withArgs('get:heap:size:limit', null, null).throws(new Error('performance not available'))
 
-      expect(await memory.getJsHeapSizeLimit(automation)).to.eq(4294967296)
+      expect(await memory.getJsHeapSizeLimit(automation)).toBe(4294967296)
     })
   })
 
-  context('#getMemoryHandler', () => {
+  describe('#getMemoryHandler', () => {
     it('returns "default" for non-linux', async () => {
-      const defaultHandler = require('../../../../lib/browsers/memory/default').default
+      const defaultHandler = requireCjs('../../../../lib/browsers/memory/default').default
 
-      sinon.stub(os, 'platform').returns('darwin')
+      vi.spyOn(os, 'platform').mockReturnValue('darwin')
 
-      expect(await memory.getMemoryHandler()).to.eq(defaultHandler)
+      expect(await memory.getMemoryHandler()).toBe(defaultHandler)
     })
 
     it('returns "cgroup-v1" for linux cgroup v1', async () => {
-      const cgroupV1Handler = require('../../../../lib/browsers/memory/cgroup-v1').default
+      const cgroupV1Handler = requireCjs('../../../../lib/browsers/memory/cgroup-v1').default
 
-      sinon.stub(os, 'platform').returns('linux')
-      sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(false)
+      vi.spyOn(os, 'platform').mockReturnValue('linux')
+      argMatcher(vi.spyOn(fs, 'pathExists')).withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(false)
 
-      expect(await memory.getMemoryHandler()).to.eq(cgroupV1Handler)
+      expect(await memory.getMemoryHandler()).toBe(cgroupV1Handler)
     })
 
     it('returns "cgroup-v2" for linux cgroup v2 when the cgroup has a memory limit', async () => {
-      const cgroupV2Handler = require('../../../../lib/browsers/memory/cgroup-v2').default
+      const cgroupV2Handler = requireCjs('../../../../lib/browsers/memory/cgroup-v2').default
 
-      sinon.stub(os, 'platform').returns('linux')
-      sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
+      vi.spyOn(os, 'platform').mockReturnValue('linux')
+      argMatcher(vi.spyOn(fs, 'pathExists')).withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
 
-      const readFile = sinon.stub(fs, 'readFile')
+      const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
       readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
       readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('2147483648\n')
 
-      expect(await memory.getMemoryHandler()).to.eq(cgroupV2Handler)
+      expect(await memory.getMemoryHandler()).toBe(cgroupV2Handler)
     })
 
     it('returns "default" for linux cgroup v2 when the cgroup is unconstrained', async () => {
-      const defaultHandler = require('../../../../lib/browsers/memory/default').default
+      const defaultHandler = requireCjs('../../../../lib/browsers/memory/default').default
 
-      sinon.stub(os, 'platform').returns('linux')
-      sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
+      vi.spyOn(os, 'platform').mockReturnValue('linux')
+      argMatcher(vi.spyOn(fs, 'pathExists')).withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
 
-      const readFile = sinon.stub(fs, 'readFile')
+      const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
       readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
       readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('max\n')
 
-      expect(await memory.getMemoryHandler()).to.eq(defaultHandler)
+      expect(await memory.getMemoryHandler()).toBe(defaultHandler)
     })
 
     it('returns "default" for linux cgroup v2 when the memory files are not readable', async () => {
-      const defaultHandler = require('../../../../lib/browsers/memory/default').default
+      const defaultHandler = requireCjs('../../../../lib/browsers/memory/default').default
 
-      sinon.stub(os, 'platform').returns('linux')
-      sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
+      vi.spyOn(os, 'platform').mockReturnValue('linux')
+      argMatcher(vi.spyOn(fs, 'pathExists')).withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
 
-      const readFile = sinon.stub(fs, 'readFile')
+      const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
       readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
       readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').rejects(new Error('ENOENT'))
 
-      expect(await memory.getMemoryHandler()).to.eq(defaultHandler)
+      expect(await memory.getMemoryHandler()).toBe(defaultHandler)
     })
   })
 
   describe('cgroup-v2 handler', () => {
-    const cgroupV2 = require('../../../../lib/browsers/memory/cgroup-v2').default
+    const cgroupV2 = requireCjs('../../../../lib/browsers/memory/cgroup-v2').default
 
     describe('#isAvailable', () => {
       it('is true when memory.max is a numeric limit', async () => {
-        const readFile = sinon.stub(fs, 'readFile')
+        const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
         readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
         readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('2147483648\n')
 
-        expect(await cgroupV2.isAvailable()).to.be.true
+        expect(await cgroupV2.isAvailable()).toBe(true)
       })
 
       it('is false when the cgroup is unconstrained (memory.max is "max")', async () => {
-        const readFile = sinon.stub(fs, 'readFile')
+        const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
         readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
         readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('max\n')
 
-        expect(await cgroupV2.isAvailable()).to.be.false
+        expect(await cgroupV2.isAvailable()).toBe(false)
       })
 
       it('is false when memory.max is not readable', async () => {
-        const readFile = sinon.stub(fs, 'readFile')
+        const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
         readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
         readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').rejects(new Error('ENOENT'))
 
-        expect(await cgroupV2.isAvailable()).to.be.false
+        expect(await cgroupV2.isAvailable()).toBe(false)
       })
 
       it('resolves the cgroup path from /proc/self/cgroup on a non-containerized host', async () => {
-        const readFile = sinon.stub(fs, 'readFile')
+        const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
         readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/user.slice/user-1000.slice\n')
         // only the resolved sub-cgroup path is stubbed, so a true result proves the path was resolved
         readFile.withArgs('/sys/fs/cgroup/user.slice/user-1000.slice/memory.max', 'utf8').resolves('2147483648\n')
 
-        expect(await cgroupV2.isAvailable()).to.be.true
+        expect(await cgroupV2.isAvailable()).toBe(true)
       })
     })
 
     describe('#getTotalMemoryLimit', () => {
       it('reads the memory limit in bytes from memory.max', async () => {
-        const readFile = sinon.stub(fs, 'readFile')
+        const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
         readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
         readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('2147483648\n')
 
-        expect(await cgroupV2.getTotalMemoryLimit()).to.eq(2147483648)
+        expect(await cgroupV2.getTotalMemoryLimit()).toBe(2147483648)
       })
     })
 
     describe('#getAvailableMemory', () => {
       it('subtracts the working set (usage minus inactive file cache) from the total limit', async () => {
-        const readFile = sinon.stub(fs, 'readFile')
+        const readFile = argMatcher(vi.spyOn(fs, 'readFile'))
 
         readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
         readFile.withArgs('/sys/fs/cgroup/memory.current', 'utf8').resolves('1000\n')
@@ -170,18 +255,18 @@ describe('lib/browsers/memory', () => {
         const log: { [key: string]: any } = {}
 
         // working set = 1000 - 300 = 700, available = 2000 - 700 = 1300
-        expect(await cgroupV2.getAvailableMemory(2000, log)).to.eq(1300)
-        expect(log.totalMemoryWorkingSetUsed).to.eq(700)
+        expect(await cgroupV2.getAvailableMemory(2000, log)).toBe(1300)
+        expect(log.totalMemoryWorkingSetUsed).toBe(700)
       })
     })
   })
 
   describe('cgroup-util', () => {
-    const cgroupUtil = require('../../../../lib/browsers/memory/cgroup-util')
+    const cgroupUtil = requireCjs('../../../../lib/browsers/memory/cgroup-util')
 
     describe('#parseMemoryStat', () => {
       it('parses `key value` lines into a numeric lookup', () => {
-        expect(cgroupUtil.parseMemoryStat('anon 400\ninactive_file 300\n')).to.deep.eq({ anon: 400, inactive_file: 300 })
+        expect(cgroupUtil.parseMemoryStat('anon 400\ninactive_file 300\n')).toEqual({ anon: 400, inactive_file: 300 })
       })
     })
 
@@ -190,70 +275,71 @@ describe('lib/browsers/memory', () => {
         const log: { [key: string]: any } = {}
 
         // working set = 1000 - 300 = 700, available = 2000 - 700 = 1300
-        expect(cgroupUtil.availableFromWorkingSet(2000, 1000, 300, log)).to.eq(1300)
-        expect(log.totalMemoryWorkingSetUsed).to.eq(700)
+        expect(cgroupUtil.availableFromWorkingSet(2000, 1000, 300, log)).toBe(1300)
+        expect(log.totalMemoryWorkingSetUsed).toBe(700)
       })
     })
   })
 
-  context('#startProfiling', () => {
+  describe('#startProfiling', () => {
     it('starts the profiling', async () => {
       // restore the fake timers since we are stubbing setTimeout directly
-      sinon._clock.restore()
+      vi.useRealTimers()
 
-      const automation = sinon.createStubInstance(Automation)
+      const automation = createAutomation()
 
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'calculateMemoryStats').resolves()
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'calculateMemoryStats').mockResolvedValue(undefined)
 
-      sinon.stub(global, 'setTimeout').onFirstCall().callsFake(async (fn) => {
+      vi.spyOn(globalThis, 'setTimeout').mockImplementation((() => undefined) as any).mockImplementationOnce((async (fn: () => Promise<void>) => {
         await fn()
-      })
+      }) as any)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      expect(memory.calculateMemoryStats).to.be.calledTwice
+      expect(memory.calculateMemoryStats).toHaveBeenCalledTimes(2)
     })
 
     it('doesn\'t start twice', async () => {
-      const automation = sinon.createStubInstance(Automation)
+      const automation = createAutomation()
 
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'calculateMemoryStats').resolves()
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'calculateMemoryStats').mockResolvedValue(undefined)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       // second call doesn't do anything
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      expect(memory.calculateMemoryStats).to.be.calledOnce
+      expect(memory.calculateMemoryStats).toHaveBeenCalledOnce()
     })
   })
 
-  context('#checkMemoryPressure', () => {
+  describe('#checkMemoryPressure', () => {
     it('collects memory when renderer process is greater than the default threshold', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'getRendererMemoryUsage').resolves(75)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'getRendererMemoryUsage').mockResolvedValue(75)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -282,26 +368,27 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('collects memory when renderer process is greater than the custom threshold', async () => {
       process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE = '25'
       process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
 
-      const memory = proxyquire('../lib/browsers/memory', {})
+      const memory = loadMemory()
 
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'getRendererMemoryUsage').mockResolvedValue(25)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -330,21 +417,22 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('collects memory when renderer process is equal to the threshold', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'getRendererMemoryUsage').resolves(50)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'getRendererMemoryUsage').mockResolvedValue(50)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -373,21 +461,22 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('uses the available memory limit if it\'s less than the jsHeapSizeLimit', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(10),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(10),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'getRendererMemoryUsage').mockResolvedValue(25)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -416,21 +505,22 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('skips collecting memory when renderer process is less than the threshold', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'getRendererMemoryUsage').mockResolvedValue(25)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -459,24 +549,25 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.not.be.called
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(0)
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('skips collecting memory if the renderer process is not found', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(si, 'processes').resolves({ list: [
+      vi.spyOn(si, 'processes').mockResolvedValue({ list: [
         { name: 'foo', pid: process.pid },
       ] })
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -497,32 +588,33 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.not.be.called
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(0)
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('finds the renderer process from the process.command', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(2000),
-        getTotalMemoryLimit: sinon.stub().resolves(3000),
+        getAvailableMemory: vi.fn().mockResolvedValue(2000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(3000),
       }
 
-      const processesMock = sinon.stub(si, 'processes').resolves({ list: [
+      const processesMock = vi.spyOn(si, 'processes').mockResolvedValue({ list: [
         { name: 'cypress', pid: process.pid },
         { name: 'browser', pid: 1234, parentPid: process.pid, command: 'browser.exe' },
         { name: 'renderer', pid: 12345, parentPid: 1234, command: '--type=renderer', memRss: 1 },
       ] })
 
-      sinon.stub(browsers, 'getBrowserInstance').returns({
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({
         pid: 1234,
-        once: sinon.stub().resolves(),
-        removeListener: sinon.stub(),
+        once: vi.fn().mockResolvedValue(undefined),
+        removeListener: vi.fn(),
       })
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(2000)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -552,33 +644,34 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(processesMock).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(processesMock).toHaveBeenCalledOnce()
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('finds the renderer process from the process.params', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(2000),
-        getTotalMemoryLimit: sinon.stub().resolves(3000),
+        getAvailableMemory: vi.fn().mockResolvedValue(2000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(3000),
       }
 
-      const processesMock = sinon.stub(si, 'processes').resolves({ list: [
+      const processesMock = vi.spyOn(si, 'processes').mockResolvedValue({ list: [
         { name: 'cypress', pid: process.pid },
         { name: 'browser', pid: 1234, parentPid: process.pid, command: 'browser.exe' },
         { name: 'renderer', pid: 12345, parentPid: 1234, command: 'browser.exe', params: '--type=renderer', memRss: 1 },
       ] })
 
-      sinon.stub(browsers, 'getBrowserInstance').returns({
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({
         pid: 1234,
-        once: sinon.stub().resolves(),
-        removeListener: sinon.stub(),
+        once: vi.fn().mockResolvedValue(undefined),
+        removeListener: vi.fn(),
       })
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(2000)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -608,34 +701,35 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(processesMock).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(processesMock).toHaveBeenCalledOnce()
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('selects the renderer process with the most memory', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(10000),
-        getTotalMemoryLimit: sinon.stub().resolves(20000),
+        getAvailableMemory: vi.fn().mockResolvedValue(10000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(20000),
       }
 
-      const processesMock = sinon.stub(si, 'processes').resolves({ list: [
+      const processesMock = vi.spyOn(si, 'processes').mockResolvedValue({ list: [
         { name: 'cypress', pid: process.pid },
         { name: 'browser', pid: 1234, parentPid: process.pid, command: 'browser.exe' },
         { name: 'renderer', pid: 12345, parentPid: 1234, command: '--type=renderer', memRss: 1 },
         { name: 'max-renderer', pid: 123456, parentPid: 1234, command: '--type=renderer', memRss: 5 },
       ] })
 
-      sinon.stub(browsers, 'getBrowserInstance').returns({
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({
         pid: 1234,
-        once: sinon.stub().resolves(),
-        removeListener: sinon.stub(),
+        once: vi.fn().mockResolvedValue(undefined),
+        removeListener: vi.fn(),
       })
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(10000)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(10000)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
@@ -665,39 +759,40 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(processesMock).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(processesMock).toHaveBeenCalledOnce()
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('uses the existing process id to obtain the memory usage', async () => {
       process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
 
-      const pidStub = sinon.stub().resolves({ memory: 2000 })
+      const pidStub = vi.fn().mockResolvedValue({ memory: 2000 })
 
-      const memory: typeof import('../../../../lib/browsers/memory') = proxyquire('../lib/browsers/memory', { pidusage: pidStub })
+      const memory = loadMemory({ pidusage: pidStub })
 
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(3000),
-        getTotalMemoryLimit: sinon.stub().resolves(4000),
+        getAvailableMemory: vi.fn().mockResolvedValue(3000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(4000),
       }
 
-      const processesMock = sinon.stub(si, 'processes').resolves({ list: [
+      const processesMock = vi.spyOn(si, 'processes').mockResolvedValue({ list: [
         { name: 'cypress', pid: process.pid },
         { name: 'browser', pid: 1234, parentPid: process.pid, command: 'browser.exe' },
         { name: 'renderer', pid: 12345, parentPid: 1234, command: '--type=renderer', memRss: 1 },
       ] })
 
-      sinon.stub(browsers, 'getBrowserInstance').returns({
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({
         pid: 1234,
-        once: sinon.stub().resolves(),
-        removeListener: sinon.stub(),
+        once: vi.fn().mockResolvedValue(undefined),
+        removeListener: vi.fn(),
       })
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(3000)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(3000)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
 
       // first call will find the renderer process and use si.processes
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
@@ -745,25 +840,27 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(processesMock).to.be.calledOnce
-      expect(pidStub).to.be.calledOnce
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(processesMock).toHaveBeenCalledOnce()
+      expect(pidStub).toHaveBeenCalledOnce()
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
 
     it('collects memory when a previous interval call goes over the threshold', async () => {
-      const automation = sinon.createStubInstance(Automation)
-      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const automation = createAutomation()
+
+      argMatcher(automation.request).withArgs('collect:garbage').resolves()
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'getRendererMemoryUsage')
-      .onFirstCall().resolves(75) // above threshold
-      .onSecondCall().resolves(25) // below threshold
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'getRendererMemoryUsage')
+      .mockReturnValue(undefined as any)
+      .mockResolvedValueOnce(75) // above threshold
+      .mockResolvedValueOnce(25) // below threshold
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
       await memory.default.gatherMemoryStats()
@@ -805,49 +902,51 @@ describe('lib/browsers/memory', () => {
         },
       ]
 
-      expect(gcStub).to.be.calledOnce
-      expect(memory.getRendererMemoryUsage).to.be.calledTwice
-      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+      expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
+      expect(memory.getRendererMemoryUsage).toHaveBeenCalledTimes(2)
+      expect(memory.default.getMemoryStats()).toEqual(expected)
     })
   })
 
-  context('#endProfiling', () => {
+  describe('#endProfiling', () => {
     it('stops the profiling', async () => {
       // restore the fake timers since we are stubbing setTimeout/clearTimeout directly
-      sinon._clock.restore()
+      vi.useRealTimers()
 
-      const automation = sinon.createStubInstance(Automation)
+      const automation = createAutomation()
 
       const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
+        getAvailableMemory: vi.fn().mockResolvedValue(1000),
+        getTotalMemoryLimit: vi.fn().mockResolvedValue(2000),
       }
 
-      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'calculateMemoryStats').resolves()
+      vi.spyOn(memory, 'getJsHeapSizeLimit').mockResolvedValue(100)
+      vi.spyOn(memory, 'getMemoryHandler').mockResolvedValue(mockHandler)
+      vi.spyOn(memory, 'calculateMemoryStats').mockResolvedValue(undefined)
 
-      const timer = sinon.stub()
+      const timer = vi.fn()
 
-      sinon.stub(global, 'setTimeout').returns(timer)
-      sinon.stub(global, 'clearTimeout')
+      vi.spyOn(globalThis, 'setTimeout').mockReturnValue(timer as any)
+      const clearTimeoutStub = vi.spyOn(globalThis, 'clearTimeout').mockImplementation(() => {})
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
       await memory.default.endProfiling()
 
-      expect(memory.calculateMemoryStats).to.be.calledOnce
-      expect(global.clearTimeout).to.be.calledWith(timer)
+      expect(memory.calculateMemoryStats).toHaveBeenCalledOnce()
+      expect(clearTimeoutStub).toHaveBeenCalledWith(timer)
     })
 
     it('saves the cumulative memory stats to a file', async () => {
-      const fileStub = sinon.stub(fs, 'outputFile').withArgs('cypress/logs/memory/memory_spec.json').resolves()
+      const outputFile = vi.spyOn(fs, 'outputFile')
 
-      const automation = sinon.createStubInstance(Automation)
+      argMatcher(outputFile).withArgs('cypress/logs/memory/memory_spec.json').resolves()
+
+      const automation = createAutomation()
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
       await memory.default.endProfiling()
 
-      expect(fileStub).to.be.calledOnce
+      expect(callsWith(outputFile, 'cypress/logs/memory/memory_spec.json')).toHaveLength(1)
     })
   })
 })
