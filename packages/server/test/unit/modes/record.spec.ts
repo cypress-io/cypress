@@ -1,6 +1,7 @@
-import '../../spec_helper'
 import _ from 'lodash'
 import Debug from 'debug'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import * as errors from '../../../lib/errors'
 import api from '../../../lib/cloud/api'
 import exception from '../../../lib/cloud/exception'
@@ -11,17 +12,23 @@ import * as ciProvider from '../../../lib/util/ci_provider'
 const debug = Debug('test')
 const initialEnv = _.clone(process.env)
 
+// sinon's calledWith matches leading arguments only
+const callsStartingWith = (mock: Mock, ...args: unknown[]) => {
+  return mock.mock.calls.filter((call) => _.isEqual(call.slice(0, args.length), args))
+}
+
 // NOTE: the majority of the logic of record_spec is
 // tested as an e2e/record_spec
 describe('lib/modes/record', () => {
   beforeEach(() => {
-    sinon.stub(api, 'sendPreflight').callsFake(async () => {
+    vi.spyOn(api, 'sendPreflight').mockImplementation(async () => {
       api.setPreflightResult({ encrypt: false })
     })
   })
 
   afterEach(() => {
     api.resetPreflightResult({ encrypt: false })
+    vi.restoreAllMocks()
   })
 
   // QUESTION: why are these tests here when
@@ -58,7 +65,7 @@ describe('lib/modes/record', () => {
 
       debug(commit)
 
-      expect(commit.branch).to.eq('bem/circle')
+      expect(commit.branch).toBe('bem/circle')
     })
 
     it('gets branch from process.env.TRAVIS_BRANCH', () => {
@@ -70,7 +77,7 @@ describe('lib/modes/record', () => {
 
       debug(commit)
 
-      expect(commit.branch).to.eq('bem/travis')
+      expect(commit.branch).toBe('bem/travis')
     })
 
     it('gets branch from process.env.BUILDKITE_BRANCH', () => {
@@ -82,7 +89,7 @@ describe('lib/modes/record', () => {
 
       debug(commit)
 
-      expect(commit.branch).to.eq('bem/buildkite')
+      expect(commit.branch).toBe('bem/buildkite')
     })
 
     it('gets branch from process.env.APPVEYOR_REPO_BRANCH for AppVeyor', () => {
@@ -93,7 +100,7 @@ describe('lib/modes/record', () => {
 
       debug(commit)
 
-      expect(commit.branch).to.eq('bem/app')
+      expect(commit.branch).toBe('bem/app')
     })
 
     it('gets branch from git', () => {
@@ -117,16 +124,16 @@ describe('lib/modes/record', () => {
         // Stub commitInfo to return test data
         // Note: The actual env var fallback/override behavior is tested in commit-info_spec.ts
         // This test verifies that record module correctly uses values from commitInfo.commitInfo()
-        sinon.stub(commitInfo, 'commitInfo').resolves(commitData)
+        vi.spyOn(commitInfo, 'commitInfo').mockResolvedValue(commitData)
       })
 
       afterEach(() => {
-        sinon.restore()
+        vi.restoreAllMocks()
       })
 
       it('calls api.createRun with commit information from commitInfo', () => {
-        const createRun = sinon.stub(api, 'createRun').resolves()
-        const runAllSpecs = sinon.stub()
+        const createRun = vi.spyOn(api, 'createRun').mockResolvedValue(undefined)
+        const runAllSpecs = vi.fn()
 
         return recordMode.createRunAndRecordSpecs({
           key: 'foo',
@@ -135,14 +142,14 @@ describe('lib/modes/record', () => {
           runAllSpecs,
         })
         .then(() => {
-          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
-          expect(createRun).to.have.been.calledOnce
-          expect(createRun.firstCall.args).to.have.length(1)
-          const { commit } = createRun.firstCall.args[0]
+          expect(runAllSpecs).toHaveBeenCalledWith({ parallel: false })
+          expect(createRun).toHaveBeenCalledTimes(1)
+          expect(createRun.mock.calls[0]).toHaveLength(1)
+          const { commit } = createRun.mock.calls[0][0]
 
           debug('git is %o', commit)
 
-          expect(commit).to.deep.equal({
+          expect(commit).toEqual({
             sha: commitData.sha,
             branch: commitData.branch,
             authorName: commitData.author,
@@ -161,11 +168,13 @@ describe('lib/modes/record', () => {
         { relative: 'path/to/spec/b' },
       ]
 
-      beforeEach(function () {
-        sinon.stub(ciProvider, 'provider').returns('circle')
-        sinon.stub(ciProvider, 'ciParams').returns({ foo: 'bar' })
+      let commitDefaults
 
-        this.commitDefaults = {
+      beforeEach(() => {
+        vi.spyOn(ciProvider, 'provider').mockReturnValue('circle')
+        vi.spyOn(ciProvider, 'ciParams').mockReturnValue({ foo: 'bar' })
+
+        commitDefaults = {
           branch: 'master',
           author: 'brian',
           email: 'brian@cypress.io',
@@ -174,21 +183,21 @@ describe('lib/modes/record', () => {
           remote: 'https://github.com/foo/bar.git',
         }
 
-        sinon.stub(commitInfo, 'commitInfo').resolves(this.commitDefaults)
-        sinon.stub(ciProvider, 'commitDefaults').returns({
-          sha: this.commitDefaults.sha,
-          branch: this.commitDefaults.branch,
-          authorName: this.commitDefaults.author,
-          authorEmail: this.commitDefaults.email,
-          message: this.commitDefaults.message,
-          remoteOrigin: this.commitDefaults.remote,
+        vi.spyOn(commitInfo, 'commitInfo').mockResolvedValue(commitDefaults)
+        vi.spyOn(ciProvider, 'commitDefaults').mockReturnValue({
+          sha: commitDefaults.sha,
+          branch: commitDefaults.branch,
+          authorName: commitDefaults.author,
+          authorEmail: commitDefaults.email,
+          message: commitDefaults.message,
+          remoteOrigin: commitDefaults.remote,
         })
 
-        sinon.stub(api, 'createRun').resolves({
+        vi.spyOn(api, 'createRun').mockResolvedValue({
           runId: 'run-id',
         })
 
-        sinon.stub(api, 'createInstance').resolves({
+        vi.spyOn(api, 'createInstance').mockResolvedValue({
           instanceId: 'instance-id',
         })
       })
@@ -201,7 +210,7 @@ describe('lib/modes/record', () => {
         const ciBuildId = 'ciId123'
         const parallel = null
         const group = null
-        const runAllSpecs = sinon.stub()
+        const runAllSpecs = vi.fn()
         const sys = {
           osCpus: 1,
           osName: 2,
@@ -217,13 +226,13 @@ describe('lib/modes/record', () => {
         const testingType = 'e2e'
         const autoCancelAfterFailures = 4
         const project = {
-          setOnTestsReceived: sinon.stub(),
+          setOnTestsReceived: vi.fn(),
         }
         const ctx = {
           actions: {
             currentRecording: {
-              startRun: sinon.stub(),
-              startInstance: sinon.stub(),
+              startRun: vi.fn(),
+              startInstance: vi.fn(),
             },
           },
         }
@@ -247,10 +256,10 @@ describe('lib/modes/record', () => {
           ctx,
         })
 
-        expect(ctx.actions.currentRecording.startRun).to.have.been.calledWith('run-id')
-        expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
+        expect(ctx.actions.currentRecording.startRun).toHaveBeenCalledWith('run-id')
+        expect(commitInfo.commitInfo).toHaveBeenCalledWith(projectRoot)
 
-        expect(api.createRun).to.be.calledWith({
+        expect(api.createRun).toHaveBeenCalledWith({
           projectRoot,
           group,
           parallel,
@@ -288,35 +297,35 @@ describe('lib/modes/record', () => {
           project,
         })
 
-        expect(runAllSpecs).to.have.been.called
+        expect(runAllSpecs).toHaveBeenCalled()
 
-        const beforeSpecRun = runAllSpecs.firstCall.args[0].beforeSpecRun
+        const beforeSpecRun = runAllSpecs.mock.calls[0][0].beforeSpecRun
 
         await beforeSpecRun()
 
-        expect(api.createInstance).to.have.been.calledWith('run-id', sinon.match({
-          platform: sinon.match({
+        expect(api.createInstance).toHaveBeenCalledWith('run-id', expect.objectContaining({
+          platform: expect.objectContaining({
             browserFamily: 'chromium',
             browserName: 'chrome',
             browserVersion: '59',
           }),
         }))
 
-        expect(ctx.actions.currentRecording.startInstance).to.have.been.calledWith('instance-id')
+        expect(ctx.actions.currentRecording.startInstance).toHaveBeenCalledWith('instance-id')
       })
 
       it('passes browser.family as platform.browserFamily for non-chromium browsers', async () => {
-        const runAllSpecs = sinon.stub()
+        const runAllSpecs = vi.fn()
         const sys = { osCpus: 1, osName: 'linux', osMemory: 8, osVersion: '1' }
         const browser = {
           displayName: 'firefox',
           version: '120',
           family: 'firefox',
         }
-        const project = { setOnTestsReceived: sinon.stub() }
+        const project = { setOnTestsReceived: vi.fn() }
         const ctx = {
           actions: {
-            currentRecording: { startRun: sinon.stub(), startInstance: sinon.stub() },
+            currentRecording: { startRun: vi.fn(), startInstance: vi.fn() },
           },
         }
 
@@ -333,8 +342,8 @@ describe('lib/modes/record', () => {
           ctx,
         })
 
-        expect(api.createRun).to.have.been.calledWith(sinon.match({
-          platform: sinon.match({
+        expect(api.createRun).toHaveBeenCalledWith(expect.objectContaining({
+          platform: expect.objectContaining({
             browserFamily: 'firefox',
             browserName: 'firefox',
             browserVersion: '120',
@@ -345,10 +354,12 @@ describe('lib/modes/record', () => {
   })
 
   describe('.updateInstanceStdout', () => {
-    beforeEach(function () {
-      sinon.stub(api, 'updateInstanceStdout')
+    let options
 
-      this.options = {
+    beforeEach(() => {
+      vi.spyOn(api, 'updateInstanceStdout').mockImplementation(() => undefined as any)
+
+      options = {
         runId: 'run-id-123',
         instanceId: 'id-123',
         captured: {
@@ -359,12 +370,12 @@ describe('lib/modes/record', () => {
       }
     })
 
-    it('calls api.updateInstanceStdout', function () {
-      api.updateInstanceStdout.resolves()
+    it('calls api.updateInstanceStdout', () => {
+      vi.mocked(api.updateInstanceStdout).mockResolvedValue(undefined)
 
-      return recordMode.updateInstanceStdout(this.options)
+      return recordMode.updateInstanceStdout(options)
       .then(() => {
-        expect(api.updateInstanceStdout).to.be.calledWith({
+        expect(api.updateInstanceStdout).toHaveBeenCalledWith({
           runId: 'run-id-123',
           instanceId: 'id-123',
           stdout: 'foobarbaz\n',
@@ -377,8 +388,8 @@ describe('lib/modes/record', () => {
 
       err.statusCode = 503
 
-      api.updateInstanceStdout.rejects(err)
-      sinon.spy(exception, 'create')
+      vi.mocked(api.updateInstanceStdout).mockRejectedValue(err)
+      vi.spyOn(exception, 'create')
 
       const options = {
         instanceId: 'id-123',
@@ -389,16 +400,18 @@ describe('lib/modes/record', () => {
 
       return recordMode.updateInstanceStdout(options)
       .then(() => {
-        expect(exception.create).not.to.be.called
+        expect(exception.create).not.toHaveBeenCalled()
       })
     })
   })
 
   describe('.createInstance', () => {
-    beforeEach(function () {
-      sinon.stub(api, 'createInstance')
+    let options
 
-      this.options = {
+    beforeEach(() => {
+      vi.spyOn(api, 'createInstance').mockImplementation(() => undefined as any)
+
+      options = {
         runId: 'run-123',
         groupId: 'group-123',
         machineId: 'machine-123',
@@ -407,12 +420,12 @@ describe('lib/modes/record', () => {
       }
     })
 
-    it('calls api.createInstance', function () {
-      api.createInstance.resolves()
+    it('calls api.createInstance', () => {
+      vi.mocked(api.createInstance).mockResolvedValue(undefined)
 
-      return recordMode.createInstance(this.options)
+      return recordMode.createInstance(options)
       .then(() => {
-        expect(api.createInstance).to.be.calledWith('run-123', {
+        expect(api.createInstance).toHaveBeenCalledWith('run-123', {
           groupId: 'group-123',
           machineId: 'machine-123',
           platform: {},
@@ -426,9 +439,9 @@ describe('lib/modes/record', () => {
 
       err.statusCode = 503
 
-      api.createInstance.rejects(err)
+      vi.mocked(api.createInstance).mockRejectedValue(err)
 
-      sinon.spy(errors, 'get')
+      vi.spyOn(errors, 'get')
 
       await expect(recordMode.createInstance({
         runId: 'run-123',
@@ -436,20 +449,22 @@ describe('lib/modes/record', () => {
         machineId: 'machine-123',
         platform: {},
         spec: { relative: 'cypress/e2e/app_spec.cy.js' },
-      })).to.be.rejected
+      })).rejects.toThrow()
 
-      expect(errors.get).to.have.been.calledWith('CLOUD_CANNOT_PROCEED_IN_SERIAL')
+      expect(callsStartingWith(vi.mocked(errors.get), 'CLOUD_CANNOT_PROCEED_IN_SERIAL')).not.toHaveLength(0)
     })
   })
 
   describe('.createRun', () => {
-    beforeEach(function () {
-      sinon.stub(api, 'createRun')
-      sinon.stub(ciProvider, 'ciParams').returns({})
-      sinon.stub(ciProvider, 'provider').returns('')
-      sinon.stub(ciProvider, 'commitDefaults').returns({})
+    let options
 
-      this.options = {
+    beforeEach(() => {
+      vi.spyOn(api, 'createRun').mockImplementation(() => undefined as any)
+      vi.spyOn(ciProvider, 'ciParams').mockReturnValue({})
+      vi.spyOn(ciProvider, 'provider').mockReturnValue('')
+      vi.spyOn(ciProvider, 'commitDefaults').mockReturnValue({})
+
+      options = {
         git: {},
         recordKey: '1',
       }
@@ -461,43 +476,15 @@ describe('lib/modes/record', () => {
 
       err.statusCode = 401
 
-      api.createRun.rejects(err)
+      vi.mocked(api.createRun).mockRejectedValue(err)
 
-      sinon.spy(errors, 'throwErr')
+      vi.spyOn(errors, 'throwErr')
       await expect(recordMode.createRun({
         git: {},
         recordKey: true, // instead of a string
-      })).to.be.rejected
+      })).rejects.toThrow()
 
-      expect(errors.throwErr).to.have.been.calledWith('CLOUD_RECORD_KEY_NOT_VALID', 'undefined')
-    })
-  })
-
-  describe('.postInstanceTests', () => {
-    beforeEach(function () {
-      sinon.stub(api, 'postInstanceTests')
-      sinon.stub(ciProvider, 'ciParams').returns({})
-      sinon.stub(ciProvider, 'provider').returns('')
-      sinon.stub(ciProvider, 'commitDefaults').returns({})
-
-      this.options = {
-        results: {},
-        captured: '',
-      }
-    })
-  })
-
-  describe('.postInstanceResults', () => {
-    beforeEach(function () {
-      sinon.stub(api, 'postInstanceResults')
-      sinon.stub(ciProvider, 'ciParams').returns({})
-      sinon.stub(ciProvider, 'provider').returns('')
-      sinon.stub(ciProvider, 'commitDefaults').returns({})
-
-      this.options = {
-        results: {},
-        captured: '',
-      }
+      expect(callsStartingWith(vi.mocked(errors.throwErr), 'CLOUD_RECORD_KEY_NOT_VALID', 'undefined')).not.toHaveLength(0)
     })
   })
 })
