@@ -1,6 +1,5 @@
-const { expect, sinon } = require('../../spec_helper')
-
 import type { Protocol } from 'devtools-protocol'
+import { describe, expect, it, vi } from 'vitest'
 import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 
 // Mirrors CdpBodyCapture's cap (not exported — this pins the contract).
@@ -8,10 +7,18 @@ const CAPTURE_BYTE_CAP = 10 * 1024 * 1024
 
 function createClient () {
   return {
-    send: sinon.stub().resolves({}),
-    on: sinon.stub(),
-    off: sinon.stub(),
+    send: vi.fn(async (..._args: unknown[]): Promise<unknown> => ({})),
+    on: vi.fn(),
+    off: vi.fn(),
   }
+}
+
+type Client = ReturnType<typeof createClient>
+
+function respondTo (client: Client, command: string, respond: () => Promise<unknown>) {
+  const previous = client.send.getMockImplementation()!
+
+  client.send.mockImplementation((...args: unknown[]) => args[0] === command ? respond() : previous(...args))
 }
 
 function createCapture (client = createClient()) {
@@ -19,7 +26,7 @@ function createCapture (client = createClient()) {
 
   capture.start()
 
-  const handler = (eventName: string) => client.on.withArgs(eventName).firstCall.args[1]
+  const handler = (eventName: string) => client.on.mock.calls.find((call) => call[0] === eventName)![1]
 
   return {
     client,
@@ -63,7 +70,7 @@ describe('CdpBodyCapture', () => {
 
     capture.start()
 
-    expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
+    expect(client.on.mock.calls.map((call) => call[0])).toEqual([
       'Network.dataReceived',
       'Network.loadingFinished',
       'Network.loadingFailed',
@@ -76,7 +83,7 @@ describe('CdpBodyCapture', () => {
 
     await closed
 
-    expect(client.off.getCalls().map((call) => call.args[0])).to.deep.equal([
+    expect(client.off.mock.calls.map((call) => call[0])).toEqual([
       'Network.dataReceived',
       'Network.loadingFinished',
       'Network.loadingFailed',
@@ -87,53 +94,55 @@ describe('CdpBodyCapture', () => {
     it('sends Network.streamResourceContent for the given networkId/sessionId and pushes any bufferedData before dataReceived events', async () => {
       const client = createClient()
 
-      client.send.withArgs('Network.streamResourceContent').resolves({
-        bufferedData: Buffer.from('buffered').toString('base64'),
+      respondTo(client, 'Network.streamResourceContent', async () => {
+        return { bufferedData: Buffer.from('buffered').toString('base64') }
       })
 
       const { capture } = createCapture(client)
 
       const stream = await capture.arm('network-1', 'session-1')
 
-      expect(client.send).to.have.been.calledWith('Network.streamResourceContent', {
+      expect(client.send).toHaveBeenCalledWith('Network.streamResourceContent', {
         requestId: 'network-1',
       }, 'session-1')
 
       const firstChunk = new Promise<Buffer>((resolve) => stream!.once('data', resolve))
 
-      expect((await firstChunk).toString()).to.equal('buffered')
+      expect((await firstChunk).toString()).toBe('buffered')
     })
 
     it('returns undefined without throwing when CDP rejects the arm', async () => {
       const client = createClient()
 
-      client.send.withArgs('Network.streamResourceContent').rejects(new Error('No resource with given identifier found'))
+      respondTo(client, 'Network.streamResourceContent', () => Promise.reject(new Error('No resource with given identifier found')))
 
       const { capture } = createCapture(client)
 
       const stream = await capture.arm('network-1')
 
-      expect(stream).to.be.undefined
+      expect(stream).toBeUndefined()
     })
 
     // arming holds the response pause open, so a send that never settles must
     // not hang the page — capture is best-effort, delivery is not
     it('gives up arming when the CDP send never settles', async () => {
       const client = createClient()
+      const neverSettles = new Promise(() => {})
 
-      client.send.withArgs('Network.streamResourceContent').returns(new Promise(() => {}))
+      respondTo(client, 'Network.streamResourceContent', () => neverSettles)
 
       const { capture } = createCapture(client)
-      const clock = sinon.useFakeTimers({ shouldAdvanceTime: true })
+
+      vi.useFakeTimers({ shouldAdvanceTime: true })
 
       try {
         const armed = capture.arm('network-1')
 
-        await clock.tickAsync(2000)
+        await vi.advanceTimersByTimeAsync(2000)
 
-        expect(await armed).to.be.undefined
+        expect(await armed).toBeUndefined()
       } finally {
-        clock.restore()
+        vi.useRealTimers()
       }
     })
 
@@ -147,16 +156,16 @@ describe('CdpBodyCapture', () => {
 
       first.on('data', (chunk: Buffer) => chunks.push(chunk))
 
-      client.send.withArgs('Network.streamResourceContent').rejects(new Error('boom'))
+      respondTo(client, 'Network.streamResourceContent', () => Promise.reject(new Error('boom')))
 
-      expect(await capture.arm('network-1')).to.be.undefined
+      expect(await capture.arm('network-1')).toBeUndefined()
 
       dataReceived({ requestId: 'network-1', data: Buffer.from('still-live').toString('base64') })
 
       await tick()
 
-      expect(Buffer.concat(chunks).toString()).to.equal('still-live')
-      expect(first.destroyed).to.be.false
+      expect(Buffer.concat(chunks).toString()).toBe('still-live')
+      expect(first.destroyed).toBe(false)
     })
   })
 
@@ -174,8 +183,8 @@ describe('CdpBodyCapture', () => {
 
       await tick()
 
-      expect(Buffer.concat(root.chunks).toString()).to.equal('root')
-      expect(Buffer.concat(session.chunks).toString()).to.equal('sess')
+      expect(Buffer.concat(root.chunks).toString()).toBe('root')
+      expect(Buffer.concat(session.chunks).toString()).toBe('sess')
     })
 
     // Bounds capture of a never-ending body so Test Replay always receives a
@@ -195,7 +204,7 @@ describe('CdpBodyCapture', () => {
       // same key must not throw (e.g. push after the stream ended).
       expect(() => {
         dataReceived({ requestId: 'network-1', data: Buffer.from('late').toString('base64') })
-      }).not.to.throw()
+      }).not.toThrow()
     })
   })
 
@@ -218,7 +227,7 @@ describe('CdpBodyCapture', () => {
     it('ends (does not error) the stream on loadingFailed, preserving the partial capture', async () => {
       const { capture, dataReceived, loadingFailed } = createCapture()
       const { stream, chunks } = await armAndCollect(capture, 'network-1')
-      const errored = sinon.stub()
+      const errored = vi.fn()
 
       stream.on('error', errored)
 
@@ -227,8 +236,8 @@ describe('CdpBodyCapture', () => {
 
       await tick()
 
-      expect(errored).not.to.have.been.called
-      expect(Buffer.concat(chunks).toString()).to.equal('partial')
+      expect(errored).not.toHaveBeenCalled()
+      expect(Buffer.concat(chunks).toString()).toBe('partial')
     })
   })
 
@@ -240,7 +249,7 @@ describe('CdpBodyCapture', () => {
       loadingFinished({ requestId: 'unarmed-network' })
       loadingFailed({ requestId: 'unarmed-network', errorText: 'net::ERR_FAILED' })
       capture.release('network-unknown')
-    }).not.to.throw()
+    }).not.toThrow()
   })
 
   it('reset destroys and clears every in-flight capture', async () => {
@@ -256,7 +265,7 @@ describe('CdpBodyCapture', () => {
     // with the destroyed one.
     const nextStream = await capture.arm('network-1')
 
-    expect(nextStream).not.to.equal(stream)
+    expect(nextStream).not.toBe(stream)
   })
 
   it('release destroys and drops a single armed capture, leaving a sibling capture untouched and still pumping', async () => {
@@ -276,7 +285,7 @@ describe('CdpBodyCapture', () => {
 
     await sawData
 
-    expect(Buffer.concat(kept.chunks).toString()).to.equal('still-live')
+    expect(Buffer.concat(kept.chunks).toString()).toBe('still-live')
   })
 
   it('re-arming a live key ends the previous stream before replacing it', async () => {
@@ -290,6 +299,6 @@ describe('CdpBodyCapture', () => {
 
     await ended
 
-    expect(second).not.to.equal(first)
+    expect(second).not.toBe(first)
   })
 })
