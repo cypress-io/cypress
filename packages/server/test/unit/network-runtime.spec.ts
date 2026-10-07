@@ -1,12 +1,61 @@
+import { deepStrictEqual } from 'assert'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { NetworkProxy } from '@packages/proxy'
 import { netStubbingState } from '@packages/net-stubbing'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
 import { CdpFetchTransport } from '../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 import { createCdpFetchRuntime, createProxyRuntime } from '../../lib/network-runtime'
-import '../spec_helper'
+
+const callsMatching = (mock: Mock, expected: unknown[]) => {
+  return mock.mock.calls.filter((call) => {
+    try {
+      deepStrictEqual(call.slice(0, expected.length), expected)
+
+      return true
+    } catch {
+      return false
+    }
+  })
+}
+
+// sinon's calledWith matches a prefix of the recorded arguments, where vitest's
+// toHaveBeenCalledWith requires the exact arity
+const expectCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsMatching(mock, expected), `calls matching ${String(expected[0])}`).not.toHaveLength(0)
+}
+
+const expectNotCalledWith = (mock: Mock, ...expected: unknown[]) => {
+  expect(callsMatching(mock, expected), `calls matching ${String(expected[0])}`).toHaveLength(0)
+}
+
+const findCall = (mock: Mock, method: string) => {
+  return mock.mock.calls.find((args) => args[0] === method)
+}
+
+const pausedHandlerCalls = (on: Mock) => {
+  return on.mock.calls.filter((args) => args[0] === 'Fetch.requestPaused')
+}
+
+const callOrders = (mock: Mock, method: string) => {
+  return mock.mock.calls.flatMap((args, i) => (args[0] === method ? [mock.mock.invocationCallOrder[i]] : []))
+}
+
+const firstCallOrder = (mock: Mock, method: string) => callOrders(mock, method)[0]
+
+const lastCallOrder = (mock: Mock, method: string) => callOrders(mock, method).at(-1)
+
+// send() resolves {} for every method except the overridden ones
+const sendAnswering = (overrides: Record<string, () => Promise<unknown>>) => {
+  return (method: string) => overrides[method]?.() ?? Promise.resolve({})
+}
 
 describe('lib/network-runtime', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   const baseDeps = () => {
     return {
       config: {
@@ -14,28 +63,28 @@ describe('lib/network-runtime', () => {
         responseTimeout: 30000,
       } as Cypress.Config,
       remoteStates: {
-        hasPrimary: sinon.stub().returns(false),
-        getPrimary: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
-        get: sinon.stub().returns(undefined),
-        current: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
-        isPrimarySuperDomainBasedOrigin: sinon.stub().returns(false),
-        isPrimarySuperDomainOrigin: sinon.stub().returns(false),
-        getByStrategy: sinon.stub(),
-        reset: sinon.stub(),
+        hasPrimary: vi.fn().mockReturnValue(false),
+        getPrimary: vi.fn().mockReturnValue({ origin: 'https://example.test', strategy: 'http', props: {} }),
+        get: vi.fn().mockReturnValue(undefined),
+        current: vi.fn().mockReturnValue({ origin: 'https://example.test', strategy: 'http', props: {} }),
+        isPrimarySuperDomainBasedOrigin: vi.fn().mockReturnValue(false),
+        isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
+        getByStrategy: vi.fn(),
+        reset: vi.fn(),
       } as any,
       getFileServerToken: () => 'token',
       getCookieJar: () => {
         return {
-          getCookies: sinon.stub().returns([]),
+          getCookies: vi.fn().mockReturnValue([]),
         } as any
       },
       socket: {
-        toDriver: sinon.stub(),
+        toDriver: vi.fn(),
       } as any,
       request: {
-        rp: sinon.stub(),
+        rp: vi.fn(),
       } as any,
-      serverBus: { emit: sinon.stub() } as any,
+      serverBus: { emit: vi.fn() } as any,
       getCurrentBrowser: () => ({}) as any,
       // required for both runtimes: the state is created at server open and every
       // runtime has to share it
@@ -67,13 +116,13 @@ describe('lib/network-runtime', () => {
     } as Protocol.Fetch.RequestPausedEvent
   }
 
-  async function startCdpRuntime (runtime: ReturnType<typeof createCdpFetchRuntime>, client: { send: sinon.SinonStub, on: sinon.SinonStub }) {
+  async function startCdpRuntime (runtime: ReturnType<typeof createCdpFetchRuntime>, client: { send: Mock, on: Mock }) {
     await runtime.start()
-    client.send.resetHistory()
+    client.send.mockClear()
 
     return (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => {
-      return Promise.all(client.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
-        const handler = call.args[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void
+      return Promise.all(pausedHandlerCalls(client.on).map((call) => {
+        const handler = call[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void
 
         return handler(event, sessionId)
       }))
@@ -99,16 +148,16 @@ describe('lib/network-runtime', () => {
   // every send() with {}.
   function createCdpClient (options: { withBody?: boolean } = {}) {
     const send = options.withBody
-      ? sinon.stub().callsFake(async (method: string) => {
+      ? vi.fn(async (method: string) => {
         if (method === 'Fetch.getResponseBody') {
           return { body: '', base64Encoded: false }
         }
 
         return {}
       })
-      : sinon.stub().resolves({})
+      : vi.fn().mockResolvedValue({})
 
-    return { send, on: sinon.stub(), off: sinon.stub() }
+    return { send, on: vi.fn(), off: vi.fn() }
   }
 
   // Drives the paired request-stage/response-stage Fetch.requestPaused pauses
@@ -132,10 +181,10 @@ describe('lib/network-runtime', () => {
   // Same "replay every registered Fetch.requestPaused handler" shape as
   // startCdpRuntime's returned function, for a client not started via it
   // (e.g. an extra-target client whose handlers register through attachExtraTarget).
-  function wirePausedHandler (client: { on: sinon.SinonStub }) {
+  function wirePausedHandler (client: { on: Mock }) {
     return (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => {
-      return Promise.all(client.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
-        return (call.args[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void)(event, sessionId)
+      return Promise.all(pausedHandlerCalls(client.on).map((call) => {
+        return (call[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void)(event, sessionId)
       }))
     }
   }
@@ -150,7 +199,7 @@ describe('lib/network-runtime', () => {
       id,
       routeMatcher: { url: '*' },
       hasInterceptor: false,
-      getFixture: sinon.stub(),
+      getFixture: vi.fn(),
       matches: 0,
     } as any
   }
@@ -159,9 +208,9 @@ describe('lib/network-runtime', () => {
     const deps = baseDeps()
     const runtime = createProxyRuntime(deps)
 
-    expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
-    expect(runtime.netStubbingState).to.equal(deps.netStubbingState)
-    expect(runtime.networkProxy.http.netStubbingState).to.equal(deps.netStubbingState)
+    expect(runtime.networkProxy).toBeInstanceOf(NetworkProxy)
+    expect(runtime.netStubbingState).toBe(deps.netStubbingState)
+    expect(runtime.networkProxy.http.netStubbingState).toBe(deps.netStubbingState)
   })
 
   // See disable-navigation-preload.ts (#34652) for the mechanism; only the
@@ -172,18 +221,18 @@ describe('lib/network-runtime', () => {
   it('createProxyRuntime does not disable service worker navigation preload', () => {
     const runtime = createProxyRuntime(baseDeps())
 
-    expect(runtime.networkProxy.http.useBrowserNetworkInterception).to.be.false
+    expect(runtime.networkProxy.http.useBrowserNetworkInterception).toBe(false)
   })
 
   it('createCdpFetchRuntime disables service worker navigation preload on its NetworkProxy', () => {
     const client = {
-      send: sinon.stub(),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
 
-    expect(runtime.networkProxy.http.useBrowserNetworkInterception).to.be.true
+    expect(runtime.networkProxy.http.useBrowserNetworkInterception).toBe(true)
   })
 
   it('registers default configurator network policies at startup', () => {
@@ -198,10 +247,10 @@ describe('lib/network-runtime', () => {
 
     const policies = runtime.networkPolicyRegistration.getPolicies()
 
-    expect(policies).to.have.length(3)
-    expect(policies[0].name).to.eq('blocked-hosts')
-    expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
-    expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
+    expect(policies).toHaveLength(3)
+    expect(policies[0].name).toBe('blocked-hosts')
+    expect(policies[0].when({ url: 'http://localhost:3131/' })).toBe(true)
+    expect(runtime.networkInterceptionCore).toBeInstanceOf(NetworkInterceptionCore)
   })
 
   it('registers configurator CSP and document rewrite policies at startup', () => {
@@ -217,119 +266,124 @@ describe('lib/network-runtime', () => {
 
     const policies = runtime.networkPolicyRegistration.getPolicies()
 
-    expect(policies.map((p) => p.name)).to.include.members([
+    expect(policies.map((p) => p.name)).toEqual(expect.arrayContaining([
       'blocked-hosts',
       'csp-allow-list',
       'document-rewrite',
-    ])
+    ]))
   })
 
   it('handleHttpRequest delegates to networkProxy.handleHttpRequest', async () => {
     const runtime = createProxyRuntime(baseDeps())
     const req = { proxiedUrl: 'http://example.com/' }
     const res = {}
-    const stub = sinon.stub(runtime.networkProxy, 'handleHttpRequest').resolves()
+    const stub = vi.spyOn(runtime.networkProxy, 'handleHttpRequest').mockResolvedValue(undefined)
 
     await runtime.handleHttpRequest(req, res)
 
-    expect(stub).to.have.been.calledOnceWith(req, res)
+    expect(stub).toHaveBeenCalledOnce()
+    expect(stub).toHaveBeenCalledWith(req, res)
   })
 
   it('setProtocolManager delegates to networkProxy', () => {
     const runtime = createProxyRuntime(baseDeps())
-    const spy = sinon.spy(runtime.networkProxy, 'setProtocolManager')
+    const spy = vi.spyOn(runtime.networkProxy, 'setProtocolManager')
     const pm = {} as any
 
     runtime.setProtocolManager(pm)
 
-    expect(spy).to.have.been.calledOnceWith(pm)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenCalledWith(pm)
   })
 
   it('reset and clearCredentials delegate to networkProxy', () => {
     const runtime = createProxyRuntime(baseDeps())
-    const resetSpy = sinon.spy(runtime.networkProxy, 'reset')
-    const clearSpy = sinon.spy(runtime.networkProxy, 'clearCredentials')
+    const resetSpy = vi.spyOn(runtime.networkProxy, 'reset')
+    const clearSpy = vi.spyOn(runtime.networkProxy, 'clearCredentials')
 
     runtime.reset({ resetBetweenSpecs: true })
     runtime.clearCredentials()
 
-    expect(resetSpy).to.have.been.calledOnceWith({ resetBetweenSpecs: true })
-    expect(clearSpy).to.have.been.calledOnce
+    expect(resetSpy).toHaveBeenCalledOnce()
+    expect(resetSpy).toHaveBeenCalledWith({ resetBetweenSpecs: true })
+    expect(clearSpy).toHaveBeenCalledOnce()
   })
 
   it('addBrowserPreRequest delegates to networkProxy.addPendingBrowserPreRequest', async () => {
     const runtime = createProxyRuntime(baseDeps())
-    const spy = sinon.spy(runtime.networkProxy, 'addPendingBrowserPreRequest')
+    const spy = vi.spyOn(runtime.networkProxy, 'addPendingBrowserPreRequest')
     const preRequest = { requestId: '1', url: 'http://example.com' } as any
 
     await runtime.addBrowserPreRequest(preRequest)
 
-    expect(spy).to.have.been.calledOnceWith(preRequest)
+    expect(spy).toHaveBeenCalledOnce()
+    expect(spy).toHaveBeenCalledWith(preRequest)
   })
 
   it('createCdpFetchRuntime wires CDP Fetch with the legacy proxy pipeline', () => {
     const client = {
-      send: sinon.stub(),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
-    const isAUTFrame = sinon.stub().resolves(true)
+    const isAUTFrame = vi.fn().mockResolvedValue(true)
     const runtime = createCdpFetchRuntime({
       ...baseDeps(),
       client,
       isAUTFrame,
     })
 
-    expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
-    expect(runtime.netStubbingState.routes).to.deep.equal([])
-    expect(runtime.networkInterception).to.exist
-    expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
-    expect(runtime.networkPolicyRegistration).to.exist
-    expect(runtime.fetchTransport).to.exist
+    expect(runtime.networkProxy).toBeInstanceOf(NetworkProxy)
+    expect(runtime.netStubbingState.routes).toStrictEqual([])
+    expect(runtime.networkInterception).toBeDefined()
+    expect(runtime.networkInterceptionCore).toBeInstanceOf(NetworkInterceptionCore)
+    expect(runtime.networkPolicyRegistration).toBeDefined()
+    expect(runtime.fetchTransport).toBeDefined()
     // Express handleHttpRequest uses a proxy-codec intercept; CDP traffic uses a distinct one.
-    expect(runtime.networkProxy.http.networkInterception).to.exist
-    expect(runtime.networkProxy.http.networkInterception).to.not.equal(runtime.networkInterception)
+    expect(runtime.networkProxy.http.networkInterception).toBeDefined()
+    expect(runtime.networkProxy.http.networkInterception).not.toBe(runtime.networkInterception)
 
     const policies = runtime.networkPolicyRegistration.getPolicies()
 
-    expect(policies.map((p) => p.name)).to.include.members([
+    expect(policies.map((p) => p.name)).toEqual(expect.arrayContaining([
       'blocked-hosts',
       'csp-allow-list',
       'document-rewrite',
-    ])
+    ]))
   })
 
   it('createCdpFetchRuntime routes handleHttpRequest through the Express intercept', async () => {
     const client = {
-      send: sinon.stub(),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({
       ...baseDeps(),
       client,
     })
     const expressIntercept = runtime.networkProxy.http.networkInterception!
-    const handleStub = sinon.stub(expressIntercept, 'handle').resolves({} as any)
-    const req = { proxiedUrl: 'http://example.com/', get: sinon.stub() } as any
+    const handleStub = vi.spyOn(expressIntercept, 'handle').mockResolvedValue({} as any)
+    const req = { proxiedUrl: 'http://example.com/', get: vi.fn() } as any
     const res = {} as any
 
     await runtime.networkProxy.handleHttpRequest(req, res)
 
-    expect(handleStub).to.have.been.calledOnce
-    expect(handleStub.firstCall.args[0]).to.include({ req, res })
+    expect(handleStub).toHaveBeenCalledOnce()
+    expect(handleStub.mock.calls[0][0].req).toBe(req)
+    expect(handleStub.mock.calls[0][0].res).toBe(res)
   })
 
   it('createCdpFetchRuntime reuses a provided netStubbingState', () => {
     const client = {
-      send: sinon.stub(),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const existingState = {
       routes: [{ id: 'existing-route' }],
       requests: {},
-      reset: sinon.stub(),
+      reset: vi.fn(),
     } as any
     const runtime = createCdpFetchRuntime({
       ...baseDeps(),
@@ -337,15 +391,15 @@ describe('lib/network-runtime', () => {
       netStubbingState: existingState,
     })
 
-    expect(runtime.netStubbingState).to.equal(existingState)
-    expect(runtime.networkProxy.http.netStubbingState).to.equal(existingState)
+    expect(runtime.netStubbingState).toBe(existingState)
+    expect(runtime.networkProxy.http.netStubbingState).toBe(existingState)
   })
 
   it('createCdpFetchRuntime registers blocked-hosts policy for the browser (CDP) network path', () => {
     const client = {
-      send: sinon.stub(),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({
       ...baseDeps(),
@@ -360,45 +414,45 @@ describe('lib/network-runtime', () => {
     const policies = runtime.networkPolicyRegistration.getPolicies()
     const blockedHosts = policies.find((p) => p.name === 'blocked-hosts')
 
-    expect(blockedHosts).to.exist
-    expect(blockedHosts!.when({ url: 'http://blocked.example.test/' })).to.be.true
-    expect(blockedHosts!.when({ url: 'http://allowed.example.test/' })).to.be.false
+    expect(blockedHosts).toBeDefined()
+    expect(blockedHosts!.when({ url: 'http://blocked.example.test/' })).toBe(true)
+    expect(blockedHosts!.when({ url: 'http://allowed.example.test/' })).toBe(false)
   })
 
   it('createCdpFetchRuntime reset clears transport state without resetting NetworkProxy or disabling Fetch', async () => {
     const client = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-    const networkProxyReset = sinon.spy(runtime.networkProxy, 'reset')
-    const transportReset = sinon.spy(runtime.fetchTransport, 'reset')
+    const networkProxyReset = vi.spyOn(runtime.networkProxy, 'reset')
+    const transportReset = vi.spyOn(runtime.fetchTransport, 'reset')
 
     await runtime.start()
-    client.send.resetHistory()
+    client.send.mockClear()
 
     runtime.reset()
 
     // server-base owns networkProxy.reset; runtime.reset is transport-only
-    expect(networkProxyReset).not.to.have.been.called
-    expect(transportReset).to.have.been.calledOnce
-    expect(client.send).not.to.have.been.calledWith('Fetch.disable')
+    expect(networkProxyReset).not.toHaveBeenCalled()
+    expect(transportReset).toHaveBeenCalledOnce()
+    expectNotCalledWith(client.send, 'Fetch.disable')
 
     await runtime.stop()
 
-    expect(client.send).to.have.been.calledWith('Fetch.disable')
+    expectCalledWith(client.send, 'Fetch.disable')
   })
 
   it('createCdpFetchRuntime records the AUT URL when the automation layer reports an AUT navigation commit', async () => {
     const client = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     let notifyAUTFrameNavigated!: (url: string) => void
-    const unsubscribe = sinon.stub()
-    const onAUTFrameNavigated = sinon.stub().callsFake((listener: (url: string) => void) => {
+    const unsubscribe = vi.fn()
+    const onAUTFrameNavigated = vi.fn((listener: (url: string) => void) => {
       notifyAUTFrameNavigated = listener
 
       return unsubscribe
@@ -411,7 +465,7 @@ describe('lib/network-runtime', () => {
 
     await runtime.start()
 
-    const setAUTUrl = sinon.spy(runtime.networkProxy.http, 'setAUTUrl')
+    const setAUTUrl = vi.spyOn(runtime.networkProxy.http, 'setAUTUrl')
 
     // test isolation blanks the AUT frame between tests; about:blank must
     // never become the simulated top
@@ -419,42 +473,43 @@ describe('lib/network-runtime', () => {
     notifyAUTFrameNavigated('data:text/html,<p>hi</p>')
     notifyAUTFrameNavigated('https://app.test/dashboard')
 
-    expect(setAUTUrl).to.have.been.calledOnceWith('https://app.test/dashboard')
+    expect(setAUTUrl).toHaveBeenCalledOnce()
+    expect(setAUTUrl).toHaveBeenCalledWith('https://app.test/dashboard')
 
     await runtime.stop()
 
-    expect(unsubscribe).to.have.been.calledOnce
+    expect(unsubscribe).toHaveBeenCalledOnce()
   })
 
   it('createCdpFetchRuntime unsubscribes from AUT navigation commits when Fetch.enable fails', async () => {
     const client = {
-      send: sinon.stub().rejects(new Error('enable failed')),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockRejectedValue(new Error('enable failed')),
+      on: vi.fn(),
+      off: vi.fn(),
     }
-    const unsubscribe = sinon.stub()
+    const unsubscribe = vi.fn()
     const runtime = createCdpFetchRuntime({
       ...baseDeps(),
       client,
-      onAUTFrameNavigated: sinon.stub().returns(unsubscribe),
+      onAUTFrameNavigated: vi.fn().mockReturnValue(unsubscribe),
     })
 
-    await expect(runtime.start()).to.be.rejectedWith('enable failed')
+    await expect(runtime.start()).rejects.toThrow('enable failed')
 
-    expect(unsubscribe).to.have.been.calledOnce
+    expect(unsubscribe).toHaveBeenCalledOnce()
   })
 
   it('createCdpFetchRuntime starts Fetch interception and continues requests by default', async () => {
     const client = {
-      send: sinon.stub().callsFake(async (method: string) => {
+      send: vi.fn(async (method: string) => {
         if (method === 'Fetch.getResponseBody') {
           return { body: '', base64Encoded: false }
         }
 
         return {}
       }),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
     const onRequestPaused = await startCdpRuntime(runtime, client)
@@ -467,10 +522,10 @@ describe('lib/network-runtime', () => {
     await flush()
 
     // Legacy request middleware may mutate headers (e.g. accept-encoding) before continue.
-    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+    const continueCall = findCall(client.send, 'Fetch.continueRequest')
 
-    expect(continueCall, 'expected Fetch.continueRequest').to.exist
-    expect(continueCall!.args[1]).to.include({ requestId: 'fetch-request' })
+    expect(continueCall, 'expected Fetch.continueRequest').toBeDefined()
+    expect(continueCall![1]).toMatchObject({ requestId: 'fetch-request' })
 
     await onRequestPaused(createPausedRequest({
       requestId: 'fetch-request',
@@ -481,16 +536,16 @@ describe('lib/network-runtime', () => {
     await flush()
     await handled
 
-    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
-    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+    const continueResponseCall = findCall(client.send, 'Fetch.continueResponse')
+    const fulfillCall = findCall(client.send, 'Fetch.fulfillRequest')
 
-    expect(continueResponseCall, 'expected Fetch.continueResponse for unmodified response').to.exist
-    expect(continueResponseCall!.args[1]).to.include({
+    expect(continueResponseCall, 'expected Fetch.continueResponse for unmodified response').toBeDefined()
+    expect(continueResponseCall![1]).toMatchObject({
       requestId: 'fetch-request',
       responseCode: 200,
     })
 
-    expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').to.not.exist
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').toBeUndefined()
   })
 
   // The legacy pipeline hands every response body back through the synthetic
@@ -499,15 +554,15 @@ describe('lib/network-runtime', () => {
   it('createCdpFetchRuntime continues asset responses the legacy pipeline leaves byte-identical', async () => {
     const assetBody = Buffer.from('body { color: red; }')
     const client = {
-      send: sinon.stub().callsFake(async (method: string) => {
+      send: vi.fn(async (method: string) => {
         if (method === 'Fetch.getResponseBody') {
           return { body: assetBody.toString('base64'), base64Encoded: true }
         }
 
         return {}
       }),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
     const onRequestPaused = await startCdpRuntime(runtime, client)
@@ -537,33 +592,33 @@ describe('lib/network-runtime', () => {
     await flush()
     await handled
 
-    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
-    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+    const continueResponseCall = findCall(client.send, 'Fetch.continueResponse')
+    const fulfillCall = findCall(client.send, 'Fetch.fulfillRequest')
 
-    expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten asset').to.exist
-    expect(continueResponseCall!.args[1]).to.include({
+    expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten asset').toBeDefined()
+    expect(continueResponseCall![1]).toMatchObject({
       requestId: 'asset-request',
       responseCode: 200,
     })
 
     // The pipeline left the headers alone, so the origin's own content-length
     // survives by omitting responseHeaders rather than resending a copy of it.
-    expect(continueResponseCall!.args[1]).to.not.have.property('responseHeaders')
+    expect(continueResponseCall![1]).not.toHaveProperty('responseHeaders')
 
-    expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').to.not.exist
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').toBeUndefined()
   })
 
   it('createCdpFetchRuntime propagates CDP XHR resourceType onto the synthetic Express request', async () => {
     const client = {
-      send: sinon.stub().callsFake(async (method: string) => {
+      send: vi.fn(async (method: string) => {
         if (method === 'Fetch.getResponseBody') {
           return { body: '', base64Encoded: false }
         }
 
         return {}
       }),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({
       ...baseDeps(),
@@ -584,7 +639,7 @@ describe('lib/network-runtime', () => {
 
     // Resolve correlation immediately with no browserPreRequest so the
     // transport value is the only source of resourceType.
-    sinon.stub(runtime.networkProxy.http.preRequests, 'get').callsFake((_req, _debug, cb) => {
+    vi.spyOn(runtime.networkProxy.http.preRequests, 'get').mockImplementation((_req, _debug, cb) => {
       cb({ browserPreRequest: undefined })
 
       return undefined
@@ -609,20 +664,20 @@ describe('lib/network-runtime', () => {
     await flush()
     await handled
 
-    expect(seenResourceTypes).to.include('xhr')
+    expect(seenResourceTypes).toContain('xhr')
   })
 
   it('createCdpFetchRuntime redirects strategy:file URLs to the Cypress origin with loopback headers', async () => {
     const client = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const deps = baseDeps()
 
     deps.config = { ...deps.config, port: 2020 } as Cypress.Config
 
-    deps.remoteStates.current = sinon.stub().returns({
+    deps.remoteStates.current = vi.fn().mockReturnValue({
       origin: 'http://localhost:2020',
       strategy: 'file',
       fileServer: 'http://localhost:2021',
@@ -631,8 +686,8 @@ describe('lib/network-runtime', () => {
     })
 
     deps.request = {
-      rp: sinon.stub(),
-      create: sinon.stub(),
+      rp: vi.fn(),
+      create: vi.fn(),
     } as any
 
     const runtime = createCdpFetchRuntime({ ...deps, client })
@@ -648,27 +703,27 @@ describe('lib/network-runtime', () => {
 
     // No Node-side file-server fetch — the request stays on the wire and the
     // Express direct-origin catch-all serves it.
-    expect(deps.request.create).to.not.have.been.called
+    expect(deps.request.create).not.toHaveBeenCalled()
 
-    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
-    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+    const continueCall = findCall(client.send, 'Fetch.continueRequest')
+    const fulfillCall = findCall(client.send, 'Fetch.fulfillRequest')
 
-    expect(continueCall, 'expected Fetch.continueRequest').to.exist
-    expect(fulfillCall, 'expected no Fetch.fulfillRequest').to.not.exist
+    expect(continueCall, 'expected Fetch.continueRequest').toBeDefined()
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest').toBeUndefined()
 
     // Page-invisible url override to our origin; loopback headers carry the
     // impersonated URL so setProxiedUrl restores it Express-side.
-    const continueParams = continueCall!.args[1]
+    const continueParams = continueCall![1]
 
-    expect(continueParams.requestId).to.eq('file-request')
-    expect(continueParams.url).to.eq('http://localhost:2020/cypress/fixtures/records.csv')
+    expect(continueParams.requestId).toBe('file-request')
+    expect(continueParams.url).toBe('http://localhost:2020/cypress/fixtures/records.csv')
 
     const headerNames = continueParams.headers.map((h: { name: string }) => h.name)
 
-    expect(headerNames).to.include('x-cypress-internal-loopback')
-    expect(headerNames).to.include('x-cypress-internal-loopback-token')
+    expect(headerNames).toContain('x-cypress-internal-loopback')
+    expect(headerNames).toContain('x-cypress-internal-loopback-token')
     expect(continueParams.headers.find((h: { name: string }) => h.name === 'x-cypress-internal-loopback').value)
-    .to.eq('http://localhost:2020/cypress/fixtures/records.csv')
+    .toBe('http://localhost:2020/cypress/fixtures/records.csv')
 
     // The response pause for a passed-through request is released untouched.
     await onRequestPaused(createPausedRequest({
@@ -680,15 +735,15 @@ describe('lib/network-runtime', () => {
 
     await flush()
 
-    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const continueResponseCall = findCall(client.send, 'Fetch.continueResponse')
 
-    expect(continueResponseCall, 'expected Fetch.continueResponse').to.exist
-    expect(continueResponseCall!.args[1]).to.deep.equal({ requestId: 'file-request' })
+    expect(continueResponseCall, 'expected Fetch.continueResponse').toBeDefined()
+    expect(continueResponseCall![1]).toStrictEqual({ requestId: 'file-request' })
   })
 
   it('createCdpFetchRuntime releases the pause untouched when the origin-redirect continueRequest is rejected', async () => {
     const client = {
-      send: sinon.stub().callsFake(async (method: string, params: any) => {
+      send: vi.fn(async (method: string, params: any) => {
         // reject the full-args override, accept the bare release
         if (method === 'Fetch.continueRequest' && params?.url) {
           throw new Error('Invalid http header value')
@@ -696,14 +751,14 @@ describe('lib/network-runtime', () => {
 
         return {}
       }),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const deps = baseDeps()
 
     deps.config = { ...deps.config, port: 2020 } as Cypress.Config
 
-    deps.remoteStates.current = sinon.stub().returns({
+    deps.remoteStates.current = vi.fn().mockReturnValue({
       origin: 'http://localhost:2020',
       strategy: 'file',
       fileServer: 'http://localhost:2021',
@@ -722,25 +777,23 @@ describe('lib/network-runtime', () => {
 
     await flush()
 
-    const continueCalls = client.send.getCalls().filter((call) => call.args[0] === 'Fetch.continueRequest')
+    const continueCalls = client.send.mock.calls.filter((args) => args[0] === 'Fetch.continueRequest')
 
-    expect(continueCalls, 'override attempt plus bare fallback').to.have.length(2)
-    expect(continueCalls[0].args[1].url).to.exist
-    expect(continueCalls[1].args[1]).to.deep.equal({ requestId: 'file-request' })
+    expect(continueCalls, 'override attempt plus bare fallback').toHaveLength(2)
+    expect(continueCalls[0][1].url).toBeDefined()
+    expect(continueCalls[1][1]).toStrictEqual({ requestId: 'file-request' })
   })
 
-  it('createCdpFetchRuntime passes download pauses without networkId through without waiting for pre-request timeout', async function () {
-    this.timeout(5000)
-
-    const clock = sinon.useFakeTimers({
+  it('createCdpFetchRuntime passes download pauses without networkId through without waiting for pre-request timeout', { timeout: 5000 }, async () => {
+    vi.useFakeTimers({
       toFake: ['setTimeout', 'clearTimeout'],
     })
 
     try {
       const client = {
-        send: sinon.stub().resolves({}),
-        on: sinon.stub(),
-        off: sinon.stub(),
+        send: vi.fn().mockResolvedValue({}),
+        on: vi.fn(),
+        off: vi.fn(),
       }
       const deps = baseDeps()
       const fileBody = Buffer.from('"Joe","Smith"')
@@ -748,7 +801,7 @@ describe('lib/network-runtime', () => {
 
       deps.config = { ...deps.config, port: 2020 } as Cypress.Config
 
-      deps.remoteStates.current = sinon.stub().returns({
+      deps.remoteStates.current = vi.fn().mockReturnValue({
         origin: 'http://localhost:2020',
         strategy: 'file',
         fileServer: 'http://localhost:2021',
@@ -757,8 +810,8 @@ describe('lib/network-runtime', () => {
       })
 
       deps.request = {
-        rp: sinon.stub(),
-        create: sinon.stub().resolves({
+        rp: vi.fn(),
+        create: vi.fn().mockResolvedValue({
           statusCode: 200,
           headers: {
             'content-type': 'text/csv',
@@ -773,7 +826,7 @@ describe('lib/network-runtime', () => {
         client,
         shouldCorrelatePreRequests: () => true,
       })
-      const addPendingSpy = sinon.spy(runtime.networkProxy, 'addPendingUrlWithoutPreRequest')
+      const addPendingSpy = vi.spyOn(runtime.networkProxy, 'addPendingUrlWithoutPreRequest')
       const onRequestPaused = await startCdpRuntime(runtime, client)
 
       // Downloads omit networkId — without pre-registration the Express-side
@@ -784,43 +837,44 @@ describe('lib/network-runtime', () => {
       }))
 
       await flush()
-      await clock.tickAsync(0)
+      await vi.advanceTimersByTimeAsync(0)
       await flush()
 
       // Pre-registration still happens for pass-through pauses so the
       // Express-side CorrelateBrowserPreRequest resolves immediately.
-      expect(addPendingSpy).to.have.been.calledOnceWith(downloadUrl)
-      expect(deps.request.create).to.not.have.been.called
+      expect(addPendingSpy).toHaveBeenCalledOnce()
+      expect(addPendingSpy).toHaveBeenCalledWith(downloadUrl)
+      expect(deps.request.create).not.toHaveBeenCalled()
 
-      const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+      const continueCall = findCall(client.send, 'Fetch.continueRequest')
 
-      expect(continueCall, 'expected Fetch.continueRequest before pre-request timeout').to.exist
-      expect(continueCall!.args[1].requestId).to.eq('download-file-request')
-      expect(continueCall!.args[1].url).to.eq(downloadUrl)
+      expect(continueCall, 'expected Fetch.continueRequest before pre-request timeout').toBeDefined()
+      expect(continueCall![1].requestId).toBe('download-file-request')
+      expect(continueCall![1].url).toBe(downloadUrl)
 
       await handled
     } finally {
-      clock.restore()
+      vi.useRealTimers()
     }
   })
 
   it('createCdpFetchRuntime continues http-strategy requests without hitting the file server', async () => {
     const client = {
-      send: sinon.stub().callsFake(async (method: string) => {
+      send: vi.fn(async (method: string) => {
         if (method === 'Fetch.getResponseBody') {
           return { body: '', base64Encoded: false }
         }
 
         return {}
       }),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const deps = baseDeps()
 
     deps.request = {
-      rp: sinon.stub(),
-      create: sinon.stub().resolves({
+      rp: vi.fn(),
+      create: vi.fn().mockResolvedValue({
         statusCode: 200,
         headers: {},
         body: 'should-not-be-used',
@@ -838,11 +892,11 @@ describe('lib/network-runtime', () => {
 
     await flush()
 
-    expect(deps.request.create).not.to.have.been.called
+    expect(deps.request.create).not.toHaveBeenCalled()
 
-    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+    const continueCall = findCall(client.send, 'Fetch.continueRequest')
 
-    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(continueCall, 'expected Fetch.continueRequest').toBeDefined()
 
     await onRequestPaused(createPausedRequest({
       requestId: 'http-request',
@@ -854,34 +908,34 @@ describe('lib/network-runtime', () => {
     await flush()
     await handled
 
-    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
-    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+    const continueResponseCall = findCall(client.send, 'Fetch.continueResponse')
+    const fulfillCall = findCall(client.send, 'Fetch.fulfillRequest')
 
-    expect(continueResponseCall, 'expected Fetch.continueResponse for http-strategy response').to.exist
-    expect(continueResponseCall!.args[1]).to.include({
+    expect(continueResponseCall, 'expected Fetch.continueResponse for http-strategy response').toBeDefined()
+    expect(continueResponseCall![1]).toMatchObject({
       requestId: 'http-request',
       responseCode: 200,
     })
 
-    expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').to.not.exist
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').toBeUndefined()
   })
 
   it('createCdpFetchRuntime attachExtraTarget transports redirect strategy:file URLs like the main transport', async () => {
     const mainClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const extraClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const deps = baseDeps()
 
     deps.config = { ...deps.config, port: 2020 } as Cypress.Config
 
-    deps.remoteStates.current = sinon.stub().returns({
+    deps.remoteStates.current = vi.fn().mockReturnValue({
       origin: 'http://localhost:2020',
       strategy: 'file',
       fileServer: 'http://localhost:2021',
@@ -895,8 +949,8 @@ describe('lib/network-runtime', () => {
     await runtime.attachExtraTarget(extraClient)
 
     const onRequestPaused = (event: Protocol.Fetch.RequestPausedEvent) => {
-      return Promise.all(extraClient.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
-        return (call.args[1] as (event: Protocol.Fetch.RequestPausedEvent) => void)(event)
+      return Promise.all(pausedHandlerCalls(extraClient.on).map((call) => {
+        return (call[1] as (event: Protocol.Fetch.RequestPausedEvent) => void)(event)
       }))
     }
 
@@ -910,26 +964,26 @@ describe('lib/network-runtime', () => {
 
     // Popup file traffic reaches Express either way — released untouched so
     // the pipeline runs once there, not on the CDP side first.
-    const continueCall = extraClient.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+    const continueCall = findCall(extraClient.send, 'Fetch.continueRequest')
 
-    expect(continueCall, 'expected Fetch.continueRequest').to.exist
-    expect(continueCall!.args[1].url).to.eq('http://localhost:2020/cypress/fixtures/popup.html')
-    expect(continueCall!.args[1].headers.map((h: { name: string }) => h.name))
-    .to.include('x-cypress-internal-loopback-token')
+    expect(continueCall, 'expected Fetch.continueRequest').toBeDefined()
+    expect(continueCall![1].url).toBe('http://localhost:2020/cypress/fixtures/popup.html')
+    expect(continueCall![1].headers.map((h: { name: string }) => h.name))
+    .toContain('x-cypress-internal-loopback-token')
 
     await runtime.stop()
   })
 
   it('createCdpFetchRuntime attachExtraTarget starts a transport that shares the main intercept', async () => {
     const mainClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const extraClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
 
@@ -937,8 +991,8 @@ describe('lib/network-runtime', () => {
 
     const detach = await runtime.attachExtraTarget(extraClient)
 
-    expect(extraClient.send).to.have.been.calledWith('Network.enable')
-    expect(extraClient.send).to.have.been.calledWith('Fetch.enable', {
+    expectCalledWith(extraClient.send, 'Network.enable')
+    expectCalledWith(extraClient.send, 'Fetch.enable', {
       patterns: [{
         requestStage: 'Request',
       }, {
@@ -946,44 +1000,43 @@ describe('lib/network-runtime', () => {
       }],
     })
 
-    expect(extraClient.on).to.have.been.calledWith('Fetch.requestPaused')
-    expect(extraClient.send.withArgs('Fetch.enable'))
-    .to.have.been.calledBefore(extraClient.send.withArgs('Network.enable'))
+    expectCalledWith(extraClient.on, 'Fetch.requestPaused')
+    expect(firstCallOrder(extraClient.send, 'Fetch.enable')).toBeLessThan(lastCallOrder(extraClient.send, 'Network.enable'))
 
-    const transportReset = sinon.spy(CdpFetchTransport.prototype, 'reset')
+    const transportReset = vi.spyOn(CdpFetchTransport.prototype, 'reset')
 
     runtime.reset()
 
     // Asserts the extra transport itself reset, not just that reset() fired
     // twice — a call count alone would also pass if the main transport's
     // reset ran twice and the extra transport's never ran.
-    expect(transportReset).to.have.been.calledTwice
-    expect(transportReset.thisValues).to.include(runtime.fetchTransport)
-    expect(transportReset.thisValues.filter((transport) => transport !== runtime.fetchTransport)).to.have.length(1)
+    expect(transportReset).toHaveBeenCalledTimes(2)
+    expect(transportReset.mock.contexts).toContain(runtime.fetchTransport)
+    expect(transportReset.mock.contexts.filter((transport) => transport !== runtime.fetchTransport)).toHaveLength(1)
 
     await detach()
 
-    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    expectCalledWith(extraClient.send, 'Fetch.disable')
 
     await runtime.stop()
   })
 
   it('createCdpFetchRuntime attachExtraTarget attaches even when Network.enable never settles on the paused target', async () => {
     const mainClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const extraClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
 
     // models the auto-attached debugger-paused target: Network.enable's
     // response never arrives because the renderer only unpauses after
     // attachExtraTarget returns (#34512)
-    extraClient.send.withArgs('Network.enable').returns(new Promise(() => {}))
+    extraClient.send.mockImplementation(sendAnswering({ 'Network.enable': () => new Promise(() => {}) }))
 
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
 
@@ -991,8 +1044,8 @@ describe('lib/network-runtime', () => {
 
     const detach = await runtime.attachExtraTarget(extraClient)
 
-    expect(detach).to.be.a('function')
-    expect(extraClient.send).to.have.been.calledWith('Fetch.enable', {
+    expect(detach).toBeTypeOf('function')
+    expectCalledWith(extraClient.send, 'Fetch.enable', {
       patterns: [{
         requestStage: 'Request',
       }, {
@@ -1002,29 +1055,29 @@ describe('lib/network-runtime', () => {
 
     // The enable was still attempted, even though it never settles while
     // paused — a future change should not be able to silently drop it.
-    expect(extraClient.send).to.have.been.calledWith('Network.enable')
+    expectCalledWith(extraClient.send, 'Network.enable')
 
-    expect(extraClient.on).to.have.been.calledWith('Fetch.requestPaused')
+    expectCalledWith(extraClient.on, 'Fetch.requestPaused')
 
     await runtime.stop()
   })
 
   it('createCdpFetchRuntime attachExtraTarget does not surface an unhandled rejection when Network.enable fails', async () => {
     const mainClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const extraClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
 
-    extraClient.send.withArgs('Network.enable').rejects(new Error('WebSocket connection closed'))
+    extraClient.send.mockImplementation(sendAnswering({ 'Network.enable': () => Promise.reject(new Error('WebSocket connection closed')) }))
 
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
-    const unhandled = sinon.stub()
+    const unhandled = vi.fn()
 
     await runtime.start()
 
@@ -1035,7 +1088,7 @@ describe('lib/network-runtime', () => {
 
       await flush()
 
-      expect(unhandled).not.to.have.been.called
+      expect(unhandled).not.toHaveBeenCalled()
     } finally {
       process.removeListener('unhandledRejection', unhandled)
     }
@@ -1045,28 +1098,28 @@ describe('lib/network-runtime', () => {
 
   it('createCdpFetchRuntime enables Fetch on service worker sessions that attach to the page connection', async () => {
     const client: {
-      send: sinon.SinonStub
-      on: sinon.SinonStub
-      off: sinon.SinonStub
+      send: Mock
+      on: Mock
+      off: Mock
       onChildTargetAttached?: (sessionId: string) => Promise<void>
     } = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
 
-    expect(client.onChildTargetAttached, 'hook is not registered before start').to.not.exist
+    expect(client.onChildTargetAttached, 'hook is not registered before start').toBeUndefined()
 
     await runtime.start()
-    client.send.resetHistory()
+    client.send.mockClear()
 
     await client.onChildTargetAttached!('sw-session')
 
     // A service worker's script fetch and fetch-handler requests run on its own
     // session, so they only reach the middleware onion (and cy.intercept) if
     // Fetch is enabled there too.
-    expect(client.send).to.have.been.calledWith('Fetch.enable', {
+    expectCalledWith(client.send, 'Fetch.enable', {
       patterns: [{
         requestStage: 'Request',
       }, {
@@ -1078,37 +1131,37 @@ describe('lib/network-runtime', () => {
 
     // The page client outlives the runtime, so a stale hook would enable Fetch
     // against a transport that has already dropped its handlers.
-    expect(client.onChildTargetAttached, 'hook is cleared on stop').to.not.exist
+    expect(client.onChildTargetAttached, 'hook is cleared on stop').toBeUndefined()
   })
 
   it('createCdpFetchRuntime clears the service worker hook when Fetch.enable fails', async () => {
     const client: {
-      send: sinon.SinonStub
-      on: sinon.SinonStub
-      off: sinon.SinonStub
+      send: Mock
+      on: Mock
+      off: Mock
       onChildTargetAttached?: (sessionId: string) => Promise<void>
     } = {
-      send: sinon.stub().rejects(new Error('enable failed')),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockRejectedValue(new Error('enable failed')),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
 
-    await expect(runtime.start()).to.be.rejectedWith('enable failed')
+    await expect(runtime.start()).rejects.toThrow('enable failed')
 
-    expect(client.onChildTargetAttached).to.not.exist
+    expect(client.onChildTargetAttached).toBeUndefined()
   })
 
   it('createCdpFetchRuntime stop also stops attached extra-target transports', async () => {
     const mainClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const extraClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
 
@@ -1116,25 +1169,25 @@ describe('lib/network-runtime', () => {
     await runtime.attachExtraTarget(extraClient)
     await runtime.stop()
 
-    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
-    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+    expectCalledWith(extraClient.send, 'Fetch.disable')
+    expectCalledWith(mainClient.send, 'Fetch.disable')
   })
 
   it('createCdpFetchRuntime stop does not hang on an extra-target transport that never answers Fetch.disable', async () => {
     const mainClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const extraClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
 
     // models an extra target whose own CDP connection is already gone —
     // Fetch.disable is sent but never answered
-    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+    extraClient.send.mockImplementation(sendAnswering({ 'Fetch.disable': () => new Promise(() => {}) }))
 
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
 
@@ -1142,29 +1195,31 @@ describe('lib/network-runtime', () => {
     await runtime.attachExtraTarget(extraClient)
     await runtime.stop()
 
-    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
-    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+    expectCalledWith(extraClient.send, 'Fetch.disable')
+    expectCalledWith(mainClient.send, 'Fetch.disable')
   })
 
   it('createCdpFetchRuntime attachExtraTarget rejects promptly when stop() lands mid-attach', async () => {
     const mainClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
     const extraClient = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
+      send: vi.fn().mockResolvedValue({}),
+      on: vi.fn(),
+      off: vi.fn(),
     }
 
     // park attachExtraTarget inside extraTransport.start() until we release it
     const fetchEnableGate = Promise.withResolvers<void>()
 
-    extraClient.send.withArgs('Fetch.enable').returns(fetchEnableGate.promise)
     // models a dead-but-open extra-target socket — Fetch.disable is sent but
     // never answered, same as the sibling stop()/detach paths
-    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+    extraClient.send.mockImplementation(sendAnswering({
+      'Fetch.enable': () => fetchEnableGate.promise,
+      'Fetch.disable': () => new Promise(() => {}),
+    }))
 
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
 
@@ -1179,8 +1234,8 @@ describe('lib/network-runtime', () => {
 
     fetchEnableGate.resolve()
 
-    await expect(attach).to.be.rejectedWith('CDP Fetch runtime has been stopped')
-    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    await expect(attach).rejects.toThrow('CDP Fetch runtime has been stopped')
+    expectCalledWith(extraClient.send, 'Fetch.disable')
   })
 
   // `times` exhaustion disables a route once request-stage counting reaches
@@ -1217,10 +1272,10 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
-    expect(timesRoute.disabled).to.be.true
+    expectCalledWith(client.send, 'Fetch.getResponseBody')
+    expect(timesRoute.disabled).toBe(true)
 
-    client.send.resetHistory()
+    client.send.mockClear()
 
     await drivePausedRequest(onRequestPaused, {
       requestId: 'times-second-request',
@@ -1231,8 +1286,8 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
-    expect(client.send).to.have.been.calledWith('Fetch.continueResponse')
+    expectNotCalledWith(client.send, 'Fetch.getResponseBody')
+    expectCalledWith(client.send, 'Fetch.continueResponse')
   })
 
   it('reads stubbingState.routes live — a route registered after the first stream-classified request still forces the next one to materialize', async () => {
@@ -1249,9 +1304,9 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+    expectNotCalledWith(client.send, 'Fetch.getResponseBody')
 
-    client.send.resetHistory()
+    client.send.mockClear()
     runtime.netStubbingState.routes.push(minimalMatchingRoute('route-2'))
 
     await drivePausedRequest(onRequestPaused, {
@@ -1263,7 +1318,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+    expectCalledWith(client.send, 'Fetch.getResponseBody')
   })
 
   // Every other test in this file leaves both obstructive-code flags
@@ -1293,7 +1348,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'text/javascript' }],
     })
 
-    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+    expectCalledWith(client.send, 'Fetch.getResponseBody')
   })
 
   it('arms capture for a stream-classified response once a protocol manager with isProtocolEnabled true is applied after createCdpFetchRuntime returns', async () => {
@@ -1316,10 +1371,10 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
     })
 
-    const armCall = client.send.getCalls().find((call) => call.args[0] === 'Network.streamResourceContent')
+    const armCall = findCall(client.send, 'Network.streamResourceContent')
 
-    expect(armCall, 'expected Network.streamResourceContent to arm capture').to.exist
-    expect(armCall!.args[1]).to.deep.equal({ requestId: 'network-sse-armed' })
+    expect(armCall, 'expected Network.streamResourceContent to arm capture').toBeDefined()
+    expect(armCall![1]).toStrictEqual({ requestId: 'network-sse-armed' })
   })
 
   it('does not arm capture when the protocol manager reports isProtocolEnabled false', async () => {
@@ -1339,7 +1394,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
     })
 
-    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+    expectNotCalledWith(client.send, 'Network.streamResourceContent')
   })
 
   it('attachExtraTarget transports share the same shouldStreamBody composition as the main transport', async () => {
@@ -1361,13 +1416,13 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(extraClient.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+    expectNotCalledWith(extraClient.send, 'Fetch.getResponseBody')
 
     // ExtractCypressMetadataHeaders restricts an extra-target request to the
     // bare-minimum middleware (MaybeSetBasicAuthHeaders) — SetMatchingRoutes
     // never runs for it, so a route registered in netStubbingState has no
     // request-stage match to thread through, and the pause still streams.
-    extraClient.send.resetHistory()
+    extraClient.send.mockClear()
     runtime.netStubbingState.routes.push(minimalMatchingRoute('extra-route-1'))
 
     await drivePausedRequest(onExtraPaused, {
@@ -1379,13 +1434,13 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(extraClient.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+    expectNotCalledWith(extraClient.send, 'Fetch.getResponseBody')
 
     // shouldCaptureBody parity: with recording on, a stream-classified pause
     // on the extra target arms capture on the extra target's own client
     runtime.networkProxy.setProtocolManager({ isProtocolEnabled: true } as any)
     runtime.netStubbingState.routes.length = 0
-    extraClient.send.resetHistory()
+    extraClient.send.mockClear()
 
     await drivePausedRequest(onExtraPaused, {
       requestId: 'extra-armed-request',
@@ -1396,7 +1451,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(extraClient.send).to.have.been.calledWith('Network.streamResourceContent', {
+    expectCalledWith(extraClient.send, 'Network.streamResourceContent', {
       requestId: 'extra-network-armed',
     })
 
@@ -1424,6 +1479,6 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
     })
 
-    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+    expectNotCalledWith(client.send, 'Network.streamResourceContent')
   })
 })
