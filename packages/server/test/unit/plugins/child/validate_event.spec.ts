@@ -1,5 +1,5 @@
-import '../../../spec_helper'
 import _ from 'lodash'
+import { describe, expect, it } from 'vitest'
 
 import { validateEvent } from '../../../../lib/plugins/child/validate_event'
 
@@ -20,34 +20,34 @@ describe('lib/plugins/child/validate_event', () => {
   it('returns error when called with no event name', () => {
     const { isValid, error } = validateEvent()
 
-    expect(isValid).to.be.false
-    expect(error.name).to.equal('InvalidEventNameError')
-    expect(error.message).to.equal(`invalid event name registered: undefined`)
+    expect(isValid).toBe(false)
+    expect(error.name).toBe('InvalidEventNameError')
+    expect(error.message).toBe(`invalid event name registered: undefined`)
   })
 
   it('returns error when called with no event handler', () => {
     const { isValid, error } = validateEvent('file:preprocessor')
 
-    expect(isValid).to.be.false
-    expect(error.name).to.equal('InvalidEventHandlerError')
-    expect(error.message).to.equal('The handler for the event `file:preprocessor` must be a function')
+    expect(isValid).toBe(false)
+    expect(error.name).toBe('InvalidEventHandlerError')
+    expect(error.message).toBe('The handler for the event `file:preprocessor` must be a function')
   })
 
   it('returns error when called with unsupported event name', () => {
     const { isValid, error } = validateEvent('invalid:event:name', {})
 
-    expect(isValid).to.be.false
-    expect(error.name).to.equal('InvalidEventNameError')
-    expect(error.message).to.equal(`invalid event name registered: invalid:event:name`)
+    expect(isValid).toBe(false)
+    expect(error.name).toBe('InvalidEventNameError')
+    expect(error.message).toBe(`invalid event name registered: invalid:event:name`)
   })
 
   _.each(events, ([event, type]) => {
     it(`returns error when event handler of ${event} is not ${type}`, () => {
       const { isValid, error } = validateEvent(event, 'invalid type')
 
-      expect(isValid).to.be.false
-      expect(error.name).to.equal('InvalidEventHandlerError')
-      expect(error.message).to.equal(`The handler for the event \`${event}\` must be ${type}`)
+      expect(isValid).toBe(false)
+      expect(error.name).toBe('InvalidEventHandlerError')
+      expect(error.message).toBe(`The handler for the event \`${event}\` must be ${type}`)
     })
   })
 
@@ -55,7 +55,7 @@ describe('lib/plugins/child/validate_event', () => {
     it(`returns success when event handler of ${event} is ${type}`, () => {
       const { isValid } = validateEvent(event, validValue)
 
-      expect(isValid).to.be.true
+      expect(isValid).toBe(true)
     })
   })
 })
