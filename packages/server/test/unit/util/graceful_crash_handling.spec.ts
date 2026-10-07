@@ -1,6 +1,4 @@
-// Intentionally omit spec_helper: it pulls in lib/cache before this file's imports; that chain
-// fails under some Node/ts-node setups. Chai's `expect` is sufficient for this pure unit test.
-import { expect } from 'chai'
+import { describe, expect, it } from 'vitest'
 
 import type { ReporterResults } from '../../../lib/types/reporter'
 import { patchRunResultsAfterCrash } from '../../../lib/util/graceful_crash_handling'
@@ -60,20 +58,20 @@ describe('lib/util/graceful_crash_handling', () => {
 
       const out = patchRunResultsAfterCrash(fatal, baseReporterResults(), { id: 'r1' })
 
-      expect(out.error).to.include('Your configFile threw an error')
+      expect(out.error).toContain('Your configFile threw an error')
 
       const test = out.tests[0]
 
-      expect(test.state).to.eq('failed')
-      expect(test.displayError).to.eq(fatal.stack)
-      expect(test.attempts).to.have.length(1)
-      expect(test.attempts[0].state).to.eq('failed')
-      expect(test.attempts[0].error).to.include({
+      expect(test.state).toBe('failed')
+      expect(test.displayError).toBe(fatal.stack)
+      expect(test.attempts).toHaveLength(1)
+      expect(test.attempts[0].state).toBe('failed')
+      expect(test.attempts[0].error).toMatchObject({
         name: 'Error',
         message: 'Your configFile threw an error',
       })
 
-      expect(test.attempts[0].error.stack).to.eq(`    at cfg (cypress.config.js:1:1)`)
+      expect(test.attempts[0].error.stack).toBe(`    at cfg (cypress.config.js:1:1)`)
     })
 
     it('serializes attempt stack without message line (matches reporter normalizeTest)', () => {
@@ -84,9 +82,9 @@ describe('lib/util/graceful_crash_handling', () => {
       const out = patchRunResultsAfterCrash(err, baseReporterResults(), { id: 'r1' })
       const attemptErr = out.tests[0].attempts[0].error
 
-      expect(attemptErr?.name).to.eq('Error')
-      expect(attemptErr?.message).to.eq('config blew up')
-      expect(attemptErr?.stack).to.eq(`    at foo (bar.js:1:1)`)
+      expect(attemptErr?.name).toBe('Error')
+      expect(attemptErr?.message).toBe('config blew up')
+      expect(attemptErr?.stack).toBe(`    at foo (bar.js:1:1)`)
     })
 
     it('strips ANSI from displayError and attempt fields for Cypress errors', () => {
@@ -98,11 +96,11 @@ describe('lib/util/graceful_crash_handling', () => {
 
       const out = patchRunResultsAfterCrash(fatal, baseReporterResults(), { id: 'r1' })
 
-      expect(out.tests[0].displayError).to.not.include('\u001b[')
-      expect(out.tests[0].attempts[0].error?.message).to.not.include('\u001b[')
-      expect(out.tests[0].attempts[0].error?.message).to.include('configFile')
-      expect(out.tests[0].attempts[0].error?.message).to.include('cypress.config.js')
-      expect(out.tests[0].attempts[0].error?.stack).to.not.include('\u001b[')
+      expect(out.tests[0].displayError).not.toContain('\u001b[')
+      expect(out.tests[0].attempts[0].error?.message).not.toContain('\u001b[')
+      expect(out.tests[0].attempts[0].error?.message).toContain('configFile')
+      expect(out.tests[0].attempts[0].error?.message).toContain('cypress.config.js')
+      expect(out.tests[0].attempts[0].error?.stack).not.toContain('\u001b[')
     })
 
     it('does not throw and does not patch tests when mostRecentRunnable is undefined', () => {
@@ -110,8 +108,8 @@ describe('lib/util/graceful_crash_handling', () => {
       const results = baseReporterResults()
       const out = patchRunResultsAfterCrash(fatal, results, undefined)
 
-      expect(out.tests[0].state).to.eq('skipped')
-      expect(out.tests[0].attempts[0].error).to.eq(null)
+      expect(out.tests[0].state).toBe('skipped')
+      expect(out.tests[0].attempts[0].error).toBeNull()
     })
 
     it('does not patch test when runnable id does not match a test (stats still reflect fatal)', () => {
@@ -137,11 +135,11 @@ describe('lib/util/graceful_crash_handling', () => {
 
       const out = patchRunResultsAfterCrash(fatal, results, { id: 'nonexistent' })
 
-      expect(out.tests[0].state).to.eq('skipped')
-      expect(out.tests[0].attempts[0].error).to.eq(null)
-      expect(out.tests[1].state).to.eq('passed')
-      expect(out.tests[1].attempts[0].error).to.eq(null)
-      expect(out.stats.failures).to.equal(results.stats.failures + 1)
+      expect(out.tests[0].state).toBe('skipped')
+      expect(out.tests[0].attempts[0].error).toBeNull()
+      expect(out.tests[1].state).toBe('passed')
+      expect(out.tests[1].attempts[0].error).toBeNull()
+      expect(out.stats.failures).toBe(results.stats.failures + 1)
     })
 
     it('only replaces the last attempt when there are prior attempts (retries)', () => {
@@ -171,10 +169,10 @@ describe('lib/util/graceful_crash_handling', () => {
 
       const out = patchRunResultsAfterCrash(fatal, results, { id: 'r1' })
 
-      expect(out.tests[0].attempts).to.have.length(2)
-      expect(out.tests[0].attempts[0].error).to.deep.include({ message: 'first flake' })
-      expect(out.tests[0].attempts[1].state).to.eq('failed')
-      expect(out.tests[0].attempts[1].error?.message).to.eq('tab crashed')
+      expect(out.tests[0].attempts).toHaveLength(2)
+      expect(out.tests[0].attempts[0].error).toMatchObject({ message: 'first flake' })
+      expect(out.tests[0].attempts[1].state).toBe('failed')
+      expect(out.tests[0].attempts[1].error?.message).toBe('tab crashed')
     })
   })
 })
