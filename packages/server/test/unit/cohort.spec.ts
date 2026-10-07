@@ -1,11 +1,18 @@
-require('../spec_helper')
-
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Cohort } from '@packages/types'
 import { cache } from '../../lib/cache'
 import * as cohorts from '../../lib/cohorts'
 
 describe('lib/cohort', () => {
-  context('.get', () => {
+  beforeEach(async () => {
+    await cache.remove()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('.get', () => {
     it('calls cache.get', async () => {
       const cohortTest: Cohort = {
         name: 'testName',
@@ -21,32 +28,32 @@ describe('lib/cohort', () => {
         [cohortTest2.name]: cohortTest2,
       }
 
-      sinon.stub(cache, 'getCohorts').resolves(allCohorts)
+      vi.spyOn(cache, 'getCohorts').mockResolvedValue(allCohorts)
 
       return cohorts.get().then((cohorts) => {
-        expect(cohorts).to.eq(allCohorts)
+        expect(cohorts).toBe(allCohorts)
       })
     })
   })
 
-  context('.getByName', () => {
+  describe('.getByName', () => {
     it('calls cache.getByName', async () => {
       const cohortTest: Cohort = {
         name: 'testName',
         cohort: 'A',
       }
 
-      sinon.stub(cache, 'getCohorts').resolves({
+      vi.spyOn(cache, 'getCohorts').mockResolvedValue({
         [cohortTest.name]: cohortTest,
       })
 
       return cohorts.getByName(cohortTest.name).then((cohort) => {
-        expect(cohort).to.eq(cohortTest)
+        expect(cohort).toBe(cohortTest)
       })
     })
   })
 
-  context('.set', () => {
+  describe('.set', () => {
     it('calls cache.set', async () => {
       const cohortTest: Cohort = {
         name: 'testName',
@@ -55,7 +62,7 @@ describe('lib/cohort', () => {
 
       return cohorts.set(cohortTest).then(() => {
         return cohorts.getByName(cohortTest.name).then((cohort) => {
-          expect(cohort).to.deep.eq(cohortTest)
+          expect(cohort).toStrictEqual(cohortTest)
         })
       })
     })
