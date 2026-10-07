@@ -467,7 +467,7 @@ export class CommandQueue extends Queue<$Command> {
 
       // If we have created a timeout but are in an unstable state, clear the
       // timeout in favor of the on load timeout already running.
-      if (!this.state('isStable')) {
+      if (this.state('isStable') === false) {
         this.cy.clearTimeout()
       }
 
