@@ -1,23 +1,22 @@
-const { expect, sinon } = require('../../spec_helper')
-
 import type { Protocol } from 'devtools-protocol'
+import { describe, expect, it, vi } from 'vitest'
 import { InterceptionEscapeDetector } from '../../../lib/browsers/cdp-protocol/interception-escape-detector'
 
 function createClient () {
   return {
-    on: sinon.stub(),
-    off: sinon.stub(),
+    on: vi.fn(),
+    off: vi.fn(),
   }
 }
 
 function createDetector () {
   const client = createClient()
-  const onEscape = sinon.stub()
+  const onEscape = vi.fn()
   const detector = new InterceptionEscapeDetector(client as any, onEscape)
 
   detector.start()
 
-  const handler = (eventName: string) => client.on.withArgs(eventName).firstCall.args[1]
+  const handler = (eventName: string) => client.on.mock.calls.find((call) => call[0] === eventName)![1]
 
   return {
     client,
@@ -61,13 +60,13 @@ describe('InterceptionEscapeDetector', () => {
   describe('start/stop', () => {
     it('registers its handlers on start and removes them on stop', () => {
       const client = createClient()
-      const detector = new InterceptionEscapeDetector(client as any, sinon.stub())
+      const detector = new InterceptionEscapeDetector(client as any, vi.fn())
 
       detector.start()
 
-      const registered = client.on.getCalls().map((call) => call.args[0])
+      const registered = client.on.mock.calls.map((call) => call[0])
 
-      expect(registered).to.deep.equal([
+      expect(registered).toEqual([
         'Fetch.requestPaused',
         'Network.requestWillBeSent',
         'Network.responseReceived',
@@ -80,20 +79,20 @@ describe('InterceptionEscapeDetector', () => {
 
       detector.stop()
 
-      expect(client.off.getCalls().map((call) => call.args[0])).to.deep.equal(registered)
+      expect(client.off.mock.calls.map((call) => call[0])).toEqual(registered)
     })
 
     it('is idempotent', () => {
       const client = createClient()
-      const detector = new InterceptionEscapeDetector(client as any, sinon.stub())
+      const detector = new InterceptionEscapeDetector(client as any, vi.fn())
 
       detector.start()
       detector.start()
-      expect(client.on.callCount).to.equal(8)
+      expect(client.on).toHaveBeenCalledTimes(8)
 
       detector.stop()
       detector.stop()
-      expect(client.off.callCount).to.equal(8)
+      expect(client.off).toHaveBeenCalledTimes(8)
     })
   })
 
@@ -104,7 +103,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('1', 'https://app.test/dashboard'))
       responseReceived(documentResponse('1', 'https://app.test/dashboard', true))
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/dashboard', method: 'GET' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/dashboard', method: 'GET' })
     })
 
     it('falls back to GET and the response url when the request was never tracked', () => {
@@ -112,7 +111,7 @@ describe('InterceptionEscapeDetector', () => {
 
       responseReceived(documentResponse('untracked', 'https://app.test/', true))
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/', method: 'GET' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/', method: 'GET' })
     })
 
     it('uses the redirected url when the document request re-emits under the same requestId', () => {
@@ -122,7 +121,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('1', 'https://app.test/new'))
       responseReceived(documentResponse('1', 'https://app.test/new', true))
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/new', method: 'GET' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/new', method: 'GET' })
     })
 
     it('ignores documents not served by a service worker', () => {
@@ -131,7 +130,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('1', 'https://app.test/'))
       responseReceived(documentResponse('1', 'https://app.test/', false))
 
-      expect(onEscape).not.to.be.called
+      expect(onEscape).not.toHaveBeenCalled()
     })
 
     it('ignores non-document responses even when service-worker-served', () => {
@@ -143,7 +142,7 @@ describe('InterceptionEscapeDetector', () => {
         response: { url: 'https://app.test/api', fromServiceWorker: true },
       })
 
-      expect(onEscape).not.to.be.called
+      expect(onEscape).not.toHaveBeenCalled()
     })
   })
 
@@ -157,7 +156,7 @@ describe('InterceptionEscapeDetector', () => {
       requestPaused({ request: { method: 'GET', url: 'https://app.test/dashboard' } }, 'worker-session')
       responseReceived(documentResponse('1', 'https://app.test/dashboard', true))
 
-      expect(onEscape).not.to.be.called
+      expect(onEscape).not.toHaveBeenCalled()
     })
 
     it('does not let an earlier visit\'s pause vouch for a later escaped document of the same url', () => {
@@ -172,7 +171,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('2', 'https://app.test/dashboard'))
       responseReceived(documentResponse('2', 'https://app.test/dashboard', true))
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/dashboard', method: 'GET' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/dashboard', method: 'GET' })
     })
 
     it('does not count the response-stage pause of a hop as a second interception', () => {
@@ -188,7 +187,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('2', 'https://app.test/'))
       responseReceived(documentResponse('2', 'https://app.test/', true))
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/', method: 'GET' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/', method: 'GET' })
     })
 
     it('does not report while a worker session is attached (cache-served document)', () => {
@@ -198,7 +197,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('1', 'https://app.test/dashboard'))
       responseReceived(documentResponse('1', 'https://app.test/dashboard', true))
 
-      expect(onEscape).not.to.be.called
+      expect(onEscape).not.toHaveBeenCalled()
     })
 
     it('suppresses via a worker that attached already running', () => {
@@ -207,7 +206,7 @@ describe('InterceptionEscapeDetector', () => {
       attachedToTarget(workerAttach('worker-1', false))
       responseReceived(documentResponse('1', 'https://app.test/', true))
 
-      expect(onEscape).not.to.be.called
+      expect(onEscape).not.toHaveBeenCalled()
     })
 
     it('reports again once every worker target has detached', () => {
@@ -219,7 +218,7 @@ describe('InterceptionEscapeDetector', () => {
       detachedFromTarget({ sessionId: 'session-worker-1' })
       responseReceived(documentResponse('1', 'https://app.test/', true))
 
-      expect(onEscape).to.be.calledOnce
+      expect(onEscape).toHaveBeenCalledOnce()
     })
 
     it('reports again once every worker target has been destroyed', () => {
@@ -229,7 +228,7 @@ describe('InterceptionEscapeDetector', () => {
       targetDestroyed({ targetId: 'worker-1' })
       responseReceived(documentResponse('1', 'https://app.test/', true))
 
-      expect(onEscape).to.be.calledOnce
+      expect(onEscape).toHaveBeenCalledOnce()
     })
 
     it('keys tracked documents by session so equal requestIds cannot collide', () => {
@@ -239,7 +238,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('1', 'https://app.test/b'), 'session-b')
       responseReceived(documentResponse('1', 'https://app.test/a', true), 'session-a')
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/a', method: 'POST' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/a', method: 'POST' })
     })
   })
 
@@ -256,7 +255,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('1', 'https://app.test/'))
       responseReceived(documentResponse('1', 'https://app.test/', true))
 
-      expect(onEscape).not.to.be.called
+      expect(onEscape).not.toHaveBeenCalled()
     })
 
     it('clears tracked document requests', () => {
@@ -266,7 +265,7 @@ describe('InterceptionEscapeDetector', () => {
       detector.reset()
       responseReceived(documentResponse('1', 'https://app.test/form', true))
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/form', method: 'GET' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/form', method: 'GET' })
     })
   })
 
@@ -278,7 +277,7 @@ describe('InterceptionEscapeDetector', () => {
       loadingFinished({ requestId: '1' })
       responseReceived(documentResponse('1', 'https://app.test/', true))
 
-      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/', method: 'GET' })
+      expect(onEscape).toHaveBeenCalledExactlyOnceWith({ url: 'https://app.test/', method: 'GET' })
     })
 
     it('evicts the oldest pause key at the cap instead of growing unbounded', () => {
@@ -293,7 +292,7 @@ describe('InterceptionEscapeDetector', () => {
       requestWillBeSent(documentRequest('1', 'https://app.test/first'))
       responseReceived(documentResponse('1', 'https://app.test/first', true))
 
-      expect(onEscape).to.be.calledOnce
+      expect(onEscape).toHaveBeenCalledOnce()
     })
   })
 })
