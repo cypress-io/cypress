@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest'
 import { performance } from 'perf_hooks'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   telemetryManager,
   MARK_NAMES,

@@ -3460,6 +3460,7 @@
     "./packages/data-context/src/util/files.ts",
     "./packages/data-context/src/util/hasTypescript.ts",
     "./packages/data-context/src/util/index.ts",
+    "./packages/data-context/src/util/maskProxyPassword.ts",
     "./packages/data-context/src/util/pluginHandlers.ts",
     "./packages/data-context/src/util/shouldLoadConfigAsEsm.ts",
     "./packages/data-context/src/util/urqlCacheKeys.ts",
@@ -3939,5 +3940,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "947cbbb98b9ad17d2f52503ace945013c70ce6fa9fe98e04af1bb68172067b35"
+  "deferredHash": "2a134425cd192d392197e12eab63d17856f49dc4397da94509f16210ae37407a"
 }
