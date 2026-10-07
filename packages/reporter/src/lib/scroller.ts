@@ -25,6 +25,7 @@ export class Scroller {
   private _userScrollThresholdMs = SCROLL_THRESHOLD_MS
   private _onUserScroll?: UserScrollCallback
   private _scrollListenerAbort?: AbortController
+  private _applyingProgrammaticScroll = false
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
     this._detachScrollListener()
@@ -107,7 +108,24 @@ export class Scroller {
     }
 
     this._userScrollCount--
-    this._container.scrollTop = scrollTopGoal
+    this._applyProgrammaticScrollTop(scrollTopGoal)
+  }
+
+  /** Command-log auto-scroll should not dismiss reporter popovers listening on `scroll`. */
+  shouldDismissPopoverOnScroll () {
+    return !this._applyingProgrammaticScroll
+  }
+
+  private _applyProgrammaticScrollTop (scrollTop: number) {
+    if (!this._container) return
+
+    this._applyingProgrammaticScroll = true
+
+    try {
+      this._container.scrollTop = scrollTop
+    } finally {
+      this._applyingProgrammaticScroll = false
+    }
   }
 
   _isFullyVisible (element: HTMLElement) {
@@ -133,7 +151,7 @@ export class Scroller {
 
   setScrollTop (scrollTop?: number | null) {
     if (this._container && scrollTop != null) {
-      this._container.scrollTop = scrollTop
+      this._applyProgrammaticScrollTop(scrollTop)
     }
   }
 
@@ -152,6 +170,7 @@ export class Scroller {
     clearTimeout(this._countUserScrollsTimeout)
     this._countUserScrollsTimeout = undefined
     this._userScrollThresholdMs = SCROLL_THRESHOLD_MS
+    this._applyingProgrammaticScroll = false
   }
 
   __setScrollThresholdMs (ms: number) {
