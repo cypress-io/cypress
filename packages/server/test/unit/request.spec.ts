@@ -15,6 +15,11 @@ const calledWithMatch = (spy: { mock: { calls: any[][] } }, partial: object) => 
 }
 
 // `resolves()` sets the answer for every message except the two cookie messages.
+// Node builds header objects with a null prototype, which toStrictEqual rejects
+const withPlainRequestHeaders = (entries: any[]) => {
+  return entries.map((entry) => ({ ...entry, 'Request Headers': { ...entry['Request Headers'] } }))
+}
+
 const makeAutomationFn = () => {
   let defaultImpl: (() => unknown) | undefined
 
@@ -463,9 +468,7 @@ describe('lib/request', () => {
         expect(resp.headers).toStrictEqual({ 'content-type': 'text/html' })
         expect(resp.isOkStatusCode).toBe(true)
         expect(resp.requestBody).toBe('foobarbaz')
-        // Node builds header objects with a null prototype, which toStrictEqual rejects,
-        // including the copies nested in allRequestResponses
-        expect(resp.requestHeaders).toEqual({
+        expect({ ...resp.requestHeaders }).toStrictEqual({
           'accept': '*/*',
           'accept-encoding': 'gzip, deflate',
           'connection': 'keep-alive',
@@ -473,7 +476,7 @@ describe('lib/request', () => {
           'host': 'www.github.com',
         })
 
-        expect(resp.allRequestResponses).toEqual([
+        expect(withPlainRequestHeaders(resp.allRequestResponses)).toStrictEqual([
           {
             'Request Body': 'foobarbaz',
             'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'content-length': 9, 'host': 'www.github.com' },
@@ -521,9 +524,7 @@ describe('lib/request', () => {
           '302: http://www.github.com/login',
         ])
 
-        // Node builds header objects with a null prototype, which toStrictEqual rejects,
-        // including the copies nested in allRequestResponses
-        expect(resp.requestHeaders).toEqual({
+        expect({ ...resp.requestHeaders }).toStrictEqual({
           'accept': '*/*',
           'accept-encoding': 'gzip, deflate',
           'connection': 'keep-alive',
@@ -531,7 +532,7 @@ describe('lib/request', () => {
           'host': 'www.github.com',
         })
 
-        expect(resp.allRequestResponses).toEqual([
+        expect(withPlainRequestHeaders(resp.allRequestResponses)).toStrictEqual([
           {
             'Request Body': null,
             'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'host': 'www.github.com' },

@@ -116,8 +116,8 @@ passes vacuously against a 3-argument call. Either assert the full argument list
 
 **chai `deep.equal` / `eql` maps to `toStrictEqual`, not `toEqual`.** `toEqual` ignores keys whose
 value is `undefined`, which chai does not. `toStrictEqual` is stricter than chai mainly about
-prototypes: Node's header objects have a null prototype, so assert those with `toEqual`
-(`request.spec.ts`).
+prototypes: Node's header objects have a null prototype, so spread them into a plain object
+before asserting (`request.spec.ts`).
 
 **`sinon.stub().withArgs(x)` returns the filtered stub.** When the original assigned that return
 value, the "filter" never gated anything and the stub answered every call. Porting it as an

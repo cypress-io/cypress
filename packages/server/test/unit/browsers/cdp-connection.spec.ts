@@ -13,8 +13,8 @@ const CONNECT_OPTIONS = { target: DEBUGGER_URL, local: true }
 
 type Behavior = () => unknown
 
-// Mirrors the sinon stub this spec was written against: a behavior registered for the
-// connect options wins, then a per-call-index behavior, then the default.
+// A behavior registered for the connect options wins, then a per-call-index behavior,
+// then the default.
 const cdp = vi.hoisted(() => {
   const state = {
     forConnectOptions: undefined as Behavior | undefined,
