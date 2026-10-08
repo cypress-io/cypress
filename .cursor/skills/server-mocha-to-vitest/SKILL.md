@@ -14,7 +14,7 @@ Scope: `packages/server/test/unit` only. Integration and performance suites stay
 
 This skill lists the things that go wrong *silently*: a converted spec that is green while
 its mocks never engaged, or that asserts less than the mocha original did. Plain API
-mapping (`sinon.stub` to `vi.fn`, `to.deep.equal` to `toEqual`, `context` to `describe`)
+mapping (`sinon.stub` to `vi.fn`, `context` to `describe`)
 is not covered; you already know it. Parent issue: cypress-io/cypress#34846.
 
 ## The contract
@@ -113,6 +113,11 @@ fails `toHaveBeenCalledWith('Network.enable')`. Worse, `not.toHaveBeenCalledWith
 passes vacuously against a 3-argument call. Either assert the full argument list or filter
 `mock.calls` by leading arguments. Examples: `expectCalledWith` in `browsers/cri-client.spec.ts`,
 `callsFor` in `server-base.spec.ts`.
+
+**chai `deep.equal` / `eql` maps to `toStrictEqual`, not `toEqual`.** `toEqual` ignores keys whose
+value is `undefined`, which chai does not. `toStrictEqual` is stricter than chai mainly about
+prototypes: Node's header objects have a null prototype, so spread them into a plain object
+before asserting (`request.spec.ts`).
 
 **`sinon.stub().withArgs(x)` returns the filtered stub.** When the original assigned that return
 value, the "filter" never gated anything and the stub answered every call. Porting it as an
