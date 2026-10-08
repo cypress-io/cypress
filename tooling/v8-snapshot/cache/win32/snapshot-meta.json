@@ -606,7 +606,7 @@
     "./node_modules/send/node_modules/debug/src/browser.js",
     "./node_modules/send/node_modules/debug/src/index.js",
     "./node_modules/signal-exit/signals.js",
-    "./node_modules/simple-git/dist/cjs/index.js",
+    "./node_modules/simple-git/dist/index.cjs",
     "./node_modules/socket.io-adapter/dist/cluster-adapter.js",
     "./node_modules/socket.io-adapter/dist/in-memory-adapter.js",
     "./node_modules/socket.io-adapter/node_modules/ws/index.js",
@@ -3460,6 +3460,7 @@
     "./packages/data-context/src/util/files.ts",
     "./packages/data-context/src/util/hasTypescript.ts",
     "./packages/data-context/src/util/index.ts",
+    "./packages/data-context/src/util/maskProxyPassword.ts",
     "./packages/data-context/src/util/pluginHandlers.ts",
     "./packages/data-context/src/util/shouldLoadConfigAsEsm.ts",
     "./packages/data-context/src/util/urqlCacheKeys.ts",
@@ -3939,5 +3940,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ea15d9cebd0779ca67f5c67cfbe66a439171336aa60256cbc7f74a196bf6a990"
+  "deferredHash": "2a134425cd192d392197e12eab63d17856f49dc4397da94509f16210ae37407a"
 }

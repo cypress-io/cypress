@@ -698,6 +698,16 @@ describe('visual error templates', () => {
         pem: ['trustedCertificates[0].pem', makeErr()],
       }
     },
+    CLIENT_CERTIFICATES_NOT_LOADED: () => {
+      return {
+        default: ['https://example.com/secure'],
+      }
+    },
+    CLIENT_CERTIFICATES_CONFLICT: () => {
+      return {
+        default: ['example.com:443', ['https://example.com/one', 'https://example.com/two']],
+      }
+    },
     SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 

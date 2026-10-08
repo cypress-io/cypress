@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Roles</title>
+  <style>
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Account settings</h1>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#profile">Profile</a></li>
+        <li><a href="#billing">Billing</a></li>
+        <li><a>Placeholder link</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="implicit" aria-label="Implicit roles">
+      <h2>Implicit roles</h2>
+      <button id="implicit-button">Plain button</button>
+      <input id="submit-input" type="submit" value="Submit input">
+      <input id="text-input" aria-label="Text input">
+      <input id="untyped-input" type="not-a-type" aria-label="Untyped input">
+      <input id="search-input" type="search" aria-label="Search input">
+      <input id="checkbox-input" type="checkbox" aria-label="Checkbox input">
+      <select id="single-select" aria-label="Single select"><option>One</option></select>
+      <select id="multi-select" multiple aria-label="Multi select"><option>One</option></select>
+      <img id="logo" src="data:," alt="Company logo">
+      <img id="decorative" src="data:," alt="">
+    </section>
+
+    <section id="explicit" aria-label="Explicit roles">
+      <h2>Explicit roles</h2>
+      <div id="div-button" role="button" tabindex="0">Div button</div>
+      <button id="tab-button" role="tab">Tab button</button>
+      <div id="multi-role" role="switch checkbox" aria-checked="false">Multi role</div>
+      <div id="div-heading" role="heading" aria-level="3">Div heading</div>
+    </section>
+
+    <section id="names" aria-label="Accessible names">
+      <h2>Accessible names</h2>
+      <button id="name-content">  Save   changes  </button>
+      <button id="name-aria-label" aria-label="Close dialog">×</button>
+      <span id="first-label">Delete</span>
+      <span id="second-label">account</span>
+      <button id="name-labelledby" aria-labelledby="first-label second-label">🗑</button>
+      <label>Email <input id="name-wrapping-label" type="email"></label>
+      <label for="name-label-for">Password</label>
+      <input id="name-label-for" type="password">
+      <label for="name-label-for-textbox">Username</label>
+      <input id="name-label-for-textbox" type="text">
+      <button id="name-title" title="Help"></button>
+      <button id="name-nested"><span>Download</span> <strong>report</strong></button>
+      <button id="name-hidden-content">Send<span aria-hidden="true"> ✉️</span></button>
+      <button id="name-hidden-labelledby" aria-labelledby="hidden-label">🗄</button>
+      <span id="hidden-label" aria-hidden="true"><span style="display: none">Archive</span></span>
+    </section>
+
+    <section id="visibility" aria-label="Visibility">
+      <h2>Visibility</h2>
+      <button id="aria-hidden-button" aria-hidden="true">Aria hidden</button>
+      <div aria-hidden="true"><button id="aria-hidden-parent-button">Inside aria hidden</button></div>
+      <div hidden><button id="hidden-attr-button">Inside hidden</button></div>
+      <div style="display: none"><button id="display-none-button">Inside display none</button></div>
+      <button id="visibility-hidden-button" style="visibility: hidden">Visibility hidden</button>
+      <button id="visually-hidden-button" class="visually-hidden">Visually hidden</button>
+      <button id="zero-opacity-button" style="opacity: 0">Zero opacity</button>
+    </section>
+
+    <section id="shadow" aria-label="Shadow DOM">
+      <h2>Shadow DOM</h2>
+      <div id="shadow-host"></div>
+      <div id="hidden-shadow-host" aria-hidden="true"></div>
+    </section>
+
+    <section id="dynamic" aria-label="Dynamic content">
+      <h2>Dynamic content</h2>
+      <button id="add-alert">Add alert</button>
+      <button id="remove-status">Remove status</button>
+      <div id="dynamic-container">
+        <div id="status" role="status">Saving</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Footer text</p>
+  </footer>
+
+  <script>
+    const shadowRoot = document.getElementById('shadow-host').attachShadow({ mode: 'open' })
+
+    shadowRoot.innerHTML = '<button id="shadow-button">Shadow button</button><div id="nested-host"></div>'
+    shadowRoot.getElementById('nested-host').attachShadow({ mode: 'open' }).innerHTML = '<a href="#nested">Nested shadow link</a>'
+
+    document.getElementById('hidden-shadow-host').attachShadow({ mode: 'open' }).innerHTML = '<button>Hidden shadow button</button>'
+
+    document.getElementById('add-alert').addEventListener('click', () => {
+      setTimeout(() => {
+        const alert = document.createElement('div')
+
+        alert.setAttribute('role', 'alert')
+        alert.textContent = 'Changes saved'
+        document.getElementById('dynamic-container').appendChild(alert)
+      }, 200)
+    })
+
+    document.getElementById('remove-status').addEventListener('click', () => {
+      setTimeout(() => {
+        document.getElementById('status').remove()
+      }, 200)
+    })
+  </script>
+</body>
+</html>

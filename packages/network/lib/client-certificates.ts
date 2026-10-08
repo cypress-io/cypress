@@ -156,6 +156,18 @@ export class ClientCertificateStore {
     return matchingCerts[0].clientCertificates
   }
 
+  /**
+   * Material for one configured URL, matched exactly.
+   *
+   * Distinct from the per-request lookup above, which applies the matcher rules. A caller
+   * that already holds a configured URL must not round-trip it through those rules: a
+   * path-scoped entry does not match its own URL once `ParsedUrl` has normalized the path,
+   * and the entry would be silently dropped.
+   */
+  getClientCertificatesForConfiguredUrl (url: string): ClientCertificates | null {
+    return this._urlClientCertificates.find((x) => x.url === url)?.clientCertificates ?? null
+  }
+
   getCertCount (): number {
     return this._urlClientCertificates.length
   }
@@ -178,14 +190,16 @@ type Config = {
   // not read here, but it keeps `Config` from being a weak type that no caller
   // structurally matches — every caller passes a full Cypress config
   projectRoot: string
+  // optional exactly where the public `ClientCertificate` type is: an entry supplies PEM
+  // or PFX, not both, and the loader below guards each field
   clientCertificates?: Array<{
     url: string
-    ca: string[]
+    ca?: string[]
     certs: Array<{
-      cert: string
-      key: string
-      passphrase: string
-      pfx: string
+      cert?: string
+      key?: string
+      passphrase?: string
+      pfx?: string
     }>
   }>
 }
