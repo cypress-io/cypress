@@ -1,5 +1,7 @@
 const { _ } = Cypress
 
+export {}
+
 describe('src/cy/commands/assertions', () => {
   beforeEach(function () {
     cy.visit('/fixtures/jquery.html')
@@ -12,9 +14,7 @@ describe('src/cy/commands/assertions', () => {
 
     describe('#contain', () => {
       it('can find input type submit by value', function () {
-        // $input creates an HTML element to be tested.
-        // eslint-disable-next-line no-unused-vars
-        const $input = cy.$$('<input type=\'submit\' value=\'click me\' />').appendTo(this.$body)
+        cy.$$('<input type=\'submit\' value=\'click me\' />').appendTo(this.$body)
 
         cy.get('input[type=submit]').should('contain', 'click me')
       })
@@ -183,6 +183,7 @@ describe('src/cy/commands/assertions', () => {
 
           cy.on('fail', spy)
 
+          // @ts-expect-error - intentionally omitting the subject
           return cy.wrap().should('not.be.visible')
         })
 
