@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { $ } = Cypress
 
 describe('src/cy/commands/assertions', () => {
