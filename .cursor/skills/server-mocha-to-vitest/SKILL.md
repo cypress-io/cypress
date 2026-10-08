@@ -107,6 +107,10 @@ patches what `server-base.ts` sees. It keeps the real implementation unless you 
 
 ## Assertions that flip meaning
 
+**chai `deep.equal` is `toStrictEqual`, not `toEqual`.** `toEqual` ignores keys whose value is
+`undefined`, so an expected `{ envUrl: undefined }` also matches an object with no `envUrl` key,
+which chai rejects (`cloud/environment.spec.ts`).
+
 **sinon `calledWith` is a prefix match. vitest `toHaveBeenCalledWith` is exact-arity.**
 `client.send('Network.enable', opts, sessionId)` satisfies `calledWith('Network.enable')` but
 fails `toHaveBeenCalledWith('Network.enable')`. Worse, `not.toHaveBeenCalledWith('Fetch.disable')`

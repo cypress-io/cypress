@@ -19,8 +19,10 @@ Target one package through the workspace:
 
 ```bash
 yarn workspace @packages/server test-unit -- <path-to-spec>
-yarn workspace @packages/server test-unit -- --grep "<pattern>"
+yarn workspace @packages/server test-unit -- -t "<pattern>"
 ```
+
+Name filters are runner-specific: vitest takes `-t`, mocha takes `--grep`.
 
 ## Never use `yarn test --scope`
 

@@ -47,11 +47,11 @@ describe('ensureStudioBundle', () => {
 
     await ensureStudioBundle({ studioUrl: 'https://cdn.cypress.io/studio/x.tar' })
 
-    expect(ensureSignedBundleStub).toHaveBeenCalledWith({
+    expect(ensureSignedBundleStub.mock.calls).toStrictEqual([[{
       url: 'https://cdn.cypress.io/studio/x.tar',
       projectId: undefined,
       kind: 'studio',
-    })
+    }]])
   })
 
   it('propagates errors from ensureSignedBundle', async () => {
