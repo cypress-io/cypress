@@ -26,6 +26,20 @@ commands:
             pnpm config set store-dir .pnpm-store
       - run: pnpm import 2>&1 | tail -3
 
+  win-pnpm-setup:
+    steps:
+      - run:
+          name: Install Node (ensure-node.sh)
+          command: source ./scripts/ensure-node.sh && node -v
+      - run: node .circleci/exp/pnpm-prep.js
+      - run:
+          name: Install pnpm
+          command: |
+            npm i -g pnpm@12.9.1
+            pnpm -v
+            pnpm config set store-dir .pnpm-store
+      - run: pnpm import 2>&1 | tail -3
+
 jobs:
   prep-yarn:
     executor: cy
@@ -236,10 +250,58 @@ jobs:
           key: rec-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-<< pipeline.number >>
           paths: [.pnpm-store]
 
+  win-prep-pnpm:
+    machine:
+      image: windows-server-2022-gui:stable
+      shell: bash.exe -eo pipefail
+    resource_class: windows.large
+    environment: {PLATFORM: windows}
+    steps:
+      - checkout
+      - win-pnpm-setup
+      - run:
+          name: TIMED pnpm install (cold)
+          command: pnpm install --ignore-scripts 2>&1 | tail -3
+          no_output_timeout: 30m
+      - run:
+          name: facts
+          command: |
+            pnpm store path
+            du -sh .pnpm-store node_modules || true
+            node .circleci/exp/win-facts.js
+      - save_cache:
+          name: Save pnpm store
+          key: win-pnpm-store-v1-<< pipeline.number >>
+          paths: [.pnpm-store]
+      - save_cache:
+          name: PROBE save linked root node_modules (expect link warnings)
+          key: win-pnpm-linked-probe-v1-<< pipeline.number >>
+          paths: [node_modules]
+
+  win-measure-pnpm:
+    parameters: {n: {type: integer}}
+    machine:
+      image: windows-server-2022-gui:stable
+      shell: bash.exe -eo pipefail
+    resource_class: windows.large
+    environment: {PLATFORM: windows}
+    steps:
+      - checkout
+      - win-pnpm-setup
+      - restore_cache:
+          name: TIMED restore pnpm store
+          key: win-pnpm-store-v1-<< pipeline.number >>
+      - run:
+          name: TIMED pnpm install (warm store)
+          command: pnpm install --ignore-scripts 2>&1 | tail -3
+      - run:
+          name: facts
+          command: node .circleci/exp/win-facts.js
+
 workflows:
-  recommended-pnpm:
+  windows-pnpm:
     jobs:
-      - rec-prep
-      - rec-measure:
-          requires: [rec-prep]
+      - win-prep-pnpm
+      - win-measure-pnpm:
+          requires: [win-prep-pnpm]
           matrix: {parameters: {n: [1, 2, 3]}}

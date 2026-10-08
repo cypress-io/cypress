@@ -1,6 +1,5 @@
 // Throwaway: converts the yarn workspace into a pnpm one for cache-timing only.
 const fs = require('fs')
-const { execSync } = require('child_process')
 const p = JSON.parse(fs.readFileSync('package.json'))
 
 delete p.packageManager
@@ -21,7 +20,12 @@ const overrides = Object.entries(o).map(([k, v]) => `  ${JSON.stringify(k)}: ${J
 
 fs.writeFileSync('pnpm-workspace.yaml', `packages:\n${p.workspaces.packages.map((x) => `  - "${x}"`).join('\n')}\nlinkWorkspacePackages: true\noverrides:\n${overrides}\n`)
 fs.appendFileSync('.npmrc', 'link-workspace-packages=true\nlockfile=true\npackage-lock=true\n')
-for (const f of execSync('ls npm/*/package.json packages/*/package.json cli/package.json tooling/*/package.json').toString().trim().split('\n')) {
+const workspaceManifests = ['npm', 'packages', 'tooling']
+.flatMap((dir) => fs.readdirSync(dir).map((name) => `${dir}/${name}/package.json`))
+.concat('cli/package.json')
+.filter((f) => fs.existsSync(f))
+
+for (const f of workspaceManifests) {
   const q = JSON.parse(fs.readFileSync(f))
 
   if (q.resolutions) {
