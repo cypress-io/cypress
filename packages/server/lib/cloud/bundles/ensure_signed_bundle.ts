@@ -29,6 +29,12 @@ interface EnsureSignedBundleResult {
 
 const randomSuffix = (): string => Math.random().toString(36).substring(2, 15)
 
+// EBUSY is what renameAtomicWithRetry gives up on when a Windows antivirus or
+// indexer lock outlasts its short retries.
+const shouldFallBackToTmpDir = (err: unknown): err is NodeJS.ErrnoException => {
+  return isPermissionError(err) || (err instanceof Error && 'code' in err && err.code === 'EBUSY')
+}
+
 const ensureSignedBundleIn = async (baseDir: string, {
   url,
   projectId,
@@ -120,7 +126,7 @@ export const ensureSignedBundle = async (options: EnsureSignedBundleOptions): Pr
     // lock on Windows). Retry the whole attempt once in the OS temp dir rather
     // than failing — the staging dir lives under baseDir, so a partial publish
     // can't just be moved across, as the temp dir is often a different volume.
-    if (!isPermissionError(err) || baseDir === getFallbackBundleCacheDir(kind)) throw err
+    if (!shouldFallBackToTmpDir(err) || baseDir === getFallbackBundleCacheDir(kind)) throw err
 
     debug('%s bundle write failed under %s (%s); retrying in OS temp dir', kind, baseDir, err.code)
 

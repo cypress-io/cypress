@@ -278,7 +278,7 @@ describe('ensureSignedBundle', () => {
       }
     })
 
-    for (const code of ['EACCES', 'EPERM', 'EROFS']) {
+    for (const code of ['EACCES', 'EPERM', 'EROFS', 'EBUSY']) {
       it(`retries once in the OS temp dir on ${code} from a downstream write`, async () => {
         let calls = 0
         const { ensureSignedBundle, streamStub } = setup({
