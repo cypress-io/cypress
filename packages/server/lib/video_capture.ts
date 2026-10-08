@@ -120,6 +120,7 @@ export function start (options: StartOptions) {
   let wantsWrite = true
   let skippedFramesCount = 0
   let writtenFramesCount = 0
+  let startedVideoCapture: Date
 
   _.defaults(options, {
     onError () {},
@@ -190,6 +191,11 @@ export function start (options: StartOptions) {
 
     writtenFramesCount++
 
+    // the video's timeline begins at the first frame, so chapter timestamps must be measured from it
+    if (writtenFramesCount === 1) {
+      startedVideoCapture = new Date
+    }
+
     debugFrames('writing video frame')
 
     if (wantsWrite) {
@@ -220,10 +226,9 @@ export function start (options: StartOptions) {
       .on('start', (command) => {
         debug('capture started %o', { command })
 
-        return resolve({
-          cmd,
-          startedVideoCapture: new Date,
-        })
+        startedVideoCapture = new Date
+
+        return resolve({ cmd })
       }).on('codecData', (data) => {
         return debug('capture codec data: %o', data)
       }).on('stderr', (stderr) => {
@@ -274,13 +279,15 @@ export function start (options: StartOptions) {
   }
 
   return startCapturing()
-  .then(({ cmd, startedVideoCapture }: any) => {
+  .then(({ cmd }: any) => {
     return {
       _pt: pt,
       cmd,
       endVideoCapture,
       writeVideoFrame,
-      startedVideoCapture,
+      get startedVideoCapture () {
+        return startedVideoCapture
+      },
       restart: () => {
         throw new Error('restart cannot be called on a plain ffmpeg stream')
       },
