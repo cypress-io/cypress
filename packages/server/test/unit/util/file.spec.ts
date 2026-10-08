@@ -102,7 +102,7 @@ describe('lib/util/file', () => {
       .then(() => {
         return fileUtil.transaction((tx) => {
           return tx.get('items').then((items) => {
-            expect(items).toEqual(['foo', 'bar', 'baz'])
+            expect(items).toStrictEqual(['foo', 'bar', 'baz'])
           })
         })
       })
@@ -116,7 +116,7 @@ describe('lib/util/file', () => {
 
     it('resolves entire object if given no key', () => {
       return fileUtil.get().then((contents) => {
-        expect(contents).toEqual({})
+        expect(contents).toStrictEqual({})
       })
     })
 
@@ -164,7 +164,7 @@ describe('lib/util/file', () => {
       .then(() => {
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({})
+        expect(contents).toStrictEqual({})
       })
     })
 
@@ -175,7 +175,7 @@ describe('lib/util/file', () => {
       }).then(() => {
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({})
+        expect(contents).toStrictEqual({})
       })
     })
 
@@ -188,7 +188,7 @@ describe('lib/util/file', () => {
 
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({})
+        expect(contents).toStrictEqual({})
       })
     })
 
@@ -199,7 +199,7 @@ describe('lib/util/file', () => {
 
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({ foo: 'bar' })
+        expect(contents).toStrictEqual({ foo: 'bar' })
       })
     })
 
@@ -210,7 +210,7 @@ describe('lib/util/file', () => {
       }).then(() => {
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({})
+        expect(contents).toStrictEqual({})
       })
     })
 
@@ -294,7 +294,7 @@ describe('lib/util/file', () => {
       .then(() => {
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({
+        expect(contents).toStrictEqual({
           foo: {
             baz: 'bar',
           },
@@ -312,7 +312,7 @@ describe('lib/util/file', () => {
       .then(() => {
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({
+        expect(contents).toStrictEqual({
           foo: 'bar',
           baz: {
             qux: 'lolz',
@@ -328,7 +328,7 @@ describe('lib/util/file', () => {
       }).then(() => {
         return fileUtil.get()
       }).then((contents) => {
-        expect(contents).toEqual({
+        expect(contents).toStrictEqual({
           foo: 'bar',
           baz: 'qux',
         })
@@ -340,7 +340,7 @@ describe('lib/util/file', () => {
       .then(() => {
         return fs.readFileAsync(path.join(dir, 'file.json'), 'utf8')
       }).then((contents) => {
-        expect(JSON.parse(contents)).toEqual({ foo: 'bar' })
+        expect(JSON.parse(contents)).toStrictEqual({ foo: 'bar' })
       })
     })
 

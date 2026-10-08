@@ -344,7 +344,7 @@ describe('lib/util/graceful-exit', () => {
       exitStub.mockRestore()
     }
 
-    expect(unhandled, 'an abandoned step leaked an unhandled rejection').toEqual([])
+    expect(unhandled, 'an abandoned step leaked an unhandled rejection').toStrictEqual([])
     expect(exitCalls).toContainEqual([0])
     expect(exitCalls).not.toContainEqual([1])
   }, 5000)

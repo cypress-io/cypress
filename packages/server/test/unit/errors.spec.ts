@@ -8,7 +8,7 @@ import * as errors from '../../lib/errors'
 
 // The worker's stdout is not a TTY, and without color `chalk.red(err.stack)`
 // equals `err.stack`, which would make the negative assertions below meaningless.
-const errorsChalk = createRequire(require.resolve('@packages/errors'))('chalk')
+const errorsChalk = createRequire(require.resolve('@packages/errors/package.json'))('chalk')
 const original = { enabled: chalk.enabled, level: chalk.level, errorsLevel: errorsChalk.level }
 
 beforeAll(() => {

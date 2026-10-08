@@ -81,7 +81,7 @@ describe('lib/config', () => {
       .then((obj) => {
         expect(obj.projectRoot).toBe(projectRoot)
 
-        expect(obj.env).toEqual({ foo: 'bar' })
+        expect(obj.env).toStrictEqual({ foo: 'bar' })
       })
     })
 
@@ -102,8 +102,8 @@ describe('lib/config', () => {
 
       return ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
-        expect(settings).toEqual({ foo: 'bar' })
-        expect(envSettings).toEqual({ baz: 'qux' })
+        expect(settings).toStrictEqual({ foo: 'bar' })
+        expect(envSettings).toStrictEqual({ baz: 'qux' })
       })
     })
 

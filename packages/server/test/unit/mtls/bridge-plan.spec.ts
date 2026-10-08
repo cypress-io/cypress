@@ -21,7 +21,7 @@ describe('planBridgeListeners', () => {
     ])
 
     expect(listeners).toHaveLength(2)
-    expect(listeners.map((l) => `${l.hostname}:${l.port}`)).toEqual(['a.com:443', 'b.com:8443'])
+    expect(listeners.map((l) => `${l.hostname}:${l.port}`)).toStrictEqual(['a.com:443', 'b.com:8443'])
   })
 
   it('collapses entries that differ only by path onto one listener', () => {
@@ -31,7 +31,7 @@ describe('planBridgeListeners', () => {
     ])
 
     expect(listeners).toHaveLength(1)
-    expect(listeners[0].sourceUrls).toEqual(['https://a.com/one', 'https://a.com/two'])
+    expect(listeners[0].sourceUrls).toStrictEqual(['https://a.com/one', 'https://a.com/two'])
   })
 
   it('throws when one origin is configured with different certificates', () => {
@@ -57,13 +57,13 @@ describe('planBridgeListeners', () => {
   it('defaults a portless entry to 443', () => {
     const listeners = planBridgeListeners([entry('https://a.com', 'a.com', undefined, 'a')])
 
-    expect(listeners[0].port).toEqual(443)
+    expect(listeners[0].port).toStrictEqual(443)
   })
 
   it('keeps wildcard hostnames intact', () => {
     const listeners = planBridgeListeners([entry('https://*.a.com', '*.a.com', undefined, 'a')])
 
-    expect(listeners[0].hostname).toEqual('*.a.com')
+    expect(listeners[0].hostname).toStrictEqual('*.a.com')
   })
 })
 
@@ -89,7 +89,7 @@ describe('formatHostResolverRules', () => {
       { hostname: 'special.example.com', port: 443, listenPort: 9003 },
     ]).split(',')
 
-    expect(rules.map((rule) => rule.split(' ')[1])).toEqual([
+    expect(rules.map((rule) => rule.split(' ')[1])).toStrictEqual([
       'special.example.com:443',
       '*.example.com:443',
       '*:443',
@@ -102,10 +102,10 @@ describe('formatHostResolverRules', () => {
       { hostname: '*.b.com', port: 8443, listenPort: 9002 },
     ])
 
-    expect(rules).toEqual('MAP a.com:443 127.0.0.1:9001,MAP *.b.com:8443 127.0.0.1:9002')
+    expect(rules).toStrictEqual('MAP a.com:443 127.0.0.1:9001,MAP *.b.com:8443 127.0.0.1:9002')
   })
 
   it('is empty when nothing is configured', () => {
-    expect(formatHostResolverRules([])).toEqual('')
+    expect(formatHostResolverRules([])).toStrictEqual('')
   })
 })

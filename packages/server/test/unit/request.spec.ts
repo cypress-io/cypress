@@ -15,6 +15,11 @@ const calledWithMatch = (spy: { mock: { calls: any[][] } }, partial: object) => 
 }
 
 // `resolves()` sets the answer for every message except the two cookie messages.
+// Node builds header objects with a null prototype, which toStrictEqual rejects
+const withPlainRequestHeaders = (entries: any[]) => {
+  return entries.map((entry) => ({ ...entry, 'Request Headers': { ...entry['Request Headers'] } }))
+}
+
 const makeAutomationFn = () => {
   let defaultImpl: (() => unknown) | undefined
 
@@ -132,7 +137,7 @@ describe('lib/request', () => {
 
       expect(delaysRemaining).toHaveLength(0)
 
-      expect(retryFn.mock.calls).toEqual([
+      expect(retryFn.mock.calls).toStrictEqual([
         [{ delay: 0, attempt: 1 }],
         [{ delay: 999, attempt: 2 }],
         [{ delay: 100, attempt: 3 }],
@@ -194,14 +199,14 @@ describe('lib/request', () => {
       expect(opts.retryIntervals).toBe(retryIntervals)
       expect(opts.delaysRemaining).not.toBe(retryIntervals)
 
-      expect(opts.delaysRemaining).toEqual(retryIntervals)
+      expect(opts.delaysRemaining).toStrictEqual(retryIntervals)
     })
 
     it('retryIntervals to [] by default', () => {
       // @ts-expect-error - setDefaults is private
       const opts = Request.setDefaults({})
 
-      expect(opts.retryIntervals).toEqual([])
+      expect(opts.retryIntervals).toStrictEqual([])
     })
 
     it('delaysRemaining can be overridden', () => {
@@ -228,7 +233,7 @@ describe('lib/request', () => {
           headers: { foo: 'bar' },
           body: 'body',
         },
-      })).toEqual({
+      })).toStrictEqual({
         status: 404,
         statusText: 'Not Found',
         isOkStatusCode: false,
@@ -252,7 +257,7 @@ describe('lib/request', () => {
           headers: { foo: 'bar' },
           body: 'body',
         },
-      })).toEqual({
+      })).toStrictEqual({
         body: '<html>foo</html>',
         headers: { 'Content-Length': 50 },
         status: 200,
@@ -345,7 +350,10 @@ describe('lib/request', () => {
       })
 
       it('retries 4x on a NXDOMAIN (ENOTFOUND)', async () => {
-        nock.enableNetConnect()
+        nock('http://will-never-exist.invalid.example.com')
+        .get('/')
+        .times(5)
+        .replyWithError({ code: 'ENOTFOUND', message: 'getaddrinfo ENOTFOUND will-never-exist.invalid.example.com' })
 
         const opts = {
           url: 'http://will-never-exist.invalid.example.com',
@@ -452,15 +460,15 @@ describe('lib/request', () => {
         body: 'foobarbaz',
       })
       .then((resp) => {
-        expect(Object.keys(resp).sort()).toEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'requestBody', 'requestHeaders'].sort())
+        expect(Object.keys(resp).sort()).toStrictEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'requestBody', 'requestHeaders'].sort())
 
         expect(resp.status).toBe(200)
         expect(resp.statusText).toBe('OK')
         expect(resp.body).toBe('hello')
-        expect(resp.headers).toEqual({ 'content-type': 'text/html' })
+        expect(resp.headers).toStrictEqual({ 'content-type': 'text/html' })
         expect(resp.isOkStatusCode).toBe(true)
         expect(resp.requestBody).toBe('foobarbaz')
-        expect(resp.requestHeaders).toEqual({
+        expect({ ...resp.requestHeaders }).toStrictEqual({
           'accept': '*/*',
           'accept-encoding': 'gzip, deflate',
           'connection': 'keep-alive',
@@ -468,7 +476,7 @@ describe('lib/request', () => {
           'host': 'www.github.com',
         })
 
-        expect(resp.allRequestResponses).toEqual([
+        expect(withPlainRequestHeaders(resp.allRequestResponses)).toStrictEqual([
           {
             'Request Body': 'foobarbaz',
             'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'content-length': 9, 'host': 'www.github.com' },
@@ -503,20 +511,20 @@ describe('lib/request', () => {
         cookies: false,
       })
       .then((resp) => {
-        expect(Object.keys(resp).sort()).toEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'redirects', 'requestBody', 'requestHeaders'].sort())
+        expect(Object.keys(resp).sort()).toStrictEqual(['status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'redirects', 'requestBody', 'requestHeaders'].sort())
 
         expect(resp.status).toBe(200)
         expect(resp.statusText).toBe('OK')
         expect(resp.body).toBe('log in')
-        expect(resp.headers).toEqual({ 'content-type': 'text/html' })
+        expect(resp.headers).toStrictEqual({ 'content-type': 'text/html' })
         expect(resp.isOkStatusCode).toBe(true)
         expect(resp.requestBody).toBeUndefined()
-        expect(resp.redirects).toEqual([
+        expect(resp.redirects).toStrictEqual([
           '301: http://www.github.com/auth',
           '302: http://www.github.com/login',
         ])
 
-        expect(resp.requestHeaders).toEqual({
+        expect({ ...resp.requestHeaders }).toStrictEqual({
           'accept': '*/*',
           'accept-encoding': 'gzip, deflate',
           'connection': 'keep-alive',
@@ -524,7 +532,7 @@ describe('lib/request', () => {
           'host': 'www.github.com',
         })
 
-        expect(resp.allRequestResponses).toEqual([
+        expect(withPlainRequestHeaders(resp.allRequestResponses)).toStrictEqual([
           {
             'Request Body': null,
             'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'host': 'www.github.com' },
@@ -583,7 +591,7 @@ describe('lib/request', () => {
         cookies: false,
       })
       .then((resp) => {
-        expect(resp.body).toEqual({ status: 'ok' })
+        expect(resp.body).toStrictEqual({ status: 'ok' })
       })
     })
 
@@ -599,7 +607,7 @@ describe('lib/request', () => {
         cookies: false,
       })
       .then((resp) => {
-        expect(resp.body).toEqual({ status: 'ok' })
+        expect(resp.body).toStrictEqual({ status: 'ok' })
       })
     })
 

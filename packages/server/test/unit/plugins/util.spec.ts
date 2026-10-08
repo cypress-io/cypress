@@ -170,7 +170,7 @@ describe('lib/plugins/util', () => {
         extra: 'this is extra',
       }
 
-      expect(util.serializeError(err)).toEqual({
+      expect(util.serializeError(err)).toStrictEqual({
         name: 'the name',
         message: 'the message',
         stack: 'the stack',
@@ -189,7 +189,7 @@ describe('lib/plugins/util', () => {
 
       const result = util.buildErrorLocationFromTransformError(err, '/my/project/root')
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         compilerErrorLocation: {
           filePath: 'cypress.config.ts',
           line: 12,
@@ -214,7 +214,7 @@ describe('lib/plugins/util', () => {
     at Object.<anonymous> (${configFilePath}:3:23)`,
       }
 
-      expect(await util.buildErrorLocationFromConfigFileError(err, configFilePath, projectRoot)).toEqual({
+      expect(await util.buildErrorLocationFromConfigFileError(err, configFilePath, projectRoot)).toStrictEqual({
         filePath: 'cypress.config.js',
         line: 3,
         column: 23,
@@ -231,7 +231,7 @@ describe('lib/plugins/util', () => {
     at T._resolveFilename (file:///my/project/root/node_modules/tsx/dist/register-CqMfTiWi.mjs:2:14889)`,
       }
 
-      expect(await util.buildErrorLocationFromConfigFileError(err, configFilePath, projectRoot)).toEqual({
+      expect(await util.buildErrorLocationFromConfigFileError(err, configFilePath, projectRoot)).toStrictEqual({
         filePath: 'cypress.config.js',
         line: 3,
         column: 23,

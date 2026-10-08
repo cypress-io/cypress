@@ -59,7 +59,7 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
 
   const encryptRequestSpy = vi.spyOn(encryption, 'encryptRequest').mockImplementation(async (params) => {
     if (reqBody) {
-      expect(params.body).toEqual(reqBody)
+      expect(params.body).toStrictEqual(reqBody)
     }
 
     const { secretKey, jwe } = await encryptRequest(params, { publicKey })
@@ -305,7 +305,7 @@ describe('lib/cloud/api', () => {
 
       return prodApi.sendPreflight({ projectId: 'abc123' })
       .then((ret) => {
-        expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).toStrictEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -332,7 +332,7 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
-        expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).toStrictEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -359,7 +359,7 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
-        expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).toStrictEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -406,7 +406,7 @@ describe('lib/cloud/api', () => {
 
         return prodApi.sendPreflight({ projectId: 'abc123' })
         .then((ret) => {
-          expect(ret).toEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+          expect(ret).toStrictEqual({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
         })
       })
     })
@@ -721,7 +721,7 @@ describe('lib/cloud/api', () => {
         project,
       })
       .then((ret) => {
-        expect(ret).toEqual({
+        expect(ret).toStrictEqual({
           runId: 'new-run-id-123',
           capture: {
             url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
@@ -816,7 +816,7 @@ describe('lib/cloud/api', () => {
         project,
       })
       .then((ret) => {
-        expect(ret).toEqual({
+        expect(ret).toStrictEqual({
           runId: 'new-run-id-123',
           capture: {
             url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
@@ -884,7 +884,7 @@ describe('lib/cloud/api', () => {
         project,
       })
       .then((ret) => {
-        expect(ret).toEqual({
+        expect(ret).toStrictEqual({
           runId: 'new-run-id-123',
           capture: {
             url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
@@ -1073,7 +1073,7 @@ describe('lib/cloud/api', () => {
       .reply(200)
 
       expect(expectedConfig.projectId).toBe('abcd1234')
-      expect(expectedConfig.env).toEqual({
+      expect(expectedConfig.env).toStrictEqual({
         NUMERIC_VALUE: `omitted: number`,
         TRUTHY_VALUE: `omitted: boolean`,
         SOME_REALLY_LONG_VALUE: `omitted: string`,
@@ -1104,7 +1104,7 @@ describe('lib/cloud/api', () => {
 
       expect(expectedConfig.projectId).toBe('abcd1234')
       expect(expectedConfig.indexHtmlFile).toBe('cypress/support/component-index.html')
-      expect(expectedConfig.devServerConfig).toEqual({
+      expect(expectedConfig.devServerConfig).toStrictEqual({
         framework: 'react',
         bundler: 'webpack',
         mode: 'omitted: string',
@@ -1412,7 +1412,7 @@ describe('lib/cloud/api', () => {
   describe('.getAuthUrls', () => {
     it('GET /auth + returns the urls', () => {
       return api.getAuthUrls().then((urls) => {
-        expect(urls).toEqual(AUTH_URLS)
+        expect(urls).toStrictEqual(AUTH_URLS)
       })
     })
 
@@ -1440,7 +1440,7 @@ describe('lib/cloud/api', () => {
         // nock will throw if this makes a second HTTP call
         return api.getAuthUrls()
       }).then((urls) => {
-        expect(urls).toEqual(AUTH_URLS)
+        expect(urls).toStrictEqual(AUTH_URLS)
       })
     })
   })
@@ -1664,20 +1664,20 @@ describe('lib/cloud/api', () => {
 
       return api.retryWithBackoff(fn).then(() => {
         expect(errors.warning).toHaveBeenCalledTimes(3)
-        expect(vi.mocked(errors.warning).mock.calls[0][0]).toEqual('CLOUD_API_RESPONSE_FAILED_RETRYING')
-        expect(vi.mocked(errors.warning).mock.calls[0][1]).toEqual({
+        expect(vi.mocked(errors.warning).mock.calls[0][0]).toStrictEqual('CLOUD_API_RESPONSE_FAILED_RETRYING')
+        expect(vi.mocked(errors.warning).mock.calls[0][1]).toStrictEqual({
           delay: '30 seconds',
           tries: 3,
           response: err,
         })
 
-        expect(vi.mocked(errors.warning).mock.calls[1][1]).toEqual({
+        expect(vi.mocked(errors.warning).mock.calls[1][1]).toStrictEqual({
           delay: '1 minute',
           tries: 2,
           response: err,
         })
 
-        expect(vi.mocked(errors.warning).mock.calls[2][1]).toEqual({
+        expect(vi.mocked(errors.warning).mock.calls[2][1]).toStrictEqual({
           delay: '2 minutes',
           tries: 1,
           response: err,

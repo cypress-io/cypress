@@ -65,7 +65,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       layer.start()
 
-      expect(client.on.mock.calls.map((call) => call[0])).toEqual([
+      expect(client.on.mock.calls.map((call) => call[0])).toStrictEqual([
         'Network.requestWillBeSentExtraInfo',
         'Network.responseReceived',
         'Network.responseReceivedExtraInfo',
@@ -75,7 +75,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       layer.stop()
 
-      expect(client.off.mock.calls.map((call) => call[0])).toEqual([
+      expect(client.off.mock.calls.map((call) => call[0])).toStrictEqual([
         'Network.requestWillBeSentExtraInfo',
         'Network.responseReceived',
         'Network.responseReceivedExtraInfo',
@@ -137,7 +137,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(event?.headers).toStrictEqual({ 'set-cookie': 'foo1=bar1' })
 
       // the consumed entry waits for its responseReceived (which fires only
       // after the pause is released) before it is dropped
@@ -172,7 +172,7 @@ describe('CDPNetworkExtraInfo', () => {
       await tick()
 
       expect(held.resolved).toBe(true)
-      expect(held.event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(held.event?.headers).toStrictEqual({ 'set-cookie': 'foo1=bar1' })
       expect(entries().size).toBe(1)
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
@@ -225,7 +225,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(event?.headers).toStrictEqual({ 'set-cookie': 'foo1=bar1' })
 
       loadingFinished({ requestId: 'request-1' })
 
@@ -312,7 +312,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       await tick()
 
-      expect(held.event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(held.event?.headers).toStrictEqual({ 'set-cookie': 'foo1=bar1' })
       expect(entries().size).toBe(0)
     })
 
@@ -341,7 +341,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(event?.headers).toStrictEqual({ 'set-cookie': 'foo1=bar1' })
       expect(entryFor('request-1')).toMatchObject({ consumed: true, responseReceived: false })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
@@ -373,7 +373,7 @@ describe('CDPNetworkExtraInfo', () => {
       await tick()
 
       // the event only resolves the deferred — consumption belongs to the pause
-      expect(held.event?.headers).toEqual({ 'set-cookie': 'foo1=bar1' })
+      expect(held.event?.headers).toStrictEqual({ 'set-cookie': 'foo1=bar1' })
       expect(entryFor('request-1')).toMatchObject({ settled: true, consumed: true, responseReceived: false })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
@@ -477,7 +477,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const event = await layer.responseExtraInfo('request-1')
 
-      expect(event?.headers).toEqual({ 'set-cookie': 'late=1' })
+      expect(event?.headers).toStrictEqual({ 'set-cookie': 'late=1' })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
@@ -526,7 +526,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const redirectEvent = await layer.responseExtraInfo('request-1')
 
-      expect(redirectEvent?.headers).toEqual({ 'set-cookie': 'redirect=1' })
+      expect(redirectEvent?.headers).toStrictEqual({ 'set-cookie': 'redirect=1' })
 
       // the redirect response never gets its own responseReceived — its
       // consumed entry waits to be replaced by the next response's events
@@ -544,7 +544,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const finalEvent = await layer.responseExtraInfo('request-1')
 
-      expect(finalEvent?.headers).toEqual({ 'set-cookie': 'final=1' })
+      expect(finalEvent?.headers).toStrictEqual({ 'set-cookie': 'final=1' })
 
       // responseReceived fires once, for the final response of the chain
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
@@ -588,7 +588,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const finalEvent = await layer.responseExtraInfo('request-1')
 
-      expect(finalEvent?.headers).toEqual({ 'set-cookie': 'final=1' })
+      expect(finalEvent?.headers).toStrictEqual({ 'set-cookie': 'final=1' })
 
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
@@ -620,7 +620,7 @@ describe('CDPNetworkExtraInfo', () => {
 
       const event = await layer.responseExtraInfo('request-1', 'service-worker-session')
 
-      expect(event?.headers).toEqual({ 'set-cookie': 'evil=1' })
+      expect(event?.headers).toStrictEqual({ 'set-cookie': 'evil=1' })
 
       // each session's responseReceived sweeps its own consumed entry
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })

@@ -101,7 +101,7 @@ describe('lib/cloud/studio', () => {
       })
 
       expect(createStudioServerStub).toHaveBeenCalledOnce()
-      expect(createStudioServerStub.mock.calls[0][0].debugData).toEqual(debugData)
+      expect(createStudioServerStub.mock.calls[0][0].debugData).toStrictEqual(debugData)
     })
 
     it('passes undefined debugData to createStudioServer when not provided', async () => {
@@ -195,7 +195,7 @@ describe('lib/cloud/studio', () => {
       studioManager.getCachedStudioConfig()
 
       expect(getCachedStudioConfig.mock.contexts).toContain(studio)
-      expect(getCachedStudioConfig.mock.calls[0]).toEqual([])
+      expect(getCachedStudioConfig.mock.calls[0]).toStrictEqual([])
     })
   })
 

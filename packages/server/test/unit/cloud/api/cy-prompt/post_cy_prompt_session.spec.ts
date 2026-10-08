@@ -45,7 +45,7 @@ describe('postCyPromptSession', () => {
       projectId: '12345',
     })
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz',
     })
 

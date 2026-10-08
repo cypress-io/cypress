@@ -266,7 +266,7 @@ describe('lib/browsers/memory', () => {
 
     describe('#parseMemoryStat', () => {
       it('parses `key value` lines into a numeric lookup', () => {
-        expect(cgroupUtil.parseMemoryStat('anon 400\ninactive_file 300\n')).toEqual({ anon: 400, inactive_file: 300 })
+        expect(cgroupUtil.parseMemoryStat('anon 400\ninactive_file 300\n')).toStrictEqual({ anon: 400, inactive_file: 300 })
       })
     })
 
@@ -369,7 +369,7 @@ describe('lib/browsers/memory', () => {
       ]
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('collects memory when renderer process is greater than the custom threshold', async () => {
@@ -418,7 +418,7 @@ describe('lib/browsers/memory', () => {
       ]
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('collects memory when renderer process is equal to the threshold', async () => {
@@ -462,7 +462,7 @@ describe('lib/browsers/memory', () => {
       ]
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('uses the available memory limit if it\'s less than the jsHeapSizeLimit', async () => {
@@ -506,7 +506,7 @@ describe('lib/browsers/memory', () => {
       ]
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('skips collecting memory when renderer process is less than the threshold', async () => {
@@ -550,7 +550,7 @@ describe('lib/browsers/memory', () => {
       ]
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(0)
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('skips collecting memory if the renderer process is not found', async () => {
@@ -589,7 +589,7 @@ describe('lib/browsers/memory', () => {
       ]
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(0)
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('finds the renderer process from the process.command', async () => {
@@ -646,7 +646,7 @@ describe('lib/browsers/memory', () => {
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
       expect(processesMock).toHaveBeenCalledOnce()
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('finds the renderer process from the process.params', async () => {
@@ -703,7 +703,7 @@ describe('lib/browsers/memory', () => {
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
       expect(processesMock).toHaveBeenCalledOnce()
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('selects the renderer process with the most memory', async () => {
@@ -761,7 +761,7 @@ describe('lib/browsers/memory', () => {
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
       expect(processesMock).toHaveBeenCalledOnce()
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('uses the existing process id to obtain the memory usage', async () => {
@@ -843,7 +843,7 @@ describe('lib/browsers/memory', () => {
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
       expect(processesMock).toHaveBeenCalledOnce()
       expect(pidStub).toHaveBeenCalledOnce()
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
 
     it('collects memory when a previous interval call goes over the threshold', async () => {
@@ -904,7 +904,7 @@ describe('lib/browsers/memory', () => {
 
       expect(callsWith(automation.request, 'collect:garbage')).toHaveLength(1)
       expect(memory.getRendererMemoryUsage).toHaveBeenCalledTimes(2)
-      expect(memory.default.getMemoryStats()).toEqual(expected)
+      expect(memory.default.getMemoryStats()).toStrictEqual(expected)
     })
   })
 

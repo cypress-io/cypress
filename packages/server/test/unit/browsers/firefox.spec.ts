@@ -24,7 +24,7 @@ const webdriver: typeof WebDriverPackage = requireCjs(requireCjs.resolve('webdri
 
 const isMatch = (actual: unknown, expected: unknown) => {
   try {
-    expect(actual).toEqual(expected)
+    expect(actual).toStrictEqual(expected)
 
     return true
   } catch {

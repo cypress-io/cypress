@@ -84,7 +84,7 @@ describe('lib/fixture', () => {
   describe('unicode escape syntax', () => {
     it('can parse unicode escape in JSON', () => {
       return fixture.get(fixturesFolder, 'unicode_escape.json').then((obj) => {
-        expect(obj).toEqual({
+        expect(obj).toStrictEqual({
           name: '\u2665',
         })
       })
@@ -94,7 +94,7 @@ describe('lib/fixture', () => {
   describe('nested fixtures', () => {
     it('can pass path to nested fixture', () => {
       return fixture.get(fixturesFolder, 'nested/fixture.js').then((obj) => {
-        expect(obj).toEqual({
+        expect(obj).toStrictEqual({
           nested: 'fixture',
         })
       })
@@ -151,7 +151,7 @@ describe('lib/fixture', () => {
 
     it('parses json to valid JS object', () => {
       return fixture.get(fixturesFolder, 'users.json').then((users) => {
-        expect(users).toEqual([
+        expect(users).toStrictEqual([
           {
             id: 1,
             name: 'brian',
@@ -207,7 +207,7 @@ describe('lib/fixture', () => {
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
         .then((result) => {
-          expect(result).toEqual({ 'bar': 'baz' })
+          expect(result).toStrictEqual({ 'bar': 'baz' })
         })
       })
     })
@@ -224,7 +224,7 @@ describe('lib/fixture', () => {
       for (const { encoding, content } of fixtures) {
         const result = await fixture.get(fixturesFolder, 'foo', { encoding })
 
-        expect(result).toEqual(content)
+        expect(result).toStrictEqual(content)
       }
     })
   })
@@ -232,7 +232,7 @@ describe('lib/fixture', () => {
   describe('js files', () => {
     it('returns valid JS object', () => {
       return fixture.get(fixturesFolder, 'user.js').then((user) => {
-        expect(user).toEqual({
+        expect(user).toStrictEqual({
           id: 1,
           name: 'brian',
           age: 29,
@@ -341,7 +341,7 @@ John,Chef,1982
   describe('binary files', () => {
     it('returns file as buffer regardless of extension when passed null encoding', () => {
       return fixture.get(fixturesFolder, 'nested/fixture.js', { encoding: null }).then((index) => {
-        expect(index).toEqual(Buffer.from('{nested: "fixture"}'))
+        expect(index).toStrictEqual(Buffer.from('{nested: "fixture"}'))
       })
     })
   })
@@ -360,7 +360,7 @@ John,Chef,1982
       .then((file) => {
         return fixture.get(fixturesFolder, 'images/flower.png')
         .then((result) => {
-          expect(result).toEqual(file)
+          expect(result).toStrictEqual(file)
         })
       })
     })
@@ -370,7 +370,7 @@ John,Chef,1982
       .then((file) => {
         return fixture.get(fixturesFolder, 'images/sample.jpg')
         .then((result) => {
-          expect(result).toEqual(file)
+          expect(result).toStrictEqual(file)
         })
       })
     })
@@ -380,7 +380,7 @@ John,Chef,1982
       .then((file) => {
         return fixture.get(fixturesFolder, 'images/word.gif')
         .then((result) => {
-          expect(result).toEqual(file)
+          expect(result).toStrictEqual(file)
         })
       })
     })
@@ -390,7 +390,7 @@ John,Chef,1982
       .then((file) => {
         return fixture.get(fixturesFolder, 'images/sample.tif')
         .then((result) => {
-          expect(result).toEqual(file)
+          expect(result).toStrictEqual(file)
         })
       })
     })
@@ -411,7 +411,7 @@ John,Chef,1982
       return read(fixturesFolder, 'example.zip')
       .then((file) => {
         return fixture.get(fixturesFolder, 'example.zip').then((result) => {
-          expect(result).toEqual(file)
+          expect(result).toStrictEqual(file)
         })
       })
     })
@@ -420,7 +420,7 @@ John,Chef,1982
   describe('extension omitted', () => {
     it('#1 finds json', () => {
       return fixture.get(fixturesFolder, 'foo').then((obj) => {
-        expect(obj).toEqual([
+        expect(obj).toStrictEqual([
           { json: true },
         ])
       })
@@ -428,7 +428,7 @@ John,Chef,1982
 
     it('#2 finds js', () => {
       return fixture.get(fixturesFolder, 'bar').then((obj) => {
-        expect(obj).toEqual({ js: true })
+        expect(obj).toStrictEqual({ js: true })
       })
     })
 

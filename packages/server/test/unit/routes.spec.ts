@@ -514,7 +514,7 @@ describe('lib/routes', () => {
 
       expect(handleHttpRequest).toHaveBeenCalledWith(req, res)
       // the pipeline routes by proxiedUrl — it must be absolute at our origin
-      expect((req as any).proxiedUrl).toEqual('http://localhost:2020/cypress/fixtures/dom.html')
+      expect((req as any).proxiedUrl).toStrictEqual('http://localhost:2020/cypress/fixtures/dom.html')
     })
 
     it('serves strategy:file requests addressed under an aliased host name', async () => {
@@ -538,7 +538,7 @@ describe('lib/routes', () => {
       await handler(req, res, next)
 
       expect(handleHttpRequest).toHaveBeenCalledWith(req, res)
-      expect((req as any).proxiedUrl).toEqual('http://127.0.0.1:2020/cypress/fixtures/dom.html')
+      expect((req as any).proxiedUrl).toStrictEqual('http://127.0.0.1:2020/cypress/fixtures/dom.html')
     })
 
     it('serves loopback-token requests without rewriting the URL', async () => {
@@ -561,7 +561,7 @@ describe('lib/routes', () => {
       expect(handleHttpRequest).toHaveBeenCalledWith(req, res)
       // net-stubbing and the file-server rewrite must see the real target,
       // not this server's origin
-      expect(req.proxiedUrl).toEqual('http://www.foobar.com:9500/test.html')
+      expect(req.proxiedUrl).toStrictEqual('http://www.foobar.com:9500/test.html')
     })
 
     it('ignores a forged loopback header without the token', async () => {

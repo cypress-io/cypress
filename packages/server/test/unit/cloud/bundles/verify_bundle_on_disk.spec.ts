@@ -73,7 +73,7 @@ describe('verifyBundleOnDisk', () => {
       'client/index.js': '// client\n',
     })
 
-    expect(await verifyBundleOnDisk(finalDir)).toEqual(manifest)
+    expect(await verifyBundleOnDisk(finalDir)).toStrictEqual(manifest)
     expect(verifySignatureStub).toHaveBeenCalledOnce()
   })
 

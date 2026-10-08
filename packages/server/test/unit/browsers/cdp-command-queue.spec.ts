@@ -118,7 +118,7 @@ describe('CDPCommandQueue', () => {
 
       expect(queue.entries).toHaveLength(1)
       queue.entries[0].deferred.resolve({ value: true })
-      await expect(afterReject).resolves.toEqual({ value: true })
+      await expect(afterReject).resolves.toStrictEqual({ value: true })
     })
   })
 

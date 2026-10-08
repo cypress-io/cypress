@@ -170,7 +170,7 @@ describe('lib/reporter', () => {
 
       expect(tests).toHaveLength(1)
       expect(tests[0].testId).toBe('r4')
-      expect(tests[0].title).toEqual([
+      expect(tests[0].title).toStrictEqual([
         'TodoMVC - React',
         'When page is initially opened',
         'should focus on the todo input field',
@@ -188,7 +188,7 @@ describe('lib/reporter', () => {
 
       const { tests } = reporter.results()
 
-      expect(tests.map((t) => t.testId)).toEqual(['r4', 'r5'])
+      expect(tests.map((t) => t.testId)).toStrictEqual(['r4', 'r5'])
     })
 
     it('matches a test under a suite with an empty title, mirroring Mocha\'s native titlePath()', () => {
@@ -224,7 +224,7 @@ describe('lib/reporter', () => {
 
       const { tests } = reporter.results()
 
-      expect(tests.map((t) => t.testId)).toEqual(['e3'])
+      expect(tests.map((t) => t.testId)).toStrictEqual(['e3'])
     })
 
     it('treats an empty keep-list as no filter', () => {

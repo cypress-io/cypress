@@ -301,7 +301,7 @@ describe('CdpFetchTransport', () => {
 
       const request = codec.decodeRequest(transportRequest)
 
-      expect(request).toEqual({
+      expect(request).toStrictEqual({
         body: undefined,
         headers: {},
         id: 'network-1',
@@ -454,7 +454,7 @@ describe('CdpFetchTransport', () => {
         postDataEntries: [{ bytes: body.toString('base64') }],
       }
 
-      expect(codec.decodeRequest(transportRequest).body).toEqual(body)
+      expect(codec.decodeRequest(transportRequest).body).toStrictEqual(body)
     })
 
     it('concatenates every postDataEntries entry, as a multipart body arrives split', () => {
@@ -468,7 +468,7 @@ describe('CdpFetchTransport', () => {
         postDataEntries: parts.map((part) => ({ bytes: part.toString('base64') })),
       }
 
-      expect(codec.decodeRequest(transportRequest).body).toEqual(Buffer.concat(parts))
+      expect(codec.decodeRequest(transportRequest).body).toStrictEqual(Buffer.concat(parts))
     })
 
     it('falls back to postData when the pause carries no entries', () => {
@@ -562,7 +562,7 @@ describe('CdpFetchTransport', () => {
 
       codec.encodeRequest({ ...request, body: edited })
 
-      expect(transportRequest.postDataBuffer).toEqual(edited)
+      expect(transportRequest.postDataBuffer).toStrictEqual(edited)
     })
 
     it('encodes an emptied body when only the entries recorded the pause body', () => {
@@ -600,7 +600,7 @@ describe('CdpFetchTransport', () => {
 
       codec.encodeRequest({ ...request, body: Buffer.alloc(0) })
 
-      expect(transportRequest.postDataBuffer).toEqual(Buffer.alloc(0))
+      expect(transportRequest.postDataBuffer).toStrictEqual(Buffer.alloc(0))
       expect(transportRequest.postData).toBe('')
     })
 
@@ -630,7 +630,7 @@ describe('CdpFetchTransport', () => {
 
       const response = codec.decodeResponse(transportResponse)
 
-      expect(response).toEqual({
+      expect(response).toStrictEqual({
         bodyStream: undefined,
         headers: {
           'content-type': 'text/plain',
@@ -860,7 +860,7 @@ describe('CdpFetchTransport', () => {
         url: 'https://example.test/stubbed',
       }))
 
-      expect(encoded.responseHeaders).toEqual([{
+      expect(encoded.responseHeaders).toStrictEqual([{
         name: 'content-type',
         value: 'text/plain',
       }, {
@@ -925,10 +925,10 @@ describe('CdpFetchTransport', () => {
       const enableCalls = client.send.mock.calls.filter((call) => call[0] === 'Fetch.enable')
 
       expect(enableCalls).toHaveLength(2)
-      expect(enableCalls.map((call) => call[2])).toEqual([undefined, 'sw-session'])
+      expect(enableCalls.map((call) => call[2])).toStrictEqual([undefined, 'sw-session'])
       // one pattern list for every session — not two that can drift apart
       expect(enableCalls[1][1]).toBe(enableCalls[0][1])
-      expect(enableCalls[1][1]).toEqual(FETCH_PATTERNS)
+      expect(enableCalls[1][1]).toStrictEqual(FETCH_PATTERNS)
     })
 
     // The caller (CriClient) wires onChildTargetAttached before awaiting
@@ -1274,7 +1274,7 @@ describe('CdpFetchTransport', () => {
         await handled
       }
 
-      expect(seenResourceTypes).toEqual(['xhr', 'fetch', 'other'])
+      expect(seenResourceTypes).toStrictEqual(['xhr', 'fetch', 'other'])
     })
 
     it('strips a previously injected AUT frame header on redirect re-pause', async () => {
@@ -1496,7 +1496,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(seenResponseHeaders).toEqual({
+      expect(seenResponseHeaders).toStrictEqual({
         'content-type': 'text/html',
       })
 
@@ -1743,7 +1743,7 @@ describe('CdpFetchTransport', () => {
         requestId: 'download-pause-id',
       })
 
-      expect(seenIds).toEqual(['download-pause-id'])
+      expect(seenIds).toStrictEqual(['download-pause-id'])
 
       await onRequestPaused(createPausedRequest({
         requestId: 'download-pause-id',
@@ -1964,7 +1964,7 @@ describe('CdpFetchTransport', () => {
 
       expectCalledOnceWith(networkExtraInfo.responseExtraInfo, 'network-1', 'session-1')
 
-      expect(seenResponseHeaders).toEqual({
+      expect(seenResponseHeaders).toStrictEqual({
         'content-type': 'text/plain',
         'set-cookie': ['foo1=bar1; Domain=foobar.com', 'foo2=bar2'],
       })
@@ -2009,7 +2009,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(seenResponseHeaders).toEqual({
+      expect(seenResponseHeaders).toStrictEqual({
         'content-type': 'text/plain',
         'set-cookie': ['foo1=bar1; Domain=foobar.com', 'foo2=bar2'],
       })
@@ -3361,7 +3361,7 @@ describe('CdpFetchTransport', () => {
         }],
       })
 
-      expect(client.on.mock.calls.map((call) => call[0])).toEqual([
+      expect(client.on.mock.calls.map((call) => call[0])).toStrictEqual([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
         'Network.loadingFailed',
@@ -3399,7 +3399,7 @@ describe('CdpFetchTransport', () => {
         }],
       })
 
-      expect(client.on.mock.calls.map((call) => call[0])).toEqual([
+      expect(client.on.mock.calls.map((call) => call[0])).toStrictEqual([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
         'Network.loadingFailed',

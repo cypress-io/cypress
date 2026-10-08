@@ -79,8 +79,8 @@ describe('lib/util/spki', () => {
       const fromFile = resolveTrustedCertificateFingerprints([{ filePath: 'leaf.pem' }], projectRoot)
       const fromPem = resolveTrustedCertificateFingerprints([{ pem: LEAF_PEM }], projectRoot)
 
-      expect(fromFile).toEqual([LEAF_FINGERPRINT])
-      expect(fromFile).toEqual(fromPem)
+      expect(fromFile).toStrictEqual([LEAF_FINGERPRINT])
+      expect(fromFile).toStrictEqual(fromPem)
     })
 
     it('resolves an absolute filePath', () => {
@@ -88,13 +88,13 @@ describe('lib/util/spki', () => {
 
       fs.writeFileSync(absolute, LEAF_PEM)
 
-      expect(resolveTrustedCertificateFingerprints([{ filePath: absolute }], os.tmpdir())).toEqual([LEAF_FINGERPRINT])
+      expect(resolveTrustedCertificateFingerprints([{ filePath: absolute }], os.tmpdir())).toStrictEqual([LEAF_FINGERPRINT])
     })
 
     it('passes through an spki entry untouched', () => {
       const result = resolveTrustedCertificateFingerprints([{ spki: LEAF_FINGERPRINT }], projectRoot)
 
-      expect(result).toEqual([LEAF_FINGERPRINT])
+      expect(result).toStrictEqual([LEAF_FINGERPRINT])
     })
 
     it('fingerprints every certificate in a pem bundle', () => {
@@ -105,8 +105,8 @@ describe('lib/util/spki', () => {
       const fromFile = resolveTrustedCertificateFingerprints([{ filePath: 'bundle.pem' }], projectRoot)
       const fromPem = resolveTrustedCertificateFingerprints([{ pem: bundle }], projectRoot)
 
-      expect(fromFile).toEqual([LEAF_FINGERPRINT, SECOND_FINGERPRINT])
-      expect(fromFile).toEqual(fromPem)
+      expect(fromFile).toStrictEqual([LEAF_FINGERPRINT, SECOND_FINGERPRINT])
+      expect(fromFile).toStrictEqual(fromPem)
     })
 
     it('dedupes identical fingerprints from different input shapes', () => {
@@ -118,11 +118,11 @@ describe('lib/util/spki', () => {
         { spki: LEAF_FINGERPRINT },
       ], projectRoot)
 
-      expect(result).toEqual([LEAF_FINGERPRINT])
+      expect(result).toStrictEqual([LEAF_FINGERPRINT])
     })
 
     it('returns an empty array for no entries', () => {
-      expect(resolveTrustedCertificateFingerprints([], projectRoot)).toEqual([])
+      expect(resolveTrustedCertificateFingerprints([], projectRoot)).toStrictEqual([])
     })
 
     it('throws a Cypress error naming the path when a filePath cannot be read', () => {

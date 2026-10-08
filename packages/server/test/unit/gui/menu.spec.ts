@@ -71,7 +71,7 @@ describe('gui/menu', () => {
       menu.set()
       const labels = getLabels(getMenuItem('File').submenu)
 
-      expect(labels).toEqual([
+      expect(labels).toStrictEqual([
         'Changelog',
         'Manage Account',
         'Log Out',
@@ -136,7 +136,7 @@ describe('gui/menu', () => {
 
     it('binds Close Window to shortcut', () => {
       menu.set()
-      expect(getSubMenuItem(getMenuItem('File'), 'Close Window')).toEqual({
+      expect(getSubMenuItem(getMenuItem('File'), 'Close Window')).toStrictEqual({
         label: 'Close Window',
         accelerator: 'CmdOrCtrl+W',
         role: 'close',
@@ -148,7 +148,7 @@ describe('gui/menu', () => {
     it('contains undo, redo, cut, copy, paste, selectall', () => {
       menu.set()
 
-      expect(getMenuItem('Edit').submenu).toEqual([
+      expect(getMenuItem('Edit').submenu).toStrictEqual([
         {
           label: 'Undo',
           accelerator: 'CmdOrCtrl+Z',
@@ -190,7 +190,7 @@ describe('gui/menu', () => {
     it('contains zoom actions', () => {
       menu.set()
 
-      expect(getMenuItem('View').submenu).toEqual([
+      expect(getMenuItem('View').submenu).toStrictEqual([
         {
           label: 'Actual Size',
           accelerator: 'CmdOrCtrl+0',
@@ -214,7 +214,7 @@ describe('gui/menu', () => {
     it('contains minimize', () => {
       menu.set()
 
-      expect(getMenuItem('Window')).toEqual({
+      expect(getMenuItem('Window')).toStrictEqual({
         label: 'Window',
         role: 'window',
         submenu: [
@@ -233,7 +233,7 @@ describe('gui/menu', () => {
       menu.set()
       const labels = getLabels(getMenuItem('Help').submenu)
 
-      expect(labels).toEqual([
+      expect(labels).toStrictEqual([
         'Support',
         'Documentation',
         'Download Chromium',
@@ -281,7 +281,7 @@ describe('gui/menu', () => {
       menu.set()
       const labels = getLabels(getMenuItem('Developer Tools').submenu)
 
-      expect(labels).toEqual([
+      expect(labels).toStrictEqual([
         'Reload',
         'Toggle Developer Tools',
         'View App Data',
@@ -299,7 +299,7 @@ describe('gui/menu', () => {
       it('exists and contains reload, toggle', () => {
         const labels = getLabels(devSubmenu)
 
-        expect(labels).toEqual([
+        expect(labels).toStrictEqual([
           'Reload',
           'Toggle Developer Tools',
           'View App Data',

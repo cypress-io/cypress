@@ -60,7 +60,7 @@ describe('connectUpstream through an upstream proxy', () => {
 
     await dialThrough(port).catch(() => {})
 
-    expect(seen.split('\r\n')[0]).toEqual('CONNECT origin.example:443 HTTP/1.1')
+    expect(seen.split('\r\n')[0]).toStrictEqual('CONNECT origin.example:443 HTTP/1.1')
   })
 
   // The status line can arrive split across segments, and the status check matches a prefix,
@@ -149,8 +149,8 @@ describe('connectUpstream completes mutual TLS through a CONNECT proxy', () => {
       connection.socket.once('data', (chunk) => resolve(chunk.toString()))
     })
 
-    expect(greeting).toEqual('peer=cypress-client')
-    expect(connection.alpnProtocol).toEqual('http/1.1')
+    expect(greeting).toStrictEqual('peer=cypress-client')
+    expect(connection.alpnProtocol).toStrictEqual('http/1.1')
 
     connection.socket.destroy()
   }, 30000)

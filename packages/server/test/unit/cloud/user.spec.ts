@@ -17,7 +17,7 @@ describe('lib/cloud/user', () => {
       vi.spyOn(cache, 'getUser').mockResolvedValue({ name: 'brian' })
 
       return user.get().then((user) => {
-        expect(user).toEqual({ name: 'brian' })
+        expect(user).toStrictEqual({ name: 'brian' })
       })
     })
   })

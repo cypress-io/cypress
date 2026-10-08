@@ -61,7 +61,7 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
       bindingHandler({ frame: frameB }, 'payload-2')
       bindingHandler({ frame: frameA }, 'payload-3')
 
-      expect(events).toEqual([
+      expect(events).toStrictEqual([
         { name: 'binding-1', payload: 'payload-1', executionContextId: 1 },
         { name: 'binding-1', payload: 'payload-2', executionContextId: 2 },
         { name: 'binding-1', payload: 'payload-3', executionContextId: 1 },
@@ -113,12 +113,12 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
       const second = bridge.send('Runtime.evaluate', { expression: 'two()' })
 
       await new Promise((resolve) => setImmediate(resolve))
-      expect(order).toEqual([])
+      expect(order).toStrictEqual([])
 
       resolveFirst()
       await Promise.all([first, second])
 
-      expect(order).toEqual(['first resolved', 'second started'])
+      expect(order).toStrictEqual(['first resolved', 'second started'])
     })
 
     it('advances past an evaluation that never settles', async () => {
@@ -171,7 +171,7 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
 
       // the third message waits for the second to settle (its own turn) rather
       // than sharing the stuck evaluation's deadline and firing concurrently
-      expect(order).toEqual(['second started', 'second resolved', 'third started'])
+      expect(order).toStrictEqual(['second started', 'second resolved', 'third started'])
     })
 
     it('keeps evaluating after a failed evaluation', async () => {

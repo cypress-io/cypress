@@ -38,13 +38,13 @@ describe('lib/files', () => {
     // https://github.com/cypress-io/cypress/issues/1558
     it('explicit null encoding is sent to driver as a Buffer', () => {
       return readFile(projectRoot, { file: 'tests/_fixtures/ascii.foo', encoding: null }).then(({ contents }) => {
-        expect(contents).toEqual(Buffer.from('\n'))
+        expect(contents).toStrictEqual(Buffer.from('\n'))
       })
     })
 
     it('parses json to valid JS object', () => {
       return readFile(projectRoot, { file: 'tests/_fixtures/users.json' }).then(({ contents }) => {
-        expect(contents).toEqual([
+        expect(contents).toStrictEqual([
           {
             id: 1,
             name: 'brian',
@@ -80,7 +80,7 @@ describe('lib/files', () => {
     it('explicit null encoding is written exactly as received', () => {
       return writeFile(projectRoot, { fileName: '.projects/write_file.txt', contents: Buffer.from(''), encoding: null }).then(() => {
         return readFile(projectRoot, { file: '.projects/write_file.txt', encoding: null }).then(({ contents }) => {
-          expect(contents).toEqual(Buffer.from(''))
+          expect(contents).toStrictEqual(Buffer.from(''))
         })
       })
     })

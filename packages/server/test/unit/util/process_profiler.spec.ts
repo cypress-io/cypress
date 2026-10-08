@@ -195,7 +195,7 @@ describe('lib/util/process_profiler', function () {
       ]
 
       // @ts-ignore
-      expect(_renameBrowserGroup(processes)).toEqual(expected)
+      expect(_renameBrowserGroup(processes)).toStrictEqual(expected)
     })
   })
 

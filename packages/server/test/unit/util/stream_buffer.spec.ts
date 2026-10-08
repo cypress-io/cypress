@@ -149,7 +149,7 @@ describe('lib/util/stream_buffer', () => {
     const writeable = new stream.Writable({
       final () {
         expect(push).toHaveBeenCalledTimes(2)
-        expect(push.mock.calls[0][0]).toEqual(buf)
+        expect(push.mock.calls[0][0]).toStrictEqual(buf)
         expect(push.mock.calls[1][0]).toBeNull()
         done()
       },

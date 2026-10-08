@@ -66,7 +66,7 @@ describe('InterceptionEscapeDetector', () => {
 
       const registered = client.on.mock.calls.map((call) => call[0])
 
-      expect(registered).toEqual([
+      expect(registered).toStrictEqual([
         'Fetch.requestPaused',
         'Network.requestWillBeSent',
         'Network.responseReceived',
@@ -79,7 +79,7 @@ describe('InterceptionEscapeDetector', () => {
 
       detector.stop()
 
-      expect(client.off.mock.calls.map((call) => call[0])).toEqual(registered)
+      expect(client.off.mock.calls.map((call) => call[0])).toStrictEqual(registered)
     })
 
     it('is idempotent', () => {

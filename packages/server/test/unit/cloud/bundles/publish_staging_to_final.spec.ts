@@ -125,7 +125,7 @@ describe('publishStagingToFinal', () => {
     }
 
     expect(slowResolved, 'slow renames should have settled before the function returned').toBe(true)
-    expect(unhandled, 'no unhandled rejections from in-flight publishOne calls').toEqual([])
+    expect(unhandled, 'no unhandled rejections from in-flight publishOne calls').toStrictEqual([])
   })
 
   it('cross-process: parallel publishers + reader sees no absent or partial bytes', { timeout: 30000 }, async () => {
@@ -184,7 +184,7 @@ describe('publishStagingToFinal', () => {
     if (childB.code !== 0) throw new Error(`child B exited with ${childB.code}: ${childB.stderr}`)
 
     expect(enoentObserved, 'reader must never see ENOENT for an already-published file').toBe(0)
-    expect(corruptObserved, 'reader must always read complete bytes').toEqual([])
+    expect(corruptObserved, 'reader must always read complete bytes').toStrictEqual([])
     expect(reads, 'reader loop should run at least once').toBeGreaterThan(0)
 
     // After both publishers exit, finalDir must contain every file from the bundle.

@@ -38,7 +38,7 @@ describe('lib/cloud/auth', function () {
     vi.spyOn(machineId, 'machineId').mockResolvedValue('abc123')
   })
 
-  // Registered before the stopServer hook so it runs after it, as sinon.restore did under mocha
+  // Registered before the stopServer hook so mocks are restored only after the server stops
   afterEach(() => {
     vi.restoreAllMocks()
   })

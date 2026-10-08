@@ -1363,7 +1363,7 @@ describe('lib/browsers/cri-client', () => {
 
       client.removeSessionEnablements('session-1')
 
-      expect(client.queue.enableCommands).toEqual([
+      expect(client.queue.enableCommands).toStrictEqual([
         { command: 'Network.enable', sessionId: 'session-2' },
         { command: 'Target.setDiscoverTargets', params: { discover: true } },
       ])

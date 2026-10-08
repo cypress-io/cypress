@@ -108,7 +108,7 @@ describe('lib/cloud/protocol', () => {
     expect(mockThrows).toHaveBeenCalled()
     expect((protocolManager as any)._errors).toHaveLength(1)
     expect((protocolManager as any)._errors[0].captureMethod).toBe('cdpClient.on')
-    expect((protocolManager as any)._errors[0].args).toEqual([
+    expect((protocolManager as any)._errors[0].args).toStrictEqual([
       'Page.backForwardCacheNotUsed',
       {
         test: 'test1',
@@ -463,7 +463,7 @@ describe('lib/cloud/protocol', () => {
       protocolManager.cleanup()
 
       expect(cleanup.mock.contexts).toContain(protocol)
-      expect(cleanup.mock.calls[0]).toEqual([])
+      expect(cleanup.mock.calls[0]).toStrictEqual([])
     })
   })
 
@@ -764,8 +764,8 @@ describe('lib/cloud/protocol', () => {
 
         expect(protocolManager['_errors']).toHaveLength(0)
         expect(protocolManager['dispatchErrors']).toHaveBeenCalled()
-        expect(protocolManager['dispatchErrors'].mock.calls[0][0]).toEqual([err])
-        expect(protocolManager['dispatchErrors'].mock.calls[0][1]).toEqual({
+        expect(protocolManager['dispatchErrors'].mock.calls[0][0]).toStrictEqual([err])
+        expect(protocolManager['dispatchErrors'].mock.calls[0][1]).toStrictEqual({
           osName: os.platform(),
           projectSlug: protocolManager['options']['projectId'],
           specName: protocolManager['_specName'],

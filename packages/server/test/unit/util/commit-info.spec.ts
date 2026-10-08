@@ -108,7 +108,7 @@ describe('lib/util/commit-info', () => {
       execaStub.mockImplementation(createGitResponses())
 
       return commitInfo().then((info) => {
-        expect(info).toEqual({
+        expect(info).toStrictEqual({
           branch: 'test-branch',
           message: 'test message',
           email: 'test@example.com',
@@ -128,7 +128,7 @@ describe('lib/util/commit-info', () => {
       }))
 
       return commitInfo().then((info) => {
-        expect(info).toEqual({
+        expect(info).toStrictEqual({
           branch: 'test-branch',
           message: null,
           email: 'test@example.com',
@@ -169,7 +169,7 @@ describe('lib/util/commit-info', () => {
       })
 
       return commitInfo().then((info) => {
-        expect(info).toEqual({
+        expect(info).toStrictEqual({
           branch: 'env-branch',
           message: 'env message',
           email: 'env@example.com',

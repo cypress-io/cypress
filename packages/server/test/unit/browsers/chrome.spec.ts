@@ -71,7 +71,7 @@ const resolved = () => Promise.resolve()
 
 const matchesPrefix = (call: unknown[], expected: unknown[]) => {
   try {
-    expect(call.slice(0, expected.length)).toEqual(expected)
+    expect(call.slice(0, expected.length)).toStrictEqual(expected)
 
     return true
   } catch {
@@ -394,7 +394,7 @@ describe('lib/browsers/chrome', () => {
       const rules = hostResolverRules[0].slice('--host-resolver-rules='.length).split(',')
 
       // user-supplied rules come first so they win over the ones from `hosts`
-      expect(rules).toEqual([
+      expect(rules).toStrictEqual([
         'MAP example.com 10.0.0.1',
         'MAP foobar.com 127.0.0.1',
       ])
@@ -1439,7 +1439,7 @@ describe('lib/browsers/chrome', () => {
 
       const rules = args.filter((arg) => arg.startsWith('--host-resolver-rules='))
 
-      expect(rules).toEqual([
+      expect(rules).toStrictEqual([
         '--host-resolver-rules=MAP secure.com 10.0.0.1',
         '--host-resolver-rules=MAP secure.com:443 127.0.0.1:9001',
       ])
@@ -1456,7 +1456,7 @@ describe('lib/browsers/chrome', () => {
         hosts: { 'foobar.com': '127.0.0.1' },
       } as any, undefined as any)
 
-      expect(args.filter((arg) => arg.startsWith('--host-resolver-rules='))).toEqual([
+      expect(args.filter((arg) => arg.startsWith('--host-resolver-rules='))).toStrictEqual([
         '--host-resolver-rules=MAP foobar.com 127.0.0.1',
       ])
     })
@@ -1567,13 +1567,13 @@ describe('lib/browsers/chrome', () => {
     it('returns args unchanged when no disable features args are present', () => {
       const args = ['--foo', '--bar=baz']
 
-      expect(chrome._normalizeDisableFeatures(args)).toEqual(args)
+      expect(chrome._normalizeDisableFeatures(args)).toStrictEqual(args)
     })
 
     it('returns args unchanged when a single disable features arg is present', () => {
       const args = ['--foo', '--disable-features=Translate,HttpsUpgrades']
 
-      expect(chrome._normalizeDisableFeatures(args)).toEqual(args)
+      expect(chrome._normalizeDisableFeatures(args)).toStrictEqual(args)
     })
 
     it('keeps Cypress features when a user arg from before:browser:launch is appended', () => {
@@ -1583,7 +1583,7 @@ describe('lib/browsers/chrome', () => {
         '--disable-features=OptimizationGuideModelDownloading',
       ]
 
-      expect(chrome._normalizeDisableFeatures(args)).toEqual([
+      expect(chrome._normalizeDisableFeatures(args)).toStrictEqual([
         '--foo',
         '--disable-features=Translate,LocalNetworkAccessChecks,OptimizationGuideModelDownloading',
       ])
@@ -1595,7 +1595,7 @@ describe('lib/browsers/chrome', () => {
         '--disable-features=HttpsUpgrades,MediaRouter',
       ]
 
-      expect(chrome._normalizeDisableFeatures(args)).toEqual([
+      expect(chrome._normalizeDisableFeatures(args)).toStrictEqual([
         '--disable-features=Translate,HttpsUpgrades,MediaRouter',
       ])
     })
@@ -1606,7 +1606,7 @@ describe('lib/browsers/chrome', () => {
         '--disable-features=',
       ]
 
-      expect(chrome._normalizeDisableFeatures(args)).toEqual([
+      expect(chrome._normalizeDisableFeatures(args)).toStrictEqual([
         '--disable-features=Translate',
       ])
     })
@@ -1618,7 +1618,7 @@ describe('lib/browsers/chrome', () => {
         '--disable-features=',
       ]
 
-      expect(chrome._normalizeDisableFeatures(args)).toEqual(['--foo'])
+      expect(chrome._normalizeDisableFeatures(args)).toStrictEqual(['--foo'])
     })
   })
 
@@ -1626,13 +1626,13 @@ describe('lib/browsers/chrome', () => {
     it('returns args unchanged when no host resolver rules are present', () => {
       const args = ['--foo', '--bar=baz']
 
-      expect(chrome._normalizeHostResolverRules(args)).toEqual(args)
+      expect(chrome._normalizeHostResolverRules(args)).toStrictEqual(args)
     })
 
     it('returns args unchanged when a single host resolver rules arg is present', () => {
       const args = ['--foo', '--host-resolver-rules=MAP foobar.com 127.0.0.1']
 
-      expect(chrome._normalizeHostResolverRules(args)).toEqual(args)
+      expect(chrome._normalizeHostResolverRules(args)).toStrictEqual(args)
     })
 
     it('merges multiple host resolver rules args with later (user-supplied) rules first', () => {
@@ -1642,7 +1642,7 @@ describe('lib/browsers/chrome', () => {
         '--host-resolver-rules=MAP example.com 10.0.0.1,MAP foobar.com 10.0.0.2',
       ]
 
-      expect(chrome._normalizeHostResolverRules(args)).toEqual([
+      expect(chrome._normalizeHostResolverRules(args)).toStrictEqual([
         '--foo',
         '--host-resolver-rules=MAP example.com 10.0.0.1,MAP foobar.com 10.0.0.2,MAP foobar.com 127.0.0.1',
       ])
@@ -1655,7 +1655,7 @@ describe('lib/browsers/chrome', () => {
         '--host-resolver-rules=MAP example.com 10.0.0.1',
       ]
 
-      expect(chrome._normalizeHostResolverRules(args)).toEqual([
+      expect(chrome._normalizeHostResolverRules(args)).toStrictEqual([
         '--host-resolver-rules=MAP example.com 10.0.0.1,MAP foobar.com 127.0.0.1',
       ])
     })
@@ -1666,7 +1666,7 @@ describe('lib/browsers/chrome', () => {
         '--host-resolver-rules=',
       ]
 
-      expect(chrome._normalizeHostResolverRules(args)).toEqual([
+      expect(chrome._normalizeHostResolverRules(args)).toStrictEqual([
         '--host-resolver-rules=MAP foobar.com 127.0.0.1',
       ])
     })
@@ -1678,7 +1678,7 @@ describe('lib/browsers/chrome', () => {
         '--host-resolver-rules=',
       ]
 
-      expect(chrome._normalizeHostResolverRules(args)).toEqual(['--foo'])
+      expect(chrome._normalizeHostResolverRules(args)).toStrictEqual(['--foo'])
     })
   })
 
@@ -1690,7 +1690,7 @@ describe('lib/browsers/chrome', () => {
         '/foo/Local State': enoent,
       })
 
-      await expect(chrome._getChromePreferences('/foo')).resolves.toEqual({
+      await expect(chrome._getChromePreferences('/foo')).resolves.toStrictEqual({
         default: {},
         defaultSecure: {},
         localState: {},
@@ -1704,7 +1704,7 @@ describe('lib/browsers/chrome', () => {
         '/foo/Local State': () => Promise.resolve({ baz: 'quux' }),
       })
 
-      await expect(chrome._getChromePreferences('/foo')).resolves.toEqual({
+      await expect(chrome._getChromePreferences('/foo')).resolves.toStrictEqual({
         default: { foo: 'bar' },
         defaultSecure: { bar: 'baz' },
         localState: { baz: 'quux' },
@@ -1747,7 +1747,7 @@ describe('lib/browsers/chrome', () => {
         localState: {},
       }
 
-      expect(chrome._mergeChromePreferences(originalPrefs, newPrefs as any)).toEqual(expected)
+      expect(chrome._mergeChromePreferences(originalPrefs, newPrefs as any)).toStrictEqual(expected)
     })
   })
 
@@ -1869,7 +1869,7 @@ describe('lib/browsers/chrome', () => {
         const result = await chrome._getChromePreferencesWithDefaults('/foo')
 
         // Should merge defaults with existing preferences, where existing values take precedence
-        expect(result).toEqual({
+        expect(result).toStrictEqual({
           default: {
             fake_preference: {
               value: 'value',
@@ -1902,7 +1902,7 @@ describe('lib/browsers/chrome', () => {
       try {
         const result = await chrome._getChromePreferencesWithDefaults('/foo')
 
-        expect(result).toEqual(mockDefaults)
+        expect(result).toStrictEqual(mockDefaults)
       } finally {
         mockDefaultPrefs.mockRestore()
       }
@@ -1921,7 +1921,7 @@ describe('lib/browsers/chrome', () => {
     it('returns empty preferences when IGNORE_CHROME_PREFERENCES is set', async () => {
       const result = await chrome._getChromePreferences('/foo')
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         default: {},
         defaultSecure: {},
         localState: {},
@@ -1978,14 +1978,14 @@ describe('lib/browsers/chrome', () => {
 
       const result = chrome._mergeChromePreferences(defaultPrefs, userPrefs)
 
-      expect(result.default).toEqual({
+      expect(result.default).toStrictEqual({
         fake_preference: {
           value: 'value',
         },
         newSetting: 'userValue', // User addition
       })
 
-      expect(result.localState).toEqual({
+      expect(result.localState).toStrictEqual({
         fake_local_state: {
           value: 'value',
         },
@@ -2027,16 +2027,16 @@ describe('lib/browsers/chrome', () => {
 
       const result = chrome._mergeChromePreferences(originalPrefs, newPrefs)
 
-      expect(result.default).toEqual({
+      expect(result.default).toStrictEqual({
         keepThis: 'value',
         addThis: 'newValue',
       })
 
-      expect(result.defaultSecure).toEqual({
+      expect(result.defaultSecure).toStrictEqual({
         keepThis: 'value',
       })
 
-      expect(result.localState).toEqual({
+      expect(result.localState).toStrictEqual({
         keepThis: 'value',
         addThis: 'newValue',
       })
@@ -2072,7 +2072,7 @@ describe('lib/browsers/chrome', () => {
 
       const result = await chrome._getChromePreferences('/foo')
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         default: {},
         defaultSecure: {},
         localState: {},

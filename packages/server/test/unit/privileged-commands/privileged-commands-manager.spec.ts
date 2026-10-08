@@ -54,7 +54,7 @@ describe('lib/privileged-commands/privileged-commands-manager', () => {
       const scriptsLiteral = channelOptions.match(/\n\s*scripts: (.+),\n/)![1]
       const parsedScripts = JSON.parse(JSON.parse(scriptsLiteral))
 
-      expect(parsedScripts).toEqual([relativeUrl])
+      expect(parsedScripts).toStrictEqual([relativeUrl])
     })
 
     it('escapes characters that would end the inline script element', async () => {

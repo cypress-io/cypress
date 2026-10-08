@@ -36,7 +36,7 @@ describe('ensureStudioBundle', () => {
       kind: 'studio',
     })
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       manifest: mockManifest,
       studioPath: mockBundleDir,
     })

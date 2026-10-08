@@ -40,7 +40,7 @@ describe('lib/cloud/filter_tests', () => {
       })]
 
       // passing + flaky-passing are excluded (they are not in the keep-list)
-      expect(getEligibleTestTitles(actions)).toEqual([
+      expect(getEligibleTestTitles(actions)).toStrictEqual([
         'suite a fails',
         'suite d skipped',
         'suite e new',
@@ -55,7 +55,7 @@ describe('lib/cloud/filter_tests', () => {
         ],
       })]
 
-      expect(getEligibleTestTitles(actions)).toEqual(['outer inner the test'])
+      expect(getEligibleTestTitles(actions)).toStrictEqual(['outer inner the test'])
     })
 
     it('strips the "(skipped due to browser)" suffix so titles match the runner', () => {
@@ -66,7 +66,7 @@ describe('lib/cloud/filter_tests', () => {
         ],
       })]
 
-      expect(getEligibleTestTitles(actions)).toEqual(['suite a test'])
+      expect(getEligibleTestTitles(actions)).toStrictEqual(['suite a test'])
     })
 
     it('returns an empty array when a FILTER action has no eligible tests', () => {
@@ -77,7 +77,7 @@ describe('lib/cloud/filter_tests', () => {
         ],
       })]
 
-      expect(getEligibleTestTitles(actions)).toEqual([])
+      expect(getEligibleTestTitles(actions)).toStrictEqual([])
     })
 
     it('ignores non-FILTER actions alongside a FILTER action', () => {
@@ -91,7 +91,7 @@ describe('lib/cloud/filter_tests', () => {
         }),
       ]
 
-      expect(getEligibleTestTitles(actions)).toEqual(['suite a fails'])
+      expect(getEligibleTestTitles(actions)).toStrictEqual(['suite a fails'])
     })
   })
 })
