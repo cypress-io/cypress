@@ -1,8 +1,9 @@
 import { proxyquire, sinon } from '../../../spec_helper'
-import { ensureDir, mkdtemp, pathExists, readFile, remove, writeFile } from 'fs-extra'
+import { ensureDir, mkdtemp, pathExists, readdir, readFile, remove, writeFile } from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import { BundleError } from '../../../../lib/cloud/bundles/bundle_error'
+import { publishStagingToFinal } from '../../../../lib/cloud/bundles/publish_staging_to_final'
 
 const FIXTURE_MANIFEST = { version: 1, entrypoint: 'server/index.js' }
 const MANIFEST_TEXT = JSON.stringify(FIXTURE_MANIFEST)
@@ -50,6 +51,7 @@ describe('ensureSignedBundle', () => {
     streamImpl: (opts: { staging: string }) => Promise<string>
     verifyResult: boolean
     verifyOnDisk: sinon.SinonStub
+    publish: sinon.SinonStub
   }> = {}): SetupResult => {
     const streamStub = sinon.stub().callsFake(async (opts: { staging: string }) => {
       if (overrides.streamImpl) return overrides.streamImpl(opts)
@@ -75,6 +77,10 @@ describe('ensureSignedBundle', () => {
     // always a miss).
     if (overrides.verifyOnDisk) {
       stubs['./verify_bundle_on_disk'] = { verifyBundleOnDisk: overrides.verifyOnDisk }
+    }
+
+    if (overrides.publish) {
+      stubs['./publish_staging_to_final'] = { publishStagingToFinal: overrides.publish }
     }
 
     const ensureSignedBundleModule = proxyquire('../lib/cloud/bundles/ensure_signed_bundle', stubs)
@@ -239,28 +245,21 @@ describe('ensureSignedBundle', () => {
     const fallbackBase = () => path.join(tmpRoot, 'cypress-cache', 'bundles', 'cy-prompt')
 
     it('republishes into the OS temp dir when publishing into the cache dir hits a permission error', async () => {
-      if (process.platform === 'win32') return // simpler skip than juggling ACLs
-
-      const { ensureSignedBundle, streamStub } = setup()
       const finalDir = path.join(cacheRoot, 'primary', 'bundles', 'cy-prompt', 'pubfail')
 
-      await ensureDir(finalDir)
+      // Fail the publish itself rather than chmod-ing finalDir, which root (as in
+      // CI containers) can still write into.
+      const publish = sinon.stub().callsFake(async (staging: string, dst: string) => {
+        if (dst === finalDir) throw permissionError()
 
-      // Make finalDir read-only so renames into it fail with EACCES
-      const fs = require('fs-extra')
+        return publishStagingToFinal(staging, dst)
+      })
+      const { ensureSignedBundle, streamStub } = setup({ publish })
 
-      await fs.chmod(finalDir, 0o500)
-
-      let result: Awaited<ReturnType<typeof ensureSignedBundle>>
-
-      try {
-        result = await ensureSignedBundle({
-          url: 'https://cdn.cypress.io/cy-prompt/pubfail.tar',
-          kind: 'cy-prompt',
-        })
-      } finally {
-        await fs.chmod(finalDir, 0o755)
-      }
+      const result = await ensureSignedBundle({
+        url: 'https://cdn.cypress.io/cy-prompt/pubfail.tar',
+        kind: 'cy-prompt',
+      })
 
       const fallbackDir = path.join(fallbackBase(), 'pubfail')
 
@@ -268,11 +267,12 @@ describe('ensureSignedBundle', () => {
       expect(result.manifest).to.deep.equal(FIXTURE_MANIFEST)
       expect(await readFile(path.join(fallbackDir, 'manifest.json'), 'utf8')).to.equal(MANIFEST_TEXT)
       expect(await readFile(path.join(fallbackDir, '.manifest-sig'), 'utf8')).to.equal('fake-manifest-sig')
+      expect(publish).to.be.calledTwice
       expect(streamStub).to.be.calledTwice
       expect(path.dirname(streamStub.secondCall.args[0].staging)).to.equal(fallbackBase())
 
       for (const baseDir of [path.dirname(finalDir), fallbackBase()]) {
-        const remaining: string[] = await fs.readdir(baseDir)
+        const remaining: string[] = await readdir(baseDir)
 
         expect(remaining.filter((n: string) => n.startsWith('.staging-')), baseDir).to.deep.equal([])
       }
