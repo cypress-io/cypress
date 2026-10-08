@@ -64,7 +64,7 @@ describe('lib/cloud/environment', () => {
 
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
-    expect(information).toEqual({
+    expect(information).toStrictEqual({
       envUrl: 'https://example.com',
       dependencies: { bar: { version: '2.0.0' }, foo: { version: '1.0.0' } },
       errors: [],
@@ -88,7 +88,7 @@ describe('lib/cloud/environment', () => {
 
     const { errors, ...information } = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
-    expect(information).toEqual({
+    expect(information).toStrictEqual({
       envUrl: 'https://example.com',
       dependencies: { bar: { version: '2.0.0' } },
     })
@@ -103,7 +103,7 @@ describe('lib/cloud/environment', () => {
   it('should be able to get the environment for: absent CYPRESS_API_URL and all tracked dependencies', async () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
-    expect(information).toEqual({
+    expect(information).toStrictEqual({
       envUrl: undefined,
       dependencies: { bar: { version: '2.0.0' }, foo: { version: '1.0.0' } },
       errors: [],
@@ -113,7 +113,7 @@ describe('lib/cloud/environment', () => {
   it('should be able to get the environment for: absent CYPRESS_API_URL and partial dependencies not matching criteria', async () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-not-matching'), process.pid.toString())
 
-    expect(information).toEqual({
+    expect(information).toStrictEqual({
       envUrl: undefined,
       dependencies: { bar: { version: '2.0.0' } },
       errors: [],
@@ -128,7 +128,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).toEqual({
+      expect(information).toStrictEqual({
         envUrl: process.platform !== 'win32' ? 'https://grandparent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -142,7 +142,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).toEqual({
+      expect(information).toStrictEqual({
         envUrl: process.platform !== 'win32' ? 'https://parent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -156,7 +156,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).toEqual({
+      expect(information).toStrictEqual({
         envUrl: process.platform !== 'win32' ? 'https://url.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -171,7 +171,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).toEqual({
+      expect(information).toStrictEqual({
         envUrl: process.platform !== 'win32' ? 'https://parent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
@@ -183,7 +183,7 @@ describe('lib/cloud/environment', () => {
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
-      expect(information).toEqual({
+      expect(information).toStrictEqual({
         envUrl: undefined,
         dependencies: { foo: { version: '1.0.0' } },
         errors: [],
