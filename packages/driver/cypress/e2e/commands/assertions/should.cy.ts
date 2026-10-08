@@ -1,8 +1,15 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { $, _ } = Cypress
 
+interface CapturedCommand {
+  name: string | null
+  snapshots: number
+  retries: number
+}
+
 const captureCommands = () => {
-  const commands = []
+  const commands: CapturedCommand[] = []
 
   let current
 
@@ -79,6 +86,7 @@ describe('src/cy/commands/assertions', () => {
 
       cy
       .get('div.foo').should('have.class', 'foo').then(($div) => {
+        // @ts-expect-error - the typings only accept a selector string, but chai-jquery also matches against an element
         expect($div).to.match(div)
 
         $div.remove()
@@ -217,7 +225,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('works with regular objects', () => {
-        const obj = {}
+        const obj: { foo?: string } = {}
 
         cy.on('command:retry', _.after(2, () => {
           obj.foo = 'bar'
@@ -319,6 +327,7 @@ describe('src/cy/commands/assertions', () => {
         })
 
         cy.window().should((win) => {
+          // @ts-expect-error - any command triggers the error, so the message type doesn't matter here
           cy.log(win)
         })
       })
@@ -336,7 +345,7 @@ describe('src/cy/commands/assertions', () => {
           cy
           .get('input:first').should(function ($input) {
             const isInstanceOf = Cypress.utils.isInstanceOf($input, this.remoteWindow.$)
-            const hasProp = $input.__foobar === fn
+            const hasProp = '__foobar' in $input && $input.__foobar === fn
 
             expect(isInstanceOf).to.be.true
 
@@ -362,7 +371,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('resolves all 3 assertions', (done) => {
-        const logs = []
+        const logs: Cypress.Log[] = []
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
