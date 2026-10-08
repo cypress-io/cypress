@@ -16,11 +16,11 @@ export const getBundleCacheDir = (kind: 'cy-prompt' | 'studio'): string => {
   return path.join(getBundleCacheRoot(), kind)
 }
 
-const getFallbackBundleCacheDir = (kind: 'cy-prompt' | 'studio'): string => {
+export const getFallbackBundleCacheDir = (kind: 'cy-prompt' | 'studio'): string => {
   return path.join(os.tmpdir(), 'cypress-cache', BUNDLES_DIRNAME, kind)
 }
 
-const isPermissionError = (err: unknown): boolean => {
+export const isPermissionError = (err: unknown): err is NodeJS.ErrnoException => {
   const code = (err as NodeJS.ErrnoException | null)?.code
 
   return code === 'EACCES' || code === 'EPERM' || code === 'EROFS'
@@ -42,6 +42,14 @@ const ensureDirWritable = async (dir: string): Promise<void> => {
   await remove(probe).catch(() => { /* best-effort cleanup */ })
 }
 
+export const ensureWritableFallbackBundleCacheDir = async (kind: 'cy-prompt' | 'studio'): Promise<string> => {
+  const fallback = getFallbackBundleCacheDir(kind)
+
+  await ensureDirWritable(fallback)
+
+  return fallback
+}
+
 // Ensure a writable bundle cache dir, returning the directory that was created.
 // When the configured Cypress cache folder is not writable (e.g. a root-owned or
 // read-only cache in locked-down CI), fall back to the OS temp dir rather than
@@ -56,11 +64,8 @@ export const ensureWritableBundleCacheDir = async (kind: 'cy-prompt' | 'studio')
   } catch (err) {
     if (!isPermissionError(err)) throw err
 
-    const fallback = getFallbackBundleCacheDir(kind)
+    debug('bundle cache dir %s not writable (%s); falling back to %s', primary, err.code, getFallbackBundleCacheDir(kind))
 
-    debug('bundle cache dir %s not writable (%s); falling back to %s', primary, (err as NodeJS.ErrnoException).code, fallback)
-    await ensureDirWritable(fallback)
-
-    return fallback
+    return ensureWritableFallbackBundleCacheDir(kind)
   }
 }
