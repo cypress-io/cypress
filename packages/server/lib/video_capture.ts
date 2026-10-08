@@ -37,9 +37,15 @@ export function generateFfmpegChaptersConfig (tests) {
     return
   }
 
-  const configString = tests.map((test) => {
-    return test.attempts.map((attempt, i) => {
+  const configString = tests.flatMap((test) => {
+    return test.attempts.flatMap((attempt, i) => {
       const { videoTimestamp, wallClockDuration } = attempt
+
+      // pending tests never ran, so they have no place in the video
+      if (videoTimestamp == null || wallClockDuration == null) {
+        return []
+      }
+
       let title = test.title ? test.title.join(' ') : ''
 
       if (i > 0) {
@@ -49,11 +55,11 @@ export function generateFfmpegChaptersConfig (tests) {
       return [
         '[CHAPTER]',
         'TIMEBASE=1/1000',
-          `START=${videoTimestamp - wallClockDuration}`,
-          `END=${videoTimestamp}`,
-          `title=${title}`,
+        `START=${videoTimestamp}`,
+        `END=${videoTimestamp + wallClockDuration}`,
+        `title=${title}`,
       ].join('\n')
-    }).join('\n')
+    })
   }).join('\n')
 
   return `;FFMETADATA1\n${configString}`
