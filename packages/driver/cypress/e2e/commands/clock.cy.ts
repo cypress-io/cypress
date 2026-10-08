@@ -33,6 +33,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - `ms` is optional at runtime and defaults to 0
         clock.tick()
       })
     })
@@ -49,6 +50,7 @@ describe('src/cy/commands/clock', () => {
 
     it('expands an empty methods array to the default set', function () {
       cy.clock(0, []).then(function (clock) {
+        // @ts-expect-error - `details()` is internal to the driver clock
         const { methods } = clock.details()
 
         expect(methods).to.include('setTimeout')
@@ -64,7 +66,9 @@ describe('src/cy/commands/clock', () => {
       cy.clock().then(function (clock) {
         const callback = cy.stub()
 
+        // @ts-expect-error - `details()` is internal to the driver clock
         expect(clock.details().methods).to.include('requestIdleCallback')
+        // @ts-expect-error - `details()` is internal to the driver clock
         expect(clock.details().methods).to.include('cancelIdleCallback')
 
         const id = this.window.requestIdleCallback(callback)
@@ -158,6 +162,7 @@ describe('src/cy/commands/clock', () => {
 
           clock.setSystemTime(1111111)
           expect(callCount).to.equal(0)
+          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
           clock.tick()
           expect(callCount).to.equal(1)
         })
@@ -193,6 +198,7 @@ describe('src/cy/commands/clock', () => {
           })
         })
 
+        // @ts-expect-error - `ms` is optional at runtime and defaults to 0
         clock.tick()
       })
     })
@@ -221,6 +227,7 @@ describe('src/cy/commands/clock', () => {
       .clock()
       .clock(400)
       .then((clock) => {
+        // @ts-expect-error - `details()` is internal to the driver clock
         expect(clock.details().now).to.equal(0)
       })
     })
@@ -264,6 +271,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid `now` argument
         cy.clock('250')
       })
 
@@ -275,6 +283,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid `methods` argument
         cy.clock(0, 'setTimeout')
       })
 
@@ -286,6 +295,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid `methods` argument
         cy.clock(0, [42])
       })
     })
@@ -299,6 +309,7 @@ describe('src/cy/commands/clock', () => {
             done()
           })
 
+          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
           clock.tick()
         })
       })
@@ -314,6 +325,7 @@ describe('src/cy/commands/clock', () => {
               done()
             })
 
+            // @ts-expect-error - `ms` is optional at runtime and defaults to 0
             clock.tick()
           }, 5)
         })
@@ -357,6 +369,7 @@ describe('src/cy/commands/clock', () => {
           const onSetTimeout = cy.spy()
 
           cy.state('window').setTimeout(onSetTimeout)
+          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
           clock.tick()
 
           expect(onSetTimeout).to.be.called
@@ -365,7 +378,7 @@ describe('src/cy/commands/clock', () => {
 
       it('re-binds to new window when window changes', () => {
         const newWindow = {
-          setTimeout () {},
+          setTimeout (..._args: unknown[]) {},
           clearTimeout () {},
           Date: function Date () {},
           XMLHttpRequest: {
@@ -379,6 +392,7 @@ describe('src/cy/commands/clock', () => {
           const onSetTimeout = cy.spy()
 
           newWindow.setTimeout(onSetTimeout)
+          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
           clock.tick()
 
           expect(onSetTimeout).to.be.called
@@ -397,6 +411,7 @@ describe('src/cy/commands/clock', () => {
           cy.visit('/fixtures/generic.html')
           cy.window().then((win) => {
             // override the setTimeout function now
+            // @ts-expect-error - replacing setTimeout with a no-op on purpose
             win.setTimeout = () => {}
           })
         })
@@ -411,6 +426,7 @@ describe('src/cy/commands/clock', () => {
             cy.visit('/fixtures/generic.html')
             cy.window().then((win) => {
               // override the setTimeout function now
+              // @ts-expect-error - replacing setTimeout with a no-op on purpose
               win.setTimeout = () => { }
 
               // manually restore the clock
@@ -474,6 +490,7 @@ describe('src/cy/commands/clock', () => {
         })
 
         cy.clock({ log: false }).then((clock) => {
+          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
           clock.tick()
           clock.restore()
           expect(this.logs.length).to.equal(0)
@@ -488,6 +505,7 @@ describe('src/cy/commands/clock', () => {
         })
 
         cy.clock({ log: false }).then((clock) => {
+          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
           clock.tick()
           clock.restore()
           expect(this.logs.length).to.equal(0)
@@ -590,6 +608,7 @@ describe('src/cy/commands/clock', () => {
 
     it('defaults to 0ms', () => {
       cy.clock()
+      // @ts-expect-error - `ms` is optional at runtime and defaults to 0
       .tick().then(function (clock) {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
@@ -606,6 +625,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - `ms` is optional at runtime and defaults to 0
         cy.tick()
       })
 
@@ -617,6 +637,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid `ms` argument
         cy.clock().tick('100')
       })
     })
@@ -730,6 +751,7 @@ describe('src/cy/commands/clock', () => {
         })
 
         cy.clock().then(function (clock) {
+          // @ts-expect-error - `restore()` accepts log options internally
           clock.restore({ log: false })
 
           const { hiddenLog } = this
@@ -748,6 +770,7 @@ describe('src/cy/commands/clock', () => {
         })
 
         cy.clock().then(function (clock) {
+          // @ts-expect-error - `restore()` accepts log options internally
           clock.restore({ log: false })
 
           const { hiddenLog } = this
