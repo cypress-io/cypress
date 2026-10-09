@@ -35,6 +35,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
+- Fixed a regression in [13.6.3](#13-6-3) where a newline (`\n`) in the message passed to [`cy.log()`](https://on.cypress.io/log) or `Cypress.log()` did not start a new line in the Command Log. Fixes [#31724](https://github.com/cypress-io/cypress/issues/31724).
 
 **Misc:**
 
