@@ -37,9 +37,15 @@ export function generateFfmpegChaptersConfig (tests) {
     return
   }
 
-  const configString = tests.map((test) => {
-    return test.attempts.map((attempt, i) => {
+  const configString = tests.flatMap((test) => {
+    return test.attempts.flatMap((attempt, i) => {
       const { videoTimestamp, wallClockDuration } = attempt
+
+      // pending tests never ran, so they have no place in the video
+      if (videoTimestamp == null || wallClockDuration == null) {
+        return []
+      }
+
       let title = test.title ? test.title.join(' ') : ''
 
       if (i > 0) {
@@ -49,11 +55,11 @@ export function generateFfmpegChaptersConfig (tests) {
       return [
         '[CHAPTER]',
         'TIMEBASE=1/1000',
-          `START=${videoTimestamp - wallClockDuration}`,
-          `END=${videoTimestamp}`,
-          `title=${title}`,
+        `START=${videoTimestamp}`,
+        `END=${videoTimestamp + wallClockDuration}`,
+        `title=${title}`,
       ].join('\n')
-    }).join('\n')
+    })
   }).join('\n')
 
   return `;FFMETADATA1\n${configString}`
@@ -120,6 +126,7 @@ export function start (options: StartOptions) {
   let wantsWrite = true
   let skippedFramesCount = 0
   let writtenFramesCount = 0
+  let startedVideoCapture: Date
 
   _.defaults(options, {
     onError () {},
@@ -190,6 +197,11 @@ export function start (options: StartOptions) {
 
     writtenFramesCount++
 
+    // the video's timeline begins at the first frame, so chapter timestamps must be measured from it
+    if (writtenFramesCount === 1) {
+      startedVideoCapture = new Date
+    }
+
     debugFrames('writing video frame')
 
     if (wantsWrite) {
@@ -220,10 +232,9 @@ export function start (options: StartOptions) {
       .on('start', (command) => {
         debug('capture started %o', { command })
 
-        return resolve({
-          cmd,
-          startedVideoCapture: new Date,
-        })
+        startedVideoCapture = new Date
+
+        return resolve({ cmd })
       }).on('codecData', (data) => {
         return debug('capture codec data: %o', data)
       }).on('stderr', (stderr) => {
@@ -274,13 +285,15 @@ export function start (options: StartOptions) {
   }
 
   return startCapturing()
-  .then(({ cmd, startedVideoCapture }: any) => {
+  .then(({ cmd }: any) => {
     return {
       _pt: pt,
       cmd,
       endVideoCapture,
       writeVideoFrame,
-      startedVideoCapture,
+      get startedVideoCapture () {
+        return startedVideoCapture
+      },
       restart: () => {
         throw new Error('restart cannot be called on a plain ffmpeg stream')
       },

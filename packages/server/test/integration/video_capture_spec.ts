@@ -91,6 +91,45 @@ describe('Video Capture', () => {
     })
   })
 
+  context('#start.startedVideoCapture', () => {
+    let tmpFilename
+
+    beforeEach(() => {
+      tmpFilename = path.join(fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-')), 'video.mp4')
+    })
+
+    it('is the time the first frame was written, not when ffmpeg started', async () => {
+      const controller = await videoCapture.start({ videoName: tmpFilename })
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      const beforeFirstFrame = Date.now()
+
+      controller.writeVideoFrame(fse.readFileSync(image1Path))
+
+      expect(controller.startedVideoCapture.getTime()).to.be.at.least(beforeFirstFrame)
+
+      await controller.endVideoCapture(false)
+    })
+
+    it('is not changed by subsequent frames', async () => {
+      const controller = await videoCapture.start({ videoName: tmpFilename })
+
+      controller.writeVideoFrame(fse.readFileSync(image1Path))
+
+      const firstFrameAt = controller.startedVideoCapture
+
+      await new Promise((resolve) => setTimeout(resolve, 50))
+
+      controller.writeVideoFrame(fse.readFileSync(image2Path))
+      controller.writeVideoFrame(fse.readFileSync(image3Path))
+
+      expect(controller.startedVideoCapture).to.eq(firstFrameAt)
+
+      await controller.endVideoCapture(false)
+    })
+  })
+
   context('#start.endVideoCapture', () => {
     let tmpFilename
 
