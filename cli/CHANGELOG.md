@@ -15,6 +15,7 @@
 - Fixed an issue where an error whose `message` cannot be overwritten — such as the `DOMException` a browser throws for a cross-origin access or a Content Security Policy violation — was reported as `TypeError: setting getter-only property "message"` from inside Cypress, hiding the error that actually failed the test. Fixes [#34818](https://github.com/cypress-io/cypress/issues/34818).
 - Fixed an issue where [`cy.prompt`](https://docs.cypress.io/api/commands/prompt) and Studio could fail to load. Fixed in [#35013](https://github.com/cypress-io/cypress/pull/35013).
 - Calling a query that needs a subject, such as [`.eq()`](https://on.cypress.io/eq), [`.first()`](https://on.cypress.io/first), [`.find()`](https://on.cypress.io/find), or [`.shadow()`](https://on.cypress.io/shadow), directly off `cy` instead of chaining it off a command that yields a subject now fails right away with an error that names the command and explains that it must be chained. Previously, Cypress retried until the command timed out and then reported that the subject was not a DOM element, or, when the query was the first command in a test, failed with `Cannot read properties of undefined (reading 'get')`. Child commands called directly off `cy`, such as `cy.click()`, show the same reworded error. Fixed in [#35024](https://github.com/cypress-io/cypress/pull/35024).
+- Fixed an issue where `cypress run` changed the browser that `cypress open` selects by default for a project to whichever browser the run used, such as the one passed with `--browser`. Fixed in [#34924](https://github.com/cypress-io/cypress/pull/34924).
 
 **Misc:**
 
@@ -35,7 +36,6 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
-- Fixed an issue where `cypress run` changed the browser that `cypress open` selects by default for a project to whichever browser the run used, such as the one passed with `--browser`. Fixed in [#34924](https://github.com/cypress-io/cypress/pull/34924).
 
 **Misc:**
 
