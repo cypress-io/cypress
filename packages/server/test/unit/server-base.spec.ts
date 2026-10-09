@@ -578,7 +578,7 @@ describe('lib/server-base', () => {
       await server.createCdpFetchNetworkRuntime(client, isAUTFrame)
 
       expect(callsFor(client.on, 'Fetch.requestPaused')).not.toHaveLength(0)
-      expect(callsFor(client.send, 'Fetch.enable')[0][1]).toEqual({
+      expect(callsFor(client.send, 'Fetch.enable')[0][1]).toStrictEqual({
         patterns: [{
           requestStage: 'Request',
         }, {
@@ -613,7 +613,7 @@ describe('lib/server-base', () => {
 
       expect(server.isBrowserNetworkMode()).toBe(true)
       expect(server._networkProxy).toBe(server._cdpFetchRuntime.networkProxy)
-      expect(modeDuringStart).toEqual([true])
+      expect(modeDuringStart).toStrictEqual([true])
     })
 
     // DriverInterceptRegistrationAdapter binds to the state object created at open,
@@ -1158,7 +1158,7 @@ describe('lib/server-base', () => {
       it('applies the blockHosts value the driver resolved for the upcoming test', () => {
         websocketOptions.onResetServerState({ blockHosts: ['*.pendo.io'] })
 
-        expect(server._openConfig.blockHosts).toEqual(['*.pendo.io'])
+        expect(server._openConfig.blockHosts).toStrictEqual(['*.pendo.io'])
       })
 
       it('applies null so an override can clear blocking', () => {
@@ -1182,7 +1182,7 @@ describe('lib/server-base', () => {
       it('is read by the network runtime, which shares the config object', () => {
         websocketOptions.onResetServerState({ blockHosts: ['*.pendo.io'] })
 
-        expect(server._networkProxy.http.config.blockHosts).toEqual(['*.pendo.io'])
+        expect(server._networkProxy.http.config.blockHosts).toStrictEqual(['*.pendo.io'])
       })
     })
 
@@ -1197,11 +1197,11 @@ describe('lib/server-base', () => {
 
       server._networkProxy.http.getRenderedHTMLOrigins()['http://example.com'] = true
 
-      expect(options.getRenderedHTMLOrigins()).toEqual({ 'http://example.com': true })
+      expect(options.getRenderedHTMLOrigins()).toStrictEqual({ 'http://example.com': true })
 
       server._networkProxy = undefined
 
-      expect(options.getRenderedHTMLOrigins()).toEqual({})
+      expect(options.getRenderedHTMLOrigins()).toStrictEqual({})
     })
   })
 
