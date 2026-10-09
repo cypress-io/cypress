@@ -417,7 +417,7 @@ describe('lib/routes', () => {
   })
 
   describe('catch-all', () => {
-    function setupCatchAll ({ remoteState, isBrowserNetworkMode = () => true, getNetworkProxy }: { remoteState: any, isBrowserNetworkMode?: () => boolean, getNetworkProxy?: () => NetworkProxy }) {
+    function setupCatchAll ({ remoteState, isBrowserNetworkMode = () => true, getNetworkProxy }: { remoteState: any, isBrowserNetworkMode?: () => boolean, getNetworkProxy?: () => NetworkProxy | undefined }) {
       const router = makeRouter()
 
       expressStubs.Router.mockReturnValue(router as any)
@@ -614,6 +614,22 @@ describe('lib/routes', () => {
 
       expect(second.handleHttpRequest).toHaveBeenCalledWith(secondReq, secondRes)
       expect(first.handleHttpRequest).toHaveBeenCalledTimes(1)
+    })
+
+    // close() disposes the NetworkProxy before the HTTP server stops accepting
+    // connections, and a rejection here would exit the process
+    it('drops a request that arrives after the NetworkProxy is disposed', async () => {
+      const { handler } = setupCatchAll({
+        remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
+        isBrowserNetworkMode: () => false,
+        getNetworkProxy: () => undefined,
+      })
+      const req = { url: 'http://example.com/late', method: 'GET', headers: {} }
+      const res = { destroy: vi.fn() }
+
+      await expect(handler(req, res, vi.fn())).resolves.toBeUndefined()
+
+      expect(res.destroy).toHaveBeenCalled()
     })
 
     it('falls through for URLs the file server cannot resolve', async () => {

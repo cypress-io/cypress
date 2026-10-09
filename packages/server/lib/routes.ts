@@ -1,6 +1,6 @@
 import httpProxy from 'http-proxy'
 import Debug from 'debug'
-import type { ErrorRequestHandler, Request } from 'express'
+import type { ErrorRequestHandler, Request, Response } from 'express'
 import { Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -35,9 +35,10 @@ export interface InitializeRoutes {
   /**
    * Read per request, never captured: the CDP Fetch runtime installs a new
    * NetworkProxy at every launch, and the network path can flip on this same
-   * router when the browser is switched in open mode.
+   * router when the browser is switched in open mode. Undefined once close()
+   * has disposed the runtime.
    */
-  getNetworkProxy: () => NetworkProxy
+  getNetworkProxy: () => NetworkProxy | undefined
   remoteStates: RemoteStates
   isBrowserNetworkMode: () => boolean
   onError: (...args: unknown[]) => any
@@ -56,6 +57,23 @@ export const createCommonRoutes = ({
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
+
+  // close() disposes the NetworkProxy before the HTTP server stops accepting
+  // connections, so a late browser request can still land here with nothing
+  // left to serve it. Drop it the way the closing server would: throwing from
+  // an async Express 4 handler is an unhandled rejection, which exits the process.
+  const handleHttpRequest = async (req: Request, res: Response) => {
+    const networkProxy = getNetworkProxy()
+
+    if (!networkProxy) {
+      debug('dropping request received after the NetworkProxy was disposed: %s %s', req.method, req.url)
+      res.destroy()
+
+      return
+    }
+
+    await networkProxy.handleHttpRequest(req, res)
+  }
 
   // When a test visits an http:// site and we load our main app page,
   // (e.g. test has cy.visit('http://example.com'), we load http://example.com/__/)
@@ -117,11 +135,11 @@ export const createCommonRoutes = ({
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     router.all(`${CYPRESS_STUDIO_ROUTE}*`, async (req, res) => {
-      await getNetworkProxy().handleHttpRequest(req, res)
+      await handleHttpRequest(req, res)
     })
 
     router.all(`${CYPRESS_CY_PROMPT_ROUTE}*`, async (req, res) => {
-      await getNetworkProxy().handleHttpRequest(req, res)
+      await handleHttpRequest(req, res)
     })
 
     router.get('/status-code-test/:num', (req, res) => {
@@ -184,7 +202,11 @@ export const createCommonRoutes = ({
   router.get(`/${config.namespace}/automation/setLocalStorage`, (req, res) => {
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
-    getNetworkProxy().http.getRenderedHTMLOrigins()[origin] = true
+    const renderedHTMLOrigins = getNetworkProxy()?.http.getRenderedHTMLOrigins()
+
+    if (renderedHTMLOrigins) {
+      renderedHTMLOrigins[origin] = true
+    }
 
     res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
   })
@@ -338,12 +360,10 @@ export const createCommonRoutes = ({
   // this same router. Mounting both would not work either: the MITM branch
   // never calls next(), so mount order would decide the behavior permanently.
   router.all('*', async (req: Request & { proxiedUrl?: string }, res, next) => {
-    const proxy = getNetworkProxy()
-
     // MITM path: every browser request arrives here in absolute form, so the
     // pipeline owns all of it.
     if (!isBrowserNetworkMode()) {
-      await proxy.handleHttpRequest(req, res)
+      await handleHttpRequest(req, res)
 
       return
     }
@@ -368,7 +388,7 @@ export const createCommonRoutes = ({
     if (isTrustedInternalLoopback(req.headers) && req.proxiedUrl && /^https?:\/\//.test(req.proxiedUrl)) {
       debug('serving loopback-token request through the pipeline: %s %s', req.method, req.proxiedUrl)
 
-      await proxy.handleHttpRequest(req, res)
+      await handleHttpRequest(req, res)
 
       return
     }
@@ -386,7 +406,7 @@ export const createCommonRoutes = ({
       debug('serving direct file server request through the pipeline: %s %s', req.method, absoluteUrl)
 
       req.proxiedUrl = absoluteUrl
-      await proxy.handleHttpRequest(req, res)
+      await handleHttpRequest(req, res)
 
       return
     }
