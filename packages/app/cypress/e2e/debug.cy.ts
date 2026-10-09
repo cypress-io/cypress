@@ -172,7 +172,7 @@ describe('App - Debug Page', () => {
   })
 
   it('shows running and updating build', () => {
-    cy.remoteGraphQLIntercept((obj, _testState, options) => {
+    cy.remoteGraphQLIntercept((obj, testState, options) => {
       if (obj.operationName === 'RelevantRunsDataSource_RunsByCommitShas') {
         obj.result.data = options.RelevantRunsDataSource_RunsByCommitShas.data
       }
@@ -213,7 +213,6 @@ describe('App - Debug Page', () => {
       }
 
       if (obj.operationName === 'RelevantRunSpecsDataSource_Specs' && obj.result.data) {
-        // NOTE Figure out how to manually trigger polling instead of adjusting polling intervals
         obj.result.data.pollingIntervals = {
           __typename: 'CloudPollingIntervals',
           runByNumber: 1.5, //Increase polling interval for debugging test
@@ -222,7 +221,7 @@ describe('App - Debug Page', () => {
         if (run.totalInstanceCount === run.completedInstanceCount) {
           obj.result.data.pollingIntervals.runByNumber = 100
         } else {
-          run.completedInstanceCount = run.completedInstanceCount !== undefined ? ++run.completedInstanceCount : 0
+          run.completedInstanceCount = testState.completedInstanceCount ?? 1
         }
 
         obj.result.data.cloudNodesByIds = [
@@ -245,8 +244,18 @@ describe('App - Debug Page', () => {
 
     cy.get('[data-cy=debug-testing-progress]').contains('Testing in progress...')
     cy.findByTestId('debug-testing-progress').contains('1 of 3 specs completed')
+
+    cy.withCtx((_ctx, o) => {
+      o.testState.completedInstanceCount = 2
+    })
+
     cy.findByTestId('debug-testing-progress').contains('2 of 3 specs completed')
-    cy.findByTestId('debug-testing-progress').contains('3 of 3 specs completed')
+
+    cy.withCtx((_ctx, o) => {
+      o.testState.completedInstanceCount = 3
+    })
+
+    cy.findByTestId('debug-testing-progress').should('not.exist')
     cy.get('[data-cy="debug-badge"]').contains('1').should('be.visible')
 
     cy.findByTestId('spec-contents').within(() => {

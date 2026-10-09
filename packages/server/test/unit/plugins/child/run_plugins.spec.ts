@@ -82,7 +82,7 @@ describe('lib/plugins/child/run_plugins', () => {
           typescript: '/path/to/typescript.js',
         })
 
-        expect(_.last(registrations)).toEqual({
+        expect(_.last(registrations)).toStrictEqual({
           event: 'file:preprocessor',
           eventId: 5,
         })
@@ -112,7 +112,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
         expect(webpackPreprocessor).not.toHaveBeenCalled()
 
-        expect(registrations[4]).toEqual({
+        expect(registrations[4]).toStrictEqual({
           event: 'file:preprocessor',
           eventId: 4,
         })
@@ -128,10 +128,10 @@ describe('lib/plugins/child/run_plugins', () => {
 
         const { setupConfig, registrations, requires } = sentPayload('setupTestingType:reply')
 
-        expect(setupConfig).toEqual({ includeShadowDom: true })
+        expect(setupConfig).toStrictEqual({ includeShadowDom: true })
 
         expect(registrations).toHaveLength(6)
-        expect(_.map(registrations, 'event')).toEqual([
+        expect(_.map(registrations, 'event')).toStrictEqual([
           '_get:task:body',
           '_get:task:keys',
           '_process:cross:origin:callback',
@@ -344,7 +344,7 @@ describe('lib/plugins/child/run_plugins', () => {
         expect(util.wrapChildPromise).toHaveBeenCalled()
         const result = vi.mocked(util.wrapChildPromise).mock.lastCall?.[1]('1')
 
-        expect(result).toEqual(['the:task', 'another:task', 'a:third:task'])
+        expect(result).toStrictEqual(['the:task', 'another:task', 'a:third:task'])
       })
     })
 
