@@ -34,6 +34,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where `cypress open` with both a `--browser` and a testing type flag launched the browser twice the first time Cypress showed its major-version welcome screen — on first open after upgrading, or after clearing app data. Fixes [#34868](https://github.com/cypress-io/cypress/issues/34868).
 - Fixed an issue where [`cy.clock()`](https://on.cypress.io/clock) overrode `requestIdleCallback` but not `cancelIdleCallback`, so an idle callback that your application canceled while the clock was installed still ran on the next [`cy.tick()`](https://on.cypress.io/tick). `cy.clock()` now overrides `cancelIdleCallback` by default, and passing `cancelIdleCallback` in the list of functions to override no longer throws a `non-existent timers and/or objects cannot be faked` error. Fixed in [#34926](https://github.com/cypress-io/cypress/pull/34926).
 
 **Misc:**
