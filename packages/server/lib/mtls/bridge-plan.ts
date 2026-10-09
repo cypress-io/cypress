@@ -24,7 +24,7 @@ export interface ClientCertificateEntry {
   hostname: string
   /** Port from the configured URL, or undefined when it omitted one. */
   port?: number
-  /** `UrlMatcher`'s own test for `hostname`, so a ClientHello's SNI is judged by the same rule. */
+  /** `UrlMatcher`'s own test for a wildcard `hostname`. An exact host is compared exactly. */
   hostMatcher: HostMatcher
   /** Whether the URL limits the certificate to part of the origin. */
   pathScoped: boolean

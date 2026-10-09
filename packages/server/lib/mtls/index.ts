@@ -104,8 +104,7 @@ export function toBridgeEntries (clientCertificates: { url: string }[]): ClientC
       hostname: parsed.host,
       port: parsed.port,
       hostMatcher: parsed.hostMatcher,
-      // `/**` matches every path, so it configures the whole origin
-      pathScoped: parsed.path !== undefined && parsed.path !== '/**',
+      pathScoped: parsed.path !== undefined,
       material,
     }]
   })

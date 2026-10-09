@@ -44,10 +44,12 @@ describe('toBridgeEntries', () => {
     }])
   })
 
-  it('treats a path that matches every path as the whole origin', () => {
-    store('https://example.com/**', 'all')
+  // `UrlMatcher` does not apply `/**` to dot-segment paths such as `/.well-known/`, so it
+  // does not configure the whole origin either
+  it('treats a path glob as path-scoped', () => {
+    store('https://example.com/**', 'glob')
 
-    expect(toBridgeEntries([{ url: 'https://example.com/**' }])).toMatchObject([{ pathScoped: false }])
+    expect(toBridgeEntries([{ url: 'https://example.com/**' }])).toMatchObject([{ pathScoped: true }])
   })
 
   it('judges a servername by the configured host pattern', () => {
