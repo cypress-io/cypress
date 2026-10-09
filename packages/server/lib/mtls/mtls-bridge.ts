@@ -35,6 +35,39 @@ export interface MtlsBridgeOptions {
   secureContextFor (servername: string): Promise<SecureContext>
 }
 
+// Only letters, digits, `-` and `_` in dot-separated labels. A wildcard pattern's `*` matches
+// any character but `/`, so without this a name carrying CR/LF or NUL would reach the
+// upstream proxy's CONNECT line and the resolver intact.
+const DNS_NAME = /^[a-z0-9_-]+(\.[a-z0-9_-]+)*$/
+
+/**
+ * The host to dial for a connection to this listener, or null when there is none it may
+ * truthfully stand for.
+ *
+ * The listener is reachable by any local process and by any page in the browser, and the
+ * origin is dialed with this listener's key, so a name it was not configured for must never
+ * get that far.
+ */
+function originFor (listener: BridgeListener, servername: string | null): string | null {
+  const wildcard = listener.hostname.includes('*')
+
+  // A browser sends no SNI for an IP literal, so an exact listener stands for its own host.
+  // A wildcard one only knows its origin from SNI.
+  if (servername === null) {
+    return wildcard ? null : listener.hostname
+  }
+
+  const name = servername.toLowerCase()
+
+  if (name.length > 253 || !DNS_NAME.test(name)) {
+    return null
+  }
+
+  // An exact host is compared exactly: as a glob, an IPv6 literal like `[::1]` would be a
+  // character class
+  return (wildcard ? listener.hostMatcher.match(name) : name === listener.hostname) ? name : null
+}
+
 /** What `allowDestroy` adds to a `net.Server`: close, and take live connections with it. */
 type DestroyableServer = net.Server & { destroy (cb: () => void): void }
 
@@ -123,12 +156,10 @@ export class MtlsBridge {
         return
       }
 
-      // A wildcard listener only knows which origin it stands for from SNI, so a connection
-      // that carries none cannot be forwarded anywhere truthful.
-      const hostname = scan.servername ?? (listener.hostname.includes('*') ? null : listener.hostname)
+      const hostname = originFor(listener, scan.servername)
 
       if (!hostname) {
-        debug('no servername for wildcard listener %s; closing', listener.hostname)
+        debug('servername %s is not one listener %s stands for; closing', scan.servername, listener.hostname)
         browserSocket.destroy()
 
         return

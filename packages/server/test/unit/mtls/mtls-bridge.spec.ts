@@ -7,9 +7,14 @@ import http2 from 'http2'
 import https from 'https'
 import { execFileSync } from 'child_process'
 import { randomUUID } from 'crypto'
+import net from 'net'
 import type { AddressInfo } from 'net'
 import { generateMtlsCertificates } from '@packages/network/test/helpers/mtls-certs'
+// through the package entry, matching the composition root
+import { clientCertificates as certStore } from '@packages/network'
 import { MtlsBridge } from '../../../lib/mtls/mtls-bridge'
+import { scanClientHello } from '../../../lib/mtls/client-hello'
+import { captureClientHello } from './support/capture-client-hello'
 import type { MtlsBridgeOptions } from '../../../lib/mtls/mtls-bridge'
 import type { BridgeListener } from '../../../lib/mtls/bridge-plan'
 
@@ -104,6 +109,7 @@ beforeAll(async () => {
 
   listener = {
     hostname: 'localhost',
+    hostMatcher: { match: (h) => h === 'localhost' },
     port: originPort,
     sourceUrls: [`https://localhost:${originPort}`],
     material: {
@@ -228,5 +234,87 @@ describe('MtlsBridge', () => {
       port: originPort,
       alpnProtocols: ['h2', 'http/1.1'],
     }])
+  })
+
+  describe('servername', () => {
+    // The listener dials whatever SNI arrives, with its own key, so a name outside its
+    // pattern would authenticate the configured certificate to a host the user never listed.
+    async function dialsFor (listeners: BridgeListener[], connect: (port: number) => net.Socket) {
+      const calls: string[] = []
+      const gated = new MtlsBridge({
+        listeners,
+        connectUpstream: async ({ hostname }) => {
+          calls.push(hostname)
+
+          throw new Error('stop at the dial')
+        },
+        secureContextFor,
+      })
+      const [bound] = await gated.listen()
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          setTimeout(() => reject(new Error('the listener left the connection open')), 2000).unref()
+
+          connect(bound.listenPort)
+          .once('error', () => resolve())
+          .once('close', () => resolve())
+        })
+      } finally {
+        await gated.close()
+      }
+
+      return calls
+    }
+
+    const connectAs = (listeners: BridgeListener[], servername: string) => {
+      return dialsFor(listeners, (port) => tls.connect({ host: '127.0.0.1', port, servername, rejectUnauthorized: false }))
+    }
+
+    // Node refuses to send these names, so they are spliced over a same-length placeholder
+    // in a real ClientHello.
+    const sendSplicedHello = async (listeners: BridgeListener[], placeholder: string, servername: string) => {
+      const hello = await captureClientHello({ servername: placeholder })
+      const spliced = Buffer.from(hello.toString('latin1').replace(placeholder, servername), 'latin1')
+
+      expect(scanClientHello(spliced)).toMatchObject({ servername })
+
+      return dialsFor(listeners, (port) => {
+        const socket = net.connect(port, '127.0.0.1', () => socket.write(spliced))
+
+        return socket
+      })
+    }
+
+    const wildcard: BridgeListener = {
+      ...listener,
+      hostname: '*.a.com',
+      hostMatcher: new certStore.ParsedUrl('https://*.a.com').hostMatcher,
+    }
+
+    it('closes a connection for a host the listener was not configured for', async () => {
+      await expect(connectAs([listener], 'attacker.example')).resolves.toStrictEqual([])
+    })
+
+    it('dials the host an exact listener stands for', async () => {
+      await expect(connectAs([listener], 'localhost')).resolves.toStrictEqual(['localhost'])
+    })
+
+    it('dials a host a wildcard listener covers, lowercased', async () => {
+      await expect(connectAs([wildcard], 'X.A.COM')).resolves.toStrictEqual(['x.a.com'])
+    })
+
+    it('closes a connection for a host outside a wildcard listener', async () => {
+      await expect(connectAs([wildcard], 'attacker.example')).resolves.toStrictEqual([])
+    })
+
+    // A wildcard's `*` matches any character but `/`, and these would otherwise reach the
+    // upstream proxy's CONNECT line and the resolver as written
+    it.each([
+      ['a line break', 'evilcom443xxxxxxx.a.com', 'evil.com:443\r\nX: .a.com'],
+      ['a NUL', 'localhostx.a.com', 'localhost\0.a.com'],
+    ])('closes a connection whose servername carries %s', async (_kind, placeholder, servername) => {
+      await expect(sendSplicedHello([wildcard], placeholder, servername)).resolves.toStrictEqual([])
+    })
   })
 })

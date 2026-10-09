@@ -103,6 +103,8 @@ export function toBridgeEntries (clientCertificates: { url: string }[]): ClientC
       url: item.url,
       hostname: parsed.host,
       port: parsed.port,
+      hostMatcher: parsed.hostMatcher,
+      pathScoped: parsed.path !== undefined,
       material,
     }]
   })

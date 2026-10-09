@@ -24,13 +24,22 @@ export interface ClientCertificateEntry {
   hostname: string
   /** Port from the configured URL, or undefined when it omitted one. */
   port?: number
+  /** `UrlMatcher`'s own test for a wildcard `hostname`. An exact host is compared exactly. */
+  hostMatcher: HostMatcher
+  /** Whether the URL limits the certificate to part of the origin. */
+  pathScoped: boolean
   material: ClientCertificateMaterial
+}
+
+interface HostMatcher {
+  match (hostname: string): boolean
 }
 
 /** One listener the bridge must open, and the origin it stands in for. */
 export interface BridgeListener {
   hostname: string
   port: number
+  hostMatcher: HostMatcher
   material: ClientCertificateMaterial
   /** Every configured URL that collapsed into this listener. */
   sourceUrls: string[]
@@ -55,19 +64,29 @@ export interface BoundBridgeListener {
  * therefore cannot both be honored, and two entries for the same origin carrying different
  * material is a configuration that no transport can satisfy — it fails here, at startup,
  * rather than silently presenting whichever one happened to win.
+ *
+ * For the same reason a path-scoped entry cannot be kept to its path: the resolver rule
+ * steers the whole origin, so any page could reach any path on it with the certificate
+ * attached. An origin is only bridged when some entry configures it whole.
  */
 export function planBridgeListeners (entries: ClientCertificateEntry[]): BridgeListener[] {
   const listeners = new Map<string, BridgeListener>()
+  const originWide = new Set<string>()
 
   entries.forEach((entry) => {
     const port = entry.port ?? DEFAULT_HTTPS_PORT
     const key = `${entry.hostname}:${port}`
     const existing = listeners.get(key)
 
+    if (!entry.pathScoped) {
+      originWide.add(key)
+    }
+
     if (!existing) {
       listeners.set(key, {
         hostname: entry.hostname,
         port,
+        hostMatcher: entry.hostMatcher,
         material: entry.material,
         sourceUrls: [entry.url],
       })
@@ -80,6 +99,12 @@ export function planBridgeListeners (entries: ClientCertificateEntry[]): BridgeL
     }
 
     existing.sourceUrls.push(entry.url)
+  })
+
+  listeners.forEach((listener, key) => {
+    if (!originWide.has(key)) {
+      errors.throwErr('CLIENT_CERTIFICATES_PATH_SCOPED', key, listener.sourceUrls)
+    }
   })
 
   return [...listeners.values()]
