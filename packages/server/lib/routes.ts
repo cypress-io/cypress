@@ -191,11 +191,11 @@ export const createCommonRoutes = ({
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
   router.get(`/${config.namespace}/bundled/*`, (req, res) => {
-    const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
+    const root = AppData.getBundledFilePath(config.projectRoot, 'src')
 
-    debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
+    debug(`Serving dist'd bundle at file path: %o`, { root, path: req.params[0], url: req.url })
 
-    res.sendFile(file, { etag: false })
+    return send(req, encodeURI(req.params[0] ?? ''), { root, etag: false }).pipe(res)
   })
 
   router.get(`/${config.namespace}/spec-bridge-iframes`, async (req, res) => {
@@ -255,9 +255,7 @@ export const createCommonRoutes = ({
     })
   } else {
     router.get('/__cypress/assets/*', (req, res) => {
-      const pathToFile = getPathToDist('app', req.params[0])
-
-      return send(req, pathToFile).pipe(res)
+      return send(req, encodeURI(req.params[0] ?? ''), { root: getPathToDist('app') }).pipe(res)
     })
   }
 
@@ -307,9 +305,8 @@ export const createCommonRoutes = ({
     `${clientRoute}shiki/*`,
   ], (req, res) => {
     debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
-    const pathToFile = getPathToDist('app', req.path.slice(clientRoute.length))
 
-    return send(req, pathToFile).pipe(res)
+    return send(req, req.path.slice(clientRoute.length), { root: getPathToDist('app') }).pipe(res)
   })
 
   // user app code + spec code

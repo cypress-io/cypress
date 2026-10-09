@@ -28,8 +28,8 @@ describe('lib/util/tty', () => {
 
       ttyUtil.override()
 
-      expect(process.stdout.getWindowSize()).toEqual([10, 20])
-      expect(process.stderr.getWindowSize()).toEqual([10, 20])
+      expect(process.stdout.getWindowSize()).toStrictEqual([10, 20])
+      expect(process.stderr.getWindowSize()).toStrictEqual([10, 20])
     })
   })
 

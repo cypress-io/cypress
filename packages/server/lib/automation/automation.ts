@@ -1,10 +1,11 @@
 import Bluebird from 'bluebird'
 import { randomUUID } from 'crypto'
-import { Cookies } from './cookie/automation'
+import { Cookies, getCookieUrl } from './cookie/automation'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationCommands, AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
-import { cookieJar } from './cookie/jar'
+import type { SerializableAutomationCookie } from './cookie/jar'
+import { automationCookieToToughCookie, cookieJar } from './cookie/jar'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import Debug from 'debug'
 import { AutomationNotImplemented } from './automation_not_implemented'
@@ -25,6 +26,61 @@ type AutomationOptions = {
   onServiceWorkerVersionUpdated?: OnServiceWorkerVersionUpdated
   onServiceWorkerClientSideRegistrationUpdated?: OnServiceWorkerClientSideRegistrationUpdated
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
+}
+
+// `cy.request()` and `cy.setCookie()` reach the browser without passing through the
+// proxy, so the jar never sees the new value on its own. A stale copy there wins over
+// the browser's on the next AUT frame navigation, since jar cookies take precedence
+// when both carry the same name.
+// See https://github.com/cypress-io/cypress/issues/34891
+const syncSetCookieToJar = (cookie: SerializableAutomationCookie) => {
+  // resolved the same way `Cookies.setCookie` resolves the url it hands the browser,
+  // so the jar ends up holding the cookie the browser was actually told to set
+  const url = cookie.url ?? getCookieUrl(cookie)
+
+  try {
+    const { hostname, pathname } = new URL(url)
+
+    // refresh only a cookie the jar already tracks. seeding one it has never held would
+    // shadow a same-origin `document.cookie` write, which reaches the browser but not
+    // the jar. the lookup goes over https so it is not scheme-restricted: `getCookies`
+    // withholds a Secure cookie from an http url, and this url's scheme follows the
+    // cookie's own `secure` flag, which `cy.setCookie()` leaves false by default
+    if (!cookieJar.getCookies(`https://${hostname}${pathname}`).some(({ key }) => key === cookie.name)) {
+      return
+    }
+
+    // tough-cookie's store keys on the dot-stripped domain and `getCookies` only searches
+    // those keys, so a `.example.com` domain — which `cy.setCookie()` forwards verbatim —
+    // would write to a key nothing reads. `getCookieUrl` strips the dot for the same reason
+    const toughCookie = automationCookieToToughCookie({ ...cookie, domain: cookie.domain?.replace(/^\./, '') }, hostname)
+
+    // a set:cookie payload carries no maxAge, which the conversion turns into
+    // 'Infinity'. tough-cookie reads maxAge ahead of expires, so the jar copy would
+    // outlive the one the browser holds. Infinity is its sentinel for "never expires",
+    // and expiryTime() throws on undefined
+    if (cookie.maxAge == null) {
+      // null is tough-cookie's own default for a cookie without Max-Age, and every
+      // read of maxAge guards with `!= null`, but its types do not admit it
+      // @ts-expect-error
+      toughCookie.maxAge = null
+      toughCookie.expires = toughCookie.expires ?? Infinity
+    }
+
+    // browsers treat an unspecified SameSite as Lax, which is what `CookieJar.parse`
+    // applies to cookies arriving on a response. `cy.setCookie()` also accepts the
+    // extension vocabulary's literal 'unspecified', which means the same thing but
+    // which tough-cookie does not recognise and so treats as None. without this the
+    // jar copy is attached to cross-site requests the browser would withhold it from
+    if (!toughCookie.sameSite || cookie.sameSite === 'unspecified') {
+      toughCookie.sameSite = 'lax'
+    }
+
+    // no request drives this write, so there is no same-site context to apply
+    cookieJar.setCookie(toughCookie, url, undefined)
+  } catch (err) {
+    debug('adding cookie to jar failed %o', { cookie, err })
+  }
 }
 
 export class Automation {
@@ -152,6 +208,13 @@ export class Automation {
           return this.cookies.getCookie(data, automate)
         case 'set:cookie':
           return this.cookies.setCookie(data, automate)
+          .then((automationCookie) => {
+            // the sync runs only once the automation resolves, so a namespaced or
+            // browser-rejected cookie never reaches the jar
+            syncSetCookieToJar(data)
+
+            return automationCookie
+          })
         case 'set:cookies':
           return this.cookies.setCookies(data, automate)
         case 'add:cookies':

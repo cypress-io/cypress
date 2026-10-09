@@ -36,7 +36,7 @@ Note: you should not ever need to build the .js files manually. `@packages/ts` p
 yarn workspace @packages/server build-prod
 ```
 
-* `yarn test-unit` executes unit tests in [`test/unit`](./test/unit) on both runners: mocha owns `*_spec.ts` (`yarn test-unit-mocha`) and vitest owns `*.spec.ts` (`yarn test-unit-vitest`)
+* `yarn test-unit` executes unit tests in [`test/unit`](./test/unit) with vitest
 * `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
 * `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
 
@@ -49,12 +49,9 @@ yarn test-watch /test/path/to/spec.js
 ### Running individual unit tests
 
 ```bash
-yarn test <path/to/test>
-yarn test test/unit/cache_spec.ts
+yarn test-unit test/unit/routes.spec.ts
 ## or
-yarn test-unit-mocha cache_spec ## shorthand, uses globbing to find spec
-## vitest specs (*.spec.ts)
-yarn test-unit-vitest test/unit/routes.spec.ts
+yarn test-unit routes ## filters spec files by substring
 ```
 
 ### Running individual integration tests
@@ -72,11 +69,11 @@ yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 
 ### Updating snapshots
 
-Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
+For integration tests, prepend `SNAPSHOT_UPDATE=1` to the test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info. For unit tests, pass vitest's `-u` flag.
 
 ```bash
-SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.js
 SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
+yarn test-unit test/unit/reporter.spec.ts -u
 ```
 
 ### V8 Snapshots

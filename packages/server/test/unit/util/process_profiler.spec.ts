@@ -1,0 +1,226 @@
+// The SUT bare-requires lib/browsers and lib/plugins, which only a ts require hook can load
+import '@packages/ts/register'
+import { createRequire } from 'module'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import _ from 'lodash'
+import type si from 'systeminformation'
+import {
+  groupCyProcesses,
+  _renameBrowserGroup,
+  _aggregateGroups,
+  _reset,
+} from '../../../lib/util/process_profiler'
+
+// Same CJS instances the SUT's bare require() sees, including the DataContext that getPluginPid checks
+const requireCjs = createRequire(import.meta.url)
+const browsers = requireCjs('../../../lib/browsers').default
+const plugins = requireCjs('../../../lib/plugins')
+const { clearCtx, getCtx, setCtx, makeDataContext } = requireCjs('../../../lib/makeDataContext')
+
+const BROWSER_PID = 11111
+const SUB_BROWSER_PID = 11112
+const GUI_PID = 77777
+const PLUGIN_PID = 22222
+const SUB_PLUGIN_PID = 22223
+const FFMPEG_PID = 33333
+const MAIN_PID = process.pid
+const OTHER_PID = 66666
+const ANOTHER_PID = 88888
+const LAUNCHER_PID = 55555
+const SHARED_BROKER_PID = 99990
+const SHARED_GPU_PID = 99991
+const SHARED_UTILITY_PID = 99992
+const SHARED_ZYGOTE_PID = 99993
+
+const PROCESSES: Partial<si.Systeminformation.ProcessesProcessData>[] = [
+  {
+    pid: MAIN_PID,
+    parentPid: LAUNCHER_PID,
+    params: '',
+    name: 'Cypress',
+  },
+  {
+    pid: BROWSER_PID,
+    parentPid: MAIN_PID,
+    params: '',
+    name: 'firefox',
+  },
+  {
+    pid: SUB_BROWSER_PID,
+    parentPid: BROWSER_PID,
+    params: '',
+    name: 'firefox-bin',
+  },
+  {
+    pid: GUI_PID,
+    parentPid: MAIN_PID,
+    params: '--type=renderer',
+    name: 'Cypress',
+  },
+  {
+    pid: PLUGIN_PID,
+    parentPid: MAIN_PID,
+    params: 'plugin.js',
+    name: 'node',
+  },
+  {
+    pid: SUB_PLUGIN_PID,
+    parentPid: PLUGIN_PID,
+    params: '',
+    name: 'msword.exe',
+  },
+  {
+    pid: FFMPEG_PID,
+    parentPid: MAIN_PID,
+    params: '',
+    name: 'ffmpeg',
+  },
+  {
+    pid: OTHER_PID,
+    parentPid: MAIN_PID,
+    params: '',
+    name: 'foo',
+  },
+  {
+    pid: ANOTHER_PID,
+    parentPid: MAIN_PID,
+    params: '',
+    name: 'bar',
+  },
+  {
+    pid: SHARED_GPU_PID,
+    parentPid: MAIN_PID,
+    params: '--type=gpu-process',
+    name: 'Cypress',
+  },
+  {
+    pid: SHARED_BROKER_PID,
+    parentPid: MAIN_PID,
+    params: '--type=broker',
+    name: 'Cypress',
+  },
+  {
+    pid: SHARED_UTILITY_PID,
+    parentPid: MAIN_PID,
+    params: '--type=utility',
+    name: 'Cypress',
+  },
+  {
+    pid: SHARED_ZYGOTE_PID,
+    parentPid: MAIN_PID,
+    params: '--type=zygote',
+    name: 'Cypress',
+  },
+]
+
+describe('lib/util/process_profiler', function () {
+  beforeEach(async () => {
+    await clearCtx()
+    setCtx(makeDataContext({}))
+    _reset()
+  })
+
+  afterEach(async () => {
+    await getCtx()._reset()
+    await clearCtx()
+    vi.restoreAllMocks()
+  })
+
+  describe('.groupCyProcesses', () => {
+    it('groups correctly', () => {
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ pid: BROWSER_PID })
+      vi.spyOn(plugins, 'getPluginPid').mockReturnValue(PLUGIN_PID)
+
+      // @ts-ignore
+      const groupedProcesses = groupCyProcesses({ list: PROCESSES })
+
+      const checkGroup = (pid, group) => {
+        expect(_.find(groupedProcesses, { pid })).toHaveProperty('group', group)
+      }
+
+      checkGroup(BROWSER_PID, 'browser')
+      checkGroup(SUB_BROWSER_PID, 'browser')
+      checkGroup(GUI_PID, 'launchpad')
+      checkGroup(PLUGIN_PID, 'plugin')
+      checkGroup(SUB_PLUGIN_PID, 'plugin')
+      checkGroup(FFMPEG_PID, 'ffmpeg')
+      checkGroup(MAIN_PID, 'cypress')
+      checkGroup(OTHER_PID, 'other')
+      checkGroup(ANOTHER_PID, 'other')
+      checkGroup(SHARED_GPU_PID, 'electron-shared')
+      checkGroup(SHARED_BROKER_PID, 'electron-shared')
+      checkGroup(SHARED_UTILITY_PID, 'electron-shared')
+      checkGroup(SHARED_ZYGOTE_PID, 'electron-shared')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/30670
+    // the profiler runs on its own timer and can fire when the DataContext
+    // has not been set (or has been torn down), which previously caused
+    // `getPluginPid` to throw "Expected DataContext to already have been set"
+    it('does not throw when the DataContext has not been set', async () => {
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ pid: BROWSER_PID })
+
+      // tear down the context that beforeEach sets up so getPluginPid
+      // exercises the real, un-stubbed code path with no context
+      await clearCtx()
+
+      try {
+        expect(plugins.getPluginPid()).toBeUndefined()
+
+        // @ts-ignore
+        expect(() => groupCyProcesses({ list: PROCESSES })).not.toThrow()
+      } finally {
+        // restore a context so the afterEach teardown can run cleanly
+        setCtx(makeDataContext({}))
+      }
+    })
+  })
+
+  describe('._renameBrowserGroup', () => {
+    it('renames browser-grouped processes to correct name', () => {
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ browser: { displayName: 'FooBrowser' } })
+
+      const processes = [
+        { group: 'foo' },
+        { group: 'bar' },
+        { group: 'browser', pid: 1 },
+        { group: 'browser', pid: 2 },
+      ]
+
+      const expected = [
+        { group: 'foo' },
+        { group: 'bar' },
+        { group: 'FooBrowser', pid: 1 },
+        { group: 'FooBrowser', pid: 2 },
+      ]
+
+      // @ts-ignore
+      expect(_renameBrowserGroup(processes)).toStrictEqual(expected)
+    })
+  })
+
+  describe('._aggregateGroups', () => {
+    it('aggregates groups as expected', () => {
+      vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ pid: BROWSER_PID })
+      vi.spyOn(plugins, 'getPluginPid').mockReturnValue(PLUGIN_PID)
+
+      const processes = _.cloneDeep(PROCESSES)
+      .map((proc) => {
+        // add some dummy measurements so there is data to aggregate
+        proc.memRss = 10 * 1024 // 10mb
+        proc.cpu = 20
+
+        return proc
+      })
+
+      // @ts-ignore
+      const result = _aggregateGroups(groupCyProcesses({ list: processes }))
+
+      // main process will have variable pid, replace it w constant for snapshotting
+      // @ts-ignore
+      _.find(result, { pids: String(MAIN_PID) }).pids = '111111111'
+
+      expect(result).toMatchSnapshot()
+    })
+  })
+})

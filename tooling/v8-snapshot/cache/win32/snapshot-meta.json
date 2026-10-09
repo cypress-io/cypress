@@ -606,7 +606,7 @@
     "./node_modules/send/node_modules/debug/src/browser.js",
     "./node_modules/send/node_modules/debug/src/index.js",
     "./node_modules/signal-exit/signals.js",
-    "./node_modules/simple-git/dist/cjs/index.js",
+    "./node_modules/simple-git/dist/index.cjs",
     "./node_modules/socket.io-adapter/dist/cluster-adapter.js",
     "./node_modules/socket.io-adapter/dist/in-memory-adapter.js",
     "./node_modules/socket.io-adapter/node_modules/ws/index.js",
@@ -882,6 +882,10 @@
     "./packages/server/lib/util/fs.ts",
     "./packages/server/lib/util/glob.ts",
     "./packages/server/lib/video_capture.ts",
+    "./packages/server/node_modules/axios/node_modules/agent-base/dist/src/index.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/agent.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/index.js",
+    "./packages/server/node_modules/axios/node_modules/https-proxy-agent/dist/parse-proxy-response.js",
     "./packages/server/node_modules/body-parser/index.js",
     "./packages/server/node_modules/body-parser/node_modules/debug/src/browser.js",
     "./packages/server/node_modules/body-parser/node_modules/debug/src/index.js",
@@ -3456,6 +3460,7 @@
     "./packages/data-context/src/util/files.ts",
     "./packages/data-context/src/util/hasTypescript.ts",
     "./packages/data-context/src/util/index.ts",
+    "./packages/data-context/src/util/maskProxyPassword.ts",
     "./packages/data-context/src/util/pluginHandlers.ts",
     "./packages/data-context/src/util/shouldLoadConfigAsEsm.ts",
     "./packages/data-context/src/util/urqlCacheKeys.ts",
@@ -3777,6 +3782,7 @@
     "./packages/server/lib/util/tests_utils.ts",
     "./packages/server/lib/util/trash.ts",
     "./packages/server/lib/util/tty.ts",
+    "./packages/server/node_modules/axios/node_modules/agent-base/dist/src/promisify.js",
     "./packages/server/node_modules/body-parser/lib/read.js",
     "./packages/server/node_modules/body-parser/lib/types/json.js",
     "./packages/server/node_modules/body-parser/lib/types/raw.js",
@@ -3934,5 +3940,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "83746fa7bdf589ed7da0eb587c99f5c5a850d3402ea0f5062fd6bffea418efe2"
+  "deferredHash": "2a134425cd192d392197e12eab63d17856f49dc4397da94509f16210ae37407a"
 }
