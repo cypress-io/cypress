@@ -40,7 +40,23 @@ describe('toBridgeEntries', () => {
 
     expect(toBridgeEntries([{ url: 'https://example.com/secure' }])).toMatchObject([{
       hostname: 'example.com',
+      pathScoped: true,
     }])
+  })
+
+  it('treats a path that matches every path as the whole origin', () => {
+    store('https://example.com/**', 'all')
+
+    expect(toBridgeEntries([{ url: 'https://example.com/**' }])).toMatchObject([{ pathScoped: false }])
+  })
+
+  it('judges a servername by the configured host pattern', () => {
+    store('https://*.example.com', 'wildcard')
+
+    const [{ hostMatcher }] = toBridgeEntries([{ url: 'https://*.example.com' }])
+
+    expect(hostMatcher.match('api.example.com')).toBe(true)
+    expect(hostMatcher.match('attacker.example')).toBe(false)
   })
 
   it('returns nothing when no certificates are configured', () => {
@@ -66,6 +82,17 @@ describe('createMtlsBridge', () => {
     })
 
     await expect(attempt).rejects.toMatchObject({ type: 'CLIENT_CERTIFICATES_CONFLICT' })
+  })
+
+  it('refuses a certificate configured for only part of an origin', async () => {
+    store('https://example.com/secure/*', 'path')
+
+    const attempt = createMtlsBridge({
+      clientCertificates: [{ url: 'https://example.com/secure/*' }],
+      caFolder: '/tmp/mtls-bridge-unused',
+    })
+
+    await expect(attempt).rejects.toMatchObject({ type: 'CLIENT_CERTIFICATES_PATH_SCOPED' })
   })
 
   it('does nothing when no client certificate is configured', async () => {

@@ -104,6 +104,7 @@ beforeAll(async () => {
 
   listener = {
     hostname: 'localhost',
+    hostMatcher: { match: (h) => h === 'localhost' },
     port: originPort,
     sourceUrls: [`https://localhost:${originPort}`],
     material: {
@@ -228,5 +229,55 @@ describe('MtlsBridge', () => {
       port: originPort,
       alpnProtocols: ['h2', 'http/1.1'],
     }])
+  })
+
+  describe('servername', () => {
+    // The listener dials whatever SNI arrives, with its own key, so a name outside its
+    // pattern would authenticate the configured certificate to a host the user never listed.
+    async function connectAs (listeners: BridgeListener[], servername: string) {
+      const calls: string[] = []
+      const gated = new MtlsBridge({
+        listeners,
+        connectUpstream: async ({ hostname }) => {
+          calls.push(hostname)
+
+          throw new Error('stop at the dial')
+        },
+        secureContextFor,
+      })
+      const [bound] = await gated.listen()
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          setTimeout(() => reject(new Error('the listener left the connection open')), 2000).unref()
+
+          tls.connect({ host: '127.0.0.1', port: bound.listenPort, servername, rejectUnauthorized: false })
+          .once('error', () => resolve())
+          .once('close', () => resolve())
+        })
+      } finally {
+        await gated.close()
+      }
+
+      return calls
+    }
+
+    const wildcard: BridgeListener = {
+      ...listener,
+      hostname: '*.a.com',
+      hostMatcher: { match: (h) => h.endsWith('.a.com') },
+    }
+
+    it('closes a connection for a host the listener was not configured for', async () => {
+      await expect(connectAs([listener], 'attacker.example')).resolves.toStrictEqual([])
+    })
+
+    it('dials a host a wildcard listener covers', async () => {
+      await expect(connectAs([wildcard], 'x.a.com')).resolves.toStrictEqual(['x.a.com'])
+    })
+
+    it('closes a connection for a host outside a wildcard listener', async () => {
+      await expect(connectAs([wildcard], 'attacker.example')).resolves.toStrictEqual([])
+    })
   })
 })

@@ -123,9 +123,19 @@ export class MtlsBridge {
         return
       }
 
+      // The listener is reachable by any local process and by any page in the browser, and the
+      // origin is dialed from SNI with this listener's key, so a name it was not configured
+      // for must never get that far.
+      if (scan.servername && !listener.hostMatcher.match(scan.servername.toLowerCase())) {
+        debug('servername %s does not match listener %s; closing', scan.servername, listener.hostname)
+        browserSocket.destroy()
+
+        return
+      }
+
       // A wildcard listener only knows which origin it stands for from SNI, so a connection
       // that carries none cannot be forwarded anywhere truthful.
-      const hostname = scan.servername ?? (listener.hostname.includes('*') ? null : listener.hostname)
+      const hostname = scan.servername?.toLowerCase() ?? (listener.hostname.includes('*') ? null : listener.hostname)
 
       if (!hostname) {
         debug('no servername for wildcard listener %s; closing', listener.hostname)
