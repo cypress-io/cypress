@@ -762,7 +762,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws if used as a parent command', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 1)
-          expect(err.message).to.include('looks like you are trying to call a child command before running a parent command')
+          expect(err.message).to.include('`cy.should(function(){})` failed because it is not chained off a command that yields a subject.')
 
           done()
         })

@@ -382,7 +382,7 @@ describe('src/cy/commands/actions/selectFile', () => {
     }, () => {
       it('is a child command', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('A child command must be chained after a parent because it operates on a previous subject.')
+          expect(err.message).to.include('`cy.selectFile()` runs on the subject yielded by the command it is chained off')
           done()
         })
 
