@@ -407,5 +407,37 @@ describe('FilterTaggedContent', () => {
       expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
       expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.THREE, ENCODING_UTF8))
     })
+
+    it('handles an end tag followed by a new start tag on the same line', async () => {
+      const coalesced = `${START_TAG}${TEST_LINES.ONE}\n${END_TAG}${START_TAG}${TEST_LINES.TWO}\n${END_TAG}`
+      const lines = [
+        `${START_TAG}${TEST_LINES.ONE}\n`,
+        `${END_TAG}${START_TAG}${TEST_LINES.TWO}\n`,
+        END_TAG,
+      ]
+
+      mockStringDecoder.write.mockReturnValue(coalesced)
+      mockLineDecoder[Symbol.iterator].mockReturnValue(lines[Symbol.iterator]())
+
+      await filter.transform(Buffer.from(coalesced), ENCODING_UTF8, vi.fn())
+
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(`${TEST_LINES.ONE}\n`, ENCODING_UTF8))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(`${TEST_LINES.TWO}\n`, ENCODING_UTF8))
+      expect(filter.push).not.toHaveBeenCalled()
+    })
+
+    it('handles multiple tagged sections on the same line', async () => {
+      const line = `${START_TAG}${TEST_LINES.ONE}${END_TAG}${TEST_LINES.TWO}${START_TAG}${TEST_LINES.THREE}${END_TAG}${TEST_LINES.FOUR}`
+
+      mockStringDecoder.write.mockReturnValue(line)
+      mockLineDecoder[Symbol.iterator].mockReturnValue([line][Symbol.iterator]())
+
+      await filter.transform(Buffer.from(line), ENCODING_UTF8, vi.fn())
+
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.THREE, ENCODING_UTF8))
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.FOUR, ENCODING_UTF8))
+    })
   })
 })

@@ -151,6 +151,59 @@ describe('GitDataSource', () => {
     })
   })
 
+  it(`reads committed files whose names contain shell or pathspec syntax as literal paths on ${os.platform()}`, async () => {
+    const filenames = [
+      'pwn$(touch${IFS}injected).cy.js',
+      'pwn`touch${IFS}injected`.cy.js',
+      'file withSpace.cy.js',
+      'file\'withOneSingleQuote.cy.js',
+      '[xy].cy.js',
+    ]
+
+    if (os.platform() !== 'win32') {
+      // Double quote not a legal character on NTFS
+      filenames.push('file"withOneDoubleQuote.cy.js')
+    }
+
+    const specs = filenames.map((filename) => toPosix(path.join(e2eFolder, filename)))
+
+    await Promise.all(specs.map((spec) => fs.createFile(spec)))
+    await git.add(specs)
+    await git.commit('add specs with special names')
+
+    // a later commit that `[xy].cy.js` would match if it were read as a glob
+    const globMatch = path.join(e2eFolder, 'x.cy.js')
+
+    await fs.createFile(globMatch)
+    await git.add([globMatch])
+    await git.commit('add glob match')
+
+    const projectContents = await fs.readdir(projectPath)
+    const dfd = Promise.withResolvers()
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: jest.fn(),
+      onGitInfoChange: dfd.resolve,
+      onError: jest.fn(),
+    })
+
+    gitInfo.setSpecs(specs)
+
+    await dfd.promise
+
+    expect(await fs.readdir(projectPath)).toEqual(projectContents)
+
+    for (const spec of specs) {
+      expect(gitInfo.gitInfoFor(spec)).toMatchObject({
+        statusType: 'unmodified',
+        author: 'Test User',
+        subject: 'add specs with special names',
+      })
+    }
+  })
+
   it(`watches switching branches on ${os.platform()}`, async () => {
     const stub = jest.fn()
     const dfd = Promise.withResolvers()

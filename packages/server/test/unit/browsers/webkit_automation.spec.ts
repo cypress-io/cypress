@@ -66,7 +66,7 @@ describe('lib/browsers/webkit-automation', () => {
     })
 
     it('registers request, requestfinished, and requestfailed handlers', () => {
-      expect(Object.keys(handlers).sort()).toEqual(['request', 'requestfailed', 'requestfinished'].sort())
+      expect(Object.keys(handlers).sort()).toStrictEqual(['request', 'requestfailed', 'requestfinished'].sort())
     })
 
     // https://github.com/cypress-io/cypress/issues/23810

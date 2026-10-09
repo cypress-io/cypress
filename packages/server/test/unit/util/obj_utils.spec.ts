@@ -18,7 +18,7 @@ describe('obj_utils', () => {
         bar: remove,
       })
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         foos: [{ id: 0, newName: 'foo' }, { id: 1, newName: 'bar' }, { id: 2, newName: 'baz' }],
         foos2: [{ id: 1 }, { id: 2 }, { id: 3 }],
       })
