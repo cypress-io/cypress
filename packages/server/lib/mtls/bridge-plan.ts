@@ -31,7 +31,7 @@ export interface ClientCertificateEntry {
   material: ClientCertificateMaterial
 }
 
-export interface HostMatcher {
+interface HostMatcher {
   match (hostname: string): boolean
 }
 
