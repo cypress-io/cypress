@@ -12,6 +12,7 @@ import { SocketE2E } from '../../lib/socket-e2e'
 import { ServerBase } from '../../lib/server-base'
 import { Automation } from '../../lib/automation'
 import preprocessor from '../../lib/plugins/preprocessor'
+import * as specFrameScripts from '../../lib/util/spec_frame_scripts'
 import { fs } from '../../lib/util/fs'
 import * as session from '../../lib/session'
 import devServer from '../../lib/plugins/dev-server'
@@ -1221,11 +1222,29 @@ describe('lib/socket', () => {
 
       describe('#watchTestFileByPath', () => {
         let getFile: MockInstance
+        let isSpecFrameScript: MockInstance
 
         beforeEach(() => {
           socket.testsDir = Fixtures.project('todos/tests')
 
+          isSpecFrameScript = vi.spyOn(specFrameScripts, 'isSpecFrameScript').mockReturnValue(true)
           getFile = vi.spyOn(preprocessor, 'getFile').mockResolvedValue(undefined as any)
+        })
+
+        it('refuses to watch a path that is not a spec or the support file', () => {
+          isSpecFrameScript.mockReturnValue(false)
+          const removeFile = vi.spyOn(preprocessor, 'removeFile')
+
+          socket.testFilePath = 'test1.js'
+
+          const result = socket.watchTestFileByPath(cfg, {
+            relative: '../secret.json',
+          })
+
+          expect(result).toBeUndefined()
+          expect(getFile).not.toHaveBeenCalled()
+          expect(removeFile).not.toHaveBeenCalled()
+          expect(socket.testFilePath).toBe('test1.js')
         })
 
         it('returns undefined if trying to watch special path __all', () => {
