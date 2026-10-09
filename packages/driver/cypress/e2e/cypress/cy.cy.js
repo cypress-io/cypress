@@ -1,3 +1,4 @@
+const { stripIndent } = require('common-tags')
 const { $ } = Cypress
 
 describe('driver/src/cypress/cy', () => {
@@ -276,8 +277,7 @@ describe('driver/src/cypress/cy', () => {
 
       it('fails when calling child command before parent', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Oops, it looks like you are trying to call a child command before running a parent command')
-          expect(err.message).to.include('cy.c()')
+          expect(err.message).to.include('`cy.c()` failed because it is not chained off a command that yields a subject.')
 
           done()
         })
@@ -289,8 +289,12 @@ describe('driver/src/cypress/cy', () => {
 
       it('fails when calling child command before parent with arguments', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Oops, it looks like you are trying to call a child command before running a parent command')
-          expect(err.message).to.include('cy.c("bar")')
+          expect(err.message).to.eq(stripIndent`\
+            \`cy.c("bar")\` failed because it is not chained off a command that yields a subject.
+
+            \`cy.c()\` runs on the subject yielded by the command it is chained off, so calling it directly off \`cy\` gives it no subject. Chain it off a command that yields a subject, such as \`cy.get()\` or \`cy.wrap()\`.`)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/introduction-to-cypress')
 
           done()
         })
@@ -614,5 +618,60 @@ describe('driver/src/cypress/cy', () => {
         })
       })
     })
+  })
+})
+
+describe('driver/src/cypress/cy - subject validation as the first command in the test', () => {
+  before(() => {
+    Cypress.Commands.add('validatesElementAsParent', () => {
+      Cypress.ensure.isElement('abc', 'validatesElementAsParent', cy)
+    })
+
+    Cypress.Commands.add('validatesWindowAsParent', () => {
+      Cypress.ensure.isWindow('abc', 'validatesWindowAsParent', cy)
+    })
+
+    Cypress.Commands.add('validatesDocumentAsParent', () => {
+      Cypress.ensure.isDocument('abc', 'validatesDocumentAsParent', cy)
+    })
+
+    Cypress.Commands.add('validatesElementAsDual', { prevSubject: 'optional' }, (subject) => {
+      Cypress.ensure.isType(subject, ['element'], 'validatesElementAsDual', cy)
+    })
+  })
+
+  const cases = [
+    { name: 'validatesElementAsParent', requirement: 'requires a DOM element.' },
+    { name: 'validatesWindowAsParent', requirement: 'requires the subject be a global `window` object.' },
+    { name: 'validatesDocumentAsParent', requirement: 'requires the subject be a global `document` object.' },
+  ]
+
+  cases.forEach(({ name, requirement }) => {
+    it(`reports the invalid subject from cy.${name}() without a previous command`, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.match(new RegExp(`^\`cy\\.${name}\\(\\)\` failed because it ${Cypress._.escapeRegExp(requirement)}`))
+        expect(err.message).not.to.include('The previous command that ran was')
+
+        done()
+      })
+
+      cy[name]()
+    })
+  })
+
+  it('reports the invalid subject when no command is running', () => {
+    expect(() => Cypress.ensure.isElement('abc', 'foo', cy)).to.throw('`cy.foo()` failed because it requires a DOM element.')
+    expect(() => Cypress.ensure.isWindow('abc', 'foo', cy)).to.throw('`cy.foo()` failed because it requires the subject be a global `window` object.')
+    expect(() => Cypress.ensure.isDocument('abc', 'foo', cy)).to.throw('`cy.foo()` failed because it requires the subject be a global `document` object.')
+  })
+
+  it('reports a missing element, not a missing parent, for a dual command with no subject', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.match(/^`cy\.validatesElementAsDual\(\)` failed because it requires a DOM element\./)
+
+      done()
+    })
+
+    cy.validatesElementAsDual()
   })
 })
