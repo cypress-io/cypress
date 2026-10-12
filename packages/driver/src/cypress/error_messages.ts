@@ -55,6 +55,14 @@ const cmd = (command, args = '') => {
   return `\`${prefix}${command}(${args})\``
 }
 
+const previousCommandSection = (previous?: string) => {
+  if (!previous) {
+    return ''
+  }
+
+  return `\n\nThe previous command that ran was:\n\n  > ${cmd(previous)}`
+}
+
 const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map($utils.stringifyActual).join(', ')})`
 
 export const subjectChainToString = (subjectChain) => {
@@ -927,20 +935,13 @@ export default {
       docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invoking_child_without_parent (obj) {
-      return stripIndent`\
-        Oops, it looks like you are trying to call a child command before running a parent command.
+      return {
+        message: stripIndent`\
+          ${cmd(obj.cmd, obj.args)} failed because it is not chained off a command that yields a subject.
 
-        You wrote code that looks like this:
-
-        \`${cmd(obj.cmd, obj.args)}\`
-
-        A child command must be chained after a parent because it operates on a previous subject.
-
-        For example - if we were issuing the child command \`click\`...
-
-        cy
-          .get('button') // parent command must come first
-          .click()       // then child command comes second`
+          ${cmd(obj.cmd)} runs on the subject yielded by the command it is chained off, so calling it directly off \`cy\` gives it no subject. Chain it off a command that yields a subject, such as ${cmd('get')} or ${cmd('wrap')}.`,
+        docsUrl: 'https://on.cypress.io/introduction-to-cypress',
+      }
     },
     no_cy: '`Cypress.cy` is `undefined`. You may be trying to query outside of a running test. Cannot call `Cypress.$()`',
     no_runner: 'Cannot call `Cypress#run` without a runner instance.',
@@ -2004,28 +2005,20 @@ export default {
       }
     },
     not_window_or_document (obj) {
-      return stripIndent`\
+      return `${stripIndent`\
         ${cmd(obj.name)} failed because it requires the subject be a global \`${obj.type}\` object.
 
         The subject received was:
 
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}`
+          > \`${obj.subject}\``}${previousCommandSection(obj.previous)}`
     },
     not_element (obj) {
-      return stripIndent`\
+      return `${stripIndent`\
         ${cmd(obj.name)} failed because it requires a DOM element.
 
         The subject received was:
 
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}`
+          > \`${obj.subject}\``}${previousCommandSection(obj.previous)}`
     },
     not_element_empty_subject (obj) {
       return stripIndent`\

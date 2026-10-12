@@ -394,3 +394,43 @@ describe('src/cy/commands/traversals', () => {
     })
   })
 })
+
+describe('src/cy/commands/traversals - called directly off cy', () => {
+  const notChained = 'failed because it is not chained off a command that yields a subject.'
+
+  const traversals = ['find', 'filter', 'not', 'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev', 'prevAll', 'prevUntil', 'siblings']
+
+  traversals.forEach((name) => {
+    it(`throws when cy.${name}() has no previous subject`, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.match(new RegExp(`^\`cy\\.${name}\\(.*\\)\` ${_.escapeRegExp(notChained)}`))
+
+        done()
+      })
+
+      cy[name]()
+    })
+  })
+
+  it('names the command and its argument for cy.eq(0)', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.include(`\`cy.eq(0)\` ${notChained}`)
+
+      done()
+    })
+
+    cy.eq(0)
+  })
+
+  it('fails right away when a command that yields a subject ran first but is not chained', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.match(new RegExp(`^\`cy\\.eq\\(0\\)\` ${_.escapeRegExp(notChained)}`))
+
+      done()
+    })
+
+    cy.visit('/fixtures/dom.html')
+    cy.get('#list li')
+    cy.eq(0)
+  })
+})
