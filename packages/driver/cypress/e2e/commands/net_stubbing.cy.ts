@@ -20,6 +20,14 @@ const uniqueRoute = (route) => {
   return `${route}-${routeCount}`
 }
 
+// Shared `/post-only` is hit by many specs; leaked requests (#20397) can match
+// intercepts on the bare path. Scope body-parsing traffic with a unique query.
+const uniquePostOnlyUrl = () => {
+  routeCount += 1
+
+  return `/post-only?cypressBodyParsing=${routeCount}`
+}
+
 // The default network path intercepts in the browser through CDP, which only
 // Chromium-family browsers support; Firefox, Electron, and WebKit stay on the
 // HTTP/1 proxy either way.
@@ -2251,15 +2259,16 @@ describe('network stubbing', { retries: 15 }, function () {
     })
 
     context('body parsing', function () {
-      // `/post-only` is shared by other tests here, including one that fires a `GET /post-only`
+      // `/post-only` is shared by other tests here, including POSTs without a content-type
       [
         ['application/json', '{"foo":"bar"}'],
         ['application/vnd.api+json', '{}'],
       ].forEach(([contentType, expectedBody]) => {
         it(`automatically parses ${contentType} request bodies`, function () {
           const p = Promise.defer()
+          const postUrl = uniquePostOnlyUrl()
 
-          cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
+          cy.intercept({ method: 'POST', url: postUrl }, (req) => {
             expect(req.headers['content-type']).to.eq(contentType)
             expect(req.body).to.deep.eq({ foo: 'bar' })
 
@@ -2267,7 +2276,7 @@ describe('network stubbing', { retries: 15 }, function () {
           }).as('post')
           .then(() => {
             return $.ajax({
-              url: '/post-only',
+              url: postUrl,
               method: 'POST',
               contentType,
               data: JSON.stringify({ foo: 'bar' }),
@@ -2283,15 +2292,16 @@ describe('network stubbing', { retries: 15 }, function () {
 
       it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
         const p = Promise.defer()
+        const postUrl = uniquePostOnlyUrl()
 
-        cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
+        cy.intercept({ method: 'POST', url: postUrl }, (req) => {
           expect(req.body).to.deep.eq(JSON.stringify({ foo: 'bar' }))
 
           p.resolve()
         }).as('post')
         .then(() => {
           return $.ajax({
-            url: '/post-only',
+            url: postUrl,
             method: 'POST',
             contentType: 'text/html',
             data: JSON.stringify({ foo: 'bar' }),
@@ -2302,15 +2312,16 @@ describe('network stubbing', { retries: 15 }, function () {
 
       it('sets body to string if JSON is malformed', function () {
         const p = Promise.defer()
+        const postUrl = uniquePostOnlyUrl()
 
-        cy.intercept({ method: 'POST', url: '/post-only*' }, (req) => {
+        cy.intercept({ method: 'POST', url: postUrl }, (req) => {
           expect(req.body).to.deep.eq('{ foo::: }')
 
           p.resolve()
         }).as('post')
         .then(() => {
           return $.ajax({
-            url: '/post-only',
+            url: postUrl,
             method: 'POST',
             contentType: 'application/json',
             // invalid JSON
