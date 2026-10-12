@@ -1,5 +1,7 @@
 const isWebkit = Cypress.isBrowser('webkit')
 
+export {}
+
 describe('src/cy/commands/cookies - no stub', () => {
   const setCookies = () => {
     cy.log('set cookies')
@@ -225,8 +227,8 @@ describe('src/cy/commands/cookies - no stub', () => {
       setCookies()
 
       cy.getCookie('key').should((cookie) => {
-        expect(cookie.value).to.equal('barbaz.com value')
-        expect(cookie.domain).to.match(/\.?barbaz\.com/)
+        expect(cookie?.value).to.equal('barbaz.com value')
+        expect(cookie?.domain).to.match(/\.?barbaz\.com/)
       })
 
       // webkit does not support cy.origin()
@@ -236,8 +238,8 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
         cy.getCookie('key').should((cookie) => {
-          expect(cookie.value).to.equal('foobar.com value')
-          expect(cookie.domain).to.match(/\.?foobar\.com/)
+          expect(cookie?.value).to.equal('foobar.com value')
+          expect(cookie?.domain).to.match(/\.?foobar\.com/)
         })
       })
     })
@@ -247,8 +249,8 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
 
       cy.getCookie('key').should((cookie) => {
-        expect(cookie.value).to.equal('www.barbaz.com value')
-        expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
+        expect(cookie?.value).to.equal('www.barbaz.com value')
+        expect(cookie?.domain).to.match(/\.?www\.barbaz\.com/)
       })
 
       // webkit does not support cy.origin()
@@ -259,8 +261,8 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
         cy.getCookie('key').should((cookie) => {
-          expect(cookie.value).to.equal('www.foobar.com value')
-          expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
+          expect(cookie?.value).to.equal('www.foobar.com value')
+          expect(cookie?.domain).to.match(/\.?www\.foobar\.com/)
         })
       })
     })
@@ -270,8 +272,8 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
 
       cy.getCookie('key').should((cookie) => {
-        expect(cookie.value).to.equal('barbaz.com value')
-        expect(cookie.domain).to.match(/\.?barbaz\.com/)
+        expect(cookie?.value).to.equal('barbaz.com value')
+        expect(cookie?.domain).to.match(/\.?barbaz\.com/)
       })
 
       // webkit does not support cy.origin()
@@ -282,8 +284,8 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
 
         cy.getCookie('key').should((cookie) => {
-          expect(cookie.value).to.equal('foobar.com value')
-          expect(cookie.domain).to.match(/\.?foobar\.com/)
+          expect(cookie?.value).to.equal('foobar.com value')
+          expect(cookie?.domain).to.match(/\.?foobar\.com/)
         })
       })
     })
@@ -293,8 +295,8 @@ describe('src/cy/commands/cookies - no stub', () => {
       setCookies()
 
       cy.getCookie('key', { domain: 'www.foobar.com' }).should((cookie) => {
-        expect(cookie.value).to.equal('www.foobar.com value')
-        expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
+        expect(cookie?.value).to.equal('www.foobar.com value')
+        expect(cookie?.domain).to.match(/\.?www\.foobar\.com/)
       })
 
       // webkit does not support cy.origin()
@@ -304,8 +306,8 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
         cy.getCookie('key', { domain: 'www.barbaz.com' }).should((cookie) => {
-          expect(cookie.value).to.equal('www.barbaz.com value')
-          expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
+          expect(cookie?.value).to.equal('www.barbaz.com value')
+          expect(cookie?.domain).to.match(/\.?www\.barbaz\.com/)
         })
       })
     })
