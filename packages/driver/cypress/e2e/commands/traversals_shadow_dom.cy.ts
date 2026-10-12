@@ -95,7 +95,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
 
   context('#find', () => {
     it('retrieves a matching element beyond shadow boundaries', () => {
-      const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+      const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
 
       cy
       .get('#parent-of-shadow-container-0')
@@ -119,7 +119,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
     })
 
     it('allows traversal when already within a shadow root', () => {
-      const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+      const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
 
       cy
       .get('#shadow-element-3')
@@ -401,6 +401,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
         cy
         .get('#shadow-element-3')
         .find('p', { includeShadowDom: true })
+        // @ts-expect-error - intentionally omitting the selector to get every ancestor
         .parentsUntil()
         .then(($parents) => {
           expect($parents.length).to.eq(6)
@@ -416,6 +417,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
       it('retrieves parents normally when no shadow roots exist', () => {
         cy
         .get('#shadow-element-3')
+        // @ts-expect-error - intentionally omitting the selector to get every ancestor
         .parentsUntil()
         .then(($parents) => {
           expect($parents.length).to.eq(4)
@@ -430,6 +432,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
         cy
         .get('#shadow-element-3, #shadow-element-8')
         .find('p', { includeShadowDom: true })
+        // @ts-expect-error - intentionally omitting the selector to get every ancestor
         .parentsUntil()
         .then(($parents) => {
           expect($parents.length).to.eq(10)
