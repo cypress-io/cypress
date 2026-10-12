@@ -1302,7 +1302,6 @@ describe('src/cy/commands/connectors', () => {
       it('handles number subjects', () => {
         const num = 12345
 
-        // Safe because specs always run inside the Cypress runner, so `top` is the runner's window
         const { toFixed } = (top as Window & typeof globalThis).Number.prototype
 
         cy.wrap(num).its('toFixed').should('eq', toFixed)
