@@ -223,7 +223,7 @@ describe('MtlsBridge', () => {
 
     await requestOverHttp2(['h2', 'http/1.1'])
 
-    expect(connectCalls).toEqual([{
+    expect(connectCalls).toStrictEqual([{
       hostname: 'localhost',
       port: originPort,
       alpnProtocols: ['h2', 'http/1.1'],
