@@ -1861,12 +1861,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/parentsuntil
      */
     parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-    /**
-     * Get all ancestors of each DOM element in a set of matched DOM elements, without a stopping point or a filter.
-     *
-     * @see https://on.cypress.io/parentsuntil
-     */
-    parentsUntil<E extends Node = HTMLElement>(): Chainable<JQuery<E>>
 
     /**
      * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.

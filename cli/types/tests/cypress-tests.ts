@@ -1373,7 +1373,6 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
-  cy.wrap({}).parentsUntil() // $ExpectType Chainable<JQuery<HTMLElement>>
 }
 
 namespace ChaiJQueryTests {
