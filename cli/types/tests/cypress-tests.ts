@@ -1388,10 +1388,13 @@ namespace ChaiJQueryTests {
   expect($el).to.match($el) // $ExpectType Assertion
   expect($el).to.match(Cypress.$<Element>('div')) // $ExpectType Assertion
   expect($el).to.match(Cypress.$<SVGElement>('svg')) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$(document)) // $ExpectType Assertion
   expect($el).to.match({ foo: 'bar' }) // $ExpectError
 
   cy.get('#result').should('have.attr', 'tabindex', 0)
   cy.get('#result').should('not.have.attr', 'tabindex', 1)
+  cy.get('#result').should('match', Cypress.$('div'))
+  cy.get('#result').should('not.match', $el[0])
 }
 
 namespace CypressOptionsBeforeCallbackTests {

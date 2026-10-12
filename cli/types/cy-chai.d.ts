@@ -90,6 +90,6 @@ declare namespace Chai {
      *    expect($('#result')).to.match($('.menu'))
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      */
-    (element: Element | JQuery<Element>): Assertion
+    (element: Element | JQuery<any>): Assertion
   }
 }
