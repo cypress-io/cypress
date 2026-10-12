@@ -86,7 +86,6 @@ describe('src/cy/commands/assertions', () => {
 
       cy
       .get('div.foo').should('have.class', 'foo').then(($div) => {
-        // @ts-expect-error - the typings only accept a selector string, but chai-jquery also matches against an element
         expect($div).to.match(div)
 
         $div.remove()
