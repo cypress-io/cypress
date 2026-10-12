@@ -1,17 +1,19 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 const { Promise } = Cypress
 
 describe('src/cy/commands/cookies', () => {
+  let automation: sinon.SinonStub
+
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
+    automation = cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
 
     cy.visit('http://localhost:3500/fixtures/generic.html')
   })
 
   context('#clearCookie', () => {
     it('returns null', () => {
-      Cypress.automation.withArgs('clear:cookie').resolves(null)
+      automation.withArgs('clear:cookie').resolves(null)
 
       cy.clearCookie('foo').should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
@@ -25,7 +27,7 @@ describe('src/cy/commands/cookies', () => {
       it('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
       }, () => {
-        Cypress.automation.resolves(null)
+        automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -35,7 +37,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can override timeout', () => {
-        Cypress.automation.resolves(null)
+        automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -45,7 +47,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves([])
+        automation.resolves([])
 
         cy.timeout(100)
 
@@ -82,7 +84,7 @@ describe('src/cy/commands/cookies', () => {
         error.name = 'foo'
         error.stack = 'stack'
 
-        Cypress.automation.rejects(error)
+        automation.rejects(error)
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -98,7 +100,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.automation.resolves(Promise.delay(1000))
+        automation.resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -129,6 +131,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the runtime check for a non-string name
         cy.clearCookie(123)
       })
 
@@ -143,6 +146,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the runtime check for a non-string domain
         cy.clearCookie('foo', { domain: true })
       })
     })
@@ -155,7 +159,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        Cypress.automation
+        automation
         .withArgs('clear:cookie', { domain: 'localhost', name: 'foo' })
         .resolves({
           name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false,
