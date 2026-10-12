@@ -94,8 +94,11 @@ describe('src/cy/commands/traversals - shadow dom', () => {
   })
 
   context('#find', () => {
+    // Safe because the fixture's cy-test-element attaches an open shadow root in its constructor
+    const getShadowParagraph = () => cy.$$('#shadow-element-3')[0].shadowRoot!.querySelector('p')
+
     it('retrieves a matching element beyond shadow boundaries', () => {
-      const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
+      const el = getShadowParagraph()
 
       cy
       .get('#parent-of-shadow-container-0')
@@ -119,7 +122,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
     })
 
     it('allows traversal when already within a shadow root', () => {
-      const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
+      const el = getShadowParagraph()
 
       cy
       .get('#shadow-element-3')

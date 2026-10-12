@@ -11,7 +11,7 @@ interface CapturedCommand {
 const captureCommands = () => {
   const commands: CapturedCommand[] = []
 
-  let current
+  let current: Cypress.CommandQueue | null = null
 
   cy.on('command:start', (command) => {
     current = command
