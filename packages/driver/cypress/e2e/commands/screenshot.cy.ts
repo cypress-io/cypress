@@ -1,10 +1,10 @@
+import type Bluebird from 'bluebird'
 import $ from 'jquery'
 import { assertLogLength } from '../../support/utils'
 
 const { _, Promise, Screenshot } = Cypress
 
 const getViewportHeight = () => {
-  // Safe because a jQuery-wrapped window always has a height
   return Math.min(cy.state('viewportHeight'), $(cy.state('window')).height() as number)
 }
 
@@ -54,8 +54,7 @@ describe('src/cy/commands/screenshot', () => {
 
       const runnable = cy.state('runnable')
 
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      // @ts-expect-error - `Cypress.action` returns a promise for this event
+      Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
       .then(() => {
         expect(Cypress.action).not.to.be.calledWith('test:set:state')
         expect(Cypress.automation).not.to.be.called
@@ -76,8 +75,7 @@ describe('src/cy/commands/screenshot', () => {
 
       const runnable = cy.state('runnable')
 
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      // @ts-expect-error - `Cypress.action` returns a promise for this event
+      Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
       .then(() => {
         expect(Cypress.action).not.to.be.calledWith('test:set:state')
         expect(Cypress.automation).not.to.be.called
@@ -97,8 +95,7 @@ describe('src/cy/commands/screenshot', () => {
 
       const runnable = cy.state('runnable')
 
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      // @ts-expect-error - `Cypress.action` returns a promise for this event
+      Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
       .then(() => {
         expect(Cypress.action).not.to.be.calledWith('cy:test:set:state')
         expect(Cypress.automation).not.to.be.called
@@ -121,8 +118,7 @@ describe('src/cy/commands/screenshot', () => {
       const test = { id: '123', err: new Error() }
       const runnable = cy.state('runnable')
 
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      // @ts-expect-error - `Cypress.action` returns a promise for this event
+      Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
       .then(() => {
         expect(Cypress.action).to.be.calledWith('cy:before:screenshot', {
           id: runnable.id,
@@ -166,8 +162,7 @@ describe('src/cy/commands/screenshot', () => {
 
       const runnable = cy.state('runnable')
 
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      // @ts-expect-error - `Cypress.action` returns a promise for this event
+      Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
       .then(() => {
         expect(Cypress.automation).to.be.calledWith('take:screenshot')
         let args = automation.withArgs('take:screenshot').args[0][1]
@@ -217,8 +212,7 @@ describe('src/cy/commands/screenshot', () => {
 
         const runnable = cy.state('runnable')
 
-        Cypress.action('runner:runnable:after:run:async', test, runnable)
-        // @ts-expect-error - `Cypress.action` returns a promise for this event
+        Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
         .delay(1) // before:screenshot promise requires a tick
         .then(() => {
           expect(automation.withArgs('take:screenshot')).to.be.calledOnce
@@ -261,8 +255,7 @@ describe('src/cy/commands/screenshot', () => {
 
         const runnable = cy.state('runnable')
 
-        Cypress.action('runner:runnable:after:run:async', test, runnable)
-        // @ts-expect-error - `Cypress.action` returns a promise for this event
+        Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
         .delay(1) // before:screenshot promise requires a tick
         .then(() => {
           expect(automation.withArgs('take:screenshot')).to.be.calledOnce
@@ -289,8 +282,7 @@ describe('src/cy/commands/screenshot', () => {
       }
       const runnable = cy.state('runnable')
 
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      // @ts-expect-error - `Cypress.action` returns a promise for this event
+      Cypress.action<Bluebird<unknown[]>>('runner:runnable:after:run:async', test, runnable)
       .then(() => {
         expect(Cypress.automation).to.be.calledWith('take:screenshot')
         let args = automation.withArgs('take:screenshot').args[0][1]
