@@ -7,7 +7,7 @@ describe('digestBody', () => {
     const body = Buffer.from('hello world')
     const expectedSha256 = createHash('sha256').update(body).digest('hex')
 
-    expect(digestBody(body)).toEqual({
+    expect(digestBody(body)).toStrictEqual({
       length: body.length,
       sha256: expectedSha256,
     })

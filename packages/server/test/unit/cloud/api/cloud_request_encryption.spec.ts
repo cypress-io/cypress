@@ -186,9 +186,9 @@ describe('CloudRequest Encryption', () => {
       TestReq.post('/', dataObj(3), { encrypt: 'always' }),
     ])
 
-    expect(res.data).toEqual(dataObj(1))
-    expect(res2.data).toEqual(dataObj(2))
-    expect(res3.data).toEqual(dataObj(3))
+    expect(res.data).toStrictEqual(dataObj(1))
+    expect(res2.data).toStrictEqual(dataObj(2))
+    expect(res3.data).toStrictEqual(dataObj(3))
   })
 
   it('decrypts errors', async () => {
@@ -217,7 +217,7 @@ describe('CloudRequest Encryption', () => {
       foo: 'bar',
     }, { encrypt: 'signed' }).then((d) => d.data)
 
-    expect(data).toEqual({ foo: 'bar' })
+    expect(data).toStrictEqual({ foo: 'bar' })
 
     // Bad
     try {

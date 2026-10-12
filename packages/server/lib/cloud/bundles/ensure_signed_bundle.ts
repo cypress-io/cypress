@@ -2,7 +2,7 @@ import { ensureDir, readFile, remove, writeFile } from 'fs-extra'
 import path from 'path'
 import Debug from 'debug'
 import { verifySignature } from '../encryption'
-import { ensureWritableBundleCacheDir } from './cache_root'
+import { ensureWritableBundleCacheDir, ensureWritableFallbackBundleCacheDir, getFallbackBundleCacheDir, isPermissionError } from './cache_root'
 import { parseHashFromBundleUrl } from './parse_hash_from_bundle_url'
 import { sweepOrphanStaging } from './sweep_orphan_staging'
 import { streamDownloadVerifyExtract } from './stream_download_verify_extract'
@@ -29,13 +29,18 @@ interface EnsureSignedBundleResult {
 
 const randomSuffix = (): string => Math.random().toString(36).substring(2, 15)
 
-export const ensureSignedBundle = async ({
+// EBUSY is what renameAtomicWithRetry gives up on when a Windows antivirus or
+// indexer lock outlasts its short retries.
+const shouldFallBackToTmpDir = (err: unknown): err is NodeJS.ErrnoException => {
+  return isPermissionError(err) || (err instanceof Error && 'code' in err && err.code === 'EBUSY')
+}
+
+const ensureSignedBundleIn = async (baseDir: string, {
   url,
   projectId,
   kind,
 }: EnsureSignedBundleOptions): Promise<EnsureSignedBundleResult> => {
   const hash = parseHashFromBundleUrl(url)
-  const baseDir = await ensureWritableBundleCacheDir(kind)
   const finalDir = path.join(baseDir, hash)
   const staging = path.join(baseDir, `${STAGING_PREFIX}${randomSuffix()}`)
 
@@ -106,5 +111,25 @@ export const ensureSignedBundle = async ({
     }
   } finally {
     await remove(staging).catch(() => { /* ignore */ })
+  }
+}
+
+export const ensureSignedBundle = async (options: EnsureSignedBundleOptions): Promise<EnsureSignedBundleResult> => {
+  const { kind } = options
+  const baseDir = await ensureWritableBundleCacheDir(kind)
+
+  try {
+    return await ensureSignedBundleIn(baseDir, options)
+  } catch (err) {
+    // The cache dir passed the writability probe, but can still turn unwritable
+    // afterwards (another process, a read-only remount, an antivirus or indexer
+    // lock on Windows). Retry the whole attempt once in the OS temp dir rather
+    // than failing — the staging dir lives under baseDir, so a partial publish
+    // can't just be moved across, as the temp dir is often a different volume.
+    if (!shouldFallBackToTmpDir(err) || baseDir === getFallbackBundleCacheDir(kind)) throw err
+
+    debug('%s bundle write failed under %s (%s); retrying in OS temp dir', kind, baseDir, err.code)
+
+    return ensureSignedBundleIn(await ensureWritableFallbackBundleCacheDir(kind), options)
   }
 }

@@ -41,6 +41,7 @@
         "react-dom",
         "semantic-release-monorepo",
         "shelljs",
+        "sinon-chai",
         "snap-shot-it",
         "tar",
         "term-to-html",
