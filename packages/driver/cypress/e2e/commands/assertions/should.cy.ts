@@ -92,6 +92,21 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    it('matches jquery chai against elements and predicates', () => {
+      const div = $('<div class=\'foo\'>asdf</div>')
+
+      cy.$$('body').append(div)
+
+      cy
+      .get('div.foo').should('match', div).and('not.match', 'span').then(($div) => {
+        expect($div).to.match([div[0]])
+        expect($div).to.match((index, element) => element.classList.contains('foo'))
+        expect($div).not.to.match((index, element) => element.id === 'missing')
+
+        $div.remove()
+      })
+    })
+
     it('can chain multiple assertions', () => {
       cy
       .get('body')

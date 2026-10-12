@@ -84,12 +84,13 @@ declare namespace Chai {
 
   interface Match {
     /**
-     * Assert that the selection matches the given DOM element or jQuery object, using `.is()`.
+     * Assert that the selection matches the given element, elements, jQuery object, or predicate, using `.is()`.
      *
      * @example
      *    expect($('#result')).to.match($('.menu'))
+     *    expect($('#result')).to.match((index, element) => element.id === 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      */
-    (element: Element | JQuery<any>): Assertion
+    (element: Element | Element[] | JQuery<any> | ((this: Element, index: number, element: Element) => boolean)): Assertion
   }
 }

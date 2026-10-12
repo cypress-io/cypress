@@ -1388,6 +1388,9 @@ namespace ChaiJQueryTests {
   expect($el).to.match(Cypress.$<Element>('div')) // $ExpectType Assertion
   expect($el).to.match(Cypress.$<SVGElement>('svg')) // $ExpectType Assertion
   expect($el).to.match(Cypress.$(document)) // $ExpectType Assertion
+  expect($el).to.match([$el[0], $el[1]]) // $ExpectType Assertion
+  expect($el).to.match((index, element) => element.id === 'result') // $ExpectType Assertion
+  expect($el).to.match((index: string) => true) // $ExpectError
   expect($el).to.match({ foo: 'bar' }) // $ExpectError
 }
 
