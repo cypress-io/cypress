@@ -1,0 +1,21 @@
+diff --git a/node_modules/@types/chai-jquery/index.d.ts b/node_modules/@types/chai-jquery/index.d.ts
+index d1bfd8d..56814f6 100644
+--- a/node_modules/@types/chai-jquery/index.d.ts
++++ b/node_modules/@types/chai-jquery/index.d.ts
+@@ -3,7 +3,7 @@
+ 
+ declare namespace Chai {
+     interface Assertion {
+-        attr(name: string, value?: string): Assertion;
++        attr(name: string, value?: string | number): Assertion;
+         prop(name: string, value?: any): Assertion;
+         css(name: string, value?: string): Assertion;
+         data(name: string, value?: string): Assertion;
+@@ -24,6 +24,7 @@ declare namespace Chai {
+ 
+     interface Match {
+         (selector: string): Assertion;
++        (element: Element | JQuery): Assertion;
+     }
+ }
+ 

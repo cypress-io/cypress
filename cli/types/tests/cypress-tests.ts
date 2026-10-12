@@ -1373,6 +1373,25 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
+  cy.wrap({}).parentsUntil() // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil({ log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil({ log: 'true' }) // $ExpectError
+}
+
+namespace ChaiJQueryTests {
+  const $el = Cypress.$('div')
+
+  expect($el).to.have.attr('num', 777) // $ExpectType Assertion
+  expect($el).to.have.attr('role', 'menu') // $ExpectType Assertion
+  expect($el).to.have.attr({ width: '200px' }) // $ExpectError
+
+  expect($el).to.match('div') // $ExpectType Assertion
+  expect($el).to.match($el[0]) // $ExpectType Assertion
+  expect($el).to.match($el) // $ExpectType Assertion
+  expect($el).to.match({ foo: 'bar' }) // $ExpectError
+
+  cy.get('#result').should('have.attr', 'tabindex', 0)
+  cy.get('#result').should('not.have.attr', 'tabindex', 1)
 }
 
 namespace CypressOptionsBeforeCallbackTests {
