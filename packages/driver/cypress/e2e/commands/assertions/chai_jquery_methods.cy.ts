@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { $ } = Cypress
 
 describe('src/cy/commands/assertions', () => {
@@ -42,6 +43,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('#data-number').then(($el) => {
+          // @ts-expect-error - the typings only accept a string value, but numbers are supported at runtime
           expect($el).to.have.data('number', 222)
           expect($el).not.to.have.data('number', '222')
         })
@@ -78,6 +80,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('.999').then(($el) => {
+          // @ts-expect-error - the typings only accept a string value, but numbers are supported at runtime
           expect($el).to.have.class(999)
           expect($el).to.have.class('999')
         })
@@ -141,6 +144,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('#456').then(($el) => {
+          // @ts-expect-error - the typings only accept a string value, but numbers are supported at runtime
           expect($el).to.have.id(456)
           expect($el).to.have.id('456')
         })
@@ -270,6 +274,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('#number').then(($el) => {
+          // @ts-expect-error - the typings only accept a string value, but numbers are supported at runtime
           expect($el).to.have.text(123)
         })
       })
@@ -343,6 +348,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('#value-number').then(($el) => {
+          // @ts-expect-error - the typings only accept a string value, but numbers are supported at runtime
           expect($el).to.have.value(123)
           expect($el).to.have.value('123')
         })
