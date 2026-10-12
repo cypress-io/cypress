@@ -1,22 +1,26 @@
-const { assertLogLength } = require('../../../support/utils')
-const { stripIndent } = require('common-tags')
+import { assertLogLength } from '../../../support/utils'
+import { stripIndent } from 'common-tags'
 const { Promise } = Cypress
 
 describe('src/cy/commands/cookies', () => {
+  let automation: sinon.SinonStub
+
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
+    automation = cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
 
     cy.visit('http://localhost:3500/fixtures/generic.html')
   })
 
   context('#setCookie', () => {
+    let addTwentyYears: sinon.SinonStub
+
     beforeEach(() => {
-      cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
+      addTwentyYears = cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
     })
 
     it('returns set cookie', () => {
-      Cypress.automation.withArgs('set:cookie').resolves({
+      automation.withArgs('set:cookie').resolves({
         name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: false, httpOnly: false, expiry: 12345,
       })
 
@@ -32,7 +36,7 @@ describe('src/cy/commands/cookies', () => {
     })
 
     it('can change options', () => {
-      Cypress.automation.withArgs('set:cookie').resolves({
+      automation.withArgs('set:cookie').resolves({
         name: 'foo', value: 'bar', domain: 'brian.dev.local', path: '/foo', secure: true, httpOnly: true, expiry: 987,
       })
 
@@ -48,7 +52,7 @@ describe('src/cy/commands/cookies', () => {
     })
 
     it('does not mutate options', () => {
-      Cypress.automation.resolves()
+      automation.resolves()
       const options = {}
 
       cy.setCookie('foo', 'bar', {}).then(() => {
@@ -57,18 +61,21 @@ describe('src/cy/commands/cookies', () => {
     })
 
     it('can set cookies with sameSite', () => {
-      Cypress.automation.restore()
-      Cypress.utils.addTwentyYears.restore()
+      automation.restore()
+      addTwentyYears.restore()
 
+      // @ts-expect-error - verifies a lowercase `none` is normalized to `no_restriction`
       cy.setCookie('one', 'bar', { sameSite: 'none', secure: true })
       cy.getCookie('one').should('include', { sameSite: 'no_restriction' })
 
       cy.setCookie('two', 'bar', { sameSite: 'no_restriction', secure: true })
       cy.getCookie('two').should('include', { sameSite: 'no_restriction' })
 
+      // @ts-expect-error - verifies `sameSite` is normalized case-insensitively
       cy.setCookie('three', 'bar', { sameSite: 'Lax' })
       cy.getCookie('three').should('include', { sameSite: 'lax' })
 
+      // @ts-expect-error - verifies `sameSite` is normalized case-insensitively
       cy.setCookie('four', 'bar', { sameSite: 'Strict' })
       cy.getCookie('four').should('include', { sameSite: 'strict' })
 
@@ -98,7 +105,7 @@ describe('src/cy/commands/cookies', () => {
       it('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
       }, () => {
-        Cypress.automation.resolves(null)
+        automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -108,7 +115,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can override timeout', () => {
-        Cypress.automation.resolves(null)
+        automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -118,7 +125,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves(null)
+        automation.resolves(null)
 
         cy.timeout(100)
 
@@ -154,7 +161,7 @@ describe('src/cy/commands/cookies', () => {
 
         error.name = 'foo'
 
-        Cypress.automation.rejects(error)
+        automation.rejects(error)
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -170,7 +177,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.automation.resolves(Promise.delay(1000))
+        automation.resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -201,6 +208,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the runtime check for a non-string name
         cy.setCookie(123)
       })
 
@@ -216,6 +224,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the runtime check for a non-string value
         cy.setCookie('foo', 123)
       })
 
@@ -236,6 +245,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the runtime check for an unknown `sameSite`
         cy.setCookie('foo', 'bar', { sameSite: 'bad' })
       })
 
@@ -255,6 +265,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the `secure` check for a capitalized `None`
         cy.setCookie('foo', 'bar', { sameSite: 'None' })
       })
 
@@ -269,6 +280,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the runtime check for a non-string domain
         cy.setCookie('foo', 'bar', { domain: true })
       })
 
@@ -276,10 +288,10 @@ describe('src/cy/commands/cookies', () => {
         it('throws an error if the backend responds with an error', (done) => {
           const err = new Error('backend could not set cookie')
 
-          Cypress.automation.withArgs('set:cookie').rejects(err)
+          automation.withArgs('set:cookie').rejects(err)
 
           cy.on('fail', (err) => {
-            expect(Cypress.automation.withArgs('set:cookie')).to.be.calledOnce
+            expect(automation.withArgs('set:cookie')).to.be.calledOnce
             expect(err.message).to.contain('unexpected error setting the requested cookie')
             expect(err.message).to.contain(err.message)
 
@@ -300,7 +312,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        Cypress.automation
+        automation
         .withArgs('set:cookie', {
           domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, hostOnly: false, expiry: 12345, sameSite: undefined,
         })
