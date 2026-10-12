@@ -595,8 +595,7 @@ describe('src/cy/commands/request', () => {
     describe('binary data', () => {
       // https://github.com/cypress-io/cypress/issues/6178
       it('can send Blob', () => {
-        // @ts-expect-error - intentionally passing a nested array to test how Blob serializes it
-        const body = new Blob([[1, 2, 3, 4]], { type: 'application/octet-stream' })
+        const body = new Blob(['1,2,3,4'], { type: 'application/octet-stream' })
 
         cy.request(
           {
