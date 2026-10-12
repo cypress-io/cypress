@@ -21,7 +21,7 @@
 **Misc:**
 
 - TypeScript now types the object yielded by [`cy.location()`](https://on.cypress.io/location) as the plain object Cypress actually yields, instead of the browser's `window.location`. `searchParams` is now typed, so `cy.location('searchParams')` and `loc.searchParams.get('q')` no longer report a type error. Addressed in [#34956](https://github.com/cypress-io/cypress/pull/34956).
-- The TypeScript types now accept a number as the expected value of the `attr` assertion, such as `expect($el).to.have.attr('tabindex', 0)` or `.should('have.attr', 'tabindex', 0)`. Cypress already compared the number against the attribute's string value at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).
+- The TypeScript types now accept a number as the expected value of the `attr` assertion, such as `expect($el).to.have.attr('tabindex', 0)`. Cypress already compared the number against the attribute's string value at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).
 - The TypeScript types now accept a DOM element or jQuery object in the `match` assertion, such as `expect($el).to.match($other)`. Cypress already supported this at runtime, but TypeScript reported an error. Addressed in [#TODO](https://github.com/cypress-io/cypress/pull/TODO).
 - Masked the environment variable values on the Project settings page. Addressed in [#35004](https://github.com/cypress-io/cypress/pull/35004).
 
