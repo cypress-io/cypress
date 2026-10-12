@@ -82,7 +82,7 @@ describe('TelemetryManager', () => {
         MEASURE_NAMES.INITIALIZATION_DURATION,
       ])
 
-      expect(measures).toEqual({
+      expect(measures).toStrictEqual({
         [MEASURE_NAMES.INITIALIZATION_DURATION]: -1,
       })
     })
@@ -153,7 +153,7 @@ describe('TelemetryManager', () => {
         test: 'test',
       })
 
-      expect(telemetryManager['groupMetadata'][TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO]).toEqual({
+      expect(telemetryManager['groupMetadata'][TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO]).toStrictEqual({
         test: 'test',
       })
     })

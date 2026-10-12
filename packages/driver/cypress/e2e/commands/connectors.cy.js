@@ -1086,7 +1086,7 @@ describe('src/cy/commands/connectors', () => {
         it('throws without a subject', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('cy.invoke("queue")')
-            expect(err.message).to.include('child command before running a parent command')
+            expect(err.message).to.include('failed because it is not chained off a command that yields a subject.')
 
             done()
           })
@@ -1558,7 +1558,7 @@ describe('src/cy/commands/connectors', () => {
         it('throws without a subject', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('cy.its("wat")')
-            expect(err.message).to.include('child command before running a parent command')
+            expect(err.message).to.include('failed because it is not chained off a command that yields a subject.')
 
             done()
           })
