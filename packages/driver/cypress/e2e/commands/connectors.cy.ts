@@ -341,6 +341,7 @@ describe('src/cy/commands/connectors', () => {
             return $div
           })
           .then(function () {
+            // @ts-expect-error cy.subject() is internal and not in the public types
             expect(cy.subject()).not.to.be.instanceof(this.remoteWindow.$)
           })
         })
@@ -789,8 +790,9 @@ describe('src/cy/commands/connectors', () => {
 
             cy.wrap({ foo () {
               return 'foo'
+            } })
             // @ts-expect-error Testing invalid inputs
-            } }).invoke({})
+            .invoke({})
           })
 
           it('throws when function name is not of type string but of type boolean', function (done) {
@@ -805,8 +807,9 @@ describe('src/cy/commands/connectors', () => {
 
             cy.wrap({ foo () {
               return 'foo'
+            } })
             // @ts-expect-error Testing invalid inputs
-            } }).invoke({}, true)
+            .invoke({}, true)
           })
 
           it('throws when function name is not of type string but of type function', function (done) {
@@ -838,8 +841,9 @@ describe('src/cy/commands/connectors', () => {
 
             cy.wrap({ foo () {
               return 'foo'
+            } })
             // @ts-expect-error Testing invalid inputs
-            } }).invoke(true, 'show')
+            .invoke(true, 'show')
           })
         })
 
@@ -1234,29 +1238,25 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('does not invoke a function with multiple its', () => {
-        const fn: Record<string, any> = () => {
+        const fn = () => {
           return 'fn'
         }
 
-        fn.bar = () => {
+        fn.bar = Object.assign(() => {
           return 'bar'
-        }
-
-        fn.bar.baz = 'baz'
+        }, { baz: 'baz' })
 
         cy.wrap(fn).its('bar').its('baz').should('eq', 'baz')
       })
 
       it('does not invoke a function and uses as a reduced property', () => {
-        const fn: Record<string, any> = () => {
+        const fn = () => {
           return 'fn'
         }
 
-        fn.bar = () => {
+        fn.bar = Object.assign(() => {
           return 'bar'
-        }
-
-        fn.bar.baz = 'baz'
+        }, { baz: 'baz' })
 
         const obj = {
           foo: fn,
@@ -1769,15 +1769,13 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
-          const fn: Record<string, any> = () => {
+          const fn = () => {
             return 'fn'
           }
 
-          fn.bar = () => {
+          fn.bar = Object.assign(() => {
             return 'bar'
-          }
-
-          fn.bar.baz = 'baz'
+          }, { baz: 'baz' })
 
           // @ts-expect-error Testing invalid inputs
           cy.wrap(fn).its('bar', { log: false }, 'baz').should('eq', 'baz')

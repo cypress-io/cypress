@@ -72,7 +72,6 @@ declare namespace Cypress {
     isStable: IStability['isStable']
     fail: (err: Error, options: { async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
-    subject: (chainerId?: string) => any
     subjectChain: (chainerId?: string) => SubjectChain
 
     createSnapshot: ISnapshots['createSnapshot']
