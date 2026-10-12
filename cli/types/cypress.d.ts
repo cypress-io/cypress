@@ -79,6 +79,14 @@ declare namespace Cypress {
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
+  /**
+   * Trigger action
+   * @private
+   */
+  interface ActionTrigger {
+    <T = (any[] | void)>(action: string, ...args: any[]): T
+  }
+
   type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
@@ -776,7 +784,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
+    action: ActionTrigger
 
     /**
      * Load files
