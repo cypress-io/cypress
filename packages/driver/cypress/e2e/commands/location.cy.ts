@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
+
 const { _ } = Cypress
 
 describe('src/cy/commands/location', () => {
@@ -505,6 +506,7 @@ describe('src/cy/commands/location', () => {
           done()
         })
 
+        // @ts-expect-error - intentionally passing a key the location object doesn't have
         cy.location('ladida')
       })
 
@@ -525,7 +527,7 @@ describe('src/cy/commands/location', () => {
       })
 
       it('does not log an additional log on failure', function (done) {
-        const logs = []
+        const logs: Cypress.Log[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
