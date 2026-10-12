@@ -1,9 +1,19 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
+interface NonDomCase {
+  name: string
+  subject: unknown
+  assertion: (obj: unknown) => void
+  method: string
+  inspected: string
+  logMessage: string | null
+  partialLogMessage?: boolean
+}
 
 // Every chai-jQuery assertion routes a non-DOM subject through the same guard in
 // `assertDom` (packages/driver/src/cypress/assertions/assert.ts), which fails the
 // assertion and names both the method and the subject it was handed.
-const nonDomCases = [
+const nonDomCases: NonDomCase[] = [
   {
     name: 'data',
     subject: {},
