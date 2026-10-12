@@ -91,6 +91,6 @@ declare namespace Chai {
      *    expect($('#result')).to.match((index, element) => element.id === 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      */
-    (element: Element | Element[] | JQuery<any> | ((this: Element, index: number, element: Element) => boolean)): Assertion
+    (selector: Cypress.JQueryMatchable): Assertion
   }
 }

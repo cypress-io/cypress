@@ -93,12 +93,17 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('matches jquery chai against elements and predicates', () => {
-      const div = $('<div class=\'foo\'>asdf</div>')
+      const div = $('<div class=\'foo\' num=\'777\'>asdf</div>')
 
       cy.$$('body').append(div)
 
       cy
-      .get('div.foo').should('match', div).and('not.match', 'span').then(($div) => {
+      .get('div.foo')
+      .should('match', div)
+      .and('match', div[0])
+      .and('not.match', 'span')
+      .and('have.attr', 'num', 777)
+      .then(($div) => {
         expect($div).to.match([div[0]])
         expect($div).to.match((index, element) => element.classList.contains('foo'))
         expect($div).not.to.match((index, element) => element.id === 'missing')

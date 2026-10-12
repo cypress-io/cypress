@@ -4322,6 +4322,13 @@ declare namespace Cypress {
     encoding: Encodings
   }
 
+  /**
+   * What the chai-jquery `match` assertion accepts for a DOM subject: anything jQuery's `.is()` accepts.
+   *
+   * @see http://chaijs.com/plugins/chai-jquery/#matchselector
+   */
+  type JQueryMatchable = string | Element | Element[] | JQuery<any> | ((this: Element, index: number, element: Element) => boolean)
+
   // Kind of onerous, but has a nice auto-complete.
   /**
    * @see https://on.cypress.io/should
@@ -6109,7 +6116,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'match', value: string | Element | Element[] | JQuery<any> | ((this: Element, index: number, element: Element) => boolean)): Chainable<Subject>
+    (chainer: 'match', value: JQueryMatchable): Chainable<Subject>
 
     // jquery-chai.not
     /**
@@ -6338,7 +6345,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.match', value: string | Element | Element[] | JQuery<any> | ((this: Element, index: number, element: Element) => boolean)): Chainable<Subject>
+    (chainer: 'not.match', value: JQueryMatchable): Chainable<Subject>
 
     // fallback
     /**
