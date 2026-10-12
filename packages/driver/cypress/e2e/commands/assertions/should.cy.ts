@@ -42,7 +42,7 @@ const captureCommands = () => {
 }
 
 describe('src/cy/commands/assertions', () => {
-  let testCommands
+  let testCommands: () => CapturedCommand[]
 
   beforeEach(function () {
     cy.visit('/fixtures/jquery.html')
@@ -343,9 +343,9 @@ describe('src/cy/commands/assertions', () => {
           this.remoteWindow.$.fn.__foobar = (fn = function () {})
 
           cy
-          .get('input:first').should(function ($input) {
+          .get('input:first').should(function ($input: JQuery & { __foobar?: unknown }) {
             const isInstanceOf = Cypress.utils.isInstanceOf($input, this.remoteWindow.$)
-            const hasProp = '__foobar' in $input && $input.__foobar === fn
+            const hasProp = $input.__foobar === fn
 
             expect(isInstanceOf).to.be.true
 
