@@ -341,7 +341,6 @@ describe('src/cy/commands/connectors', () => {
             return $div
           })
           .then(function () {
-            // @ts-expect-error cy.subject() is internal and not in the public types
             expect(cy.subject()).not.to.be.instanceof(this.remoteWindow.$)
           })
         })
