@@ -1,15 +1,18 @@
-const $ = require('jquery')
-const { assertLogLength } = require('../../support/utils')
+import $ from 'jquery'
+import { assertLogLength } from '../../support/utils'
 
 const { _, Promise, Screenshot } = Cypress
 
 const getViewportHeight = () => {
-  return Math.min(cy.state('viewportHeight'), $(cy.state('window')).height())
+  // Safe because a jQuery-wrapped window always has a height
+  return Math.min(cy.state('viewportHeight'), $(cy.state('window')).height() as number)
 }
 
 describe('src/cy/commands/screenshot', () => {
+  let automation: sinon.SinonStub
+
   beforeEach(function () {
-    cy.stub(Cypress, 'automation').callThrough()
+    automation = cy.stub(Cypress, 'automation').callThrough()
 
     this.serverResult = {
       path: '/path/to/screenshot',
@@ -40,6 +43,7 @@ describe('src/cy/commands/screenshot', () => {
       // is correct based on what mode we're currently in
       const isTextTerminal = Cypress.config('isTextTerminal')
 
+      // @ts-expect-error - `isTextTerminal` is an internal config key
       Cypress.config('isTextTerminal', false)
 
       cy.spy(Cypress, 'action').log(false)
@@ -51,16 +55,19 @@ describe('src/cy/commands/screenshot', () => {
       const runnable = cy.state('runnable')
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
+      // @ts-expect-error - `Cypress.action` returns a promise for this event
       .then(() => {
         expect(Cypress.action).not.to.be.calledWith('test:set:state')
         expect(Cypress.automation).not.to.be.called
       })
       .finally(() => {
+        // @ts-expect-error - `isTextTerminal` is an internal config key
         Cypress.config('isTextTerminal', isTextTerminal)
       })
     })
 
     it('is noop when no test.err', () => {
+      // @ts-expect-error - `isInteractive` is an internal config key
       Cypress.config('isInteractive', false)
 
       cy.spy(Cypress, 'action').log(false)
@@ -70,6 +77,7 @@ describe('src/cy/commands/screenshot', () => {
       const runnable = cy.state('runnable')
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
+      // @ts-expect-error - `Cypress.action` returns a promise for this event
       .then(() => {
         expect(Cypress.action).not.to.be.calledWith('test:set:state')
         expect(Cypress.automation).not.to.be.called
@@ -77,6 +85,7 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('is noop when screenshotOnRunFailure is false', () => {
+      // @ts-expect-error - `isInteractive` is an internal config key
       Cypress.config('isInteractive', false)
       Cypress.config('screenshotOnRunFailure', false)
 
@@ -89,6 +98,7 @@ describe('src/cy/commands/screenshot', () => {
       const runnable = cy.state('runnable')
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
+      // @ts-expect-error - `Cypress.action` returns a promise for this event
       .then(() => {
         expect(Cypress.action).not.to.be.calledWith('cy:test:set:state')
         expect(Cypress.automation).not.to.be.called
@@ -96,10 +106,12 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('sends before/after events', function () {
+      // @ts-expect-error - `isInteractive` is an internal config key
       Cypress.config('isInteractive', false)
       this.screenshotConfig.scale = false
+      // @ts-expect-error - `getConfig` is internal to Screenshot
       cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       cy.stub(Cypress, 'action').log(false)
       .callThrough()
@@ -110,6 +122,7 @@ describe('src/cy/commands/screenshot', () => {
       const runnable = cy.state('runnable')
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
+      // @ts-expect-error - `Cypress.action` returns a promise for this event
       .then(() => {
         expect(Cypress.action).to.be.calledWith('cy:before:screenshot', {
           id: runnable.id,
@@ -138,11 +151,13 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('takes screenshot when not isInteractive', function () {
+      // @ts-expect-error - `isInteractive` is an internal config key
       Cypress.config('isInteractive', false)
       Cypress.config('screenshotOnRunFailure', true)
+      // @ts-expect-error - `getConfig` is internal to Screenshot
       cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
 
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       const test = {
         id: '123',
@@ -152,9 +167,10 @@ describe('src/cy/commands/screenshot', () => {
       const runnable = cy.state('runnable')
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
+      // @ts-expect-error - `Cypress.action` returns a promise for this event
       .then(() => {
         expect(Cypress.automation).to.be.calledWith('take:screenshot')
-        let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
+        let args = automation.withArgs('take:screenshot').args[0][1]
 
         args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
 
@@ -181,15 +197,18 @@ describe('src/cy/commands/screenshot', () => {
       })
 
       afterEach(function () {
+        // @ts-expect-error - `hideRunnerUi` is an internal config key
         Cypress.config('hideRunnerUi', this.hideRunnerUiOld)
       })
 
       it('if screenshot has been taken in test', function () {
         cy.state('screenshotTaken', true)
+        // @ts-expect-error - `isInteractive` is an internal config key
         Cypress.config('isInteractive', false)
+        // @ts-expect-error - `getConfig` is internal to Screenshot
         cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
 
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
 
         const test = {
           id: '123',
@@ -199,10 +218,11 @@ describe('src/cy/commands/screenshot', () => {
         const runnable = cy.state('runnable')
 
         Cypress.action('runner:runnable:after:run:async', test, runnable)
+        // @ts-expect-error - `Cypress.action` returns a promise for this event
         .delay(1) // before:screenshot promise requires a tick
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledOnce
-          let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
+          expect(automation.withArgs('take:screenshot')).to.be.calledOnce
+          let args = automation.withArgs('take:screenshot').args[0][1]
 
           args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
 
@@ -225,11 +245,14 @@ describe('src/cy/commands/screenshot', () => {
       })
 
       it('if the runner is hidden', function () {
+        // @ts-expect-error - `isInteractive` is an internal config key
         Cypress.config('isInteractive', false)
+        // @ts-expect-error - `hideRunnerUi` is an internal config key
         Cypress.config('hideRunnerUi', true)
+        // @ts-expect-error - `getConfig` is internal to Screenshot
         cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
 
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
 
         const test = {
           id: '123',
@@ -239,10 +262,11 @@ describe('src/cy/commands/screenshot', () => {
         const runnable = cy.state('runnable')
 
         Cypress.action('runner:runnable:after:run:async', test, runnable)
+        // @ts-expect-error - `Cypress.action` returns a promise for this event
         .delay(1) // before:screenshot promise requires a tick
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledOnce
-          const args = Cypress.automation.withArgs('take:screenshot').args[0][1]
+          expect(automation.withArgs('take:screenshot')).to.be.calledOnce
+          const args = automation.withArgs('take:screenshot').args[0][1]
 
           expect(args.simple).to.be.false
         })
@@ -252,10 +276,12 @@ describe('src/cy/commands/screenshot', () => {
 
   context('runnable:after:run:async hooks', () => {
     beforeEach(function () {
+      // @ts-expect-error - `isInteractive` is an internal config key
       Cypress.config('isInteractive', false)
+      // @ts-expect-error - `getConfig` is internal to Screenshot
       cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
 
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       const test = {
         id: '123',
@@ -264,9 +290,10 @@ describe('src/cy/commands/screenshot', () => {
       const runnable = cy.state('runnable')
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
+      // @ts-expect-error - `Cypress.action` returns a promise for this event
       .then(() => {
         expect(Cypress.automation).to.be.calledWith('take:screenshot')
-        let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
+        let args = automation.withArgs('take:screenshot').args[0][1]
 
         args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
 
@@ -293,54 +320,59 @@ describe('src/cy/commands/screenshot', () => {
 
   context('#screenshot', () => {
     beforeEach(function () {
+      // @ts-expect-error - `getConfig` is internal to Screenshot
       cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
       cy.stub(cy, 'pauseTimers').resolves()
     })
 
     it('sets name to undefined when not passed name', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       cy.screenshot().then(() => {
-        expect(Cypress.automation.withArgs('take:screenshot').args[0][1].name).to.be.undefined
+        expect(automation.withArgs('take:screenshot').args[0][1].name).to.be.undefined
       })
     })
 
     it('can pass name', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       cy.screenshot('my/file').then(() => {
-        expect(Cypress.automation.withArgs('take:screenshot').args[0][1].name).to.equal('my/file')
+        expect(automation.withArgs('take:screenshot').args[0][1].name).to.equal('my/file')
       })
     })
 
     it('calls onBeforeScreenshot callback with documentElement', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
-      cy.stub(Screenshot, 'onBeforeScreenshot')
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
+      // @ts-expect-error - `onBeforeScreenshot` is internal to Screenshot
+      const onBeforeScreenshotStub = cy.stub(Screenshot, 'onBeforeScreenshot')
+
       cy.spy(Cypress, 'action').log(false)
 
       cy
       .screenshot('foo')
       .then(() => {
-        expect(Screenshot.onBeforeScreenshot).to.be.calledOnce
-        expect(Screenshot.onBeforeScreenshot.firstCall.args[0].get(0)).to.eq(cy.state('document').documentElement)
+        expect(onBeforeScreenshotStub).to.be.calledOnce
+        expect(onBeforeScreenshotStub.firstCall.args[0].get(0)).to.eq(cy.state('document').documentElement)
       })
     })
 
     it('calls onAfterScreenshot callback with documentElement', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
-      cy.stub(Screenshot, 'onAfterScreenshot')
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
+      // @ts-expect-error - `onAfterScreenshot` is internal to Screenshot
+      const onAfterScreenshotStub = cy.stub(Screenshot, 'onAfterScreenshot')
+
       cy.spy(Cypress, 'action').log(false)
 
       cy
       .screenshot('foo')
       .then(() => {
-        expect(Screenshot.onAfterScreenshot).to.be.calledOnce
-        expect(Screenshot.onAfterScreenshot.firstCall.args[0].get(0)).to.eq(cy.state('document').documentElement)
+        expect(onAfterScreenshotStub).to.be.calledOnce
+        expect(onAfterScreenshotStub.firstCall.args[0].get(0)).to.eq(cy.state('document').documentElement)
       })
     })
 
     it('pauses then unpauses timers if disableTimersAndAnimations is true', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)
 
       cy
@@ -353,7 +385,7 @@ describe('src/cy/commands/screenshot', () => {
 
     it('does not pause timers if disableTimersAndAnimations is false', function () {
       this.screenshotConfig.disableTimersAndAnimations = false
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)
 
       cy
@@ -364,7 +396,7 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('should call onAfterScreenshot before timers are resumed', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)
 
       const onAfterScreenshot = cy.stub().callsFake(() => {
@@ -381,25 +413,25 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('sends clip as userClip if specified', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)
       const clip = { width: 100, height: 100, x: 0, y: 0 }
 
       cy
       .screenshot({ clip })
       .then(() => {
-        expect(Cypress.automation.withArgs('take:screenshot').args[0][1].userClip).to.equal(clip)
+        expect(automation.withArgs('take:screenshot').args[0][1].userClip).to.equal(clip)
       })
     })
 
     it('sends viewport dimensions of main browser window', function () {
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)
 
       cy
       .screenshot()
       .then(() => {
-        expect(Cypress.automation.withArgs('take:screenshot').args[0][1].viewport).to.eql({
+        expect(automation.withArgs('take:screenshot').args[0][1].viewport).to.eql({
           width: window.parent.innerWidth,
           height: window.parent.innerHeight,
         })
@@ -420,10 +452,12 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     describe('before/after events', () => {
-      beforeEach(function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      let action: sinon.SinonSpy
 
-        cy.spy(Cypress, 'action').log(false)
+      beforeEach(function () {
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
+
+        action = cy.spy(Cypress, 'action').log(false)
       })
 
       it('sends before:screenshot', () => {
@@ -432,8 +466,8 @@ describe('src/cy/commands/screenshot', () => {
         cy
         .screenshot('foo')
         .then(() => {
-          expect(Cypress.action.withArgs('cy:before:screenshot')).to.be.calledOnce
-          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
+          expect(action.withArgs('cy:before:screenshot')).to.be.calledOnce
+          expect(action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
             id: runnable.id,
             isOpen: true,
             appOnly: true,
@@ -453,8 +487,8 @@ describe('src/cy/commands/screenshot', () => {
         cy
         .screenshot('foo')
         .then(() => {
-          expect(Cypress.action.withArgs('cy:after:screenshot')).to.be.calledOnce
-          expect(Cypress.action.withArgs('cy:after:screenshot').args[0][1]).to.eql({
+          expect(action.withArgs('cy:after:screenshot')).to.be.calledOnce
+          expect(action.withArgs('cy:after:screenshot').args[0][1]).to.eql({
             id: runnable.id,
             isOpen: false,
             appOnly: true,
@@ -477,7 +511,7 @@ describe('src/cy/commands/screenshot', () => {
         cy
         .screenshot('foo')
         .then(() => {
-          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
+          expect(action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
             id: runnable.id,
             isOpen: true,
             appOnly: false,
@@ -499,7 +533,7 @@ describe('src/cy/commands/screenshot', () => {
         cy
         .screenshot('foo')
         .then(() => {
-          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
+          expect(action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
             id: runnable.id,
             isOpen: true,
             appOnly: true,
@@ -516,7 +550,7 @@ describe('src/cy/commands/screenshot', () => {
 
     describe('capture: fullPage', () => {
       beforeEach(function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
         cy.spy(Cypress, 'action').log(false)
         cy.viewport(600, 200)
         cy.visit('/fixtures/screenshots.html')
@@ -525,14 +559,14 @@ describe('src/cy/commands/screenshot', () => {
       it('takes a screenshot for each time it needs to scroll', () => {
         cy.screenshot({ capture: 'fullPage' })
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledThrice
+          expect(automation.withArgs('take:screenshot')).to.be.calledThrice
         })
       })
 
       it('sends capture: fullPage', () => {
         cy.screenshot({ capture: 'fullPage' })
         .then(() => {
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].capture).to.equal('fullPage')
           expect(take.args[1][1].capture).to.equal('fullPage')
@@ -543,7 +577,7 @@ describe('src/cy/commands/screenshot', () => {
       it('sends number of current screenshot for each time it needs to scroll', () => {
         cy.screenshot({ capture: 'fullPage' })
         .then(() => {
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].current).to.equal(1)
           expect(take.args[1][1].current).to.equal(2)
@@ -554,7 +588,7 @@ describe('src/cy/commands/screenshot', () => {
       it('sends total number of screenshots for each time it needs to scroll', () => {
         cy.screenshot({ capture: 'fullPage' })
         .then(() => {
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].total).to.equal(3)
           expect(take.args[1][1].total).to.equal(3)
@@ -591,7 +625,7 @@ describe('src/cy/commands/screenshot', () => {
       it('sends the right clip values', () => {
         cy.screenshot({ capture: 'fullPage' })
         .then(() => {
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].clip).to.eql({ x: 0, y: 0, width: 600, height: 200 })
           expect(take.args[1][1].clip).to.eql({ x: 0, y: 0, width: 600, height: 200 })
@@ -601,17 +635,21 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     describe('element capture', () => {
+      let action: sinon.SinonSpy
+
       beforeEach(function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
-        cy.spy(Cypress, 'action').log(false)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
+        action = cy.spy(Cypress, 'action').log(false)
         cy.viewport(600, 200)
         cy.visit('/fixtures/screenshots.html')
       })
 
       it('yields an object with details', function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
-        cy.stub(Screenshot, 'onAfterScreenshot')
-        cy.stub(Screenshot, 'onBeforeScreenshot')
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
+        // @ts-expect-error - `onAfterScreenshot` is internal to Screenshot
+        const onAfterScreenshotStub = cy.stub(Screenshot, 'onAfterScreenshot')
+        // @ts-expect-error - `onBeforeScreenshot` is internal to Screenshot
+        const onBeforeScreenshotStub = cy.stub(Screenshot, 'onBeforeScreenshot')
 
         cy
         .get('.tall-element')
@@ -627,28 +665,28 @@ describe('src/cy/commands/screenshot', () => {
             expect(results.blackout).to.eql(this.screenshotConfig.blackout)
             expect(results.dimensions).to.eql(this.serverResult.dimensions)
 
-            expect(Screenshot.onBeforeScreenshot).to.be.calledOnce
-            expect(Screenshot.onBeforeScreenshot.firstCall.args[0]).to.match('.tall-element')
-            expect(Screenshot.onAfterScreenshot).not.to.be.called
+            expect(onBeforeScreenshotStub).to.be.calledOnce
+            expect(onBeforeScreenshotStub.firstCall.args[0]).to.match('.tall-element')
+            expect(onAfterScreenshotStub).not.to.be.called
           },
         })
         .then(() => {
-          expect(Screenshot.onAfterScreenshot).to.be.calledOnce
-          expect(Screenshot.onAfterScreenshot.firstCall.args[0]).to.match('.tall-element')
+          expect(onAfterScreenshotStub).to.be.calledOnce
+          expect(onAfterScreenshotStub.firstCall.args[0]).to.match('.tall-element')
         })
       })
 
       it('takes a screenshot for each time it needs to scroll', () => {
         cy.get('.tall-element').screenshot()
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledTwice
+          expect(automation.withArgs('take:screenshot')).to.be.calledTwice
         })
       })
 
       it('sends number of current screenshot for each time it needs to scroll', () => {
         cy.get('.tall-element').screenshot()
         .then(() => {
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].current).to.equal(1)
           expect(take.args[1][1].current).to.equal(2)
@@ -658,7 +696,7 @@ describe('src/cy/commands/screenshot', () => {
       it('sends total number of screenshots for each time it needs to scroll', () => {
         cy.get('.tall-element').screenshot()
         .then(() => {
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].total).to.equal(2)
           expect(take.args[1][1].total).to.equal(2)
@@ -697,7 +735,7 @@ describe('src/cy/commands/screenshot', () => {
         .then(() => {
           expect(scrollTo.getCall(0).args).to.eql([0, 140])
 
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].clip).to.eql({ x: 20, y: 0, width: 560, height: 200 })
           expect(take.args[1][1].clip).to.eql({ x: 20, y: 60, width: 560, height: 120 })
@@ -713,7 +751,7 @@ describe('src/cy/commands/screenshot', () => {
           // try to scroll until the element is at the top of the viewport.
           expect(scrollTo.getCall(0).args).to.eql([0, 20])
 
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
         })
@@ -731,7 +769,7 @@ describe('src/cy/commands/screenshot', () => {
           expect(scrollTo.getCall(0).args).to.eql([0, 140 - padding])
           expect(scrollTo.getCall(1).args).to.eql([0, (140 + viewportHeight) - padding])
 
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].clip).to.eql({
             x: 20 - padding,
@@ -758,7 +796,7 @@ describe('src/cy/commands/screenshot', () => {
         .then(() => {
           expect(scrollTo.getCall(0).args).to.eql([0, padding])
 
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].clip).to.eql({
             x: 30,
@@ -773,7 +811,7 @@ describe('src/cy/commands/screenshot', () => {
         cy.get('.short-element').within(() => {
           cy.screenshot()
         }).then(() => {
-          const take = Cypress.automation.withArgs('take:screenshot')
+          const take = automation.withArgs('take:screenshot')
 
           expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
         })
@@ -785,18 +823,18 @@ describe('src/cy/commands/screenshot', () => {
           cy.screenshot({ capture: 'runner' })
         }).then(() => {
           // the runner was captured ("appOnly === true" means to hide the runner UI)
-          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.false
-          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('runner')
+          expect(action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.false
+          expect(automation.withArgs('take:screenshot').args[0][1].capture).to.equal('runner')
         })
       })
 
       it('coerces capture option into \'app\'', function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
 
         cy.get('.short-element').screenshot({ capture: 'runner' })
         .then(() => {
-          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
-          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
+          expect(action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
+          expect(automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
         })
       })
 
@@ -830,7 +868,7 @@ describe('src/cy/commands/screenshot', () => {
         .then((doc) => {
           cy.wrap(doc)
           .screenshot()
-          .then((d) => {
+          .then((d: unknown) => {
             expect(doc === d).to.be.true
           })
         })
@@ -845,7 +883,7 @@ describe('src/cy/commands/screenshot', () => {
 
     describe('timeout', () => {
       beforeEach(function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
       })
 
       it('sets timeout to Cypress.config(responseTimeout)', {
@@ -924,6 +962,7 @@ describe('src/cy/commands/screenshot', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ capture: true })
       })
 
@@ -937,6 +976,7 @@ describe('src/cy/commands/screenshot', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ capture: 'foo' })
       })
 
@@ -950,6 +990,7 @@ describe('src/cy/commands/screenshot', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ scale: 'foo' })
       })
 
@@ -963,6 +1004,7 @@ describe('src/cy/commands/screenshot', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ disableTimersAndAnimations: 'foo' })
       })
 
@@ -976,6 +1018,7 @@ describe('src/cy/commands/screenshot', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ blackout: 'foo' })
       })
 
@@ -989,6 +1032,7 @@ describe('src/cy/commands/screenshot', () => {
           done()
         })
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ blackout: [true] })
       })
 
@@ -1002,18 +1046,21 @@ describe('src/cy/commands/screenshot', () => {
       it('throws if padding is not a number', function (done) {
         this.assertErrorMessage('`cy.screenshot()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `50px`', done)
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ padding: '50px' })
       })
 
       it('throws if padding is not an array of numbers', function (done) {
         this.assertErrorMessage('`cy.screenshot()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `bad, bad, bad, bad`', done)
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ padding: ['bad', 'bad', 'bad', 'bad'] })
       })
 
       it('throws if padding is not an array with a length between 1 and 4', function (done) {
         this.assertErrorMessage('`cy.screenshot()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `20, 10, 20, 10, 50`', done)
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ padding: [20, 10, 20, 10, 50] })
       })
 
@@ -1027,24 +1074,28 @@ describe('src/cy/commands/screenshot', () => {
       it('throws if clip is not an object', function (done) {
         this.assertErrorMessage('`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `true`', done)
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ clip: true })
       })
 
       it('throws if clip is lacking proper keys', function (done) {
         this.assertErrorMessage('`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`', done)
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ clip: { x: 5 } })
       })
 
       it('throws if clip has extraneous keys', function (done) {
         this.assertErrorMessage('`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`', done)
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
       })
 
       it('throws if clip has non-number values', function (done) {
         this.assertErrorMessage('`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `Object{4}`', done)
 
+        // @ts-expect-error - testing an invalid option
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: '5' } })
       })
 
@@ -1069,7 +1120,7 @@ describe('src/cy/commands/screenshot', () => {
         error.name = 'foo'
         error.stack = 'stack'
 
-        Cypress.automation.withArgs('take:screenshot').rejects(error)
+        automation.withArgs('take:screenshot').rejects(error)
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -1087,7 +1138,7 @@ describe('src/cy/commands/screenshot', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.automation.withArgs('take:screenshot').resolves(Promise.delay(1000))
+        automation.withArgs('take:screenshot').resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -1109,7 +1160,7 @@ describe('src/cy/commands/screenshot', () => {
 
     describe('.log', () => {
       beforeEach(function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
 
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'screenshot') {
@@ -1174,7 +1225,7 @@ describe('src/cy/commands/screenshot', () => {
       })
 
       it('#consoleProps', function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
 
         let expected = _.extend({}, this.serverResult, this.screenshotConfig, {
           scaled: true,
@@ -1202,32 +1253,35 @@ describe('src/cy/commands/screenshot', () => {
       })
 
       afterEach(function () {
+        // @ts-expect-error - `hideRunnerUi` is an internal config key
         Cypress.config('hideRunnerUi', this.hideRunnerUiOld)
       })
 
       it('sends hideRunnerUi: false when the runner is not hidden', function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
         cy.spy(Cypress, 'action').log(false)
 
+        // @ts-expect-error - `hideRunnerUi` is an internal config key
         Cypress.config('hideRunnerUi', false)
 
         cy
         .screenshot()
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(false)
+          expect(automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(false)
         })
       })
 
       it('sends hideRunnerUi: true when the runner is hidden', function () {
-        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        automation.withArgs('take:screenshot').resolves(this.serverResult)
         cy.spy(Cypress, 'action').log(false)
 
+        // @ts-expect-error - `hideRunnerUi` is an internal config key
         Cypress.config('hideRunnerUi', true)
 
         cy
         .screenshot()
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(true)
+          expect(automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(true)
         })
       })
     })
