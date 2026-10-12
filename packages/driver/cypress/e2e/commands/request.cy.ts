@@ -595,7 +595,8 @@ describe('src/cy/commands/request', () => {
     describe('binary data', () => {
       // https://github.com/cypress-io/cypress/issues/6178
       it('can send Blob', () => {
-        const body = new Blob(['1,2,3,4'], { type: 'application/octet-stream' })
+        // 0x80 and 0xff are never valid UTF-8, so any text decoding along the way would corrupt them
+        const body = new Blob([new Uint8Array([0x00, 0x01, 0x7f, 0x80, 0xff])], { type: 'application/octet-stream' })
 
         cy.request(
           {
@@ -610,12 +611,10 @@ describe('src/cy/commands/request', () => {
         .then((response) => {
           expect(response.status).to.equal(200)
 
-          // When user-passed body to the Nodejs server is a Buffer,
-          // Nodejs doesn't provide any decoder in the response.
-          // So, we need to decode it ourselves.
-          const dec = new TextDecoder()
+          // A Blob request yields an ArrayBuffer response body, even for JSON responses
+          const { hex } = JSON.parse(new TextDecoder().decode(response.body))
 
-          expect(dec.decode(response.body)).to.contain('1,2,3,4')
+          expect(hex).to.eq('00017f80ff')
         })
       })
 
