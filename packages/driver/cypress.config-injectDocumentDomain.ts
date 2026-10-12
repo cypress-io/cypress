@@ -6,7 +6,7 @@ export default defineConfig({
   ...baseConfig,
   e2e: {
     ...baseConfig.e2e,
-    specPattern: '{cypress/**/origin/**/*.cy.{js,ts},cypress/**/cookies.cy.{js,ts},cypress/**/net_stubbing.cy.{js,ts}}',
+    specPattern: '{cypress/**/origin/**/*.cy.{js,ts},cypress/**/cookies.cy.{js,ts},cypress/**/net_stubbing/*.cy.{js,ts}}',
     injectDocumentDomain: true,
   },
   component: undefined,
