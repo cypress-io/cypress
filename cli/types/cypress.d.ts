@@ -1866,7 +1866,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/parentsuntil
      */
-    parentsUntil<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parentsUntil<E extends Node = HTMLElement>(): Chainable<JQuery<E>>
 
     /**
      * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.

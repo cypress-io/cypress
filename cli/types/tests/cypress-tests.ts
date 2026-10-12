@@ -1374,8 +1374,6 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
   cy.wrap({}).parentsUntil() // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).parentsUntil({ log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).parentsUntil({ log: 'true' }) // $ExpectError
 }
 
 namespace ChaiJQueryTests {
@@ -1388,6 +1386,8 @@ namespace ChaiJQueryTests {
   expect($el).to.match('div') // $ExpectType Assertion
   expect($el).to.match($el[0]) // $ExpectType Assertion
   expect($el).to.match($el) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$<Element>('div')) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$<SVGElement>('svg')) // $ExpectType Assertion
   expect($el).to.match({ foo: 'bar' }) // $ExpectError
 
   cy.get('#result').should('have.attr', 'tabindex', 0)

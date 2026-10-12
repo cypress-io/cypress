@@ -69,5 +69,27 @@ declare namespace Chai {
      * @see http://chaijs.com/api/bdd/#method_most
      */
     lessThanOrEqual: NumberComparer
+
+    /**
+     * Assert that the first element of the selection has the given attribute, using `.attr()`.
+     * Optionally, assert a particular value as well. A number is compared against the attribute's string value.
+     *
+     * @example
+     *    expect($('#result')).to.have.attr('role', 'menu')
+     *    expect($('#result')).to.have.attr('tabindex', 0)
+     * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
+     */
+    attr(name: string, value?: string | number): Assertion
+  }
+
+  interface Match {
+    /**
+     * Assert that the selection matches the given DOM element or jQuery object, using `.is()`.
+     *
+     * @example
+     *    expect($('#result')).to.match($('.menu'))
+     * @see http://chaijs.com/plugins/chai-jquery/#matchselector
+     */
+    (element: Element | JQuery<Element>): Assertion
   }
 }
