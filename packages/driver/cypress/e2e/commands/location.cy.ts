@@ -527,12 +527,6 @@ describe('src/cy/commands/location', () => {
       })
 
       it('does not log an additional log on failure', function (done) {
-        const logs: Cypress.Log[] = []
-
-        cy.on('log:added', (attrs, log) => {
-          logs.push(log)
-        })
-
         cy.on('fail', () => {
           assertLogLength(this.logs, 2)
 
