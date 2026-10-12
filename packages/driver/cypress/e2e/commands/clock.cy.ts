@@ -33,7 +33,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
-        // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+        // @ts-expect-error - relies on the undocumented 0ms default for `ms`
         clock.tick()
       })
     })
@@ -162,7 +162,7 @@ describe('src/cy/commands/clock', () => {
 
           clock.setSystemTime(1111111)
           expect(callCount).to.equal(0)
-          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+          // @ts-expect-error - relies on the undocumented 0ms default for `ms`
           clock.tick()
           expect(callCount).to.equal(1)
         })
@@ -198,7 +198,7 @@ describe('src/cy/commands/clock', () => {
           })
         })
 
-        // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+        // @ts-expect-error - relies on the undocumented 0ms default for `ms`
         clock.tick()
       })
     })
@@ -309,7 +309,7 @@ describe('src/cy/commands/clock', () => {
             done()
           })
 
-          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+          // @ts-expect-error - relies on the undocumented 0ms default for `ms`
           clock.tick()
         })
       })
@@ -325,7 +325,7 @@ describe('src/cy/commands/clock', () => {
               done()
             })
 
-            // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+            // @ts-expect-error - relies on the undocumented 0ms default for `ms`
             clock.tick()
           }, 5)
         })
@@ -369,7 +369,7 @@ describe('src/cy/commands/clock', () => {
           const onSetTimeout = cy.spy()
 
           cy.state('window').setTimeout(onSetTimeout)
-          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+          // @ts-expect-error - relies on the undocumented 0ms default for `ms`
           clock.tick()
 
           expect(onSetTimeout).to.be.called
@@ -392,7 +392,7 @@ describe('src/cy/commands/clock', () => {
           const onSetTimeout = cy.spy()
 
           newWindow.setTimeout(onSetTimeout)
-          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+          // @ts-expect-error - relies on the undocumented 0ms default for `ms`
           clock.tick()
 
           expect(onSetTimeout).to.be.called
@@ -490,7 +490,7 @@ describe('src/cy/commands/clock', () => {
         })
 
         cy.clock({ log: false }).then((clock) => {
-          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+          // @ts-expect-error - relies on the undocumented 0ms default for `ms`
           clock.tick()
           clock.restore()
           expect(this.logs.length).to.equal(0)
@@ -505,7 +505,7 @@ describe('src/cy/commands/clock', () => {
         })
 
         cy.clock({ log: false }).then((clock) => {
-          // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+          // @ts-expect-error - relies on the undocumented 0ms default for `ms`
           clock.tick()
           clock.restore()
           expect(this.logs.length).to.equal(0)
@@ -608,7 +608,7 @@ describe('src/cy/commands/clock', () => {
 
     it('defaults to 0ms', () => {
       cy.clock()
-      // @ts-expect-error - `ms` is optional at runtime and defaults to 0
+      // @ts-expect-error - testing the undocumented 0ms default for `ms`
       .tick().then(function (clock) {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
@@ -625,8 +625,7 @@ describe('src/cy/commands/clock', () => {
           done()
         })
 
-        // @ts-expect-error - `ms` is optional at runtime and defaults to 0
-        cy.tick()
+        cy.tick(1000)
       })
 
       it('throws if ms is not undefined or a number', (done) => {
