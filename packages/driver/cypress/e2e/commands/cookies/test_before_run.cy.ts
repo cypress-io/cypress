@@ -1,7 +1,3 @@
-const { Promise } = Cypress
-
-export {}
-
 describe('src/cy/commands/cookies', () => {
   let automation: sinon.SinonStub
 
@@ -13,63 +9,59 @@ describe('src/cy/commands/cookies', () => {
   })
 
   context('test:before:run:async', () => {
-    it('clears cookies before each test run', () => {
+    it('clears cookies before each test run', async () => {
       automation
-      .withArgs('get:cookies', { domain: 'localhost' })
+      .withArgs('get:cookies', {})
       .resolves([{ name: 'foo' }])
-      .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
+      .withArgs('clear:cookies', [{ name: 'foo' }])
       .resolves([])
 
-      Cypress.emitThen('test:before:run:async', {
+      await Cypress.action('runner:test:before:run:async', {
         id: 'r1',
         currentRetry: 1,
-      })
-      // @ts-expect-error - `emitThen` is publicly typed as returning `BluebirdStatic` rather than a promise
-      .then(() => {
-        expect(automation).to.be.calledWith(
-          'get:cookies',
-          { domain: 'localhost' },
-        )
+      }, Cypress.state('runnable'))
 
-        expect(automation).to.be.calledWith(
-          'clear:cookies',
-          [{ domain: 'localhost', name: 'foo' }],
-        )
-      })
+      expect(automation).to.be.calledWith(
+        'get:cookies',
+        {},
+      )
+
+      expect(automation).to.be.calledWith(
+        'clear:cookies',
+        [{ name: 'foo' }],
+      )
     })
 
-    it('does not call clear:cookies when get:cookies returns empty array', () => {
+    it('calls clear:cookies with an empty array when get:cookies returns empty array', async () => {
       automation.withArgs('get:cookies').resolves([])
+      automation.withArgs('clear:cookies').resolves([])
 
-      Cypress.emitThen('test:before:run:async', {
+      await Cypress.action('runner:test:before:run:async', {
         id: 'r1',
         currentRetry: 1,
-      })
-      // @ts-expect-error - `emitThen` is publicly typed as returning `BluebirdStatic` rather than a promise
-      .then(() => {
-        expect(automation).not.to.be.calledWith(
-          'clear:cookies',
-        )
-      })
+      }, Cypress.state('runnable'))
+
+      expect(automation).to.be.calledWith(
+        'clear:cookies',
+        [],
+      )
     })
 
-    it('does not attempt to time out', () => {
+    it('does not attempt to time out', async () => {
       automation
-      .withArgs('get:cookies', { domain: 'localhost' })
+      .withArgs('get:cookies', {})
       .resolves([{ name: 'foo' }])
-      .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
+      .withArgs('clear:cookies', [{ name: 'foo' }])
       .resolves([])
 
-      const timeout = cy.spy(Promise.prototype, 'timeout')
+      const timeout = cy.spy(Cypress.Promise.prototype, 'timeout')
 
-      Cypress.emitThen('test:before:run:async', {
+      await Cypress.action('runner:test:before:run:async', {
         id: 'r1',
         currentRetry: 1,
-      })
-      // @ts-expect-error - `emitThen` is publicly typed as returning `BluebirdStatic` rather than a promise
-      .then(() => {
-        expect(timeout).not.to.be.called
-      })
+      }, Cypress.state('runnable'))
+
+      expect(timeout).not.to.be.called
     })
   })
 })
