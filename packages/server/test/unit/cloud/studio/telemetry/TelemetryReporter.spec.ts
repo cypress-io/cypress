@@ -142,7 +142,7 @@ describe('TelemetryReporter', () => {
       // Await the post promise to resolve
       await new Promise((resolve) => setTimeout(resolve, 5))
 
-      expect(mockPost).toHaveBeenCalledWith(
+      expect(mockPost.mock.calls).toStrictEqual([[
         'https://cloud.cypress.io/studio/telemetry',
         {
           projectSlug: 'test-project',
@@ -159,7 +159,7 @@ describe('TelemetryReporter', () => {
             'x-cypress-version': 'test-version',
           },
         },
-      )
+      ]])
     })
 
     it('handles cloud request errors gracefully', async () => {

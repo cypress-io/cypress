@@ -2173,8 +2173,7 @@ jobs:
       - restore_cached_workspace
       - run: yarn test-unit --scope=@packages/server
       - sanitize-verify-and-store-mocha-results:
-          # one junit file each from the mocha and vitest runners
-          expectedResultCount: 2
+          expectedResultCount: 1
 
   server-unit-tests-cloud-environment:
     <<: *defaults
@@ -2203,9 +2202,7 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - windows_reinstall_deps
-      # `test-unit` chains both runners and the filename filter only narrows mocha,
-      # so target the mocha runner directly to keep this a single-spec job
-      - run: yarn workspace @packages/server test-unit-mocha cloud/environment_spec.ts
+      - run: yarn workspace @packages/server test-unit test/unit/cloud/environment.spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 

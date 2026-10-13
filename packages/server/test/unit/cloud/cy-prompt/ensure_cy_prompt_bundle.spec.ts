@@ -47,11 +47,11 @@ describe('ensureCyPromptBundle', () => {
 
     await ensureCyPromptBundle({ cyPromptUrl: 'https://cdn.cypress.io/cy-prompt/x.tar' })
 
-    expect(ensureSignedBundleStub).toHaveBeenCalledWith({
+    expect(ensureSignedBundleStub.mock.calls).toStrictEqual([[{
       url: 'https://cdn.cypress.io/cy-prompt/x.tar',
       projectId: undefined,
       kind: 'cy-prompt',
-    })
+    }]])
   })
 
   it('propagates errors from ensureSignedBundle', async () => {
