@@ -708,6 +708,11 @@ describe('visual error templates', () => {
         default: ['example.com:443', ['https://example.com/one', 'https://example.com/two']],
       }
     },
+    CLIENT_CERTIFICATES_PATH_SCOPED: () => {
+      return {
+        default: ['example.com:443', ['https://example.com/secure/*']],
+      }
+    },
     SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 
