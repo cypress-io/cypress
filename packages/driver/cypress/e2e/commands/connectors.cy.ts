@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
+
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/connectors', () => {
@@ -48,7 +49,7 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('throws when promise timeout', (done) => {
-          const logs = []
+          const logs: any[] = []
 
           cy.on('log:added', (attrs, log) => {
             logs?.push(log)
@@ -294,7 +295,7 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('unbinds command:enqueued in the case of an error thrown', function (done) {
-          const listeners = []
+          const listeners: number[] = []
 
           cy.on('fail', () => {
             listeners.push(cy.listeners('command:enqueued').length)
@@ -538,7 +539,7 @@ describe('src/cy/commands/connectors', () => {
         // https://github.com/cypress-io/cypress/issues/3871
         describe('dot-separated property paths on the remote window', () => {
           it('invokes a top-level function', () => {
-            cy.window().then((win) => {
+            cy.window().then((win: Cypress.AUTWindow & Record<string, any>) => {
               win.val = 40
               win.get = function () {
                 return this.val
@@ -549,7 +550,7 @@ describe('src/cy/commands/connectors', () => {
           })
 
           it('invokes a function nested 1 level deep', () => {
-            cy.window().then((win) => {
+            cy.window().then((win: Cypress.AUTWindow & Record<string, any>) => {
               win.obj = {
                 val: 41,
                 get () {
@@ -562,7 +563,7 @@ describe('src/cy/commands/connectors', () => {
           })
 
           it('invokes a function nested 2 levels deep', () => {
-            cy.window().then((win) => {
+            cy.window().then((win: Cypress.AUTWindow & Record<string, any>) => {
               win.obj = {
                 innerObj: {
                   val: 42,
@@ -577,7 +578,7 @@ describe('src/cy/commands/connectors', () => {
           })
 
           it('invokes a function nested 3 levels deep', () => {
-            cy.window().then((win) => {
+            cy.window().then((win: Cypress.AUTWindow & Record<string, any>) => {
               win.obj = {
                 innerObj: {
                   innerInnerObj: {
@@ -603,7 +604,7 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('retries until function exists on the subject', () => {
-          const obj = {}
+          const obj: Record<string, any> = {}
 
           cy.on('command:retry', _.after(3, () => {
             obj.foo = () => {
@@ -617,7 +618,7 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('retries until property is a function', () => {
-          const obj = {
+          const obj: Record<string, any> = {
             foo: '',
           }
 
@@ -633,7 +634,7 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('retries until property is a function when initially undefined', () => {
-          const obj = {
+          const obj: Record<string, any> = {
             foo: undefined,
           }
 
@@ -788,7 +789,9 @@ describe('src/cy/commands/connectors', () => {
 
             cy.wrap({ foo () {
               return 'foo'
-            } }).invoke({})
+            } })
+            // @ts-expect-error Testing invalid inputs
+            .invoke({})
           })
 
           it('throws when function name is not of type string but of type boolean', function (done) {
@@ -803,7 +806,9 @@ describe('src/cy/commands/connectors', () => {
 
             cy.wrap({ foo () {
               return 'foo'
-            } }).invoke({}, true)
+            } })
+            // @ts-expect-error Testing invalid inputs
+            .invoke({}, true)
           })
 
           it('throws when function name is not of type string but of type function', function (done) {
@@ -819,6 +824,7 @@ describe('src/cy/commands/connectors', () => {
             cy.wrap({ foo () {
               return 'foo'
             } })
+            // @ts-expect-error Testing invalid inputs
             .invoke(() => {})
           })
 
@@ -834,7 +840,9 @@ describe('src/cy/commands/connectors', () => {
 
             cy.wrap({ foo () {
               return 'foo'
-            } }).invoke(true, 'show')
+            } })
+            // @ts-expect-error Testing invalid inputs
+            .invoke(true, 'show')
           })
         })
 
@@ -1086,7 +1094,7 @@ describe('src/cy/commands/connectors', () => {
         it('throws without a subject', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('cy.invoke("queue")')
-            expect(err.message).to.include('child command before running a parent command')
+            expect(err.message).to.include('failed because it is not chained off a command that yields a subject.')
 
             done()
           })
@@ -1104,6 +1112,7 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
+          // @ts-expect-error Testing invalid inputs
           cy.invoke({})
         })
 
@@ -1232,11 +1241,9 @@ describe('src/cy/commands/connectors', () => {
           return 'fn'
         }
 
-        fn.bar = () => {
+        fn.bar = Object.assign(() => {
           return 'bar'
-        }
-
-        fn.bar.baz = 'baz'
+        }, { baz: 'baz' })
 
         cy.wrap(fn).its('bar').its('baz').should('eq', 'baz')
       })
@@ -1246,11 +1253,9 @@ describe('src/cy/commands/connectors', () => {
           return 'fn'
         }
 
-        fn.bar = () => {
+        fn.bar = Object.assign(() => {
           return 'bar'
-        }
-
-        fn.bar.baz = 'baz'
+        }, { baz: 'baz' })
 
         const obj = {
           foo: fn,
@@ -1296,13 +1301,13 @@ describe('src/cy/commands/connectors', () => {
       it('handles number subjects', () => {
         const num = 12345
 
-        const { toFixed } = top.Number.prototype
+        const { toFixed } = (top as Window & typeof globalThis).Number.prototype
 
         cy.wrap(num).its('toFixed').should('eq', toFixed)
       })
 
       it('retries by default until property exists without an assertion', () => {
-        const obj = {}
+        const obj: Record<string, any> = {}
 
         cy.on('command:retry', _.after(3, () => {
           return obj.foo = 'bar'
@@ -1314,7 +1319,7 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('retries until property is not undefined without an assertion', () => {
-        const obj = {
+        const obj: Record<string, any> = {
           foo: undefined,
         }
 
@@ -1328,7 +1333,7 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('retries until property is not null without an assertion', () => {
-        const obj = {
+        const obj: Record<string, any> = {
           foo: null,
         }
 
@@ -1356,7 +1361,7 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('retries until property does NOT exist with an assertion', () => {
-        const obj = {
+        const obj: Record<string, any> = {
           foo: '',
         }
 
@@ -1558,7 +1563,7 @@ describe('src/cy/commands/connectors', () => {
         it('throws without a subject', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('cy.its("wat")')
-            expect(err.message).to.include('child command before running a parent command')
+            expect(err.message).to.include('failed because it is not chained off a command that yields a subject.')
 
             done()
           })
@@ -1656,7 +1661,7 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('does not display parenthesis on command', function (done) {
-          const obj = {
+          const obj: Record<string, any> = {
             foo: {
               bar () {},
             },
@@ -1767,12 +1772,11 @@ describe('src/cy/commands/connectors', () => {
             return 'fn'
           }
 
-          fn.bar = () => {
+          fn.bar = Object.assign(() => {
             return 'bar'
-          }
+          }, { baz: 'baz' })
 
-          fn.bar.baz = 'baz'
-
+          // @ts-expect-error Testing invalid inputs
           cy.wrap(fn).its('bar', { log: false }, 'baz').should('eq', 'baz')
         })
 
@@ -1786,6 +1790,7 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
+          // @ts-expect-error Testing invalid inputs
           cy.wrap({ foo: 'string' }).its('foo', 'bar')
         })
 
@@ -1799,6 +1804,7 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
+          // @ts-expect-error Testing invalid inputs
           cy.wrap({ foo: 'foo' }).its()
         })
 
@@ -1812,13 +1818,14 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
+          // @ts-expect-error Testing invalid inputs
           cy.wrap({ foo: 'foo' }).its(true)
         })
 
         it('resets traversalErr and throws the right assertion', function (done) {
           cy.timeout(200)
 
-          const obj = {}
+          const obj: Record<string, any> = {}
 
           cy.on('fail', (err) => {
             const { itsLog, lastLog } = this
@@ -1925,7 +1932,7 @@ describe('src/cy/commands/connectors', () => {
           })
         }).then(($lis) => {
           expect(count).to.eq(3)
-          expect(new Date() - start).to.be.gt(60)
+          expect(new Date().getTime() - start.getTime()).to.be.gt(60)
         })
       })
 
@@ -2041,7 +2048,7 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('throws when not passed a callback function', function (done) {
-          const logs = []
+          const logs: any[] = []
 
           cy.on('log:added', (attrs, log) => {
             logs?.push(log)
@@ -2056,6 +2063,7 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
+          // @ts-expect-error Testing invalid inputs
           cy.get('ul').each({})
         })
 

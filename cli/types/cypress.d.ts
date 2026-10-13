@@ -79,6 +79,14 @@ declare namespace Cypress {
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
+  /**
+   * Trigger action
+   * @private
+   */
+  interface ActionTrigger {
+    <T = (any[] | void)>(action: string, ...args: any[]): T
+  }
+
   type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
@@ -776,7 +784,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
+    action: ActionTrigger
 
     /**
      * Load files
@@ -1378,7 +1386,7 @@ declare namespace Cypress {
      * @param {Number} index A number indicating the index to find the element at within an array of elements. A negative number counts index from the end of the list.
      * @example
      *    cy.get('tbody>tr').eq(0)    // Yield first 'tr' in 'tbody'
-     *    cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
+     *    cy.get('ul>li').eq(4)       // Yield fifth 'li' in 'ul'
      *    cy.get('li').eq(-2) // Yields second from last 'li' element
      */
     eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
@@ -1664,7 +1672,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/next
      * @example
-     *    cy.get('nav a:first').next('.menu-item)
+     *    cy.get('nav a:first').next('.menu-item')
      */
     next<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 

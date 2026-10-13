@@ -185,7 +185,7 @@ describe('src/cy/commands/aliasing', () => {
     describe('errors', () => {
       it('throws as a parent command', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('before running a parent command')
+          expect(err.message).to.include('`cy.as("foo")` failed because it is not chained off a command that yields a subject.')
           expect(err.message).to.include('`cy.as("foo")`')
 
           done()
