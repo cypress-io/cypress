@@ -103,7 +103,9 @@ export function toBridgeEntries (clientCertificates: { url: string }[]): ClientC
       url: item.url,
       hostname: parsed.host,
       port: parsed.port,
-      hostMatcher: parsed.hostMatcher,
+      // As a glob, an exact host like the IPv6 literal `[::1]` would be a character class, so
+      // only a pattern is matched as one
+      hostMatcher: parsed.host.includes('*') ? parsed.hostMatcher : { match: (hostname) => hostname === parsed.host },
       pathScoped: parsed.path !== undefined,
       material,
     }]

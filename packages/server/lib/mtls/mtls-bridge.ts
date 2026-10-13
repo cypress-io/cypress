@@ -49,12 +49,10 @@ const DNS_NAME = /^[a-z0-9_-]+(\.[a-z0-9_-]+)*$/
  * get that far.
  */
 function originFor (listener: BridgeListener, servername: string | null): string | null {
-  const wildcard = listener.hostname.includes('*')
-
   // A browser sends no SNI for an IP literal, so an exact listener stands for its own host.
   // A wildcard one only knows its origin from SNI.
   if (servername === null) {
-    return wildcard ? null : listener.hostname
+    return listener.hostname.includes('*') ? null : listener.hostname
   }
 
   const name = servername.toLowerCase()
@@ -63,9 +61,7 @@ function originFor (listener: BridgeListener, servername: string | null): string
     return null
   }
 
-  // An exact host is compared exactly: as a glob, an IPv6 literal like `[::1]` would be a
-  // character class
-  return (wildcard ? listener.hostMatcher.match(name) : name === listener.hostname) ? name : null
+  return listener.hostMatcher.match(name) ? name : null
 }
 
 /** What `allowDestroy` adds to a `net.Server`: close, and take live connections with it. */

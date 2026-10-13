@@ -24,7 +24,7 @@ export interface ClientCertificateEntry {
   hostname: string
   /** Port from the configured URL, or undefined when it omitted one. */
   port?: number
-  /** `UrlMatcher`'s own test for a wildcard `hostname`. An exact host is compared exactly. */
+  /** Whether a servername is one `hostname` stands for, by `UrlMatcher`'s rules for a pattern. */
   hostMatcher: HostMatcher
   /** Whether the URL limits the certificate to part of the origin. */
   pathScoped: boolean
@@ -67,7 +67,8 @@ export interface BoundBridgeListener {
  *
  * For the same reason a path-scoped entry cannot be kept to its path: the resolver rule
  * steers the whole origin, so any page could reach any path on it with the certificate
- * attached. An origin is only bridged when some entry configures it whole.
+ * attached. An origin is only bridged when some entry configures it whole, or when the
+ * wildcard that would otherwise steer it already presents the same certificate on every path.
  */
 export function planBridgeListeners (entries: ClientCertificateEntry[]): BridgeListener[] {
   const listeners = new Map<string, BridgeListener>()
@@ -101,13 +102,34 @@ export function planBridgeListeners (entries: ClientCertificateEntry[]): BridgeL
     existing.sourceUrls.push(entry.url)
   })
 
+  const wildcards = [...listeners]
+  .filter(([key, listener]) => originWide.has(key) && listener.hostname.includes('*'))
+  .map(([, listener]) => listener)
+
   listeners.forEach((listener, key) => {
-    if (!originWide.has(key)) {
-      errors.throwErr('CLIENT_CERTIFICATES_PATH_SCOPED', key, listener.sourceUrls)
+    if (originWide.has(key)) {
+      return
     }
+
+    const covering = coveringWildcard(listener, wildcards)
+
+    if (!covering || materialKey(covering.material) !== materialKey(listener.material)) {
+      return errors.throwErr('CLIENT_CERTIFICATES_PATH_SCOPED', key, listener.sourceUrls)
+    }
+
+    // Without its own resolver rule the origin falls through to the wildcard's, which
+    // presents the same certificate it would have
+    listeners.delete(key)
   })
 
   return [...listeners.values()]
+}
+
+/** The listener Chromium would steer this origin to if it had no rule of its own. */
+function coveringWildcard (listener: BridgeListener, wildcards: BridgeListener[]): BridgeListener | undefined {
+  return wildcards
+  .filter((wildcard) => wildcard.port === listener.port && wildcard.hostMatcher.match(listener.hostname))
+  .sort((a, b) => wildcardBreadth(a.hostname) - wildcardBreadth(b.hostname))[0]
 }
 
 /**

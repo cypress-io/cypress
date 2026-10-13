@@ -9,8 +9,11 @@ const material = (seed: string) => {
   }
 }
 
+// stands in for minimatch, which treats `*` as any run of characters other than `/`
+const hostPattern = (hostname: string) => new RegExp(`^${hostname.replace(/\./g, '\\.').replace(/\*/g, '[^/]*')}$`)
+
 const entry = (url: string, hostname: string, port: number | undefined, seed: string, pathScoped = false): ClientCertificateEntry => {
-  return { url, hostname, port, hostMatcher: { match: (h) => h === hostname }, pathScoped, material: material(seed) }
+  return { url, hostname, port, hostMatcher: { match: (h) => hostPattern(hostname).test(h) }, pathScoped, material: material(seed) }
 }
 
 describe('planBridgeListeners', () => {
@@ -41,6 +44,67 @@ describe('planBridgeListeners', () => {
       return planBridgeListeners([
         entry('https://a.com/one', 'a.com', 443, 'same', true),
         entry('https://a.com/two', 'a.com', 443, 'same', true),
+      ])
+    }
+
+    expect(plan).toThrow(expect.objectContaining({ type: 'CLIENT_CERTIFICATES_PATH_SCOPED' }))
+  })
+
+  it('fails the whole plan when any one origin is only configured for some of its paths', () => {
+    const plan = () => {
+      return planBridgeListeners([
+        entry('https://a.com', 'a.com', undefined, 'a'),
+        entry('https://b.com/one', 'b.com', 443, 'b', true),
+      ])
+    }
+
+    expect(plan).toThrow(expect.objectContaining({ type: 'CLIENT_CERTIFICATES_PATH_SCOPED' }))
+  })
+
+  // The wildcard's resolver rule already steers the host to a listener presenting that same
+  // certificate on every path, so the path-scoped entry adds nothing.
+  it('leaves a path-scoped entry to a wildcard that covers its host with the same certificate', () => {
+    const listeners = planBridgeListeners([
+      entry('https://*.example.com', '*.example.com', undefined, 'same'),
+      entry('https://api.example.com/secure', 'api.example.com', undefined, 'same', true),
+    ])
+
+    expect(listeners.map((l) => l.hostname)).toStrictEqual(['*.example.com'])
+  })
+
+  it('throws when the wildcard covering a path-scoped entry presents a different certificate', () => {
+    const plan = () => {
+      return planBridgeListeners([
+        entry('https://*.example.com', '*.example.com', undefined, 'wildcard'),
+        entry('https://api.example.com/secure', 'api.example.com', undefined, 'path', true),
+      ])
+    }
+
+    expect(plan).toThrow(expect.objectContaining({ type: 'CLIENT_CERTIFICATES_PATH_SCOPED' }))
+  })
+
+  // Chromium applies the most specific matching rule, so that is the certificate the host
+  // would actually get.
+  it('judges a path-scoped entry against the most specific wildcard that covers it', () => {
+    const plan = (seed: string) => {
+      return () => {
+        return planBridgeListeners([
+          entry('https://*', '*', undefined, 'everything'),
+          entry('https://*.example.com', '*.example.com', undefined, 'example'),
+          entry('https://api.example.com/secure', 'api.example.com', undefined, seed, true),
+        ])
+      }
+    }
+
+    expect(plan('example')).not.toThrow()
+    expect(plan('everything')).toThrow(expect.objectContaining({ type: 'CLIENT_CERTIFICATES_PATH_SCOPED' }))
+  })
+
+  it('does not cover a path-scoped entry with a wildcard on another port', () => {
+    const plan = () => {
+      return planBridgeListeners([
+        entry('https://*.example.com:8443', '*.example.com', 8443, 'same'),
+        entry('https://api.example.com/secure', 'api.example.com', undefined, 'same', true),
       ])
     }
 

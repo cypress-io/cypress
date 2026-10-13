@@ -61,6 +61,15 @@ describe('toBridgeEntries', () => {
     expect(hostMatcher.match('attacker.example')).toBe(false)
   })
 
+  it('judges a servername by an exact host as written', () => {
+    store('https://[::1]:8443', 'ipv6')
+
+    const [{ hostMatcher }] = toBridgeEntries([{ url: 'https://[::1]:8443' }])
+
+    expect(hostMatcher.match('[::1]')).toBe(true)
+    expect(hostMatcher.match('1')).toBe(false)
+  })
+
   it('returns nothing when no certificates are configured', () => {
     expect(toBridgeEntries([])).toStrictEqual([])
   })

@@ -300,6 +300,19 @@ describe('MtlsBridge', () => {
       await expect(connectAs([listener], 'localhost')).resolves.toStrictEqual(['localhost'])
     })
 
+    // A browser sends no SNI for an IP-literal URL
+    const connectWithoutServername = (listeners: BridgeListener[]) => {
+      return dialsFor(listeners, (port) => tls.connect({ host: '127.0.0.1', port, rejectUnauthorized: false }))
+    }
+
+    it('dials the host an exact listener stands for when no servername is sent', async () => {
+      await expect(connectWithoutServername([listener])).resolves.toStrictEqual(['localhost'])
+    })
+
+    it('closes a connection to a wildcard listener that sends no servername', async () => {
+      await expect(connectWithoutServername([wildcard])).resolves.toStrictEqual([])
+    })
+
     it('dials a host a wildcard listener covers, lowercased', async () => {
       await expect(connectAs([wildcard], 'X.A.COM')).resolves.toStrictEqual(['x.a.com'])
     })
