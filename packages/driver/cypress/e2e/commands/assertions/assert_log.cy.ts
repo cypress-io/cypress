@@ -1,5 +1,3 @@
-const { $ } = Cypress
-
 describe('src/cy/commands/assertions', () => {
   beforeEach(function () {
     cy.visit('/fixtures/jquery.html')
@@ -141,7 +139,7 @@ describe('src/cy/commands/assertions', () => {
         }
       })
 
-      expect(2n).to.equal(2n)
+      expect(BigInt(2)).to.equal(BigInt(2))
     })
 
     it('handles non-HTMLElement(s) (e.g. Element)', () => {
@@ -290,7 +288,7 @@ describe('src/cy/commands/assertions', () => {
             }
           })
 
-          cy.$$('body').prepend($('<input value=\'\' />'))
+          cy.$$('body').prepend(Cypress.$('<input value=\'\' />'))
 
           cy.get('input').eq(0).then(($input) => {
             expect($input).to.have.attr('value', '')
@@ -300,6 +298,7 @@ describe('src/cy/commands/assertions', () => {
         it('can chain off of chai-jquery assertions', () => {
           const $el = cy.$$('ul#list')
 
+          // @ts-expect-error chai-jquery's typings declare `visible` as a method, but at runtime it's a chainable property
           expect($el).to.be.visible.and.have.id('list')
         })
 
@@ -316,7 +315,7 @@ describe('src/cy/commands/assertions', () => {
             })
 
             // prepend an empty div so it has no id or class
-            cy.$$('body').prepend($('<div />'))
+            cy.$$('body').prepend(Cypress.$('<div />'))
 
             // expect($div).to.match("div")
             cy.get('div').eq(0).then(($div) => {
@@ -336,7 +335,7 @@ describe('src/cy/commands/assertions', () => {
             })
 
             // prepend an empty div so it has no id or class
-            cy.$$('body').prepend($('<input />'))
+            cy.$$('body').prepend(Cypress.$('<input />'))
 
             cy.get('input').eq(0).then(($div) => {
               expect($div).to.match('input')
@@ -498,7 +497,7 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    describe('formats strings with spaces', (done) => {
+    describe('formats strings with spaces', () => {
       const tester = (message, done) => {
         const nbspedMsg = message
         .replace(/^\s+/, (match) => {

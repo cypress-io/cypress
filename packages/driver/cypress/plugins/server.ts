@@ -226,7 +226,7 @@ const createApp = (port) => {
   })
 
   app.all('/dump-octet-body', (req, res) => {
-    return res.send(`<html><body>it worked!<br>request body:<br>${req.body.toString()}</body></html>`)
+    return res.json({ hex: req.body.toString('hex') })
   })
 
   app.all('/dump-form-data', upload.single('file'), (req, res) => {

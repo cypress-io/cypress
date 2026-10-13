@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { $ } = Cypress
 
 describe('src/cy/commands/assertions', () => {
@@ -107,6 +108,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('#attr-number').then(($el) => {
+          // @ts-expect-error - the typings only accept a string value, but numbers are supported at runtime
           expect($el).to.have.attr('num', 777)
           expect($el).to.have.attr('num', '777')
         })
@@ -124,6 +126,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
+        // @ts-expect-error - intentionally passing a non-string attribute name
         expect(this.$div).to.have.attr({ width: '200px' })
       })
     })
@@ -239,6 +242,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
+        // @ts-expect-error - intentionally passing a non-string property name
         expect(this.$input).to.have.prop({ checked: false })
       })
     })
@@ -308,6 +312,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
+        // @ts-expect-error - intentionally passing a non-string CSS property name
         expect(this.$div).to.have.css({ backgroundColor: 'rgb(128, 0, 0)' })
       })
 
