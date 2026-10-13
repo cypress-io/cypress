@@ -22,4 +22,4 @@ To run tests:
 yarn test
 ```
 
-Additionally, `net_stubbing_spec` in the `driver` package tests the functionality in this repo.
+Additionally, the `net_stubbing` specs in the `driver` package (`cypress/e2e/commands/net_stubbing/`) test the functionality in this repo.
