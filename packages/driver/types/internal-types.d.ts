@@ -84,7 +84,7 @@ declare namespace Cypress {
     encodeBase64Unicode: (str: string) => string
     getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
     isInstanceOf: (instance: any, constructor: any) => boolean
-    locExisting: () => { domain: string, superDomain: string }
+    locExisting: () => ReturnType<Cypress['Location']['create']>
     locHref: (url: string, win: Window) => void
     locReload: (forceReload: boolean, win: Window) => void
     log: (...msgs: any[]) => void
