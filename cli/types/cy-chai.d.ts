@@ -5,6 +5,15 @@ declare namespace Chai {
   interface Include {
     html(html: string): Assertion
     text(text: string | number): Assertion
+    /**
+     * Assert that the value of the first element of the selection contains the given value, using `.val()`.
+     * A number is compared against the value as a string. Elements whose value is a number,
+     * such as `<progress>`, `<meter>`, and `<li>`, never partially match.
+     *
+     * @example
+     *    expect($('input')).to.contain.value('red')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     */
     value(value: string | number): Assertion
 
     /**
@@ -83,14 +92,15 @@ declare namespace Chai {
 
     /**
      * Assert that the first element of the selection has the given data value, using `.data()`.
-     * jQuery parses numeric, boolean, and JSON `data-*` attributes, so the value can be of any type.
+     * jQuery parses numeric, boolean, and `null` `data-*` attributes into those types, and the value is compared with `===`,
+     * so an object or array parsed from JSON never matches.
      *
      * @example
      *    expect($('#result')).to.have.data('foo', 'bar')
      *    expect($('#result')).to.have.data('count', 3)
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      */
-    data(name: string, value?: any): Assertion
+    data(name: string, value?: string | number | boolean | null): Assertion
 
     /**
      * Assert that the first element of the selection has the given id, using `.prop('id')`.
@@ -116,7 +126,7 @@ declare namespace Chai {
 
     /**
      * Assert that the first element of the selection has the given value, using `.val()`.
-     * A number is compared against the value as a string, except for elements whose value is a number, such as `<progress>`.
+     * A number is compared against the value as a string, except for elements whose value is a number: `<progress>`, `<meter>`, and `<li>`.
      *
      * @example
      *    expect($('input')).to.have.value('red')
@@ -129,6 +139,7 @@ declare namespace Chai {
   interface Match {
     /**
      * Assert that the selection matches the given element, elements, jQuery object, or predicate, using `.is()`.
+     * The subject must be a DOM element or jQuery object; any other subject accepts only a regular expression.
      *
      * @example
      *    expect($('#result')).to.match($('.menu'))

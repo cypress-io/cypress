@@ -6011,7 +6011,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.data', value: string, match?: any): Chainable<Subject>
+    (chainer: 'have.data', value: string, match?: string | number | boolean | null): Chainable<Subject>
     /**
      * Assert that the selection contains at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
@@ -6051,7 +6051,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.id', value: string | number, match?: string): Chainable<Subject>
+    (chainer: 'have.id', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection has the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -6110,7 +6110,7 @@ declare namespace Cypress {
      */
     (chainer: 'include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection matches a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * Assert that the selection matches a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted.
      * @example
      *    cy.get('#result').should('match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
@@ -6240,7 +6240,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.data', value: string, match?: any): Chainable<Subject>
+    (chainer: 'not.have.data', value: string, match?: string | number | boolean | null): Chainable<Subject>
     /**
      * Assert that the selection does not contain at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
@@ -6280,7 +6280,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.id', value: string | number, match?: string): Chainable<Subject>
+    (chainer: 'not.have.id', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not have the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -6339,7 +6339,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection does not match a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * Assert that the selection does not match a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted.
      * @example
      *    cy.get('#result').should('not.match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector

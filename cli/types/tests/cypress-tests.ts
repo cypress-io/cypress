@@ -1402,7 +1402,9 @@ namespace ChaiJQueryTests {
   expect($el).to.have.value(0.72) // $ExpectType Assertion
   expect($el).to.include.value(12) // $ExpectType Assertion
   expect($el).to.have.data('number', 222) // $ExpectType Assertion
-  expect($el).to.have.data('flags', { a: true }) // $ExpectType Assertion
+  expect($el).to.have.data('enabled', true) // $ExpectType Assertion
+  expect($el).to.have.data('missing', null) // $ExpectType Assertion
+  expect($el).to.have.data('flags', { a: true }) // $ExpectError
 }
 
 namespace CypressOptionsBeforeCallbackTests {
