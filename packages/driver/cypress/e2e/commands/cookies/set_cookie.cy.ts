@@ -55,7 +55,7 @@ describe('src/cy/commands/cookies', () => {
       automation.resolves()
       const options = {}
 
-      cy.setCookie('foo', 'bar', {}).then(() => {
+      cy.setCookie('foo', 'bar', options).then(() => {
         expect(options).deep.eq({})
       })
     })
@@ -290,10 +290,10 @@ describe('src/cy/commands/cookies', () => {
 
           automation.withArgs('set:cookie').rejects(err)
 
-          cy.on('fail', (err) => {
+          cy.on('fail', (failErr) => {
             expect(automation.withArgs('set:cookie')).to.be.calledOnce
-            expect(err.message).to.contain('unexpected error setting the requested cookie')
-            expect(err.message).to.contain(err.message)
+            expect(failErr.message).to.contain('unexpected error setting the requested cookie')
+            expect(failErr.message).to.contain(err.message)
 
             done()
           })
