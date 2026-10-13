@@ -4,8 +4,8 @@
 declare namespace Chai {
   interface Include {
     html(html: string): Assertion
-    text(text: string): Assertion
-    value(text: string): Assertion
+    text(text: string | number): Assertion
+    value(value: string | number): Assertion
 
     /**
      * Asserts that the target contains one of the values in the given list.
@@ -80,6 +80,50 @@ declare namespace Chai {
      * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
      */
     attr(name: string, value?: string | number): Assertion
+
+    /**
+     * Assert that the first element of the selection has the given data value, using `.data()`.
+     * jQuery parses numeric, boolean, and JSON `data-*` attributes, so the value can be of any type.
+     *
+     * @example
+     *    expect($('#result')).to.have.data('foo', 'bar')
+     *    expect($('#result')).to.have.data('count', 3)
+     * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
+     */
+    data(name: string, value?: any): Assertion
+
+    /**
+     * Assert that the first element of the selection has the given id, using `.prop('id')`.
+     * A number is compared against the id as a string.
+     *
+     * @example
+     *    expect($('#result')).to.have.id('result')
+     *    expect($('#456')).to.have.id(456)
+     * @see http://chaijs.com/plugins/chai-jquery/#idid
+     */
+    id(id: string | number): Assertion
+
+    /**
+     * Assert that the text of the selection equals the given text, using `.text()`.
+     * A number is compared against the text as a string.
+     *
+     * @example
+     *    expect($('#result')).to.have.text('pending')
+     *    expect($('#count')).to.have.text(123)
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     */
+    text(text: string | number): Assertion
+
+    /**
+     * Assert that the first element of the selection has the given value, using `.val()`.
+     * A number is compared against the value as a string, except for elements whose value is a number, such as `<progress>`.
+     *
+     * @example
+     *    expect($('input')).to.have.value('red')
+     *    expect($('progress')).to.have.value(0.72)
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     */
+    value(value: string | number): Assertion
   }
 
   interface Match {

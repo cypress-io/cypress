@@ -1391,7 +1391,18 @@ namespace ChaiJQueryTests {
   expect($el).to.match([$el[0], $el[1]]) // $ExpectType Assertion
   expect($el).to.match((index, element) => element.id === 'result') // $ExpectType Assertion
   expect($el).to.match((index: string) => true) // $ExpectError
+  expect($el).to.match(document.querySelectorAll('div')) // $ExpectType Assertion
+  expect($el).to.match([$el[0]] as ReadonlyArray<HTMLElement>) // $ExpectType Assertion
   expect($el).to.match({ foo: 'bar' }) // $ExpectError
+
+  expect($el).to.have.id(456) // $ExpectType Assertion
+  expect($el).to.have.id({ id: 456 }) // $ExpectError
+  expect($el).to.have.text(123) // $ExpectType Assertion
+  expect($el).to.contain.text(123) // $ExpectType Assertion
+  expect($el).to.have.value(0.72) // $ExpectType Assertion
+  expect($el).to.include.value(12) // $ExpectType Assertion
+  expect($el).to.have.data('number', 222) // $ExpectType Assertion
+  expect($el).to.have.data('flags', { a: true }) // $ExpectType Assertion
 }
 
 namespace CypressOptionsBeforeCallbackTests {
