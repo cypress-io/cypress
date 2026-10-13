@@ -721,10 +721,9 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         buttons: 2,
         which: 3,
       }
-      // `buttons` lists the buttons still held, so it is empty once the right button is released
       const upEvtOptionsExtend = {
-        ...downEvtOptionsExtend,
-        buttons: 0,
+        button: 2,
+        which: 3,
       }
 
       const mouseDownPhase = mouse.down(fromElViewport, forceEl, downEvtOptionsExtend, downEvtOptionsExtend)
