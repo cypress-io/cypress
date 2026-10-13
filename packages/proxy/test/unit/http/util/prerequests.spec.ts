@@ -194,6 +194,80 @@ describe('http/util/prerequests', () => {
     expect(timings.proxyRequestCorrelationDuration).toEqual(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - timings.proxyRequestReceivedTimestamp)
   })
 
+  describe('after a request misses its pre-request', () => {
+    const proxiedRequest = { method: 'POST', proxiedUrl: 'http://localhost:8080/api', headers: {} } as unknown as CypressIncomingRequest
+
+    const preRequestSentNow = (requestId: string): BrowserPreRequest => {
+      return {
+        requestId,
+        url: 'http://localhost:8080/api',
+        method: 'POST',
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        documentURL: 'http://localhost:8080/__cypress/iframes/index.html',
+        cdpRequestWillBeSentTimestamp: performance.now() + performance.timeOrigin,
+        cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
+      }
+    }
+
+    const missOnePreRequest = async () => {
+      const cb = vi.fn()
+
+      preRequests.get(proxiedRequest, () => {}, cb)
+      await vi.waitFor(() => {
+        expect(cb).toHaveBeenCalledWith({ noPreRequestExpected: false })
+      })
+    }
+
+    it('matches the next request with the same key to its own pre-request', async () => {
+      await missOnePreRequest()
+
+      preRequests.addPending(preRequestSentNow('2'))
+      const cb = vi.fn()
+
+      preRequests.get(proxiedRequest, () => {}, cb)
+
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({
+        browserPreRequest: expect.objectContaining({ requestId: '2' }),
+        noPreRequestExpected: false,
+      }))
+
+      expect(protocolManager.responseStreamTimedOut).not.toHaveBeenCalled()
+      expectPendingCounts(0, 0)
+    })
+
+    it('matches every later request with the same key without waiting for the timeout', async () => {
+      await missOnePreRequest()
+
+      for (let i = 2; i <= 6; i++) {
+        preRequests.addPending(preRequestSentNow(String(i)))
+        const cb = vi.fn()
+
+        preRequests.get(proxiedRequest, () => {}, cb)
+
+        expect(cb, `request ${i} waited for the timeout`).toHaveBeenCalledWith(expect.objectContaining({
+          browserPreRequest: expect.objectContaining({ requestId: String(i) }),
+        }))
+      }
+
+      expectPendingCounts(0, 0)
+    })
+
+    it('matches the next request when its request reaches the proxy before its pre-request', async () => {
+      await missOnePreRequest()
+
+      const cb = vi.fn()
+
+      preRequests.get(proxiedRequest, () => {}, cb)
+      preRequests.addPending(preRequestSentNow('2'))
+
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({
+        browserPreRequest: expect.objectContaining({ requestId: '2' }),
+      }))
+    })
+  })
+
   // https://github.com/cypress-io/cypress/issues/17853
   it('eventually discards pre-requests that don\'t match requests', () => {
     preRequests = new PreRequests(10, 200)
