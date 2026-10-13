@@ -21,7 +21,7 @@ describe('src/cy/commands/cookies', () => {
         name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: true,
       })
       .then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'get:cookie',
           { domain: 'localhost', name: 'foo' },
         )

@@ -26,12 +26,12 @@ describe('src/cy/commands/cookies', () => {
       })
       // @ts-expect-error - `emitThen` is publicly typed as returning `BluebirdStatic` rather than a promise
       .then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'get:cookies',
           { domain: 'localhost' },
         )
 
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'clear:cookies',
           [{ domain: 'localhost', name: 'foo' }],
         )
@@ -47,7 +47,7 @@ describe('src/cy/commands/cookies', () => {
       })
       // @ts-expect-error - `emitThen` is publicly typed as returning `BluebirdStatic` rather than a promise
       .then(() => {
-        expect(Cypress.automation).not.to.be.calledWith(
+        expect(automation).not.to.be.calledWith(
           'clear:cookies',
         )
       })

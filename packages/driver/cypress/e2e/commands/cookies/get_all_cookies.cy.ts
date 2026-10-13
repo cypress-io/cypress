@@ -16,7 +16,7 @@ describe('src/cy/commands/cookies', () => {
       automation.withArgs('get:cookies').resolves([])
 
       cy.getAllCookies().should('deep.eq', []).then(() => {
-        expect(Cypress.automation).to.be.calledWith('get:cookies')
+        expect(automation).to.be.calledWith('get:cookies')
       })
     })
 

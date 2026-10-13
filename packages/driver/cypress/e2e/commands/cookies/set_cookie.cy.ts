@@ -28,7 +28,7 @@ describe('src/cy/commands/cookies', () => {
         name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: false, httpOnly: false, expiry: 12345,
       })
       .then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'set:cookie',
           { domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, hostOnly: false, expiry: 12345, sameSite: undefined },
         )
@@ -44,7 +44,7 @@ describe('src/cy/commands/cookies', () => {
         name: 'foo', value: 'bar', domain: 'brian.dev.local', path: '/foo', secure: true, httpOnly: true, expiry: 987,
       })
       .then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'set:cookie',
           { domain: 'brian.dev.local', name: 'foo', value: 'bar', path: '/foo', secure: true, httpOnly: true, hostOnly: false, expiry: 987, sameSite: undefined },
         )

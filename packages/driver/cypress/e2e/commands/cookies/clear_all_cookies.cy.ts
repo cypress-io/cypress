@@ -22,7 +22,7 @@ describe('src/cy/commands/cookies', () => {
       automation.withArgs('get:cookies').resolves([])
 
       cy.clearAllCookies().then(() => {
-        expect(Cypress.automation).not.to.be.calledWith(
+        expect(automation).not.to.be.calledWith(
           'clear:cookies',
         )
       })
@@ -49,7 +49,7 @@ describe('src/cy/commands/cookies', () => {
 
       cy
       .clearAllCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'clear:cookies', [
             { name: 'foo', domain: 'localhost' },
             { name: 'bar', domain: 'bar.com' },

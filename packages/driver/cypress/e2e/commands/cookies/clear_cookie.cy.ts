@@ -16,7 +16,7 @@ describe('src/cy/commands/cookies', () => {
       automation.withArgs('clear:cookie').resolves(null)
 
       cy.clearCookie('foo').should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'clear:cookie',
           { domain: 'localhost', name: 'foo' },
         )
