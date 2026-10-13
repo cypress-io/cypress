@@ -6,7 +6,7 @@ describe('src/cy/commands/cookies', () => {
   let automation: sinon.SinonStub
 
   beforeEach(() => {
-    // call through normally on everything
+    // fail loudly on any automation call a test hasn't stubbed
     automation = cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
 
     cy.visit('http://localhost:3500/fixtures/generic.html')
