@@ -68,7 +68,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       cy.getCookie('foo').should('exist').then((cookie) => {
-        expect(cookie?.value).to.eq('bar')
+        expect(cookie).to.have.property('value', 'bar')
         expect(get.callCount).to.be.gte(3)
       })
     })
