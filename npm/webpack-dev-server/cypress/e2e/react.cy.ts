@@ -4,7 +4,7 @@ import dedent from 'dedent'
 
 type ProjectDirs = typeof fixtureDirs
 
-const WEBPACK_REACT: ProjectDirs[number][] = ['webpack5_wds5-react']
+const WEBPACK_REACT: ProjectDirs[number][] = ['webpack5_wds5-react', 'webpack5_wds6-react']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectDirs[number][] = []

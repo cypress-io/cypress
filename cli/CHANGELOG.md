@@ -4,6 +4,7 @@
 **Features:**
 
 - Added the [`cy.getByRole()`](https://on.cypress.io/getbyrole) query, which finds elements by their ARIA role and, optionally, their accessible name, for example `cy.getByRole('tab', { name: 'Billing' })`. Elements hidden from the accessibility tree are skipped unless you pass `{ hidden: true }`. For a role that HTML has an element for, only that element matches by default, so `cy.getByRole('button')` finds a `<button>` but not a `<div role="button">`. Pass `{ native: false }` to also match elements with a `role` attribute. Like [`cy.get()`](https://on.cypress.io/get), it yields every match and retries until its assertions pass. When nothing matches, the error lists the roles and accessible names on the page. Addressed in [#34937](https://github.com/cypress-io/cypress/pull/34937).
+- Component testing with webpack now supports `webpack-dev-server` 6 when your project provides it, which Angular 22.2 projects using `@angular-devkit/build-angular` do. `webpack-dev-server` 6 requires webpack `5.101.0` or newer, and Cypress reports an error naming both versions when an older webpack is installed. The `webpack-dev-server` bundled with Cypress is still version 5. Addresses [#34259](https://github.com/cypress-io/cypress/issues/34259).
 
 **Bugfixes:**
 
