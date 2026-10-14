@@ -3,8 +3,26 @@
 /// <reference path="./chai/index.d.ts" />
 declare namespace Chai {
   interface Include {
+    /**
+     * Assert that the HTML of the first element of the selection contains the given HTML, using `.html()`.
+     *
+     * @example
+     *    expect($('#result')).to.contain.html('<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     */
     html(html: string): Assertion
+
+    /**
+     * Assert that the text of the selection contains the given text, using `.text()`.
+     * A number is compared against the text as a string.
+     *
+     * @example
+     *    expect($('#result')).to.contain.text('John')
+     *    expect($('#count')).to.contain.text(12)
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     */
     text(text: string | number): Assertion
+
     /**
      * Assert that the value of the first element of the selection contains the given value, using `.val()`.
      * A number is compared against the value as a string. Elements whose value is a number,
