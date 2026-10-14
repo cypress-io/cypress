@@ -26,10 +26,9 @@ describe('e2e large spec bundle', () => {
     project: 'large-spec-bundle',
     spec: 'large_spec_bundle.cy.ts',
     expectedExitCode: 0,
-    timeout: 180000,
+    timeout: 90000,
     config: {
       forceHttp1: false,
-      pageLoadTimeout: 30000,
     },
   })
 
@@ -39,10 +38,9 @@ describe('e2e large spec bundle', () => {
     project: 'large-spec-bundle',
     spec: 'large_spec_bundle.cy.ts',
     expectedExitCode: 0,
-    timeout: 180000,
+    timeout: 90000,
     config: {
       forceHttp1: true,
-      pageLoadTimeout: 30000,
     },
   })
 })

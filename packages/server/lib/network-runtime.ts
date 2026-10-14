@@ -23,8 +23,8 @@ import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './brow
 import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception-escape-detector'
 import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
 import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
-import { createServeInternalRoutesMiddleware, shouldLoopbackInternalRoute } from './adapters/serve-internal-routes'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, resolveProxyUrlBase } from './adapters/internal-routes'
+import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, isAnsweredByCypress, isReadMethod, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:network-runtime')
 
@@ -293,12 +293,16 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // Internal-route reads (spec bundles, runner assets) get the same treatment
   // when the page requests them from the AUT origin. Fulfilling them here
   // would carry the whole body in one CDP message, which the browser drops
-  // once it is large enough. Other methods keep the Node loopback.
+  // once it is large enough. Other methods keep the Node loopback. The inner
+  // Cypress in cypress-in-cypress also keeps it: it shares the page's
+  // interception with the parent, and its overridden requests never load
+  // (component specs and spec bridges stall). Its bundles are small.
   // Shared with extra-target transports: popup file traffic reaches Express
   // the same way, so it needs the same single-owner release.
   const resolveOriginRedirect = (request: HttpRequest) => {
-    const isInternalRouteRead = ['GET', 'HEAD'].includes((request.method ?? 'GET').toUpperCase())
-      && shouldLoopbackInternalRoute(request, deps.config, true)
+    const isInternalRouteRead = !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+      && isReadMethod(request.method)
+      && isAnsweredByCypress(request, deps.config, true)
 
     if (!toFileServerUrl(request.url, deps.remoteStates.current()) && !isInternalRouteRead) {
       return undefined

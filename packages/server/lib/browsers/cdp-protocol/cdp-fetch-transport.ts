@@ -496,16 +496,17 @@ export class CdpFetchTransport {
       debug('resolveOriginRedirect failed for %s: %s', event.request.url, (err as Error).message)
     }
 
+    // Without networkId there will never be a matching browser pre-request.
+    // Register the URL so CorrelateBrowserPreRequest does not burn ~2s waiting.
+    // A redirected strategy:file request needs it too: the Express-side
+    // pipeline correlates the direct request, keyed on the page URL (Network
+    // events report it, not the override).
+    if (!event.networkId) {
+      this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
+    }
+
     if (originRedirect) {
       debug('redirecting %s to the Cypress origin (%s) — page keeps its URL', event.request.url, originRedirect.url)
-
-      // The Express-side pipeline still runs pre-request correlation for the
-      // direct request, so pauses without networkId (download-manager) must be
-      // pre-registered here just like intercepted ones. Correlation keys on
-      // the page URL — Network events report it, not the override.
-      if (!event.networkId) {
-        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
-      }
 
       this.originRedirectedRequests.add(event.requestId)
 
@@ -545,12 +546,6 @@ export class CdpFetchTransport {
         fetchRequestId,
         networkRequestId,
         event.resourceType)
-
-      // Without networkId there will never be a matching browser pre-request.
-      // Register the URL so CorrelateBrowserPreRequest does not burn ~2s waiting.
-      if (!event.networkId) {
-        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
-      }
 
       // Mark AUT documents for the intercept/legacy pipeline the same way the
       // MITM path does (header in, stripped before upstream). Never send this

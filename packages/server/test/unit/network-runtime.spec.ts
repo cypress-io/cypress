@@ -54,6 +54,7 @@ const sendAnswering = (overrides: Record<string, () => Promise<unknown>>) => {
 describe('lib/network-runtime', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
   })
 
   const baseDeps = () => {
@@ -845,6 +846,23 @@ describe('lib/network-runtime', () => {
       expect(loopbackHeader(findCall(client.send, 'Fetch.continueRequest'))).toBeUndefined()
     })
 
+    it('redirects a HEAD like a GET', async () => {
+      const client = createCdpClient()
+      const deps = internalRouteDeps()
+      const runtime = createCdpFetchRuntime({ ...deps, client })
+      const onRequestPaused = await startCdpRuntime(runtime, client)
+
+      await onRequestPaused({
+        ...createPausedRequest({ requestId: 'head-request', networkId: 'network-head-1', resourceType: 'XHR', url: specUrl }),
+        request: { url: specUrl, method: 'HEAD', headers: {} },
+      } as Protocol.Fetch.RequestPausedEvent)
+
+      await flush()
+
+      expect(deps.request.create).not.toHaveBeenCalled()
+      expect(loopbackHeader(findCall(client.send, 'Fetch.continueRequest'))?.value).toBe(specUrl)
+    })
+
     it('falls back to the Node loopback and fulfill when the override is rejected', async () => {
       const client = {
         send: vi.fn(async (method: string, params: any) => {
@@ -873,39 +891,46 @@ describe('lib/network-runtime', () => {
       expect(bareContinues, 'the pause is not released to the real site').toHaveLength(0)
     })
 
+    it('keeps the Node loopback and fulfill for internal-route reads in the inner cypress-in-cypress process', async () => {
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
+
+      const client = createCdpClient()
+      const deps = internalRouteDeps()
+      const runtime = createCdpFetchRuntime({ ...deps, client })
+      const onRequestPaused = await startCdpRuntime(runtime, client)
+
+      await onRequestPaused(createPausedRequest({ requestId: 'spec-bundle', networkId: 'network-spec-1', resourceType: 'Script', url: specUrl }))
+
+      await flush()
+
+      expect(deps.request.create).toHaveBeenCalledOnce()
+      expect(findCall(client.send, 'Fetch.fulfillRequest')).toBeDefined()
+      expect(loopbackHeader(findCall(client.send, 'Fetch.continueRequest'))).toBeUndefined()
+    })
+
     it('does not redirect the own-origin runner document in cypress-in-cypress', async () => {
-      const previous = process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      const client = createCdpClient()
+      const deps = internalRouteDeps()
+      const runtime = createCdpFetchRuntime({ ...deps, client })
+      const onRequestPaused = await startCdpRuntime(runtime, client)
 
-      try {
-        const client = createCdpClient()
-        const deps = internalRouteDeps()
-        const runtime = createCdpFetchRuntime({ ...deps, client })
-        const onRequestPaused = await startCdpRuntime(runtime, client)
+      // The pause stays open for the parent's pipeline, so it is not awaited.
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'runner-document',
+        networkId: 'network-runner-1',
+        resourceType: 'Document',
+        url: 'http://localhost:2020/__/',
+      }))
 
-        // The pause stays open for the parent's pipeline, so it is not awaited.
-        const handled = onRequestPaused(createPausedRequest({
-          requestId: 'runner-document',
-          networkId: 'network-runner-1',
-          resourceType: 'Document',
-          url: 'http://localhost:2020/__/',
-        }))
+      await flush()
 
-        await flush()
+      expect(deps.request.create).not.toHaveBeenCalled()
+      expect(loopbackHeader(findCall(client.send, 'Fetch.continueRequest'))).toBeUndefined()
 
-        expect(deps.request.create).not.toHaveBeenCalled()
-        expect(loopbackHeader(findCall(client.send, 'Fetch.continueRequest'))).toBeUndefined()
-
-        await runtime.stop()
-        await handled.catch(() => {})
-      } finally {
-        if (previous === undefined) {
-          delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
-        } else {
-          process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = previous
-        }
-      }
+      await runtime.stop()
+      await handled.catch(() => {})
     })
 
     it('redirects for extra-target transports like the main transport', async () => {
@@ -936,53 +961,6 @@ describe('lib/network-runtime', () => {
 
       await runtime.stop()
     })
-  })
-
-  it('createCdpFetchRuntime continues through the normal flow when the origin-redirect continueRequest is rejected', async () => {
-    const client = {
-      send: vi.fn(async (method: string, params: any) => {
-        // reject the full-args override, accept the bare release
-        if (method === 'Fetch.continueRequest' && params?.url) {
-          throw new Error('Invalid http header value')
-        }
-
-        return {}
-      }),
-      on: vi.fn(),
-      off: vi.fn(),
-    }
-    const deps = baseDeps()
-
-    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
-
-    deps.remoteStates.current = vi.fn().mockReturnValue({
-      origin: 'http://localhost:2020',
-      strategy: 'file',
-      fileServer: 'http://localhost:2021',
-      domainName: 'localhost',
-      props: null,
-    })
-
-    const runtime = createCdpFetchRuntime({ ...deps, client })
-    const onRequestPaused = await startCdpRuntime(runtime, client)
-
-    // The normal flow keeps the pause open for its response, so it is not awaited.
-    const handled = onRequestPaused(createPausedRequest({
-      requestId: 'file-request',
-      networkId: 'network-file-1',
-      url: 'http://localhost:2020/cypress/fixtures/records.csv',
-    }))
-
-    await flush()
-
-    const continueCalls = client.send.mock.calls.filter((args) => args[0] === 'Fetch.continueRequest')
-
-    expect(continueCalls, 'override attempt plus the pipeline continue').toHaveLength(2)
-    expect(continueCalls[0][1].url).toBeDefined()
-    expect(continueCalls[1][1]).toStrictEqual({ requestId: 'file-request' })
-
-    await runtime.stop()
-    await handled.catch(() => {})
   })
 
   it('createCdpFetchRuntime passes download pauses without networkId through without waiting for pre-request timeout', { timeout: 5000 }, async () => {

@@ -1,4 +1,5 @@
 import { id as randomId } from '../util/random'
+import type { HttpRequest } from '@packages/network-interception'
 
 // Fields are optional at the type level because RuntimeConfigOptions extends
 // Partial<...>. At runtime, `port` is required before loopback (toLoopbackUrl
@@ -152,4 +153,60 @@ export function isCypressServerOrigin (requestUrl: string, config: InternalRoute
   }
 
   return url.hostname === serverUrl.hostname || LOCALHOST_NAMES.has(url.hostname)
+}
+
+export function parseRequestUrl (requestUrl: string, config: Pick<InternalRouteConfig, 'port' | 'proxyUrl'>): URL {
+  if (/^https?:\/\//i.test(requestUrl)) {
+    return new URL(requestUrl)
+  }
+
+  return new URL(requestUrl, resolveProxyUrlBase(config))
+}
+
+// The large bodies the origin redirect exists for are responses to reads, and
+// writes keep the loopback, which forwards their request bodies.
+export function isReadMethod (method: string | undefined): boolean {
+  return ['GET', 'HEAD'].includes((method ?? 'GET').toUpperCase())
+}
+
+// In cypress-in-cypress the inner Cypress shares the browser page with the
+// parent. Own-origin requests in two classes are left to the parent's
+// pipeline instead of being answered by Cypress, matching the e2e-mode
+// topology where the inner has no interception at all:
+//   - clientRoute paths: the runner document IS the parent's AUT document,
+//     which the parent must inject, plus its static assets. Answering it in
+//     the inner's pipeline would preempt the parent's interception, so
+//     window:before:load would die silently.
+//   - concrete subresource types (xhr/fetch/script/...): e.g. the app's
+//     /__cypress/graphql calls, which the parent's cy.intercept must see.
+//     Injection never touches non-documents.
+// Everything else stays with Cypress. Documents normalize to 'other', so a
+// non-clientRoute document such as the CT fixture iframe
+// (/__cypress/iframes) is kept out of the parent's partial injection, which
+// would reroute the inner AUT's deliberate test errors to the parent as
+// cross-origin uncaught exceptions. Foreign-origin internal routes (the CT
+// dev server origin) never reach the inner's Express over the wire, so they
+// stay with Cypress too.
+export function isReleasedToParent (request: HttpRequest, url: URL, config: InternalRouteConfig): boolean {
+  return Boolean(
+    process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+    && isCypressServerOrigin(request.url, config)
+    && (
+      (config.clientRoute && matchesPathPrefix(url.pathname, config.clientRoute))
+      || (request.resourceType && request.resourceType !== 'other')
+    ),
+  )
+}
+
+// Whether Cypress answers this request itself: an internal route that is
+// neither trusted loopback re-entry (the middleware handles that separately)
+// nor released to the cypress-in-cypress parent. The CDP transport uses it to
+// decide which pauses it can send to the Cypress origin. It is built from the
+// same checks the serve-internal-routes middleware runs, in the same order.
+export function isAnsweredByCypress (request: HttpRequest, config: InternalRouteConfig, isBrowserNetworkMode: boolean): boolean {
+  const url = parseRequestUrl(request.url, config)
+
+  return isInternalCypressRoute(url.pathname, config, isBrowserNetworkMode)
+    && !isTrustedInternalLoopback(request.headers)
+    && !isReleasedToParent(request, url, config)
 }
