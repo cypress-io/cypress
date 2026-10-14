@@ -12,6 +12,6 @@ describe('lib/adapters/configurator-network-policy', () => {
 
     adapter.add(policy)
 
-    expect(adapter.getPolicies()).toEqual([policy])
+    expect(adapter.getPolicies()).toStrictEqual([policy])
   })
 })

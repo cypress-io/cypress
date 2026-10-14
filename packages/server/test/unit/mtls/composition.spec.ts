@@ -40,11 +40,38 @@ describe('toBridgeEntries', () => {
 
     expect(toBridgeEntries([{ url: 'https://example.com/secure' }])).toMatchObject([{
       hostname: 'example.com',
+      pathScoped: true,
     }])
   })
 
+  // `UrlMatcher` does not apply `/**` to dot-segment paths such as `/.well-known/`, so it
+  // does not configure the whole origin either
+  it('treats a path glob as path-scoped', () => {
+    store('https://example.com/**', 'glob')
+
+    expect(toBridgeEntries([{ url: 'https://example.com/**' }])).toMatchObject([{ pathScoped: true }])
+  })
+
+  it('judges a servername by the configured host pattern', () => {
+    store('https://*.example.com', 'wildcard')
+
+    const [{ hostMatcher }] = toBridgeEntries([{ url: 'https://*.example.com' }])
+
+    expect(hostMatcher.match('api.example.com')).toBe(true)
+    expect(hostMatcher.match('attacker.example')).toBe(false)
+  })
+
+  it('judges a servername by an exact host as written', () => {
+    store('https://[::1]:8443', 'ipv6')
+
+    const [{ hostMatcher }] = toBridgeEntries([{ url: 'https://[::1]:8443' }])
+
+    expect(hostMatcher.match('[::1]')).toBe(true)
+    expect(hostMatcher.match('1')).toBe(false)
+  })
+
   it('returns nothing when no certificates are configured', () => {
-    expect(toBridgeEntries([])).toEqual([])
+    expect(toBridgeEntries([])).toStrictEqual([])
   })
 })
 
@@ -66,6 +93,17 @@ describe('createMtlsBridge', () => {
     })
 
     await expect(attempt).rejects.toMatchObject({ type: 'CLIENT_CERTIFICATES_CONFLICT' })
+  })
+
+  it('refuses a certificate configured for only part of an origin', async () => {
+    store('https://example.com/secure/*', 'path')
+
+    const attempt = createMtlsBridge({
+      clientCertificates: [{ url: 'https://example.com/secure/*' }],
+      caFolder: '/tmp/mtls-bridge-unused',
+    })
+
+    await expect(attempt).rejects.toMatchObject({ type: 'CLIENT_CERTIFICATES_PATH_SCOPED' })
   })
 
   it('does nothing when no client certificate is configured', async () => {
