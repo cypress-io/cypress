@@ -33,11 +33,22 @@ interface StreamDownloadVerifyExtractOptions {
   kind: BundleKind
 }
 
+// Matches the Cloud's project ID format. The bundle routes look bundles up by
+// hash and don't need this header, so a malformed ID (e.g. one with a non-ASCII
+// look-alike character, which fetch rejects as a header value) is left off.
+const PROJECT_ID_PATTERN = /^([a-z0-9]{6}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/
+
 const buildHeaders = (projectId: string | undefined): Record<string, string> => {
+  const isValidProjectId = !!projectId && PROJECT_ID_PATTERN.test(projectId)
+
+  if (projectId && !isValidProjectId) {
+    debug('omitting x-cypress-project-slug header, invalid projectId: %s', projectId)
+  }
+
   return {
     'x-route-version': '1',
     'x-cypress-signature': PUBLIC_KEY_VERSION,
-    ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
+    ...(isValidProjectId ? { 'x-cypress-project-slug': projectId } : {}),
     'x-os-name': os.platform(),
     'x-cypress-version': pkg.version,
   }
