@@ -848,6 +848,134 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  // Each call here relies on a chai-jquery signature that the TypeScript types
+  // widened, so this spec type-checks those signatures and proves the runtime
+  // accepts them. Keep it free of casts and `@ts-expect-error`.
+  context('chai-jquery argument types', () => {
+    const expectToFail = (fn: () => void): string => {
+      try {
+        fn()
+      } catch (err) {
+        return (err as Error).message
+      }
+
+      throw new Error('expected the assertion to fail')
+    }
+
+    beforeEach(() => {
+      cy.$$('body').append(`
+        <div id="4567" num="777" data-num="222" data-yes="true" data-no="false" data-nil="null">123</div>
+        <input id="typed-input" value="12345">
+        <progress id="typed-progress" value="0.72"></progress>
+        <meter id="typed-meter" min="0" max="100" value="50"></meter>
+        <ul><li id="typed-li" value="3">li</li></ul>
+        <span class="typed-span">a</span><span class="typed-span">b</span>
+      `)
+    })
+
+    it('attr accepts a number', () => {
+      expect(cy.$$('[id="4567"]')).to.have.attr('num', 777)
+      expect(cy.$$('[id="4567"]')).not.to.have.attr('num', 778)
+      cy.get('[id="4567"]').should('have.attr', 'num', 777).and('not.have.attr', 'num', 778)
+    })
+
+    it('id accepts a number', () => {
+      expect(cy.$$('[id="4567"]')).to.have.id(4567)
+      expect(cy.$$('[id="4567"]')).not.to.have.id(4568)
+      cy.get('[id="4567"]').should('have.id', 4567).and('not.have.id', 4568)
+    })
+
+    it('text accepts a number in every form', () => {
+      const $el = cy.$$('[id="4567"]')
+
+      expect($el).to.have.text(123)
+      expect($el).to.contain.text(23)
+      expect($el).to.include.text(12)
+      expect($el).not.to.contain.text(9)
+
+      cy.get('[id="4567"]')
+      .should('have.text', 123)
+      .and('contain.text', 23)
+      .and('include.text', 12)
+      .and('not.have.text', 124)
+      .and('not.contain.text', 9)
+      .and('not.include.text', 9)
+    })
+
+    it('value accepts a number in every form on a text input', () => {
+      const $input = cy.$$('#typed-input')
+
+      expect($input).to.have.value(12345)
+      expect($input).to.contain.value(234)
+      expect($input).to.include.value(45)
+      expect($input).not.to.contain.value(9)
+
+      cy.get('#typed-input')
+      .should('have.value', 12345)
+      .and('contain.value', 234)
+      .and('include.value', 45)
+      .and('not.have.value', 1)
+      .and('not.contain.value', 9)
+      .and('not.include.value', 9)
+    })
+
+    it('value compares numbers directly on number-valued elements, which never partially match', () => {
+      cy.get('#typed-progress').should('have.value', 0.72)
+      cy.get('#typed-meter').should('have.value', 50)
+      cy.get('#typed-li').should('have.value', 3)
+
+      expectToFail(() => expect(cy.$$('#typed-progress')).to.contain.value(0.72))
+      expectToFail(() => expect(cy.$$('#typed-li')).to.include.value(3))
+    })
+
+    it('data accepts a number, boolean, or null', () => {
+      const $el = cy.$$('[id="4567"]')
+
+      expect($el).to.have.data('num', 222)
+      expect($el).to.have.data('yes', true)
+      expect($el).to.have.data('no', false)
+      expect($el).to.have.data('nil', null)
+      expect($el).not.to.have.data('num', '222')
+
+      // `have.data` yields the data value, so each assertion needs its own query
+      cy.get('[id="4567"]').should('have.data', 'num', 222)
+      cy.get('[id="4567"]').should('have.data', 'yes', true)
+      cy.get('[id="4567"]').should('have.data', 'nil', null)
+      cy.get('[id="4567"]').should('not.have.data', 'num', 223)
+    })
+
+    it('match accepts elements, array-likes, jQuery objects, and predicates', () => {
+      const $spans = cy.$$('.typed-span')
+      const autDocument = $spans[0].ownerDocument
+      const thisValues: Element[] = []
+
+      expect($spans).to.match($spans[0])
+      expect($spans).to.match($spans)
+      expect($spans).to.match(autDocument.querySelectorAll('.typed-span'))
+      expect($spans).to.match(Object.freeze([$spans[0]]))
+      expect($spans).not.to.match(Cypress.$(autDocument))
+      expect($spans).to.match(function (this: Element, index, element) {
+        thisValues.push(this)
+
+        return this === element
+      })
+
+      expect(thisValues).to.deep.equal($spans.toArray())
+
+      cy.get('.typed-span')
+      .should('match', autDocument.querySelectorAll('.typed-span'))
+      .and('match', $spans[1])
+      .and('not.match', (index, element) => element.id === 'missing')
+    })
+
+    it('match on a non-DOM subject accepts only a regular expression', () => {
+      const message = expectToFail(() => expect('foo').to.match(cy.$$('body')[0]))
+
+      expect(message).to.include('`match` requires its argument be a `RegExp`')
+      expect('foo').to.match(/fo/)
+    })
+  })
+
   context('cross-origin iframe', () => {
     it(`doesn't throw when iframe exists`, () => {
       cy.visit('fixtures/cross_origin.html')
