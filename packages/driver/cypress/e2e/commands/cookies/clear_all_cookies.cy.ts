@@ -1,33 +1,35 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 const { Promise } = Cypress
 
 describe('src/cy/commands/cookies', () => {
+  let automation: sinon.SinonStub
+
   beforeEach(() => {
-    // call through normally on everything
-    cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
+    // fail loudly on any automation call a test hasn't stubbed
+    automation = cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
 
     cy.visit('http://localhost:3500/fixtures/generic.html')
   })
 
   context('#clearAllCookies', () => {
     it('returns null', () => {
-      Cypress.automation.withArgs('get:cookies').resolves([])
+      automation.withArgs('get:cookies').resolves([])
 
       cy.clearAllCookies().should('be.null')
     })
 
     it('does not call \'clear:cookies\' when no cookies were returned', () => {
-      Cypress.automation.withArgs('get:cookies').resolves([])
+      automation.withArgs('get:cookies').resolves([])
 
       cy.clearAllCookies().then(() => {
-        expect(Cypress.automation).not.to.be.calledWith(
+        expect(automation).not.to.be.calledWith(
           'clear:cookies',
         )
       })
     })
 
     it('calls \'clear:cookies\' with all cookies', () => {
-      Cypress.automation
+      automation
       .withArgs('get:cookies')
       .resolves([
         { name: 'foo', domain: 'localhost' },
@@ -47,7 +49,7 @@ describe('src/cy/commands/cookies', () => {
 
       cy
       .clearAllCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'clear:cookies', [
             { name: 'foo', domain: 'localhost' },
             { name: 'bar', domain: 'bar.com' },
@@ -59,7 +61,7 @@ describe('src/cy/commands/cookies', () => {
 
     describe('timeout', () => {
       beforeEach(() => {
-        Cypress.automation
+        automation
         .withArgs('get:cookies')
         .resolves([{}])
         .withArgs('clear:cookies')
@@ -69,7 +71,7 @@ describe('src/cy/commands/cookies', () => {
       it('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
       }, () => {
-        Cypress.automation.resolves([])
+        automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -79,7 +81,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can override timeout', () => {
-        Cypress.automation.resolves([])
+        automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -123,7 +125,7 @@ describe('src/cy/commands/cookies', () => {
         error.name = 'foo'
         error.stack = 'some err message\n  at fn (foo.js:1:1)'
 
-        Cypress.automation.rejects(error)
+        automation.rejects(error)
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -140,8 +142,8 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.automation.resolves([{ name: 'foo' }])
-        Cypress.automation.withArgs('clear:cookies').resolves(Promise.delay(1000))
+        automation.resolves([{ name: 'foo' }])
+        automation.withArgs('clear:cookies').resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -161,7 +163,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('logs once on \'clear:cookies\' error', function (done) {
-        Cypress.automation.withArgs('get:cookies').resolves([
+        automation.withArgs('get:cookies').resolves([
           { name: 'foo' }, { name: 'bar' },
         ])
 
@@ -170,7 +172,7 @@ describe('src/cy/commands/cookies', () => {
         error.name = 'foo'
         error.stack = 'stack'
 
-        Cypress.automation.withArgs('clear:cookies').rejects(error)
+        automation.withArgs('clear:cookies').rejects(error)
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -195,7 +197,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        Cypress.automation
+        automation
         .withArgs('get:cookies', {})
         .resolves([{ name: 'foo', domain: 'localhost' }])
         .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
@@ -277,7 +279,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        Cypress.automation
+        automation
         .withArgs('get:cookies')
         .resolves([])
       })
@@ -302,7 +304,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        Cypress.automation
+        automation
         .withArgs('get:cookies', {})
         .resolves([])
       })

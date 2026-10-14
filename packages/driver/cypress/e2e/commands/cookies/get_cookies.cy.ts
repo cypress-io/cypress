@@ -1,20 +1,22 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 const { Promise } = Cypress
 
 describe('src/cy/commands/cookies', () => {
+  let automation: sinon.SinonStub
+
   beforeEach(() => {
-    // call through normally on everything
-    cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
+    // fail loudly on any automation call a test hasn't stubbed
+    automation = cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
 
     cy.visit('http://localhost:3500/fixtures/generic.html')
   })
 
   context('#getCookies', () => {
     it('returns array of cookies', () => {
-      Cypress.automation.withArgs('get:cookies').resolves([])
+      automation.withArgs('get:cookies').resolves([])
 
       cy.getCookies().should('deep.eq', []).then(() => {
-        expect(Cypress.automation).to.be.calledWith(
+        expect(automation).to.be.calledWith(
           'get:cookies',
           { domain: 'localhost' },
         )
@@ -25,7 +27,7 @@ describe('src/cy/commands/cookies', () => {
       it('sets timeout to Cypress.config(defaultCommandTimeout)', {
         defaultCommandTimeout: 2500,
       }, () => {
-        Cypress.automation.resolves([])
+        automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -35,7 +37,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can override timeout', () => {
-        Cypress.automation.resolves([])
+        automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -47,7 +49,7 @@ describe('src/cy/commands/cookies', () => {
 
     // https://github.com/cypress-io/cypress/issues/4802
     it('retries reading cookies until an assertion passes', () => {
-      const get = Cypress.automation.withArgs('get:cookies')
+      const get = automation.withArgs('get:cookies')
 
       get.resolves([])
       get.onCall(2).resolves([
@@ -87,6 +89,7 @@ describe('src/cy/commands/cookies', () => {
           done()
         })
 
+        // @ts-expect-error - verifies the runtime check for a non-string domain
         cy.getCookies({ domain: true })
       })
 
@@ -96,7 +99,7 @@ describe('src/cy/commands/cookies', () => {
         error.name = 'foo'
         error.stack = 'stack'
 
-        Cypress.automation.rejects(error)
+        automation.rejects(error)
 
         cy.on('fail', () => {
           const { lastLog } = this
@@ -112,7 +115,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.automation.resolves(Promise.delay(1000))
+        automation.resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -140,7 +143,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        Cypress.automation
+        automation
         .withArgs('get:cookies', { domain: 'localhost' })
         .resolves([
           { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
