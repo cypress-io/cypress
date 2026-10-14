@@ -1,4 +1,4 @@
-import { assertLogLength } from '../../../support/utils'
+import { assertLogLength, isWebKit } from '../../../support/utils'
 import { stripIndent } from 'common-tags'
 const { Promise } = Cypress
 
@@ -86,7 +86,7 @@ describe('src/cy/commands/cookies', () => {
       // webkit returns "no_restriction" for sameSite;
       // other browsers do not return sameSite at all
       const sameSite = (
-        Cypress.isBrowser('webkit')
+        isWebKit
         // There is an odd inconsistency when setting an undefined cookie context in WebKit in WebKit 26.
         // On linux based machines, the sameSite will be set to `lax`, but on MacOS the sameSite is set to `None` (no_restriction).
         // There is no difference in the webkit-automation logic within cypress so the inconsistency must lie in the OS
