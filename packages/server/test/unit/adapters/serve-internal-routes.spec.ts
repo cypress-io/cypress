@@ -1,9 +1,9 @@
 import zlib from 'zlib'
 import _ from 'lodash'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { isCypressServerOrigin, isInternalCypressRoute, cypressInternalLoopbackToken } from '../../../lib/adapters/internal-routes'
-import { createServeInternalRoutesMiddleware } from '../../../lib/adapters/serve-internal-routes'
+import { createServeInternalRoutesMiddleware, shouldLoopbackInternalRoute } from '../../../lib/adapters/serve-internal-routes'
 
 // sinon's `calledWithMatch` compares objects partially at every depth and
 // ignores arguments beyond the ones given.
@@ -682,5 +682,81 @@ describe('lib/adapters/serve-internal-routes', () => {
 
       expect(serverRequest.create).toHaveBeenCalledTimes(2)
     })
+  })
+})
+
+describe('lib/adapters/serve-internal-routes shouldLoopbackInternalRoute', () => {
+  afterEach(() => {
+    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+  })
+
+  const loops = (request: { url: string, headers?: Record<string, string>, resourceType?: any }, isBrowserNetworkMode = true) => {
+    return shouldLoopbackInternalRoute({ id: 'req-1', method: 'GET', ...request }, config, isBrowserNetworkMode)
+  }
+
+  it('is false for non-internal paths', () => {
+    expect(loops({ url: 'https://example.test/app' })).toBe(false)
+  })
+
+  it('is false for component-testing bundler assets', () => {
+    expect(loops({ url: 'https://example.test/__cypress/src/spec-0.js' })).toBe(false)
+  })
+
+  it('is true for internal routes on any origin', () => {
+    expect(loops({ url: 'https://example.test/__cypress/tests?p=spec.cy.js' })).toBe(true)
+    expect(loops({ url: 'http://localhost:1234/__/' })).toBe(true)
+  })
+
+  it('is false for a trusted loopback re-entry, including cloud-bundle namespaces', () => {
+    const headers = { 'x-cypress-internal-loopback-token': cypressInternalLoopbackToken }
+
+    expect(loops({ url: 'http://localhost:1234/__cypress/xhrs/foo', headers })).toBe(false)
+    expect(loops({ url: 'http://localhost:1234/__cypress-studio/app-studio.js', headers })).toBe(false)
+  })
+
+  it('is true for a loopback header without the process token', () => {
+    expect(loops({
+      url: 'https://example.test/__cypress/tests',
+      headers: { 'x-cypress-internal-loopback': 'https://example.test/__cypress/tests' },
+    })).toBe(true)
+  })
+
+  it('is false for cloud-bundle namespaces on the MITM path', () => {
+    expect(loops({ url: 'https://example.test/__cypress-studio/app-studio.js' }, false)).toBe(false)
+  })
+
+  it('is true for studio and cy-prompt routes on the CDP path', () => {
+    expect(loops({ url: 'https://example.test/__cypress-studio-ai/generate' })).toBe(true)
+    expect(loops({ url: 'https://example.test/__cypress-cy-prompt/app.js' })).toBe(true)
+  })
+
+  describe('cypress-in-cypress inner (CYPRESS_INTERNAL_E2E_TESTING_SELF)', () => {
+    beforeEach(() => {
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+    })
+
+    it('is false for the own-origin runner document', () => {
+      expect(loops({ url: 'http://localhost:1234/__/', resourceType: 'other' })).toBe(false)
+    })
+
+    it('is false for own-origin namespace subresources with concrete types', () => {
+      expect(loops({ url: 'http://localhost:1234/__cypress/graphql/mutation-foo', resourceType: 'xhr' })).toBe(false)
+    })
+
+    it('is true for own-origin non-clientRoute documents', () => {
+      expect(loops({ url: 'http://localhost:1234/__cypress/iframes/spec', resourceType: 'other' })).toBe(true)
+    })
+
+    it('is false for own-origin clientRoute subresources', () => {
+      expect(loops({ url: 'http://localhost:1234/__/assets/app.js', resourceType: 'script' })).toBe(false)
+    })
+
+    it('is true for foreign-origin internal routes', () => {
+      expect(loops({ url: 'http://localhost:5173/__cypress/xhrs/foo', resourceType: 'other' })).toBe(true)
+    })
+  })
+
+  it('is true for own-origin internals outside cypress-in-cypress', () => {
+    expect(loops({ url: 'http://localhost:1234/__/' })).toBe(true)
   })
 })

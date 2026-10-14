@@ -5,7 +5,7 @@ import type { BrowserPreRequest } from '@packages/proxy'
 import { NetworkProxy, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import type { NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
-import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
+import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, HttpRequest, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
@@ -23,7 +23,7 @@ import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './brow
 import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception-escape-detector'
 import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
 import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
-import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
+import { createServeInternalRoutesMiddleware, shouldLoopbackInternalRoute } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:network-runtime')
@@ -290,22 +290,29 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // Releasing both pauses untouched leaves Express as the single owner of
   // the middleware. The loopback headers mark the request as ours so the
   // catch-all serves it under the URL the page actually asked for.
+  // Internal-route reads (spec bundles, runner assets) get the same treatment
+  // when the page requests them from the AUT origin. Fulfilling them here
+  // would carry the whole body in one CDP message, which the browser drops
+  // once it is large enough. Other methods keep the Node loopback.
   // Shared with extra-target transports: popup file traffic reaches Express
   // the same way, so it needs the same single-owner release.
-  const resolveOriginRedirect = (url: string) => {
-    if (!toFileServerUrl(url, deps.remoteStates.current())) {
+  const resolveOriginRedirect = (request: HttpRequest) => {
+    const isInternalRouteRead = ['GET', 'HEAD'].includes((request.method ?? 'GET').toUpperCase())
+      && shouldLoopbackInternalRoute(request, deps.config, true)
+
+    if (!toFileServerUrl(request.url, deps.remoteStates.current()) && !isInternalRouteRead) {
       return undefined
     }
 
-    const parsed = new URL(url)
+    const parsed = new URL(request.url)
 
     return {
-      // Identity today — a strategy:file remote state always resolves to our
-      // own origin — but this keeps the request pointed at us if that stops
-      // holding, rather than letting it escape to a host we do not serve.
+      // Identity for strategy:file, whose remote state always resolves to our
+      // own origin. For an internal route requested from the AUT origin this
+      // is what points the request at us.
       url: new URL(`${parsed.pathname}${parsed.search}`, resolveProxyUrlBase(deps.config)).href,
       headers: {
-        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url,
+        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: request.url,
         [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
       },
     }
