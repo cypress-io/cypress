@@ -848,10 +848,11 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
-  // Every call here uses a chai-jquery signature typed in `cli/types`, so driver
-  // `check-ts` fails if a signature rejects a form the runtime accepts, and this
-  // spec fails if the runtime rejects a form the types allow. A cast or
-  // `@ts-expect-error` here would hide the first kind of failure.
+  // Every call here uses a chai-jquery signature typed in `cli/types`. Driver
+  // `check-ts` fails if an `expect()` signature rejects a form the runtime
+  // accepts; the `.should()` calls compile through the catch-all chainer either
+  // way, so only this spec's run covers them. A cast or `@ts-expect-error` here
+  // would hide a type regression.
   context('chai-jquery argument types', () => {
     const expectToFail = (fn: () => void): string => {
       try {
@@ -874,59 +875,62 @@ describe('src/cy/commands/assertions', () => {
       `)
     })
 
-    it('attr accepts a number', () => {
-      expect(cy.$$('[id="4567"]')).to.have.attr('num', 777)
-      expect(cy.$$('[id="4567"]')).not.to.have.attr('num', 778)
-      cy.get('[id="4567"]').should('have.attr', 'num', 777).and('not.have.attr', 'num', 778)
-    })
+    // https://github.com/cypress-io/cypress/issues/7314
+    describe('number values', () => {
+      it('attr accepts a number', () => {
+        expect(cy.$$('[id="4567"]')).to.have.attr('num', 777)
+        expect(cy.$$('[id="4567"]')).not.to.have.attr('num', 778)
+        cy.get('[id="4567"]').should('have.attr', 'num', 777).and('not.have.attr', 'num', 778)
+      })
 
-    it('id accepts a number', () => {
-      expect(cy.$$('[id="4567"]')).to.have.id(4567)
-      expect(cy.$$('[id="4567"]')).not.to.have.id(4568)
-      cy.get('[id="4567"]').should('have.id', 4567).and('not.have.id', 4568)
-    })
+      it('id accepts a number', () => {
+        expect(cy.$$('[id="4567"]')).to.have.id(4567)
+        expect(cy.$$('[id="4567"]')).not.to.have.id(4568)
+        cy.get('[id="4567"]').should('have.id', 4567).and('not.have.id', 4568)
+      })
 
-    it('text accepts a number in every form', () => {
-      const $el = cy.$$('[id="4567"]')
+      it('text accepts a number in every form', () => {
+        const $el = cy.$$('[id="4567"]')
 
-      expect($el).to.have.text(123)
-      expect($el).to.contain.text(23)
-      expect($el).to.include.text(12)
-      expect($el).not.to.contain.text(9)
+        expect($el).to.have.text(123)
+        expect($el).to.contain.text(23)
+        expect($el).to.include.text(12)
+        expect($el).not.to.contain.text(9)
 
-      cy.get('[id="4567"]')
-      .should('have.text', 123)
-      .and('contain.text', 23)
-      .and('include.text', 12)
-      .and('not.have.text', 124)
-      .and('not.contain.text', 9)
-      .and('not.include.text', 9)
-    })
+        cy.get('[id="4567"]')
+        .should('have.text', 123)
+        .and('contain.text', 23)
+        .and('include.text', 12)
+        .and('not.have.text', 124)
+        .and('not.contain.text', 9)
+        .and('not.include.text', 9)
+      })
 
-    it('value accepts a number in every form on a text input', () => {
-      const $input = cy.$$('#typed-input')
+      it('value accepts a number in every form on a text input', () => {
+        const $input = cy.$$('#typed-input')
 
-      expect($input).to.have.value(12345)
-      expect($input).to.contain.value(234)
-      expect($input).to.include.value(45)
-      expect($input).not.to.contain.value(9)
+        expect($input).to.have.value(12345)
+        expect($input).to.contain.value(234)
+        expect($input).to.include.value(45)
+        expect($input).not.to.contain.value(9)
 
-      cy.get('#typed-input')
-      .should('have.value', 12345)
-      .and('contain.value', 234)
-      .and('include.value', 45)
-      .and('not.have.value', 1)
-      .and('not.contain.value', 9)
-      .and('not.include.value', 9)
-    })
+        cy.get('#typed-input')
+        .should('have.value', 12345)
+        .and('contain.value', 234)
+        .and('include.value', 45)
+        .and('not.have.value', 1)
+        .and('not.contain.value', 9)
+        .and('not.include.value', 9)
+      })
 
-    it('value compares numbers directly on number-valued elements, which never partially match', () => {
-      cy.get('#typed-progress').should('have.value', 0.72)
-      cy.get('#typed-meter').should('have.value', 50)
-      cy.get('#typed-li').should('have.value', 3)
+      it('value compares numbers directly on number-valued elements, which never partially match', () => {
+        cy.get('#typed-progress').should('have.value', 0.72)
+        cy.get('#typed-meter').should('have.value', 50)
+        cy.get('#typed-li').should('have.value', 3)
 
-      expectToFail(() => expect(cy.$$('#typed-progress')).to.contain.value(0.72))
-      expectToFail(() => expect(cy.$$('#typed-li')).to.include.value(3))
+        expect(expectToFail(() => expect(cy.$$('#typed-progress')).to.contain.value(0.72))).to.include('to contain value 0.72')
+        expect(expectToFail(() => expect(cy.$$('#typed-li')).to.include.value(3))).to.include('to contain value 3')
+      })
     })
 
     it('data accepts a number, boolean, or null', () => {

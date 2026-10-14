@@ -6110,7 +6110,7 @@ declare namespace Cypress {
      */
     (chainer: 'include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection matches a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted.
+     * Assert that the selection matches a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted, and a regular expression never matches a DOM element or jQuery object.
      * @example
      *    cy.get('#result').should('match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
@@ -6339,7 +6339,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection does not match a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted.
+     * Assert that the selection does not match a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted, and a regular expression never matches a DOM element or jQuery object.
      * @example
      *    cy.get('#result').should('not.match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector

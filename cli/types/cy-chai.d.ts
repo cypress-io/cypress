@@ -139,7 +139,8 @@ declare namespace Chai {
   interface Match {
     /**
      * Assert that the selection matches the given element, elements, jQuery object, or predicate, using `.is()`.
-     * The subject must be a DOM element or jQuery object; any other subject accepts only a regular expression.
+     * The subject must be a DOM element or jQuery object; any other subject accepts only a regular expression,
+     * and a regular expression never matches a DOM element or jQuery object.
      *
      * @example
      *    expect($('#result')).to.match($('.menu'))
