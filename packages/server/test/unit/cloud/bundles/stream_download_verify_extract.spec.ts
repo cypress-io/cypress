@@ -270,7 +270,7 @@ describe('streamDownloadVerifyExtract', () => {
     })
   })
 
-  it('sends only the bundle request headers, with no project slug', async () => {
+  it('sends the correct bundle request headers', async () => {
     fetchStub.mockResolvedValue({
       ok: false,
       url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',

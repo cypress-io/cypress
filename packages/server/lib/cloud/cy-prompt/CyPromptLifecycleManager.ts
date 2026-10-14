@@ -172,7 +172,6 @@ export class CyPromptLifecycleManager {
     cloudDataSource,
     getProjectOptions,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     getProjectOptions: CyPromptServerOptions['getProjectOptions']
   }): Promise<{ cyPromptManager?: CyPromptManager, error?: Error }> {
@@ -268,11 +267,9 @@ export class CyPromptLifecycleManager {
   }
 
   private setupWatcher ({
-    projectId,
     cloudDataSource,
     getProjectOptions,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     getProjectOptions: () => Promise<{
       user?: CyPromptAuthenticatedUserShape
@@ -306,7 +303,6 @@ export class CyPromptLifecycleManager {
     }).on('change', async () => {
       this.cyPromptManager = undefined
       this.cyPromptManagerPromise = this.createCyPromptManager({
-        projectId,
         cloudDataSource,
         getProjectOptions,
       }).catch((error) => {
