@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 
 const { _, Promise } = Cypress
 
@@ -41,7 +41,7 @@ describe('src/cy/commands/navigation', () => {
         expect(loadedAt, 'window:load fired before cy.go() resolved').to.be.a('number')
         expect(win.location.pathname).to.eq('/slow-load')
         expect(win.document.readyState).to.eq('complete')
-        expect(win.document.querySelector('img').complete).to.be.true
+        expect(win.document.querySelector('img')?.complete).to.be.true
       })
     })
 
@@ -271,6 +271,7 @@ describe('src/cy/commands/navigation', () => {
             done()
           })
 
+          // @ts-expect-error - invalid argument
           cy.go(val)
         })
       })
@@ -283,6 +284,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - invalid direction
         cy.go('foo')
       })
 

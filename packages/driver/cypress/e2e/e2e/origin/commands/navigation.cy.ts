@@ -37,7 +37,6 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
       const consoleProps = goLog.invoke('consoleProps')
 
       expect(consoleProps.props.Yielded).to.eq(win)
-      // @ts-expect-error - `Cypress.Log` is the internal LogUtils namespace at runtime, but the public types only declare it as a log instance
       expect(() => Cypress.Log.toSerializedConsoleProps(consoleProps)).not.to.throw()
     })
 

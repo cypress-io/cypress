@@ -1,6 +1,6 @@
-const Cookie = require('js-cookie')
+import Cookie from 'js-cookie'
 
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 
 const { _, Promise, $ } = Cypress
 
