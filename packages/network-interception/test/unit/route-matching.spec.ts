@@ -118,6 +118,29 @@ describe('core/route-matching', function () {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34974
+    it('keeps query matchers whose keys contain brackets or dots', function () {
+      tryMatch({
+        proxiedUrl: 'https://example.com/api/items?filter[status]=active',
+      }, {
+        query: { 'filter[status]': 'active' },
+      })
+
+      // a different value for the bracketed key must NOT match
+      tryMatch({
+        proxiedUrl: 'https://example.com/api/items?filter[status]=archived',
+      }, {
+        query: { 'filter[status]': 'active' },
+      }, false)
+
+      // dotted literal key
+      tryMatch({
+        proxiedUrl: 'https://example.com/api/items?a.b=1',
+      }, {
+        query: { 'a.b': '1' },
+      })
+    })
+
     it('matches on a null matcher', function () {
       tryMatch({
         proxiedUrl: 'https://google.com/asdf?1234=a',
