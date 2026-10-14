@@ -1,4 +1,4 @@
-const isWebkit = Cypress.isBrowser('webkit')
+import { isWebKit } from '../../../support/utils'
 
 describe('src/cy/commands/cookies - no stub', () => {
   const setCookies = () => {
@@ -14,13 +14,11 @@ describe('src/cy/commands/cookies - no stub', () => {
   }
 
   it('sets the cookie on the specified domain as hostOnly and validates hostOnly property persists through related commands that fetch cookies', () => {
-    const isWebkit = Cypress.browser.name.includes('webkit')
-
     cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
     cy.setCookie('foo', 'bar', { hostOnly: true })
 
     cy.getCookie('foo').its('domain').should('eq', 'www.barbaz.com')
-    if (!isWebkit) {
+    if (!isWebKit) {
       cy.getCookie('foo').its('hostOnly').should('eq', true)
     }
 
@@ -30,7 +28,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       const cookie = cookies[0]
 
       expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      if (!isWebkit) {
+      if (!isWebKit) {
         expect(cookie).to.have.property('hostOnly', true)
       }
     })
@@ -41,7 +39,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       const cookie = cookies[0]
 
       expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      if (!isWebkit) {
+      if (!isWebKit) {
         expect(cookie).to.have.property('hostOnly', true)
       }
     })
@@ -64,7 +62,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
@@ -96,7 +94,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -140,7 +138,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -186,7 +184,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
@@ -225,19 +223,19 @@ describe('src/cy/commands/cookies - no stub', () => {
       setCookies()
 
       cy.getCookie('key').should((cookie) => {
-        expect(cookie.value).to.equal('barbaz.com value')
-        expect(cookie.domain).to.match(/\.?barbaz\.com/)
+        expect(cookie).to.have.property('value', 'barbaz.com value')
+        expect(cookie).to.have.property('domain').that.matches(/\.?barbaz\.com/)
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
         cy.getCookie('key').should((cookie) => {
-          expect(cookie.value).to.equal('foobar.com value')
-          expect(cookie.domain).to.match(/\.?foobar\.com/)
+          expect(cookie).to.have.property('value', 'foobar.com value')
+          expect(cookie).to.have.property('domain').that.matches(/\.?foobar\.com/)
         })
       })
     })
@@ -247,20 +245,20 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
 
       cy.getCookie('key').should((cookie) => {
-        expect(cookie.value).to.equal('www.barbaz.com value')
-        expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
+        expect(cookie).to.have.property('value', 'www.barbaz.com value')
+        expect(cookie).to.have.property('domain').that.matches(/\.?www\.barbaz\.com/)
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
         cy.getCookie('key').should((cookie) => {
-          expect(cookie.value).to.equal('www.foobar.com value')
-          expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
+          expect(cookie).to.have.property('value', 'www.foobar.com value')
+          expect(cookie).to.have.property('domain').that.matches(/\.?www\.foobar\.com/)
         })
       })
     })
@@ -270,20 +268,20 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
 
       cy.getCookie('key').should((cookie) => {
-        expect(cookie.value).to.equal('barbaz.com value')
-        expect(cookie.domain).to.match(/\.?barbaz\.com/)
+        expect(cookie).to.have.property('value', 'barbaz.com value')
+        expect(cookie).to.have.property('domain').that.matches(/\.?barbaz\.com/)
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
 
         cy.getCookie('key').should((cookie) => {
-          expect(cookie.value).to.equal('foobar.com value')
-          expect(cookie.domain).to.match(/\.?foobar\.com/)
+          expect(cookie).to.have.property('value', 'foobar.com value')
+          expect(cookie).to.have.property('domain').that.matches(/\.?foobar\.com/)
         })
       })
     })
@@ -293,19 +291,19 @@ describe('src/cy/commands/cookies - no stub', () => {
       setCookies()
 
       cy.getCookie('key', { domain: 'www.foobar.com' }).should((cookie) => {
-        expect(cookie.value).to.equal('www.foobar.com value')
-        expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
+        expect(cookie).to.have.property('value', 'www.foobar.com value')
+        expect(cookie).to.have.property('domain').that.matches(/\.?www\.foobar\.com/)
       })
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
         cy.getCookie('key', { domain: 'www.barbaz.com' }).should((cookie) => {
-          expect(cookie.value).to.equal('www.barbaz.com value')
-          expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
+          expect(cookie).to.have.property('value', 'www.barbaz.com value')
+          expect(cookie).to.have.property('domain').that.matches(/\.?www\.barbaz\.com/)
         })
       })
     })
@@ -321,7 +319,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key', { domain: 'barbaz.com' }).should('be.null')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -344,7 +342,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key', { domain: 'foobar.com' }).should('be.null')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -373,7 +371,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key6').should('not.exist')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
@@ -405,7 +403,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key6').should('not.exist')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -439,7 +437,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key6', { domain: 'barbaz.com' }).should('exist')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -468,7 +466,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getAllCookies().its('length').should('equal', 0)
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
@@ -510,7 +508,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key', { domain: 'foobar.com' }).should('exist')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
@@ -535,7 +533,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key').should('not.exist')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -556,7 +554,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key').should('not.exist')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -580,7 +578,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('key', { domain: 'barbaz.com' }).should('exist')
 
       // webkit does not support cy.origin()
-      if (isWebkit) return
+      if (isWebKit) return
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')

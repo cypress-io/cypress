@@ -1,6 +1,6 @@
-const { stripIndent } = require('common-tags')
+import { stripIndent } from 'common-tags'
 
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 
 const { Promise } = Cypress
 
@@ -99,6 +99,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - missing url
         cy.visit()
       })
 
@@ -123,6 +124,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - invalid method
         cy.visit({
           url: 'http://foobarbaz',
           method: 'FOO',
@@ -137,6 +139,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - invalid headers
         cy.visit({
           url: 'http://foobarbaz',
           headers: 'quux',
@@ -157,6 +160,7 @@ describe('src/cy/commands/navigation', () => {
             done()
           })
 
+          // @ts-expect-error - invalid qs
           cy.visit({
             url: 'http://foobarbaz',
             qs,
@@ -179,7 +183,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays loading_network_failed when _resolveUrl throws', function (done) {
-        const err1 = new Error('connect ECONNREFUSED 127.0.0.1:64646')
+        const err1: Error & { url?: string } = new Error('connect ECONNREFUSED 127.0.0.1:64646')
 
         // dont log else we create an endless loop!
         const emit = cy.spy(Cypress, 'emit').log(false)
@@ -220,7 +224,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays loading_file_failed when _resolveUrl resp is not ok', function (done) {
-        const obj = {
+        const obj: Record<string, unknown> = {
           isOkStatusCode: false,
           isHtml: true,
           contentType: 'text/html',
@@ -267,7 +271,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays loading_file_failed redirects when _resolveUrl resp is not ok', function (done) {
-        const obj = {
+        const obj: Record<string, unknown> = {
           isOkStatusCode: false,
           isHtml: true,
           contentType: 'text/html',
@@ -320,7 +324,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays loading_http_failed when _resolveUrl resp is not ok', function (done) {
-        const obj = {
+        const obj: Record<string, unknown> = {
           isOkStatusCode: false,
           isHtml: true,
           contentType: 'text/html',
@@ -366,7 +370,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays loading_http_failed redirects when _resolveUrl resp is not ok', function (done) {
-        const obj = {
+        const obj: Record<string, unknown> = {
           isOkStatusCode: false,
           isHtml: true,
           contentType: 'text/html',
@@ -463,7 +467,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays loading_invalid_content_type when isHtml is false on file requests', function (done) {
-        const obj = {
+        const obj: Record<string, unknown> = {
           isOkStatusCode: true,
           isHtml: false,
           filePath: '/path/to/bar/',
@@ -511,7 +515,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays body_circular when body is circular', function (done) {
-        const foo = {
+        const foo: { bar: { baz: { quux?: unknown } } } = {
           bar: {
             baz: {},
           },
