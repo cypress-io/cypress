@@ -1392,7 +1392,8 @@ namespace ChaiJQueryTests {
   expect($el).to.match((index, element) => element.id === 'result') // $ExpectType Assertion
   expect($el).to.match((index: string) => true) // $ExpectError
   expect($el).to.match(document.querySelectorAll('div')) // $ExpectType Assertion
-  expect($el).to.match([$el[0]] as ReadonlyArray<HTMLElement>) // $ExpectType Assertion
+  const readonlyElements: ReadonlyArray<HTMLElement> = [$el[0]]
+  expect($el).to.match(readonlyElements) // $ExpectType Assertion
   expect($el).to.match({ foo: 'bar' }) // $ExpectError
 
   expect($el).to.have.id(456) // $ExpectType Assertion

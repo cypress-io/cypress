@@ -848,15 +848,16 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
-  // Each call here relies on a chai-jquery signature that the TypeScript types
-  // widened, so this spec type-checks those signatures and proves the runtime
-  // accepts them. Keep it free of casts and `@ts-expect-error`.
+  // Every call here uses a chai-jquery signature typed in `cli/types`, so driver
+  // `check-ts` fails if a signature rejects a form the runtime accepts, and this
+  // spec fails if the runtime rejects a form the types allow. A cast or
+  // `@ts-expect-error` here would hide the first kind of failure.
   context('chai-jquery argument types', () => {
     const expectToFail = (fn: () => void): string => {
       try {
         fn()
       } catch (err) {
-        return (err as Error).message
+        return String(err)
       }
 
       throw new Error('expected the assertion to fail')
