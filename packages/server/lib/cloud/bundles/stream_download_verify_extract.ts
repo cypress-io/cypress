@@ -28,27 +28,14 @@ const RETRY_DELAY_MS = 500
 
 interface StreamDownloadVerifyExtractOptions {
   url: string
-  projectId?: string
   staging: string
   kind: BundleKind
 }
 
-// Matches the Cloud's project ID format. The bundle routes look bundles up by
-// hash and don't need this header, so a malformed ID (e.g. one with a non-ASCII
-// look-alike character, which fetch rejects as a header value) is left off.
-const PROJECT_ID_PATTERN = /^([a-z0-9]{6}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/
-
-const buildHeaders = (projectId: string | undefined): Record<string, string> => {
-  const isValidProjectId = !!projectId && PROJECT_ID_PATTERN.test(projectId)
-
-  if (projectId && !isValidProjectId) {
-    debug('omitting x-cypress-project-slug header, invalid projectId: %s', projectId)
-  }
-
+const buildHeaders = (): Record<string, string> => {
   return {
     'x-route-version': '1',
     'x-cypress-signature': PUBLIC_KEY_VERSION,
-    ...(isValidProjectId ? { 'x-cypress-project-slug': projectId } : {}),
     'x-os-name': os.platform(),
     'x-cypress-version': pkg.version,
   }
@@ -149,7 +136,7 @@ const wrapAsBundleError = (
   })
 }
 
-const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownloadVerifyExtractOptions): Promise<string> => {
+const runDownloadAttempt = async ({ url, staging, kind }: StreamDownloadVerifyExtractOptions): Promise<string> => {
   // Each attempt starts from a clean staging dir so retries can't see
   // partial bytes from the previous attempt.
   await remove(staging).catch(() => { /* ignore */ })
@@ -215,7 +202,7 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
         // @ts-expect-error - this is supported
         agent: strictAgent,
         method: 'GET',
-        headers: buildHeaders(projectId),
+        headers: buildHeaders(),
         encrypt: 'signed',
         signal: controller.signal,
       })

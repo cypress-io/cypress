@@ -180,7 +180,6 @@ export class CyPromptLifecycleManager {
     let manifest: Record<string, string>
 
     const currentProjectOptions = await getProjectOptions()
-    const projectId = currentProjectOptions.projectSlug
     const cyPromptSession = await postCyPromptSession({
       projectId: currentProjectOptions.projectSlug,
     })
@@ -193,7 +192,6 @@ export class CyPromptLifecycleManager {
       if (!hashLoadingPromise) {
         hashLoadingPromise = ensureCyPromptBundle({
           cyPromptUrl: cyPromptSession.cyPromptUrl,
-          projectId,
         })
 
         CyPromptLifecycleManager.hashLoadingMap.set(this.cyPromptHash, hashLoadingPromise)

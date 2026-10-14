@@ -3,7 +3,6 @@ import { mkdtemp, remove } from 'fs-extra'
 import { Readable } from 'stream'
 import os from 'os'
 import path from 'path'
-import { Headers } from 'cross-fetch'
 import { BundleError } from '../../../../lib/cloud/bundles/bundle_error'
 import { SystemError } from '../../../../lib/cloud/network/system_error'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
@@ -271,60 +270,24 @@ describe('streamDownloadVerifyExtract', () => {
     })
   })
 
-  describe('x-cypress-project-slug header', () => {
-    const requestHeadersFor = async (projectId: string | undefined): Promise<Record<string, string>> => {
-      fetchStub.mockResolvedValue({
-        ok: false,
-        url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',
-        status: 404,
-        statusText: 'Not Found',
-        text: async () => 'not found',
-      })
-
-      await streamDownloadVerifyExtract({
-        url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',
-        projectId,
-        staging: path.join(tmp, 'staging'),
-        kind: 'cy-prompt',
-      }).catch(() => { /* ignore */ })
-
-      const headers = fetchStub.mock.calls[0][1].headers
-
-      // Real fetch validates header values while building the request.
-      expect(() => new Headers(headers)).not.toThrow()
-
-      return headers
-    }
-
-    it('sends a valid 6-character project ID', async () => {
-      const headers = await requestHeadersFor('abc123')
-
-      expect(headers['x-cypress-project-slug']).toBe('abc123')
+  it('sends only the bundle request headers, with no project slug', async () => {
+    fetchStub.mockResolvedValue({
+      ok: false,
+      url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',
+      status: 404,
+      statusText: 'Not Found',
+      text: async () => 'not found',
     })
 
-    it('sends a valid UUID project ID', async () => {
-      const headers = await requestHeadersFor('0b8c5d2e-1f3a-4b6c-9d7e-2a4f6c8e0b1d')
+    await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
-      expect(headers['x-cypress-project-slug']).toBe('0b8c5d2e-1f3a-4b6c-9d7e-2a4f6c8e0b1d')
-    })
+    const headers = fetchStub.mock.calls[0][1].headers
 
-    it('omits a project ID containing a non-ASCII character', async () => {
-      // Trailing Cyrillic "к" (U+043A), which is not a legal header value
-      const headers = await requestHeadersFor('4ufp9vк')
-
-      expect(headers).not.toHaveProperty('x-cypress-project-slug')
-    })
-
-    it('omits a malformed ASCII project ID', async () => {
-      const headers = await requestHeadersFor('ABC123')
-
-      expect(headers).not.toHaveProperty('x-cypress-project-slug')
-    })
-
-    it('omits the header when there is no project ID', async () => {
-      const headers = await requestHeadersFor(undefined)
-
-      expect(headers).not.toHaveProperty('x-cypress-project-slug')
-    })
+    expect(Object.keys(headers).sort()).toEqual([
+      'x-cypress-signature',
+      'x-cypress-version',
+      'x-os-name',
+      'x-route-version',
+    ])
   })
 })
