@@ -38,9 +38,7 @@ describe('src/cy/commands/traversals', () => {
         const el = traverse(cy.$$('#list'))
 
         cy.get('#list')[name](arg).then(($el) => {
-          // chai-jquery types `match` as taking a selector, but it delegates to
-          // `$el.is()`, which also accepts another jQuery object
-          expect($el).to.match(el as any)
+          expect($el).to.match(el)
         })
       })
 

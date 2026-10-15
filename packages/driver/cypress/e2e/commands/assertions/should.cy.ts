@@ -80,14 +80,22 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('works with jquery chai', () => {
-      const div = $('<div class=\'foo\'>asdf</div>')
+      const div = $('<div class=\'foo\' num=\'777\'>asdf</div>')
 
       cy.$$('body').append(div)
 
       cy
-      .get('div.foo').should('have.class', 'foo').then(($div) => {
-        // @ts-expect-error - the typings only accept a selector string, but chai-jquery also matches against an element
+      .get('div.foo')
+      .should('have.class', 'foo')
+      .and('match', div)
+      .and('match', div[0])
+      .and('not.match', 'span')
+      .and('have.attr', 'num', 777)
+      .then(($div) => {
         expect($div).to.match(div)
+        expect($div).to.match([div[0]])
+        expect($div).to.match((index, element) => element.classList.contains('foo'))
+        expect($div).not.to.match((index, element) => element.id === 'missing')
 
         $div.remove()
       })
@@ -837,6 +845,139 @@ describe('src/cy/commands/assertions', () => {
       expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])
       expect([1, 2, 3]).to.contain.oneOf([3, 4, 5])
       expect([1, 2, 3]).to.not.contain.oneOf([4, 5, 6])
+    })
+  })
+
+  // Every call here uses a chai-jquery signature typed in `cli/types`. Driver
+  // `check-ts` fails if an `expect()` signature rejects a form the runtime
+  // accepts; the `.should()` calls compile through the catch-all chainer either
+  // way, so only this spec's run covers them. A cast or `@ts-expect-error` here
+  // would hide a type regression.
+  context('chai-jquery argument types', () => {
+    const expectToFail = (fn: () => void): string => {
+      try {
+        fn()
+      } catch (err) {
+        return String(err)
+      }
+
+      throw new Error('expected the assertion to fail')
+    }
+
+    beforeEach(() => {
+      cy.$$('body').append(`
+        <div id="4567" num="777" data-num="222" data-yes="true" data-no="false" data-nil="null">123</div>
+        <input id="typed-input" value="12345">
+        <progress id="typed-progress" value="0.72"></progress>
+        <meter id="typed-meter" min="0" max="100" value="50"></meter>
+        <ul><li id="typed-li" value="3">li</li></ul>
+        <span class="typed-span">a</span><span class="typed-span">b</span>
+      `)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7314
+    describe('number values', () => {
+      it('attr accepts a number', () => {
+        expect(cy.$$('[id="4567"]')).to.have.attr('num', 777)
+        expect(cy.$$('[id="4567"]')).not.to.have.attr('num', 778)
+        cy.get('[id="4567"]').should('have.attr', 'num', 777).and('not.have.attr', 'num', 778)
+      })
+
+      it('id accepts a number', () => {
+        expect(cy.$$('[id="4567"]')).to.have.id(4567)
+        expect(cy.$$('[id="4567"]')).not.to.have.id(4568)
+        cy.get('[id="4567"]').should('have.id', 4567).and('not.have.id', 4568)
+      })
+
+      it('text accepts a number in every form', () => {
+        const $el = cy.$$('[id="4567"]')
+
+        expect($el).to.have.text(123)
+        expect($el).to.contain.text(23)
+        expect($el).to.include.text(12)
+        expect($el).not.to.contain.text(9)
+
+        cy.get('[id="4567"]')
+        .should('have.text', 123)
+        .and('contain.text', 23)
+        .and('include.text', 12)
+        .and('not.have.text', 124)
+        .and('not.contain.text', 9)
+        .and('not.include.text', 9)
+      })
+
+      it('value accepts a number in every form on a text input', () => {
+        const $input = cy.$$('#typed-input')
+
+        expect($input).to.have.value(12345)
+        expect($input).to.contain.value(234)
+        expect($input).to.include.value(45)
+        expect($input).not.to.contain.value(9)
+
+        cy.get('#typed-input')
+        .should('have.value', 12345)
+        .and('contain.value', 234)
+        .and('include.value', 45)
+        .and('not.have.value', 1)
+        .and('not.contain.value', 9)
+        .and('not.include.value', 9)
+      })
+
+      it('value compares numbers directly on number-valued elements, which never partially match', () => {
+        cy.get('#typed-progress').should('have.value', 0.72)
+        cy.get('#typed-meter').should('have.value', 50)
+        cy.get('#typed-li').should('have.value', 3)
+
+        expect(expectToFail(() => expect(cy.$$('#typed-progress')).to.contain.value(0.72))).to.include('to contain value 0.72')
+        expect(expectToFail(() => expect(cy.$$('#typed-li')).to.include.value(3))).to.include('to contain value 3')
+      })
+    })
+
+    it('data accepts a number, boolean, or null', () => {
+      const $el = cy.$$('[id="4567"]')
+
+      expect($el).to.have.data('num', 222)
+      expect($el).to.have.data('yes', true)
+      expect($el).to.have.data('no', false)
+      expect($el).to.have.data('nil', null)
+      expect($el).not.to.have.data('num', '222')
+
+      // `have.data` yields the data value, so each assertion needs its own query
+      cy.get('[id="4567"]').should('have.data', 'num', 222)
+      cy.get('[id="4567"]').should('have.data', 'yes', true)
+      cy.get('[id="4567"]').should('have.data', 'nil', null)
+      cy.get('[id="4567"]').should('not.have.data', 'num', 223)
+    })
+
+    it('match accepts elements, array-likes, jQuery objects, and predicates', () => {
+      const $spans = cy.$$('.typed-span')
+      const autDocument = $spans[0].ownerDocument
+      const thisValues: Element[] = []
+
+      expect($spans).to.match($spans[0])
+      expect($spans).to.match($spans)
+      expect($spans).to.match(autDocument.querySelectorAll('.typed-span'))
+      expect($spans).to.match(Object.freeze([$spans[0]]))
+      expect($spans).not.to.match(Cypress.$(autDocument))
+      expect($spans).to.match(function (this: Element, index, element) {
+        thisValues.push(this)
+
+        return this === element
+      })
+
+      expect(thisValues).to.deep.equal($spans.toArray())
+
+      cy.get('.typed-span')
+      .should('match', autDocument.querySelectorAll('.typed-span'))
+      .and('match', $spans[1])
+      .and('not.match', (index, element) => element.id === 'missing')
+    })
+
+    it('match on a non-DOM subject accepts only a regular expression', () => {
+      const message = expectToFail(() => expect('foo').to.match(cy.$$('body')[0]))
+
+      expect(message).to.include('`match` requires its argument be a `RegExp`')
+      expect('foo').to.match(/fo/)
     })
   })
 
