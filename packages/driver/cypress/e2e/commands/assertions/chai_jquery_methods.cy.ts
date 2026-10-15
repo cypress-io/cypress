@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 const { $ } = Cypress
 
 describe('src/cy/commands/assertions', () => {
@@ -78,6 +78,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('.999').then(($el) => {
+          // @ts-expect-error - class is typed as a string; a number only works because jQuery's hasClass coerces it
           expect($el).to.have.class(999)
           expect($el).to.have.class('999')
         })

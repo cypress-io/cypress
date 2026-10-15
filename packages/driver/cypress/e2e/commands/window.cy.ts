@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
 const { _, $ } = Cypress
 
 describe('src/cy/commands/window', () => {
@@ -923,6 +923,7 @@ describe('src/cy/commands/window', () => {
           done()
         })
 
+        // @ts-expect-error - invalid preset
         cy.viewport('foo')
       })
 
@@ -935,6 +936,7 @@ describe('src/cy/commands/window', () => {
           done()
         })
 
+        // @ts-expect-error - string height
         cy.viewport(800, '600')
       })
 
@@ -967,6 +969,7 @@ describe('src/cy/commands/window', () => {
           done()
         })
 
+        // @ts-expect-error - empty preset
         cy.viewport('')
       })
 
@@ -979,12 +982,13 @@ describe('src/cy/commands/window', () => {
           done()
         })
 
+        // @ts-expect-error - invalid orientation
         cy.viewport('iphone-4', 'foobar')
       })
 
       _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
         it(`throws when passed the invalid: '${val}' as width`, function (done) {
-          const logs = []
+          const logs: Cypress.Log[] = []
 
           cy.on('log:added', (attrs, log) => {
             logs.push(log)
@@ -998,6 +1002,7 @@ describe('src/cy/commands/window', () => {
             done()
           })
 
+          // @ts-expect-error - invalid width
           cy.viewport(val)
         })
       })
@@ -1076,6 +1081,7 @@ describe('src/cy/commands/window', () => {
           this.hiddenLog = log
         })
 
+        // @ts-expect-error - the types require an orientation before options, but the driver also accepts options in its place
         cy.viewport('macbook-15', { log: false }).then(function () {
           const { lastLog, hiddenLog } = this
 

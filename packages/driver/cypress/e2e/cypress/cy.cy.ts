@@ -1,4 +1,4 @@
-const { stripIndent } = require('common-tags')
+import { stripIndent } from 'common-tags'
 const { $ } = Cypress
 
 describe('driver/src/cypress/cy', () => {
@@ -32,21 +32,25 @@ describe('driver/src/cypress/cy', () => {
 
     beforeEach(() => {
       setup = (fn = () => {}) => {
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('nested', () => {
           cy.url()
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.nested().noop().then(() => fn())
       }
     })
 
     it('ensures to splice queue correctly on first custom command', () => {
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.add('login', () => {
         cy.get('input:first').type('foo')
       })
 
       const existing = cy.queue.names()
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.login().noop().then(() => {
         expect(cy.queue.names()).to.deep.eq(
           existing.concat(['login', 'get', 'type', 'noop', 'then']),
@@ -83,16 +87,20 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('can recursively nest', () => {
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.add('nest1', () => {
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.nest2()
       })
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.add('nest2', () => {
         cy.noop()
       })
 
       const existing = cy.queue.names()
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.nest1().then(() => {
         expect(cy.queue.names()).to.deep.eq(
           existing.concat(['nest1', 'nest2', 'noop', 'then']),
@@ -101,12 +109,15 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('works with multiple nested commands', () => {
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.add('multiple', () => {
+        // @ts-expect-error - noop is an internal command and is not in the Chainable types
         cy.url().location().noop()
       })
 
       const existing = cy.queue.names()
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.multiple().then(() => {
         expect(cy.queue.names()).to.deep.eq(
           existing.concat(['multiple', 'url', 'location', 'noop', 'then']),
@@ -121,7 +132,7 @@ describe('driver/src/cypress/cy', () => {
       .then(() => {
         const userInvocationStack = cy.queue.find({ name: 'get' }).get('userInvocationStack')
 
-        expect(userInvocationStack).to.include('.cy.js')
+        expect(userInvocationStack).to.include('.cy.ts')
       })
     })
 
@@ -133,7 +144,7 @@ describe('driver/src/cypress/cy', () => {
       .then(() => {
         const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
 
-        expect(userInvocationStack).to.include('.cy.js')
+        expect(userInvocationStack).to.include('.cy.ts')
       })
     })
 
@@ -150,11 +161,13 @@ describe('driver/src/cypress/cy', () => {
 
   context('custom commands', () => {
     beforeEach(() => {
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.add('dashboard.selectRenderer', () => {
         cy.get('[contenteditable]').first()
       })
 
-      Cypress.Commands.add('login', { prevSubject: true }, (subject, email) => {
+      // @ts-expect-error - custom command names are not in the Chainable types
+      Cypress.Commands.add('login', { prevSubject: true }, (subject: JQuery, email: string) => {
         cy.wrap(subject.find('input:first')).type(email)
       })
     })
@@ -179,40 +192,46 @@ describe('driver/src/cypress/cy', () => {
     // TODO(webkit): fix+unskip for experimental webkit
     describe('invocation stack', { browser: '!webkit' }, () => {
       beforeEach(() => {
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('getInput', () => cy.get('input'))
-        Cypress.Commands.add('findInput', { prevSubject: 'element' }, (subject) => {
+        // @ts-expect-error - custom command names are not in the Chainable types
+        Cypress.Commands.add('findInput', { prevSubject: 'element' }, (subject: JQuery) => {
           subject.find('input')
         })
       })
 
       it('stores invocation stack for first command', () => {
         cy
+        // @ts-expect-error - custom command names are not in the Chainable types
         .getInput()
         .then(() => {
           const userInvocationStack = cy.queue.find({ name: 'getInput' }).get('userInvocationStack')
 
-          expect(userInvocationStack).to.include('.cy.js')
+          expect(userInvocationStack).to.include('.cy.ts')
         })
       })
 
       it('stores invocation stack for chained command', () => {
         cy
         .get('div')
+        // @ts-expect-error - custom command names are not in the Chainable types
         .findInput()
         .then(() => {
           const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
 
-          expect(userInvocationStack).to.include('.cy.js')
+          expect(userInvocationStack).to.include('.cy.ts')
         })
       })
     })
 
     describe('parent commands', () => {
       it('ignores existing subject', () => {
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('bar', (arg1, arg2) => {
           return [arg1, arg2]
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.wrap('foo').bar(1, 2).then((arr) => {
           expect(arr).to.deep.eq([1, 2])
         })
@@ -221,17 +240,23 @@ describe('driver/src/cypress/cy', () => {
 
     describe('child commands', () => {
       beforeEach(() => {
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('c', { prevSubject: true }, (subject, arg) => {
           cy.wrap([subject, arg])
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('c2', { prevSubject: true }, (subject, arg) => {
           return [subject, arg]
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('winOnly', { prevSubject: 'window' }, () => {})
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('docOnly', { prevSubject: 'document' }, () => {})
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('elOnly', { prevSubject: 'element' }, () => {})
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('elWinOnly', { prevSubject: ['element', 'window'] }, () => {})
       })
 
@@ -239,11 +264,13 @@ describe('driver/src/cypress/cy', () => {
         const ctx = this
         let expected = false
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('childCtx', { prevSubject: true }, function () {
           expect(this).to.equal(ctx)
           expected = true
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.wrap(null).childCtx().then(() => {
           expect(expected).to.be.true
         })
@@ -252,6 +279,7 @@ describe('driver/src/cypress/cy', () => {
       it('inherits subjects', () => {
         cy
         .wrap('foo')
+        // @ts-expect-error - custom command names are not in the Chainable types
         .c('bar')
         .then((arr) => {
           expect(arr).to.deep.eq(['foo', 'bar'])
@@ -284,6 +312,7 @@ describe('driver/src/cypress/cy', () => {
 
         cy.wrap('foo')
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.c()
       })
 
@@ -301,6 +330,7 @@ describe('driver/src/cypress/cy', () => {
 
         cy.wrap('foo')
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.c('bar')
       })
 
@@ -313,6 +343,7 @@ describe('driver/src/cypress/cy', () => {
           done()
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.wrap({ foo: 'bar' }).winOnly()
       })
 
@@ -325,6 +356,7 @@ describe('driver/src/cypress/cy', () => {
           done()
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.wrap([1, 2, 3]).docOnly()
       })
 
@@ -340,10 +372,12 @@ describe('driver/src/cypress/cy', () => {
           done()
         })
 
+        // @ts-expect-error - custom command names are not in the Chainable types
         cy.window().elWinOnly()
         .then(() => {
           firstPassed = true
 
+          // @ts-expect-error - custom command names are not in the Chainable types
           cy.wrap('string').elWinOnly()
         })
       })
@@ -351,6 +385,7 @@ describe('driver/src/cypress/cy', () => {
 
     describe('dual commands', () => {
       beforeEach(() => {
+        // @ts-expect-error - custom command names are not in the Chainable types
         Cypress.Commands.add('d', { prevSubject: 'optional' }, (subject, arg) => {
           cy.wrap([subject, arg])
         })
@@ -359,6 +394,7 @@ describe('driver/src/cypress/cy', () => {
       it('passes on subject when used as a child', () => {
         cy
         .wrap('foo')
+        // @ts-expect-error - custom command names are not in the Chainable types
         .d('bar')
         .then((arr) => {
           expect(arr).to.deep.eq(['foo', 'bar'])
@@ -367,6 +403,7 @@ describe('driver/src/cypress/cy', () => {
 
       it('has an undefined subject when used as a parent', () => {
         cy
+        // @ts-expect-error - custom command names are not in the Chainable types
         .d('bar')
         .then((arr) => {
           expect(arr).to.deep.eq([undefined, 'bar'])
@@ -377,6 +414,7 @@ describe('driver/src/cypress/cy', () => {
         cy.wrap('foo')
 
         cy
+        // @ts-expect-error - custom command names are not in the Chainable types
         .d('bar')
         .then((arr) => {
           expect(arr).to.deep.eq([undefined, 'bar'])
@@ -403,17 +441,20 @@ describe('driver/src/cypress/cy', () => {
       })
 
       Cypress.Commands.overwrite('each', (orig, subject, cb) => {
+        // @ts-expect-error - the overwrite's parameters are typed from the chainer method, which does not take the subject
         subject = $([1])
 
         return orig(subject, cb)
       })
 
-      Cypress.Commands.overwrite('noop', function (orig, fn) {
+      // @ts-expect-error - noop is an internal command and is not in the Chainable types
+      Cypress.Commands.overwrite('noop', function (orig, fn: (ctx: Mocha.Context) => void) {
         // yield the context
         return fn(this)
       })
 
       Cypress.Commands.overwrite('submit', (orig, subject) => {
+        // @ts-expect-error - the overwrite's parameters are typed from the chainer method, which does not take the subject
         return orig(subject, { foo: 'foo' })
       })
     })
@@ -448,6 +489,7 @@ describe('driver/src/cypress/cy', () => {
 
     it('errors when command does not exist', () => {
       const fn = () => {
+        // @ts-expect-error - foo is not an existing command
         Cypress.Commands.overwrite('foo', () => {})
       }
 
@@ -466,16 +508,20 @@ describe('driver/src/cypress/cy', () => {
 
     // https://github.com/cypress-io/cypress/issues/18892
     it('passes this through to overwritten command', () => {
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.add('bar', function () {
-        expect(this.test.title).to.exist
+        expect(this.test?.title).to.exist
       })
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.bar()
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.overwrite('bar', function (originalFn) {
         return originalFn.call(this)
       })
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.bar()
     })
   })
@@ -489,7 +535,9 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.addQuery('promiseQuery', () => Promise.resolve())
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.promiseQuery()
     })
 
@@ -499,7 +547,9 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.addQuery('badReturnQuery', () => 1)
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.badReturnQuery()
     })
 
@@ -509,30 +559,37 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.addQuery('commandQuery', () => cy.visit('/'))
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.commandQuery()
     })
 
     it('custom commands that return query chainers retry', () => {
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.add('getButton', () => cy.get('button'))
       cy.on('command:retry', () => cy.$$('button').first().remove())
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.getButton().should('have.length', 23)
     })
 
     it('allows queries to use other queries', () => {
-      const logs = []
+      const logs: Cypress.Log[] = []
 
       cy.on('log:added', (attrs, log) => logs.push(log))
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.addQuery('getButtonQuery', () => {
         cy.now('get', 'body')
 
         return cy.now('get', 'button')
       })
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.addQuery('queryQuery', () => cy.now('getButtonQuery'))
 
+      // @ts-expect-error - custom command names are not in the Chainable types
       cy.queryQuery().should('have.length', 24)
       cy.then(() => {
         // Length of 3: getButtonQuery.body (from get), getButtonQuery.button (from get), `should.have.length.24`
@@ -556,7 +613,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('ends all messages when query chain fails', (done) => {
-      const logs = []
+      const logs: Cypress.Log[] = []
 
       cy.on('log:added', (attrs, log) => logs.push(log))
 
@@ -582,6 +639,7 @@ describe('driver/src/cypress/cy', () => {
       })
 
       it('does not allow queries to overwrite commands', () => {
+        // @ts-expect-error - a query must return a function, but this one is rejected by name first
         const fn = () => Cypress.Commands.overwriteQuery('click', () => {})
 
         expect(fn).to.throw().with.property('message')
@@ -623,18 +681,22 @@ describe('driver/src/cypress/cy', () => {
 
 describe('driver/src/cypress/cy - subject validation as the first command in the test', () => {
   before(() => {
+    // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesElementAsParent', () => {
       Cypress.ensure.isElement('abc', 'validatesElementAsParent', cy)
     })
 
+    // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesWindowAsParent', () => {
       Cypress.ensure.isWindow('abc', 'validatesWindowAsParent', cy)
     })
 
+    // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesDocumentAsParent', () => {
       Cypress.ensure.isDocument('abc', 'validatesDocumentAsParent', cy)
     })
 
+    // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesElementAsDual', { prevSubject: 'optional' }, (subject) => {
       Cypress.ensure.isType(subject, ['element'], 'validatesElementAsDual', cy)
     })
@@ -672,6 +734,7 @@ describe('driver/src/cypress/cy - subject validation as the first command in the
       done()
     })
 
+    // @ts-expect-error - custom command names are not in the Chainable types
     cy.validatesElementAsDual()
   })
 })

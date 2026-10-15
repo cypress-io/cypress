@@ -1,5 +1,5 @@
-const { create, Log, LogUtils } = require('@packages/driver/src/cypress/log')
-const { MAX_VISIBILITY_CHECK_ELEMENTS } = require('@packages/types')
+import { create, Log, LogUtils } from '@packages/driver/src/cypress/log'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 const objectDiff = (newAttrs, oldAttrs) => {
   return Object.entries(newAttrs).reduce(
@@ -82,7 +82,7 @@ describe('src/cypress/log', function () {
 
       log.set('key', 'value')
 
-      expect(log.attributes).have.property('key', 'value')
+      expect(log.get()).have.property('key', 'value')
     })
 
     it('can set with object', function () {
@@ -90,7 +90,7 @@ describe('src/cypress/log', function () {
 
       log.set({ key: 'value' })
 
-      expect(log.attributes).have.property('key', 'value')
+      expect(log.get()).have.property('key', 'value')
     })
 
     it('stringifies url value', function () {
@@ -98,11 +98,11 @@ describe('src/cypress/log', function () {
 
       log.set({ url: null })
 
-      expect(log.attributes).have.property('url', '')
+      expect(log.get()).have.property('url', '')
 
       log.set({ url: 'www.cypress.io' })
 
-      expect(log.attributes).have.property('url', 'www.cypress.io')
+      expect(log.get()).have.property('url', 'www.cypress.io')
     })
 
     it('maintains backwards compatibility with onConsole', function () {
@@ -110,20 +110,20 @@ describe('src/cypress/log', function () {
       const consoleProps = { Info: 'some info' }
 
       log.set({ onConsole: consoleProps })
-      expect(log.attributes).have.property('consoleProps', consoleProps)
-      expect(log.attributes).not.have.property('onConsole')
+      expect(log.get()).have.property('consoleProps', consoleProps)
+      expect(log.get()).not.have.property('onConsole')
     })
 
     it('determines aliasType when alias is set', function () {
       const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
 
       log.set({ alias: 'button' })
-      expect(log.attributes).have.property('alias', 'button')
-      expect(log.attributes).have.property('aliasType', 'primitive')
+      expect(log.get()).have.property('alias', 'button')
+      expect(log.get()).have.property('aliasType', 'primitive')
 
       log.set({ alias: 'button', $el: 'button' })
-      expect(log.attributes).have.property('alias', 'button')
-      expect(log.attributes).have.property('aliasType', 'dom')
+      expect(log.get()).have.property('alias', 'button')
+      expect(log.get()).have.property('aliasType', 'dom')
     })
 
     it('does not allow overriding the log id', function () {
@@ -131,7 +131,7 @@ describe('src/cypress/log', function () {
 
       log.set({ id: 'log-1' })
       log.set({ id: 'diff-id' })
-      expect(log.attributes).have.property('id', 'log-1')
+      expect(log.get()).have.property('id', 'log-1')
     })
 
     it('adds updatedAtTimestamp each time the log is updated', function () {
@@ -139,7 +139,7 @@ describe('src/cypress/log', function () {
 
       log.set({ key: 'value' })
 
-      expect(log.attributes).have.property('updatedAtTimestamp')
+      expect(log.get()).have.property('updatedAtTimestamp')
     })
 
     it('wraps consoleProps when consoleProps is set and is a function', function () {
@@ -152,9 +152,9 @@ describe('src/cypress/log', function () {
       }
 
       log.set({ consoleProps })
-      expect(log.attributes).have.property('consoleProps')
-      expect(log.attributes.consoleProps).to.be.a('function')
-      const wrappedProps = log.attributes.consoleProps()
+      expect(log.get()).have.property('consoleProps')
+      expect(log.get().consoleProps).to.be.a('function')
+      const wrappedProps = log.get().consoleProps()
 
       expect(wrappedProps).have.property('name')
       expect(wrappedProps).have.property('type', 'command')
@@ -175,11 +175,13 @@ describe('src/cypress/log', function () {
       const $el = Cypress.$('<div />')
 
       // Create a jQuery object with more elements than the limit
-      const $largeSet = Cypress.$()
+      const elements: HTMLElement[] = []
 
       for (let i = 0; i < MAX_VISIBILITY_CHECK_ELEMENTS + 1; i++) {
-        $largeSet.push($el.clone()[0])
+        elements.push($el.clone()[0])
       }
+
+      const $largeSet = Cypress.$(elements)
 
       log.set({ $el: $largeSet })
       const attrs = log.get()
@@ -206,11 +208,13 @@ describe('src/cypress/log', function () {
       const $el = Cypress.$('<div />')
 
       // Create a jQuery object with elements within the limit
-      const $smallSet = Cypress.$()
+      const elements: HTMLElement[] = []
 
       for (let i = 0; i < MAX_VISIBILITY_CHECK_ELEMENTS; i++) {
-        $smallSet.push($el.clone()[0])
+        elements.push($el.clone()[0])
       }
+
+      const $smallSet = Cypress.$(elements)
 
       log.set({ $el: $smallSet })
       const attrs = log.get()
@@ -239,8 +243,8 @@ describe('src/cypress/log', function () {
         const longMessage = 'x'.repeat(5000)
 
         log.set({ message: longMessage })
-        expect(log.attributes).have.property('message')
-        expect(log.attributes.message).have.have.length(5000)
+        expect(log.get()).have.property('message')
+        expect(log.get().message).have.have.length(5000)
       })
 
       it('does not truncates renderProps.message value', function () {
@@ -255,8 +259,8 @@ describe('src/cypress/log', function () {
         }
 
         log.set({ renderProps })
-        expect(log.attributes).have.property('renderProps')
-        const renderedProps = log.attributes.renderProps()
+        expect(log.get()).have.property('renderProps')
+        const renderedProps = log.get().renderProps()
 
         expect(renderedProps).have.property('message')
         expect(renderedProps.message).have.have.length(5000)
@@ -270,8 +274,8 @@ describe('src/cypress/log', function () {
         const longMessage = 'x'.repeat(5000)
 
         log.set({ message: longMessage })
-        expect(log.attributes).have.property('message')
-        expect(log.attributes.message).have.have.length(5000)
+        expect(log.get()).have.property('message')
+        expect(log.get().message).have.have.length(5000)
       })
 
       it('truncates message value of hidden log', function () {
@@ -280,8 +284,8 @@ describe('src/cypress/log', function () {
         const longMessage = 'x'.repeat(5000)
 
         log.set({ hidden: true, message: longMessage })
-        expect(log.attributes).have.property('message')
-        expect(log.attributes.message).have.have.length(3000)
+        expect(log.get()).have.property('message')
+        expect(log.get().message).have.have.length(3000)
       })
 
       it('does not truncates renderProps.message value', function () {
@@ -296,8 +300,8 @@ describe('src/cypress/log', function () {
         }
 
         log.set({ renderProps })
-        expect(log.attributes).have.property('renderProps')
-        const renderedProps = log.attributes.renderProps()
+        expect(log.get()).have.property('renderProps')
+        const renderedProps = log.get().renderProps()
 
         expect(renderedProps).have.property('message')
         expect(renderedProps.message).have.have.length(5000)
@@ -315,8 +319,8 @@ describe('src/cypress/log', function () {
         }
 
         log.set({ hidden: true, renderProps })
-        expect(log.attributes).have.property('renderProps')
-        const renderedProps = log.attributes.renderProps()
+        expect(log.get()).have.property('renderProps')
+        const renderedProps = log.get().renderProps()
 
         expect(renderedProps).have.property('message')
         expect(renderedProps.message).have.have.length(3000)
@@ -568,24 +572,28 @@ describe('src/cypress/log', function () {
   })
 
   context('timestamps', () => {
+    let createLog: ReturnType<typeof create>
+
     beforeEach(() => {
-      this.cy = {
+      const fakeCy = {
         createSnapshot: cy.stub().returns({}),
       }
 
-      this.state = cy.stub()
-      this.config = cy.stub()
-      this.config.withArgs('isInteractive').returns(true)
-      this.config.withArgs('numTestsKeptInMemory').returns(50)
-      this.log = create(Cypress, this.cy, this.state, this.config)
+      const state = cy.stub()
+      const config = cy.stub()
+
+      config.withArgs('isInteractive').returns(true)
+      config.withArgs('numTestsKeptInMemory').returns(50)
+      createLog = create(Cypress, fakeCy, state, config)
     })
 
     it('sets created at and updated at timestamps', () => {
-      const log = this.log()
+      const log = createLog()
 
-      expect(log.attributes.createdAtTimestamp).to.be.a('number')
-      expect(log.attributes.updatedAtTimestamp).to.be.a('number')
-      expect(log.attributes.createdAtTimestamp).be.lessThan(log.attributes.updatedAtTimestamp)
+      assert.exists(log)
+      expect(log.get().createdAtTimestamp).to.be.a('number')
+      expect(log.get().updatedAtTimestamp).to.be.a('number')
+      expect(log.get().createdAtTimestamp).be.lessThan(log.get().updatedAtTimestamp)
     })
   })
 

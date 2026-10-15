@@ -1,8 +1,8 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
 const { _, Promise } = Cypress
-let reqQueue = []
+let reqQueue: XMLHttpRequest[] = []
 
-const xhrGet = function (win, url) {
+const xhrGet = function (win: Cypress.AUTWindow, url: string) {
   const xhr = new win.XMLHttpRequest()
 
   xhr.open('GET', url)
@@ -68,7 +68,7 @@ describe('src/cy/commands/waiting', () => {
           return null
         })
         .wait('@fetch.response').then((xhr) => {
-          expect(xhr.response.body).to.deep.eq(response)
+          expect(xhr.response?.body).to.deep.eq(response)
         })
       })
 
@@ -306,6 +306,7 @@ describe('src/cy/commands/waiting', () => {
 
           cy
           .intercept('*', {}).as('getAny')
+          // @ts-expect-error - alias missing '@'
           .wait('getAny').then(() => {})
         })
 
@@ -341,6 +342,7 @@ describe('src/cy/commands/waiting', () => {
 
             return null
           })
+          // @ts-expect-error - 2nd alias missing '@'
           .wait(['@foo', 'bar'])
         })
 
@@ -445,6 +447,7 @@ describe('src/cy/commands/waiting', () => {
           cy
           .intercept(/foo/, {}).as('foo')
           .intercept(/bar/, {}).as('bar')
+          // @ts-expect-error - 2nd alias missing '@'
           .wait(['@foo', 'bar'])
         })
 
@@ -762,6 +765,7 @@ describe('src/cy/commands/waiting', () => {
             done()
           })
 
+          // @ts-expect-error - multiple string arguments
           cy.wait('@foo', '@bar')
         })
 
@@ -773,6 +777,7 @@ describe('src/cy/commands/waiting', () => {
             done()
           })
 
+          // @ts-expect-error - callback function
           cy.wait('@foo', () => {})
         })
       })
@@ -897,15 +902,15 @@ describe('src/cy/commands/waiting', () => {
         .intercept(/users/, resp).as('getUsers')
         .wait('@getUsers').then((xhr) => {
           expect(xhr.request.url).to.include('/users?num=1')
-          expect(xhr.response.body).to.deep.eq(resp)
+          expect(xhr.response?.body).to.deep.eq(resp)
         })
         .wait('@getUsers').then((xhr) => {
           expect(xhr.request.url).to.include('/users?num=2')
-          expect(xhr.response.body).to.deep.eq(resp)
+          expect(xhr.response?.body).to.deep.eq(resp)
         })
         .wait('@getUsers').then((xhr) => {
           expect(xhr.request.url).to.include('/users?num=3')
-          expect(xhr.response.body).to.deep.eq(resp)
+          expect(xhr.response?.body).to.deep.eq(resp)
         })
       })
 
@@ -936,7 +941,7 @@ describe('src/cy/commands/waiting', () => {
         }).wait('@getUsers').then((xhr) => {
           expect(xhr.request.url).to.include('/users?num=4')
 
-          expect(xhr.response.body).to.deep.eq(resp)
+          expect(xhr.response?.body).to.deep.eq(resp)
         })
       })
 
@@ -970,7 +975,7 @@ describe('src/cy/commands/waiting', () => {
         .intercept(/users/, resp).as('getUsersAfterEach')
         .wait('@getUsersAfterEach').then((xhr) => {
           expect(xhr.request.url).to.include('/users?afterEach=1')
-          expect(xhr.response.body).to.deep.eq(resp)
+          expect(xhr.response?.body).to.deep.eq(resp)
         })
       })
     })
@@ -998,6 +1003,7 @@ describe('src/cy/commands/waiting', () => {
               done()
             })
 
+            // @ts-expect-error - invalid 1st argument
             cy.get('body').wait(attrs.val)
           })
         })
@@ -1084,7 +1090,7 @@ describe('src/cy/commands/waiting', () => {
           .then(function (xhr) {
             const { lastWaitLog, hiddenWaitLog } = this
 
-            expect(xhr.response.body).to.deep.eq(response)
+            expect(xhr.response?.body).to.deep.eq(response)
 
             expect(lastWaitLog).to.be.undefined
             expect(hiddenWaitLog).to.be.undefined
@@ -1116,7 +1122,7 @@ describe('src/cy/commands/waiting', () => {
           .then(function (xhr) {
             const { lastWaitLog, hiddenWaitLog } = this
 
-            expect(xhr.response.body).to.deep.eq(response)
+            expect(xhr.response?.body).to.deep.eq(response)
 
             expect(lastWaitLog).to.be.undefined
             expect(hiddenWaitLog).to.be.ok
@@ -1152,7 +1158,7 @@ describe('src/cy/commands/waiting', () => {
         .then(function (xhr) {
           const { lastWaitLog, hiddenWaitLog } = this
 
-          expect(xhr.response.body).to.deep.eq(response)
+          expect(xhr.response?.body).to.deep.eq(response)
 
           expect(lastWaitLog).to.be.undefined
           expect(hiddenWaitLog).to.be.ok
