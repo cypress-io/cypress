@@ -1,4 +1,4 @@
-import { Comp } from './comp.jsx'
+import { Comp } from './comp'
 import React from 'react'
 import { mount } from '@cypress/react'
 

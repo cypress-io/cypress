@@ -1,4 +1,4 @@
-import { Transpiled } from './transpiled.jsx'
+import { Transpiled } from './transpiled'
 import React from 'react'
 import { mount } from '@cypress/react'
 

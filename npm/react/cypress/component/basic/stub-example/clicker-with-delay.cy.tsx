@@ -2,7 +2,7 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 describe('Clicker with delay', () => {
-  const Clicker = ({ click }) => {
+  const Clicker = ({ click }: { click: () => void }) => {
     return (
       <div>
         <button onClick={() => setTimeout(click, 500)}>Click me</button>

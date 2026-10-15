@@ -1,8 +1,8 @@
 import React from 'react'
 import { mount } from '@cypress/react'
-import MyComponent from './my-component.jsx'
+import MyComponent from './my-component'
 
 it('is a test', () => {
-  mount(<MyComponent name="some text" />)
+  mount(<MyComponent />)
   cy.contains('Hello').should('be.visible')
 })

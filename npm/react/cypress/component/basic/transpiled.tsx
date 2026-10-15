@@ -1,6 +1,6 @@
 import React from 'react'
 
-export class Transpiled extends React.Component {
+export class Transpiled extends React.Component<object, { count: number }> {
   state = {
     count: 0,
   }

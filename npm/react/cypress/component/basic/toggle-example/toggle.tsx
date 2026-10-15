@@ -1,7 +1,7 @@
 // example from https://reactjs.org/docs/testing-recipes.html#events
 import React, { useState } from 'react'
 
-export default function Toggle (props) {
+export default function Toggle (props: { onChange: (on: boolean) => void }) {
   const [state, setState] = useState(false)
 
   return (

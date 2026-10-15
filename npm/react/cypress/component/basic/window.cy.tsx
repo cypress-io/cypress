@@ -1,8 +1,14 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 
+declare global {
+  interface Window {
+    component?: Component
+  }
+}
+
 export class Component extends React.Component {
-  constructor (props) {
+  constructor (props: object) {
     super(props)
     console.log(
       'set window.counter to this component in window',
@@ -28,7 +34,7 @@ it('has the same window from the component as from test', () => {
   cy.window()
   .its('location.search')
   // this filename
-  .should('match', /window.cy.jsx$/)
+  .should('match', /window.cy.tsx$/)
 
   // the window should have property set by the component
   cy.window().should('have.property', 'component')

@@ -2,7 +2,7 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 describe('Clicker', () => {
-  const Clicker = ({ click }) => {
+  const Clicker = ({ click }: { click: () => void }) => {
     return (
       <div>
         <button onClick={click}>Click me</button>

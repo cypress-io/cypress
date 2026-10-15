@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react'
 
-export const Comp = ({ onMount, onUnmount }) => {
+interface CompProps {
+  onMount: () => void
+  onUnmount: () => void
+}
+
+export const Comp = ({ onMount, onUnmount }: CompProps) => {
   useEffect(() => {
     onMount()
 
