@@ -81,7 +81,7 @@ describe('lib/adapters/internal-routes', () => {
 
 describe('lib/adapters/serve-internal-routes', () => {
   afterEach(() => {
-    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+    vi.unstubAllEnvs()
   })
 
   function createMiddleware (response: any = {
@@ -449,7 +449,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     // here hides the pause from the parent's interception (injection,
     // window:before:load), so the inner must release them to the wire.
     it('releases the own-origin runner document to the next middleware', async () => {
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware()
       const next = vi.fn().mockResolvedValue({ id: 'req-1', statusCode: 200 })
@@ -467,7 +467,7 @@ describe('lib/adapters/serve-internal-routes', () => {
 
     it('releases own-origin namespace subresources with concrete types', async () => {
       // the app's graphql calls — the parent's cy.intercept must see these
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware()
       const next = vi.fn().mockResolvedValue({ id: 'req-1', statusCode: 200 })
@@ -486,7 +486,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     it('still loops own-origin non-clientRoute documents back to Express', async () => {
       // e.g. the CT fixture iframe under /__cypress/iframes — the parent must
       // not get a chance to inject into frames the inner owns outright
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware({
         statusCode: 200,
@@ -509,7 +509,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     it('releases own-origin clientRoute subresources to the next middleware', async () => {
       // matches the e2e-mode topology, where the inner has no interception
       // and the parent's pipeline carries /__/ assets already
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware()
       const next = vi.fn().mockResolvedValue({ id: 'req-1', statusCode: 200 })
@@ -528,7 +528,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     it('still loops foreign-origin internal requests back to Express', async () => {
       // e.g. internal routes requested on the CT dev-server origin — those
       // never reach our Express over the wire, so the loopback must stay.
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware({
         statusCode: 200,
@@ -659,7 +659,7 @@ describe('lib/adapters/serve-internal-routes', () => {
 
 describe('lib/adapters/internal-routes isAnsweredByCypress', () => {
   afterEach(() => {
-    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+    vi.unstubAllEnvs()
   })
 
   const answered = (request: { url: string, headers?: Record<string, string>, resourceType?: any }, isBrowserNetworkMode = true) => {
@@ -704,7 +704,7 @@ describe('lib/adapters/internal-routes isAnsweredByCypress', () => {
 
   describe('cypress-in-cypress inner (CYPRESS_INTERNAL_E2E_TESTING_SELF)', () => {
     beforeEach(() => {
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
     })
 
     it('is false for the own-origin runner document', () => {
