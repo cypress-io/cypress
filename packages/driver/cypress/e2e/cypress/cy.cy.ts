@@ -586,7 +586,7 @@ describe('driver/src/cypress/cy', () => {
         return cy.now('get', 'button')
       })
 
-      // @ts-expect-error - custom command names are not in the Chainable types, and the driver's internal cy.now type requires a second argument
+      // @ts-expect-error - custom command names are not in the Chainable types
       Cypress.Commands.addQuery('queryQuery', () => cy.now('getButtonQuery'))
 
       // @ts-expect-error - custom command names are not in the Chainable types
@@ -683,25 +683,21 @@ describe('driver/src/cypress/cy - subject validation as the first command in the
   before(() => {
     // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesElementAsParent', () => {
-      // @ts-expect-error - the driver's internal cy.now type differs from Chainable.now, so cy does not satisfy ensure's Chainable parameter
       Cypress.ensure.isElement('abc', 'validatesElementAsParent', cy)
     })
 
     // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesWindowAsParent', () => {
-      // @ts-expect-error - the driver's internal cy.now type differs from Chainable.now, so cy does not satisfy ensure's Chainable parameter
       Cypress.ensure.isWindow('abc', 'validatesWindowAsParent', cy)
     })
 
     // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesDocumentAsParent', () => {
-      // @ts-expect-error - the driver's internal cy.now type differs from Chainable.now, so cy does not satisfy ensure's Chainable parameter
       Cypress.ensure.isDocument('abc', 'validatesDocumentAsParent', cy)
     })
 
     // @ts-expect-error - custom command names are not in the Chainable types
     Cypress.Commands.add('validatesElementAsDual', { prevSubject: 'optional' }, (subject) => {
-      // @ts-expect-error - the driver's internal cy.now type differs from Chainable.now, so cy does not satisfy ensure's Chainable parameter
       Cypress.ensure.isType(subject, ['element'], 'validatesElementAsDual', cy)
     })
   })
@@ -726,11 +722,8 @@ describe('driver/src/cypress/cy - subject validation as the first command in the
   })
 
   it('reports the invalid subject when no command is running', () => {
-    // @ts-expect-error - the driver's internal cy.now type differs from Chainable.now, so cy does not satisfy ensure's Chainable parameter
     expect(() => Cypress.ensure.isElement('abc', 'foo', cy)).to.throw('`cy.foo()` failed because it requires a DOM element.')
-    // @ts-expect-error - the driver's internal cy.now type differs from Chainable.now, so cy does not satisfy ensure's Chainable parameter
     expect(() => Cypress.ensure.isWindow('abc', 'foo', cy)).to.throw('`cy.foo()` failed because it requires the subject be a global `window` object.')
-    // @ts-expect-error - the driver's internal cy.now type differs from Chainable.now, so cy does not satisfy ensure's Chainable parameter
     expect(() => Cypress.ensure.isDocument('abc', 'foo', cy)).to.throw('`cy.foo()` failed because it requires the subject be a global `document` object.')
   })
 
