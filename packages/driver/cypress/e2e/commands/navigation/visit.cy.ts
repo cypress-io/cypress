@@ -1,4 +1,8 @@
+export {} // make typescript see this as a module
+
 const { _, Promise } = Cypress
+
+type FooWindow = Cypress.AUTWindow & { foo?: string }
 
 describe('src/cy/commands/navigation', () => {
   context('#visit', () => {
@@ -209,7 +213,7 @@ describe('src/cy/commands/navigation', () => {
 
       // One time, set the amount of times we want the page to perform it's redirect loop.
       cy.once('window:before:load', (win) => {
-        win.sessionStorage.setItem('redirectCount', 21)
+        win.sessionStorage.setItem('redirectCount', '21')
       })
 
       cy.visit('fixtures/redirection-loop-a.html')
@@ -218,7 +222,7 @@ describe('src/cy/commands/navigation', () => {
     describe('when only hashes are changing when testIsolation=true', () => {
       it('short circuits the visit if the page will not refresh', () => {
         let count = 0
-        const urls = []
+        const urls: string[] = []
 
         cy.on('window:load', () => {
           urls.push(cy.state('window').location.href)
@@ -308,13 +312,13 @@ describe('src/cy/commands/navigation', () => {
       const onLoad = cy.stub()
 
       cy
-      .visit('http://localhost:3500/fixtures/generic.html#foo').then((win) => {
+      .visit('http://localhost:3500/fixtures/generic.html#foo').then((win: FooWindow) => {
         win.foo = 'bar'
       })
       .visit('http://localhost:3500/fixtures/generic.html#foo', {
         onLoad,
       })
-      .then((win) => {
+      .then((win: FooWindow) => {
         expect(win.foo).to.equal('bar')
         expect(onLoad).not.to.have.been.called
       })
@@ -434,7 +438,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('replaces window.location when origins don\'t match', (done) => {
         const fn = function (str, win) {
-          const isEqual = win === top.window
+          const isEqual = win === top?.window
 
           expect(isEqual).to.be.true
           expect(str).to.eq('http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js')
@@ -770,6 +774,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('logs options if they are supplied', () => {
+        // @ts-expect-error - notReal is not a visit option
         cy.visit({
           url: 'http://localhost:3500/fixtures/generic.html',
           headers: {

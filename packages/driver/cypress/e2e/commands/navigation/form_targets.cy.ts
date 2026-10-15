@@ -1,4 +1,15 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
+// base-target-dynamic.html defines window.injectBase to add a <base> after load
+const injectBase = (target: string) => {
+  cy.window().then((win) => {
+    if (!('injectBase' in win) || typeof win.injectBase !== 'function') {
+      throw new Error('expected window.injectBase to be defined by base-target-dynamic.html')
+    }
+
+    win.injectBase(target)
+  })
+}
 
 describe('src/cy/commands/navigation', () => {
   context('#form sub', () => {
@@ -17,7 +28,7 @@ describe('src/cy/commands/navigation', () => {
 
     // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
     it('logs \'form sub\'', { browser: '!webkit' }, () => {
-      let event = null
+      let event: Event | undefined
 
       cy
       .visit('/fixtures/form.html')
@@ -151,9 +162,13 @@ describe('src/cy/commands/navigation', () => {
 
         it('does not strip link_parent', () => {
           cy.get('iframe').then(($iframe) => {
-            const $el = $iframe.contents().find('a.inline_parent')
+            const link = $iframe.contents().find('a.inline_parent')[0]
 
-            $el[0].click()
+            if (!('click' in link)) {
+              throw new Error('expected a.inline_parent to be an element')
+            }
+
+            link.click()
           })
 
           cy.url().should('include', 'empty.html')
@@ -213,7 +228,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('keeps anchor click inside AUT when <base target="_top"> is injected after load', () => {
         cy.visit('/fixtures/base-target-dynamic.html')
-        cy.window().then((win) => win.injectBase('_top'))
+        injectBase('_top')
         cy.get('#link').click()
         cy.get('#dom').should('contain', 'DOM')
         cy.url().should('include', 'dom.html')
@@ -221,7 +236,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('keeps form submit inside AUT when <base target="_parent"> is injected after load', () => {
         cy.visit('/fixtures/base-target-dynamic.html')
-        cy.window().then((win) => win.injectBase('_parent'))
+        injectBase('_parent')
         cy.get('#submit').click()
         cy.get('#dom').should('contain', 'DOM')
         cy.url().should('include', 'dom.html')
@@ -231,7 +246,7 @@ describe('src/cy/commands/navigation', () => {
       // so a mixed-case value is just as obstructive as the lowercase form.
       it('keeps anchor click inside AUT when <base target="_TOP"> (uppercase) is injected after load', () => {
         cy.visit('/fixtures/base-target-dynamic.html')
-        cy.window().then((win) => win.injectBase('_TOP'))
+        injectBase('_TOP')
         cy.get('#link').click()
         cy.get('#dom').should('contain', 'DOM')
         cy.url().should('include', 'dom.html')
@@ -243,7 +258,7 @@ describe('src/cy/commands/navigation', () => {
       // neutralization must run independently of the per-element tag check.
       it('keeps click-on-anchor-child inside AUT when <base target="_top"> is injected after load', () => {
         cy.visit('/fixtures/base-target-dynamic.html')
-        cy.window().then((win) => win.injectBase('_top'))
+        injectBase('_top')
         cy.get('#nested-link-child').click()
         cy.get('#dom').should('contain', 'DOM')
         cy.url().should('include', 'dom.html')

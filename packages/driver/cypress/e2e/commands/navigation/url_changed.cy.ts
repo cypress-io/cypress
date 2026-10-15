@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 
 const { Promise } = Cypress
 
@@ -364,6 +364,7 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('/fixtures/generic.html')
         .window().then((win) => {
+          // @ts-expect-error - the DOM types require a string for the unused title, but browsers accept null
           win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
         })
       })
@@ -372,6 +373,7 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('/fixtures/generic.html')
         .window().then(function (win) {
+          // @ts-expect-error - null title
           win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
 
           const { lastLog } = this
@@ -419,6 +421,7 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('/fixtures/generic.html')
         .window().then((win) => {
+          // @ts-expect-error - null title
           win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
         })
       })
@@ -427,6 +430,7 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('/fixtures/generic.html')
         .window().then(function (win) {
+          // @ts-expect-error - null title
           win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
 
           const { lastLog } = this
