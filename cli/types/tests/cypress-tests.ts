@@ -1114,6 +1114,7 @@ namespace CypressSessionsTests {
   cy.session('user', () => { }, {
     validate: () => { },
   })
+  cy.session('user', () => { }) // $ExpectType Chainable<"created" | "restored" | "recreated">
 
   cy.session() // $ExpectError
   cy.session('user') // $ExpectError
