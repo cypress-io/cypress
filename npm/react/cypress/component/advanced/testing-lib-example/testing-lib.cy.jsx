@@ -3,7 +3,7 @@ import { mount } from '@cypress/react'
 import Fetcher from './fetcher'
 
 // The findBy* commands come from '@testing-library/cypress/add-commands',
-// registered in cypress/support/component.jsx
+// registered in cypress/support/component.ts
 // https://testing-library.com/docs/cypress-testing-library/intro
 it('loads and displays greeting (testing-lib)', () => {
   cy.intercept('/greeting', { greeting: 'Hello there' }).as('greet')
