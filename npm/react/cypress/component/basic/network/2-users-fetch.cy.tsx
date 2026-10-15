@@ -1,4 +1,4 @@
-import { Users } from './2-users-fetch.jsx'
+import { Users } from './2-users-fetch'
 import React from 'react'
 import { mount } from '@cypress/react'
 

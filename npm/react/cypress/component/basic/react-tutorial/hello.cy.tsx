@@ -1,4 +1,4 @@
-import Hello from './hello.jsx'
+import Hello from './hello'
 import React from 'react'
 import { mount } from '@cypress/react'
 

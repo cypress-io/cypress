@@ -1,6 +1,6 @@
 import React from 'react'
 import { mount } from '@cypress/react'
-import { HelloWorld } from './hello-world.jsx'
+import { HelloWorld } from './hello-world'
 
 it('works by itself', () => {
   mount(<HelloWorld />)

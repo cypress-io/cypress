@@ -1,6 +1,13 @@
 import React, { useState } from 'react'
 
-function Square ({ value, onSquareClick }) {
+type Squares = Array<string | null>
+
+interface SquareProps {
+  value: string | null
+  onSquareClick: () => void
+}
+
+function Square ({ value, onSquareClick }: SquareProps) {
   return (
     <button className="square" onClick={onSquareClick}>
       {value}
@@ -8,8 +15,14 @@ function Square ({ value, onSquareClick }) {
   )
 }
 
-export function Board ({ xIsNext, squares, onPlay }) {
-  function handleClick (i) {
+export interface BoardProps {
+  xIsNext?: boolean
+  squares: Squares
+  onPlay: (nextSquares: Squares) => void
+}
+
+export function Board ({ xIsNext, squares, onPlay }: BoardProps) {
+  function handleClick (i: number) {
     if (calculateWinner(squares) || squares[i]) {
       return
     }
@@ -57,19 +70,19 @@ export function Board ({ xIsNext, squares, onPlay }) {
 }
 
 export default function Game () {
-  const [history, setHistory] = useState([Array(9).fill(null)])
+  const [history, setHistory] = useState<Squares[]>([Array(9).fill(null)])
   const [currentMove, setCurrentMove] = useState(0)
   const xIsNext = currentMove % 2 === 0
   const currentSquares = history[currentMove]
 
-  function handlePlay (nextSquares) {
+  function handlePlay (nextSquares: Squares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares]
 
     setHistory(nextHistory)
     setCurrentMove(nextHistory.length - 1)
   }
 
-  function jumpTo (nextMove) {
+  function jumpTo (nextMove: number) {
     setCurrentMove(nextMove)
   }
 
@@ -101,7 +114,7 @@ export default function Game () {
   )
 }
 
-export function calculateWinner (squares) {
+export function calculateWinner (squares: Squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],

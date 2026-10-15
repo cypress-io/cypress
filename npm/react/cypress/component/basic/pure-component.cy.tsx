@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from './pure-component.jsx'
+import Button from './pure-component'
 import { mount } from '@cypress/react'
 
 describe('Button pure component', function () {

@@ -1,10 +1,11 @@
-import Game, { Board, calculateWinner } from './game.jsx'
+import Game, { Board, calculateWinner } from './game'
+import type { BoardProps } from './game'
 import React from 'react'
 import { mount } from '@cypress/react'
 import './tic-tac-toe.css'
 
 // for now need a constructor, otherwise getting "Weak map" key
-const BoardWrap = ({ squares, onPlay }) => {
+const BoardWrap = ({ squares, onPlay = () => {} }: Pick<BoardProps, 'squares'> & Partial<Pick<BoardProps, 'onPlay'>>) => {
   return (
     <div className="game">
       <div className="game-board">

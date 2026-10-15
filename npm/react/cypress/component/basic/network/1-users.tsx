@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+
+interface User {
+  id: number
+  name: string
+}
 
 export function Users () {
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState<User[]>([])
 
   const getUsers = async () => {
-    const response = await fetch('https://jsonplaceholder.cypress.io/users?_limit=3')
-    const list = await response.json()
+    const response = await axios.get<User[]>('https://jsonplaceholder.cypress.io/users?_limit=3')
 
-    setUsers(list)
+    setUsers(response.data)
   }
 
   useEffect(() => {
