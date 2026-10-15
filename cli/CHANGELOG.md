@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.2.1
 
+**Bugfixes:**
+
+- Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
+
 **Misc:**
 
 - The TypeScript types now accept a number as the expected value of the `attr`, `id`, `text`, and `value` assertions, including the `contain` and `include` forms of `text` and `value`, such as `expect($el).to.have.attr('tabindex', 0)` or `expect($el).to.have.text(123)`. Cypress already accepted numbers for these assertions at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).

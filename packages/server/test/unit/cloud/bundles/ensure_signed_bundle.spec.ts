@@ -131,7 +131,6 @@ describe('ensureSignedBundle', () => {
 
     const result = await ensureSignedBundle({
       url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',
-      projectId: 'proj-1',
       kind: 'cy-prompt',
     })
 
