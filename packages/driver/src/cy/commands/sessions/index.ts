@@ -523,6 +523,8 @@ export default function (Commands, Cypress, cy) {
           return navigateAboutBlank()
           .then(() => {
             setSessionLogStatus(status)
+
+            return status
           })
         })
       })
