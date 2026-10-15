@@ -1,5 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.2.1
+## 16.3.0
+
+**Features:**
+
+- Component testing with webpack now supports `webpack-dev-server` 6 when your project provides it, which Angular 22.2 projects using `@angular-devkit/build-angular` do. `webpack-dev-server` 6 requires webpack `5.101.0` or newer, and Cypress reports an error naming both versions when an older webpack is installed. The `webpack-dev-server` bundled with Cypress is still version 5. Addresses [#34259](https://github.com/cypress-io/cypress/issues/34259).
 
 **Bugfixes:**
 
@@ -11,12 +15,16 @@
 - The TypeScript types now accept a DOM element, an array of elements, a jQuery object, or a predicate function in the `match` assertion, such as `expect($el).to.match($other)` or `expect($el).to.match((index, el) => el.id === 'result')`. Cypress already supported these at runtime, but TypeScript reported an error. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
 - The TypeScript types now accept a number, boolean, or `null` as the expected value of the `data` assertion, such as `expect($el).to.have.data('count', 3)`. jQuery parses numeric, boolean, and `null` `data-*` attributes into those types, so a string could never match them, but TypeScript accepted only a string. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
 
+**Dependency Updates:**
+
+- Upgraded `ws` from `8.21.1` to `8.22.0`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
+- Upgraded `shell-quote` from `1.11.0` to `1.12.0`. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
+
 ## 16.2.0
 
 **Features:**
 
 - Added the [`cy.getByRole()`](https://on.cypress.io/getbyrole) query, which finds elements by their ARIA role and, optionally, their accessible name, for example `cy.getByRole('tab', { name: 'Billing' })`. Elements hidden from the accessibility tree are skipped unless you pass `{ hidden: true }`. For a role that HTML has an element for, only that element matches by default, so `cy.getByRole('button')` finds a `<button>` but not a `<div role="button">`. Pass `{ native: false }` to also match elements with a `role` attribute. Like [`cy.get()`](https://on.cypress.io/get), it yields every match and retries until its assertions pass. When nothing matches, the error lists the roles and accessible names on the page. Addressed in [#34937](https://github.com/cypress-io/cypress/pull/34937).
-- Component testing with webpack now supports `webpack-dev-server` 6 when your project provides it, which Angular 22.2 projects using `@angular-devkit/build-angular` do. `webpack-dev-server` 6 requires webpack `5.101.0` or newer, and Cypress reports an error naming both versions when an older webpack is installed. The `webpack-dev-server` bundled with Cypress is still version 5. Addresses [#34259](https://github.com/cypress-io/cypress/issues/34259).
 
 **Bugfixes:**
 
@@ -41,8 +49,6 @@
 
 - Upgraded `shell-quote` from `1.10.0` to `1.11.0` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SHELLQUOTE-20250993) vulnerability reported in security scans. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
 - Upgraded `simple-git` from `3.36.0` to `4.0.2` to address a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335531) vulnerability and two Arbitrary Command Injection vulnerabilities ([SNYK-JS-SIMPLEGIT-20335524](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335524), [SNYK-JS-SIMPLEGIT-20335540](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-20335540)) reported in security scans. This also upgrades its `@simple-git/argv-parser` dependency from `1.1.1` to `2.0.1`, which addresses a [Command Injection](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGITARGVPARSER-20335528) vulnerability reported in security scans. Addressed in [#34960](https://github.com/cypress-io/cypress/pull/34960).
-- Upgraded `ws` from `8.21.1` to `8.22.0`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
-- Upgraded `shell-quote` from `1.11.0` to `1.12.0`. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
 
 ## 16.1.1
 
