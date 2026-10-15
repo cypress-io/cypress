@@ -1375,6 +1375,39 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
 }
 
+namespace ChaiJQueryTests {
+  const $el = Cypress.$('div')
+
+  expect($el).to.have.attr('num', 777) // $ExpectType Assertion
+  expect($el).to.have.attr('role', 'menu') // $ExpectType Assertion
+  expect($el).to.have.attr({ width: '200px' }) // $ExpectError
+
+  expect($el).to.match('div') // $ExpectType Assertion
+  expect($el).to.match($el[0]) // $ExpectType Assertion
+  expect($el).to.match($el) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$<Element>('div')) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$<SVGElement>('svg')) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$(document)) // $ExpectType Assertion
+  expect($el).to.match([$el[0], $el[1]]) // $ExpectType Assertion
+  expect($el).to.match((index, element) => element.id === 'result') // $ExpectType Assertion
+  expect($el).to.match((index: string) => true) // $ExpectError
+  expect($el).to.match(document.querySelectorAll('div')) // $ExpectType Assertion
+  const readonlyElements: ReadonlyArray<HTMLElement> = [$el[0]]
+  expect($el).to.match(readonlyElements) // $ExpectType Assertion
+  expect($el).to.match({ foo: 'bar' }) // $ExpectError
+
+  expect($el).to.have.id(456) // $ExpectType Assertion
+  expect($el).to.have.id({ id: 456 }) // $ExpectError
+  expect($el).to.have.text(123) // $ExpectType Assertion
+  expect($el).to.contain.text(123) // $ExpectType Assertion
+  expect($el).to.have.value(0.72) // $ExpectType Assertion
+  expect($el).to.include.value(12) // $ExpectType Assertion
+  expect($el).to.have.data('number', 222) // $ExpectType Assertion
+  expect($el).to.have.data('enabled', true) // $ExpectType Assertion
+  expect($el).to.have.data('missing', null) // $ExpectType Assertion
+  expect($el).to.have.data('flags', { a: true }) // $ExpectError
+}
+
 namespace CypressOptionsBeforeCallbackTests {
   cy.getCookies().each({ timeout: 4000 }, (cookie) => {})
   cy.getCookies().spread({ timeout: 4000 }, (cookie1, cookie2) => {})
