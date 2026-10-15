@@ -4,7 +4,7 @@ import { Button } from './Button'
 
 describe('Button', () => {
   it('can be orange', () => {
-    mount(<Button name="Orange" orange />)
+    mount(<Button name="Orange" orange clickHandler={cy.stub()} />)
 
     cy.get('.component-button')
     .should('have.class', 'orange')

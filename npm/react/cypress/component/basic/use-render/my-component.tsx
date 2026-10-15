@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function MyComponent () {
+export function MyComponent (_props: { name?: string }) {
   return <div>Hello</div>
 }
 

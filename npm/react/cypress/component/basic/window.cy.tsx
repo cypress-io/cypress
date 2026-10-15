@@ -34,7 +34,7 @@ it('has the same window from the component as from test', () => {
   cy.window()
   .its('location.search')
   // this filename
-  .should('match', /window.cy.tsx$/)
+  .should('match', /window\.cy\.tsx$/)
 
   // the window should have property set by the component
   cy.window().should('have.property', 'component')

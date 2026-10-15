@@ -5,7 +5,7 @@ interface ButtonProps {
   name: string
   orange?: boolean
   wide?: boolean
-  clickHandler?: (name: string) => void
+  clickHandler: (name: string) => void
 }
 
 export function Button ({ name, orange, wide, clickHandler }: ButtonProps) {
@@ -16,7 +16,7 @@ export function Button ({ name, orange, wide, clickHandler }: ButtonProps) {
   ]
 
   function handleClick () {
-    clickHandler?.(name)
+    clickHandler(name)
   }
 
   return (

@@ -5,7 +5,7 @@ import { mount } from '@cypress/react'
 import './tic-tac-toe.css'
 
 // for now need a constructor, otherwise getting "Weak map" key
-const BoardWrap = ({ squares, onPlay = () => {} }: Pick<BoardProps, 'squares'> & Partial<Pick<BoardProps, 'onPlay'>>) => {
+const BoardWrap = ({ squares, onPlay }: Pick<BoardProps, 'squares' | 'onPlay'>) => {
   return (
     <div className="game">
       <div className="game-board">
@@ -39,7 +39,7 @@ it('renders Board with a few squares filled', () => {
 
   squares[0] = 'X'
   squares[1] = 'O'
-  mount(<BoardWrap squares={squares} />)
+  mount(<BoardWrap squares={squares} onPlay={cy.stub()} />)
   cy.get('.board-row')
   .eq(0)
   .find('.square')
