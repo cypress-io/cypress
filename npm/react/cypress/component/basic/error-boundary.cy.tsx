@@ -1,4 +1,4 @@
-import { ErrorBoundary } from './error-boundary.jsx'
+import { ErrorBoundary } from './error-boundary'
 import React from 'react'
 import { mount } from '@cypress/react'
 

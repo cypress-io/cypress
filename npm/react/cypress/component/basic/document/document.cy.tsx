@@ -2,7 +2,11 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 // example from https://github.com/bahmutov/cypress-react-unit-test/issues/52
-const DocumentTest = ({ reportHeight }) => {
+interface DocumentTestProps {
+  reportHeight: (docElementHeight: number, docBodyHeight: number) => void
+}
+
+const DocumentTest = ({ reportHeight }: DocumentTestProps) => {
   return (
     <div>
       <button

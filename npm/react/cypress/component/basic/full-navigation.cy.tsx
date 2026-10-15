@@ -16,7 +16,11 @@ describe('full navigation', () => {
 
     const clicked = cy.stub()
 
-    cy.get('a').invoke('on', 'click', (e) => e.preventDefault() || clicked())
+    cy.get('a').invoke('on', 'click', (e: JQuery.ClickEvent) => {
+      e.preventDefault()
+      clicked()
+    })
+
     cy.get('a').click()
     cy.wrap(clicked).should('have.been.calledOnce')
   })

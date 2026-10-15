@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 
-const Hello = ({ children }) => {
+const Hello = ({ children }: { children?: React.ReactNode }) => {
   return (
     <>
       <div className="hello">Hello there!</div>

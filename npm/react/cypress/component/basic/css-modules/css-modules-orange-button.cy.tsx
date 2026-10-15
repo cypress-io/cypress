@@ -1,13 +1,15 @@
 import React from 'react'
 import { mount } from '@cypress/react'
-import { Button } from './Button.jsx'
+import styles from './Button.module.css'
+import { Button } from './Button'
 
 describe('Button', () => {
-  it('can be orange', () => {
+  it('renders orange styles', () => {
     mount(<Button name="Orange" orange />)
 
-    cy.get('.component-button')
-    .should('have.class', 'orange')
+    cy.get('div > button')
+    .parent()
+    .should('have.class', styles.orange)
     .find('button')
     .should('have.css', 'background-color', 'rgb(245, 146, 62)')
   })

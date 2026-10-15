@@ -1,6 +1,6 @@
 import React from 'react'
 import { mount } from '@cypress/react'
-import { Counter } from './counter.jsx'
+import { Counter } from './counter'
 
 describe('Counter', () => {
   it('counts clicks', () => {

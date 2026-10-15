@@ -2,7 +2,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 
-function Hello (props) {
+function Hello (props: { name?: string }) {
   if (props.name) {
     return <h1>Hello, {props.name}!</h1>
   }
