@@ -1,4 +1,4 @@
-import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
+import { EnvironmentSetupFragmentDoc, EnvironmentSetup_OpenInFinderDocument } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
@@ -129,6 +129,17 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     cy.contains('li', PATH_3).should('be.visible')
     cy.contains('p', DOCS_CTA).should('be.visible')
     cy.contains('a', 'framework definition documentation').should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Framework+Definition+Warning&utm_source=Binary%3A+Launchpad')
+
+    const openInFinder = cy.stub()
+
+    cy.stubMutationResolver(EnvironmentSetup_OpenInFinderDocument, (defineResult, { path }) => {
+      openInFinder(path)
+
+      return defineResult({ openInFinder: true })
+    })
+
+    cy.findByRole('button', { name: PATH_2 }).click()
+    cy.wrap(openInFinder).should('have.been.calledOnceWith', PATH_2)
 
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       onResult: (res) => {

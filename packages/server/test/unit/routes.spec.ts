@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { clearCtx, getCtx, setCtx } from '@packages/data-context'
 import { createCommonRoutes } from '../../lib/routes'
 import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
+import { runnerGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 
 const expressStubs = vi.hoisted(() => {
   return {
@@ -31,7 +32,7 @@ vi.mock('express', async (importActual) => {
 // the first realm's types then refuse to mix with. Nothing here calls it.
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
-    graphQLHTTP: vi.fn(),
+    runnerGraphQLHTTP: vi.fn(),
   }
 })
 
@@ -347,6 +348,24 @@ describe('lib/routes', () => {
       const { router } = setupCommonRoutes()
 
       expect(cyPromptManager.initializeRoutes).toHaveBeenCalledWith(router)
+    })
+
+    describe('graphql mounts', () => {
+      const graphqlMount = (router: ReturnType<typeof makeRouter>, path: string) => {
+        return router.use.mock.calls.find((args) => args[0] === path)
+      }
+
+      it('mounts the runner graphql handler on the namespaced mount', () => {
+        const { router } = setupCommonRoutes()
+
+        expect(graphqlMount(router, '/namespace/graphql/*')).toEqual(['/namespace/graphql/*', runnerGraphQLHTTP])
+      })
+
+      it('mounts the runner graphql handler on the tap mount in open mode', () => {
+        const { router } = setupCommonRoutes()
+
+        expect(graphqlMount(router, '/__cypress/tap/graphql/*')).toEqual(['/__cypress/tap/graphql/*', runnerGraphQLHTTP])
+      })
     })
   })
 
