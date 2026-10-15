@@ -81,6 +81,7 @@ declare namespace Cypress {
   }
 
   interface CypressUtils {
+    addTwentyYears: () => number
     encodeBase64Unicode: (str: string) => string
     getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
     isInstanceOf: (instance: any, constructor: any) => boolean

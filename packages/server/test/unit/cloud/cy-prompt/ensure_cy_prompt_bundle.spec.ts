@@ -26,32 +26,17 @@ describe('ensureCyPromptBundle', () => {
 
     const result = await ensureCyPromptBundle({
       cyPromptUrl: 'https://cdn.cypress.io/cy-prompt/abc.tar',
-      projectId: 'proj-1',
     })
 
-    expect(ensureSignedBundleStub).toHaveBeenCalledOnce()
-    expect(ensureSignedBundleStub).toHaveBeenCalledWith({
+    expect(ensureSignedBundleStub.mock.calls).toStrictEqual([[{
       url: 'https://cdn.cypress.io/cy-prompt/abc.tar',
-      projectId: 'proj-1',
       kind: 'cy-prompt',
-    })
+    }]])
 
     expect(result).toStrictEqual({
       manifest: mockManifest,
       cyPromptPath: mockBundleDir,
     })
-  })
-
-  it('forwards an undefined projectId without injecting one', async () => {
-    ensureSignedBundleStub.mockResolvedValue({ manifest: {}, bundleDir: '/cache/bundles/cy-prompt/x' })
-
-    await ensureCyPromptBundle({ cyPromptUrl: 'https://cdn.cypress.io/cy-prompt/x.tar' })
-
-    expect(ensureSignedBundleStub.mock.calls).toStrictEqual([[{
-      url: 'https://cdn.cypress.io/cy-prompt/x.tar',
-      projectId: undefined,
-      kind: 'cy-prompt',
-    }]])
   })
 
   it('propagates errors from ensureSignedBundle', async () => {

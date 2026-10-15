@@ -269,4 +269,25 @@ describe('streamDownloadVerifyExtract', () => {
       expect(HttpError.isHttpError(cause as any)).toBe(false)
     })
   })
+
+  it('sends the correct bundle request headers', async () => {
+    fetchStub.mockResolvedValue({
+      ok: false,
+      url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',
+      status: 404,
+      statusText: 'Not Found',
+      text: async () => 'not found',
+    })
+
+    await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
+
+    const headers = fetchStub.mock.calls[0][1].headers
+
+    expect(Object.keys(headers).sort()).toEqual([
+      'x-cypress-signature',
+      'x-cypress-version',
+      'x-os-name',
+      'x-route-version',
+    ])
+  })
 })
