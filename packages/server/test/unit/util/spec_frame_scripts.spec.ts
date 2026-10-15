@@ -57,6 +57,28 @@ describe('lib/util/spec_frame_scripts', () => {
       expect(isSpecFrameScript(config, 'cypress/support/e2e.js')).toBe(false)
       expect(isSpecFrameScript(config, 'cypress/e2e/app.cy.js')).toBe(true)
     })
+
+    describe('path case', () => {
+      const platform = process.platform
+
+      afterEach(() => {
+        Object.defineProperty(process, 'platform', { value: platform })
+      })
+
+      it('ignores case on windows', () => {
+        Object.defineProperty(process, 'platform', { value: 'win32' })
+        config.supportFile = supportPath.toUpperCase()
+
+        expect(isSpecFrameScript(config, 'cypress/support/e2e.js')).toBe(true)
+        expect(isSpecFrameScript(config, 'CYPRESS/E2E/APP.CY.JS')).toBe(true)
+      })
+
+      it('respects case elsewhere', () => {
+        Object.defineProperty(process, 'platform', { value: 'linux' })
+
+        expect(isSpecFrameScript(config, 'CYPRESS/E2E/APP.CY.JS')).toBe(false)
+      })
+    })
   })
 
   describe('NotSpecFrameScriptError', () => {

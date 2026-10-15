@@ -6,13 +6,19 @@ import type { Cfg } from '../project-base'
 // project's specs. Anything else was named by someone other than the runner.
 export const isSpecFrameScript = (config: Cfg, filePath: string): boolean => {
   const { projectRoot, supportFile } = config
-  const target = path.resolve(projectRoot, filePath)
+  // Windows paths are case-insensitive, and drive-letter case varies by source (e.g. require.resolve)
+  const resolve = (p: string) => {
+    const resolved = path.resolve(projectRoot, p)
 
-  if (supportFile && path.resolve(projectRoot, supportFile) === target) {
+    return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+  }
+  const target = resolve(filePath)
+
+  if (supportFile && resolve(supportFile) === target) {
     return true
   }
 
-  return getCtx().project.specs.some(({ absolute }) => path.resolve(projectRoot, absolute) === target)
+  return getCtx().project.specs.some(({ absolute }) => resolve(absolute) === target)
 }
 
 export class NotSpecFrameScriptError extends Error {
