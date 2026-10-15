@@ -18,7 +18,6 @@ const STAGING_PREFIX = '.staging-'
 
 interface EnsureSignedBundleOptions {
   url: string
-  projectId?: string
   kind: BundleKind
 }
 
@@ -37,7 +36,6 @@ const shouldFallBackToTmpDir = (err: unknown): err is NodeJS.ErrnoException => {
 
 const ensureSignedBundleIn = async (baseDir: string, {
   url,
-  projectId,
   kind,
 }: EnsureSignedBundleOptions): Promise<EnsureSignedBundleResult> => {
   const hash = parseHashFromBundleUrl(url)
@@ -62,7 +60,7 @@ const ensureSignedBundleIn = async (baseDir: string, {
   if (sweptCount > 0) debug('swept %d orphan staging dir(s) under %s', sweptCount, baseDir)
 
   try {
-    const manifestSig = await streamDownloadVerifyExtract({ url, projectId, staging, kind })
+    const manifestSig = await streamDownloadVerifyExtract({ url, staging, kind })
 
     const manifestPath = path.join(staging, 'manifest.json')
     let manifestText: string

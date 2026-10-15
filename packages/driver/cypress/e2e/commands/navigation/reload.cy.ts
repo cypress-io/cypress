@@ -1,4 +1,6 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
+type FooWindow = Cypress.AUTWindow & { foo?: string }
 
 const { Promise } = Cypress
 
@@ -30,11 +32,11 @@ describe('src/cy/commands/navigation', () => {
 
     it('returns the window object', () => {
       cy
-      .window().then((oldWin) => {
+      .window().then((oldWin: FooWindow) => {
         oldWin.foo = 'bar'
         expect(oldWin.foo).to.eq('bar')
 
-        cy.reload().then((win) => {
+        cy.reload().then((win: FooWindow) => {
           expect(win).not.to.be.undefined
           expect(win.foo).to.be.undefined
 
@@ -137,6 +139,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - invalid argument
         cy.reload(Infinity)
       })
 
@@ -150,6 +153,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - too many arguments
         cy.reload(1, 2, 3)
       })
 
@@ -161,6 +165,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - invalid arguments
         cy.reload(true, 1)
       })
 
@@ -172,16 +177,17 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
+        // @ts-expect-error - invalid argument
         cy.reload(1)
       })
 
       it('fully refreshes page', () => {
         cy
-        .window().then((win) => {
+        .window().then((win: FooWindow) => {
           win.foo = 'foo'
         })
         .reload()
-        .window().then((win) => {
+        .window().then((win: FooWindow) => {
           expect(win.foo).to.be.undefined
         })
       })

@@ -1,4 +1,16 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.2.1
+
+**Bugfixes:**
+
+- Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
+
+**Misc:**
+
+- The TypeScript types now accept a number as the expected value of the `attr`, `id`, `text`, and `value` assertions, including the `contain` and `include` forms of `text` and `value`, such as `expect($el).to.have.attr('tabindex', 0)` or `expect($el).to.have.text(123)`. Cypress already accepted numbers for these assertions at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).
+- The TypeScript types now accept a DOM element, an array of elements, a jQuery object, or a predicate function in the `match` assertion, such as `expect($el).to.match($other)` or `expect($el).to.match((index, el) => el.id === 'result')`. Cypress already supported these at runtime, but TypeScript reported an error. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
+- The TypeScript types now accept a number, boolean, or `null` as the expected value of the `data` assertion, such as `expect($el).to.have.data('count', 3)`. jQuery parses numeric, boolean, and `null` `data-*` attributes into those types, so a string could never match them, but TypeScript accepted only a string. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
+
 ## 16.2.0
 
 **Features:**
@@ -15,6 +27,7 @@
 - [`cy.get()`](https://on.cypress.io/get) now fails right away when you ask for index `0` of a [`cy.intercept()`](https://on.cypress.io/intercept) alias, such as `cy.get('@getUsers.0')`. Previously, Cypress retried until the command timed out before it showed the error, even though retrying could never succeed. Fixed in [#34936](https://github.com/cypress-io/cypress/pull/34936).
 - Fixed an issue where chapter markers in videos recorded during `cypress run` in Chrome-based browsers, Electron, and Firefox were placed later than the tests they label when the browser was slow to show its first frame. In that case the video could also report a longer length than its footage and show a frozen final frame. Fixed in [#35018](https://github.com/cypress-io/cypress/pull/35018).
 - Fixed an issue where an error whose `message` cannot be overwritten — such as the `DOMException` a browser throws for a cross-origin access or a Content Security Policy violation — was reported as `TypeError: setting getter-only property "message"` from inside Cypress, hiding the error that actually failed the test. Fixes [#34818](https://github.com/cypress-io/cypress/issues/34818).
+- Fixed an issue where, after one request missed its browser pre-request, every later request with the same method and URL waited the full 2 second pre-request timeout for the rest of the spec. Fixes [#34966](https://github.com/cypress-io/cypress/issues/34966).
 - Fixed an issue where [`cy.prompt`](https://docs.cypress.io/api/commands/prompt) and Studio could fail to load. Fixed in [#35013](https://github.com/cypress-io/cypress/pull/35013).
 - Calling a query that needs a subject, such as [`.eq()`](https://on.cypress.io/eq), [`.first()`](https://on.cypress.io/first), [`.find()`](https://on.cypress.io/find), or [`.shadow()`](https://on.cypress.io/shadow), directly off `cy` instead of chaining it off a command that yields a subject now fails right away with an error that names the command and explains that it must be chained. Previously, Cypress retried until the command timed out and then reported that the subject was not a DOM element, or, when the query was the first command in a test, failed with `Cannot read properties of undefined (reading 'get')`. Child commands called directly off `cy`, such as `cy.click()`, show the same reworded error. Fixed in [#35024](https://github.com/cypress-io/cypress/pull/35024).
 - Fixed an issue where `cypress run` changed the browser that `cypress open` selects by default for a project to whichever browser the run used, such as the one passed with `--browser`. Fixed in [#34924](https://github.com/cypress-io/cypress/pull/34924).
