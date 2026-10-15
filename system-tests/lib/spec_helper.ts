@@ -78,6 +78,7 @@ sinon.useFakeTimers = function (...args) {
 sinon.restore = function (...args) {
   if (clock) {
     clock.restore()
+    clock = undefined
   }
 
   return restore.apply(sinon, args)
