@@ -16,12 +16,13 @@
         v-for="framework in erroredFrameworks"
         :key="framework.path as string"
       >
-        <ExternalLink
+        <button
           data-cy="errored-framework-path"
-          :href="`file://${framework.path}`"
+          class="text-left text-indigo-500 hocus-link-default"
+          @click="openInFinder(framework.path as string)"
         >
           {{ framework.path }}
-        </ExternalLink>
+        </button>
       </li>
     </ul>
     <i18n-t
@@ -82,6 +83,7 @@ import {
   EnvironmentSetup_ClearTestingTypeDocument,
   EnvironmentSetup_WizardUpdateDocument,
   EnvironmentSetup_DetectionChangeDocument,
+  EnvironmentSetup_OpenInFinderDocument,
 } from '../generated/graphql'
 
 import { useI18n } from '@cy/i18n'
@@ -176,6 +178,18 @@ const frameworks = computed(() => {
 const erroredFrameworks = computed(() => {
   return props.gql.erroredFrameworks.filter((framework) => framework.path)
 })
+
+gql`
+mutation EnvironmentSetup_OpenInFinder($path: String!) {
+  openInFinder(path: $path)
+}
+`
+
+const openInFinderMutation = useMutation(EnvironmentSetup_OpenInFinderDocument)
+
+const openInFinder = (path: string) => {
+  openInFinderMutation.executeMutation({ path })
+}
 
 gql`
 mutation EnvironmentSetup_wizardUpdate($input: WizardUpdateInput!) {

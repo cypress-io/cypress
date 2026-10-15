@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 import { stripIndent } from 'common-tags'
+import { parse } from '@babel/parser'
 import { insertValueInJSString } from '../../src/util/config-file-updater'
 
 const errors = {
@@ -316,6 +317,35 @@ describe('lib/util/config-file-updater', () => {
           }`
 
           expect(output).toEqual(expectedOutput)
+        })
+      })
+
+      describe('escaping', () => {
+        const value = `abc\\\\'+require('child_process').execSync('id'),//\nnext`
+
+        const valueOf = (output: string, key: string) => {
+          const [declaration] = parse(output, { sourceType: 'module' }).program.body as any[]
+
+          return declaration.declaration.properties.find((prop) => prop.key.name === key).value
+        }
+
+        it('inserts a string that cannot end its literal early', async () => {
+          const output = await insertValueInJSString('export default {\n}', { projectId: value }, errors)
+
+          expect(valueOf(output, 'projectId')).toMatchObject({ type: 'StringLiteral', value })
+        })
+
+        it('updates a string that cannot end its literal early', async () => {
+          const output = await insertValueInJSString(`export default {\n  projectId: 'old',\n}`, { projectId: value }, errors)
+
+          expect(valueOf(output, 'projectId')).toMatchObject({ type: 'StringLiteral', value })
+        })
+
+        it('inserts a nested string that cannot end its literal early', async () => {
+          const output = await insertValueInJSString('export default {\n}', { component: { specPattern: value } }, errors)
+          const [specPattern] = valueOf(output, 'component').properties
+
+          expect(specPattern.value).toMatchObject({ type: 'StringLiteral', value })
         })
       })
 
