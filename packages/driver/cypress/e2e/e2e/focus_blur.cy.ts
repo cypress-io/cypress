@@ -38,11 +38,13 @@
   *   - no focus events are queued when programmatically calling element.focus() AND the window is out of focus. the events evaporate into the ether.
   *   - however, if calling window.focus() programmatically prior to programmatic element.focus() calls will fire all events as if the window is natively in focus
 */
+import chaiSubset from 'chai-subset'
+
 const { _ } = Cypress
 
-const chaiSubset = require('chai-subset')
-
 chai.use(chaiSubset)
+
+const top = window.top!
 
 const windowHasFocus = function () {
   if (top.document.hasFocus()) return true
@@ -69,8 +71,8 @@ const requireWindowInFocus = () => {
 it('can intercept blur/focus events', () => {
   // Browser must be in focus
 
-  const focus = cy.spy(window.top.HTMLElement.prototype, 'focus')
-  const blur = cy.spy(window.top.HTMLElement.prototype, 'blur')
+  const focus = cy.spy(top.HTMLElement.prototype, 'focus')
+  const blur = cy.spy(top.HTMLElement.prototype, 'blur')
 
   const handleFocus = cy.stub().as('handleFocus')
   const handleBlur = cy.stub().as('handleBlur')
@@ -135,7 +137,7 @@ it('blur the activeElement when clicking the body', () => {
   cy
   .visit('http://localhost:3500/fixtures/active-elements.html')
   .then(() => {
-    const events = []
+    const events: (Event | undefined)[] = []
 
     expect(cy.getFocused()).to.be.null
 
@@ -232,7 +234,7 @@ it('receives the blur event when the activeElement is programmatically changed',
 })
 
 describe('document.hasFocus()', { retries: 0 }, () => {
-  const autIframeHasFocus = () => Object.getOwnPropertyDescriptor(top.Document.prototype, 'hasFocus').value.call(top.frames[1].document)
+  const autIframeHasFocus = () => Object.getOwnPropertyDescriptor(top.Document.prototype, 'hasFocus')!.value.call(top.frames[1].document)
 
   // https://github.com/cypress-io/cypress/issues/1939
   it('has focus when running headlessly', () => {
@@ -259,7 +261,7 @@ describe('document.hasFocus()', { retries: 0 }, () => {
         return cy.document().invoke('hasFocus').should('be.true')
       }
 
-      cy.document().invoke('hasFocus').should('be.false')
+      return cy.document().invoke('hasFocus').should('be.false')
     })
   })
 
@@ -287,7 +289,7 @@ describe('polyfill programmatic blur events', () => {
   let stubSVGFocus
   let stubSVGBlur
   let stubHasFocus
-  let oldActiveElement = null
+  let oldActiveElement: PropertyDescriptor | undefined
 
   const setActiveElement = (el) => {
     Object.defineProperty(cy.state('document'), 'activeElement', {
@@ -303,16 +305,16 @@ describe('polyfill programmatic blur events', () => {
 
     // simulate window being out of focus by overwriting
     // the focus/blur methods on HTMLElement
-    stubHasFocus = cy.stub(window.top.document, 'hasFocus').returns(false)
+    stubHasFocus = cy.stub(top.document, 'hasFocus').returns(false)
 
-    stubElementFocus = cy.stub(window.top.HTMLElement.prototype, 'focus')
-    stubElementBlur = cy.stub(window.top.HTMLElement.prototype, 'blur')
-    stubSVGFocus = cy.stub(window.top.SVGElement.prototype, 'focus')
-    stubSVGBlur = cy.stub(window.top.SVGElement.prototype, 'blur')
+    stubElementFocus = cy.stub(top.HTMLElement.prototype, 'focus')
+    stubElementBlur = cy.stub(top.HTMLElement.prototype, 'blur')
+    stubSVGFocus = cy.stub(top.SVGElement.prototype, 'focus')
+    stubSVGBlur = cy.stub(top.SVGElement.prototype, 'blur')
   })
 
   afterEach(() => {
-    Object.defineProperty(window.Document.prototype, 'activeElement', oldActiveElement)
+    Object.defineProperty(window.Document.prototype, 'activeElement', oldActiveElement!)
     stubHasFocus.restore()
     stubElementFocus.restore()
     stubElementBlur.restore()
@@ -603,6 +605,8 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
         if (!Cypress.isBrowser({ family: 'firefox' })) {
           return new Promise((resolve) => doc.onselectionchange = resolve)
         }
+
+        return undefined
       })
 
       cy.document().then((doc) => {

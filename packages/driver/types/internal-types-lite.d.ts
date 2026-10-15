@@ -74,6 +74,7 @@ declare namespace Cypress {
      * If `as` is chained to the current command, return the alias name used.
      */
     getAlias: IAliases['getAlias']
+    getFocused: IFocused['getFocused']
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v?: T) => Cypress.Chainable<T>
     queue: CommandQueue
