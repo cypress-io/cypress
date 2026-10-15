@@ -1305,7 +1305,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${superDomain}"`)
         })
       })
 
@@ -1317,7 +1317,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${secondSuperDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${secondSuperDomain}"`)
         })
       })
 
@@ -1329,7 +1329,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${superDomain}"`)
         })
       })
     })
