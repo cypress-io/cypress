@@ -27,8 +27,16 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    graphQLHTTP: vi.fn(),
+    runnerGraphQLHTTP: vi.fn(),
   }
+})
+
+const openExternal = vi.hoisted(() => {
+  return vi.fn()
+})
+
+vi.mock('../../lib/gui/links', () => {
+  return { openExternal }
 })
 
 vi.mock('@packages/data-context/graphql/schema', () => {
@@ -301,6 +309,35 @@ describe('lib/socket', () => {
 
             return done()
           })
+        })
+      })
+    })
+
+    describe('on(external:open)', () => {
+      let onUnhandledRejection: MockInstance
+
+      beforeEach(() => {
+        onUnhandledRejection = vi.fn()
+        process.on('unhandledRejection', onUnhandledRejection as any)
+      })
+
+      afterEach(() => {
+        process.off('unhandledRejection', onUnhandledRejection as any)
+      })
+
+      it('handles a url the OS fails to open', () => {
+        return new Promise<void>((done) => {
+          openExternal.mockImplementationOnce(() => {
+            setImmediate(() => {
+              expect(onUnhandledRejection).not.toHaveBeenCalled()
+
+              done()
+            })
+
+            return Promise.reject(new Error('no handler for https'))
+          })
+
+          client.emit('external:open', 'https://on.cypress.io')
         })
       })
     })
