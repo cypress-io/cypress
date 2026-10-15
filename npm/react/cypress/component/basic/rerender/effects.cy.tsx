@@ -5,7 +5,7 @@ it('should not run unmount effect cleanup when rerendering', () => {
   const layoutEffectCleanup = cy.stub()
   const effectCleanup = cy.stub()
 
-  const Component = ({ input }) => {
+  const Component = ({ input }: { input: string }) => {
     useLayoutEffect(() => {
       return layoutEffectCleanup
     }, [input])
@@ -37,7 +37,7 @@ it('should run unmount effect cleanup when unmounting', () => {
   const layoutEffectCleanup = cy.stub()
   const effectCleanup = cy.stub()
 
-  const Component = ({ input }) => {
+  const Component = ({ input }: { input: string }) => {
     useLayoutEffect(() => {
       return layoutEffectCleanup
     }, [])

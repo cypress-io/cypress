@@ -1,4 +1,4 @@
-import Square from './square3.jsx'
+import Square from './square3'
 import React from 'react'
 import { mount } from '@cypress/react'
 

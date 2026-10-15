@@ -1,4 +1,4 @@
-import ShoppingList from './shopping-list.jsx'
+import ShoppingList from './shopping-list'
 import React from 'react'
 import { mount } from '@cypress/react'
 

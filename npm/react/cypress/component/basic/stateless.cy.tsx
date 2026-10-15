@@ -1,4 +1,4 @@
-import HelloWorld from './stateless.jsx'
+import HelloWorld from './stateless'
 import React from 'react'
 import { mount } from '@cypress/react'
 

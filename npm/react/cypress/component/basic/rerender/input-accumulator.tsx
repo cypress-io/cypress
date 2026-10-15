@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
-export const InputAccumulator = ({ input }) => {
-  const [store, setStore] = useState([])
+export const InputAccumulator = ({ input }: { input: string }) => {
+  const [store, setStore] = useState<string[]>([])
 
   useEffect(() => {
     setStore((prev) => [...prev, input])

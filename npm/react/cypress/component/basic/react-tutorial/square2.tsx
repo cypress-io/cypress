@@ -1,9 +1,9 @@
 import React from 'react'
 
-export default function Square ({ value }) {
+export default function Square ({ value }: { value?: string }) {
   return (
     <button className="square" onClick={() => alert('click')}>
-      {value}
+      {value || null}
     </button>
   )
 }

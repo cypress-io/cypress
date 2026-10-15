@@ -2,11 +2,11 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 it('should properly handle swapping components', () => {
-  const Component1 = ({ input }) => {
+  const Component1 = ({ input }: { input: string }) => {
     return <div>{input}</div>
   }
 
-  const Component2 = ({ differentProp }) => {
+  const Component2 = ({ differentProp }: { differentProp: string }) => {
     return <div style={{ backgroundColor: 'blue' }}>{differentProp}</div>
   }
 
