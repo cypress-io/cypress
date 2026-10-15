@@ -1,6 +1,6 @@
 // a stubbed out version of electron
 // for using in all of our tests :-)
-module.exports = {
+export = {
   shell: {},
   dialog: {},
   ipcMain: {

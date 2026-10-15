@@ -42,7 +42,9 @@
 ## Working Constraints
 
 - Worktrees must use a full `yarn` install in the worktree. Do not symlink `node_modules` or packages back to another checkout.
-- E2E and packaged-binary integration tests do not run in the sandbox. When they are needed, provide the exact commands and ask the user to run them.
+- Packaged-binary integration tests (`system-tests/test-binary`) need Docker and a built binary, so they do not run in the sandbox. When they are needed, provide the exact commands and ask the user to run them.
+- System tests under `system-tests/test` do run in cloud containers once the monorepo is built. Run them yourself rather than handing them off; see [Running system tests](./AGENTS.md#running-system-tests).
+- Keep follow-up work from the same task, such as review fixes and related instruction updates, on that task's branch. Create a separate branch only when the user asks for one.
 - Before committing or pushing, `yarn check-ts`, `yarn lint`, and relevant unit tests must pass locally. CI currently does not block expensive e2e jobs when these fail.
 
 @AGENTS.md

@@ -1,14 +1,16 @@
-const ciProvider = require('@packages/server/lib/util/ci_provider')
-const { commitInfo } = require('@packages/server/lib/util/commit-info')
-const pkg = require('@packages/root')
-const rp = require('@cypress/request-promise')
-const debug = require('debug')('cypress:performance')
+import * as ciProvider from '@packages/server/lib/util/ci_provider'
+import commitInfoUtil from '@packages/server/lib/util/commit-info'
+import pkg from '@packages/root'
+import rp from '@cypress/request-promise'
+import Debug from 'debug'
+
+const debug = Debug('cypress:performance')
 
 const API_URL = process.env.PERF_API_URL || 'http://localhost:2999/track'
 const API_KEY = process.env.PERF_API_KEY
 
 // Store this performance record permanently.
-function track (type, data) {
+export function track (type: string, data: Record<string, unknown>): Promise<unknown> {
   if (!API_KEY) {
     debug('skip tracking "%s", API key is not set', type)
 
@@ -17,7 +19,7 @@ function track (type, data) {
 
   debug('getting commit information')
 
-  return commitInfo()
+  return commitInfoUtil.commitInfo()
   .then((commitInformation) => {
     const ciInformation = ciProvider.commitParams() || {}
     const timestamp = commitInformation.timestamp || ciInformation.timestamp
@@ -55,8 +57,4 @@ function track (type, data) {
   .catch((err) => {
     console.error('Track error for type %s %s', type, err.message)
   })
-}
-
-module.exports = {
-  track,
 }
