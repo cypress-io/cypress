@@ -4097,9 +4097,9 @@ declare namespace Cypress {
     /**
      * Function to run immediately after `setup` creates a session, or after a saved session is
      * restored. The session is invalid if this function throws an exception, contains a failing
-     * Cypress command, returns a Promise that rejects or resolves to `false`, or its last Cypress
-     * command yields `false`. Returning `false` directly, without a Promise, does not invalidate
-     * the session.
+     * Cypress command, returns a Promise that rejects or resolves to `false`, or returns nothing
+     * and its last Cypress command yields `false`. Returning `false` directly, without a Promise,
+     * does not invalidate the session.
      *
      * If validation fails immediately after `setup`, the test will fail.
      * If validation fails after restoring a session, `setup` will re-run.

@@ -577,6 +577,34 @@ describe('cy.session', { retries: 0 }, () => {
         })
       })
 
+      describe('restores saved session when validate returns false synchronously', () => {
+        let sessionId
+        let yielded
+
+        before(() => {
+          setupTestContext()
+          validate.callsFake(() => false)
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup, { validate })
+          .then(() => {
+            resetMocks()
+            validate.callsFake(() => false)
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup, { validate }).then((status) => {
+            yielded = status
+          })
+        })
+
+        it('restores the session without running setup again', () => {
+          expect(setup).to.not.be.called
+          expect(validate).to.be.calledOnce
+          expect(yielded).to.eq('restored')
+        })
+      })
+
       describe('restores saved session with validation flow', () => {
         let sessionId
 
