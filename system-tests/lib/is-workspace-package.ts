@@ -1,7 +1,7 @@
-const path = require('path')
-const fs = require('fs-extra')
+import path from 'path'
+import fs from 'fs-extra'
 
-async function isWorkspacePackage (projectDir, projectsDir) {
+export async function isWorkspacePackage (projectDir: string, projectsDir: string): Promise<boolean> {
   const lockfiles = ['yarn.lock', 'package-lock.json', 'pnpm-lock.yaml', 'bun.lock', 'bun.lockb']
   let currentDir = path.dirname(projectDir)
 
@@ -20,8 +20,4 @@ async function isWorkspacePackage (projectDir, projectsDir) {
   }
 
   return false
-}
-
-module.exports = {
-  isWorkspacePackage,
 }

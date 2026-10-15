@@ -1,22 +1,34 @@
-const chai = require('chai')
+import chai from 'chai'
+import chaiSubset from 'chai-subset'
+import sinonChai from '@cypress/sinon-chai'
+import chaiUuid from 'chai-uuid'
+import chaiAsPromised from 'chai-as-promised'
+import supertest from 'supertest'
+import nock from 'nock'
+import mockery from 'mockery'
+import proxyquire from 'proxyquire'
+import sinon from 'sinon'
+import _ from 'lodash'
+import path from 'path'
+import { cache } from '@packages/server/lib/cache'
 
-chai.use(require('chai-subset'))
+chai
+.use(chaiSubset)
+.use(sinonChai)
+.use(chaiUuid)
+.use(chaiAsPromised)
 
-global.IS_TEST = true
-global.supertest = require('supertest')
-global.nock = require('nock')
-global.expect = chai.expect
-global.mockery = require('mockery')
-global.proxyquire = require('proxyquire')
-global.sinon = require('sinon')
-const _ = require('lodash')
-const path = require('path')
-const cache = require('@packages/server/lib/cache').cache
+const expect = chai.expect
 
-require('chai')
-.use(require('@cypress/sinon-chai'))
-.use(require('chai-uuid'))
-.use(require('chai-as-promised'))
+Object.assign(global, {
+  IS_TEST: true,
+  supertest,
+  nock,
+  expect,
+  mockery,
+  proxyquire,
+  sinon,
+})
 
 if (process.env.UPDATE) {
   throw new Error('You\'re using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
@@ -30,19 +42,21 @@ if (process.env.UPDATE_SNAPSHOTS) {
   throw new Error('You\'re using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
 }
 
-let hasOnly = false;
+let hasOnly = false
 
 // hack for older version of mocha so that
 // snap-shot-it can find suite._onlyTests
-['it', 'describe', 'context'].forEach((prop) => {
-  const backup = global[prop].only
+for (const fn of [it, describe, context]) {
+  const backup = fn.only
 
-  global[prop].only = function (...args) {
-    hasOnly = true
+  Object.assign(fn, {
+    only (...args) {
+      hasOnly = true
 
-    return backup.apply(this, args)
-  }
-})
+      return Reflect.apply(backup, this, args)
+    },
+  })
+}
 
 const originalEnv = process.env
 const env = _.clone(process.env)
@@ -53,17 +67,17 @@ const {
   useFakeTimers,
 } = sinon
 
+let clock: sinon.SinonFakeTimers | undefined
+
 sinon.useFakeTimers = function (...args) {
-  sinon._clock = useFakeTimers.apply(sinon, args)
+  clock = useFakeTimers.apply(sinon, args)
+
+  return clock
 }
 
 sinon.restore = function (...args) {
-  let c
-
-  c = sinon._clock
-
-  if (c) {
-    c.restore()
+  if (clock) {
+    clock.restore()
   }
 
   return restore.apply(sinon, args)
@@ -87,11 +101,9 @@ mockery.registerMock('original-fs', {})
 
 before(function () {
   if (hasOnly) {
-    this.test.parent._onlyTests = [true]
+    this.test.parent['_onlyTests'] = [true]
   }
 })
-
-// appData.ensure()
 
 beforeEach(async function () {
   this.originalEnv = originalEnv
@@ -113,10 +125,9 @@ afterEach(() => {
   process.env = _.clone(env)
 })
 
-module.exports = {
-  expect: global.expect,
-  nock: global.nock,
-  proxyquire: global.proxyquire,
-  sinon: global.sinon,
-  root: global.root,
+export {
+  expect,
+  nock,
+  proxyquire,
+  sinon,
 }
