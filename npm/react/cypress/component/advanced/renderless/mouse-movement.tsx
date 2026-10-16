@@ -1,41 +1,36 @@
 // https://medium.com/@pierrehedkvist/renderless-components-in-react-8d663746314c
-import { useState, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 export default function MouseMovement ({ onMoved }: { onMoved: (moved: boolean) => void }) {
-  const [timer, setTimer] = useState<ReturnType<typeof setTimeout>>()
-
-  function onMouseMove () {
-    console.log('MouseMovement onMouseMove')
-    clearTimeout(timer)
-    const timerNew = setTimeout(timeout, 4000)
-
-    setTimer(timerNew)
-    onMoved(true)
-  }
-
-  function timeout () {
-    console.log('timeout')
-    clearTimeout(timer)
-    onMoved(false)
-  }
+  // a ref, not state, so the listener and cleanup always see the latest timer
+  const timer = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
+    function timeout () {
+      console.log('timeout')
+      onMoved(false)
+    }
+
+    function onMouseMove () {
+      console.log('MouseMovement onMouseMove')
+      clearTimeout(timer.current)
+      timer.current = setTimeout(timeout, 4000)
+      onMoved(true)
+    }
+
     // Anything in here is fired on component mount.
     console.log('MouseMovement componentWillMount')
     document.addEventListener('mousemove', onMouseMove)
-    const timerNew = setTimeout(timeout, 4000)
-
-    setTimer(timerNew)
+    timer.current = setTimeout(timeout, 4000)
 
     return () => {
       // Anything in here is fired on component unmount.
       console.log('MouseMovement componentWillUnmount')
       document.removeEventListener('mousemove', onMouseMove)
-      clearTimeout(timer)
-      setTimer(undefined)
+      clearTimeout(timer.current)
     }
-  }, [])
+  }, [onMoved])
 
   return null
 }

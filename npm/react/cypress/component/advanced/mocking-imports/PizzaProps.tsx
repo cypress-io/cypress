@@ -3,10 +3,16 @@ import { fetchIngredients as defaultFetchIngredients } from './services'
 import type { IngredientsResponse } from './services'
 
 interface PizzaPropsProps {
-  fetchIngredients: () => Promise<IngredientsResponse>
+  fetchIngredients?: () => Promise<IngredientsResponse>
 }
 
-export default function PizzaProps ({ fetchIngredients }: PizzaPropsProps) {
+// React 19 drops defaultProps on function components, so the defaults live
+// in an object the default parameter reads on every render, where tests can stub them
+export const defaultProps = {
+  fetchIngredients: defaultFetchIngredients,
+}
+
+export default function PizzaProps ({ fetchIngredients = defaultProps.fetchIngredients }: PizzaPropsProps) {
   const [ingredients, setIngredients] = React.useState<string[]>([])
 
   const handleCook = () => {
@@ -30,8 +36,4 @@ export default function PizzaProps ({ fetchIngredients }: PizzaPropsProps) {
       )}
     </>
   )
-}
-
-PizzaProps.defaultProps = {
-  fetchIngredients: defaultFetchIngredients,
 }

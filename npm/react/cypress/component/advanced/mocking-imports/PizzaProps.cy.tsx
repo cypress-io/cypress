@@ -1,12 +1,12 @@
 import React from 'react'
-import PizzaProps from './PizzaProps'
+import PizzaProps, { defaultProps } from './PizzaProps'
 import { mount } from '@cypress/react'
 
 const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 
 describe('PizzaProps', () => {
   it('mocks method in the default props', () => {
-    cy.stub(PizzaProps.defaultProps, 'fetchIngredients')
+    cy.stub(defaultProps, 'fetchIngredients')
     .as('fetchMock')
     .resolves({ args: { ingredients } })
 

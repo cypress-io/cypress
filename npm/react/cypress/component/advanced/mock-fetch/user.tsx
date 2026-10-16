@@ -9,16 +9,33 @@ interface UserData {
 
 export default function User (props: { id: string }) {
   const [user, setUser] = useState<UserData | null>(null)
-
-  function fetchUserData (id: string) {
-    fetch(`/${id}`)
-    .then((response) => response.json())
-    .then(setUser)
-  }
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchUserData(props.id)
+    // ignore responses for an id that is no longer current
+    let ignore = false
+
+    fetch(`/${props.id}`)
+    .then((response) => response.json())
+    .then((data: UserData) => {
+      if (!ignore) {
+        setUser(data)
+      }
+    })
+    .catch((err: Error) => {
+      if (!ignore) {
+        setError(err.message)
+      }
+    })
+
+    return () => {
+      ignore = true
+    }
   }, [props.id])
+
+  if (error) {
+    return `failed to load user: ${error}`
+  }
 
   if (!user) {
     return 'loading...'

@@ -15,7 +15,7 @@ describe('Counter with access', () => {
   it('allows access via reference', () => {
     mount(<Counter />)
 
-    // the window.counter was set from the Counter's constructor
+    // the Counter sets window.counter after it renders
     cy.window()
     .should('have.property', 'counter')
     .its('count')

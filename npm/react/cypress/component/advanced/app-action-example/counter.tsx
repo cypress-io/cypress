@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 declare global {
   interface Window {
@@ -12,22 +12,25 @@ declare global {
 export function Counter () {
   const [count, setCount] = useState(0)
 
-  if (window.Cypress) {
-    // if this component is mounted from inside Cypress Test Runner
-    // then expose the reference to this instance
-    // to allow controlling it from tests
-    console.log(
-      'set window.counter to this component in window',
-      window.location.pathname,
-    )
+  // in an effect, not during render, so window.counter only ever holds committed state
+  useEffect(() => {
+    if (window.Cypress) {
+      // if this component is mounted from inside Cypress Test Runner
+      // then expose the reference to this instance
+      // to allow controlling it from tests
+      console.log(
+        'set window.counter to this component in window',
+        window.location.pathname,
+      )
 
-    window.counter = {
-      count,
-      setCount,
+      window.counter = {
+        count,
+        setCount,
+      }
+    } else {
+      console.log('running outside Cypress')
     }
-  } else {
-    console.log('running outside Cypress')
-  }
+  }, [count])
 
   function click () {
     setCount(count + 1)
