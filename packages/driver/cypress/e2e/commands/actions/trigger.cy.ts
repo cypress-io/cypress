@@ -936,21 +936,44 @@ describe('src/cy/commands/actions/trigger', () => {
         return null
       })
 
-      it('throws when eventName is not a string', function (done) {
+      ;[
+        { eventName: 1, passed: '1' },
+        { eventName: ['click'], passed: '[click]' },
+        { eventName: { type: 'click' }, passed: '{type: click}' },
+      ].forEach(({ eventName, passed }) => {
+        it(`throws when eventName is ${passed}`, function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
+
+            assertLogLength(this.logs, 2)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(`\`cy.trigger()\` must be passed a non-empty string as its 1st argument. You passed: \`${passed}\`.`)
+            expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
+
+            done()
+          })
+
+          // @ts-expect-error - testing invalid argument
+          cy.get('button:first').trigger(eventName)
+        })
+      })
+
+      it('throws when eventName is not passed', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
           assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: `1`.')
+          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
 
           done()
         })
 
-        // @ts-expect-error - testing invalid argument
-        cy.get('button:first').trigger(1)
+        // @ts-expect-error - testing missing argument
+        cy.get('button:first').trigger()
       })
 
       it('throws when eventName is an empty string', function (done) {
