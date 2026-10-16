@@ -349,6 +349,8 @@ export class DataContext {
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
+    // lives on DataActions, which survives the reset
+    this.actions.project.launchCount = 0
     // @ts-expect-error - we've already cleaned up, this is for testing only
     this.lifecycleManager = new ProjectLifecycleManager(this)
 
