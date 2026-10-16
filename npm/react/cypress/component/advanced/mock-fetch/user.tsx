@@ -15,6 +15,9 @@ export default function User (props: { id: string }) {
     // ignore responses for an id that is no longer current
     let ignore = false
 
+    setUser(null)
+    setError(null)
+
     fetch(`/${props.id}`)
     .then((response) => response.json())
     .then((data: UserData) => {
