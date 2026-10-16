@@ -137,6 +137,7 @@ type RouteHandler = {
   resSchema?: {
     [K in keyof RecordSchemaVersions]: [K, keyof RecordSchemaVersions[K]]
   }[keyof RecordSchemaVersions]
+  onReqBody?: (body: any) => void
   res?: RequestHandler | object
 }
 
