@@ -19,13 +19,11 @@ export default function MouseMovement ({ onMoved }: { onMoved: (moved: boolean) 
       onMoved(true)
     }
 
-    // Anything in here is fired on component mount.
     console.log('MouseMovement componentWillMount')
     document.addEventListener('mousemove', onMouseMove)
     timer.current = setTimeout(timeout, 4000)
 
     return () => {
-      // Anything in here is fired on component unmount.
       console.log('MouseMovement componentWillUnmount')
       document.removeEventListener('mousemove', onMouseMove)
       clearTimeout(timer.current)

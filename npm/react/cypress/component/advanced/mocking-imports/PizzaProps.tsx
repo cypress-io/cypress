@@ -6,8 +6,7 @@ interface PizzaPropsProps {
   fetchIngredients?: () => Promise<IngredientsResponse>
 }
 
-// React 19 drops defaultProps on function components, so the defaults live
-// in an object the default parameter reads on every render, where tests can stub them
+// React 19 ignores defaultProps on function components, so tests stub this object instead
 export const defaultProps = {
   fetchIngredients: defaultFetchIngredients,
 }
