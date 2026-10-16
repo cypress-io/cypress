@@ -50,7 +50,10 @@ export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
   // if the command has url args, don't format those chars like __ and ~~
-  if (name === 'visit' || name === 'request' || name === 'origin') {
+  // the download message is a file path, where a windows backslash before
+  // a punctuation character in the filename would otherwise be treated as a
+  // markdown escape and dropped from the rendered path
+  if (name === 'visit' || name === 'request' || name === 'origin' || name === 'download') {
     return message
   }
 
