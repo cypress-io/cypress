@@ -14,10 +14,22 @@ export interface LocalSettingsApiShape {
   setPreferences (object: AllowedState): Promise<void>
 }
 
+// Preferences that are written as a complete snapshot rather than a patch. Deep-merging one of
+// these would keep entries the client has since dropped, so nothing could ever be removed.
+const replacedPreferences: ReadonlyArray<keyof AllowedState> = ['specsListTreeExpansion']
+
 // If the value being merged is an array, replace it rather than merging the array items together
-function customizer (objValue: any, srcValue: any) {
-  if (_.isArray(objValue)) {
-    return srcValue
+const makeCustomizer = (target: unknown) => {
+  return (objValue: any, srcValue: any, key: string, object: unknown) => {
+    if (_.isArray(objValue)) {
+      return srcValue
+    }
+
+    // Only a top-level preference is a snapshot, so a nested key that happens to share a name
+    // with one is still merged normally.
+    if (object === target && replacedPreferences.includes(key as keyof AllowedState)) {
+      return srcValue
+    }
   }
 }
 
@@ -29,17 +41,19 @@ export class LocalSettingsActions {
 
     if (type === 'global') {
       // update local data on server
-      _.mergeWith(this.ctx.coreData.localSettings.preferences, toJson, customizer)
+      const localPreferences = this.ctx.coreData.localSettings.preferences
+
+      _.mergeWith(localPreferences, toJson, makeCustomizer(localPreferences))
 
       // persist to global appData - projects/__global__/state.json
       const currentGlobalPreferences = await this.ctx._apis.localSettingsApi.getPreferences()
-      const combinedResult = _.mergeWith(currentGlobalPreferences, toJson, customizer)
+      const combinedResult = _.mergeWith(currentGlobalPreferences, toJson, makeCustomizer(currentGlobalPreferences))
 
       return this.ctx._apis.localSettingsApi.setPreferences(combinedResult)
     }
 
     const currentLocalPreferences = this.ctx._apis.projectApi.getCurrentProjectSavedState()
-    const combinedResult = _.mergeWith(currentLocalPreferences, toJson, customizer)
+    const combinedResult = _.mergeWith(currentLocalPreferences, toJson, makeCustomizer(currentLocalPreferences))
 
     // persist to project appData - for example projects/launchpad/state.json
     return this.ctx._apis.projectApi.setProjectPreferences(combinedResult)
