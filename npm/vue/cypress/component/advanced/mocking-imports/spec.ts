@@ -14,7 +14,7 @@ describe('Mocking ES6 imports', () => {
   })
 
   it('shows mocked greeting', () => {
-    cy.stub(GreetingModule, 'greeting').returns('Cypress').as('greeting')
+    cy.stub(GreetingModule, 'greeting').as('greeting').returns('Cypress')
     mount(Hello)
     cy.contains('Hello, Cypress!')
     // confirm the stub was called

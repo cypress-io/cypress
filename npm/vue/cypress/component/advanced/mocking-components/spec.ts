@@ -32,7 +32,7 @@ describe('Mocking components', () => {
     //
     // use built-in cy.stub method https://on.cypress.io/stub
     // that are reset automatically before every test
-    cy.stub(ParentComponent, 'components', {
+    cy.stub(ParentComponent, 'components').value({
       ChildComponent: {
         template: '<div class="test-child">Test component</div>',
       },

@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import { mount } from '@cypress/vue'
 import { h as createElement } from 'vue'
+import type { Slots, VNode } from 'vue'
 
 describe('Single render function component', () => {
   // the component definition
@@ -119,7 +120,7 @@ describe('Component with slot', () => {
 describe('Component with arguments', () => {
   // the component definition
   const appComponent = {
-    render () {
+    render (this: { elementtype: string, $slots: Slots }): VNode {
       let a = this.elementtype.split(',')
 
       return createElement(
