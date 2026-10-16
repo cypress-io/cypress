@@ -11,6 +11,7 @@ describe('Mocking Axios', () => {
 
   it('mocks axios.get', () => {
     cy.stub(axios, 'get')
+    .as('get')
     .resolves({
       data: [
         {
@@ -19,7 +20,6 @@ describe('Mocking Axios', () => {
         },
       ],
     })
-    .as('get')
 
     mount(<Users />)
     // only the test user should be shown

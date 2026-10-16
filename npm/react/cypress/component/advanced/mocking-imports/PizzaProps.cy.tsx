@@ -7,8 +7,8 @@ const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 describe('PizzaProps', () => {
   it('mocks method in the default props', () => {
     cy.stub(PizzaProps.defaultProps, 'fetchIngredients')
-    .resolves({ args: { ingredients } })
     .as('fetchMock')
+    .resolves({ args: { ingredients } })
 
     mount(<PizzaProps />)
     cy.contains('button', /cook/i).click()

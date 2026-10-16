@@ -5,24 +5,19 @@ import { mount } from '@cypress/react'
 declare global {
   namespace Cypress {
     interface Chainable {
-      state: (key: 'test') => { currentRetry?: () => number }
+      state: (key: 'test') => { currentRetry: () => number }
     }
   }
 }
 
-// you can skip the tests if there is no retries feature
-const describeOrSkip = Cypress.getTestRetries ? describe : describe.skip
-
-describeOrSkip('Test', () => {
+describe('Test', () => {
   const Hello = () => {
     // this is how you can get the current retry number
     // attempt 1: (first test execution) retry = 0
     // attempt 2: (second test execution) retry = 1
     // attempt 3: retry = 2,
     // etc
-    const n = cy.state('test').currentRetry
-      ? cy.state('test').currentRetry()
-      : 0
+    const n = cy.state('test').currentRetry()
 
     return <div>retry {n}</div>
   }

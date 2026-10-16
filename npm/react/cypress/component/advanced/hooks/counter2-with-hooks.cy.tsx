@@ -1,11 +1,11 @@
 import React from 'react'
-import ReactDom from 'react-dom'
+import ReactDom from 'react-dom/client'
 import { mount } from '@cypress/react'
 import Counter2WithHooks from './counter2-with-hooks'
 
 describe('Counter2WithHooks', function () {
   it('changes document title', function () {
-    mount(<Counter2WithHooks />, { React, ReactDom })
+    mount(<Counter2WithHooks />, { ReactDom })
     cy.contains('0')
     cy.document().should('have.property', 'title', 'You clicked 0 times')
 

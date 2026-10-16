@@ -9,7 +9,7 @@ describe('Button component', function () {
   })
 
   it('forwards refs as expected', function () {
-    const ref = React.createRef()
+    const ref = React.createRef<HTMLButtonElement>()
 
     mount(
       <Button className="testing" ref={ref}>
