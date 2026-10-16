@@ -983,7 +983,7 @@ describe('src/cy/commands/actions/trigger', () => {
           assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: ``.')
+          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: `\'\'`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
 
           done()

@@ -3,7 +3,6 @@ import Promise from 'bluebird'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
-import $utils from '../../../cypress/utils'
 import $actionability from '../../actionability'
 
 export const dispatch = (target, appWindow, eventName, options) => {
@@ -96,7 +95,7 @@ export default (Commands, Cypress, cy, state, config) => {
       if (!eventName || !_.isString(eventName)) {
         $errUtils.throwErrByPath('trigger.invalid_argument', {
           onFail: options._log,
-          args: { eventName: $utils.stringifyActual(eventName) },
+          args: { eventName },
         })
       }
 
