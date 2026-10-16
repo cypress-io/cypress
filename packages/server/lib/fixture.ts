@@ -35,10 +35,11 @@ const friendlyJsonParse = function (s) {
 }
 
 export async function get (fixturesFolder: string, filePath: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null | undefined } = {}) {
+  const root = path.resolve(fixturesFolder)
   const p = path.join(fixturesFolder, filePath)
   const fixture = path.basename(p)
 
-  if (!isInsideDir(path.resolve(fixturesFolder), path.resolve(p))) {
+  if (!isInsideDir(root, path.resolve(p))) {
     throw new Error(`Fixture path '${filePath}' must resolve to a file inside the fixtures folder: ${fixturesFolder}`)
   }
 
@@ -61,7 +62,7 @@ export async function get (fixturesFolder: string, filePath: string, options: { 
     const matches = (await glob(pattern, {
       nosort: true,
       nodir: true,
-    })).filter((match) => isInsideDir(path.resolve(fixturesFolder), path.resolve(match)))
+    })).filter((match) => isInsideDir(root, path.resolve(match)))
 
     if (matches.length === 0) {
       const relativePath = path.relative('.', p)
