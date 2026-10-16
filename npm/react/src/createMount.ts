@@ -167,5 +167,5 @@ export const createMount = (defaultOptions: MountOptions) => {
 
 // it is required to unmount component in beforeEach hook in order to provide a clean state inside test
 // because `mount` can be called after some preparation that can side effect unmount
-// @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
+// @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator.cy.tsx
 setupHooks(preMountCleanup)
