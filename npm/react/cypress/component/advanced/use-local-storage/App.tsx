@@ -3,7 +3,7 @@ import * as React from 'react'
 export default function App () {
   const storedCart = localStorage.getItem('cart')
   const [cart, setCart] = React.useState<string[]>(
-    storedCart ? JSON.parse(storedCart) : ['kiwi 🥝'],
+    (storedCart && JSON.parse(storedCart)) || ['kiwi 🥝'],
   )
 
   const addJuice = () => {
