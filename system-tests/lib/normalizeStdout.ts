@@ -189,9 +189,9 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
-  // Firefox/Chrome can emit a transient retry line before the browser connects; strip it when
-  // tests still run (issue_7217 snapshots keep this line when the browser never connects).
-  .replace(/Timed out waiting for the browser to connect\. Retrying\.\.\.\n+(?=  suite 1)/g, '')
+  // Strip browser-connect retries that a later attempt recovered from; issue_7217 snapshots a run
+  // where every attempt fails, so the lines stay when the run aborts.
+  .replace(/(?:\nTimed out waiting for the browser to connect\. Retrying(?: again)?\.\.\.\n)+(?!\nTimed out waiting for the browser to connect|\nThe browser never connected)/g, '')
   // Teardown exceeding its budget is a property of the machine, not the run, so these lines come
   // and go with CI load. The exit code the harness asserts is what matters here. `system-tests.ts`
   // tallies them so the trend stays visible without being able to fail a snapshot.
