@@ -974,7 +974,7 @@
     "packages/driver/src/cy/commands/querying/within.ts": [
       "exports"
     ],
-    "npm/react/cypress/component/basic/use-render/my-component.jsx": [
+    "npm/react/cypress/component/basic/use-render/my-component.tsx": [
       "exports"
     ],
     "packages/driver/src/cypress/command.ts": [

@@ -1,0 +1,39 @@
+import React from 'react'
+import { mount } from '@cypress/react'
+
+// cy.state is internal, so the public types don't declare it
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      state: (key: 'test') => { currentRetry: () => number }
+    }
+  }
+}
+
+describe('Test', () => {
+  const Hello = () => {
+    // this is how you can get the current retry number
+    // attempt 1: (first test execution) retry = 0
+    // attempt 2: (second test execution) retry = 1
+    // attempt 3: retry = 2,
+    // etc
+    const n = cy.state('test').currentRetry()
+
+    return <div>retry {n}</div>
+  }
+
+  it('does not retry', { retries: 0 }, () => {
+    mount(<Hello />)
+    cy.contains('retry 0')
+
+    // now let's fail the test - it won't retry it
+    // enable manually to observe
+    // cy.contains('retry 1')
+  })
+
+  it('retries', { retries: 3 }, () => {
+    mount(<Hello />)
+    // now let's fail the test - it will retry several times and pass
+    cy.contains('retry 3', { timeout: 1500 })
+  })
+})

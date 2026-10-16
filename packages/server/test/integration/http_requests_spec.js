@@ -588,6 +588,13 @@ describe('Routes', () => {
     })
   }
 
+  // The route only preprocesses a project's specs and support file, and these
+  // tests request fixture files outside their project's default specPattern.
+  async function loadProjectWithSpecs (projectRoot, relativeSpecs) {
+    await pollUntilEventsIpcLoaded()
+    ctx.project.setSpecs(relativeSpecs.map((relative) => ({ absolute: path.join(projectRoot, relative), relative })))
+  }
+
   context('GET /__cypress/tests', () => {
     describe('ids with typescript', () => {
       beforeEach(function () {
@@ -599,7 +606,7 @@ describe('Routes', () => {
       })
 
       it('processes foo.js spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/foo.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
@@ -608,7 +615,7 @@ describe('Routes', () => {
       })
 
       it('processes dom.jsx spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/baz.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
         expect(res.statusCode).to.eq(200)
@@ -617,7 +624,7 @@ describe('Routes', () => {
       })
 
       it('processes spec into modern javascript', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/es6.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
 
         expect(res.statusCode).to.eq(200)
@@ -629,12 +636,31 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when the file is missing', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['does/not/exist.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Module not found')
         expect(res.body).to.include('Cypress.action("spec:script:error", {')
+      })
+
+      it('refuses a project file that is not a spec or the support file', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress.config.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('cypress.config.js is not a spec file or the support file of this project.')
+        expect(res.body).not.to.include('module.exports')
+      })
+
+      it('refuses a path that escapes the project', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=../e2e/cypress.config.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('../e2e/cypress.config.js is not a spec file or the support file of this project.')
+        expect(res.body).not.to.include('module.exports')
       })
     })
 
@@ -652,7 +678,7 @@ describe('Routes', () => {
       })
 
       it('processes foo.js spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/foo.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
@@ -661,7 +687,7 @@ describe('Routes', () => {
       })
 
       it('processes dom.jsx spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/baz.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
         expect(res.statusCode).to.eq(200)
@@ -670,7 +696,7 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when the file is missing', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['does/not/exist.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
@@ -692,7 +718,7 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when there\'s a syntax error', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('failures'), ['cypress/e2e/syntax_error.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
 
         expect(res.statusCode).to.eq(200)

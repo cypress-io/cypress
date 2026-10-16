@@ -3,7 +3,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import _ from 'lodash'
 import { getCtx } from '@packages/data-context'
-import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
+import { handleRunnerGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { ForInterceptRegistration } from '@packages/network-interception'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
@@ -676,7 +676,9 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('external:open', (url: string) => {
           debug('received external:open %o', { url })
 
-          return openExternal(url)
+          openExternal(url).catch((err) => {
+            debug('failed to open %s: %o', url, err)
+          })
         })
 
         socket.on('get:user:editor', (cb) => {
@@ -745,7 +747,7 @@ export class SocketBase implements SocketBroadcaster {
 
     this.getIos().forEach((io) => {
       (io?.of('/data-context') as ExtendedSocketIoNamespace).on('connection', (socket: Socket) => {
-        socket.on('graphql:request', handleGraphQLSocketRequest)
+        socket.on('graphql:request', handleRunnerGraphQLSocketRequest)
       })
     })
 

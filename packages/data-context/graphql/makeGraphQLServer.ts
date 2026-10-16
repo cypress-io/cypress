@@ -18,8 +18,9 @@ import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { graphqlSchema } from './schema'
-import { execute, Kind, parse } from 'graphql'
-import type { DefinitionNode, DocumentNode, OperationDefinitionNode, OperationTypeNode } from 'graphql'
+import { runnerMutationRule } from './runnerMutationRule'
+import { execute, Kind, locatedError, parse, specifiedRules, validate } from 'graphql'
+import type { DefinitionNode, DocumentNode, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
 
 const debug = debugLib(`cypress-verbose:graphql:operation`)
 
@@ -159,13 +160,50 @@ interface GraphQLSocketPayload {
  * @param data
  * @param callback
  */
-export async function handleGraphQLSocketRequest (uid: string, payload: string, callback: Function) {
-  try {
-    const operation = JSON.parse(payload) as GraphQLSocketPayload
-    const context = getCtx()
-    const document = parse(operation.query)
+export const handleGraphQLSocketRequest = makeGraphQLSocketHandler([])
 
-    DataContext.addActiveRequest()
+/**
+ * The runner server's socket entry point, which also restricts mutations to
+ * the ones the runner app sends.
+ */
+export const handleRunnerGraphQLSocketRequest = makeGraphQLSocketHandler([runnerMutationRule])
+
+function makeGraphQLSocketHandler (validationRules: readonly ValidationRule[]) {
+  const rules = [...specifiedRules, ...validationRules]
+
+  // The rules are fixed here because socket.io passes every emitted argument to the handler.
+  return (uid: string, payload: string, callback: Function) => executeGraphQLSocketRequest(rules, uid, payload, callback)
+}
+
+async function executeGraphQLSocketRequest (validationRules: readonly ValidationRule[], uid: string, payload: string, callback: Function) {
+  if (typeof callback !== 'function') {
+    return
+  }
+
+  let operation: GraphQLSocketPayload
+  let document: DocumentNode
+  let validationErrors: readonly GraphQLError[]
+
+  try {
+    operation = JSON.parse(payload) as GraphQLSocketPayload
+    document = parse(operation.query)
+    // Validation recurses through fragment spreads, so a long chain can throw.
+    validationErrors = validate(graphqlSchema, document, validationRules)
+  } catch (e) {
+    callback({ data: null, errors: [locatedError(e, undefined)] })
+
+    return
+  }
+
+  if (validationErrors.length) {
+    callback({ data: null, errors: validationErrors })
+
+    return
+  }
+
+  DataContext.addActiveRequest()
+
+  try {
     const result = await execute({
       operationName: operation.operationName,
       variableValues: operation.variables,
@@ -173,7 +211,7 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
       schema: graphqlSchema,
       contextValue: graphqlRequestContext({
         app: 'app',
-        context,
+        context: getCtx(),
         document,
         variables: operation.variables ?? null,
       }),
@@ -181,7 +219,7 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
 
     callback(result)
   } catch (e) {
-    callback({ data: null, errors: [e] })
+    callback({ data: null, errors: [locatedError(e, undefined)] })
   } finally {
     DataContext.finishActiveRequest()
   }
@@ -194,6 +232,7 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
  * @param httpServer The http server we are utilizing for the websocket
  * @param targetRoute Route to target in the server upgrade event
  * @param options.enforceOrigin Defaults to true: reject upgrades whose Origin port does not match the server's listen port. Set to false only when the server receives proxied upgrades whose Origin reflects an upstream host (i.e. the test-runner server) and another allowlist gates inbound connections.
+ * @param options.validationRules Applied to every operation in addition to the specified rules.
  * @returns WebSocket server and graphql-ws dispose — call `dispose()` before destroying the HTTP server.
  */
 export interface GraphqlWsHandle {
@@ -201,8 +240,14 @@ export interface GraphqlWsHandle {
   dispose: () => Promise<void>
 }
 
-export const graphqlWS = (httpServer: Server, targetRoute: string, options: { enforceOrigin?: boolean } = {}): GraphqlWsHandle => {
-  const { enforceOrigin = true } = options
+export interface GraphqlWsOptions {
+  enforceOrigin?: boolean
+  validationRules?: readonly ValidationRule[]
+}
+
+export const graphqlWS = (httpServer: Server, targetRoute: string, options: GraphqlWsOptions = {}): GraphqlWsHandle => {
+  const { enforceOrigin = true, validationRules = [] } = options
+  const rules = [...specifiedRules, ...validationRules]
   const graphqlWs = new WebSocketServer({ noServer: true })
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
@@ -223,6 +268,7 @@ export const graphqlWS = (httpServer: Server, targetRoute: string, options: { en
   const { dispose } = useServer({
     schema: graphqlSchema,
     context: () => getCtx(),
+    validate: (schema, document) => validate(schema, document, rules),
   }, graphqlWs)
 
   return {
@@ -231,51 +277,62 @@ export const graphqlWS = (httpServer: Server, targetRoute: string, options: { en
   }
 }
 
+const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]) => {
+  return graphqlHTTP((req, res, params) => {
+    const context = getCtx()
+    let document: DocumentNode | undefined
+
+    // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
+    try {
+      // @ts-expect-error
+      document = parse(params.query)
+    } catch {
+      // error will be re-thrown in customParseFn below
+    }
+
+    return {
+      schema: graphqlSchema,
+      graphiql: IS_DEVELOPMENT,
+      validationRules,
+      context: params && document ? graphqlRequestContext({
+        req: req as Request,
+        context,
+        document,
+        variables: params.variables,
+      }) : undefined,
+      customParseFn: (source) => {
+        // No need to re-parse if we have a document, otherwise re-parse to throw the error
+        return document ?? parse(source)
+      },
+      customExecuteFn: (args) => {
+        const date = new Date()
+        const prefix = `${args.operationName ?? '(anonymous)'}`
+
+        DataContext.addActiveRequest()
+
+        return Promise.resolve(execute(args)).then((val) => {
+          debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
+
+          return val
+        }).finally(() => {
+          DataContext.finishActiveRequest()
+        })
+      },
+    }
+  })
+}
+
 /**
  * An Express middleware function handler which can be added to
  * routes expected to service a GraphQL request from an HTTP client.
  */
-export const graphQLHTTP = graphqlHTTP((req, res, params) => {
-  const context = getCtx()
-  let document: DocumentNode | undefined
+const graphQLHTTP = makeGraphQLHTTP([])
 
-  // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
-  try {
-    // @ts-expect-error
-    document = parse(params.query)
-  } catch {
-    // error will be re-thrown in customParseFn below
-  }
-
-  return {
-    schema: graphqlSchema,
-    graphiql: IS_DEVELOPMENT,
-    context: params && document ? graphqlRequestContext({
-      req: req as Request,
-      context,
-      document,
-      variables: params.variables,
-    }) : undefined,
-    customParseFn: (source) => {
-      // No need to re-parse if we have a document, otherwise re-parse to throw the error
-      return document ?? parse(source)
-    },
-    customExecuteFn: (args) => {
-      const date = new Date()
-      const prefix = `${args.operationName ?? '(anonymous)'}`
-
-      DataContext.addActiveRequest()
-
-      return Promise.resolve(execute(args)).then((val) => {
-        debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
-
-        return val
-      }).finally(() => {
-        DataContext.finishActiveRequest()
-      })
-    },
-  }
-})
+/**
+ * The runner server's HTTP handler, which also restricts mutations to the ones
+ * the runner app and `cypress tap` send.
+ */
+export const runnerGraphQLHTTP = makeGraphQLHTTP([runnerMutationRule])
 
 interface GraphQLRequestContextOptions {
   app?: 'launchpad' | 'app'
