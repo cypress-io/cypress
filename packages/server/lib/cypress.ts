@@ -100,9 +100,8 @@ export = {
       // like in production and we shouldn't spawn a new
       // process
       if (this.isCurrentlyRunningElectron()) {
-        // if we weren't invoked from the CLI
-        // then display a warning to the user
-        if (!options.invokedFromCli) {
+        // The verify task invokes the binary directly for its internal smoke test.
+        if (!options.invokedFromCli && mode !== 'smokeTest') {
           errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
         }
 
