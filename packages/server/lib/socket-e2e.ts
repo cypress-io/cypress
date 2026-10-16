@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import preprocessor from './plugins/preprocessor'
+import { isSpecFrameScript } from './util/spec_frame_scripts'
 import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
@@ -81,6 +82,13 @@ export class SocketE2E extends SocketBase {
 
     if (specConfig.relative.startsWith('/')) {
       specConfig.relative = specConfig.relative.slice(1)
+    }
+
+    // getFile refuses a non-spec path too, but bail before touching watch state
+    if (!isSpecFrameScript(config, specConfig.relative)) {
+      debug('refusing to watch %o', specConfig.relative)
+
+      return
     }
 
     // bail if we're already watching this exact file

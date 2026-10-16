@@ -46,6 +46,7 @@ import type { FileServer } from './file_server'
 import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerMutationRule } from '@packages/data-context/graphql/runnerMutationRule'
 import * as statusCode from './util/status_code'
 import { getContentType } from './util/headers'
 import stream from 'stream'
@@ -360,7 +361,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
     // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
-    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, { enforceOrigin: false })
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, {
+      enforceOrigin: false,
+      validationRules: [runnerMutationRule],
+    })
 
     // Start the file server first so its port is known before we begin
     // listening for proxied requests on the main server. The primary

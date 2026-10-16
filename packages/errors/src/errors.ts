@@ -912,6 +912,36 @@ export const AllCypressErrors = {
 
       Each entry must supply exactly one of a ${fmt.highlightSecondary(`filePath`)} to a PEM file (relative paths resolve against your project root), an inline ${fmt.highlightSecondary(`pem`)} string, or a base64 SHA-256 ${fmt.highlightSecondary(`spki`)} fingerprint.`
   },
+  CLIENT_CERTIFICATES_CONFLICT: (origin: string, urls: string[]) => {
+    return errTemplate`\
+      Cypress could not apply your ${fmt.highlight(`clientCertificates`)} configuration.
+
+      More than one certificate is configured for ${fmt.highlightSecondary(origin)}:
+
+      ${fmt.listItems(urls)}
+
+      A browser opens one connection per origin and presents a single client certificate on it, before any path is known. Configure one certificate per origin.
+
+      Setting ${fmt.highlightSecondary(`forceHttp1: true`)} routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.`
+  },
+  CLIENT_CERTIFICATES_PATH_SCOPED: (origin: string, urls: string[]) => {
+    return errTemplate`\
+      Cypress could not apply your ${fmt.highlight(`clientCertificates`)} configuration.
+
+      The certificate for ${fmt.highlightSecondary(origin)} is limited to part of that origin:
+
+      ${fmt.listItems(urls)}
+
+      A browser presents a client certificate when it connects to an origin, before any path is known, so Cypress cannot keep it to the configured path. Configure the certificate for the whole origin by removing the path from the URL.
+
+      Setting ${fmt.highlightSecondary(`forceHttp1: true`)} routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.`
+  },
+  CLIENT_CERTIFICATES_NOT_LOADED: (url: string) => {
+    return errTemplate`\
+      Cypress could not load the certificate configured in ${fmt.highlight(`clientCertificates`)} for ${fmt.highlightSecondary(url)}.
+
+      The entry was accepted during validation but no certificate was available for it when the browser launched, so Cypress stopped rather than run without presenting it.`
+  },
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`

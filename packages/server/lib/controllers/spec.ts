@@ -2,6 +2,7 @@ import Debug from 'debug'
 import Promise from 'bluebird'
 import { get as errorsGet } from '../errors'
 import preprocessor from '../plugins/preprocessor'
+import { NotSpecFrameScriptError } from '../util/spec_frame_scripts'
 import type { Cfg } from '../project-base'
 import type { Request, Response } from 'express'
 import type { PreprocessorError } from '@packages/types'
@@ -51,6 +52,13 @@ const specController = {
     .catch({ code: 'ECONNABORTED' }, ignoreECONNABORTED)
     .catch({ code: 'EPIPE' }, ignoreEPIPE)
     .catch((err: PreprocessorError) => {
+      // a non-spec request is not a bundle failure, so don't end the run over it
+      if (err instanceof NotSpecFrameScriptError) {
+        debug('refusing to preprocess %s', spec)
+
+        return res.send(preprocessor.clientSideError(err))
+      }
+
       debug(`preprocessor error for spec '%s': %s`, spec, err.stack)
 
       if (!config.isTextTerminal) {

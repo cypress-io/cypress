@@ -315,7 +315,7 @@ describe('key:press automation command', () => {
 
         const expectedValue = BidiOverrideCodepoints[key] ?? key
 
-        expect(client.inputPerformActions.mock.calls[0][0]).toEqual({
+        expect(client.inputPerformActions.mock.calls[0][0]).toStrictEqual({
           context: autContext,
           actions: [{
             type: 'key',
@@ -377,7 +377,7 @@ describe('key:press automation command', () => {
         it(`dispatches a keydown and keyup action with the value '\\u${value.charCodeAt(0).toString(16).toUpperCase()}' for key '${key}'`, async () => {
           await bidiKeyPress(key, client, autContext, 'idSuffix')
 
-          expect(client.inputPerformActions.mock.calls[0][0]).toEqual({
+          expect(client.inputPerformActions.mock.calls[0][0]).toStrictEqual({
             context: autContext,
             actions: [{
               type: 'key',
@@ -409,7 +409,7 @@ describe('key:press automation command', () => {
       it('dispatches one keydown followed by a keyup event for each codepoint', async () => {
         await bidiKeyPress(key, client, autContext, 'idSuffix')
 
-        expect(client.inputPerformActions.mock.calls[0][0]).toEqual({
+        expect(client.inputPerformActions.mock.calls[0][0]).toStrictEqual({
           context: autContext,
           actions: [{
             type: 'key',

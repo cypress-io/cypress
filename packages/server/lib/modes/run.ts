@@ -313,6 +313,9 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
 
             ffmpegController.writeVideoFrame(data)
           },
+          get startedVideoCapture () {
+            return ffmpegController.startedVideoCapture
+          },
           async restart () {
             await videoRecording.api.useFfmpegVideoController(_ffmpegOpts)
           },

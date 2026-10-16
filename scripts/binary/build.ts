@@ -14,7 +14,7 @@ import { spawn, execSync } from 'child_process'
 import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
-import performanceTracking from '../../system-tests/lib/performance'
+import * as performanceTracking from '../../system-tests/lib/performance'
 import * as electronBuilder from 'electron-builder'
 
 const globAsync = promisify(glob)

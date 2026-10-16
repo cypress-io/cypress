@@ -41,10 +41,18 @@ describe('src/cy/commands/actions/rightclick', () => {
       cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
       cy.getAll('el', 'click').each(shouldNotBeCalled)
 
-      cy.getAll('el', 'pointerdown mousedown pointerup mouseup').each((stub) => {
+      cy.getAll('el', 'pointerdown mousedown').each((stub) => {
         expect(stub.firstCall.args[0]).to.containSubset({
           button: 2,
           buttons: 2,
+          which: 3,
+        })
+      })
+
+      cy.getAll('el', 'pointerup mouseup').each((stub) => {
+        expect(stub.firstCall.args[0]).to.containSubset({
+          button: 2,
+          buttons: 0,
           which: 3,
         })
       })

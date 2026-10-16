@@ -125,6 +125,12 @@ export type BrowserLaunchOpts = {
    */
   trustedCertificateFingerprints?: string[]
   /**
+   * `--host-resolver-rules` entries steering `clientCertificates` origins at the local mTLS
+   * bridge, which performs the handshake the browser cannot. Absent when no client
+   * certificate is configured.
+   */
+  mtlsHostResolverRules?: string
+  /**
    * Whether to drop the persisted service worker and cache storage of the runner's
    * origin and of every http(s) origin holding a service worker registration,
    * ahead of each runner-document navigation on the browser network path — both
