@@ -2100,7 +2100,7 @@ export default {
 
   trigger: {
     invalid_argument: {
-      message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`{{cmd}}\`.`,
+      message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`{{eventName}}\`.`,
       docsUrl: 'https://on.cypress.io/trigger',
     },
     multiple_elements: {

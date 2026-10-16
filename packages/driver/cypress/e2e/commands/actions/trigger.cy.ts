@@ -936,16 +936,37 @@ describe('src/cy/commands/actions/trigger', () => {
         return null
       })
 
-      // TODO: trigger() doesn't throw an error now.
-      it.skip('throws when eventName is not a string', (done) => {
+      it('throws when eventName is not a string', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('`cy.trigger()` can only be called on a single element. Your subject contained 15 elements.')
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 2)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: `1`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
 
           done()
         })
 
-        cy.get('button:first').trigger('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: \'undefined\'.')
+        // @ts-expect-error - testing invalid argument
+        cy.get('button:first').trigger(1)
+      })
+
+      it('throws when eventName is an empty string', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 2)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: ``.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
+
+          done()
+        })
+
+        cy.get('button:first').trigger('')
       })
 
       it('throws when not a dom subject', (done) => {
