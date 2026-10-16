@@ -1,17 +1,18 @@
 /* eslint-disable no-console */
-const _ = require('lodash')
-const path = require('path')
-const Promise = require('bluebird')
-const dedent = require('dedent')
+import _ from 'lodash'
+import path from 'path'
+import dedent from 'dedent'
+import Debug from 'debug'
+import os from 'os'
+import { randomBytes } from 'crypto'
+import { promises as fsPromise } from 'fs'
+import { setTimeout as delay } from 'timers/promises'
 
-const systemTests = require('../lib/system-tests').default
-const { fs } = require('@packages/server/lib/util/fs')
-const { promises: fsPromise } = require('fs')
-const os = require('os')
-
-const Fixtures = require('../lib/fixtures')
-const { assertSchema } = require('../lib/validations/cloudValidations')
-const {
+import systemTests from '../lib/system-tests'
+import { fs } from '@packages/server/lib/util/fs'
+import Fixtures from '../lib/fixtures'
+import { assertSchema } from '../lib/validations/cloudValidations'
+import {
   createRoutes,
   setupStubbedServer,
   enableCaptureProtocol,
@@ -28,11 +29,11 @@ const {
   postRunResponseWithProtocolDisabled,
   routeHandlers,
   enableInvalidProtocolSignature,
-} = require('../lib/serverStub')
-const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
-const { randomBytes } = require('crypto')
-const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR, PROTOCOL_STUB_NO_DB_WRITE } = require('../lib/protocol-stubs/protocolStubResponse')
-const debug = require('debug')('cypress:system-tests:record_spec')
+} from '../lib/serverStub'
+import { expectRunsToHaveCorrectTimings } from '../lib/resultsUtils'
+import { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR, PROTOCOL_STUB_NO_DB_WRITE } from '../lib/protocol-stubs/protocolStubResponse'
+
+const debug = Debug('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
 
@@ -42,7 +43,7 @@ const { instanceId } = postRunInstanceResponse
 describe('e2e record', () => {
   beforeEach(() => {
     // uploads happen too fast to be captured by these tests without tuning these values
-    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = '100'
   })
 
   context('passing', () => {
@@ -392,8 +393,7 @@ describe('e2e record', () => {
         // stagger the 2nd run
         // starting up a bit
         // NOTE: this is probably why this test flakes - despite waiting 3s, sometimes the second instance finishes first
-        Promise
-        .delay(3000)
+        delay(3000)
         .then(() => {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -432,6 +432,7 @@ describe('e2e record', () => {
 
     it('errors and exits when no browser found', function () {
       return systemTests.exec(this, {
+        // @ts-expect-error - deliberately not a known browser name
         browser: 'browserDoesNotExist',
         spec: 'record_pass*',
         snapshot: true,
@@ -1527,7 +1528,7 @@ describe('e2e record', () => {
           configFile: 'cypress-with-project-id.config.js',
           spec: 'a_record.cy.js,b_record.cy.js',
           group: 'foo',
-          ciBuildId: 1,
+          ciBuildId: '1',
           expectedExitCode: 1,
           record: true,
           snapshot: true,
@@ -1551,7 +1552,7 @@ describe('e2e record', () => {
           configFile: 'cypress-with-project-id.config.js',
           spec: 'a_record.cy.js,b_record.cy.js',
           group: 'foo',
-          ciBuildId: 1,
+          ciBuildId: '1',
           expectedExitCode: 1,
           record: true,
           posixExitCodes: true,
@@ -1691,7 +1692,7 @@ describe('e2e record', () => {
 
         putVideo: {
           res (req, res) {
-            return Promise.delay(500)
+            return delay(500)
             .then(() => {
               return res.sendStatus(500)
             })
@@ -2987,23 +2988,28 @@ describe('e2e record', () => {
 describe('capture-protocol api errors', () => {
   beforeEach(() => {
     // uploads happen too fast to be captured by these tests without tuning these values
-    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = '100'
   })
 
   enableCaptureProtocol()
 
   const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER, status = 500, mimeType = 'text/plain', responseBody = '') => {
     let failures = 0
+    const { res: successHandler } = routeHandlers[endpoint]
+
+    if (typeof successHandler !== 'function') {
+      throw new Error(`routeHandlers.${endpoint}.res must be a function to stub errors on it`)
+    }
 
     return setupStubbedServer(createRoutes({
       [endpoint]: {
-        res: (req, res) => {
+        res: (req, res, next) => {
           if (failures < numberOfFailuresBeforeSuccess) {
             failures += 1
             res.set('Content-Type', mimeType)
             res.status(status).send(responseBody)
           } else {
-            routeHandlers[endpoint].res(req, res)
+            successHandler(req, res, next)
           }
         },
       },
