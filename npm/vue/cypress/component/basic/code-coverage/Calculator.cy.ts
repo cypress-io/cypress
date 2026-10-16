@@ -7,8 +7,8 @@ describe.skip('Calculator', () => {
   it('adds two numbers', () => {
     cy.viewport(400, 200)
     mount(Calculator)
-    cy.get('[data-cy=a]').clear().type(23)
-    cy.get('[data-cy=b]').clear().type(19)
+    cy.get('[data-cy=a]').clear().type('23')
+    cy.get('[data-cy=b]').clear().type('19')
     cy.contains('= 42')
 
     cy.log('**check coverage**')
