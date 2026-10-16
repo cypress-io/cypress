@@ -1,4 +1,5 @@
-import { describe, expect, beforeEach, afterEach, it, vi, Mock, MockInstance } from 'vitest'
+import type { Mock, MockInstance } from 'vitest'
+import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import zlib from 'zlib'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
@@ -10,9 +11,20 @@ import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
+import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../lib/http/util/disable-navigation-preload'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))
+}
+
+async function streamToString (stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: Buffer[] = []
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+
+  return Buffer.concat(chunks).toString('utf8')
 }
 
 describe('http/response-middleware', function () {
@@ -51,6 +63,7 @@ describe('http/response-middleware', function () {
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
       'MaybeInjectServiceWorker',
+      'NotifyResponseStreamReceived',
       'CompressBody',
       'SendResponseBodyToClient',
     ])
@@ -198,7 +211,6 @@ describe('http/response-middleware', function () {
     beforeEach(() => {
       headers = { 'header-name': 'header-value' }
       ctx = {
-        onlyRunMiddleware: vi.fn(),
         incomingRes: { headers },
         req: {},
         res: {
@@ -210,26 +222,40 @@ describe('http/response-middleware', function () {
 
     it('sets headers on response and runs minimal subsequent middleware if request is from an extra target', async () => {
       ctx.req.isFromExtraTarget = true
+      let allowedMiddlewareRan = false
+      let skippedMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        AttachPlainTextStreamFn () {
+          allowedMiddlewareRan = true
+          this.next()
+        },
+        OmitProblematicHeaders () {
+          skippedMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
       expect(ctx.res.set).toHaveBeenCalledWith(headers)
 
-      expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith([
-        'AttachPlainTextStreamFn',
-        'PatchExpressSetHeader',
-        'MaybeSendRedirectToClient',
-        'CopyResponseStatusCode',
-        'MaybeEndWithEmptyBody',
-        'CompressBody',
-        'SendResponseBodyToClient',
-      ])
+      expect(allowedMiddlewareRan).toBe(true)
+      expect(skippedMiddlewareRan).toBe(false)
     })
 
     it('runs all subsequent middleware if request is not from an extra target', async () => {
       ctx.req.isFromMainTarget = false
+      let subsequentMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
-      expect(ctx['onlyRunMiddleware']).not.toHaveBeenCalled()
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        OmitProblematicHeaders () {
+          subsequentMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
+      expect(subsequentMiddlewareRan).toBe(true)
     })
   })
 
@@ -2396,14 +2422,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': undefined,
-            'deferSourceMapRewrite': undefined,
             'domainName': 'foobar.com',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': true,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://www.foobar.com:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2420,14 +2443,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': undefined,
-            'deferSourceMapRewrite': undefined,
             'domainName': '127.0.0.1',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': false,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://127.0.0.1:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2450,14 +2470,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': 'fake-nonce',
-            'deferSourceMapRewrite': undefined,
             'domainName': 'foobar.com',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': true,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://www.foobar.com:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2530,12 +2547,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': true,
         'modifyObstructiveThirdPartyCode': true,
         'url': 'http://www.foobar.com:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2545,12 +2559,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': true,
         'modifyObstructiveThirdPartyCode': false,
         'url': 'http://127.0.0.1:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2568,12 +2579,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': false,
         'modifyObstructiveThirdPartyCode': false,
         'url': 'http://www.foobar.com:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2672,7 +2680,84 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
       expect(injectIntoServiceWorkerStub).toHaveBeenCalledOnce()
-      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo')
+
+      // toHaveBeenCalledWith/toEqual treat an `undefined`-valued property as
+      // equivalent to an absent key, so asserting the option key by name that
+      // way would pass even against a differently-named key. toStrictEqual
+      // does not make that elision, so it actually pins the key name.
+      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined }])
+    })
+
+    it('passes the reserved path prefixes when useBrowserNetworkInterception is set on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
+        useBrowserNetworkInterception: true,
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', {
+        disableServiceWorkerNavigationPreload: true,
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
+      }])
+    })
+
+    it('does not pass the reserved path prefixes when useBrowserNetworkInterception is unset on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      expect(injectIntoServiceWorkerStub.mock.calls[0][1]).toStrictEqual({ disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined })
+    })
+
+    it('prepends the navigation preload expression when useBrowserNetworkInterception is set on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        useBrowserNetworkInterception: true,
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo', expect.objectContaining({ disableServiceWorkerNavigationPreload: true }))
+
+      const rewritten = await streamToString(ctx.incomingResStream)
+
+      expect(rewritten).toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
+    })
+
+    it('does not prepend the navigation preload expression when useBrowserNetworkInterception is unset on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      const rewritten = await streamToString(ctx.incomingResStream)
+
+      expect(rewritten).not.toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
     })
 
     function prepareContext (props) {
@@ -2714,8 +2799,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('CompressBody', function () {
-    const { CompressBody } = ResponseMiddleware
+  describe('NotifyResponseStreamReceived and CompressBody', function () {
+    const { CompressBody, NotifyResponseStreamReceived } = ResponseMiddleware
     let ctx
     let responseStreamReceivedStub: Mock
 
@@ -2753,7 +2838,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2797,7 +2882,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2830,7 +2915,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2855,7 +2940,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2890,7 +2975,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',

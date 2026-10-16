@@ -1,0 +1,32 @@
+{
+  "name": "angular-22",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "ng build",
+    "ng": "ng",
+    "start": "ng serve",
+    "test": "ng test",
+    "watch": "ng build --watch --configuration development"
+  },
+  "dependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/compiler": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^22.0.0",
+    "@angular/build": "^22.0.0",
+    "@angular/cli": "^22.0.0",
+    "@angular/compiler-cli": "^22.0.0",
+    "jsdom": "^27.1.0",
+    "typescript": "~6.0.3",
+    "vitest": "^4.0.8"
+  },
+  "projectFixtureDirectory": "angular"
+}

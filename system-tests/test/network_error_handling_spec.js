@@ -241,7 +241,6 @@ describe('e2e network error handling', function () {
     settings: {
       e2e: {
         supportFile: false,
-        allowCypressEnv: false,
         baseUrl: `http://localhost:${PORT}/`,
       },
     },
@@ -395,22 +394,21 @@ describe('e2e network error handling', function () {
           snapshot: true,
           config: {
             baseUrl: `https://localhost:${HTTPS_PORT}`,
+            // the Cypress SNI/MITM server only exists on the HTTP/1 proxy path;
+            // on the browser (CDP) network path the browser reaches the AUT directly (#34351)
+            forceHttp1: true,
           },
         })
         .then(() => {
-          expect(onConnect).to.be.calledTwice
+          // Only count CONNECTs to the test server. The browser may also make
+          // additional requests, and their count is timing-dependent.
+          const connectsToServer = onConnect.getCalls().filter((call) => {
+            return call.args[0].host === 'localhost' && call.args[0].port === HTTPS_PORT
+          })
 
           // 1st request: verifying base url
-          expect(onConnect.firstCall).to.be.calledWithMatch({
-            host: 'localhost',
-            port: HTTPS_PORT,
-          })
-
           // 2nd request: <img> load from spec
-          expect(onConnect.secondCall).to.be.calledWithMatch({
-            host: 'localhost',
-            port: HTTPS_PORT,
-          })
+          expect(connectsToServer).to.have.length(2)
         })
       })
     })

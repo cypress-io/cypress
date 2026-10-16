@@ -92,5 +92,5 @@ interface MinimatchOptions {
 }
 
 declare namespace Minimatch {
-  function minimatch(target: string, pattern: string, options?: MinimatchOptions): boolean
+  function minimatch (target: string, pattern: string, options?: MinimatchOptions): boolean
 }

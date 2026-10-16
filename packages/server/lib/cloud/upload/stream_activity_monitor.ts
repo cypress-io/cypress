@@ -1,5 +1,6 @@
 import Debug from 'debug'
-import { Transform, Readable } from 'stream'
+import type { Readable } from 'stream'
+import { Transform } from 'stream'
 import { StreamStalledError } from './stream_stalled_error'
 const debug = Debug('cypress:server:cloud:stream-activity-monitor')
 const debugVerbose = Debug('cypress-verbose:server:cloud:stream-activity-monitor')

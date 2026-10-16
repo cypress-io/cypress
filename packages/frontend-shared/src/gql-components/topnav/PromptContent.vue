@@ -11,7 +11,6 @@
         <li
           v-for="provider in ciProviders"
           :key="provider.name"
-          class
         >
           <Button
             :href="getUrl(provider.link)"

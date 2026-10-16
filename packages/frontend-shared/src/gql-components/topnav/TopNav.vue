@@ -117,6 +117,12 @@
         data-cy="top-nav-active-browser"
         class="font-medium whitespace-nowrap"
       >{{ props.gql.currentProject?.activeBrowser?.displayName }} {{ props.gql.currentProject?.activeBrowser?.majorVersion }}</span>
+      <Badge
+        v-if="props.gql.currentProject?.activeBrowser?.isDeprecated"
+        :label="t('topNav.deprecated')"
+        status="warning"
+        data-cy="top-nav-active-browser-deprecated-badge"
+      />
     </template>
     <VerticalBrowserListItems
       :gql="props.gql.currentProject"
@@ -209,6 +215,7 @@ import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
+import Badge from '../../components/Badge.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
 
@@ -237,6 +244,7 @@ fragment TopNav on Query {
       id
       displayName
       majorVersion
+      isDeprecated
     }
     ...VerticalBrowserListItems
   }

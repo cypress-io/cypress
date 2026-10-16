@@ -17,7 +17,8 @@ import mimeDb from 'mime-db'
 import type { BidiAutomation } from './bidi_automation'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
-import { getError, CypressError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
+import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import type { RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
@@ -105,6 +106,9 @@ const defaultPreferences = {
   'browser.tabs.warnOnCloseOtherTabs': false,
   // Do not warn when multiple tabs will be opened
   'browser.tabs.warnOnOpen': false,
+
+  // Do not offer to translate the page under test
+  'browser.translations.enable': false,
 
   // Disable the UI tour.
   'browser.uitour.enabled': false,

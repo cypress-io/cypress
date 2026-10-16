@@ -72,7 +72,6 @@ import NoResults from '@cy/components/NoResults.vue'
 import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import ExpandableFileList from './ExpandableFileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
-import { gql } from '@urql/core'
 import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 const props = withDefaults(defineProps<{
@@ -85,14 +84,6 @@ const props = withDefaults(defineProps<{
 })
 
 const { t } = useI18n()
-
-gql`
-fragment FileChooser on FileParts {
-  relative
-  id
-  ...FileListItem
-}
-`
 
 const emits = defineEmits<{
   (eventName: 'update:extensionPattern', value: string)

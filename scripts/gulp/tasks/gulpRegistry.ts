@@ -1,5 +1,4 @@
 import type { ChildProcess } from 'child_process'
-import pDefer from 'p-defer'
 import treeKill from 'tree-kill'
 import gulp from 'gulp'
 import os from 'os'
@@ -41,7 +40,7 @@ export async function exitAndRemoveProcess (child: ChildProcess) {
 
   childProcesses.delete(child)
 
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
 
   exitedPids.add(child.pid)
   treeKill(child.pid, (err) => {

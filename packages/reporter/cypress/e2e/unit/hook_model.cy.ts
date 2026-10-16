@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 
-import CommandModel from '../../../src/commands/command-model'
-import ErrModel from '../../../src/errors/err-model'
+import type CommandModel from '../../../src/commands/command-model'
+import type ErrModel from '../../../src/errors/err-model'
 import Hook from '../../../src/hooks/hook-model'
 
 describe('Hook model', () => {

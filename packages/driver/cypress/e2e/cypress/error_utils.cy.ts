@@ -3,7 +3,8 @@ import { allowTsModuleStubbing } from '../../support/helpers'
 allowTsModuleStubbing()
 
 import $stackUtils from '../../../src/cypress/stack_utils'
-import $errUtils, { CypressError } from '../../../src/cypress/error_utils'
+import type { CypressError } from '../../../src/cypress/error_utils'
+import $errUtils from '../../../src/cypress/error_utils'
 import $errorMessages from '../../../src/cypress/error_messages'
 
 const { sinon } = Cypress
@@ -667,34 +668,6 @@ describe('driver/src/cypress/error_utils', () => {
 
         return true
       })
-    })
-  })
-
-  context('.getUnsupportedPlugin', () => {
-    it('returns unsupported plugin if the error msg is the expected one', () => {
-      const unsupportedPlugin = $errUtils.getUnsupportedPlugin({
-        invocationDetails: {
-          originalFile: 'node_modules/@cypress/code-coverage',
-        },
-        err: {
-          message: 'glob pattern string required',
-        },
-      })
-
-      expect(unsupportedPlugin).to.eq('@cypress/code-coverage')
-    })
-
-    it('returns null if the error msg is not the expected one', () => {
-      const unsupportedPlugin = $errUtils.getUnsupportedPlugin({
-        invocationDetails: {
-          originalFile: 'node_modules/@cypress/code-coverage',
-        },
-        err: {
-          message: 'random error msg',
-        },
-      })
-
-      expect(unsupportedPlugin).to.eq(null)
     })
   })
 

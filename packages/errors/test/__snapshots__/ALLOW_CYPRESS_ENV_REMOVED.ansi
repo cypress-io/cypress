@@ -1,0 +1,8 @@
+[31mThe [33mallowCypressEnv[39m[31m configuration option was removed in Cypress version 16.0.0.[39m
+[31m[39m
+[31m[33mCypress.env()[39m[31m has been removed. Replace [33mCypress.env()[39m[31m calls with [33mcy.env()[39m[31m (for sensitive values) or [33mCypress.expose()[39m[31m (for public configuration).[39m
+[31m[39m
+[31mYou can safely remove [33mallowCypressEnv[39m[31m from your configuration.[39m
+[31m[39m
+[31mLearn more: https://on.cypress.io/cypress-env-migration[39m
+[31m[39m

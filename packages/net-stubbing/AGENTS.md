@@ -20,17 +20,19 @@ yarn workspace @packages/net-stubbing check-ts
 
 - `lib/server/` — Server-side interception logic
   - `index.ts` — Entry point; registers the net-stubbing plugin with the proxy
-  - `route-matching.ts` — Matches incoming requests against registered routes
+  - `middleware/` — The `request`/`response`/`error` middleware the proxy mounts
+  - `handle-intercept-request.ts`, `handle-intercept-response.ts` — Request/response orchestration
   - `intercepted-request.ts` — Represents a request currently being intercepted
   - `driver-events.ts` — Handles events from the driver (browser) to the server
   - `state.ts` — Manages the server-side route and handler state
   - `util.ts`, `types.ts` — Server-specific utilities and types
-- Shared protocol and public API types live in `@packages/network-interception` (public API types are copied to `cypress/types/net-stubbing` at CLI build time)
+- `lib/adapters/` — Implementations of `@packages/network-interception` ports; see [`lib/adapters/README.md`](./lib/adapters/README.md)
+- Route matching, subscription planning, and handler-result merging live in `@packages/network-interception` (`lib/core/`), as do the shared protocol and public API types (public API types are copied to `cypress/types/net-stubbing` at CLI build time)
 
 **Gotchas / Notes**
 
 - Do not build `.js` files manually during development; `@packages/ts` provides require-time transpilation.
-- End-to-end behavioral tests live in `@packages/driver` (`net_stubbing_spec`), not in this package's `test/` directory.
+- End-to-end behavioral tests live in `@packages/driver` (`cypress/e2e/commands/net_stubbing/`), not in this package's `test/` directory.
 - The `lib/server/` entry point is what gets imported by `@packages/server`; the browser side is in `@packages/driver`.
 
 **Integration Points**

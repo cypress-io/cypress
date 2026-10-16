@@ -121,7 +121,7 @@ describe('App: Settings', () => {
       cy.contains('Record key').should('exist')
       cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByTestId('user-avatar-title').click()
-      cy.findByRole('button', { name: 'Log out' }).click()
+      cy.getByRole('button', { name: 'Log out' }).click()
 
       cy.withRetryableCtx((ctx, o) => {
         expect(ctx.actions.auth.logout).to.have.been.calledOnce
@@ -163,8 +163,8 @@ describe('App: Settings', () => {
       cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
-      cy.get('[data-cy="file-match-indicator"]').contains('19 matches')
-      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*.(js|ts|coffee)')
+      cy.get('[data-cy="file-match-indicator"]').contains('13 matches')
+      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*.(js|ts)')
     })
 
     it('shows the Experiments section', () => {
@@ -200,13 +200,6 @@ describe('App: Settings', () => {
           cy.validateExternalLink({
             name: 'after:spec',
             href: 'https://on.cypress.io/after-spec',
-          })
-        })
-
-        cy.get('[data-cy="experiment-experimentalSourceRewriting"]').within(() => {
-          cy.validateExternalLink({
-            name: '#5273',
-            href: 'https://github.com/cypress-io/cypress/issues/5273',
           })
         })
       })
@@ -247,7 +240,7 @@ describe('App: Settings', () => {
 
       cy.get('[data-cy="config-code"]').within(() => {
         cy.get('[data-cy-config="config"]').contains('tests/_fixtures')
-        cy.get('[data-cy-config="config"]').contains('tests/**/*.(js|ts|coffee)')
+        cy.get('[data-cy-config="config"]').contains('tests/**/*.(js|ts)')
         cy.get('[data-cy-config="config"]').contains('tests/_support/spec_helper.js')
         cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
         cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
@@ -268,7 +261,7 @@ describe('App: Settings', () => {
 
       cy.visitApp('/settings')
       cy.findByText('Project settings').click()
-      cy.findByRole('button', { name: 'Edit' }).click()
+      cy.getByRole('button', { name: 'Edit' }).click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
       })
@@ -564,7 +557,7 @@ describe('App: Settings without cloud', () => {
     })
 
     cy.contains('button', 'Connect to Cypress Cloud').click()
-    cy.findByRole('dialog', { name: 'Continue in your browser' }).should('be.visible')
+    cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).should('be.visible')
 
     cy.withCtx((ctx, o) => {
       // validate utmSource

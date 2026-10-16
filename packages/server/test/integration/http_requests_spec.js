@@ -1,6 +1,7 @@
 require('../spec_helper')
 
 const _ = require('lodash')
+const path = require('path')
 let r = require('@cypress/request')
 const rp = require('@cypress/request-promise')
 const compression = require('compression')
@@ -35,6 +36,11 @@ const dedent = require('dedent')
 const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
 
 zlib = Promise.promisifyAll(zlib)
+
+const repoPackageJson = path.resolve(__dirname, '../../../../package.json')
+
+// Express decodes the %2F after routing, so each ../ reaches the handler intact
+const traversalTo = (absolutePath) => `${'..%2F'.repeat(20)}${encodeURIComponent(absolutePath)}`
 
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
@@ -170,6 +176,11 @@ describe('Routes', () => {
                 const automationStub = {
                   use: () => { },
                 }
+
+                // these requests arrive in absolute form, and CONNECT for https,
+                // like a proxied browser — which only happens on the MITM path,
+                // and the server refuses CONNECT until a launch resolves it
+                await this.server.setNetworkMode(false)
 
                 await this.server.startWebsockets(automationStub, config, {})
 
@@ -373,12 +384,47 @@ describe('Routes', () => {
     it('other URLs redirect to clientRoute without a proxy set', function () {
       // test something that isn't the clientRoute
       return this.rp({
-        url: `${this.proxy}/__cypress/xhrs/foo`,
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
         proxy: null,
       })
       .then((res) => {
         expect(res.statusCode).to.eq(302)
 
+        expect(res.headers['location']).to.eq('/__/')
+      })
+    })
+
+    it('internal loopback header bypasses forceProxy redirect without a proxy set', function () {
+      // serve-internal-routes hits Express as a path-only request; without the
+      // trusted token _forceProxyMiddleware would 302 to clientRoute.
+      const { cypressInternalLoopbackToken } = require('../../lib/adapters/internal-routes')
+
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': '1',
+          'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.headers['location']).to.be.undefined
+      })
+    })
+
+    it('spoofed loopback header without the process token does not bypass forceProxy', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': 'https://evil.example/__/',
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(302)
         expect(res.headers['location']).to.eq('/__/')
       })
     })
@@ -392,6 +438,63 @@ describe('Routes', () => {
 
           expect(res.body).to.match(/window.__Cypress__ = true/)
         })
+      })
+    })
+  })
+
+  context('on the browser (CDP) network path', () => {
+    beforeEach(async function () {
+      await this.setup({ projectName: 'foobarbaz' })
+
+      // the browser (CDP) network path is claimed by the runtime that serves it, so installing one
+      // against a stub CRI client is what puts the server on that path
+      await this.server.createCdpFetchNetworkRuntime({
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      })
+    })
+
+    it('does not redirect non-proxied traffic to clientRoute', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).not.to.eq(302)
+        expect(res.headers.location).to.be.undefined
+      })
+    })
+
+    it('serves the runner app from clientRoute instead of the Whoops page', function () {
+      return this.rp({
+        url: `${this.proxy}/__`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).not.to.match(/This browser was not launched through Cypress\./)
+        expect(res.body).to.match(/window.__Cypress__ = true/)
+      })
+    })
+  })
+
+  context('GET /__cypress/iframes/*', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('does not let the spec path close the inline script', function () {
+      const specPath = 'x</script><script>window.injected=1</script>.cy.js'
+
+      return this.rp(`http://localhost:8443/__cypress/iframes/${encodeURIComponent(specPath)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).not.to.include('<script>window.injected')
+
+        const scripts = JSON.parse(res.body.match(/window\.Cypress\.onSpecWindow\(window, (.+)\);/)[1])
+
+        expect(_.map(scripts, 'relative')).to.include(specPath)
       })
     })
   })
@@ -416,6 +519,39 @@ describe('Routes', () => {
         expect(res.statusCode).to.eq(200)
 
         expect(res.body).to.match(/\.reporter/)
+      })
+    })
+
+    it('refuses a path that escapes the runner dist', function () {
+      return this.rp(`http://localhost:8443/__cypress/runner/${traversalTo(repoPackageJson)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(403)
+      })
+    })
+  })
+
+  context('GET /__cypress/assets/*', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('refuses a path that escapes the app dist', function () {
+      return this.rp(`http://localhost:8443/__cypress/assets/${traversalTo(repoPackageJson)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(403)
+      })
+    })
+  })
+
+  context('GET /__cypress/bundled/*', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('refuses a path that escapes the bundles folder', function () {
+      return this.rp(`http://localhost:8443/__cypress/bundled/${traversalTo(repoPackageJson)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(403)
       })
     })
   })
@@ -472,6 +608,13 @@ describe('Routes', () => {
     })
   }
 
+  // The route only preprocesses a project's specs and support file, and these
+  // tests request fixture files outside their project's default specPattern.
+  async function loadProjectWithSpecs (projectRoot, relativeSpecs) {
+    await pollUntilEventsIpcLoaded()
+    ctx.project.setSpecs(relativeSpecs.map((relative) => ({ absolute: path.join(projectRoot, relative), relative })))
+  }
+
   context('GET /__cypress/tests', () => {
     describe('ids with typescript', () => {
       beforeEach(function () {
@@ -482,17 +625,17 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', async function () {
-        await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+      it('processes foo.js spec', async function () {
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/foo.js'])
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
-        expect(res.body).to.include('expect("foo.coffee")')
+        expect(res.body).to.include('foo.js')
       })
 
       it('processes dom.jsx spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/baz.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
         expect(res.statusCode).to.eq(200)
@@ -501,7 +644,7 @@ describe('Routes', () => {
       })
 
       it('processes spec into modern javascript', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/es6.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
 
         expect(res.statusCode).to.eq(200)
@@ -513,12 +656,31 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when the file is missing', async function () {
-        await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['does/not/exist.js'])
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Module not found')
         expect(res.body).to.include('Cypress.action("spec:script:error", {')
+      })
+
+      it('refuses a project file that is not a spec or the support file', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress.config.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('cypress.config.js is not a spec file or the support file of this project.')
+        expect(res.body).not.to.include('module.exports')
+      })
+
+      it('refuses a path that escapes the project', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=../e2e/cypress.config.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('../e2e/cypress.config.js is not a spec file or the support file of this project.')
+        expect(res.body).not.to.include('module.exports')
       })
     })
 
@@ -535,17 +697,17 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', async function () {
-        await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+      it('processes foo.js spec', async function () {
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/foo.js'])
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
-        expect(res.body).to.include('expect("foo.coffee")')
+        expect(res.body).to.include('foo.js')
       })
 
       it('processes dom.jsx spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/baz.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
         expect(res.statusCode).to.eq(200)
@@ -554,8 +716,8 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when the file is missing', async function () {
-        await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['does/not/exist.js'])
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Cypress.action("spec:script:error", {')
@@ -576,7 +738,7 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when there\'s a syntax error', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('failures'), ['cypress/e2e/syntax_error.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
 
         expect(res.statusCode).to.eq(200)
@@ -617,334 +779,6 @@ describe('Routes', () => {
       })
     })
   })
-
-  context('ALL /__cypress/xhrs/*', () => {
-    beforeEach(function () {
-      return this.setup()
-    })
-
-    describe('delay', () => {
-      it('can set delay to 10ms', function () {
-        const delay = sinon.spy(Promise, 'delay')
-
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          headers: {
-            'x-cypress-delay': '10',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(delay).to.be.calledWith(10)
-        })
-      })
-
-      it('does not call Promise.delay when no delay', function () {
-        const delay = sinon.spy(Promise, 'delay')
-
-        return this.rp('http://localhost:2020/__cypress/xhrs/users/1')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(delay).not.to.be.called
-        })
-      })
-    })
-
-    describe('status', () => {
-      it('can set status', function () {
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          headers: {
-            'x-cypress-status': '401',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(401)
-        })
-      })
-    })
-
-    describe('headers', () => {
-      it('can set headers', function () {
-        const headers = JSON.stringify({
-          'x-token': '123',
-          'content-type': 'text/plain',
-        })
-
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          headers: {
-            'x-cypress-headers': headers,
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-type']).to.match(/text\/plain/)
-
-          expect(res.headers['x-token']).to.eq('123')
-        })
-      })
-
-      it('sets headers from response type', function () {
-        const headers = JSON.stringify({
-          'x-token': '123',
-        })
-
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          json: true,
-          headers: {
-            'x-cypress-headers': headers,
-            'x-cypress-response': JSON.stringify({ foo: 'bar' }),
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-type']).to.match(/application\/json/)
-          expect(res.headers['x-token']).to.eq('123')
-
-          expect(res.body).to.deep.eq({ foo: 'bar' })
-        })
-      })
-    })
-
-    describe('response', () => {
-      it('sets response to json', function () {
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          json: true,
-          headers: {
-            'x-cypress-response': JSON.stringify([1, 2, 3]),
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-type']).to.match(/application\/json/)
-
-          expect(res.body).to.deep.eq([1, 2, 3])
-        })
-      })
-
-      it('sets response to text/html', function () {
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          headers: {
-            'x-cypress-response': '<html>foo</html>',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-type']).to.match(/text\/html/)
-
-          expect(res.body).to.eq('<html>foo</html>')
-        })
-      })
-
-      it('sets response to text/plain', function () {
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          headers: {
-            'x-cypress-response': 'foobarbaz',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-type']).to.match(/text\/plain/)
-
-          expect(res.body).to.eq('foobarbaz')
-        })
-      })
-
-      it('sets response to text/plain on empty response', function () {
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          headers: {
-            'x-cypress-response': '',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-type']).to.match(/text\/plain/)
-
-          expect(res.body).to.eq('')
-        })
-      })
-
-      it('decodes responses', function () {
-        const response = encodeURI(JSON.stringify({
-          'test': 'We’ll',
-        }))
-
-        return this.rp({
-          url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          json: true,
-          headers: {
-            'x-cypress-response': response,
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.deep.eq({ test: 'We’ll' })
-        })
-      })
-
-      context('fixture', () => {
-        beforeEach(function () {
-          Fixtures.scaffold('todos')
-
-          return this.setup({
-            projectRoot: Fixtures.projectPath('todos'),
-            config: {
-              specPattern: 'tests/**/*',
-              supportFile: false,
-              fixturesFolder: 'tests/_fixtures',
-            },
-          })
-        })
-
-        it('returns fixture contents', function () {
-          return this.rp({
-            url: 'http://localhost:2020/__cypress/xhrs/bar',
-            json: true,
-            headers: {
-              'x-cypress-response': 'fixture:foo',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.headers['content-type']).to.match(/application\/json/)
-
-            expect(res.body).to.deep.eq([{ json: true }])
-          })
-        })
-
-        it('returns __error on fixture errors', function () {
-          return this.rp({
-            url: 'http://localhost:2020/__cypress/xhrs/bar',
-            json: true,
-            headers: {
-              'x-cypress-response': 'fixture:bad_json',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(400)
-            expect(res.headers['content-type']).to.match(/application\/json/)
-
-            expect(res.body.__error).to.include('\'bad_json\' is not valid JSON.')
-          })
-        })
-
-        it('can change the fixture encoding', function () {
-          return fs.readFileAsync(Fixtures.projectPath('todos/tests/_fixtures/images/flower.png'), 'binary')
-          .then((bin) => {
-            return this.rp({
-              url: 'http://localhost:2020/__cypress/xhrs/bar',
-              headers: {
-                'x-cypress-response': 'fixture:images/flower.png,binary',
-                'x-cypress-headers': JSON.stringify({
-                  'content-type': 'binary/octet-stream',
-                }),
-              },
-            })
-            .then((res) => {
-              expect(res.statusCode).to.eq(200)
-              expect(res.headers['content-type']).to.include('binary/octet-stream')
-
-              expect(res.headers['content-length']).to.eq(`${bin.length}`)
-            })
-          })
-        })
-      })
-
-      context('PUT', () => {
-        it('can issue PUT requests', function () {
-          return this.rp({
-            method: 'put',
-            url: 'http://localhost:2020/__cypress/xhrs/users/1',
-            json: true,
-            body: {
-              name: 'brian',
-            },
-            headers: {
-              'x-cypress-response': JSON.stringify({ id: 123, name: 'brian' }),
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.headers['content-type']).to.match(/application\/json/)
-
-            expect(res.body).to.deep.eq({ id: 123, name: 'brian' })
-          })
-        })
-      })
-
-      context('POST', () => {
-        it('can issue POST requests', function () {
-          return this.rp({
-            method: 'post',
-            url: 'http://localhost:2020/__cypress/xhrs/users/1',
-            json: true,
-            body: {
-              name: 'brian',
-            },
-            headers: {
-              'x-cypress-response': JSON.stringify({ id: 123, name: 'brian' }),
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.headers['content-type']).to.match(/application\/json/)
-
-            expect(res.body).to.deep.eq({ id: 123, name: 'brian' })
-          })
-        })
-      })
-
-      context('HEAD', () => {
-        it('can issue PUT requests', function () {
-          return this.rp({
-            method: 'head',
-            url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            expect(res.headers['content-type']).to.match(/text\/plain/)
-          })
-        })
-      })
-
-      context('DELETE', () => {
-        it('can issue DELETE requests', function () {
-          return this.rp({
-            method: 'delete',
-            url: 'http://localhost:2020/__cypress/xhrs/users/1',
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            expect(res.headers['content-type']).to.match(/text\/plain/)
-          })
-        })
-      })
-    })
-  })
-
-  // describe "maximum header size", ->
-  //   ## https://github.com/cypress-io/cypress/issues/76
-  //   it "does not bomb on huge headers", ->
-  //     json = Fixtures.get("server/really_big_json.json")
-
-  //     supertest(@srv)
-  //       .get("/__cypress/xhrs/users")
-  //       .set("x-cypress-response", json)
-  //       .set("x-cypress-response-2", json)
-  //       .expect(200)
-  //       .expect("Content-Type", /application\/json/)
-  //       .expect(JSON.parse(json))
 
   context('GET *', () => {
     context('basic request', () => {
@@ -3470,7 +3304,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include(`document.domain = \'${superdomain}\'`)
+            expect(res.body).to.include(`document.domain = "${superdomain}"`)
           })
         })
 
@@ -3511,7 +3345,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foobar.com\'; </script></head><body>https server</body></html>')
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "foobar.com"; </script></head><body>https server</body></html>')
             })
           })
         })
@@ -3536,7 +3370,7 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script></head></html>')
+            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "cypress.io"; </script></head></html>')
           })
         })
 
@@ -3585,7 +3419,7 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = "foobar.com";`)
           })
         })
 
@@ -3705,7 +3539,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "foo.com"; </script></head></html>')
             })
           })
         })
@@ -4277,7 +4111,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'localhost\';')
+            expect(res.body).to.include('document.domain = "localhost";')
           })
         })
 
@@ -4293,7 +4127,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'localhost\';')
+            expect(res.body).to.include('document.domain = "localhost";')
           })
         })
 
@@ -4308,7 +4142,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(301)
 
-            expect(res.body).not.to.include('document.domain = \'localhost\';')
+            expect(res.body).not.to.include('document.domain = "localhost";')
           })
         })
 

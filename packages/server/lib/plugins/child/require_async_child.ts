@@ -1,7 +1,6 @@
 process.title = 'Cypress: Config Manager'
 
 import os from 'os'
-import pDefer from 'p-defer'
 import Debug from 'debug'
 import { telemetry, OTLPTraceExporterIpc, decodeTelemetryContext } from '@packages/telemetry'
 import minimist from 'minimist'
@@ -52,12 +51,15 @@ const ipc = util.wrapIpc(process as unknown as util.WrappedIpcProcess)
 exporter.attachIPC(ipc)
 
 let disconnection: Promise<void> | null = null
-const willDisconnect = pDefer<void>()
+let resolveWillDisconnect!: () => void
+const willDisconnect = new Promise<void>((resolve) => {
+  resolveWillDisconnect = resolve
+})
 
 process.on('disconnect', async () => {
   try {
     debug('received disconnect event')
-    willDisconnect.resolve()
+    resolveWillDisconnect()
     await Promise.resolve() // allow for diconnect teardown to complete, if in process
   } finally {
     process.exit()
@@ -81,14 +83,14 @@ ipc.on('main:process:will:disconnect', async () => {
 
   debug('sending main:process:will:disconnect:ack')
   ipc.send('main:process:will:disconnect:ack')
-  willDisconnect.resolve()
+  resolveWillDisconnect()
 })
 
 ;['SIGINT', 'SIGTERM'].forEach((signal) => {
   process.on(signal, async () => {
     debug('received signal', signal)
     await Promise.race([
-      willDisconnect.promise,
+      willDisconnect,
       new Promise<void>((resolve) => {
         setTimeout(() => {
           debug('timeout waiting for main:process:will:disconnect signal')

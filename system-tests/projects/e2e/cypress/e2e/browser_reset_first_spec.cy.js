@@ -22,17 +22,17 @@ const indexedDB = (win) => {
     const DBOpenRequest = win.indexedDB.open('toDoList', 1)
 
     DBOpenRequest.onupgradeneeded = (e) => {
-      console.log('on upgrade needed')
-      const db = e.target.result
+      e.target.result.createObjectStore('toDoList')
+    }
 
-      try {
-        db.createObjectStore('toDoList')
-      } catch (error) {
-        console.log(error)
-      }
-
+    // close the connection so it can't block the browser state reset
+    // from deleting the database
+    DBOpenRequest.onsuccess = (e) => {
+      e.target.result.close()
       resolve(win)
     }
+
+    DBOpenRequest.onerror = () => reject(DBOpenRequest.error)
   })
 }
 

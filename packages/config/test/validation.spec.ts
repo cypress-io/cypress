@@ -69,6 +69,88 @@ describe('config/src/validation', () => {
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot('invalid url')
     })
+
+    it('reports the correct certificate index for an absolute CA filepath', () => {
+      const result = validation.isValidClientCertificatesSet(mockKey, [
+        { url: 'https://a.com', certs: [], ca: ['relative/ca.pem'] },
+        { url: 'https://b.com', certs: [], ca: ['/absolute/ca.pem'] },
+      ])
+
+      expect(result).not.toBe(true)
+      expect((result as any).key).toEqual('clientCertificates[1].ca[0]')
+    })
+  })
+
+  describe('.isValidTrustedCertificates', () => {
+    const validSpki = 'FATqPodQyOdF/d9ZiS7za/C4uyu1X3a+xiWhG3DF0RY='
+
+    it('accepts an empty array', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [])).toBe(true)
+    })
+
+    it('accepts a filePath entry with a relative path', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ filePath: 'certs/leaf.pem' }])).toBe(true)
+    })
+
+    it('accepts a filePath entry with an absolute path', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ filePath: '/etc/certs/leaf.pem' }])).toBe(true)
+    })
+
+    it('accepts a pem entry', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ pem: '-----BEGIN CERTIFICATE-----' }])).toBe(true)
+    })
+
+    it('accepts a well-formed spki entry', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ spki: validSpki }])).toBe(true)
+    })
+
+    it('rejects a non-array value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, { filePath: 'leaf.pem' })
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a non-object entry', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, ['leaf.pem'])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with zero keys', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{}])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with more than one key', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: 'leaf.pem', pem: 'x' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with an unknown key', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ url: 'https://a.com' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an empty string value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: '' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a non-string value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ pem: 123 }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a malformed spki', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ spki: 'not-a-fingerprint' }])
+
+      expect(result).not.toBe(true)
+    })
   })
 
   describe('.isValidBrowser', () => {
@@ -302,6 +384,20 @@ describe('config/src/validation', () => {
 
           expect(result).not.toBe(true)
           expect(result).toMatchSnapshot()
+        })
+
+        it('detect-flake-and-pass-on-threshold: missing passesRequired reports the passesRequired value', () => {
+          const result = validation.isValidRetriesConfig(mockKey, {
+            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+            experimentalOptions: {
+              maxRetries: 2,
+              stopIfAnyPassed: true,
+            },
+          })
+
+          expect(result).not.toBe(true)
+          expect((result as any).key).toEqual('mockConfigKey.experimentalOptions.passesRequired')
+          expect((result as any).value).toBeUndefined()
         })
 
         ;['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold'].forEach((strategy) => {
@@ -544,8 +640,14 @@ describe('config/src/validation', () => {
       expect(result).toBe(true)
     })
 
-    it('returns error message when value is a not number or false', () => {
+    it('returns true for value=null', () => {
       const result = validation.isNumberOrFalse(mockKey, null)
+
+      expect(result).toBe(true)
+    })
+
+    it('returns error message when value is a not number or false', () => {
+      const result = validation.isNumberOrFalse(mockKey, 'string')
 
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot()

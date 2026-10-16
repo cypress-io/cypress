@@ -1,36 +1,38 @@
 # @cypress/puppeteer [beta]
 
-Utilize [Puppeteer's browser API](https://pptr.dev/api) within Cypress with a single command.
+Use [Puppeteer's browser API](https://pptr.dev/api) from your Cypress tests with a single command.
 
-> This plugin is in public beta, so we'd love to get your feedback to improve it. Please leave any feedback you have in [this discussion](https://github.com/cypress-io/cypress/discussions/28410).
+> This plugin is in public beta, and we'd love your feedback to help improve it. Please share it in [this discussion](https://github.com/cypress-io/cypress/discussions/28410).
 
-# Table of Contents
+## Table of Contents
 
 - [Installation](#installation)
 - [Compatibility](#compatibility)
+- [How it works](#how-it-works)
 - [Usage](#usage)
 - [API](#api)
 - [Examples](#examples)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [Changelog](./CHANGELOG.md)
 
-# Installation
+## Installation
 
-## npm
+With npm:
 
 ```sh
 npm install --save-dev @cypress/puppeteer
 ```
 
-## yarn
+With yarn:
 
 ```sh
 yarn add --dev @cypress/puppeteer
 ```
 
-## With TypeScript
+### TypeScript
 
-Add the following in `tsconfig.json`:
+To get types for `cy.puppeteer()`, add the support types to your `tsconfig.json`:
 
 ```json
 {
@@ -40,23 +42,38 @@ Add the following in `tsconfig.json`:
 }
 ```
 
+The `setup` and `retry` functions ship with their own type definitions, so no extra configuration is needed for your Cypress config file.
+
 ## Compatibility
 
-Before using `@cypress/puppeteer`, ensure the following requirements are met:
+- **Cypress 13.6.0 or later.** The plugin relies on the `after:browser:launch` event, which was added in 13.6.0.
+- **Chromium-family browsers only**, such as Electron, Chrome for Testing, Chromium, and Edge. Calling `cy.puppeteer()` in Firefox or WebKit fails with an error.
+- **Google Chrome 137 and later is not supported in headed mode** (`cypress open` or `cypress run --headed`). Chrome removed the `--load-extension` flag in version 137, and the plugin needs the Cypress extension in headed Chromium browsers (see [How it works](#how-it-works)). When the plugin detects this combination, it throws an error at browser launch. Headless `cypress run` works in any Chrome version. For headed runs, use Electron, Chrome for Testing, or Chromium instead. The Cypress Docker images repository has examples for [Chrome for Testing](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chrome-for-testing) and [Chromium](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chromium).
 
-- Cypress 13.6.0+ is required.
-- Only Chromium-based browsers are supported, such as Chrome for Testing, Chromium, and Electron.
-- Chrome-branded browsers (e.g., standard Chrome) are not supported in version 137+ due to Chrome's removal of the `--load-extension` flag. We recommend using Electron, Chrome for Testing or Chromium instead. See Cypress Docker image examples for [Chrome for Testing](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chrome-for-testing) and [Chromium](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chromium). Note this change only applies to headed applications such as `cypress open` or `cypress run --headed`. The plugin will work as expected in `cypress run` mode in any version of Chrome.
+## How it works
+
+The plugin has two halves:
+
+- **In your Cypress config**, you register named message handlers with `setup()`. These handlers run in Node.js, not in the browser.
+- **In your spec**, you call `cy.puppeteer('handlerName', ...args)` to run one of them. Under the hood, this is a [`cy.task()`](https://on.cypress.io/task), so it follows the same rules for arguments, return values, and timeouts.
+
+Each time `cy.puppeteer()` runs, the plugin:
+
+1. Connects Puppeteer to the browser Cypress launched.
+2. Calls your message handler with that Puppeteer [`Browser`](https://pptr.dev/api/puppeteer.browser) instance and any arguments you passed.
+3. In headed Chromium browsers other than Electron, brings the main Cypress tab back to the front through the Cypress extension, so your test can keep running after you've worked with other tabs.
+4. Disconnects Puppeteer from the browser. The browser itself stays open.
+5. Yields your handler's return value to the Cypress command chain.
+
+Because the connection is created fresh for every call and closed at the end, don't hold on to `Browser`, `Page`, or element references between `cy.puppeteer()` calls. Look them up again inside each handler.
 
 ## Usage
 
-`@cypress/puppeteer` is set up in your Cypress config and support file, then executed in your spec. See [API](#api) and [Examples](#examples) below for more details.
-
-While the `cy.puppeteer()` command is executed in the browser, the majority of the Puppeteer execution is run in the Node process via your Cypress config. You pass a string message name to `cy.puppeteer()` that indicates which message handler to execute in the Cypress config. This is similar to how [cy.task()](on.cypress.io/task) operates.
-
-In your Cypress config (e.g. `cypress.config.ts`):
+### 1. Register message handlers in your Cypress config
 
 ```typescript
+// cypress.config.ts
+import { defineConfig } from 'cypress'
 import { setup } from '@cypress/puppeteer'
 
 export default defineConfig({
@@ -65,143 +82,155 @@ export default defineConfig({
       setup({
         on,
         onMessage: {
-          async myMessageHander (browser) {
-            // Utilize the Puppeteer browser instance and the Puppeteer API to interact with and automate the browser
+          async getNewTabUrl (browser) {
+            // Use the Puppeteer API to interact with the browser here.
+            // Whatever you return is yielded by cy.puppeteer() in your spec.
+            const pages = await browser.pages()
+
+            return pages[pages.length - 1].url()
           },
         },
       })
     },
   },
-}
+})
 ```
 
-In your support file (e.g. `cypress/support/e2e.ts`):
+### 2. Import the support file
 
 ```typescript
+// cypress/support/e2e.ts
 import '@cypress/puppeteer/support'
 ```
 
-In your spec (e.g. `spec.cy.ts`):
+### 3. Call `cy.puppeteer()` in your spec
 
 ```typescript
-  it('switches to and tests a new tab', () => {
-    cy.visit('/')
-    cy.get('button').click() // opens a new tab
+// cypress/e2e/spec.cy.ts
+it('opens a new tab', () => {
+  cy.visit('/')
+  cy.get('button').click() // opens a new tab
 
-    cy
-    .puppeteer('myMessageHander')
-    .should('equal', 'You said: Hello from Page 1')
-  })
+  cy.puppeteer('getNewTabUrl').should('include', '/new-page')
+})
 ```
 
 ## API
 
-### Cypress Config - setup
+### `setup(options)`
 
-This sets up `@cypress/puppeteer` message handlers that run Puppeteer browser automation.
+Call this inside `setupNodeEvents` to register your message handlers.
 
 ```typescript
-setup(options)
+import { setup } from '@cypress/puppeteer'
+
+setup({ on, onMessage, puppeteer })
 ```
 
 #### Options
 
-- `on` _required_: The `on` event registration function provided by `setupNodeEvents`
-- `onMessage` _required_: An object with string keys and function values (see more details [below](#onmessage))
-- `puppeteer` _optional_: The `puppeteer` library imported from `puppeteer-core`, overriding the default version of `puppeteer-core` used by this plugin
+| Option | Required | Description |
+| --- | --- | --- |
+| `on` | Yes | The `on` event registration function that `setupNodeEvents` receives. |
+| `onMessage` | Yes | An object whose keys are message names and whose values are handler functions. See [Message handlers](#message-handlers). |
+| `puppeteer` | No | A Puppeteer module (from `puppeteer` or `puppeteer-core`) to use instead of the version of `puppeteer-core` bundled with this plugin. Handy when you want to pin your own Puppeteer version. |
 
-##### onMessage
+`setup` throws right away if `options`, `on`, or `onMessage` is missing, or if `onMessage` isn't a plain object.
 
-The keys provided in this are used to invoke their corresponding functions by calling `cy.puppeteer(key)` in your Cypress test.
+#### Message handlers
 
-The functions should contain Puppeteer code for automating the browser. The code is executed within Node.js and not within the browser, so Cypress commands and DOM APIs cannot be utilized.
+Each key in `onMessage` is a name you can pass to `cy.puppeteer()`. Its function runs in Node.js, so Cypress commands and DOM APIs aren't available inside it — use the Puppeteer API instead.
 
-The functions receive the following arguments:
+A handler receives:
 
-###### browser
+- `browser`: A Puppeteer [`Browser`](https://pptr.dev/api/puppeteer.browser) instance connected to the Cypress-launched browser.
+- `...args`: Any arguments passed to `cy.puppeteer()` after the message name.
 
-A [puppeteer browser instance](https://pptr.dev/api/puppeteer.browser) connected to the Cypress-launched browser.
+Handlers can be synchronous or `async`. What they return (or resolve to) is yielded by `cy.puppeteer()`:
 
-###### ...args
+- The return value must be serializable, just like a `cy.task()` result.
+- Returning `undefined` yields `null`, since `cy.task()` doesn't allow `undefined`.
+- If a handler throws or rejects, `cy.puppeteer()` fails the test with the error message.
 
-The rest of the arguments are any de-serialized arguments passed to the `cy.puppeteer()` command from your Cypress test.
+### `retry(functionToRetry[, options])`
 
-### Cypress Config - retry
-
-This is a utility function provided to aid in retrying actions that may initially fail.
+A helper for your message handlers that keeps calling a function until it succeeds. It's useful for things that take a moment to show up, like a tab that's still opening.
 
 ```typescript
-retry(functionToRetry[, options])
+import { retry } from '@cypress/puppeteer'
+
+const page = await retry(async () => {
+  const pages = await browser.pages()
+  const page = pages.find((page) => page.url().includes('page-2.html'))
+
+  if (!page) throw new Error('Could not find page')
+
+  return page
+})
 ```
 
-#### functionToRetry
+#### `functionToRetry`
 
-_required_
+_Required._ A function (synchronous or `async`) to call. If it throws or rejects, `retry` waits and calls it again. As soon as it succeeds, `retry` resolves with its return value.
 
-A function that will run and retry if an error is thrown. If an error is not thrown, `retry` will return the value returned by this function.
+#### `options`
 
-The function will continue to run at the default or configured interval until the default or configured timeout, at which point `retry` will throw an error and cease retrying this function.
+_Optional._
 
-#### Options
+| Option | Default | Description |
+| --- | --- | --- |
+| `timeout` | `4000` | How long to keep retrying, in milliseconds. Once it's reached, `retry` rejects with `Failed retrying after <timeout>ms: <last error message>`. |
+| `delayBetweenTries` | `200` | How long to wait between attempts, in milliseconds. |
 
-_optional_
+The timeout is counted in delays between attempts, so time spent inside `functionToRetry` itself isn't included. A slow function can make `retry` run longer than `timeout`.
 
-- `timeout` _optional_: The total time in milliseconds during which to attempt retrying the function. Default: `4000ms`
-- `delayBetweenTries` _optional_: The time to wait between retries. Default: `200ms`
+### `cy.puppeteer(messageName[, ...args])`
 
-### Cypress Spec - cy.puppeteer()
-
-```typescript
-cy.puppeteer(messageName[, ...args])
-```
-
-#### messageName
-
-_required_
-
-A string matching one of the keys passed to the `onMessage` option of `setup` in your Cypress config.
-
-#### ...args
-
-_optional_
-
-Values that will be passed to the message handler. These values must be JSON-serializable.
-
-Example:
+Runs the message handler registered under `messageName` and yields its return value.
 
 ```typescript
-// spec
 cy.puppeteer('testNewTab', 'value 1', 42, [true, false])
+```
 
-// Cypress config
+#### `messageName`
+
+_Required._ A string matching one of the keys in the `onMessage` option you passed to `setup`. If there's no match, the command fails and lists the registered names.
+
+#### `...args`
+
+_Optional._ Values to pass to the message handler. They're sent from the browser to Node.js, so they must be serializable.
+
+For example, the call above arrives in the handler like this:
+
+```typescript
 setup({
   on,
   onMessage: {
     testNewTab (browser, stringArg, numberArg, arrayOfBooleans) {
       // stringArg === 'value 1'
       // numberArg === 42
-      // arrayOfBooleans[0] === true / arrayOfBooleans[1] === false
-    }
-  }
+      // arrayOfBooleans[0] === true, arrayOfBooleans[1] === false
+    },
+  },
 })
 ```
 
 ## Examples
 
-These examples can be found and run in the [Cypress tests of this package](./cypress) with this project's [cypress.config.ts](./cypress.config.ts).
+Both examples live in this package's [Cypress tests](./cypress/e2e/multi-tab.cy.ts) and [cypress.config.ts](./cypress.config.ts), where you can run them yourself. That config also starts a small static server on `http://localhost:8000` and sets it as the `baseUrl`, which is why the URLs below point there.
 
-While these examples use tabs, they could just as easily apply to windows. Tabs and windows are essentially the same things as far as Puppeteer is concerned and encapsulated by instances of the [Page class](https://pptr.dev/api/puppeteer.page/).
+The examples use tabs, but the same approach works for windows. Puppeteer treats both as instances of the [`Page` class](https://pptr.dev/api/puppeteer.page/).
 
 ### Switching to a new tab
 
-This example demonstrates the following:
+This example shows how to:
 
-- Switching to a tab opened by an action in the Cypress test
-- Getting the page instance via Puppeteer utilizing the `retry` function
-- Getting page references and content via puppeteer
-- Passing that content back to be asserted on in Cypress
+- Find a tab that an action in your Cypress test opened
+- Wait for that tab with `retry`
+- Read content from the tab with Puppeteer
+- Pass that content back to Cypress for assertions
 
-_spec.cy.ts_
+_cypress/e2e/multi-tab.cy.ts_
 
 ```typescript
 it('switches to a new tab', () => {
@@ -220,7 +249,6 @@ _cypress.config.ts_
 ```typescript
 import { defineConfig } from 'cypress'
 import type { Browser as PuppeteerBrowser, Page } from 'puppeteer-core'
-
 import { setup, retry } from '@cypress/puppeteer'
 
 export default defineConfig({
@@ -230,35 +258,32 @@ export default defineConfig({
         on,
         onMessage: {
           async switchToTabAndGetContent (browser: PuppeteerBrowser) {
-            // In this message handler, we utilize the Puppeteer API to interact with the browser and the new tab that our Cypress tests has opened
-
-            // Utilize the retry since the page may not have opened and loaded by the time this runs
+            // The new tab may not have opened and loaded yet, so keep looking until it has
             const page = await retry<Promise<Page>>(async () => {
-              // The browser will (eventually) have 2 tabs open: the Cypress tab and the newly opened tab
-              // In Puppeteer, tabs and windows are called pages
+              // The browser will eventually have 2 tabs open: the Cypress tab and the new tab.
+              // In Puppeteer, tabs and windows are called pages.
               const pages = await browser.pages()
-              // Try to find the page we want to interact with
               const page = pages.find((page) => page.url().includes('page-2.html'))
 
-              // If we can't find the page, it probably hasn't loaded yet, so throw an error to signal that this function should retry
+              // Throwing tells `retry` to try again
               if (!page) throw new Error('Could not find page')
 
-              // Otherwise, return the page instance and it will be returned by the `retry` function itself
+              // Returning resolves `retry` with the page
               return page
             })
 
-            // Cypress will maintain focus on the Cypress tab within the browser. It's generally a good idea to bring the page to the front to interact with it.
+            // Cypress keeps focus on its own tab, so bring the new page to the front before interacting with it
             await page.bringToFront()
 
             const paragraph = (await page.waitForSelector('p'))!
             const paragraphText = await page.evaluate((el) => el.textContent, paragraph)
 
-            // Clean up any references before finishing up
+            // Clean up references before finishing
             paragraph.dispose()
 
             await page.close()
 
-            // Return the paragraph text and it will be the value yielded by the `cy.puppeteer()` invocation in the spec
+            // This value is yielded by cy.puppeteer() in the spec
             return paragraphText
           },
         },
@@ -270,23 +295,22 @@ export default defineConfig({
 
 ### Creating a new tab
 
-This example demonstrates the following:
+This example shows how to:
 
-- Passing a non-default version of puppeteer to `@cypress/puppeteer`
-- Passing arguments from `cy.puppeteer()` to the message handler
-- Creating a new tab and visiting a page via Puppeteer
-- Getting page references and content via puppeteer
-- Passing that content back to be asserted on in Cypress
+- Pass your own Puppeteer module to `setup`
+- Pass arguments from `cy.puppeteer()` to a message handler
+- Open a new tab and visit a page with Puppeteer
+- Pass content from that tab back to Cypress for assertions
 
-_spec.cy.ts_
+_cypress/e2e/multi-tab.cy.ts_
 
 ```typescript
 it('creates a new tab', () => {
   cy.visit('/cypress/fixtures/page-3.html')
-  // We get a dynamic value from the page and pass it through to the puppeteer
-  // message handler
+  // Read a value from the page and pass it through to the message handler
   cy.get('#message').invoke('text').then((message) => {
-    cy.puppeteer('createTabAndGetContent', message)
+    cy
+    .puppeteer('createTabAndGetContent', message)
     .should('equal', 'I approve this message: Cypress and Puppeteer make a great combo')
   })
 })
@@ -296,36 +320,34 @@ _cypress.config.ts_
 
 ```typescript
 import { defineConfig } from 'cypress'
-import puppeteer, { Browser as PuppeteerBrowser, Page } from 'puppeteer-core'
-
-import { setup, retry } from '@cypress/puppeteer'
+import puppeteer from 'puppeteer-core'
+import type { Browser as PuppeteerBrowser } from 'puppeteer-core'
+import { setup } from '@cypress/puppeteer'
 
 export default defineConfig({
   e2e: {
     setupNodeEvents (on) {
       setup({
         on,
-        // Pass in your own version of puppeteer to be used instead of the default one
+        // Use your own installed Puppeteer instead of the version bundled with the plugin
         puppeteer,
         onMessage: {
           async createTabAndGetContent (browser: PuppeteerBrowser, text: string) {
-            // In this message handler, we utilize the Puppeteer API to interact with the browser, creating a new tab and getting its content
-
-            // This will create a new tab within the Cypress-launched browser
+            // Opens a new tab in the Cypress-launched browser
             const page = await browser.newPage()
 
-            // Text comes from the test invocation of `cy.puppeteer()`
-            await page.goto(`http://localhost:8000/cypress/fixtures/page-4.html?text=${text}`)
+            // `text` comes from the cy.puppeteer() call in the spec
+            await page.goto(`http://localhost:8000/cypress/fixtures/page-4.html?text=${encodeURIComponent(text)}`)
 
             const paragraph = (await page.waitForSelector('p'))!
             const paragraphText = await page.evaluate((el) => el.textContent, paragraph)
 
-            // Clean up any references before finishing up
+            // Clean up references before finishing
             paragraph.dispose()
 
             await page.close()
 
-            // Return the paragraph text and it will be the value yielded by the `cy.puppeteer()` invocation in the spec
+            // This value is yielded by cy.puppeteer() in the spec
             return paragraphText
           },
         },
@@ -337,50 +359,80 @@ export default defineConfig({
 
 ## Troubleshooting
 
-### Error: Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.
+### `@cypress/puppeteer does not work in Google Chrome v137 and higher in cypress open mode (or headed run mode)`
 
-If you receive this error in your command log, the Puppeteer plugin was unable to communicate with the Cypress extension. This extension is necessary in order to re-activate the main Cypress tab after a Puppeteer command, when running in open mode.
+Chrome 137 removed support for loading extensions from the command line, and the plugin needs the Cypress extension in headed mode. Switch to Electron, Chrome for Testing, or Chromium for headed runs, or run Chrome headlessly with `cypress run`. See [Compatibility](#compatibility) for details.
 
-* If you're using a Chrome-branded browser (e.g., standard Chrome) in version 137+, you'll need to use Chrome for Testing or Chromium instead. [See download instructions](https://www.chromium.org/getting-involved/download-chromium/).
-* Ensure this extension is enabled in the instance of Chrome that Cypress launches by visiting chrome://extensions/
-* Ensure the Cypress extension is allowed by your company's security policy by its extension id, `caljajdfkjjjdehjdoimjkkakekklcck`
+### `Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.`
+
+After each handler runs in a headed Chromium browser, the plugin asks the Cypress extension to bring the main Cypress tab back to the front. This error means the extension didn't respond within 2 seconds. A few things to check:
+
+- If you're using Google Chrome 137 or later, switch to Chrome for Testing or Chromium. [See download instructions](https://www.chromium.org/getting-involved/download-chromium/).
+- Make sure the Cypress extension is enabled in the browser Cypress launched by visiting `chrome://extensions/`.
+- Make sure your company's security policy allows the Cypress extension. Its ID is `caljajdfkjjjdehjdoimjkkakekklcck`.
+
+### `Lost the reference to the browser`
+
+This usually happens when your Cypress config reloads but the browser doesn't relaunch. Close the browser and open it again from Cypress.
+
+### `Only browsers in the "Chromium" family are supported`
+
+You're running in Firefox or WebKit. Switch to a Chromium-family browser such as Electron, Chrome for Testing, Chromium, or Edge.
+
+### `Could not find message handler with the name ...`
+
+The name passed to `cy.puppeteer()` doesn't match any key in `onMessage`. The error lists the names that are registered, so it's usually a quick typo fix.
 
 ## Contributing
 
-Build the TypeScript files:
+This package lives in the [Cypress monorepo](https://github.com/cypress-io/cypress). Run `yarn` from the repository root first, then run these commands from `npm/puppeteer`.
+
+Build the TypeScript files into `dist/`:
 
 ```shell
 yarn build
 ```
 
-Watch the TypeScript files and rebuild on file change:
+Rebuild whenever a file changes:
 
 ```shell
 yarn watch
 ```
 
-Open Cypress tests:
+Type-check without emitting files (`yarn build` doesn't fail on type errors, so run this before opening a PR):
 
 ```shell
-yarn cypress:open
+yarn check-ts
 ```
 
-Run Cypress tests once:
+Lint:
 
 ```shell
-yarn cypress:run
+yarn lint
 ```
 
-Run all unit tests once:
+Run the unit tests once:
 
 ```shell
 yarn test
 ```
 
-Run unit tests in watch mode:
+Run the unit tests in watch mode:
 
 ```shell
 yarn test-watch
+```
+
+Open the Cypress tests:
+
+```shell
+yarn cypress:open
+```
+
+Run the Cypress tests once in Chrome:
+
+```shell
+yarn cypress:run
 ```
 
 ## [Changelog](./CHANGELOG.md)

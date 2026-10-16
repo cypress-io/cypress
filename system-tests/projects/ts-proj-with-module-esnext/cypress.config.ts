@@ -1,7 +1,6 @@
 import { asyncGreeting } from './greeting'
 
 module.exports = {
-  'allowCypressEnv': false,
   'supportFolder': false,
   'e2e': {
     'supportFile': false,

@@ -24,6 +24,22 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`,
+  # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
+  # (can also be set manually to run those workflows)
+  run-platform-workflows:
+    type: boolean
+    default: false
+  # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
+  # Trigger Pipeline when a visual review is needed. Requires PERCY_TOKEN.
+  percy-enabled:
+    type: boolean
+    default: false
+  # Opt-in full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy)
+  # path on Chrome. Enable via Trigger Pipeline when investigating that path.
+  run-force-http1-tests:
+    type: boolean
+    default: false
 
 commands:
   persist:
@@ -63,12 +79,6 @@ commands:
           name: Pack workflows
           command: |
             ./scripts/pack-ci.sh --all
-  validate-workflows:
-    steps:
-      - run:
-          name: Validate workflows
-          command: |
-            ./scripts/pack-ci.sh --validate --pack=false
 
   # Retrieving and saving packed workflows based on the checksum of the hash
   # of the yml files in ./.circleci/src
@@ -139,7 +149,7 @@ jobs:
   pack-workflows:
     docker:
         - image: cimg/base:stable
-    resource_class: small
+    resource_class: small.gen2
     steps:
         - cancel-draft-prs
         - checkout:
@@ -153,7 +163,7 @@ jobs:
   launch-primary-workflow:
       docker:
           - image: cimg/base:stable
-      resource_class: small
+      resource_class: small.gen2
       steps:
           - cancel-draft-prs
           - checkout:
@@ -171,6 +181,9 @@ jobs:
               name: Generate path-filtered pipeline parameters
               environment:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
+                PERCY_ENABLED: << pipeline.parameters.percy-enabled >>
+                TRIGGER_SOURCE: "<< pipeline.trigger_source >>"
+                BASE_REVISION: "<< pipeline.git.base_revision >>"
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

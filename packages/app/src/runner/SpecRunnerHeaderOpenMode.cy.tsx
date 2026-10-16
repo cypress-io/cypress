@@ -1,7 +1,8 @@
 import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import { useAutStore, useSelectorPlaygroundStore } from '../store'
 import { useStudioStore } from '../store/studio-store'
-import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
+import type { SpecRunnerHeaderFragment } from '../generated/graphql-test'
+import { SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
 import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
 import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
@@ -313,7 +314,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       })
 
       cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
-      cy.findByRole('list').within(() =>
+      cy.getByRole('list').within(() =>
         ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
 
       cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')

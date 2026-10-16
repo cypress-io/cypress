@@ -4,13 +4,7 @@ export * from './types'
 
 export { ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
 
-export {
-  ProxyRequestInterceptionAdapter,
-  ProxyResponseInterceptionAdapter,
-  ProxyNetworkCaptureAdapter,
-  ProxyCookieStateAdapter,
-  ProxyCommandLogAdapter,
-} from './adapters'
+export { createSyntheticProxyCodec, toIdentityResponse } from './adapters/synthetic-proxy-codec'
 
 export { createProxyNetworkInterception } from './adapters/create-proxy-network-interception'
 

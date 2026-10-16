@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 import type { FileDetails } from '@packages/types'
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from './tooltip'
 
 import TextIcon from '@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 import OpenFileInIDE from './open-file-in-ide'

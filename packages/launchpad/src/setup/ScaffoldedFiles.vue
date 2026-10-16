@@ -18,6 +18,7 @@
       <Button
         size="40"
         :disabled="needsChanges"
+        data-cy="continue-button"
         @click="completeSetup"
       >
         {{ t('setupPage.step.continue') }}

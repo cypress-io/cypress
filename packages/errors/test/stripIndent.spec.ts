@@ -35,4 +35,12 @@ Something went wrong.
 - b
 - c`.trimLeft())
   })
+
+  it('inserts an argument containing $ replacement patterns verbatim', () => {
+    const arg = `a$&b$\`c$'d$$e$1f`
+
+    const str = stripIndent`You passed: ${arg}`
+
+    expect(str).toEqual(`You passed: ${arg}`)
+  })
 })

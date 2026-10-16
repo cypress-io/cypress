@@ -3,7 +3,6 @@
  * 'no-console', certain IDEs will still show errors.
  */
 
-import os from 'os'
 import path from 'path'
 import Debug from 'debug'
 import minimist from 'minimist'
@@ -15,14 +14,6 @@ const debugElectron = Debug('cypress:electron:electron')
 import { open } from './open'
 
 export { open }
-
-/**
- * If running as root on Linux, no-sandbox must be passed or Chrome will not start
- */
-const isSandboxNeeded = () => {
-  // eslint-disable-next-line no-restricted-properties
-  return (os.platform() === 'linux') && (process.geteuid?.() === 0)
-}
 
 export function installIfNeeded () {
   return _install.check()
@@ -44,22 +35,18 @@ export function getElectronVersion () {
 export function getElectronNodeVersion () {
   debugElectron('getting Electron Node version')
 
-  const args = []
-
-  if (isSandboxNeeded()) {
-    args.push('--no-sandbox')
-  }
-
   // runs locally installed "electron" bin alias
   const localScript = path.join(__dirname, 'print-node-version.js')
 
   debugElectron('local script that prints Node version %s', localScript)
 
-  args.push(localScript)
+  const args = [localScript]
 
   const options = {
     preferLocal: true, // finds the "node_modules/.bin/electron"
     timeout: 10000, // prevents hanging Electron if there is an error for some reason
+    // run as plain Node instead of booting the GUI app, which can time out on headless CI
+    env: { ELECTRON_RUN_AS_NODE: '1' },
   }
 
   debugElectron('Running Electron with %o %o', args, options)

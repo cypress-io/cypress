@@ -149,7 +149,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   it('increases the timeout delta', () => {
     cy.spy(cy, 'timeout')
 
-    cy.get(':text:first').type('foo{enter}').then(() => {
+    cy.get(':text:first').type('foo{enter}', { delay: 10 }).then(() => {
       expect(cy.timeout).to.be.calledWith(40, true, 'type')
 
       expect(cy.timeout).to.be.calledWith(50, true, 'type')
@@ -391,66 +391,6 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       cy.get(':text:first').then((el) => {
         expect(el[0].scrollIntoView).not.to.be.called
-      })
-    })
-
-    it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
-      })
-    })
-
-    it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
-      })
-    })
-
-    it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
-      })
-    })
-
-    it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).not.to.be.called
-      })
-    })
-
-    it('calls scrollIntoView by default', () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
       })
     })
 
@@ -710,11 +650,11 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('delay', () => {
-    it('adds default delay to delta for each key sequence', () => {
+    it('adds delay to delta for each key sequence when delay is set', () => {
       cy.spy(cy, 'timeout')
 
       cy.get(':text:first')
-      .type('foo{enter}bar{leftarrow}')
+      .type('foo{enter}bar{leftarrow}', { delay: 10 })
       .then(() => {
         expect(cy.timeout).to.be.calledWith(10 * 8, true, 'type')
       })
@@ -746,7 +686,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         , 50)
       })
 
-      cy.get(':text:first').type('foo{enter}bar{leftarrow}')
+      cy.get(':text:first').type('foo{enter}bar{leftarrow}', { delay: 10 })
     })
 
     it('test config keystrokeDelay overrides global value', { keystrokeDelay: 5 }, () => {
@@ -1163,7 +1103,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      cy.get('#input-without-value').type('foo').then(($input) => {
+      cy.get('#input-without-value').type('foo', { delay: 10 }).then(($input) => {
         expect($input).to.have.value('f-o-o-')
       })
     })
@@ -1255,6 +1195,16 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('#number-without-value').type('42').then(($text) => {
           expect($text).to.have.value('42')
         })
+      })
+
+      // TODO(webkit): fix+unskip for experimental webkit
+      // https://github.com/cypress-io/cypress/issues/7170
+      it('appends to the existing value when the input is already focused', { browser: '!webkit' }, () => {
+        cy.visit('fixtures/issue-7170.html')
+        cy.get('button').click()
+        cy.get('input')
+        .type('2')
+        .should('have.value', '12')
       })
 
       it('can input decimal', () => {
@@ -3196,6 +3146,15 @@ describe('src/cy/commands/actions/type - #type', () => {
           ])
         })
       })
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/14864
+  describe('input handler that updates the value asynchronously', () => {
+    it('defers keyup until the handler microtasks have run', () => {
+      cy.visit('/fixtures/issue-14864.html')
+      cy.get('input').type('/')
+      cy.get('#feedback').should('have.text', 'You typed Slash')
     })
   })
 

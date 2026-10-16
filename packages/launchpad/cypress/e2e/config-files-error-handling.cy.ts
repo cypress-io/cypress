@@ -27,7 +27,7 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
@@ -50,7 +50,7 @@ describe('Config files error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
   })
@@ -121,7 +121,7 @@ describe('Launchpad: Error System Tests', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
@@ -134,7 +134,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
 
     // Try again while the config is still invalid
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.wait('@resetErrorsAndLoadConfig')
 
@@ -145,7 +145,7 @@ describe('Launchpad: Error System Tests', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress')
   })
@@ -230,12 +230,18 @@ describe('setupNodeEvents', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
   })
 
   it('handles multiple config errors and then recovers', () => {
+    // Each 'Try again' fires this mutation to reset the error and reload the config. The
+    // old error stays mounted with identical markup until the mutation resolves, so waiting
+    // on it anchors the recovery assertions to the reloaded state instead of racing against
+    // the stale error DOM.
+    cy.intercept('mutation-Main_ResetErrorsAndLoadConfig').as('resetErrorsAndLoadConfig')
+
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
@@ -252,7 +258,8 @@ describe('setupNodeEvents', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { baseUrl: 'http://ocalhost:3000', e2e: { supportFile: false } }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
+    cy.wait('@resetErrorsAndLoadConfig')
     cy.get('[data-cy-testingType=e2e]').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is invalid when set from the root of the config object')
@@ -261,7 +268,8 @@ describe('setupNodeEvents', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'http://localhost:3000', supportFile: false } }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
+    cy.wait('@resetErrorsAndLoadConfig')
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
@@ -293,7 +301,7 @@ describe('setupNodeEvents', () => {
         }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
     .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)

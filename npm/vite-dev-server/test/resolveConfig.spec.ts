@@ -2,9 +2,6 @@ import path from 'path'
 import { fileURLToPath } from 'node:url'
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import { EventEmitter } from 'events'
-import * as vite5 from 'vite-5'
-import * as vite6 from 'vite-6'
-import * as vite7 from 'vite-7'
 import * as vite8 from 'vite-8'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig, JSX_REFRESH_SCRIPT_RE } from '../src/resolveConfig'
@@ -22,20 +19,7 @@ const getViteDevServerConfig = (projectRoot: string) => {
     framework: 'react',
   } as unknown as ViteDevServerConfig
 }
-const MAJOR_VERSIONS: ({version: 5, vite: any } | {version: 6, vite: any } | {version: 7, vite: any })[] = [
-
-  {
-    version: 5,
-    vite: vite5,
-  },
-  {
-    version: 6,
-    vite: vite6,
-  },
-  {
-    version: 7,
-    vite: vite7,
-  },
+const MAJOR_VERSIONS: ({version: 8, vite: typeof vite8})[] = [
   {
     version: 8,
     vite: vite8,
@@ -118,11 +102,11 @@ describe('resolveConfig', function () {
     })
   })
 
-  describe('Vite 8 JSX refresh excludes component specs', () => {
+  describe('Vite JSX refresh excludes component specs', () => {
     // Real package root so createRequire can resolve `vite` like a consumer project; inline viteConfig skips fixture scaffolding.
     const viteDevServerPackageRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 
-    it('sets oxc.jsxRefreshInclude and jsxRefreshExclude from Cypress specs (Vite 8)', async () => {
+    it('sets oxc.jsxRefreshInclude and jsxRefreshExclude from Cypress specs', async () => {
       const specAbsolutes = [
         path.join(viteDevServerPackageRoot, 'src', 'Hello.cy.tsx'),
         path.join(viteDevServerPackageRoot, 'src', 'Other.cy.tsx'),
@@ -140,19 +124,6 @@ describe('resolveConfig', function () {
 
       expect(viteConfig.oxc?.jsxRefreshInclude).to.equal(JSX_REFRESH_SCRIPT_RE)
       expect(viteConfig.oxc?.jsxRefreshExclude).to.eql(specAbsolutes)
-    })
-
-    it('does not set oxc overrides for Vite 7', async () => {
-      const specAbsolute = path.join(viteDevServerPackageRoot, 'components', 'Card.cy.tsx')
-      const viteDevServerConfig = {
-        ...getViteDevServerConfig(viteDevServerPackageRoot),
-        viteConfig: {},
-        specs: [{ absolute: specAbsolute, relative: 'components/Card.cy.tsx' }],
-      } as unknown as ViteDevServerConfig
-
-      const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite7)
-
-      expect(viteConfig.oxc).to.be.undefined
     })
 
     it('matches only script-like paths so imported CSS (e.g. support files) is not run through transformWithOxc', () => {

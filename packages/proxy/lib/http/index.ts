@@ -3,13 +3,15 @@ import chalk from 'chalk'
 import Debug from 'debug'
 import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
-import { DeferredSourceMapCache } from '@packages/rewriter'
-import { telemetry, Span } from '@packages/telemetry'
+import type { Span } from '@packages/telemetry'
+import { telemetry } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
+import { fetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
+import type { GetPreRequestCb, PendingRequest } from './util/prerequests'
+import { PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
@@ -18,19 +20,21 @@ import type { SocketBroadcaster } from '@packages/socket'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
+  CypressOutgoingResponseLike,
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkInterceptionCore } from '@packages/network-interception'
+import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
-import type { Request, Response } from 'express'
+import type { Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
-import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
+import { serviceWorkerHeaderIsScript } from '@packages/network-interception'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -38,8 +42,12 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
+// Pure predicate shared with should-stream-response-body.ts (packages/server/lib/browsers/cdp-protocol),
+// which does its own case-insensitive header-name lookup and needs only the
+// value check.
+
 export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
-  return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
+  return serviceWorkerHeaderIsScript(headers?.['service-worker']) || serviceWorkerHeaderIsScript(headers?.['Service-Worker'])
 }
 
 export const isVerboseTelemetry = true
@@ -75,9 +83,9 @@ export type HttpMiddlewareStacks = {
   }
 }
 
-type HttpMiddlewareCtx<T> = {
+export type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
-  res: CypressOutgoingResponse
+  res: CypressOutgoingResponseLike
   handleHttpRequestSpan?: Span
   reqMiddlewareSpan?: Span
   resMiddlewareSpan?: Span
@@ -87,7 +95,6 @@ type HttpMiddlewareCtx<T> = {
   middleware: HttpMiddlewareStacks
   pendingRequest: PendingRequest | undefined
   getCookieJar: () => CookieJar
-  deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => PendingRequest | undefined
   addPendingUrlWithoutPreRequest: (url: string) => void
   removePendingRequest: (pendingRequest: PendingRequest) => void
@@ -112,11 +119,23 @@ export type ServerCtx = Readonly<{
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   networkInterceptionCore: NetworkInterceptionCore
+  networkInterception?: ForNetworkInterception<any, any>
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // See disable-navigation-preload.ts (#34652). Named to match the launch
+  // option (BrowserLaunchOpts.useBrowserNetworkInterception), not
+  // network-mode.ts's isBrowserNetworkMode() - same concept, but that name
+  // is already an established function/method elsewhere in this codebase
+  // (network-mode.ts, ServerBase), and a plain boolean field of the same
+  // name here would read as callable.
+  useBrowserNetworkInterception?: boolean
+  // Path prefixes Cypress reserves on every origin under test. This package
+  // cannot import from @packages/server, which owns the routes, so the server
+  // supplies the list (adapters/internal-routes.ts) at construction time.
+  reservedPathPrefixes?: string[]
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -125,6 +144,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'getFileServerToken',
   'netStubbingState',
   'networkInterceptionCore',
+  'networkInterception',
   'next',
   'end',
   'onResponse',
@@ -202,7 +222,17 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
       function onClose () {
         if (!ctx.res.writableFinished) {
-          _onError(createBrowserConnectionClosedError())
+          const error: Error & { isForceNetworkError?: boolean } = createBrowserConnectionClosedError()
+
+          // forceNetworkError destroys the res itself, so this close is our own
+          // teardown rather than a browser cancel. Carry the tag forward or it
+          // is lost here — this handler runs after the requested error already
+          // set ctx.error, and replaces it.
+          if ((ctx.error as Error & { isForceNetworkError?: boolean } | undefined)?.isForceNetworkError) {
+            error.isForceNetworkError = true
+          }
+
+          _onError(error)
         }
       }
 
@@ -232,6 +262,9 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       const fullCtx = {
+        // Spread ctx first so middleware helpers (next/end/onResponse/...) always
+        // win over any same-named fields that may exist on the request ctx.
+        ...ctx,
         next: () => {
           fullCtx.next = () => {
             const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
@@ -263,7 +296,6 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
         },
-        ...ctx,
       }
 
       try {
@@ -308,12 +340,12 @@ export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
-  deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   networkInterceptionCore: NetworkInterceptionCore
+  networkInterception?: ForNetworkInterception<any, any>
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
   request: ServerRequest
@@ -324,10 +356,11 @@ export class Http {
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
+  useBrowserNetworkInterception?: boolean
+  reservedPathPrefixes?: string[]
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
-    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
@@ -335,79 +368,21 @@ export class Http {
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
     this.networkInterceptionCore = opts.networkInterceptionCore
+    this.networkInterception = opts.networkInterception
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
+    this.useBrowserNetworkInterception = opts.useBrowserNetworkInterception
+    this.reservedPathPrefixes = opts.reservedPathPrefixes
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
     }
   }
 
-  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
-    const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
-    const debugUrl = debugVerbose.enabled ?
-      (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
-      : undefined
-
-    const ctx: HttpMiddlewareCtx<any> = {
-      req,
-      res,
-      handleHttpRequestSpan,
-      buffers: this.buffers,
-      config: this.config,
-      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      getFileServerToken: this.getFileServerToken,
-      remoteStates: this.remoteStates,
-      request: this.request,
-      middleware: _.cloneDeep(this.middleware),
-      netStubbingState: this.netStubbingState,
-      networkInterceptionCore: this.networkInterceptionCore,
-      socket: this.socket,
-      serverBus: this.serverBus,
-      getCookieJar: this.getCookieJar,
-      simulatedCookies: [],
-      debug: (formatter, ...args) => {
-        if (!debugVerbose.enabled) return
-
-        debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
-      },
-      deferSourceMapRewrite: (opts) => {
-        this.deferredSourceMapCache.defer({
-          resHeaders: ctx.incomingRes.headers,
-          ...opts,
-        })
-      },
-      getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
-      getAUTUrl: this.getAUTUrl,
-      setAUTUrl: this.setAUTUrl,
-      getPreRequest: (cb) => {
-        // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
-        // it's the service worker request via the `service-worker` header
-        if (hasServiceWorkerHeader(req.headers)) {
-          ctx.debug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
-
-          cb({
-            noPreRequestExpected: true,
-          })
-
-          return
-        }
-
-        return this.preRequests.get(ctx.req, ctx.debug, cb)
-      },
-      addPendingUrlWithoutPreRequest: (url) => {
-        this.preRequests.addPendingUrlWithoutPreRequest(url)
-      },
-      removePendingRequest: (pendingRequest: PendingRequest) => {
-        this.preRequests.removePendingRequest(pendingRequest)
-      },
-      protocolManager: this.protocolManager,
-      getCurrentBrowser: this.getCurrentBrowser,
-    }
-
+  private buildOnError (ctx: HttpMiddlewareCtx<any>) {
     const onError = async (error: Error): Promise<void> => {
       const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
 
@@ -438,6 +413,165 @@ export class Http {
       return _runStage(HttpStages.Error, ctx, onError)
     }
 
+    return onError
+  }
+
+  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>): InterceptMiddleware {
+    return async (request, next): Promise<HttpResponse> => {
+      try {
+        const ctx = codec.encodeRequest(request)
+
+        const onError = this.buildOnError(ctx)
+
+        await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+        // Skip the response middleware only when the browser canceled: destroyed before finishing.
+        // The synthetic response auto-destroys after end(), so a middleware that finished it
+        // (blocked-host 503, unload redirect) also reads as destroyed.
+        if (ctx.res.destroyed && !ctx.res.writableFinished) {
+          const error: Error & { isForceNetworkError?: boolean } = createBrowserConnectionClosedError()
+
+          // forceNetworkError destroys the res itself; carry its tag through
+          // so the CDP Fetch transport can map the rejection to
+          // Fetch.failRequest. Everything else about this path — the error
+          // stage re-run, the thrown type — is unchanged, so MITM behavior
+          // (where the destroyed socket already delivered the network error)
+          // is untouched.
+          if ((ctx.error as Error & { isForceNetworkError?: boolean } | undefined)?.isForceNetworkError) {
+            error.isForceNetworkError = true
+          }
+
+          await onError(error)
+
+          throw error
+        }
+
+        // Skip the origin fetch when request middleware already finished the client
+        // response (e.g. blocked-host 503 or unload redirect) without setting incomingRes.
+        // Middleware that ends the client response must set headersSent/writableFinished
+        // (or incomingRes); otherwise the pipeline will still call next()/origin.
+        if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
+          const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
+
+          try {
+            const response = await next(codec.decodeRequest(ctx))
+
+            span?.end()
+
+            codec.encodeResponse(response)
+
+            if (ctx.incomingRes && !ctx.incomingResStream) {
+              throw new Error('Incoming response stream was not set by the HTTP transport codec.')
+            }
+          } catch (err) {
+            span?.end()
+            await onError(err as Error)
+
+            // Re-throw so transports (e.g. CDP Fetch) fail the pause instead of
+            // encoding a synthetic empty success body via decodeResponse.
+            throw err
+          }
+        }
+
+        if (ctx.incomingRes) {
+          // start the span that is responsible for recording the start time of the entire middleware run on the stack
+          ctx.resMiddlewareSpan = telemetry.startSpan({
+            name: 'response:middleware',
+            parentSpan: ctx.handleHttpRequestSpan,
+            isVerbose,
+          })
+
+          await _runStage(HttpStages.IncomingResponse, ctx, onError)
+          .finally(() => {
+            ctx.resMiddlewareSpan?.end()
+          })
+
+          if (ctx.error) {
+            throw ctx.error
+          }
+
+          return codec.decodeResponse(ctx)
+        }
+
+        if (ctx.error) {
+          throw ctx.error
+        }
+
+        ctx.debug('Warning: Request was not fulfilled with a response.')
+
+        return codec.decodeResponse(ctx)
+      } finally {
+        codec.releaseRequest?.(request.id)
+      }
+    }
+  }
+
+  createMiddlewareContext (req: CypressIncomingRequest, res: CypressOutgoingResponseLike, handleHttpRequestSpan?: Span): HttpMiddlewareCtx<any> {
+    const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
+    const debugUrl = debugVerbose.enabled ?
+      (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
+      : undefined
+
+    const ctx: HttpMiddlewareCtx<any> = {
+      req,
+      res,
+      handleHttpRequestSpan,
+      buffers: this.buffers,
+      config: this.config,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      getFileServerToken: this.getFileServerToken,
+      remoteStates: this.remoteStates,
+      request: this.request,
+      middleware: _.cloneDeep(this.middleware),
+      netStubbingState: this.netStubbingState,
+      networkInterceptionCore: this.networkInterceptionCore,
+      networkInterception: this.networkInterception,
+      socket: this.socket,
+      serverBus: this.serverBus,
+      getCookieJar: this.getCookieJar,
+      simulatedCookies: [],
+      debug: (formatter, ...args) => {
+        if (!debugVerbose.enabled) return
+
+        debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
+      },
+      getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
+      getAUTUrl: this.getAUTUrl,
+      setAUTUrl: this.setAUTUrl,
+      getPreRequest: (cb) => {
+        // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
+        // it's the service worker request via the `service-worker` header
+        if (hasServiceWorkerHeader(req.headers)) {
+          ctx.debug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
+
+          cb({
+            noPreRequestExpected: true,
+          })
+
+          return
+        }
+
+        return this.preRequests.get(ctx.req, ctx.debug, cb)
+      },
+      addPendingUrlWithoutPreRequest: (url) => {
+        this.preRequests.addPendingUrlWithoutPreRequest(url)
+      },
+      removePendingRequest: (pendingRequest: PendingRequest) => {
+        this.preRequests.removePendingRequest(pendingRequest)
+      },
+      protocolManager: this.protocolManager,
+      getCurrentBrowser: this.getCurrentBrowser,
+      useBrowserNetworkInterception: this.useBrowserNetworkInterception,
+      reservedPathPrefixes: this.reservedPathPrefixes,
+    }
+
+    return ctx
+  }
+
+  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+    const ctx = this.createMiddlewareContext(req, res, handleHttpRequestSpan)
+    const onError = this.buildOnError(ctx)
+
     // start the span that is responsible for recording the start time of the entire middleware run on the stack
     // make this span a part of the middleware ctx so we can keep names simple when correlating
     ctx.reqMiddlewareSpan = telemetry.startSpan({
@@ -446,29 +580,18 @@ export class Http {
       isVerbose,
     })
 
-    return _runStage(HttpStages.IncomingRequest, ctx, onError)
-    .then(() => {
-      // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-      // In this case we don't want to run the response middleware and should just exit.
-      if (res.destroyed) {
-        return onError(createBrowserConnectionClosedError())
+    if (!this.networkInterception) {
+      return onError(new Error('Network interception is not configured for the proxy runtime.'))
+    }
+
+    return this.networkInterception.handle(ctx, fetchOrigin)
+    .catch((err) => {
+      // The legacy pipeline may already have run error middleware for this ctx.
+      if (ctx.error) {
+        return
       }
 
-      if (ctx.incomingRes) {
-        // start the span that is responsible for recording the start time of the entire middleware run on the stack
-        ctx.resMiddlewareSpan = telemetry.startSpan({
-          name: 'response:middleware',
-          parentSpan: handleHttpRequestSpan,
-          isVerbose,
-        })
-
-        return _runStage(HttpStages.IncomingResponse, ctx, onError)
-        .finally(() => {
-          ctx.resMiddlewareSpan?.end()
-        })
-      }
-
-      return ctx.debug('Warning: Request was not fulfilled with a response.')
+      return onError(err)
     })
   }
 
@@ -482,20 +605,6 @@ export class Http {
 
   setAUTUrl = (url) => {
     this.autUrl = url
-  }
-
-  async handleSourceMapRequest (req: Request, res: Response) {
-    try {
-      const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
-
-      if (!sm) {
-        throw new Error('no sourcemap found')
-      }
-
-      res.json(sm)
-    } catch (err) {
-      res.status(500).json({ err })
-    }
   }
 
   reset (options: { resetBetweenSpecs: boolean }) {

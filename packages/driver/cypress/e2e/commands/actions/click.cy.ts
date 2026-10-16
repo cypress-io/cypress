@@ -1263,101 +1263,6 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('does not scroll when scrollBehavior is false in options', () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click({ scrollBehavior: false })
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).not.to.be.called
-        })
-      })
-
-      it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click()
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
-        })
-      })
-
-      it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click()
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'center' })
-        })
-      })
-
-      it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click()
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'nearest' })
-        })
-      })
-
-      it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click()
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).not.to.be.called
-        })
-      })
-
-      it('calls scrollIntoView by default', () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click()
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
-        })
-      })
-
-      it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.click()` failed because the center of this element is hidden from view')
-          expect(cy.state('window').scrollY).to.equal(0)
-          expect(cy.state('window').scrollX).to.equal(0)
-
-          done()
-        })
-
-        // make sure the input is out of view
-        const $body = cy.$$('body')
-
-        $('<div>Long block 5</div>')
-        .css({
-          height: '500px',
-          border: '1px solid red',
-          marginTop: '10px',
-          width: '100%',
-        }).prependTo($body)
-
-        cy.get('input:first').click({ scrollBehavior: false, timeout: 200 })
-      })
-
       it('can force click on hidden elements', () => {
         cy.get('button:first').invoke('hide').click({ force: true })
       })
@@ -1692,6 +1597,19 @@ describe('src/cy/commands/actions/click', () => {
             Cypress.config('animationDistanceThreshold', old)
           }
         })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/565
+      it('scrolls a table cell under fixed and sticky headers into view in a small viewport', () => {
+        cy.viewport(400, 400)
+        cy.visit('/fixtures/issue-565.html')
+        cy.get('td:first').click()
+      })
+
+      // https://github.com/cypress-io/cypress/issues/8279
+      it('can click a button inside a large div with tabindex=0 without scrolling', () => {
+        cy.visit('/fixtures/issue-8279.html')
+        cy.get('#clickme').click()
       })
 
       describe('scroll-behavior', () => {

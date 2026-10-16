@@ -46,19 +46,11 @@ exports['e2e async timeouts / failing1'] = `
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     async_timeouts.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts.cy.js/async -- bar fails (failed     (1280x720)
-     ).png                                                                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts.cy.js/async -- fails async after     (1280x720)
-      cypress command (failed).png                                                                  
 
 
 ====================================================================================================

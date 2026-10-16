@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import os from 'os'
 import path from 'path'
 import { randomUUID } from 'crypto'
 
@@ -8,6 +7,7 @@ import * as files from '../files'
 import { fs } from '../util/fs'
 import * as task from '../task'
 import { getUserDefinedEnvironmentVariables } from '../getUserDefinedEnvs'
+import { serializeForInlineScript } from '@packages/network-tools'
 
 interface SpecOriginatedCommand {
   name: string
@@ -44,22 +44,16 @@ class PrivilegedCommandsManager {
     this.channelKeys[options.url] = key
 
     const script = (await fs.readFileAsync(path.join(__dirname, 'privileged-channel.js'))).toString()
-    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => {
-      if (os.platform() === 'win32') {
-        return relativeUrl.replaceAll('\\', '\\\\')
-      }
-
-      return relativeUrl
-    }))
+    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => relativeUrl))
 
     return `${script}({
-      browserFamily: '${options.browserFamily}',
-      isSpecBridge: ${options.isSpecBridge || 'false'},
-      key: '${key}',
-      namespace: '${options.namespace}',
-      scripts: '${specScripts}',
-      url: '${options.url}',
-      documentDomainContext: ${options.documentDomainContext},
+      browserFamily: ${serializeForInlineScript(options.browserFamily)},
+      isSpecBridge: ${serializeForInlineScript(!!options.isSpecBridge)},
+      key: ${serializeForInlineScript(key)},
+      namespace: ${serializeForInlineScript(options.namespace)},
+      scripts: ${serializeForInlineScript(specScripts)},
+      url: ${serializeForInlineScript(options.url)},
+      documentDomainContext: ${serializeForInlineScript(!!options.documentDomainContext)},
     })`
   }
 
@@ -100,7 +94,7 @@ class PrivilegedCommandsManager {
       case 'env':
         return getUserDefinedEnvironmentVariables({ requestedKeys: options.envVars, userDefinedEnvironmentVariables: config.env || {} })
       case 'exec':
-        return exec.run(config.projectRoot, options)
+        return exec.run()
       case 'origin':
         // only need to verify that it's spec-originated above
         return

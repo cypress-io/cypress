@@ -17,9 +17,9 @@ yarn lint         # ESLint
 ## Gotchas / Notes
 
 - The `build` script tolerates type errors (`|| echo 'built, with type errors'`) — check `yarn check-ts` separately for a clean type report.
-- The `postbuild` step syncs `dist/` to both `cli/mount-utils/` and `{projectRoot}/dist` — required before any adapter package that depends on it can build correctly.
+- `postbuild` re-exports this package into `cli/mount-utils/` — build it before any adapter that depends on it. See [`npm/AGENTS.md`](../AGENTS.md).
 - This package has no test script; it is a pure utility library validated through the consuming adapter packages.
 
 ## Integration Points
 
-- Consumed by `@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/angular-zoneless`, and `@cypress/svelte` as a build-time (`devDependencies`) dependency.
+- Consumed by `@cypress/react`, `@cypress/vue`, `@cypress/angular`, and `@cypress/svelte` as a build-time (`devDependencies`) dependency.

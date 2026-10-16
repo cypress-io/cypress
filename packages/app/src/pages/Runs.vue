@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Ref, ref, watchEffect } from 'vue'
+import { ref, watchEffect } from 'vue'
 import RunsSkeleton from '../runs/RunsSkeleton.vue'
 import RunsContainer from '../runs/RunsContainer.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
@@ -29,6 +29,7 @@ import { useOnline } from '@vueuse/core'
 import { useProjectRuns } from '../runs/useProjectRuns'
 import { useGitTreeRuns } from '../runs/useGitTreeRuns'
 import type { RunsComposable } from '../runs/RunsComposable'
+import type { Ref } from 'vue'
 
 const isOnlineRef = ref(true)
 const online = useOnline()

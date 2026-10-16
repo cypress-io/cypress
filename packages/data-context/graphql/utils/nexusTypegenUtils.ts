@@ -2,7 +2,6 @@
 /* eslint-disable no-restricted-syntax */
 import { spawn, execSync } from 'child_process'
 import chalk from 'chalk'
-import pDefer from 'p-defer'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -32,7 +31,7 @@ async function windowsTouch (filename: string, time: Date) {
 }
 
 async function nexusTypegen (cfg: NexusTypegenCfg) {
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
 
   if (cfg.outputPath) {
     await fs.ensureDir(path.join(dataContextPackageRoot, 'src/gen'))

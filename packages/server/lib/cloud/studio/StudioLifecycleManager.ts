@@ -214,7 +214,6 @@ export class StudioLifecycleManager {
 
         hashLoadingPromise = ensureStudioBundle({
           studioUrl: studioSession.studioUrl,
-          projectId: currentProjectOptions.projectSlug,
         })
 
         StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
@@ -293,7 +292,7 @@ export class StudioLifecycleManager {
       projectId: currentProjectOptions.projectSlug,
       testingType: cfg.testingType,
       cloudApi: {
-        url: routes.apiUrl,
+        url: routes.getApiUrl(),
         retryWithBackoff: api.retryWithBackoff,
         requestPromise: api.rp,
       },

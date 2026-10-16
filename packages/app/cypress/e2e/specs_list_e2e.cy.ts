@@ -119,12 +119,12 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item-link').should('have.attr', 'href')
       cy.findAllByTestId('spec-item-link').contains('dom-content.spec.js').click()
 
-      cy.contains('Your tests are loading...').should('not.exist')
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().contains('Your tests are loading...').should('not.exist')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
 
       cy.get('[data-selected-spec="true"]').contains('dom-content.spec.js')
-      cy.findByTestId('runnable-header').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
     })
 
     it('updates the spec filename when a new spec is selected', () => {
@@ -132,19 +132,19 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item-link').contains('accounts_list.spec.js').click()
 
       // ensure the tests are loaded
-      cy.contains('Your tests are loading...').should('not.exist')
+      cy.reporter().contains('Your tests are loading...').should('not.exist')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       // open the inline spec list
       cy.get('body').type('f')
 
       // verify the first spec filename
-      cy.findByTestId('runnable-header').contains('accounts_list.spec.js')
+      cy.reporter().find('[data-cy="runnable-header"]').contains('accounts_list.spec.js')
 
       // select the second spec from the inline spec list
       cy.findAllByTestId('spec-file-item').contains('accounts_new.spec.js').click()
       // verify the spec filename was updated
-      cy.findByTestId('runnable-header').contains('accounts_new.spec.js')
+      cy.reporter().find('[data-cy="runnable-header"]').contains('accounts_new.spec.js')
     })
 
     it('cannot open the Spec File Row link in a new tab with "cmd + click"', (done) => {
@@ -359,14 +359,14 @@ describe('App: Spec List (E2E)', () => {
         cy.contains('a', targetSpecFile).click()
 
         // make sure we are on the spec view before clicking back to the specs list
-        cy.findByTestId('runnable-header').contains(targetSpecFile)
+        cy.reporter().find('[data-cy="runnable-header"]').contains(targetSpecFile)
 
         cy.contains('input', targetSpecFile).should('not.exist')
 
         // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before expanding the "Search specs" menu.
         // Otherwise, the click happens before the event is registered, which causes the "Search Specs" menu to not expand.
-        cy.get('[data-cy="runnable-header"]').should('be.visible')
-        cy.findByTestId('toggle-specs-button').click({ force: true })
+        cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
+        cy.reporter().find('[data-cy="toggle-specs-button"]').click({ force: true })
 
         // wait until specs list is visible
         cy.findByTestId('specs-list-container').should('be.visible')

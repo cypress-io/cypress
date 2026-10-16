@@ -60,10 +60,11 @@ describe('Launchpad: Setup Project', () => {
   const verifyChooseABrowserPage = () => {
     cy.contains('Choose a browser', { timeout: 15000 })
 
-    cy.findByRole('radio', { name: 'Chrome v1' })
-    cy.findByRole('radio', { name: 'Firefox v6' })
-    cy.findByRole('radio', { name: 'Electron v13' })
-    cy.findByRole('radio', { name: 'Edge v9' })
+    cy.getByRole('radio', { name: 'Chrome v1', native: false })
+    cy.getByRole('radio', { name: 'Firefox v6', native: false })
+    // Electron's accessible name includes its deprecated ribbon text.
+    cy.getByRole('radio', { name: /Electron v13/, native: false })
+    cy.getByRole('radio', { name: 'Edge v9', native: false })
   }
 
   beforeEach(() => {
@@ -120,7 +121,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key differences' }).should('be.visible')
+      cy.getByRole('dialog', { name: 'Key differences', native: false }).should('be.visible')
       cy.contains('Need help').should('be.visible')
 
       cy.get('[data-cy="end-to-end-comparison"]').within(() => {
@@ -140,7 +141,7 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key differences' })
+      cy.getByRole('dialog', { name: 'Key differences', native: false })
       .as('aboutTestingTypes')
       .should('be.visible')
 
@@ -153,7 +154,7 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key differences' })
+      cy.getByRole('dialog', { name: 'Key differences', native: false })
       .as('aboutTestingTypes')
       .should('be.visible')
 
@@ -166,14 +167,14 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key differences' })
+      cy.getByRole('dialog', { name: 'Key differences', native: false })
       .as('aboutTestingTypes')
       .should('be.visible')
       .within(() => {
         cy.get('h2').contains('Key differences').should('be.visible')
       })
 
-      cy.findByRole('button', { name: 'Close' }).click()
+      cy.getByRole('button', { name: 'Close' }).click()
       cy.get('#app').should('not.have.attr', 'aria-hidden')
       cy.get('@aboutTestingTypes').should('not.exist')
     })
@@ -182,13 +183,13 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key differences' })
+      cy.getByRole('dialog', { name: 'Key differences', native: false })
       .as('aboutTestingTypes')
       .should('be.visible')
       .within(() => {
         cy.get('h2').contains('Key differences').should('be.visible')
 
-        cy.findByRole('button', { name: 'Close' })
+        cy.getByRole('button', { name: 'Close' })
         .focus()
         .type('{enter}')
       })
@@ -201,7 +202,7 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key differences' })
+      cy.getByRole('dialog', { name: 'Key differences', native: false })
       .should('be.visible')
       .within(() => {
         cy.validateExternalLink({
@@ -257,7 +258,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyScaffoldedFiles('e2e')
 
-        cy.findByRole('button', { name: 'Continue' })
+        cy.getByRole('button', { name: 'Continue' })
         .should('not.be.disabled')
         .click()
       })
@@ -280,7 +281,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyScaffoldedFiles('e2e')
 
-        cy.findByRole('button', { name: 'Continue' })
+        cy.getByRole('button', { name: 'Continue' })
         .should('not.be.disabled')
         .click()
 
@@ -321,7 +322,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyScaffoldedFiles('e2e')
 
-        cy.findByRole('button', { name: 'Continue' })
+        cy.getByRole('button', { name: 'Continue' })
         .should('not.be.disabled')
         .click()
 
@@ -355,7 +356,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyScaffoldedFiles('e2e')
 
-        cy.findByRole('button', { name: 'Continue' })
+        cy.getByRole('button', { name: 'Continue' })
         .should('not.be.disabled')
         .click()
 
@@ -375,35 +376,35 @@ describe('Launchpad: Setup Project', () => {
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
         cy.contains('Pick a framework').click()
-        cy.findByRole('option', { name: 'React.js' }).click()
+        cy.getByRole('option', { name: 'React.js', native: false }).click()
 
         cy.contains('Pick a bundler').click()
-        cy.findByRole('option', { name: 'Vite' }).click()
+        cy.getByRole('option', { name: 'Vite', native: false }).click()
 
-        cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled')
+        cy.getByRole('button', { name: 'Next step' }).should('not.be.disabled')
 
-        cy.findByRole('button', { name: 'Back' }).click()
+        cy.getByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Next step' }).should('be.disabled')
+        cy.getByRole('button', { name: 'Next step' }).should('be.disabled')
 
         cy.contains('Pick a framework').click()
-        cy.findByRole('option', { name: 'React.js' }).click()
-        cy.findByRole('button', { name: 'Next step' }).should('be.disabled')
+        cy.getByRole('option', { name: 'React.js', native: false }).click()
+        cy.getByRole('button', { name: 'Next step' }).should('be.disabled')
 
         // Create-React-Scaffolding was removed in Cypress 14. Users now MUST select a bundler.
         cy.contains('Pick a bundler').click()
-        cy.findByRole('option', { name: 'Webpack' }).click()
+        cy.getByRole('option', { name: 'Webpack', native: false }).click()
 
-        cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled')
-        cy.findByRole('button', { name: 'Next step' }).click()
-        cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
+        cy.getByRole('button', { name: 'Next step' }).should('not.be.disabled')
+        cy.getByRole('button', { name: 'Next step' }).click()
+        cy.getByRole('button', { name: 'Waiting for you to install the dependencies...' })
 
         cy.contains('li', 'webpack')
         cy.contains('li', 'react')
         cy.contains('li', 'react-dom')
 
-        cy.findByRole('button', { name: 'Skip' }).click()
+        cy.getByRole('button', { name: 'Skip' }).click()
 
         cy.get('[data-cy=valid]').as('valid').contains('cypress.config.js')
         cy.get('@valid').containsPath('cypress/support/component-index.html')
@@ -503,26 +504,26 @@ describe('Launchpad: Setup Project', () => {
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
         cy.contains('Pick a framework').click()
-        cy.findByRole('option', { name: 'React.js' }).click()
+        cy.getByRole('option', { name: 'React.js', native: false }).click()
 
         cy.contains('Pick a bundler').click()
-        cy.findByRole('option', { name: 'Webpack' }).click()
+        cy.getByRole('option', { name: 'Webpack', native: false }).click()
 
-        cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled')
+        cy.getByRole('button', { name: 'Next step' }).should('not.be.disabled')
 
-        cy.findByRole('button', { name: 'Back' }).click()
+        cy.getByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
         cy.contains('Pick a framework').click()
-        cy.findByRole('option', { name: 'Vue.js 3' }).click()
+        cy.getByRole('option', { name: 'Vue.js 3', native: false }).click()
 
-        cy.findByRole('button', { name: 'Pick a bundler' }).click()
-        cy.findByRole('option', { name: 'Vite' }).click()
+        cy.getByRole('button', { name: 'Pick a bundler' }).click()
+        cy.getByRole('option', { name: 'Vite', native: false }).click()
 
-        cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled')
-        cy.findByRole('button', { name: 'Next step' }).click()
+        cy.getByRole('button', { name: 'Next step' }).should('not.be.disabled')
+        cy.getByRole('button', { name: 'Next step' }).click()
 
-        cy.findByRole('button', { name: 'Skip' }).click()
+        cy.getByRole('button', { name: 'Skip' }).click()
 
         cy.contains('cypress.config.js')
         cy.containsPath('cypress/support/component-index.html')
@@ -530,7 +531,7 @@ describe('Launchpad: Setup Project', () => {
         cy.containsPath('cypress/support/commands.js')
         cy.containsPath('cypress/fixtures/example.json')
 
-        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.getByRole('button', { name: 'Continue' }).click()
       })
 
       it('setup component testing with typescript files', () => {
@@ -546,13 +547,13 @@ describe('Launchpad: Setup Project', () => {
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
         cy.contains('Pick a framework').click()
-        cy.findByRole('option', { name: 'React.js' }).click()
+        cy.getByRole('option', { name: 'React.js', native: false }).click()
 
         cy.contains('Pick a bundler').click()
-        cy.findByRole('option', { name: 'Webpack' }).click()
+        cy.getByRole('option', { name: 'Webpack', native: false }).click()
 
-        cy.findByRole('button', { name: 'Next step' }).click()
-        cy.findByRole('button', { name: 'Skip' }).click()
+        cy.getByRole('button', { name: 'Next step' }).click()
+        cy.getByRole('button', { name: 'Skip' }).click()
 
         cy.contains('cypress.config.ts')
         cy.containsPath('cypress/support/component-index.html')
@@ -562,36 +563,34 @@ describe('Launchpad: Setup Project', () => {
 
         verifyScaffoldedFiles('component')
 
-        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.getByRole('button', { name: 'Continue' }).click()
       })
     })
   })
 
   describe('Command for package managers', () => {
     it('makes the right command for yarn', () => {
-      scaffoldAndOpenProject('pristine-yarn')
+      scaffoldAndOpenProject('pristine-yarn', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('React.js').click()
       cy.contains('Pick a bundler').click()
-      cy.findByRole('option', { name: 'Webpack' }).click()
+      cy.getByRole('option', { name: 'Webpack', native: false }).click()
       cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('yarn add -D webpack react react-dom').should('be.visible')
     })
 
     it('makes the right command for pnpm', () => {
-      scaffoldAndOpenProject('pristine-pnpm')
+      scaffoldAndOpenProject('pristine-pnpm', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('React.js').click()
       cy.contains('Pick a bundler').click()
-      cy.findByRole('option', { name: 'Vite' }).click()
+      cy.getByRole('option', { name: 'Vite', native: false }).click()
       cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('pnpm add -D vite react react-dom')
     })
@@ -600,11 +599,10 @@ describe('Launchpad: Setup Project', () => {
     // Would be great to fully support Plug n Play eventually, but right now it causes issues relating
     // to not correctly detecting dependencies when installing the binary.
     it.skip('works with Yarn 3 Plug n Play', () => {
-      scaffoldAndOpenProject('yarn-v3.1.1-pnp')
+      scaffoldAndOpenProject('yarn-v3.2.0-pnp', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.contains('button', 'Vue.js 3(detected)').should('be.visible')
       cy.contains('button', 'Vite(detected)').should('be.visible')
       cy.contains('button', 'Next step').should('not.be.disabled').click()
@@ -612,15 +610,14 @@ describe('Launchpad: Setup Project', () => {
     })
 
     it('makes the right command for npm', () => {
-      scaffoldAndOpenProject('pristine-npm')
+      scaffoldAndOpenProject('pristine-npm', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('React.js').click()
       cy.contains('Pick a bundler').click()
-      cy.findByRole('option', { name: 'Webpack' }).click()
+      cy.getByRole('option', { name: 'Webpack', native: false }).click()
       cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('npm install -D webpack react react-dom')
     })
@@ -628,16 +625,15 @@ describe('Launchpad: Setup Project', () => {
 
   describe('openLink', () => {
     it('opens docs link in the default browser', () => {
-      scaffoldAndOpenProject('pristine-with-e2e-testing')
+      scaffoldAndOpenProject('pristine-with-e2e-testing', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
-      cy.get('[data-testid="select-framework"]').click()
+      cy.get('[data-testid="select-framework"]', { timeout: 10000 }).click()
       cy.findByText('Vue.js 3').click()
       cy.contains('button', 'Pick a bundler').click()
       cy.findByText('Webpack').click()
-      cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled').click()
+      cy.getByRole('button', { name: 'Next step' }).should('not.be.disabled').click()
       cy.withCtx(async (ctx) => {
         Object.defineProperty(ctx.coreData, 'scaffoldedFiles', {
           get () {
@@ -659,7 +655,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
 
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.getByRole('button', { name: 'Skip' }).click()
       cy.findByText('Learn more', { timeout: 10000 }).click()
       cy.wait('@OpenExternal')
       .its('request.body.variables.url')

@@ -48,7 +48,6 @@ describe('module api, after:spec, and after:run results', () => {
     outputPath,
     expectedExitCode: 3,
     config: {
-      allowCypressEnv: false,
       retries: 2,
     },
     async onRun (execFn) {

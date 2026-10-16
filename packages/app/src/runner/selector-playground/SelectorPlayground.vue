@@ -44,11 +44,16 @@
         >
           <span class="text-gray-300">cy</span>.<span class="text-jade-300">{{ selectorPlaygroundStore.method }}</span>(‘
         </span>
+        <!--
+          `autocorrect` reflects as a boolean IDL property, so Vue setting it as a DOM
+          property coerces the string `off` to `true` and reflects back as
+          `autocorrect="on"`, autocorrecting typed selectors. Bind it as an attribute.
+        -->
         <input
           v-model="selector"
           autocapitalize="none"
           autocomplete="off"
-          autocorrect="off"
+          :autocorrect.attr="'off'"
           spellcheck="false"
           aria-label="selector"
           data-cy="playground-selector"

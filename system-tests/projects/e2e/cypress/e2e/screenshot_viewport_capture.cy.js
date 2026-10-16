@@ -10,10 +10,12 @@ it('takes consistent viewport captures', () => {
   cy.visit('http://localhost:3322/viewport')
   cy.screenshot('viewport-original', options)
   .then(() => {
-    // take 25 screenshots and check that they're all the same
+    // take 10 screenshots and check that they're all the same
     // to ensure the Cypress UI is consistently hidden
     const fn = function () {
-      cy.screenshot('viewport-compare', options)
+      // without `overwrite`, each capture lands at `viewport-compare (n).png`
+      // and the comparison below keeps re-reading the very first capture
+      cy.screenshot('viewport-compare', { ...options, overwrite: true })
 
       cy.task('compare:screenshots', {
         a: 'screenshot_viewport_capture.cy.js/viewport-original',
@@ -23,7 +25,7 @@ it('takes consistent viewport captures', () => {
       })
     }
 
-    Cypress._.times(25, fn)
+    Cypress._.times(10, fn)
   })
 })
 

@@ -1,9 +1,10 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 // @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from '../lib/tooltip'
 import Button from '@cypress-design/react-button'
-import defaultEvents, { Events } from '../lib/events'
+import type { Events } from '../lib/events'
+import defaultEvents from '../lib/events'
 import type { AppState } from '../lib/app-state'
 import { action } from 'mobx'
 import type { StatsStore } from './stats-store'

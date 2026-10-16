@@ -46,7 +46,7 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Edge v9', checked: true })
+      cy.getByRole('radio', { name: 'Edge v9', native: false }).filter('[aria-checked="true"]')
 
       cy.percySnapshot()
 
@@ -87,7 +87,10 @@ describe('Choose a browser page', () => {
 
       cy.openProject('launchpad', ['--e2e', '--browser', path])
 
-      cy.visitLaunchpad()
+      // Launchpad re-fetches its config on an increasing backoff while the project
+      // loads (see Main.vue), so the loading spinner can outlast visitLaunchpad's
+      // default settle timeout under CI load. Allow more time so it can clear.
+      cy.visitLaunchpad({ spinnerTimeout: 30000 })
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -115,7 +118,7 @@ describe('Choose a browser page', () => {
       cy.get('[data-cy="alert-suffix-icon"]').click()
       cy.get('[data-cy="alert-header"]').should('not.exist')
 
-      cy.visitLaunchpad()
+      cy.visitLaunchpad({ spinnerTimeout: 30000 })
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('not.exist')
     })
@@ -127,13 +130,26 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1' })
+      cy.getByRole('radio', { name: 'Chrome v1', native: false })
 
-      cy.findByRole('radio', { name: 'Firefox v6' })
+      cy.getByRole('radio', { name: 'Firefox v6', native: false })
 
-      cy.findByRole('radio', { name: 'Electron v13' })
+      // Electron's accessible name includes its deprecated ribbon text.
+      cy.getByRole('radio', { name: /Electron v13/, native: false })
 
-      cy.findByRole('radio', { name: 'Edge v9' })
+      cy.getByRole('radio', { name: 'Edge v9', native: false })
+
+      // Electron is deprecated: it sorts after the other supported browsers and
+      // renders a deprecated ribbon with an informational tooltip.
+      cy.get('[data-cy="open-browser-list"] [data-cy-browser]').last()
+      .should('have.attr', 'data-cy-browser', 'electron')
+
+      cy.get('[data-cy-browser="electron"]').within(() => {
+        cy.findByTestId('deprecated-ribbon').should('contain', 'Deprecated').trigger('mouseenter')
+      })
+
+      cy.contains('Deprecated browser').should('be.visible')
+      cy.contains('a', 'See supported browsers').should('have.attr', 'href', 'https://on.cypress.io/launching-browsers')
     })
 
     it('performs mutation to launch selected browser when launch button is pressed', () => {
@@ -195,8 +211,8 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
-      cy.findByRole('radio', { name: 'Firefox v6', checked: false }).as('firefoxItem')
+      cy.getByRole('radio', { name: 'Chrome v1', native: false }).filter('[aria-checked="true"]').as('chromeItem')
+      cy.getByRole('radio', { name: 'Firefox v6', native: false }).filter('[aria-checked="false"]').as('firefoxItem')
 
       cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
 
@@ -206,8 +222,8 @@ describe('Choose a browser page', () => {
         cy.wait('@setBrowser').its('request.body.variables.id').should('eq', $label.attr('for'))
       })
 
-      cy.findByRole('radio', { name: 'Chrome v1', checked: false })
-      cy.findByRole('radio', { name: 'Firefox v6', checked: true })
+      cy.getByRole('radio', { name: 'Chrome v1', native: false }).filter('[aria-checked="false"]')
+      cy.getByRole('radio', { name: 'Firefox v6', native: false }).filter('[aria-checked="true"]')
 
       cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
     })
@@ -233,6 +249,11 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+
+      // `visitLaunchpad` resolves before the browser list mounts, and the list only learns
+      // about status changes through the subscription it opens on mount.
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
+
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
@@ -244,16 +265,18 @@ describe('Choose a browser page', () => {
       cy.wait('@closeBrowser')
     })
 
-    it('performs mutation to focus open browser when focus button is pressed', { retries: 15 }, () => {
+    it('performs mutation to focus open browser when focus button is pressed', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
 
+      cy.get('h1').should('contain', 'Choose a browser')
+
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
+
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
-
-      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.contains('button', 'Running Chrome').as('launchButton')
 
@@ -303,7 +326,7 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
+      cy.getByRole('radio', { name: 'Chrome v1', native: false }).filter('[aria-checked="true"]').as('chromeItem')
 
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.project, 'launchProject')
@@ -325,7 +348,7 @@ describe('Choose a browser page', () => {
       })
 
       cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
-      cy.findByRole('radio', { name: 'Firefox v6', checked: true }).should('be.visible')
+      cy.getByRole('radio', { name: 'Firefox v6', native: false }).filter('[aria-checked="true"]').should('be.visible')
     })
 
     it('should return to welcome screen if user modifies the config file to not include the current testing type and recover', () => {
@@ -373,7 +396,13 @@ describe('Choose a browser page', () => {
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
-      cy.findByRole('radio', { name: 'Electron v13', checked: true })
+      cy.getByRole('radio', { name: /Electron v13/, native: false }).filter('[aria-checked="true"]')
+
+      // Even as the lone, preselected browser, Electron is marked deprecated.
+      cy.get('[data-cy-browser="electron"]').within(() => {
+        cy.findByTestId('deprecated-ribbon').should('contain', 'Deprecated')
+      })
+
       cy.percySnapshot()
     })
   })

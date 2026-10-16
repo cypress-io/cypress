@@ -1,7 +1,8 @@
 /// <reference lib="dom" />
 import { v4 as uuidv4 } from 'uuid'
 import { decode, encode } from '../utils'
-import { Emitter, DefaultEventsMap } from '@socket.io/component-emitter'
+import type { DefaultEventsMap } from '@socket.io/component-emitter'
+import { Emitter } from '@socket.io/component-emitter'
 
 // Match the shape socket.io-client's `Socket` exposes (it also extends this Emitter), so
 // `client()` and `createWebsocket()` can return either a real Socket or a CDPBrowserSocket.
@@ -70,7 +71,10 @@ export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap
     }
 
     await encode([event, uuid, args], this._namespace).then((encoded: any) => {
-      window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
+      // Playwright-exposed bindings return a page-side promise that rejects when the
+      // page or context is torn down mid-send; swallow it so it doesn't surface as an
+      // unhandled rejection in the runner. CDP bindings return undefined synchronously.
+      Promise.resolve(window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))).catch(() => {})
     })
 
     return this

@@ -148,7 +148,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
     validKeys.push('passesRequired')
 
     if (_.isNull(value.passesRequired) || value.passesRequired === undefined) {
-      return errMsg(`${key}.passesRequired`, value.stopIfAnyPassed, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
+      return errMsg(`${key}.passesRequired`, value.passesRequired, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
     }
 
     const isValidPassesRequired = Number.isInteger(value.passesRequired) && value.passesRequired >= 1 && value.passesRequired <= value.maxRetries
@@ -260,6 +260,49 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
 
     if (isValidValue !== true) {
       return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy')
+    }
+  }
+
+  return true
+}
+
+// the per-axis form takes the same values as the native `scrollIntoView`
+const SCROLL_BEHAVIOR_POSITIONS = ['center', 'start', 'end', 'nearest']
+// a single value also accepts the block-axis-only alignments
+const SCROLL_BEHAVIOR_ALIGNMENTS = [...SCROLL_BEHAVIOR_POSITIONS, 'top', 'bottom']
+const SCROLL_BEHAVIOR_AXES = ['block', 'inline']
+const SCROLL_BEHAVIOR_POSITION_HINTS: Record<string, string> = { top: 'start', bottom: 'end' }
+
+/**
+ * Checks that a value is a valid `scrollBehavior`: `false`, one alignment applied
+ * to both axes, or a per-axis object such as `{ block: 'start', inline: 'nearest' }`.
+ */
+export const isValidScrollBehavior = (key: string, value: any): ErrResult | true => {
+  const alignments = SCROLL_BEHAVIOR_ALIGNMENTS.map((a) => str(a)).join(', ')
+  const positions = SCROLL_BEHAVIOR_POSITIONS.map((p) => str(p)).join(', ')
+  const expected = `one of these values: ${alignments}, false, or an object with keys "block" and/or "inline" set to one of ${positions}`
+
+  if (value === false || SCROLL_BEHAVIOR_ALIGNMENTS.includes(value)) {
+    return true
+  }
+
+  if (!_.isPlainObject(value)) {
+    return errMsg(key, value, expected)
+  }
+
+  const axes = Object.keys(value)
+
+  if (!axes.length || !axes.every((axis) => SCROLL_BEHAVIOR_AXES.includes(axis))) {
+    return errMsg(key, value, expected)
+  }
+
+  for (const axis of axes) {
+    const position = value[axis]
+
+    if (!SCROLL_BEHAVIOR_POSITIONS.includes(position)) {
+      const hint = SCROLL_BEHAVIOR_POSITION_HINTS[position]
+
+      return errMsg(`${key}.${axis}`, position, `one of these values: ${positions}${hint ? ` (use ${str(hint)} instead of ${str(position)})` : ''}`)
     }
   }
 
@@ -412,9 +455,49 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     if (certsForUrl.ca) {
       for (let k = 0; k < certsForUrl.ca.length; k++) {
         if (path.isAbsolute(certsForUrl.ca[k] || '')) {
-          return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+          return errMsg(`clientCertificates[${i}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
         }
       }
+    }
+  }
+
+  return true
+}
+
+const TRUSTED_CERTIFICATE_KEYS = ['filePath', 'pem', 'spki']
+// Chrome's --ignore-certificate-errors-spki-list format: base64 SHA-256 (32 bytes → 43 chars + '=').
+const SPKI_FINGERPRINT = /^[A-Za-z0-9+/]{43}=$/
+
+/**
+ * Validates the `trustedCertificates` list. Each entry must be an object with
+ * exactly one of `filePath`, `pem`, or `spki` set to a non-empty string.
+ * @returns {string|true} Returns `true` if the list is valid. Returns an error message if it is not.
+ */
+export const isValidTrustedCertificates = (key: string, value: any): ErrResult | true => {
+  if (!Array.isArray(value)) {
+    return errMsg(key, value, 'an array of trusted certificate objects')
+  }
+
+  for (const [i, entry] of value.entries()) {
+    if (!_.isPlainObject(entry)) {
+      return errMsg(`${key}[${i}]`, entry, 'an object with exactly one of "filePath", "pem", or "spki"')
+    }
+
+    const keys = Object.keys(entry)
+
+    if (keys.length !== 1 || !TRUSTED_CERTIFICATE_KEYS.includes(keys[0]!)) {
+      return errMsg(`${key}[${i}]`, entry, 'an object with exactly one of "filePath", "pem", or "spki"')
+    }
+
+    const [entryKey] = keys
+    const entryValue = entry[entryKey!]
+
+    if (!_.isString(entryValue) || _.isEmpty(entryValue)) {
+      return errMsg(`${key}[${i}].${entryKey}`, entryValue, 'a non-empty string')
+    }
+
+    if (entryKey === 'spki' && !SPKI_FINGERPRINT.test(entryValue)) {
+      return errMsg(`${key}[${i}].spki`, entryValue, 'a base64-encoded SHA-256 SPKI fingerprint')
     }
   }
 
@@ -462,7 +545,7 @@ export function isArray (key: string, value: any) {
 }
 
 export function isNumberOrFalse (key: string, value: any): ErrResult | true {
-  if (_.isNumber(value) || isFalse(value)) {
+  if (value == null || _.isNumber(value) || isFalse(value)) {
     return true
   }
 

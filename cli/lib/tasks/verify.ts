@@ -3,7 +3,6 @@ import chalk from 'chalk'
 import { Listr, PRESET_TIMESTAMP } from 'listr2'
 import Debug from 'debug'
 import { stripIndent } from 'common-tags'
-import Bluebird from 'bluebird'
 import logSymbols from 'log-symbols'
 import os from 'os'
 import { throwFormErrorText, errors } from '../errors'
@@ -213,10 +212,7 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
 
       await state.clearBinaryStateAsync(binaryDir)
 
-      await Promise.all([
-        runSmokeTest(binaryDir, options),
-        Bluebird.delay(1500), // good user experience
-      ])
+      await runSmokeTest(binaryDir, options)
 
       debug('write verified: true')
 

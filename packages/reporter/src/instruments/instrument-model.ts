@@ -9,12 +9,14 @@ export interface AliasObject {
 
 export type Alias = string | Array<string> | null | AliasObject | Array<AliasObject>
 
+export type AliasType = 'agent' | 'dom' | 'primitive' | 'route'
+
 type DefaultCollapsedState = 'closed' | 'open'
 
 export interface InstrumentProps {
   id: number
   alias?: Alias
-  aliasType?: 'agent' | 'dom' | 'primitive' | 'route'
+  aliasType?: AliasType
   displayName?: string
   name?: string
   message?: string
@@ -30,7 +32,7 @@ export interface InstrumentProps {
 
 export default class Log {
   alias?: Alias
-  aliasType?: string
+  aliasType?: AliasType
   displayName?: string
   id?: number
   name?: string

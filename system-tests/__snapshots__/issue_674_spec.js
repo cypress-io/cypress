@@ -46,19 +46,11 @@ exports['e2e issue 674 / fails'] = `
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_674.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_674.cy.js/issue 674 -- does not hang when     (1280x720)
-      both beforeEach and afterEach fail -- before each hook (failed).png                           
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_674.cy.js/issue 674 -- does not hang when     (1280x720)
-      both beforeEach and afterEach fail -- after each hook (failed).png                            
 
 
 ====================================================================================================

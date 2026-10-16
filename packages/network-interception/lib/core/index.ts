@@ -11,3 +11,5 @@ export * from './document-preparation'
 export * from './request-logging'
 
 export * from './network-interception-core'
+
+export * from './http-intercept'

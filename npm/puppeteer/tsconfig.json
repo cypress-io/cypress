@@ -5,6 +5,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
+    "moduleResolution": "node",
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

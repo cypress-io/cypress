@@ -45,17 +45,11 @@ We dynamically generated a new test to display this failure.
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_synchronous_before_tests_parsed.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_before_tests_parsed.js/An      (1280x720)
-     uncaught error was detected outside of a test (failed).png                                     
 
 
 ====================================================================================================
@@ -120,17 +114,11 @@ We dynamically generated a new test to display this failure.
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_synchronous_during_hook.cy.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_during_hook.cy.js/An uncau     (1280x720)
-     ght error was detected outside of a test (failed).png                                          
 
 
 ====================================================================================================
@@ -222,21 +210,11 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Failing:      3                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  3                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_during_test.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test.cy.js/foo -- fails with se     (1280x720)
-     tTimeout (failed).png                                                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test.cy.js/foo -- fails with se     (1280x720)
-     tTimeout and done (failed).png                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test.cy.js/foo -- fails with as     (1280x720)
-     ync app code error (failed).png                                                                
 
 
 ====================================================================================================
@@ -304,17 +282,11 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_during_hook.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_hook.cy.js/foo -- does not run      (1280x720)
-     -- before all hook (failed).png                                                                
 
 
 ====================================================================================================
@@ -395,23 +367,11 @@ exports['e2e uncaught errors / failing5'] = `
   │ Failing:      4                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  4                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     caught_async_sync_test.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test.cy.js/foo -- baz fails (     (1280x720)
-     failed).png                                                                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test.cy.js/foo -- bar fails (     (1280x720)
-     failed).png                                                                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test.cy.js/foo -- quux fails      (1280x720)
-     (failed).png                                                                                   
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test.cy.js/foo -- quux2 fails     (1280x720)
-      (failed).png                                                                                  
 
 
 ====================================================================================================

@@ -1,10 +1,4 @@
-@import 'lib/variables';
-@import 'lib/mixins';
 @import 'lib/fonts';
 @import 'lib/base';
-// import all other scss files in src except if they are in lib 
-// or their file name is `main`
-// NOTA: no need to import scss files in their components
-@import '../../runner/src/!(lib)*/**/!(assertions-menu|main).scss';
 
 @import '../../reporter/src/main-runner';

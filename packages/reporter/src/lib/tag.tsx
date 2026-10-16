@@ -1,9 +1,11 @@
 import cs from 'classnames'
 import React from 'react'
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from './tooltip'
+
+export type TagType = 'agent' | 'count' | 'dom' | 'failed-status' | 'primitive' | 'route' | 'successful-status' | 'warned-status'
 
 interface TagProps {
-  type?: 'agent' | 'count' | 'dom' | 'failed-status' | 'primitive' | 'route' | 'successful-status'
+  type?: TagType
   content: React.ReactNode | string
   count?: number
   tooltipMessage?: React.ReactNode | string

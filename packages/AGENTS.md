@@ -27,7 +27,6 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/network** — Node.js networking utilities: HTTP/HTTPS proxy-aware agents, CA certificate management, and connection helpers.
 - **@packages/network-tools** — Isomorphic (browser + Node.js) low-level networking utilities: CORS helpers, URI parsing, domain utilities.
 - **@packages/https-proxy** — Intercepts TLS connections by acting as a dynamic CA; generates per-hostname certificates on the fly using `node-forge`.
-- **@packages/rewriter** — Rewrites JS and HTML at proxy time to inject Cypress instrumentation (e.g., `document.domain` injection, spec bridge).
 
 ### Configuration & Data
 
@@ -48,6 +47,7 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/telemetry** — OpenTelemetry convenience wrapper for capturing performance spans and usage signals inside Cypress processes.
 - **@packages/icons** — Cypress icon assets (SVG, PNG, ICO) and build scripts that produce browser-consumable image files.
 - **@packages/stderr-filtering** — Utility for tagging and filtering noisy third-party stderr output into `debug` streams.
+- **@packages/agent-info** — Detects whether an AI coding agent invoked the current process, and which one, by fingerprinting environment variables.
 
 ### Build & Snapshot Infrastructure
 
@@ -85,8 +85,8 @@ yarn build
 ## Notes
 
 - Most packages publish both CJS (`cjs/`) and ESM (`esm/`) builds; the `main` field points to CJS and `module` to ESM.
-- `@packages/ts` provides require-time TypeScript transpilation during development so most packages do not need pre-built `.js` files to run tests locally.
+- `@packages/ts` provides require-time TypeScript transpilation during development, so do not build `.js` files by hand. Node-side packages need no pre-build to run their tests locally; the browser bundles (`driver`, `runner`, `app`, `launchpad`, `frontend-shared`, `reporter`) still do, and are built by `yarn watch` from the repo root.
 - Many packages use `vitest` for unit tests; the front-end packages (`app`, `launchpad`, `frontend-shared`) use Cypress component tests and E2E tests (cypress-in-cypress pattern).
-- The `nohoist` workspace option is set in `driver` and `frontend-shared` to prevent specific dependencies from being hoisted to the monorepo root.
+- The `nohoist` workspace option prevents specific dependencies from being hoisted to the monorepo root. It is set in `driver` (which nohoists everything, `["*"]`), `frontend-shared`, `proxy`, `server`, `socket`, and `types` — check the package's own `package.json` `workspaces.nohoist` rather than assuming.
 - Packages that depend on generated GraphQL types (from `data-context`) must run `yarn build:graphql` before type-checking will pass.
-- **When adding or removing a package under `packages/`**, regenerate the path map with `yarn gulp makePathMap` (from the repo root). This rewrites the auto-generated [`scripts/gulp/monorepoPaths.ts`](../scripts/gulp/monorepoPaths.ts) — do not hand-edit that file. It is also regenerated as part of `yarn dev`, but run the task explicitly so the change is committed alongside the package addition.
+- **When adding or removing a package under `packages/`**, regenerate the path map with `yarn gulp makePathMap` (from the repo root). This rewrites the auto-generated [`scripts/gulp/monorepoPaths.ts`](../scripts/gulp/monorepoPaths.ts), produced by [`scripts/gulp/utils/makePathMap.ts`](../scripts/gulp/utils/makePathMap.ts) from an enumeration of `packages/*` — do not hand-edit it. `yarn dev` regenerates it too, but run the task explicitly so the change is committed alongside the package addition.

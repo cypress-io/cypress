@@ -3,7 +3,6 @@ import globby from 'globby'
 import { z } from 'zod'
 import fs from 'fs-extra'
 import Debug from 'debug'
-import findUp from 'find-up'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-third-party')
 
@@ -58,6 +57,23 @@ async function hasWorkspacePackageJson (directory: string) {
   }
 }
 
+function* directoryAndAncestors (from: string): Generator<string> {
+  let directory = path.resolve(from)
+
+  while (true) {
+    yield directory
+
+    const parent = path.dirname(directory)
+
+    // `path.dirname` returns the same path once we reach the filesystem root
+    if (parent === directory) {
+      return
+    }
+
+    directory = parent
+  }
+}
+
 export async function isRepositoryRoot (directory: string) {
   if (ROOT_PATHS.some((rootPath) => fs.existsSync(path.join(directory, rootPath)))) {
     return true
@@ -94,13 +110,12 @@ export async function detectThirdPartyCTFrameworks (
   const erroredFrameworks: ErroredFramework[] = []
 
   try {
-    let fullPathGlobs
     let packageJsonPaths: string[] = []
 
     // Start at the project root and check each directory above it until we see
     // an indication that the current directory is the root of the repository.
-    await findUp(async (directory: string): Promise<findUp.Match> => {
-      fullPathGlobs = [
+    for (const directory of directoryAndAncestors(projectRoot)) {
+      const fullPathGlobs = [
         path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
         path.join(directory, CT_FRAMEWORK_NAMESPACED_GLOB),
       ].map((x) => x.replaceAll('\\', '/'))
@@ -115,17 +130,12 @@ export async function detectThirdPartyCTFrameworks (
 
       packageJsonPaths = [...packageJsonPaths, ...newPackagePaths]
 
-      const isCurrentRepositoryRoot = await isRepositoryRoot(directory)
-
-      if (isCurrentRepositoryRoot) {
+      if (await isRepositoryRoot(directory)) {
         debug('stopping search at %s because it is believed to be the repository root', directory)
 
-        return findUp.stop
+        break
       }
-
-      // Return undefined to keep searching
-      return undefined
-    }, { cwd: projectRoot })
+    }
 
     if (packageJsonPaths.length === 0) {
       debug('no third-party dependencies detected')

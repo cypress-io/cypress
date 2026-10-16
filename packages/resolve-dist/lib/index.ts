@@ -1,9 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
 
-export type RunnerPkg = 'app' | 'runner'
-
-type FoldersWithDist = 'static' | 'driver' | RunnerPkg | 'launchpad'
+type FoldersWithDist = 'static' | 'driver' | 'app' | 'runner' | 'launchpad'
 
 export const resolveFromPackages = (...args: string[]) => {
   return path.join(...[__dirname, '..', '..', ...args])
@@ -23,10 +21,6 @@ export const getRunnerInjectionContents = () => {
 
 export const getRunnerCrossOriginInjectionContents = () => {
   return getRunnerContents('injection_cross_origin.js')
-}
-
-export const getPathToIndex = (pkg: RunnerPkg) => {
-  return getPathToDist(pkg, 'index.html')
 }
 
 export const getPathToDesktopIndex = (graphqlPort: number) => {

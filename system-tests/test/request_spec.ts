@@ -181,6 +181,7 @@ describe('e2e requests', () => {
       spec: 'request_http_network_error_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
     })
   })
 
@@ -189,6 +190,7 @@ describe('e2e requests', () => {
       spec: 'request_status_code_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
       onStdout (stdout) {
         return stdout
         .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
@@ -203,6 +205,7 @@ describe('e2e requests', () => {
       spec: 'request_long_http_props_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
       onStdout (stdout) {
         return stdout
         .replace(/"user-agent": ".+",/, '"user-agent": "foo",')

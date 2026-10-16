@@ -1,6 +1,6 @@
 import { URL } from 'url'
 import { telemetry } from '@packages/telemetry'
-import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import { toughCookieToAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import { CookiesHelper } from '../http/util/cookies'
 import { doesTopNeedToBeSimulated } from '../http/util/top-simulation'
 import { isVerboseTelemetry as isVerbose } from '../http'

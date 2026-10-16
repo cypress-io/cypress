@@ -44,17 +44,11 @@ https://on.cypress.io/api/task
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     task_not_registered.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/task_not_registered.cy.js/fails because the tas          (YxX)
-     k event is not registered in setupNodeEvents method (failed).png                               
 
 
 ====================================================================================================

@@ -1,4 +1,5 @@
-import { Client, gql } from '@urql/core'
+import type { Client } from '@urql/core'
+import { gql } from '@urql/core'
 import { pipe, subscribe } from 'wonka'
 import { GlobalSubscriptions_ErrorWarningChangeDocument, GlobalSubscriptions_PushFragmentDocument } from '../generated/graphql'
 
@@ -46,14 +47,14 @@ fragment WarningContent on ErrorWrapper {
 export function initializeGlobalSubscriptions (client: Client) {
   // https://formidable.com/open-source/urql/docs/advanced/subscriptions/#one-off-subscriptions
   const { unsubscribe: unsubscribeErrorWarning } = pipe(
-    client.subscription(GlobalSubscriptions_ErrorWarningChangeDocument),
+    client.subscription(GlobalSubscriptions_ErrorWarningChangeDocument, {}),
     subscribe(() => {
       //
     }),
   )
 
   const { unsubscribe: unsubscribePushFragment } = pipe(
-    client.subscription(GlobalSubscriptions_PushFragmentDocument),
+    client.subscription(GlobalSubscriptions_PushFragmentDocument, {}),
     subscribe((val) => {
       // console.log(val)
     }),

@@ -14,9 +14,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findByTestId('aut-url').should('be.visible')
     cy.findByTestId('playground-activator').should('not.exist')
 
-    cy.findByLabelText('Stats').within(() => {
-      cy.get('.passed .num', { timeout: 10000 }).should('have.text', '1')
-    })
+    cy.reporter().find('[aria-label="Stats"] .passed .num', { timeout: 10000 }).should('have.text', '1')
 
     // confirm expected content is rendered
     cy.contains('1000x660').should('be.visible')
@@ -43,9 +41,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findByTestId('aut-url').contains('URL navigation disabled in component testing').should('be.visible')
     cy.findByTestId('playground-activator').should('not.exist')
 
-    cy.findByLabelText('Stats').within(() => {
-      cy.get('.passed .num', { timeout: 10000 }).should('have.text', '1')
-    })
+    cy.reporter().find('[aria-label="Stats"] .passed .num', { timeout: 10000 }).should('have.text', '1')
 
     // confirm expected content is rendered
     cy.contains('500x500').should('be.visible')
@@ -76,7 +72,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
-    cy.findByLabelText('Stats').should('not.exist')
+    cy.get('#reporter-frame').should('not.exist')
     cy.findByTestId('specs-list-panel').should('not.be.visible')
     cy.findByTestId('reporter-panel').should('not.be.visible')
     cy.findByTestId('sidebar').should('not.exist')
@@ -100,7 +96,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('not.exist')
-    cy.findByLabelText('Stats').should('not.exist')
+    cy.get('#reporter-frame').should('not.exist')
     cy.findByTestId('specs-list-panel').should('not.be.visible')
     cy.findByTestId('reporter-panel').should('not.be.visible')
     cy.findByTestId('sidebar').should('not.exist')

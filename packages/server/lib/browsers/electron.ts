@@ -4,7 +4,7 @@ import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
-import { CdpAutomation, screencastOpts } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp-protocol/cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
@@ -17,7 +17,7 @@ import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -342,7 +342,7 @@ export = {
       ps = options.proxyServer
 
       if (ps) {
-        return this._setProxy(win.webContents, ps)
+        return this._setProxy(win.webContents, ps, options.proxyBypassList)
       }
     }
 
@@ -364,7 +364,7 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        utils.initializeCDP(pageCriClient, automation),
+        utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
         // Note that we are omitting `file_systems` as it is very non-performant to clear:
         // https://github.com/cypress-io/cypress/pull/32703
@@ -378,9 +378,13 @@ export = {
 
     // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
     if (cdpAutomation) {
-      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
-      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
-      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
+
+      if (pageCriClient) {
+        // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+        await cdpAutomation._handlePausedRequests(pageCriClient)
+        cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      }
     }
 
     await win.loadURL(url)
@@ -475,13 +479,11 @@ export = {
     return webContents.session.setUserAgent(userAgent)
   },
 
-  _setProxy (webContents, proxyServer) {
+  _setProxy (webContents, proxyServer, proxyBypassList?: string) {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
-      // this should really only be necessary when
-      // running Chromium versions >= 72
-      // https://github.com/cypress-io/cypress/issues/1872
-      proxyBypassRules: '<-loopback>',
+      // without any rules, Chromium's implicit rules keep loopback off the proxy
+      ...(proxyBypassList ? { proxyBypassRules: proxyBypassList } : {}),
     })
   },
 
@@ -502,6 +504,10 @@ export = {
       browserCriClient?.close(options.gracefulShutdown).catch(() => {})
       browserCriClient = null
     }
+  },
+
+  markBrowserCrashed () {
+    browserCriClient?.markCrashed()
   },
 
   connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {

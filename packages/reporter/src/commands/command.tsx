@@ -3,7 +3,7 @@ import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
 import React, { useState, useEffect, useCallback } from 'react'
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from '../lib/tooltip'
 import Button from '@cypress-design/react-button'
 
 import appState from '../lib/app-state'
@@ -250,7 +250,7 @@ const Aliases: React.FC<AliasesProps> = observer(({ model }: AliasesProps) => {
 
         return (
           <Tag
-            key={alias}
+            key={String(alias)}
             content={aliases.join(', ')}
             type={model.aliasType}
             tooltipMessage={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`}

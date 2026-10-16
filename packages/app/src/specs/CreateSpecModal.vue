@@ -100,6 +100,10 @@ const currentGeneratorId: Ref<GeneratorId | undefined> = ref(props.initialGenera
 const { t } = useI18n()
 const title = ref(t('createSpec.newSpecModalTitle'))
 
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
+
+const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
+
 const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
 
@@ -117,10 +121,6 @@ const helpLink = computed(() => {
 const specFileName = computed(() => {
   return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
-
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
-
-const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 
 whenever(not(generator), () => {
   title.value = t('createSpec.newSpecModalTitle')

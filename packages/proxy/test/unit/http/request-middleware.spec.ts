@@ -2,12 +2,13 @@ import { describe, expect, beforeEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import RequestMiddleware from '../../../lib/http/request-middleware'
 import { testMiddleware } from './helpers'
-import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
-import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
+import type { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
+import type { HttpBuffer } from '../../../lib/http/util/buffers'
+import { HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
-import { CookieJar } from '@packages/server/lib/util/cookies'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 import { NetworkInterceptionCore } from '@packages/network-interception'
-import { HttpMiddlewareThis } from '../../../lib/http'
+import type { HttpMiddlewareThis } from '../../../lib/http'
 import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
 
 vi.mock('../../../lib/resourceTypeAndCredentialManager', () => {
@@ -57,7 +58,6 @@ describe('http/request-middleware', () => {
       'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
       'MaybeSetBasicAuthHeaders',
-      'SendRequestOutgoing',
     ])
   })
 
@@ -67,7 +67,6 @@ describe('http/request-middleware', () => {
     function prepareContext (headers = {}) {
       return {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
-        onlyRunMiddleware: vi.fn(),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
         },
@@ -108,12 +107,25 @@ describe('http/request-middleware', () => {
         const ctx = prepareContext({
           'x-cypress-is-from-extra-target': 'true',
         })
+        let maybeSetBasicAuthHeadersRan = false
+        let skippedMiddlewareRan = false
 
-        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+        await testMiddleware({
+          ExtractCypressMetadataHeaders,
+          MaybeSetBasicAuthHeaders () {
+            maybeSetBasicAuthHeadersRan = true
+            this.next()
+          },
+          MaybeSimulateSecHeaders () {
+            skippedMiddlewareRan = true
+            this.next()
+          },
+        }, ctx)
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
-        expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith(['MaybeSetBasicAuthHeaders', 'SendRequestOutgoing'])
+        expect(maybeSetBasicAuthHeadersRan).toBe(true)
+        expect(skippedMiddlewareRan).toBe(false)
       })
 
       it('when it does not exist, removes header and sets in on the req', async () => {
@@ -739,6 +751,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
       expect(ctx.req.headers!['accept-encoding']).toBe('gzip,br')
+      expect(ctx.req.originalAcceptEncoding).toBe('gzip, deflate, br')
     })
 
     it('strips to br only when client sends only br', async () => {
@@ -950,6 +963,54 @@ describe('http/request-middleware', () => {
       expect(ctx.res.off).toHaveBeenCalledWith('close', expect.any(Function))
     })
 
+    it('preserves a pre-set resourceType when no browserPreRequest arrives', async () => {
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          browserPreRequest: undefined,
+          resourceType: 'xhr',
+          headers: [],
+        },
+        res: {
+          off: vi.fn(),
+          once: vi.fn(),
+        },
+        shouldCorrelatePreRequests: () => true,
+        getPreRequest: vi.fn().mockImplementation((cb) => {
+          cb({ browserPreRequest: undefined })
+        }),
+      }
+
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      expect(ctx.req.resourceType).toEqual('xhr')
+    })
+
+    it('lets browserPreRequest.resourceType override a pre-set resourceType', async () => {
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          browserPreRequest: undefined,
+          resourceType: 'xhr',
+          headers: [],
+        },
+        res: {
+          off: vi.fn(),
+          once: vi.fn(),
+        },
+        shouldCorrelatePreRequests: () => true,
+        getPreRequest: vi.fn().mockImplementation((cb) => {
+          cb({
+            browserPreRequest: {
+              resourceType: 'fetch',
+            },
+          })
+        }),
+      }
+
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      expect(ctx.req.resourceType).toEqual('fetch')
+    })
+
     it('errors when the request is destroyed prior to receiving a pre-request', () => {
       const ctx = {
         req: {
@@ -978,67 +1039,6 @@ describe('http/request-middleware', () => {
       expect(ctx.req.browserPreRequest).toBeUndefined()
       expect(ctx.res.once).toHaveBeenCalledWith('close', expect.any(Function))
       expect(ctx.onError).toHaveBeenCalledOnce()
-    })
-  })
-
-  describe('SendRequestOutgoing', () => {
-    const { SendRequestOutgoing } = RequestMiddleware
-
-    let ctx
-
-    beforeEach(() => {
-      const headers = {}
-
-      ctx = {
-        onError: vi.fn(),
-        request: {
-          create: (opts) => {
-            return {
-              inputArgs: opts,
-              on: (event, callback) => {
-                if (event === 'response') {
-                  callback({ request: { timings: {} } })
-                }
-              },
-            }
-          },
-        },
-        req: {
-          body: '{}',
-          headers,
-          socket: {
-            on: () => {},
-          },
-        },
-        res: {
-          on: (event, listener) => {},
-          off: (event, listener) => {},
-        } as Partial<CypressOutgoingResponse>,
-        remoteStates,
-      }
-    })
-
-    describe('same-origin file request', () => {
-      beforeEach(() => {
-        ctx.getFileServerToken = () => 'abcd1234'
-        ctx.req.proxiedUrl = 'https://www.cypress.io/file'
-        ctx.remoteStates.set({
-          origin: 'https://www.cypress.io',
-          strategy: 'file',
-        } as any)
-      })
-
-      it('adds `x-cypress-authorization` header', async () => {
-        await testMiddleware([SendRequestOutgoing], ctx)
-        expect(ctx.req.headers['x-cypress-authorization']).toEqual('abcd1234')
-      })
-
-      it('handles nil fileServer token', async () => {
-        ctx.getFileServerToken = () => undefined
-
-        await testMiddleware([SendRequestOutgoing], ctx)
-        expect(ctx.req.headers['x-cypress-authorization']).toBeUndefined()
-      })
     })
   })
 

@@ -1,4 +1,5 @@
-import { FieldResolver, plugin } from 'nexus'
+import { plugin } from 'nexus'
+import type { FieldResolver } from 'nexus'
 
 // We know this is a valid node typename
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

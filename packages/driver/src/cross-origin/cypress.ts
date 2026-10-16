@@ -31,9 +31,9 @@ const createCypress = () => {
   // @ts-ignore
   const Cypress = window.Cypress = new $Cypress() as Cypress.Cypress
 
-  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env, expose, isProtocolEnabled }) => {
+  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, expose, isProtocolEnabled }) => {
     // eventually, setup will get called again on rerun and cy will get re-created
-    setup({ cypressConfig: config, env, expose, isProtocolEnabled })
+    setup({ cypressConfig: config, expose, isProtocolEnabled })
   })
 
   Cypress.specBridgeCommunicator.on('attach:to:window', () => {
@@ -85,12 +85,11 @@ const createCypress = () => {
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
 
-const setup = ({ cypressConfig, env, expose, isProtocolEnabled }: { cypressConfig: Cypress.Config, env: Cypress.ObjectLike, expose: Cypress.ObjectLike, isProtocolEnabled: boolean }) => {
+const setup = ({ cypressConfig, expose, isProtocolEnabled }: { cypressConfig: Cypress.Config, expose: Cypress.ObjectLike, isProtocolEnabled: boolean }) => {
   const Cypress = window.Cypress
 
   Cypress.configure({
     ...cypressConfig,
-    env,
     expose,
     // never turn on video for a spec bridge when syncing the config. This is handled in the primary.
     video: false,
@@ -239,7 +238,7 @@ const attachToWindow = (autWindow: Window) => {
       return Cypress.action('app:window:alert', str)
     },
     onConfirm (str) {
-      const results = Cypress.action('app:window:confirm', str) as any[]
+      const results = Cypress.action('app:window:confirm', str)
 
       // return false if ANY results are false
       const ret = !results.some((result) => result === false)

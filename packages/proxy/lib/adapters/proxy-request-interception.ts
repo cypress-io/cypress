@@ -1,7 +1,7 @@
 import type { ForRequestInterception, RunPoliciesResult } from '@packages/network-interception'
 import { correlateBrowserPreRequest } from './correlate-browser-pre-request'
 import { endRequestsToBlockedHosts } from './end-requests-to-blocked-hosts'
-import { sendRequestOutgoing } from './send-request-outgoing'
+import { sendRequestOutgoing } from '../http/send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
 
 /** {@link ForRequestInterception} adapter — delegates to legacy proxy request middleware. */

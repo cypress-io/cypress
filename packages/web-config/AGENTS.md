@@ -3,8 +3,7 @@ This package centralizes web-related build configuration for the Cypress monorep
 **Architecture**
 
 - `webpack.config.base.ts` — Shared base webpack configuration (loaders, plugins, polyfills) used as a starting point by packages like `@packages/reporter` and `@packages/runner`
-- `node-register.js` — Registers Babel so that the webpack configs (written in TypeScript/modern JS) can be consumed from Node.js without a separate compile step
-- `index.d.ts` — TypeScript types for the exported webpack config helpers
+- `tsconfig.json` — TypeScript config for the package; `scripts/type_check` runs `tsc --noEmit` against it
 
 **Gotchas / Notes**
 

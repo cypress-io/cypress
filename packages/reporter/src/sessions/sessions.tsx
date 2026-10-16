@@ -13,7 +13,9 @@ interface SessionPanelProps {
   model: Record<string, SessionsModel>
 }
 
-const SessionRow: React.FC<SessionsModel> = (model) => {
+type SessionRowProps = Pick<SessionsModel, 'name' | 'isGlobalSession' | 'id' | 'status' | 'testId' | 'tagType'>
+
+const SessionRow: React.FC<SessionRowProps> = (model) => {
   const { name, isGlobalSession, id, status, testId } = model
 
   const printToConsole = (id) => {

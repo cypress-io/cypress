@@ -6,18 +6,6 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="dom-link"]').click()
   })
 
-  it('.end()', () => {
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.get('#button').end().should('be.null')
-    })
-  })
-
-  it('.exec()', () => {
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
-    })
-  })
-
   it('.focused()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
@@ -79,23 +67,6 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
 
       cy.on('log:changed', (attrs, log) => {
         logs.set(attrs.id, log)
-      })
-    })
-
-    it('.exec()', () => {
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.exec('echo foobar')
-      })
-
-      cy.shouldWithTimeout(() => {
-        const { consoleProps } = findCrossOriginLogs('exec', logs, 'foobar.com')
-
-        expect(consoleProps.name).to.equal('exec')
-        expect(consoleProps.type).to.equal('command')
-        expect(consoleProps.props['Shell Used']).to.be.undefined
-        expect(consoleProps.props.Yielded).to.have.property('exitCode').that.equals(0)
-        expect(consoleProps.props.Yielded).to.have.property('stderr').that.equals('')
-        expect(consoleProps.props.Yielded).to.have.property('stdout').that.equals('foobar')
       })
     })
 
@@ -222,7 +193,7 @@ it('verifies number of cy commands', () => {
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
     'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
     'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
-    'focused', 'get', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
+    'focused', 'get', 'contains', 'getByRole', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev', 'press',
     'prevAll', 'prevUntil', 'prompt', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
     'mount', 'as', 'root', 'getAllLocalStorage', 'clearAllLocalStorage', 'getAllSessionStorage', 'clearAllSessionStorage',

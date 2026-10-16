@@ -1,5 +1,6 @@
 import path from 'path'
-import chokidar, { FSWatcher } from 'chokidar'
+import type { FSWatcher } from 'chokidar'
+import chokidar from 'chokidar'
 
 import type { DataContext } from '..'
 

@@ -66,7 +66,7 @@
 
   <div class="test-section" cy-section="pointer-events-none">
     <h3>Pointer Events: None</h3>
-    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Element with pointer-events: none" style="pointer-events: none;">Element with pointer-events: none</div>
+    <div class="testCase" cy-expect="visible" cy-label="Element with pointer-events: none" style="pointer-events: none;">Element with pointer-events: none</div>
   </div>
 
   <div class="test-section" cy-section="contain-property">
@@ -79,7 +79,7 @@
 
     <!-- Element with contain: paint -->
     <div class="testCase" cy-expect="visible" cy-label="Element with contain: paint" style="width: 100px; height: 100px; background: lightcoral; contain: paint;">
-      <span class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Child positioned out of bounds of its `contain: paint` parent" style="position:relative; top:500px">contain: paint</span>
+      <span class="testCase" cy-expect="visible" cy-label="Child positioned out of bounds of its `contain: paint` parent" style="position:relative; top:500px">contain: paint</span>
     </div>
 
     <!-- Element with contain: strict -->

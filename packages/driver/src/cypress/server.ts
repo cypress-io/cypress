@@ -5,8 +5,8 @@ export const defaults = (obj = {}) => {
   return $errUtils.throwErrByPath('server.removed', { args: { cmd: 'Cypress.Server.defaults' } })
 }
 
-// Left behind for backwards compatibility
-// When cy.server() is moved to a plugin, this might be safely removed.
+// Kept so `Cypress.Server.defaults()` throws a message pointing at cy.intercept
+// rather than a bare TypeError.
 export default {
   defaults,
 }

@@ -256,6 +256,20 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
 
       cy.wait(250)
     })
+
+    // https://github.com/cypress-io/cypress/issues/23927
+    it('fails gracefully with an unknown error message when the secondary origin AUT rejects a promise with undefined', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      cy.origin('http://foobar.com:3500', () => {
+        Cypress.on('uncaught:exception', (err, runnable) => {
+          expect(err.message).to.contain('An unknown error has occurred: undefined')
+
+          return false
+        })
+
+        cy.visit('http://foobar.com:3500/fixtures/throws-undefined.html')
+      })
+    })
   })
 
   describe('unserializable errors', () => {

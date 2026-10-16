@@ -38,16 +38,11 @@ exports['e2e issue 173 / failing'] = `
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_173.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_173.cy.js/fails (failed).png                  (1280x720)
 
 
 ====================================================================================================

@@ -21,7 +21,8 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '../../graphql/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
-import { FileExtension, getDefaultSpecFileName } from '../util/files'
+import { getDefaultSpecFileName } from '../util/files'
+import type { FileExtension } from '../util/files'
 
 type SpecPatterns = {
   specPattern?: string[]
@@ -34,6 +35,8 @@ interface MatchedSpecs {
   specAbsolutePaths: string[]
   specPattern: string | string[]
 }
+
+const MASKED_ENV_VALUE = '*****'
 
 const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
@@ -207,6 +210,17 @@ export function getPathFromSpecPattern ({
   const randExp = new RandExp(finalGlob.replace(/\./g, '\\.'))
 
   return randExp.gen()
+}
+
+/**
+ * `minimatch` only understands posix separators, but `path.relative` emits `\` on
+ * Windows, so the relative path has to be normalized or a specPattern containing a
+ * directory segment (like the `cypress/e2e/**` default) can never match.
+ */
+export function matchesAnySpecPattern (relativeSpecPath: string, specPattern: string[], sep: string = path.sep): boolean {
+  const posixPath = toPosix(relativeSpecPath, sep)
+
+  return specPattern.some((s) => minimatch(posixPath, s))
 }
 
 export class ProjectDataSource {
@@ -441,7 +455,7 @@ export class ProjectDataSource {
         }
 
         // If none of the spec patterns match, we don't need to watch it
-        return !specPattern.some((s) => minimatch(path.relative(projectRoot, file), s))
+        return !matchesAnySpecPattern(path.relative(projectRoot, file), specPattern)
       }],
     })
   }
@@ -538,9 +552,10 @@ export class ProjectDataSource {
   }
 
   getUnmatchedPatterns (patterns: string[], specs: SpecWithRelativeRoot[]): string[] {
-    const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
+    // Use micromatch (the matcher backing `globby`/`fast-glob` used to discover specs)
+    const MICROMATCH_OPTIONS = { dot: true }
     // Normalize to forward slashes: path.relative may return backslashes on Windows and
-    // minimatch treats backslashes as escape characters rather than path separators.
+    // micromatch treats backslashes as escape characters rather than path separators.
     const normalize = (p: string) => p.split(path.sep).join('/')
     const specRelativePaths = specs
     .map((s) => s.relative)
@@ -548,7 +563,7 @@ export class ProjectDataSource {
     .map(normalize)
 
     return patterns.filter((pattern) => {
-      return !specRelativePaths.some((specPath) => minimatch(specPath, normalize(pattern), MINIMATCH_OPTIONS))
+      return !specRelativePaths.some((specPath) => micromatch.isMatch(specPath, normalize(pattern), MICROMATCH_OPTIONS))
     })
   }
 
@@ -578,7 +593,8 @@ export class ProjectDataSource {
         return {
           field: key,
           from: key,
-          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, value])),
+          // The page under test can reach this field, and env values must only reach the spec through cy.env()
+          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, key === 'env' ? MASKED_ENV_VALUE : value])),
         }
       }
 

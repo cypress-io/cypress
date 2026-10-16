@@ -8,7 +8,8 @@ import fs from 'fs-extra'
 const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
-import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
+import { addTestingTypeToCypressConfig } from '@packages/config'
+import type { AddTestingTypeToCypressConfigOptions } from '@packages/config'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
@@ -121,6 +122,10 @@ export class WizardActions {
       })
 
       this.ctx.emitter.frameworkDetectionChange()
+      // The detection-change subscription alone does not reliably refresh the
+      // wizard UI, so trigger a launchpad re-query to surface the detected
+      // framework/bundler.
+      this.ctx.emitter.toLaunchpad()
     }
   }
 

@@ -71,10 +71,10 @@
       "description": "The change detection strategy to use in the new component.",
       "enum": [
         "Default",
+        "Eager",
         "OnPush"
       ],
       "type": "string",
-      "default": "Default",
       "alias": "c"
     },
     "prefix": {

@@ -12,8 +12,8 @@ yarn workspace @packages/runner build-prod
 
 **Architecture**
 
-- `src/main.jsx` — Entry point; assembles reporter and driver into the runner iframe
-- `src/cross-origin.js` — Handles cross-origin iframe communication
+- `src/main.ts` — Entry point; assembles reporter and driver into the runner iframe
+- `src/cross-origin.ts` — Handles cross-origin iframe communication
 - `src/main.scss` — Runner-level styles (including legacy Cypress styles)
 - `unified-runner.tsx` — Unified runner entry used in some Cypress app contexts
 - `webpack.config.ts` — Webpack configuration for the runner bundle

@@ -8,11 +8,13 @@ yarn workspace @packages/server start
 
 # NOTE: Full suite is slow (hundreds of tests); always target a specific file or grep pattern
 
+# Unit tests (test/unit/**/*.spec.ts) run on vitest; integration and performance tests run on mocha
+
 # Run a specific unit test file
 yarn workspace @packages/server test-unit -- <path-to-spec>
 
 # Filter unit tests by name pattern
-yarn workspace @packages/server test-unit -- --grep "handles request"
+yarn workspace @packages/server test-unit -- -t "handles request"
 
 # Run a specific integration test file
 yarn workspace @packages/server test-integration -- <path-to-spec>
@@ -23,6 +25,10 @@ yarn workspace @packages/server test-integration -- --grep "video capture"
 # Build TypeScript to JS (production)
 yarn workspace @packages/server build-prod
 ```
+
+**Migrating a unit spec from mocha to vitest**
+
+Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/server-mocha-to-vitest/SKILL.md) first. It covers the runner contract and the conversions that pass while silently proving less than the mocha original. The migration is tracked in [cypress-io/cypress#34846](https://github.com/cypress-io/cypress/issues/34846).
 
 **Architecture**
 
@@ -37,7 +43,6 @@ yarn workspace @packages/server build-prod
 - `lib/video_capture.ts` — Video recording via ffmpeg
 - `lib/session.ts` — Session management for `cy.session()`
 - `lib/fixture.ts` — Fixture file loading
-- `lib/exec.ts` — `cy.exec()` subprocess handling
 - `lib/config.ts` — Server-side config resolution
 - `lib/makeDataContext.ts` — Data context factory for GraphQL layer
 
@@ -49,11 +54,12 @@ yarn workspace @packages/server build-prod
 - E2E/system tests have moved to `system-tests/`; only unit and integration tests live in `test/unit` and `test/integration`.
 - `better-sqlite3` requires native compilation; run `yarn workspace @packages/server rebuild-better-sqlite3` after an Electron version upgrade.
 - Several dependencies (e.g., `axios`, `devtools-protocol`, `geckodriver`) are nohoisted to avoid version conflicts.
+- **The config/plugins child runs under the user's Node, not the bundled/dev Node.** `lib/plugins/child/require_async_child.ts` (and everything reachable from it) is forked with the user's resolved Node; its supported range is `engines.node` in `cli/package.json`, which is lower than the dev floor (`.node-version`) or the bundled Electron. Do not use runtime APIs newer than that floor in this path — the rest of the server runs in the bundled Electron main process. See root `AGENTS.md` → Runtime targets.
 
 **Integration Points**
 
 - Consumes virtually every other `@packages/*` package in the monorepo.
-- `@packages/proxy` and `@packages/rewriter` handle all HTTP interception.
+- `@packages/proxy` handles all HTTP interception.
 - `@packages/net-stubbing` provides `cy.intercept()` server-side state.
 - `@packages/data-context` provides the GraphQL layer consumed by `@packages/launchpad` and `@packages/app`.
 - `@packages/socket` provides the WebSocket bridge between the server and the browser driver.

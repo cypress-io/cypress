@@ -73,7 +73,8 @@ import Button from '@cy/components/Button.vue'
 import ExternalLink from '../ExternalLink.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 
-import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
+import { CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
+import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useDebounceFn, useOnline } from '@vueuse/core'
 

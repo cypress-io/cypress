@@ -1,0 +1,76 @@
+diff --git a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
+index 585aa65..7dbafef 100644
+--- a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
++++ b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.js
+@@ -397,13 +397,32 @@ function computeTextAlternative(root) {
+     }
+     return null;
+   }
++  // Cypress patch, accname 1.2 step 2A: a hidden node is skipped unless it is
++  // part of an aria-labelledby or aria-describedby traversal whose directly
++  // referenced node is hidden. Each referenced node starts its own traversal,
++  // so a nested reference to a visible node skips its hidden descendants again.
++  // https://w3c.github.io/accname/#step2A
++  // Remove once https://github.com/eps1lon/dom-accessibility-api/issues/1102 is fixed.
++  var inHiddenReferencedTraversal = false;
+   function computeTextAlternative(current, context) {
++    if (!context.isReferenced) {
++      return computeTextAlternativeStep(current, context);
++    }
++    var outerTraversal = inHiddenReferencedTraversal;
++    inHiddenReferencedTraversal = !hidden && isHidden(current, getComputedStyle);
++    try {
++      return computeTextAlternativeStep(current, context);
++    } finally {
++      inHiddenReferencedTraversal = outerTraversal;
++    }
++  }
++  function computeTextAlternativeStep(current, context) {
+     if (consultedNodes.has(current)) {
+       return "";
+     }
+ 
+     // 2A
+-    if (!hidden && isHidden(current, getComputedStyle) && !context.isReferenced) {
++    if (!hidden && isHidden(current, getComputedStyle) && !context.isReferenced && !inHiddenReferencedTraversal) {
+       consultedNodes.add(current);
+       return "";
+     }
+diff --git a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
+index 8f905f1..7003573 100644
+--- a/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
++++ b/node_modules/dom-accessibility-api/dist/accessible-name-and-description.mjs
+@@ -396,13 +396,32 @@ export function computeTextAlternative(root) {
+     }
+     return null;
+   }
++  // Cypress patch, accname 1.2 step 2A: a hidden node is skipped unless it is
++  // part of an aria-labelledby or aria-describedby traversal whose directly
++  // referenced node is hidden. Each referenced node starts its own traversal,
++  // so a nested reference to a visible node skips its hidden descendants again.
++  // https://w3c.github.io/accname/#step2A
++  // Remove once https://github.com/eps1lon/dom-accessibility-api/issues/1102 is fixed.
++  var inHiddenReferencedTraversal = false;
+   function computeTextAlternative(current, context) {
++    if (!context.isReferenced) {
++      return computeTextAlternativeStep(current, context);
++    }
++    var outerTraversal = inHiddenReferencedTraversal;
++    inHiddenReferencedTraversal = !hidden && isHidden(current, getComputedStyle);
++    try {
++      return computeTextAlternativeStep(current, context);
++    } finally {
++      inHiddenReferencedTraversal = outerTraversal;
++    }
++  }
++  function computeTextAlternativeStep(current, context) {
+     if (consultedNodes.has(current)) {
+       return "";
+     }
+ 
+     // 2A
+-    if (!hidden && isHidden(current, getComputedStyle) && !context.isReferenced) {
++    if (!hidden && isHidden(current, getComputedStyle) && !context.isReferenced && !inHiddenReferencedTraversal) {
+       consultedNodes.add(current);
+       return "";
+     }

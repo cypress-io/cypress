@@ -22,7 +22,10 @@
               scope="global"
               keypath="globalPage.empty.dropText"
             >
-              <button class="font-medium text-indigo-500 hocus-link-default">
+              <button
+                class="font-medium text-indigo-500 hocus-link-default"
+                data-cy="browse-manually"
+              >
                 <!--
               This button allows keyboard users to fire a click event with the Enter or Space keys,
               which will be handled by the dropzone's existing click handler.

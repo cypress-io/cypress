@@ -1,0 +1,55 @@
+<html><body><h1 id="app">app</h1><script>
+// updateViaCache: 'all' makes worker update checks honor the script's
+// max-age (main-script checks bypass the HTTP cache by default) - see the
+// /sw.js route comment for why an update check must never refetch from the
+// origin here
+navigator.serviceWorker.register('/sw.js', { updateViaCache: 'all' })
+
+// Window-realm call guarding the bootstrap-script seam (see sw.js's activate
+// handler). `reg` here is the worker's own registration, reached from the
+// window via `serviceWorker.ready` - but which seam a call exercises depends
+// on which realm's NavigationPreloadManager.prototype it resolves through,
+// not on which object it was reached from: called from here, it resolves
+// through the window realm's prototype (the one the bootstrap script
+// patches), not the worker's own.
+let pageEnableSettled = false
+const markPageEnableSettled = () => { pageEnableSettled = true }
+
+navigator.serviceWorker.ready
+  .then((reg) => reg.navigationPreload.enable())
+  .then(markPageEnableSettled, markPageEnableSettled)
+
+// Poll .controller AND pageEnableSettled rather than navigationPreload.getState()
+// here: on the browser network path Cypress no-ops both enable() calls, so
+// getState().enabled never becomes true, and this poll is what the spec's own
+// getState() assertion waits on. Each flag guards its own seam (see sw.js for
+// the ordering constraint both sides rely on).
+//
+// The /probe poll can't prevent an injector miss - by the time this page
+// script runs, a worker that cold-started before the injector's script-prepend
+// seam attached has already made its real enable() call (the #34674 gap the
+// spec header disclaims). Its value is diagnostic rather than corrective: a
+// worker whose session interception is stuck or never covered surfaces here as
+// a clear sw-ready timeout instead of a confusing getState() assertion
+// failure, and it keeps the SW-session interception path (Fetch enabled on
+// the worker's own CDP session) live-exercised by this spec. The probe is
+// passed through the worker (see sw.js) and the origin serves it with
+// X-Frame-Options, which interception always strips: the header disappearing
+// from a same-origin fetch is evidence that worker-originated traffic is
+// intercepted.
+const check = () => {
+  if (!navigator.serviceWorker.controller || !pageEnableSettled) {
+    return setTimeout(check, 50)
+  }
+
+  fetch('/probe').then((res) => {
+    if (res.headers.get('x-frame-options')) {
+      return setTimeout(check, 250)
+    }
+
+    document.getElementById('app').textContent = 'sw-ready'
+  }, () => setTimeout(check, 250))
+}
+
+check()
+</script></body></html>

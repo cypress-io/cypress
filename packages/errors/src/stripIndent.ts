@@ -27,7 +27,10 @@ export const stripIndent = (strings: TemplateStringsArray, ...args: any[]): stri
   let result = strippedLines.join('\n').trimLeft()
 
   args.forEach((arg, i) => {
-    result = result.replace(`<<${i}>>`, `${arg}`)
+    // Use a replacer function so `$` sequences in the arg (`$&`, `$\``, `$'`,
+    // `$$`) are inserted literally rather than treated as special replacement
+    // patterns by String.prototype.replace.
+    result = result.replace(`<<${i}>>`, () => `${arg}`)
   })
 
   return result

@@ -48,7 +48,6 @@ import type { RouteLocationRaw } from 'vue-router'
 defineProps<{
   isLeaf: boolean
   route?: RouteLocationRaw
-  isProjectConnected?: boolean
   gridColumns: string
 }>()
 

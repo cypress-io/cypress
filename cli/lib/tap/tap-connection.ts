@@ -1,0 +1,315 @@
+import Debug from 'debug'
+import CRI from 'chrome-remote-interface'
+
+import { DEFAULT_CDP_TIMEOUT_MS, FIND_SESSION_TIMEOUT_MS, boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
+import type { ReadySessionState } from '../cypress-sessions'
+import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD, TapError } from '@packages/cypress-sessions'
+import type { RaisableTapErrorCode, TapErrorPayload, TapExecResult } from '@packages/cypress-sessions'
+
+const debug = Debug('cypress:cli:tap')
+
+// Chrome reports these CDP failures under the generic -32000 "server error"
+// protocol code, so the exact message text is the only way to recognize them.
+export const CdpErrorMessage = {
+  objectNotFound: 'Could not find object with given id',
+  contextNotFound: 'Cannot find context with specified id',
+  contextDestroyed: 'Execution context was destroyed',
+  targetGone: 'Inspected target navigated or closed',
+  sessionNotFound: 'Session with given id not found',
+} as const
+
+const staleObjectMessages = [CdpErrorMessage.objectNotFound, CdpErrorMessage.contextNotFound, CdpErrorMessage.contextDestroyed]
+const sessionGoneMessages = [CdpErrorMessage.targetGone, CdpErrorMessage.sessionNotFound]
+
+const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
+  return err instanceof Error && messages.some((message) => err.message.includes(message))
+}
+
+/**
+ * Raises a transport or protocol failure under the code its copy is registered
+ * against. `message` is the diagnostic — the call that failed, the version that
+ * disagreed — which reaches the logs rather than the rendered output.
+ *
+ * An unresponsive renderer is reported as itself rather than as whatever call
+ * happened to time out: it is the condition worth waiting longer on.
+ */
+export const throwTapError = (code: RaisableTapErrorCode, message?: string, cause?: unknown): never => {
+  if (isRendererUnresponsive(cause)) {
+    throw cause
+  }
+
+  throw new TapError(code, { message, cause })
+}
+
+export interface TapConnection {
+  call (method: string, args?: unknown[]): Promise<unknown>
+  // Raw CDP access for the frame extractors (dom/aria/inspect), which run
+  // protocol domains
+  // (Page/DOM/CSS/Accessibility) against the runner page and its AUT child
+  // frame rather than routing through the binding. `sessionId` is a getter so
+  // it stays correct across the re-attach `call` performs on a lost session.
+  readonly client: CRI.Client
+  readonly sessionId: string
+}
+
+// The code is the whole of a failure envelope; `detail` is optional, so a payload
+// carrying only a code is well-formed.
+const isFailureError = (error: unknown): error is TapErrorPayload => {
+  return !!error && typeof error === 'object' && typeof (error as any).code === 'string'
+}
+
+export const validateExecResult = (value: unknown): TapExecResult => {
+  const outcome = value as TapExecResult | null | undefined
+  const fail = () => throwTapError('PROTOCOL_MISMATCH', `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
+
+  if (!outcome || typeof outcome !== 'object') return fail()
+
+  if ('error' in outcome) return isFailureError(outcome.error) ? outcome : fail()
+
+  if ('result' in outcome) return outcome
+
+  return fail()
+}
+
+const isStaleHandleError = (err: unknown): boolean => {
+  return matchesAnyMessage(err, staleObjectMessages)
+}
+
+const isSessionGoneError = (err: unknown): boolean => {
+  if (!(err instanceof Error)) {
+    return false
+  }
+
+  return matchesAnyMessage(err, sessionGoneMessages) || matchesAnyMessage((err as { cause?: unknown }).cause, sessionGoneMessages)
+}
+
+interface PageTargetInfo {
+  targetId: string
+  type: string
+  url: string
+}
+
+const connectToBrowser = async (wsUrl: string): Promise<CRI.Client> => {
+  try {
+    return await CRI({ target: wsUrl })
+  } catch (err: any) {
+    return throwTapError('CDP_UNREACHABLE', `Could not open a debugging connection to the browser: ${err.message}`, err)
+  }
+}
+
+const listTargets = async (client: CRI.Client) => {
+  try {
+    return await client.Target.getTargets()
+  } catch (err: any) {
+    return throwTapError('CDP_UNREACHABLE', `Listing the browser's targets failed: ${err.message}`, err)
+  }
+}
+
+const attachToPage = async (client: CRI.Client, targetId: string): Promise<string> => {
+  try {
+    const { sessionId } = await client.Target.attachToTarget({ targetId, flatten: true })
+
+    return sessionId
+  } catch (err: any) {
+    return throwTapError('CDP_UNREACHABLE', `Could not attach to the Cypress runner page: ${err.message}`, err)
+  }
+}
+
+const evaluateBinding = (client: CRI.Client, sessionId: string) => {
+  return client.Runtime.evaluate({ expression: `window.${TAP_BINDING_GLOBAL}` }, sessionId)
+}
+
+const probeForBinding = async (client: CRI.Client, sessionId: string, findSessionMs: number): Promise<boolean> => {
+  const { result, exceptionDetails } = await withCdpDeadline(
+    evaluateBinding(client, sessionId),
+    'the runner-page probe',
+    findSessionMs,
+  )
+
+  return !exceptionDetails && result.type !== 'undefined' && !!result.objectId
+}
+
+const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[], findSessionMs: number): Promise<string> => {
+  let unresponsive: unknown
+
+  for (const target of targetInfos) {
+    if (target.type !== 'page') {
+      continue
+    }
+
+    let sessionId: string | undefined
+
+    try {
+      sessionId = await attachToPage(client, target.targetId)
+
+      if (await probeForBinding(client, sessionId, findSessionMs)) {
+        debug('matched runner page target %o', { targetId: target.targetId, url: target.url })
+
+        return sessionId
+      }
+    } catch (err: any) {
+      if (isRendererUnresponsive(err)) {
+        unresponsive = err
+      }
+
+      debug('probing target %s failed: %s', target.targetId, err.message)
+    }
+
+    if (sessionId) {
+      await client.Target.detachFromTarget({ sessionId }).catch(() => {})
+    }
+  }
+
+  // A page that never answered the probe is a different failure from a browser
+  // holding no runner page at all, and only the former is worth waiting longer on.
+  if (unresponsive) {
+    throw unresponsive
+  }
+
+  return throwTapError('BINDING_NOT_FOUND', `Failed to connect to the runner page.`)
+}
+
+const resolveBindingObjectId = async (client: CRI.Client, sessionId: string): Promise<string> => {
+  let evaluated: Awaited<ReturnType<typeof evaluateBinding>>
+
+  try {
+    evaluated = await evaluateBinding(client, sessionId)
+  } catch (err: any) {
+    if (isStaleHandleError(err) || isSessionGoneError(err)) {
+      throw err
+    }
+
+    return throwTapError('CDP_UNREACHABLE', `Evaluating the tap binding failed: ${err.message}`, err)
+  }
+
+  const { result, exceptionDetails } = evaluated
+
+  if (exceptionDetails) {
+    return throwTapError('CDP_UNREACHABLE', `Failed to connect to the session.`)
+  }
+
+  if (result.type === 'undefined' || !result.objectId) {
+    return throwTapError('BINDING_NOT_FOUND', `Connected to an unsupported session.`)
+  }
+
+  return result.objectId
+}
+
+const callBindingMethod = (client: CRI.Client, sessionId: string, objectId: string, method: string, args: unknown[]) => {
+  return client.Runtime.callFunctionOn({
+    objectId,
+    functionDeclaration: `function (method, ...args) { return this[method](...args) }`,
+    arguments: [method, ...args].map((value) => ({ value })),
+    returnByValue: true,
+    awaitPromise: true,
+  }, sessionId)
+}
+
+const throwCdpError = (method: string, err: any): never => {
+  return throwTapError('CDP_UNREACHABLE', `The CDP call for ${method} failed: ${err.message}`, err)
+}
+
+const callBindingWithRetry = async (client: CRI.Client, sessionId: string, method: string, args: unknown[]) => {
+  const attempt = async () => {
+    const objectId = await resolveBindingObjectId(client, sessionId)
+
+    try {
+      return await callBindingMethod(client, sessionId, objectId, method, args)
+    } catch (err: any) {
+      if (isStaleHandleError(err)) {
+        throw err
+      }
+
+      return throwCdpError(method, err)
+    }
+  }
+
+  try {
+    return await attempt()
+  } catch (err: any) {
+    if (!isStaleHandleError(err)) {
+      throw err
+    }
+
+    debug('stale binding handle; re-acquiring and retrying once')
+
+    try {
+      return await attempt()
+    } catch (retryErr: any) {
+      if (isStaleHandleError(retryErr)) {
+        return throwTapError('STALE_HANDLE', retryErr.message, retryErr)
+      }
+
+      throw retryErr
+    }
+  }
+}
+
+export const withTapConnection = async <T> (
+  session: ReadySessionState,
+  fn: (connection: TapConnection) => Promise<T>,
+  timeoutMs?: number,
+): Promise<T> => {
+  const callMs = timeoutMs ?? DEFAULT_CDP_TIMEOUT_MS
+  const findSessionMs = timeoutMs ?? FIND_SESSION_TIMEOUT_MS
+
+  debug('opening tap connection for session %o', { pid: session.pid, cdpBrowserWsUrl: session.cdpBrowserWsUrl, callMs, findSessionMs })
+
+  const client = await connectToBrowser(session.cdpBrowserWsUrl)
+
+  boundCdpCalls(client, callMs)
+
+  try {
+    const attach = async (): Promise<string> => {
+      const { targetInfos } = await listTargets(client)
+
+      return findRunnerPageSession(client, targetInfos, findSessionMs)
+    }
+
+    let sessionId = await attach()
+
+    const call = async (method: string, args: unknown[] = []): Promise<unknown> => {
+      let response: Awaited<ReturnType<typeof callBindingWithRetry>>
+
+      try {
+        response = await callBindingWithRetry(client, sessionId, method, args)
+      } catch (err: any) {
+        if (!isSessionGoneError(err)) {
+          throw err
+        }
+
+        debug('session gone (%s); re-attaching to the runner page', err.message)
+
+        sessionId = await attach()
+
+        try {
+          response = await callBindingWithRetry(client, sessionId, method, args)
+        } catch (retryErr: any) {
+          if (isSessionGoneError(retryErr)) {
+            return throwTapError('STALE_HANDLE', retryErr.message, retryErr)
+          }
+
+          throw retryErr
+        }
+      }
+
+      if (response?.exceptionDetails) {
+        return throwTapError('BINDING_THREW', `${method} threw: ${response.exceptionDetails.exception?.description || response.exceptionDetails.text}`)
+      }
+
+      return response.result.value
+    }
+
+    const connection: TapConnection = {
+      call,
+      client,
+      get sessionId () {
+        return sessionId
+      },
+    }
+
+    return await fn(connection)
+  } finally {
+    await client.close().catch(() => {})
+  }
+}

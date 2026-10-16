@@ -3,7 +3,7 @@ const snapshot = require('snap-shot-it')
 import type { SpawnOptions, ChildProcess } from 'child_process'
 import stream from 'stream'
 import { expect } from './spec_helper'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
@@ -14,6 +14,7 @@ import {
   pathUpToProjectName,
   normalizeStdout,
   browserNameVersionRe,
+  teardownBudgetNoticeRe,
 } from './normalizeStdout'
 
 const isCi = require('ci-info').isCI
@@ -21,13 +22,12 @@ const isCi = require('ci-info').isCI
 require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
-let cp = require('child_process')
+const cp = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
-const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const treeKill = require('tree-kill')
 const { once } = require('events')
@@ -566,12 +566,31 @@ function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) 
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
 
-cp = Bluebird.promisifyAll(cp)
-
 const processEnvCache = _.clone(process.env)
 
-Bluebird.config({
-  longStackTraces: true,
+// The budget notices are stripped from snapshots (see normalizeStdout) because whether teardown fits in
+// its budget depends on how loaded the machine is, not on the run. Tally them here so the trend stays
+// visible in the job output, and so a root-cause fix can be told apart from a quiet machine.
+const teardownBudget = { runs: 0, runsOverBudget: 0, notices: 0 }
+
+const recordTeardownBudget = (output: string) => {
+  const notices = output.match(teardownBudgetNoticeRe())
+
+  teardownBudget.runs++
+
+  if (notices) {
+    teardownBudget.runsOverBudget++
+    teardownBudget.notices += notices.length
+  }
+}
+
+process.on('exit', () => {
+  if (!teardownBudget.runs) {
+    return
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
 })
 
 // extract the 'Difference' section from a snap-shot-it error message
@@ -653,7 +672,13 @@ const startServer = function (obj) {
 
   const app = Express()
 
-  const srv = https ? createHttpsServer(app) : new http.Server(app)
+  let srv
+
+  if (https) {
+    srv = createHttpsServer(app)
+  } else {
+    srv = new http.Server(app)
+  }
 
   allowDestroy(srv)
 
@@ -667,7 +692,7 @@ const startServer = function (obj) {
     app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
   }
 
-  return new Bluebird((resolve) => {
+  return new Promise((resolve) => {
     return srv.listen(port, () => {
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
@@ -693,7 +718,11 @@ const copy = function (projectPath: string) {
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
     const copy = (src, dest) => {
-      return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
+      return fs.copy(src, dest, { overwrite: true }).catch((err) => {
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      })
     }
 
     // copy each of the screenshots and videos
@@ -873,7 +902,7 @@ const systemTests = {
       if (options.servers) {
         const optsServers = [].concat(options.servers)
 
-        const servers = await Bluebird.map(optsServers, startServer)
+        const servers = await Promise.all(optsServers.map((server) => startServer(server)))
 
         this.servers = servers
       } else {
@@ -890,7 +919,7 @@ const systemTests = {
 
       if (s) {
         try {
-          await Bluebird.map(s, stopServer)
+          await Promise.all(s.map((srv) => stopServer(srv)))
         } catch (err) {
           console.error('Error stopping server', err)
           throw err
@@ -1056,6 +1085,8 @@ const systemTests = {
         }
       }
 
+      recordTeardownBudget(stdout)
+
       const { expectedExitCode, skipExitSignalAssertion } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
@@ -1113,7 +1144,7 @@ const systemTests = {
             }
           }
 
-          expect(parseFloat(version)).to.be.a.number
+          expect(parseFloat(version)).to.be.a('number')
 
           // if we are in headed mode or headed is undefined in a browser other
           // than electron

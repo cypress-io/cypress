@@ -53,10 +53,6 @@ vi.mock('../../lib/windows', async (importActual) => {
   }
 })
 
-const isWindows = () => {
-  return os.platform() === 'win32'
-}
-
 describe('detect', () => {
   beforeEach(async () => {
     vi.unstubAllEnvs()
@@ -78,10 +74,21 @@ describe('detect', () => {
   // making simple to debug tests
   // using DEBUG=... flag
 
-  // we are only going to run tests on platforms with at least
-  // one browser. This test, is really E2E because it finds
-  // real browsers
-  it('detects available browsers', async () => {
+  it('returns the browsers reported by the platform helper', async () => {
+    const stubDetect = (browser: Browser) => {
+      return Promise.resolve({
+        name: browser.name,
+        path: `/path/to/${browser.name}`,
+        version: '130.0.0.0',
+      })
+    }
+
+    // @ts-expect-error
+    vi.mocked(linuxDetect).mockImplementation(stubDetect)
+    vi.mocked(darwinDetect).mockImplementation(stubDetect)
+    // @ts-expect-error
+    vi.mocked(windowsDetect).mockImplementation(stubDetect)
+
     const browsers = await detect()
 
     log('detected browsers %j', browsers)
@@ -91,12 +98,11 @@ describe('detect', () => {
 
     log('%d browsers\n%j', browsers.length, mainProps)
 
-    if (isWindows()) {
-      // we might not find any browsers on Windows CI
-      expect(browsers.length).toBeGreaterThanOrEqual(0)
-    } else {
-      expect(browsers.length).toBeGreaterThan(0)
-    }
+    expect(browsers.length).toBeGreaterThan(0)
+
+    browsers.forEach((browser) => {
+      expect(browser.majorVersion).toEqual('130')
+    })
   })
 
   describe('#getMajorVersion', () => {

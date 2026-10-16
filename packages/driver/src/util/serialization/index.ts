@@ -1,28 +1,12 @@
 import _ from 'lodash'
-import structuredClonePonyfill from 'core-js-pure/actual/structured-clone'
 import $stackUtils from '../../cypress/stack_utils'
 import $errUtils from '../../cypress/error_utils'
 
 const UNSERIALIZABLE = '__cypress_unserializable_value'
 
-// If a native structuredClone exists, use that to determine if a value can be serialized or not. Otherwise, use the ponyfill.
-// we need this because some implementations of SCA treat certain values as unserializable (ex: Error is serializable in ponyfill but NOT in firefox implementations)
-// @ts-ignore
-const structuredCloneRef = window?.structuredClone || structuredClonePonyfill
-
-export const isSerializableInCurrentBrowser = (value: any) => {
+export const isSerializableInCurrentBrowser = (value: unknown) => {
   try {
-    structuredCloneRef(value)
-
-    // @ts-ignore
-    if (Cypress.isBrowser('firefox') && _.isError(value) && structuredCloneRef !== window?.structuredClone) {
-      /**
-       * NOTE: structuredClone() was introduced in Firefox 94. Supported versions below 94 need to use the ponyfill
-       * to determine whether or not a value can be serialized through postMessage. Since the ponyfill deems Errors
-       * as clone-able, but postMessage does not in Firefox, we must make sure we do NOT attempt to send native errors through firefox
-       */
-      return false
-    }
+    structuredClone(value)
 
     // In some instances of structuredClone, Bluebird promises are considered serializable, but can be very deep objects
     // For ours needs, we really do NOT want to serialize these

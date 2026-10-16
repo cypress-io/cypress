@@ -5,9 +5,7 @@ describe('src/cypress/dom/visibility', {
   slowTestThreshold: 500,
 }, () => {
   function assertVisibilityForEl (el: HTMLElement) {
-    // once experimentalFastVisibility is added, switch based on the config value
-    // and use `cy-fast-expect` instead of `cy-legacy-expect` when it is enabled.
-    const breakingChangeExpectedProp = Cypress.config('experimentalFastVisibility') ? 'cy-fast-expect' : 'cy-legacy-expect'
+    const breakingChangeExpectedProp = Cypress.config('visibilityStrategy') === 'modern' ? 'cy-modern-expect' : 'cy-legacy-expect'
     const expected = el.getAttribute('cy-expect') ?? el.getAttribute(breakingChangeExpectedProp)
 
     if (!expected) {
@@ -56,11 +54,11 @@ describe('src/cypress/dom/visibility', {
     }
   }
 
-  const modes = ['fast', 'legacy']
+  const modes: ('modern' | 'legacy')[] = ['modern', 'legacy']
 
   for (const mode of modes) {
     describe(`${mode}`, {
-      experimentalFastVisibility: mode === 'fast',
+      visibilityStrategy: mode,
     }, () => {
       beforeEach(() => {
         cy.visit('/fixtures/generic.html')
@@ -222,7 +220,25 @@ describe('src/cypress/dom/visibility', {
       })
 
       describe('visibility scenarios', () => {
+        // The legacy strategy always treats <html>/<body> as visible. The modern
+        // strategy does not special-case them: they obey checkVisibility and the
+        // 0-dimension rule like any other element.
         describe('html and body overrides', () => {
+          const rootExpectation = mode === 'legacy' ? 'visible' : 'hidden'
+
+          const assertRoot = (selector: 'html' | 'body', expected: 'visible' | 'hidden') => {
+            const opposite = expected === 'visible' ? 'hidden' : 'visible'
+
+            expect(cy.$$(selector).is(`:${expected}`), `${selector} should be :${expected}`).to.be.true
+            expect(cy.$$(selector).is(`:${opposite}`), `${selector} should not be :${opposite}`).to.be.false
+
+            expect(cy.$$(selector)).to.be[expected]
+            expect(cy.$$(selector)).to.not.be[opposite]
+
+            cy.wrap(cy.$$(selector)).should(`be.${expected}`)
+            cy.wrap(cy.$$(selector)).should(`not.be.${opposite}`)
+          }
+
           beforeEach(() => {
             cy.visit('/fixtures/empty.html')
           })
@@ -238,44 +254,26 @@ describe('src/cypress/dom/visibility', {
               })
             })
 
-            it('is always visible', () => {
-              expect(cy.$$('html').is(':hidden')).to.be.false
-              expect(cy.$$('html').is(':visible')).to.be.true
-
-              expect(cy.$$('html')).not.to.be.hidden
-              expect(cy.$$('html')).to.be.visible
-
-              cy.wrap(cy.$$('html')).should('not.be.hidden')
-              cy.wrap(cy.$$('html')).should('be.visible')
-              expect(cy.$$('body').is(':hidden')).to.be.false
-              expect(cy.$$('body').is(':visible')).to.be.true
-
-              expect(cy.$$('body')).not.to.be.hidden
-              expect(cy.$$('body')).to.be.visible
-
-              cy.wrap(cy.$$('body')).should('not.be.hidden')
-              cy.wrap(cy.$$('body')).should('be.visible')
+            it(`is ${rootExpectation}`, () => {
+              assertRoot('html', rootExpectation)
+              assertRoot('body', rootExpectation)
             })
           })
 
-          describe('when not display none', () => {
+          describe('when empty', () => {
+            it(`body is ${rootExpectation}`, () => {
+              assertRoot('body', rootExpectation)
+            })
+          })
+
+          describe('when it has rendered dimensions', () => {
+            beforeEach(() => {
+              cy.get('body').invoke('html', '<div style="width: 100px; height: 100px;">content</div>')
+            })
+
             it('is visible', () => {
-              expect(cy.$$('html').is(':hidden')).to.be.false
-              expect(cy.$$('html').is(':visible')).to.be.true
-
-              expect(cy.$$('html')).not.to.be.hidden
-              expect(cy.$$('html')).to.be.visible
-
-              cy.wrap(cy.$$('html')).should('not.be.hidden')
-              cy.wrap(cy.$$('html')).should('be.visible')
-              expect(cy.$$('body').is(':hidden')).to.be.false
-              expect(cy.$$('body').is(':visible')).to.be.true
-
-              expect(cy.$$('body')).not.to.be.hidden
-              expect(cy.$$('body')).to.be.visible
-
-              cy.wrap(cy.$$('body')).should('not.be.hidden')
-              cy.wrap(cy.$$('body')).should('be.visible')
+              assertRoot('html', 'visible')
+              assertRoot('body', 'visible')
             })
           })
         })
@@ -315,11 +313,10 @@ describe('src/cypress/dom/visibility', {
 
           assertVisibilityForSections([
             'zero-dimensions-with-overflow-hidden',
-            // TODO: Firefox has slightly different behavior than chromium - address with test harness changes in https://github.com/cypress-io/cypress/issues/33127
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'text-content-with-zero-dimensions' : undefined,
+            'text-content-with-zero-dimensions',
             'positive-dimensions-with-overflow-hidden',
             'overflow-auto-with-zero-dimensions',
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'mixed-dimension-scenarios' : undefined,
+            'mixed-dimension-scenarios',
             'overflow-hidden',
             'overflow-y-hidden',
             'overflow-x-hidden',
@@ -328,7 +325,7 @@ describe('src/cypress/dom/visibility', {
             'overflow-relative-positioning',
             'overflow-flex-container',
             'overflow-complex-scenarios',
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'clip-path-scenarios' : undefined,
+            'clip-path-scenarios',
           ])
         })
 
@@ -355,7 +352,7 @@ describe('src/cypress/dom/visibility', {
 
           assertVisibilityForSections([
             'scaling',
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'translation' : undefined,
+            'translation',
             'rotation',
             'skew',
             'matrix',
@@ -365,11 +362,65 @@ describe('src/cypress/dom/visibility', {
             'backface-visibility',
           ])
         })
+
+        describe('edge cases', () => {
+          const isModern = mode === 'modern'
+
+          beforeEach(() => {
+            cy.visit('/fixtures/empty.html')
+          })
+
+          it('`display: contents` element is hidden in both modes', () => {
+            // Per spec the element has no layout box; legacy's dim check and modern's
+            // checkVisibility() both report it hidden.
+            cy.$$('body').append('<div id="contents-el" style="display: contents;">contents</div>')
+            cy.get('#contents-el').should('be.hidden')
+          })
+
+          it('child of `display: contents` parent is visible in both modes', () => {
+            cy.$$('body').append('<div style="display: contents;"><span class="contents-child">child</span></div>')
+            cy.get('.contents-child').should('be.visible')
+          })
+
+          it('`content-visibility: hidden`', () => {
+            // Modern catches this via checkVisibility(); legacy doesn't model content-visibility.
+            cy.$$('body').append('<div id="cv-hidden" style="content-visibility: hidden;">cv hidden</div>')
+            cy.get('#cv-hidden').should(isModern ? 'be.hidden' : 'be.visible')
+          })
+
+          it('element inside a <template> fragment is hidden in both modes', () => {
+            const tmpl = cy.$$('body').get(0).ownerDocument.createElement('template')
+
+            tmpl.innerHTML = '<div id="in-template">never rendered</div>'
+            cy.$$('body').get(0).appendChild(tmpl)
+            const inTemplate = tmpl.content.querySelector('#in-template') as HTMLElement
+
+            // Element lives in a detached document fragment with no layout box.
+            expect(Cypress.dom.isHidden(inTemplate)).to.be.true
+          })
+
+          it('single-axis zero (`width: 0; height: 100px`) with overflowing text', () => {
+            // Legacy preserves visibility because text overflows the zero-width box.
+            // Modern hides it via the dim guard regardless of overflowing content.
+            cy.$$('body').append('<div id="single-axis-zero" style="width: 0; height: 100px;">overflowing text</div>')
+            cy.get('#single-axis-zero').should(isModern ? 'be.hidden' : 'be.visible')
+          })
+
+          it('`inert` element is visible (affects interactivity, not layout)', () => {
+            cy.$$('body').append('<div id="inert-el" inert style="width: 100px; height: 100px;">inert</div>')
+            cy.get('#inert-el').should('be.visible')
+          })
+
+          it('`aria-hidden="true"` element is visible (semantics, not rendering)', () => {
+            cy.$$('body').append('<div id="aria-hidden-el" aria-hidden="true" style="width: 100px; height: 100px;">aria</div>')
+            cy.get('#aria-hidden-el').should('be.visible')
+          })
+        })
       })
     })
   }
 
-  context('#getReasonIsHidden', () => {
+  context('#getReasonIsHidden (legacy)', { visibilityStrategy: 'legacy' }, () => {
     const reasonIs = ($el: JQuery, str: string) => {
       expect(dom.getReasonIsHidden($el)).to.eq(str)
     }
@@ -520,6 +571,104 @@ describe('src/cypress/dom/visibility', {
 
       cy.$$('body').append(visible)
       reasonIs(visible, 'This element `<div>` is not visible.')
+    })
+  })
+
+  context('#getReasonIsHidden (modern)', { visibilityStrategy: 'modern' }, () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/visibility/basic-css-properties.html')
+    })
+
+    it('returns the generic checkVisibility message with computed values', () => {
+      prepareFixtureSection('display-property')
+      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+      })
+    })
+
+    it('passes opacityProperty: true to checkVisibility by default', () => {
+      cy.get('h1').then(($el) => {
+        const spy = cy.spy($el[0], 'checkVisibility')
+
+        dom.getReasonIsHidden($el)
+
+        expect(spy).to.be.calledWith(Cypress.sinon.match({ opacityProperty: true }))
+      })
+    })
+
+    it('passes opacityProperty: false to checkVisibility when checkOpacity is false', () => {
+      cy.get('h1').then(($el) => {
+        const spy = cy.spy($el[0], 'checkVisibility')
+
+        dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(spy).to.be.calledWith(Cypress.sinon.match({ opacityProperty: false }))
+      })
+    })
+
+    it('reports the computed opacity value even when checkOpacity: false', () => {
+      // checkOpacity: false excludes opacity from the hidden decision, but when the element is
+      // hidden for another reason the message still reports the actual computed opacity.
+      cy.$$('body').append('<div id="display-and-opacity" style="display: none; opacity: 0;">hidden</div>')
+      cy.get('#display-and-opacity').then(($el) => {
+        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(reason).to.eq('This element `<div#display-and-opacity>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
+      })
+    })
+
+    it('does not branch on specific css properties (always generic)', () => {
+      prepareFixtureSection('opacity-property')
+      cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: block`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
+      })
+    })
+
+    it('attributes zero-dimension elements to the dimension guard, not checkVisibility', () => {
+      cy.$$('body').append('<div id="zero-dim" style="width: 0; height: 0;">zero</div>')
+      cy.get('#zero-dim').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div#zero-dim>` is not visible because it has an effective width and height of: `0 x 0` pixels.')
+      })
+    })
+
+    it('describes the first hidden element in a multi-element jQuery subject', () => {
+      // modernIsHidden returns true if *any* element in the jQuery subject is hidden, so the
+      // message must describe the element that actually tripped.
+      cy.$$('body').append('<div id="multi-visible" style="width: 100px; height: 20px;">visible</div>')
+      cy.$$('body').append('<div id="multi-hidden" style="display: none;">hidden</div>')
+      cy.then(() => {
+        const $els = Cypress.$('#multi-visible, #multi-hidden')
+        const reason = dom.getReasonIsHidden($els)
+
+        expect(reason).to.eq('This element `<div#multi-hidden>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+      })
+    })
+
+    it('surfaces the detached cause instead of the generic checkVisibility message', () => {
+      // detached elements fail `Element.checkVisibility()`, which would otherwise produce
+      // an unhelpful generic message. The reason should call out the structural cause.
+      const $detached = Cypress.$('<div id="detached-el">detached</div>')
+      const reason = dom.getReasonIsHidden($detached)
+
+      expect(reason).to.eq('This element `<div#detached-el>` is not visible because it is detached from the DOM')
+    })
+
+    it('falls back to the generic message when modernIsHidden checks all pass', () => {
+      // If neither checkVisibility nor the zero-dimension guard rejects the element, the
+      // function falls back to the legacy generic "not visible." string rather than emitting
+      // a misleading dimension message.
+      cy.$$('body').append('<div id="actually-visible" style="width: 100px; height: 20px;">visible</div>')
+      cy.get('#actually-visible').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div#actually-visible>` is not visible.')
+      })
     })
   })
 })

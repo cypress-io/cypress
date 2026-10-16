@@ -137,7 +137,7 @@ describe('KeyboardBindingsModal', () => {
 
       cy.get('[data-cy="keyboard-modal"]').should('be.visible')
       // Click outside the modal (on the backdrop)
-      cy.get('body').click(0, 0)
+      cy.get('[role="dialog"]').click('topLeft')
       cy.get('@closeSpy').should('have.been.calledOnce')
     })
   })

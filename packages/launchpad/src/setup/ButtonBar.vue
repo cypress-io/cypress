@@ -6,6 +6,7 @@
         size="40"
         :disabled="!canNavigateForward"
         :variant="mainVariant === 'pending' ? 'disabled' : mainVariant"
+        data-cy="next-button"
         @click="nextFn"
       >
         <i-cy-loading_x16
@@ -18,13 +19,14 @@
         v-if="backFn"
         size="40"
         variant="outline-light"
+        data-cy="back-button"
         @click="backFn"
       >
         {{ back }}
       </Button>
       <div class="grow" />
       <div
-        v-if="altFn && alt"
+        v-if="altFn != null && alt != null && alt !== ''"
         class="flex px-3 items-center"
       >
         <label
@@ -46,6 +48,7 @@
         size="40"
         variant="link"
         class="text-gray-500"
+        data-cy="skip-button"
         @click="skipFn"
       >
         {{ skip }}

@@ -540,7 +540,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return this._protocol[method].apply(this._protocol, args)
+      return this._protocol[method](...args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
@@ -561,7 +561,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return await this._protocol[method].apply(this._protocol, args)
+      return await this._protocol[method](...args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })

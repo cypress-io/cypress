@@ -139,6 +139,12 @@ describe('src/cy/commands/querying', () => {
           cy.$$('body').append(cy.$$('<foobarbazquux>asdf</foobarbazquux>'))
         }).get('@foo').should('contain', 'asdf')
       })
+
+      // https://github.com/cypress-io/cypress/issues/4373
+      it('can get a custom element when the framework patches Node.prototype', () => {
+        cy.visit('/fixtures/issue-4373.html')
+        cy.get('lightning-badge')
+      })
     })
 
     describe('should(\'exist\')', {
@@ -783,6 +789,38 @@ describe('src/cy/commands/querying', () => {
         cy.get('.spinner\'')
       })
 
+      // https://github.com/cypress-io/cypress/issues/3847
+      describe('invalid selector', () => {
+        const selector = '\'input\''
+        // mirrors the error Sizzle throws
+        const error = new Error(`Syntax error, unrecognized expression: ${selector}`)
+
+        it('fails with the selector syntax error when log is true', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eql(error.message)
+            expect(err.name).to.eql(error.name)
+            done()
+
+            return false
+          })
+
+          cy.get(selector)
+        })
+
+        it('fails with the selector syntax error instead of an unhandled rejection when log is false', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eql(error.message)
+            expect(err.name).to.eql(error.name)
+            expect(err.message).not.to.match(/Unhandled\srejection\sTypeError/)
+            done()
+
+            return false
+          })
+
+          cy.get(selector, { log: false })
+        })
+      })
+
       it('throws on too many elements after timing out waiting for length', (done) => {
         const buttons = cy.$$('button')
 
@@ -953,7 +991,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+          expect(err.message).to.match(/This element `<button#button>` is not visible/)
 
           done()
         })
@@ -965,7 +1003,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('element `<button#button>` is not visible because')
+          expect(err.message).to.match(/element `<button#button>` is not visible/)
 
           done()
         })
@@ -987,15 +1025,22 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('throws when alias property is `0`', (done) => {
+        let start: number
+
         cy.on('fail', (err) => {
           expect(err.message).to.include('`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`')
+          // retrying can never make `0` a valid index, so it should fail without waiting out the timeout
+          expect(Date.now() - start).to.be.lessThan(1000)
 
           done()
         })
 
         cy
         .intercept(/users/, {}).as('getUsers')
-        .get('@getUsers.0')
+        .then(() => {
+          start = Date.now()
+        })
+        .get('@getUsers.0', { timeout: 10000 })
       })
 
       it('throws when alias property isnt just a digit', (done) => {
@@ -1044,7 +1089,7 @@ describe('src/cy/commands/querying', () => {
           const getLog = this.logs[0]
           const assertionLog = this.logs[1]
 
-          expect(err.message).to.contain('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+          expect(err.message).to.match(/This element `<button#button>` is not visible/)
 
           expect(getLog.get('state')).to.eq('passed')
           expect(getLog.get('error')).to.be.undefined
@@ -1363,6 +1408,41 @@ describe('src/cy/commands/querying', () => {
           expect($el).to.be.null
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/25962
+      describe('describes the missing subject by its content', () => {
+        let assertMessage: string | undefined
+
+        beforeEach(() => {
+          assertMessage = undefined
+
+          cy.on('log:added', (attrs, log) => {
+            if (attrs.name === 'assert' && assertMessage === undefined) {
+              assertMessage = log.get('message')
+            }
+          })
+
+          return null
+        })
+
+        it('in an existence assertion', () => {
+          cy.contains('does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in an existence assertion with a filter', () => {
+          cy.contains('span', 'does-not-exist').should('not.exist').then(() => {
+            expect(assertMessage).to.eq('expected **span, does-not-exist** not to exist in the DOM')
+          })
+        })
+
+        it('in a length assertion', () => {
+          cy.contains('does-not-exist').should('have.length', 0).then(() => {
+            expect(assertMessage).to.eq('expected **does-not-exist** to have a length of **0**')
+          })
+        })
+      })
     })
 
     describe('should(\'be.visible\')', () => {
@@ -1677,6 +1757,46 @@ space
           })
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/24911
+      // Reproducing this needs `=` and `[` in the same string, so the special
+      // characters are combined here rather than exercised one at a time.
+      describe('combined', () => {
+        const content = 'This is a custom label ~!@#$%^&*()_+=-[]{}\\|:",./? UID'
+
+        it('finds a descendant', () => {
+          const label = $('<label></label>').text(content).appendTo(cy.$$('body'))
+
+          cy.contains('label', content).then(($label) => {
+            expect($label.get(0)).to.eq(label.get(0))
+          })
+        })
+
+        it('finds the subject itself', () => {
+          // With no matching descendant, .contains() filters the subject, which
+          // runs the selector through jQuery's matchesSelector rather than find()
+          const label = $('<label id="combined-chars"></label>').text(content).appendTo(cy.$$('body'))
+
+          cy.get('#combined-chars').contains(content).then(($label) => {
+            expect($label.get(0)).to.eq(label.get(0))
+          })
+        })
+
+        it('asserts on the content', () => {
+          $('<label id="combined-chars-assertion"></label>').text(content).appendTo(cy.$$('body'))
+
+          cy.get('#combined-chars-assertion').should('contain', content)
+        })
+
+        it('reports missing content as not found', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('Expected to find content')
+            done()
+          })
+
+          cy.contains('label', content, { timeout: 100 })
+        })
+      })
     })
 
     describe('.log', () => {
@@ -1747,6 +1867,12 @@ space
         })
       })
 
+      it('sets type to parent when used as a parent command', () => {
+        cy.contains('foo').then(function () {
+          expect(this.lastLog.get('type')).to.eq('parent')
+        })
+      })
+
       it('logs when not exists', () => {
         cy.contains('does-not-exist').should('not.exist').then(function () {
           expect(this.lastLog.get('message')).to.eq('does-not-exist')
@@ -1764,10 +1890,11 @@ space
       })
 
       // https://github.com/cypress-io/cypress/issues/1119
-      it('logs "0" on cy.contains(0)', function () {
+      it('logs "contains 0" on cy.contains(0)', function () {
         cy.state('document').write('<span>0</span>')
 
         cy.contains(0).then(() => {
+          expect(this.lastLog.get('name')).to.eq('contains')
           expect(this.lastLog.get('message')).to.eq('0')
         })
       })

@@ -5,16 +5,16 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "149.0.7827.155"
-chrome-beta-version: &chrome-beta-version "150.0.7871.24"
+chrome-stable-version: &chrome-stable-version "153.0.8010.36"
+chrome-beta-version: &chrome-beta-version "154.0.8037.17"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.24"
-firefox-stable-version: &firefox-stable-version "151.0.1"
-base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "153.0.8010.36"
+firefox-stable-version: &firefox-stable-version "154.0"
+base-internal-trixie: &base-internal-trixie cypress/base-internal:24.15.0-trixie
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.15.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
-base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
+base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
 
 parameters:
   publish-binary-branch:
@@ -26,8 +26,26 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
-  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
-  # Default true so develop/release branches run everything without explicit params.
+  # Opt-in Percy visual snapshots. Default false; set true via Trigger Pipeline
+  # (the setup config forwards it). Requires PERCY_TOKEN (test-runner:percy context).
+  percy-enabled:
+    type: boolean
+    default: false
+  # Opt-in full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy)
+  # path on Chrome. Default false; set true via Trigger Pipeline (or by
+  # forwarding the setup-pipeline parameter).
+  run-force-http1-tests:
+    type: boolean
+    default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`,
+  # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
+  # (can also be set manually to run those workflows)
+  run-platform-workflows:
+    type: boolean
+    default: false
+  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PR
+  # branches and on webhook pushes to develop. Default true so that any pipeline
+  # whose continuation omits them runs everything.
   run-driver-tests:
     type: boolean
     default: true
@@ -129,7 +147,15 @@ executors:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
-    resource_class: medium
+    resource_class: medium.gen2
+    environment:
+      PLATFORM: linux
+
+  # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check)
+  node-slim:
+    docker:
+      - image: cimg/node:24.15.0
+    resource_class: medium.gen2
     environment:
       PLATFORM: linux
 
@@ -137,7 +163,7 @@ executors:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
-    resource_class: medium
+    resource_class: medium.gen2
     environment:
       PLATFORM: linux
 
@@ -694,7 +720,7 @@ commands:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
 
-  # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 11 has the oldest glibc version (2.31) that we support.
+  # This code builds better-sqlite3 on Ubuntu 20 (Focal). This is necessary because Ubuntu 20 has the oldest glibc version (2.31) that we support.
   #
   # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to 
   # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the 
@@ -709,9 +735,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:22.19.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:24.15.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 37.6.0 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.7.0 --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -745,6 +771,18 @@ commands:
         description: run subset of tests with injectDocumentDomain config enabled
         type: boolean
         default: false
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full driver suite
+        type: string
+        default: ''
+      record-group-suffix:
+        description: optional Cypress Cloud group name suffix (after -force-http1 when set)
+        type: string
+        default: ''
       guard:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
@@ -788,22 +826,47 @@ commands:
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
+            if << parameters.force-http1 >> ; then
+              export CYPRESS_forceHttp1=true
+            fi
+
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
-              PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
+              GROUP="5x-driver-inject-document-domain-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
-              PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
+              GROUP="5x-driver-<<parameters.browser>>"
             fi
+
+            if << parameters.force-http1 >> ; then
+              GROUP="${GROUP}-force-http1"
+            fi
+
+            SPEC="<< parameters.spec >>"
+            GROUP_SUFFIX="<< parameters.record-group-suffix >>"
+            if [[ -n "$GROUP_SUFFIX" ]]; then
+              GROUP="${GROUP}${GROUP_SUFFIX}"
+            fi
+
+            SPEC_ARGS=()
+            if [[ -n "$SPEC" ]]; then
+              SPEC_ARGS=(--spec "$SPEC")
+            fi
+
+            PARALLEL="--parallel --group ${GROUP}"
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn $YARN_CMD --record $PARALLEL --browser <<parameters.browser>> --runner-ui
+              yarn $YARN_CMD --record $PARALLEL --browser <<parameters.browser>> --runner-ui "${SPEC_ARGS[@]}"
             else
               # external PR
-              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              if [[ -n "$SPEC" ]]; then
+                TESTFILES="$SPEC"
+              else
+                TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              fi
               echo "Test files for this machine are $TESTFILES"
 
               if [[ -z "$TESTFILES" ]]; then
@@ -877,6 +940,14 @@ commands:
         description: debug option
         type: string
         default: ''
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full package suite
+        type: string
+        default: ''
       guard:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
@@ -911,25 +982,44 @@ commands:
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
+            if << parameters.force-http1 >> ; then
+              export CYPRESS_forceHttp1=true
+            fi
+
+            SPEC="<< parameters.spec >>"
+
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+              GROUP="<<parameters.package>>-<<parameters.type>>"
+              if << parameters.force-http1 >> ; then
+                GROUP="${GROUP}-force-http1"
+              fi
 
+              SPEC_ARGS=()
+              if [[ -n "$SPEC" ]]; then
+                SPEC_ARGS=(--spec "$SPEC")
+              fi
+
+              # Percy only runs when the percy-enabled pipeline parameter is set
+              # (Trigger Pipeline → percy-enabled=true) and PERCY_TOKEN is available.
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group "$GROUP" "${SPEC_ARGS[@]}"
             else
               # external PR
 
               # To make `circleci tests` work correctly, we need to step into the package folder.
               cd packages/<<parameters.package>>
 
-              if [[ <<parameters.type>> == 'ct' ]]; then
+              if [[ -n "$SPEC" ]]; then
+                TESTFILES="$SPEC"
+              elif [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
                 TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -946,7 +1036,7 @@ commands:
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
             fi
@@ -954,7 +1044,7 @@ commands:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
             else
@@ -976,6 +1066,14 @@ commands:
           bun-v1.2.22)
         type: string
         default: bun-v1.2.22
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
+      spec:
+        description: optional space-separated system-test paths; empty runs the full suite
+        type: string
+        default: ''
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
@@ -1028,16 +1126,25 @@ commands:
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: |
-            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
-            SPECS=
-            for file in $ALL_SPECS; do
-              # filter out non_root tests, they have their own stage
-              if [[ "$file" == *"non_root"* ]]; then
-                echo "Skipping $file"
-                continue
-              fi
-              SPECS="$SPECS $file"
-            done
+            if << parameters.force-http1 >> ; then
+              export CYPRESS_forceHttp1=true
+            fi
+
+            SPEC="<< parameters.spec >>"
+            if [[ -n "$SPEC" ]]; then
+              SPECS="$SPEC"
+            else
+              ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
+              SPECS=
+              for file in $ALL_SPECS; do
+                # filter out non_root tests, they have their own stage
+                if [[ "$file" == *"non_root"* ]]; then
+                  echo "Skipping $file"
+                  continue
+                fi
+                SPECS="$SPECS $file"
+              done
+            fi
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
@@ -1124,8 +1231,11 @@ commands:
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
 
             cd ~/cypress/..
-            # install some deps for get-next-version
-            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12 minimist@1.2.5
+            # get-next-version runs before the workspace dependencies are
+            # unpacked, so install what it needs at the versions
+            # cypress/package.json pins.
+            NEXT_VERSION_DEPS=$(node -p "const deps = require('./cypress/package.json').devDependencies; ['semver', 'conventional-recommended-bump', 'minimist'].map((name) => name + '@' + deps[name]).join(' ')")
+            npm i $NEXT_VERSION_DEPS
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
@@ -1640,7 +1750,7 @@ commands:
             ssh-keyscan github.com >> ~/.ssh/known_hosts
 
   # Halts a job immediately if its guard parameter is false.
-  # Used to skip jobs that are not relevant to the changed files in a PR.
+  # Used to skip jobs that are not relevant to the changed files.
   # The job still exits with "success" so downstream jobs and all-jobs-passed
   # are not blocked.
   halt-if-skipped:
@@ -1666,7 +1776,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
       build-better-sqlite3:
         type: boolean
         default: false
@@ -1695,7 +1805,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1717,6 +1827,25 @@ jobs:
             node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
       - build-and-persist
 
+  check-lockfile:
+    <<: *defaults
+    executor: node-slim
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Check yarn.lock is deduplicated 🧬
+          command: |
+            if ! yarn check-lockfile; then
+              echo ""
+              echo "yarn.lock has duplicates that the local postinstall would collapse on its own,"
+              echo "so the committed lockfile does not match the tree contributors actually install."
+              echo "Run 'yarn-deduplicate --strategy=highest' and commit the resulting yarn.lock."
+              exit 1
+            fi
+      - run:
+          name: Check yarn.lock matches resolved dependencies 🔒
+          command: yarn check-lockfile-drift
+
   lint:
     <<: *defaults
     steps:
@@ -1724,15 +1853,18 @@ jobs:
       - run:
           name: Linting 🧹
           command: |
-            yarn clean
             git clean -df
             yarn lint
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
+      - run:
+          name: Audit conditional job filters
+          command: yarn audit-ci-filters
 
   check-ts:
     <<: *defaults
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1742,6 +1874,7 @@ jobs:
 
   health-check:
     <<: *defaults
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1752,12 +1885,20 @@ jobs:
   # a special job that closes the Percy build started by the required jobs
   percy-finalize:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     parameters:
       <<: *defaultsParameters
       required_env_var:
         type: env_var_name
     steps:
+      - unless:
+          condition: << pipeline.parameters.percy-enabled >>
+          steps:
+            - run:
+                # Percy runs opt-in only (Trigger Pipeline → percy-enabled=true),
+                # so by default there is no Percy build to finalize.
+                name: Percy disabled — skipping finalize
+                command: circleci-agent step halt
       # Uses an inline when: not: or: instead of halt-if-skipped because this
       # job depends on multiple parameters. CircleCI boolean parameters cannot
       # express or: logic, so a multi-condition inline step is required here.
@@ -1797,51 +1938,9 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
-  # verify accessibility scores from Cypress
-  verify-accessibility-results:
-    <<: *defaults
-    resource_class: small
-    steps:
-      # Uses an inline when: not: or: instead of halt-if-skipped because this
-      # job depends on multiple parameters. CircleCI boolean parameters cannot
-      # express or: logic, so a multi-condition inline step is required here.
-      - when:
-          condition:
-            not:
-              or:
-                - << pipeline.parameters.run-reporter-tests >>
-                - << pipeline.parameters.run-app-ui-tests >>
-                - << pipeline.parameters.run-frontend-shared-tests >>
-                - << pipeline.parameters.run-launchpad-tests >>
-                - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
-                - << pipeline.parameters.run-npm-vite-dev-server-tests >>
-                - << pipeline.parameters.run-driver-tests >>
-          steps:
-            - run:
-                name: Skipping job — not relevant to changed files
-                command: circleci-agent step halt
-      - run: |
-          if [[ -z "$MAIN_RECORD_KEY" ]]; then
-            echo "skipping for contributor PRs since we don't record to the cloud"
-            circleci-agent step halt
-          fi
-      - update_known_hosts
-      - run:
-          name: checkout
-          command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" --depth 1
-      - run:
-          name: Install extract-cloud-results package
-          command: |
-            npm install https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz
-      - run:
-          name: Verify Accessibility Results
-          command: |
-            cp ./cypress/scripts/verify-accessibility-results.js verify-accessibility-results.js
-            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY node verify-accessibility-results.js
-
   ready-to-release:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     parameters:
       <<: *defaultsParameters
     steps:
@@ -1851,7 +1950,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-cli-tests >>
@@ -1872,7 +1971,7 @@ jobs:
           name: Upload CLI snapshots for diffing
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
@@ -1882,7 +1981,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -1935,7 +2034,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -1955,6 +2054,8 @@ jobs:
           environment:
             CYPRESS_CONFIG_ENV: production
           command: |
+            source ./scripts/ensure-node.sh
+            cd packages/driver
             echo Current working directory is $PWD
             node --version
             if [[ `node ../../scripts/get-platform-key.js` == 'linux-arm64' ]]; then
@@ -1966,7 +2067,6 @@ jobs:
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
             DEBUG=cypress*memory \
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
-          working_directory: packages/driver
       - sanitize-verify-and-store-mocha-results
 
   unit-tests:
@@ -1985,9 +2085,6 @@ jobs:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
-      - install-browsers:
-          install-chrome: true
-          executor: << parameters.executor >>
       - when:
           condition:
             # several snapshots fails for windows due to paths.
@@ -2033,15 +2130,18 @@ jobs:
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 3
 
+  # Unguarded: a release gate rather than a test group, and the only check on
+  # either release train. `test-npm-package-release-script` is the dry run of
+  # the @cypress/* publish that `npm-release` performs for real later in this
+  # same pipeline; `validate-binary-changelog.js` validates cli/CHANGELOG.md
+  # for the binary release. Neither depends on which paths changed.
   verify-release-readiness:
     <<: *defaults
-    resource_class: small
+    resource_class: medium.gen2
     parallelism: 1
     environment:
       GITHUB_TOKEN: $GH_TOKEN
     steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
@@ -2051,6 +2151,7 @@ jobs:
 
   lint-types:
     <<: *defaults
+    executor: node-slim
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -2081,7 +2182,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -2102,7 +2203,11 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - windows_reinstall_deps
-      - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
+      - run:
+          name: Run cloud environment unit tests
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn workspace @packages/server test-unit test/unit/cloud/environment.spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
@@ -2136,6 +2241,68 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
+  # Fast, Node-only parity check for the proxy middleware onion across both
+  # network transports (browser CDP Fetch and the HTTP/1 MITM proxy) — mirrors
+  # run_unit_suite() in scripts/validate-proxy-middleware-transport.sh.
+  proxy-transport-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-unit-tests >>
+      - restore_cached_workspace
+      - run:
+          name: Proxy middleware transport parity unit tests
+          command: |
+            REPORTS=/tmp/cypress/junit
+            mkdir -p "$REPORTS"
+
+            yarn workspace @packages/proxy test -- \
+              test/unit/http/index.spec.ts \
+              test/unit/adapters/http-codec.spec.ts \
+              test/integration/net-stubbing.spec.ts \
+              test/unit/http/request-middleware.spec.ts \
+              test/unit/http/util/prerequests.spec.ts \
+              test/unit/adapters/proxy-request-interception.spec.ts \
+              test/unit/adapters/proxy-response-interception.spec.ts \
+              --reporter=default --reporter=junit --outputFile.junit=$REPORTS/proxy-transport-proxy-core.xml
+
+            yarn workspace @packages/proxy test -- \
+              test/unit/http/response-middleware.spec.ts -t "experimentalCspAllowList" \
+              --reporter=default --reporter=junit --outputFile.junit=$REPORTS/proxy-transport-proxy-csp.xml
+
+            yarn workspace @packages/network-interception test -- \
+              test/unit/http-intercept.spec.ts \
+              --reporter=default --reporter=junit --outputFile.junit=$REPORTS/proxy-transport-network-interception.xml
+
+            yarn workspace @packages/net-stubbing test -- \
+              test/unit/adapters/driver-intercept-registration.spec.ts \
+              --reporter=default --reporter=junit --outputFile.junit=$REPORTS/proxy-transport-net-stubbing.xml
+      - sanitize-verify-and-store-mocha-results:
+          expectedResultCount: 4
+
+  h2-dual-stack-tests:
+    <<: *defaults
+    resource_class: medium+.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-system-tests >>
+      - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+      - run:
+          name: Start dual-stack h2 origin
+          background: true
+          command: node system-tests/projects/http2-dual-stack/server.mjs
+      - run:
+          name: Verify browser h2 with the MITM proxy disabled
+          command: |
+            yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome
+      - run:
+          name: Verify HTTP/1.1 downgrade with the MITM proxy enabled
+          command: |
+            yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --config forceHttp1=true --expose expectedBrowserProtocol=1.1
+
   system-tests-node-modules-install:
     <<: *defaults
     steps:
@@ -2158,7 +2325,7 @@ jobs:
       - update_cached_system_tests_deps
 
   binary-system-tests:
-    parallelism: 5
+    parallelism: 4
     working_directory: ~/cypress
     environment:
       <<: *defaultsEnvironment
@@ -2180,7 +2347,7 @@ jobs:
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
-      TEST_PROJECT_DIR: ./system-tests/projects/yarn-v4.3.1-pnp-dep-resolution
+      TEST_PROJECT_DIR: ./system-tests/projects/yarn-v4.15.0-pnp-dep-resolution
       USE_YARN_TO_INSTALL_CYPRESS_BINARY: true
     steps:
       - maybe_skip_binary_jobs
@@ -2195,11 +2362,11 @@ jobs:
             yarn set version 1.22.22
             yarn install --ignore-scripts
       - run:
-          name: install dependencies in yarn-v4.3.1-pnp-dep-resolution with yarn berry
-            4.3.1
+          name: install dependencies in yarn-v4.15.0-pnp-dep-resolution with yarn berry
+            4.15.0
           command: |
-            yarn set version 4.3.1
-            cd ./system-tests/projects/yarn-v4.3.1-pnp-dep-resolution && yarn
+            yarn set version 4.15.0
+            cd ./system-tests/projects/yarn-v4.15.0-pnp-dep-resolution && yarn
       - run:
           name: Bootstrap the Cypress binary and run binary system test
           command: |
@@ -2234,16 +2401,33 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
-    resource_class: medium+
-    parallelism: 8
+    parameters:
+      <<: *defaultsParameters
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
+      spec:
+        description: optional space-separated system-test paths; empty runs the full suite
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 8
+    resource_class: medium+.gen2
+    parallelism: << parameters.parallelism >>
     steps:
       - run-system-tests:
           browser: chrome
+          force-http1: << parameters.force-http1 >>
+          spec: << parameters.spec >>
           guard: << pipeline.parameters.run-system-tests >>
 
+  # electron is deprecated as a test browser, so it stays on the HTTP/1 MITM
+  # proxy path
   system-tests-electron:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 8
     steps:
       - run-system-tests:
@@ -2252,7 +2436,7 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 8
     steps:
       - run-system-tests:
@@ -2261,7 +2445,7 @@ jobs:
 
   system-tests-webkit:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 8
     steps:
       - run-system-tests:
@@ -2289,7 +2473,7 @@ jobs:
         type: boolean
         default: false
     parallelism: 3
-    resource_class: large
+    resource_class: large.gen2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -2323,12 +2507,24 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
       percy:
         type: boolean
         default: false
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full launchpad e2e
+          suite
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 3
     resource_class: << parameters.resource_class >>
-    parallelism: 3
+    parallelism: << parameters.parallelism >>
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -2336,6 +2532,8 @@ jobs:
           percy: << parameters.percy >>
           package: launchpad
           type: e2e
+          force-http1: << parameters.force-http1 >>
+          spec: << parameters.spec >>
           guard: << pipeline.parameters.run-launchpad-tests >>
 
   run-app-component-tests-chrome:
@@ -2344,7 +2542,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
       percy:
         type: boolean
         default: false
@@ -2365,12 +2563,23 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
       percy:
         type: boolean
         default: false
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full app e2e suite
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 8
     resource_class: << parameters.resource_class >>
-    parallelism: 8
+    parallelism: << parameters.parallelism >>
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -2378,32 +2587,61 @@ jobs:
           percy: << parameters.percy >>
           package: app
           type: e2e
+          force-http1: << parameters.force-http1 >>
+          spec: << parameters.spec >>
           guard: << pipeline.parameters.run-app-ui-tests >>
 
   driver-integration-tests-chrome:
     <<: *defaults
-    parallelism: 5
-    resource_class: medium+
+    parameters:
+      <<: *defaultsParameters
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full driver suite
+        type: string
+        default: ''
+      record-group-suffix:
+        description: optional Cypress Cloud group name suffix
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 5
+    parallelism: << parameters.parallelism >>
+    resource_class: medium+.gen2
     steps:
       - run-driver-integration-tests:
           browser: chrome
           install-chrome-channel: stable
+          force-http1: << parameters.force-http1 >>
+          spec: << parameters.spec >>
+          record-group-suffix: << parameters.record-group-suffix >>
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-inject-document-domain:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      force-http1:
+        description: run with forceHttp1=true (deprecated HTTP/1 MITM proxy path)
+        type: boolean
+        default: false
     parallelism: 5
-    resource_class: medium+
+    resource_class: medium+.gen2
     steps:
       - run-driver-integration-tests:
           browser: chrome
           install-chrome-channel: stable
           inject-document-domain: true
+          force-http1: << parameters.force-http1 >>
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2413,7 +2651,7 @@ jobs:
 
   driver-integration-tests-chrome-beta-inject-document-domain:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2424,16 +2662,18 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: firefox
           guard: << pipeline.parameters.run-driver-tests >>
 
+  # electron is deprecated as a test browser, so it stays on the HTTP/1 MITM
+  # proxy path
   driver-integration-tests-electron:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2442,7 +2682,7 @@ jobs:
 
   driver-integration-tests-webkit:
     <<: *defaults
-    resource_class: large
+    resource_class: large.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2470,7 +2710,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 3
     steps:
       - halt-if-skipped:
@@ -2484,7 +2724,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui
@@ -2493,7 +2733,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 2
     steps:
       - halt-if-skipped:
@@ -2507,7 +2747,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
@@ -2529,7 +2769,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
@@ -2575,7 +2815,7 @@ jobs:
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-npm-webpack-batteries-tests >>
@@ -2609,16 +2849,6 @@ jobs:
       - run:
           name: Build
           command: node scripts/lerna-build.js --scope=@cypress/angular
-
-  npm-angular-zoneless:
-    <<: *defaults
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-npm-angular-tests >>
-      - restore_cached_workspace
-      - run:
-          name: Build
-          command: node scripts/lerna-build.js --scope @cypress/angular-zoneless
 
   npm-puppeteer-unit-tests:
     <<: *defaults
@@ -2694,7 +2924,7 @@ jobs:
 
   npm-grep:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-npm-grep-tests >>
@@ -2710,6 +2940,7 @@ jobs:
       - run: yarn workspace @cypress/grep omit:specs
       - run: yarn workspace @cypress/grep or
       - run: yarn workspace @cypress/grep skip
+      - run: yarn workspace @cypress/grep specify
       - run: yarn workspace @cypress/grep tags:inverted
       - run: yarn workspace @cypress/grep tags:and
       - run: yarn workspace @cypress/grep tags:and:not
@@ -2757,7 +2988,7 @@ jobs:
 
   npm-release:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     steps:
       - restore_cached_workspace
       - run:
@@ -2770,7 +3001,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: xlarge
+        default: xlarge.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -2797,7 +3028,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: small
+        default: small.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2813,7 +3044,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2842,13 +3073,68 @@ jobs:
           package_url_path: ~/cypress/npm-package-url.json
           binary_url_path: ~/cypress/binary-url.json
 
+  # Alerts the author of the commit that broke the binary. Requires every binary
+  # job at `terminal`, so it wakes up however they finished, then asks the API
+  # which of them actually failed - a cancelled or skipped job is not a breakage.
+  # Scope comes from this job's own dependency list, so it follows the `requires:`
+  # block in the workflow rather than a second list of job names that would drift.
+  notify-binary-failure:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small.gen2
+    steps:
+      - run:
+          name: Comment on the commit if a binary job failed
+          command: |
+            # This endpoint paginates and linux-x64 is already ~80 jobs, so a
+            # dropped page would silently report no failures at all.
+            ITEMS="[]"
+            PAGE=""
+            while :; do
+              RESP=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
+                "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?page-token=$PAGE")
+              ITEMS=$(jq -n --argjson a "$ITEMS" --argjson b "$(echo "$RESP" | jq '.items')" '$a + $b')
+              PAGE=$(echo "$RESP" | jq -r '.next_page_token // empty')
+              [[ -n "$PAGE" ]] || break
+            done
+
+            # `failed` is not the only way a job breaks - CircleCI reports
+            # timeouts and infrastructure errors under their own statuses.
+            # `canceled` and `not_run` stay off this list on purpose.
+            FAILED=$(jq -rn --argjson items "$ITEMS" '
+              ["failed","timedout","infrastructure_fail","terminated-unknown"] as $bad
+              | ($items[]|select(.name=="notify-binary-failure").dependencies) as $d
+              | [$items[]|select(.id as $i|$d|index($i))|select(.status as $s|$bad|index($s))|.name]
+              | join(", ")')
+
+            if [[ -z "$FAILED" ]]; then
+              echo "No binary job failed; nothing to report."
+              exit 0
+            fi
+
+            REPO="$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+            AUTH="Authorization: token $GH_TOKEN"
+            # develop is squash-merged, so the commit author is the PR author.
+            # An unresolvable author still gets a comment, just without the tag.
+            LOGIN=$(curl -sS -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1" \
+              | jq -r '.author.login // empty') || true
+            # CIRCLE_BUILD_URL points at this notifier, which is green and tells
+            # the author nothing. Link the workflow holding the failed jobs.
+            WORKFLOW_URL="https://app.circleci.com/workflow/$CIRCLE_WORKFLOW_ID"
+            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($WORKFLOW_URL)"
+
+            curl -sfS -X POST -H "$AUTH" \
+              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1/comments" \
+              --data "$(jq -n --arg b "$BODY" '{body:$b}')"
+
   test-kitchensink:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: medium+.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -2910,7 +3196,7 @@ jobs:
 
   test-npm-module-and-verify-binary:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - restore_cached_workspace
       # make sure we have cypress.zip received
@@ -2948,7 +3234,7 @@ jobs:
   # Test NPM module on minimum node version we support
   test-npm-module-on-minimum-node-version:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     docker:
       - image: *base-internal-minimum-node
     steps:
@@ -2992,7 +3278,7 @@ jobs:
         type: string
         default: /root/test-cypress-and-jest
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
@@ -3028,7 +3314,7 @@ jobs:
         type: executor
         default: cy-docker
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
@@ -3146,7 +3432,7 @@ jobs:
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     steps:
       - test-binary-against-rwa:
           repo: cypress-realworld-app
@@ -3197,8 +3483,18 @@ jobs:
   all-jobs-passed:
     docker:
       - image: cimg/base:stable
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - run:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
+
+  # Fan-in gate: build complete and contributor PR approved (when applicable).
+  ready-to-test:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: Ready to test
+          command: echo "✅ Build finished and contributor PR approved"

@@ -176,12 +176,12 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
     })
 
     it('closes with click-outside', () => {
-      cy.get('body').click()
+      cy.get('[role="dialog"]').click('top')
       cy.get('@updateSpy').should('have.been.calledOnceWith', false)
     })
 
     it('does not close w/ click-outside when viewport is xs', { viewportWidth: 400 }, () => {
-      cy.get('body').click()
+      cy.get('[role="dialog"]').click('top')
       cy.get('@updateSpy').should('not.have.been.called')
     })
 

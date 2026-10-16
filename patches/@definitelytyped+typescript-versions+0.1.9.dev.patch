@@ -1,0 +1,16 @@
+diff --git a/node_modules/@definitelytyped/typescript-versions/dist/index.js b/node_modules/@definitelytyped/typescript-versions/dist/index.js
+--- a/node_modules/@definitelytyped/typescript-versions/dist/index.js
++++ b/node_modules/@definitelytyped/typescript-versions/dist/index.js
+@@ -10,7 +10,11 @@ var TypeScriptVersion;
+     /** Add to this list when a version actually ships.  */
+     TypeScriptVersion.shipped = ["5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9"];
+     /** Add to this list when a version is available as typescript@next */
+-    TypeScriptVersion.supported = [...TypeScriptVersion.shipped, "6.0"];
++    // PATCHED (cypress): only test against shipped TypeScript versions. The unshipped entry
++    // made TypeScriptVersion.latest map to the typescript@next dist-tag, which now resolves
++    // to the TypeScript 7 native compiler — its package has no `main`, so dtslint's
++    // require() of the install directory crashes ("Cannot find module .../node_modules/typescript").
++    TypeScriptVersion.supported = [...TypeScriptVersion.shipped];
+     /** Add to this list when it will no longer be supported on Definitely Typed */
+     TypeScriptVersion.unsupported = [
+         "2.0",

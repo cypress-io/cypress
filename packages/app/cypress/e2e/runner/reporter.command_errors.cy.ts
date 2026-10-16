@@ -372,7 +372,7 @@ describe('errors ui', {
 
     verify('from chai assert', {
       column: 12,
-      message: 'object tested must be an array',
+      message: 'is invalid for this assertion',
     })
   })
 

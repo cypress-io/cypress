@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type { ForNetworkPolicyRegistration } from '../ports/driving-ports'
 import { createBlockedHosts } from './blocked-hosts'
 import type { BlockedHostsConfig } from './blocked-hosts'
@@ -38,4 +39,6 @@ export function registerDefaultNetworkPolicies (
     modifyObstructiveCode: config.modifyObstructiveCode,
     experimentalModifyObstructiveThirdPartyCode: config.experimentalModifyObstructiveThirdPartyCode,
   }))
+
+  debug.policies('registered default network policies')
 }

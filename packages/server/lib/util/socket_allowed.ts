@@ -46,4 +46,18 @@ export class SocketAllowed {
 
     return isAllowed
   }
+
+  /**
+   * The port allow-list is populated by proxy CONNECT tracking, which never
+   * happens with the MITM proxy disabled — a loopback remoteAddress is the
+   * only available gate for direct websocket upgrades there.
+   */
+  isRequestFromLocalhost (req: Request) {
+    const { remoteAddress } = req.socket
+    const isAllowed = ['127.0.0.1', '::1'].includes(remoteAddress!)
+
+    debug('is incoming request from localhost? %o', { isAllowed, reqUrl: req.url, remoteAddress })
+
+    return isAllowed
+  }
 }

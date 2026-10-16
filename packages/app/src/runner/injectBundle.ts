@@ -1,6 +1,4 @@
-import pDefer from 'p-defer'
-
-export const dfd = pDefer()
+export const dfd = Promise.withResolvers<void>()
 
 export function injectBundle (namespace: string) {
   const script = document.createElement('script')

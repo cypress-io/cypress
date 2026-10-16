@@ -5,7 +5,7 @@ describe('e2e typescript in spec and support file', function () {
 
   it('spec passes', function () {
     return systemTests.exec(this, {
-      project: 'coffee-react-interop',
+      project: 'react-webpack-interop',
       spec: 'typescript_passing.cy.ts',
       snapshot: true,
     })
@@ -34,6 +34,12 @@ describe('e2e typescript in spec and support file', function () {
   it('project passes with typescript 6', function () {
     return systemTests.exec(this, {
       project: 'ts-proj-6',
+    })
+  })
+
+  it('project passes with typescript 7', function () {
+    return systemTests.exec(this, {
+      project: 'ts-proj-7',
     })
   })
 

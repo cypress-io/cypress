@@ -45,17 +45,11 @@ We dynamically generated a new test to display this failure.
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid-browser.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid-browser.js/An uncaught error was detect     (1280x720)
-     ed outside of a test (failed).png                                                              
 
 
 ====================================================================================================
@@ -119,19 +113,11 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid_before_test_event.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/does not run (fail     (1280x720)
-     ed).png                                                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/nested -- does not     (1280x720)
-      run 2 (failed).png                                                                            
 
 
 ====================================================================================================
@@ -195,19 +181,11 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid_before_test_async_event.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/does not run     (1280x720)
-      (failed).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/nested -- do     (1280x720)
-     es not run 2 (failed).png                                                                      
 
 
 ====================================================================================================
@@ -420,29 +398,11 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   │ Failing:      14                                                                               │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  7                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
-     rror (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
-     rror when executed within cy cmd (failed).png                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in test (failed).png                                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in before hook -- 4 -- before all hook (failed).png                       
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in beforeEach hook -- 5 -- before each hook (failed).png                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in after hook -- 5 -- after all hook (failed).png                         
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in afterEach hook -- 5 -- after each hook (failed).png                    
 
 
 ====================================================================================================
@@ -605,19 +565,11 @@ https://on.cypress.io/config
   │ Failing:      8                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     before-invalid.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
-      config override throws error (failed).png                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
-      config override throws error when executed within cy cmd (failed).png                         
 
 
 ====================================================================================================
@@ -1076,29 +1028,11 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   │ Failing:      14                                                                               │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  7                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
-     rror (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/inline test config override throws e     (1280x720)
-     rror when executed within cy cmd (failed).png                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in test (failed).png                                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in before hook -- 4 -- before all hook (failed).png                       
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in beforeEach hook -- 5 -- before each hook (failed).png                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in after hook -- 5 -- after all hook (failed).png                         
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid.js/throws error when invalid config opt     (1280x720)
-      in Cypress.config() in afterEach hook -- 5 -- after each hook (failed).png                    
 
 
 ====================================================================================================
@@ -1255,19 +1189,11 @@ https://on.cypress.io/config
   │ Failing:      8                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     before-invalid.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
-      config override throws error (failed).png                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/before-invalid.js/runs all tests -- inline test     (1280x720)
-      config override throws error when executed within cy cmd (failed).png                         
 
 
 ====================================================================================================
@@ -1627,71 +1553,6 @@ exports['testConfigOverrides / experimental retries specific behavior / succeeds
   │ ✔  override-with-legacy-retries.cy.js       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['testConfigOverrides / fails when trying to perform testConfigOverrides for Cypress.env() with allowCypressEnv=false'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (allow_cypress_env.cy.js)                                                  │
-  │ Searched:   cypress/e2e/testConfigOverrides/allow_cypress_env.cy.js                            │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  allow_cypress_env.cy.js                                                         (1 of 1)
-
-
-  testConfigOverrides with allowCypressEnv=false
-    1) fails when trying to perform testConfigOverrides for Cypress.env()
-
-
-  0 passing
-  1 failing
-
-  1) testConfigOverrides with allowCypressEnv=false
-       fails when trying to perform testConfigOverrides for Cypress.env():
-     CypressError: overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.
-
-https://on.cypress.io/cypress-env-migration
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     allow_cypress_env.cy.js                                                          │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  allow_cypress_env.cy.js                  XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

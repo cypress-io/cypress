@@ -1,5 +1,10 @@
 import { expect } from 'chai'
 
+// The default network path intercepts in the browser through CDP, which only
+// Chromium-family browsers support; Firefox, Electron, and WebKit stay on the
+// HTTP/1 proxy either way.
+const usesBrowserNetworkPath = !Cypress.config('forceHttp1') && Cypress.isBrowser([{ name: '!electron', family: 'chromium' }])
+
 describe('Proxy Logging', () => {
   const { _ } = Cypress
 
@@ -220,7 +225,11 @@ describe('Proxy Logging', () => {
                 method: 'GET',
                 url: 'http://localhost:3500/some-url',
                 body: '',
-                httpVersion: '1.1',
+                // NOTE: accepted MITM → CDP drift (#34562): proxy-off there is no
+                // browser→proxy hop to report, and the protocol negotiated with the
+                // origin is not knowable while the request is paused, so httpVersion
+                // is honestly absent rather than a fabricated 1.1.
+                ...(usesBrowserNetworkPath ? {} : { httpVersion: '1.1' }),
                 query: {},
                 responseTimeout: Cypress.config('responseTimeout'),
                 headers: interceptProps.Request.headers,
@@ -237,6 +246,31 @@ describe('Proxy Logging', () => {
               },
               RouteHandler: 'stubbed response',
               'RouteHandler Type': 'StaticResponse stub',
+            })
+
+            done()
+          } catch (error) {
+            // don't throw, eventually the log update will come in
+            // eslint-disable-next-line no-console
+            console.error('assertion error', error)
+          }
+        })
+      })
+
+      it('shows successful indicator for 304 Not Modified responses', (done) => {
+        cy.intercept('/some-url', { statusCode: 304 }).as('alias')
+        .then(() => {
+          // tslint:disable:no-floating-promises
+          fetch('/some-url')
+        })
+
+        cy.on('log:changed', (log) => {
+          if (log.displayName !== 'fetch') return
+
+          try {
+            expect(log.renderProps).to.deep.include({
+              indicator: 'successful',
+              message: 'GET 304 /some-url',
             })
 
             done()
