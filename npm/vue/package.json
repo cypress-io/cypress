@@ -17,6 +17,8 @@
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
+    "@cypress/vite-plugin-cypress-esm": "0.0.0-development",
+    "@intlify/unplugin-vue-i18n": "11.2.5",
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
     "@vitejs/plugin-vue": "6.0.6",
