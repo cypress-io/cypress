@@ -177,16 +177,8 @@ Note also that `cjs`/`esm` are anchored to the workspace roots (`packages/*`, `n
 - Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
 - The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
 
-### 8. **Simplify Lint-Staged Configuration**
-After all packages are migrated, simplify the lint-staged configuration in root `package.json`:
-
-```json
-{
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-  }
-}
-```
+### 8. **Lint-Staged After the Migration**
+The root `lint-staged` config is already a single catch-all pattern, so it needs no change when the last package migrates. Once the root itself moves to flat config, that same pattern runs ESLint 9.
 
 ### 9. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
@@ -345,6 +337,7 @@ For each package, ensure you've completed:
 - [ ] Created `eslint.config.ts` with proper configuration
 - [ ] Added required dependencies (`eslint`, `@packages/eslint-config`, `jiti`)
 - [ ] Added lint-staged configuration to `package.json`
+- [ ] Added the package to the `--scope` list of the root `lint:fix` script
 - [ ] Created/updated `tsconfig.json` that extends base config
 - [ ] Updated ESLint scripts (removed `--ext` flag)
 - [ ] Ran `yarn lint` successfully
