@@ -75,13 +75,6 @@
       }
     }
   },
-  "standard": {
-    "globals": [
-      "Cypress",
-      "cy",
-      "expect"
-    ]
-  },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   }
