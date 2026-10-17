@@ -164,7 +164,7 @@ Working through each package from leaf to shared to root nodes, and files within
 - Type definitions are added _only_ when adding them does not have a domino effect
 - When adding a type definition would have a domino effect, use an `any` type. Because we can warn on the use of `any` types, this serves as an implicit "todo" to come back and fix it.
 - Add definitely-typed dependencies as necessary
-- Add `@ts-expect-error` directives as necessary - we will warn on them, so they become an implicit "todo".
+- Add `@ts-expect-error` directives as necessary, each with a description of the error it suppresses (`// @ts-expect-error - <reason>`). `@typescript-eslint/ban-ts-comment` requires the description and bans `@ts-ignore` and `@ts-nocheck` in packages on the flat config ([`@packages/eslint-config`](../packages/eslint-config)); packages still on `.eslintrc` do not enforce it yet. The directive fails type checking once the error is gone, so it stays an implicit "todo".
 
 ### Stage 2: Reduce Warnings
 

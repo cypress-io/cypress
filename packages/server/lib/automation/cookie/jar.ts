@@ -94,7 +94,7 @@ export class CookieJar {
   }
 
   getCookies (url: string, sameSiteContext: SameSiteContext = undefined) {
-    // @ts-ignore
+    // @ts-expect-error - tough-cookie supports sameSiteContext, but GetCookiesOptions does not declare it
     return this._cookieJar.getCookiesSync(url, { sameSiteContext })
   }
 
@@ -103,7 +103,7 @@ export class CookieJar {
 
     // have to use the internal memstore. looks like an async api, but
     // it's actually synchronous
-    // @ts-ignore
+    // @ts-expect-error - store is internal to tough-cookie and not on CookieJar's public type
     this._cookieJar.store.getAllCookies((_err, _cookies: Cookie[]) => {
       cookies = _cookies
     })
@@ -112,14 +112,14 @@ export class CookieJar {
   }
 
   setCookie (cookie: string | Cookie, url: string, sameSiteContext: SameSiteContext) {
-    // @ts-ignore
+    // @ts-expect-error - tough-cookie supports sameSiteContext, but SetCookieOptions does not declare it
     return this._cookieJar.setCookieSync(cookie, url, { sameSiteContext })
   }
 
   removeCookie (cookieData: CookieData) {
     // have to use the internal memstore. looks like an async api, but
     // it's actually synchronous
-    // @ts-ignore
+    // @ts-expect-error - store is internal to tough-cookie and not on CookieJar's public type
     this._cookieJar.store.removeCookie(
       cookieData.domain,
       cookieData.path || '/',

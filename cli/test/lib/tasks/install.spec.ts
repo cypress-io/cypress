@@ -20,7 +20,7 @@ vi.mock('systeminformation', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       osInfo: vi.fn(),
     },
@@ -32,7 +32,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
       arch: vi.fn(),
@@ -49,7 +49,7 @@ vi.mock('timers/promises', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       setTimeout: vi.fn(),
     },
@@ -61,7 +61,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       remove: vi.fn(),
       ensureDir: vi.fn(),
@@ -75,7 +75,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pkgVersion: vi.fn(),
       pkgBuildInfo: vi.fn(),
@@ -92,7 +92,7 @@ vi.mock('../../../lib/tasks/download', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -104,7 +104,7 @@ vi.mock('../../../lib/tasks/unzip', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -116,7 +116,7 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getVersionDir: vi.fn(),
       getBinaryDir: vi.fn(),
