@@ -3,7 +3,7 @@ import { mount } from '@cypress/vue'
 import Users from './Users.vue'
 
 describe('Fetching users', () => {
-  let mockUsers
+  let mockUsers: { id: string, name: string }[]
 
   before(() => {
     // load the mock user list once from cypress/fixtures/users.json
