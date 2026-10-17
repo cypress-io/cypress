@@ -1,6 +1,6 @@
 import debugModule from 'debug'
 import { sync as globbySync } from 'globby'
-import { getTestNames } from 'find-test-names'
+import { getTestNames, findEffectiveTestTags } from 'find-test-names'
 import { readFileSync } from 'fs'
 import { version } from '../package.json'
 import { parseGrep, shouldTestRun } from './utils'
@@ -122,13 +122,15 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
         const text = readFileSync(specFile, { encoding: 'utf8' })
 
         try {
-          const testInfo = getTestNames(text)
+          // use the effective tags of each test (its own tags plus the tags
+          // inherited from its parent suites), matching the run-time filter
+          const testTags: Record<string, { effectiveTags: string[] }> = findEffectiveTestTags(text)
 
           debug('spec file %s', specFile)
-          debug('test info: %o', testInfo.tests)
+          debug('test tags: %o', testTags)
 
-          return testInfo.tests.some((info) => {
-            const shouldRun = shouldTestRun(parsedGrep, null, info.tags)
+          return Object.values(testTags).some((info) => {
+            const shouldRun = shouldTestRun(parsedGrep, null, info.effectiveTags)
 
             return shouldRun
           })
