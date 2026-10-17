@@ -4,7 +4,6 @@
 **Bugfixes:**
 
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
-- Fixed an issue in component testing where an error thrown while creating the webpack dev server, such as one caused by an invalid webpack configuration, was reported as an unhandled error from the config file process instead of as a failure to start the dev server. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Misc:**
 
