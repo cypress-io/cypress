@@ -13,7 +13,6 @@ import type { Systeminformation } from 'systeminformation'
 import si from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
 import { stripVTControlCharacters as stripAnsi } from 'util'
-import { Listr } from 'listr2'
 
 import util from '../../../lib/util'
 import logger from '../../../lib/logger'
