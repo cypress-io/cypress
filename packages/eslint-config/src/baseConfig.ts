@@ -7,6 +7,7 @@ import cy from 'eslint-plugin-cypress'
 import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
 import vue from 'eslint-plugin-vue'
+import vueParser from 'vue-eslint-parser'
 import stylistic from '@stylistic/eslint-plugin'
 import react from 'eslint-plugin-react'
 
@@ -46,6 +47,15 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
           jsx: true,
         },
       },
+    },
+  },
+
+  // eslint-plugin-vue takes vue-eslint-parser as a peer and resolves whichever copy
+  // is hoisted, which can be an ESLint 8 era release that ignores the TS script parser
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
     },
   },
 
