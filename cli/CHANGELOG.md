@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed a regression in [16.1.0](#16-1-0) where, in Chrome, Chromium, and Edge run headed, the Cypress browser extension could stop responding for the rest of the run. This caused [`@cypress/puppeteer`](https://github.com/cypress-io/cypress/tree/develop/npm/puppeteer) to fail with `Cannot communicate with the Cypress Chrome extension`. Fixed in [#34958](https://github.com/cypress-io/cypress/pull/34958).
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
 
 **Misc:**
