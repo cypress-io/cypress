@@ -254,8 +254,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // restore between specs. Kept here rather than in the network runtime, which is
   // rebuilt mid-run and would snapshot an active override.
   private _projectBlockHosts?: Cfg['blockHosts']
-  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-  // After some package refactoring, we should be able to remove this.
+  // @ts-expect-error - httpsProxy is not a type in scope here
   protected _httpsProxy?: httpsProxy
   private _httpsProxyReady?: Promise<void>
   protected _graphqlWS?: GraphqlWsHandle
@@ -912,7 +911,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     allowDestroy(svr)
 
-    // @ts-ignore
+    // @ts-expect-error - allowDestroy adds destroyAsync at runtime, but http.Server's type lacks it
     return svr
   }
 
@@ -950,7 +949,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (userAgent, automationRequest, options) {
-    // @ts-ignore
     return this.request.sendPromise(userAgent, automationRequest, options)
   }
 
@@ -1283,7 +1281,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       // Read the field, not the getter: teardown drops _netStubbingState, so a
       // resolve:url racing close matches zero routes instead of throwing.
-      // @ts-ignore
       const iterator = getRoutesForRequest(this._netStubbingState?.routes ?? [], proxiedReq)
       // If the iterator is exhausted (done) on the first try, then 0 matches were found
       const zeroMatches = iterator.next().done
@@ -1515,8 +1512,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
-        // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-        // After some package refactoring, we should be able to remove this.
         return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()

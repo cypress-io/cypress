@@ -417,12 +417,12 @@ export class SocketBase implements SocketBroadcaster {
             }).filter(Boolean) as Cypress.Spec[]
 
             debug(`updating CT dev-server with ${specsToCompile.length} specs`)
-            // @ts-expect-error
+            // @ts-expect-error - the getDevServer() type in ProjectApiShape omits updateSpecs' options argument
             await devServer.updateSpecs(specsToCompile, { neededForJustInTimeCompile: true })
           } else {
             // update the dev server with the spec running
             debug(`updating CT dev-server with spec: ${spec.relative}`)
-            // @ts-expect-error
+            // @ts-expect-error - the getDevServer() type in ProjectApiShape omits updateSpecs' options argument
             await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
           }
 

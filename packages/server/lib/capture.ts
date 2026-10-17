@@ -5,7 +5,7 @@ const _log = process.log
 export const restore = function () {
   // restore to the originals
   process.stdout.write = _write
-  // @ts-expect-error
+  // @ts-expect-error - process.log is added by Electron and is not in Node's Process type
   process.log = _log
 }
 
@@ -14,14 +14,14 @@ export const stdout = function () {
 
   // lazily backup write to enable injection
   const { write } = process.stdout
-  // @ts-expect-error
+  // @ts-expect-error - process.log is added by Electron and is not in Node's Process type
   const { log } = process
 
   // electron adds a new process.log
   // method for windows instead of process.stdout.write
   // https://github.com/cypress-io/cypress/issues/977
   if (log) {
-    // @ts-expect-error
+    // @ts-expect-error - process.log is added by Electron and is not in Node's Process type
     process.log = function (str: string) {
       logs.push(str)
 
@@ -32,7 +32,7 @@ export const stdout = function () {
   process.stdout.write = function (str: string) {
     logs.push(str)
 
-    // @ts-expect-error
+    // @ts-expect-error - IArguments does not match stdout.write's parameter tuple
     return write.apply(this, arguments)
   }
 

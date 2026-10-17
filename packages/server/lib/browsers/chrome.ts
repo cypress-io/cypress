@@ -342,9 +342,9 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
     const filename = data.suggestedFilename
 
     if (filename) {
-      // @ts-ignore
+      // @ts-expect-error - filePath is not declared on the downloadItem literal
       downloadItem.filePath = path.join(downloadsFolder, data.suggestedFilename)
-      // @ts-ignore
+      // @ts-expect-error - mime is not declared on the downloadItem literal
       downloadItem.mime = mime.getType(data.suggestedFilename)
     }
 
@@ -715,7 +715,7 @@ export = {
       // if the client disconnects (e.g. due to a computer sleeping), update
       // the frame tree on reconnect in cases there were changes while
       // the client was disconnected
-      // @ts-expect-error
+      // @ts-expect-error - _updateFrameTree is private to CdpAutomation
       return cdpAutomation._updateFrameTree(client, 'onReconnect')()
     }
 

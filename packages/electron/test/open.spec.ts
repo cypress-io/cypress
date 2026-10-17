@@ -67,7 +67,7 @@ describe('open', () => {
   let mockStderrDebugFn: Mock<ReturnType<typeof Debug>>
 
   beforeEach(() => {
-    // @ts-expect-error
+    // @ts-expect-error - partial child process mock, and `ChildProcess` is not imported
     mockChildProcess = vi.mocked<ChildProcess>({
       on: vi.fn(),
       stderr: {
@@ -81,17 +81,17 @@ describe('open', () => {
       },
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - partial Writable mock that only stubs `pipe`
     mockProcessStdoutWritePipe = vi.mocked<Writable>({
       pipe: vi.fn(),
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - partial Writable mock that only stubs `pipe`
     mockProcessStdinWritePipe = vi.mocked<Writable>({
       pipe: vi.fn(),
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - partial Writable mock that only stubs `pipe`
     mockFilterWriter = vi.mocked<Writable>({
       pipe: vi.fn(),
     })
@@ -115,7 +115,7 @@ describe('open', () => {
     vi.mocked(filter).mockReturnValue(mockFilterWriter)
     mockElectronDebugFn = vi.fn()
     mockStderrDebugFn = vi.fn()
-    // @ts-expect-error
+    // @ts-expect-error - returns undefined for other namespaces, which Debug's return type does not allow
     vi.mocked(Debug).mockImplementation((ns) => {
       if (ns === 'cypress:electron') {
         return mockElectronDebugFn
@@ -160,7 +160,7 @@ describe('open', () => {
 
   describe('when electron logging is enabled via debug', () => {
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error - `enabled` is not on the Mock type, but open() reads it from the debugger
       mockElectronDebugFn.enabled = true
     })
 
@@ -189,7 +189,7 @@ describe('open', () => {
     beforeEach(() => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
       vi.stubEnv('ELECTRON_ENABLE_LOGGING', '0')
-      // @ts-expect-error
+      // @ts-expect-error - `enabled` is not on the Mock type, but open() reads it from the debugger
       mockElectronDebugFn.enabled = false
     })
 

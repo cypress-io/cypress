@@ -12,7 +12,7 @@ import { logError } from '@packages/stderr-filtering'
 
 const debug = Debug('cypress:server:saved_state')
 
-const stateFiles: Record<string, typeof FileUtil> = {}
+const stateFiles: Record<string, FileUtil> = {}
 
 export const formStatePath = async (projectRoot?: string) => {
   debug('making saved state from %s', getCwd())
@@ -86,8 +86,6 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): P
     return Promise.resolve(FileUtil.noopFile)
   }
 
-  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-  // After some package refactoring, we should be able to remove this.
   return formStatePath(projectRoot)
   .then((statePath: string) => {
     const fullStatePath = appData.projectsPath(statePath)
@@ -108,8 +106,6 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): P
 
     stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
 
-    // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-    // After some package refactoring, we should be able to remove this.
     stateFiles[fullStatePath] = stateFile
 
     return stateFile as SavedStateAPI
