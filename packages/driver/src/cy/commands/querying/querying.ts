@@ -284,7 +284,9 @@ export default (Commands, Cypress, cy, state) => {
     const getFn = cy.now('get', selector, getOptions)
 
     const getPhrase = () => {
-      if (filter && !(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
+      const $withinSubject = cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>
+
+      if (filter && $withinSubject.length && !$withinSubject.is('body')) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} and with the selector: '${filter}' `
@@ -294,7 +296,7 @@ export default (Commands, Cypress, cy, state) => {
         return `within the selector: '${filter}' `
       }
 
-      if (!(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
+      if ($withinSubject.length && !$withinSubject.is('body')) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} `
