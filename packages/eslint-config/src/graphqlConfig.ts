@@ -14,9 +14,8 @@ import { baseConfig } from './baseConfig'
 const PACKAGES_DIR = path.resolve(__dirname, '../..')
 const SCHEMA_PATH = path.join(PACKAGES_DIR, 'data-context/schemas/schema.graphql')
 
-// Every package that writes `gql` documents against the schema. Fragments are
-// spread by name across these packages, so rules that follow a spread need
-// all of them loaded, not just the documents in the file being linted.
+// Fragments are spread by name across these packages, so rules that follow a
+// spread need all of their documents loaded, not just the file being linted.
 const GQL_PACKAGES = ['app', 'frontend-shared', 'launchpad', 'data-context']
 
 const CODE_FILES = ['**/*.{js,jsx,ts,tsx,vue}']
