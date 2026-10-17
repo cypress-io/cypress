@@ -120,9 +120,14 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
   // overrides for basic recommended rules, and custom rules
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
     rules: {
       'no-console': 'error',
       'prefer-spread': 'error',
+      // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
       'no-restricted-properties': [
         'error',
         {
@@ -199,9 +204,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-rest-params': 'off',
       'no-prototype-builtins': 'off',
       'no-global-assign': 'off',
-      'no-unsafe-finally': 'off',
       'no-async-promise-executor': 'off',
-      'no-unsafe-optional-chaining': 'off',
 
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
@@ -214,7 +217,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/triple-slash-reference': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-wrapper-object-types': 'off',
-      '@typescript-eslint/no-non-null-asserted-optional-chain': 'off',
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
