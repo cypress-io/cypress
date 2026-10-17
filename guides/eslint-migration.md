@@ -193,6 +193,18 @@ After all packages are migrated, simplify the lint-staged configuration in root 
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
 
+### 10. **GraphQL Packages**
+
+`app`, `frontend-shared`, `launchpad` and `data-context` validate their `gql` templates against `packages/data-context/schemas/schema.graphql`. The root `.eslintrc.js` does this with `eslint-plugin-graphql`, scoped to those four packages. On flat config, add the shared block when migrating one of them:
+
+```ts
+import { baseConfig, graphqlConfig } from '@packages/eslint-config'
+
+export default [...baseConfig, ...graphqlConfig()]
+```
+
+It carries over the old rules: the graphql-js validations (except known/unused fragments and unused variables), deprecated fields, and a required `id` wherever the type has one. `capitalized-type-name` has no counterpart. It is not needed, since every type in the schema is PascalCase and `known-type-names` rejects any name the schema lacks. Do not add it to other packages. It scans every `gql` document in the four packages each time ESLint loads the config. Once all four are migrated, remove the `graphql` override, `eslint-plugin-graphql` and the `graphqlOpts` setup from the root `.eslintrc.js`.
+
 ---
 
 ## Example: Migrating a Batch

@@ -248,7 +248,9 @@
       "**/webpack-batteries-included-preprocessor/ts-loader",
       "**/jest",
       "**/jest*",
-      "**/expect"
+      "**/expect",
+      "**/eslint-config/@graphql-eslint/eslint-plugin",
+      "**/eslint-config/@graphql-eslint/eslint-plugin/**"
     ]
   },
   "lint-staged": {

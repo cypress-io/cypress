@@ -2,6 +2,8 @@ export * from './baseConfig'
 
 export * from './cliOverrides'
 
+export * from './graphqlConfig'
+
 import * as globalImport from 'globals'
 
 export const globals = {
