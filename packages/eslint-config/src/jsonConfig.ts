@@ -2,9 +2,8 @@ import type { Linter } from 'eslint'
 import jsonc from 'eslint-plugin-jsonc'
 import * as jsoncParser from 'jsonc-eslint-parser'
 
-// The "pro" order from eslint-plugin-json-format, which the eslintrc
-// `@cypress/dev/general` preset applied to every package.json. Keys not listed
-// here may appear anywhere after them.
+// Puts scripts and dependencies near the top so they are readable without
+// scrolling. Keys not listed here may appear anywhere after these.
 const packageJsonKeyOrder = [
   'name',
   'version',
@@ -31,16 +30,17 @@ const packageJsonKeyOrder = [
 ]
 
 /**
- * Opt-in JSON linting. Spread it after `baseConfig`:
+ * Opt-in JSON linting. Spread it after `baseConfig`, which registers the
+ * `@stylistic` plugin and supplies `eol-last`:
  * `export default [...baseConfig, ...jsonConfig]`.
  *
- * Enforces the `JSON.stringify(value, null, 2)` layout and `package.json` key
- * order that eslint-plugin-json-format enforced under eslintrc.
+ * `--fix` rewrites each file to the `JSON.stringify(value, null, 2)` layout.
  */
 export const jsonConfig: Linter.Config[] = [
   {
     files: ['**/*.json'],
-    // JSONC files that eslint-plugin-json-format skipped too, and generated lockfiles
+    // tsconfig and VS Code settings are JSONC, which allows comments, and
+    // package-lock.json is generated
     ignores: [
       '**/tsconfig*.json',
       '**/.vscode/**',

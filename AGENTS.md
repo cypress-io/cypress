@@ -240,6 +240,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Explain the why** — When a comment is necessary, use it to explain the *why* and anything relevant that is not directly expressed by the code itself.
 - **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
 - **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
+- **Name the reason, not the predecessor** — "Matches what the old plugin did" is not a *why*, and it rots once that plugin is deleted. State the reason the old code had, and put parity with replaced tooling in the commit message or guide.
 
 Bad examples:
 
