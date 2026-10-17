@@ -3,7 +3,7 @@ import jsonc from 'eslint-plugin-jsonc'
 import * as jsoncParser from 'jsonc-eslint-parser'
 
 // Puts scripts and dependencies near the top so they are readable without
-// scrolling. Keys not listed here may appear anywhere after these.
+// scrolling. Keys not listed here are left unchecked and may sit anywhere.
 const packageJsonKeyOrder = [
   'name',
   'version',

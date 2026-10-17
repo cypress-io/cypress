@@ -195,14 +195,14 @@ export default [
 | Reformatted to `JSON.stringify(value, null, 2)` plus a final newline | `jsonc/indent`, the `jsonc/*-newline` rules, `@stylistic/eol-last`, and `@stylistic/no-multiple-empty-lines` set to `0`. All of them autofix. |
 | `package.json` keys in the "pro" order | `jsonc/sort-keys` with the same list. Keys outside it stay wherever they are |
 | `package.json` dependency maps sorted | `jsonc/sort-keys` sorting `dependencies`, `devDependencies`, `peerDependencies` and `optionalDependencies` in ascending order |
-| Skipped `tsconfig.json`, `.vscode/**` and `package-lock.json` | Same files skipped |
+| Skipped `tsconfig.json`, `.vscode/**` and `package-lock.json` | Same skips, widened to every `tsconfig*.json` variant, since `tsc` reads all of them as JSONC |
 
 `@eslint/json` was considered and rejected. It is a separate ESLint *language*, so every JS rule in `baseConfig` that has no `files` restriction would need fencing off. It has no formatting rules, and its `sort-keys` only sorts alphabetically, so it cannot express the `package.json` order. `eslint-plugin-jsonc` parses JSON into an AST that the existing JS rules ignore, and it autofixes both layout and key order. It is pinned to v2 because v3 needs ESLint 9.38 or later.
 
 Known differences from the old preset:
 
 - **Scripts:** `sort-package-json` also sorted `scripts` alphabetically, grouping `pre`/`post` hooks with their script. `jsonConfig` leaves `scripts` in authored order.
-- **Unlisted top-level keys:** keys outside the "pro" list (`module`, `exports`, `lint-staged` and so on) were given a fixed position. `jsonConfig` lets them sit anywhere after the listed keys.
+- **Unlisted top-level keys:** keys outside the "pro" list (`module`, `exports`, `lint-staged` and so on) were given a fixed position. `jsonConfig` does not check them, so they can sit anywhere, even between listed keys.
 - **Empty containers:** whitespace inside an empty container (`{ }`) is not collapsed to `{}`.
 
 When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfig`, staging a `.json` file only produces a "File ignored because no matching configuration was supplied" warning. Running `eslint --fix` once on opt-in sorts any `package.json` that drifted while the package was not linting JSON. `@packages/errors` is the reference opt-in.
