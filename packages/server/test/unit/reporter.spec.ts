@@ -325,6 +325,23 @@ describe('lib/reporter', () => {
       expect(emit).not.toHaveBeenCalled()
     })
 
+    // https://github.com/cypress-io/cypress/issues/34953
+    // 'retry' mapped to the literal `true` instead of `mergeRunnable('retry')`, so the raw wire
+    // payload (a plain object with no Mocha.Test prototype) was forwarded as-is. A custom reporter
+    // calling `.fullTitle()` on it - as every other test-lifecycle event's payload supports - threw
+    // a TypeError. `title` comes only from the pre-populated runnable, not the emitted payload, so
+    // it proves the merge happened; `fullTitle()` reproduces the reported symptom directly.
+    it('emits retry with the merged runnable object, not the raw payload', () => {
+      reporter.emit('retry', { id: 'r5', currentRetry: 1 })
+      expect(callsFor(emit, 'retry')).not.toHaveLength(0)
+
+      const emitted = emit.mock.calls[0][1]
+
+      expect(emitted.title).toBe('does something good')
+      expect(typeof emitted.fullTitle).toBe('function')
+      expect(emitted.fullTitle()).toBe('TodoMVC - React When page is initially opened does something good')
+    })
+
     it('sends suites with updated properties and nested subtree', () => {
       reporter.emit('suite', { id: 'r3', state: 'passed' })
       expect(callsFor(emit, 'suite')).not.toHaveLength(0)
