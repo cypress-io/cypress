@@ -44,16 +44,18 @@ function hasOnlyRouteMatcherKeys (obj: any) {
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
  * DICT_STRING_MATCHER_FIELDS objects
  */
-function getAllStringMatcherFields (options: RouteMatcherOptions): string[] {
+function getAllStringMatcherFields (options: RouteMatcherOptions): (string | string[])[] {
   // add the nested DictStringMatcher values to the list of fields to annotate
   return _.chain(DICT_STRING_MATCHER_FIELDS)
-  .map((field): string[] | string => {
+  .map((field): string[][] | string => {
     const value = options[field]
 
     if (value) {
       // if this DICT_STRING_MATCHER is set, return a list of the prop paths
       return _.keys(value).map((key) => {
-        return `${field}.${key}`
+        // array path: keys like `filter[status]` or `a.b` must pass through
+        // literally, not be re-parsed as lodash dotted-path syntax (#34974)
+        return [field, key]
       })
     }
 
