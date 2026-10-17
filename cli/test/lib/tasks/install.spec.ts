@@ -172,10 +172,6 @@ const PRE_RELEASE_DOWNLOAD_URL =
  * @see https://listr2.kilic.dev/renderer/renderer.html#frontmatter-title
  */
 describe('/lib/tasks/install', function () {
-  const buildInfo = {
-    commitSha: 'abc123',
-    commitBranch: 'aBranchName',
-  }
   const createStdoutCapture = () => {
     const logs: string[] = []
 

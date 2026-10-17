@@ -128,6 +128,14 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-spread': 'error',
       // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      // Unused args and caught errors stay allowed, matching eslintrc: callbacks
+      // and interface implementations often have to accept parameters they ignore
+      '@typescript-eslint/no-unused-vars': ['error', {
+        args: 'none',
+        caughtErrors: 'none',
+        ignoreRestSiblings: true,
+        varsIgnorePattern: '^_',
+      }],
       'no-restricted-properties': [
         'error',
         {
@@ -208,7 +216,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-namespace': 'off',
@@ -262,6 +269,14 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       // down the line we can enable them.
       'import-x/default': 'warn',
       'import-x/namespace': 'warn',
+    },
+  },
+
+  // A merged declaration must repeat the original's type parameters, used or not
+  {
+    files: ['**/*.d.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 
