@@ -85,7 +85,7 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   const options: CypressOptions = {
     ...defaultOptions,
     ...userOptions,
-    //@ts-ignore
+    // @ts-expect-error - `dev` is an internal option not declared in `CypressOptions`
     dev: process.env.CYPRESS_ENV === 'test',
   }
 

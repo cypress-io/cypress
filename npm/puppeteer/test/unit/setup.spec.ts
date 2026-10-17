@@ -298,7 +298,7 @@ describe('#setup', () => {
         }
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - testing a message handler that is not a function
       setup({ on, onMessage: { notAFunction: true } })
 
       await flushPromises()
@@ -524,32 +524,32 @@ describe('#setup', () => {
 
   describe('validation', () => {
     it('errors if options argument is not provided', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a missing options argument
       expect(() => setup()).toThrow('Must provide options argument to `setup`.')
     })
 
     it('errors if options argument is not an object', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a non-object options argument
       expect(() => setup(true)).toThrow('The options argument provided to `setup` must be an object.')
     })
 
     it('errors if `on` option is not provided', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a missing `on` option
       expect(() => setup({})).toThrow('Must provide `on` function to `setup`.')
     })
 
     it('errors if `on` option is not a function', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a non-function `on` option
       expect(() => setup({ on: 'string' })).toThrow('The `on` option provided to `setup` must be a function.')
     })
 
     it('errors if `onMessage` option is not provided', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a missing `onMessage` option
       expect(() => setup({ on: vi.fn() })).toThrow('Must provide `onMessage` object to `setup`.')
     })
 
     it('errors if `onMessage` option is not an object', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a non-object `onMessage` option
       expect(() => setup({ on: vi.fn(), onMessage: () => {} })).toThrow('The `onMessage` option provided to `setup` must be an object.')
     })
   })

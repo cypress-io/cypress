@@ -30,7 +30,7 @@ vi.mock('systeminformation', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       osInfo: vi.fn(),
     },
@@ -52,7 +52,7 @@ vi.mock('lodash', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       random: vi.fn(),
     },
@@ -65,7 +65,7 @@ vi.mock('process', async (importActual) => {
   return {
     geteuid: vi.fn(),
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       geteuid: vi.fn(),
     },
@@ -77,7 +77,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
       release: vi.fn(),
@@ -95,7 +95,7 @@ vi.mock('../../../lib/exec/xvfb', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
       stop: vi.fn(),
@@ -110,7 +110,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getCacheDir: vi.fn(),
       isCi: vi.fn(),
