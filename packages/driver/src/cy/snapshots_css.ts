@@ -6,7 +6,6 @@ import $utils from '../cypress/utils'
 import LimitedMap from '../util/limited_map'
 
 const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
-const screenStylesheetRe = /(screen|all)/
 
 const reduceText = (arr, fn) => {
   return _.reduce(arr, ((memo, item) => {
@@ -17,7 +16,17 @@ const reduceText = (arr, fn) => {
 const isScreenStylesheet = (stylesheet) => {
   const media = stylesheet.getAttribute('media')
 
-  return !_.isString(media) || screenStylesheetRe.test(media)
+  if (!_.isString(media) || media.trim() === '') {
+    return true
+  }
+
+  const mediaLC = media.trim().toLowerCase()
+
+  if (mediaLC === 'print' || mediaLC.startsWith('print ') || mediaLC.startsWith('print,')) {
+    return false
+  }
+
+  return true
 }
 
 const getDocumentStylesheets = (doc) => {
@@ -158,19 +167,12 @@ export const create = ($$, state) => {
     styles = _.filter(styles, isScreenStylesheet)
 
     return _.map(styles, (stylesheet) => {
-      // in cases where we can get the CSS as a string, make the paths
-      // absolute so that when they're restored by appending them to the page
-      // in <style> tags, background images and fonts still properly load
       const href = stylesheet.href
 
-      // if there's an href, it's a link tag
-      // return the CSS rules as a string, or, if cross-origin,
-      // a reference to the stylesheet's href
       if (href) {
         return getStyleId(href, stylesheets[href]) || { href }
       }
 
-      // otherwise, it's a style tag, and we can just grab its content
       const cssContents = getInlineCssContents(stylesheet, $$)
 
       return makePathsAbsoluteToDoc(cssContents, doc)
