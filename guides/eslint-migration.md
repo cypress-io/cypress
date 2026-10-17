@@ -3,18 +3,19 @@
 ## Migration Checklist
 
 ### Batch 1: Small npm utilities
-- [x] npm/grep ✅ **COMPLETED** 
-- [x] npm/puppeteer ✅ **COMPLETED** 
-- [x] npm/mount-utils ✅ **COMPLETED** 
-- [x] npm/cypress-schematic ✅ **COMPLETED** 
+- [x] npm/grep ✅ **COMPLETED**
+- [x] npm/puppeteer ✅ **COMPLETED**
+- [x] npm/mount-utils ✅ **COMPLETED**
+- [x] npm/cypress-schematic ✅ **COMPLETED**
 
 ### Batch 2: Framework adapters
 - [x] npm/react ✅ **COMPLETED**
 - [x] npm/vue ✅ **COMPLETED**
 - [x] npm/svelte ✅ **COMPLETED**
+- [ ] npm/angular
 
 ### Batch 3: Build-related
-- [x] npm/webpack-batteries-included-preprocessor
+- [x] npm/webpack-batteries-included-preprocessor ✅ **COMPLETED**
 - [ ] npm/webpack-preprocessor
 - [ ] npm/webpack-dev-server
 - [ ] npm/vite-plugin-cypress-esm
@@ -29,21 +30,23 @@
 - [ ] packages/net-stubbing
 - [ ] packages/driver
 - [ ] packages/reporter
-- [x] packages/server
+- [x] packages/server ✅ **COMPLETED**
 
 ### Batch 4b: Core packages (part 2)
 - [ ] packages/runner
 - [ ] packages/extension
 - [ ] packages/network
+- [ ] packages/network-interception
+- [ ] packages/network-tools
 - [ ] packages/socket
 - [ ] packages/telemetry
 - [ ] packages/launchpad
-- [x] packages/errors
+- [x] packages/errors ✅ **COMPLETED**
 - [ ] packages/data-context
 - [ ] packages/app
 
 ### Batch 4c: Core packages (part 3)
-- [x] cli
+- [x] cli ✅ **COMPLETED**
 - [x] packages/agent-info ✅ **COMPLETED**
 - [x] packages/cypress-sessions ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
@@ -57,6 +60,13 @@
 - [ ] packages/web-config
 - [ ] packages/types
 - [ ] packages/example
+- [ ] packages/scaffold-config
+- [ ] packages/ts
+
+### Batch 4d: Build tooling
+- [ ] tooling/electron-mksnapshot
+- [ ] tooling/packherd
+- [ ] tooling/v8-snapshot
 
 ### Batch 5: Test and script folders
 - [ ] system-tests
