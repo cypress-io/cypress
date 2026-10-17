@@ -10,7 +10,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 - **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling
 - **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot`
-- **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
+- **`system-tests/`** — Full end-to-end system test suite: `test/` runs against the dev app, `test-binary/` against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
 ## Task runbooks
@@ -72,8 +72,9 @@ yarn workspace @packages/server test-unit -- --grep "<pattern>"
 # @packages/data-context is the one package on jest, not vitest or mocha
 yarn workspace @packages/data-context test-unit -- <path-to-spec>
 
-# Run system tests (full binary-level E2E)
-yarn test-system
+# Run system test specs whose file name contains a fragment (not a path);
+# see system-tests/AGENTS.md
+yarn test-system go_spec --browser electron
 
 # Run Cypress headlessly against a specific spec (dev mode)
 yarn cypress:run -- --spec "path/to/spec.cy.ts"
@@ -227,7 +228,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **TypeScript**: `strict: true` base, but `noImplicitAny: false` (implicit `any` allowed for pragmatic reasons).
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
 - **Type guards over `as`** — Narrow with a type guard, an `asserts` function or an `in` check rather than an `as` assertion, and explain any assertion that remains with a "Safe because" comment. See [Type Assertions](./guides/typescript.md#type-assertions).
-- **Unused vars**: Prefix with `_` to suppress (`argsIgnorePattern: '^_'`).
+- **Unused vars**: Unused variables and imports are errors. Unused function parameters and caught errors are allowed, since callbacks often have to accept arguments they ignore. In packages on the flat config, prefix a variable that exists only to be type-checked with `_`.
 - **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
@@ -295,7 +296,7 @@ Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, an
 
 ### Environment
 
-- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
+- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which runs the postinstall. What it covers depends on `CI` ([`scripts/run-postInstall.js`](./scripts/run-postInstall.js)): with `CI` set, as on Claude Code on the web, it skips `yarn-deduplicate`, `yarn build` and the V8 snapshot, so nothing is built. Check `echo $CI`, and run `yarn build` before anything that loads built packages, such as system tests.
 - The root `package.json` sets `engines.node` to the version in [`.node-version`](./.node-version), so yarn refuses to run any script on an older Node: `The engine "node" is incompatible with this module`. Containers that pre-install a lower version need the required one installed before anything else works — see [Matching the required Node version](#matching-the-required-node-version).
 - Browsers and a display differ by host. Cursor Cloud runs Xvfb on `DISPLAY=:1` and ships Chrome at `/usr/bin/google-chrome-stable`. Claude Code on the web has Xvfb installed but leaves `DISPLAY` unset, and has no Chrome — only the Chromium that Playwright bundles under `$PLAYWRIGHT_BROWSERS_PATH`. There, `cypress run` starts its own Xvfb when `DISPLAY` is unset, so the Cypress-based suites do run; pass `--browser "$PLAYWRIGHT_BROWSERS_PATH/chromium"` instead of `--browser chrome`, and wrap anything else that needs a display (such as `yarn dev`) in `xvfb-run -a`. On any host, prefix Electron commands with `env -u ELECTRON_RUN_AS_NODE`: some agent hosts set it, and it makes Electron start as plain Node.
 
@@ -309,6 +310,17 @@ Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, an
 - Prefer scoped tests: `yarn workspace @packages/<name> test`. Do not use `yarn test --scope <name>` — lerna unions scopes with the ones the root `test` script already sets, so it broadens the run instead of narrowing it. `yarn lint --scope` and `yarn check-ts --scope` do narrow correctly.
 - Some test suites (e.g., `@packages/network`) require privileged ports (443) and will fail with EACCES in unprivileged containers — this is expected.
 - `@packages/config` has 2 tests that assert `cypressBinaryRoot` contains `'cypress'`; these fail when the workspace directory name differs (e.g., `/workspace`). This is a known path-dependent issue, not a code bug.
+
+### Running system tests
+
+Specs in `system-tests/test` run in cloud containers. Specs in `system-tests/test-binary` need Docker and a built binary, so they do not.
+
+1. **Build once:** `env -u ELECTRON_RUN_AS_NODE yarn build`. System tests need all three things it produces: the compiled workspace packages, the dev Electron app in `packages/electron/dist/Cypress`, and the `cli/dist` bundle that fixture projects resolve `cypress` from. Without them the run fails with `Cannot find module '…/lib-dist/index.js'`, `spawn …/dist/Cypress/Cypress ENOENT`, or `Cannot find module '…/cypress/dist/index.js'`.
+2. **Run by file name fragment:** `env -u ELECTRON_RUN_AS_NODE yarn test-system go_spec --browser electron`. The script wraps its argument in `{test,test-binary}/**/*<arg>*`, so a path such as `test/go_spec.js`, or `--spec <path>`, matches nothing. The runner starts its own Xvfb, so `DISPLAY` can stay unset.
+3. **Pick a browser that exists:** Claude Code on the web has no Chrome or Firefox install, so pass `--browser electron`. It runs the Electron variant and reports the other browsers as pending.
+4. **Restore snapshots afterwards:** a local run prunes snapshot keys for tests it skipped. See [`system-tests/AGENTS.md`](./system-tests/AGENTS.md).
+
+If `yarn build` fails in `@cypress/vue` with `Cannot find module '@cypress/mount-utils'` while `npm/mount-utils/dist` exists, the rollup-plugin-typescript2 cache is stale: delete `npm/vue/node_modules/.cache/rollup-plugin-typescript2` and rerun.
 
 ### Linting
 

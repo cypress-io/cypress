@@ -716,23 +716,22 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
     },
 
     rightclick (fromElViewport, forceEl) {
-      const pointerEvtOptionsExtend = {
+      const downEvtOptionsExtend = {
         button: 2,
         buttons: 2,
         which: 3,
       }
-      const mouseEvtOptionsExtend = {
+      const upEvtOptionsExtend = {
         button: 2,
-        buttons: 2,
         which: 3,
       }
 
-      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse.down(fromElViewport, forceEl, downEvtOptionsExtend, downEvtOptionsExtend)
 
       const contextmenuEvent = mouse._contextmenuEvent(fromElViewport, forceEl)
 
       const skipMouseupEvent = mouseDownPhase.events.pointerdown.preventedDefault
-      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, upEvtOptionsExtend, upEvtOptionsExtend)
 
       const clickEvents = _.extend({}, mouseDownPhase.events, mouseUpPhase.events)
 

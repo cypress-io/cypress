@@ -57,6 +57,7 @@ async function bridgeTo (originPort: number) {
   const bridge = new MtlsBridge({
     listeners: [{
       hostname: 'localhost',
+      hostMatcher: { match: (h) => h === 'localhost' },
       port: originPort,
       sourceUrls: [`https://localhost:${originPort}`],
       material: { ca: [read('origin-ca.crt')], cert: [read('client.crt')], key: [{ pem: read('client.key') }] },
@@ -113,7 +114,7 @@ describe('MtlsBridge ALPN mirror', () => {
   it('offers the browser http/1.1 when the origin would take nothing else', async () => {
     const { bridge, listenPort } = await bridgeTo(await startOrigin(['http/1.1']))
 
-    await expect(negotiate(listenPort, ['h2', 'http/1.1'])).resolves.toEqual('http/1.1')
+    await expect(negotiate(listenPort, ['h2', 'http/1.1'])).resolves.toStrictEqual('http/1.1')
 
     await bridge.close()
   }, 30000)
@@ -121,7 +122,7 @@ describe('MtlsBridge ALPN mirror', () => {
   it('offers the browser no ALPN when the origin negotiated none', async () => {
     const { bridge, listenPort } = await bridgeTo(await startOrigin())
 
-    await expect(negotiate(listenPort, ['h2', 'http/1.1'])).resolves.toEqual(false)
+    await expect(negotiate(listenPort, ['h2', 'http/1.1'])).resolves.toStrictEqual(false)
 
     await bridge.close()
   }, 30000)

@@ -924,6 +924,18 @@ export const AllCypressErrors = {
 
       Setting ${fmt.highlightSecondary(`forceHttp1: true`)} routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.`
   },
+  CLIENT_CERTIFICATES_PATH_SCOPED: (origin: string, urls: string[]) => {
+    return errTemplate`\
+      Cypress could not apply your ${fmt.highlight(`clientCertificates`)} configuration.
+
+      The certificate for ${fmt.highlightSecondary(origin)} is limited to part of that origin:
+
+      ${fmt.listItems(urls)}
+
+      A browser presents a client certificate when it connects to an origin, before any path is known, so Cypress cannot keep it to the configured path. Configure the certificate for the whole origin by removing the path from the URL.
+
+      Setting ${fmt.highlightSecondary(`forceHttp1: true`)} routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.`
+  },
   CLIENT_CERTIFICATES_NOT_LOADED: (url: string) => {
     return errTemplate`\
       Cypress could not load the certificate configured in ${fmt.highlight(`clientCertificates`)} for ${fmt.highlightSecondary(url)}.
@@ -1791,7 +1803,7 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
     return err
   }
 
-  // @ts-expect-error
+  // @ts-expect-error - `args` is not typed as the parameter tuple of the template selected by `type`
   const result = AllCypressErrors[type](...args) as ErrTemplateResult
 
   const { message, details, originalError, messageMarkdown } = result

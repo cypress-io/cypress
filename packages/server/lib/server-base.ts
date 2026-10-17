@@ -46,6 +46,7 @@ import type { FileServer } from './file_server'
 import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerMutationRule } from '@packages/data-context/graphql/runnerMutationRule'
 import * as statusCode from './util/status_code'
 import { getContentType } from './util/headers'
 import stream from 'stream'
@@ -253,9 +254,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // restore between specs. Kept here rather than in the network runtime, which is
   // rebuilt mid-run and would snapshot an active override.
   private _projectBlockHosts?: Cfg['blockHosts']
-  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-  // After some package refactoring, we should be able to remove this.
-  protected _httpsProxy?: httpsProxy
+  protected _httpsProxy?: HttpsProxyServer
   private _httpsProxyReady?: Promise<void>
   protected _graphqlWS?: GraphqlWsHandle
   private _closing?: Bluebird<any>
@@ -360,7 +359,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
     // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
-    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, { enforceOrigin: false })
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, {
+      enforceOrigin: false,
+      validationRules: [runnerMutationRule],
+    })
 
     // Start the file server first so its port is known before we begin
     // listening for proxied requests on the main server. The primary
@@ -906,10 +908,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // retry covers a gap longer than this.
     svr.keepAliveTimeout = KEEP_ALIVE_TIMEOUT
 
-    allowDestroy(svr)
-
-    // @ts-ignore
-    return svr
+    return allowDestroy(svr)
   }
 
   _port = () => {
@@ -946,7 +945,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (userAgent, automationRequest, options) {
-    // @ts-ignore
     return this.request.sendPromise(userAgent, automationRequest, options)
   }
 
@@ -1279,7 +1277,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       // Read the field, not the getter: teardown drops _netStubbingState, so a
       // resolve:url racing close matches zero routes instead of throwing.
-      // @ts-ignore
       const iterator = getRoutesForRequest(this._netStubbingState?.routes ?? [], proxiedReq)
       // If the iterator is exhausted (done) on the first try, then 0 matches were found
       const zeroMatches = iterator.next().done
@@ -1511,8 +1508,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
-        // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-        // After some package refactoring, we should be able to remove this.
         return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()

@@ -11,7 +11,7 @@ import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
-import { graphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { RemoteStates } from '@packages/network-tools'
 import bodyParser from 'body-parser'
 import path from 'path'
@@ -264,7 +264,7 @@ export const createCommonRoutes = ({
     })
 
     // The tap CLI's mount; the app reaches GraphQL under `namespace` below.
-    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, graphQLHTTP)
+    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, runnerGraphQLHTTP)
   }
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -281,7 +281,7 @@ export const createCommonRoutes = ({
     })
   }
 
-  router.use(`/${namespace}/graphql/*`, graphQLHTTP)
+  router.use(`/${namespace}/graphql/*`, runnerGraphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
     runner.handle(req, res)
