@@ -58,7 +58,6 @@ export async function get (fixturesFolder: string, filePath: string, options: { 
 
     const pattern = `${p}{${extensions.join(',')}}`
 
-    // @ts-ignore as v8-snapshot package is typechecking this incorrectly
     const matches = (await glob(pattern, {
       nosort: true,
       nodir: true,

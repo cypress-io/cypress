@@ -9,6 +9,7 @@ import Axios from 'axios'
 describe('Mocking axios.get with default import', () => {
   it('renders mocked data', () => {
     cy.stub(Axios, 'get')
+    .as('get')
     .resolves({
       data: [
         {
@@ -17,7 +18,6 @@ describe('Mocking axios.get with default import', () => {
         },
       ],
     })
-    .as('get')
 
     mount(Users)
     // mock response is used
@@ -27,10 +27,10 @@ describe('Mocking axios.get with default import', () => {
 
   it('stubs with JSON loaded from fixture file', () => {
     cy.stub(Axios, 'get')
+    .as('get')
     .resolves({
       data: mockUsers,
     })
-    .as('get')
 
     mount(Users)
     // mock response is used

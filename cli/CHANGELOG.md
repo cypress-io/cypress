@@ -5,6 +5,7 @@
 
 - [`cy.fixture()`](https://on.cypress.io/fixture) and the `fixture` property of a [`cy.intercept()`](https://on.cypress.io/intercept) static response now fail when the fixture path resolves outside the [`fixturesFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files). Fixed in [#35072](https://github.com/cypress-io/cypress/pull/35072).
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
+- [`.trigger()`](https://on.cypress.io/trigger) now fails when passed an empty string as the event name, such as `cy.get('button').trigger('')`. Previously, it dispatched an event whose `type` was an empty string instead of failing, even though its error message says the event name must be a non-empty string. That error now shows the value that was passed, instead of the literal text `{{cmd}}`. It and the matching errors from [`cy.readFile()`](https://on.cypress.io/readfile) and [`cy.writeFile()`](https://on.cypress.io/writefile) now show an empty string as `''`, instead of leaving the value blank. Fixed in [#35068](https://github.com/cypress-io/cypress/pull/35068).
 
 **Misc:**
 
