@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
+- Fixed an issue where a request for a Cypress-reserved path that Cypress does not serve, such as `/__/does-not-exist` or `/__cypress/does-not-exist`, never received a response. A `fetch()` or `<script>` load for such a path hung until the page's own timeout, and [`cy.request()`](https://on.cypress.io/request) failed after 30 seconds with "No response was received within the timeout." These requests now receive a `404` promptly. Fixes [#34810](https://github.com/cypress-io/cypress/issues/34810).
 
 **Misc:**
 
