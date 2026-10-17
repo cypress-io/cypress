@@ -162,83 +162,77 @@ describe('CDP Clients', () => {
   context('reconnect after disconnect', () => {
     it('retries to connect', async () => {
       const stub = sinon.stub()
+      const reconnected = Promise.withResolvers()
 
-      return new Promise(async (resolve, reject) => {
-        const onAsynchronousError = reject
-        const onReconnect = resolve
-
-        criClient = await CriClient.create({
-          target: `ws://127.0.0.1:${wsServerPort}`,
-          onAsynchronousError,
-          onReconnect,
-          onReconnectAttempt: stub,
-        })
-
-        await Promise.all([
-          clientDisconnected(),
-          closeWsServer(),
-        ])
-
-        wsSrv = await startWsServer()
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        onAsynchronousError: reconnected.reject,
+        onReconnect: reconnected.resolve,
+        onReconnectAttempt: stub,
       })
-      .then((client) => {
-        expect(client).to.eq(criClient)
 
-        expect(stub).to.be.calledWith(1)
-        expect(stub.callCount).to.be.gte(1)
-      })
+      await Promise.all([
+        clientDisconnected(),
+        closeWsServer(),
+      ])
+
+      wsSrv = await startWsServer()
+
+      const client = await reconnected.promise
+
+      expect(client).to.eq(criClient)
+
+      expect(stub).to.be.calledWith(1)
+      expect(stub.callCount).to.be.gte(1)
     })
 
-    it('retries up to 20 times and then throws an error', () => {
+    it('retries up to 20 times and then throws an error', async () => {
       const stub = sinon.stub()
+      const asyncError = Promise.withResolvers()
 
-      return new Promise(async (resolve, reject) => {
-        const onAsynchronousError = resolve
-        const onReconnect = reject
-
-        criClient = await CriClient.create({
-          target: `ws://127.0.0.1:${wsServerPort}`,
-          onAsynchronousError,
-          onReconnect,
-          onReconnectAttempt: stub,
-        })
-
-        await Promise.all([
-          clientDisconnected(),
-          closeWsServer(),
-        ])
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        onAsynchronousError: asyncError.resolve,
+        onReconnect: asyncError.reject,
+        onReconnectAttempt: stub,
       })
-      .then((err) => {
-        expect(err).to.have.property('type', 'CDP_COULD_NOT_RECONNECT')
-        expect(err).to.have.property('isFatalApiErr', true)
 
-        expect(stub).to.be.calledWith(20)
-        expect(stub.callCount).to.be.eq(20)
-      })
+      await Promise.all([
+        clientDisconnected(),
+        closeWsServer(),
+      ])
+
+      const err = await asyncError.promise
+
+      expect(err).to.have.property('type', 'CDP_COULD_NOT_RECONNECT')
+      expect(err).to.have.property('isFatalApiErr', true)
+
+      expect(stub).to.be.calledWith(20)
+      expect(stub.callCount).to.be.eq(20)
     })
 
     it('stops trying to reconnect if .close() is called, and does not trigger an async error', async () => {
       const stub = sinon.stub()
       const onCriConnectionClosed = sinon.stub()
-      const haltedReconnection = new Promise<void>(async (resolve, reject) => {
-        onCriConnectionClosed.callsFake(resolve)
-        criClient = await CriClient.create({
-          target: `ws://127.0.0.1:${wsServerPort}`,
-          onAsynchronousError: reject,
-          onReconnect: reject,
-          onReconnectAttempt: stub,
-          onCriConnectionClosed,
-        })
+      const haltedReconnection = Promise.withResolvers<void>()
 
-        await Promise.all([
-          clientDisconnected(),
-          closeWsServer(),
-        ])
-
-        criClient.close()
+      onCriConnectionClosed.callsFake(haltedReconnection.resolve)
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        onAsynchronousError: haltedReconnection.reject,
+        onReconnect: haltedReconnection.reject,
+        onReconnectAttempt: stub,
+        onCriConnectionClosed,
       })
 
-      await haltedReconnection
+      await Promise.all([
+        clientDisconnected(),
+        closeWsServer(),
+      ])
+
+      criClient.close()
+
+      await haltedReconnection.promise
       // Macrotask queue needs to flush for the event to trigger
       await (new Promise((resolve) => setImmediate(resolve)))
       expect(onCriConnectionClosed).to.have.been.called
@@ -446,34 +440,32 @@ describe('CDP Clients', () => {
       }
     })
 
-    it('stops reconnecting after close is called', () => {
-      return new Promise(async (resolve, reject) => {
-        const onAsynchronousError = reject
-        const onReconnect = reject
+    it('stops reconnecting after close is called', async () => {
+      const closed = Promise.withResolvers<void>()
 
-        const stub = sinon.stub().onThirdCall().callsFake(async () => {
-          criClient.close()
-          .finally(() => {
-            resolve(stub)
-          })
+      const stub = sinon.stub().onThirdCall().callsFake(async () => {
+        criClient.close()
+        .finally(() => {
+          closed.resolve()
         })
-
-        criClient = await CriClient.create({
-          target: `ws://127.0.0.1:${wsServerPort}`,
-          onAsynchronousError,
-          onReconnect,
-          onReconnectAttempt: stub,
-        })
-
-        await Promise.all([
-          clientDisconnected(),
-          closeWsServer(),
-        ])
       })
-      .then((stub) => {
-        expect(criClient.closed).to.be.true
-        expect((stub as sinon.SinonStub).callCount).to.be.eq(3)
+
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        onAsynchronousError: closed.reject,
+        onReconnect: closed.reject,
+        onReconnectAttempt: stub,
       })
+
+      await Promise.all([
+        clientDisconnected(),
+        closeWsServer(),
+      ])
+
+      await closed.promise
+
+      expect(criClient.closed).to.be.true
+      expect(stub.callCount).to.be.eq(3)
     })
   })
 })

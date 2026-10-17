@@ -94,7 +94,7 @@ export = {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
-    return Promise.resolve().then(() => {
+    return Promise.resolve().then(async () => {
       // if we have the electron property on versions
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
@@ -111,19 +111,19 @@ export = {
         return require('./modes')(mode, options)
       }
 
-      return new Promise(async (resolve) => {
-        debug('starting Electron')
-        const cypressElectron = require('@packages/electron')
+      debug('starting Electron')
+      const cypressElectron = require('@packages/electron')
 
-        const args = require('./util/args').toArray(options)
+      const args = require('./util/args').toArray(options)
 
-        debug('electron open arguments %o', args)
+      debug('electron open arguments %o', args)
 
-        // const mainEntryFile = require.main.filename
-        const serverMain = getCwd()
+      // const mainEntryFile = require.main.filename
+      const serverMain = getCwd()
 
-        const child: ChildProcess = await cypressElectron.open(serverMain, args)
+      const child: ChildProcess = await cypressElectron.open(serverMain, args)
 
+      return new Promise((resolve) => {
         child.on('close', (exitCode, signal) => {
           debug('electron closed with', { code: exitCode, signal })
           const code = signal ? 1 : (exitCode ?? 0)

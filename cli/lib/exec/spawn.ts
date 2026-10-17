@@ -62,92 +62,88 @@ function createSpawnFunction (
   args: string[],
   options: any,
 ) {
-  return (overrides: any = {}): any => {
-    return new Promise(async (resolve: any, reject: any) => {
-      _.defaults(overrides, {
-        onStderrData: false,
-      })
+  return async (overrides: any = {}): Promise<any> => {
+    _.defaults(overrides, {
+      onStderrData: false,
+    })
 
-      const { onStderrData } = overrides
-      const envOverrides = util.getEnvOverrides(options)
-      const electronArgs: string[] = []
-      const node11WindowsFix = isPlatform('win32')
+    const { onStderrData } = overrides
+    const envOverrides = util.getEnvOverrides(options)
+    const electronArgs: string[] = []
+    const node11WindowsFix = isPlatform('win32')
 
-      let startScriptPath: string | undefined
+    let startScriptPath: string | undefined
 
-      if (options.dev) {
-        executable = 'node'
-        // if we're in dev then reset
-        // the launch cmd to be 'npm run dev'
-        // This path is correct in the build output, but not the source code. This file gets bundled into
-        // `dist/spawn-<hash>.js`, which makes this resolution appear incorrect at first glance.
-        startScriptPath = relativeToRepoRoot('scripts/start.js')
-        if (!startScriptPath) {
-          throw new Error(`Cypress start script (scripts/start.js) not found in parent directory of ${__dirname}`)
-        }
+    if (options.dev) {
+      executable = 'node'
+      // if we're in dev then reset
+      // the launch cmd to be 'npm run dev'
+      // This path is correct in the build output, but not the source code. This file gets bundled into
+      // `dist/spawn-<hash>.js`, which makes this resolution appear incorrect at first glance.
+      startScriptPath = relativeToRepoRoot('scripts/start.js')
+      if (!startScriptPath) {
+        throw new Error(`Cypress start script (scripts/start.js) not found in parent directory of ${__dirname}`)
       }
+    }
 
-      if (!options.dev && needsSandbox()) {
-        electronArgs.push('--no-sandbox')
-      }
+    if (!options.dev && needsSandbox()) {
+      electronArgs.push('--no-sandbox')
+    }
 
-      // strip dev out of child process options
-      /**
-         * @type {import('child_process').ForkOptions}
-         */
-      let stdioOptions: any = _.pick(options, 'env', 'detached', 'stdio')
+    // strip dev out of child process options
+    /**
+       * @type {import('child_process').ForkOptions}
+       */
+    let stdioOptions: any = _.pick(options, 'env', 'detached', 'stdio')
 
-      // figure out if we're going to be force enabling or disabling colors.
-      // also figure out whether we should force stdout and stderr into thinking
-      // it is a tty as opposed to a pipe.
-      stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
+    // figure out if we're going to be force enabling or disabling colors.
+    // also figure out whether we should force stdout and stderr into thinking
+    // it is a tty as opposed to a pipe.
+    stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
 
-      if (node11WindowsFix) {
-        stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
-      }
+    if (node11WindowsFix) {
+      stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
+    }
 
-      if (util.isPossibleLinuxWithIncorrectDisplay()) {
-        // make sure we use the latest DISPLAY variable if any
-        debug('passing DISPLAY', process.env.DISPLAY)
-        stdioOptions.env.DISPLAY = process.env.DISPLAY
-      }
+    if (util.isPossibleLinuxWithIncorrectDisplay()) {
+      // make sure we use the latest DISPLAY variable if any
+      debug('passing DISPLAY', process.env.DISPLAY)
+      stdioOptions.env.DISPLAY = process.env.DISPLAY
+    }
 
-      if (stdioOptions.detached) {
-        // Ask interactive mode to print a ready sentinel on stdout; pipe stdio during
-        // startup so errors are visible and we can detect it. Streams are destroyed
-        // once it arrives so they don't keep the parent event loop alive.
-        args.push('--emit-when-ready')
-        stdioOptions.stdio = ['ignore', 'pipe', 'pipe']
-      }
+    if (stdioOptions.detached) {
+      // Ask interactive mode to print a ready sentinel on stdout; pipe stdio during
+      // startup so errors are visible and we can detect it. Streams are destroyed
+      // once it arrives so they don't keep the parent event loop alive.
+      args.push('--emit-when-ready')
+      stdioOptions.stdio = ['ignore', 'pipe', 'pipe']
+    }
 
-      if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
-        // Since we are running electron as node, we need to add an entry point file.
-        startScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
-      } else {
-        // Start arguments with "--" so Electron knows these are OUR
-        // arguments and does not try to sanitize them. Otherwise on Windows
-        // an url in one of the arguments crashes it :(
-        // https://github.com/cypress-io/cypress/issues/5466
-        args = [...electronArgs, '--', ...args]
-      }
+    if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
+      // Since we are running electron as node, we need to add an entry point file.
+      startScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
+    } else {
+      // Start arguments with "--" so Electron knows these are OUR
+      // arguments and does not try to sanitize them. Otherwise on Windows
+      // an url in one of the arguments crashes it :(
+      // https://github.com/cypress-io/cypress/issues/5466
+      args = [...electronArgs, '--', ...args]
+    }
 
-      if (startScriptPath) {
-        args.unshift(startScriptPath)
-      }
+    if (startScriptPath) {
+      args.unshift(startScriptPath)
+    }
 
-      if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
-        args.unshift(process.env.CYPRESS_INTERNAL_DEV_DEBUG)
-      }
+    if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
+      args.unshift(process.env.CYPRESS_INTERNAL_DEV_DEBUG)
+    }
 
-      debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
-      debug('spawning Cypress with executable: %s', executable)
+    debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
+    debug('spawning Cypress with executable: %s', executable)
 
-      const platform = await util.getPlatformInfo().catch((e) => reject(e))
+    await util.getPlatformInfo()
 
-      if (!platform) {
-        return
-      }
-
+    return new Promise((resolve: any, reject: any) => {
       function resolveOn (event: any): any {
         return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })

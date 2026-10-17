@@ -76,7 +76,7 @@ describe('activateMainTab', () => {
   it('sends a tab activation request to the plugin, and rejects if it times out', async () => {
     vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
 
-    return new Promise<void>(async (resolve) => {
+    const rejected = new Promise<void>((resolve) => {
       mockPage.evaluate = vi.fn().mockImplementation(async (fn, ...args) => {
         try {
           await fn(...args)
@@ -86,12 +86,13 @@ describe('activateMainTab', () => {
           resolve()
         }
       })
-
-        const activationPromise = activateMainTab(mockBrowser as Browser)
-
-        await vi.advanceTimersByTimeAsync(ACTIVATION_TIMEOUT + 1)
-        await activationPromise
     })
+
+    const activationPromise = activateMainTab(mockBrowser as Browser)
+
+    await vi.advanceTimersByTimeAsync(ACTIVATION_TIMEOUT + 1)
+    await activationPromise
+    await rejected
   })
 
   describe('when cy in cy', () => {

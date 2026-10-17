@@ -200,7 +200,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'no-prototype-builtins': 'off',
       'no-global-assign': 'off',
       'no-unsafe-finally': 'off',
-      'no-async-promise-executor': 'off',
       'no-unsafe-optional-chaining': 'off',
 
       '@typescript-eslint/no-unused-expressions': 'off',
