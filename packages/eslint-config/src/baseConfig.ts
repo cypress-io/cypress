@@ -239,6 +239,25 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/attribute-hyphenation': 'off',
       'vue/no-useless-template-attributes': 'off',
 
+      'cypress/no-unnecessary-waiting': 'off',
+      'cypress/unsafe-to-chain-command': 'off',
+      'cypress/no-async-tests': 'off',
+      'cypress/no-assigning-return-values': 'off',
+
+      // we use react 18+, so these rules do not apply
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
+
+      // noisy, and not that helpful at this point. Maybe down the line we can
+      // enable it.
+      'import-x/default': 'warn',
+    },
+  },
+
+  {
+    // the Vue recommended config ships these as warnings, and
+    // flatConfigs.typescript leaves import-x/namespace unset
+    rules: {
       'vue/attributes-order': 'error',
       'vue/block-order': 'error',
       'vue/component-definition-name-casing': 'error',
@@ -270,26 +289,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/v-on-style': 'error',
       'vue/v-slot-style': 'error',
 
-      'cypress/no-unnecessary-waiting': 'off',
-      'cypress/unsafe-to-chain-command': 'off',
-      'cypress/no-async-tests': 'off',
-      'cypress/no-assigning-return-values': 'off',
-
-      'react/no-string-refs': 'error',
-      'react/prop-types': 'error',
-      'react/no-unescaped-entities': 'error',
-      'react/jsx-no-target-blank': 'error',
-      'react/no-unknown-property': 'error',
-      'react/jsx-key': 'error',
-      'react/display-name': 'error',
-
-      // we use react 18+, so these rules do not apply
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
-
-      // noisy, and not that helpful at this point. Maybe down the line we can
-      // enable it.
-      'import-x/default': 'warn',
       'import-x/namespace': 'error',
     },
   },
