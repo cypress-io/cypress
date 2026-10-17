@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed a regression in [16.0.0](#16-0-0) where, in Chrome, Chromium, and Edge, a spec hung forever at its first [`cy.visit()`](https://on.cypress.io/visit) to another origin when its bundled file was larger than about 75 MB, which a spec can reach by importing tens of megabytes of generated code. [`pageLoadTimeout`](https://on.cypress.io/configuration#Timeouts) never fired, so `cypress run` had to be killed. Setting [`forceHttp1`](https://on.cypress.io/configuration) to `true` is no longer needed to avoid it. Fixes [#34794](https://github.com/cypress-io/cypress/issues/34794).
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
 
 **Misc:**
