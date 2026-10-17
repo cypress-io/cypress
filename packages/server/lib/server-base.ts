@@ -254,8 +254,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // restore between specs. Kept here rather than in the network runtime, which is
   // rebuilt mid-run and would snapshot an active override.
   private _projectBlockHosts?: Cfg['blockHosts']
-  // @ts-expect-error - httpsProxy is not a type in scope here
-  protected _httpsProxy?: httpsProxy
+  protected _httpsProxy?: HttpsProxyServer
   private _httpsProxyReady?: Promise<void>
   protected _graphqlWS?: GraphqlWsHandle
   private _closing?: Bluebird<any>
@@ -909,10 +908,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // retry covers a gap longer than this.
     svr.keepAliveTimeout = KEEP_ALIVE_TIMEOUT
 
-    allowDestroy(svr)
-
-    // @ts-expect-error - allowDestroy adds destroyAsync at runtime, but http.Server's type lacks it
-    return svr
+    return allowDestroy(svr)
   }
 
   _port = () => {

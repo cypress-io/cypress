@@ -67,8 +67,8 @@ describe('open', () => {
   let mockStderrDebugFn: Mock<ReturnType<typeof Debug>>
 
   beforeEach(() => {
-    // @ts-expect-error - partial child process mock, and `ChildProcess` is not imported
-    mockChildProcess = vi.mocked<ChildProcess>({
+    // @ts-expect-error - partial child process mock
+    mockChildProcess = vi.mocked<ChildProcessWithoutNullStreams>({
       on: vi.fn(),
       stderr: {
         pipe: vi.fn(),

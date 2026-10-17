@@ -24,7 +24,7 @@ import { telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
 import { openExternal } from './gui/links'
 
-import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands, SpecWithRelativeRoot } from '@packages/types'
 import { RUN_ALL_SPECS_KEY } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
@@ -414,15 +414,14 @@ export class SocketBase implements SocketBroadcaster {
           if (spec.relative === RUN_ALL_SPECS_KEY) {
             const specsToCompile = ctx.project.runAllSpecs.map((relPath) => {
               return ctx.project.specs.find((s) => s.relative === relPath)
-            }).filter(Boolean) as Cypress.Spec[]
+            }).filter((s): s is SpecWithRelativeRoot => Boolean(s))
 
             debug(`updating CT dev-server with ${specsToCompile.length} specs`)
-            // @ts-expect-error - the getDevServer() type in ProjectApiShape omits updateSpecs' options argument
             await devServer.updateSpecs(specsToCompile, { neededForJustInTimeCompile: true })
           } else {
             // update the dev server with the spec running
             debug(`updating CT dev-server with spec: ${spec.relative}`)
-            // @ts-expect-error - the getDevServer() type in ProjectApiShape omits updateSpecs' options argument
+            // @ts-expect-error - the socket payload is typed as Cypress.Spec, which lacks SpecWithRelativeRoot's fields
             await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
           }
 

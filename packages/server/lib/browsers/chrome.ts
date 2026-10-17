@@ -334,7 +334,7 @@ const _navigateUsingCRI = async function (client, url) {
 
 const _handleDownloads = async function (client, downloadsFolder: string, automation) {
   client.on('Page.downloadWillBegin', (data) => {
-    const downloadItem = {
+    const downloadItem: { id: string, url: string, filePath?: string, mime?: string | null } = {
       id: data.guid,
       url: data.url,
     }
@@ -342,9 +342,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
     const filename = data.suggestedFilename
 
     if (filename) {
-      // @ts-expect-error - filePath is not declared on the downloadItem literal
       downloadItem.filePath = path.join(downloadsFolder, data.suggestedFilename)
-      // @ts-expect-error - mime is not declared on the downloadItem literal
       downloadItem.mime = mime.getType(data.suggestedFilename)
     }
 
