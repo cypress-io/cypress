@@ -52,49 +52,53 @@ describe('lib/server', () => {
       socket.destroy = vi.fn()
       const head: Buffer = Buffer.from('')
 
-      return new Promise<void>((resolve) => {
-        const onError = function (err: Error, socket2: Socket, head2: Buffer, port: string) {
-          expect(err.message).toEqual('connect ECONNREFUSED 127.0.0.1:8444')
+      const errored = Promise.withResolvers<void>()
 
-          expect(socket).toEqual(socket2)
-          expect(head).toEqual(head2)
-          expect(port).toEqual('8444')
+      const onError = function (err: Error, socket2: Socket, head2: Buffer, port: string) {
+        expect(err.message).toEqual('connect ECONNREFUSED 127.0.0.1:8444')
 
-          expect(socket.destroy).toHaveBeenCalledOnce()
+        expect(socket).toEqual(socket2)
+        expect(head).toEqual(head2)
+        expect(port).toEqual('8444')
 
-          resolve()
-        }
+        expect(socket.destroy).toHaveBeenCalledOnce()
 
-        setup({ onError }).then((srv) => {
-          srv._makeConnection(socket, head, '8444', 'localhost')
-        })
-      })
+        errored.resolve()
+      }
+
+      const srv = await setup({ onError })
+
+      srv._makeConnection(socket, head, '8444', 'localhost')
+
+      await errored.promise
     })
 
     // https://github.com/cypress-io/cypress/issues/3250
-    it('does not crash when an erroneous URL is provided, just destroys socket', function () {
+    it('does not crash when an erroneous URL is provided, just destroys socket', async function () {
       const socket = new EE() as Socket
 
       socket.destroy = vi.fn()
       const head: Buffer = Buffer.from('')
 
-      return new Promise<void>((resolve) => {
-        const onError = function (err: Error, socket2: Socket, head2: Buffer, port: string) {
-          expect(err.message).toEqual('getaddrinfo ENOTFOUND %7Balgolia_application_id%7D-dsn.algolia.net')
+      const errored = Promise.withResolvers<void>()
 
-          expect(socket).toEqual(socket2)
-          expect(head).toEqual(head2)
-          expect(port).toEqual('443')
+      const onError = function (err: Error, socket2: Socket, head2: Buffer, port: string) {
+        expect(err.message).toEqual('getaddrinfo ENOTFOUND %7Balgolia_application_id%7D-dsn.algolia.net')
 
-          expect(socket.destroy).toHaveBeenCalledOnce()
+        expect(socket).toEqual(socket2)
+        expect(head).toEqual(head2)
+        expect(port).toEqual('443')
 
-          resolve()
-        }
+        expect(socket.destroy).toHaveBeenCalledOnce()
 
-        setup({ onError }).then((srv) => {
-          srv._makeConnection(socket, head, '443', '%7Balgolia_application_id%7D-dsn.algolia.net')
-        })
-      })
+        errored.resolve()
+      }
+
+      const srv = await setup({ onError })
+
+      srv._makeConnection(socket, head, '443', '%7Balgolia_application_id%7D-dsn.algolia.net')
+
+      await errored.promise
     })
 
     // https://github.com/cypress-io/cypress/issues/9220

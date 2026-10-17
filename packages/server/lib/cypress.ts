@@ -90,50 +90,45 @@ export = {
     return isRunning()
   },
 
-  runElectron (mode: Mode, options: any): Promise<RunElectronResult> {
-    // wrap all of this in a promise to force the
-    // promise interface - even if it doesn't matter
-    // in dev mode due to cp.spawn
-    return Promise.resolve().then(async () => {
-      // if we have the electron property on versions
-      // that means we're already running in electron
-      // like in production and we shouldn't spawn a new
-      // process
-      if (this.isCurrentlyRunningElectron()) {
-        // if we weren't invoked from the CLI
-        // then display a warning to the user
-        if (!options.invokedFromCli) {
-          errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
-        }
-
-        debug('running Electron currently')
-
-        return require('./modes')(mode, options)
+  async runElectron (mode: Mode, options: any): Promise<RunElectronResult> {
+    // if we have the electron property on versions
+    // that means we're already running in electron
+    // like in production and we shouldn't spawn a new
+    // process
+    if (this.isCurrentlyRunningElectron()) {
+      // if we weren't invoked from the CLI
+      // then display a warning to the user
+      if (!options.invokedFromCli) {
+        errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
       }
 
-      debug('starting Electron')
-      const cypressElectron = require('@packages/electron')
+      debug('running Electron currently')
 
-      const args = require('./util/args').toArray(options)
+      return require('./modes')(mode, options)
+    }
 
-      debug('electron open arguments %o', args)
+    debug('starting Electron')
+    const cypressElectron = require('@packages/electron')
 
-      // const mainEntryFile = require.main.filename
-      const serverMain = getCwd()
+    const args = toArray(options)
 
-      const child: ChildProcess = await cypressElectron.open(serverMain, args)
+    debug('electron open arguments %o', args)
 
-      return new Promise((resolve) => {
-        child.on('close', (exitCode, signal) => {
-          debug('electron closed with', { code: exitCode, signal })
-          const code = signal ? 1 : (exitCode ?? 0)
+    // const mainEntryFile = require.main.filename
+    const serverMain = getCwd()
 
-          if (mode === 'smokeTest') {
-            resolve(code)
-          } else {
-            resolve({ totalFailed: code })
-          }
-        })
+    const child: ChildProcess = await cypressElectron.open(serverMain, args)
+
+    return new Promise((resolve) => {
+      child.on('close', (exitCode, signal) => {
+        debug('electron closed with', { code: exitCode, signal })
+        const code = signal ? 1 : (exitCode ?? 0)
+
+        if (mode === 'smokeTest') {
+          resolve(code)
+        } else {
+          resolve({ totalFailed: code })
+        }
       })
     })
   },
