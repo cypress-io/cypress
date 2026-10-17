@@ -1,6 +1,7 @@
 import type { ESLint } from 'eslint'
 
 import { arrowBodyMultilineBraces } from './arrowBodyMultilineBraces'
+import { jsonEmptyContainerSpacing } from './jsonEmptyContainerSpacing'
 import { skipComment } from './skipComment'
 
 // Namespaced `@cypress/dev` to keep the existing `eslint-disable` comments
@@ -8,6 +9,7 @@ import { skipComment } from './skipComment'
 export const cypressDevPlugin: ESLint.Plugin = {
   rules: {
     'arrow-body-multiline-braces': arrowBodyMultilineBraces,
+    'json-empty-container-spacing': jsonEmptyContainerSpacing,
     'skip-comment': skipComment,
   },
 }

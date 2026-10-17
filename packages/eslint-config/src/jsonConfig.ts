@@ -1,5 +1,6 @@
 import type { Linter } from 'eslint'
 import jsonc from 'eslint-plugin-jsonc'
+import packageJson from 'eslint-plugin-package-json'
 import * as jsoncParser from 'jsonc-eslint-parser'
 
 // Puts scripts and dependencies near the top so they are readable without
@@ -31,7 +32,7 @@ const packageJsonKeyOrder = [
 
 /**
  * Opt-in JSON linting. Spread it after `baseConfig`, which registers the
- * `@stylistic` plugin and supplies `eol-last`:
+ * `@stylistic` and `@cypress/dev` plugins and supplies `eol-last`:
  * `export default [...baseConfig, ...jsonConfig]`.
  *
  * `--fix` rewrites each file to the `JSON.stringify(value, null, 2)` layout.
@@ -63,10 +64,14 @@ export const jsonConfig: Linter.Config[] = [
       'jsonc/array-bracket-newline': ['error', { minItems: 1 }],
       'jsonc/array-element-newline': ['error', 'always'],
       '@stylistic/no-multiple-empty-lines': ['error', { max: 0 }],
+      '@cypress/dev/json-empty-container-spacing': 'error',
     },
   },
   {
     files: ['**/package.json'],
+    plugins: {
+      'package-json': packageJson,
+    },
     rules: {
       'jsonc/sort-keys': [
         'error',
@@ -74,10 +79,18 @@ export const jsonConfig: Linter.Config[] = [
           pathPattern: '^$',
           order: packageJsonKeyOrder,
         },
-        {
-          pathPattern: '^(?:dev|peer|optional)?[Dd]ependencies$',
-          order: { type: 'asc' },
-        },
+      ],
+      // Not the rule's default list: that includes `exports`, where the order
+      // of conditions is significant and `default` must come last
+      'package-json/sort-collections': [
+        'error',
+        [
+          'scripts',
+          'dependencies',
+          'devDependencies',
+          'peerDependencies',
+          'optionalDependencies',
+        ],
       ],
     },
   },

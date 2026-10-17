@@ -192,18 +192,16 @@ export default [
 | Old preset (`eslint-plugin-json-format`) | `jsonConfig` |
 | --- | --- |
 | File must parse as JSON | Parse errors, plus `jsonc/recommended-with-json` (no comments, no trailing commas, no duplicate keys) |
-| Reformatted to `JSON.stringify(value, null, 2)` plus a final newline | `jsonc/indent`, the `jsonc/*-newline` rules, `@stylistic/eol-last`, and `@stylistic/no-multiple-empty-lines` set to `0`. All of them autofix. |
+| Reformatted to `JSON.stringify(value, null, 2)` plus a final newline | `jsonc/indent`, the `jsonc/*-newline` rules, `@stylistic/eol-last`, `@stylistic/no-multiple-empty-lines` set to `0`, and `@cypress/dev/json-empty-container-spacing`, which collapses `{ }` and `[ ]`. All of them autofix. |
 | `package.json` keys in the "pro" order | `jsonc/sort-keys` with the same list. Keys outside it stay wherever they are |
-| `package.json` dependency maps sorted | `jsonc/sort-keys` sorting `dependencies`, `devDependencies`, `peerDependencies` and `optionalDependencies` in ascending order |
+| `package.json` `scripts` and dependency maps sorted | `package-json/sort-collections` (from [`eslint-plugin-package-json`](https://github.com/michaelfaith/eslint-plugin-package-json)), which uses `sort-package-json` too. It keeps `pre`/`post` hooks and `name:variant` scripts next to their base script, and sorts the dependency maps in ascending order. `exports` is left out of its default list, because the order of conditions there is significant |
 | Skipped `tsconfig.json`, `.vscode/**` and `package-lock.json` | Same skips, widened to every `tsconfig*.json` variant, since `tsc` reads all of them as JSONC |
 
-`@eslint/json` was considered and rejected. It is a separate ESLint *language*, so every JS rule in `baseConfig` that has no `files` restriction would need fencing off. It has no formatting rules, and its `sort-keys` only sorts alphabetically, so it cannot express the `package.json` order. `eslint-plugin-jsonc` parses JSON into an AST that the existing JS rules ignore, and it autofixes both layout and key order. It is pinned to v2 because v3 needs ESLint 9.38 or later.
+`@eslint/json` was considered and rejected. It is a separate ESLint *language*, so every JS rule in `baseConfig` that has no `files` restriction would need fencing off. It has no formatting rules, and its `sort-keys` only sorts alphabetically, so it cannot express the `package.json` order. `eslint-plugin-jsonc` parses JSON into an AST that the existing JS rules ignore, and it autofixes both layout and key order. It is pinned to v2 because v3 needs ESLint 9.38 or later. `eslint-plugin-package-json` is pinned to 0.x for a related reason: 1.x moves to `jsonc-eslint-parser` v3 and declares a peer dependency on `@eslint/json`.
 
-Known differences from the old preset:
+One difference from the old preset remains:
 
-- **Scripts:** `sort-package-json` also sorted `scripts` alphabetically, grouping `pre`/`post` hooks with their script. `jsonConfig` leaves `scripts` in authored order.
 - **Unlisted top-level keys:** keys outside the "pro" list (`module`, `exports`, `lint-staged` and so on) were given a fixed position. `jsonConfig` does not check them, so they can sit anywhere, even between listed keys.
-- **Empty containers:** whitespace inside an empty container (`{ }`) is not collapsed to `{}`.
 
 When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfig`, staging a `.json` file only produces a "File ignored because no matching configuration was supplied" warning. Running `eslint --fix` once on opt-in sorts any `package.json` that drifted while the package was not linting JSON. `@packages/errors` is the reference opt-in.
 

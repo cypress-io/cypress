@@ -90,7 +90,7 @@ export default [
 ]
 ```
 
-`jsonConfig` enforces two-space JSON layout and `package.json` key order, using `eslint-plugin-jsonc`. See the [ESLint migration guide](../../guides/eslint-migration.md#7-lint-json-with-jsonconfig).
+`jsonConfig` enforces two-space JSON layout, `package.json` key order and sorted `scripts` and dependency maps, using `eslint-plugin-jsonc` and `eslint-plugin-package-json`. See the [ESLint migration guide](../../guides/eslint-migration.md#7-lint-json-with-jsonconfig).
 
 ## Environment-Specific Configurations
 
