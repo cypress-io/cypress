@@ -5,7 +5,7 @@ import * as jsoncParser from 'jsonc-eslint-parser'
 
 /**
  * Opt-in JSON linting. Spread it after `baseConfig`, which registers the
- * `@stylistic` and `@cypress/dev` plugins and supplies `eol-last`:
+ * `@stylistic` plugin and supplies `eol-last`:
  * `export default [...baseConfig, ...jsonConfig]`.
  *
  * `--fix` rewrites each file to the `JSON.stringify(value, null, 2)` layout.
@@ -36,8 +36,8 @@ export const jsonConfig: Linter.Config[] = [
       'jsonc/object-property-newline': 'error',
       'jsonc/array-bracket-newline': ['error', { minItems: 1 }],
       'jsonc/array-element-newline': ['error', 'always'],
+      'jsonc/array-bracket-spacing': 'error',
       '@stylistic/no-multiple-empty-lines': ['error', { max: 0 }],
-      '@cypress/dev/json-empty-container-spacing': 'error',
     },
   },
   {
