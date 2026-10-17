@@ -128,8 +128,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-spread': 'error',
       // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
-      // Unused args and caught errors stay allowed, matching eslintrc: callbacks
-      // and interface implementations often have to accept parameters they ignore
+      // Unused args and caught errors stay allowed: callbacks and interface
+      // implementations often have to accept parameters they ignore. A leading
+      // `_` keeps a variable that exists only to be type-checked, like `_typeCheck`
       '@typescript-eslint/no-unused-vars': ['error', {
         args: 'none',
         caughtErrors: 'none',
