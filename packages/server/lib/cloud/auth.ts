@@ -5,8 +5,6 @@ const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const url = require('url')
-// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
-const { shell } = require('electron')
 
 const machineId = require('./machine_id')
 import { id as randomId } from '../util/random'
@@ -194,6 +192,11 @@ const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
   setTimeout(warnCouldNotLaunch, 4000)
 
   openExternalAttempted = true
+
+  // Required lazily so that loading cloud code (e.g. `cypress run --record`)
+  // does not require Electron; only the interactive login flow needs it
+  // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
+  const { shell } = require('electron')
 
   return shell.openExternal(loginUrl)
   .catch((err) => {

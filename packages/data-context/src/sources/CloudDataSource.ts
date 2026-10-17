@@ -90,7 +90,6 @@ interface CloudDataSourceParams {
  */
 export class CloudDataSource {
   #cloudUrqlClient: Client
-  #lastCache?: string
   #batchExecutor: ReturnType<typeof createBatchingExecutor>
   #batchExecutorBatcher: DataLoader<CloudExecuteRemote, OperationResult>
 
@@ -128,25 +127,6 @@ export class CloudDataSource {
             Mutation: {
               _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
                 cache.invalidate(...args)
-              },
-              _showUrqlCache: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
-                this.#lastCache = JSON.stringify(cache, function replacer (key, value) {
-                  if (value instanceof Map) {
-                    const reducer = (obj: any, mapKey: any) => {
-                      obj[mapKey] = value.get(mapKey)
-
-                      return obj
-                    }
-
-                    return [...value.keys()].sort().reduce(reducer, {})
-                  }
-
-                  if (value instanceof Set) {
-                    return [...value].sort()
-                  }
-
-                  return value
-                })
               },
             },
           },
@@ -348,23 +328,6 @@ export class CloudDataSource {
         },
       },
     }).toPromise()
-  }
-
-  async getCache () {
-    await this.#cloudUrqlClient.mutation(`
-      mutation Internal_showUrqlCache { 
-        _showUrqlCache
-      }
-    `, { }, {
-      fetchOptions: {
-        headers: {
-          // Same note as above on the "invalidate", we could make this a bit clearer
-          INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
-        },
-      },
-    }).toPromise()
-
-    return JSON.parse(this.#lastCache ?? '')
   }
 
   getCloudUrl (env: CloudEnv) {

@@ -1,3 +1,10 @@
+# [@[secure]/puppeteer-v0.1.10](https://github.com/[secure]-io/[secure]/compare/@[secure]/puppeteer-v0.1.9...@[secure]/puppeteer-v0.1.10) (2026-09-30)
+
+
+### Bug Fixes
+
+* **puppeteer:** lowercase the [secure] type reference so types resolve on case-sensitive file systems ([#34954](https://github.com/[secure]-io/[secure]/issues/34954)) ([83ab206](https://github.com/[secure]-io/[secure]/commit/83ab20656626a93eb9079e7aee670d008f0821d3))
+
 # [@[secure]/puppeteer-v0.1.9](https://github.com/[secure]-io/[secure]/compare/@[secure]/puppeteer-v0.1.8...@[secure]/puppeteer-v0.1.9) (2026-09-24)
 
 

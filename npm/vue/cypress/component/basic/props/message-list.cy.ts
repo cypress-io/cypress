@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import type { ComponentPublicInstance } from 'vue'
 import MessageList from '../MessageList.vue'
 import { mount } from '@cypress/vue'
 
@@ -81,7 +82,10 @@ describe('Props', () => {
     })
 
     it('starts with two items', () => {
-      expect(Cypress.vue.messages).to.deep.equal(['uno', 'dos'])
+      // Safe because the component mounted in beforeEach gets its data from data()
+      const vm = Cypress.vue as ComponentPublicInstance<{}, {}, ReturnType<typeof data>>
+
+      expect(vm.messages).to.deep.equal(['uno', 'dos'])
     })
 
     // TODO: fix with https://github.com/cypress-io/cypress/issues/30706

@@ -79,6 +79,7 @@ function getAlias (selector, log, cy) {
       if (match && match[1] === '0') {
         $errUtils.throwErrByPath('get.alias_zero', {
           args: { alias: aliasObj.alias },
+          errProps: { retry: false },
         })
       }
 
@@ -273,7 +274,7 @@ export default (Commands, Cypress, cy, state) => {
 
     const log = Cypress.log({
       message: displayName,
-      type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      type: this.hasPreviouslyLinkedCommand() ? 'child' : 'parent',
       hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),

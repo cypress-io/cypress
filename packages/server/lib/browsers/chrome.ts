@@ -334,7 +334,7 @@ const _navigateUsingCRI = async function (client, url) {
 
 const _handleDownloads = async function (client, downloadsFolder: string, automation) {
   client.on('Page.downloadWillBegin', (data) => {
-    const downloadItem = {
+    const downloadItem: { id: string, url: string, filePath?: string, mime?: string | null } = {
       id: data.guid,
       url: data.url,
     }
@@ -342,9 +342,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
     const filename = data.suggestedFilename
 
     if (filename) {
-      // @ts-ignore
       downloadItem.filePath = path.join(downloadsFolder, data.suggestedFilename)
-      // @ts-ignore
       downloadItem.mime = mime.getType(data.suggestedFilename)
     }
 
@@ -466,6 +464,13 @@ export = {
       }).join(',')
 
       args.push(`${HOST_RESOLVER_RULES}${rules}`)
+    }
+
+    // Pushed after the `hosts` rules so that the merge in `_normalizeHostResolverRules`
+    // orders these first and they win for an origin that appears in both. The bridge
+    // resolves the real address itself, so a `hosts` entry for that origin still applies.
+    if (options.mtlsHostResolverRules) {
+      args.push(`${HOST_RESOLVER_RULES}${options.mtlsHostResolverRules}`)
     }
 
     // Blink's cache-aware font loading hard-fails uncached @font-face loads
@@ -708,7 +713,7 @@ export = {
       // if the client disconnects (e.g. due to a computer sleeping), update
       // the frame tree on reconnect in cases there were changes while
       // the client was disconnected
-      // @ts-expect-error
+      // @ts-expect-error - _updateFrameTree is private to CdpAutomation
       return cdpAutomation._updateFrameTree(client, 'onReconnect')()
     }
 

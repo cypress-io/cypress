@@ -1,3 +1,5 @@
+# [@[secure]/vue-v7.0.1](https://github.com/[secure]-io/[secure]/compare/@[secure]/vue-v7.0.0...@[secure]/vue-v7.0.1) (2026-09-28)
+
 # [@[secure]/vue-v7.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/vue-v[secure]...@[secure]/vue-v7.0.0) (2026-08-26)
 
 

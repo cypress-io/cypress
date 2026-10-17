@@ -2,16 +2,16 @@
 
 These examples come from the blog post [Testing Vue components with Vue Testing Library](https://blog.logrocket.com/testing-vue-components-with-vue-testing-library/) and the tests are written using `@cypress/vue`.
 
-Tests for [Counter.vue](Counter.vue) are in [Counter.spec.js](Counter.spec.js)
+Tests for [Counter.vue](Counter.vue) are in [Counter.cy.ts](Counter.cy.ts)
 
 ![Counter spec](images/counter.png)
 
-Tests for [Repeater.vue](Repeater.vue) are in [Repeater.spec.js](Repeater.spec.js)
+Tests for [Repeater.vue](Repeater.vue) are in [Repeater.cy.ts](Repeater.cy.ts)
 
 ![Repeater spec](images/repeater.png)
 
-Tests for [Form.vue](Form.vue) are in [Form.spec.js](Form.spec.js)
+Tests for [Form.vue](Form.vue) are in [Form.cy.ts](Form.cy.ts)
 
 ![Form spec](images/form.gif)
 
-Tests for [AppInput.vue](AppInput.vue) in [AppInput.spec.js](AppInput.spec.js) show how to pass a `slot` template to a component while mounting it.
+Tests for [AppInput.vue](AppInput.vue) in [AppInput.cy.ts](AppInput.cy.ts) show how to pass a `slot` template to a component while mounting it.

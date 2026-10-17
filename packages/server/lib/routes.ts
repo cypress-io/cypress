@@ -11,7 +11,7 @@ import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
-import { graphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { RemoteStates } from '@packages/network-tools'
 import bodyParser from 'body-parser'
 import path from 'path'
@@ -191,11 +191,11 @@ export const createCommonRoutes = ({
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
   router.get(`/${config.namespace}/bundled/*`, (req, res) => {
-    const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
+    const root = AppData.getBundledFilePath(config.projectRoot, 'src')
 
-    debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
+    debug(`Serving dist'd bundle at file path: %o`, { root, path: req.params[0], url: req.url })
 
-    res.sendFile(file, { etag: false })
+    return send(req, encodeURI(req.params[0] ?? ''), { root, etag: false }).pipe(res)
   })
 
   router.get(`/${config.namespace}/spec-bridge-iframes`, async (req, res) => {
@@ -242,7 +242,7 @@ export const createCommonRoutes = ({
     })
 
     // The tap CLI's mount; the app reaches GraphQL under `namespace` below.
-    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, graphQLHTTP)
+    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, runnerGraphQLHTTP)
   }
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -255,13 +255,11 @@ export const createCommonRoutes = ({
     })
   } else {
     router.get('/__cypress/assets/*', (req, res) => {
-      const pathToFile = getPathToDist('app', req.params[0])
-
-      return send(req, pathToFile).pipe(res)
+      return send(req, encodeURI(req.params[0] ?? ''), { root: getPathToDist('app') }).pipe(res)
     })
   }
 
-  router.use(`/${namespace}/graphql/*`, graphQLHTTP)
+  router.use(`/${namespace}/graphql/*`, runnerGraphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
     runner.handle(req, res)
@@ -307,9 +305,8 @@ export const createCommonRoutes = ({
     `${clientRoute}shiki/*`,
   ], (req, res) => {
     debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
-    const pathToFile = getPathToDist('app', req.path.slice(clientRoute.length))
 
-    return send(req, pathToFile).pipe(res)
+    return send(req, req.path.slice(clientRoute.length), { root: getPathToDist('app') }).pipe(res)
   })
 
   // user app code + spec code

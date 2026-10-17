@@ -46,6 +46,22 @@ declare namespace Cypress {
     (task: 'preserve:run:state', runState: any): Promise<void>
   }
 
+  interface ActionTrigger {
+    (action: 'runner:test:before:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'runner:test:before:after:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'runner:test:after:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'runner:runnable:after:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:visit:blank', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:command:start:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:collect:run:state', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:before:stability:release', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'app:timers:reset', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'app:timers:pause', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:fail', ...args: any[]): any[]
+    (action: 'app:uncaught:exception', ...args: any[]): any[]
+    (action: 'app:window:confirm', ...args: any[]): any[]
+  }
+
   interface Devices {
     keyboard: Keyboard
     mouse: Mouse
@@ -58,9 +74,9 @@ declare namespace Cypress {
      * If `as` is chained to the current command, return the alias name used.
      */
     getAlias: IAliases['getAlias']
+    getFocused: IFocused['getFocused']
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v?: T) => Cypress.Chainable<T>
-    now: <T>(string, v: T) => Cypress.Chainable<T>
     queue: CommandQueue
     retry: IRetries['retry']
     state: State
@@ -70,8 +86,10 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: ITimeouts['clearTimeout']
     isStable: IStability['isStable']
+    whenStable: IStability['whenStable']
     fail: (err: Error, options: { async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
+    subject: (chainerId?: string) => any
     subjectChain: (chainerId?: string) => SubjectChain
 
     createSnapshot: ISnapshots['createSnapshot']

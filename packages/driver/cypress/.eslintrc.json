@@ -10,5 +10,22 @@
   },
   "rules": {
     "mocha/no-global-tests": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.cy.js",
+        "**/*.cy.jsx"
+      ],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Program",
+            "message": "Driver specs must be TypeScript (.cy.ts)."
+          }
+        ]
+      }
+    }
+  ]
 }

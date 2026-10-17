@@ -843,10 +843,48 @@ namespace CypressContainsTests {
   cy.contains('my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
 }
 
+namespace CypressGetByRoleTests {
+  cy.getByRole('button') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.getByRole<HTMLInputElement>('textbox') // $ExpectType Chainable<JQuery<HTMLInputElement>>
+  cy.getByRole('doc-chapter')
+  cy.getByRole('button', { name: 'Submit' })
+  cy.getByRole('button', { name: /submit/i })
+  cy.getByRole('button', { name: 42 })
+  cy.getByRole('button', {
+    name: (name, element) => {
+      name // $ExpectType string
+      element // $ExpectType Element | null
+
+      return name.startsWith('Sub')
+    },
+  })
+  cy.getByRole('button', { hidden: true, log: false, timeout: 100, includeShadowDom: true })
+  cy.getByRole('button', { name: 'Save', native: true })
+  cy.getByRole('dialog', { native: false })
+  cy.getByRole('button', { native: 'yes' }) // $ExpectError
+  cy.get('form').getByRole('button').click()
+  cy.getByRole() // $ExpectError
+  cy.getByRole(/button/) // $ExpectError
+  cy.getByRole('button', { name: {} }) // $ExpectError
+  cy.getByRole('button', { hidden: 'yes' }) // $ExpectError
+  cy.getByRole('heading', { level: 2 }) // $ExpectError
+
+  const options: Partial<Cypress.GetByRoleOptions> = { name: 'Submit', hidden: true }
+  cy.getByRole('button', options)
+}
+
 // https://github.com/cypress-io/cypress/pull/5574
 namespace CypressLocationTests {
   cy.location('path') // $ExpectError
   cy.location('pathname') // $ExpectType Chainable<string>
+  cy.location('searchParams') // $ExpectType Chainable<URLSearchParams>
+  cy.location() // $ExpectType Chainable<AUTLocation>
+  cy.location().then((loc) => {
+    loc // $ExpectType AUTLocation
+    loc.searchParams.get('q') // $ExpectType string | null
+  })
+  cy.location('toString') // $ExpectError
+  cy.location('assign') // $ExpectError
 }
 
 // https://github.com/cypress-io/cypress/issues/17399
@@ -1076,6 +1114,7 @@ namespace CypressSessionsTests {
   cy.session('user', () => { }, {
     validate: () => { },
   })
+  cy.session('user', () => { }) // $ExpectType Chainable<"created" | "restored" | "recreated">
 
   cy.session() // $ExpectError
   cy.session('user') // $ExpectError
@@ -1335,6 +1374,39 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('div', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', { log: 'true' }) // $ExpectError
+}
+
+namespace ChaiJQueryTests {
+  const $el = Cypress.$('div')
+
+  expect($el).to.have.attr('num', 777) // $ExpectType Assertion
+  expect($el).to.have.attr('role', 'menu') // $ExpectType Assertion
+  expect($el).to.have.attr({ width: '200px' }) // $ExpectError
+
+  expect($el).to.match('div') // $ExpectType Assertion
+  expect($el).to.match($el[0]) // $ExpectType Assertion
+  expect($el).to.match($el) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$<Element>('div')) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$<SVGElement>('svg')) // $ExpectType Assertion
+  expect($el).to.match(Cypress.$(document)) // $ExpectType Assertion
+  expect($el).to.match([$el[0], $el[1]]) // $ExpectType Assertion
+  expect($el).to.match((index, element) => element.id === 'result') // $ExpectType Assertion
+  expect($el).to.match((index: string) => true) // $ExpectError
+  expect($el).to.match(document.querySelectorAll('div')) // $ExpectType Assertion
+  const readonlyElements: ReadonlyArray<HTMLElement> = [$el[0]]
+  expect($el).to.match(readonlyElements) // $ExpectType Assertion
+  expect($el).to.match({ foo: 'bar' }) // $ExpectError
+
+  expect($el).to.have.id(456) // $ExpectType Assertion
+  expect($el).to.have.id({ id: 456 }) // $ExpectError
+  expect($el).to.have.text(123) // $ExpectType Assertion
+  expect($el).to.contain.text(123) // $ExpectType Assertion
+  expect($el).to.have.value(0.72) // $ExpectType Assertion
+  expect($el).to.include.value(12) // $ExpectType Assertion
+  expect($el).to.have.data('number', 222) // $ExpectType Assertion
+  expect($el).to.have.data('enabled', true) // $ExpectType Assertion
+  expect($el).to.have.data('missing', null) // $ExpectType Assertion
+  expect($el).to.have.data('flags', { a: true }) // $ExpectError
 }
 
 namespace CypressOptionsBeforeCallbackTests {
