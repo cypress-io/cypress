@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) did not detect duplicate header matchers when an uppercase header was specified before a lowercase or mixed-case header with the same name, silently dropping the earlier matcher. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
 
 **Misc:**
 
