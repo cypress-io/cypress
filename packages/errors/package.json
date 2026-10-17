@@ -2,9 +2,15 @@
   "name": "@packages/errors",
   "version": "0.0.0-development",
   "description": "Error definitions and utilities for Cypress",
+  "license": "MIT",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "browser": "esm/index.js",
+  "types": "cjs/index.d.ts",
+  "files": [
+    "cjs/*",
+    "esm/*"
+  ],
   "scripts": {
     "build": "yarn build:esm && yarn build:cjs",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
@@ -18,6 +24,9 @@
     "test-unit": "vitest run",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "ansi_up": "5.0.0",
@@ -36,14 +45,5 @@
     "rimraf": "6.1.1",
     "vitest": "^3.2.4"
   },
-  "files": [
-    "cjs/*",
-    "esm/*"
-  ],
-  "types": "cjs/index.d.ts",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
-  },
-  "license": "MIT",
   "nx": {}
 }

@@ -3,33 +3,6 @@ import jsonc from 'eslint-plugin-jsonc'
 import packageJson from 'eslint-plugin-package-json'
 import * as jsoncParser from 'jsonc-eslint-parser'
 
-// Puts scripts and dependencies near the top so they are readable without
-// scrolling. Keys not listed here are left unchecked and may sit anywhere.
-const packageJsonKeyOrder = [
-  'name',
-  'version',
-  'description',
-  'private',
-  'main',
-  'browser',
-  'scripts',
-  'husky',
-  'dependencies',
-  'devDependencies',
-  'peerDependencies',
-  'files',
-  'bin',
-  'engines',
-  'types',
-  'typings',
-  'productName',
-  'license',
-  'repository',
-  'homepage',
-  'author',
-  'bugs',
-]
-
 /**
  * Opt-in JSON linting. Spread it after `baseConfig`, which registers the
  * `@stylistic` and `@cypress/dev` plugins and supplies `eol-last`:
@@ -73,13 +46,7 @@ export const jsonConfig: Linter.Config[] = [
       'package-json': packageJson,
     },
     rules: {
-      'jsonc/sort-keys': [
-        'error',
-        {
-          pathPattern: '^$',
-          order: packageJsonKeyOrder,
-        },
-      ],
+      'package-json/order-properties': ['error', { order: 'sort-package-json' }],
       // Not the rule's default list: that includes `exports`, where the order
       // of conditions is significant and `default` must come last
       'package-json/sort-collections': [
