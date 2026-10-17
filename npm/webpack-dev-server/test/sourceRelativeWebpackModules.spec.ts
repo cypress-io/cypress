@@ -22,6 +22,11 @@ const WEBPACK_REACT: Partial<Record<ProjectDirs[number], {
     webpackDevServer: 5,
     htmlWebpackPlugin: 5,
   },
+  'webpack5_wds6-react': {
+    webpack: 5,
+    webpackDevServer: 6,
+    htmlWebpackPlugin: 5,
+  },
 }
 
 async function sourceModulesForProject (fixture: ProjectDirs[number]) {

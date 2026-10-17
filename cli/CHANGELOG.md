@@ -1,5 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.2.1
+## 16.3.0
+
+**Features:**
+
+- Component testing with webpack now supports `webpack-dev-server` 6 when your project provides it, which Angular 22.2 projects using `@angular-devkit/build-angular` do. `webpack-dev-server` 6 requires webpack `5.101.0` or newer, and Cypress reports an error naming both versions when an older webpack is installed. The `webpack-dev-server` bundled with Cypress is still version 5. Addresses [#34259](https://github.com/cypress-io/cypress/issues/34259).
 
 **Bugfixes:**
 
@@ -12,6 +16,11 @@
 - The TypeScript types now accept a number, boolean, or `null` as the expected value of the `data` assertion, such as `expect($el).to.have.data('count', 3)`. jQuery parses numeric, boolean, and `null` `data-*` attributes into those types, so a string could never match them, but TypeScript accepted only a string. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
 - TypeScript now types the value yielded by [`cy.session()`](https://on.cypress.io/session) as the session's status, `'created'`, `'restored'`, or `'recreated'`, instead of `null`. Cypress already yielded the status at runtime, so code that uses it as a string, such as `cy.session('user', setup).then((status) => status.toUpperCase())`, no longer reports a type error. Addressed in [#35057](https://github.com/cypress-io/cypress/pull/35057).
 - The TypeScript documentation for the `validate` option of [`cy.session()`](https://on.cypress.io/session) now lists the conditions that make a session invalid. It previously said that returning `false` invalidates the session, but a `false` return only does so when it comes from a Promise, or when `validate` returns nothing and its last Cypress command yields `false`. It also no longer shows a default of `false`, because `validate` has no default. Addressed in [#35057](https://github.com/cypress-io/cypress/pull/35057).
+
+**Dependency Updates:**
+
+- Upgraded `ws` from `8.21.1` to `8.22.0`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
+- Upgraded `shell-quote` from `1.11.0` to `1.12.0`. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
 
 ## 16.2.0
 
