@@ -66,11 +66,9 @@ export const create = (fileServerFolder: string, { maxAttempts = MAX_LISTEN_ATTE
   return new Promise(((resolve, reject) => {
     const token = randomId(64)
 
-    const srv = http.createServer(httpUtils.lenientOptions, (req: http.IncomingMessage, res: http.ServerResponse) => {
+    const srv = allowDestroy(http.createServer(httpUtils.lenientOptions, (req: http.IncomingMessage, res: http.ServerResponse) => {
       return onRequest(req, res, token, fileServerFolder)
-    })
-
-    allowDestroy(srv)
+    }))
 
     let attempts = 0
 
@@ -113,7 +111,6 @@ export const create = (fileServerFolder: string, { maxAttempts = MAX_LISTEN_ATTE
             return `http://localhost:${this.port()}`
           },
           close () {
-            // @ts-expect-error - destroyAsync is defined when allowDestroy is called
             return srv.destroyAsync()
           },
         }
