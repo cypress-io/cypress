@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`cy.wait()`](https://on.cypress.io/wait) could time out waiting for a route's response even when the response arrived within [`responseTimeout`](https://on.cypress.io/configuration#Timeouts), because time spent waiting for the request counted against the response timeout budget. Fixed in [#34940](https://github.com/cypress-io/cypress/pull/34940).
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
 
 **Misc:**
