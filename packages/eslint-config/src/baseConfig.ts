@@ -244,22 +244,52 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'cypress/no-async-tests': 'off',
       'cypress/no-assigning-return-values': 'off',
 
-      'react/no-string-refs': 'warn',
-      'react/prop-types': 'warn',
-      'react/no-unescaped-entities': 'warn',
-      'react/jsx-no-target-blank': 'warn',
-      'react/no-unknown-property': 'warn',
-      'react/jsx-key': 'warn',
-      'react/display-name': 'warn',
-
       // we use react 18+, so these rules do not apply
       'react/react-in-jsx-scope': 'off',
       'react/jsx-uses-react': 'off',
 
-      // these are generally noisy, and not that helpful at this point. Maybe
-      // down the line we can enable them.
+      // noisy, and not that helpful at this point. Maybe down the line we can
+      // enable it.
       'import-x/default': 'warn',
-      'import-x/namespace': 'warn',
+    },
+  },
+
+  {
+    // the Vue recommended config ships these as warnings, and
+    // flatConfigs.typescript leaves import-x/namespace unset
+    rules: {
+      'vue/attributes-order': 'error',
+      'vue/block-order': 'error',
+      'vue/component-definition-name-casing': 'error',
+      'vue/first-attribute-linebreak': 'error',
+      'vue/html-closing-bracket-newline': 'error',
+      'vue/html-end-tags': 'error',
+      'vue/html-indent': 'error',
+      'vue/html-quotes': 'error',
+      'vue/html-self-closing': 'error',
+      'vue/max-attributes-per-line': 'error',
+      'vue/multiline-html-element-content-newline': 'error',
+      'vue/mustache-interpolation-spacing': 'error',
+      'vue/no-lone-template': 'error',
+      'vue/no-multi-spaces': 'error',
+      'vue/no-multiple-slot-args': 'error',
+      'vue/no-required-prop-with-default': 'error',
+      'vue/no-spaces-around-equal-signs-in-attribute': 'error',
+      'vue/no-template-shadow': 'error',
+      'vue/no-v-html': 'error',
+      'vue/one-component-per-file': 'error',
+      'vue/order-in-components': 'error',
+      'vue/prop-name-casing': 'error',
+      'vue/require-default-prop': 'error',
+      'vue/require-explicit-emits': 'error',
+      'vue/require-prop-types': 'error',
+      'vue/singleline-html-element-content-newline': 'error',
+      'vue/this-in-template': 'error',
+      'vue/v-bind-style': 'error',
+      'vue/v-on-style': 'error',
+      'vue/v-slot-style': 'error',
+
+      'import-x/namespace': 'error',
     },
   },
 
