@@ -22,6 +22,7 @@ yarn tsd          # build + run tsd type assertion tests
 ## Gotchas / Notes
 
 - Type-checking uses `vue-tsc` (not plain `tsc`) and also runs `tsd` assertions in the `test-tsd/` directory. Run `yarn check-ts` to execute both.
+- The root `tsconfig.json` covers only `src/`, because the rollup build type-checks every file it includes. Component specs and fixtures are type-checked through `cypress/tsconfig.json`, which `yarn check-ts` also runs.
 - `postbuild` re-exports this package into `cli/vue/` — build before testing against the Cypress binary. See [`npm/AGENTS.md`](../AGENTS.md).
 - Peer dependency on `@cypress/webpack-dev-server` is optional (used in webpack-based setups).
 
