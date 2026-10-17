@@ -3526,6 +3526,7 @@
     "./packages/network-interception/cjs/types/internal-types.js",
     "./packages/network-tools/cjs/accept-encoding.js",
     "./packages/network-tools/cjs/parse-domain.js",
+    "./packages/network-tools/cjs/serialize-for-inline-script.js",
     "./packages/network-tools/cjs/types.js",
     "./packages/network-tools/cjs/uri.js",
     "./packages/network/cjs/allow-destroy.js",
