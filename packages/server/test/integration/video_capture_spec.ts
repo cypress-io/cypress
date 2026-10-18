@@ -61,7 +61,7 @@ describe('Video Capture', () => {
         writeVideoFrameAsBuffer(''),
       ]
 
-      // @ts-ignore
+      // @ts-expect-error - write is stubbed with sinon
       expect(_pt.write.lastCall).calledWith(buf2)
 
       await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)

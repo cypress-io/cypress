@@ -62,7 +62,7 @@ const syncSetCookieToJar = (cookie: SerializableAutomationCookie) => {
     if (cookie.maxAge == null) {
       // null is tough-cookie's own default for a cookie without Max-Age, and every
       // read of maxAge guards with `!= null`, but its types do not admit it
-      // @ts-expect-error
+      // @ts-expect-error - tough-cookie types maxAge as number | 'Infinity' | '-Infinity', without null
       toughCookie.maxAge = null
       toughCookie.expires = toughCookie.expires ?? Infinity
     }

@@ -970,9 +970,7 @@ describe('lib/config', () => {
       })
 
       describe('retries', () => {
-        // need to keep the const here or it'll get stripped by the build
-
-        const cases = [
+        [
           [{ retries: null }, 'with null', null],
           [{ retries: 3 }, 'when a number', null],
           [{ retries: 3.2 }, 'when a float', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],

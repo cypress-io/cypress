@@ -244,7 +244,7 @@ export class File {
     .then(() => {
       debugVerbose('write %s', this.path)
 
-      // @ts-expect-error
+      // @ts-expect-error - outputJsonAsync comes from promisifying fs-extra and is not in its types
       return fs.outputJsonAsync(this.path, this._cache, { spaces: 2 })
     })
     .finally(() => {
