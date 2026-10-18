@@ -456,18 +456,11 @@ describe('lib/modes/record', () => {
   })
 
   describe('.createRun', () => {
-    let options
-
     beforeEach(() => {
       vi.spyOn(api, 'createRun').mockImplementation(() => undefined as any)
       vi.spyOn(ciProvider, 'ciParams').mockReturnValue({})
       vi.spyOn(ciProvider, 'provider').mockReturnValue('')
       vi.spyOn(ciProvider, 'commitDefaults').mockReturnValue({})
-
-      options = {
-        git: {},
-        recordKey: '1',
-      }
     })
 
     // https://github.com/cypress-io/cypress/issues/14571

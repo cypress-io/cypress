@@ -1817,7 +1817,7 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
     return err
   }
 
-  // @ts-expect-error
+  // @ts-expect-error - `args` is not typed as the parameter tuple of the template selected by `type`
   const result = AllCypressErrors[type](...args) as ErrTemplateResult
 
   const { message, details, originalError, messageMarkdown } = result

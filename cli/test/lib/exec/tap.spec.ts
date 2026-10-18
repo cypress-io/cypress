@@ -6,7 +6,6 @@ import type { LiveSessionSelection, LiveSessionState } from '../../../lib/cypres
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { FIND_SESSION_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { querySessionGraphql } from '../../../lib/tap/session-gql'
-import { tapCliCommands } from '../../../lib/tap/commands'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'

@@ -120,9 +120,23 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
   // overrides for basic recommended rules, and custom rules
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
     rules: {
       'no-console': 'error',
       'prefer-spread': 'error',
+      // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      // Unused args and caught errors stay allowed: callbacks and interface
+      // implementations often have to accept parameters they ignore. A leading
+      // `_` keeps a variable that exists only to be type-checked, like `_typeCheck`
+      '@typescript-eslint/no-unused-vars': ['error', {
+        args: 'none',
+        caughtErrors: 'none',
+        ignoreRestSiblings: true,
+        varsIgnorePattern: '^_',
+      }],
       'no-restricted-properties': [
         'error',
         {
@@ -199,22 +213,17 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-rest-params': 'off',
       'no-prototype-builtins': 'off',
       'no-global-assign': 'off',
-      'no-unsafe-finally': 'off',
       'no-async-promise-executor': 'off',
-      'no-unsafe-optional-chaining': 'off',
 
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-this-alias': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-wrapper-object-types': 'off',
-      '@typescript-eslint/no-non-null-asserted-optional-chain': 'off',
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
@@ -290,6 +299,14 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/v-slot-style': 'error',
 
       'import-x/namespace': 'error',
+    },
+  },
+
+  // A merged declaration must repeat the original's type parameters, used or not
+  {
+    files: ['**/*.d.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 

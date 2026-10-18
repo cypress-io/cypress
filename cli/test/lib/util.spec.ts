@@ -152,7 +152,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -171,7 +171,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -190,7 +190,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -211,7 +211,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -233,7 +233,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -257,7 +257,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -302,7 +302,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -472,7 +472,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             platform: vi.fn(),
@@ -485,7 +485,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             osInfo: vi.fn(),
