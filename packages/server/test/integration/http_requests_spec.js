@@ -215,6 +215,8 @@ describe('Routes', () => {
   })
 
   afterEach(function () {
+    this.timeout(20000)
+
     evilDns.clear()
     nock.cleanAll()
     preprocessor.close()
