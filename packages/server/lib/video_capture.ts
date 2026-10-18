@@ -386,7 +386,6 @@ export async function compress (options: ProcessOptions) {
 
       const progressed = utils.timemarkToSeconds(progress.timemark)
 
-      // @ts-ignore
       const percent = progressed / total
 
       if (percent < 1) {

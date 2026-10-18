@@ -479,6 +479,26 @@ describe('Routes', () => {
     })
   })
 
+  context('GET /__cypress/iframes/*', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('does not let the spec path close the inline script', function () {
+      const specPath = 'x</script><script>window.injected=1</script>.cy.js'
+
+      return this.rp(`http://localhost:8443/__cypress/iframes/${encodeURIComponent(specPath)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).not.to.include('<script>window.injected')
+
+        const scripts = JSON.parse(res.body.match(/window\.Cypress\.onSpecWindow\(window, (.+)\);/)[1])
+
+        expect(_.map(scripts, 'relative')).to.include(specPath)
+      })
+    })
+  })
+
   context('GET /__cypress/runner/*', () => {
     beforeEach(function () {
       return this.setup('http://localhost:8443')
@@ -3284,7 +3304,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include(`document.domain = \'${superdomain}\'`)
+            expect(res.body).to.include(`document.domain = "${superdomain}"`)
           })
         })
 
@@ -3325,7 +3345,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foobar.com\'; </script></head><body>https server</body></html>')
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "foobar.com"; </script></head><body>https server</body></html>')
             })
           })
         })
@@ -3350,7 +3370,7 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script></head></html>')
+            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "cypress.io"; </script></head></html>')
           })
         })
 
@@ -3399,7 +3419,7 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = "foobar.com";`)
           })
         })
 
@@ -3519,7 +3539,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "foo.com"; </script></head></html>')
             })
           })
         })
@@ -4091,7 +4111,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'localhost\';')
+            expect(res.body).to.include('document.domain = "localhost";')
           })
         })
 
@@ -4107,7 +4127,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'localhost\';')
+            expect(res.body).to.include('document.domain = "localhost";')
           })
         })
 
@@ -4122,7 +4142,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(301)
 
-            expect(res.body).not.to.include('document.domain = \'localhost\';')
+            expect(res.body).not.to.include('document.domain = "localhost";')
           })
         })
 

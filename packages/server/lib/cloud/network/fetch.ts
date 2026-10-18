@@ -61,7 +61,7 @@ export async function fetch<
       // cross-fetch thinks this is in the browser, so declares
       // types based on that rather than on node-fetch which it
       // actually uses under the hood. node-fetch supports `agent`.
-      // @ts-expect-error
+      // @ts-expect-error - agent is not part of the web RequestInit type
       agent: strictAgent,
     })
 
