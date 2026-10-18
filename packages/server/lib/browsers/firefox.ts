@@ -637,7 +637,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   // since we no longer directly control the browser with webdriver, we need to make the browserInstance
   // a simulated wrapper that kills the process IDs that come back from webdriver
-  // @ts-expect-error
+  // @ts-expect-error - a bare EventEmitter lacks BrowserInstance's kill until it is assigned below
   let browserInstanceWrapper: BrowserInstance = new EventEmitter()
 
   browserInstanceWrapper.kill = () => undefined

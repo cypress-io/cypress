@@ -19,10 +19,13 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-cypress": "^6.1.0",
     "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-jsonc": "^2.21.1",
     "eslint-plugin-mocha": "^11.1.0",
+    "eslint-plugin-package-json": "^0.91.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-vue": "^10.3.0",
     "globals": "^15.14.0",
+    "jsonc-eslint-parser": "^2.4.0",
     "typescript-eslint": "^8.37.0",
     "vue-eslint-parser": "^10.0.0"
   },

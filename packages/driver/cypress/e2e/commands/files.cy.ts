@@ -260,7 +260,7 @@ describe('src/cy/commands/files', () => {
           assertLogLength(this.logs, 1)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.')
+          expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `\'\'`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
           done()
@@ -722,6 +722,22 @@ describe('src/cy/commands/files', () => {
 
         // @ts-expect-error - intentionally passing a non-string file name
         cy.writeFile(2)
+      })
+
+      it('throws when file name argument is an empty string', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `\'\'`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+
+          done()
+        })
+
+        cy.writeFile('', 'contents')
       })
 
       it('throws when contents argument is absent', function (done) {
