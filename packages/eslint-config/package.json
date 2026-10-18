@@ -2,9 +2,13 @@
   "name": "@packages/eslint-config",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "src/index.ts",
   "scripts": {
     "lint": "eslint"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "jiti": "^2.4.2"
@@ -30,9 +34,5 @@
   },
   "peerDependencies": {
     "eslint": "^9.31.0"
-  },
-  "license": "MIT",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   }
 }

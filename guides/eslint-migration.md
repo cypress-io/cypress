@@ -392,6 +392,7 @@ For each package, ensure you've completed:
 - [ ] Created `eslint.config.ts` with proper configuration
 - [ ] Added required dependencies (`eslint`, `@packages/eslint-config`, `jiti`)
 - [ ] Added lint-staged configuration to `package.json`
+- [ ] Spread `jsonConfig` after `baseConfig` and included `json` in the lint-staged glob (see [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig))
 - [ ] Created/updated `tsconfig.json` that extends base config
 - [ ] Updated ESLint scripts (removed `--ext` flag)
 - [ ] Ran `yarn lint` successfully
