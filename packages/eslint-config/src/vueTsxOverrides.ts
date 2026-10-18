@@ -1,4 +1,3 @@
-/* Rule overrides for Vue packages that write components as JSX/TSX */
 import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 import { reactRulesOff } from './reactRulesOff'
 
