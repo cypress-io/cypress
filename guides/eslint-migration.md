@@ -203,7 +203,7 @@ import { baseConfig, graphqlConfig } from '@packages/eslint-config'
 export default [...baseConfig, ...graphqlConfig()]
 ```
 
-It carries over the old rules: the graphql-js validations (except known/unused fragments and unused variables), deprecated fields, and a required `id` wherever the type has one. `capitalized-type-name` has no counterpart. It is not needed, since every type in the schema is PascalCase and `known-type-names` rejects any name the schema lacks. Do not add it to other packages. It scans every `gql` document in the four packages each time ESLint loads the config. Once all four are migrated, remove the `graphql` override, `eslint-plugin-graphql` and the `graphqlOpts` setup from the root `.eslintrc.js`.
+It carries over the old rules: the graphql-js validations, deprecated fields, and a required `id` wherever the type has one. As before, known/unused fragments and unused variables are skipped. Unique operation and fragment names also drop out, because graphql-eslint only checks those across files. Codegen still rejects duplicates. `capitalized-type-name` has no counterpart. It is not needed, since every type in the schema is PascalCase and `known-type-names` rejects any name the schema lacks. Do not add it to other packages. It scans every `gql` document in the four packages each time ESLint loads the config. Once all four are migrated, remove the `graphql` override, `eslint-plugin-graphql` and the `graphqlOpts` setup from the root `.eslintrc.js`.
 
 ---
 
