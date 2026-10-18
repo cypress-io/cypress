@@ -13,10 +13,11 @@ yarn workspace @packages/eslint-config lint
 
 ```
 src/
-  baseConfig.ts     Core flat-config with TypeScript, import, and stylistic rules
-  cliOverrides.ts   Overrides applied for CLI/Node.js contexts
+  baseConfig.ts       Core flat-config with TypeScript, import, and stylistic rules
+  cliOverrides.ts     Overrides applied for CLI/Node.js contexts
   vueTsxOverrides.ts  Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
-  index.ts          Main entry: composes and exports the full flat-config array
+  reactRulesOff.ts    Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
+  index.ts            Main entry: composes and exports the full flat-config array
 ```
 
 ## Gotchas / Notes

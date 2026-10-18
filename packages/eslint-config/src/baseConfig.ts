@@ -14,6 +14,7 @@ import react from 'eslint-plugin-react'
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
 import { cypressDevPlugin } from './rules'
+import { reactRulesOff } from './reactRulesOff'
 
 export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
@@ -21,29 +22,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   cy.configs.recommended,
   mocha.configs?.recommended ?? {},
   ...vue.configs['flat/recommended'],
-
-  // React rules do not apply to Vue SFCs. Vue JSX/TSX files need `vueTsxOverrides`.
   {
     ...react.configs.flat.recommended,
-    ignores: ['**/*.vue'],
     settings: {
       react: {
         version: '18',
       },
-    },
-    rules: {
-      ...react.configs.flat.recommended.rules,
-      'react/no-string-refs': 'warn',
-      'react/prop-types': 'warn',
-      'react/no-unescaped-entities': 'warn',
-      'react/jsx-no-target-blank': 'warn',
-      'react/no-unknown-property': 'warn',
-      'react/jsx-key': 'warn',
-      'react/display-name': 'warn',
-
-      // we use react 18+, so these rules do not apply
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
     },
   },
   // importing { config } from @stylistic/eslint-plugin causes errors
@@ -271,11 +255,29 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'cypress/no-async-tests': 'off',
       'cypress/no-assigning-return-values': 'off',
 
+      'react/no-string-refs': 'warn',
+      'react/prop-types': 'warn',
+      'react/no-unescaped-entities': 'warn',
+      'react/jsx-no-target-blank': 'warn',
+      'react/no-unknown-property': 'warn',
+      'react/jsx-key': 'warn',
+      'react/display-name': 'warn',
+
+      // we use react 18+, so these rules do not apply
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
+
       // these are generally noisy, and not that helpful at this point. Maybe
       // down the line we can enable them.
       'import-x/default': 'warn',
       'import-x/namespace': 'warn',
     },
+  },
+
+  // React rules do not apply to Vue SFCs. Vue JSX/TSX files need `vueTsxOverrides`.
+  {
+    files: ['**/*.vue'],
+    rules: reactRulesOff,
   },
 
   // common file patterns to ignore

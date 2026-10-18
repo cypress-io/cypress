@@ -1,12 +1,13 @@
 /* Rule overrides for Vue packages that write components as JSX/TSX */
 import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
-import react from 'eslint-plugin-react'
+import { reactRulesOff } from './reactRulesOff'
 
 // Vue JSX is indistinguishable from React JSX by file extension, and React rules
-// misread it (e.g. `class` flagged as an unknown property)
+// misread it (e.g. `class` flagged as an unknown property). Spread after
+// `baseConfig` and after any `react/*` rule settings, or they switch back on.
 export const vueTsxOverrides = [
   {
     files: ['**/*.{jsx,tsx}'],
-    rules: Object.fromEntries(Object.keys(react.rules).map((name) => [`react/${name}`, 'off'])),
+    rules: reactRulesOff,
   },
 ] satisfies InfiniteDepthConfigWithExtends[]
