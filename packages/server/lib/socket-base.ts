@@ -25,7 +25,7 @@ import type { Automation } from './automation'
 import { openExternal } from './gui/links'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands, SpecWithRelativeRoot } from '@packages/types'
-import { RUN_ALL_SPECS_KEY } from '@packages/types'
+import { RUN_ALL_SPECS_KEY, compactHttpResponse } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import type { StudioInitOptions } from './types/studio'
@@ -522,7 +522,7 @@ export class SocketBase implements SocketBroadcaster {
                 return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
               }
               case 'http:request':
-                return options.onRequest(userAgent, automationRequest, args[0])
+                return Bluebird.resolve(options.onRequest(userAgent, automationRequest, args[0])).then(compactHttpResponse)
               case 'reset:server:state':
                 return options.onResetServerState(args[0])
               case 'get:fixture':

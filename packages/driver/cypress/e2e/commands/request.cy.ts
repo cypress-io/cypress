@@ -681,6 +681,71 @@ describe('src/cy/commands/request', () => {
       })
     })
 
+    describe('response body', () => {
+      it('yields parsed JSON and logs the raw response text byte for byte', () => {
+        cy.readFile('cypress/fixtures/example.json', null).then((fixture) => {
+          cy.request('http://localhost:3500/fixtures/example.json').then((resp) => {
+            expect(resp.body).to.deep.eq({ example: true })
+            expect(resp.allRequestResponses).to.have.length(1)
+            expect(resp.allRequestResponses[0]['Response Body']).to.eq(new TextDecoder().decode(fixture))
+          })
+        })
+      })
+
+      it('yields non-JSON text as the same string it logs', () => {
+        cy.request('http://localhost:3500/html-content-type-with-charset-param').then((resp) => {
+          expect(resp.body).to.eq('<html><head><title>Test</title></head><body><center>Hello</center></body></html>')
+          expect(resp.allRequestResponses[0]['Response Body']).to.eq(resp.body)
+        })
+      })
+
+      it('only rebuilds the body from the final response of a redirect chain', () => {
+        cy.request('http://localhost:3500/redirect?code=302&href=http://localhost:3500/fixtures/example.json').then((resp) => {
+          expect(resp.allRequestResponses).to.have.length(2)
+          expect(resp.allRequestResponses[0]['Response Status']).to.eq(302)
+          expect(resp.allRequestResponses[0]['Response Body']).to.be.null
+          expect(resp.allRequestResponses[1]['Response Body']).to.be.a('string')
+          expect(resp.body).to.deep.eq({ example: true })
+        })
+      })
+
+      it('yields a binary body as an ArrayBuffer separate from the logged one', () => {
+        // A Blob request body makes the server read the response as raw bytes
+        const body = new Blob([new Uint8Array([120, 42, 7])], { type: 'application/octet-stream' })
+
+        cy.request({ method: 'POST', url: 'http://localhost:3500/binary', body, headers: { 'Content-Type': 'application/octet-stream' } }).then((resp) => {
+          const raw = resp.allRequestResponses[0]['Response Body']
+
+          // The response comes from the driver's realm, so `instanceof` against this frame's ArrayBuffer is false
+          expect(Object.prototype.toString.call(resp.body)).to.eq('[object ArrayBuffer]')
+          expect(Object.prototype.toString.call(raw)).to.eq('[object ArrayBuffer]')
+          expect(resp.body).not.to.eq(raw)
+          expect([...new Uint8Array(resp.body)]).to.deep.eq([120, 42, 7])
+          expect([...new Uint8Array(raw)]).to.deep.eq([120, 42, 7])
+        })
+      })
+
+      it('yields a `json: true` body as the logged object itself', () => {
+        // `/binary` echoes the request body, and an object body sets `json: true`
+        cy.request({ method: 'POST', url: 'http://localhost:3500/binary', body: { a: 1 } }).then((resp) => {
+          const raw = resp.allRequestResponses[0]['Response Body']
+
+          expect(raw).to.deep.eq({ a: 1 })
+          expect(resp.body).to.eq(raw)
+        })
+      })
+
+      it('includes the response body in the `failOnStatusCode` error', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('<html><body>not found</body></html>')
+
+          done()
+        })
+
+        cy.request('http://localhost:3500/status-404')
+      })
+    })
+
     describe('subjects', () => {
       it('resolves with response obj', () => {
         const resp = {

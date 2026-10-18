@@ -6,6 +6,7 @@ import type { MockInstance } from 'vitest'
 // NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
 // we are unable to import ESM into a CommonJS test context, even if we await import() the module.
 import * as socketIo from '@packages/socket/lib/client'
+import { expandHttpResponse, HTTP_RESPONSE_BODY_HINT } from '@packages/types'
 import Fixtures from '@tooling/system-tests'
 import * as errors from '../../lib/errors'
 import { SocketE2E } from '../../lib/socket-e2e'
@@ -433,6 +434,30 @@ describe('lib/socket', () => {
 
           return client.emit('backend:request', 'http:request', 'foo', (resp) => {
             expect(resp.response).toStrictEqual({ foo: 'bar' })
+
+            return done()
+          })
+        })
+      })
+
+      it('sends the response body over the wire once', () => {
+        return new Promise<void>((done) => {
+          const raw = '{"id":123}'
+
+          options.onRequest = vi.fn().mockResolvedValue({
+            body: { id: 123 },
+            status: 200,
+            allRequestResponses: [{ 'Response Body': raw, 'Response Status': 200 }],
+          })
+
+          return client.emit('backend:request', 'http:request', 'foo', (resp) => {
+            expect(resp.response).toStrictEqual({
+              status: 200,
+              allRequestResponses: [{ 'Response Body': raw, 'Response Status': 200 }],
+              [HTTP_RESPONSE_BODY_HINT]: 'json',
+            })
+
+            expect(expandHttpResponse(resp.response).body).toStrictEqual({ id: 123 })
 
             return done()
           })

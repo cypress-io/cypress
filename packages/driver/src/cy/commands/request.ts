@@ -5,6 +5,7 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { $Location } from '../../cypress/location'
 import { whatIsCircular } from '../../util/what-is-circular'
+import { expandHttpResponse } from '@packages/types'
 
 const isOptional = (memo, val, key) => {
   if (_.isNull(val)) {
@@ -379,7 +380,9 @@ export default (Commands, Cypress, cy, state, config) => {
         return Cypress.backend('http:request', requestOpts)
       })
       .timeout(options.timeout)
-      .then((response) => {
+      .then((compactResponse) => {
+        const response = expandHttpResponse(compactResponse)
+
         options.response = response
 
         // bomb if we should fail on non okay status code
