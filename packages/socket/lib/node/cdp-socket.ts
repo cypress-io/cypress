@@ -6,13 +6,23 @@ import Debug from 'debug'
 
 const debugVerbose = Debug('cypress-verbose:server:socket:cdp-socket')
 
+// Runs in the browser with the namespace and encoded payload passed as call
+// arguments, so the payload is never escaped into script source or compiled.
+// The browser socket may not be installed yet; such messages are dropped.
+export const DELIVER_TO_BROWSER_SOCKET = `function (namespace, payload) {
+  var socket = window['cypressSocket-' + namespace]
+  if (socket && socket.send) {
+    socket.send(payload)
+  }
+}`
+
 /**
  * The subset of the CDP surface this socket needs. Satisfied by a real CDP
  * client (Chromium) or by an adapter over another automation protocol that can
- * expose a window binding and evaluate script (e.g. Playwright for WebKit).
+ * expose a window binding and call a function in the page (e.g. Playwright for WebKit).
  */
 export interface CDPSocketBridge {
-  send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate', params?: object): Promise<any>
+  send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate' | 'Runtime.callFunctionOn', params?: object): Promise<any>
   on (event: 'Runtime.bindingCalled', listener: (event: Protocol.Runtime.BindingCalledEvent) => void): void
   off (event: 'Runtime.bindingCalled', listener: (event: Protocol.Runtime.BindingCalledEvent) => void): void
 }
@@ -91,6 +101,7 @@ export class CDPSocket extends EventEmitter {
   private _cdpClient?: CDPSocketBridge
   private _namespace: string
   private _executionContextId?: number
+  private _pendingDelivery?: Promise<void>
 
   constructor (cdpClient: CDPSocketBridge, namespace: string) {
     super()
@@ -128,16 +139,25 @@ export class CDPSocket extends EventEmitter {
       this.once(uuid, callback)
     }
 
-    await encode([event, uuid, args], this._namespace).then((encoded: any) => {
-      const expression = `
-        if (window['cypressSocket-${this._namespace}'] && window['cypressSocket-${this._namespace}'].send) {
-          window['cypressSocket-${this._namespace}'].send('${JSON.stringify(encoded).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
-        }
-      `
+    await encode([event, uuid, args], this._namespace).then((encoded: string) => {
+      debugVerbose('sending message to browser %o', { payload: encoded })
 
-      debugVerbose('sending message to browser %o', { expression })
+      // While a delivery that has to look up its target is in flight, later
+      // messages wait behind it so they still reach the browser in emit order.
+      const mustQueue = this._pendingDelivery !== undefined || this._executionContextId === undefined
+      const deliver = () => this._deliver(encoded)
+      const delivery = this._pendingDelivery ? this._pendingDelivery.then(deliver) : deliver()
 
-      this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId, returnByValue: true }).then((result) => {
+      if (mustQueue) {
+        const settled = delivery.then(() => {}, () => {})
+
+        this._pendingDelivery = settled
+        void settled.then(() => {
+          if (this._pendingDelivery === settled) this._pendingDelivery = undefined
+        })
+      }
+
+      delivery.then((result) => {
         debugVerbose('successfully sent message to browser %o', result)
       }).catch((error) => {
         debugVerbose('error sending message to browser %o', { error })
@@ -145,6 +165,30 @@ export class CDPSocket extends EventEmitter {
     })
 
     return true
+  }
+
+  private _deliver (payload: string): Promise<any> {
+    const cdpClient = this._cdpClient
+
+    if (!cdpClient) return Promise.resolve()
+
+    const call = {
+      functionDeclaration: DELIVER_TO_BROWSER_SOCKET,
+      arguments: [{ value: this._namespace }, { value: payload }],
+      returnByValue: true,
+    }
+
+    if (this._executionContextId !== undefined) {
+      return cdpClient.send('Runtime.callFunctionOn', { ...call, executionContextId: this._executionContextId })
+    }
+
+    // Until the browser first calls the binding, its context is unknown.
+    // Runtime.callFunctionOn needs a target, so call on the default context's
+    // global instead. A bridge without remote objects (WebKit) returns no
+    // objectId and calls into its default frame.
+    return cdpClient.send('Runtime.evaluate', { expression: 'globalThis' }).then((evaluated) => {
+      return cdpClient.send('Runtime.callFunctionOn', { ...call, objectId: evaluated?.result?.objectId })
+    })
   }
 
   disconnect = () => {

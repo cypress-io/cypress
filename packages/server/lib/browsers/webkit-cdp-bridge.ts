@@ -15,16 +15,24 @@ type RuntimeParams = {
   expression?: string
   contextId?: number
   returnByValue?: boolean
+  functionDeclaration?: string
+  arguments?: Array<{ value?: unknown }>
+  executionContextId?: number
+  objectId?: string
 }
+
+type PageFunction = (args: unknown[]) => unknown
 
 /**
  * Adapts a Playwright page to the `CDPSocketBridge` interface so the
  * automation socket (`CDPSocketServer`) can carry driver <-> server traffic in
  * WebKit the same way CDP does in Chromium.
  *
- * Unlike CDP, `Runtime.evaluate` resolves to the evaluated value directly —
- * not a `{ result }` envelope — and `returnByValue` is ignored since
- * Playwright always returns by value.
+ * Unlike CDP, `Runtime.evaluate` and `Runtime.callFunctionOn` resolve to the
+ * value directly — not a `{ result }` envelope — and `returnByValue` is
+ * ignored since Playwright always returns by value. The bridge models no
+ * remote objects, so `Runtime.callFunctionOn` ignores `objectId` and, like
+ * `Runtime.evaluate`, runs in the main frame unless given a known context.
  */
 export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
   private frameByContextId = new Map<number, playwright.Frame>()
@@ -33,6 +41,7 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
   private nextContextId = 1
   // serializes evaluations so messages reach the browser in emit order, like CDP's transport
   private evaluateChain: Promise<unknown> = Promise.resolve()
+  private pageFunctions = new Map<string, PageFunction>()
 
   constructor (private page: playwright.Page, private evaluateOrderTimeout: number = EVALUATE_ORDER_TIMEOUT_MS) {
     super()
@@ -44,7 +53,7 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
     })
   }
 
-  async send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate', params: RuntimeParams = {}): Promise<any> {
+  async send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate' | 'Runtime.callFunctionOn', params: RuntimeParams = {}): Promise<any> {
     switch (command) {
       case 'Runtime.enable':
         return
@@ -70,39 +79,71 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
         })
 
       case 'Runtime.evaluate': {
-        const frame = (params.contextId && this.frameByContextId.get(params.contextId)) || this.page.mainFrame()
+        const frame = this.frameFor(params.contextId)
 
         // wrap in an IIFE so the multi-statement expression is valid for Playwright's string evaluation
-        const evaluation = this.evaluateChain.then(() => frame.evaluate(`(() => {${params.expression}})()`))
+        return this.enqueue(() => frame.evaluate(`(() => {${params.expression}})()`))
+      }
 
-        // advance the chain when the evaluation settles, or when a timeout
-        // (started once the evaluation takes its turn) elapses. This way an
-        // evaluation that never settles (e.g. a frame stuck mid-navigation)
-        // only delays later server -> browser messages instead of stalling
-        // them forever, and messages behind it stay serialized; a timed-out
-        // evaluation may still complete later, trading strict ordering for
-        // liveness in that degraded case
-        this.evaluateChain = this.evaluateChain.then(() => {
-          let timer!: NodeJS.Timeout
+      case 'Runtime.callFunctionOn': {
+        const frame = this.frameFor(params.executionContextId)
+        const pageFunction = this.pageFunctionFor(params.functionDeclaration!)
+        const args = (params.arguments ?? []).map((arg) => arg.value)
 
-          return Promise.race([
-            evaluation.catch(() => undefined),
-            new Promise<void>((resolve) => {
-              timer = setTimeout(() => {
-                debug('evaluation did not settle within %dms, dispatching later messages', this.evaluateOrderTimeout)
-                resolve()
-              }, this.evaluateOrderTimeout)
-
-              timer.unref?.()
-            }),
-          ]).finally(() => clearTimeout(timer))
-        })
-
-        return evaluation
+        // the arguments travel as Playwright's serialized evaluate argument, not as script source
+        return this.enqueue(() => frame.evaluate(pageFunction, args))
       }
 
       default:
         throw new Error(`WebKitCDPBridge cannot handle command: ${command}`)
     }
+  }
+
+  private frameFor (contextId?: number): playwright.Frame {
+    return (contextId && this.frameByContextId.get(contextId)) || this.page.mainFrame()
+  }
+
+  // Playwright only calls a page function it is given as a function; a string
+  // is evaluated as an expression and never receives the argument. Build one
+  // from the declaration (once per declaration) that Playwright serializes
+  // back to source and calls with the argument values spread like CDP's.
+  private pageFunctionFor (functionDeclaration: string): PageFunction {
+    let pageFunction = this.pageFunctions.get(functionDeclaration)
+
+    if (!pageFunction) {
+      pageFunction = new Function(`return (args) => (${functionDeclaration}).apply(globalThis, args)`)() as PageFunction
+      this.pageFunctions.set(functionDeclaration, pageFunction)
+    }
+
+    return pageFunction
+  }
+
+  private enqueue<T> (run: () => Promise<T>): Promise<T> {
+    const evaluation = this.evaluateChain.then(run)
+
+    // advance the chain when the evaluation settles, or when a timeout
+    // (started once the evaluation takes its turn) elapses. This way an
+    // evaluation that never settles (e.g. a frame stuck mid-navigation)
+    // only delays later server -> browser messages instead of stalling
+    // them forever, and messages behind it stay serialized; a timed-out
+    // evaluation may still complete later, trading strict ordering for
+    // liveness in that degraded case
+    this.evaluateChain = this.evaluateChain.then(() => {
+      let timer!: NodeJS.Timeout
+
+      return Promise.race([
+        evaluation.catch(() => undefined),
+        new Promise<void>((resolve) => {
+          timer = setTimeout(() => {
+            debug('evaluation did not settle within %dms, dispatching later messages', this.evaluateOrderTimeout)
+            resolve()
+          }, this.evaluateOrderTimeout)
+
+          timer.unref?.()
+        }),
+      ]).finally(() => clearTimeout(timer))
+    })
+
+    return evaluation
   }
 }

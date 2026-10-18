@@ -198,4 +198,143 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
       expect(mainFrame.evaluate).toHaveBeenCalledWith('(() => {reply()})()')
     })
   })
+
+  describe('Runtime.callFunctionOn', () => {
+    const functionDeclaration = 'function (namespace, payload) { window.received = [this === globalThis, namespace, payload] }'
+    const payload = `it's "quoted" \\ \n \u2028 😀 </script>`
+
+    const call = (extra: object = {}) => {
+      return bridge.send('Runtime.callFunctionOn', {
+        functionDeclaration,
+        arguments: [{ value: '/ns' }, { value: payload }],
+        returnByValue: true,
+        ...extra,
+      })
+    }
+
+    // runs the page function the way Playwright does: from its source, called with the argument
+    const runInFakePage = (pageFunction: Function, arg: unknown) => {
+      const window: Record<string, any> = {}
+      const compiled = new Function('window', 'globalThis', `return (${pageFunction.toString()})`)(window, window)
+
+      compiled(arg)
+
+      return window.received
+    }
+
+    it('passes the arguments as the Playwright argument, never in the function source', async () => {
+      await call()
+
+      const [pageFunction, arg] = mainFrame.evaluate.mock.calls[0]
+
+      expect(typeof pageFunction).toBe('function')
+      expect(pageFunction.toString()).toContain(functionDeclaration)
+      expect(pageFunction.toString()).not.toContain('quoted')
+      expect(arg).toStrictEqual(['/ns', payload])
+    })
+
+    it('calls the declaration with the argument values spread, like CDP', async () => {
+      await call()
+
+      const [pageFunction, arg] = mainFrame.evaluate.mock.calls[0]
+
+      expect(runInFakePage(pageFunction, arg)).toStrictEqual([true, '/ns', payload])
+    })
+
+    it('reuses the page function for the same declaration', async () => {
+      await call()
+      await call()
+
+      expect(mainFrame.evaluate.mock.calls[0][0]).toBe(mainFrame.evaluate.mock.calls[1][0])
+    })
+
+    it('calls in the frame that last called the binding for the given executionContextId', async () => {
+      await bridge.send('Runtime.addBinding', { name: 'binding-1' })
+
+      const bindingHandler = page.exposeBinding.mock.calls[0][1]
+      const frame = { evaluate: vi.fn(async () => {}) }
+
+      bindingHandler({ frame }, 'payload')
+
+      await call({ executionContextId: 1 })
+
+      expect(frame.evaluate).toHaveBeenCalledWith(expect.any(Function), ['/ns', payload])
+      expect(mainFrame.evaluate).not.toHaveBeenCalled()
+    })
+
+    it('calls in the main frame for an unknown executionContextId or an objectId', async () => {
+      await call({ executionContextId: 42 })
+      await call({ objectId: 'global-object' })
+
+      expect(mainFrame.evaluate).toHaveBeenCalledTimes(2)
+    })
+
+    it('falls back to the main frame for a detached frame\'s executionContextId', async () => {
+      await bridge.send('Runtime.addBinding', { name: 'binding-1' })
+
+      const bindingHandler = page.exposeBinding.mock.calls[0][1]
+      const frame = { evaluate: vi.fn(async () => {}) }
+
+      bindingHandler({ frame }, 'payload')
+      frameDetachedHandler(frame)
+
+      await call({ executionContextId: 1 })
+
+      expect(frame.evaluate).not.toHaveBeenCalled()
+      expect(mainFrame.evaluate).toHaveBeenCalledWith(expect.any(Function), ['/ns', payload])
+    })
+
+    it('shares the evaluation order with Runtime.evaluate', async () => {
+      const order: string[] = []
+      let resolveFirst!: () => void
+
+      mainFrame.evaluate = vi.fn()
+      .mockImplementationOnce(() => {
+        return new Promise<void>((resolve) => {
+          resolveFirst = () => {
+            order.push('evaluate resolved')
+            resolve()
+          }
+        })
+      })
+      .mockImplementationOnce(() => {
+        order.push('callFunctionOn started')
+
+        return Promise.resolve('ok')
+      })
+
+      const first = bridge.send('Runtime.evaluate', { expression: 'globalThis' })
+      const second = call()
+
+      await new Promise((resolve) => setImmediate(resolve))
+      expect(order).toStrictEqual([])
+
+      resolveFirst()
+      await expect(second).resolves.toBe('ok')
+      await first
+
+      expect(order).toStrictEqual(['evaluate resolved', 'callFunctionOn started'])
+    })
+
+    it('advances past a call that never settles', async () => {
+      bridge = new WebKitCDPBridge(page, 10)
+
+      mainFrame.evaluate = vi.fn()
+      .mockImplementationOnce(() => new Promise(() => {}))
+      .mockResolvedValueOnce('ok')
+
+      call()
+
+      await expect(call()).resolves.toBe('ok')
+    })
+
+    it('rejects with the evaluation error and keeps going', async () => {
+      mainFrame.evaluate = vi.fn()
+      .mockRejectedValueOnce(new Error('Execution context was destroyed'))
+      .mockResolvedValueOnce('ok')
+
+      await expect(call()).rejects.toThrow('Execution context was destroyed')
+      await expect(call()).resolves.toBe('ok')
+    })
+  })
 })

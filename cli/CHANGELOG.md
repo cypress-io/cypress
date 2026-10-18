@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.2.1
 
+**Performance:**
+
+- Improved the performance of messages sent from Cypress to the browser in Chrome-based browsers, Electron, and WebKit, such as the response of a [`cy.request()`](https://on.cypress.io/request), the result of a [`cy.task()`](https://on.cypress.io/task), and [`cy.intercept()`](https://on.cypress.io/intercept) events. Large messages are no longer turned into script for the browser to run, so a `cy.request()` with a large response body completes faster. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Bugfixes:**
 
 - [`cy.fixture()`](https://on.cypress.io/fixture) and the `fixture` property of a [`cy.intercept()`](https://on.cypress.io/intercept) static response now fail when the fixture path resolves outside the [`fixturesFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files). Fixed in [#35072](https://github.com/cypress-io/cypress/pull/35072).

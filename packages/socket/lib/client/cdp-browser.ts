@@ -27,9 +27,7 @@ export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap
     this._namespace = namespace
 
     const send = async (payload: string) => {
-      const parsed = JSON.parse(payload)
-
-      await decode(parsed).then(async (decoded: any) => {
+      await decode(payload).then(async (decoded: any) => {
         const [event, callbackEvent, args] = decoded
 
         super.emit(event, ...args)
