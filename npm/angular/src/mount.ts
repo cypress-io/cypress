@@ -323,7 +323,7 @@ function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, componen
 
     if (changeKeyIfExists) {
       component[expectedChangeKey] =
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
         config.componentProperties[expectedChangeKey]
     }
 
@@ -368,7 +368,7 @@ function setupComponent<T> (
     getComponentInputs(fixture.componentRef.componentType).forEach((key) => {
       // only assign props if they are passed into the component
       if (config?.componentProperties?.hasOwnProperty(key)) {
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
         const passedInValue = config?.componentProperties[key]
 
         registerSignalEventsIfNeeded(
@@ -393,11 +393,11 @@ function setupComponent<T> (
 
       // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
       // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
-      // @ts-expect-error
+      // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
       if (property instanceof EventEmitter || (config?.componentProperties?.hasOwnProperty(key) && config?.componentProperties[key] instanceof EventEmitter)) {
       // only assign props if they are passed into the component
         if (config?.componentProperties?.hasOwnProperty(key)) {
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
           const passedInValue = config?.componentProperties[key]
 
           component[key] = passedInValue
