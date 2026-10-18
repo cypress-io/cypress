@@ -61,12 +61,8 @@ export const isListening = (urlStr: string) => {
     // urls excluded from the proxy via NO_PROXY (e.g. localhost, which is the
     // component testing dev server and is in NO_PROXY by default) fall through
     // to a direct connection below so we don't route them through the proxy.
-    // For some reason, TypeScript gets confused by the "agent" parameter
-    // and required double ts-ignore to allow it on local machines and on CI
-    // @ts-ignore
     return rp({
       url: urlStr,
-      // @ts-ignore
       agent,
       proxy: null,
     })

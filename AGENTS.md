@@ -228,7 +228,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **TypeScript**: `strict: true` base, but `noImplicitAny: false` (implicit `any` allowed for pragmatic reasons).
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
 - **Type guards over `as`** — Narrow with a type guard, an `asserts` function or an `in` check rather than an `as` assertion, and explain any assertion that remains with a "Safe because" comment. See [Type Assertions](./guides/typescript.md#type-assertions).
-- **Unused vars**: Prefix with `_` to suppress (`argsIgnorePattern: '^_'`).
+- **Unused vars**: Unused variables and imports are errors. Unused function parameters and caught errors are allowed, since callbacks often have to accept arguments they ignore. In packages on the flat config, prefix a variable that exists only to be type-checked with `_`.
 - **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
