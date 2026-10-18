@@ -6,7 +6,7 @@ import { stripVTControlCharacters as stripAnsi } from 'util'
 import * as errors from './errors'
 import { fs } from './util/fs'
 import { globAsync as glob } from './util/glob'
-import { isInsideDir } from './util/is_inside_dir'
+import { isInsideDir } from '@packages/data-context/src/util/isInsideDir'
 import type { ObjectEncodingOptions } from 'fs-extra'
 
 const debug = debugModule('cypress:server:fixture')

@@ -1,8 +1,8 @@
 import path from 'path'
-import { describe, it, expect } from 'vitest'
-import { isInsideDir } from '../../../lib/util/is_inside_dir'
+import { describe, it, expect } from '@jest/globals'
+import { isInsideDir } from '../../../src/util/isInsideDir'
 
-describe('lib/util/is_inside_dir', () => {
+describe('isInsideDir', () => {
   const parent = path.resolve('/project/fixtures')
 
   it('is true for a descendant', () => {
