@@ -45,20 +45,6 @@
     "testing",
     "zoneless"
   ],
-  "contributors": [
-    {
-      "name": "Bill Glesias",
-      "social": "@atofstryker"
-    },
-    {
-      "name": "Jordan Powell",
-      "social": "@jordanpowell88"
-    },
-    {
-      "name": "Zach Williams",
-      "social": "@ZachJW34"
-    }
-  ],
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"

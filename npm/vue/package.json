@@ -13,20 +13,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "license": "MIT",
-  "contributors": [
-    {
-      "name": "Jessica Sachs",
-      "social": "@JessicaSachs"
-    },
-    {
-      "name": "Amir Rustamzadeh",
-      "social": "@amirrustam"
-    },
-    {
-      "name": "Lachlan Miller",
-      "social": "@Lachlan19900"
-    }
-  ],
   "main": "dist/cypress-vue.cjs.js",
   "module": "dist/cypress-vue.esm-bundler.js",
   "types": "dist/index.d.ts",

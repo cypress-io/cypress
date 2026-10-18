@@ -16,28 +16,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "license": "MIT",
-  "contributors": [
-    {
-      "name": "Dmitriy Kovalenko",
-      "social": "@dmtrKovalenko"
-    },
-    {
-      "name": "Brian Mann",
-      "social": "@brian-mann"
-    },
-    {
-      "name": "Barthélémy Ledoux",
-      "social": "@elevatebart"
-    },
-    {
-      "name": "Lachlan Miller",
-      "social": "@lmiller1990"
-    },
-    {
-      "name": "Jessica Sachs",
-      "social": "@_JessicaSachs"
-    }
-  ],
   "main": "dist/cypress-react.cjs.js",
   "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",
