@@ -522,7 +522,7 @@ export class SocketBase implements SocketBroadcaster {
                 return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
               }
               case 'http:request':
-                return Bluebird.resolve(options.onRequest(userAgent, automationRequest, args[0])).then(compactHttpResponse)
+                return Promise.resolve(options.onRequest(userAgent, automationRequest, args[0])).then(compactHttpResponse)
               case 'reset:server:state':
                 return options.onResetServerState(args[0])
               case 'get:fixture':
