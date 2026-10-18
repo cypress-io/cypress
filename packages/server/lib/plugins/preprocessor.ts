@@ -4,6 +4,7 @@ import path from 'path'
 import debug from 'debug'
 import Promise from 'bluebird'
 import * as appData from '../util/app_data'
+import { isSpecFrameScript, NotSpecFrameScriptError } from '../util/spec_frame_scripts'
 import * as plugins from '../plugins'
 import { telemetry } from '@packages/telemetry'
 import type { PluginIpcHandler, PreprocessorError } from '@packages/types'
@@ -78,6 +79,10 @@ const API: PreprocessorAPI = {
 
   getFile (filePath: string, config: Cfg) {
     let fileObject: FileObject
+
+    if (!isSpecFrameScript(config, filePath)) {
+      return Promise.reject(new NotSpecFrameScriptError(filePath))
+    }
 
     debugFn(`getting file ${filePath}`)
     filePath = path.resolve(config.projectRoot, filePath)

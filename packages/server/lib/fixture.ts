@@ -6,6 +6,7 @@ import { stripVTControlCharacters as stripAnsi } from 'util'
 import * as errors from './errors'
 import { fs } from './util/fs'
 import { globAsync as glob } from './util/glob'
+import { isInsideDir } from './util/is_inside_dir'
 import type { ObjectEncodingOptions } from 'fs-extra'
 
 const debug = debugModule('cypress:server:fixture')
@@ -34,8 +35,13 @@ const friendlyJsonParse = function (s) {
 }
 
 export async function get (fixturesFolder: string, filePath: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null | undefined } = {}) {
+  const root = path.resolve(fixturesFolder)
   const p = path.join(fixturesFolder, filePath)
   const fixture = path.basename(p)
+
+  if (!isInsideDir(root, path.resolve(p))) {
+    throw new Error(`Fixture path '${filePath}' must resolve to a file inside the fixtures folder: ${fixturesFolder}`)
+  }
 
   // if the file exists, go ahead and parse it
   // otherwise, glob for potential extensions
@@ -52,11 +58,10 @@ export async function get (fixturesFolder: string, filePath: string, options: { 
 
     const pattern = `${p}{${extensions.join(',')}}`
 
-    // @ts-ignore as v8-snapshot package is typechecking this incorrectly
-    const matches = await glob(pattern, {
+    const matches = (await glob(pattern, {
       nosort: true,
       nodir: true,
-    })
+    })).filter((match) => isInsideDir(root, path.resolve(match)))
 
     if (matches.length === 0) {
       const relativePath = path.relative('.', p)

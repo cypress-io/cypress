@@ -16,7 +16,6 @@ import crypto from 'crypto'
 import { flipFuses, FuseVersion, FuseV1Options } from '@electron/fuses'
 import { move, remove } from 'fs-extra'
 import * as cyIcons from '@packages/icons'
-// @ts-ignore
 import pkg from '@packages/root'
 
 const debug = Debug('cypress:electron:install')

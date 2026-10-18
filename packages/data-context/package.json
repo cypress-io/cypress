@@ -76,6 +76,8 @@
   },
   "devDependencies": {
     "@babel/types": "7.28.2",
+    "@graphql-tools/code-file-loader": "^7.0.6",
+    "@graphql-tools/load": "^7.3.0",
     "@jest/globals": "^30.1.2",
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",

@@ -142,7 +142,7 @@ const rp = request.defaults((params, callback) => {
         const options = this // request promise options
 
         const throwStatusCodeErrWithResp = (message, responseBody) => {
-          // @ts-ignore - server's check-ts fails on this, but driver's check-ts does not, so expect-error is not appropriate
+          // @ts-expect-error - StatusCodeError expects request's Options, which require url, but RequestPromiseOptions makes it optional
           throw new RequestErrors.StatusCodeError(response.statusCode, message, options, responseBody)
         }
 

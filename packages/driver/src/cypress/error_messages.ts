@@ -27,6 +27,11 @@ function removeLeadingSlash (str: string) {
   return str.substring(li + 1)
 }
 
+// Only an empty string fails a non-empty string check, so quote strings to keep it visible
+const formatNonEmptyStringArg = (value) => {
+  return _.isString(value) ? `'${value}'` : $utils.stringifyActual(value)
+}
+
 const formatConfigFile = (projectRoot: Cypress.Config['projectRoot'], configFile: Cypress.Config['configFile']) => {
   configFile = removeLeadingSlash(configFile.replace(projectRoot, ''))
 
@@ -540,7 +545,7 @@ export default {
     },
     invalid_argument (obj) {
       return {
-        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`{{file}}\`.`,
+        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(obj.file)}\`.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
@@ -2099,9 +2104,11 @@ export default {
   },
 
   trigger: {
-    invalid_argument: {
-      message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`{{cmd}}\`.`,
-      docsUrl: 'https://on.cypress.io/trigger',
+    invalid_argument ({ eventName }) {
+      return {
+        message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(eventName)}\`.`,
+        docsUrl: 'https://on.cypress.io/trigger',
+      }
     },
     multiple_elements: {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,

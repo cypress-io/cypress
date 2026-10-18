@@ -86,15 +86,15 @@ describe('lib/modes/run', () => {
 
     sinon.stub(fsUtil, 'access').withArgs(options.projectRoot).resolves()
     sinon.stub(process, 'chdir').withArgs(options.projectRoot).returns()
-    // @ts-expect-error
+    // @ts-expect-error - partial Stats stub
     sinon.stub(fs, 'statSync').withArgs(options.projectRoot).returns({
       isDirectory: () => true,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - withArgs resolves against the callback overload of pathExists
     sinon.stub(fsExtra, 'pathExists').withArgs(`${options.projectRoot}/${mockedRelativeSupportFilePath}`).resolves(true)
     /// mock the project config IPC loadConfig to avoid communicating over sub processes, which will not work here since we are mocking the directory
-    // @ts-expect-error
+    // @ts-expect-error - initialConfig is stubbed as a JSON string
     sinon.stub(ProjectConfigIpc.prototype, 'loadConfig').callsFake(() => {
       return Promise.resolve({
         requires: [],
@@ -124,7 +124,7 @@ describe('lib/modes/run', () => {
   it('recovers when the browser is closed unexpectedly by not sending "shouldLaunchNewTab" on newly created browser instances (creates the CRI client in the actual implementation)', async () => {
     let launchAttemptOfBarSpec = 0
 
-    // @ts-expect-error
+    // @ts-expect-error - fake resolves without a BrowserInstance
     sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {
       switch (spec as unknown as string) {
         case 'foo.cy.ts':
@@ -178,21 +178,20 @@ describe('lib/modes/run', () => {
       cwd: fallbackRoot,
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - access is already stubbed in the beforeEach
     fsUtil.access.withArgs(fallbackRoot).resolves()
-    // @ts-expect-error
+    // @ts-expect-error - chdir is already stubbed in the beforeEach
     process.chdir.withArgs(fallbackRoot).returns()
-    // @ts-expect-error
+    // @ts-expect-error - statSync is already stubbed in the beforeEach
     fs.statSync.withArgs(fallbackRoot).returns({
       isDirectory: () => true,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - pathExists is already stubbed in the beforeEach
     fsExtra.pathExists.withArgs(`${fallbackRoot}/${mockedRelativeSupportFilePath}`).resolves(true)
-    // @ts-expect-error
+    // @ts-expect-error - getFilesByGlob is already stubbed in the beforeEach
     FileDataSource.prototype.getFilesByGlob.withArgs(fallbackRoot, 'cypress/support/e2e.{js,jsx,ts,tsx}').resolves([`${fallbackRoot}/${mockedRelativeSupportFilePath}`])
 
-    // @ts-expect-error
     sinon.stub(OpenProject.prototype, 'launch').resolves()
 
     await run(options, Promise.resolve())
@@ -213,7 +212,7 @@ describe('lib/modes/run', () => {
   it('retries launching the browser when FIREFOX_COULD_NOT_CONNECT is thrown', async () => {
     let launchAttempt = 0
 
-    // @ts-expect-error
+    // @ts-expect-error - fake resolves without a BrowserInstance
     sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, _spec, _browserOpts) => {
       launchAttempt++
 
@@ -279,7 +278,6 @@ describe('lib/modes/run', () => {
 
       // component testing starts a dev server to derive config.baseUrl; stub it so the
       // run can proceed without standing up a real bundler/dev server
-      // @ts-expect-error
       sinon.stub(devServer, 'start').resolves({ port: 1234, close: () => {} })
 
       // component testing requires config.baseUrl (normally the dev server URL). Inject
