@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.2.1
 
+**Performance:**
+
+- Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start faster when the previous test left nothing to reset, such as API tests that only use [`cy.request()`](https://on.cypress.io/request). Cypress no longer reloads the blank page between tests when the previous test passed on its first attempt and only used commands that cannot change the page, and it skips clearing cookies and visited origins when there are none. Cookies, `localStorage`, `sessionStorage`, and the page are still reset whenever anything could have changed them. This does not apply when recording to Test Replay. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+
 **Bugfixes:**
 
 - [`cy.fixture()`](https://on.cypress.io/fixture) and the `fixture` property of a [`cy.intercept()`](https://on.cypress.io/intercept) static response now fail when the fixture path resolves outside the [`fixturesFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files). Fixed in [#35072](https://github.com/cypress-io/cypress/pull/35072).

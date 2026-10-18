@@ -12,6 +12,7 @@ import {
   statusMap,
 } from './utils'
 import $sourceMapUtils from '../../../cypress/source_map_utils'
+import { TestIsolationPage } from './test_isolation_page'
 
 /**
  * Session data should be cleared with spec browser launch.
@@ -27,6 +28,20 @@ export default function (Commands, Cypress, cy) {
 
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
+  const testIsolationPage = new TestIsolationPage(Cypress, cy)
+
+  // When in doubt, navigate: only a test that passed on its first attempt
+  // and left the blank page untouched can skip it.
+  const canKeepTestIsolationPage = (runnable) => {
+    return Cypress.testingType === 'e2e'
+      // Test Replay records page loads, so keep its recordings unchanged
+      && !Cypress.state('isProtocolEnabled')
+      && Cypress.config('testIsolation')
+      && runnable?.state === 'passed'
+      && !runnable._currentRetry
+      && !runnable.prevAttempts?.length
+      && testIsolationPage.isUntouched()
+  }
 
   Cypress.on('run:start', () => {
     // @ts-ignore
@@ -36,9 +51,17 @@ export default function (Commands, Cypress, cy) {
       }
     })
 
-    Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }: {nextTestHasTestIsolationOn?: boolean} = {}) => {
+    Cypress.on('test:before:after:run:async', async (test, runnable, { nextTestHasTestIsolationOn }: {nextTestHasTestIsolationOn?: boolean} = {}) => {
       if (nextTestHasTestIsolationOn || nextTestHasTestIsolationOn === undefined) {
-        return navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
+        if (canKeepTestIsolationPage(runnable)) {
+          return
+        }
+
+        await navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
+
+        if (Cypress.testingType === 'e2e') {
+          await testIsolationPage.recordBlankPage()
+        }
       }
 
       return
@@ -49,8 +72,13 @@ export default function (Commands, Cypress, cy) {
         return
       }
 
-      return sessions.clearCurrentSessionData()
-      .then(() => Cypress.backend('reset:rendered:html:origins'))
+      const renderedOrigins = await sessionsManager.clearSessionData()
+
+      // Only a rendered page or a cross-origin storage clear adds an origin, and
+      // neither runs between reading an empty set above and this point.
+      if (renderedOrigins.length) {
+        await Cypress.backend('reset:rendered:html:origins')
+      }
     })
   })
 

@@ -98,6 +98,27 @@ export default class SessionsManager {
     ])
   }
 
+  /**
+   * Clears cookies, localStorage and sessionStorage across all domains.
+   * Resolves to the origins that had rendered HTML before clearing.
+   */
+  clearSessionData = async (): Promise<string[]> => {
+    // this prevents a log occurring when we clear session in-between tests
+    if (this.cy.state('duringUserTestExecution')) {
+      this.Cypress.log(getLogProperties('clearCurrentSessionData'))
+    }
+
+    window.localStorage.clear()
+    window.sessionStorage.clear()
+
+    const [renderedOrigins] = await Promise.all([
+      clearStorage(this.Cypress),
+      this.sessions.clearCookies(),
+    ])
+
+    return renderedOrigins
+  }
+
   // this the public api exposed to consumers as Cypress.session
   sessions = {
     clearAllSavedSessions: async () => {
@@ -109,18 +130,7 @@ export default class SessionsManager {
     },
 
     clearCurrentSessionData: async () => {
-      // this prevents a log occurring when we clear session in-between tests
-      if (this.cy.state('duringUserTestExecution')) {
-        this.Cypress.log(getLogProperties('clearCurrentSessionData'))
-      }
-
-      window.localStorage.clear()
-      window.sessionStorage.clear()
-
-      await Promise.all([
-        clearStorage(this.Cypress),
-        this.sessions.clearCookies(),
-      ])
+      await this.clearSessionData()
     },
 
     getCookies: async () => {
@@ -132,7 +142,13 @@ export default class SessionsManager {
     },
 
     clearCookies: async () => {
-      return this.Cypress.automation('clear:cookies', await this.sessions.getCookies())
+      const cookies = await this.sessions.getCookies()
+
+      if (!cookies.length) {
+        return []
+      }
+
+      return this.Cypress.automation('clear:cookies', cookies)
     },
 
     getCurrentSessionData: async () => {
