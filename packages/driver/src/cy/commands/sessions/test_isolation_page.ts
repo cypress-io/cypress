@@ -54,8 +54,18 @@ export class TestIsolationPage {
     // The runner writes the blank page from its own `load` listener on the app
     // frame, which can run after the one that resolved our navigation. All
     // listeners for one event run within a single task, so the page is written
-    // by the time the next task starts.
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    // by the time the next task starts. A message channel queues that task
+    // without the throttling some browsers apply to timers in hidden windows.
+    await new Promise<void>((resolve) => {
+      const { port1, port2 } = new MessageChannel()
+
+      port1.onmessage = () => {
+        port1.close()
+        resolve()
+      }
+
+      port2.postMessage(null)
+    })
 
     const doc = this.currentDocument()
 
