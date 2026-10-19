@@ -258,6 +258,11 @@ const buildSession = async (booted: BootedSession, options: OpenTapSessionOption
         const isThisSession = typeof current.projectRoot === 'string'
           && path.resolve(current.projectRoot) === path.resolve(projectRoot)
 
+        // The project could not load, so no browser is coming: say why now, not after the timeout
+        if (isThisSession && current.status === 'error') {
+          return failWithContext(`the project failed to load: ${String(current.error)}`)
+        }
+
         if (isThisSession && current.status !== 'not connected' && current.status !== 'browser not selected') {
           debug('session ready at stage %s', current.status)
 
