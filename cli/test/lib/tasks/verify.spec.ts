@@ -3,6 +3,8 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import path from 'path'
 import chalk from 'chalk'
 import _ from 'lodash'
+import execa from 'execa'
+import Debug from 'debug'
 import os from 'os'
 import { stripIndent } from 'common-tags'
 import mockfs from 'mock-fs'
@@ -284,6 +286,81 @@ describe('lib/tasks/verify', () => {
     await start()
 
     expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
+  })
+
+  describe('the environment of the smoke test', () => {
+    // execa adds process.env to the env it is given, so what the child sees is only
+    // known by running one
+    const envSeenByChild = async (name: string): Promise<string> => {
+      const [, , options] = vi.mocked(util.exec).mock.calls[0] as unknown as [string, string[], { env: NodeJS.ProcessEnv }]
+
+      const { stdout } = await execa(process.execPath, ['-e', `process.stdout.write(String(process.env.${name}))`], options as any)
+
+      return stdout
+    }
+
+    beforeEach(() => {
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+    })
+
+    it('does not pass on a variable the caller removed', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      await start({ env: _.omit(process.env, 'ELECTRON_RUN_AS_NODE') })
+
+      expect(await envSeenByChild('ELECTRON_RUN_AS_NODE')).toBe('undefined')
+    })
+
+    it('passes on the rest of the environment as it is when the test runs', async () => {
+      vi.stubEnv('KEPT_BY_VERIFY_SPEC', 'yes')
+
+      await start({ env: _.omit(process.env, 'ELECTRON_RUN_AS_NODE') })
+
+      expect(await envSeenByChild('KEPT_BY_VERIFY_SPEC')).toBe('yes')
+    })
+
+    it('passes on a variable the caller changed or added', async () => {
+      vi.stubEnv('CHANGED_BY_VERIFY_SPEC', 'before')
+
+      await start({ env: { ...process.env, CHANGED_BY_VERIFY_SPEC: 'after', ADDED_BY_VERIFY_SPEC: 'new' } })
+
+      expect(await envSeenByChild('CHANGED_BY_VERIFY_SPEC')).toBe('after')
+      expect(await envSeenByChild('ADDED_BY_VERIFY_SPEC')).toBe('new')
+    })
+
+    it('passes on everything when no environment is given', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      await start()
+
+      expect(await envSeenByChild('ELECTRON_RUN_AS_NODE')).toBe('1')
+    })
+
+    it('does not write the environment to the debug log', async () => {
+      const debugOutput: string[] = []
+
+      vi.spyOn(process.stderr, 'write').mockImplementation((chunk: any) => {
+        debugOutput.push(chunk.toString())
+
+        return true
+      })
+
+      vi.stubEnv('A_SECRET_FOR_VERIFY_SPEC', 'hunter2')
+      Debug.enable('cypress:cli')
+
+      try {
+        await start({ env: _.omit(process.env, 'ELECTRON_RUN_AS_NODE') })
+      } finally {
+        Debug.disable()
+      }
+
+      expect(debugOutput.join('')).toContain('verifying Cypress app with options')
+      expect(debugOutput.join('')).not.toContain('hunter2')
+    })
   })
 
   it('adds --no-sandbox when user is non-root', async () => {
