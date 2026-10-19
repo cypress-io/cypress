@@ -48,7 +48,6 @@ export function setupHooks (optionalCallback?: Function) {
     )
   })
 
-  // @ts-ignore
   Cypress.on('test:before:after:run:async', () => {
     optionalCallback?.()
   })

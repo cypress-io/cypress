@@ -15,7 +15,7 @@ describe('lib/util/socket_allowed', function () {
     it('adds localPort to allowed list and removes it when closed', () => {
       const socket = new EventEmitter as Socket
 
-      // @ts-ignore readonly
+      // @ts-expect-error - localPort is readonly
       socket.localPort = 12345
 
       const req = {

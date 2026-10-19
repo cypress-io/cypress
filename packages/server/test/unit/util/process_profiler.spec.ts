@@ -131,7 +131,7 @@ describe('lib/util/process_profiler', function () {
       vi.spyOn(browsers, 'getBrowserInstance').mockReturnValue({ pid: BROWSER_PID })
       vi.spyOn(plugins, 'getPluginPid').mockReturnValue(PLUGIN_PID)
 
-      // @ts-ignore
+      // @ts-expect-error - partial process list fixture
       const groupedProcesses = groupCyProcesses({ list: PROCESSES })
 
       const checkGroup = (pid, group) => {
@@ -167,7 +167,7 @@ describe('lib/util/process_profiler', function () {
       try {
         expect(plugins.getPluginPid()).toBeUndefined()
 
-        // @ts-ignore
+        // @ts-expect-error - partial process list fixture
         expect(() => groupCyProcesses({ list: PROCESSES })).not.toThrow()
       } finally {
         // restore a context so the afterEach teardown can run cleanly
@@ -194,7 +194,7 @@ describe('lib/util/process_profiler', function () {
         { group: 'FooBrowser', pid: 2 },
       ]
 
-      // @ts-ignore
+      // @ts-expect-error - partial process fixtures
       expect(_renameBrowserGroup(processes)).toStrictEqual(expected)
     })
   })
@@ -213,11 +213,11 @@ describe('lib/util/process_profiler', function () {
         return proc
       })
 
-      // @ts-ignore
+      // @ts-expect-error - partial process list fixture
       const result = _aggregateGroups(groupCyProcesses({ list: processes }))
 
       // main process will have variable pid, replace it w constant for snapshotting
-      // @ts-ignore
+      // @ts-expect-error - find may return undefined
       _.find(result, { pids: String(MAIN_PID) }).pids = '111111111'
 
       expect(result).toMatchSnapshot()

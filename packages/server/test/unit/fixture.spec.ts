@@ -101,6 +101,40 @@ describe('lib/fixture', () => {
     })
   })
 
+  describe('paths outside the fixtures folder', () => {
+    const expectOutsideFolderError = async (filePath: string, options?: Parameters<typeof fixture.get>[2]) => {
+      await expect(fixture.get(fixturesFolder, filePath, options)).rejects.toThrow(`Fixture path '${filePath}' must resolve to a file inside the fixtures folder`)
+    }
+
+    it('rejects a relative path that traverses out of the fixtures folder', async () => {
+      await expectOutsideFolderError('../test1.js')
+      await expectOutsideFolderError('../../cypress.config.js')
+    })
+
+    it('rejects a traversal path that omits the extension', async () => {
+      await expectOutsideFolderError('../test1')
+    })
+
+    it('rejects a path that resolves to the fixtures folder itself', async () => {
+      await expectOutsideFolderError('.')
+      await expectOutsideFolderError('nested/..')
+    })
+
+    it('rejects a traversal path when an encoding is passed', async () => {
+      await expectOutsideFolderError('../test1.js', { encoding: 'utf8' })
+    })
+
+    it('does not resolve extension matches that glob patterns expand outside the fixtures folder', async () => {
+      await expect(fixture.get(fixturesFolder, '{..,x}/test1')).rejects.toThrow('A fixture file could not be found')
+    })
+
+    it('allows a path that traverses within the fixtures folder', async () => {
+      const obj = await fixture.get(fixturesFolder, 'nested/../foo.json')
+
+      expect(obj).toStrictEqual([{ json: true }])
+    })
+  })
+
   describe('json files', () => {
     it('throws when json is invalid', () => {
       return fixture.get(fixturesFolder, 'bad_json.json')
