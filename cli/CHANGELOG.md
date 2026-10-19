@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- [`cy.request()`](https://on.cypress.io/request) is faster when the response has a JSON body, and the larger the body, the bigger the gain. A request with a 330 KB JSON response now takes about a third as long as before. The response it yields, including `allRequestResponses`, is unchanged. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- [`cy.request()`](https://on.cypress.io/request) is faster when the response has a JSON body, especially a large one. The response it yields, including `allRequestResponses`, is unchanged. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 
 **Bugfixes:**
 
