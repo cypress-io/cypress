@@ -155,6 +155,7 @@ export class SocketBase implements SocketBroadcaster {
       onMocha () {},
       onConnect () {},
       onRequest () {},
+      onCancelRequest () {},
       onResolveUrl () {},
       onFocusTests () {},
       onSpecChanged () {},
@@ -522,7 +523,9 @@ export class SocketBase implements SocketBroadcaster {
                 return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
               }
               case 'http:request':
-                return options.onRequest(userAgent, automationRequest, args[0])
+                return options.onRequest(userAgent, automationRequest, args[0], args[1])
+              case 'cancel:http:request':
+                return options.onCancelRequest(args[0])
               case 'reset:server:state':
                 return options.onResetServerState(args[0])
               case 'get:fixture':

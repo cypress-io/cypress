@@ -68,6 +68,16 @@ const needsFormSpecified = (options: any = {}) => {
   return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
 }
 
+let requestCount = 0
+
+// The primary driver and each cy.origin spec bridge count independently, so the
+// random part keeps their ids from colliding on the shared server
+const createRequestId = () => {
+  requestCount += 1
+
+  return `cy-request-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${requestCount}`
+}
+
 interface BackendError {
   backend: boolean
   message?: string
@@ -376,7 +386,18 @@ export default (Commands, Cypress, cy, state, config) => {
         }
       })
       .then(() => {
-        return Cypress.backend('http:request', requestOpts)
+        const requestId = createRequestId()
+
+        // `.timeout()` and a cancelled command both cancel this promise, which
+        // tells the server to abort the request so a late response can't touch
+        // the browser
+        return new Promise<any>((resolve, reject, onCancel) => {
+          Cypress.backend('http:request', requestOpts, requestId).then(resolve, reject)
+
+          onCancel?.(() => {
+            Promise.try(() => Cypress.backend('cancel:http:request', requestId)).catch(_.noop)
+          })
+        })
       })
       .timeout(options.timeout)
       .then((response) => {

@@ -452,6 +452,36 @@ describe('lib/socket', () => {
           })
         })
       })
+
+      it('forwards the request id', () => {
+        return new Promise<void>((done) => {
+          options.onRequest = vi.fn().mockResolvedValue({ foo: 'bar' })
+
+          return client.emit('backend:request', 'http:request', { url: 'http://foo.com' }, 'request-id-1', () => {
+            const [, , requestOpts, requestId] = options.onRequest.mock.calls[0]
+
+            expect(requestOpts).toStrictEqual({ url: 'http://foo.com' })
+            expect(requestId).toBe('request-id-1')
+
+            return done()
+          })
+        })
+      })
+    })
+
+    describe('on(backend:request, cancel:http:request)', () => {
+      it('calls options.onCancelRequest with the request id', () => {
+        return new Promise<void>((done) => {
+          options.onCancelRequest = vi.fn()
+
+          return client.emit('backend:request', 'cancel:http:request', 'request-id-1', (resp) => {
+            expectCalledWith(options.onCancelRequest, 'request-id-1')
+            expect(resp.response).toBeUndefined()
+
+            return done()
+          })
+        })
+      })
     })
 
     describe('on(backend:request, reset:server:state)', () => {

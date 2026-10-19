@@ -41,6 +41,36 @@ const createApp = (port) => {
     res.end(req.method)
   })
 
+  // sends a Set-Cookie with the headers at once, then trickles the body for `ms`,
+  // so a client that gives up early has already seen the cookie it must not set.
+  // Registered ahead of compression(), which would hold the headers back until the
+  // gzip stream flushes
+  app.get('/set-cookie-then-trickle', (req: QueryRequest, res) => {
+    const ms = Number(req.query.ms) || 2000
+    const chunkEvery = 100
+    let chunksLeft = Math.ceil(ms / chunkEvery)
+
+    res.writeHead(200, {
+      'Set-Cookie': `${req.query.name || 'late'}=1; Path=/`,
+      'Content-Type': 'text/plain',
+    })
+
+    res.flushHeaders()
+
+    const interval = setInterval(() => {
+      if (res.destroyed) {
+        return clearInterval(interval)
+      }
+
+      res.write('.')
+
+      if (--chunksLeft === 0) {
+        clearInterval(interval)
+        res.end()
+      }
+    }, chunkEvery)
+  })
+
   app.use(cors())
   app.use(cookieParser())
   app.use(compression())

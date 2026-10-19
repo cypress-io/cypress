@@ -818,6 +818,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
+    options.onCancelRequest = (requestId: string) => this.request.cancel(requestId)
     options.interceptRegistration = new DriverInterceptRegistrationAdapter({
       state: this.netStubbingState,
       socket: this.socket,
@@ -944,8 +945,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onRequest (userAgent, automationRequest, options) {
-    return this.request.sendPromise(userAgent, automationRequest, options)
+  _onRequest (userAgent, automationRequest, options, requestId?: string) {
+    return this.request.sendPromise(userAgent, automationRequest, options, requestId)
   }
 
   _callRequestListeners (server, listeners, req, res) {

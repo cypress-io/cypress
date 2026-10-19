@@ -739,6 +739,129 @@ describe('src/cy/commands/request', () => {
       })
     })
 
+    describe('cancellation', () => {
+      it('sends the server a request id', () => {
+        backend
+        .withArgs('http:request')
+        .resolves({ isOkStatusCode: true, status: 200 })
+
+        cy.request('http://www.foo.com').then(() => {
+          expect(backend.withArgs('http:request').firstCall.args[2]).to.be.a('string').and.match(/^cy-request-/)
+        })
+      })
+
+      it('does not cancel a request that completes in time', () => {
+        backend
+        .withArgs('http:request')
+        .resolves({ isOkStatusCode: true, status: 200 })
+
+        cy.request('http://www.foo.com').then(() => {
+          return Promise.delay(50)
+        }).then(() => {
+          expect(backend).not.to.be.calledWith('cancel:http:request')
+        })
+      })
+
+      it('cancels the server-side request with the same id when it times out', (done) => {
+        backend
+        .withArgs('http:request')
+        .returns(new Promise(() => {}))
+
+        // stubbed so the real server never sees this cancel
+        backend
+        .withArgs('cancel:http:request')
+        .resolves()
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('timed out waiting `50ms`')
+
+          // Bluebird runs cancellation callbacks asynchronously
+          Promise.delay(10).then(() => {
+            const requestId = backend.withArgs('http:request').firstCall.args[2]
+
+            expect(backend.withArgs('cancel:http:request')).to.be.calledOnce
+            expect(backend.withArgs('cancel:http:request')).to.be.calledWithExactly('cancel:http:request', requestId)
+
+            done()
+          })
+        })
+
+        cy.request({ url: 'http://localhost:1234/foo', timeout: 50 })
+      })
+
+      context('when the command is cancelled while the request is in flight', () => {
+        let canceledRequestId: string | undefined
+        let sentRequestId: string | undefined
+
+        const recordCancel = (eventName: string, requestId: string) => {
+          if (eventName === 'cancel:http:request') {
+            canceledRequestId = requestId
+          }
+        }
+
+        it('test ends early', (done) => {
+          Cypress.on('backend:request', recordCancel)
+
+          backend
+          .withArgs('http:request')
+          .callsFake((eventName, opts, requestId) => {
+            sentRequestId = requestId
+            // ending the test cancels the in-flight cy.request
+            setTimeout(done)
+
+            return new Promise(() => {})
+          })
+
+          cy.request({ url: 'http://localhost:1234/foo', timeout: 10000 })
+        })
+
+        it('cancels the server-side request', () => {
+          Cypress.off('backend:request', recordCancel)
+
+          expect(sentRequestId).to.be.a('string')
+          expect(canceledRequestId).to.eq(sentRequestId)
+        })
+      })
+
+      // a retry of the last test would run after the late response, so it could only pass
+      context('against a real server', { retries: 0 }, () => {
+        it('still fails with request.timed_out when the server never responds', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.request()` timed out waiting `200ms` for a response from your server.')
+            expect(err.message).to.include('No response was received within the timeout.')
+
+            done()
+          })
+
+          cy.request({ url: 'http://localhost:3500/timeout?ms=1000', timeout: 200 })
+        })
+
+        // a late response used to set its cookies after the next test's isolation had already cleared them
+        it('times out while the response is still arriving', () => {
+          // swallowing the failure, rather than ending the test with `done`, lets the
+          // next test start while the response is still arriving
+          cy.on('fail', (err) => {
+            if (!err.message.includes('timed out waiting `500ms`')) {
+              throw err
+            }
+          })
+
+          cy.request({ url: 'http://localhost:3500/set-cookie-then-trickle?ms=2500&name=late-request-cookie', timeout: 500 })
+        })
+
+        it('never sets the cookies of the request that timed out', () => {
+          // without the fix, the trickle above finishes during this wait and its
+          // cookie lands after this test's isolation already cleared cookies
+          cy.wait(3000)
+
+          // getAllCookies, since getCookies leaves out cookies on the test server's domain
+          cy.getAllCookies().then((cookies) => {
+            expect(_.map(cookies, 'name')).not.to.include('late-request-cookie')
+          })
+        })
+      })
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {

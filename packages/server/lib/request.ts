@@ -19,8 +19,21 @@ const VERBOSE_REQUEST_OPTS = 'followRedirect strictSSL'.split(' ')
 const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket timeout upgrade'.split(' ')
 const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
+// The driver's timer starts before the request reaches us, so this deadline always
+// fires after the driver has given up. The grace period leaves room for its cancel
+// message to arrive first; the deadline only matters when that message is lost.
+const ABANDON_GRACE_MS = 5000
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+export class RequestAbandonedError extends Error {
+  readonly isRequestAbandoned = true
+
+  constructor (reason: string) {
+    super(`The request was abandoned: ${reason}`)
+    this.name = 'RequestAbandonedError'
+  }
+}
 
 const convertSameSiteToughToExtension = (sameSite, setCookie) => {
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
@@ -163,6 +176,7 @@ interface RetryCallbackOptions {
 export class Request {
   private r: typeof cypressRequest
   rp: typeof cypressRequestPromise
+  private inFlight = new Map<string, AbortController>()
 
   constructor (options: { timeout?: number } = {}) {
     const defaults = {
@@ -418,7 +432,7 @@ export class Request {
     })
   }
 
-  private createRetryingRequestPromise (opts) {
+  private createRetryingRequestPromise (opts, signal?: AbortSignal) {
     const {
       requestId,
       retryIntervals,
@@ -429,14 +443,29 @@ export class Request {
 
     const self = this
 
+    if (signal?.aborted) {
+      return Promise.reject(signal.reason)
+    }
+
     const retry = ({ delay }) => {
       return Promise.delay(delay)
       .then(() => {
-        return this.createRetryingRequestPromise(opts)
+        return this.createRetryingRequestPromise(opts, signal)
       })
     }
 
-    return this.rp(opts)
+    const req = this.rp(opts)
+    const abortReq = () => {
+      debug('aborting abandoned request %o', { requestId })
+      req.abort()
+    }
+
+    signal?.addEventListener('abort', abortReq, { once: true })
+
+    return req
+    .finally(() => {
+      signal?.removeEventListener('abort', abortReq)
+    })
     .catch((err) => {
       // rp wraps network errors in a RequestError, so might need to unwrap it to check
       return this.maybeRetryOnNetworkFailure(err.error || err, {
@@ -561,7 +590,7 @@ export class Request {
     })
   }
 
-  private setCookiesOnBrowser (res: any, resUrl: string, automationFn: AutomationFn): Promise<any> {
+  private setCookiesOnBrowser (res: any, resUrl: string, automationFn: AutomationFn, signal?: AbortSignal): Promise<any> {
     let cookies = res.headers['set-cookie']
 
     if (!cookies) {
@@ -578,6 +607,12 @@ export class Request {
     debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
 
     return Promise.map(cookies as string[], (cyCookie) => {
+      if (signal?.aborted) {
+        debug('request was abandoned, not setting cookie %o', { cyCookie })
+
+        return
+      }
+
       let cookie: any = tough.Cookie.parse(cyCookie, { loose: true } as tough.Cookie.ParseOptions)
 
       debug('parsing cookie %o', { cyCookie, toughCookie: cookie })
@@ -627,7 +662,7 @@ export class Request {
     })
   }
 
-  create (strOrOpts: string | RequestOpts, promise?: boolean) {
+  create (strOrOpts: string | RequestOpts, promise?: boolean, signal?: AbortSignal) {
     let opts
 
     if (_.isString(strOrOpts)) {
@@ -641,7 +676,7 @@ export class Request {
     opts = Request.setDefaults(opts)
 
     if (promise) {
-      return this.createRetryingRequestPromise(opts)
+      return this.createRetryingRequestPromise(opts, signal)
     }
 
     return this.createRetryingRequestStream(opts)
@@ -703,7 +738,26 @@ export class Request {
     })
   }
 
-  sendPromise (userAgent: string, automationFn: AutomationFn, options: RequestOpts = {}) {
+  /**
+   * Abandons the in-flight `sendPromise` registered under `requestId`: its socket is
+   * closed, no further retry or redirect starts, and no cookies reach the browser.
+   * Unknown or already-settled ids are ignored.
+   */
+  cancel (requestId: string) {
+    const controller = this.inFlight.get(requestId)
+
+    if (!controller) {
+      debug('ignoring cancel for unknown request %o', { requestId })
+
+      return
+    }
+
+    debug('cancelling request %o', { requestId })
+    this.inFlight.delete(requestId)
+    controller.abort(new RequestAbandonedError('the command that sent it was cancelled'))
+  }
+
+  sendPromise (userAgent: string, automationFn: AutomationFn, options: RequestOpts = {}, requestId?: string) {
     _.defaults(options, {
       headers: {},
       gzip: true,
@@ -770,7 +824,27 @@ export class Request {
 
     const self = this
 
+    const controller = new AbortController()
+    const { signal } = controller
+
+    if (requestId) {
+      this.inFlight.set(requestId, controller)
+    }
+
+    const deadline = options.timeout ? setTimeout(() => {
+      debug('request passed its deadline without a cancel %o', { requestId, timeout: options.timeout })
+      controller.abort(new RequestAbandonedError(`no cancel arrived within ${options.timeout + ABANDON_GRACE_MS}ms`))
+    }, options.timeout + ABANDON_GRACE_MS) : undefined
+
+    const throwIfAbandoned = () => {
+      if (signal.aborted) {
+        throw signal.reason
+      }
+    }
+
     const send = () => {
+      throwIfAbandoned()
+
       const ms = Date.now()
 
       const redirects: string[] = []
@@ -784,6 +858,12 @@ export class Request {
 
       if (options.followRedirect) {
         options.followRedirect = function (incomingRes) {
+          // @cypress/request starts the next hop whenever this resolves truthy,
+          // even after the request was aborted
+          if (signal.aborted) {
+            return false
+          }
+
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
           // normalize the url
@@ -795,10 +875,14 @@ export class Request {
           // we need to override the init method and
           // first set the new cookies on the browser
           // and then grab the cookies for the new url
-          return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn)
+          return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn, signal)
           .then(() => {
-            return self.setRequestCookieHeader(this, newUrl, automationFn)
+            return signal.aborted ? undefined : self.setRequestCookieHeader(this, newUrl, automationFn)
           }).then(() => {
+            if (signal.aborted) {
+              return false
+            }
+
             currentUrl = newUrl
 
             return true
@@ -806,9 +890,11 @@ export class Request {
         }
       }
 
-      return this.create(options, true)
+      return this.create(options, true, signal)
       .then(this.normalizeResponse.bind(this, push))
       .then((resp) => {
+        throwIfAbandoned()
+
         resp.duration = Date.now() - ms
         resp.allRequestResponses = requestResponses
 
@@ -822,16 +908,27 @@ export class Request {
           resp.redirectedToUrl = url.resolve(options.url!, resp.headers.location)
         }
 
-        return this.setCookiesOnBrowser(resp, currentUrl!, automationFn)
+        return this.setCookiesOnBrowser(resp, currentUrl!, automationFn, signal)
         .return(resp)
       })
     }
 
-    if (options.cookies) {
-      return self.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
-      .then(send)
-    }
+    const sent = options.cookies
+      ? Promise.resolve(self.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))).then(send)
+      : Promise.try(send)
 
-    return send()
+    // settle as soon as the request is abandoned, without waiting on the aborted
+    // work; attaching to `sent` here also keeps its later rejection handled
+    return new Promise((resolve, reject) => {
+      signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+      sent.then(resolve, reject)
+    })
+    .finally(() => {
+      clearTimeout(deadline)
+
+      if (requestId && this.inFlight.get(requestId) === controller) {
+        this.inFlight.delete(requestId)
+      }
+    })
   }
 }
