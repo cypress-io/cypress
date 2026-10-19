@@ -166,8 +166,8 @@ describe('request-response', () => {
     expect(compacted.allRequestResponses[0]['Response Body']).toBe('first hop')
   })
 
-  // The socket serializer keeps shared references intact but sends each binary
-  // value as its own attachment, so these mirror what the browser received before
+  // These match how an uncompacted response reaches the browser: the socket
+  // serializer copies each binary value but keeps other shared references
   it('gives an expanded binary body its own copy', () => {
     const buffer = new Uint8Array([1, 2, 3]).buffer
     const binary = expandHttpResponse({ allRequestResponses: [entry(buffer)], [HTTP_RESPONSE_BODY_HINT]: 'raw' }) as Record<string, any>

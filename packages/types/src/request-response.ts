@@ -1,4 +1,4 @@
-// A `cy.request` response carries its body twice: as `body`, and as the raw
+// A `cy.request` response holds its body twice: as `body`, and as the raw
 // `'Response Body'` of the final `allRequestResponses` entry. The server sends
 // only the raw copy over the socket, plus a hint telling the driver how its own
 // `body` was derived from it, and the driver rebuilds `body` on arrival.
@@ -31,10 +31,6 @@ const isBodyHint = (value: unknown): value is BodyHint => {
   return value === 'raw' || value === 'json'
 }
 
-/**
- * Drops `body` from a `cy.request` response before it crosses the socket.
- * Anything that isn't a full response is returned unchanged.
- */
 export function compactHttpResponse<T> (resp: T): T {
   if (!isPlainObject(resp) || !Object.prototype.hasOwnProperty.call(resp, 'body')) {
     return resp
@@ -65,10 +61,7 @@ export function compactHttpResponse<T> (resp: T): T {
   return { ...rest, [HTTP_RESPONSE_BODY_HINT]: hint } as T
 }
 
-/**
- * Restores the `body` that `compactHttpResponse` dropped, so the response
- * deep-equals what the server built. Uncompacted responses are returned unchanged.
- */
+// Leaves uncompacted responses alone, such as the ones specs stub `Cypress.backend` with
 export function expandHttpResponse<T> (resp: T): T {
   if (!isPlainObject(resp) || !isBodyHint(resp[HTTP_RESPONSE_BODY_HINT])) {
     return resp
@@ -91,8 +84,9 @@ export function expandHttpResponse<T> (resp: T): T {
 
     body = JSON.parse(raw)
   } else if (isBinary(raw)) {
-    // The socket serializer preserves shared references but sends every binary
-    // value as its own attachment, so binary bodies always arrived as a separate copy
+    // The socket serializer keeps shared references but sends each binary value
+    // as its own attachment. An uncompacted response therefore reaches the
+    // browser with a binary body copied and any other body shared, so match that.
     body = structuredClone(raw)
   } else {
     body = raw

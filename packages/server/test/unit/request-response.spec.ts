@@ -23,7 +23,7 @@ const shapes: { name: string, send: () => Promise<any> }[] = [
   {
     name: 'JSON that parses',
     send: () => {
-      // Formatting the server's parse would not preserve, to prove the raw text survives
+      // `1.0` and the oversized integer change if parsed and re-serialized, so they show the raw text is kept as-is
       nock('http://localhost:1234').get('/').reply(200, '{ "a": 1.0, "big": 12345678901234567890, "b": [1, 2] }', { 'Content-Type': 'application/json' })
 
       return request.sendPromise({}, automationFn, { url: 'http://localhost:1234/', cookies: false })
