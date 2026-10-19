@@ -9,6 +9,7 @@ describe('e2e issue 6619', () => {
   systemTests.it('can reload during spec run', {
     spec: 'reload.spec.js',
     snapshot: true,
-    timeout: 30000,
+    // Firefox open-mode reload simulation can exceed 30s under CI load.
+    timeout: 120000,
   })
 })
