@@ -30,7 +30,7 @@ vi.mock('systeminformation', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       osInfo: vi.fn(),
     },
@@ -42,7 +42,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
       arch: vi.fn(),
@@ -59,7 +59,7 @@ vi.mock('readline', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       createInterface: vi.fn(),
     },
@@ -70,10 +70,10 @@ vi.mock('process', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual returns unknown, which cannot be spread
     ...actual,
     stdin: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .stdin is untyped
       ...actual.stdin,
       on: vi.fn(),
       emit: vi.fn(),
@@ -82,15 +82,15 @@ vi.mock('process', async (importActual) => {
     },
     stdout: vi.fn(),
     stderr: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .stderr is untyped
       ...actual.stderr,
       write: vi.fn(),
     },
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       stdin: {
-        // @ts-expect-error
+        // @ts-expect-error - importActual returns unknown, so .default is untyped
         ...actual.default.stdin,
         on: vi.fn(),
         emit: vi.fn(),
@@ -99,7 +99,7 @@ vi.mock('process', async (importActual) => {
       },
       stdout: vi.fn(),
       stderr: {
-        // @ts-expect-error
+        // @ts-expect-error - importActual returns unknown, so .default is untyped
         ...actual.default.stderr,
         write: vi.fn(),
       },
@@ -113,7 +113,7 @@ vi.mock('child_process', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       spawn: vi.fn(),
     },
@@ -125,7 +125,7 @@ vi.mock('tty', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       isatty: vi.fn(),
     },
@@ -150,7 +150,7 @@ vi.mock('../../../lib/exec/xvfb', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
       stop: vi.fn(),
@@ -164,7 +164,7 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getBinaryDir: vi.fn(),
       getPathToExecutable: vi.fn(),
@@ -183,7 +183,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       supportsColor: vi.fn(),
     },

@@ -11,6 +11,13 @@ export default [
     },
   },
   {
+    // Type tests declare values only so the type checker can assert on them
+    files: ['types/tests/**'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+  {
     ignores: [
       '**/__snapshots__',
       '**/build/**/*',

@@ -9,7 +9,7 @@ export interface DestroyableHttpServer extends http.Server {
   destroyAsync (): Promise<void>
 }
 
-export const allowDestroy = (server) => {
+export const allowDestroy = (server): DestroyableHttpServer => {
   allowDestroyNetwork(server)
 
   server.destroyAsync = () => {

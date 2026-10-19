@@ -16,7 +16,7 @@ import { PUBLIC_KEY_VERSION } from '../constants'
 import { createStreamingSignatureVerifier } from '../encryption'
 import type { BundleErrorStage, BundleKind } from './bundle_error'
 import { BundleError } from './bundle_error'
-import { isInsideDir } from './is_inside_dir'
+import { isInsideDir } from '@packages/data-context/src/util/isInsideDir'
 
 const pkg = require('@packages/root')
 

@@ -759,7 +759,7 @@ describe('lib/browsers/cdp_automation', () => {
           },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
@@ -838,7 +838,7 @@ describe('lib/browsers/cdp_automation', () => {
           },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
@@ -874,7 +874,7 @@ describe('lib/browsers/cdp_automation', () => {
           },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
@@ -927,7 +927,7 @@ describe('lib/browsers/cdp_automation', () => {
             },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
@@ -960,7 +960,7 @@ describe('lib/browsers/cdp_automation', () => {
             },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
@@ -999,7 +999,7 @@ describe('lib/browsers/cdp_automation', () => {
             },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
@@ -1045,7 +1045,7 @@ describe('lib/browsers/cdp_automation', () => {
           },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
@@ -1085,7 +1085,7 @@ describe('lib/browsers/cdp_automation', () => {
           },
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - executionContexts is private and the context is a partial stub
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',

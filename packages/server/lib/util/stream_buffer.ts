@@ -109,7 +109,6 @@ export function streamBuffer (initialSize = 2048) {
 
       const readable = new stream.Readable({
         read: onRead,
-        // @ts-ignore
         autoDestroy: true,
       })
 
@@ -135,7 +134,6 @@ export function streamBuffer (initialSize = 2048) {
   const writeable = new StreamBuffer({
     write: onWrite,
     final: onFinal,
-    // @ts-ignore
     autoDestroy: true,
   })
 

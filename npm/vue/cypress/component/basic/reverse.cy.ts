@@ -15,7 +15,7 @@ describe.skip('Handling User Input', () => {
   }
 
   const methods = {
-    reverseMessage () {
+    reverseMessage (this: { message: string }) {
       this.message = this.message.split('').reverse().join('')
     },
   }

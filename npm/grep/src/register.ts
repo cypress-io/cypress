@@ -3,7 +3,6 @@
 import { parseGrep, shouldTestRun } from './utils'
 import { version } from '../package.json'
 import debug from 'debug'
-// @ts-ignore
 const debugInstance = debug('@cypress/grep')
 
 debugInstance.log = console.info.bind(console)

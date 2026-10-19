@@ -38,7 +38,7 @@ describe('Card', () => {
   it('renders scopedSlots', () => {
     mount(Card, {
       slots: {
-        default: ({ content }) => h('div', {}, h('p', `Yay! ${content}`)),
+        default: ({ content }: { content: string }) => h('div', {}, h('p', `Yay! ${content}`)),
       },
     })
 
