@@ -98,7 +98,7 @@ describe('test isolation blank page', { testIsolation: true, retries: 0 }, () =>
 
   it('touches the page with a plugin-style render into the blank page', () => {
     expectSameBlankPage()
-    // only allowlisted commands run, so the DOM change alone must be noticed
+    // Only allowlisted commands run, so the DOM change alone must be noticed
     cy.then(() => {
       Cypress.$(cy.state('document').body).append('<div id="plugin-ui">plugin</div>')
     })

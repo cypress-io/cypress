@@ -73,10 +73,9 @@ export class TestIsolationPage {
       return
     }
 
-    // Anything Cypress itself renders into the blank page, such as a native
-    // view of API responses, also counts as a mutation here and forces a full
-    // reset. A feature like that has to render outside this document or
-    // record the page again once it has rendered.
+    // Anything Cypress itself renders into the blank page counts as a mutation
+    // too and forces a full reset, so a feature that renders there has to use
+    // a separate document or record the page again once it has rendered.
     this.observer = new MutationObserver(() => {
       this.touched = true
     })
