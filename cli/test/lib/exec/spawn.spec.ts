@@ -587,6 +587,36 @@ describe('lib/exec/spawn', function () {
         // second code should be 0 after successfully running with Xvfb
         expect(code).toEqual(0)
       })
+
+      it('retries with xvfb if electron reports a missing X server', async () => {
+        // mock display missing
+        spawnedProcess.stderr.on.mockImplementation((event, callback) => {
+          if (event === 'data') {
+            callback('[some noise here] Missing X server or $DISPLAY')
+          }
+        })
+
+        vi.mocked(os.platform).mockReturnValue('linux')
+
+        const startPromise = start('--foo')
+
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+        // mock display error due to missing display
+        spawnedProcess.emit('close', 1)
+
+        // mock the process actually starting up after xfvb is started
+        await flushPromises()
+
+        spawnedProcess.emit('close', 0)
+
+        const code = await startPromise
+
+        expect(xvfb.start).toHaveBeenCalledOnce()
+        expect(xvfb.stop).toHaveBeenCalledOnce()
+        expect(cp.spawn).toHaveBeenCalledTimes(2)
+        // second code should be 0 after successfully running with Xvfb
+        expect(code).toEqual(0)
+      })
     })
 
     it('rejects with error from spawn', async () => {

@@ -676,6 +676,45 @@ describe('lib/tasks/verify', () => {
       ))
     })
 
+    it('retries with our Xvfb on Linux when the X server is missing', async () => {
+      // initially we think the user has everything set
+      vi.mocked(xvfb.isNeeded).mockReturnValue(false)
+      vi.mocked(util.isPossibleLinuxWithIncorrectDisplay).mockReturnValue(true)
+      // @ts-expect-error - mock args
+      vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
+        const firstSpawnError: any = new Error('')
+
+        // this message contains Electron error shown if X11 is incorrect
+        // like in the case of DISPLAY=987
+        firstSpawnError.stderr = stripIndent`
+            [some noise here] Missing X server or $DISPLAY
+              and maybe a few other lines here with weird indent
+          `
+
+        firstSpawnError.stdout = ''
+
+        // the second time the binary returns expected ping
+        // @ts-expect-error - mock args
+        vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
+          if (args[0] === executablePath) {
+            return Promise.resolve({
+              stdout: '222',
+            })
+          }
+        })
+
+        return Promise.reject(firstSpawnError)
+      })
+
+      await start()
+
+      expect(util.exec).toHaveBeenCalledTimes(2)
+      // user should have been warned
+      expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining(
+        'This is likely due to a misconfigured DISPLAY environment variable.',
+      ))
+    })
+
     it('fails on both retries with our Xvfb on Linux', async () => {
       // initially we think the user has everything set
       vi.mocked(xvfb.isNeeded).mockReturnValue(false)
