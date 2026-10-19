@@ -50,7 +50,8 @@ export async function start (): Promise<any> {
       throw e
     }
 
-    const raiseErrorFn = throwFormErrorText(errors.missingXvfb)
+    // Only a binary that is not there is a missing dependency
+    const raiseErrorFn = throwFormErrorText(e.code === 'ENOENT' ? errors.missingXvfb : errors.xvfbFailedToStart)
 
     await raiseErrorFn(e)
   }
