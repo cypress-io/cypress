@@ -17,7 +17,7 @@
 
 **Dependency Updates:**
 
-- Upgraded `undici` from `6.28.0` to `6.29.1` to address an [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-UNDICI-21181005) vulnerability reported in security scans. `undici` is a transitive dependency of `webdriver`. Addressed in [#35087](https://github.com/cypress-io/cypress/pull/35087).
+- Upgraded `undici` from `6.28.0` to `6.29.1` to address an [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-UNDICI-21181005) vulnerability reported in security scans. Addressed in [#35087](https://github.com/cypress-io/cypress/pull/35087).
 
 ## 16.2.0
 
