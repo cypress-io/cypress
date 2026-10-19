@@ -7,8 +7,8 @@ import Debug from 'debug'
 const debugVerbose = Debug('cypress-verbose:server:socket:cdp-socket')
 
 // Runs in the browser with the namespace and encoded payload passed as call
-// arguments, so the payload is never escaped into script source or compiled.
-// The browser socket may not be installed yet; such messages are dropped.
+// arguments, so a large payload travels as a value and is never compiled as
+// script. The browser socket may not be installed yet; such messages are dropped.
 export const DELIVER_TO_BROWSER_SOCKET = `function (namespace, payload) {
   var socket = window['cypressSocket-' + namespace]
   if (socket && socket.send) {

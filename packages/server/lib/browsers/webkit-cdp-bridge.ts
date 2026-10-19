@@ -90,7 +90,6 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
         const pageFunction = this.pageFunctionFor(params.functionDeclaration!)
         const args = (params.arguments ?? []).map((arg) => arg.value)
 
-        // the arguments travel as Playwright's serialized evaluate argument, not as script source
         return this.enqueue(() => frame.evaluate(pageFunction, args))
       }
 

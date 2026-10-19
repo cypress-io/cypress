@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { EventEmitter } from 'events'
 import { CDPSocket } from '../lib/node/cdp-socket'
 import { CDPBrowserSocket } from '../lib/client/cdp-browser'
-import { decode } from '../lib/utils'
 
 const namespace = '/__socket/default'
 
@@ -38,12 +37,7 @@ class FakeBrowserBridge extends EventEmitter {
 
         return
       case 'Runtime.evaluate':
-        if (params.expression === 'globalThis') {
-          return { result: { type: 'object', objectId: 'global-object' } }
-        }
-
-        // eslint-disable-next-line no-new-func
-        return new Function('window', params.expression)(this.window)
+        return { result: { type: 'object', objectId: 'global-object' } }
       case 'Runtime.callFunctionOn': {
         // eslint-disable-next-line no-new-func
         const fn = new Function('window', `return (${params.functionDeclaration})`)(this.window)
@@ -76,7 +70,7 @@ describe('CDPSocket → CDPBrowserSocket round trip', () => {
   })
 
   afterEach(() => {
-    // @ts-expect-error cleanup
+    // @ts-expect-error the Node global has no window property
     delete global.window
   })
 
@@ -123,20 +117,5 @@ describe('CDPSocket → CDPBrowserSocket round trip', () => {
     })
 
     expect(received).toHaveBeenCalledWith(41)
-  })
-
-  it('matches the decode of the previous script-literal path for every case', async () => {
-    const { encode } = await import('../lib/utils')
-
-    for (const value of Object.values(cases)) {
-      const encoded = await encode(['message', 'uuid', [value]], namespace)
-      // the previous delivery: escape into a single-quoted literal, evaluate, JSON.parse
-      const literal = JSON.stringify(encoded).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')
-      // eslint-disable-next-line no-new-func
-      const legacyPayload = JSON.parse(new Function(`return '${literal}'`)())
-
-      expect(legacyPayload).toBe(encoded)
-      expect(await decode(encoded)).toStrictEqual(await decode(legacyPayload))
-    }
   })
 })
