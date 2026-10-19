@@ -3,12 +3,14 @@
   "version": "0.0.0-development",
   "description": "Official Cypress schematic for the Angular CLI",
   "keywords": [
-    "schematics",
     "cypress",
-    "e2e",
-    "testing",
     "angular",
-    "automation"
+    "angular-cli",
+    "schematics",
+    "ng-add",
+    "e2e",
+    "component-testing",
+    "testing"
   ],
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/cypress-schematic#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",

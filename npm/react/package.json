@@ -3,11 +3,13 @@
   "version": "0.0.0-development",
   "description": "Test React components using Cypress",
   "keywords": [
-    "react",
     "cypress",
-    "cypress-io",
-    "test",
-    "testing"
+    "react",
+    "component-testing",
+    "react-testing",
+    "testing",
+    "react-component",
+    "jsx"
   ],
   "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/react/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Freact&template=1-bug-report.md&title=",

@@ -5,8 +5,10 @@
   "keywords": [
     "cypress",
     "svelte",
-    "testing",
-    "component testing"
+    "svelte5",
+    "component-testing",
+    "svelte-testing",
+    "testing"
   ],
   "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/svelte/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fsvelte&template=1-bug-report.md&title=",

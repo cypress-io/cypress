@@ -4,7 +4,14 @@
   "description": "Filter tests using substring",
   "keywords": [
     "cypress",
-    "grep"
+    "cypress-plugin",
+    "grep",
+    "filter",
+    "tags",
+    "test-tags",
+    "test-filtering",
+    "burn",
+    "flaky-tests"
   ],
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/grep#readme",
   "bugs": {

@@ -4,7 +4,12 @@
   "description": "Browser-based Component Testing for Vue.js with Cypress.io",
   "keywords": [
     "cypress",
-    "vue"
+    "vue",
+    "vue3",
+    "component-testing",
+    "vue-testing",
+    "testing",
+    "sfc"
   ],
   "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/vue/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",

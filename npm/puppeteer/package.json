@@ -3,6 +3,15 @@
   "version": "0.0.0-development",
   "private": false,
   "description": "Plugin for enhancing Cypress tests with Puppeteer",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "puppeteer",
+    "chrome",
+    "chromium",
+    "browser-automation",
+    "multi-tab"
+  ],
   "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/puppeteer/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fpuppeteer&template=1-bug-report.md&title=",
   "repository": {

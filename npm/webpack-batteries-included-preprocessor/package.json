@@ -7,7 +7,10 @@
     "cypress",
     "cypress-plugin",
     "cypress-preprocessor",
-    "webpack"
+    "webpack",
+    "typescript",
+    "babel",
+    "preprocessor"
   ],
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-batteries-included-preprocessor#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20webpack-batteries-included-preprocessor&template=1-bug-report.md&title=",
