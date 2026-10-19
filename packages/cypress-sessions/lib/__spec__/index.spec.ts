@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   isCompatibleRecord,
+  isStartingRecord,
   isTapSupportedBrowser,
   recordFileName,
   parseRecordPid,
@@ -40,6 +41,32 @@ describe('cypress-sessions contract', () => {
       expect(isCompatibleRecord({ ...validRecord, serverPort: 1.5 })).toBe(false)
       expect(isCompatibleRecord({ ...validRecord, sessionId: '' })).toBe(false)
       expect(isCompatibleRecord({ ...validRecord, testingType: 'nope' })).toBe(false)
+    })
+  })
+
+  describe('a starting record', () => {
+    const starting = { ...validRecord, serverPort: 0, status: 'starting' as const, loadError: { message: 'boom' } }
+
+    it('is accepted with no server port and a load error', () => {
+      expect(isCompatibleRecord(starting)).toBe(true)
+    })
+
+    it('must say why the project did not load', () => {
+      expect(isCompatibleRecord({ ...starting, loadError: undefined })).toBe(false)
+    })
+
+    it('is told apart from a session that has a server', () => {
+      expect(isStartingRecord(starting)).toBe(true)
+      expect(isStartingRecord(validRecord)).toBe(false)
+    })
+
+    it('is the only record that may name port 0', () => {
+      expect(isCompatibleRecord({ ...validRecord, serverPort: 0 })).toBe(false)
+    })
+
+    it('rejects an unknown status or a load error without a message', () => {
+      expect(isCompatibleRecord({ ...starting, status: 'ready' })).toBe(false)
+      expect(isCompatibleRecord({ ...starting, loadError: {} })).toBe(false)
     })
   })
 
