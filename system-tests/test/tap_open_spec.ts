@@ -2,6 +2,7 @@
 // and needs none of systemTests.it's spawn/snapshot machinery or its global setup.
 import { expect } from 'chai'
 import path from 'path'
+import fs from 'fs-extra'
 import stripAnsi from 'strip-ansi'
 import { TAP_ERROR_COPY } from '@packages/cypress-sessions'
 import type { TapErrorCopy } from '@packages/cypress-sessions'
@@ -964,6 +965,41 @@ describe('tap CLI against a session an AI agent opened with the welcome screen u
     const status = await session.runSpec(SPEC)
 
     expect(status.status).to.eq('passed')
+  })
+})
+
+/**
+ * In a project with no Cypress configuration, open mode creates the configuration and
+ * support files and then waits for a person to press Continue in the Launchpad before it
+ * loads them. An AI agent running `cypress open --e2e` has no one to press it, so it
+ * continues on its own: one launch is enough for a session to register.
+ */
+describe('tap CLI against a session an AI agent opened in a project with no Cypress configuration', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: TapSession
+
+  before(async () => {
+    session = await openTapSession('pristine', {
+      seedWelcome: false,
+      env: { CLAUDECODE: '1', CYPRESS_AGENT_MODE: undefined },
+    })
+  })
+
+  after(async () => {
+    await session?.kill()
+  })
+
+  it('registers a session with a browser attached from a single launch', async () => {
+    const status = await session.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+  })
+
+  it('creates the configuration and support files it started with', async () => {
+    for (const file of ['cypress.config.js', 'cypress/support/e2e.js']) {
+      expect(await fs.pathExists(path.join(session.projectRoot, file)), file).to.eq(true)
+    }
   })
 })
 

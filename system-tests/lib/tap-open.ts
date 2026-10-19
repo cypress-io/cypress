@@ -10,6 +10,7 @@ import pkg from '@packages/root'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { toHashName } from '@packages/server/lib/util/app_data'
 import Fixtures from './fixtures'
+import * as DepInstaller from './dep-installer'
 import type { ProjectFixtureDir } from './fixtureDirs'
 
 const debug = Debug('cypress:system-tests:tap-open')
@@ -332,6 +333,10 @@ const buildSession = async (booted: BootedSession, options: OpenTapSessionOption
 
 const prepareProject = async (project: ProjectFixtureDir, options: OpenTapSessionOptions): Promise<string> => {
   const projectRoot = await Fixtures.scaffoldProject(project)
+
+  // A project Cypress sets up for itself gets a config that requires `cypress`, which a
+  // fixture has no node_modules to resolve; systemTests.exec links it for the same reason
+  await DepInstaller.scaffoldCommonNodeModules()
 
   if (!options.additional) {
     await fs.remove(CACHE_FOLDER)
