@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.2.1
 
+**Performance:**
+
+- Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start faster when there is nothing to clear. Between tests, Cypress no longer asks the browser to clear cookies when there are none, and no longer resets its record of the origins your tests visited when no pages were visited. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+
 **Bugfixes:**
 
 - [`cy.fixture()`](https://on.cypress.io/fixture) and the `fixture` property of a [`cy.intercept()`](https://on.cypress.io/intercept) static response now fail when the fixture path resolves outside the [`fixturesFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files). Fixed in [#35072](https://github.com/cypress-io/cypress/pull/35072).

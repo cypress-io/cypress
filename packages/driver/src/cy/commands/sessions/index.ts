@@ -49,8 +49,13 @@ export default function (Commands, Cypress, cy) {
         return
       }
 
-      return sessions.clearCurrentSessionData()
-      .then(() => Cypress.backend('reset:rendered:html:origins'))
+      const renderedOrigins = await sessionsManager.clearSessionData()
+
+      // Only a rendered page or a cross-origin storage clear adds an origin, and
+      // neither runs between reading an empty set above and this point.
+      if (renderedOrigins.length) {
+        await Cypress.backend('reset:rendered:html:origins')
+      }
     })
   })
 
