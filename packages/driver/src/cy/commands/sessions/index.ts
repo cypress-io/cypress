@@ -51,8 +51,8 @@ export default function (Commands, Cypress, cy) {
 
       const renderedOrigins = await sessionsManager.clearSessionData()
 
-      // Only a rendered page or a cross-origin storage clear adds an origin, and
-      // neither runs between reading an empty set above and this point.
+      // An empty set has nothing to reset. A page that finishes rendering after
+      // the read stays in the set, so the next test clears its storage too.
       if (renderedOrigins.length) {
         await Cypress.backend('reset:rendered:html:origins')
       }
