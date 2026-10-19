@@ -2,7 +2,7 @@ import path from 'path'
 
 import { TapError, SessionNotFoundTapError, isTapSupportedBrowser } from './record'
 import type { LiveSessionState, ReadySessionState, CypressSession } from './record'
-import { isPidAlive, verifySessionRecord } from './liveness'
+import { verifySessionRecord } from './liveness'
 import { readLiveSessions } from './store'
 
 export { TAP_TARGET, TapError, isTapError, SESSIONS_DIRNAME, isTapSupportedBrowser } from './record'
@@ -29,12 +29,11 @@ const matchesSession = (record: CypressSession, session: number | undefined): bo
   return session === undefined || record.pid === session
 }
 
-// A dead pid is skipped without a probe (it proves the writer is gone); the
-// survivors carry the live browser CDP state from their probe response.
+// Every match is probed, whether or not its pid can be signalled from here: the
+// pid check cannot see across PID namespaces. The survivors carry the live
+// browser CDP state from their probe response.
 const probeMatches = async (matches: CypressSession[], probeTimeoutMs?: number): Promise<LiveSessionState[]> => {
-  const probed = await Promise.all(matches.map(async (record) => {
-    return isPidAlive(record.pid) ? verifySessionRecord(record, probeTimeoutMs) : null
-  }))
+  const probed = await Promise.all(matches.map((record) => verifySessionRecord(record, probeTimeoutMs)))
 
   return probed.filter((session): session is LiveSessionState => session !== null)
 }
