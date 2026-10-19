@@ -1,6 +1,7 @@
 import type { AllModeOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
+import { stripVTControlCharacters } from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
 import str from 'underscore.string'
@@ -301,6 +302,50 @@ export class DataContext {
 
   logTraceError (e: unknown) {
     logError(e)
+  }
+
+  // The error on display that the record was written for, so dismissing some other error leaves the record alone
+  private _loadErrorIdForTap: string | null = null
+
+  get loadErrorIdForTap () {
+    return this._loadErrorIdForTap
+  }
+
+  /**
+   * Records that the project could not load, for `cypress tap status` to report when the
+   * project never starts a session. Only errors that stop the project from starting belong
+   * here, which is why `onError`, also used for errors from a project that is running
+   * normally, does not call it. Without a project there is nothing for a session to describe.
+   */
+  reportLoadErrorToTap (error: CypressError | string) {
+    const projectRoot = this.currentProject
+
+    if (!this.isOpenMode || !projectRoot) {
+      return
+    }
+
+    // A message with no error behind it has nothing on display to dismiss
+    this._loadErrorIdForTap = typeof error === 'string' ? null : this.coreData.diagnostics?.error?.id ?? null
+
+    this._apis.projectApi.setSessionLoadError({
+      projectRoot,
+      testingType: this.coreData.currentTestingType,
+      loadError: stripVTControlCharacters(typeof error === 'string' ? error : formatForOutput(error)),
+    }).catch((err) => this.debug('could not record the load error for cypress tap: %o', err))
+  }
+
+  /**
+   * Withdraws the record of a load error once the error has been dismissed or the project
+   * is loading again, so `cypress tap status` does not keep reporting it.
+   */
+  clearLoadErrorForTap () {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    this._loadErrorIdForTap = null
+
+    this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
   }
 
   onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {

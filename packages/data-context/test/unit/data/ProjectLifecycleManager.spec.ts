@@ -45,6 +45,36 @@ describe('ProjectLifecycleManager', () => {
     process.chdir(path.join(__dirname, '../../../'))
   })
 
+  describe('#onLoadError', () => {
+    const loadErrorCtx = () => {
+      const context = createDataContext({ project: 'foo' })
+      const setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+
+      context._apis.projectApi.setSessionLoadError = setSessionLoadError as any
+      context.coreData.currentProject = '/projects/foo'
+      jest.spyOn(context, 'onError').mockImplementation(() => {})
+
+      return { context, setSessionLoadError }
+    }
+
+    it('records an error that stops the project for cypress tap status', () => {
+      const { context, setSessionLoadError } = loadErrorCtx()
+
+      context.lifecycleManager.onLoadError(new Error('boom') as any)
+
+      expect(setSessionLoadError).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not record an error that leaves the project running', () => {
+      const { context, setSessionLoadError } = loadErrorCtx()
+
+      context.lifecycleManager.onLoadError(new Error('both config files') as any, { stopsProject: false })
+
+      expect(context.onError).toHaveBeenCalledTimes(1)
+      expect(setSessionLoadError).not.toHaveBeenCalled()
+    })
+  })
+
   describe('#initializeProjectSetup', () => {
     const originalEnv = process.env
     let consoleError: ReturnType<typeof jest.spyOn>
@@ -174,6 +204,22 @@ describe('ProjectLifecycleManager', () => {
       await expect(setup.lifecycleManager.initializeProjectSetup('e2e')).resolves.toBeUndefined()
 
       expect(onLoadError).toHaveBeenCalledWith(failure)
+    })
+
+    it('records the reason for cypress tap status when a file needs changes made by a person', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid', 'changes'))
+      const setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+
+      setup._apis.projectApi.setSessionLoadError = setSessionLoadError as any
+      setup.coreData.currentProject = '/projects/foo'
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+        loadError: expect.stringContaining('need changes made by hand'),
+      }))
     })
 
     it('says nothing about created files when every file was skipped', async () => {

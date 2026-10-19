@@ -299,7 +299,7 @@ export class ProjectLifecycleManager {
           }
 
           if (pingBaseUrl) {
-            this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
+            this.ctx.actions.project.pingBaseUrl().catch((err) => this.onLoadError(err, { stopsProject: false }))
           }
         }
 
@@ -530,7 +530,7 @@ export class ProjectLifecycleManager {
     this._configManager = this.createConfigManager()
 
     // Preemptively load these so that they are available when we need them later
-    this.ctx.browser.machineBrowsers().catch(this.onLoadError)
+    this.ctx.browser.machineBrowsers().catch((err) => this.onLoadError(err, { stopsProject: false }))
 
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
@@ -560,6 +560,8 @@ export class ProjectLifecycleManager {
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
+
+    this.ctx.clearLoadErrorForTap()
 
     this.verifyProjectRoot(projectRoot)
 
@@ -623,6 +625,10 @@ export class ProjectLifecycleManager {
         }
       }
     })
+
+    if (testingType) {
+      this.ctx.clearLoadErrorForTap()
+    }
 
     this._currentTestingType = testingType
 
@@ -886,7 +892,10 @@ export class ProjectLifecycleManager {
     const needsAPerson = relativePaths(['changes', 'error'])
 
     if (needsAPerson.length) {
-      logError(`Cypress could not finish setting up e2e testing for this project on its own, because these files need changes made by hand: ${needsAPerson.join(', ')}. Make the changes, then start Cypress again.`)
+      const message = `Cypress could not finish setting up e2e testing for this project on its own, because these files need changes made by hand: ${needsAPerson.join(', ')}. Make the changes, then start Cypress again.`
+
+      logError(message)
+      this.ctx.reportLoadErrorToTap(message)
 
       return
     }
@@ -934,7 +943,7 @@ export class ProjectLifecycleManager {
     }
 
     if (this.metaState.allFoundConfigFiles.length > 1) {
-      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles))
+      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles), { stopsProject: false })
     }
   }
 
@@ -942,13 +951,21 @@ export class ProjectLifecycleManager {
    * When there is an error during any part of the lifecycle
    * initiation, we pass it through here. This allows us to intercept
    * centrally in the e2e tests, as well as notify the "pending initialization"
-   * for run mode
+   * for run mode.
+   *
+   * An error that leaves the project running, such as two config files of different languages,
+   * is not reported to `cypress tap status`, which would otherwise tell a poller to give up
+   * on a start that is going to succeed.
    */
-  onLoadError = (err: CypressError) => {
+  onLoadError = (err: CypressError, { stopsProject = true }: { stopsProject?: boolean } = {}) => {
     if (this.ctx.isRunMode && this._pendingInitialize) {
       this._pendingInitialize.reject(err)
     } else {
       this.ctx.onError(err, 'Cypress configuration error')
+
+      if (stopsProject) {
+        this.ctx.reportLoadErrorToTap(err)
+      }
     }
   }
 
