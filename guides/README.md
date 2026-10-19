@@ -28,6 +28,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 * [Studio development](./studio-development.md)
 * [Testing other projects](./testing-other-projects.md)
 * [Testing strategy and style guide (draft)](./testing-strategy-and-styleguide.md)
+* [Using `cypress tap` in agent sandboxes](./using-cypress-tap-in-agent-sandboxes.md)
 * [V8 Snapshots](./v8-snapshots.md)
 * [Writing cross-platform JavaScript](./writing-cross-platform-javascript.md)
 * [Writing the Cypress Changelog](./writing-the-cypress-changelog.md)
