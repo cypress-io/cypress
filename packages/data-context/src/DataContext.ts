@@ -48,6 +48,19 @@ const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
+// A Cypress error keeps the first paragraph in `message` and the rest, such as the
+// stack trace of a config file that failed to load, in `details`. An error that did not
+// come from a template has only its stack to say where it came from.
+const formatForOutput = (err: CypressError) => {
+  if (!err.isCypressErr && err.stack) {
+    return err.stack
+  }
+
+  const message = err.message ?? String(err)
+
+  return err.details ? `${message}\n\n${err.details}` : message
+}
+
 export interface DataContextConfig {
   schema: GraphQLSchema
   schemaCloud: GraphQLSchema
@@ -304,6 +317,16 @@ export class DataContext {
         cypressError,
       }
 
+      // The Launchpad only shows this error to a person looking at its window, so
+      // print it for a caller reading the process output. A repeat of the error
+      // already on display is skipped, since one failed load can report it
+      // several times.
+      const shown = this.coreData.diagnostics?.error?.cypressError
+
+      if (!shown || formatForOutput(shown) !== formatForOutput(cypressError)) {
+        logError(formatForOutput(cypressError))
+      }
+
       this.update((d) => {
         if (d.diagnostics) {
           d.diagnostics.error = err
@@ -323,6 +346,10 @@ export class DataContext {
         id: _.uniqueId('Warning'),
         title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
         cypressError: err,
+      }
+
+      if (!this.coreData.diagnostics.warnings.some((existing) => formatForOutput(existing.cypressError) === formatForOutput(err))) {
+        logError(formatForOutput(err))
       }
 
       this.update((d) => {
