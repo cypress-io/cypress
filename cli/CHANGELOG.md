@@ -16,6 +16,10 @@
 - TypeScript now types the value yielded by [`cy.session()`](https://on.cypress.io/session) as the session's status, `'created'`, `'restored'`, or `'recreated'`, instead of `null`. Cypress already yielded the status at runtime, so code that uses it as a string, such as `cy.session('user', setup).then((status) => status.toUpperCase())`, no longer reports a type error. Addressed in [#35057](https://github.com/cypress-io/cypress/pull/35057).
 - The TypeScript documentation for the `validate` option of [`cy.session()`](https://on.cypress.io/session) now lists the conditions that make a session invalid. It previously said that returning `false` invalidates the session, but a `false` return only does so when it comes from a Promise, or when `validate` returns nothing and its last Cypress command yields `false`. It also no longer shows a default of `false`, because `validate` has no default. Addressed in [#35057](https://github.com/cypress-io/cypress/pull/35057).
 
+**Dependency Updates:**
+
+- Upgraded `undici` from `6.28.0` to `6.29.1` to address an [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-UNDICI-21181005) vulnerability reported in security scans. Addressed in [#35087](https://github.com/cypress-io/cypress/pull/35087).
+
 ## 16.2.0
 
 **Features:**
