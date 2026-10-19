@@ -5,7 +5,7 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { $Location } from '../../cypress/location'
 import { whatIsCircular } from '../../util/what-is-circular'
-import { expandHttpResponse } from '@packages/types'
+import { expandHttpResponse } from './helpers/request'
 
 const isOptional = (memo, val, key) => {
   if (_.isNull(val)) {

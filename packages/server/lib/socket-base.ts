@@ -25,9 +25,10 @@ import type { Automation } from './automation'
 import { openExternal } from './gui/links'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands, SpecWithRelativeRoot } from '@packages/types'
-import { RUN_ALL_SPECS_KEY, compactHttpResponse } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { compactHttpResponse } from './util/compact-http-response'
 import type { StudioInitOptions } from './types/studio'
 
 type StartListeningCallbacks = {
