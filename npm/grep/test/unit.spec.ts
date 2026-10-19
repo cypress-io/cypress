@@ -1,4 +1,4 @@
-import { expect, describe, it, vi } from 'vitest'
+import { expect, describe, it, vi, afterEach } from 'vitest'
 import {
   parseGrep,
   parseTitleGrep,
@@ -9,6 +9,7 @@ import {
   shouldTestRunTitle,
 } from '../src/utils'
 import { plugin } from '../src/plugin'
+import { register } from '../src/register'
 
 describe('utils', () => {
   describe('parseTitleGrep', () => {
@@ -641,6 +642,100 @@ describe('utils', () => {
         const result = plugin(config)
 
         expect(result).toBeDefined()
+      })
+    })
+  })
+  describe('register', () => {
+    describe('it.skip', () => {
+      // Stands in for mocha's it/describe so the registrations can be read
+      // back without a browser.
+      const setup = ({ grepTags, grepOmitFiltered }: { grepTags?: string, grepOmitFiltered?: boolean }) => {
+        const pending: string[] = []
+        const defined: string[] = []
+
+        const realIt: any = (name: string) => {
+          defined.push(name)
+        }
+
+        realIt.skip = (name: string) => {
+          pending.push(name)
+        }
+        realIt.only = () => {}
+        realIt.retries = () => {}
+
+        const realDescribe: any = (name: string, options: any, callback?: any) => {
+          if (typeof options === 'function') {
+            callback = options
+          }
+
+          if (callback) {
+            callback()
+          }
+        }
+
+        realDescribe.skip = () => {}
+        realDescribe.only = () => {}
+
+        const exposed: Record<string, any> = { grepTags, grepOmitFiltered }
+
+        globalThis.it = realIt
+        globalThis.describe = realDescribe
+        globalThis.context = realDescribe
+        globalThis.specify = realIt
+        globalThis.Cypress = {
+          expose: (key: string) => exposed[key],
+          _: { isInteger: Number.isInteger, times: () => [] },
+        }
+
+        register()
+
+        return { pending, defined }
+      }
+
+      const originals = {
+        it: globalThis.it,
+        describe: globalThis.describe,
+        context: globalThis.context,
+        specify: globalThis.specify,
+        Cypress: globalThis.Cypress,
+      }
+
+      afterEach(() => {
+        Object.assign(globalThis, originals)
+      })
+
+      it('omits a skipped test whose tags do not match', () => {
+        const { pending } = setup({ grepTags: '@tag1', grepOmitFiltered: true })
+
+        globalThis.it.skip('does not match', { tags: '@tag2' }, () => {})
+
+        expect(pending).toEqual([])
+      })
+
+      it('keeps a skipped test whose tags match', () => {
+        const { pending } = setup({ grepTags: '@tag1', grepOmitFiltered: true })
+
+        globalThis.it.skip('matches', { tags: '@tag1' }, () => {})
+
+        expect(pending).toEqual(['matches'])
+      })
+
+      it('keeps a skipped test that inherits a matching tag from its suite', () => {
+        const { pending } = setup({ grepTags: '@tag1', grepOmitFiltered: true })
+
+        globalThis.describe('suite', { tags: '@tag1' }, () => {
+          globalThis.it.skip('inherits', () => {})
+        })
+
+        expect(pending).toEqual(['inherits'])
+      })
+
+      it('still reports a non-matching skipped test when not omitting filtered tests', () => {
+        const { pending } = setup({ grepTags: '@tag1' })
+
+        globalThis.it.skip('does not match', { tags: '@tag2' }, () => {})
+
+        expect(pending).toEqual(['does not match'])
       })
     })
   })
