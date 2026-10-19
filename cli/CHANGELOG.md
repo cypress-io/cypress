@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start faster when there is nothing to clear. Between tests, Cypress no longer asks the browser to clear cookies when there are none, and no longer resets its record of the origins your tests visited when no pages were visited. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start faster when there is nothing to clear. Between tests, Cypress no longer asks the browser to clear cookies when there are none, and no longer resets its record of the origins your tests visited when no pages were visited. Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
 
