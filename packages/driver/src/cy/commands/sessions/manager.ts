@@ -98,10 +98,7 @@ export default class SessionsManager {
     ])
   }
 
-  /**
-   * Clears cookies, localStorage and sessionStorage across all domains.
-   * Resolves to the origins that had rendered HTML before clearing.
-   */
+  // Resolves to the rendered origins that `clearStorage` read before clearing.
   clearSessionData = async (): Promise<string[]> => {
     // this prevents a log occurring when we clear session in-between tests
     if (this.cy.state('duringUserTestExecution')) {
