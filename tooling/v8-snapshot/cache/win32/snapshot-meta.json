@@ -3459,6 +3459,7 @@
     "./packages/data-context/src/util/files.ts",
     "./packages/data-context/src/util/hasTypescript.ts",
     "./packages/data-context/src/util/index.ts",
+    "./packages/data-context/src/util/isInsideDir.ts",
     "./packages/data-context/src/util/maskProxyPassword.ts",
     "./packages/data-context/src/util/pluginHandlers.ts",
     "./packages/data-context/src/util/shouldLoadConfigAsEsm.ts",
@@ -3654,7 +3655,6 @@
     "./packages/server/lib/cloud/bundles/bundle_error.ts",
     "./packages/server/lib/cloud/bundles/cache_root.ts",
     "./packages/server/lib/cloud/bundles/ensure_signed_bundle.ts",
-    "./packages/server/lib/cloud/bundles/is_inside_dir.ts",
     "./packages/server/lib/cloud/bundles/parse_hash_from_bundle_url.ts",
     "./packages/server/lib/cloud/bundles/publish_staging_to_final.ts",
     "./packages/server/lib/cloud/bundles/sweep_orphan_staging.ts",
@@ -3945,5 +3945,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "fee043b6ff927bdb0f2de0bf4c23462f29219ea2766d3be0e2c7a4f339282244"
+  "deferredHash": "98691bb1629ba4b9ddf2243c57539761ce96afb5539c55fd87e003649a5ea106"
 }
