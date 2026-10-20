@@ -2,53 +2,26 @@
   "name": "@cypress/grep",
   "version": "0.0.0-development",
   "description": "Filter tests using substring",
-  "scripts": {
-    "build": "tsc",
-    "cypress:open": "node ../../scripts/cypress.js open",
-    "test": "vitest",
-    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "and": "PROJECT_NAME=and node ../../scripts/cypress.js run --expose grep='Test 2',grepTags='smoke+high' --config specPattern='**/tags/*.cy.ts'",
-    "and:not": "PROJECT_NAME=and-not node ../../scripts/cypress.js run --expose grep='Test 2',grepTags='smoke+-high' --config specPattern='**/tags/*.cy.ts'",
-    "burn": "PROJECT_NAME=burn node ../../scripts/cypress.js run --expose burn=5 --config specPattern='**/burn.cy.ts'",
-    "each": "PROJECT_NAME=each node ../../scripts/cypress.js run --config specPattern='**/each.cy.ts'",
-    "filter:specs": "PROJECT_NAME=filter-specs node ../../scripts/cypress.js run --expose grep='Test 2',grepFilterSpecs=true --config specPattern='**/tags/*.cy.ts'",
-    "grep": "PROJECT_NAME=grep node ../../scripts/cypress.js run --config specPattern='**/grep-task.cy.ts'",
-    "inverted": "PROJECT_NAME=inverted node ../../scripts/cypress.js run --expose grep='-Test 2' --config specPattern='**/tags/*.cy.ts'",
-    "lint": "eslint",
-    "multiple-registrations": "PROJECT_NAME=multiple-registrations node ../../scripts/cypress.js run --config specPattern='**/multiple-registrations.cy.ts'",
-    "omit:specs": "PROJECT_NAME=omit-specs node ../../scripts/cypress.js run --expose grep='Test 2',grepOmitFiltered=true --config specPattern='**/tags/*.cy.ts'",
-    "or": "PROJECT_NAME=or node ../../scripts/cypress.js run --expose grep='Test 1',grepTags='regression high' --config specPattern='**/tags/*.cy.ts'",
-    "skip": "PROJECT_NAME=skip node ../../scripts/cypress.js run --config specPattern='**/*skip.cy.ts'",
-    "specify": "PROJECT_NAME=specify node ../../scripts/cypress.js run --expose grepTags=@tag1 --config specPattern='**/specify.cy.ts'",
-    "tags:inverted": "PROJECT_NAME=tag-inverted node ../../scripts/cypress.js run --expose grepTags='-regression' --config specPattern='**/tags/*.cy.ts'",
-    "tags": "PROJECT_NAME=tags node ../../scripts/cypress.js run --expose grepTags=smoke --config specPattern='**/tags/*.cy.ts'",
-    "tags:and": "PROJECT_NAME=tags-and node ../../scripts/cypress.js run --expose grepTags='smoke+high' --config specPattern='**/tags/*.cy.ts'",
-    "tags:and:not": "PROJECT_NAME=tags-and-not node ../../scripts/cypress.js run --expose grepTags='smoke+-high' --config specPattern='**/tags/*.cy.ts'",
-    "tags:before": "PROJECT_NAME=tags-before node ../../scripts/cypress.js run --expose grepTags=@staging --config specPattern='**/before.cy.ts'",
-    "tags:config": "PROJECT_NAME=tags-config node ../../scripts/cypress.js run --expose grepTags=config --config specPattern='**/config-tags.cy.ts'",
-    "tags:describe": "PROJECT_NAME=tags-describe node ../../scripts/cypress.js run --expose grepTags=@smoke --config specPattern='**/describe-tags.cy.ts'",
-    "tags:filter:specs": "PROJECT_NAME=tags-filter-specs node ../../scripts/cypress.js run --expose grepTags='regression',grepFilterSpecs=true --config specPattern='**/tags/*.cy.ts'",
-    "tags:inherit": "PROJECT_NAME=tags-inherit node ../../scripts/cypress.js run --expose grepTags=@screen-b --config specPattern='**/inherits-tag.cy.ts'",
-    "tags:nested-describe": "PROJECT_NAME=tags-nested-describe node ../../scripts/cypress.js run --expose grepTags='@smoke @integration' --config specPattern='**/nested-describe.cy.ts'",
-    "tags:omit:specs": "PROJECT_NAME=tags-omit-specs node ../../scripts/cypress.js run --expose grepTags='regression',grepOmitFiltered=true --config specPattern='**/tags/*.cy.ts'",
-    "tags:or": "PROJECT_NAME=tags-or node ../../scripts/cypress.js run --expose grepTags='regression high' --config specPattern='**/tags/*.cy.ts'",
-    "this": "PROJECT_NAME=this node ../../scripts/cypress.js run --expose grep='this context' --config specPattern='**/this.cy.ts'",
-    "untagged": "PROJECT_NAME=untagged node ../../scripts/cypress.js run --expose grepUntagged=true --config specPattern='**/tags/*.cy.ts'"
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "grep",
+    "filter",
+    "tags",
+    "test-tags",
+    "test-filtering",
+    "burn",
+    "flaky-tests"
+  ],
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/grep#readme",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress/issues"
   },
-  "dependencies": {
-    "debug": "^4.3.4",
-    "find-test-names": "^1.28.18",
-    "globby": "^11.0.4"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
   },
-  "devDependencies": {
-    "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.31.0",
-    "vitest": "^3.2.4",
-    "typescript": "~5.4.5"
-  },
-  "peerDependencies": {
-    "cypress": ">=15.10.0"
-  },
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -62,24 +35,58 @@
   "files": [
     "dist"
   ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress.git"
+  "scripts": {
+    "and": "PROJECT_NAME=and node ../../scripts/cypress.js run --expose grep='Test 2',grepTags='smoke+high' --config specPattern='**/tags/*.cy.ts'",
+    "and:not": "PROJECT_NAME=and-not node ../../scripts/cypress.js run --expose grep='Test 2',grepTags='smoke+-high' --config specPattern='**/tags/*.cy.ts'",
+    "build": "tsc",
+    "burn": "PROJECT_NAME=burn node ../../scripts/cypress.js run --expose burn=5 --config specPattern='**/burn.cy.ts'",
+    "cypress:open": "node ../../scripts/cypress.js open",
+    "each": "PROJECT_NAME=each node ../../scripts/cypress.js run --config specPattern='**/each.cy.ts'",
+    "filter:specs": "PROJECT_NAME=filter-specs node ../../scripts/cypress.js run --expose grep='Test 2',grepFilterSpecs=true --config specPattern='**/tags/*.cy.ts'",
+    "grep": "PROJECT_NAME=grep node ../../scripts/cypress.js run --config specPattern='**/grep-task.cy.ts'",
+    "inverted": "PROJECT_NAME=inverted node ../../scripts/cypress.js run --expose grep='-Test 2' --config specPattern='**/tags/*.cy.ts'",
+    "lint": "eslint",
+    "multiple-registrations": "PROJECT_NAME=multiple-registrations node ../../scripts/cypress.js run --config specPattern='**/multiple-registrations.cy.ts'",
+    "omit:specs": "PROJECT_NAME=omit-specs node ../../scripts/cypress.js run --expose grep='Test 2',grepOmitFiltered=true --config specPattern='**/tags/*.cy.ts'",
+    "or": "PROJECT_NAME=or node ../../scripts/cypress.js run --expose grep='Test 1',grepTags='regression high' --config specPattern='**/tags/*.cy.ts'",
+    "skip": "PROJECT_NAME=skip node ../../scripts/cypress.js run --config specPattern='**/*skip.cy.ts'",
+    "specify": "PROJECT_NAME=specify node ../../scripts/cypress.js run --expose grepTags=@tag1 --config specPattern='**/specify.cy.ts'",
+    "tags": "PROJECT_NAME=tags node ../../scripts/cypress.js run --expose grepTags=smoke --config specPattern='**/tags/*.cy.ts'",
+    "tags:and": "PROJECT_NAME=tags-and node ../../scripts/cypress.js run --expose grepTags='smoke+high' --config specPattern='**/tags/*.cy.ts'",
+    "tags:and:not": "PROJECT_NAME=tags-and-not node ../../scripts/cypress.js run --expose grepTags='smoke+-high' --config specPattern='**/tags/*.cy.ts'",
+    "tags:before": "PROJECT_NAME=tags-before node ../../scripts/cypress.js run --expose grepTags=@staging --config specPattern='**/before.cy.ts'",
+    "tags:config": "PROJECT_NAME=tags-config node ../../scripts/cypress.js run --expose grepTags=config --config specPattern='**/config-tags.cy.ts'",
+    "tags:describe": "PROJECT_NAME=tags-describe node ../../scripts/cypress.js run --expose grepTags=@smoke --config specPattern='**/describe-tags.cy.ts'",
+    "tags:filter:specs": "PROJECT_NAME=tags-filter-specs node ../../scripts/cypress.js run --expose grepTags='regression',grepFilterSpecs=true --config specPattern='**/tags/*.cy.ts'",
+    "tags:inherit": "PROJECT_NAME=tags-inherit node ../../scripts/cypress.js run --expose grepTags=@screen-b --config specPattern='**/inherits-tag.cy.ts'",
+    "tags:inverted": "PROJECT_NAME=tag-inverted node ../../scripts/cypress.js run --expose grepTags='-regression' --config specPattern='**/tags/*.cy.ts'",
+    "tags:nested-describe": "PROJECT_NAME=tags-nested-describe node ../../scripts/cypress.js run --expose grepTags='@smoke @integration' --config specPattern='**/nested-describe.cy.ts'",
+    "tags:omit:specs": "PROJECT_NAME=tags-omit-specs node ../../scripts/cypress.js run --expose grepTags='regression',grepOmitFiltered=true --config specPattern='**/tags/*.cy.ts'",
+    "tags:or": "PROJECT_NAME=tags-or node ../../scripts/cypress.js run --expose grepTags='regression high' --config specPattern='**/tags/*.cy.ts'",
+    "test": "vitest",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "this": "PROJECT_NAME=this node ../../scripts/cypress.js run --expose grep='this context' --config specPattern='**/this.cy.ts'",
+    "untagged": "PROJECT_NAME=untagged node ../../scripts/cypress.js run --expose grepUntagged=true --config specPattern='**/tags/*.cy.ts'"
   },
-  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/grep#readme",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress/issues"
-  },
-  "keywords": [
-    "cypress",
-    "grep"
-  ],
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "resolutions": {
     "jiti": "^2.4.2"
+  },
+  "dependencies": {
+    "debug": "^4.3.4",
+    "find-test-names": "^1.28.18",
+    "globby": "^11.0.4"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "typescript": "~5.4.5",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "cypress": ">=15.10.0"
   },
   "publishConfig": {
     "access": "public"
