@@ -13,11 +13,13 @@ yarn workspace @packages/eslint-config lint
 
 ```
 src/
-  baseConfig.ts     Core flat-config with TypeScript, import, and stylistic rules
-  cliOverrides.ts   Overrides applied for CLI/Node.js contexts
-  jsonConfig.ts     Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
-  rules/            Cypress-authored rules, registered under the `@cypress/dev` namespace
-  index.ts          Main entry: composes and exports the full flat-config array
+  baseConfig.ts       Core flat-config with TypeScript, import, and stylistic rules
+  cliOverrides.ts     Overrides applied for CLI/Node.js contexts
+  jsonConfig.ts       Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
+  vueTsxOverrides.ts  Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
+  reactRulesOff.ts    Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
+  rules/              Cypress-authored rules, registered under the `@cypress/dev` namespace
+  index.ts            Main entry: composes and exports the full flat-config array
 ```
 
 ## Gotchas / Notes

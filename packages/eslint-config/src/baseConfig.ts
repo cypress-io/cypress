@@ -7,12 +7,14 @@ import cy from 'eslint-plugin-cypress'
 import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
 import vue from 'eslint-plugin-vue'
+import vueParser from 'vue-eslint-parser'
 import stylistic from '@stylistic/eslint-plugin'
 import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
 import { cypressDevPlugin } from './rules'
+import { reactRulesOff } from './reactRulesOff'
 
 export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
@@ -46,6 +48,15 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
           jsx: true,
         },
       },
+    },
+  },
+
+  // eslint-plugin-vue takes vue-eslint-parser as a peer and resolves whichever copy
+  // is hoisted, which can be an ESLint 8 era release that ignores the TS script parser
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
     },
   },
 
@@ -308,6 +319,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
     },
+  },
+
+  // React rules do not apply to Vue SFCs. Vue JSX/TSX files need `vueTsxOverrides`.
+  {
+    files: ['**/*.vue'],
+    rules: reactRulesOff,
   },
 
   // common file patterns to ignore

@@ -12,6 +12,7 @@
 - [x] npm/react ✅ **COMPLETED**
 - [x] npm/vue ✅ **COMPLETED**
 - [x] npm/svelte ✅ **COMPLETED**
+- [x] npm/angular ✅ **COMPLETED**
 
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
