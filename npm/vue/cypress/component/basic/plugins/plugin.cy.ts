@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import type { Plugin } from 'vue'
 import { MyPlugin } from './MyPlugin'
 import { MyPluginWithOptions } from './MyPluginWithOptions'
 import { mount } from '@cypress/vue'
@@ -43,7 +44,7 @@ describe('Custom plugin MyPlugin', () => {
 
 describe('Plugins with options', () => {
   it('passes options', () => {
-    const use = [
+    const use: (Plugin | [Plugin, ...unknown[]])[] = [
       MyPlugin, // this plugin does not need options
       [MyPluginWithOptions, { label: 'testing' }], // this plugin needs options
     ]

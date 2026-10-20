@@ -4,7 +4,7 @@ import Form from './Form.vue'
 import { mount } from '@cypress/vue'
 
 describe('Form', () => {
-  const getByLabelText = (text) => {
+  const getByLabelText = (text: string) => {
     return cy
     .contains('label', text)
     .invoke('attr', 'for')

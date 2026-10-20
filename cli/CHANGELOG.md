@@ -4,7 +4,10 @@
 **Bugfixes:**
 
 - Fixed a regression in [16.1.0](#16-1-0) where, in Chrome, Chromium, and Edge run headed, the Cypress browser extension could stop responding for the rest of the run. This caused [`@cypress/puppeteer`](https://github.com/cypress-io/cypress/tree/develop/npm/puppeteer) to fail with `Cannot communicate with the Cypress Chrome extension`. Fixed in [#34958](https://github.com/cypress-io/cypress/pull/34958).
+- [`cy.fixture()`](https://on.cypress.io/fixture) and the `fixture` property of a [`cy.intercept()`](https://on.cypress.io/intercept) static response now fail when the fixture path resolves outside the [`fixturesFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files). Fixed in [#35072](https://github.com/cypress-io/cypress/pull/35072).
 - Fixed an issue where [`.rightclick()`](https://on.cypress.io/rightclick) sent `buttons: 2` on its `pointerup` and `mouseup` events. A real right click reports `buttons: 0` on these events because the right button has just been released, so code that checks `event.buttons` on release now sees the same value it does in a browser. Fixed in [#35042](https://github.com/cypress-io/cypress/pull/35042).
+- [`.trigger()`](https://on.cypress.io/trigger) now fails when passed an empty string as the event name, such as `cy.get('button').trigger('')`. Previously, it dispatched an event whose `type` was an empty string instead of failing, even though its error message says the event name must be a non-empty string. That error now shows the value that was passed, instead of the literal text `{{cmd}}`. It and the matching errors from [`cy.readFile()`](https://on.cypress.io/readfile) and [`cy.writeFile()`](https://on.cypress.io/writefile) now show an empty string as `''`, instead of leaving the value blank. Fixed in [#35068](https://github.com/cypress-io/cypress/pull/35068).
+- Fixed a regression in [16.0.0](#16-0-0) where a run whose tests all passed could exit with code 1 and print `ServerBase#open must first be called before accessing 'this.null'` if the browser made a request while Cypress was shutting down. Fixed in [#34977](https://github.com/cypress-io/cypress/pull/34977).
 
 **Misc:**
 
@@ -13,6 +16,10 @@
 - The TypeScript types now accept a number, boolean, or `null` as the expected value of the `data` assertion, such as `expect($el).to.have.data('count', 3)`. jQuery parses numeric, boolean, and `null` `data-*` attributes into those types, so a string could never match them, but TypeScript accepted only a string. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
 - TypeScript now types the value yielded by [`cy.session()`](https://on.cypress.io/session) as the session's status, `'created'`, `'restored'`, or `'recreated'`, instead of `null`. Cypress already yielded the status at runtime, so code that uses it as a string, such as `cy.session('user', setup).then((status) => status.toUpperCase())`, no longer reports a type error. Addressed in [#35057](https://github.com/cypress-io/cypress/pull/35057).
 - The TypeScript documentation for the `validate` option of [`cy.session()`](https://on.cypress.io/session) now lists the conditions that make a session invalid. It previously said that returning `false` invalidates the session, but a `false` return only does so when it comes from a Promise, or when `validate` returns nothing and its last Cypress command yields `false`. It also no longer shows a default of `false`, because `validate` has no default. Addressed in [#35057](https://github.com/cypress-io/cypress/pull/35057).
+
+**Dependency Updates:**
+
+- Upgraded `undici` from `6.28.0` to `6.29.1` to address an [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-UNDICI-21181005) vulnerability reported in security scans. Addressed in [#35087](https://github.com/cypress-io/cypress/pull/35087).
 
 ## 16.2.0
 

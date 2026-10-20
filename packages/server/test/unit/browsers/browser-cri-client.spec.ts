@@ -333,7 +333,7 @@ describe('lib/browsers/browser-cri-client', function () {
     })
 
     it('ignores a detach for a session with no binding', async function () {
-      const client = await getClient({ fullyManageTabs: true })
+      await getClient({ fullyManageTabs: true })
 
       await callsWith(on, 'Target.detachedFromTarget')[0][1]({ sessionId: 'never-attached' })
 

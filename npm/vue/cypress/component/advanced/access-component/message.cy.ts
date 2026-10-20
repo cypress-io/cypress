@@ -5,7 +5,7 @@ import { mount } from '@cypress/vue'
 // test example from
 // https://github.com/alexjoverm/vue-testing-series/blob/lesson-1/test/Message.test.js
 
-const createCmp = (propsData) => mount(Message, { propsData })
+const createCmp = (propsData?: { message: string }) => mount(Message, { propsData })
 
 /* eslint-env mocha */
 describe('Message', () => {
@@ -21,7 +21,7 @@ describe('Message', () => {
     })
 
     describe('Validation', () => {
-      let message
+      let message: { type: unknown, required?: boolean, validator?: (value: string) => boolean }
 
       beforeEach(() => {
         createCmp().then(() => {
@@ -48,7 +48,8 @@ describe('Message', () => {
     it('calls handleClick when click on message', () => {
       // need to spy on the _original_ method before it gets
       // passed to the Vue.extend and gets into private closure
-      const spy = cy.spy(Message.methods, 'handleClick')
+      // Safe because Message.vue declares handleClick in its methods
+      const spy = cy.spy(Message.methods as { handleClick: () => void }, 'handleClick')
 
       createCmp({ message: 'Cat' })
       cy.get('.message')

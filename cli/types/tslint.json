@@ -1,11 +1,5 @@
 {
-  // settings for linting TypeScript files in this folder
-  // using https://github.com/Microsoft/dtslint
-  // to force full checking you may need to reinstall dtsint with `npm i dtslint`
-  // and then run `npm run dtslint`. This will force installing different versions
-  // of TypeScript (2.0, 2.1, 2.2, ... next) and will run lint check against every version.
   "extends": "dtslint/dtslint.json",
-  // disable some rules that we do not need
   "rules": {
     "semicolon": [
       true,
@@ -22,16 +16,15 @@
     "export-just-namespace": false,
     "file-name-casing": false,
     "jsdoc-format": false,
-    // for now keep the Cypress NPM module API
-    // in its own file for simplicity
     "no-single-declare-module": false,
-    // This is detecting necessary qualifiers as unnecessary
     "no-unnecessary-qualifier": false,
-    "space-before-function-paren": ["warn", "always"]
+    "space-before-function-paren": [
+      "warn",
+      "always"
+    ]
   },
   "linterOptions": {
     "exclude": [
-      // Lodash types and other external types are 3rd party and don't follow our rules
       "./aria-query/*",
       "./blob-util/*",
       "./bluebird/*",
@@ -43,8 +36,6 @@
       "./minimatch/*",
       "./sinon/**/*",
       "./sinon-chai/*",
-      // Copied from net-stubbing and renamed to a declaration file. Since it's not originally
-      // a declaration file, we need to exclude it from linting.
       "./net-stubbing.d.ts"
     ]
   }

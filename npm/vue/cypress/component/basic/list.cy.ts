@@ -1,3 +1,4 @@
+import type { ComponentPublicInstance } from 'vue'
 import { mount } from '@cypress/vue'
 
 // TODO: fix with https://github.com/cypress-io/cypress/issues/30706
@@ -30,7 +31,10 @@ describe.skip('Declarative rendering', () => {
   })
 
   it('can add an item', () => {
-    Cypress.vue.todos.push({ text: 'Test using Cypress' })
+    // Safe because the component mounted in beforeEach gets its data from data()
+    const vm = Cypress.vue as ComponentPublicInstance<{}, {}, ReturnType<typeof data>>
+
+    vm.todos.push({ text: 'Test using Cypress' })
     cy.get('li').should('have.length', 4)
   })
 })

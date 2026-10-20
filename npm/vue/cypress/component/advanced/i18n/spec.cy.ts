@@ -5,6 +5,8 @@ import { createI18n } from 'vue-i18n'
 import { mount } from '@cypress/vue'
 import messages from './translations.json'
 
+const translations: Record<string, { hello: string }> = messages
+
 function expectHelloWorldGreeting () {
   cy.viewport(400, 200)
   const allLocales = Cypress.vue.$i18n.availableLocales
@@ -14,7 +16,7 @@ function expectHelloWorldGreeting () {
 
   allLocales.forEach((locale) => {
     cy.get('select').select(locale).should('have.value', locale)
-    const hello = messages[locale].hello
+    const hello = translations[locale].hello
 
     cy.contains(hello)
   })
