@@ -8,17 +8,17 @@ const createRootRunnable = () => {
   return {
     id: 'r1',
     hooks: [hook('h1', 'before each')],
-    tests: [{ id: 'r2', hooks: [] }],
+    tests: [{ id: 'r2', hooks: [] as ReturnType<typeof hook>[] }],
     suites: [
       {
         id: 'r3',
         hooks: [hook('h2', 'before all'), hook('h3', 'before each')],
-        tests: [{ id: 'r4', hooks: [] }],
+        tests: [{ id: 'r4', hooks: [] as ReturnType<typeof hook>[] }],
         suites: [
           {
             id: 'r5',
             hooks: [hook('h4', 'after each')],
-            tests: [{ id: 'r6', hooks: [] }],
+            tests: [{ id: 'r6', hooks: [] as ReturnType<typeof hook>[] }],
             suites: [],
           },
         ],
@@ -26,30 +26,26 @@ const createRootRunnable = () => {
       {
         id: 'r7',
         hooks: [],
-        tests: [{ id: 'r8', hooks: [] }],
+        tests: [{ id: 'r8', hooks: [] as ReturnType<typeof hook>[] }],
         suites: [],
       },
     ],
   }
 }
 
-const hookIdsByTestId = (tests) => {
-  return Object.fromEntries(tests.map((test) => [test.id, test.hooks.map((h) => h.hookId)]))
-}
-
 describe('lib/util/tests_utils', () => {
   describe('.flattenSuiteIntoRunnables', () => {
     it('flattens every test and hook in the suite tree', () => {
-      const [tests, hooks] = flattenSuiteIntoRunnables(createRootRunnable())
+      const { tests, hooks } = flattenSuiteIntoRunnables(createRootRunnable())
 
       expect(tests.map((t) => t.id)).toEqual(['r2', 'r4', 'r6', 'r8'])
       expect(hooks.map((h) => h.hookId)).toEqual(['h1', 'h2', 'h3', 'h4'])
     })
 
     it('gives each test the hooks of its ancestor suites, nearest suite first', () => {
-      const [tests] = flattenSuiteIntoRunnables(createRootRunnable())
+      const { hookIdsByTestId } = flattenSuiteIntoRunnables(createRootRunnable())
 
-      expect(hookIdsByTestId(tests)).toEqual({
+      expect(hookIdsByTestId).toEqual({
         r2: ['h1'],
         r4: ['h2', 'h3', 'h1'],
         r6: ['h4', 'h2', 'h3', 'h1'],
@@ -69,9 +65,7 @@ describe('lib/util/tests_utils', () => {
       runnable.tests[0].hooks = runnable.hooks
       runnable.suites[1].tests[0].hooks = runnable.hooks
 
-      const [tests] = flattenSuiteIntoRunnables(runnable)
-
-      expect(hookIdsByTestId(tests)).toEqual(hookIdsByTestId(flattenSuiteIntoRunnables(createRootRunnable())[0]))
+      expect(flattenSuiteIntoRunnables(runnable).hookIdsByTestId).toEqual(flattenSuiteIntoRunnables(createRootRunnable()).hookIdsByTestId)
     })
 
     it('does not mutate the runnables', () => {
@@ -82,8 +76,9 @@ describe('lib/util/tests_utils', () => {
       expect(runnable).toEqual(createRootRunnable())
     })
 
-    it('returns empty arrays without a suite', () => {
-      expect(flattenSuiteIntoRunnables(undefined)).toEqual([[], []])
+    it('returns empty results without a suite', () => {
+      expect(flattenSuiteIntoRunnables(undefined)).toEqual({ tests: [], hooks: [], hookIdsByTestId: {} })
+      expect(flattenSuiteIntoRunnables({})).toEqual({ tests: [], hooks: [], hookIdsByTestId: {} })
     })
   })
 })

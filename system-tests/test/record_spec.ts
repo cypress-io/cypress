@@ -2682,6 +2682,25 @@ describe('e2e record', () => {
             expect(artifactReport?.protocol?.afterSpecDurations?.afterSpecTotal).to.be.a('number')
           })
         })
+
+        it('reports the hooks that run around each test', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'simple_hooks*',
+            record: true,
+          }).then(() => {
+            const postInstanceTests = getRequests().find(({ url }) => url === `POST /instances/${instanceId}/tests`)?.body
+            const hookIds = postInstanceTests?.hooks.map((hook) => hook.clientId)
+
+            expect(hookIds).to.have.length(4)
+            expect(postInstanceTests?.tests).to.have.length(3)
+
+            postInstanceTests?.tests.forEach((test) => {
+              expect(test.hookIds).to.have.members(hookIds)
+            })
+          })
+        })
       })
 
       describe('when capture protocol script returns with an invalid signature', () => {

@@ -1,31 +1,48 @@
 import _ from 'lodash'
 
-export const flattenSuiteIntoRunnables = (suite, tests: any[] = [], hooks: any[] = [], inheritedHooks: any[] = []) => {
-  if (_.isArray(suite)) {
-    return _.map(suite, (s) => flattenSuiteIntoRunnables(s, [], [], inheritedHooks))
-    .reduce(
-      (arr1, arr2) => [arr1[0].concat(arr2[0]), arr1[1].concat(arr2[1])],
-      [tests, hooks],
-    )
+interface RunnableHook {
+  hookId: string
+  [key: string]: any
+}
+
+interface RunnableTest {
+  id: string
+  hooks?: RunnableHook[]
+  [key: string]: any
+}
+
+interface RunnableSuite {
+  hooks?: RunnableHook[]
+  tests?: RunnableTest[]
+  suites?: RunnableSuite[]
+  [key: string]: any
+}
+
+export const flattenSuiteIntoRunnables = (rootSuite?: RunnableSuite | null) => {
+  const tests: RunnableTest[] = []
+  const hooks: RunnableHook[] = []
+  const hookIdsByTestId: Record<string, string[]> = {}
+
+  const flatten = (suite: RunnableSuite | undefined, inheritedHooks: RunnableHook[]) => {
+    // if we dont have a suite, return early
+    if (!suite || !suite.suites) {
+      return
+    }
+
+    // union, not concat: when the command log is shown, the reporter has already merged these
+    const suiteHooks = _.unionBy(suite.hooks, inheritedHooks, 'hookId')
+
+    _.each(suite.tests, (test) => {
+      tests.push(test)
+      hookIdsByTestId[test.id] = _.map(_.unionBy(test.hooks, suiteHooks, 'hookId'), 'hookId')
+    })
+
+    hooks.push(...(suite.hooks ?? []))
+
+    _.each(suite.suites, (childSuite) => flatten(childSuite, suiteHooks))
   }
 
-  // if we dont have a suite, return early
-  if (!suite || !suite.suites) {
-    return [tests, hooks]
-  }
+  flatten(rootSuite ?? undefined, [])
 
-  // union, not concat: when the command log is shown, the reporter has already merged these
-  const suiteHooks = _.unionBy(suite.hooks, inheritedHooks, 'hookId')
-
-  tests = tests.concat(_.map(suite.tests, (test) => {
-    return { ...test, hooks: _.unionBy(test.hooks, suiteHooks, 'hookId') }
-  }))
-
-  hooks = hooks.concat(suite.hooks)
-
-  if (suite.suites.length) {
-    return flattenSuiteIntoRunnables(suite.suites, tests, hooks, suiteHooks)
-  }
-
-  return [tests, hooks]
+  return { tests, hooks, hookIdsByTestId }
 }
