@@ -654,7 +654,8 @@ const pruneEmptySuites = (rootSuite, testFilter: NonNullable<TestFilter>) => {
   return totalUnfilteredTests
 }
 
-// normalized copies only: test lifecycle events serialize the mocha runnables
+// a test also runs the hooks of every enclosing suite; set them on each
+// normalized test so they're recorded even when the command log is hidden
 const addSuiteHooksToTests = (normalizedSuite, inheritedHooks = []) => {
   const suiteHooks = _.unionBy(normalizedSuite.hooks, inheritedHooks, 'hookId')
 
