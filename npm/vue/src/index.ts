@@ -396,7 +396,7 @@ export function mount (componentOptions: any, options: any = {}) {
 
   // then wait for cypress to load
   return cy.then(() => {
-    // @ts-ignore
+    // @ts-expect-error - `cy.state` is internal and not in the public Cypress types
     const document: Document = cy.state('document')
 
     const el = getContainerEl()

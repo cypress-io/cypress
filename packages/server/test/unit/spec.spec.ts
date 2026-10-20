@@ -2,6 +2,7 @@ import Bluebird from 'bluebird'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import spec from '../../lib/controllers/spec'
 import preprocessor from '../../lib/plugins/preprocessor'
+import { NotSpecFrameScriptError } from '../../lib/util/spec_frame_scripts'
 
 describe('lib/controllers/spec', () => {
   const specName = 'sample.js'
@@ -54,6 +55,24 @@ describe('lib/controllers/spec', () => {
       expect(res.send).toHaveBeenCalled()
       expect(res.send.mock.calls[0][0]).toContain('(function')
       expect(res.send.mock.calls[0][0]).toContain('Reason request failed')
+    })
+  })
+
+  it('sends a client-side error when the preprocessor refuses a non-spec file', () => {
+    vi.mocked(preprocessor.getFile).mockImplementation(() => Bluebird.reject(new NotSpecFrameScriptError('../secret.json')))
+
+    return handle('../secret.json').then(() => {
+      expect(res.send.mock.calls[0][0]).toContain('(function')
+      expect(res.send.mock.calls[0][0]).toContain('../secret.json is not a spec file or the support file of this project.')
+    })
+  })
+
+  it('does not end the run when the preprocessor refuses a non-spec file', () => {
+    vi.mocked(preprocessor.getFile).mockImplementation(() => Bluebird.reject(new NotSpecFrameScriptError('../secret.json')))
+
+    return handle('../secret.json', { isTextTerminal: true }).then(() => {
+      expect(onError).not.toHaveBeenCalled()
+      expect(res.send.mock.calls[0][0]).toContain('is not a spec file or the support file of this project.')
     })
   })
 

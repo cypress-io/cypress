@@ -108,7 +108,6 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/7314
       it('supports a number argument', () => {
         cy.get('#attr-number').then(($el) => {
-          // @ts-expect-error - the typings only accept a string value, but numbers are supported at runtime
           expect($el).to.have.attr('num', 777)
           expect($el).to.have.attr('num', '777')
         })

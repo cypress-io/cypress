@@ -606,9 +606,9 @@ describe('lib/cloud/protocol', () => {
               ...expectedAfterSpecDurations.durations,
             })
 
-            // @ts-ignore
+            // @ts-expect-error - specAccess is optional on the result
             expect(res?.specAccess.offset).toBe(offset)
-            // @ts-ignore
+            // @ts-expect-error - specAccess is optional on the result
             expect(res?.specAccess.size).toBe(size)
 
             expect(fs.unlink).toHaveBeenCalled()
@@ -627,7 +627,7 @@ describe('lib/cloud/protocol', () => {
           })
 
           afterEach(() => {
-            // @ts-ignore
+            // @ts-expect-error - uploadStallSamplingInterval is not optional
             protocol.uploadStallSamplingInterval = undefined
           })
 
