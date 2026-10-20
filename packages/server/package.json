@@ -2,7 +2,28 @@
   "name": "@packages/server",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "config",
+    "hook-require.js",
+    "lib",
+    "patches",
+    "start-cypress.js",
+    "v8-snapshot-entry.js"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "axios",
+      "devtools-protocol",
+      "edgedriver",
+      "geckodriver",
+      "http-proxy",
+      "tsconfig-paths",
+      "webdriver"
+    ]
+  },
   "scripts": {
     "build-prod": "yarn ensure-cloud-validations && (tsc || echo 'built, with type errors')",
     "check-ts": "yarn ensure-cloud-validations && tsc --noEmit",
@@ -20,6 +41,9 @@
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
     "test-unit": "vitest run",
     "test-watch": "./test/scripts/watch test"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "@cypress/get-windows-proxy": "1.6.3",
@@ -192,34 +216,10 @@
     "xvfb-maybe": "0.2.1",
     "zod": "^3.23.8"
   },
-  "files": [
-    "config",
-    "hook-require.js",
-    "lib",
-    "patches",
-    "start-cypress.js",
-    "v8-snapshot-entry.js"
-  ],
-  "types": "index.d.ts",
-  "productName": "Cypress",
-  "license": "MIT",
-  "workspaces": {
-    "nohoist": [
-      "axios",
-      "devtools-protocol",
-      "edgedriver",
-      "geckodriver",
-      "http-proxy",
-      "tsconfig-paths",
-      "webdriver"
-    ]
-  },
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
-  },
   "optionalDependencies": {
     "fsevents": "^2.3.3",
     "registry-js": "1.15.0"
   },
-  "nx": {}
+  "nx": {},
+  "productName": "Cypress"
 }

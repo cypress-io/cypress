@@ -2484,7 +2484,31 @@ exports['e2e events'] = `
               "currentRetry": 0,
               "retries": -1,
               "_slow": 10000,
-              "hooks": [],
+              "hooks": [
+                {
+                  "title": "\\"before each\\" hook",
+                  "hookName": "before each",
+                  "hookId": "h1",
+                  "pending": false,
+                  "body": "() => {\\n    // cause the top-origin to change by visiting a different domain\\n    cy.visit('http://localhost:3131/index.html');\\n  }",
+                  "type": "hook",
+                  "file": null,
+                  "invocationDetails": {
+                    "function": "Suite.eval",
+                    "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js",
+                    "originalFile": "webpack://protocol-sample-project/./cypress/e2e/protocol.cy.js",
+                    "relativeFile": "cypress/e2e/protocol.cy.js",
+                    "absoluteFile": "/path/to/absoluteFile",
+                    "line": 2,
+                    "column": 2,
+                    "whitespace": "    ",
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:11:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+                  },
+                  "currentRetry": 0,
+                  "retries": -1,
+                  "_slow": 10000
+                }
+              ],
               "_testConfig": {
                 "testConfigList": [
                   {
