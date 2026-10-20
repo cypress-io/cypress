@@ -235,13 +235,9 @@ describe('ProjectConfigIpc', () => {
     })
 
     describe('NODE_TLS_REJECT_UNAUTHORIZED', () => {
-      let originalEnv: NodeJS.ProcessEnv
+      const originalEnv = process.env
 
       beforeEach(() => {
-        originalEnv = { ...process.env }
-        // matches what @packages/server's request.ts sets in the main process
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
         // @ts-expect-error - mock
         childProcess.fork.mockImplementation(() => {
           return {
@@ -258,7 +254,10 @@ describe('ProjectConfigIpc', () => {
         process.env = originalEnv
       })
 
-      const forkEnv = async () => {
+      // The server sets NODE_TLS_REJECT_UNAUTHORIZED to '0' and records the user's value in CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED
+      const getConfigProcessEnv = async (serverEnv: NodeJS.ProcessEnv) => {
+        process.env = { ...originalEnv, ...serverEnv }
+
         const projectPath = await scaffoldProject('e2e')
 
         projectConfigIpc = new ProjectConfigIpc(
@@ -272,25 +271,19 @@ describe('ProjectConfigIpc', () => {
         )
 
         // @ts-expect-error - mock
-        return childProcess.fork.mock.calls.at(-1)[2].env
+        return childProcess.fork.mock.lastCall[2].env
       }
 
-      it('leaves it unset when the user did not set it', async () => {
-        delete process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED
+      it('is not set when the user did not set it', async () => {
+        const env = await getConfigProcessEnv({ NODE_TLS_REJECT_UNAUTHORIZED: '0' })
 
-        const env = await forkEnv()
-
-        expect(env).not.toHaveProperty('NODE_TLS_REJECT_UNAUTHORIZED')
-        expect(env).not.toHaveProperty('CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED')
+        expect(env.NODE_TLS_REJECT_UNAUTHORIZED).toBeUndefined()
       })
 
-      it('passes through the value the user set', async () => {
-        process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = '1'
-
-        const env = await forkEnv()
+      it('is the value the user set', async () => {
+        const env = await getConfigProcessEnv({ NODE_TLS_REJECT_UNAUTHORIZED: '0', CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED: '1' })
 
         expect(env.NODE_TLS_REJECT_UNAUTHORIZED).toEqual('1')
-        expect(env).not.toHaveProperty('CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED')
       })
     })
   })

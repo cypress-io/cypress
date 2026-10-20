@@ -44,11 +44,11 @@ describe('lib/util/suppress_warnings', function () {
     expect(emitWarning).not.toHaveBeenCalled()
   })
 
-  it('passes through NODE_TLS_REJECT_UNAUTHORIZED warnings when suppressTlsWarning is false', async () => {
+  it('passes through NODE_TLS_REJECT_UNAUTHORIZED warnings when showTlsWarning is true', async () => {
     const emitWarning = vi.spyOn(process, 'emitWarning')
     const suppress = await loadSuppress()
 
-    suppress({ suppressTlsWarning: false })
+    suppress({ showTlsWarning: true })
     process.emitWarning(TLS_WARNING)
 
     expect(emitWarning).toHaveBeenCalledOnce()
