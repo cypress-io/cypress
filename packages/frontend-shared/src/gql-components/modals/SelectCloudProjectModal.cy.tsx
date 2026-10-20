@@ -66,7 +66,7 @@ describe('<SelectCloudProjectModal />', () => {
   it('can only choose an existing project if the organization has a project', () => {
     mountDialog()
     cy.get('[data-cy="selectOrganization"]').click()
-    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 2').click())
+    cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 2').click())
 
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('not.exist')
   })
@@ -74,7 +74,7 @@ describe('<SelectCloudProjectModal />', () => {
   it('auto selects a project if it is the only project in the organization', () => {
     mountDialog()
     cy.get('[data-cy="selectOrganization"]').click()
-    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 3').click())
+    cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 3').click())
 
     cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 3')
   })
@@ -82,14 +82,14 @@ describe('<SelectCloudProjectModal />', () => {
   it(`doesn't auto select a project if there are more than 1 projects in the org`, () => {
     mountDialog()
     cy.get('[data-cy="selectOrganization"]').click()
-    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+    cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 1').click())
     cy.get('[data-cy="selectProject"] button').should('have.text', 'Pick a project')
   })
 
   it('shows the selected project when selecting from a list of >= 2 projects', () => {
     mountDialog()
     cy.get('[data-cy="selectOrganization"]').click()
-    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+    cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 1').click())
     cy.get('[data-cy="selectProject"] button').click()
     cy.contains('Test Project 2').click()
     cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 2').click()
@@ -137,13 +137,13 @@ describe('<SelectCloudProjectModal />', () => {
 
     it('can switch between organizations with and without projects', () => {
       cy.get('[data-cy="selectOrganization"]').click()
-      cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 2').click())
+      cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 2').click())
 
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.connectProject).should('not.exist')
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).should('be.visible')
 
       cy.get('[data-cy="selectOrganization"]').click()
-      cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+      cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 1').click())
 
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).should('not.exist')
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.connectProject).should('be.visible')
@@ -177,7 +177,7 @@ describe('<SelectCloudProjectModal />', () => {
     context('select existing project', () => {
       beforeEach(() => {
         cy.get('[data-cy="selectOrganization"]').click()
-        cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+        cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 1').click())
         cy.get('[data-cy="selectProject"] button').click()
         cy.contains('Test Project 2').click()
 

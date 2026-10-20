@@ -147,7 +147,7 @@ export class BidiAutomation {
     this.webDriverClient = webDriverClient
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
-    // @ts-expect-error
+    // @ts-expect-error - webdriver types request.destination as string, wider than our RequestDestination
     this.webDriverClient.on('network.beforeRequestSent', this.onBeforeRequestSent)
     this.webDriverClient.on('network.responseStarted', this.onResponseStarted)
     this.webDriverClient.on('network.responseCompleted', this.onResponseComplete)

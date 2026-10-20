@@ -53,7 +53,7 @@ describe('<InstallDependencies />', () => {
       },
     })
 
-    cy.findByRole('button', {
+    cy.getByRole('button', {
       name: defaultMessages.setupPage.step.back,
     })
     .should('be.visible')

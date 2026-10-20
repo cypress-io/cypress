@@ -18,6 +18,12 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
     })
   })
 
+  it('.getByRole()', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.getByRole('button', { name: 'get ajax' }).should('have.length', 1)
+    })
+  })
+
   it('.within()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#by-id').within(() => {
@@ -38,7 +44,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)
         expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+        expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
         //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -54,7 +60,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)
         expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+        expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
         //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -65,12 +71,27 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
       cy.contains('Nested Find')
     })
 
+    it('.getByRole()', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out retrying after 50ms:`)
+        expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
+        expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
+        expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
+        expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
+        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+        done()
+      })
+
+      cy.getByRole('button', { name: 'get ajax' })
+    })
+
     it('.within()', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)
         expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+        expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
         //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -88,7 +109,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)
         expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+        expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
         //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -104,7 +125,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)
         expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+        expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
         //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -120,7 +141,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)
         expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+        expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
         expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
         //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -164,6 +185,28 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         expect(consoleProps.props.Content).to.equal('Nested Find')
         expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('DIV')
         expect(consoleProps.props.Yielded).to.have.property('id').that.equals('nested-find')
+      })
+    })
+
+    it('.getByRole()', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.getByRole('button', { name: 'get ajax' })
+      })
+
+      cy.shouldWithTimeout(() => {
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
+        const { consoleProps } = findCrossOriginLogs('getByRole', logs, 'foobar.com')
+
+        expect(consoleProps.name).to.equal('getByRole')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BODY')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Role).to.equal('button')
+        expect(consoleProps.props.Options).to.deep.equal({ name: 'get ajax' })
+        expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('BUTTON')
       })
     })
 

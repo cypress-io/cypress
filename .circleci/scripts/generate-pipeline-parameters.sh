@@ -421,7 +421,10 @@ while IFS= read -r file; do
       npm_schematic_tests=true
       system_tests=true
       ;;
-    packages/eslint-config/*|packages/example/*|npm/xpath/*)
+    packages/example/*)
+      unit_tests=true
+      ;;
+    packages/eslint-config/*|npm/xpath/*)
       # No CI jobs are associated with these packages — no tests to run
       ;;
     *)

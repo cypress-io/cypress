@@ -450,11 +450,7 @@ export default function (Commands, Cypress, cy) {
           return cy.whenStable(() => createSession(existingSession, step))
         })
         .then({ timeout: INTERNAL_COMMAND_TIMEOUT }, () => validateSession(existingSession, step))
-        .then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async (isValidSession: boolean) => {
-          if (!isValidSession) {
-            return 'failed'
-          }
-
+        .then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
           sessionsManager.registeredSessions.set(existingSession.id, true)
           await sessionsManager.saveSessionData(existingSession)
 
@@ -519,7 +515,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }).then({ timeout: INTERNAL_COMMAND_TIMEOUT }, (status: 'created' | 'restored' | 'recreated' | 'failed') => {
+        }).then({ timeout: INTERNAL_COMMAND_TIMEOUT }, (status: 'created' | 'restored' | 'recreated') => {
           return navigateAboutBlank()
           .then(() => {
             setSessionLogStatus(status)

@@ -27,6 +27,11 @@ function removeLeadingSlash (str: string) {
   return str.substring(li + 1)
 }
 
+// Only an empty string fails a non-empty string check, so quote strings to keep it visible
+const formatNonEmptyStringArg = (value) => {
+  return _.isString(value) ? `'${value}'` : $utils.stringifyActual(value)
+}
+
 const formatConfigFile = (projectRoot: Cypress.Config['projectRoot'], configFile: Cypress.Config['configFile']) => {
   configFile = removeLeadingSlash(configFile.replace(projectRoot, ''))
 
@@ -53,6 +58,14 @@ const cmd = (command, args = '') => {
   const prefix = command.startsWith('Cypress') ? '' : 'cy.'
 
   return `\`${prefix}${command}(${args})\``
+}
+
+const previousCommandSection = (previous?: string) => {
+  if (!previous) {
+    return ''
+  }
+
+  return `\n\nThe previous command that ran was:\n\n  > ${cmd(previous)}`
 }
 
 const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map($utils.stringifyActual).join(', ')})`
@@ -532,7 +545,7 @@ export default {
     },
     invalid_argument (obj) {
       return {
-        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`{{file}}\`.`,
+        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(obj.file)}\`.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
@@ -606,6 +619,30 @@ export default {
         message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
+    },
+  },
+
+  // Shared by every `cy.getBy*()` query. Each query passes its own `cmd` and `docsUrl`.
+  get_by: {
+    docsUrl: '{{docsUrl}}',
+    invalid_options: `${cmd('{{cmd}}')} only accepts an options object as its second argument. You passed: \`{{options}}\``,
+    invalid_option: `${cmd('{{cmd}}')} does not accept the \`{{option}}\` option.{{hint}} It accepts: {{accepted}}.`,
+    invalid_option_boolean: `${cmd('{{cmd}}')} only accepts a \`boolean\` for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_matcher: `${cmd('{{cmd}}')} only accepts a string, number, regular expression, or function for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_timeout: `${cmd('{{cmd}}')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
+    not_found: 'Expected to find {{description}}{{scope}}, but never did.{{hints}}',
+    found: 'Expected not to find {{description}}{{scope}}, but continuously found it.',
+
+    getByRole: {
+      docsUrl: 'https://on.cypress.io/getbyrole',
+      invalid_role: `${cmd('getByRole')} requires a role as its first argument, such as \`'button'\` or \`'heading'\`. You passed: \`{{matcher}}\``,
+      option_hint: ' To narrow the results by `{{option}}`, chain {{alternative}} instead.',
+      roles_hint: 'Here are the {{accessible}}roles that were found, with the accessible name of each element:\n\n{{roles}}',
+      no_roles: 'No elements with a role were found.',
+      no_accessible_roles: 'No accessible elements with a role were found, but some elements may be hidden from the accessibility tree. To include them, pass `{ hidden: true }`.',
+      role_with_whitespace: `${cmd('getByRole')} was passed the role \`{{role}}\`, but a role is a single word with no spaces, such as \`'button'\`. Query one role at a time.`,
+      no_native_element: `${cmd('getByRole')} was passed \`native: true\`, but HTML has no native element with the role \`{{role}}\`, so only a \`role\` attribute can give an element that role. Remove \`native: true\` to find it.`,
+      native_hint: 'Some elements have the role "{{role}}" only through a `role` attribute, so they were skipped. The native elements for this role are: {{tags}}. To include elements with a `role` attribute, pass `{ native: false }`.',
     },
   },
 
@@ -903,20 +940,13 @@ export default {
       docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invoking_child_without_parent (obj) {
-      return stripIndent`\
-        Oops, it looks like you are trying to call a child command before running a parent command.
+      return {
+        message: stripIndent`\
+          ${cmd(obj.cmd, obj.args)} failed because it is not chained off a command that yields a subject.
 
-        You wrote code that looks like this:
-
-        \`${cmd(obj.cmd, obj.args)}\`
-
-        A child command must be chained after a parent because it operates on a previous subject.
-
-        For example - if we were issuing the child command \`click\`...
-
-        cy
-          .get('button') // parent command must come first
-          .click()       // then child command comes second`
+          ${cmd(obj.cmd)} runs on the subject yielded by the command it is chained off, so calling it directly off \`cy\` gives it no subject. Chain it off a command that yields a subject, such as ${cmd('get')} or ${cmd('wrap')}.`,
+        docsUrl: 'https://on.cypress.io/introduction-to-cypress',
+      }
     },
     no_cy: '`Cypress.cy` is `undefined`. You may be trying to query outside of a running test. Cannot call `Cypress.$()`',
     no_runner: 'Cannot call `Cypress#run` without a runner instance.',
@@ -947,16 +977,16 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
+    cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled, isSameSuperDomainOrigin }) {
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-        ${isSkipDomainInjectionEnabled ? `
-        Unless \`injectDocumentDomain\` is disabled, a ${cmd('origin')} command is required.
-        ` : ''}
-        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+        ${isInjectDocumentDomainEnabled || !isSameSuperDomainOrigin ? '' : `
+        Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
+        `}
+        Use ${cmd('origin')} to wrap the commands run on \`${autOrigin}\`.
 
         \`cy.origin('${autOrigin}', () => {\`
         \`  <commands targeting ${autOrigin} go here>\`
@@ -1980,28 +2010,20 @@ export default {
       }
     },
     not_window_or_document (obj) {
-      return stripIndent`\
+      return `${stripIndent`\
         ${cmd(obj.name)} failed because it requires the subject be a global \`${obj.type}\` object.
 
         The subject received was:
 
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}`
+          > \`${obj.subject}\``}${previousCommandSection(obj.previous)}`
     },
     not_element (obj) {
-      return stripIndent`\
+      return `${stripIndent`\
         ${cmd(obj.name)} failed because it requires a DOM element.
 
         The subject received was:
 
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}`
+          > \`${obj.subject}\``}${previousCommandSection(obj.previous)}`
     },
     not_element_empty_subject (obj) {
       return stripIndent`\
@@ -2066,22 +2088,27 @@ export default {
   },
 
   then: {
-    callback_mixes_sync_and_async: stripIndent`\
-      ${cmd('then')} failed because you are mixing up async and sync code.
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because you are mixing up async and sync code.
 
-      In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
 
-      Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
 
-      You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
 
-      The value you synchronously returned was: \`{{value}}\``,
+        The value you synchronously returned was: \`{{value}}\``,
+      docsUrl: 'https://on.cypress.io/{{cmd}}',
+    },
   },
 
   trigger: {
-    invalid_argument: {
-      message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`{{cmd}}\`.`,
-      docsUrl: 'https://on.cypress.io/trigger',
+    invalid_argument ({ eventName }) {
+      return {
+        message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(eventName)}\`.`,
+        docsUrl: 'https://on.cypress.io/trigger',
+      }
     },
     multiple_elements: {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,

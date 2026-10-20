@@ -5,6 +5,7 @@ import $utils from './utils'
 import $errUtils from './error_utils'
 import type { $Cy } from './cy'
 import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
+import { getSuperDomainOrigin } from '@packages/network-tools'
 
 // verbose since subject validation runs on every retry of a query
 const debugVerbose = Debug('cypress-verbose:driver:ensure')
@@ -80,8 +81,18 @@ const isType = (subject, type, name: string, cy: $Cy) => {
     return `${copy.join(', ')} or ${last}`
   }
 
-  // every validation failed and we had more than one validation
+  // every validation failed
   if (errors.length === types.length) {
+    const current = cy.state('current')
+    const needsChainedSubject = current?.get('query') || current?.get('type') === 'child'
+
+    // Parent and dual commands can run without a subject, and a query replayed
+    // while another command resolves an alias validates under its own name
+    // rather than the running command's, so neither is told to chain off one
+    if (_.isUndefined(subject) && needsChainedSubject && current.get('name') === name) {
+      isChildCommand(current, current.get('args'), cy)
+    }
+
     err = errors[0]
 
     if (types.length > 1) {
@@ -105,6 +116,8 @@ const isChildCommand = (command, args, cy: $Cy) => {
         cmd: command.get('name'),
         args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
       },
+      // a chain only gains a subject from its own commands, so retrying can't help
+      errProps: { retry: false },
     })
   }
 }
@@ -165,7 +178,7 @@ const isAttached = (subject, name: string, cy: $Cy, onFail?) => {
   if ($dom.isDetached(subject)) {
     const current = cy.state('current')
 
-    const subjectChain = cy.subjectChain(current.get('chainerId'))
+    const subjectChain = cy.subjectChain(current?.get('chainerId'))
 
     debugVerbose('subject %s is detached after `%s`', $dom.stringify(subject), name)
 
@@ -181,14 +194,14 @@ const isElement = (subject, name: string, cy: $Cy, onFail?) => {
     const current = cy.state('current')
 
     if ($dom.isJquery(subject) && subject.length === 0) {
-      const subjectChain = cy.subjectChain(current.get('chainerId'))
-      const prevCommandWasQuery = current.get('prev').get('query')
+      const subjectChain = cy.subjectChain(current?.get('chainerId'))
+      const prevCommandWasQuery = current?.get('prev')?.get('query')
 
       if (prevCommandWasQuery) {
         $errUtils.throwErrByPath('subject.not_element_empty_subject', {
           onFail,
           args: {
-            name: current.get('name'),
+            name: current?.get('name') ?? name,
             subjectChain,
           },
         })
@@ -200,7 +213,7 @@ const isElement = (subject, name: string, cy: $Cy, onFail?) => {
       args: {
         name,
         subject: $utils.stringifyActual(subject),
-        previous: current.get('prev').get('name'),
+        previous: current?.get('prev')?.get('name'),
       },
     })
   }
@@ -208,14 +221,14 @@ const isElement = (subject, name: string, cy: $Cy, onFail?) => {
 
 const isWindow = (subject, name: string, cy: $Cy) => {
   if (!$dom.isWindow(subject)) {
-    const prev = cy.state('current').get('prev')
+    const prev = cy.state('current')?.get('prev')
 
     $errUtils.throwErrByPath('subject.not_window_or_document', {
       args: {
         name,
         type: 'window',
         subject: $utils.stringifyActual(subject),
-        previous: prev.get('name'),
+        previous: prev?.get('name'),
       },
     })
   }
@@ -223,14 +236,14 @@ const isWindow = (subject, name: string, cy: $Cy) => {
 
 const isDocument = (subject, name: string, cy: $Cy) => {
   if (!$dom.isDocument(subject)) {
-    const prev = cy.state('current').get('prev')
+    const prev = cy.state('current')?.get('prev')
 
     $errUtils.throwErrByPath('subject.not_window_or_document', {
       args: {
         name,
         type: 'document',
         subject: $utils.stringifyActual(subject),
-        previous: prev.get('name'),
+        previous: prev?.get('name'),
       },
     })
   }
@@ -249,6 +262,15 @@ const isScrollable = ($el, name, onFail?): true | void => {
   })
 }
 
+const isSameSuperDomainOrigin = (origin: string, otherOrigin: string): boolean => {
+  try {
+    return getSuperDomainOrigin(origin) === getSuperDomainOrigin(otherOrigin)
+  } catch (err) {
+    // an opaque origin, such as a sandboxed or data: URL, reports 'null' and can't be parsed
+    return false
+  }
+}
+
 /**
   * commandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
   * If we can not communicate, throw an error.
@@ -258,10 +280,14 @@ const isScrollable = ($el, name, onFail?): true | void => {
   */
 const commandCanCommunicateWithAUT = (cy: $Cy, err?): boolean => {
   if (!isRunnerAbleToCommunicateWithAut()) {
+    const commandOrigin = window.location.origin
+    const autOrigin = cy.state('autLocation').origin
+
     const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
-      commandOrigin: window.location.origin,
-      autOrigin: cy.state('autLocation').origin,
+      commandOrigin,
+      autOrigin,
       isInjectDocumentDomainEnabled: Cypress.config('injectDocumentDomain'),
+      isSameSuperDomainOrigin: isSameSuperDomainOrigin(commandOrigin, autOrigin),
     })
 
     if (err) {

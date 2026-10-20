@@ -79,6 +79,14 @@ declare namespace Cypress {
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
+  /**
+   * Trigger action
+   * @private
+   */
+  interface ActionTrigger {
+    <T = (any[] | void)>(action: string, ...args: any[]): T
+  }
+
   type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
@@ -295,6 +303,25 @@ declare namespace Cypress {
    * Window type for Application Under Test(AUT)
    */
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
+
+  /**
+   * The object yielded by `cy.location()`, describing the current URL of the Application Under Test (AUT).
+   * It is a plain object, not the AUT's `window.location`, so it has no methods such as `assign()` or `reload()`.
+   *
+   * @see https://on.cypress.io/location
+   */
+  interface AUTLocation {
+    hash: string
+    host: string
+    hostname: string
+    href: string
+    origin: string
+    pathname: string
+    port: string
+    protocol: string
+    search: string
+    searchParams: URLSearchParams
+  }
 
   /**
    * The interface for user-defined properties in Window object under test.
@@ -757,7 +784,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
+    action: ActionTrigger
 
     /**
      * Load files
@@ -1252,7 +1279,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific corner / side.
      *
@@ -1262,7 +1289,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -1276,7 +1303,7 @@ declare namespace Cypress {
     cy.get('button').dblclick(15, 40)
     ```
      */
-    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(x: number, y: number, options?: Partial<DblClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
@@ -1318,9 +1345,12 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
+      * Yields the status of the session: `'created'` when `setup` ran for a new session, `'restored'` when a saved
+      * session was restored, or `'recreated'` when a restored session failed validation and `setup` ran again.
+      *
       * @see https://on.cypress.io/session
       */
-    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<null>
+    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<'created' | 'restored' | 'recreated'>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -1338,8 +1368,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/each
      */
-    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
-    each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
+    each(fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
      *
@@ -1349,8 +1379,8 @@ declare namespace Cypress {
      *      // work with each cookie
      *    })
      */
-    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>>
-    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
+    each<E extends Node = HTMLElement>(options: Partial<Timeoutable>, fn: (element: JQuery<E>, index: number, $list: JQuery<E>) => void): Chainable<JQuery<E>>
+    each(options: Partial<Timeoutable>, fn: (item: any, index: number, $list: any) => void): Chainable<Subject>
 
     /**
      * Get A DOM element at a specific index in an array of elements.
@@ -1359,7 +1389,7 @@ declare namespace Cypress {
      * @param {Number} index A number indicating the index to find the element at within an array of elements. A negative number counts index from the end of the list.
      * @example
      *    cy.get('tbody>tr').eq(0)    // Yield first 'tr' in 'tbody'
-     *    cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
+     *    cy.get('ul>li').eq(4)       // Yield fifth 'li' in 'ul'
      *    cy.get('li').eq(-2) // Yields second from last 'li' element
      */
     eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
@@ -1482,6 +1512,30 @@ declare namespace Cypress {
     get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>
 
     /**
+     * Get every element with the given ARIA role, optionally narrowed to
+     * those whose accessible name matches `name`. Elements hidden from the
+     * accessibility tree are skipped unless `hidden` is `true`.
+     *
+     * For a role that HTML has an element for, only that element matches by
+     * default: `'button'` finds a `<button>`, not a `<div role="button">`.
+     * Pass `native: false` to also match elements that get the role from a
+     * `role` attribute.
+     *
+     * Chained off an element, it searches that element's descendants.
+     *
+     * @see https://on.cypress.io/getbyrole
+     * @example
+     *    // A native <button>, never a <div role="button">
+     *    cy.getByRole('button', { name: 'Save' }).click()
+     *    // Widgets that HTML has no element for
+     *    cy.getByRole('tab', { name: 'Billing' }).click()
+     *    cy.get('nav').getByRole('menuitem', { name: /delete/i })
+     *    // A dialog rendered as <div role="dialog"> by a component library
+     *    cy.getByRole('dialog', { name: 'Settings', native: false })
+     */
+    getByRole<E extends Node = HTMLElement>(role: import('./aria-query').ARIARole | (string & {}), options?: Partial<GetByRoleOptions>): Chainable<JQuery<E>>
+
+    /**
      * Get a browser cookie by its name.
      *
      * @see https://on.cypress.io/getcookie
@@ -1576,15 +1630,15 @@ declare namespace Cypress {
     last<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Get the global `window.location` object of the page that is currently active.
+     * Yield a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
      *    cy.location() // Get location object
      */
-    location(options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location(options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation>
     /**
-     * Get a part of the global `window.location` object of the page that is currently active.
+     * Yield one property of a plain object describing the current URL of the application under test.
      *
      * @see https://on.cypress.io/location
      * @example
@@ -1593,7 +1647,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location<K extends keyof Location>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<Location[K]>
+    location<K extends keyof AUTLocation>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<AUTLocation[K]>
 
     /**
      * Print a message to the Cypress Command Log.
@@ -1621,7 +1675,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/next
      * @example
-     *    cy.get('nav a:first').next('.menu-item)
+     *    cy.get('nav a:first').next('.menu-item')
      */
     next<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
@@ -2793,6 +2847,41 @@ declare namespace Cypress {
     timeout: number
   }
 
+  interface GetByRoleOptions extends Loggable, Timeoutable, Shadow {
+    /**
+     * Only match elements whose accessible name matches: the text a screen
+     * reader announces for the element, taken from its label, its content,
+     * `aria-label` or `aria-labelledby`. A string must match the whole name, a
+     * regular expression is tested against it, and a function is called with
+     * the name and the element.
+     */
+    name: string | number | RegExp | ((name: string, element: Element | null) => boolean)
+    /**
+     * Include elements that are hidden from the accessibility tree, such as
+     * those with `aria-hidden="true"`, `display: none` or `visibility: hidden`.
+     *
+     * @default false
+     */
+    hidden: boolean
+    /**
+     * Only match elements whose tag gives them the role, like `<button>`,
+     * skipping elements that only have it through a `role` attribute, like
+     * `<div role="button">`. Set it to `false` to match both.
+     *
+     * Some widely used patterns get their role from a `role` attribute even
+     * though HTML has an element for it, so they need `native: false`: an
+     * `<input role="combobox">` (the native combobox is a `<select>` or an
+     * `<input list>`) and an `<svg role="img">` (the native one is an `<img>`).
+     *
+     * Roles that HTML has no element for, such as `tab` or `menuitem`, can
+     * only come from a `role` attribute, so they are always matched that way.
+     * Passing `native: true` with one of those roles throws.
+     *
+     * @default true for roles that HTML has an element for
+     */
+    native: boolean
+  }
+
   /**
    * Options that check case sensitivity
    */
@@ -2972,6 +3061,18 @@ declare namespace Cypress {
      * @default false
      */
     cmdKey: boolean
+  }
+
+  /**
+   * Object to change the default behavior of .dblclick().
+   */
+  interface DblClickOptions extends ClickOptions {
+    /**
+     * Serially double click multiple elements
+     *
+     * @default true
+     */
+    multiple: boolean
   }
 
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
@@ -3994,14 +4095,14 @@ declare namespace Cypress {
      */
     cacheAcrossSpecs?: boolean
     /**
-     * Function to run immediately after the session is created and `setup` function runs or
-     * after a session is restored and the page is cleared. If this returns `false`, throws an
-     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
-     * Cypress command, the session is considered invalid.
+     * Function to run immediately after `setup` creates a session, or after a saved session is
+     * restored. The session is invalid if this function throws an exception, contains a failing
+     * Cypress command, returns a Promise that rejects or resolves to `false`, or returns nothing
+     * and its last Cypress command yields `false`. Returning `false` directly, without a Promise,
+     * does not invalidate the session.
      *
      * If validation fails immediately after `setup`, the test will fail.
      * If validation fails after restoring a session, `setup` will re-run.
-     * @default {false}
      */
     validate?: () => Promise<false | void> | void
   }
@@ -4223,6 +4324,13 @@ declare namespace Cypress {
     flag: string
     encoding: Encodings
   }
+
+  /**
+   * What the chai-jquery `match` assertion accepts for a DOM subject: anything jQuery's `.is()` accepts.
+   *
+   * @see http://chaijs.com/plugins/chai-jquery/#matchselector
+   */
+  type JQueryMatchable = string | Element | ArrayLike<Element> | JQuery<any> | ((this: Element, index: number, element: Element) => boolean)
 
   // Kind of onerous, but has a nice auto-complete.
   /**
@@ -5878,10 +5986,11 @@ declare namespace Cypress {
      * @example
      *    cy.get('#result').should('have.attr', 'role')
      *    cy.get('#result').should('have.attr', 'role', 'menu')
+     *    cy.get('#result').should('have.attr', 'tabindex', 0)
      * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.attr', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.attr', value: string, match?: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection has the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -5905,7 +6014,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.data', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.data', value: string, match?: string | number | boolean | null): Chainable<Subject>
     /**
      * Assert that the selection contains at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
@@ -5939,13 +6048,13 @@ declare namespace Cypress {
      */
     (chainer: 'include.html', value: string): Chainable<Subject>
     /**
-     * Assert that the first element of the selection has the given id, using `.attr('id')`.
+     * Assert that the first element of the selection has the given id, using `.prop('id')`.
      * @example
      *    cy.get('#result').should('have.id', 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.id', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.id', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection has the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -5962,7 +6071,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.text', value: string): Chainable<Subject>
+    (chainer: 'have.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection partially contains the given text, using `.text()`.
      * @example
@@ -5970,7 +6079,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'contain.text', value: string): Chainable<Subject>
+    (chainer: 'contain.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection partially contains the given text, using `.text()`.
      * @example
@@ -5978,7 +6087,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'include.text', value: string): Chainable<Subject>
+    (chainer: 'include.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection has the given value, using `.val()`.
      * @example
@@ -5986,7 +6095,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.value', value: string): Chainable<Subject>
+    (chainer: 'have.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection partially contains the given value, using `.val()`.
      * @example
@@ -5994,7 +6103,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'contain.value', value: string): Chainable<Subject>
+    (chainer: 'contain.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection partially contains the given value, using `.val()`.
      * @example
@@ -6002,15 +6111,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'include.value', value: string): Chainable<Subject>
+    (chainer: 'include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection matches a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * Assert that the selection matches a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted, and a regular expression never matches a DOM element or jQuery object.
      * @example
      *    cy.get('#result').should('match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'match', value: string): Chainable<Subject>
+    (chainer: 'match', value: JQueryMatchable): Chainable<Subject>
 
     // jquery-chai.not
     /**
@@ -6106,10 +6215,11 @@ declare namespace Cypress {
      * @example
      *    cy.get('#result').should('not.have.attr', 'role')
      *    cy.get('#result').should('not.have.attr', 'role', 'menu')
+     *    cy.get('#result').should('not.have.attr', 'tabindex', 0)
      * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.attr', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.attr', value: string, match?: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not have the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -6133,7 +6243,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.data', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.data', value: string, match?: string | number | boolean | null): Chainable<Subject>
     /**
      * Assert that the selection does not contain at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
@@ -6167,13 +6277,13 @@ declare namespace Cypress {
      */
     (chainer: 'not.include.html', value: string): Chainable<Subject>
     /**
-     * Assert that the first element of the selection does not have the given id, using `.attr('id')`.
+     * Assert that the first element of the selection does not have the given id, using `.prop('id')`.
      * @example
      *    cy.get('#result').should('not.have.id', 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.id', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.id', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not have the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -6190,7 +6300,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.text', value: string): Chainable<Subject>
+    (chainer: 'not.have.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection does not contain the given text, using `.text()`.
      * @example
@@ -6198,7 +6308,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.contain.text', value: string): Chainable<Subject>
+    (chainer: 'not.contain.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection does not contain the given text, using `.text()`.
      * @example
@@ -6206,7 +6316,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.include.text', value: string): Chainable<Subject>
+    (chainer: 'not.include.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not have the given value, using `.val()`.
      * @example
@@ -6214,7 +6324,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.value', value: string): Chainable<Subject>
+    (chainer: 'not.have.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not contain the given value, using `.val()`.
      * @example
@@ -6222,7 +6332,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.contain.value', value: string): Chainable<Subject>
+    (chainer: 'not.contain.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not contain the given value, using `.val()`.
      * @example
@@ -6230,15 +6340,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.include.value', value: string): Chainable<Subject>
+    (chainer: 'not.include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection does not match a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * Assert that the selection does not match a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted, and a regular expression never matches a DOM element or jQuery object.
      * @example
      *    cy.get('#result').should('not.match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.match', value: string): Chainable<Subject>
+    (chainer: 'not.match', value: JQueryMatchable): Chainable<Subject>
 
     // fallback
     /**

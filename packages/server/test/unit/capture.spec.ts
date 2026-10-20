@@ -28,7 +28,7 @@ describe('lib/capture', () => {
       console.log('bar')
       process.stdout.write('baz')
 
-      expect(captured.data).toEqual([
+      expect(captured.data).toStrictEqual([
         'foo\n',
         'bar\n',
         'baz',
@@ -64,7 +64,7 @@ describe('lib/capture', () => {
       process.log('foo\n')
       process.log('bar\n')
 
-      expect(captured.data).toEqual([
+      expect(captured.data).toStrictEqual([
         'foo\n',
         'bar\n',
       ])
