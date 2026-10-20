@@ -755,11 +755,11 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         // this also means runtimeConfig will be missing
         runnables = runnables || {}
 
-        const flattened = flattenSuiteIntoRunnables(runnables)
+        const r = flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
         const resolvedRuntimeConfig = { ...config, ...runtimeConfig }
 
-        const tests = _.chain(flattened.tests)
+        const tests = _.chain(r[0])
         .uniqBy('id')
         .map((v) => {
           return _.pick({
@@ -774,13 +774,13 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
               return title.replace(BROWSER_SKIP_TITLE, '')
             }),
-            hookIds: flattened.hookIdsByTestId[v.id],
+            hookIds: v.hooks.map((hook) => hook.hookId),
           },
           'clientId', 'body', 'title', 'config', 'hookIds')
         })
         .value()
 
-        const hooks = _.chain(flattened.hooks)
+        const hooks = _.chain(r[1])
         .uniqBy('hookId')
         .map((v) => {
           return _.pick({
