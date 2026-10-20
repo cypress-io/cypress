@@ -312,9 +312,13 @@ export class ProjectConfigIpc extends EventEmitter {
 
     const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath, '--shouldLoadAsEsm', String(shouldLoadAsEsm)]
     // we do NOT want telemetry enabled within our cy-in-cy tests as it isn't configured to handled it
-    const env = _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY')
+    const env = _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY', 'NODE_TLS_REJECT_UNAUTHORIZED', 'CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED')
 
     env.NODE_OPTIONS = process.env.ORIGINAL_NODE_OPTIONS || ''
+
+    if (process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
+      env.NODE_TLS_REJECT_UNAUTHORIZED = process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED
+    }
 
     const childOptions: ForkOptions = {
       stdio: 'pipe',

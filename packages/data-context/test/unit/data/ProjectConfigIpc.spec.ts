@@ -233,5 +233,65 @@ describe('ProjectConfigIpc', () => {
         }, 30000)
       })
     })
+
+    describe('NODE_TLS_REJECT_UNAUTHORIZED', () => {
+      let originalEnv: NodeJS.ProcessEnv
+
+      beforeEach(() => {
+        originalEnv = { ...process.env }
+        // matches what @packages/server's request.ts sets in the main process
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+        // @ts-expect-error - mock
+        childProcess.fork.mockImplementation(() => {
+          return {
+            on: jest.fn(),
+            once: jest.fn(),
+            emit: jest.fn(),
+            kill: jest.fn(),
+            removeAllListeners: jest.fn(),
+          }
+        })
+      })
+
+      afterEach(() => {
+        process.env = originalEnv
+      })
+
+      const forkEnv = async () => {
+        const projectPath = await scaffoldProject('e2e')
+
+        projectConfigIpc = new ProjectConfigIpc(
+          undefined,
+          projectPath,
+          path.join(projectPath, 'cypress.config.js'),
+          false,
+          (error) => {},
+          () => {},
+          () => {},
+        )
+
+        // @ts-expect-error - mock
+        return childProcess.fork.mock.calls.at(-1)[2].env
+      }
+
+      it('leaves it unset when the user did not set it', async () => {
+        delete process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED
+
+        const env = await forkEnv()
+
+        expect(env).not.toHaveProperty('NODE_TLS_REJECT_UNAUTHORIZED')
+        expect(env).not.toHaveProperty('CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED')
+      })
+
+      it('passes through the value the user set', async () => {
+        process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = '1'
+
+        const env = await forkEnv()
+
+        expect(env.NODE_TLS_REJECT_UNAUTHORIZED).toEqual('1')
+        expect(env).not.toHaveProperty('CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED')
+      })
+    })
   })
 })

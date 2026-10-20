@@ -211,9 +211,9 @@ type ExecOptions = {
    */
   env?: string
   /**
-   * Set OS-level env vars.
+   * Set OS-level env vars. `undefined` unsets one inherited from the test process.
    */
-  processEnv?: { [key: string]: string | number }
+  processEnv?: { [key: string]: string | number | undefined }
   /**
    * Set an output path.
    */
