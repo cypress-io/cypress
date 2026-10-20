@@ -127,7 +127,7 @@ describe('video compression 0', () => {
 const { instanceId } = postRunInstanceResponse
 
 describe('video compression true', () => {
-  // @see ./record_spec.js for additional references
+  // @see ./record_spec.ts for additional references
   setupStubbedServer(createRoutes())
 
   systemTests.it('coerces true to 32 CRF', {

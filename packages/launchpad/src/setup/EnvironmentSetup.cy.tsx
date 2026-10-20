@@ -1,4 +1,4 @@
-import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
+import { EnvironmentSetupFragmentDoc, EnvironmentSetup_OpenInFinderDocument } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
@@ -14,10 +14,9 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByRole('button', {
+    cy.getByRole('button', {
       name: 'Pick a framework',
-      expanded: false,
-    })
+    }).filter('[aria-expanded="false"]')
     .should('have.attr', 'aria-haspopup', 'true')
     .click()
     .should('have.attr', 'aria-expanded', 'true')
@@ -30,10 +29,10 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       cy.wrap($secondLi).find('svg').should('have.attr', 'data-cy', 'vue-logo')
     })
 
-    cy.findByRole('button', { name: 'Next step' })
+    cy.getByRole('button', { name: 'Next step' })
     .should('be.disabled')
 
-    cy.findByRole('link', { name: 'Browse our list of third-party framework integrations' })
+    cy.getByRole('link', { name: 'Browse our list of third-party framework integrations' })
     .should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Select+Framework+Dropdown&utm_source=Binary%3A+Launchpad&utm_campaign=Browse+third-party+frameworks')
 
     cy.percySnapshot()
@@ -54,12 +53,11 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByRole('button', {
+    cy.getByRole('button', {
       name: 'Pick a framework',
-      expanded: false,
-    }).click()
+    }).filter('[aria-expanded="false"]').click()
 
-    cy.findByRole('option', { name: 'React.js (detected)' }).should('be.visible').click()
+    cy.getByRole('option', { name: 'React.js (detected)', native: false }).should('be.visible').click()
   })
 
   it('shows the description of bundler', () => {
@@ -131,6 +129,17 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     cy.contains('li', PATH_3).should('be.visible')
     cy.contains('p', DOCS_CTA).should('be.visible')
     cy.contains('a', 'framework definition documentation').should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Framework+Definition+Warning&utm_source=Binary%3A+Launchpad')
+
+    const openInFinder = cy.stub()
+
+    cy.stubMutationResolver(EnvironmentSetup_OpenInFinderDocument, (defineResult, { path }) => {
+      openInFinder(path)
+
+      return defineResult({ openInFinder: true })
+    })
+
+    cy.findByRole('button', { name: PATH_2 }).click()
+    cy.wrap(openInFinder).should('have.been.calledOnceWith', PATH_2)
 
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       onResult: (res) => {

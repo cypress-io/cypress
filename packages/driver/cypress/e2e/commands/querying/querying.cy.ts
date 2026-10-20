@@ -1025,15 +1025,22 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('throws when alias property is `0`', (done) => {
+        let start: number
+
         cy.on('fail', (err) => {
           expect(err.message).to.include('`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`')
+          // retrying can never make `0` a valid index, so it should fail without waiting out the timeout
+          expect(Date.now() - start).to.be.lessThan(1000)
 
           done()
         })
 
         cy
         .intercept(/users/, {}).as('getUsers')
-        .get('@getUsers.0')
+        .then(() => {
+          start = Date.now()
+        })
+        .get('@getUsers.0', { timeout: 10000 })
       })
 
       it('throws when alias property isnt just a digit', (done) => {

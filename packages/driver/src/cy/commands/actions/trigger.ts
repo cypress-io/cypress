@@ -92,7 +92,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       options._log?.snapshot('before', { next: 'after' })
 
-      if (!_.isString(eventName)) {
+      if (!eventName || !_.isString(eventName)) {
         $errUtils.throwErrByPath('trigger.invalid_argument', {
           onFail: options._log,
           args: { eventName },

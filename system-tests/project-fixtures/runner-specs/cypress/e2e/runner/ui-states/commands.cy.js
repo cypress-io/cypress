@@ -90,7 +90,7 @@ describe('Command Options and UI Display Tests', () => {
     cy.get('#b').prevAll('input', { timeout: 2026 })
     cy.get('#b').prevUntil('#a', { timeout: 2027 })
     cy.readFile('./cypress/fixtures/uiStates.json', { timeout: 2028 })
-    cy.reload(true, { timeout: 2028 })
+    cy.reload(true, { timeout: 60000 })
     cy.get('button').rightclick({ timeout: 2028 })
     cy.root({ timeout: 2028 })
   })

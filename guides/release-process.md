@@ -2,7 +2,7 @@
 
 These procedures concern the release process for the Cypress binary and `cypress` npm module.
 
-The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into `develop`. You can read more about this in [CONTRIBUTING.md](../CONTRIBUTING.md#releases).
+The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.org/intro/)) upon being merged into `develop`. You can read more about this in [CONTRIBUTING.md](../CONTRIBUTING.md#releases).
 
 [Anyone can build the binary and npm package locally](./building-release-artifacts.md), but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
 
@@ -177,13 +177,11 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - Run `yarn workspace @packages/example deploy`. This adds changes from `cypress-example-kitchensink` to a commit in the `gh-pages` branch, which will deploy to production with its own CI.
     - Check the deployed site at `https://example.cypress.io` to ensure the new changes deployed correctly.
 
-17. Once the release is complete, create a Github tag off of the release commit which bumped the version:
+17. Once the release is complete, tag the commit that was released: the `<commit sha>` passed to `prepare-release-artifacts` in step 6.
     ```shell
-    git checkout develop
-    git pull origin develop
-    git log --pretty=oneline
-    # copy sha of the version bump commit
-    git tag -a vX.Y.Z -m vX.Y.Z <sha>
+    git fetch origin develop
+    git log -1 --oneline origin/develop # confirm it matches the step 6 sha
+    git tag -a vX.Y.Z -m vX.Y.Z <commit sha>
     git push origin vX.Y.Z
     ```
 
