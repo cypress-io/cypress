@@ -4,6 +4,8 @@ export * from './cliOverrides'
 
 export * from './jsonConfig'
 
+export * from './vueTsxOverrides'
+
 import * as globalImport from 'globals'
 
 export const globals = {
