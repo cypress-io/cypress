@@ -104,7 +104,7 @@ export default function (Commands, Cypress, cy, state) {
       if (ret && invokedCyCommand && !ret.then) {
         $errUtils.throwErrByPath('then.callback_mixes_sync_and_async', {
           onFail: options._log,
-          args: { value: $utils.stringify(ret) },
+          args: { cmd: name, value: $utils.stringify(ret) },
         })
       }
 

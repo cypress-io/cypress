@@ -55,7 +55,7 @@ yarn clean              # Remove dist/
 
 ## Gotchas / Notes
 
-- **`yarn build` must be used, not `tsc` alone.** The build script runs `rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint` after compilation. Running `tsc` directly leaves `dist/blueprint/` absent or stale, causing runtime failures.
+- **`yarn build` must be used, not `tsc` alone.** The full script is `yarn ensure-typedefs && tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)`. `src/blueprint/` holds plain `.js` files that `tsc` will not copy, so running `tsc` directly leaves `dist/blueprint/` absent or stale, causing runtime failures — and without the `rimraf`, stale is the likelier of the two.
 - **Strict vs. non-strict blueprint**: During doctor runs a strict globals shim (`globals-strict.js`) is used to catch violations (e.g. `new Error(...)`) that would silently cause a segfault in `mksnapshot`. The non-strict `globals.js` is used in the final production snapshot.
 - **Snapshot Doctor is CPU-parallel**: The doctor spawns one worker per available CPU via `worker-nodes`. On machines with many cores this is fast but memory-intensive; on CI it may need `--max-old-space-size` tuning.
 - **`snapshot-meta.json` cache**: The doctor writes a `snapshot-meta.json` to the cache directory. If `yarn.lock` has not changed (hash matches), a subsequent run reuses the previous classification without re-running the doctor. Delete `./cache/snapshot-meta.json` to force a fresh run, or set `V8_SNAPSHOT_FROM_SCRATCH=1`.

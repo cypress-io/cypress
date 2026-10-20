@@ -11,23 +11,10 @@ export default [
     },
   },
   {
+    // Type tests declare values only so the type checker can assert on them
+    files: ['types/tests/**'],
     rules: {
-      '@stylistic/comma-dangle': 'warn',
-      '@stylistic/comma-spacing': 'warn',
-      '@stylistic/type-generic-spacing': 'warn',
-      '@stylistic/quotes': 'warn',
-      '@stylistic/arrow-parens': 'warn',
-      '@stylistic/no-multi-spaces': 'warn',
-      'padding-line-between-statements': 'warn',
-      '@stylistic/space-unary-ops': 'warn',
-      '@stylistic/member-delimiter-style': 'warn',
-      '@stylistic/object-curly-spacing': 'warn',
-      '@stylistic/semi': 'warn',
-      '@stylistic/space-in-parens': 'warn',
-      '@stylistic/space-infix-ops': 'warn',
-      '@stylistic/template-tag-spacing': 'warn',
-      'no-var': 'warn',
-      '@stylistic/space-before-function-paren': ['warn', 'always'],
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
   {
@@ -36,12 +23,14 @@ export default [
       '**/build/**/*',
       'package.json',
       '**/angular/**/*',
-      '**/angular-zoneless/**/*',
       '**/react/**/*',
       '**/vue/**/*',
       '**/svelte/**/*',
       '**/mount-utils/**/*',
-      '**/types/{bluebird,chai,chai-jquery,jquery,lodash,minimatch,mocha,sinon,sinon-chai}/**/*',
+      '**/types/{aria-query,bluebird,chai,chai-jquery,jquery,lodash,minimatch,mocha,sinon,sinon-chai}/**/*',
+      // Copied in by sync-typedefs from @packages/network-interception, which lints
+      // the original. Its disable directive reads as unused against this config.
+      '**/types/net-stubbing.d.ts',
       '.mocharc.js',
       '**/*.js',
     ],

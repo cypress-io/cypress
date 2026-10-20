@@ -1,0 +1,84 @@
+import type { PinnedView, TapNativeCommandSchema } from '@packages/cypress-sessions'
+
+/** Options `cypress tap` accepts from the top-level CLI. */
+export interface TapCliOptions {
+  session?: number
+  /** Print the raw JSON result even when the command has a human-readable rendering. */
+  json?: boolean
+  /** How long to wait on any single CDP call, in milliseconds. */
+  timeout?: number
+}
+
+/**
+ * A tap subcommand implemented entirely in the CLI, as opposed to the commands
+ * discovered from the running Cypress session's schema. Its declarative shape
+ * (description, params, options, help prose) comes from `TAP_NATIVE_COMMANDS`;
+ * its positionals and options are parsed CLI-side with the same commander
+ * grammar the schema commands use, then handed to `handler` as raw strings
+ * keyed by name. `handler` is the erased view the dispatcher calls through —
+ * `defineNativeCommand` types each command's handler precisely for authoring.
+ */
+export interface TapCliCommand extends TapNativeCommandSchema {
+  handler: (...args: any[]) => Promise<number>
+}
+
+/**
+ * The `run-state` payload reported by the running Cypress session's tap
+ * binding. Mirrors the app-side result shape, which travels over CDP as
+ * untyped JSON.
+ */
+export interface TapRunState {
+  /** Relative path of the selected spec, or `null` before one is selected. */
+  spec: string | null
+  /** Number of specs the session can run. */
+  totalSpecs: number
+  /** Where the selected spec is in its run; absent until a spec is selected. */
+  state?: 'loading' | 'running' | 'passed' | 'failed'
+  /** The run the other fields describe, named by its start time; `null` while loading. */
+  startedAt?: string | null
+  /** Number of tests the selected spec declares. */
+  totalTests?: number
+  /** Per-outcome test counts for the selected spec. */
+  results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** Why the spec could not run, when it failed to build. */
+  error?: string
+  /** The currently pinned command, if any. */
+  pinned?: PinnedView
+}
+
+/**
+ * What `cypress tap status` renders: how far the session has progressed
+ * through its lifecycle, plus run progress once a spec is selected.
+ */
+export interface TapStatus {
+  /**
+   * Lifecycle phase: `not connected`, `browser not selected`,
+   * `spec not selected`, or the run state (`loading` | `running` | `passed` |
+   * `failed`). Only `passed` and `failed` are verdicts.
+   */
+  status: string
+  /** Process id of the running Cypress session. */
+  pid?: number
+  /** Absolute path of the project the session has open. */
+  projectRoot?: string
+  /** Testing type the session has open, or `null` before one is chosen. */
+  testingType?: 'e2e' | 'component' | null
+  /** Whether the session has a browser attached over CDP. */
+  browserAttached?: boolean
+  /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
+  browserName?: string | null
+  /** Number of specs the session can run. */
+  totalSpecs?: number
+  /** Relative path of the selected spec. */
+  spec?: string
+  /** The run the other fields describe, named by its start time; `null` while loading. */
+  startedAt?: string | null
+  /** Number of tests the selected spec declares. */
+  totalTests?: number
+  /** Per-outcome test counts for the selected spec. */
+  results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** Why the spec could not run, when it failed to build. */
+  error?: string
+  /** The currently pinned command, if any. */
+  pinned?: PinnedView
+}

@@ -1,7 +1,7 @@
-import _ from 'lodash'
 import type { IncomingMessage } from 'http'
 import type { RemoteState, DocumentDomainInjection } from '@packages/network-tools'
 import type { CypressIncomingRequest } from '../../types'
+import { acceptWillRenderHtml, contentTypeIsHtml, contentTypeIsJavaScript } from '@packages/network-interception'
 
 export function reqMatchesPolicyBasedOnDomain (
   req: CypressIncomingRequest,
@@ -26,19 +26,17 @@ export function reqWillRenderHtml (req: CypressIncomingRequest, res: IncomingMes
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
-  // don't inject if this is an XHR from jquery
-  if (req.headers['x-requested-with']) {
-    return
-  }
-
-  // don't inject if we didn't find both text/html and application/xhtml+xml,
-  const accept = req.headers['accept']
-
   // only check the content-type value, if it exists, to contains some type of html mimetype
   const contentType = res?.headers['content-type'] || ''
-  const contentTypeIsHtmlIfExists = contentType ? contentType.includes('html') : true
+  const contentTypeIsHtmlIfExists = contentType ? contentTypeIsHtml(contentType) : true
 
-  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml') && contentTypeIsHtmlIfExists
+  // 'accept' and 'x-requested-with' are single-value headers; CypressIncomingRequest
+  // types every header generically as string | string[], so narrow here to match
+  // what the browser actually sends (and what acceptWillRenderHtml expects).
+  return acceptWillRenderHtml(
+    req.headers['accept'] as string | undefined,
+    req.headers['x-requested-with'] as string | undefined,
+  ) && contentTypeIsHtmlIfExists
 }
 
 export function resContentTypeIs (res: IncomingMessage, contentType: string) {
@@ -46,8 +44,5 @@ export function resContentTypeIs (res: IncomingMessage, contentType: string) {
 }
 
 export function resContentTypeIsJavaScript (res: IncomingMessage) {
-  return _.some(
-    ['application/javascript', 'application/x-javascript', 'text/javascript']
-    .map(_.partial(resContentTypeIs, res)),
-  )
+  return contentTypeIsJavaScript(res.headers['content-type'])
 }

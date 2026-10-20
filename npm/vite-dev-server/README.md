@@ -23,8 +23,13 @@ export default defineConfig({
 Function syntax:
 
 ```ts
+import { fileURLToPath } from 'node:url'
 import { devServer } from '@cypress/vite-dev-server'
 import { defineConfig } from 'cypress'
+
+function resolvePackage (specifier) {
+  return fileURLToPath(import.meta.resolve(specifier))
+}
 
 export default defineConfig({
   component: {
@@ -32,7 +37,7 @@ export default defineConfig({
       return devServer({
         ...devServerConfig,
         framework: 'react',
-        viteConfig: require('./vite.config.js')
+        viteConfig: resolvePackage('vite.config.mjs')
       })
     }
   }
@@ -57,6 +62,7 @@ We then merge the sourced config with the user's vite config, and layer on our o
 | >= v3 <= v5              | >= v10 <= v13 |
 | >= v6                    | >= v14        |
 | >= v7 (esm only)         | >= v15        |
+| >= v8 (esm only)         | >= v16        |
 
 #### `devServerPublicPathRoute` for Vite v5+
 

@@ -133,7 +133,14 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
     cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5')
-      .should('not.be.visible')
+      .then(($el) => {
+        // Before scrolling, the heading is below the scroll container's
+        // visible area. The modern visibility algorithm no longer reports
+        // scroll-clipped elements as hidden, so assert the geometry directly.
+        const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+        expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+      })
       .scrollIntoView().should('be.visible')
     })
   })
@@ -142,7 +149,12 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
     cy.origin('http://www.foobar.com:3500', () => {
-      cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
+      cy.get('#scroll-into-view-vertical h5').then(($el) => {
+        const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+        expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+      })
+
       cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       cy.get('#scroll-into-view-vertical h5').should('be.visible')
     })
@@ -260,7 +272,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     const assertOriginFailure = (err: Error, done: () => void) => {
       expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
       expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-      expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+      expect(err.message).to.include(`Use \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\`.`)
       expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
 
       //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
@@ -838,7 +850,11 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
       cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot of primary is showing for scrollIntoView
         cy.get('#scroll-into-view-vertical h5')
-        .should('not.be.visible')
+        .then(($el) => {
+          const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
         .scrollIntoView()
       })
 
@@ -865,7 +881,12 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
       cy.get('a[data-cy="scrolling-link"]').click()
 
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
+        cy.get('#scroll-into-view-vertical h5').then(($el) => {
+          const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
+
         cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       })
 

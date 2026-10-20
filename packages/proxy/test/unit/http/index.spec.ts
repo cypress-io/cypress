@@ -1,9 +1,14 @@
-import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
-import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
-import { BrowserPreRequest } from '../../../lib'
+import type { Mock } from 'vitest'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
+import type { HttpMiddleware, HttpMiddlewareStacks, ServerCtx } from '../../../lib/http'
+import { Http, HttpStages, _runStage } from '../../../lib/http'
+import type { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 import { HttpIntercept } from '@packages/network-interception'
 import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
+import { correlateBrowserPreRequest } from '../../../lib/adapters/correlate-browser-pre-request'
+import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
+import RequestMiddleware from '../../../lib/http/request-middleware'
 import * as sendRequestOutgoingModule from '../../../lib/http/send-request-outgoing'
 
 describe('http', function () {
@@ -436,6 +441,37 @@ describe('http', function () {
     })
   })
 
+  describe('createMiddlewareContext', function () {
+    function createHttpWithFlag (useBrowserNetworkInterception?: boolean) {
+      return new Http({
+        config: {} as CyServer.Config,
+        middleware: {},
+        request: { rp: vi.fn() },
+        ...(useBrowserNetworkInterception !== undefined ? { useBrowserNetworkInterception } : {}),
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+    }
+
+    function createCtx (http: Http) {
+      return http.createMiddlewareContext({ proxiedUrl: 'http://example.test/', headers: {} } as any, {} as any)
+    }
+
+    // Pins the opts -> instance property -> ctx plumbing for
+    // useBrowserNetworkInterception (#34652) — MaybeInjectServiceWorker
+    // reads it off the middleware ctx (`this.useBrowserNetworkInterception`),
+    // which only exists if createMiddlewareContext copies it from the Http instance.
+    it('carries useBrowserNetworkInterception from the constructor opts onto the ctx', function () {
+      const ctx = createCtx(createHttpWithFlag(true))
+
+      expect(ctx.useBrowserNetworkInterception).toBe(true)
+    })
+
+    it('leaves useBrowserNetworkInterception undefined on the ctx when omitted from opts', function () {
+      const ctx = createCtx(createHttpWithFlag())
+
+      expect(ctx.useBrowserNetworkInterception).toBeUndefined()
+    })
+  })
+
   describe('Service Worker', function () {
     let config: CyServer.Config & Cypress.Config
     let middleware: HttpMiddlewareStacks
@@ -593,6 +629,114 @@ describe('http', function () {
       http.handleServiceWorkerClientEvent(event)
 
       expect(handleServiceWorkerClientEventStub).toHaveBeenCalledWith(event)
+    })
+  })
+
+  // The synthetic exchange has no socket, so browser cancellation reaches the
+  // pipeline out of band (the CDP Fetch transport calls abortRequest) rather
+  // than through a dying connection the way the MITM path does.
+  describe('createLegacyProxyPipeline over a synthetic exchange', function () {
+    function createSyntheticPipeline () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => true,
+        networkInterceptionCore: { correlateBrowserPreRequest } as any,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {
+            CorrelateBrowserPreRequest: RequestMiddleware.CorrelateBrowserPreRequest,
+          },
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+
+      return { http, codec, pipeline: http.createLegacyProxyPipeline(codec) }
+    }
+
+    const request = {
+      id: 'network-1',
+      url: 'http://localhost:3500/1mb',
+      method: 'GET',
+      headers: {},
+    }
+
+    it('releases the pending pre-request when the request is aborted', async function () {
+      const { http, codec, pipeline } = createSyntheticPipeline()
+      const next = vi.fn()
+      const handled = pipeline(request, next)
+
+      await vi.waitFor(() => {
+        expect(http.preRequests.pendingRequests.length).toEqual(1)
+      })
+
+      codec.abortRequest('network-1')
+
+      await expect(handled).rejects.toThrow('The browser closed the connection before the response completed.')
+
+      // the pre-request timer is cleared with it — an expiry is what logs the
+      // "Never received pre-request" warning and inflates unmatchedRequests
+      expect(http.preRequests.pendingRequests.length).toEqual(0)
+      expect(next, 'origin fetch').not.toHaveBeenCalled()
+    })
+
+    it('keeps waiting on the pre-request while the request is not aborted', async function () {
+      const { http, pipeline } = createSyntheticPipeline()
+
+      pipeline(request, vi.fn())
+
+      await vi.waitFor(() => {
+        expect(http.preRequests.pendingRequests.length).toEqual(1)
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 20))
+
+      expect(http.preRequests.pendingRequests.length).toEqual(1)
+    })
+
+    // The synthetic res auto-destroys once a middleware finishes it. If the pipeline
+    // reads that as a browser cancel, the CDP transport releases the paused request
+    // to the origin.
+    it('resolves a response finished by request middleware instead of treating it as canceled', async function () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => false,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {
+            EndRequest () {
+              this.res.set('x-cypress-matched-blocked-host', 'localhost:3500')
+              this.res.status(503).end()
+              this.end()
+            },
+          },
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+      const next = vi.fn()
+
+      const response = await http.createLegacyProxyPipeline(codec)(request, next)
+
+      expect(response.statusCode).toEqual(503)
+      expect(response.headers).toEqual({ 'x-cypress-matched-blocked-host': 'localhost:3500' })
+      expect(next, 'origin fetch').not.toHaveBeenCalled()
     })
   })
 })

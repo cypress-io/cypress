@@ -46,6 +46,9 @@ packages/proxy/lib/**/*.js
 # npm packages
 npm/**/cypress/screenshots
 
+# from example, compiled .js files
+packages/example/lib/**/*.js
+
 # from example
 packages/example/app
 packages/example/build
@@ -404,13 +407,16 @@ system-tests/lib/validations
 # IDE files
 .cursor/*
 !.cursor/BUGBOT.md
-!.cursor/skills
 !.cursor/environment.json
 !.cursor/Dockerfile
+!.cursor/skills
 
 settings.local.json
 
 .claude/*
+!.claude/settings.json
+!.claude/skills
+!.claude/rules
 
 # chunk active sidecar tracking
 .chunk/sidecar.json

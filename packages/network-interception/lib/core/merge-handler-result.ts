@@ -13,6 +13,9 @@ export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: 
 }
 
 export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
+  // lodash merge converts Buffer into Array (by design)
+  // https://github.com/lodash/lodash/issues/2964
+  // @see https://github.com/cypress-io/cypress/issues/15898
   _.mergeWith(before, after, (_a, b) => {
     if (b instanceof Buffer) {
       return b

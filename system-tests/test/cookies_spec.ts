@@ -200,7 +200,6 @@ describe('e2e cookies', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       config: {
         baseUrl,
-        allowCypressEnv: false,
         env: {
           baseUrl,
           expectedDomain: 'localhost',
@@ -255,7 +254,6 @@ describe('e2e cookies', () => {
           browser: '!webkit', // TODO(webkit): fix+unskip
           config: {
             baseUrl,
-            allowCypressEnv: false,
             env: {
               baseUrl,
               expectedDomain: baseDomain,
@@ -279,7 +277,6 @@ describe('e2e cookies', () => {
       it('passes with no baseurl', {
         browser: '!webkit', // TODO(webkit): fix+unskip
         config: {
-          allowCypressEnv: false,
           env: {
             httpUrl,
             httpsUrl,
@@ -293,13 +290,7 @@ describe('e2e cookies', () => {
   })
 })
 
-const describeCrossOriginCookies = process.env.CYPRESS_INTERNAL_DISABLE_PROXY === '1'
-  ? describe.skip
-  : describe
-
-// NOTE: baseUrl 127.0.0.3 cookie verification fails under CDP for hosts/loopback
-// reasons outside #34464; MITM/proxy-enabled runs still cover this suite.
-describeCrossOriginCookies('cross-origin cookies, set:cookies', () => {
+describe('cross-origin cookies, set:cookies', () => {
   const onServer = (app) => {
     app.use(parser())
     app.use(cors({
@@ -361,7 +352,9 @@ describeCrossOriginCookies('cross-origin cookies, set:cookies', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://127.0.0.3:${httpPort}`,
-      allowCypressEnv: false,
+      // NOTE: baseUrl 127.0.0.3 cookie verification fails on the browser (CDP) network path
+      // for hosts/loopback reasons outside #34464
+      forceHttp1: true,
       env: {
         HTTP: httpPort,
         HTTPS: httpsPort,
@@ -415,7 +408,6 @@ describe('cookie jar stays in sync after same-origin requests', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://localhost:${httpPort}`,
-      allowCypressEnv: false,
     },
     spec: 'stale_cookie.cy.js',
   })
@@ -510,8 +502,63 @@ describe('OAuth/SSO redirect-back cookie', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://localhost:${primaryPort}`,
-      allowCypressEnv: false,
     },
     spec: 'oauth_redirect_cookie.cy.js',
+  })
+})
+
+describe('cookie jar stays in sync after cookies are set outside the proxy', () => {
+  const onServer = (app) => {
+    app.use(parser())
+
+    // Renders the `sid` the server received, so a spec can assert on what arrived on
+    // the wire rather than on what the browser believes it holds.
+    const renderSid = (res, sid: string, extra = '') => {
+      return res
+      .type('html')
+      .send(`<html><body><div id="sid">sid: ${sid || 'none'}</div>${extra}</body></html>`)
+    }
+
+    // Seeding `sid` on the first visit is what primes the server-side cookie jar,
+    // since that navigation response is the one the proxy sees.
+    app.get('/rotated_cookie', (req, res) => {
+      const sid = req.cookies.sid || 'anon'
+
+      if (!req.cookies.sid) {
+        res.cookie('sid', sid, { httpOnly: true, sameSite: 'lax' })
+      }
+
+      return renderSid(res, sid, '<a id="account" href="/rotated_cookie/account">account</a>')
+    })
+
+    // cy.request() issues this from Node, so the proxy never sees the Set-Cookie.
+    app.post('/rotated_cookie/login', (req, res) => {
+      res.cookie('sid', 'auth', { httpOnly: true, sameSite: 'lax' })
+
+      return res.sendStatus(200)
+    })
+
+    app.get('/rotated_cookie/account', (req, res) => {
+      return renderSid(res, req.cookies.sid)
+    })
+  }
+
+  systemTests.setup({
+    servers: [{
+      onServer,
+      port: httpPort,
+    }],
+    settings: {
+      e2e: {},
+    },
+  })
+
+  // https://github.com/cypress-io/cypress/issues/34891
+  it('sends cookies set by cy.request and cy.setCookie on the next navigation', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
+    config: {
+      baseUrl: `http://localhost:${httpPort}`,
+    },
+    spec: 'rotated_cookie.cy.ts',
   })
 })

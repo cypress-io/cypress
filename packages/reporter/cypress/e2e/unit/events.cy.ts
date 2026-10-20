@@ -1,10 +1,11 @@
-import sinon, { SinonSpy, SinonStub } from 'sinon'
+import type { SinonSpy, SinonStub } from 'sinon'
+import sinon from 'sinon'
 
 import events from '../../../src/lib/events'
-import { AppState } from '../../../src/lib/app-state'
-import { RunnablesStore } from '../../../src/runnables/runnables-store'
-import { Scroller } from '../../../src/lib/scroller'
-import { StatsStore } from '../../../src/header/stats-store'
+import type { AppState } from '../../../src/lib/app-state'
+import type { RunnablesStore } from '../../../src/runnables/runnables-store'
+import type { Scroller } from '../../../src/lib/scroller'
+import type { StatsStore } from '../../../src/header/stats-store'
 
 interface RunnerStub {
   on: SinonSpy

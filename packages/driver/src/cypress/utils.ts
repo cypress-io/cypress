@@ -24,7 +24,7 @@ const additionalHttpMethods = ['query']
 const validHttpMethods = new Set([...methods, ...additionalHttpMethods].map((method) => method.toLowerCase()))
 
 const defaultOptions = {
-  delay: 10,
+  delay: 0,
   force: false,
   timeout: null,
   interval: null,

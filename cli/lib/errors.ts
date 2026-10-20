@@ -5,7 +5,8 @@ import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
 
-const docsUrl = 'https://on.cypress.io'
+export const docsUrl = 'https://on.cypress.io'
+
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
 
@@ -149,7 +150,7 @@ const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
 const invalidSmokeTestDisplayError = {
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution (msg: string): string {
+  solution (msg?: string): string {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 
@@ -266,19 +267,6 @@ const CYPRESS_RUN_BINARY = {
  */
 export async function getError (errorObject: any): Promise<Error> {
   const errorMessage = await formErrorText(errorObject)
-
-  const err: any = new Error(errorMessage)
-
-  err.known = true
-
-  return err
-}
-
-export function getErrorSync (errorObject: any, platform: string): Error {
-  const errorMessage = syncFormErrorText({
-    ...errorObject,
-    platform,
-  })
 
   const err: any = new Error(errorMessage)
 

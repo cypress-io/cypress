@@ -12,16 +12,24 @@ import * as session from './session'
 import { cookieJar } from './automation/cookie/jar'
 import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
-import { DataContext, getCtx } from '@packages/data-context'
+import type { DataContext } from '@packages/data-context'
+import { getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
-import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
+import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
+import { GracefulExit, getPeerWaitTimeoutMs } from './util/graceful-exit'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
+import { resolveTrustedCertificateFingerprints } from './util/spki'
+import { createMtlsBridge } from './mtls'
+import type { MtlsBridgeLaunchOpts } from './mtls'
+import * as appData from './util/app_data'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject extends EventEmitter {
   private projectBase: ProjectBase | null = null
+  private _mtlsBridge?: MtlsBridgeLaunchOpts
+  private _mtlsBridgeReady?: Promise<MtlsBridgeLaunchOpts | undefined>
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -81,6 +89,45 @@ export class OpenProject extends EventEmitter {
     debug('open project url %s', url)
 
     const cfg = this.projectBase.getConfig()
+    // The one place we decide, for this launch, whether the browser intercepts
+    // its own traffic (Chrome, Chromium, and Edge) or everything is routed
+    // through the HTTP/1 MITM proxy (Firefox, WebKit, Electron, or forceHttp1).
+    // Everything downstream — the launch args below, the CDP wiring, and the
+    // server's request-time gates — reads this resolved value rather than
+    // re-deriving it from config, so the two can never disagree.
+    const useBrowserNetworkInterception = isBrowserNetworkMode(cfg, browser)
+
+    // The browser presents no client certificate of its own — CDP exposes no way to give it
+    // one — so configured origins are steered at a local bridge that performs the handshake
+    // from this process. Nothing starts when no certificate is configured.
+    //
+    // The bridge outlives this launch on purpose. Its ports reach the browser as
+    // `--host-resolver-rules`, which is read once at launch, and a later spec reuses that
+    // browser rather than relaunching it — so rebinding here would leave every spec after
+    // the first steered at a port that no longer exists. One bridge per project keeps the
+    // ports the browser was told about valid for as long as that browser runs.
+    // the in-flight promise is stored, not the resolved value: two overlapping launches
+    // would otherwise both pass the guard and bind a second full set of listeners, and the
+    // loser would be orphaned still bound, with the browser possibly steered at it
+    if (useBrowserNetworkInterception && cfg.clientCertificates?.length && !this._mtlsBridgeReady) {
+      const ready = createMtlsBridge({
+        clientCertificates: cfg.clientCertificates,
+        caFolder: appData.path('proxy'),
+      })
+
+      this._mtlsBridgeReady = ready
+
+      // A rejection must not be cached: a transient bind or CA failure would otherwise be
+      // replayed to every later launch, so the run could never recover without reopening
+      // the project. The await below still surfaces this attempt's failure to the caller.
+      ready.catch(() => {
+        if (this._mtlsBridgeReady === ready) {
+          this._mtlsBridgeReady = undefined
+        }
+      })
+    }
+
+    this._mtlsBridge = await this._mtlsBridgeReady
 
     const options: BrowserLaunchOpts = {
       browser: browser as FoundBrowser & { isHeadless: boolean },
@@ -96,28 +143,33 @@ export class OpenProject extends EventEmitter {
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
+      useBrowserNetworkInterception,
       // proxy launch opts must win over prevOptions: args may carry a normalized
       // NO_PROXY that is wrong for the MITM path, and <-loopback> must never leak
-      // onto the disable-proxy path (#34351).
-      ...(isProxyEnabled() ? {
-        proxyServer: ensureProxyServer(cfg),
-        // the AUT is served over loopback by our own proxy, so subtract Chromium's
-        // implicit rules to keep that traffic proxied
-        // https://github.com/cypress-io/cypress/issues/1872
-        proxyBypassList: '<-loopback>',
-      } : {
+      // onto the browser (CDP) network path (#34351).
+      ...(useBrowserNetworkInterception ? {
         proxyServer: undefined,
         proxyBypassList: undefined,
-        // Chromium-family only: Firefox/WebKit parse proxyServer differently and
-        // do not honor Chromium bypass / scheme-map syntax yet (#34351).
-        ...(browser.family === 'chromium' ? translateEgressPolicyToLaunchOpts(cfg.hosts) : {}),
+        // The browser (CDP) path makes origin fetches itself, so certs the user has marked
+        // trusted must be handed to the browser as SPKI fingerprints. A bad entry throws a
+        // Cypress error naming the offending `trustedCertificates` entry.
+        trustedCertificateFingerprints: resolveTrustedCertificateFingerprints(cfg.trustedCertificates ?? [], cfg.projectRoot),
+        mtlsHostResolverRules: this._mtlsBridge?.hostResolverRules,
+        ...translateEgressPolicyToLaunchOpts(cfg.hosts, this._mtlsBridge?.origins),
         hosts: cfg.hosts,
+        shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },
         onExtraTargetCriClientReady: (client) => {
           return this.projectBase!.server.attachCdpFetchExtraTarget(client)
         },
+      } : {
+        proxyServer: ensureProxyServer(cfg),
+        // the AUT is served over loopback by our own proxy, so subtract Chromium's
+        // implicit rules to keep that traffic proxied
+        // https://github.com/cypress-io/cypress/issues/1872
+        proxyBypassList: '<-loopback>',
       }),
     }
 
@@ -130,7 +182,7 @@ export class OpenProject extends EventEmitter {
       browser.isHeadless = false
     }
 
-    this.projectBase.setCurrentSpecAndBrowser(spec, browser)
+    await this.projectBase.setCurrentSpecAndBrowser(spec, browser, useBrowserNetworkInterception)
 
     const automation = this.projectBase.getAutomation()
 
@@ -220,8 +272,8 @@ export class OpenProject extends EventEmitter {
     return this.relaunchBrowser()
   }
 
-  closeBrowser () {
-    return browsers.close()
+  closeBrowser (timeoutMs?: number) {
+    return browsers.close({ timeoutMs })
   }
 
   async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
@@ -238,6 +290,12 @@ export class OpenProject extends EventEmitter {
     return this.projectBase?.resetBrowserState()
   }
 
+  private async _closeMtlsBridge () {
+    await this._mtlsBridge?.close()
+    this._mtlsBridge = undefined
+    this._mtlsBridgeReady = undefined
+  }
+
   async closeOpenProjectAndBrowsers () {
     // Wait for the HTTP server to release its port before the next open
     // (cy-in-cy reopens on hardcoded 4455; Windows is especially sensitive).
@@ -247,9 +305,14 @@ export class OpenProject extends EventEmitter {
       this._ctx?.logTraceError(e)
     }
 
+    await this._closeMtlsBridge()
+
     this.resetOpenProject()
 
-    return this.closeBrowser()
+    // The browser is signalled either way; this only decides how long we wait for its process to be
+    // gone. A browser with several renderers takes seconds to reap on a loaded machine, and on the way
+    // out that wait sits inside the exit budget every teardown step shares, so bound it there.
+    return this.closeBrowser(GracefulExit.isShuttingDown ? getPeerWaitTimeoutMs() : undefined)
   }
 
   close () {
@@ -319,6 +382,8 @@ export class OpenProject extends EventEmitter {
 
   async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
     // ensure switching to a new project in cy-in-cy tests and from the launchpad starts with a clean slate
+    // — including any bridge, whose listeners stand for the previous project's origins
+    await this._closeMtlsBridge()
     this.reset()
     this._ctx = getCtx()
     debug('open_project create %s', path)

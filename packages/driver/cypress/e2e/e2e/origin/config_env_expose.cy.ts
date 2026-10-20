@@ -1,4 +1,4 @@
-['config', 'env', 'expose'].forEach((fnName) => {
+['config', 'expose'].forEach((fnName) => {
   describe(`cy.origin- Cypress.${fnName}()`, { browser: '!webkit' }, () => {
     const USED_KEYS = {
       foo: 'cy-origin-foo',
@@ -13,10 +13,6 @@
     const getTestConfigOverride = (key: string, value: any) => {
       if (fnName === 'config') {
         return { [key]: value }
-      }
-
-      if (fnName === 'env') {
-        return { env: { [key]: value } }
       }
 
       return { expose: { [key]: value } }

@@ -1,4 +1,5 @@
-import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
+import type { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment } from '../generated/graphql-test'
+import { DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
@@ -50,7 +51,7 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setProjectFlag('isUsingGit', true)
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
-      cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
+      cy.getByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
     it('is logged in with no project', () => {
@@ -62,7 +63,7 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
-      cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
+      cy.getByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
     it('has no runs', () => {
@@ -210,19 +211,19 @@ describe('<DebugContainer />', () => {
     context('over limit', () => {
       it('handled usage exceeded', () => {
         mountTestRun('overLimit')
-        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
 
       it('handles retention exceeded', () => {
         mountTestRun('overLimitRetention')
-        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
 
       it('does not show passing message if run is hidden', () => {
         mountTestRun('overLimitPassed')
         cy.contains('Well Done!').should('not.exist')
         cy.contains('All your tests passed.').should('not.exist')
-        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
     })
 
@@ -556,7 +557,14 @@ describe('<DebugContainer />', () => {
 
         //test scrolling
 
-        cy.findByTestId('run-423').should('not.be.visible')
+        // The modern visibility algorithm doesn't detect scroll-clipped
+        // elements as hidden, so assert geometrically that run-423 sits
+        // below the scroll container's visible area before scrolling.
+        cy.findByTestId('run-423').then(($el) => {
+          const container = $el[0].closest('#debug-runs-container') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
 
         cy.findByTestId('debug-runs-container').scrollTo('bottom')
 

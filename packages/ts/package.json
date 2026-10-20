@@ -2,7 +2,6 @@
   "name": "@packages/ts",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
   "scripts": {
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
@@ -14,16 +13,12 @@
   "dependencies": {
     "debug": "^4.3.4",
     "ts-node": "^10.9.2",
-    "tslib": "2.3.1",
-    "typescript-cached-transpile": "^0.0.6"
+    "tslib": "2.3.1"
   },
   "devDependencies": {},
   "files": [
     "register.js",
     "registerDir.js"
-  ],
-  "types": [
-    "index.d.ts"
   ],
   "license": "MIT",
   "nx": {}

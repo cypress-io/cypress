@@ -108,7 +108,6 @@
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
-          :is-project-connected="projectConnectionStatus === 'CONNECTED'"
           :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
           :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
           @toggleRow="row.data.toggle"
@@ -204,9 +203,11 @@ import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
-import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
+import { SpecsList_GitInfoUpdatedDocument } from '../generated/graphql'
+import type { Specs_SpecsListFragment, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, useCollapsibleTree } from './tree/useCollapsibleTree'
+import { buildSpecTree, useCollapsibleTree } from './tree/useCollapsibleTree'
+import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -226,6 +227,17 @@ import { useSubscription } from '../graphql'
 import TestingTypeSwitcher from './switcher/TestingTypeSwitcher.vue'
 import { useTestingType } from '../composables/useTestingType'
 import TestingTypePromo from './TestingTypePromo.vue'
+
+const props = withDefaults(defineProps<{
+  gql: Specs_SpecsListFragment
+  mostRecentUpdate: string | null
+}>(), {
+  mostRecentUpdate: null,
+})
+
+const emit = defineEmits<{
+  (e: 'showCreateSpecModal'): void
+}>()
 
 const { openLoginConnectModal } = useUserProjectStatusStore()
 
@@ -339,17 +351,6 @@ fragment Specs_SpecsList on Query {
 `
 
 useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
-
-const props = withDefaults(defineProps<{
-  gql: Specs_SpecsListFragment
-  mostRecentUpdate: string | null
-}>(), {
-  mostRecentUpdate: null,
-})
-
-const emit = defineEmits<{
-  (e: 'showCreateSpecModal'): void
-}>()
 
 const showSpecPatternModal = ref(false)
 

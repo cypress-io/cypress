@@ -7,7 +7,6 @@ import { SocketIOServer } from '@packages/socket'
 import { allowDestroy } from '../../lib/allow-destroy'
 
 export interface AsyncServer {
-  closeAsync: () => Promise<void>
   destroyAsync: () => Promise<void>
   listenAsync: (port) => Promise<void>
 }
@@ -61,7 +60,6 @@ export class Servers {
     const httpServer = allowDestroy(http.createServer(app))
 
     this.httpServer = Object.assign(httpServer, {
-      closeAsync: promisify(httpServer.close.bind(httpServer)),
       destroyAsync: promisify(httpServer.destroy.bind(httpServer)),
       listenAsync: promisify(httpServer.listen.bind(httpServer)),
     }) as http.Server & AsyncServer
@@ -73,7 +71,6 @@ export class Servers {
     const httpsServer = allowDestroy(https.createServer(this.https, <http.RequestListener>app))
 
     this.httpsServer = Object.assign(httpsServer, {
-      closeAsync: promisify(httpsServer.close.bind(httpsServer)),
       destroyAsync: promisify(httpsServer.destroy.bind(httpsServer)),
       listenAsync: promisify(httpsServer.listen.bind(httpsServer)),
     }) as https.Server & AsyncServer

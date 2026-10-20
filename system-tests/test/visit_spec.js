@@ -122,7 +122,6 @@ describe('e2e visit', () => {
         responseTimeout: 500,
         pageLoadTimeout: 1000,
         e2e: {
-          allowCypressEnv: false,
         },
       },
       servers: {
@@ -195,7 +194,6 @@ describe('e2e visit', () => {
       settings: {
         responseTimeout: 2000,
         e2e: {
-          allowCypressEnv: false,
         },
       },
       servers: {
@@ -222,17 +220,13 @@ describe('e2e visit', () => {
       },
       settings: {
         e2e: {
-          allowCypressEnv: false,
         },
       },
     })
 
-    systemTests.it('passes with experimentalSourceRewriting', {
+    systemTests.it('passes with the default source rewriter', {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'source_rewriting.cy.js',
-      config: {
-        experimentalSourceRewriting: true,
-      },
       snapshot: true,
     })
   })
@@ -242,7 +236,6 @@ describe('e2e visit', () => {
       settings: {
         pageLoadTimeout: 1000,
         e2e: {
-          allowCypressEnv: false,
         },
       },
       servers: {

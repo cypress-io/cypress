@@ -26,6 +26,7 @@ lib/
   cors.ts                      CORS utilities: origin comparison, header manipulation
   document-domain-injection.ts Helpers for injecting document.domain overrides via the spec bridge
   index.ts                     Public entry point re-exporting all modules
+  serialize-for-inline-script.ts  JSON serialization that can't close the inline <script> it's written into
   types.ts                     Shared TypeScript types
   uri.ts                       URI parsing, normalization, and same-origin comparison helpers
 ```
@@ -39,5 +40,5 @@ lib/
 ## Integration Points
 
 - Consumed by **@packages/driver** (browser) for CORS and URI utilities used in command implementations.
-- Consumed by **@packages/rewriter** and **@packages/proxy** (Node.js) for the same CORS and URI logic on the server side.
+- Consumed by **@packages/proxy** (Node.js) for the same CORS and URI logic on the server side.
 - Consumed by **@packages/config** for URL/domain validation.

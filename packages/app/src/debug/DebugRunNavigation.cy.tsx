@@ -1,5 +1,6 @@
 import DebugRunNavigation from './DebugRunNavigation.vue'
-import { DebugRunNavigationFragment, DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
+import type { DebugRunNavigationFragment } from '../generated/graphql-test'
+import { DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
 import type { CommitInfo } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
 
@@ -240,7 +241,7 @@ describe('<DebugRunNavigation />', () => {
     cy.findByTestId('debug-toggle').click()
 
     cy.contains('We found more than 100 runs.').should('be.visible')
-    cy.findByRole('link', { name: 'Go to Cypress Cloud to see all runs' }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf/?utm_medium=Debug+Tab&utm_campaign=Run+Navigation+Limit&utm_source=Binary%3A+Launchpad')
+    cy.getByRole('link', { name: 'Go to Cypress Cloud to see all runs' }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf/?utm_medium=Debug+Tab&utm_campaign=Run+Navigation+Limit&utm_source=Binary%3A+Launchpad')
   })
 
   describe('Switch to latest run button', () => {

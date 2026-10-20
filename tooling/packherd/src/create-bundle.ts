@@ -3,7 +3,7 @@ import type { CreateBundleOpts, CreateBundleResult } from './types'
 
 const DEFAULT_BUNDLE_OPTS: Partial<CreateBundleOpts> = {
   platform: 'node',
-  target: ['node20'],
+  target: ['node22'],
 }
 
 /**

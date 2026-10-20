@@ -164,7 +164,6 @@ describe('specChange subscription', () => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -313,7 +312,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -438,7 +436,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -464,7 +461,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {

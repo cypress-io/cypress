@@ -2,7 +2,7 @@ import Button from '@cypress-design/react-button'
 import React from 'react'
 import events from '../lib/events'
 import { IconWindowCodeEditorSmall } from '@cypress-design/react-icon'
-import { FileDetails } from '@packages/types'
+import type { FileDetails } from '@packages/types'
 import cx from 'classnames'
 
 interface Props {

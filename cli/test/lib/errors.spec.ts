@@ -1,7 +1,8 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
-import si, { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import util from '../../lib/util'
 import { errors, getError, formErrorText } from '../../lib/errors'
 
@@ -10,7 +11,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
       arch: vi.fn(),
@@ -19,12 +20,16 @@ vi.mock('os', async (importActual) => {
   }
 })
 
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
+
 vi.mock('systeminformation', async (importActual) => {
   const actual = await importActual()
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       osInfo: vi.fn(),
     },
@@ -36,7 +41,7 @@ vi.mock('../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pkgVersion: vi.fn(),
     },
@@ -119,6 +124,7 @@ describe('errors', function () {
         solution: 42,
       }
 
+      // @ts-expect-error - the invalid solution type is what this asserts on
       await expect(formErrorText(error)).rejects.toThrow()
     })
 

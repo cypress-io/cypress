@@ -15,7 +15,7 @@ const babelLoader = _.find(commonConfig.module.rules, (rule) => {
 
 // @ts-ignore
 babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
-  'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+  'languages': ['javascript', 'typescript', 'jsx', 'tsx'],
   'plugins': ['line-numbers', 'line-highlight'],
   'theme': 'default',
   'css': false,
@@ -25,7 +25,7 @@ babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
-    cypress_runner: [path.resolve(__dirname, 'src/index.js')],
+    cypress_runner: [path.resolve(__dirname, 'src/index.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -45,7 +45,7 @@ mainConfig.resolve = {
 const crossOriginConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
-    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.js')],
+    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -82,7 +82,7 @@ const crossOriginInjectionConfig: webpack.Configuration = {
 export default async function () {
   await waitUntilIconsBuilt()
 
-  const cyIcons = require('@packages/icons')
+  const cyIcons = await import('@packages/icons')
 
   mainConfig.plugins = [
     // @ts-ignore

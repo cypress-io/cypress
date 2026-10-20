@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 # Generates a JSON object of CircleCI pipeline parameters based on changed files.
-# Used in launch-primary-workflow to enable path-based job filtering on PRs.
+# Used in launch-primary-workflow to enable path-based job filtering on PR
+# branches and on genuine webhook pushes to develop.
 #
 # Output: JSON written to stdout, consumed by continuation/continue pipeline_parameters.
 #
-# All run-* params default to true so that develop/release branches and
-# API-triggered pipelines run everything without needing to pass explicit params.
+# Every path a job could care about must map to a run-* param below: a path
+# that matches nothing is an error rather than a silent skip.
+#
+# release/* branches, the update-v8-snapshot-cache-on-develop branch, the
+# run-all-jobs manual trigger, and any develop run that isn't a webhook push
+# (scheduled pipelines, API triggers, or an unset/unknown trigger source) skip
+# path inspection entirely and run everything.
+#
+# The corresponding pipeline parameters in @pipeline.yml default to true, so a
+# continuation that omits them runs everything rather than nothing.
 
 set -euo pipefail
 
@@ -34,15 +43,21 @@ npm_eslint_plugin_tests=false
 npm_schematic_tests=false
 
 # Opt-in only — never enabled by path filtering or emit_all_true. Set via
-# Trigger Pipeline → run-proxy-disabled-tests=true (setup config forwards it).
-run_proxy_disabled_tests=false
-if [[ "${RUN_PROXY_DISABLED_TESTS:-false}" == "true" || "${RUN_PROXY_DISABLED_TESTS:-}" == "1" ]]; then
-  run_proxy_disabled_tests=true
+# Trigger Pipeline → percy-enabled=true (setup config forwards it).
+percy_enabled=false
+if [[ "${PERCY_ENABLED:-false}" == "true" || "${PERCY_ENABLED:-}" == "1" ]]; then
+  percy_enabled=true
 fi
+
+# run-force-http1-tests is NOT forwarded here: it's already a pipeline parameter
+# declared in both the setup config and .circleci/packed/pipeline.yml, so it is
+# inherited into the continued config automatically. Re-passing it through the
+# continuation's `parameters` map collides with that inherited value and
+# CircleCI rejects the continuation with "Conflicting pipeline parameters."
 
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "run-proxy-disabled-tests": $run_proxy_disabled_tests}
+{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "percy-enabled": $percy_enabled}
 EOF
 }
 
@@ -74,14 +89,36 @@ emit_all_true() {
 }
 
 # ----- branch override --------------------------------------------------------
-# On develop/release branches all jobs must run.
+# On release branches and the v8 snapshot cache branch all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
-if [[ "$BRANCH" == "develop" ]] || \
-   [[ "$BRANCH" =~ ^release/ ]] || \
+if [[ "$BRANCH" =~ ^release/ ]] || \
    [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
   echo "Branch '$BRANCH' — running all tests" >&2
   emit_all_true
   exit 0
+fi
+
+# ----- develop trigger-source exemption ---------------------------------------
+# The nightly platform cron runs *on* the develop branch (CIRCLE_BRANCH=develop),
+# so a branch check alone can't tell it apart from a real push - it must stay
+# unfiltered, or path-filtering would silently gut the nightly full sweep down
+# to the last merge's diff. Scoping filtering to genuine webhook pushes also
+# covers manual "Trigger Pipeline" reruns and run-platform-workflows=true
+# triggers for free, since those report a non-webhook trigger source too -
+# no separate check is needed for them.
+#
+# filtering_develop_push is threaded through the rest of the script instead of
+# re-testing $BRANCH at each site (diff base resolution, the empty-diff check,
+# the unrecognized-path guard) that needs to behave differently for a develop
+# push than for a PR.
+filtering_develop_push=false
+if [[ "$BRANCH" == "develop" ]]; then
+  if [[ "${TRIGGER_SOURCE:-}" != "webhook" ]]; then
+    echo "Develop trigger source '${TRIGGER_SOURCE:-<unset>}' is not a webhook push — running all tests" >&2
+    emit_all_true
+    exit 0
+  fi
+  filtering_develop_push=true
 fi
 
 # ----- manual trigger override -----------------------------------------------
@@ -94,25 +131,71 @@ if [[ "$RUN_ALL_RAW" == "true" || "$RUN_ALL_RAW" == "1" ]]; then
 fi
 
 # ----- compute changed files --------------------------------------------------
-# Fetch develop from the upstream project repo using CIRCLE_PROJECT_USERNAME/REPONAME,
-# which CircleCI always sets to the canonical upstream (cypress-io/cypress), not the
-# contributor's fork. This ensures fork PRs compare against the real develop branch.
-UPSTREAM_URL="https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git"
-MERGE_BASE=""
-if git fetch "$UPSTREAM_URL" develop 2>/dev/null; then
-  MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
-else
-  echo "Could not fetch upstream develop" >&2
-fi
+# --no-renames on every diff below: with rename detection on, `--name-only`
+# reports only a rename's destination, so moving a file out of a globally
+# triggering package (say packages/config/) would escape that trigger.
+#
+# Resolves the base commit for a develop push. Prefers BASE_REVISION
+# (<< pipeline.git.base_revision >>) since it also covers a push that lands
+# multiple commits at once; falls back to HEAD~1, which is correct for both
+# squash merges and true merge commits landing on develop (first-parent).
+# Tolerates a missing/garbage BASE_REVISION under `set -e` via the `if` guards.
+resolve_develop_base() {
+  local base="${BASE_REVISION:-}"
 
-if [[ -n "$MERGE_BASE" ]]; then
-  CHANGED=$(git -c core.quotepath=false diff --name-only "$MERGE_BASE" HEAD)
+  if [[ -n "$base" ]] && git cat-file -e "${base}^{commit}" 2>/dev/null; then
+    echo "$base"
+    return 0
+  fi
+
+  if git cat-file -e "HEAD~1^{commit}" 2>/dev/null; then
+    echo "HEAD~1"
+    return 0
+  fi
+
+  return 1
+}
+
+if [[ "$filtering_develop_push" == "true" ]]; then
+  # A develop push's merge-base against upstream develop is HEAD itself (the
+  # push already landed), so the upstream-fetch logic below would always see
+  # an empty diff. Diff against the previous tip instead. The checkout in this
+  # job is blobless (full commit/tree history, blobs filtered), so this needs
+  # no extra fetch.
+  if DEVELOP_BASE=$(resolve_develop_base); then
+    echo "Diffing develop push against $DEVELOP_BASE" >&2
+    CHANGED=$(git -c core.quotepath=false diff --no-renames --name-only "$DEVELOP_BASE" HEAD)
+  else
+    echo "Warning: could not resolve a base revision for develop push (BASE_REVISION='${BASE_REVISION:-<unset>}', HEAD~1 unavailable) — running all tests" >&2
+    emit_all_true
+    exit 0
+  fi
 else
-  echo "Could not find merge base with upstream develop, falling back to HEAD~1" >&2
-  CHANGED=$(git -c core.quotepath=false diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+  # Fetch develop from the upstream project repo using CIRCLE_PROJECT_USERNAME/REPONAME,
+  # which CircleCI always sets to the canonical upstream (cypress-io/cypress), not the
+  # contributor's fork. This ensures fork PRs compare against the real develop branch.
+  UPSTREAM_URL="https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git"
+  MERGE_BASE=""
+  if git fetch "$UPSTREAM_URL" develop 2>/dev/null; then
+    MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
+  else
+    echo "Could not fetch upstream develop" >&2
+  fi
+
+  if [[ -n "$MERGE_BASE" ]]; then
+    CHANGED=$(git -c core.quotepath=false diff --no-renames --name-only "$MERGE_BASE" HEAD)
+  else
+    echo "Could not find merge base with upstream develop, falling back to HEAD~1" >&2
+    CHANGED=$(git -c core.quotepath=false diff --no-renames --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+  fi
 fi
 
 if [[ -z "$CHANGED" ]]; then
+  if [[ "$filtering_develop_push" == "true" ]]; then
+    echo "Warning: no changed files detected for develop push — running all tests" >&2
+    emit_all_true
+    exit 0
+  fi
   echo "Error: no changed files detected" >&2
   exit 1
 fi
@@ -142,11 +225,11 @@ while IFS= read -r file; do
     *.md|*.mdx|*.txt|*.png|*.jpg|*.gif|*.svg|*.ico|\
     LICENSE|.github/*|.gitignore|.gitattributes|.editorconfig|\
     guides/*|assets/*|\
-    .eslintrc.js|.prettierignore|.nvmrc|.node-version|.npmrc|.yarnclean|\
+    .eslintrc.js|.eslintignore|.prettierignore|.nvmrc|.node-version|.npmrc|.yarnclean|\
     .percy.yml|.releaserc.js|renovate.json|docker-compose.yml|lerna.json|\
     electron-builder.json|knip.json|nx.json|jsconfig.json|autobarrel.json|\
     mocha-reporter-config.json|apollo.config.js|\
-    .husky/*|.vscode/*|.cursor/*|__snapshots__/*)
+    .husky/*|.vscode/*|.cursor/*|.claude/*|__snapshots__/*)
       ;;
     packages/driver/*)
       driver_tests=true
@@ -169,10 +252,6 @@ while IFS= read -r file; do
     packages/network-interception/*)
       server_tests=true
       driver_tests=true
-      system_tests=true
-      ;;
-    packages/rewriter/*)
-      server_tests=true
       system_tests=true
       ;;
     packages/https-proxy/*)
@@ -202,6 +281,17 @@ while IFS= read -r file; do
     packages/data-context/*)
       app_ui_tests=true
       launchpad_tests=true
+      server_tests=true
+      system_tests=true
+      unit_tests=true
+      ;;
+    packages/agent-info/*)
+      cli_tests=true
+      unit_tests=true
+      ;;
+    packages/cypress-sessions/*)
+      app_ui_tests=true
+      cli_tests=true
       server_tests=true
       system_tests=true
       unit_tests=true
@@ -304,10 +394,6 @@ while IFS= read -r file; do
       npm_angular_tests=true
       system_tests=true
       ;;
-    npm/angular-zoneless/*)
-      npm_angular_tests=true
-      system_tests=true
-      ;;
     npm/svelte/*)
       system_tests=true
       ;;
@@ -335,12 +421,24 @@ while IFS= read -r file; do
       npm_schematic_tests=true
       system_tests=true
       ;;
-    packages/eslint-config/*|packages/example/*|npm/xpath/*)
+    packages/example/*)
+      unit_tests=true
+      ;;
+    packages/eslint-config/*|npm/xpath/*)
       # No CI jobs are associated with these packages — no tests to run
       ;;
     *)
-      # Unrecognized path — fail loudly so the mapping is kept up to date.
-      # Add the new path to one of the cases above rather than silently skipping tests.
+      # Unrecognized path. On a PR, fail loudly so the mapping is kept up to
+      # date — add the new path to one of the cases above rather than
+      # silently skipping tests. On a develop push, the merge already passed
+      # PR CI, so failing the merge pipeline over an unmapped path is worse
+      # than over-running it — fall back to running everything instead.
+      if [[ "$filtering_develop_push" == "true" ]]; then
+        echo "Warning: unrecognized path '$file' has no mapping in generate-pipeline-parameters.sh — running all tests" >&2
+        echo "Add it to the targeted path mapping section when convenient." >&2
+        emit_all_true
+        exit 0
+      fi
       echo "Error: unrecognized path '$file' has no mapping in generate-pipeline-parameters.sh" >&2
       echo "Add it to the targeted path mapping section before merging." >&2
       exit 1

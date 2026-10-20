@@ -3,7 +3,8 @@ import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
 
 export interface AutSnapshot {
-  id?: number
+  id?: string
+  testId?: string
   name?: string
   $el: any
   snapshot?: AutSnapshot
@@ -26,7 +27,7 @@ export interface AutSnapshot {
 export class IframeModel {
   isSnapshotPinned: boolean = false
   originalState?: AutSnapshot
-  detachedId?: number
+  detachedId?: string
   intervalId?: number
 
   constructor (
@@ -220,6 +221,14 @@ export class IframeModel {
     snapshotStore.pinSnapshot(snapshotProps)
 
     clearInterval(this.intervalId)
+
+    if (!this.originalState) {
+      this._storeOriginalState()
+    }
+
+    // Claim the pending restore of any preview this pin replaced, so its deferred
+    // `hide:snapshot` cannot put the live page back over the pin.
+    this.detachedId = snapshotProps.id
 
     this._restoreDom(snapshots[0], snapshotProps)
   }

@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, Mock } from 'vitest'
+import type { Mock } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import type { PuppeteerNode, Browser } from 'puppeteer-core'
 import { setup } from '../../src/plugin'
 import { activateMainTab } from '../../src/plugin/activateMainTab'
@@ -297,7 +298,7 @@ describe('#setup', () => {
         }
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - testing a message handler that is not a function
       setup({ on, onMessage: { notAFunction: true } })
 
       await flushPromises()
@@ -367,6 +368,89 @@ describe('#setup', () => {
       expect(taskResult.__error__.message).toEqual(
         'Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.',
       )
+    })
+
+    it('disconnects the browser if activateMainTab rejects', async () => {
+      vi.mocked(activateMainTab).mockRejectedValueOnce(undefined)
+
+      let taskResult: any = null
+
+      on.mockImplementation(async (event, handler) => {
+        if (event === 'after:browser:launch') {
+          return handler({ family: 'chromium', isHeaded: true }, { webSocketDebuggerUrl: 'ws://debugger' })
+        }
+
+        if (event === 'task') {
+          taskResult = await handler.__cypressPuppeteer__({ name: testTask, args: [] })
+
+          return taskResult
+        }
+      })
+
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+
+      await flushPromises()
+
+      expect(mockBrowser.disconnect).toHaveBeenCalled()
+      expect(taskResult.__error__.message).toEqual(
+        'Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.',
+      )
+    })
+
+    it('returns the message handler error rather than the activateMainTab error if both fail', async () => {
+      vi.mocked(activateMainTab).mockRejectedValueOnce(undefined)
+      testTaskHandler.mockRejectedValue(new Error('handler error'))
+
+      let taskResult: any = null
+
+      on.mockImplementation(async (event, handler) => {
+        if (event === 'after:browser:launch') {
+          return handler({ family: 'chromium', isHeaded: true }, { webSocketDebuggerUrl: 'ws://debugger' })
+        }
+
+        if (event === 'task') {
+          taskResult = await handler.__cypressPuppeteer__({ name: testTask, args: [] })
+
+          return taskResult
+        }
+      })
+
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+
+      await flushPromises()
+
+      expect(mockBrowser.disconnect).toHaveBeenCalled()
+      expect(taskResult.__error__.message).toEqual('handler error')
+    })
+
+    it.each([
+      [undefined, 'undefined'],
+      [null, 'null'],
+      [0, '0'],
+      ['', ''],
+    ])('returns error object if message handler rejects with %j', async (rejection, expectedMessage) => {
+      testTaskHandler.mockRejectedValue(rejection)
+
+      let taskResult: any = null
+
+      on.mockImplementation(async (event, handler) => {
+        if (event === 'after:browser:launch') {
+          return handler({ family: 'chromium', isHeaded: false }, { webSocketDebuggerUrl: 'ws://debugger' })
+        }
+
+        if (event === 'task') {
+          taskResult = await handler.__cypressPuppeteer__({ name: testTask, args: [] })
+
+          return taskResult
+        }
+      })
+
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+
+      await flushPromises()
+
+      expect(taskResult.__error__).toBeInstanceOf(Object)
+      expect(taskResult.__error__.message).toEqual(expectedMessage)
     })
 
     it('does not try to activate main tab when the browser is headless', async () => {
@@ -440,32 +524,32 @@ describe('#setup', () => {
 
   describe('validation', () => {
     it('errors if options argument is not provided', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a missing options argument
       expect(() => setup()).toThrow('Must provide options argument to `setup`.')
     })
 
     it('errors if options argument is not an object', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a non-object options argument
       expect(() => setup(true)).toThrow('The options argument provided to `setup` must be an object.')
     })
 
     it('errors if `on` option is not provided', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a missing `on` option
       expect(() => setup({})).toThrow('Must provide `on` function to `setup`.')
     })
 
     it('errors if `on` option is not a function', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a non-function `on` option
       expect(() => setup({ on: 'string' })).toThrow('The `on` option provided to `setup` must be a function.')
     })
 
     it('errors if `onMessage` option is not provided', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a missing `onMessage` option
       expect(() => setup({ on: vi.fn() })).toThrow('Must provide `onMessage` object to `setup`.')
     })
 
     it('errors if `onMessage` option is not an object', () => {
-      // @ts-expect-error
+      // @ts-expect-error - testing a non-object `onMessage` option
       expect(() => setup({ on: vi.fn(), onMessage: () => {} })).toThrow('The `onMessage` option provided to `setup` must be an object.')
     })
   })

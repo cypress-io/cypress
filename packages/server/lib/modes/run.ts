@@ -26,7 +26,8 @@ import type { Browser } from '../browsers/types'
 import type { Data } from '../util/fs'
 import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
-import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
+import type { CypressRunResult } from './results'
+import { createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
@@ -312,6 +313,9 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
 
             ffmpegController.writeVideoFrame(data)
           },
+          get startedVideoCapture () {
+            return ffmpegController.startedVideoCapture
+          },
           async restart () {
             await videoRecording.api.useFfmpegVideoController(_ffmpegOpts)
           },
@@ -502,7 +506,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
   }
 
   // TODO: remove the need to extend options and avoid the type error
-  // @ts-expect-error
+  // @ts-expect-error - setScreenshotMetadata is not declared on the run options type
   options.setScreenshotMetadata = (data) => {
     return currentSetScreenshotMetadata(data)
   }

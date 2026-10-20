@@ -1,0 +1,321 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lib/exec/tap help > cypress tap --help 1`] = `
+"Usage: cypress tap [command] [args...] [options]
+
+Discover, control, and query an open-mode Cypress session from the command
+line. Programmatically run specs, review results, and inspect the
+application-under-test through the full test lifecycle.
+
+Options:
+  -s, --session <pid>   target a local Cypress session by its process id (PID)
+  --json                print the raw JSON result instead of the human-readable
+                        rendering
+  --timeout <ms>        how long to wait on any single call into the Cypress
+                        session, in milliseconds (default: 30000)
+  -h, --help            display help for command
+
+Commands:
+  sessions [options]    list the Cypress sessions this CLI can reach
+  status [options]      report where a Cypress session is in its lifecycle
+  specs [options]       list the specs the Cypress session can run, most
+                        recently modified first
+  run [options] <spec>  run (or rerun) a spec by its project-relative path
+  dom [options]         read the application-under-test DOM as HTML: the page
+                        body, or a single element with its children by
+                        providing a CSS Selector
+  aria [options]        read the accessibility (ARIA) tree of the
+                        application-under-test page body, or the subtree at a
+                        selector
+  inspect [options]     retrieve the tag, attributes, computed styles, box
+                        model, and accessibility node of a specific element
+  command [options]     retrieve the reporter row, the pinnable DOM
+                        snapshots, and the console properties of a single
+                        command in a test
+  reporter [options]    retrieve the test runner reporter for the spec or a
+                        specific test
+  pin [options]         pin a command’s DOM snapshot into the live
+                        application-under-test frame
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap aria --help 1`] = `
+"Usage: cypress tap aria [options]
+
+Reads the accessibility (ARIA) tree of the application under test, rooted at the
+page body or at the element a CSS Selector matches. Structural and text-only
+roles are dropped, leaving the compact role/name/state tree DevTools shows.
+
+The selector must match exactly one element. If it matches multiple elements
+nothing is read: the command answers with a numbered list of the matches (up to
+10), each with a unique selector. Re-run with --at <index> to read one of them,
+or with whichever selector you meant.
+
+Options:
+  -e, --selector <selector>    a CSS selector matching exactly one element
+                               (default: "body")
+  -m, --max-nodes <max-nodes>  cap on the number of accessibility nodes
+                               returned (default: 200)
+  --at <at>                    When a selector matches multiple elements, the
+                               0-based index of the match to read
+  -s, --session <pid>          target a local Cypress session by its process id
+                               (PID)
+  --json                       print the raw JSON result instead of the
+                               human-readable rendering
+  --timeout <ms>               how long to wait on any single call into the
+                               Cypress session, in milliseconds (default:
+                               30000)
+  -h, --help                   display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap command --help 1`] = `
+"Usage: cypress tap command [options]
+
+Retrieves a single command from a test's command log: its reporter row, the DOM
+snapshots pinnable on it, and any associated console properties.
+
+Options:
+  -t, --test-id <test-id>        test id, as listed by the reporter command
+  -c, --command-id <command-id>  command id, as listed by the reporter command
+                                 — a row number (test body first when
+                                 duplicated), an e-prefixed event id, or
+                                 hook-qualified like "h1:3"
+  -a, --attempt <attempt>        1-based attempt (attempt 1 = first run);
+                                 defaults to the latest
+  -d, --depth <depth>            how many levels of nested console properties
+                                 to expand before summarizing the rest as "{n
+                                 keys}" / "[n items]": a number or "all"
+                                 (default 3, and a section over 8 rows folds at
+                                 any depth unless this is passed)
+  -s, --session <pid>            target a local Cypress session by its process
+                                 id (PID)
+  --json                         print the raw JSON result instead of the
+                                 human-readable rendering. This will output
+                                 every console property in full regardless of
+                                 length.
+  --timeout <ms>                 how long to wait on any single call into the
+                                 Cypress session, in milliseconds (default:
+                                 30000)
+  -h, --help                     display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap dom --help 1`] = `
+"Usage: cypress tap dom [options]
+
+Reads the application-under-test DOM as HTML: a single element matching a CSS
+Selector, and all of its children. Without --selector it reads the page body;
+pass --selector html for the entire document. Output is capped browser-side so a
+heavy page never ships megabytes at once.
+
+The selector must match exactly one element. If it matches multiple elements
+nothing is read: the command answers with a numbered list of the matches (up to
+10), each with a unique selector. Re-run with --at <index> to read one of them,
+or with whichever selector you meant.
+
+Options:
+  -e, --selector <selector>    a CSS selector matching exactly one element
+                               (default: "body")
+  -m, --max-chars <max-chars>  cap on returned HTML characters (default: 30000)
+  --at <at>                    When a selector matches multiple elements, the
+                               0-based index of the match to read
+  -s, --session <pid>          target a local Cypress session by its process id
+                               (PID)
+  --json                       print the raw JSON result instead of the
+                               human-readable rendering
+  --timeout <ms>               how long to wait on any single call into the
+                               Cypress session, in milliseconds (default:
+                               30000)
+  -h, --help                   display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap inspect --help 1`] = `
+"Usage: cypress tap inspect [options]
+
+Inspects a single element matching a CSS Selector: outputs the tag, attributes,
+curated computed styles, box model, and that element's own accessibility node
+— where \`aria\` reads the whole tree, this reads the one node.
+
+The selector must match exactly one element. If it matches multiple elements
+nothing is read: the command answers with a numbered list of the matches (up to
+10), each with a unique selector. Re-run with --at <index> to read one of them,
+or with whichever selector you meant.
+
+Options:
+  -e, --selector <selector>  a CSS selector matching exactly one element,
+                             identifying the element to inspect
+  --at <at>                  When a selector matches multiple elements, the
+                             0-based index of the match to read
+  -s, --session <pid>        target a local Cypress session by its process id
+                             (PID)
+  --json                     print the raw JSON result instead of the
+                             human-readable rendering
+  --timeout <ms>             how long to wait on any single call into the
+                             Cypress session, in milliseconds (default: 30000)
+  -h, --help                 display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap pin --help 1`] = `
+"Usage: cypress tap pin [options]
+
+Pins a command's DOM snapshot into the live application-under-test frame so the
+dom/aria/inspect commands can read it. Pass --clear to release.
+
+Options:
+  -t, --test-id <test-id>        test id, as listed by the reporter command
+  -c, --command-id <command-id>  command id, as listed by the reporter command
+                                 — a row number (test body first when
+                                 duplicated), an e-prefixed event id, or
+                                 hook-qualified like "h1:3"
+  -a, --attempt <attempt>        1-based attempt (attempt 1 = first run);
+                                 defaults to the latest
+  --at <at>                      which snapshot to pin: a name like
+                                 "before"/"after" or a 1-based index; defaults
+                                 to the last (the command’s final state).
+                                 Re-run on the pinned command to switch
+                                 snapshots without releasing the pin
+  --clear                        release the current pin and restore the app to
+                                 its pre-pin state
+  -s, --session <pid>            target a local Cypress session by its process
+                                 id (PID)
+  --json                         print the raw JSON result instead of the
+                                 human-readable rendering
+  --timeout <ms>                 how long to wait on any single call into the
+                                 Cypress session, in milliseconds (default:
+                                 30000)
+  -h, --help                     display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap reporter --help 1`] = `
+"Usage: cypress tap reporter [options]
+
+Shows test results the way the Cypress reporter panel does.
+
+By default, this will output the spec-level overview featuring the spec's
+pass/fail stats and every suite's tests including their IDs.
+
+Provide a --test-id <id> to see one test's full story: its routes, the hooks
+that ran, the complete command log, and the failure output when something went
+wrong. Add --attempt to view an earlier retry.
+
+Options:
+  -t, --test-id <test-id>  test id, as listed by the reporter command
+  -a, --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to
+                           the latest
+  -s, --session <pid>      target a local Cypress session by its process id
+                           (PID)
+  --json                   print the raw JSON result instead of the
+                           human-readable rendering
+  --timeout <ms>           how long to wait on any single call into the Cypress
+                           session, in milliseconds (default: 30000)
+  -h, --help               display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap run --help 1`] = `
+"Usage: cypress tap run [options] <spec>
+
+Runs (or reruns) a spec by its project-relative path, as listed by the specs
+command. If no browser is open it launches one, switching to the spec's testing
+type when needed, then requests the spec and returns immediately. This requests
+the spec to begin, but completion of this command does not guarantee the spec
+has started or finished.
+
+Poll the 'status' command for progress. Read status first and keep its
+startedAt: a verdict still carrying that same startedAt describes the spec
+before this one, so wait for a verdict whose startedAt differs.
+
+Arguments:
+  spec                 project-relative spec path, as listed by the specs
+                       command
+
+Options:
+  -s, --session <pid>  target a local Cypress session by its process id (PID)
+  --json               print the raw JSON result instead of the human-readable
+                       rendering
+  --timeout <ms>       how long to wait on any single call into the Cypress
+                       session, in milliseconds (default: 30000)
+  -h, --help           display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap sessions --help 1`] = `
+"Usage: cypress tap sessions [options]
+
+Lists the Cypress sessions this CLI can reach. Cypress must be running locally,
+support the \`tap\` command, and have an active Testing Type to be listed. A
+session can be targeted by its PID in other commands using \`--session\`.
+
+tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
+A session running any other browser is listed as unsupported, and every other
+tap command refuses it.
+
+Options:
+  -s, --session <pid>  target a local Cypress session by its process id (PID)
+  --json               print the raw JSON result instead of the human-readable
+                       rendering
+  --timeout <ms>       how long to wait on any single call into the Cypress
+                       session, in milliseconds (default: 30000)
+  -h, --help           display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap specs --help 1`] = `
+"Usage: cypress tap specs [options]
+
+Lists the specs the connected Cypress session can run, in descending order by
+last modified. To find other testing types you must connect to a Cypress
+session with that testing type active.
+
+Options:
+  -s, --session <pid>  target a local Cypress session by its process id (PID)
+  --json               print the raw JSON result instead of the human-readable
+                       rendering
+  --timeout <ms>       how long to wait on any single call into the Cypress
+                       session, in milliseconds (default: 30000)
+  -h, --help           display help for command
+"
+`;
+
+exports[`lib/exec/tap help > cypress tap status --help 1`] = `
+"Usage: cypress tap status [options]
+
+Reports where a Cypress session is in its lifecycle, as JSON — for polling and
+"where am I?" checks. Always exits 0 for a determinable stage (including "not
+connected"); a poller branches on the \`status\` field.
+
+Stages:
+- not connected: Cypress cannot be reached.
+- browser not selected: Cypress does not have a supported browser open.
+- spec not selected: Cypress has a browser open but no spec is selected.
+- loading: Cypress is loading the spec.
+- running: Cypress is running the spec.
+- passed: Cypress has completed the spec and all executed tests passed.
+- failed: Cypress failed to run the spec, or has completed the spec and at least
+  one test failed.
+
+Statuses other than passed and failed are intermediate states, indicating that
+Cypress requires additional instruction or is still processing. Loading stays
+loading for as long as the spec takes to build, so a poller needs its own
+timeout; a spec whose build fails reports failed and carries the reason as
+error — it ran no tests, so it reports no counts either.
+
+From loading onwards the output carries \`startedAt\`, the spec every other field
+describes (null while loading). In the event of a rerun the previous spec's
+verdict remains visible until the new one begins, identical on every other
+field, so use \`startedAt\` to validate whether output describes the previous
+spec or the new one.
+
+Options:
+  -s, --session <pid>  target a local Cypress session by its process id (PID)
+  --json               print the raw JSON result instead of the human-readable
+                       rendering
+  --timeout <ms>       how long to wait on any single call into the Cypress
+                       session, in milliseconds (default: 30000)
+  -h, --help           display help for command
+"
+`;

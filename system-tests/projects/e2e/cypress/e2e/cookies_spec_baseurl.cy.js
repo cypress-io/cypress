@@ -174,7 +174,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',
@@ -192,7 +192,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',

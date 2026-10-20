@@ -47,7 +47,7 @@ const stats = {
   builtAt: true,
   colors: true,
   modules: true,
-  excludeModules: /(main|test-entry).scss/,
+  excludeModules: /main.scss/,
   timings: true,
 }
 
@@ -57,14 +57,10 @@ const ignoreWarnings = [{
   module: /node_modules\/mocha\/lib\/esm-utils\.js/,
 }]
 
-function makeSassLoaders ({ modules }: { modules: boolean }) {
-  const exclude = [/node_modules/]
-
-  if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
-
+function makeSassLoaders () {
   return {
-    test: modules ? /\.modules?\.s[ac]ss$/i : /\.s[ac]ss$/i,
-    exclude,
+    test: /\.s[ac]ss$/i,
+    exclude: [/node_modules/],
     enforce: 'pre',
     use: [
       {
@@ -79,7 +75,7 @@ function makeSassLoaders ({ modules }: { modules: boolean }) {
         options: {
           // sourceMap: true,
           // esModule: false,
-          modules,
+          modules: false,
         },
       }, // translates CSS into CommonJS
       {
@@ -172,8 +168,7 @@ export const getCommonConfig = () => {
             { loader: MiniCSSExtractWebpackPlugin.loader },
           ],
         },
-        makeSassLoaders({ modules: false }),
-        makeSassLoaders({ modules: true }),
+        makeSassLoaders(),
         {
           test: /\.(eot|ttf|woff|woff2)$/,
           type: 'asset/resource',
@@ -226,7 +221,7 @@ export const getCommonConfig = () => {
       //    because it is fast and maps to filenames while showing compiled source
       // 'SourceMapDevToolPlugin' is used in production for the same reasons as 'eval', but it
       //    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
-      // files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
+      // files will be mapped like: `cypress://../driver/cy/commands/click.ts`
 
       // other sourcemap options:
       // [new webpack.SourceMapDevToolPlugin({

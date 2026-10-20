@@ -21,7 +21,6 @@
   "dependencies": {
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
-    "find-up": "^5.0.0",
     "fs-extra": "^9.1.0",
     "globby": "^11.0.1",
     "resolve-package-path": "^4.0.3",

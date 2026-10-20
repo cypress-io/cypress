@@ -134,12 +134,6 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
   return matchable
 }
 
-/** @deprecated Use {@link doesRouteMatch} — kept for net-stubbing strangler re-exports. */
-export const _doesRouteMatch = doesRouteMatch
-
-/** @deprecated Use {@link getMatchableForRequest} */
-export const _getMatchableForRequest = getMatchableForRequest
-
 /**
  * Find all `BackendRoute`s that match the supplied request.
  */

@@ -144,7 +144,7 @@ module.exports = (on, config) => {
       }
 
       return performance.track('fast_visit_spec percentiles', data)
-      .return(null)
+      .then(() => null)
     },
 
     'get:browser:args' () {

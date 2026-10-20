@@ -34,6 +34,14 @@ export class EventCollectorActions {
   }
 
   async recordEvent (event: CollectibleEvent, includeMachineId: boolean): Promise<boolean> {
+    // Every event this records is collected without an account behind it, so the
+    // guest opt-out covers all of them: any value turns recording off.
+    if (process.env.CYPRESS_DISABLE_GUEST_TELEMETRY) {
+      debug('Not recording event, guest telemetry is disabled: %o', event)
+
+      return false
+    }
+
     try {
       const cloudUrl = this.ctx.cloud.getCloudUrl(resolveEventCollectorEnv())
       const eventUrl = includeMachineId ? `${cloudUrl}/machine-collect` : `${cloudUrl}/anon-collect`

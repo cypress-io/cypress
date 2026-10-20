@@ -2,12 +2,13 @@ import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals
 import os from 'os'
 import fs from 'fs-extra'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern, matchesAnySpecPattern } from '../../../src/sources'
+import type { SpecWithRelativeRoot } from '../../../src/sources'
+import { matchedSpecs, transformSpec, getLongestCommonPrefixFromPaths, getPathFromSpecPattern, matchesAnySpecPattern } from '../../../src/sources'
 import path from 'path'
 import chokidar from 'chokidar'
 import _ from 'lodash'
-import { FoundSpec } from '@packages/types'
-import { DataContext } from '../../../src'
+import type { FoundSpec } from '@packages/types'
+import type { DataContext } from '../../../src'
 import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 import { defaultExcludeSpecPattern, defaultSpecPattern } from '@packages/config'
@@ -1034,6 +1035,54 @@ describe('ProjectDataSource', () => {
       )
 
       expect(unmatched).toEqual([])
+    })
+  })
+})
+
+describe('getResolvedConfigFields', () => {
+  let ctx: DataContext
+
+  beforeEach(() => {
+    ctx = createTestDataContext('open')
+    jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({
+      resolved: {
+        baseUrl: { value: 'http://localhost:3000', from: 'config' },
+        env: {
+          apiKey: { value: 'env-secret', from: 'config' },
+          fromProcess: { value: 'process-secret', from: 'env' },
+        },
+        expose: {
+          publicFlag: { value: 'exposed', from: 'config' },
+        },
+      },
+    } as any)
+  })
+
+  it('returns env keys without their values', async () => {
+    const fields = await ctx.project.getResolvedConfigFields()
+
+    expect(fields.find((f) => f.field === 'env')).toEqual({
+      field: 'env',
+      from: 'env',
+      value: { apiKey: '*****', fromProcess: '*****' },
+    })
+
+    expect(JSON.stringify(fields)).not.toContain('secret')
+  })
+
+  it('returns expose and other config values unchanged', async () => {
+    const fields = await ctx.project.getResolvedConfigFields()
+
+    expect(fields.find((f) => f.field === 'expose')).toEqual({
+      field: 'expose',
+      from: 'expose',
+      value: { publicFlag: 'exposed' },
+    })
+
+    expect(fields.find((f) => f.field === 'baseUrl')).toEqual({
+      field: 'baseUrl',
+      from: 'config',
+      value: 'http://localhost:3000',
     })
   })
 })

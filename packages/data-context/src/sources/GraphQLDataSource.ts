@@ -1,6 +1,7 @@
 import type { NexusGenAbstractTypeMembers } from '../gen/nxs.gen'
 import debugLib from 'debug'
-import { execute, FieldNode, GraphQLResolveInfo, print, visit } from 'graphql'
+import { execute, print, visit } from 'graphql'
+import type { FieldNode, GraphQLResolveInfo } from 'graphql'
 import type { core } from 'nexus'
 import _ from 'lodash'
 import type { DataContext } from '..'

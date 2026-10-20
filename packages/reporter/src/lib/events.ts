@@ -1,9 +1,13 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
-import appState, { AppState } from './app-state'
-import runnablesStore, { RunnablesStore, LogProps, RootRunnable } from '../runnables/runnables-store'
-import statsStore, { StatsStore } from '../header/stats-store'
-import scroller, { Scroller } from './scroller'
+import type { AppState } from './app-state'
+import appState from './app-state'
+import type { RunnablesStore, LogProps, RootRunnable } from '../runnables/runnables-store'
+import runnablesStore from '../runnables/runnables-store'
+import type { StatsStore } from '../header/stats-store'
+import statsStore from '../header/stats-store'
+import type { Scroller } from './scroller'
+import scroller from './scroller'
 import type { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
 import type Err from '../errors/err-model'
 
@@ -132,6 +136,14 @@ const events: Events = {
 
     runner.on('reporter:snapshot:unpinned', action('snapshot:unpinned', () => {
       appState.pinnedSnapshotId = null
+    }))
+
+    // A pin driven from outside the reporter (e.g. the tap CLI): reflect it the
+    // way a user click would — highlight the command and open its test so the
+    // command (and its pin icon) actually render in the log.
+    runner.on('reporter:snapshot:pinned', action('snapshot:pinned', (testId: string, logId: number | string) => {
+      appState.pinnedSnapshotId = logId
+      runnablesStore.testById(testId)?.setIsOpen(true)
     }))
 
     localBus.on('resume', action('resume', () => {

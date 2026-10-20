@@ -23,7 +23,6 @@ describe('e2e user agent', () => {
     settings: {
       userAgent: 'foo bar baz agent',
       e2e: {
-        allowCypressEnv: false,
         baseUrl: 'http://localhost:4545',
       },
     },

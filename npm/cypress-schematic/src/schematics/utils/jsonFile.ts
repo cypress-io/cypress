@@ -6,11 +6,13 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { JsonValue } from '@angular-devkit/core'
-import { Tree } from '@angular-devkit/schematics'
-import {
+import type { JsonValue } from '@angular-devkit/core'
+import type { Tree } from '@angular-devkit/schematics'
+import type {
   Node,
   ParseError,
+} from 'jsonc-parser'
+import {
   applyEdits,
   findNodeAtLocation,
   getNodeValue,

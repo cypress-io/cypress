@@ -1,4 +1,5 @@
-import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
+import type { SinonSpy, SinonFakeTimers } from 'sinon'
+import sinon from 'sinon'
 
 import scroller from '../../../src/lib/scroller'
 

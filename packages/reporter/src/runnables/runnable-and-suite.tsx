@@ -4,15 +4,18 @@ import { observer } from 'mobx-react'
 import React, { useCallback, useMemo } from 'react'
 
 import appState from '../lib/app-state'
-import events, { Events } from '../lib/events'
+import type { Events } from '../lib/events'
+import events from '../lib/events'
 import Test from '../test/test'
-import Collapsible, { CollapsibleHeaderComponentProps } from '../collapsible/collapsible'
+import type { CollapsibleHeaderComponentProps } from '../collapsible/collapsible'
+import Collapsible from '../collapsible/collapsible'
 
 import type SuiteModel from './suite-model'
 import type TestModel from '../test/test-model'
 
-import { IconChevronDownMedium, IconChevronRightMedium, IconObjectStackFailed, IconObjectStackPassed, IconObjectStackQueued, IconObjectStackRunning, IconObjectStackSkipped, WindiColor } from '@cypress-design/react-icon'
-import { RunnableArray } from './runnables-store'
+import type { WindiColor } from '@cypress-design/react-icon'
+import { IconChevronDownMedium, IconChevronRightMedium, IconObjectStackFailed, IconObjectStackPassed, IconObjectStackQueued, IconObjectStackRunning, IconObjectStackSkipped } from '@cypress-design/react-icon'
+import type { RunnableArray } from './runnables-store'
 import { CreateNewTestButton } from '../header/CreateNewTestButton'
 
 // should only show connection dots if the current runnable is a test and the next runnable is a test and is not the last runnable

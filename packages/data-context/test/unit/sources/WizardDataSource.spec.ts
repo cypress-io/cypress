@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeAll } from '@jest/globals'
-import { WizardBundler, WIZARD_BUNDLERS, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
+import type { WizardBundler } from '@packages/scaffold-config'
+import { WIZARD_BUNDLERS, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'
 
 function findFramework (type: Cypress.ResolvedComponentFrameworkDefinition['type']) {

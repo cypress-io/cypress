@@ -6,7 +6,8 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
-import { $Location, LocationObject } from '../../cypress/location'
+import type { LocationObject } from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
@@ -593,9 +594,11 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         const retWin = () => state('window')
 
         // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
-        Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
+        const navigated = Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
 
-        Promise
+        // the automation round trip can outlast the 100ms unload check, so only start it once the navigation is issued
+        return Promise
+        .resolve(navigated)
         .delay(100)
         .then(() => {
           knownCommandCausedInstability = false

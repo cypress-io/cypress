@@ -3,21 +3,22 @@ import pkg from '@packages/root'
 import debugLib from 'debug'
 import DataLoader from 'dataloader'
 import { createBatchingExecutor } from '@graphql-tools/batch-execute'
-import { cacheExchange, Cache } from '@urql/exchange-graphcache'
-import fetch, { Response } from 'cross-fetch'
+import { cacheExchange } from '@urql/exchange-graphcache'
+import type { Cache } from '@urql/exchange-graphcache'
+import type fetch from 'cross-fetch'
+import { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
-import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
+import { print, visit } from 'graphql'
+import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
   fetchExchange,
-  Client,
-  OperationResult,
   stringifyVariables,
-  RequestPolicy,
 } from '@urql/core'
+import type { OperationResult, RequestPolicy, Client } from '@urql/core'
 import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
@@ -89,7 +90,6 @@ interface CloudDataSourceParams {
  */
 export class CloudDataSource {
   #cloudUrqlClient: Client
-  #lastCache?: string
   #batchExecutor: ReturnType<typeof createBatchingExecutor>
   #batchExecutorBatcher: DataLoader<CloudExecuteRemote, OperationResult>
 
@@ -127,25 +127,6 @@ export class CloudDataSource {
             Mutation: {
               _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
                 cache.invalidate(...args)
-              },
-              _showUrqlCache: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
-                this.#lastCache = JSON.stringify(cache, function replacer (key, value) {
-                  if (value instanceof Map) {
-                    const reducer = (obj: any, mapKey: any) => {
-                      obj[mapKey] = value.get(mapKey)
-
-                      return obj
-                    }
-
-                    return [...value.keys()].sort().reduce(reducer, {})
-                  }
-
-                  if (value instanceof Set) {
-                    return [...value].sort()
-                  }
-
-                  return value
-                })
               },
             },
           },
@@ -347,23 +328,6 @@ export class CloudDataSource {
         },
       },
     }).toPromise()
-  }
-
-  async getCache () {
-    await this.#cloudUrqlClient.mutation(`
-      mutation Internal_showUrqlCache { 
-        _showUrqlCache
-      }
-    `, { }, {
-      fetchOptions: {
-        headers: {
-          // Same note as above on the "invalidate", we could make this a bit clearer
-          INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
-        },
-      },
-    }).toPromise()
-
-    return JSON.parse(this.#lastCache ?? '')
   }
 
   getCloudUrl (env: CloudEnv) {

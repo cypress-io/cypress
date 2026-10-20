@@ -1,4 +1,5 @@
-import { vi, describe, it, beforeEach, afterEach, expect, MockInstance } from 'vitest'
+import type { MockInstance } from 'vitest'
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import path from 'path'
 import chalk from 'chalk'
 import _ from 'lodash'
@@ -8,10 +9,10 @@ import mockfs from 'mock-fs'
 import { geteuid } from 'process'
 import { Console } from 'console'
 import fs from 'fs-extra'
-import si, { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
 import { stripVTControlCharacters as stripAnsi } from 'util'
-import { Listr } from 'listr2'
 
 import util from '../../../lib/util'
 import logger from '../../../lib/logger'
@@ -29,7 +30,7 @@ vi.mock('systeminformation', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       osInfo: vi.fn(),
     },
@@ -51,7 +52,7 @@ vi.mock('lodash', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       random: vi.fn(),
     },
@@ -64,7 +65,7 @@ vi.mock('process', async (importActual) => {
   return {
     geteuid: vi.fn(),
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       geteuid: vi.fn(),
     },
@@ -76,7 +77,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
       release: vi.fn(),
@@ -85,12 +86,16 @@ vi.mock('os', async (importActual) => {
   }
 })
 
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
+
 vi.mock('../../../lib/exec/xvfb', async (importActual) => {
   const actual = await importActual()
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
       stop: vi.fn(),
@@ -105,7 +110,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getCacheDir: vi.fn(),
       isCi: vi.fn(),

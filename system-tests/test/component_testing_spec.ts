@@ -68,7 +68,8 @@ describe(`React major versions with Webpack`, function () {
     it(`executes all of the tests for React v${majorVersion} with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
-        configFile: 'cypress-webpack.config.ts',
+        // react19 is ESM ("type": "module") — bridge config re-exports cypress-webpack.config.ts via createRequire
+        configFile: majorVersion === '19' ? 'cypress-webpack-esm.config.ts' : 'cypress-webpack.config.ts',
         spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
@@ -79,7 +80,7 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_VERSIONS = ['18', '19', '20'] as const
+const ANGULAR_VERSIONS = ['21', '22'] as const
 
 describe(`Angular CLI versions`, () => {
   systemTests.setup()
@@ -94,17 +95,7 @@ describe(`Angular CLI versions`, () => {
     })
   }
 
-  // NOTE: Angular 21 has to be tested separate because it uses the zoneless mount function,
-  // which doesn't support zone.js any longer OR support autoDetectChanges or autoSpyOutputs
-  systemTests.it(`v21 with mount tests`, {
-    project: `angular-21`,
-    spec: 'src/**/*.cy.ts,!src/app/errors.cy.ts',
-    testingType: 'component',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
-  systemTests.it('angular 19 custom config', {
+  systemTests.it('angular 21 custom config', {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
     testingType: 'component',

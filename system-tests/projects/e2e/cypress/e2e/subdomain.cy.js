@@ -24,9 +24,7 @@ describe('subdomains', () => {
       document.cookie = 'foo=bar'
     })
 
-    cy.getCookies().then((cookies) => {
-      expect(cookies.length).to.eq(3)
-    })
+    cy.getCookies().should('have.length', 3)
   })
 
   it('issue: #207: does not duplicate or hostOnly cookies as a domain cookie', () => {

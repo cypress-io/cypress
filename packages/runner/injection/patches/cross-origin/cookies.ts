@@ -2,9 +2,10 @@ import {
   CookieJar,
   toughCookieToAutomationCookie,
   automationCookieToToughCookie,
+} from '@packages/server/lib/automation/cookie/jar'
+import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
 } from '@packages/server/lib/automation/cookie/jar'
-import type { Cookie as ToughCookie } from '@packages/server/lib/automation/cookie/jar'
 
 function isHostOnlyCookie (domain) {
   return domain[0] !== '.'

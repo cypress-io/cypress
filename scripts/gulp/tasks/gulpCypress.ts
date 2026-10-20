@@ -13,7 +13,8 @@ import { monorepoPaths } from '../monorepoPaths'
 import { ENV_VARS } from '../gulpConstants'
 import { forked } from '../utils/childProcessUtils'
 import { exitAndRemoveProcess } from './gulpRegistry'
-import { ChildProcess, exec } from 'child_process'
+import type { ChildProcess } from 'child_process'
+import { exec } from 'child_process'
 
 const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
 
@@ -95,7 +96,6 @@ async function spawnCypressWithMode (
   const finalEnv: Record<string, string | undefined> = {
     ...process.env,
     ...env,
-    TS_NODE_COMPILER: 'typescript-cached-transpile',
   }
 
   return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {

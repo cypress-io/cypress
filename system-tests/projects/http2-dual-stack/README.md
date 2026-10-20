@@ -1,7 +1,7 @@
 # http2-dual-stack
 
 Standalone dual-stack HTTP/2 origin verifying that browser traffic negotiates
-real h2 through Cypress when the MITM proxy is disabled, while the Cypress
+real h2 through Cypress on the default browser (CDP) network path, while the Cypress
 commands that run server-side (`cy.visit`'s `resolve:url` pre-flight,
 `cy.request`) keep working over HTTP/1.1 against the same origin.
 
@@ -19,19 +19,19 @@ plain node script instead of inside the harness. See #34308.
 # terminal 1 — the origin (self-signed certs are generated on first run)
 node system-tests/projects/http2-dual-stack/server.mjs
 
-# terminal 2 — h2 (proxy disabled): expect in-page fetches at HTTP/2.0
-CYPRESS_INTERNAL_DISABLE_PROXY=1 yarn cypress:run \
+# terminal 2 — h2 (default browser (CDP) network path): expect in-page fetches at HTTP/2.0
+yarn cypress:run \
   --project system-tests/projects/http2-dual-stack --browser chrome
 
-# contrast — proxy enabled: the MITM terminates browser connections, so all
+# contrast — forceHttp1: the MITM terminates browser connections, so all
 # browser traffic downgrades to HTTP/1.1
 yarn cypress:run --project system-tests/projects/http2-dual-stack \
-  --browser chrome --expose expectedBrowserProtocol=1.1
+  --browser chrome --config forceHttp1=true --expose expectedBrowserProtocol=1.1
 ```
 
 The server log shows the split directly: `resolve:url` and `cy.request`
 arrive as `HTTP/1.1` lines while the browser's in-page fetches arrive as
-`HTTP/2.0` (proxy disabled) or `HTTP/1.1` (proxy enabled). The visited
+`HTTP/2.0` (default) or `HTTP/1.1` (`forceHttp1: true`). The visited
 document itself never reaches the origin from the browser — `cy.visit`
 buffers the `resolve:url` response and fulfills the navigation with it, so
-the page always embeds `1.1` regardless of proxy mode.
+the page always embeds `1.1` regardless of network path.

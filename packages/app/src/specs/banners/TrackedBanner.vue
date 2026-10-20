@@ -11,6 +11,7 @@
 </template>
 
 <script setup lang="ts">
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- rendered in the template, which the rule cannot see; a type-only import would drop the binding at runtime
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import { computed, onMounted, ref, watchEffect, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
@@ -26,7 +27,7 @@ type EventData = {
 type DismissalScope = 'user' | 'project'
 
 type AlertComponentProps = InstanceType<typeof Alert>['$props']
-interface TrackedBannerComponentProps extends AlertComponentProps {
+interface TrackedBannerComponentProps extends /* @vue-ignore */ AlertComponentProps {
   bannerId: string
   hasBannerBeenShown: boolean
   eventData: EventData | undefined

@@ -30,16 +30,16 @@ describe('e2e blockHosts', () => {
     settings: {
       blockHosts: 'localhost:3131',
       e2e: {
-        allowCypressEnv: false,
         baseUrl: 'http://localhost:3232',
       },
     },
   })
 
-  it('passes', function () {
-    return systemTests.exec(this, {
-      spec: 'block_hosts.cy.js',
-      snapshot: true,
-    })
+  // Chrome enforces blockHosts on the browser network (CDP Fetch) path.
+  // Electron enforces it on the MITM proxy. Cover both.
+  systemTests.it('passes', {
+    browser: ['chrome', 'electron'],
+    spec: 'block_hosts.cy.js',
+    snapshot: true,
   })
 })

@@ -25,6 +25,8 @@ exports[`cli > CYPRESS_INTERNAL_ENV > allows and warns when staging environment 
     verify             Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    tap [options]      Discover, control, and query an open-mode Cypress
+                       session from the command line
     info               Prints Cypress and system information
   -------
   stderr:
@@ -235,6 +237,8 @@ exports[`cli > help command > shows help 1`] = `
     verify             Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    tap [options]      Discover, control, and query an open-mode Cypress
+                       session from the command line
     info               Prints Cypress and system information
   -------
   stderr:
@@ -271,6 +275,8 @@ exports[`cli > help command > shows help for --help 1`] = `
     verify             Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    tap [options]      Discover, control, and query an open-mode Cypress
+                       session from the command line
     info               Prints Cypress and system information
   -------
   stderr:
@@ -307,6 +313,8 @@ exports[`cli > help command > shows help for -h 1`] = `
     verify             Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    tap [options]      Discover, control, and query an open-mode Cypress
+                       session from the command line
     info               Prints Cypress and system information
   -------
   stderr:
@@ -344,6 +352,8 @@ exports[`cli > unknown command > shows usage and exits 1`] = `
     verify             Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    tap [options]      Discover, control, and query an open-mode Cypress
+                       session from the command line
     info               Prints Cypress and system information
   -------
   stderr:

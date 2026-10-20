@@ -1,26 +1,20 @@
-import 'zone.js'
-
-/**
- * @hack fixes "Mocha has already been patched with Zone" error.
- */
-// @ts-ignore
-window.Mocha['__zone_patch__'] = false
-import 'zone.js/testing'
-
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal } from '@angular/core'
+import type { SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, provideZonelessChangeDetection } from '@angular/core'
 import { toObservable } from '@angular/core/rxjs-interop'
-import {
+import type {
   ComponentFixture,
-  getTestBed,
   TestModuleMetadata,
+} from '@angular/core/testing'
+import {
+  getTestBed,
   TestBed,
   TestComponentRenderer,
 } from '@angular/core/testing'
 import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing'
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing'
 import {
   setupHooks,
   getContainerEl,
@@ -35,24 +29,6 @@ import type { Subscription } from 'rxjs'
  * @see https://angular.io/api/core/testing/TestModuleMetadata
  */
 export interface MountConfig<T> extends TestModuleMetadata {
-  /**
-   * @memberof MountConfig
-   * @description flag to automatically create a cy.spy() for every component @Output() property
-   * @example
-   * export class ButtonComponent {
-   *  @Output clicked = new EventEmitter()
-   * }
-   *
-   * cy.mount(ButtonComponent, { autoSpyOutputs: true })
-   * cy.get('@clickedSpy).should('have.been.called')
-   */
-  autoSpyOutputs?: boolean
-
-  /**
-   * @memberof MountConfig
-   * @description flag defaulted to true to automatically detect changes in your components
-   */
-  autoDetectChanges?: boolean
   /**
    * @memberof MountConfig
    * @example
@@ -73,7 +49,7 @@ export interface MountConfig<T> extends TestModuleMetadata {
    * })
    */
   // allow InputSignals to be type primitive and WritableSignal for type compliance
-  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P]}>
+  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P] }>
 }
 
 let activeFixture: ComponentFixture<any> | null = null
@@ -121,7 +97,7 @@ export type MountResponse<T> = {
    * @see https://angular.io/api/core/testing/ComponentFixture#componentInstance
    */
   component: T
-};
+}
 
 @Injectable()
 class CypressAngularErrorHandler implements ErrorHandler {
@@ -161,6 +137,10 @@ function bootstrapModule<T> (
     provide: ErrorHandler,
     useClass: CypressAngularErrorHandler,
   })
+
+  // allow for zoneless change detection inside the testing module.
+  // @see https://angular.dev/guide/zoneless#using-zoneless-in-testbed
+  testModuleMetaData.providers.push(provideZonelessChangeDetection())
 
   // check if the component is a standalone component
   if ((component as any).ɵcmp?.standalone) {
@@ -244,7 +224,7 @@ function createComponentFixture<T> (
  * @param {Type<T>} component Angular component being mounted
  * @param {MountConfig<T>} config MountConfig
 
- * @returns {ComponentFixture<T>} ComponentFixture
+ * @returns {Promise<ComponentFixture<T>>} ComponentFixture
  */
 function setupFixture<T> (
   component: Type<T>,
@@ -253,15 +233,6 @@ function setupFixture<T> (
   const fixture = getTestBed().createComponent(component)
 
   setupComponent(config, fixture)
-
-  fixture.whenStable().then(() => {
-    fixture.autoDetectChanges(config.autoDetectChanges ?? true)
-  }).catch((e) => {
-    // If this promise does not settle in Angular 19 it is rejected
-    // https://github.com/angular/angular/blob/main/CHANGELOG.md#1900-2024-11-19
-    // eslint-disable-next-line no-console
-    console.error(e)
-  })
 
   return fixture
 }
@@ -352,14 +323,8 @@ function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, componen
 
     if (changeKeyIfExists) {
       component[expectedChangeKey] =
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
         config.componentProperties[expectedChangeKey]
-    }
-
-    // since spies do NOT make change handlers by default, similar to the Output() decorator, we need to create the spy and subscribe to the signal
-    if (!changeKeyIfExists && config.autoSpyOutputs) {
-      component[expectedChangeKey] = createOutputSpy(`${expectedChangeKey}Spy`)
-      changeKeyIfExists = true
     }
 
     if (changeKeyIfExists) {
@@ -403,7 +368,7 @@ function setupComponent<T> (
     getComponentInputs(fixture.componentRef.componentType).forEach((key) => {
       // only assign props if they are passed into the component
       if (config?.componentProperties?.hasOwnProperty(key)) {
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
         const passedInValue = config?.componentProperties[key]
 
         registerSignalEventsIfNeeded(
@@ -428,25 +393,15 @@ function setupComponent<T> (
 
       // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
       // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
-      // @ts-expect-error
+      // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
       if (property instanceof EventEmitter || (config?.componentProperties?.hasOwnProperty(key) && config?.componentProperties[key] instanceof EventEmitter)) {
       // only assign props if they are passed into the component
         if (config?.componentProperties?.hasOwnProperty(key)) {
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
           const passedInValue = config?.componentProperties[key]
 
           component[key] = passedInValue
         }
-      }
-    })
-  }
-
-  if (config.autoSpyOutputs) {
-    Object.keys(component).forEach((key) => {
-      const property = component[key]
-
-      if (property instanceof EventEmitter) {
-        component[key] = createOutputSpy(`${key}Spy`)
       }
     })
   }
@@ -461,7 +416,7 @@ function setupComponent<T> (
       acc[key] = new SimpleChange(null, value, true)
 
       return acc
-    }, {} as {[key: string]: SimpleChange})
+    }, {} as { [key: string]: SimpleChange })
 
     if (Object.keys(componentProperties).length > 0) {
       component.ngOnChanges(simpleChanges)
@@ -531,22 +486,36 @@ export function mount<T> (
 
   const componentFixture = initTestBed(component, config)
 
-  activeFixture = setupFixture(componentFixture, config)
-
-  const mountResponse: MountResponse<T> = {
-    fixture: activeFixture,
-    component: activeFixture.componentInstance,
-  }
-
-  const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
-
-  Cypress.log({
-    name: 'mount',
-    message: logMessage,
-    consoleProps: () => ({ result: mountResponse }),
+  let mountResponsePromiseResolver: any
+  let mountResponsePromiseRejector: any
+  let mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
+    mountResponsePromiseResolver = resolve
+    mountResponsePromiseRejector = reject
   })
 
-  return cy.wrap(mountResponse, { log: false })
+  const fixture = setupFixture(componentFixture, config)
+
+  activeFixture = fixture
+  fixture.whenStable().then(() => {
+    const mountResponse: MountResponse<T> = {
+      fixture,
+      component: fixture.componentInstance,
+    }
+
+    const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
+
+    Cypress.log({
+      name: 'mount',
+      message: logMessage,
+      consoleProps: () => ({ result: mountResponse }),
+    })
+
+    mountResponsePromiseResolver(mountResponse)
+  }).catch((error) => {
+    mountResponsePromiseRejector(error)
+  })
+
+  return cy.wrap(mountResponsePromise, { log: false })
 }
 
 /**
@@ -583,8 +552,8 @@ export const createOutputSpy = <T>(alias: string) => {
 
 // Only needs to run once, we reset before each test
 getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting(),
+  BrowserTestingModule,
+  platformBrowserTesting(),
   {
     teardown: { destroyAfterEach: false },
   },

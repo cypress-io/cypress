@@ -35,10 +35,10 @@ const {
   // so if we decide it is useful to expose, just remove the next line, and it will be
   // available on the `VueTestUtils` import.
   shallowMount,
-  ...VueTestUtils
+  ...vueTestUtils
 } = _VueTestUtils
 
-export { VueTestUtils }
+export const VueTestUtils: Omit<typeof _VueTestUtils, 'mount' | 'shallowMount'> = vueTestUtils
 
 const DEFAULT_COMP_NAME = 'unknown'
 const VUE_ROOT = '__cy_vue_root'
@@ -396,7 +396,7 @@ export function mount (componentOptions: any, options: any = {}) {
 
   // then wait for cypress to load
   return cy.then(() => {
-    // @ts-ignore
+    // @ts-expect-error - `cy.state` is internal and not in the public Cypress types
     const document: Document = cy.state('document')
 
     const el = getContainerEl()

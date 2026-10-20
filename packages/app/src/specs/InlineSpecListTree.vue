@@ -66,7 +66,8 @@
 </template>
 
 <script setup lang="ts">
-import { UseCollapsibleTreeNode, useCollapsibleTree, SpecTreeNode, FuzzyFoundSpec, buildSpecTree } from './tree/useCollapsibleTree'
+import { useCollapsibleTree, buildSpecTree } from './tree/useCollapsibleTree'
+import type { UseCollapsibleTreeNode, SpecTreeNode, FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, watch, onMounted } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'

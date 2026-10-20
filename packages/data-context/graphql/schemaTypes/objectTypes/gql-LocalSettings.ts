@@ -1,5 +1,6 @@
 import { objectType } from 'nexus'
 import { Editor } from './gql-Editor'
+import { maskProxyPassword } from '../../../src/util/maskProxyPassword'
 
 export const LocalSettingsPreferences = objectType({
   name: 'LocalSettingsPreferences',
@@ -15,7 +16,8 @@ export const LocalSettingsPreferences = objectType({
     t.int('studioWidth')
     t.boolean('isSideNavigationOpen')
     t.string('proxyServer', {
-      resolve: (source, args, ctx) => ctx.env.HTTP_PROXY ?? null,
+      // The page under test can reach this field
+      resolve: (source, args, ctx) => ctx.env.HTTP_PROXY ? maskProxyPassword(ctx.env.HTTP_PROXY) : null,
     })
 
     t.string('proxyBypass', {

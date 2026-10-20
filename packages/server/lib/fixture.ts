@@ -1,12 +1,12 @@
 import path from 'path'
 import check from 'syntax-error'
 import debugModule from 'debug'
-import coffee from 'coffeescript'
 import jsonParseBetterErrors from 'json-parse-even-better-errors'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import * as errors from './errors'
 import { fs } from './util/fs'
 import { globAsync as glob } from './util/glob'
+import { isInsideDir } from '@packages/data-context/src/util/isInsideDir'
 import type { ObjectEncodingOptions } from 'fs-extra'
 
 const debug = debugModule('cypress:server:fixture')
@@ -14,7 +14,6 @@ const debug = debugModule('cypress:server:fixture')
 const extensions = [
   '.json',
   '.js',
-  '.coffee',
   '.html',
   '.txt',
   '.csv',
@@ -36,8 +35,13 @@ const friendlyJsonParse = function (s) {
 }
 
 export async function get (fixturesFolder: string, filePath: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null | undefined } = {}) {
+  const root = path.resolve(fixturesFolder)
   const p = path.join(fixturesFolder, filePath)
   const fixture = path.basename(p)
+
+  if (!isInsideDir(root, path.resolve(p))) {
+    throw new Error(`Fixture path '${filePath}' must resolve to a file inside the fixtures folder: ${fixturesFolder}`)
+  }
 
   // if the file exists, go ahead and parse it
   // otherwise, glob for potential extensions
@@ -54,11 +58,10 @@ export async function get (fixturesFolder: string, filePath: string, options: { 
 
     const pattern = `${p}{${extensions.join(',')}}`
 
-    // @ts-ignore as v8-snapshot package is typechecking this incorrectly
-    const matches = await glob(pattern, {
+    const matches = (await glob(pattern, {
       nosort: true,
       nodir: true,
-    })
+    })).filter((match) => isInsideDir(root, path.resolve(match)))
 
     if (matches.length === 0) {
       const relativePath = path.relative('.', p)
@@ -133,7 +136,6 @@ async function parseFileByExtension (p: string, fixture: string, ext: string, op
   switch (ext) {
     case '.json': return parseJson(p, fixture)
     case '.js': return parseJs(p, fixture)
-    case '.coffee': return parseCoffee(p, fixture)
     case '.html': return parseHtml(p, fixture)
     case '.png': case '.jpg': case '.jpeg': case '.gif': case '.tif': case '.tiff': case '.zip':
       return parse(p, fixture, options.encoding)
@@ -173,24 +175,6 @@ async function parseJs (p: string, fixture: string) {
     return obj
   } catch (err) {
     throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`)
-  }
-}
-
-async function parseCoffee (p: string, fixture: string) {
-  const dc = process.env.NODE_DISABLE_COLORS
-
-  process.env.NODE_DISABLE_COLORS = '0'
-
-  try {
-    const content = await fs.readFileAsync(p, 'utf8')
-
-    const str = coffee.compile(content, { bare: true })
-
-    return eval(str as string)
-  } catch (err) {
-    throw new Error(`'${fixture} is not a valid CoffeeScript object.\n${err.toString()}`)
-  } finally {
-    process.env.NODE_DISABLE_COLORS = dc
   }
 }
 

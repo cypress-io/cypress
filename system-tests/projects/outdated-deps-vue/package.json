@@ -1,0 +1,12 @@
+{
+  "name": "outdated-deps-vue",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "vue": "^2.6.10"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.1",
+    "vite": "^8.0.9"
+  },
+  "type": "module"
+}

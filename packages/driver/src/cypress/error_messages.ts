@@ -3,6 +3,7 @@ import { stripIndent } from 'common-tags'
 import capitalize from 'underscore.string/capitalize'
 import $stackUtils from './stack_utils'
 import $utils from './utils'
+import { textLikeInputTypes } from '../dom/elements/elementHelpers'
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -24,6 +25,11 @@ function removeLeadingSlash (str: string) {
   let li = Math.max(str.indexOf('/'), str.indexOf('\\'))
 
   return str.substring(li + 1)
+}
+
+// Only an empty string fails a non-empty string check, so quote strings to keep it visible
+const formatNonEmptyStringArg = (value) => {
+  return _.isString(value) ? `'${value}'` : $utils.stringifyActual(value)
 }
 
 const formatConfigFile = (projectRoot: Cypress.Config['projectRoot'], configFile: Cypress.Config['configFile']) => {
@@ -52,6 +58,14 @@ const cmd = (command, args = '') => {
   const prefix = command.startsWith('Cypress') ? '' : 'cy.'
 
   return `\`${prefix}${command}(${args})\``
+}
+
+const previousCommandSection = (previous?: string) => {
+  if (!previous) {
+    return ''
+  }
+
+  return `\n\nThe previous command that ran was:\n\n  > ${cmd(previous)}`
 }
 
 const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map($utils.stringifyActual).join(', ')})`
@@ -117,10 +131,6 @@ const cyStripIndent = (str, indentSize) => {
 }
 
 export default {
-  add: {
-    type_missing: '`Cypress.add(key, fn, type)` must include a type!',
-  },
-
   alias: {
     invalid: 'Invalid alias: `{{name}}`.\nYou forgot the `@`. It should be written as: `@{{displayName}}`.',
     not_registered_with_available: `${cmd('{{cmd}}')} could not find a registered alias for: \`@{{displayName}}\`.\nAvailable aliases are: \`{{availableAliases}}\`.`,
@@ -152,9 +162,6 @@ export default {
     },
     no_focused_element: {
       message: `${cmd('blur')} can only be called when there is a currently focused element.`,
-    },
-    timed_out: {
-      message: `${cmd('blur')} timed out because your browser did not receive any \`blur\` events. This is a known bug in Chrome when it is not the currently focused window.`,
     },
     wrong_focused_element: {
       message: `${cmd('blur')} can only be called on the focused element. Currently the focused element is a: \`{{node}}\``,
@@ -210,16 +217,10 @@ export default {
 
           > \`{{node}}\`
 
-        A clearable element matches one of the following selectors:
-          'a[href]'
-          'area[href]'
-          'input'
-          'select'
-          'textarea'
-          'button'
-          'iframe'
-          '[tabindex]'
-          '[contenteditable]'`,
+        A clearable element is one of the following:
+          - a \`<textarea>\`
+          - an \`<input>\` with no \`type\`, or with a \`type\` of ${textLikeInputTypes.map((type) => `\`${type}\``).join(', ')}
+          - an element made editable by \`contenteditable\`, or any element in a document with \`designMode\` set to \`on\``,
       docsUrl: 'https://on.cypress.io/clear',
     },
   },
@@ -266,6 +267,10 @@ export default {
         message: `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` because it is a read-only configuration option.`,
         docsUrl: 'https://on.cypress.io/config',
       },
+      suite_or_test_only: {
+        message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` during test execution because it would affect the next test rather than the current one. Set \`{{invalidConfigKey}}\` in the test configuration of a \`describe\`/\`context\` or \`it\` block instead.{{additionalInfo}}`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
     },
     invalid_mocha_config_override: {
       read_only: {
@@ -285,14 +290,13 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    invalid_test_override_with_allow_cypress_env: {
-      message: `overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.`,
-      docsUrl: 'https://on.cypress.io/cypress-env-migration',
-    },
-    allow_cypress_env: {
-      message: `\`Cypress.env()\` does not work when \`allowCypressEnv\` is set to \`false\`. Please migrate to \`cy.env()\` or leverage other stateful methods to manage variables. The variable being accessed was: \`{{key}}\``,
-      docsUrl: 'https://on.cypress.io/cypress-env-migration',
-    },
+    env_removed: stripIndent`\
+      Overriding the \`env\` configuration was removed in Cypress version 16.0.0.
+
+      Please update to use \`expose: { KEY: value }\` to make a value readable in the browser for a suite or test.
+
+      https://on.cypress.io/cypress-env-migration
+    `,
   },
 
   contains: {
@@ -339,12 +343,6 @@ export default {
     invalid_domain (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed a valid domain name. You passed: \`{{domain}}\``,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
-      }
-    },
-    invalid_name (obj) {
-      return {
-        message: `${cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n\`{{name}}\``,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
@@ -469,6 +467,13 @@ export default {
     },
   },
 
+  end: {
+    removed: {
+      message: `${cmd('end')} was removed in Cypress version 16.0.0. A Cypress chain is already terminated when the next \`cy.<command>()\` starts a new chain, so \`.end()\` calls can be removed.`,
+      docsUrl: 'https://on.cypress.io/migration-guide',
+    },
+  },
+
   env: {
     docsUrl: 'https://on.cypress.io/api/env',
     invalid_argument: {
@@ -490,34 +495,28 @@ export default {
 
         > "{{error}}"`,
     },
+    removed ({ keys }: { keys: string[] }) {
+      const message = ['`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values.']
+
+      if (keys.length === 1) {
+        message.push(`The key being accessed was: \`${keys[0]}\``)
+      } else if (keys.length > 1) {
+        message.push(`The keys being accessed were: ${keys.map((key) => `\`${key}\``).join(', ')}`)
+      }
+
+      message.push('This call may come from a plugin. Update the plugin to a version that supports Cypress 16.')
+
+      return {
+        message: message.join('\n\n'),
+        docsUrl: 'https://on.cypress.io/cypress-env-migration',
+      }
+    },
   },
 
   exec: {
-    failed: {
-      message: stripIndent`
-        ${cmd('exec', '\'{{cmd}}\'')} failed with the following error:
-
-        > "{{error}}"`,
-      docsUrl: 'https://on.cypress.io/exec',
-    },
-    invalid_argument: {
-      message: `${cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'.`,
-      docsUrl: 'https://on.cypress.io/exec',
-    },
-    non_zero_exit: {
-      message: stripIndent`\
-        ${cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
-
-        Pass \`{failOnNonZeroExit: false}\` to ignore exit code failures.
-
-        Information about the failure:
-        Code: {{code}}
-        {{output}}`,
-      docsUrl: 'https://on.cypress.io/exec',
-    },
-    timed_out: {
-      message: `${cmd('exec', '\'{{cmd}}\'')} timed out after waiting \`{{timeout}}ms\`.`,
-      docsUrl: 'https://on.cypress.io/exec',
+    removed: {
+      message: `${cmd('exec')} was removed in Cypress version 16.0.0. Please update to use ${cmd('task')} instead, which runs in Node and does not depend on the operating system, shell, or terminal of the machine running Cypress.`,
+      docsUrl: 'https://on.cypress.io/task',
     },
   },
 
@@ -546,7 +545,7 @@ export default {
     },
     invalid_argument (obj) {
       return {
-        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`{{file}}\`.`,
+        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(obj.file)}\`.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
@@ -597,10 +596,6 @@ export default {
       message: `${cmd('focus')} can only be called on a single element. Your subject contained {{num}} elements.`,
       docsUrl: 'https://on.cypress.io/focus',
     },
-    timed_out: {
-      message: `${cmd('focus')} timed out because your browser did not receive any \`focus\` events. This is a known bug in Chrome when it is not the currently focused window.`,
-      docsUrl: 'https://on.cypress.io/focus',
-    },
   },
 
   get: {
@@ -615,6 +610,39 @@ export default {
     invalid_option_timeout: {
       message: `${cmd('get')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
       docsUrl: 'https://on.cypress.io/get',
+    },
+  },
+
+  getAllStorage: {
+    timed_out (obj) {
+      return {
+        message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
+    },
+  },
+
+  // Shared by every `cy.getBy*()` query. Each query passes its own `cmd` and `docsUrl`.
+  get_by: {
+    docsUrl: '{{docsUrl}}',
+    invalid_options: `${cmd('{{cmd}}')} only accepts an options object as its second argument. You passed: \`{{options}}\``,
+    invalid_option: `${cmd('{{cmd}}')} does not accept the \`{{option}}\` option.{{hint}} It accepts: {{accepted}}.`,
+    invalid_option_boolean: `${cmd('{{cmd}}')} only accepts a \`boolean\` for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_matcher: `${cmd('{{cmd}}')} only accepts a string, number, regular expression, or function for its \`{{option}}\` option. You passed: \`{{value}}\``,
+    invalid_option_timeout: `${cmd('{{cmd}}')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
+    not_found: 'Expected to find {{description}}{{scope}}, but never did.{{hints}}',
+    found: 'Expected not to find {{description}}{{scope}}, but continuously found it.',
+
+    getByRole: {
+      docsUrl: 'https://on.cypress.io/getbyrole',
+      invalid_role: `${cmd('getByRole')} requires a role as its first argument, such as \`'button'\` or \`'heading'\`. You passed: \`{{matcher}}\``,
+      option_hint: ' To narrow the results by `{{option}}`, chain {{alternative}} instead.',
+      roles_hint: 'Here are the {{accessible}}roles that were found, with the accessible name of each element:\n\n{{roles}}',
+      no_roles: 'No elements with a role were found.',
+      no_accessible_roles: 'No accessible elements with a role were found, but some elements may be hidden from the accessibility tree. To include them, pass `{ hidden: true }`.',
+      role_with_whitespace: `${cmd('getByRole')} was passed the role \`{{role}}\`, but a role is a single word with no spaces, such as \`'button'\`. Query one role at a time.`,
+      no_native_element: `${cmd('getByRole')} was passed \`native: true\`, but HTML has no native element with the role \`{{role}}\`, so only a \`role\` attribute can give an element that role. Remove \`native: true\` to find it.`,
+      native_hint: 'Some elements have the role "{{role}}" only through a `role` attribute, so they were skipped. The native elements for this role are: {{tags}}. To include elements with a `role` attribute, pass `{ native: false }`.',
     },
   },
 
@@ -879,22 +907,6 @@ export default {
         docsUrl: 'https://on.cypress.io/returning-promise-and-commands-in-test',
       }
     },
-    dangling_commands: {
-      message: stripIndent`\
-        Oops, Cypress detected something wrong with your test code.
-
-        The test has finished but Cypress still has commands in its queue.
-        The {{numCommands}} queued commands that have not yet run are:
-
-        {{commands}}
-
-        In every situation we've seen, this has been caused by programmer error.
-
-        Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
-
-        For a much more thorough explanation including examples please review this error here:`,
-      docsUrl: 'https://on.cypress.io/command-queue-ended-early',
-    },
     invalid_command: {
       message: 'Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n',
       docsUrl: 'https://on.cypress.io/api',
@@ -928,20 +940,13 @@ export default {
       docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invoking_child_without_parent (obj) {
-      return stripIndent`\
-        Oops, it looks like you are trying to call a child command before running a parent command.
+      return {
+        message: stripIndent`\
+          ${cmd(obj.cmd, obj.args)} failed because it is not chained off a command that yields a subject.
 
-        You wrote code that looks like this:
-
-        \`${cmd(obj.cmd, obj.args)}\`
-
-        A child command must be chained after a parent because it operates on a previous subject.
-
-        For example - if we were issuing the child command \`click\`...
-
-        cy
-          .get('button') // parent command must come first
-          .click()       // then child command comes second`
+          ${cmd(obj.cmd)} runs on the subject yielded by the command it is chained off, so calling it directly off \`cy\` gives it no subject. Chain it off a command that yields a subject, such as ${cmd('get')} or ${cmd('wrap')}.`,
+        docsUrl: 'https://on.cypress.io/introduction-to-cypress',
+      }
     },
     no_cy: '`Cypress.cy` is `undefined`. You may be trying to query outside of a running test. Cannot call `Cypress.$()`',
     no_runner: 'Cannot call `Cypress#run` without a runner instance.',
@@ -972,16 +977,16 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
+    cross_origin_command ({ commandOrigin, autOrigin, isInjectDocumentDomainEnabled, isSameSuperDomainOrigin }) {
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-        ${isSkipDomainInjectionEnabled ? `
-        Unless \`injectDocumentDomain\` is disabled, a ${cmd('origin')} command is required.
-        ` : ''}
-        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+        ${isInjectDocumentDomainEnabled || !isSameSuperDomainOrigin ? '' : `
+        Because \`injectDocumentDomain\` is disabled (the default), a subdomain of the same domain counts as a different origin.
+        `}
+        Use ${cmd('origin')} to wrap the commands run on \`${autOrigin}\`.
 
         \`cy.origin('${autOrigin}', () => {\`
         \`  <commands targeting ${autOrigin} go here>\`
@@ -995,7 +1000,6 @@ export default {
   mocha: {
     async_timed_out: 'Timed out after `{{ms}}ms`. The `done()` callback was never invoked!',
     invalid_interface: 'Invalid mocha interface `{{name}}`',
-    timed_out: 'Cypress command timeout of `{{ms}}ms` exceeded.',
     overspecified: {
       message: stripIndent`\
         Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
@@ -1220,10 +1224,6 @@ export default {
     },
   },
 
-  ng: {
-    no_global: `Angular global (\`window.angular\`) was not found in your window. You cannot use ${cmd('ng')} methods without angular.`,
-  },
-
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
     invalid_url_argument: {
@@ -1364,12 +1364,6 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/press',
     },
-    unsupported_browser_version: {
-      message: stripIndent`\
-        ${cmd('press')} is not supported in {{browser}} version {{version}}. Upgrade to version {{minimumVersion}} to use \`cy.press()\`.
-      `,
-      docsUrl: 'https://on.cypress.io/press',
-    },
     unsupported_browser: {
       message: stripIndent`\
       ${cmd('press')} is not supported in {{family}} browsers.
@@ -1412,18 +1406,6 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/proxy-configuration',
     },
-  },
-
-  proxy: {
-    js_rewriting_failed: stripIndent`\
-      An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress. Open an issue if you see this message.
-
-      JS URL: {{url}}
-
-      Original error:
-
-      {{errMessage}}
-      {{errStack}}`,
   },
 
   reload: {
@@ -1907,26 +1889,12 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
-      not_found: {
-        message: stripIndent`
-        No session is defined with the name
-          **{{id}}**
-        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
-
-        \`cy.session(id, setup)\`
-        `,
-        docsUrl: 'https://on.cypress.io/session',
-      },
     },
   },
 
   setCookie: {
     invalid_arguments: {
       message: `${cmd('setCookie')} must be passed two string arguments for \`name\` and \`value\`.`,
-      docsUrl: 'https://on.cypress.io/setcookie',
-    },
-    invalid_value: {
-      message: `${cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n\`{{value}}\``,
       docsUrl: 'https://on.cypress.io/setcookie',
     },
     invalid_samesite: ({ validValues, value }) => {
@@ -1995,20 +1963,6 @@ export default {
   },
 
   subject: {
-    not_dom (obj) {
-      return stripIndent`\
-        ${cmd(obj.name)} failed because it requires a valid DOM object.
-
-        The subject received was:
-
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}
-
-        Cypress only considers the \`window\`, \`document\`, or any \`element\` to be valid DOM objects.`
-    },
     detached_during_actionability (obj) {
       return {
         message: stripIndent`\
@@ -2056,28 +2010,20 @@ export default {
       }
     },
     not_window_or_document (obj) {
-      return stripIndent`\
+      return `${stripIndent`\
         ${cmd(obj.name)} failed because it requires the subject be a global \`${obj.type}\` object.
 
         The subject received was:
 
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}`
+          > \`${obj.subject}\``}${previousCommandSection(obj.previous)}`
     },
     not_element (obj) {
-      return stripIndent`\
+      return `${stripIndent`\
         ${cmd(obj.name)} failed because it requires a DOM element.
 
         The subject received was:
 
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}`
+          > \`${obj.subject}\``}${previousCommandSection(obj.previous)}`
     },
     not_element_empty_subject (obj) {
       return stripIndent`\
@@ -2142,22 +2088,27 @@ export default {
   },
 
   then: {
-    callback_mixes_sync_and_async: stripIndent`\
-      ${cmd('then')} failed because you are mixing up async and sync code.
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because you are mixing up async and sync code.
 
-      In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
 
-      Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
 
-      You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
 
-      The value you synchronously returned was: \`{{value}}\``,
+        The value you synchronously returned was: \`{{value}}\``,
+      docsUrl: 'https://on.cypress.io/{{cmd}}',
+    },
   },
 
   trigger: {
-    invalid_argument: {
-      message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`{{cmd}}\`.`,
-      docsUrl: 'https://on.cypress.io/trigger',
+    invalid_argument ({ eventName }) {
+      return {
+        message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(eventName)}\`.`,
+        docsUrl: 'https://on.cypress.io/trigger',
+      }
     },
     multiple_elements: {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,
@@ -2240,10 +2191,6 @@ export default {
           \`[contenteditable]\``,
       docsUrl: 'https://on.cypress.io/type',
     },
-    readonly: {
-      message: `${cmd('type')} cannot type into an element with a \`readonly\` attribute. The element typed into was: \`{{node}}\``,
-      docsUrl: 'https://on.cypress.io/type',
-    },
     tab: {
       message: '`{tab}` isn\'t a supported character sequence.',
       docsUrl: 'https://on.cypress.io/type',
@@ -2269,20 +2216,7 @@ export default {
       docsUrl: 'https://on.cypress.io/cross-origin-script-error',
     },
     error_in_hook (obj) {
-      let msg
-
-      if (obj.unsupportedPlugin && obj.errMessage) {
-        msg = `${stripIndent`\
-          Cypress detected that the current version of \`${obj.unsupportedPlugin}\` is not supported. Update it to the latest version
-
-          The following error was caught:
-
-          > ${obj.errMessage}
-
-          Because this error occurred during a \`${obj.hookName}\` hook we are skipping` } `
-      } else {
-        msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
-      }
+      let msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
 
       const t = obj.parentTitle
 
@@ -2490,10 +2424,6 @@ export default {
   },
 
   wait: {
-    alias_invalid: {
-      message: '`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`',
-      docsUrl: 'https://on.cypress.io/wait',
-    },
     invalid_1st_arg: {
       message: `${cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/wait',
@@ -2558,11 +2488,5 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/wrap',
     },
-  },
-
-  xhr: {
-    aborted: 'This XHR was aborted by your code -- check this stack trace below.',
-    missing: '`XMLHttpRequest#xhr` is missing.',
-    network_error: 'The network request for this XHR could not be made. Check your console for the reason.',
   },
 }

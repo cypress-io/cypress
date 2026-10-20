@@ -100,7 +100,11 @@ const props = defineProps<{
   fileExtension: string
 }>()
 
-const openLearnMoreExternalLink = useExternalLink(LEARN_MORE_URL)
+const openLearnMoreHref = useExternalLink(LEARN_MORE_URL)
+
+const openLearnMoreExternalLink = () => {
+  void openLearnMoreHref()
+}
 
 const language = computed(() => {
   // The fileExtension from FileParts is prepended with a period;

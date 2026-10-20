@@ -21,7 +21,8 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '../../graphql/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
-import { FileExtension, getDefaultSpecFileName } from '../util/files'
+import { getDefaultSpecFileName } from '../util/files'
+import type { FileExtension } from '../util/files'
 
 type SpecPatterns = {
   specPattern?: string[]
@@ -34,6 +35,8 @@ interface MatchedSpecs {
   specAbsolutePaths: string[]
   specPattern: string | string[]
 }
+
+const MASKED_ENV_VALUE = '*****'
 
 const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
@@ -590,7 +593,8 @@ export class ProjectDataSource {
         return {
           field: key,
           from: key,
-          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, value])),
+          // The page under test can reach this field, and env values must only reach the spec through cy.env()
+          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, key === 'env' ? MASKED_ENV_VALUE : value])),
         }
       }
 

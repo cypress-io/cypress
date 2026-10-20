@@ -17,7 +17,8 @@ import mimeDb from 'mime-db'
 import type { BidiAutomation } from './bidi_automation'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
-import { getError, CypressError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
+import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import type { RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
@@ -105,6 +106,9 @@ const defaultPreferences = {
   'browser.tabs.warnOnCloseOtherTabs': false,
   // Do not warn when multiple tabs will be opened
   'browser.tabs.warnOnOpen': false,
+
+  // Do not offer to translate the page under test
+  'browser.translations.enable': false,
 
   // Disable the UI tour.
   'browser.uitour.enabled': false,
@@ -633,7 +637,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   // since we no longer directly control the browser with webdriver, we need to make the browserInstance
   // a simulated wrapper that kills the process IDs that come back from webdriver
-  // @ts-expect-error
+  // @ts-expect-error - a bare EventEmitter lacks BrowserInstance's kill until it is assigned below
   let browserInstanceWrapper: BrowserInstance = new EventEmitter()
 
   browserInstanceWrapper.kill = () => undefined

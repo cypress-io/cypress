@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import _ from 'lodash'
-import net, { AddressInfo } from 'net'
+import type { AddressInfo } from 'net'
+import net from 'net'
 import * as connect from '../../lib/connect'
 
 describe('lib/connect', function () {

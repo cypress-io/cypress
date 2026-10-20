@@ -1,5 +1,4 @@
 module.exports = {
-  allowCypressEnv: false,
   component: {
     justInTimeCompile: true,
     devServer: {

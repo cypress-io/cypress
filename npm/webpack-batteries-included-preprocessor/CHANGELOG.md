@@ -1,3 +1,47 @@
+# [@[secure]/webpack-batteries-included-preprocessor-v5.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-batteries-included-preprocessor-v4.2.0...@[secure]/webpack-batteries-included-preprocessor-v5.0.0) (2026-08-26)
+
+
+### breaking
+
+* remove built-in CoffeeScript support ([#33654](https://github.com/[secure]-io/[secure]/issues/33654)) ([0b7017d](https://github.com/[secure]-io/[secure]/commit/0b7017d15ed1647b82a092fd69fba56dba42db08))
+
+
+### BREAKING CHANGES
+
+* - **Cypress (semver: major, e.g. 16.0.0):** `cy.fixture()` no longer treats `.coffee` as executable CoffeeScript; those files are handled like other non-specialized extensions (e.g. raw UTF-8) unless you use encoding options.
+- **Cypress (semver: major):** The default `@[secure]/webpack-batteries-included-preprocessor` no longer registers `coffee-loader` or ships `coffeescript`. `.coffee` specs/support files will not compile unless users add their own webpack config via `@[secure]/webpack-preprocessor`.
+- **`@[secure]/webpack-batteries-included-preprocessor` (semver: minor → treat as breaking for consumers, e.g. 4.2.0):** Removed `coffee-loader` and `coffeescript` dependencies and the `/\.coffee$/` rule from default webpack options.
+
+Migration:
+- Use JavaScript or TypeScript for specs, support files, and object fixtures (`.json` / `.js`).
+- For CoffeeScript specs, use `@[secure]/webpack-preprocessor` with a custom webpack config that includes `coffee-loader` and `coffeescript`.
+
+Also:
+- Rename system-tests fixture `coffee-react-interop` → `react-webpack-interop` and update `es_modules_spec` / `typescript_spec_support_spec`.
+- Update errors copy, CLI types examples, app settings tests, driver stack/location tests, v8 snapshot cache workflow Node version, and related docs/changelogs.
+
+* fix failing test
+
+* remove date in CLI
+
+* fix changelog entry
+
+* remove screenshots from some system-test snapshots
+
+* fix snapshot
+
+* remove coffeescript import
+
+* remove webpack-batteries..changelog
+
+* remove migration specific comment
+
+* remove debugger
+
+* revert to pending test
+
+* remove other callbacks
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.1.1...@cypress/webpack-batteries-included-preprocessor-v4.2.0) (2026-07-15)
 
 

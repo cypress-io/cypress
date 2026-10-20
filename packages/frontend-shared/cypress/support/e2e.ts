@@ -1,7 +1,8 @@
 import '@testing-library/cypress/add-commands'
 import { knownBrowsers } from '@packages/launcher/lib/known-browsers'
 import { configure } from '@testing-library/cypress'
-import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
+import { fixtureDirs } from '@tooling/system-tests'
+import type { ProjectFixtureDir } from '@tooling/system-tests'
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
@@ -613,7 +614,7 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
   }
 
   return logInternal('validateExternalLink', () => {
-    cy.wrap(subject, { log: false }).findByRole('link', { name: name || href }).as('Link')
+    cy.wrap(subject, { log: false }).getByRole('link', { name: name || href }).as('Link')
     .should('have.attr', 'href', href)
     .click()
 

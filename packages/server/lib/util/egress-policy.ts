@@ -15,7 +15,10 @@ export type EgressPolicyLaunchOpts = {
  * Reads the proxy env vars normalized by `loadSystemProxySettings()` at startup,
  * which resolves lowercase vars, npm proxy config, and the Windows registry.
  */
-export function translateEgressPolicyToLaunchOpts (hosts?: { [host: string]: string } | null): EgressPolicyLaunchOpts {
+export function translateEgressPolicyToLaunchOpts (
+  hosts?: { [host: string]: string } | null,
+  mtlsOrigins: { hostname: string, port: number }[] = [],
+): EgressPolicyLaunchOpts {
   const httpProxy = process.env.HTTP_PROXY
   const httpsProxy = process.env.HTTPS_PROXY
 
@@ -46,8 +49,24 @@ export function translateEgressPolicyToLaunchOpts (hosts?: { [host: string]: str
 
   // Chromium picks the proxy from the URL's host before resolving it, and never
   // resolves a proxied host locally, so `--host-resolver-rules` cannot remap a
-  // `hosts` entry unless that entry also bypasses the proxy.
-  bypassRules.push(...Object.keys(hosts ?? {}).filter((host) => !bypassRules.includes(host)))
+  // `hosts` entry unless that entry also bypasses the proxy. The same applies to an
+  // origin steered at the mTLS bridge: without this the browser sends it to the proxy
+  // by name and the bridge is never reached. The bridge dials the proxy itself.
+  //
+  // The mTLS rules carry their port, because only that origin is bridged. Bypassing the
+  // bare host would take the host's other ports and schemes off the proxy too, and those
+  // are not steered anywhere — they would be dialed directly and fail wherever direct
+  // egress is blocked.
+  const remapped = [
+    ...Object.keys(hosts ?? {}),
+    ...mtlsOrigins.map(({ hostname, port }) => `${hostname}:${port}`),
+  ]
+
+  remapped.forEach((host) => {
+    if (!bypassRules.includes(host)) {
+      bypassRules.push(host)
+    }
+  })
 
   return {
     proxyServer,

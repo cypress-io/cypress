@@ -26,6 +26,13 @@ describe('capture-protocol', () => {
 
   describe('service worker', () => {
     BROWSERS.forEach((browser) => {
+      // Navigation preload is disabled on the browser network path (#34652),
+      // removing the preload request's correlations from SW-served
+      // navigations. The mode decides the shape, not the browser: electron is
+      // always on the HTTP/1 proxy, and the force-http1 jobs export
+      // CYPRESS_forceHttp1=true, which puts chrome back on the proxy too.
+      const navigationPreloadCorrelated = browser !== 'chrome' || process.env.CYPRESS_forceHttp1 === 'true'
+
       it(`verifies the types of requests match - ${browser}`, function () {
         this.retries(10)
 
@@ -53,7 +60,9 @@ describe('capture-protocol', () => {
             // Only correlations occur in the service worker for this asset
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/cached-service-worker.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/load.js': ['frame id'],
-            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker.html': ['frame id', 'no frame id', 'no frame id'],
+            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker.html': navigationPreloadCorrelated
+              ? ['frame id', 'no frame id', 'no frame id']
+              : ['frame id', 'no frame id'],
           })
 
           expect(parsedProtocolEvents.exceptionThrown).to.be.false
@@ -86,7 +95,9 @@ describe('capture-protocol', () => {
             'http://localhost:2121/cypress/fixtures/service-worker-assets/example.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/cached-service-worker.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/load-with-service-worker-preloaded.js': ['no frame id'],
-            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker_preloaded.html': ['no frame id', 'no frame id', 'no frame id', 'no frame id'],
+            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker_preloaded.html': navigationPreloadCorrelated
+              ? ['no frame id', 'no frame id', 'no frame id', 'no frame id']
+              : ['no frame id', 'no frame id'],
           })
 
           expect(parsedProtocolEvents.exceptionThrown).to.be.false

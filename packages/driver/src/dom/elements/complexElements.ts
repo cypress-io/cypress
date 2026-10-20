@@ -6,7 +6,7 @@ import $window from '../window'
 import { getHostContenteditable, isContentEditable, isDesignModeDocumentElement } from './contentEditable'
 import { isInputType } from './input'
 import { findParent, getParent, isUndefinedOrHTMLBodyDoc } from './find'
-import { isInput, isTextarea } from './elementHelpers'
+import { isInput, isTextarea, textLikeInputTypes } from './elementHelpers'
 import { getNativeProp } from './nativeProps'
 import { isWithinShadowRoot } from './shadow'
 import type { HTMLElementCanSetSelectionRange, HTMLTextLikeElement } from './types'
@@ -85,19 +85,7 @@ export const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement 
     isContentEditableElement,
     sel('textarea'),
     sel(':text'),
-    type('text'),
-    type('password'),
-    type('email'),
-    type('number'),
-    type('date'),
-    type('week'),
-    type('month'),
-    type('time'),
-    type('datetime'),
-    type('datetime-local'),
-    type('search'),
-    type('url'),
-    type('tel'),
+    ...textLikeInputTypes.map(type),
   ])
 }
 

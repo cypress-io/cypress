@@ -78,7 +78,7 @@
         >
           <Auth
             :gql="props.gql"
-            :auth-flow="authFlow"
+            :auth-flow="props.authFlow"
             :auto-start-auth="props.autoStartAuth"
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
@@ -126,6 +126,8 @@ const props = withDefaults(defineProps<{
   utmContent?: string
   autoStartAuth?: boolean
 }>(), {
+  authFlow: 'login',
+  utmContent: undefined,
   autoStartAuth: true,
 })
 
@@ -138,7 +140,6 @@ fragment LoginModal on Query {
 hideAllPoppers()
 
 const { t } = useI18n()
-const authFlow = computed(() => props.authFlow || 'login')
 
 const viewer = computed(() => props.gql?.cloudViewer)
 

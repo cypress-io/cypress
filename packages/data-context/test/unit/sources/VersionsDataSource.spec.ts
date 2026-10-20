@@ -2,10 +2,11 @@ import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals
 import os from 'os'
 import { Response } from 'cross-fetch'
 
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { VersionsDataSource } from '../../../src/sources'
 import { createTestDataContext } from '../helper'
-import { AllowedState, CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
+import type { AllowedState } from '@packages/types'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import pkg from '@packages/root'
 
 describe('VersionsDataSource', () => {

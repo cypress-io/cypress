@@ -1,3 +1,4 @@
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
 import { itHandlesFileOpening } from '../support/utils'
 
@@ -9,8 +10,12 @@ describe('spec title', () => {
     runner = new EventEmitter()
 
     start = (spec: Cypress.Cypress['spec']) => {
+      const runnerStore = new MobxRunnerStore()
+
+      runnerStore.setSpec(spec)
+
       cy.visit('/').then((win) => {
-        win.render({ runner, runnerStore: { spec } })
+        win.render({ runner, runnerStore })
       })
 
       cy.get('.reporter.mounted').then(() => {

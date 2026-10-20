@@ -2,7 +2,8 @@ import $ from 'jquery'
 import _ from 'lodash'
 import $dom from '../dom'
 import $elements from '../dom/elements'
-import $Keyboard, { Keyboard, ModifiersEventOptions } from './keyboard'
+import type { Keyboard, ModifiersEventOptions } from './keyboard'
+import $Keyboard from './keyboard'
 import $selection from '../dom/selection'
 import debugFn from 'debug'
 import type { StateFunc } from '../cypress/state'
@@ -715,23 +716,22 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
     },
 
     rightclick (fromElViewport, forceEl) {
-      const pointerEvtOptionsExtend = {
+      const downEvtOptionsExtend = {
         button: 2,
         buttons: 2,
         which: 3,
       }
-      const mouseEvtOptionsExtend = {
+      const upEvtOptionsExtend = {
         button: 2,
-        buttons: 2,
         which: 3,
       }
 
-      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse.down(fromElViewport, forceEl, downEvtOptionsExtend, downEvtOptionsExtend)
 
       const contextmenuEvent = mouse._contextmenuEvent(fromElViewport, forceEl)
 
       const skipMouseupEvent = mouseDownPhase.events.pointerdown.preventedDefault
-      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, upEvtOptionsExtend, upEvtOptionsExtend)
 
       const clickEvents = _.extend({}, mouseDownPhase.events, mouseUpPhase.events)
 

@@ -1,6 +1,7 @@
 import { signal } from '@angular/core'
 import { SignalsOptionalComponent } from './signals-optional.component'
 import { createOutputSpy } from 'cypress/angular'
+import type { InputSignal, ModelSignal } from '@angular/core'
 
 it('can handle default props', () => {
   cy.mount(SignalsOptionalComponent)
@@ -12,7 +13,7 @@ it('can handle default props', () => {
 it('can handle one prop', () => {
   cy.mount(SignalsOptionalComponent, {
     componentProperties: {
-      title: 'propTitle',
+      title: 'propTitle' as unknown as InputSignal<string>,
     },
   })
 
@@ -24,8 +25,8 @@ it('can handle one prop', () => {
 it('can handle primitive props', () => {
   cy.mount(SignalsOptionalComponent, {
     componentProperties: {
-      title: 'Prop Title',
-      count: 7,
+      title: 'Prop Title' as unknown as InputSignal<string>,
+      count: 7 as unknown as ModelSignal<number>,
       // @ts-expect-error
       countChange: createOutputSpy('countChange'),
     },
@@ -43,8 +44,8 @@ it('also allows writable signal as input signal / model signal', () => {
 
   cy.mount(SignalsOptionalComponent, {
     componentProperties: {
-      title: titlePropAsSignal,
-      count: countSignal,
+      title: titlePropAsSignal as unknown as InputSignal<string>,
+      count: countSignal as unknown as ModelSignal<number>,
       // @ts-expect-error
       countChange: createOutputSpy('countChange'),
       titleChange: createOutputSpy('titleChange'),

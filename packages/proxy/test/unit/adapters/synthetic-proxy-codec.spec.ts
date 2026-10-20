@@ -1,4 +1,4 @@
-import { Readable } from 'stream'
+import { PassThrough, Readable } from 'stream'
 import zlib from 'zlib'
 import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
@@ -133,6 +133,27 @@ describe('createSyntheticExpressContext', () => {
     })
 
     expect(incomingRes.headers['set-cookie']).to.deep.equal(['a=1', 'b=2'])
+  })
+
+  it('carries the reason phrase through to statusMessage', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 404,
+      statusMessage: 'Not Found',
+    })
+
+    expect(incomingRes.statusMessage).to.equal('Not Found')
+  })
+
+  it('keeps statusMessage a string when the response carries no reason phrase', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 200,
+    })
+
+    expect(incomingRes.statusMessage).to.equal('')
   })
 
   it('does not fabricate an httpVersion on the synthetic response', () => {
@@ -559,6 +580,144 @@ describe('createSyntheticProxyCodec', () => {
     expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
   })
 
+  it('copies bodySkipped and captureStream onto the ctx as resBodySkipped and resCaptureStream', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-skipped',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const captureStream = Readable.from(['origin'])
+
+    codec.encodeResponse({
+      id: 'network-skipped',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodySkipped: true,
+      bodyStream: Readable.from(['']),
+      captureStream,
+    })
+
+    expect(ctx.resBodySkipped).to.equal(true)
+    // reference identity, not just presence — resCaptureStream must be the same stream
+    expect(ctx.resCaptureStream).to.equal(captureStream)
+  })
+
+  it('drains an unconsumed capture stream when the synthetic res closes', async () => {
+    let ctx: any
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        ctx = { req, res }
+
+        return ctx
+      },
+    })
+
+    codec.encodeRequest({
+      id: 'network-drain',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const captureStream = new PassThrough()
+
+    codec.encodeResponse({
+      id: 'network-drain',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodySkipped: true,
+      bodyStream: Readable.from(['']),
+      captureStream,
+    })
+
+    // the notification stage never ran (early end / error path) — closing the
+    // synthetic res must put the orphaned pump into flowing mode
+    expect(captureStream.readableFlowing).to.not.equal(true)
+
+    ctx.res.destroy()
+
+    await new Promise((resolve) => setImmediate(resolve))
+
+    expect(captureStream.readableFlowing).to.equal(true)
+  })
+
+  it('leaves a consumed capture stream alone when the synthetic res closes', async () => {
+    let ctx: any
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        ctx = { req, res }
+
+        return ctx
+      },
+    })
+
+    codec.encodeRequest({
+      id: 'network-consumed',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const captureStream = new PassThrough()
+
+    codec.encodeResponse({
+      id: 'network-consumed',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodySkipped: true,
+      bodyStream: Readable.from(['']),
+      captureStream,
+    })
+
+    // the notification stage consumed the stream and cleared the ctx field
+    ctx.resCaptureStream = undefined
+
+    ctx.res.destroy()
+
+    await new Promise((resolve) => setImmediate(resolve))
+
+    expect(captureStream.readableFlowing).to.equal(null)
+  })
+
+  it('leaves resBodySkipped and resCaptureStream unset when bodySkipped and captureStream are absent', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-not-skipped',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    codec.encodeResponse({
+      id: 'network-not-skipped',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodyStream: Readable.from(['origin']),
+    })
+
+    expect(ctx.resBodySkipped).to.be.undefined
+    expect(ctx.resCaptureStream).to.be.undefined
+  })
+
   it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
     const { ExtractCypressMetadataHeaders } = RequestMiddleware
 
@@ -604,5 +763,77 @@ describe('createSyntheticProxyCodec', () => {
     expect(ctx.req.isFromExtraTarget).to.equal(true)
     expect(maybeSetBasicAuthHeadersRan).to.equal(true)
     expect(skippedMiddlewareRan).to.equal(false)
+  })
+
+  describe('abortRequest', () => {
+    function createCodec () {
+      return createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => {
+          return {
+            req,
+            res,
+          } as any
+        },
+      })
+    }
+
+    it('destroys the exchange of an in-flight request', async () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-abort',
+        url: 'https://example.test/1mb',
+        method: 'GET',
+        headers: {},
+      })
+
+      const closed = new Promise<void>((resolve) => ctx.res.once('close', () => resolve()))
+
+      codec.abortRequest('network-abort')
+
+      await closed
+
+      expect(ctx.req.destroyed, 'req destroyed').to.equal(true)
+      expect(ctx.res.destroyed, 'res destroyed').to.equal(true)
+    })
+
+    it('is a no-op for an unknown request id', () => {
+      expect(() => createCodec().abortRequest('never-seen')).not.to.throw()
+    })
+
+    it('is a no-op once the request has been released', () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-released',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      codec.releaseRequest?.('network-released')
+      codec.abortRequest('network-released')
+
+      expect(ctx.res.destroyed).to.equal(false)
+    })
+
+    it('does not re-destroy an exchange that is already aborted', () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-twice',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      let closeCount = 0
+
+      ctx.res.on('close', () => closeCount++)
+
+      codec.abortRequest('network-twice')
+      codec.abortRequest('network-twice')
+
+      return new Promise<void>((resolve) => setTimeout(resolve, 10)).then(() => {
+        expect(closeCount).to.equal(1)
+      })
+    })
   })
 })
