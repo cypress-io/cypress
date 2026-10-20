@@ -264,6 +264,71 @@ describe('@packages/driver/src/cypress/runner', () => {
     })
   })
 
+  describe('normalizeAll hooks', () => {
+    beforeEach(() => {
+      (globalThis as any).Cypress = {
+        config: () => false,
+        originalConfig: {},
+      }
+    })
+
+    afterEach(() => {
+      delete (globalThis as any).Cypress
+    })
+
+    const hookIdsOf = (runnable) => runnable.hooks.map((hook) => hook.hookId)
+
+    it('gives each normalized test the hooks of every enclosing suite, nearest suite first', () => {
+      const { wrapper, suite: root } = makeMochaWrapper()
+
+      root.beforeEach(() => {})
+
+      const rootTest = new Test('root test', () => {})
+
+      root.addTest(rootTest)
+
+      const nested = new Suite('nested', root.ctx)
+
+      root.addSuite(nested)
+      nested.beforeAll(() => {})
+      nested.afterEach(() => {})
+
+      const nestedTest = new Test('nested test', () => {})
+
+      nested.addTest(nestedTest)
+
+      const deepest = new Suite('deepest', nested.ctx)
+
+      nested.addSuite(deepest)
+      deepest.beforeEach(() => {})
+
+      const deepestTest = new Test('deepest test', () => {})
+
+      deepest.addTest(deepestTest)
+
+      const api = $Runner.create(makeSpecWindow(), wrapper, makeCypressStub(), makeCyStub(), makeStateStub())
+      const normalized = api.normalizeAll({}, true)
+      const [normalizedNested] = normalized.suites
+      const [normalizedDeepest] = normalizedNested.suites
+
+      const rootHookIds = hookIdsOf(normalized)
+      const nestedHookIds = hookIdsOf(normalizedNested)
+      const deepestHookIds = hookIdsOf(normalizedDeepest)
+
+      expect(rootHookIds).toHaveLength(1)
+      expect(nestedHookIds).toHaveLength(2)
+      expect(deepestHookIds).toHaveLength(1)
+
+      expect(hookIdsOf(normalized.tests[0])).toEqual(rootHookIds)
+      expect(hookIdsOf(normalizedNested.tests[0])).toEqual([...nestedHookIds, ...rootHookIds])
+      expect(hookIdsOf(normalizedDeepest.tests[0])).toEqual([...deepestHookIds, ...nestedHookIds, ...rootHookIds])
+
+      // suites keep only their own hooks and the mocha tests are left alone
+      expect(hookIdsOf(normalizedDeepest)).toEqual(deepestHookIds)
+      expect((deepestTest as any).hooks).toEqual([])
+    })
+  })
+
   it('does not accumulate process listeners across multiple run/end cycles', () => {
     // Simulates the Cypress rerun lifecycle: each "rerun" creates a new
     // $Runner, calls api.run(), then ends. After each cycle, the process
