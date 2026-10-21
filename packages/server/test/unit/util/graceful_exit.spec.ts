@@ -116,11 +116,15 @@ describe('lib/util/graceful-exit', () => {
     const flushCallbacks: Array<() => void> = []
 
     for (const stream of [process.stdout, process.stderr]) {
-      vi.spyOn(stream, 'write').mockImplementation(((_chunk: string, cb: () => void) => {
-        flushCallbacks.push(cb)
+      vi.spyOn(stream, 'write').mockImplementation((_chunk, ...rest: unknown[]) => {
+        const cb = rest.find((arg): arg is () => void => typeof arg === 'function')
+
+        if (cb) {
+          flushCallbacks.push(cb)
+        }
 
         return false
-      }) as never)
+      })
     }
 
     const exiting = GracefulExit.exitGracefully(0)
@@ -170,7 +174,7 @@ describe('lib/util/graceful-exit', () => {
     const exitStub = stubExit()
 
     stubLog()
-    vi.spyOn(process.stdout, 'write').mockImplementation((() => false) as never)
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => false)
 
     void GracefulExit.exitGracefully(3)
 
