@@ -114,7 +114,7 @@ describe('CypressCTWebpackPlugin beforeCompile', () => {
 
       vi.mocked(fs.pathExists).mockResolvedValue(true as never)
 
-      // the recompile triggered by the spec change filters the newer list on its own pass
+      // Stands in for the recompile that touching component-index.html starts in webpack
       await runBeforeCompile()
 
       expect(fs.pathExists).toHaveBeenLastCalledWith(newSpec.absolute)
