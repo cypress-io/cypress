@@ -205,10 +205,10 @@ export class CommandQueue extends Queue<$Command> {
     })
   }
 
-  cleanup () {
+  cleanup ({ resetTimeout = true } = {}) {
     const runnable = this.state('runnable')
 
-    if (runnable && !runnable.isPending()) {
+    if (resetTimeout && runnable && !runnable.isPending()) {
       // make sure we reset the runnable's timeout now
       runnable.resetTimeout()
     }
@@ -233,22 +233,30 @@ export class CommandQueue extends Queue<$Command> {
     this.state('isStable', true)
   }
 
-  // The runnable timer and mocha's uncaught-error handler end a runnable without settling
-  // its command chain. Cancel the chain so a late reply can't resume it under a later
-  // runnable. state('canceled') is left alone: it would make retrying commands in the
-  // remaining hooks give up after a single attempt.
-  cancelPending () {
-    const promise = this.state('promise')
+  // Ends the command chain before it settles. A stop or an early done() cancels the run. A
+  // failed runnable only has its pending chain ended, so a late reply can't resume it under a
+  // later runnable: state('canceled') would make retrying commands in the remaining hooks give
+  // up after a single attempt, and mocha has already cleared the runnable's timer.
+  endEarly ({ canceled }: { canceled: boolean }) {
+    const isPending = !!this.state('promise')?.isPending()
 
-    if (!promise?.isPending()) {
+    if (!canceled && !isPending) {
       return
     }
 
-    this.state('cancel')()
-    this.cleanup()
+    this.cleanup({ resetTimeout: canceled })
 
-    // cleanup() re-arms the runnable's timer, which would otherwise fire into the next attempt
-    this.cy.clearTimeout()
+    if (!isPending) {
+      return
+    }
+
+    if (canceled) {
+      this.state('canceled', true)
+      this.state('cancel')()
+      Cypress.action('cy:canceled')
+    } else {
+      this.state('cancel')()
+    }
   }
 
   private runCommand (command: $Command) {
@@ -582,11 +590,7 @@ export class CommandQueue extends Queue<$Command> {
 
     this.state('promise', promise)
     this.state('reject', reject)
-    this.state('cancel', () => {
-      cancel()
-
-      Cypress.action('cy:canceled')
-    })
+    this.state('cancel', cancel)
 
     return promise
   }

@@ -94,40 +94,65 @@ describe('@packages/driver/src/cypress/command_queue', () => {
     delete (globalThis as any).cy
   })
 
-  describe('#cancelPending', () => {
-    it('stops a pending command chain from resuming when its command settles late', async () => {
-      let settleLate: () => void = () => {}
+  describe('#endEarly', () => {
+    let settleLate: () => void
 
+    const runPendingChain = async () => {
       setup({ isStable: true })
       queue.add(createCommand(() => new Promise<void>((resolve) => settleLate = resolve)))
       queue.add(createCommand(() => null))
       queue.run()
       await flush()
+    }
 
-      queue.cancelPending()
+    describe('when a runnable fails', () => {
+      it('stops a pending command chain from resuming when its command settles late', async () => {
+        await runPendingChain()
 
-      expect(state('promise').isCancelled()).to.be.true
-      expect(queue.index).to.equal(queue.length)
-      expect(state('canceled')).to.be.undefined
-      expect(cy.clearTimeout).toHaveBeenCalled()
+        queue.endEarly({ canceled: false })
 
-      settleLate()
-      await flush()
+        expect(state('promise').isCancelled()).to.be.true
+        expect(queue.index).to.equal(queue.length)
+        expect(state('canceled')).to.be.undefined
+        expect(runnable.resetTimeout).not.toHaveBeenCalled()
+        expect(Cypress.action).not.toHaveBeenCalledWith('cy:canceled')
 
-      expect(Cypress.action).not.toHaveBeenCalledWith('cy:command:end', expect.anything())
+        settleLate()
+        await flush()
+
+        expect(Cypress.action).not.toHaveBeenCalledWith('cy:command:end', expect.anything())
+      })
+
+      it('does nothing once the command chain has settled', async () => {
+        setup({ isStable: true })
+        queue.add(createCommand(() => null))
+        await queue.run()
+
+        expect(cy.fail).not.toHaveBeenCalled()
+
+        runnable.resetTimeout.mockClear()
+        state('isStable', false)
+
+        queue.endEarly({ canceled: false })
+
+        expect(state('promise').isCancelled()).to.be.false
+        expect(state('isStable')).to.be.false
+        expect(runnable.resetTimeout).not.toHaveBeenCalled()
+      })
     })
 
-    it('does nothing once the command chain has settled', async () => {
-      setup({ isStable: true })
-      queue.add(createCommand(() => null))
-      await queue.run()
+    describe('when the run is canceled', () => {
+      it('cancels the pending command chain and emits cy:canceled', async () => {
+        await runPendingChain()
 
-      expect(cy.fail).not.toHaveBeenCalled()
+        queue.endEarly({ canceled: true })
 
-      queue.cancelPending()
-
-      expect(state('promise').isCancelled()).to.be.false
-      expect(cy.clearTimeout).not.toHaveBeenCalled()
+        expect(state('promise').isCancelled()).to.be.true
+        expect(queue.index).to.equal(queue.length)
+        expect(state('canceled')).to.be.true
+        expect(runnable.resetTimeout).toHaveBeenCalled()
+        expect(Cypress.action).toHaveBeenCalledWith('cy:canceled')
+      })
     })
   })
 })

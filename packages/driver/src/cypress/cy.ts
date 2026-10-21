@@ -655,7 +655,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   cancelPendingCommands () {
-    this.queue.cancelPending()
+    this.queue.endEarly({ canceled: false })
   }
 
   // reset is called before each test
@@ -1422,20 +1422,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private doneEarly () {
-    this.queue.cleanup()
-
-    // we only need to worry about doneEarly when
-    // it comes from a manual event such as stopping
-    // Cypress or when we yield a (done) callback
-    // and could arbitrarily call it whenever we want
-    const p = this.state('promise')
-
-    // if our outer promise is pending
-    // then cancel outer and inner
-    // and set canceled to be true
-    if (p && p.isPending()) {
-      this.state('canceled', true)
-      this.state('cancel')()
-    }
+    this.queue.endEarly({ canceled: true })
   }
 }
