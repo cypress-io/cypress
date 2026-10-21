@@ -136,6 +136,12 @@ const createApp = (port) => {
     return res.type('xml').send('<foo>bar</foo>')
   })
 
+  app.get('/xhtml', (req, res) => {
+    res.setHeader('content-type', 'application/xhtml+xml')
+
+    return res.end('<html xmlns="http://www.w3.org/1999/xhtml"><body><h1>xhtml</h1></body></html>')
+  })
+
   app.get('/arraybuffer', (req, res) => {
     return fs.readFile(path.join(PATH_TO_SERVER_PKG, 'test/support/fixtures/sample.pdf'), (err, bytes) => {
       if (err) {

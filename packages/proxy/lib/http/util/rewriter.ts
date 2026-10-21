@@ -17,6 +17,7 @@ export type InjectionOpts = {
   wantsSecurityRemoved: any
   simulatedCookies: SerializableAutomationCookie[]
   shouldInjectDocumentDomain: boolean
+  isXhtml?: boolean
 }
 
 const doctypeRe = /<\!doctype.*?>/i
@@ -60,6 +61,15 @@ function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
   }
 }
 
+// An XHTML document goes through the browser's XML parser, which rejects the bare `<` and `&`
+// in the injected JavaScript and renders a <parsererror> page in place of the document. A CDATA
+// section passes the script through verbatim; any `]]>` inside it is split across two sections.
+const wrapScriptInCdata = (script: string) => {
+  return script.replace(/^(<script[^>]*>)([\s\S]*)(<\/script>)$/, (match, openTag, body, closeTag) => {
+    return `${openTag}<![CDATA[${body.replaceAll(']]>', ']]]]><![CDATA[>')}]]>${closeTag}`
+  })
+}
+
 const insertBefore = (originalString, match, stringToInsert) => {
   const index = match.index || 0
 
@@ -73,7 +83,11 @@ const insertAfter = (originalString, match, stringToInsert) => {
 }
 
 export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
-  const htmlToInject = await Promise.resolve(getHtmlToInject(opts))
+  let htmlToInject = await Promise.resolve(getHtmlToInject(opts))
+
+  if (htmlToInject && opts.isXhtml) {
+    htmlToInject = wrapScriptInCdata(htmlToInject)
+  }
 
   // strip clickjacking and framebusting
   // from the HTML if we've been told to

@@ -1919,6 +1919,25 @@ space
       })
     })
 
+    describe('XHTML documents', () => {
+      beforeEach(() => {
+        cy.visit('http://localhost:3500/xhtml')
+        cy.document().its('contentType').should('eq', 'application/xhtml+xml')
+      })
+
+      it('finds content with a selector', () => {
+        cy.contains('h1', 'xhtml').should('have.prop', 'localName', 'h1')
+      })
+
+      it('finds content without a selector', () => {
+        cy.contains('xhtml').should('have.prop', 'localName', 'h1')
+      })
+
+      it('finds elements with cy.get()', () => {
+        cy.get('h1').should('have.text', 'xhtml')
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 100,
     }, () => {
