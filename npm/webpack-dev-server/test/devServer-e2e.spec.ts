@@ -287,20 +287,6 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
     } as any as Cypress.PluginConfigOptions
   }
 
-  const waitForCompiles = (devServerEvents: EventEmitter, count: number) => {
-    return new Promise<void>((resolve) => {
-      let seen = 0
-      const onSuccess = () => {
-        if (++seen === count) {
-          devServerEvents.off('dev-server:compile:success', onSuccess)
-          resolve()
-        }
-      }
-
-      devServerEvents.on('dev-server:compile:success', onSuccess)
-    })
-  }
-
   // Holds the first `fs.pathExists` call open so `beforeCompile` stays suspended
   // until the test releases it, making the window for a concurrent spec update deterministic.
   const holdFirstPathExists = () => {
@@ -365,7 +351,10 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
           options: { neededForJustInTimeCompile: true },
         })
 
-        const compiled = waitForCompiles(devServerEvents, 2)
+        // Webpack skips `done` for a compile that is invalidated while it runs, so only
+        // one success is guaranteed here. Every compile from this point builds the same
+        // spec list, so the first one is enough.
+        const compiled = once(devServerEvents, 'dev-server:compile:success')
 
         pathExists.release()
         await compiled
