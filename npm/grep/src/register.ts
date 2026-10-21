@@ -213,6 +213,13 @@ export function register (): void {
 
     return _it.skip(name, options, callback)
   }
+
+  // mocha binds xit and xspecify to its own it.skip while setting up the BDD
+  // interface, which happens before register() runs, so they still hold the
+  // unfiltered skip and have to be pointed at the wrapper by hand.
+  xit = it.skip
+  xspecify = it.skip
+
   it.only = _it.only
   it.retries = _it.retries
   // @ts-expect-error - is missing each on Mocha.TestFunction type

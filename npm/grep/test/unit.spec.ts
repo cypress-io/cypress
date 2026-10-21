@@ -645,6 +645,7 @@ describe('utils', () => {
       })
     })
   })
+
   describe('register', () => {
     describe('it.skip', () => {
       // Stands in for mocha's it/describe so the registrations can be read
@@ -660,6 +661,7 @@ describe('utils', () => {
         realIt.skip = (name: string) => {
           pending.push(name)
         }
+
         realIt.only = () => {}
         realIt.retries = () => {}
 
@@ -679,6 +681,9 @@ describe('utils', () => {
         const exposed: Record<string, any> = { grepTags, grepOmitFiltered }
 
         globalThis.it = realIt
+        // mocha binds these to its own it.skip before register() runs
+        globalThis.xit = realIt.skip
+        globalThis.xspecify = realIt.skip
         globalThis.describe = realDescribe
         globalThis.context = realDescribe
         globalThis.specify = realIt
@@ -694,6 +699,8 @@ describe('utils', () => {
 
       const originals = {
         it: globalThis.it,
+        xit: globalThis.xit,
+        xspecify: globalThis.xspecify,
         describe: globalThis.describe,
         context: globalThis.context,
         specify: globalThis.specify,
@@ -728,6 +735,22 @@ describe('utils', () => {
         })
 
         expect(pending).toEqual(['inherits'])
+      })
+
+      it('omits a non-matching test skipped through xit', () => {
+        const { pending } = setup({ grepTags: '@tag1', grepOmitFiltered: true })
+
+        globalThis.xit('does not match', { tags: '@tag2' }, () => {})
+
+        expect(pending).toEqual([])
+      })
+
+      it('omits a non-matching test skipped through xspecify', () => {
+        const { pending } = setup({ grepTags: '@tag1', grepOmitFiltered: true })
+
+        globalThis.xspecify('does not match', { tags: '@tag2' }, () => {})
+
+        expect(pending).toEqual([])
       })
 
       it('still reports a non-matching skipped test when not omitting filtered tests', () => {
