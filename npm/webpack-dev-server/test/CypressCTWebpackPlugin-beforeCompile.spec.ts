@@ -48,13 +48,10 @@ const createPlugin = (files: Cypress.Spec[]) => {
   })
 
   // beforeCompile only filters once a compilation exists, as it does after webpack's first build
-  const touchIndexHtml = vi.fn()
-
-  onCompilation({ inputFileSystem: { utimesSync: touchIndexHtml } })
+  onCompilation({ inputFileSystem: { utimesSync: vi.fn() } })
 
   return {
     devServerEvents,
-    touchIndexHtml,
     runBeforeCompile: () => new Promise<void>((resolve) => beforeCompile({}, resolve)),
     loadedFiles: () => {
       const loaderContext = {} as CypressCTWebpackContext
@@ -88,36 +85,29 @@ describe('CypressCTWebpackPlugin beforeCompile', () => {
     { title: 'still exists', oldSpecExists: true },
     { title: 'was deleted', oldSpecExists: false },
   ].forEach(({ title, oldSpecExists }) => {
-    it(`keeps a spec list that changes while the file system checks are pending when the old spec ${title}`, async () => {
+    it(`builds the newer spec list, filtered, when specs change while the file system checks are pending and the old spec ${title}`, async () => {
       const oldSpec = spec('Old.cy.js')
       const newSpec = spec('New.cy.js')
-      let resolvePathExists!: (exists: boolean) => void
+      const deletedNewSpec = spec('DeletedNew.cy.js')
+      let resolveOldSpecCheck!: (exists: boolean) => void
 
-      vi.mocked(fs.pathExists).mockImplementationOnce((() => new Promise<boolean>((resolve) => resolvePathExists = resolve)) as any)
+      vi.mocked(fs.pathExists)
+      .mockImplementation((async (file: string) => file !== deletedNewSpec.absolute) as any)
+      .mockImplementationOnce((() => new Promise<boolean>((resolve) => resolveOldSpecCheck = resolve)) as any)
 
-      const { devServerEvents, touchIndexHtml, runBeforeCompile, loadedFiles } = createPlugin([oldSpec])
+      const { devServerEvents, runBeforeCompile, loadedFiles } = createPlugin([oldSpec])
       const compile = runBeforeCompile()
 
       await vi.waitFor(() => expect(fs.pathExists).toHaveBeenCalledWith(oldSpec.absolute))
 
       devServerEvents.emit('dev-server:specs:changed', {
-        specs: [newSpec],
+        specs: [newSpec, deletedNewSpec],
         options: { neededForJustInTimeCompile: true },
       })
 
-      expect(touchIndexHtml).toHaveBeenCalledOnce()
-
-      resolvePathExists(oldSpecExists)
+      resolveOldSpecCheck(oldSpecExists)
       await compile
 
-      expect(loadedFiles()).toEqual([newSpec])
-
-      vi.mocked(fs.pathExists).mockResolvedValue(true as never)
-
-      // Stands in for the recompile that touching component-index.html starts in webpack
-      await runBeforeCompile()
-
-      expect(fs.pathExists).toHaveBeenLastCalledWith(newSpec.absolute)
       expect(loadedFiles()).toEqual([newSpec])
     })
   })
