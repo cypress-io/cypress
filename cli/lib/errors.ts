@@ -125,10 +125,9 @@ const nonZeroExitCodeXvfb = {
 const missingXvfb = {
   description: 'Your system is missing the dependency: Xvfb',
   solution: stripIndent`
-    Install Xvfb and run Cypress again. The command for common distributions:
+    Install Xvfb and run Cypress again. On Debian and Ubuntu:
 
-    Debian and Ubuntu: apt-get install -y xvfb
-    Fedora, RHEL and CentOS: dnf install -y xorg-x11-server-Xvfb
+    apt-get install -y xvfb
 
     Or run Cypress on a display that already exists by setting the DISPLAY environment variable.
 
