@@ -19,7 +19,7 @@
 - [ ] npm/webpack-preprocessor
 - [ ] npm/webpack-dev-server
 - [ ] npm/vite-plugin-cypress-esm
-- [ ] npm/vite-dev-server
+- [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
 - [ ] packages/frontend-shared

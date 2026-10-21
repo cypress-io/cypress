@@ -49,8 +49,13 @@ export default function (Commands, Cypress, cy) {
         return
       }
 
-      return sessions.clearCurrentSessionData()
-      .then(() => Cypress.backend('reset:rendered:html:origins'))
+      const renderedOrigins = await sessionsManager.clearSessionData()
+
+      // An empty set has nothing to reset. A page that finishes rendering after
+      // the read stays in the set, so the next test clears its storage too.
+      if (renderedOrigins.length) {
+        await Cypress.backend('reset:rendered:html:origins')
+      }
     })
   })
 

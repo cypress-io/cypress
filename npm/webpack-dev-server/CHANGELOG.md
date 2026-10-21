@@ -1,3 +1,10 @@
+# [@[secure]/webpack-dev-server-v6.1.1](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.1.0...@[secure]/webpack-dev-server-v6.1.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* show a clear error when the [secure] [secure] dev server fails to start ([#35081](https://github.com/[secure]-io/[secure]/issues/35081)) ([b7fd293](https://github.com/[secure]-io/[secure]/commit/b7fd293f3c71cb5080466a98860f73eee796f724))
+
 # [@[secure]/webpack-dev-server-v6.1.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.0.0...@[secure]/webpack-dev-server-v6.1.0) (2026-10-06)
 
 

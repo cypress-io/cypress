@@ -20,6 +20,11 @@ const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket ti
 const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 
+// Store the user's original value so the config process can restore it for their Node code
+if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
+  process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
+}
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const convertSameSiteToughToExtension = (sameSite, setCookie) => {
