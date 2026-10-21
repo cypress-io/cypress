@@ -60,10 +60,10 @@ export class CypressCTWebpackPlugin {
       return
     }
 
-    // Ensure we don't try to load files that have been removed from the file system
-    // but have not yet been detected by the onSpecsChange handler
     const files = this.files
 
+    // Ensure we don't try to load files that have been removed from the file system
+    // but have not yet been detected by the onSpecsChange handler
     const foundFiles = (await Promise.all(files.map(async (file) => {
       try {
         const exists = await fs.pathExists(file.absolute)

@@ -48,10 +48,13 @@ const createPlugin = (files: Cypress.Spec[]) => {
   })
 
   // beforeCompile only filters once a compilation exists, as it does after webpack's first build
-  onCompilation({ inputFileSystem: { utimesSync: vi.fn() } })
+  const touchIndexHtml = vi.fn()
+
+  onCompilation({ inputFileSystem: { utimesSync: touchIndexHtml } })
 
   return {
     devServerEvents,
+    touchIndexHtml,
     runBeforeCompile: () => new Promise<void>((resolve) => beforeCompile({}, resolve)),
     loadedFiles: () => {
       const loaderContext = {} as CypressCTWebpackContext
@@ -92,7 +95,7 @@ describe('CypressCTWebpackPlugin beforeCompile', () => {
 
       vi.mocked(fs.pathExists).mockImplementationOnce((() => new Promise<boolean>((resolve) => resolvePathExists = resolve)) as any)
 
-      const { devServerEvents, runBeforeCompile, loadedFiles } = createPlugin([oldSpec])
+      const { devServerEvents, touchIndexHtml, runBeforeCompile, loadedFiles } = createPlugin([oldSpec])
       const compile = runBeforeCompile()
 
       await vi.waitFor(() => expect(fs.pathExists).toHaveBeenCalledWith(oldSpec.absolute))
@@ -101,6 +104,8 @@ describe('CypressCTWebpackPlugin beforeCompile', () => {
         specs: [newSpec],
         options: { neededForJustInTimeCompile: true },
       })
+
+      expect(touchIndexHtml).toHaveBeenCalledOnce()
 
       resolvePathExists(oldSpecExists)
       await compile

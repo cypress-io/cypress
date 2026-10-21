@@ -252,7 +252,7 @@ describe('#devServer', { timeout: 5000 }, () => {
 
         await closeServer(close)
       } finally {
-        fs.writeFile('./test/fixtures/dependency.js', originalContent)
+        await fs.writeFile('./test/fixtures/dependency.js', originalContent)
       }
     })
   })
@@ -374,6 +374,12 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
     const deletedSpec = path.join(root, 'test/fixtures/deleted-before-compile.spec.js')
 
     await fs.writeFile(deletedSpec, `it('deleted before compile', () => {})\n`)
+
+    // A file modified just before the watcher starts can be reported as changed and
+    // trigger an extra rebuild, which would satisfy the wait for the deletion's rebuild.
+    const beforeWatcherStart = new Date(Date.now() - 60_000)
+
+    await fs.utimes(deletedSpec, beforeWatcherStart, beforeWatcherStart)
 
     const devServerEvents = new EventEmitter()
     const { close, port } = await devServer({
