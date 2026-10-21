@@ -246,6 +246,12 @@ export class ProjectLifecycleManager {
            *      The empty specs are handled within the @cypress/webpack-dev-server package as this has no impact on vite.
            */
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+          .catch((err) => {
+            span?.end()
+            const devServer = this.loadedConfigFile?.component?.devServer
+
+            throw getError('DEV_SERVER_START_FAILED', this.configFile, typeof devServer === 'object' ? devServer.bundler : undefined, err)
+          })
 
           // If we received a cypressConfig.port we want to null it out
           // because we propagated it into the devServer.port and it is
