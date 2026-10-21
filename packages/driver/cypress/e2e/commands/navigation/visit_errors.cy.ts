@@ -170,7 +170,12 @@ describe('src/cy/commands/navigation', () => {
 
       it('throws when failOnStatusCode is false and retryOnStatusCodeFailure is true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('These options are incompatible with each other.')
+          expect(err.message).to.eq(stripIndent`\
+            These options are incompatible with each other.
+
+             - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+             - To not fail on non-2xx status codes, pass { failOnStatusCode: false, retryOnStatusCodeFailure: false }.
+             - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }.`)
 
           done()
         })
