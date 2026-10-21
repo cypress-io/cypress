@@ -102,7 +102,7 @@ describe('ProjectLifecycleManager', () => {
     describe('when the welcome screen has not been dismissed', () => {
       const originalEnv = process.env
 
-      const agentCtx = (modeOptions: Parameters<typeof createDataContext>[0] = { project: 'foo', testingType: 'e2e' }) => {
+      const agentCtx = (modeOptions: Parameters<typeof createDataContext>[0] = { project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true }) => {
         const agent = createDataContext(modeOptions)
 
         jest.spyOn(agent.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
@@ -194,14 +194,32 @@ describe('ProjectLifecycleManager', () => {
         expect(agentCtx({ project: 'foo' }).lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
       })
 
-      it('is not bypassed without --browser', () => {
+      it('is not bypassed without --browser or a defaultBrowser', () => {
         process.env.CLAUDECODE = '1'
 
-        const agent = agentCtx()
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
+
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+      })
+
+      it('is not bypassed by a browser that a config reload copied into cliBrowser', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
 
         agent.coreData.cliBrowser = null
 
+        // the first load has no browser to launch, so one is chosen without launching it
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.coreData.activeBrowser).not.toBeNull()
+
+        // a reload then copies the active browser into cliBrowser
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.coreData.cliBrowser).not.toBeNull()
         expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.actions.project.launchProject).not.toHaveBeenCalled()
       })
 
       it('is not bypassed in run mode', () => {
