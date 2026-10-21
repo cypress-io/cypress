@@ -51,6 +51,7 @@
 - Fixed an issue where `cypress tap` commands could delete the record of a running `cypress open` session, and report that no session was running, when run from a process that cannot see the session's process ID, such as a different PID namespace in a container or sandbox. The record is now kept while the session responds. Fixed in [#35103](https://github.com/cypress-io/cypress/pull/35103).
 - `cypress open` now prints configuration errors and warnings, including the stack trace of a config file that fails to load, to the terminal. Previously they only appeared in the Cypress window, so a script or AI agent running `cypress open` saw nothing while it waited. Fixed in [#35104](https://github.com/cypress-io/cypress/pull/35104).
 - `cypress open --project <path> --e2e --browser <browser>` run by an AI coding agent now launches the browser without waiting for the welcome screen to be dismissed in the Cypress window. Set `CYPRESS_AGENT_MODE=1` to force this behavior for an agent Cypress does not detect, or `CYPRESS_AGENT_MODE=0` to turn it off. Fixed in [#35105](https://github.com/cypress-io/cypress/pull/35105).
+- `cypress open --e2e --project <path>` run by an AI coding agent in a project with no Cypress configuration file now creates the configuration and support files and starts the project in one launch, and prints the files it created. Previously the project did not start until Continue was pressed in the Cypress window. Fixed in [#35106](https://github.com/cypress-io/cypress/pull/35106).
 
 **Misc:**
 
