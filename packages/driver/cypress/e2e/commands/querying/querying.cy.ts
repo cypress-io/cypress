@@ -1919,6 +1919,25 @@ space
       })
     })
 
+    describe('XHTML documents', () => {
+      beforeEach(() => {
+        cy.visit('http://localhost:3500/xhtml')
+        cy.document().its('contentType').should('eq', 'application/xhtml+xml')
+      })
+
+      it('finds content with a selector', () => {
+        cy.contains('h1', 'xhtml').should('have.prop', 'localName', 'h1')
+      })
+
+      it('finds content without a selector', () => {
+        cy.contains('xhtml').should('have.prop', 'localName', 'h1')
+      })
+
+      it('finds elements with cy.get()', () => {
+        cy.get('h1').should('have.text', 'xhtml')
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 100,
     }, () => {
@@ -1932,6 +1951,36 @@ space
         })
 
         return null
+      })
+
+      describe('in a document without a <body>', () => {
+        beforeEach(() => {
+          cy.document().then((doc) => {
+            doc.body.remove()
+          })
+        })
+
+        it('throws when there is no filter', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.name).to.eq('AssertionError')
+            expect(err.message).to.include('Expected to find content: \'brand new content\' but never did.')
+
+            done()
+          })
+
+          cy.contains('brand new content')
+        })
+
+        it('throws when there is a filter', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.name).to.eq('AssertionError')
+            expect(err.message).to.include('Expected to find content: \'brand new content\' within the selector: \'span\' but never did.')
+
+            done()
+          })
+
+          cy.contains('span', 'brand new content')
+        })
       })
 
       _.each([undefined, null], (val) => {

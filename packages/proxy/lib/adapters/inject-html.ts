@@ -6,6 +6,7 @@ import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '../http'
 import * as rewriter from '../http/util/rewriter'
 import { getNodeCharsetFromResponse } from '../http/util/response-stream'
+import { resContentTypeIs } from '../http/util/document-preparation'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
 /**
@@ -49,6 +50,7 @@ export async function injectHtml (mw: ResponseInterceptionMiddlewareCtx): Promis
       removeSRIAttributes: mw.config.removeSRIAttributes && mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),
       url: mw.req.proxiedUrl,
       simulatedCookies: mw.simulatedCookies,
+      isXhtml: resContentTypeIs(mw.incomingRes, 'application/xhtml+xml'),
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
