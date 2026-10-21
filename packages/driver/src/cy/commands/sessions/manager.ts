@@ -127,6 +127,7 @@ export default class SessionsManager {
     },
 
     clearCurrentSessionData: async () => {
+      // Public API: resolves to nothing, unlike `clearSessionData`
       await this.clearSessionData()
     },
 
