@@ -278,6 +278,8 @@ Install [Visual Studio 2022 Build Tools](https://aka.ms/vs/17/release/vs_buildto
 
 Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 
+During `yarn` installation you may see `warning Error running install script for optional dependency` for `cpu-features`, followed by a `node-gyp` build error such as `error MSB8020: The build tools for ClangCL (Platform Toolset = 'ClangCL') cannot be found`. You can ignore it. `cpu-features` is an optional dependency of `ssh2`, which reaches the repo only through `dockerode` in [system-tests](./system-tests/package.json). `ssh2` works without it, and the installation completes successfully.
+
 #### Corepack
 
 The Cypress repo is compatible with Corepack and contains a `packageManager` field in the root [package.json](./package.json) file to automatically install Yarn. Cypress does not however require you to enable Corepack. It is classed as experimental and not suitable for production by the Node.js organization. Refer to the repo [corepack](https://github.com/nodejs/corepack#readme) for instructions, known issues and workarounds.
