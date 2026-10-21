@@ -278,13 +278,15 @@ describe('#devServer', { timeout: 5000 }, () => {
 
 describe('#devServer spec list updates during pre-compilation', { timeout: 15000 }, () => {
   const makeConfig = (overrides: Partial<Cypress.PluginConfigOptions>) => {
+    // Safe because the other fields are read only by framework handlers these tests don't
+    // use, for an error message, or with a fallback when unset
     return {
       projectRoot: root,
       supportFile: '',
       devServerPublicPathRoute: '/__cypress/src',
       indexHtmlFile: 'test/component-index.html',
       ...overrides,
-    } as any as Cypress.PluginConfigOptions
+    } as Cypress.PluginConfigOptions
   }
 
   // Holds the first `fs.pathExists` call open so `beforeCompile` stays suspended
@@ -297,7 +299,8 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
     const entered = new Promise<void>((resolve) => signalEntered = resolve)
     let held = false
 
-    const spy = vi.spyOn(fs, 'pathExists').mockImplementation((async (file: string) => {
+    // Safe because the plugin only calls the promise form of pathExists
+    const spy = vi.spyOn(fs as { pathExists: (file: string) => Promise<boolean> }, 'pathExists').mockImplementation(async (file) => {
       if (!held) {
         held = true
         signalEntered()
@@ -305,7 +308,7 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
       }
 
       return realPathExists(file)
-    }) as any)
+    })
 
     return { entered, release, restore: () => spy.mockRestore() }
   }
@@ -359,7 +362,7 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
         pathExists.release()
         await compiled
 
-        const served = await requestSpecFile('/__cypress/src/spec-0.js', port as number)
+        const served = await requestSpecFile('/__cypress/src/spec-0.js', port)
 
         expect(served).toContain('this is a spec with a path containing a space')
         expect(served).not.toContain(`it('...bar'`)
@@ -392,7 +395,7 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
     try {
       await once(devServerEvents, 'dev-server:compile:success')
 
-      const initial = await requestSpecFile('/__cypress/src/main.js', port as number)
+      const initial = await requestSpecFile('/__cypress/src/main.js', port)
 
       expect(initial).toContain('deleted-before-compile.spec.js')
 
@@ -401,7 +404,7 @@ describe('#devServer spec list updates during pre-compilation', { timeout: 15000
       await fs.remove(deletedSpec)
       await recompiled
 
-      const updated = await requestSpecFile('/__cypress/src/main.js', port as number)
+      const updated = await requestSpecFile('/__cypress/src/main.js', port)
 
       expect(updated).toContain('foo.spec.js')
       expect(updated).not.toContain('deleted-before-compile.spec.js')

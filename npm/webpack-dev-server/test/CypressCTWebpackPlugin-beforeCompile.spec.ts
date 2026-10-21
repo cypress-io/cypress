@@ -12,12 +12,15 @@ vi.mock('fs-extra', () => {
   }
 })
 
-const spec = (name: string) => {
+// Safe because the plugin only calls the promise form of pathExists
+const pathExists = vi.mocked(fs.pathExists as (file: string) => Promise<boolean>)
+
+const spec = (name: string): Cypress.Spec => {
   return {
     name,
     relative: `src/${name}`,
     absolute: `/project/src/${name}`,
-  } as Cypress.Spec
+  }
 }
 
 const createPlugin = (files: Cypress.Spec[]) => {
@@ -31,11 +34,11 @@ const createPlugin = (files: Cypress.Spec[]) => {
     projectRoot: '/project',
     supportFile: false,
     devServerEvents,
-    webpack: {
+    webpack: Object.assign(() => {}, {
       NormalModule: {
         getCompilationHooks: () => ({ loader: { tap: (_name: string, cb: typeof addLoaderContext) => addLoaderContext = cb } }),
       },
-    } as any,
+    }),
     indexHtmlFile: 'index.html',
   })
 
@@ -47,32 +50,32 @@ const createPlugin = (files: Cypress.Spec[]) => {
     },
   })
 
-  // beforeCompile only filters once a compilation exists, as it does after webpack's first build
+  // beforeCompile skips filtering until webpack has created its first compilation
   onCompilation({ inputFileSystem: { utimesSync: vi.fn() } })
 
   return {
     devServerEvents,
     runBeforeCompile: () => new Promise<void>((resolve) => beforeCompile({}, resolve)),
     loadedFiles: () => {
-      const loaderContext = {} as CypressCTWebpackContext
+      const loaderContext: Partial<CypressCTWebpackContext> = {}
 
       addLoaderContext(loaderContext, {})
 
-      return loaderContext._cypress.files
+      return loaderContext._cypress?.files
     },
   }
 }
 
 describe('CypressCTWebpackPlugin beforeCompile', () => {
   beforeEach(() => {
-    vi.mocked(fs.pathExists).mockReset()
+    pathExists.mockReset()
   })
 
   it('drops specs that no longer exist on disk', async () => {
     const kept = spec('Kept.cy.js')
     const deleted = spec('Deleted.cy.js')
 
-    vi.mocked(fs.pathExists).mockImplementation((async (file: string) => file === kept.absolute) as any)
+    pathExists.mockImplementation(async (file) => file === kept.absolute)
 
     const { runBeforeCompile, loadedFiles } = createPlugin([kept, deleted])
 
@@ -91,14 +94,14 @@ describe('CypressCTWebpackPlugin beforeCompile', () => {
       const deletedNewSpec = spec('DeletedNew.cy.js')
       let resolveOldSpecCheck!: (exists: boolean) => void
 
-      vi.mocked(fs.pathExists)
-      .mockImplementation((async (file: string) => file !== deletedNewSpec.absolute) as any)
-      .mockImplementationOnce((() => new Promise<boolean>((resolve) => resolveOldSpecCheck = resolve)) as any)
+      pathExists
+      .mockImplementation(async (file) => file !== deletedNewSpec.absolute)
+      .mockImplementationOnce(() => new Promise<boolean>((resolve) => resolveOldSpecCheck = resolve))
 
       const { devServerEvents, runBeforeCompile, loadedFiles } = createPlugin([oldSpec])
       const compile = runBeforeCompile()
 
-      await vi.waitFor(() => expect(fs.pathExists).toHaveBeenCalledWith(oldSpec.absolute))
+      await vi.waitFor(() => expect(pathExists).toHaveBeenCalledWith(oldSpec.absolute))
 
       devServerEvents.emit('dev-server:specs:changed', {
         specs: [newSpec, deletedNewSpec],
