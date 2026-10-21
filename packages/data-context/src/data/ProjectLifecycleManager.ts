@@ -318,9 +318,13 @@ export class ProjectLifecycleManager {
    * first launch still sees the welcome.
    */
   get isWelcomeBypassedForAgent () {
-    const { project, testingType } = this.ctx.modeOptions
+    const { project, testingType, isBrowserGivenByCli } = this.ctx.modeOptions
 
-    return this.ctx.isOpenMode && isAgentMode() && Boolean(project && testingType && this.ctx.coreData.cliBrowser)
+    // Neither `cliBrowser` nor `modeOptions.browser` is evidence of this: a config reload copies the
+    // active browser into both. `isBrowserGivenByCli` is set once, from the command line.
+    const hasBrowser = Boolean(isBrowserGivenByCli || this.loadedFullConfig?.defaultBrowser)
+
+    return this.ctx.isOpenMode && isAgentMode() && Boolean(project && testingType && hasBrowser)
   }
 
   /**
