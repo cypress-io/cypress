@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import childProcess from 'child_process'
+import { once } from 'events'
+import path from 'path'
 import { GracefulExit } from '../../../lib/util/graceful-exit'
 
 // resetForTesting is a no-op unless IS_TEST is set
@@ -129,6 +132,36 @@ describe('lib/util/graceful-exit', () => {
     await exiting
 
     expect(exitStub).toHaveBeenCalledWith(0)
+  })
+
+  it('delivers all stdout to a pipe reader that falls behind', async () => {
+    // Well past the pipe's kernel buffer, so most of it has to queue in the child
+    const bytes = 2_000_000
+    const child = childProcess.spawn(process.execPath, [path.join(__dirname, 'graceful_exit_flush_fixture.ts'), String(bytes)], {
+      env: { ...process.env, NODE_OPTIONS: '--import tsx' },
+      stdio: ['ignore', 'pipe', 'inherit'],
+    })
+
+    child.stdout.pause()
+
+    // the child can exit during the wait below when its output is not flushed
+    const closed = once(child, 'close')
+
+    // Well inside the teardown budget, so the force-exit cannot be what lets the child exit
+    await new Promise((r) => setTimeout(r, 500))
+
+    let received = 0
+
+    child.stdout.on('data', (chunk: Buffer) => {
+      received += chunk.length
+    })
+
+    child.stdout.resume()
+
+    const [code] = await closed
+
+    expect(code).toBe(0)
+    expect(received).toBe(bytes)
   })
 
   it('force exits when stdout never flushes', async () => {
