@@ -175,7 +175,7 @@ describe('src/cy/commands/navigation', () => {
 
               { failOnStatusCode: false, retryOnStatusCodeFailure: true }
 
-            \`retryOnStatusCodeFailure\` retries a page that responds with a status code other than \`2xx\` or \`3xx\`, and fails if the last retry gets one too. It requires \`failOnStatusCode: true\`.
+            \`retryOnStatusCodeFailure\` retries when the response has a status code other than \`2xx\` or \`3xx\`, and fails if the last retry gets one too. It requires \`failOnStatusCode: true\`.
 
             Pass one of these combinations instead:
 
