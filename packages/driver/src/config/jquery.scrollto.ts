@@ -179,7 +179,9 @@ $scrollTo.max = function (elem, axis) {
   let scroll = `scroll${Dim}`
 
   if (!isWin(elem)) {
-    return elem[scroll] - $(elem)[Dim.toLowerCase()]()
+    // Uses `client*` rather than upstream's CSS size because it leaves out a
+    // visible scrollbar and counts padding, matching the range the browser allows.
+    return elem[scroll] - elem[`client${Dim}`]
   }
 
   let size = `client${ Dim}`

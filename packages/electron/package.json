@@ -2,18 +2,31 @@
   "name": "@packages/electron",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "cypress-electron": "./bin/cypress-electron"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "app"
+  ],
   "scripts": {
     "build": "rimraf dist && yarn build:esm && yarn build:cjs",
-    "build-binary": "node ./bin/cypress-electron --install",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
+    "build-binary": "node ./bin/cypress-electron --install",
     "check-ts": "tsc -p tsconfig.json --noEmit",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "lint": "eslint",
     "start": "./bin/cypress-electron",
     "test": "yarn vitest"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "@packages/icons": "0.0.0-development",
@@ -31,18 +44,5 @@
     "systeminformation": "^5.27.7",
     "vitest": "^3.2.4"
   },
-  "files": [
-    "dist",
-    "bin",
-    "app"
-  ],
-  "bin": {
-    "cypress-electron": "./bin/cypress-electron"
-  },
-  "types": "dist/index.d.ts",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": "eslint --fix"
-  },
-  "license": "MIT",
   "nx": {}
 }

@@ -1667,6 +1667,20 @@ export const AllCypressErrors = {
     `
   },
 
+  DEV_SERVER_START_FAILED: (configFile: string, bundler: string | undefined, err: ErrorLike) => {
+    const devServer = bundler ? errPartial`the ${fmt.highlight(bundler)} dev server` : errPartial`your dev server`
+
+    return errTemplate`
+      Cypress could not start ${devServer} for component testing. Fix the error below, then run Cypress again.
+
+      Read about configuring the dev server: https://on.cypress.io/dev-server
+
+      The ${fmt.highlight('component.devServer')} set in ${fmt.path(configFile)} threw this error:
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+
   UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
     return errTemplate`
       An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
