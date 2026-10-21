@@ -2,12 +2,32 @@
   "name": "@cypress/schematic",
   "version": "0.0.0-development",
   "description": "Official Cypress schematic for the Angular CLI",
+  "keywords": [
+    "cypress",
+    "angular",
+    "angular-cli",
+    "schematics",
+    "ng-add",
+    "e2e",
+    "component-testing",
+    "testing"
+  ],
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/cypress-schematic#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
+  },
+  "license": "MIT",
   "main": "./src",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "lint": "eslint",
     "test": "vitest run --no-file-parallelism"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1",
@@ -29,24 +49,6 @@
     "@angular/cli": ">=21.0.0",
     "@angular/core": ">=21.0.0",
     "cypress": "^16.0.0"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/cypress-schematic#readme",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",
-  "keywords": [
-    "schematics",
-    "cypress",
-    "e2e",
-    "testing",
-    "angular",
-    "automation"
-  ],
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "publishConfig": {
     "access": "public"

@@ -150,7 +150,7 @@ describe('API createInstance', () => {
         it('returns the instance response data', async () => {
           const data = await createInstance(runId, instanceRequestData, 100)
 
-          expect(data).toEqual(instanceResponseData)
+          expect(data).toStrictEqual(instanceResponseData)
         })
       })
     })

@@ -526,7 +526,7 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `status`, `statusText`, `url` and `responseBody` are assigned below
       const err: Error & { status: number, statusText: string, url: string, message: string, responseBody: string } = makeErr()
 
       err.status = 500
@@ -539,7 +539,7 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `url` is assigned below
       const err: Error & { url: string } = makeErr()
 
       err.url = 'https://some/url'
@@ -549,7 +549,7 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `chunkSizeBytes` and `maxActivityDwellTime` are assigned below
       const err: Error & { chunkSizeBytes: number, maxActivityDwellTime: number } = new Error('stream stall')
 
       err.chunkSizeBytes = 65536
@@ -560,9 +560,9 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `errors` is assigned below
       const aggregateError: Error & { errors: any[] } = makeErr()
-      // @ts-expect-error
+      // @ts-expect-error - `errors` is assigned below
       const aggregateErrorWithSystemError: Error & { errors: any[] } = makeErr()
 
       const errOne = makeErr()
@@ -571,7 +571,7 @@ describe('visual error templates', () => {
 
       aggregateError.errors = [errOne, errTwo, errThree]
 
-      // @ts-expect-error
+      // @ts-expect-error - `kind` and `url` are assigned below
       const errSystemErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
 
       errSystemErr.kind = 'SystemError'
@@ -696,6 +696,21 @@ describe('visual error templates', () => {
       return {
         default: ['certs/server.crt.pem', makeErr()],
         pem: ['trustedCertificates[0].pem', makeErr()],
+      }
+    },
+    CLIENT_CERTIFICATES_NOT_LOADED: () => {
+      return {
+        default: ['https://example.com/secure'],
+      }
+    },
+    CLIENT_CERTIFICATES_CONFLICT: () => {
+      return {
+        default: ['example.com:443', ['https://example.com/one', 'https://example.com/two']],
+      }
+    },
+    CLIENT_CERTIFICATES_PATH_SCOPED: () => {
+      return {
+        default: ['example.com:443', ['https://example.com/secure/*']],
       }
     },
     SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
@@ -980,6 +995,12 @@ describe('visual error templates', () => {
     CONFIG_FILE_DEV_SERVER_INVALID_RETURN: () => {
       return {
         default: [{}],
+      }
+    },
+    DEV_SERVER_START_FAILED: () => {
+      return {
+        default: ['cypress.config.ts', 'webpack', makeErr()],
+        customDevServer: ['cypress.config.ts', undefined, makeErr()],
       }
     },
     PLUGINS_RUN_EVENT_ERROR: () => {

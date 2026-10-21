@@ -654,6 +654,18 @@ const pruneEmptySuites = (rootSuite, testFilter: NonNullable<TestFilter>) => {
   return totalUnfilteredTests
 }
 
+// a test also runs the hooks of every enclosing suite; set them on each
+// normalized test so they're recorded even when the command log is hidden
+const addSuiteHooksToTests = (normalizedSuite, inheritedHooks = []) => {
+  const suiteHooks = _.unionBy(normalizedSuite.hooks, inheritedHooks, 'hookId')
+
+  _.each(normalizedSuite.tests, (test) => {
+    test.hooks = _.unionBy(test.hooks, suiteHooks, 'hookId')
+  })
+
+  _.each(normalizedSuite.suites, (childSuite) => addSuiteHooksToTests(childSuite, suiteHooks))
+}
+
 const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber, getIsStudioCreatedTest) => {
   let totalUnfilteredTests = 0
 
@@ -681,6 +693,8 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   const tests: Record<string, any> = {}
 
   const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber, getIsStudioCreatedTest)
+
+  addSuiteHooksToTests(normalizedSuite)
 
   if (setTestsById) {
     // use callback here to hand back

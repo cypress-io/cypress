@@ -100,50 +100,59 @@ export class FilterTaggedContent extends Transform {
   /**
    * Processes a single line and routes content based on tag positions.
    *
-   * This method handles the complex logic of detecting start and end tags within a line,
-   * maintaining state across lines, and routing content to the appropriate streams.
-   * It supports cases where both tags appear on the same line, only one tag appears,
-   * or no tags appear but the line is part of ongoing tagged content.
+   * Tags are consumed left to right, so a line may contain any number of tagged
+   * regions in any order, e.g. `<end><start>text\n` when consecutive tagged writes
+   * are read as a single chunk. Tagged state carries across lines.
    *
    * @param line The line to process
    */
   private async processLine (line: string): Promise<void> {
-    const startPos = line.indexOf(this.startTag)
-    const endPos = line.lastIndexOf(this.endTag)
+    let rest = line
 
-    if (startPos >= 0 && endPos >= 0) {
-      // Both tags on same line
+    do {
+      const endPos = rest.indexOf(this.endTag)
+
+      if (this.inTaggedContent) {
+        if (endPos < 0) {
+          await this.writeToWasteStream(rest)
+
+          return
+        }
+
+        if (endPos > 0) {
+          await this.writeToWasteStream(rest.slice(0, endPos))
+        }
+
+        this.inTaggedContent = false
+        rest = rest.slice(endPos + this.endTag.length)
+        continue
+      }
+
+      const startPos = rest.indexOf(this.startTag)
+
+      // An end tag without a preceding start tag closes content whose start was not seen
+      if (endPos >= 0 && (startPos < 0 || endPos < startPos)) {
+        if (endPos > 0) {
+          await this.writeToWasteStream(rest.slice(0, endPos))
+        }
+
+        rest = rest.slice(endPos + this.endTag.length)
+        continue
+      }
+
+      if (startPos < 0) {
+        await this.pass(rest)
+
+        return
+      }
+
       if (startPos > 0) {
-        await this.pass(line.slice(0, startPos))
+        await this.pass(rest.slice(0, startPos))
       }
 
-      await this.writeToWasteStream(line.slice(startPos + this.startTag.length, endPos))
-      if (endPos + this.endTag.length < line.length) {
-        await this.pass(line.slice(endPos + this.endTag.length))
-      }
-    } else if (startPos >= 0) {
-      // Start tag found
-      if (startPos > 0) {
-        await this.pass(line.slice(0, startPos))
-      }
-
-      await this.writeToWasteStream(line.slice(startPos + this.startTag.length))
       this.inTaggedContent = true
-    } else if (endPos >= 0) {
-      // End tag found
-      await this.writeToWasteStream(line.slice(0, endPos))
-      if (endPos + this.endTag.length < line.length) {
-        await this.pass(line.slice(endPos + this.endTag.length))
-      }
-
-      this.inTaggedContent = false
-    } else if (this.inTaggedContent) {
-      // Currently in tagged content
-      await this.writeToWasteStream(line)
-    } else {
-      // Not in tagged content
-      await this.pass(line)
-    }
+      rest = rest.slice(startPos + this.startTag.length)
+    } while (rest.length > 0)
   }
 
   private async writeToWasteStream (line: string, encoding?: BufferEncoding | 'buffer') {
