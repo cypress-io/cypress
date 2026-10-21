@@ -349,7 +349,8 @@ export class DataContext {
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
-    // lives on DataActions, which survives the reset
+    // DataActions is created once in the constructor and is not rebuilt here, so
+    // its launch counter has to be reset explicitly or it leaks between tests
     this.actions.project.launchCount = 0
     // @ts-expect-error - we've already cleaned up, this is for testing only
     this.lifecycleManager = new ProjectLifecycleManager(this)
