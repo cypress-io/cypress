@@ -17,6 +17,12 @@ process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
 configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
 process.env['CYPRESS'] = 'true'
 
+// Store the user's value so the config process can restore it for their Node code. This has to run here,
+// because the V8 snapshot can defer loading lib/request (which sets it to '0') until after that process is forked.
+if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
+  process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
+}
+
 // are we in the main node process or the electron process?
 const isRunningElectron = isElectronRunning()
 
