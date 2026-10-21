@@ -13,4 +13,4 @@ mount(...)
 cy.contains(...)
 ```
 
-See component [Message.vue](Message.vue) and [message-spec.js](message-spec.js)
+See component [Message.vue](Message.vue) and [message.cy.ts](message.cy.ts)

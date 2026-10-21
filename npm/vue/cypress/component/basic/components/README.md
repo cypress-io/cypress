@@ -1,6 +1,6 @@
 # global components
 
-During mounting, you can register other components, even fake ones. See [spec.cy.js](spec.cy.js)
+During mounting, you can register other components, even fake ones. See [spec.cy.ts](spec.cy.ts)
 
 ```js
 import MessageList from '../MessageList.vue'

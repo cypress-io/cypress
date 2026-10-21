@@ -120,6 +120,10 @@ describe('command log', () => {
         cy.get('#a', options)
       })
 
+      testOptions('getByRole', { timeout: 1131, name: 'button' }, 0, (options) => {
+        cy.getByRole('button', options)
+      })
+
       testOptions('getCookie', { timeout: 1800 }, 0, (options) => {
         cy.getCookie('auth_key', options)
       })

@@ -199,19 +199,6 @@ export class CombinedAgent {
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
     _.merge(req, lenientOptions)
 
-    // If the path property is a fully qualified URL, which is what as Axios appears to set,
-    // parse the URL and set the href, path, and port based on this path
-    if (typeof options.path === 'string' && /^http(s)?:\/\//.test(options.path)) {
-      const pathUrl = new URL(options.path)
-
-      options.href = options.path
-      options.path = pathUrl.pathname
-
-      if (pathUrl.port) {
-        options.port = Number(pathUrl.port)
-      }
-    }
-
     const isHttps = isRequestHttps(options)
 
     // Ensure that HTTPS requests are using 443
@@ -250,7 +237,13 @@ export class CombinedAgent {
   }
 }
 
-const getProxyOrTargetOverrideForUrl = (href: string) => {
+/**
+ * Returns the proxy URL a request to `href` would go through, or an empty string if it
+ * would be dialed directly. Use this instead of `getProxyForUrl` when you need the proxy
+ * itself, since `getProxyForUrl` doesn't know about the `HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS`
+ * override below.
+ */
+export const getProxyOrTargetOverrideForUrl = (href: string): string => {
   // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will
   // force the parent Cypress server to treat the child Cypress server like a proxy without
   // having HTTP_PROXY set and will force traffic ONLY bound to that origin to behave

@@ -20,11 +20,16 @@ import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
 import { GracefulExit, getPeerWaitTimeoutMs } from './util/graceful-exit'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 import { resolveTrustedCertificateFingerprints } from './util/spki'
+import { createMtlsBridge } from './mtls'
+import type { MtlsBridgeLaunchOpts } from './mtls'
+import * as appData from './util/app_data'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject extends EventEmitter {
   private projectBase: ProjectBase | null = null
+  private _mtlsBridge?: MtlsBridgeLaunchOpts
+  private _mtlsBridgeReady?: Promise<MtlsBridgeLaunchOpts | undefined>
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -92,6 +97,38 @@ export class OpenProject extends EventEmitter {
     // re-deriving it from config, so the two can never disagree.
     const useBrowserNetworkInterception = isBrowserNetworkMode(cfg, browser)
 
+    // The browser presents no client certificate of its own — CDP exposes no way to give it
+    // one — so configured origins are steered at a local bridge that performs the handshake
+    // from this process. Nothing starts when no certificate is configured.
+    //
+    // The bridge outlives this launch on purpose. Its ports reach the browser as
+    // `--host-resolver-rules`, which is read once at launch, and a later spec reuses that
+    // browser rather than relaunching it — so rebinding here would leave every spec after
+    // the first steered at a port that no longer exists. One bridge per project keeps the
+    // ports the browser was told about valid for as long as that browser runs.
+    // the in-flight promise is stored, not the resolved value: two overlapping launches
+    // would otherwise both pass the guard and bind a second full set of listeners, and the
+    // loser would be orphaned still bound, with the browser possibly steered at it
+    if (useBrowserNetworkInterception && cfg.clientCertificates?.length && !this._mtlsBridgeReady) {
+      const ready = createMtlsBridge({
+        clientCertificates: cfg.clientCertificates,
+        caFolder: appData.path('proxy'),
+      })
+
+      this._mtlsBridgeReady = ready
+
+      // A rejection must not be cached: a transient bind or CA failure would otherwise be
+      // replayed to every later launch, so the run could never recover without reopening
+      // the project. The await below still surfaces this attempt's failure to the caller.
+      ready.catch(() => {
+        if (this._mtlsBridgeReady === ready) {
+          this._mtlsBridgeReady = undefined
+        }
+      })
+    }
+
+    this._mtlsBridge = await this._mtlsBridgeReady
+
     const options: BrowserLaunchOpts = {
       browser: browser as FoundBrowser & { isHeadless: boolean },
       url,
@@ -117,7 +154,8 @@ export class OpenProject extends EventEmitter {
         // trusted must be handed to the browser as SPKI fingerprints. A bad entry throws a
         // Cypress error naming the offending `trustedCertificates` entry.
         trustedCertificateFingerprints: resolveTrustedCertificateFingerprints(cfg.trustedCertificates ?? [], cfg.projectRoot),
-        ...translateEgressPolicyToLaunchOpts(cfg.hosts),
+        mtlsHostResolverRules: this._mtlsBridge?.hostResolverRules,
+        ...translateEgressPolicyToLaunchOpts(cfg.hosts, this._mtlsBridge?.origins),
         hosts: cfg.hosts,
         shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
@@ -252,6 +290,12 @@ export class OpenProject extends EventEmitter {
     return this.projectBase?.resetBrowserState()
   }
 
+  private async _closeMtlsBridge () {
+    await this._mtlsBridge?.close()
+    this._mtlsBridge = undefined
+    this._mtlsBridgeReady = undefined
+  }
+
   async closeOpenProjectAndBrowsers () {
     // Wait for the HTTP server to release its port before the next open
     // (cy-in-cy reopens on hardcoded 4455; Windows is especially sensitive).
@@ -260,6 +304,8 @@ export class OpenProject extends EventEmitter {
     } catch (e) {
       this._ctx?.logTraceError(e)
     }
+
+    await this._closeMtlsBridge()
 
     this.resetOpenProject()
 
@@ -336,6 +382,8 @@ export class OpenProject extends EventEmitter {
 
   async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
     // ensure switching to a new project in cy-in-cy tests and from the launchpad starts with a clean slate
+    // — including any bridge, whose listeners stand for the previous project's origins
+    await this._closeMtlsBridge()
     this.reset()
     this._ctx = getCtx()
     debug('open_project create %s', path)

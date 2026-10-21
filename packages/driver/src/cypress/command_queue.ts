@@ -476,7 +476,7 @@ export class CommandQueue extends Queue<$Command> {
 
       Cypress.action('cy:command:start', command)
 
-      return Cypress.action<Promise<void>>('cy:command:start:async', command)
+      return Cypress.action('cy:command:start:async', command)
       .then(() => this.runCommand(command)!)
       .then(() => {
         // each successful command invocation should

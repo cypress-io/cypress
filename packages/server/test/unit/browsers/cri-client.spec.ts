@@ -1363,7 +1363,7 @@ describe('lib/browsers/cri-client', () => {
 
       client.removeSessionEnablements('session-1')
 
-      expect(client.queue.enableCommands).toEqual([
+      expect(client.queue.enableCommands).toStrictEqual([
         { command: 'Network.enable', sessionId: 'session-2' },
         { command: 'Target.setDiscoverTargets', params: { discover: true } },
       ])
@@ -1409,12 +1409,9 @@ describe('lib/browsers/cri-client', () => {
       })
 
       client.send('Page.enable')
-      // @ts-ignore
       client.send('Page.foo')
-      // @ts-ignore
       client.send('Page.bar')
       client.send('Network.enable')
-      // @ts-ignore
       client.send('Network.baz')
 
       // clear out previous calls before reconnect

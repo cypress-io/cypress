@@ -667,24 +667,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.boolean('_clearCloudCache', {
-      description: 'Internal use only, clears the cloud cache',
-      resolve: (source, args, ctx) => {
-        ctx.cloud.reset()
-
-        return true
-      },
-    })
-
-    t.json('_showUrqlCache', {
-      description: 'Internal use only, clears the cloud cache',
-      resolve: async (source, args, ctx) => {
-        const { data } = await ctx.cloud.getCache()
-
-        return data
-      },
-    })
-
     t.boolean('setRunAllSpecs', {
       description: 'List of specs to run for the "Run All Specs" Feature',
       args: {
