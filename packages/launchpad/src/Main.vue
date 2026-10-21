@@ -212,7 +212,6 @@ watch(
   },
 )
 
-// OpenBrowser mounts once the welcome is dismissed and owns the `--browser` auto-launch
 function handleClearLandingPage () {
   setMajorVersionWelcomeDismissed(GET_MAJOR_VERSION_FOR_CONTENT())
 }
