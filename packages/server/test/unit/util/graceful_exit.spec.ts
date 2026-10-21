@@ -108,6 +108,42 @@ describe('lib/util/graceful-exit', () => {
     expect(exitStub).toHaveBeenCalledWith(0)
   })
 
+  it('waits for queued stdout and stderr writes to flush before exiting', async () => {
+    const exitStub = stubExit()
+    const flushCallbacks: Array<() => void> = []
+
+    for (const stream of [process.stdout, process.stderr]) {
+      vi.spyOn(stream, 'write').mockImplementation(((_chunk: string, cb: () => void) => {
+        flushCallbacks.push(cb)
+
+        return false
+      }) as never)
+    }
+
+    const exiting = GracefulExit.exitGracefully(0)
+
+    await vi.waitFor(() => expect(flushCallbacks).toHaveLength(2))
+    expect(exitStub, 'exited while output was still queued').not.toHaveBeenCalled()
+
+    flushCallbacks.forEach((cb) => cb())
+    await exiting
+
+    expect(exitStub).toHaveBeenCalledWith(0)
+  })
+
+  it('force exits when stdout never flushes', async () => {
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '50'
+
+    const exitStub = stubExit()
+
+    stubLog()
+    vi.spyOn(process.stdout, 'write').mockImplementation((() => false) as never)
+
+    void GracefulExit.exitGracefully(3)
+
+    await vi.waitFor(() => expect(exitStub).toHaveBeenCalledWith(3))
+  }, 5000)
+
   it('keeps the requested exit code when a step throws', async () => {
     const exitStub = stubExit()
     let healthyStepFinished = false

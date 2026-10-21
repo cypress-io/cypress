@@ -34,6 +34,24 @@ export function getPeerWaitTimeoutMs (): number {
   return Math.max(1, Math.floor(getTeardownTimeoutMs() * PEER_WAIT_BUDGET_FRACTION))
 }
 
+/**
+ * Writes to a pipe (a CI log collector, `| tee`) queue in memory whenever the reader falls behind,
+ * and process.exit drops whatever is still queued, cutting off the end of the run's output. An empty
+ * write calls back only once every write queued before it has been handed to the OS, so awaiting one
+ * per stream means nothing is left to drop.
+ */
+async function flushStdio (): Promise<void> {
+  await Promise.all([process.stdout, process.stderr].map((stream) => {
+    return new Promise<void>((resolve) => {
+      if (!stream.writable) {
+        return resolve()
+      }
+
+      stream.write('', () => resolve())
+    })
+  }))
+}
+
 export interface ExitStep {
   name: string
   fn: (code: number) => Promise<number | void> | void
@@ -221,6 +239,8 @@ export class GracefulExit {
     } catch (error) {
       this.debug('Error flushing steps: ', error)
     } finally {
+      // before clearing the force-exit timer, so a reader that never drains cannot hold the process open
+      await flushStdio()
       this.clearForceExitTimeout()
       this.processTeardown = null
       this.teardownStartedAt = null
