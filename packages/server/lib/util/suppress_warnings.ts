@@ -5,7 +5,7 @@ const debug = Debug('cypress:server:lib:util:suppress_warnings')
 
 let suppressed = false
 
-export const suppress = (): void => {
+export const suppress = ({ showTlsWarning = false }: { showTlsWarning?: boolean } = {}): void => {
   if (suppressed) {
     return
   }
@@ -25,7 +25,7 @@ export const suppress = (): void => {
      * we work on proper SSL verification.
      * https://github.com/cypress-io/cypress/issues/5248
      */
-    if (_.isString(warning) && _.includes(warning, 'NODE_TLS_REJECT_UNAUTHORIZED')) {
+    if (!showTlsWarning && _.isString(warning) && _.includes(warning, 'NODE_TLS_REJECT_UNAUTHORIZED')) {
       // https://github.com/nodejs/node/blob/85e6089c4db4da23dd88358fe0a12edefcd411f2/lib/internal/options.js#L17
 
       return

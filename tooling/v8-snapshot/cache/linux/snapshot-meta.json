@@ -872,6 +872,7 @@
     "./packages/server/lib/plugins/preprocessor.ts",
     "./packages/server/lib/plugins/run_events.ts",
     "./packages/server/lib/reporter.ts",
+    "./packages/server/lib/request.ts",
     "./packages/server/lib/screenshots.ts",
     "./packages/server/lib/util/fs.ts",
     "./packages/server/lib/util/glob.ts",
@@ -3458,6 +3459,7 @@
     "./packages/data-context/src/util/files.ts",
     "./packages/data-context/src/util/hasTypescript.ts",
     "./packages/data-context/src/util/index.ts",
+    "./packages/data-context/src/util/isInsideDir.ts",
     "./packages/data-context/src/util/maskProxyPassword.ts",
     "./packages/data-context/src/util/pluginHandlers.ts",
     "./packages/data-context/src/util/shouldLoadConfigAsEsm.ts",
@@ -3653,7 +3655,6 @@
     "./packages/server/lib/cloud/bundles/bundle_error.ts",
     "./packages/server/lib/cloud/bundles/cache_root.ts",
     "./packages/server/lib/cloud/bundles/ensure_signed_bundle.ts",
-    "./packages/server/lib/cloud/bundles/is_inside_dir.ts",
     "./packages/server/lib/cloud/bundles/parse_hash_from_bundle_url.ts",
     "./packages/server/lib/cloud/bundles/publish_staging_to_final.ts",
     "./packages/server/lib/cloud/bundles/sweep_orphan_staging.ts",
@@ -3728,7 +3729,6 @@
     "./packages/server/lib/plugins/index.ts",
     "./packages/server/lib/privileged-commands/privileged-commands-manager.ts",
     "./packages/server/lib/project_utils.ts",
-    "./packages/server/lib/request.ts",
     "./packages/server/lib/routes.ts",
     "./packages/server/lib/saved_state.ts",
     "./packages/server/lib/server-base.ts",
@@ -3945,5 +3945,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e426ab78bbe2ae2eaabf6869d939272375c2913a57129caf2bce4fad80a6aadf"
+  "deferredHash": "c6059642e2ba813a88eae4aa645d987289543fac7aa50872b56d7c418482cd70"
 }

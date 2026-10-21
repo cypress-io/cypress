@@ -463,18 +463,22 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 `
 
 exports['@cypress/webpack-dev-server / react / throws graceful error when user tries to run not supported versions of webpack'] = `
-Your configFile threw an error from: cypress-webpack.config.ts
+Cypress could not start the webpack dev server for component testing. Fix the error below, then run Cypress again.
 
-We stopped running your tests because your config file crashed.
+Read about configuring the dev server: https://on.cypress.io/dev-server
+
+The component.devServer set in cypress-webpack.config.ts threw this error:
 
 Error: Unexpected major version of webpack. Cypress webpack-dev-server works with webpack versions 5 - saw 4.47.0
       [stack trace lines]
 `
 
 exports['@cypress/webpack-dev-server / react / throws graceful error when user tries to run not supported versions of webpack-dev-server'] = `
-Your configFile threw an error from: cypress-webpack.config.ts
+Cypress could not start the webpack dev server for component testing. Fix the error below, then run Cypress again.
 
-We stopped running your tests because your config file crashed.
+Read about configuring the dev server: https://on.cypress.io/dev-server
+
+The component.devServer set in cypress-webpack.config.ts threw this error:
 
 Error: Unexpected major version of webpack-dev-server. Cypress webpack-dev-server works with webpack-dev-server versions 5 - saw 4.15.2
       [stack trace lines]
