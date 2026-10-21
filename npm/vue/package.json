@@ -2,7 +2,29 @@
   "name": "@cypress/vue",
   "version": "0.0.0-development",
   "description": "Browser-based Component Testing for Vue.js with Cypress.io",
+  "keywords": [
+    "cypress",
+    "vue",
+    "vue3",
+    "component-testing",
+    "vue-testing",
+    "testing",
+    "sfc"
+  ],
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/vue/#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
+  },
+  "license": "MIT",
   "main": "dist/cypress-vue.cjs.js",
+  "module": "dist/cypress-vue.esm-bundler.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "src/**/*.js"
+  ],
   "scripts": {
     "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
@@ -14,23 +36,26 @@
     "tsd": "yarn build && yarn tsc -p test-tsd/tsconfig.json",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix"
+  },
   "devDependencies": {
-    "@packages/eslint-config": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
     "@cypress/vite-plugin-cypress-esm": "0.0.0-development",
     "@intlify/unplugin-vue-i18n": "11.2.5",
-    "eslint": "^9.31.0",
-    "jiti": "^2.4.2",
+    "@packages/eslint-config": "0.0.0-development",
     "@vitejs/plugin-vue": "6.0.6",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.4.6",
     "axios": "^1.20.0",
     "cypress": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "rollup": "^4.60.2",
     "typescript": "~5.4.5",
     "vite": "^8.0.9",
-    "vue-eslint-parser": "^10.0.0",
     "vue": "3.2.47",
+    "vue-eslint-parser": "^10.0.0",
     "vue-i18n": "9.14.5",
     "vue-router": "^4.0.0",
     "vue-tsc": "^2.0.19",
@@ -41,44 +66,13 @@
     "cypress": ">=7.0.0",
     "vue": ">=3.0.0"
   },
-  "files": [
-    "dist/**/*",
-    "src/**/*.js"
-  ],
-  "engines": {
-    "node": "^22.0.0 || ^24.0.0 || >=26.0.0"
-  },
-  "types": "dist/index.d.ts",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/vue/#readme",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
-  "keywords": [
-    "cypress",
-    "vue"
-  ],
-  "contributors": [
-    {
-      "name": "Jessica Sachs",
-      "social": "@JessicaSachs"
-    },
-    {
-      "name": "Amir Rustamzadeh",
-      "social": "@amirrustam"
-    },
-    {
-      "name": "Lachlan Miller",
-      "social": "@Lachlan19900"
-    }
-  ],
-  "module": "dist/cypress-vue.esm-bundler.js",
   "peerDependenciesMeta": {
     "@cypress/webpack-dev-server": {
       "optional": true
     }
+  },
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0 || >=26.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -92,8 +86,5 @@
         ]
       }
     }
-  },
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,vue}": "eslint --fix"
   }
 }
