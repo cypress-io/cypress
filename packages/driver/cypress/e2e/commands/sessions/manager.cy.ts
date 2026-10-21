@@ -348,17 +348,18 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(cypressSpy).to.be.calledOnceWith('clear:cookies', cookies)
     })
 
-    it('sessions.clearCookies() skips clearing when there are no cookies', async () => {
+    // The server also empties its cookie jar on `clear:cookies`, and the jar
+    // can hold cookies the browser no longer reports.
+    it('sessions.clearCookies() still clears when the browser reports no cookies', async () => {
       const cypressSpy = cy.stub(CypressInstance, 'automation').withArgs('clear:cookies').resolves([])
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
-      const sessionsSpy = cy.stub(sessionsManager.sessions, 'getCookies').resolves([])
 
-      const result = await sessionsManager.sessions.clearCookies()
+      cy.stub(sessionsManager.sessions, 'getCookies').resolves([])
 
-      expect(sessionsSpy).to.be.calledOnce
-      expect(cypressSpy).not.to.be.called
-      expect(result).to.deep.eq([])
+      await sessionsManager.sessions.clearCookies()
+
+      expect(cypressSpy).to.be.calledOnceWith('clear:cookies', [])
     })
 
     it('sessions.getCurrentSessionData()', async () => {

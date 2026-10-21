@@ -139,13 +139,7 @@ export default class SessionsManager {
     },
 
     clearCookies: async () => {
-      const cookies = await this.sessions.getCookies()
-
-      if (!cookies.length) {
-        return []
-      }
-
-      return this.Cypress.automation('clear:cookies', cookies)
+      return this.Cypress.automation('clear:cookies', await this.sessions.getCookies())
     },
 
     getCurrentSessionData: async () => {
