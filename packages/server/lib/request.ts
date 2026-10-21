@@ -26,6 +26,7 @@ if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
 }
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+process.env.CYPRESS_INTERNAL_NODE_TLS_SERVER_OVERRIDE = '1'
 
 const convertSameSiteToughToExtension = (sameSite, setCookie) => {
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if

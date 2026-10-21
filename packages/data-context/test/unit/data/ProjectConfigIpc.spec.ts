@@ -275,7 +275,10 @@ describe('ProjectConfigIpc', () => {
       }
 
       it('is not set when the user did not set it', async () => {
-        const env = await getConfigProcessEnv({ NODE_TLS_REJECT_UNAUTHORIZED: '0' })
+        const env = await getConfigProcessEnv({
+          NODE_TLS_REJECT_UNAUTHORIZED: '0',
+          CYPRESS_INTERNAL_NODE_TLS_SERVER_OVERRIDE: '1',
+        })
 
         expect(env.NODE_TLS_REJECT_UNAUTHORIZED).toBeUndefined()
       })
@@ -284,6 +287,21 @@ describe('ProjectConfigIpc', () => {
         const env = await getConfigProcessEnv({ NODE_TLS_REJECT_UNAUTHORIZED: '0', CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED: '1' })
 
         expect(env.NODE_TLS_REJECT_UNAUTHORIZED).toEqual('1')
+      })
+
+      it('uses NODE_TLS_REJECT_UNAUTHORIZED before request.ts records the original', async () => {
+        const env = await getConfigProcessEnv({ NODE_TLS_REJECT_UNAUTHORIZED: '1' })
+
+        expect(env.NODE_TLS_REJECT_UNAUTHORIZED).toEqual('1')
+      })
+
+      it('does not pass the server override when the user did not set NODE_TLS_REJECT_UNAUTHORIZED', async () => {
+        const env = await getConfigProcessEnv({
+          NODE_TLS_REJECT_UNAUTHORIZED: '0',
+          CYPRESS_INTERNAL_NODE_TLS_SERVER_OVERRIDE: '1',
+        })
+
+        expect(env.NODE_TLS_REJECT_UNAUTHORIZED).toBeUndefined()
       })
     })
   })
