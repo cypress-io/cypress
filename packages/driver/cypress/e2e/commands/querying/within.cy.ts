@@ -184,6 +184,29 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34994
+    describe('contains() retries while the withinSubject is missing from the dom', () => {
+      beforeEach(() => {
+        cy.on('command:retry', _.once(() => {
+          cy.$$('body').append('<div id="wrapper"><div id="upper">Newer York</div></div>')
+        }))
+      })
+
+      it('with a selector', () => {
+        cy.get('#wrapper').within(() => {
+          cy.then(() => cy.$$('#wrapper').remove())
+          cy.contains('#upper', 'Newer York')
+        })
+      })
+
+      it('without a selector', () => {
+        cy.get('#wrapper').within(() => {
+          cy.then(() => cy.$$('#wrapper').remove())
+          cy.contains('Newer York')
+        })
+      })
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         this.logs = []
