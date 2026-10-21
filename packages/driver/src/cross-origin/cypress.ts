@@ -238,7 +238,7 @@ const attachToWindow = (autWindow: Window) => {
       return Cypress.action('app:window:alert', str)
     },
     onConfirm (str) {
-      const results = Cypress.action('app:window:confirm', str) as any[]
+      const results = Cypress.action('app:window:confirm', str)
 
       // return false if ANY results are false
       const ret = !results.some((result) => result === false)

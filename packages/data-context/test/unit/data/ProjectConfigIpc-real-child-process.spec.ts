@@ -12,10 +12,14 @@ jest.mock('debug', () => {
     // @ts-expect-error - mock
     const originalDebug = originalDebugModule(namespace)
 
+    // other namespaces get the real debugger, since dependencies such as
+    // simple-git call instance methods like `extend` when they're imported
+    if (namespace !== 'cypress:lifecycle:ProjectConfigIpc') {
+      return originalDebug
+    }
+
     return ((message) => {
-      if (namespace === 'cypress:lifecycle:ProjectConfigIpc') {
-        globalThis.debugMessages.push(message)
-      }
+      globalThis.debugMessages.push(message)
 
       originalDebug(message)
     })

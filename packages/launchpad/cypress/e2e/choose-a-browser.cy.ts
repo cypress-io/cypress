@@ -43,7 +43,7 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Edge v9', checked: true })
+      cy.getByRole('radio', { name: 'Edge v9', native: false }).filter('[aria-checked="true"]')
 
       cy.percySnapshot()
 
@@ -127,14 +127,14 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1' })
+      cy.getByRole('radio', { name: 'Chrome v1', native: false })
 
-      cy.findByRole('radio', { name: 'Firefox v6' })
+      cy.getByRole('radio', { name: 'Firefox v6', native: false })
 
       // Electron's accessible name includes its deprecated ribbon text.
-      cy.findByRole('radio', { name: /Electron v13/ })
+      cy.getByRole('radio', { name: /Electron v13/, native: false })
 
-      cy.findByRole('radio', { name: 'Edge v9' })
+      cy.getByRole('radio', { name: 'Edge v9', native: false })
 
       // Electron is deprecated: it sorts after the other supported browsers and
       // renders a deprecated ribbon with an informational tooltip.
@@ -208,8 +208,8 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
-      cy.findByRole('radio', { name: 'Firefox v6', checked: false }).as('firefoxItem')
+      cy.getByRole('radio', { name: 'Chrome v1', native: false }).filter('[aria-checked="true"]').as('chromeItem')
+      cy.getByRole('radio', { name: 'Firefox v6', native: false }).filter('[aria-checked="false"]').as('firefoxItem')
 
       cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
 
@@ -219,8 +219,8 @@ describe('Choose a browser page', () => {
         cy.wait('@setBrowser').its('request.body.variables.id').should('eq', $label.attr('for'))
       })
 
-      cy.findByRole('radio', { name: 'Chrome v1', checked: false })
-      cy.findByRole('radio', { name: 'Firefox v6', checked: true })
+      cy.getByRole('radio', { name: 'Chrome v1', native: false }).filter('[aria-checked="false"]')
+      cy.getByRole('radio', { name: 'Firefox v6', native: false }).filter('[aria-checked="true"]')
 
       cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
     })
@@ -323,7 +323,7 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
+      cy.getByRole('radio', { name: 'Chrome v1', native: false }).filter('[aria-checked="true"]').as('chromeItem')
 
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.project, 'launchProject')
@@ -345,7 +345,7 @@ describe('Choose a browser page', () => {
       })
 
       cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
-      cy.findByRole('radio', { name: 'Firefox v6', checked: true }).should('be.visible')
+      cy.getByRole('radio', { name: 'Firefox v6', native: false }).filter('[aria-checked="true"]').should('be.visible')
     })
 
     it('should return to welcome screen if user modifies the config file to not include the current testing type and recover', () => {
@@ -393,7 +393,7 @@ describe('Choose a browser page', () => {
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
-      cy.findByRole('radio', { name: /Electron v13/, checked: true })
+      cy.getByRole('radio', { name: /Electron v13/, native: false }).filter('[aria-checked="true"]')
 
       // Even as the lone, preselected browser, Electron is marked deprecated.
       cy.get('[data-cy-browser="electron"]').within(() => {

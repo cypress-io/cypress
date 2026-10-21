@@ -24,9 +24,11 @@ const stubbedSimpleGit: {
 jest.mock('simple-git', () => {
   // use a module factory to return the stubbed SimpleGit instance
   // @see https://jestjs.io/docs/es6-class-mocks#calling-jestmock-with-the-module-factory-parameter
-  return jest.fn().mockImplementation(() => {
-    return stubbedSimpleGit
-  })
+  return {
+    simpleGit: jest.fn().mockImplementation(() => {
+      return stubbedSimpleGit
+    }),
+  }
 })
 
 type P<F extends keyof SimpleGit> = Parameters<SimpleGit[F]>

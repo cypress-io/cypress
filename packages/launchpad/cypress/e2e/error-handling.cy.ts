@@ -18,7 +18,7 @@ describe('Error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com', supportFile: false } }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
     .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
@@ -54,7 +54,7 @@ describe('Error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
     .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)

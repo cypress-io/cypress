@@ -48,7 +48,7 @@ export interface ProjectApiShape {
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
-    updateSpecs(specs: SpecWithRelativeRoot[]): void
+    updateSpecs(specs: SpecWithRelativeRoot[], options?: { neededForJustInTimeCompile?: boolean }): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
     close(): void
     emitter: EventEmitter

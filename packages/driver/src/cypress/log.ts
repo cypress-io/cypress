@@ -499,7 +499,7 @@ export class Log {
     }
   }
 
-  get (attr) {
+  get (attr?: string) {
     if (attr) {
       return this.attributes[attr]
     }

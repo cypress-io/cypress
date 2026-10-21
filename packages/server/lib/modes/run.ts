@@ -313,6 +313,9 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
 
             ffmpegController.writeVideoFrame(data)
           },
+          get startedVideoCapture () {
+            return ffmpegController.startedVideoCapture
+          },
           async restart () {
             await videoRecording.api.useFfmpegVideoController(_ffmpegOpts)
           },
@@ -503,7 +506,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
   }
 
   // TODO: remove the need to extend options and avoid the type error
-  // @ts-expect-error
+  // @ts-expect-error - setScreenshotMetadata is not declared on the run options type
   options.setScreenshotMetadata = (data) => {
     return currentSetScreenshotMetadata(data)
   }

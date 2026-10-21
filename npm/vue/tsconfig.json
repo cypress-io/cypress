@@ -49,6 +49,5 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "esModuleInterop": true,
   },
-  "include": ["src", "cypress/component/**/*.{ts,tsx}", "cypress/component/**/*.vue"],
-  "exclude": ["**/Translated*.vue"]
+  "include": ["src"]
 }

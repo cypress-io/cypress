@@ -4,7 +4,7 @@ import { getCwd } from '../cwd'
 import Debug from 'debug'
 import { escapeFilenameInUrl } from '../util/escape_filename'
 import { getCtx } from '@packages/data-context'
-import { DocumentDomainInjection } from '@packages/network-tools'
+import { DocumentDomainInjection, serializeForInlineScript } from '@packages/network-tools'
 import { privilegedCommandsManager } from '../privileged-commands/privileged-commands-manager'
 import type { Cfg } from '../project-base'
 import type { RemoteStates } from '@packages/network-tools'
@@ -49,7 +49,7 @@ const files = {
     const iframeOptions = {
       superDomain,
       title: this.getTitle(test),
-      scripts: JSON.stringify(allFilesToSend),
+      scripts: serializeForInlineScript(allFilesToSend),
       privilegedChannel,
     }
 

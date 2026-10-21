@@ -1,3 +1,5 @@
+# [@[secure]/react-v10.0.1](https://github.com/[secure]-io/[secure]/compare/@[secure]/react-v10.0.0...@[secure]/react-v10.0.1) (2026-09-28)
+
 # [@[secure]/react-v10.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/react-v9.0.2...@[secure]/react-v10.0.0) (2026-08-26)
 
 

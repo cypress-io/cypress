@@ -48,7 +48,7 @@
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer,react,vue,svelte} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer,react,vue,svelte,angular} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
@@ -58,7 +58,7 @@
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope=cypress --scope=@packages/{agent-info,config,data-context,driver,electron,errors,extension,https-proxy,icons,launcher,net-stubbing,network-interception,network,packherd-require,proxy,scaffold-config,socket,v8-snapshot-require,telemetry,stderr-filtering,types} --scope=@tooling/{electron-mksnapshot,v8-snapshot}",
+    "test": "yarn lerna exec yarn test --scope=cypress --scope=@packages/{agent-info,config,data-context,driver,electron,errors,example,extension,https-proxy,icons,launcher,net-stubbing,network-interception,network,packherd-require,proxy,scaffold-config,socket,v8-snapshot-require,telemetry,stderr-filtering,types} --scope=@tooling/{electron-mksnapshot,v8-snapshot}",
     "test-debug": "lerna exec yarn test-debug --ignore=@packages/{driver,root,static,web-config}",
     "test-integration": "lerna exec yarn test-integration --ignore=@packages/{driver,root,static,web-config}",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
@@ -121,7 +121,6 @@
     "@types/underscore.string": "0.0.42",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
-    "@urql/introspection": "^0.3.3",
     "@vitest/coverage-v8": "^3.2.4",
     "autobarrel": "^1.1.0",
     "bluebird": "3.5.3",
@@ -210,7 +209,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
+    "url": "git+https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://cypress.io",
   "bugs": {
@@ -256,7 +255,8 @@
     "npm/vue/**/*.{js,jsx,ts,tsx,vue}": "yarn workspace @cypress/vue eslint --fix",
     "npm/svelte/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/svelte eslint --fix",
     "npm/react/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/react eslint --fix",
-    "npm/!(vue|svelte|react)/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "npm/angular/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/angular eslint --fix",
+    "npm/!(vue|svelte|react|angular)/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
     "cli/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
     "packages/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
     "scripts/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
