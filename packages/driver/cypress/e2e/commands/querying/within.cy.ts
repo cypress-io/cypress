@@ -322,6 +322,21 @@ describe('src/cy/commands/querying/within', () => {
         cy.noop().within(() => {})
       })
 
+      // https://github.com/cypress-io/cypress/issues/34994
+      it('contains() times out with a content error when the withinSubject never returns to the dom', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.name).to.eq('AssertionError')
+          expect(err.message).to.include('Expected to find content: \'New York\' within the selector: \'#upper\' but never did.')
+
+          done()
+        })
+
+        cy.get('#wrapper').within(() => {
+          cy.then(() => cy.$$('#wrapper').remove())
+          cy.contains('#upper', 'New York')
+        })
+      })
+
       it('throws when not a DOM subject', (done) => {
         cy.on('fail', (err) => {
           done()
