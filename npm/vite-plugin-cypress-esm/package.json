@@ -33,7 +33,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
+    "url": "git+https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/vite-plugin-cypress-esm#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm",
