@@ -1936,6 +1936,43 @@ space
       it('finds elements with cy.get()', () => {
         cy.get('h1').should('have.text', 'xhtml')
       })
+
+      it('injects into the page after a reload', () => {
+        cy.reload()
+        cy.get('h1').should('have.text', 'xhtml')
+        cy.get('head > script').should('exist')
+      })
+
+      it('injects into the page after navigating to it', () => {
+        cy.visit('/fixtures/generic.html')
+        cy.window().then((win) => {
+          win.location.href = 'http://localhost:3500/xhtml'
+        })
+
+        cy.get('h1').should('have.text', 'xhtml')
+        cy.get('head > script').should('exist')
+      })
+
+      it('finds elements when the content type is not lowercase', () => {
+        cy.intercept('/xhtml-uppercase', {
+          headers: { 'content-type': 'Application/XHTML+XML; charset=utf-8' },
+          body: '<html xmlns="http://www.w3.org/1999/xhtml"><body><h1>uppercase</h1></body></html>',
+        })
+
+        cy.visit('http://localhost:3500/xhtml-uppercase')
+        cy.get('h1').should('have.text', 'uppercase')
+      })
+
+      it('finds elements when the page has a self-closing bootstrap script tag', () => {
+        cy.intercept('/xhtml-bootstrap', {
+          headers: { 'content-type': 'application/xhtml+xml' },
+          body: '<html xmlns="http://www.w3.org/1999/xhtml"><head><script data-cy-bootstrap="" /></head><body><h1>bootstrap</h1><script>window.loaded = true</script></body></html>',
+        })
+
+        cy.visit('http://localhost:3500/xhtml-bootstrap')
+        cy.get('h1').should('have.text', 'bootstrap')
+        cy.window().should('have.property', 'loaded', true)
+      })
     })
 
     describe('errors', {

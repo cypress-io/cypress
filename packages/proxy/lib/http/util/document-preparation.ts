@@ -43,6 +43,10 @@ export function resContentTypeIs (res: IncomingMessage, contentType: string) {
   return (res.headers['content-type'] || '').includes(contentType)
 }
 
+export function resContentTypeIsXhtml (res: IncomingMessage) {
+  return /application\/xhtml\+xml/i.test(res.headers['content-type'] || '')
+}
+
 export function resContentTypeIsJavaScript (res: IncomingMessage) {
   return contentTypeIsJavaScript(res.headers['content-type'])
 }

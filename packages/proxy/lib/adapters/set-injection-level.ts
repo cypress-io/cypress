@@ -11,6 +11,7 @@ import {
   reqWillRenderHtml,
   resContentTypeIs,
   resContentTypeIsJavaScript,
+  resContentTypeIsXhtml,
 } from '../http/util/document-preparation'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
@@ -22,7 +23,7 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
 
   mw.res.isInitial = mw.req.cookies['__cypress.initial'] === 'true'
 
-  const isHTML = resContentTypeIs(mw.incomingRes, 'text/html')
+  const isHTML = resContentTypeIs(mw.incomingRes, 'text/html') || resContentTypeIsXhtml(mw.incomingRes)
   const isRenderedHTML = reqWillRenderHtml(mw.req, mw.incomingRes)
 
   if (isRenderedHTML) {

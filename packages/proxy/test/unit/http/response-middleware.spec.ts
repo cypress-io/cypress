@@ -710,6 +710,54 @@ describe('http/response-middleware', function () {
       expect(ctx.res.wantsInjection).toEqual('full')
     })
 
+    it('performs full injection on initial AUT xhtml origin', async function () {
+      prepareContext({
+        req: {
+          isAUTFrame: true,
+          cookies: {
+            '__cypress.initial': 'true',
+          },
+          headers: {},
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'Application/XHTML+XML; charset=utf-8',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+      expect(ctx.res.wantsInjection).toEqual('full')
+    })
+
+    it('performs partial injection on a non-initial AUT xhtml response', async function () {
+      prepareContext({
+        renderedHTMLOrigins: {},
+        getRenderedHTMLOrigins () {
+          return this.renderedHTMLOrigins
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/',
+          isAUTFrame: true,
+          cookies: {},
+          headers: {
+            'accept': [
+              'text/html',
+              'application/xhtml+xml',
+            ],
+          },
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'application/xhtml+xml',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+      expect(ctx.res.wantsInjection).toEqual('partial')
+    })
+
     it('otherwise, partial injection is set', async function () {
       prepareContext({
         renderedHTMLOrigins: {},

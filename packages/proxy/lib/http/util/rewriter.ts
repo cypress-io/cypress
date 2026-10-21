@@ -25,6 +25,7 @@ const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
 const htmlRe = /<html.*?>/i
 const bootstrapScriptRe = /(<script[^>]*\bdata-cy-bootstrap\b[^>]*>)([\s\S]*?)(<\/script>)/i
+const selfClosingBootstrapScriptRe = /(<script[^>]*?\bdata-cy-bootstrap\b[^>]*?)\s*\/>/i
 
 function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
   const {
@@ -97,6 +98,12 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
 
   if (!htmlToInject) {
     return html
+  }
+
+  // In XHTML a self-closing `<script data-cy-bootstrap="" />` is a complete element, but
+  // bootstrapScriptRe reads up to the next `</script>` the way an HTML parser would.
+  if (opts.isXhtml) {
+    html = html.replace(selfClosingBootstrapScriptRe, '$1></script>')
   }
 
   const bootstrapMatch = html.match(bootstrapScriptRe)

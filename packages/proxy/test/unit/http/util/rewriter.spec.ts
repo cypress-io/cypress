@@ -99,6 +99,23 @@ describe('http/util/rewriter', () => {
         expect(body.replace(cdataRe, '$1').trim()).toEqual(runnerInjectionContents)
       })
 
+      it('injects into a self-closing developer-provided script tag without consuming the rest of the document', async () => {
+        const html = '<html xmlns="http://www.w3.org/1999/xhtml"><head><script data-cy-bootstrap="" /><link rel="icon" href="a.png" /></head><body><h1>boot</h1><script src="app.js"></script></body></html>'
+
+        const result = await rewriter.html(html, opts)
+
+        expect(result).toMatch(/^<html xmlns="http:\/\/www.w3.org\/1999\/xhtml"><head><script data-cy-bootstrap=""><!\[CDATA\[/)
+        expect(result).toContain(']]></script><link rel="icon" href="a.png" /></head><body><h1>boot</h1><script src="app.js"></script></body></html>')
+      })
+
+      it('adds the nonce to a self-closing developer-provided script tag', async () => {
+        const html = '<html xmlns="http://www.w3.org/1999/xhtml"><head><script data-cy-bootstrap=""/></head><body></body></html>'
+
+        const result = await rewriter.html(html, { ...opts, cspNonce: 'test-nonce' })
+
+        expect(result).toContain('<script data-cy-bootstrap="" nonce="test-nonce"><![CDATA[')
+      })
+
       it('does not wrap the script in an HTML document', async () => {
         const html = '<html><head></head><body></body></html>'
 
