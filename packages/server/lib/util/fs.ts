@@ -79,24 +79,23 @@ const ensureSafePath = async function (withoutExt: string, extension: string | n
 
   const fullPath = [withoutExt, suffix].join('')
 
-  return fs.pathExists(fullPath)
-  .then((found) => {
-    if (found && !overwrite) {
+  // creating the file reserves the name and surfaces ENAMETOOLONG. without overwrite, the
+  // exclusive 'wx' create makes the claim atomic, so concurrent `cypress run` processes
+  // sharing a folder can never both take the same name
+  return fs.outputFileAsync(fullPath, '', overwrite ? {} : { flag: 'wx' })
+  .then(() => fullPath)
+  .catch((err) => {
+    if (err.code === 'EEXIST' && !overwrite) {
       return ensureSafePath(withoutExt, extension, overwrite, num + 1)
     }
 
-    // path does not exist, attempt to create it to check for an ENAMETOOLONG error
-    return fs.outputFileAsync(fullPath, '')
-    .then(() => fullPath)
-    .catch((err) => {
-      if (err.code === 'ENAMETOOLONG' && maxSafePrefixBytes >= MIN_PREFIX_BYTES) {
-        maxSafeBytes -= 1
+    if (err.code === 'ENAMETOOLONG' && maxSafePrefixBytes >= MIN_PREFIX_BYTES) {
+      maxSafeBytes -= 1
 
-        return ensureSafePath(withoutExt, extension, overwrite, num)
-      }
+      return ensureSafePath(withoutExt, extension, overwrite, num)
+    }
 
-      throw err
-    })
+    throw err
   })
 }
 

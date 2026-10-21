@@ -3,9 +3,6 @@ import type { FoundBrowser } from '@packages/types'
 describe('Choose a browser page', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
-    cy.withCtx((ctx, _) => {
-      ctx.actions.project.launchCount = 0
-    })
   })
 
   describe('System Browsers Detected', () => {
