@@ -139,6 +139,8 @@ export default class SessionsManager {
     },
 
     clearCookies: async () => {
+      // Sent even when the browser reports no cookies: the server also empties
+      // its cookie jar here, and the jar can hold cookies the browser no longer has.
       return this.Cypress.automation('clear:cookies', await this.sessions.getCookies())
     },
 
