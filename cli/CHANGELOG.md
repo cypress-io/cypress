@@ -58,6 +58,7 @@
 - The TypeScript types for [`Cypress.dom.stringify()`](https://on.cypress.io/dom) now accept the window and the document, and make the second argument optional and limited to `'long'` or `'short'`. Addressed in [#35157](https://github.com/cypress-io/cypress/pull/35157).
 - Removed the `Cypress.dom.isType()` TypeScript declaration, which had no implementation. Addressed in [#35156](https://github.com/cypress-io/cypress/pull/35156).
 - Corrected the TypeScript types of `Cypress.dom.getCoordsByPosition()`, `getFirstDeepestElement()`, and `getElements()` to match what they accept and return. For example, `getCoordsByPosition()` returns an object with `x` and `y` rather than a number. Addressed in [#35159](https://github.com/cypress-io/cypress/pull/35159).
+- The error shown when Cypress cannot start on Linux because of a missing system library now lists each library and the package that provides it, and a missing or failing Xvfb now shows install commands or the likely causes. Addressed in [#35116](https://github.com/cypress-io/cypress/pull/35116).
 
 **Dependency Updates:**
 
