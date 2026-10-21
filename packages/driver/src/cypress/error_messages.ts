@@ -2288,12 +2288,23 @@ export default {
         docsUrl: 'https://on.cypress.io/visit',
       }
     },
-    status_code_flags_invalid: stripIndent`\
-      These options are incompatible with each other.
+    status_code_flags_invalid ({ failOnStatusCode, retryOnStatusCodeFailure }) {
+      return {
+        message: stripIndent`\
+          ${cmd('visit')} was called with options that cannot be used together:
 
-       - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-       - To not fail on non-2xx status codes, pass { failOnStatusCode: false, retryOnStatusCodeFailure: false }.
-       - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }.`,
+            { failOnStatusCode: ${$utils.stringifyActual(failOnStatusCode)}, retryOnStatusCodeFailure: ${$utils.stringifyActual(retryOnStatusCodeFailure)} }
+
+          \`retryOnStatusCodeFailure\` retries a page that responds with a status code other than \`2xx\` or \`3xx\`, and fails if the last retry gets one too. It requires \`failOnStatusCode: true\`.
+
+          Pass one of these combinations instead:
+
+            1. To retry on these status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
+            2. To fail on these status codes without retrying, which is the default, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\`.
+            3. To not fail on these status codes, pass \`{ failOnStatusCode: false, retryOnStatusCodeFailure: false }\`.`,
+        docsUrl: 'https://on.cypress.io/visit',
+      }
+    },
     invalid_1st_arg: {
       message: `${cmd('visit')} must be called with a \`url\` or an \`options\` object containing a \`url\` as its 1st argument`,
       docsUrl: 'https://on.cypress.io/visit',

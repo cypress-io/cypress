@@ -171,11 +171,19 @@ describe('src/cy/commands/navigation', () => {
       it('throws when failOnStatusCode is false and retryOnStatusCodeFailure is true', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq(stripIndent`\
-            These options are incompatible with each other.
+            \`cy.visit()\` was called with options that cannot be used together:
 
-             - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-             - To not fail on non-2xx status codes, pass { failOnStatusCode: false, retryOnStatusCodeFailure: false }.
-             - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }.`)
+              { failOnStatusCode: false, retryOnStatusCodeFailure: true }
+
+            \`retryOnStatusCodeFailure\` retries a page that responds with a status code other than \`2xx\` or \`3xx\`, and fails if the last retry gets one too. It requires \`failOnStatusCode: true\`.
+
+            Pass one of these combinations instead:
+
+              1. To retry on these status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
+              2. To fail on these status codes without retrying, which is the default, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\`.
+              3. To not fail on these status codes, pass \`{ failOnStatusCode: false, retryOnStatusCodeFailure: false }\`.`)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/visit')
 
           done()
         })
@@ -184,6 +192,21 @@ describe('src/cy/commands/navigation', () => {
           url: 'http://foobarbaz',
           failOnStatusCode: false,
           retryOnStatusCodeFailure: true,
+        })
+      })
+
+      it('shows the values passed for failOnStatusCode and retryOnStatusCodeFailure', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('{ failOnStatusCode: 0, retryOnStatusCodeFailure: 1 }')
+
+          done()
+        })
+
+        // @ts-expect-error - checking that non-boolean values are echoed back as passed
+        cy.visit({
+          url: 'http://foobarbaz',
+          failOnStatusCode: 0,
+          retryOnStatusCodeFailure: 1,
         })
       })
 
