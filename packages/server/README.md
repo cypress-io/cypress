@@ -58,7 +58,7 @@ yarn test-unit routes ## filters spec files by substring
 
 ```bash
 yarn test <path/to/test>
-yarn test test/integration/cli_spec.js
+yarn test test/integration/cli_spec.ts
 ## or
 yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 ```
@@ -72,7 +72,7 @@ yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 For integration tests, prepend `SNAPSHOT_UPDATE=1` to the test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info. For unit tests, pass vitest's `-u` flag.
 
 ```bash
-SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
+SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.ts
 yarn test-unit test/unit/reporter.spec.ts -u
 ```
 
