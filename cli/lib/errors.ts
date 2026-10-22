@@ -127,7 +127,7 @@ const missingXvfb = {
   solution: stripIndent`
     Install Xvfb and run Cypress again. On Debian and Ubuntu:
 
-    apt-get install -y xvfb
+    ${chalk.cyan('apt-get install -y xvfb')}
 
     Or run Cypress on a display that already exists by setting the DISPLAY environment variable.
 
