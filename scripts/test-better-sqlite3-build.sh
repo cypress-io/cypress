@@ -39,7 +39,7 @@ echo "Copying better-sqlite3 into container ..."
 docker cp "$CYPRESS_ROOT/node_modules/better-sqlite3" "$CONTAINER_NAME:/better-sqlite3"
 
 echo "Building better_sqlite3.node ..."
-docker exec "$CONTAINER_NAME" /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 43.8.3 --include-regex 'better_sqlite3.node$'"
+docker exec "$CONTAINER_NAME" /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install node-gyp rebuild --force_build=1"
 
 BUILT_NODE_PATH='/better-sqlite3/build/Release/better_sqlite3.node'
 
