@@ -194,6 +194,8 @@ async function makeE2ETasks () {
      */
     __internal__afterEach () {
       delete process.env.CYPRESS_IN_CYPRESS_MOCK_FULL_SNAPSHOT
+      // A test that turned agent mode on does not leave it on for the next one
+      process.env.CYPRESS_AGENT_MODE = '0'
       nock.cleanAll()
 
       return null

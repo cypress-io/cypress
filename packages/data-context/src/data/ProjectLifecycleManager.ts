@@ -25,6 +25,7 @@ import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { isAgentMode } from '@packages/agent-info'
+import { logError } from '@packages/stderr-filtering'
 import { telemetry } from '@packages/telemetry'
 
 const POTENTIAL_CONFIG_FILES = [
@@ -841,10 +842,49 @@ export class ProjectLifecycleManager {
     if (testingType === 'e2e') {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
+      await this.completeE2ESetupForAgent()
     } else if (testingType === 'component') {
       await this.ctx.actions.wizard.detectFrameworks()
       await this.ctx.actions.wizard.initialize()
     }
+  }
+
+  /**
+   * The Launchpad's Continue button is what loads the new config after the e2e scaffold, so
+   * without it the project never starts. An agent has no one to press it, so it continues
+   * on its own, unless a file needs a person to merge changes into it.
+   */
+  private async completeE2ESetupForAgent () {
+    const { project, testingType } = this.ctx.modeOptions
+    const scaffolded = this.ctx.coreData.scaffoldedFiles
+
+    if (!this.ctx.isOpenMode || !isAgentMode() || !project || testingType !== 'e2e' || !scaffolded) {
+      return
+    }
+
+    const relativePaths = (statuses: string[]) => {
+      return scaffolded
+      .filter((scaffoldedFile) => statuses.includes(scaffoldedFile.status))
+      .map((scaffoldedFile) => path.relative(this.projectRoot, scaffoldedFile.file.absolute))
+    }
+
+    const needsAPerson = relativePaths(['changes', 'error'])
+
+    if (needsAPerson.length) {
+      logError(`Cypress could not finish setting up e2e testing for this project on its own, because these files need changes made by hand: ${needsAPerson.join(', ')}. Make the changes, then start Cypress again.`)
+
+      return
+    }
+
+    const created = relativePaths(['valid'])
+
+    if (created.length) {
+      logError(`Cypress set up e2e testing for this project by creating or updating: ${created.join(', ')}. Review these files and commit them.`)
+    }
+
+    // A config that fails to load after the scaffold is reported like any other load error. Nothing
+    // above this awaits the result, so a rejection would be unhandled in the main process.
+    await this.ctx.actions.wizard.completeSetup().catch(this.onLoadError)
   }
 
   async initializeRunMode (testingType: TestingType | null) {
