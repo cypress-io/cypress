@@ -2,7 +2,7 @@ import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
 import { STATUS_CODES } from 'http'
 import { Readable } from 'stream'
-import type { ForHttpIntercept } from '@packages/network-interception'
+import type { ForHttpIntercept, HttpRequest } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ResourceType } from '@packages/proxy'
 import type { BodyDigest } from './body-digest'
@@ -96,12 +96,14 @@ type CdpFetchTransportOptions = {
    * When set for a URL, the transport releases the request pause with a
    * page-invisible `Fetch.continueRequest` url override (plus the returned
    * headers) and releases the response pause untouched. No middleware runs
-   * on the CDP side. Used to send strategy:file requests to the Cypress
-   * origin regardless of what origin the page believes it is on — the wire
-   * request lands on our Express server (which runs the pipeline exactly
-   * once) while the page keeps its impersonated URL.
+   * on the CDP side. Used to send strategy:file requests and internal-route
+   * reads to the Cypress origin regardless of what origin the page believes it
+   * is on — the wire request lands on our Express server (which runs the
+   * pipeline exactly once) while the page keeps its impersonated URL. Receives
+   * the request as the middleware onion would see it. If the browser rejects
+   * the override, the pause goes through the normal interception flow.
    */
-  resolveOriginRedirect?: (url: string) => { url: string, headers: Record<string, string> } | undefined
+  resolveOriginRedirect?: (request: HttpRequest) => { url: string, headers: Record<string, string> } | undefined
   /**
    * Called with the HttpIntercept request id when the browser cancels a
    * request that is still paused in the middleware onion, so the pipeline can
@@ -462,26 +464,49 @@ export class CdpFetchTransport {
       return
     }
 
+    // Fetch.requestId is unique per redirect hop and stable across that hop's
+    // request-stage and response-stage pauses — it keys pause pairing only.
+    // networkId (Network.requestWillBeSent id) is optional and shared across
+    // hops; it joins Network-domain state (pre-requests, extraInfo), not the
+    // in-flight Fetch map. Pre-request correlation is handled separately by the
+    // addPendingUrlWithoutPreRequest registration below when networkId is absent.
+    const fetchRequestId = event.requestId
+    const networkRequestId = event.networkId ?? event.requestId
+
+    // The request as the middleware onion sees it, so the resolver can make the
+    // same decisions the middleware would.
+    const request: CdpFetchTransportRequest = {
+      ...event.request,
+      headers: {
+        ...event.request.headers,
+      },
+      id: `${this.requestIdPrefix}${networkRequestId}`,
+      requestId: event.requestId,
+      resourceType: normalizeResourceType(event.resourceType),
+      sessionId,
+    }
+
     let originRedirect: { url: string, headers: Record<string, string> } | undefined
 
     try {
-      originRedirect = this.options.resolveOriginRedirect?.(event.request.url)
+      originRedirect = this.options.resolveOriginRedirect?.(request)
     } catch (err) {
       // A resolver failure must not strand the pause — fall through to the
       // normal interception flow.
       debug('resolveOriginRedirect failed for %s: %s', event.request.url, (err as Error).message)
     }
 
+    // Without networkId there will never be a matching browser pre-request.
+    // Register the URL so CorrelateBrowserPreRequest does not burn ~2s waiting.
+    // A redirected strategy:file request needs it too: the Express-side
+    // pipeline correlates the direct request, keyed on the page URL (Network
+    // events report it, not the override).
+    if (!event.networkId) {
+      this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
+    }
+
     if (originRedirect) {
       debug('redirecting %s to the Cypress origin (%s) — page keeps its URL', event.request.url, originRedirect.url)
-
-      // The Express-side pipeline still runs pre-request correlation for the
-      // direct request, so pauses without networkId (download-manager) must be
-      // pre-registered here just like intercepted ones. Correlation keys on
-      // the page URL — Network events report it, not the override.
-      if (!event.networkId) {
-        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
-      }
 
       this.originRedirectedRequests.add(event.requestId)
 
@@ -496,29 +521,18 @@ export class CdpFetchTransport {
             ...Object.entries(originRedirect.headers).map(([name, value]) => ({ name, value })),
           ],
         }, sessionId)
+
+        return
       } catch (err) {
-        debug('origin-redirect continueRequest failed for %s, releasing untouched: %s', event.request.url, (err as Error).message)
+        // Releasing the pause untouched would send an internal route to the
+        // site under test, which cannot serve it. The normal flow answers it
+        // through the middleware onion instead.
+        debug('origin-redirect continueRequest failed for %s, intercepting instead: %s', event.request.url, (err as Error).message)
 
-        // If CDP rejected the override params, a bare release still frees the
-        // pause. The set entry stays valid: the un-overridden request reaches
-        // the same origin (the override is identity today), and its response
-        // pause must still be released untouched.
-        await this.safeSend('Fetch.continueRequest', {
-          requestId: event.requestId,
-        }, sessionId)
+        this.originRedirectedRequests.delete(event.requestId)
       }
-
-      return
     }
 
-    // Fetch.requestId is unique per redirect hop and stable across that hop's
-    // request-stage and response-stage pauses — it keys pause pairing only.
-    // networkId (Network.requestWillBeSent id) is optional and shared across
-    // hops; it joins Network-domain state (pre-requests, extraInfo), not the
-    // in-flight Fetch map. Pre-request correlation is handled separately by the
-    // addPendingUrlWithoutPreRequest registration below when networkId is absent.
-    const fetchRequestId = event.requestId
-    const networkRequestId = event.networkId ?? event.requestId
     let requestContinued = false
     let response: CdpFetchTransportResponse | undefined
     let responseRequestId: string | undefined
@@ -532,23 +546,6 @@ export class CdpFetchTransport {
         fetchRequestId,
         networkRequestId,
         event.resourceType)
-
-      // Without networkId there will never be a matching browser pre-request.
-      // Register the URL so CorrelateBrowserPreRequest does not burn ~2s waiting.
-      if (!event.networkId) {
-        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
-      }
-
-      const request: CdpFetchTransportRequest = {
-        ...event.request,
-        headers: {
-          ...event.request.headers,
-        },
-        id: `${this.requestIdPrefix}${networkRequestId}`,
-        requestId: event.requestId,
-        resourceType: normalizeResourceType(event.resourceType),
-        sessionId,
-      }
 
       // Mark AUT documents for the intercept/legacy pipeline the same way the
       // MITM path does (header in, stripped before upstream). Never send this
