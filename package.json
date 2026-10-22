@@ -136,7 +136,7 @@
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "del": "3.0.0",
-    "electron": "41.7.0",
+    "electron": "43.8.3",
     "electron-builder": "^25.1.8",
     "eslint": "^8.56.0",
     "eslint-plugin-cypress": "3.6.0",
@@ -202,7 +202,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=24.15.0",
+    "node": ">=24.22.1",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
@@ -281,7 +281,7 @@
     "browserify-sign": "4.2.5",
     "devtools-protocol": "0.0.1687809",
     "eslint-plugin-import": "2.29.1",
-    "node-abi": "4.28.0",
+    "node-abi": "4.39.0",
     "vue-template-compiler": "2.6.12",
     "yargs-unparser": "1.6.4"
   },
