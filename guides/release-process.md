@@ -115,10 +115,10 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
     You can pass `--dry-run` to see the commands this would run under the hood.
 
-7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
+7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in interactively with `npm login`, as the npm service account. The login prompts for a 2FA one-time password, so the service account must have 2FA enabled.
    If you are not already a Cypress package maintainer, contact a team member who is to get you added.
 
-8. Publish the generated npm package under the `dev` tag, using the npm service account.
+8. Publish the generated npm package under the `dev` tag, using the npm service account. Trusted publishing only works from CI, so the `cypress` package is published by hand. This step needs only the interactive 2FA login from the previous step. It does not use the `NPM_TOKEN` in the `org-npm-credentials` CircleCI context, and rotating or revoking that token does not affect it.
 
     ```shell
     npm publish /tmp/cypress-prod.tgz --tag dev
@@ -203,7 +203,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
 
-24. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. If an npm token was created when logging in, please delete this token now.
+24. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. This token is separate from the interactive login used to publish `cypress`. If an npm token was created when logging in, please delete this token now.
 
 Take a break, you deserve it! 👉😎👉
 

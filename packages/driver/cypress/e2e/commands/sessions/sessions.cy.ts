@@ -156,25 +156,43 @@ describe('cy.session', { retries: 0 }, () => {
 
     describe('test:before:run:async', () => {
       it('clears session data before each run', async () => {
-        const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
+        const backendSpy = cy.spy(Cypress, 'backend').log(false)
+        const automationSpy = cy.spy(Cypress, 'automation').log(false)
 
         await Cypress.action('runner:test:before:run:async', {
           id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
-        expect(clearCurrentSessionData).to.be.called
+        expect(backendSpy).to.be.calledWith('get:rendered:html:origins')
+        expect(automationSpy).to.be.calledWith('get:cookies')
       })
 
-      it('resets rendered html origins before each run', async () => {
-        const backendSpy = cy.spy(Cypress, 'backend').log(false)
+      it('resets rendered html origins before each run when origins were rendered', async () => {
+        const backendStub = cy.stub(Cypress, 'backend').log(false).callThrough()
+
+        backendStub.withArgs('get:rendered:html:origins').resolves({ [window.location.origin]: true })
 
         await Cypress.action('runner:test:before:run:async', {
           id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
-        expect(backendSpy).to.be.calledWith('reset:rendered:html:origins')
+        expect(backendStub).to.be.calledWith('reset:rendered:html:origins')
+      })
+
+      it('does not reset rendered html origins before each run when no origins were rendered', async () => {
+        const backendStub = cy.stub(Cypress, 'backend').log(false).callThrough()
+
+        backendStub.withArgs('get:rendered:html:origins').resolves({})
+
+        await Cypress.action('runner:test:before:run:async', {
+          id: 'r1',
+          currentRetry: 0,
+        }, Cypress.state('runnable'))
+
+        expect(backendStub).to.be.calledWith('get:rendered:html:origins')
+        expect(backendStub).not.to.be.calledWith('reset:rendered:html:origins')
       })
 
       it('clears the browser context before each run', () => {
