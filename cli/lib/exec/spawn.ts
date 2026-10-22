@@ -380,14 +380,14 @@ export async function start (args: string | string[], options: StartOptions = {}
     '--userNodeVersion', process.versions.node,
   ])
 
-  const needsXvfb = xvfb.isNeeded()
+  const env = options.env ?? process.env
+  const needsXvfb = xvfb.isNeeded(env)
 
   debug('needs to start own Xvfb?', needsXvfb)
 
   const stdio = options.stdio ?? getStdioStrategy(needsXvfb)
   const dev = options.dev ?? false
   const detached = options.detached ?? false
-  const env = options.env ?? process.env
 
   const spawn = createSpawnFunction(executable, decoratedArgs, { stdio, dev, detached, env })
 

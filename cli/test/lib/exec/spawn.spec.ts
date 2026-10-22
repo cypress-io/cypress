@@ -396,6 +396,31 @@ describe('lib/exec/spawn', function () {
       }))
     })
 
+    it('decides on xvfb from the env the child is spawned with', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      const env = { PATH: '/bin' }
+      const startPromise = start('--foo', { env })
+
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
+
+      expect(xvfb.isNeeded).toHaveBeenCalledWith(env)
+    })
+
+    it('falls back to process.env for the xvfb decision', async () => {
+      const startPromise = start('--foo')
+
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
+
+      expect(xvfb.isNeeded).toHaveBeenCalledWith(process.env)
+    })
+
     it('starts xvfb when needed', async () => {
       vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 

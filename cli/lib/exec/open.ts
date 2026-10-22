@@ -1,9 +1,12 @@
+import os from 'os'
+import _ from 'lodash'
 import Debug from 'debug'
 import util from '../util'
 import { start as spawnStart } from './spawn'
 import { start as verifyStart } from '../tasks/verify'
 import { processTestingType, checkConfigFile } from './shared'
 import { exitWithError } from '../errors'
+import logger from '../logger'
 
 const debug = Debug('cypress:cli')
 
@@ -79,14 +82,33 @@ const processOpenOptions = (options: any = {}): string[] => {
 }
 
 const start = async (options: any = {}): Promise<any> => {
+  // Some agent hosts export ELECTRON_RUN_AS_NODE, which would start the app as
+  // plain Node with no window and no session. The smoke test that verifies the
+  // binary needs the same environment, or it fails the same way.
+  let env: NodeJS.ProcessEnv | undefined
+
+  // Electron treats the variable as set when it exists, even empty. Only Windows names are case-insensitive.
+  const isRunAsNode = (key: string) => (os.platform() === 'win32' ? key.toUpperCase() : key) === 'ELECTRON_RUN_AS_NODE'
+
+  if (!options.dev && Object.keys(process.env).some(isRunAsNode)) {
+    logger.warn('ELECTRON_RUN_AS_NODE is set and was ignored because `cypress open` needs the app window.')
+    env = _.omitBy(process.env, (_value, key) => isRunAsNode(key))
+  }
+
   function open (): any {
     try {
       const args = processOpenOptions(options)
 
-      return spawnStart(args, {
+      const spawnOptions: any = {
         dev: options.dev,
         detached: Boolean(options.detached),
-      })
+      }
+
+      if (env) {
+        spawnOptions.env = env
+      }
+
+      return spawnStart(args, spawnOptions)
     } catch (err: any) {
       if (err.details) {
         return exitWithError(err.details)()
@@ -100,7 +122,7 @@ const start = async (options: any = {}): Promise<any> => {
     return open()
   }
 
-  await verifyStart()
+  await verifyStart({ env })
 
   return open()
 }
