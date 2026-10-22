@@ -24,6 +24,7 @@
 - `cypress open` now prints configuration errors and warnings, including the stack trace of a config file that fails to load, to the terminal. Previously they only appeared in the Cypress window, so a script or AI agent running `cypress open` saw nothing while it waited. Fixed in [#35104](https://github.com/cypress-io/cypress/pull/35104).
 - `cypress open --project <path> --e2e --browser <browser>` run by an AI coding agent now launches the browser without waiting for the welcome screen to be dismissed in the Cypress window. Set `CYPRESS_AGENT_MODE=1` to force this behavior for an agent Cypress does not detect, or `CYPRESS_AGENT_MODE=0` to turn it off. Fixed in [#35105](https://github.com/cypress-io/cypress/pull/35105).
 - `cypress open --e2e --project <path>` run by an AI coding agent in a project with no Cypress configuration file now creates the configuration and support files and starts the project in one launch, and prints the files it created. Previously the project did not start until Continue was pressed in the Cypress window. Fixed in [#35106](https://github.com/cypress-io/cypress/pull/35106).
+- `cypress tap status` now reports an `error` stage, with the reason, when `cypress open` could not load the project, for example because the configuration file has a syntax error, and the other `cypress tap` commands say that the project could not load instead of that no session is running. Previously `cypress tap status` reported `not connected`. Fixed in [#35107](https://github.com/cypress-io/cypress/pull/35107).
 
 **Misc:**
 
