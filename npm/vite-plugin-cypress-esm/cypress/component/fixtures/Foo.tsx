@@ -22,7 +22,6 @@ export class Dog extends Animal {
 }
 
 export class BarClassComponent extends React.Component<{ msg: string }> {
-  /* eslint-disable @typescript-eslint/no-useless-constructor */
   constructor (props) {
     super(props)
   }
