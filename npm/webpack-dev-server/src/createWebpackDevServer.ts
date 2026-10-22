@@ -65,7 +65,6 @@ function webpackDevServer5 (
   const webpackDevServerConfig: WebpackDevServer5Configuration = {
     host: '127.0.0.1',
     port: 'auto',
-    // @ts-ignore
     ...finalWebpackConfig?.devServer,
     devMiddleware: {
       publicPath: devServerPublicPathRoute,

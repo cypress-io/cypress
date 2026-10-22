@@ -17,7 +17,7 @@
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
 - [ ] npm/webpack-preprocessor
-- [ ] npm/webpack-dev-server
+- [x] npm/webpack-dev-server
 - [ ] npm/vite-plugin-cypress-esm
 - [x] npm/vite-dev-server
 

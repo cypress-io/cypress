@@ -48,7 +48,7 @@
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,cypress-sessions,electron,errors,eslint-config,server,stderr-filtering} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vue,webpack-batteries-included-preprocessor} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,cypress-sessions,electron,errors,eslint-config,server,stderr-filtering} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vue,webpack-batteries-included-preprocessor,webpack-dev-server} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
