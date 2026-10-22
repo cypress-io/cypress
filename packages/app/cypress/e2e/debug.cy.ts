@@ -1,11 +1,6 @@
-import type { OpenFileInIdeQuery } from '../../src/generated/graphql-test'
 import RelevantRunsDataSource_RunsByCommitShas from '../fixtures/gql-RelevantRunsDataSource_RunsByCommitShas.json'
 import DebugDataPassing from '../fixtures/debug-Passing/gql-Debug.json'
 import DebugDataFailing from '../fixtures/debug-Failing/gql-Debug.json'
-
-Cypress.on('window:before:load', (win) => {
-  win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
-})
 
 // These mocks all the responses so we can get deterministic
 // results to test the debug page.
@@ -52,14 +47,11 @@ describe('App - Debug Page', () => {
 
     cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
 
-    cy.intercept('mutation-useRecordEvent_recordEvent').as('recordEvent')
     cy.findByTestId('sidebar-link-debug-page').click()
 
     cy.findByTestId('debug-container').should('be.visible')
 
-    cy.wait('@recordEvent')
-
-    cy.withCtx((ctx, { sinon }) => {
+    cy.withRetryableCtx((ctx, { sinon }) => {
       expect(ctx.actions.eventCollector.recordEvent).to.have.been.calledWith(sinon.match({
         campaign: 'Navigated To Debug Page',
         medium: 'sidebar',
@@ -111,17 +103,8 @@ describe('App - Debug Page', () => {
       return obj.result
     }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataFailing })
 
-    cy.intercept('query-OpenFileInIDE', (req) => {
-      req.on('response', (res) => {
-        const gqlData = res.body.data as OpenFileInIdeQuery
-
-        gqlData.localSettings.preferences.preferredEditorBinary = 'code'
-      })
-    })
-
-    cy.intercept('mutation-OpenFileInIDE_Mutation').as('openFileInIDE')
-
     cy.withCtx((ctx, { sinon }) => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
       sinon.stub(ctx.actions.file, 'openFile')
     })
 
@@ -165,8 +148,7 @@ describe('App - Debug Page', () => {
     cy.findByTestId('run-failures').should('exist').should('have.attr', 'href', '#/specs/runner?file=src/NewComponent.spec.jsx&mode=debug')
 
     cy.findByLabelText('Open in IDE').click()
-    cy.wait('@openFileInIDE')
-    cy.withCtx((ctx) => {
+    cy.withRetryableCtx((ctx) => {
       expect(ctx.actions.file.openFile).to.have.been.calledWith('src/NewComponent.spec.jsx', 1, 1)
     })
   })
