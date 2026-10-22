@@ -24,6 +24,7 @@ import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHand
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { isAgentMode } from '@packages/agent-info'
 import { telemetry } from '@packages/telemetry'
 
 const POTENTIAL_CONFIG_FILES = [
@@ -311,6 +312,22 @@ export class ProjectLifecycleManager {
   }
 
   /**
+   * An agent that names the project and testing type on the command line, and has a browser
+   * from `--browser` or from `defaultBrowser` in the config, has no one to dismiss the welcome
+   * screen that would otherwise launch the browser. The dismissal is not saved, so a person's
+   * first launch still sees the welcome.
+   */
+  get isWelcomeBypassedForAgent () {
+    const { project, testingType, isBrowserGivenByCli } = this.ctx.modeOptions
+
+    // Neither `cliBrowser` nor `modeOptions.browser` is evidence of this: a config reload copies the
+    // active browser into both. `isBrowserGivenByCli` is set once, from the command line.
+    const hasBrowser = Boolean(isBrowserGivenByCli || this.loadedFullConfig?.defaultBrowser)
+
+    return this.ctx.isOpenMode && isAgentMode() && Boolean(project && testingType && hasBrowser)
+  }
+
+  /**
    * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
    *  1. The value of `--browser` passed via CLI.
    *  2. The value of `defaultBrowser` in `cypress.config`.
@@ -343,7 +360,7 @@ export class ProjectLifecycleManager {
 
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
 
-      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
+      const hasWelcomeBeenDismissed = this.isWelcomeBypassedForAgent || Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
 
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
       // but if the user needs to dismiss a landing page, don't continue: dismissing it renders OpenBrowser

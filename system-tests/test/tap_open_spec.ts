@@ -933,6 +933,41 @@ describe('tap CLI with more than one session running', function () {
 })
 
 /**
+ * Without the welcome screen dismissed, open mode waits for a person to click Continue
+ * before it launches the browser. An AI agent running `cypress open` with the project,
+ * testing type and browser given has no one to click, so it skips the wait. Nothing is
+ * seeded here, so this session only gets a browser if that holds.
+ */
+describe('tap CLI against a session an AI agent opened with the welcome screen undismissed', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: TapSession
+
+  before(async () => {
+    session = await openTapSession('tap-retries', {
+      seedWelcome: false,
+      env: { CLAUDECODE: '1', CYPRESS_AGENT_MODE: undefined },
+    })
+  })
+
+  after(async () => {
+    await session?.kill()
+  })
+
+  it('has a browser attached without anyone dismissing the welcome screen', async () => {
+    const status = await session.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+  })
+
+  it('runs a spec', async () => {
+    const status = await session.runSpec(SPEC)
+
+    expect(status.status).to.eq('passed')
+  })
+})
+
+/**
  * A pid alive but no longer answering: the only state that reports
  * STALE_SESSION rather than NO_SESSION.
  */
