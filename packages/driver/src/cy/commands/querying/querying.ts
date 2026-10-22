@@ -284,7 +284,13 @@ export default (Commands, Cypress, cy, state) => {
     const getFn = cy.now('get', selector, getOptions)
 
     const getPhrase = () => {
-      if (filter && !(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
+      // `withinSubject` is unset until a subject element has been searched, which never
+      // happens when the subject is empty: a page without a <body>, or a `.within()`
+      // element missing from the page. onFail runs before every retry, so
+      // throwing here would also stop `contains` from retrying.
+      const isWithinElement = !!getOptions.withinSubject && !cy.$$(getOptions.withinSubject).is('body')
+
+      if (filter && isWithinElement) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} and with the selector: '${filter}' `
@@ -294,7 +300,7 @@ export default (Commands, Cypress, cy, state) => {
         return `within the selector: '${filter}' `
       }
 
-      if (!(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
+      if (isWithinElement) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} `

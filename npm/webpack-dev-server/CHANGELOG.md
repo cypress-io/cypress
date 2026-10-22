@@ -1,3 +1,10 @@
+# [@[secure]/webpack-dev-server-v6.1.2](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.1.1...@[secure]/webpack-dev-server-v6.1.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** keep a newer spec list when specs change during beforeCompile ([#34931](https://github.com/[secure]-io/[secure]/issues/34931)) ([4c64499](https://github.com/[secure]-io/[secure]/commit/4c64499fd0c3689872cc3442879f06b9f78e4070))
+
 # [@[secure]/webpack-dev-server-v6.1.1](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.1.0...@[secure]/webpack-dev-server-v6.1.1) (2026-10-21)
 
 
