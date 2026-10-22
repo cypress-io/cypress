@@ -869,18 +869,24 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         // https://github.com/cypress-io/cypress/issues/34975
-        it('requires unique header names regardless of casing order', function (done) {
-          testFail((err) => {
-            expect(err.message).to.include('`foo` was specified more than once in `headers`. Header fields can only be matched once (HTTP header field names are case-insensitive).')
+        ;[
+          ['FOO', 'foo'],
+          ['Content-Type', 'content-type'],
+          ['Foo', 'FOO'],
+        ].forEach(([first, second]) => {
+          it(`requires unique header names regardless of casing order (${first} and ${second})`, function (done) {
+            testFail((err) => {
+              expect(err.message).to.include(`\`${second}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`)
 
-            done()
-          })
+              done()
+            })
 
-          cy.intercept({
-            headers: {
-              FOO: 'bar',
-              foo: 'bar',
-            },
+            cy.intercept({
+              headers: {
+                [first]: 'bar',
+                [second]: 'bar',
+              },
+            })
           })
         })
 
