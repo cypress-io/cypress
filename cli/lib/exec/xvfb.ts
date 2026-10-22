@@ -1,4 +1,5 @@
 import os from 'os'
+import cp from 'child_process'
 import Bluebird from 'bluebird'
 import Xvfb from '@cypress/xvfb'
 import { stripIndent } from 'common-tags'
@@ -24,7 +25,55 @@ const xvfbOptions: any = {
   },
 }
 
+// Starts Xvfb in a session of its own with no pipes to the CLI, so an app that keeps running
+// after the CLI exits keeps its display when a host ends the CLI's process group or closes its
+// output. @cypress/xvfb offers no option for this, so only the spawn is replaced and the display
+// choice, lock file wait and timeout stay the library's.
+// The library ships no usable types for the members the override reaches into
+const XvfbBase: any = Xvfb
+
+export class DetachedXvfb extends XvfbBase {
+  // Without it the class takes no arguments as far as the type checker can tell
+
+  constructor (options: any) {
+    super(options)
+  }
+
+  _spawnProcess (lockFileExists: boolean, onAsyncSpawnError: (err: Error) => void): void {
+    const display = this.display()
+
+    if (lockFileExists) {
+      if (!this._reuse) {
+        throw new Error(`Display ${display} is already in use and the "reuse" option is false.`)
+      }
+
+      return
+    }
+
+    const proc = cp.spawn('Xvfb', [display, ...this._xvfb_args], { detached: true, stdio: 'ignore' })
+
+    this._process = proc
+
+    proc.once('error', onAsyncSpawnError)
+
+    proc.once('exit', (code: number | null) => {
+      if (code !== 0) {
+        const err: any = new Error(`Xvfb exited with code ${code}`)
+
+        err.nonZeroExitCode = true
+        onAsyncSpawnError(err)
+      }
+    })
+
+    proc.unref()
+  }
+}
+
 const xvfb: any = Bluebird.promisifyAll(new Xvfb(xvfbOptions))
+const detachedXvfb: any = Bluebird.promisifyAll(new DetachedXvfb(xvfbOptions))
+
+// The instance that was started, so `stop` ends that one
+let running: any = xvfb
 
 export const _debugXvfb = debugXvfb
 
@@ -32,11 +81,13 @@ export const _xvfb = xvfb
 
 export const _xvfbOptions = xvfbOptions
 
-export async function start (): Promise<any> {
-  debug('Starting Xvfb')
+export async function start ({ detached = false }: { detached?: boolean } = {}): Promise<any> {
+  debug('Starting Xvfb', { detached })
+
+  running = detached ? detachedXvfb : xvfb
 
   try {
-    await xvfb.startAsync()
+    await running.startAsync()
 
     return null
   } catch (e: any) {
@@ -60,7 +111,7 @@ export async function stop (): Promise<null> {
   debug('Stopping Xvfb')
 
   try {
-    await xvfb.stopAsync()
+    await running.stopAsync()
 
     return null
   } catch (e) {
@@ -123,6 +174,7 @@ export default {
   _debugXvfb,
   _xvfb,
   _xvfbOptions,
+  _detachedXvfb: detachedXvfb,
   start,
   stop,
   isNeeded,

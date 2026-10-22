@@ -502,3 +502,59 @@ export const openTapSessionViaModuleApi = async (project: ProjectFixtureDir): Pr
     throw err
   }
 }
+
+export interface DetachedLaunch {
+  stdout: string
+  stderr: string
+  exitCode: number
+}
+
+export interface DetachedTapSession extends TapSession {
+  /** What `cypress open --detached` itself printed, and how it exited. */
+  launch: DetachedLaunch
+}
+
+/**
+ * Boots through `cypress open --detached`, which returns once the app is ready and leaves it
+ * running on its own. The harness has no handle on the app, so it ends it through the pid in
+ * the session record, as it does for the Module API.
+ */
+export const openDetachedTapSession = async (project: ProjectFixtureDir): Promise<DetachedTapSession> => {
+  const projectRoot = await prepareProject(project, {})
+
+  const launch = await new Promise<DetachedLaunch>((resolve, reject) => {
+    const child = cp.spawn(process.execPath, [
+      CLI_BIN, 'open',
+      '--detached',
+      '--project', projectRoot,
+      '--e2e',
+      '--browser', 'chrome',
+      '--dev',
+    ], { cwd: projectRoot, env: spawnEnv() })
+
+    let stdout = ''
+    let stderr = ''
+
+    child.stdout.on('data', (buf) => {
+      stdout += buf.toString()
+    })
+
+    child.stderr.on('data', (buf) => {
+      stderr += buf.toString()
+    })
+
+    child.on('error', reject)
+    child.on('close', (code) => resolve({ stdout, stderr, exitCode: code ?? -1 }))
+  })
+
+  const session = await buildSession({
+    projectRoot,
+    terminate: () => signalRecorded(projectRoot, 'SIGKILL'),
+    suspend: () => signalRecorded(projectRoot, 'SIGSTOP'),
+    resume: () => signalRecorded(projectRoot, 'SIGCONT'),
+    context: () => `${launch.stdout}${launch.stderr}` || '(no output captured)',
+    exitReason: () => null,
+  })
+
+  return { ...session, launch }
+}

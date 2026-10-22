@@ -2,11 +2,12 @@
 // and needs none of systemTests.it's spawn/snapshot machinery or its global setup.
 import { expect } from 'chai'
 import path from 'path'
+import fs from 'fs-extra'
 import stripAnsi from 'strip-ansi'
 import { TAP_ERROR_COPY } from '@packages/cypress-sessions'
 import type { TapErrorCopy } from '@packages/cypress-sessions'
-import { openTapSession, openTapSessionViaModuleApi, tapWithoutSession } from '../lib/tap-open'
-import type { TapSession } from '../lib/tap-open'
+import { openTapSession, openDetachedTapSession, openTapSessionViaModuleApi, tapWithoutSession } from '../lib/tap-open'
+import type { TapSession, DetachedTapSession } from '../lib/tap-open'
 
 const SPEC = 'cypress/e2e/aut-content.cy.js'
 const SLOW_SPEC = 'cypress/e2e/slow.cy.js'
@@ -1025,6 +1026,57 @@ describe('tap CLI against a Module-API-booted session', function () {
 
     expect(result.exitCode).to.eq(1)
     expect(result.json()).to.deep.include({ ambiguous: true, count: 3 })
+  })
+})
+
+/**
+ * `cypress open --detached` returns once the app is ready and leaves it running on its own.
+ * It used to close the app's output pipes as it exited, and stop a Xvfb it had started, so
+ * the app stopped shortly after the command returned.
+ */
+describe('tap CLI against a session started with cypress open --detached', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: DetachedTapSession
+
+  before(async () => {
+    session = await openDetachedTapSession('tap-retries')
+  })
+
+  after(async () => {
+    await session?.kill()
+
+    // The app keeps writing to these after the command returns, so nothing but the test removes them
+    const written = /written to "([^"]+)" and "([^"]+)"/.exec(session?.launch.stdout ?? '')
+
+    await Promise.all((written ? [written[1], written[2]] : []).map((file) => fs.remove(file)))
+  })
+
+  it('returns once the app is ready, saying where its output is written', async () => {
+    expect(session.launch.exitCode, `${session.launch.stdout}${session.launch.stderr}`).to.eq(0)
+
+    const written = /written to "([^"]+)" and "([^"]+)"/.exec(session.launch.stdout)
+
+    expect(written, session.launch.stdout).to.not.eq(null)
+
+    for (const file of [written![1], written![2]]) {
+      expect(await fs.pathExists(file), file).to.eq(true)
+    }
+  })
+
+  it('keeps the app running after the command returned', async () => {
+    // The pipes closed as the command exited, so the app's first later write was the failure.
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+
+    const status = await session.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+  })
+
+  it('runs a spec', async () => {
+    const status = await session.runSpec(SPEC)
+
+    expect(status.status).to.eq('passed')
   })
 })
 
