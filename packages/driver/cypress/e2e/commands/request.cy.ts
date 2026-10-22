@@ -1205,7 +1205,19 @@ describe('src/cy/commands/request', () => {
 
       it('throws when failOnStatusCode is false and retryOnStatusCodeFailure is true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.request()` was invoked with `{ failOnStatusCode: false, retryOnStatusCodeFailure: true }`.')
+          expect(err.message).to.eq(stripIndent`\
+            \`cy.request()\` was called with options that cannot be used together:
+
+              { failOnStatusCode: false, retryOnStatusCodeFailure: true }
+
+            \`retryOnStatusCodeFailure\` retries when the response has a status code other than \`2xx\` or \`3xx\`, and fails if the last retry gets one too. It requires \`failOnStatusCode: true\`.
+
+            Pass one of these combinations instead:
+
+              1. To retry on these status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
+              2. To fail on these status codes without retrying, which is the default, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\`.
+              3. To not fail on these status codes, pass \`{ failOnStatusCode: false, retryOnStatusCodeFailure: false }\`.`)
+
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
           done()

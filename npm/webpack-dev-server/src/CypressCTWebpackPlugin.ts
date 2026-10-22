@@ -60,18 +60,26 @@ export class CypressCTWebpackPlugin {
       return
     }
 
-    // Ensure we don't try to load files that have been removed from the file system
-    // but have not yet been detected by the onSpecsChange handler
+    let files: Cypress.Spec[]
+    let foundFiles: (Cypress.Spec | null)[]
 
-    const foundFiles = (await Promise.all(this.files.map(async (file) => {
-      try {
-        const exists = await fs.pathExists(file.absolute)
+    // onSpecsChange can replace the list while the checks are pending. Checking again until
+    // the list holds still means this compile builds the newest list, filtered.
+    do {
+      files = this.files
 
-        return exists ? file : null
-      } catch (e) {
-        return null
-      }
-    })))
+      // Ensure we don't try to load files that have been removed from the file system
+      // but have not yet been detected by the onSpecsChange handler
+      foundFiles = await Promise.all(files.map(async (file) => {
+        try {
+          const exists = await fs.pathExists(file.absolute)
+
+          return exists ? file : null
+        } catch (e) {
+          return null
+        }
+      }))
+    } while (this.files !== files)
 
     this.files = foundFiles.filter((file) => file !== null) as Cypress.Spec[]
 
