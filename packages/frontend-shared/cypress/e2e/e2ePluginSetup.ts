@@ -135,7 +135,27 @@ async function makeE2ETasks () {
 
   const launchpadPort = await makeGraphQLServer()
 
-  const __internal_scaffoldProject = async (projectName: string, isRetry = false): Promise<string> => {
+  const scaffoldsInProgress = new Map<string, Promise<string>>()
+
+  const __internal_scaffoldProject = async (projectName: string): Promise<string> => {
+    // A timed-out cy.task leaves its install running, so a test retry must not
+    // re-scaffold the project until that install finishes.
+    const scaffold = (scaffoldsInProgress.get(projectName) ?? Promise.resolve())
+    .catch(() => {})
+    .then(() => scaffoldProjectWithDeps(projectName))
+
+    scaffoldsInProgress.set(projectName, scaffold)
+
+    try {
+      return await scaffold
+    } finally {
+      if (scaffoldsInProgress.get(projectName) === scaffold) {
+        scaffoldsInProgress.delete(projectName)
+      }
+    }
+  }
+
+  const scaffoldProjectWithDeps = async (projectName: string, isRetry = false): Promise<string> => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
       Fixtures.removeProject(projectName)
     }
@@ -162,7 +182,7 @@ async function makeE2ETasks () {
       await execa('yarn', { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true })
       await fs.remove(path.join(Fixtures.projectFixturePath(projectName), 'node_modules'))
 
-      return await __internal_scaffoldProject(projectName, true)
+      return await scaffoldProjectWithDeps(projectName, true)
     }
 
     scaffoldedProjects.add(projectName)
