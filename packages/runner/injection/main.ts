@@ -11,7 +11,11 @@ import { createTimers } from './timers'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 import { patchElementIntegrity } from './patches/integrity'
 
-const Cypress = window.Cypress = parent.Cypress
+// Safe because the parent frame's Cypress is the driver instance that the global
+// `Cypress` type describes, but `parent.Cypress` is typed without its event emitter.
+const Cypress = parent.Cypress as typeof window.Cypress | undefined
+
+window.Cypress = Cypress
 
 if (!Cypress) {
   throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \

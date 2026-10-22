@@ -117,6 +117,8 @@ declare namespace Cypress {
     (action: '_log:added', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
     (action: '_log:changed', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
     (action: 'resume:all', fn: () => void)
+    (action: 'app:timers:reset', fn: () => void)
+    (action: 'app:timers:pause', fn: (shouldPause: boolean) => void)
   }
 
   interface Backend {

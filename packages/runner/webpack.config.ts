@@ -58,7 +58,7 @@ const mainInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
   entry: {
-    injection: [path.resolve(__dirname, 'injection/main.js')],
+    injection: [path.resolve(__dirname, 'injection/main.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
