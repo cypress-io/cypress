@@ -20,8 +20,6 @@ const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket ti
 const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
 const convertSameSiteToughToExtension = (sameSite, setCookie) => {
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
   // SameSite=None was not explicitly set

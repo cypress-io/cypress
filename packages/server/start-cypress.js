@@ -17,8 +17,7 @@ process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
 configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
 process.env['CYPRESS'] = 'true'
 
-// Store the user's value so the config process can restore it for their Node code. This has to run here,
-// because the V8 snapshot can defer loading lib/request (which sets it to '0') until after that process is forked.
+// Store the user's value so the config process can restore it for their Node code.
 if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
   process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
 }
@@ -29,6 +28,10 @@ const isRunningElectron = isElectronRunning()
 const pkg = require('@packages/root')
 
 if (isRunningElectron) {
+  // Set here rather than at module scope in lib/request, which the V8 snapshot can run at build time instead of
+  // startup. Only in Electron: in dev, the node process relaunches into Electron and would pass '0' on as the user's value.
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
   // if we are in the electron process, we need to patch the electron switches before Cypress launches the app
   // @see https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node
   const { app } = require('electron')
