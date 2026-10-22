@@ -12,13 +12,14 @@
 - [x] npm/react ✅ **COMPLETED**
 - [x] npm/vue ✅ **COMPLETED**
 - [x] npm/svelte ✅ **COMPLETED**
+- [x] npm/angular ✅ **COMPLETED**
 
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
 - [ ] npm/webpack-preprocessor
 - [ ] npm/webpack-dev-server
 - [ ] npm/vite-plugin-cypress-esm
-- [ ] npm/vite-dev-server
+- [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
 - [ ] packages/frontend-shared
@@ -79,13 +80,12 @@ This guide describes how to migrate all packages in the Cypress monorepo to the 
 ## Migration Strategy
 
 ### 1. **Lint-Staged Configuration**
-During the migration period, the root `package.json` uses explicit lint-staged patterns to ensure each package gets the correct linting treatment:
+lint-staged hands each staged file to the nearest `package.json` that has a `lint-staged` key, and runs that config's tasks from its directory. Routing is therefore per package, not in the root:
 
-- **Migrated packages** (like `npm/grep`): Use `yarn lint:fix` which runs ESLint from the package directory with the correct config
-- **Non-migrated packages**: Use `eslint --fix` which runs from the root with the root config
-- **Root files**: Covered by `*.{js,jsx,ts,tsx,json,eslintrc,vue}` pattern
+- **Migrated packages** carry their own `lint-staged` key (step 4 below), so their files run `eslint --fix` from the package directory, resolving the package's local ESLint 9 and its `eslint.config.ts`.
+- **Everything else** falls through to the root `package.json`, whose single `*.{js,jsx,ts,tsx,json,eslintrc,vue}` pattern runs ESLint 8 with the root `.eslintrc.js`. A pattern without a `/` matches at any depth, so it covers every directory on its own; adding directory-specific patterns beside it would lint those files twice.
 
-This configuration will be simplified once all packages are migrated to the unified ESLint setup.
+Migrating a package needs no change to the root config. `scripts/unit/lint-staged-spec.ts` fails if a workspace with an `eslint.config.*` has no `lint-staged` key. Add the package to the `--scope` list of the root `lint:fix` script too.
 
 ### 2. **Batch Packages for Migration**
 - **Batch by directory/type** to keep PRs manageable and reduce risk.
@@ -106,6 +106,7 @@ For each package in the batch:
      import baseConfig from '@packages/eslint-config'
      export default baseConfig
      ```
+   - To keep linting the package's JSON files, spread `jsonConfig` after `baseConfig`, as described in [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig).
 3. **Ensure dependencies are up to date:**
    - Remove any package-local ESLint plugins now provided by the shared config.
    - Remove TSLint-related dependencies (the new config includes `@typescript-eslint`).
@@ -173,23 +174,47 @@ A package-level `.eslintignore` cannot do this job, which is worth knowing befor
 
 Note also that `cjs`/`esm` are anchored to the workspace roots (`packages/*`, `npm/*`, `tooling/*`) rather than written as `**/esm/**`. System-tests fixtures ship handwritten sources under an `esm/` directory, and an unanchored pattern would stop linting them without any signal.
 
-### 7. **Deprecate and Remove Old Plugin**
+### 7. **Lint JSON with `jsonConfig`**
+
+Under eslintrc, the `@cypress/dev/general` preset ran every `*.json` file through `eslint-plugin-json-format`. That plugin works by patching ESLint 8's `Linter`, so it has no flat-config equivalent, and `baseConfig` matches no `.json` files: a migrated package lints no JSON at all unless it opts in. To opt in, spread `jsonConfig` after `baseConfig`:
+
+```ts
+import { baseConfig, jsonConfig } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...jsonConfig,
+]
+```
+
+`jsonConfig` is built on [`eslint-plugin-jsonc`](https://ota-meshi.github.io/eslint-plugin-jsonc/) and keeps what the old preset enforced:
+
+| Old preset (`eslint-plugin-json-format`) | `jsonConfig` |
+| --- | --- |
+| File must parse as JSON | Parse errors, plus `jsonc/recommended-with-json` (no comments, no trailing commas, no duplicate keys) |
+| Reformatted to `JSON.stringify(value, null, 2)` plus a final newline | `jsonc/indent`, the `jsonc/*-newline` rules, `@stylistic/eol-last`, `jsonc/array-bracket-spacing`, which also collapses `[ ]`, and `@stylistic/no-multiple-empty-lines` set to `0`. All of them autofix. |
+| `package.json` keys in the "pro" order, then in `sort-package-json`'s order | `package-json/order-properties` in `sort-package-json`'s standard order, with no "pro" list. Every top-level key is checked, and keys that order does not know go last in alphabetical order |
+| `package.json` `scripts` and dependency maps sorted | `package-json/sort-collections` (from [`eslint-plugin-package-json`](https://github.com/michaelfaith/eslint-plugin-package-json)), which uses `sort-package-json` too. It keeps `pre`/`post` hooks and `name:variant` scripts next to their base script, and sorts the dependency maps in ascending order. `exports` is left out of its default list, because the order of conditions there is significant |
+| Skipped `tsconfig.json`, `.vscode/**` and `package-lock.json` | Same skips, widened to every `tsconfig*.json` variant, since `tsc` reads all of them as JSONC |
+
+`@eslint/json` was considered and rejected. It is a separate ESLint *language*, so every JS rule in `baseConfig` that has no `files` restriction would need fencing off. It has no formatting rules, and its `sort-keys` only sorts alphabetically, so it cannot express the `package.json` order. `eslint-plugin-jsonc` parses JSON into an AST that the existing JS rules ignore and autofixes the layout, and `eslint-plugin-package-json` autofixes `package.json` ordering on the same AST. `eslint-plugin-jsonc` is pinned to v2 because v3 needs ESLint 9.38 or later. `eslint-plugin-package-json` is pinned to 0.x for a related reason: 1.x moves to `jsonc-eslint-parser` v3 and declares a peer dependency on `@eslint/json`.
+
+Two differences from the old preset remain:
+
+- **Top-level key order:** the old preset used the "pro" order, which put `scripts` and the dependency maps near the top. `jsonConfig` uses `sort-package-json`'s standard order, so `scripts` and the dependencies follow the metadata (`license`, `main`, `types`, `files` and so on). Nearly every `package.json` in the repo follows the "pro" order today, so the first `eslint --fix` after opting in reorders the top-level keys. This one is deliberate.
+- **Empty objects:** `{ }` is not collapsed to `{}`. `jsonc/object-curly-spacing` skips empty objects, and no off-the-shelf rule covers them.
+
+When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfig`, staging a `.json` file only produces a "File ignored because no matching configuration was supplied" warning. Running `eslint --fix` once on opt-in sorts any `package.json` that drifted while the package was not linting JSON. `@packages/errors` is the reference opt-in.
+
+### 8. **Deprecate and Remove Old Plugin**
 - `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
 - Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
 - The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
 
-### 8. **Simplify Lint-Staged Configuration**
-After all packages are migrated, simplify the lint-staged configuration in root `package.json`:
+### 9. **Lint-Staged After the Migration**
+The root `lint-staged` config is already a single catch-all pattern, so it needs no change when the last package migrates. Once the root itself moves to flat config, that same pattern runs ESLint 9.
 
-```json
-{
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-  }
-}
-```
-
-### 9. **Update Lerna/Monorepo Config**
+### 10. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
 
@@ -280,22 +305,9 @@ After all packages are migrated, simplify the lint-staged configuration in root 
 #### 4. **Rule Mismatches in Pre-commit Hook**
 **Error:** ESLint rule violations that don't match the package's ESLint configuration (e.g., `Unexpected console statement` when `no-console` is off in package config)
 
-**Root Cause:** Pre-commit hook runs ESLint from root directory using root-level config, not package-specific config
+**Root Cause:** The package has no `lint-staged` key in its `package.json`, so its files fall through to the root config and are linted by ESLint 8 against `.eslintrc.js`.
 
-**Solution:**
-- The root `package.json` now includes explicit lint-staged patterns for each package:
-  ```json
-  "lint-staged": {
-    "npm/grep/**/*.{js,jsx,ts,tsx}": "yarn lint:fix",
-    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "cli/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "packages/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    // ... explicit patterns for each directory
-  }
-  ```
-- **For migrated packages:** Use `yarn lint:fix` which runs the lerna command to execute ESLint from the package directory
-- **For non-migrated packages:** Use `eslint --fix` which runs from the root with the root config
-- **Note:** This verbose configuration is temporary during migration and will be simplified once all packages are migrated
+**Solution:** Add the `lint-staged` key from step 4. See [Lint-Staged Configuration](#1-lint-staged-configuration).
 
 #### 5. **ESLint Script Changes**
 **Before ESLint 9.x:**
@@ -359,6 +371,8 @@ For each package, ensure you've completed:
 - [ ] Created `eslint.config.ts` with proper configuration
 - [ ] Added required dependencies (`eslint`, `@packages/eslint-config`, `jiti`)
 - [ ] Added lint-staged configuration to `package.json`
+- [ ] Spread `jsonConfig` after `baseConfig` and included `json` in the lint-staged glob (see [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig))
+- [ ] Added the package to the `--scope` list of the root `lint:fix` script
 - [ ] Created/updated `tsconfig.json` that extends base config
 - [ ] Updated ESLint scripts (removed `--ext` flag)
 - [ ] Ran `yarn lint` successfully
@@ -371,10 +385,6 @@ For each package, ensure you've completed:
 - If a package is especially noisy, consider splitting it into its own PR.
 - Communicate with the team about the migration timeline and process.
 - **Test the pre-commit hook** before pushing to ensure lint-staged works correctly.
-
-## Recent Updates
-- **Fixed lint-staged configuration** to properly handle migrated vs non-migrated packages
-- **Added explicit directory patterns** to ensure complete coverage during migration period
 
 ---
 

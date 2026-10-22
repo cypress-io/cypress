@@ -49,8 +49,13 @@ export default function (Commands, Cypress, cy) {
         return
       }
 
-      return sessions.clearCurrentSessionData()
-      .then(() => Cypress.backend('reset:rendered:html:origins'))
+      const renderedOrigins = await sessionsManager.clearSessionData()
+
+      // An empty set has nothing to reset. A page that finishes rendering after
+      // the read stays in the set, so the next test clears its storage too.
+      if (renderedOrigins.length) {
+        await Cypress.backend('reset:rendered:html:origins')
+      }
     })
   })
 
@@ -450,11 +455,7 @@ export default function (Commands, Cypress, cy) {
           return cy.whenStable(() => createSession(existingSession, step))
         })
         .then({ timeout: INTERNAL_COMMAND_TIMEOUT }, () => validateSession(existingSession, step))
-        .then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async (isValidSession: boolean) => {
-          if (!isValidSession) {
-            return 'failed'
-          }
-
+        .then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
           sessionsManager.registeredSessions.set(existingSession.id, true)
           await sessionsManager.saveSessionData(existingSession)
 
@@ -519,7 +520,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }).then({ timeout: INTERNAL_COMMAND_TIMEOUT }, (status: 'created' | 'restored' | 'recreated' | 'failed') => {
+        }).then({ timeout: INTERNAL_COMMAND_TIMEOUT }, (status: 'created' | 'restored' | 'recreated') => {
           return navigateAboutBlank()
           .then(() => {
             setSessionLogStatus(status)

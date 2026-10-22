@@ -812,7 +812,9 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       if (options.retryOnStatusCodeFailure && !options.failOnStatusCode) {
-        $errUtils.throwErrByPath('visit.status_code_flags_invalid')
+        $errUtils.throwErrByPath('visit.status_code_flags_invalid', {
+          args: _.pick(options, 'failOnStatusCode', 'retryOnStatusCodeFailure'),
+        })
       }
 
       if (!isValidVisitMethod(options.method)) {

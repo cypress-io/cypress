@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { connect } from '../../lib'
 
 import net from 'net'
+import tls from 'tls'
 import type { RetryingOptions } from '../../lib/connect'
 
 describe('lib/connect', () => {
@@ -31,6 +32,40 @@ describe('lib/connect', () => {
   })
 
   describe('createRetryingSocket', () => {
+    const baseOpts: RetryingOptions = {
+      family: 0,
+      useTls: false,
+      port: 3000,
+      host: '127.0.0.1',
+      getDelayMsForRetry: () => undefined,
+    }
+
+    it('advertises http/1.1 over ALPN on tls sockets', () => {
+      const tlsSpy = vi.spyOn(tls, 'connect').mockReturnValue(new net.Socket() as any)
+
+      connect.createRetryingSocket({ ...baseOpts, useTls: true }, () => {})
+
+      expect(tlsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ ALPNProtocols: ['http/1.1'] }),
+        expect.any(Function),
+      )
+
+      tlsSpy.mockRestore()
+    })
+
+    it('does not set ALPN on plain tcp sockets', () => {
+      const netSpy = vi.spyOn(net, 'connect').mockReturnValue(new net.Socket() as any)
+
+      connect.createRetryingSocket(baseOpts, () => {})
+
+      expect(netSpy).toHaveBeenCalledWith(
+        expect.not.objectContaining({ ALPNProtocols: expect.anything() }),
+        expect.any(Function),
+      )
+
+      netSpy.mockRestore()
+    })
+
     it('cancels retries', () => {
       const getDelayMsForRetry = (iteration) => {
         if (iteration < 2) {

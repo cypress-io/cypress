@@ -248,9 +248,14 @@ You must have the following installed on your system to contribute locally:
 
 `sudo apt install build-essential` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 `python` is pre-installed on Debian-based systems including Ubuntu.
-The default Python versions included with Debian `>=11` and Ubuntu `>=22.04`, which range from Python `3.9` - `3.13`, are all compatible with Cypress requirements.
 
-For Ubuntu `>=24.04`, disable "Unprivileged user namespace restrictions" permanently for the entire system by executing the following commands that are derived from the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890):
+Minimum versions are:
+
+- Debian >=12 (x64)
+- Debian 13 (arm64)
+- Ubuntu >=24.04 (x64 & arm64)
+
+For Ubuntu, disable "Unprivileged user namespace restrictions" permanently for the entire system by executing the following commands that are derived from the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890):
 
 ```shell
 echo "kernel.apparmor_restrict_unprivileged_userns=0" | sudo tee /etc/sysctl.d/60-apparmor-namespace.conf
@@ -267,11 +272,13 @@ If you do not disable these restrictions for the affected Ubuntu versions, then 
 
 #### Windows
 
-Follow the instructions in [Using Python on Windows](https://docs.python.org/3/using/windows.html) to install the current [version of Python](https://www.python.org/downloads/) (`3.14`).
+Follow the instructions in [Using Python on Windows](https://docs.python.org/3/using/windows.html) to install the current [version of Python](https://www.python.org/downloads/).
 
 Install [Visual Studio 2022 Build Tools](https://aka.ms/vs/17/release/vs_buildtools.exe), selecting the `Desktop development with C++` workload.
 
 Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
+
+During `yarn` installation you may see `warning Error running install script for optional dependency` for `cpu-features`, followed by a `node-gyp` build error such as `error MSB8020: The build tools for ClangCL (Platform Toolset = 'ClangCL') cannot be found`. You can ignore it. `cpu-features` is an optional dependency of `ssh2`, which reaches the repo only through `dockerode` in [system-tests](./system-tests/package.json). `ssh2` works without it, and the installation completes successfully.
 
 #### Corepack
 
@@ -557,7 +564,7 @@ The repository has one protected branch:
 
 - `develop` contains the current latest "pre-release" code for the Cypress app and contains the already published code of all [standalone npm packages](./npm) Cypress maintains. This branch is set as the default branch, and all pull requests should be made against this branch.
 
-We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We used [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automate the release of these packages to npm.
+We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We use [`semantic-release`](https://semantic-release.org/intro/) to automate the release of these packages to npm.
 
 We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, the pull request should clearly state that it should not be merged until the next scheduled Cypress app release date.
 
@@ -620,18 +627,18 @@ We do not restrict or require disclosure of AI usage, but contributors are respo
 
 When submitting a pull request, please ensure that:
 
-- **You understand the code you are submitting.**  
+- **You understand the code you are submitting.**
   You should be able to explain how the change works and why it is correct.
 
-- **You have reviewed and validated AI-assisted changes.**  
+- **You have reviewed and validated AI-assisted changes.**
   AI-generated output may contain mistakes, unnecessary complexity, or patterns that do not match the repository.
 
 - **Your changes follow the existing codebase conventions and architecture.**
 
-- **Your pull request remains focused and reviewable.**  
+- **Your pull request remains focused and reviewable.**
   Avoid submitting large AI-generated changes that you have not carefully reviewed.
 
-- **The repository's pull request template is preserved.**  
+- **The repository's pull request template is preserved.**
   AI tools may help draft content, but contributors should keep the template structure intact and ensure the final content is accurate.
 
 Reviewers may ask clarifying questions about changes. As with any contribution, authors remain responsible for the correctness, maintainability, and quality of the code they submit.

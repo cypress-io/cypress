@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { clearCtx, getCtx, setCtx } from '@packages/data-context'
 import { createCommonRoutes } from '../../lib/routes'
 import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
+import { runnerGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 
 const expressStubs = vi.hoisted(() => {
   return {
@@ -31,7 +32,7 @@ vi.mock('express', async (importActual) => {
 // the first realm's types then refuse to mix with. Nothing here calls it.
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
-    graphQLHTTP: vi.fn(),
+    runnerGraphQLHTTP: vi.fn(),
   }
 })
 
@@ -348,6 +349,24 @@ describe('lib/routes', () => {
 
       expect(cyPromptManager.initializeRoutes).toHaveBeenCalledWith(router)
     })
+
+    describe('graphql mounts', () => {
+      const graphqlMount = (router: ReturnType<typeof makeRouter>, path: string) => {
+        return router.use.mock.calls.find((args) => args[0] === path)
+      }
+
+      it('mounts the runner graphql handler on the namespaced mount', () => {
+        const { router } = setupCommonRoutes()
+
+        expect(graphqlMount(router, '/namespace/graphql/*')).toEqual(['/namespace/graphql/*', runnerGraphQLHTTP])
+      })
+
+      it('mounts the runner graphql handler on the tap mount in open mode', () => {
+        const { router } = setupCommonRoutes()
+
+        expect(graphqlMount(router, '/__cypress/tap/graphql/*')).toEqual(['/__cypress/tap/graphql/*', runnerGraphQLHTTP])
+      })
+    })
   })
 
   describe('clientRoute non-proxied guard', () => {
@@ -417,7 +436,7 @@ describe('lib/routes', () => {
   })
 
   describe('catch-all', () => {
-    function setupCatchAll ({ remoteState, isBrowserNetworkMode = () => true, getNetworkProxy }: { remoteState: any, isBrowserNetworkMode?: () => boolean, getNetworkProxy?: () => NetworkProxy }) {
+    function setupCatchAll ({ remoteState, isBrowserNetworkMode = () => true, getNetworkProxy }: { remoteState: any, isBrowserNetworkMode?: () => boolean, getNetworkProxy?: () => NetworkProxy | undefined }) {
       const router = makeRouter()
 
       expressStubs.Router.mockReturnValue(router as any)
@@ -614,6 +633,22 @@ describe('lib/routes', () => {
 
       expect(second.handleHttpRequest).toHaveBeenCalledWith(secondReq, secondRes)
       expect(first.handleHttpRequest).toHaveBeenCalledTimes(1)
+    })
+
+    // close() disposes the NetworkProxy before the HTTP server stops accepting
+    // connections, and a rejection here would exit the process
+    it('drops a request that arrives after the NetworkProxy is disposed', async () => {
+      const { handler } = setupCatchAll({
+        remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
+        isBrowserNetworkMode: () => false,
+        getNetworkProxy: () => undefined,
+      })
+      const req = { url: 'http://example.com/late', method: 'GET', headers: {} }
+      const res = { destroy: vi.fn() }
+
+      await expect(handler(req, res, vi.fn())).resolves.toBeUndefined()
+
+      expect(res.destroy).toHaveBeenCalled()
     })
 
     it('falls through for URLs the file server cannot resolve', async () => {
