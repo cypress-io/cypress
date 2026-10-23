@@ -55,9 +55,28 @@ describe('lib/plugins/preprocessor', () => {
     await getCtx()._reset()
     await clearCtx()
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
   })
 
   describe('#getFile', () => {
+    it.each([
+      [false, true, false, true],
+      [false, false, false, false],
+      [false, undefined, false, true],
+      [true, true, false, false],
+      [true, false, false, false],
+      [false, false, true, true],
+      [true, false, true, true],
+    ])('sets shouldWatch (run=%s, watch=%s, force=%s) to %s', async (isTextTerminal, watchForFileChanges, forceWatch, expected) => {
+      vi.stubEnv('CYPRESS_INTERNAL_FORCE_FILEWATCH', forceWatch ? '1' : '')
+      config.isTextTerminal = isTextTerminal
+      config.watchForFileChanges = watchForFileChanges
+
+      await preprocessor.getFile(filePath, config)
+
+      expect(lastPluginFile().shouldWatch).toBe(expected)
+    })
+
     it('executes the plugin with file path', () => {
       preprocessor.getFile(filePath, config)
       expect(plugin).toHaveBeenCalled()
