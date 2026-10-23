@@ -832,26 +832,26 @@ declare namespace Cypress {
        * Add one or more custom commands
        * @see https://on.cypress.io/api/commands
        */
-      addAll<T extends keyof Chainable>(fns: CommandFns): void
+      addAll<T extends keyof Chainable>(fns: { [K in T]: CommandFn<K> }): void
 
       /**
        * Add one or more custom parent commands
        * @see https://on.cypress.io/api/commands#Parent-Commands
        */
-      addAll<T extends keyof Chainable>(options: CommandOptions & { prevSubject: false }, fns: CommandFns): void
+      addAll<T extends keyof Chainable>(options: CommandOptions & { prevSubject: false }, fns: { [K in T]: CommandFn<K> }): void
 
       /**
        * Add one or more custom child commands
        * @see https://on.cypress.io/api/commands#Child-Commands
        */
-      addAll<T extends keyof Chainable, S = any>(options: CommandOptions & { prevSubject: true }, fns: CommandFnsWithSubject<S>): void
+      addAll<T extends keyof Chainable, S = any>(options: CommandOptions & { prevSubject: true }, fns: { [K in T]: CommandFnWithSubject<K, S> }): void
 
       /**
        * Add one or more custom commands that validate their prevSubject
        * @see https://on.cypress.io/api/commands#Validations
        */
       addAll<T extends keyof Chainable, S extends PrevSubject>(
-        options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
+        options: CommandOptions & { prevSubject: S | ['optional'] }, fns: { [K in T]: CommandFnWithSubject<K, PrevSubjectMap[S]> },
       ): void
 
       /**
@@ -859,7 +859,7 @@ declare namespace Cypress {
        * @see https://on.cypress.io/api/commands#Allow-Multiple-Types
        */
       addAll<T extends keyof Chainable, S extends PrevSubject>(
-        options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
+        options: CommandOptions & { prevSubject: S[] }, fns: { [K in T]: CommandFnWithSubject<K, PrevSubjectMap<void>[S]> },
       ): void
 
       /**

@@ -84,6 +84,9 @@ namespace CypressIsCyTests {
 declare namespace Cypress {
   interface Chainable {
     newCommand: (arg: string) => Chainable<number>
+    newCommand2: (arg: string, arg2?: number) => Chainable<unknown>
+    newCommand3: (arg: string) => Chainable<void>
+    newCommand4: (arg: string) => Chainable<void>
     newQuery: (arg: string) => Chainable<number>
   }
 }
@@ -177,40 +180,40 @@ namespace CypressCommandsTests {
 
   Cypress.Commands.addAll({
     newCommand (arg) {
-      // $ExpectType any
+      // $ExpectType string
       arg
       this // $ExpectType Context
 
       return
     },
     newCommand2 (arg, arg2) {
-      // $ExpectType any
+      // $ExpectType string
       arg
-      // $ExpectType any
+      // $ExpectType number | undefined
       arg2
     },
     newCommand3: (arg) => {
-      // $ExpectType any
+      // $ExpectType string
       arg
 
       return
     },
     newCommand4: (arg) => {
-      // $ExpectType any
+      // $ExpectType string
       arg
     },
   })
   Cypress.Commands.addAll({ prevSubject: true }, {
     newCommand: (subject, arg) => {
       subject // $ExpectType any
-      arg // $ExpectType any
+      arg // $ExpectType string
 
       return
     },
   })
   Cypress.Commands.addAll({ prevSubject: false }, {
     newCommand: (arg) => {
-      arg // $ExpectType any
+      arg // $ExpectType string
 
       return
     },
@@ -218,43 +221,43 @@ namespace CypressCommandsTests {
   Cypress.Commands.addAll({ prevSubject: 'optional' }, {
     newCommand: (subject, arg) => {
       subject // $ExpectType unknown
-      arg // $ExpectType any
+      arg // $ExpectType string
 
       return
     },
     newCommand2: (subject, arg) => {
       subject // $ExpectType unknown
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({ prevSubject: ['optional'] }, {
     newCommand: (subject, arg) => {
       subject // $ExpectType unknown
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({ prevSubject: 'document' }, {
     newCommand: (subject, arg) => {
       subject // $ExpectType Document
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({ prevSubject: 'window' }, {
     newCommand: (subject, arg) => {
       subject // $ExpectType Window
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({ prevSubject: 'element' }, {
     newCommand: (subject, arg) => {
       subject // $ExpectType JQueryWithSelector<HTMLElement>
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({ prevSubject: ['element'] }, {
     newCommand: (subject, arg) => {
       subject // $ExpectType JQueryWithSelector<HTMLElement>
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({ prevSubject: ['element', 'document', 'window'] }, {
@@ -267,7 +270,7 @@ namespace CypressCommandsTests {
         subject // $ExpectType JQueryWithSelector<HTMLElement>
       }
 
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({ prevSubject: ['window', 'document', 'optional', 'element'] }, {
@@ -282,12 +285,12 @@ namespace CypressCommandsTests {
         subject // $ExpectType void
       }
 
-      arg // $ExpectType any
+      arg // $ExpectType string
     },
   })
   Cypress.Commands.addAll({
     newCommand: (arg) => {
-      // $ExpectType any
+      // $ExpectType string
       arg
 
       return cy.wrap(new Promise<number>((resolve) => { resolve(5) }))
