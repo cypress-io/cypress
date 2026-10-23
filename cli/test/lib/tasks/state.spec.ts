@@ -256,6 +256,19 @@ describe('lib/tasks/state', function () {
       )
     })
 
+    it('uses an existing cache directory name without beta build metadata', () => {
+      vi.mocked(util.pkgBuildInfo).mockReturnValue({ stable: false, commitBranch: 'develop', commitSha: 'ebbf7b1b01234567' } as any)
+      const version = 'beta-13.14.0-develop-ebbf7b1b'
+
+      expect(state.getBinaryDir(version, null)).toEqual(path.join(cacheDir, version, 'Cypress.app'))
+    })
+
+    it('still uses beta build metadata by default', () => {
+      vi.mocked(util.pkgBuildInfo).mockReturnValue({ stable: false, commitBranch: 'feature_branch', commitSha: 'abcdef0123456789' } as any)
+
+      expect(state.getBinaryDir('4.5.6')).toEqual(path.join(cacheDir, 'beta-4.5.6-feature_branch-abcdef01', 'Cypress.app'))
+    })
+
     it('rejects on anything else', function () {
       vi.mocked(os.platform).mockReturnValue('unknown' as NodeJS.Platform)
       expect(() => {

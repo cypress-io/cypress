@@ -353,6 +353,41 @@ describe('lib/tasks/cache', () => {
       vi.mocked(state.getPathToExecutable).mockReturnValue('/.cache/Cypress/1.2.3/app/cypress')
     })
 
+    it.each([false, true])('lists beta and prerelease cache entries (size=%s)', async (showSize) => {
+      mockfs.restore()
+      const versions = ['1.2.3', '16.0.0-rc.1', 'beta-13.14.0-develop-ebbf7b1b', 'beta-15.0.0-feature_branch-abc12345']
+
+      mockfs({
+        '/.cache/Cypress': {
+          ...Object.fromEntries(versions.map((version) => [version, { Cypress: { binary: 'fixture' } }])),
+          bundles: {},
+          sessions: {},
+          unrelated: {},
+        },
+      })
+
+      vi.mocked(state.getBinaryDir).mockImplementation((version, buildInfo) => {
+        expect(buildInfo).toEqual(null)
+
+        return path.join('/.cache/Cypress', version!, 'Cypress')
+      })
+
+      const binaries = await cache.getCachedVersions(showSize)
+
+      expect(binaries.map(({ version }) => version).sort()).toEqual([...versions].sort())
+      if (showSize) {
+        expect(binaries.every(({ size }) => typeof size === 'number' && size > 0)).toEqual(true)
+      }
+
+      const output = createStdoutCapture()
+
+      await cache.list(showSize)
+      for (const version of versions) {
+        expect(output()).toContain(version)
+      }
+      expect(output()).not.toContain('unrelated')
+    })
+
     it('lists all versions of cached binary', async function () {
       const output = createStdoutCapture()
 

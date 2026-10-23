@@ -2,6 +2,7 @@ import state from './state'
 import logger from '../logger'
 import fs from 'fs-extra'
 import util from '../util'
+import semver from 'semver'
 
 import { join } from 'path'
 import Table from 'cli-table3'
@@ -124,7 +125,9 @@ const getCachedVersions = async (showSize: boolean): Promise<{
 
   const versions = await fs.readdir(cacheDir)
 
-  const filteredVersions = versions.filter(util.isSemver).map((version: any) => {
+  const filteredVersions = versions.filter((version) => {
+    return util.isSemver(version) || semver.valid(version) || /^beta-\d+\.\d+\.\d+-.+-[0-9a-f]{8}$/i.test(version)
+  }).map((version: any) => {
     return {
       version,
       folderPath: join(cacheDir, version),
@@ -139,7 +142,7 @@ const getCachedVersions = async (showSize: boolean): Promise<{
   }[] = []
 
   for (const binary of filteredVersions) {
-    const binaryDir = state.getBinaryDir(binary.version)
+    const binaryDir = state.getBinaryDir(binary.version, null)
     const executable = state.getPathToExecutable(binaryDir)
 
     try {
@@ -162,7 +165,7 @@ const getCachedVersions = async (showSize: boolean): Promise<{
       // no-op
     }
     if (showSize) {
-      const binaryDir = state.getBinaryDir(binary.version)
+      const binaryDir = state.getBinaryDir(binary.version, null)
 
       const size: number = await getFolderSize(binaryDir)
 
