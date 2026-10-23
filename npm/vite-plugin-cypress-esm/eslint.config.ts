@@ -12,8 +12,10 @@ export default [
     },
   },
   {
-    // The client logs to the browser console when debugging is on and warns when
-    // a module can't be proxied, and the specs log what they import.
+    // The browser client logs when debugging is on and warns when a module can't
+    // be proxied, and the component tests log from specs and fixtures. The Node
+    // plugin in src/ logs through `debug`, so the rule stays on there.
+    files: ['client/**/*.js', 'cypress/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'off',
     },
