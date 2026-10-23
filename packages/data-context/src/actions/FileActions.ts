@@ -79,7 +79,7 @@ export class FileActions {
       return
     }
 
-    launchEditor(`${absolute}:${line}:${column}`, `"${binary}"`, (__: unknown, errMsg: string) => {
+    launchEditor(`${absolute}:${line}:${column}`, `"${binary}"`, (__: unknown, errMsg: string | null) => {
       this.ctx.debug('error opening file: %s', errMsg)
     })
   }
