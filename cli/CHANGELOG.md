@@ -25,6 +25,7 @@
 
 **Misc:**
 
+- The TypeScript types now allow custom queries to set and read a numeric `timeout` on their command instance. Addresses [#30198](https://github.com/cypress-io/cypress/issues/30198).
 - The TypeScript types now accept a number as the expected value of the `attr`, `id`, `text`, and `value` assertions, including the `contain` and `include` forms of `text` and `value`, such as `expect($el).to.have.attr('tabindex', 0)` or `expect($el).to.have.text(123)`. Cypress already accepted numbers for these assertions at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).
 - The TypeScript types now accept a DOM element, an array of elements, a jQuery object, or a predicate function in the `match` assertion, such as `expect($el).to.match($other)` or `expect($el).to.match((index, el) => el.id === 'result')`. Cypress already supported these at runtime, but TypeScript reported an error. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
 - The TypeScript types now accept a number, boolean, or `null` as the expected value of the `data` assertion, such as `expect($el).to.have.data('count', 3)`. jQuery parses numeric, boolean, and `null` `data-*` attributes into those types, so a string could never match them, but TypeScript accepted only a string. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
