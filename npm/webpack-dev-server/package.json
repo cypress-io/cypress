@@ -16,7 +16,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && tsc --project cypress/tsconfig.json",
     "clean": "rimraf dist",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
@@ -27,7 +27,7 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix --no-warn-ignored"
   },
   "dependencies": {
     "find-up": "6.3.0",

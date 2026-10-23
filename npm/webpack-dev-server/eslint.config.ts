@@ -5,12 +5,4 @@ export default [
   { ignores: ['test/fixtures/**'] },
   ...baseConfig,
   ...jsonConfig,
-  {
-    files: ['**/*.spec.ts', '**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        tsconfigRootDir: __dirname,
-      },
-    },
-  },
 ]
