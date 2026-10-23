@@ -846,6 +846,12 @@ export default {
   },
 
   miscellaneous: {
+    promise_rejected_without_error: {
+      message: stripIndent`\
+        A promise was rejected with \`{{value}}\`, but no error was provided.
+
+        Reject with an Error object to provide a useful message and stack trace.`,
+    },
     non_spec_invocation: `${cmd('{{cmd}}')} must only be invoked from the spec file or support file.`,
     returned_value_and_commands_from_custom_command (obj) {
       return {
