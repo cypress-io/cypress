@@ -95,11 +95,9 @@ If only the **minor/patch** Node version changes within the same major, this fil
 ### Better SQLite3
 
 ```bash
-# Check if better-sqlite3 needs updating for new Electron prebuilds looking through https://github.com/WiseLibs/better-sqlite3/commits/master/ to find the version number released after 'Prebuild for Election NEW_VERSION'.
-# Files to update:
-# /packages/server/package.json
-# /packages/types/package.json
-# Look for versions that support the new Electron version
+# better-sqlite3 uses Node-API, so it does not need a new version per Electron release.
+# Confirm it still compiles in the glibc 2.31 image CI uses for the Linux binary:
+#   ./scripts/test-better-sqlite3-build.sh cypress/base-internal:NEW_NODE_VERSION-glibc-2.31
 ```
 
 ### Node ABI Resolution
