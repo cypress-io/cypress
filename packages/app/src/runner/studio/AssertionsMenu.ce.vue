@@ -103,6 +103,7 @@ onMounted(() => {
     const assertionsMenuEl = assertionsMenu.value as HTMLElement
 
     createPopper(highlightEl, assertionsMenuEl, {
+      strategy: 'fixed',
       modifiers: [
         {
           name: 'preventOverflow',
@@ -131,7 +132,10 @@ onMounted(() => {
 
 .highlight {
   background: rgba(159, 196, 231, 0.6);
-  border: solid 2px #9FC4E7;
+  // Shared highlight coordinates reserve 2px for a border. An outline preserves
+  // that decoration without expanding the AUT scroll area at its edges.
+  outline: solid 2px #9FC4E7;
+  translate: 2px 2px;
   cursor: pointer;
 }
 
@@ -142,7 +146,7 @@ onMounted(() => {
   font-family: $font-system;
   z-index: 2147483647;
   width: 225px;
-  position: absolute;
+  position: fixed;
   color: $gray-300;
 
   .header {

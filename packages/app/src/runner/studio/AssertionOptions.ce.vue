@@ -82,6 +82,8 @@ const initializePopper = (): void => {
 
   createPopper(reference, popperEl, {
     placement: 'right-start',
+    strategy: 'fixed',
+    modifiers: [{ name: 'preventOverflow', options: { altAxis: true } }],
   })
 
   emit('setPopperElement', popperEl)
@@ -100,9 +102,10 @@ onMounted(() => {
 
   font-size: 14px;
   max-width: 150px;
-  overflow: hidden;
+  max-height: calc(100vh - 16px);
+  overflow: hidden auto;
   overflow-wrap: break-word;
-  position: absolute;
+  position: fixed;
   right: 8px;
   border-radius: 4px;
 
