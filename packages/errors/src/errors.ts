@@ -796,7 +796,7 @@ export const AllCypressErrors = {
 
         Other spec files that matched will still run.`
   },
-  RENDERER_CRASHED: (browserName: string) => {
+  RENDERER_CRASHED: (browserName: string, isTextTerminal: boolean) => {
     return errTemplate`\
         We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
 
@@ -806,7 +806,7 @@ export const AllCypressErrors = {
 
         If you're running lots of tests on a memory intense application.
           - Try increasing the CPU/memory on the machine you're running on.
-          - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.
+          ${isTextTerminal ? errPartial`` : errPartial`- Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.`}
 
         You can learn more here:
 
