@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
     "test": "tsx ./scripts/test-webpack-5.ts",
@@ -26,12 +26,16 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.26.0",
+    "@packages/eslint-config": "0.0.0-development",
     "@types/mocha": "9.0.0",
     "babel-loader": "^10.0.0",
     "chalk": "3.0.0",
     "cypress": "0.0.0-development",
+    "eslint": "^9.31.0",
     "fs-extra": "^10.1.0",
+    "globals": "^15.12.0",
     "globby": "^11.1.0",
+    "jiti": "^2.4.2",
     "json5": "^2.2.3",
     "mock-require": "3.0.3",
     "semantic-release": "25.0.8",
@@ -63,6 +67,9 @@
     "cypress-preprocessor",
     "webpack"
   ],
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "nx": {
     "targets": {
       "build": {
