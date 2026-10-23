@@ -48,8 +48,8 @@ const getBinaryPkgPath = (binaryDir: string): string => {
 /**
  * Get path to binary directory
 */
-const getBinaryDir = (version: string = util.pkgVersion()): string => {
-  return path.join(getVersionDir(version), getPlatFormBinaryFolder())
+const getBinaryDir = (version: string = util.pkgVersion(), buildInfo: any = util.pkgBuildInfo()): string => {
+  return path.join(getVersionDir(version, buildInfo), getPlatFormBinaryFolder())
 }
 
 const getVersionDir = (version: string = util.pkgVersion(), buildInfo: any = util.pkgBuildInfo()): string => {
