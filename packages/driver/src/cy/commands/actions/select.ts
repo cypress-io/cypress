@@ -213,13 +213,20 @@ export default (Commands, Cypress, cy) => {
       return Promise
       .try(retryOptions)
       .then((obj = {}) => {
-        const { values, optionEls, optionsObjects, notAllUniqueValues } = obj
+        let { values, optionEls, optionsObjects, notAllUniqueValues } = obj
 
         // preserve the selected values
         consoleProps.Selected = values
 
         return cy.now('click', options.$el, {
           $el: options.$el,
+          subjectFn: () => {
+            // Keep option metadata in sync with the element click re-queries.
+            ({ values, optionEls, optionsObjects, notAllUniqueValues } = getOptions())
+            consoleProps.Selected = values
+
+            return options.$el
+          },
           log: false,
           verify: false,
           errorOnSelect: false, // prevent click errors since we want the select to be clicked
