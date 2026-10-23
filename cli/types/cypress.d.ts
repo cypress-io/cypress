@@ -6452,7 +6452,7 @@ declare namespace Cypress {
 
   interface BeforeRunDetails {
     browser?: Browser
-    config: ConfigOptions
+    config: PluginConfigOptions
     cypressVersion: string
     group?: string
     parallel?: boolean
