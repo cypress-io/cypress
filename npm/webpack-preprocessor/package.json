@@ -1,9 +1,26 @@
 {
   "name": "@cypress/webpack-preprocessor",
   "version": "0.0.0-development",
-  "description": "Cypress preprocessor for bundling JavaScript via webpack",
   "private": false,
+  "description": "Cypress preprocessor for bundling JavaScript via webpack",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "cypress-preprocessor",
+    "webpack"
+  ],
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
+  },
+  "license": "MIT",
   "main": "dist",
+  "types": "dist",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
@@ -16,6 +33,9 @@
     "test-unit": "vitest run test/unit/*.spec.ts",
     "test-watch": "vitest watch test/unit/*.spec.ts",
     "watch": "rimraf dist && tsc --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "bluebird": "3.7.1",
@@ -49,26 +69,6 @@
     "@babel/preset-env": "^7.26.0",
     "babel-loader": "^9 || ^10",
     "webpack": "^5"
-  },
-  "files": [
-    "dist"
-  ],
-  "types": "dist",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
-  "keywords": [
-    "cypress",
-    "cypress-plugin",
-    "cypress-preprocessor",
-    "webpack"
-  ],
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "nx": {
     "targets": {
