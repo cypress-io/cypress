@@ -14,7 +14,7 @@ export const getFs = () => {
       return dir
     }
 
-    return _.extend({}, ..._.map(dir, (val, key) => {
+    return _.extend({}, ..._.map(dir, (val, key: string) => {
       let nextDepth = null
 
       if (d !== null) {

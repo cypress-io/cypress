@@ -1,5 +1,14 @@
 import type * as sinon from 'sinon'
 
+// sinon sets `callId` on every recorded call but leaves it out of its type definitions
+const callId = (call: object): number => {
+  if (!('callId' in call) || typeof call.callId !== 'number') {
+    throw new Error('expected a recorded call with a numeric callId')
+  }
+
+  return call.callId
+}
+
 // Simulates the underlying CDP client emitting 'disconnect' by invoking every currently
 // -attached listener, mirroring a real EventEmitter rather than indexing into a specific
 // `.on()` call - so this stays correct regardless of how many listeners connect() registers
@@ -13,7 +22,7 @@ export const activeListeners = (onStub: sinon.SinonStub, offStub: sinon.SinonStu
     ...offStub.getCalls().map((call) => ({ type: 'off' as const, call })),
   ]
   .filter(({ call }) => call.args[0] === event)
-  .sort((a, b) => a.call.callId - b.call.callId)
+  .sort((a, b) => callId(a.call) - callId(b.call))
 
   const active: Function[] = []
 

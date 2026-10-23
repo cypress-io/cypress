@@ -49,6 +49,7 @@ Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/ser
 **Gotchas / Notes**
 
 - Do not build `.js` files manually during development; `@packages/ts` provides require-time transpilation.
+- `check-ts` type-checks `lib/` and `test/` through `tsconfig.check.json`, since neither mocha (transpile-only `ts-node`) nor vitest fails a spec on type errors. Its `exclude` list holds the specs that already had type errors when the check was added: remove a spec from it once it type-checks, and do not add new ones.
 - To disable the V8 snapshot for debugging, set `DISABLE_SNAPSHOT_REQUIRE=1`.
 - To update test snapshots, prepend `SNAPSHOT_UPDATE=1` to any test command.
 - E2E/system tests have moved to `system-tests/`; only unit and integration tests live in `test/unit` and `test/integration`.
