@@ -34,11 +34,11 @@ is not covered; you already know it. Parent issue: cypress-io/cypress#34846.
   is named in four CI workflows and migrates in its own human PR.
 - Specs never connect to a non-loopback address. Tests must pass on a sandboxed host.
 
-## `spec_helper.js` is not ported. Inline what the file needs.
+## `spec_helper.ts` is not ported. Inline what the file needs.
 
-`test/spec_helper.js` installs root hooks for the whole mocha process. A mocha spec depends
+`test/spec_helper.ts` installs root hooks for the whole mocha process. A mocha spec depends
 on them even when it never imports `spec_helper`, because some other spec in the same run
-did. Under vitest each file is on its own, so read `spec_helper.js` and inline only the
+did. Under vitest each file is on its own, so read `spec_helper.ts` and inline only the
 hooks this file actually relies on:
 
 | Original behavior | Inline as |
