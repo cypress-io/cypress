@@ -18,7 +18,7 @@
 - [x] npm/webpack-batteries-included-preprocessor
 - [ ] npm/webpack-preprocessor
 - [x] npm/webpack-dev-server
-- [ ] npm/vite-plugin-cypress-esm
+- [x] npm/vite-plugin-cypress-esm
 - [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
