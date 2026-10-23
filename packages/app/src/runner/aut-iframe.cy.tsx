@@ -12,6 +12,85 @@ describe('AutIframe', () => {
     autIframe = new AutIframe('Test Project', eventManager, Cypress.$)
   })
 
+  context('.visitBlankPage', () => {
+    let eventManager: ReturnType<typeof createEventManager>
+    let automation: ReturnType<typeof cy.stub>
+    let iframe: HTMLIFrameElement
+    let originalCypress: unknown
+
+    beforeEach(() => {
+      eventManager = createEventManager()
+      originalCypress = eventManager.getCypress()
+      automation = cy.stub()
+      automation.resolves()
+      eventManager._testingOnlySetCypress({ browser: { family: 'chromium', name: 'chrome' }, automation })
+      autIframe = new AutIframe('Test Project', eventManager, Cypress.$)
+      iframe = document.createElement('iframe')
+      autIframe.$iframe = Cypress.$(iframe) as JQuery<HTMLIFrameElement>
+      cy.stub(autIframe, '_showInitialBlankPage')
+      cy.stub(autIframe, '_showTestIsolationBlankPage')
+      Object.defineProperty(iframe, 'src', {
+        configurable: true,
+        set: () => iframe.dispatchEvent(new Event('load')),
+      })
+    })
+
+    afterEach(() => {
+      eventManager._testingOnlySetCypress(originalCypress)
+    })
+
+    it('arms before navigation and resets the policy after load', () => {
+      Object.defineProperty(iframe, 'src', {
+        set: () => {
+          expect(automation).to.have.been.calledOnceWithExactly('set:beforeunload:handling', true)
+          iframe.dispatchEvent(new Event('load'))
+        },
+      })
+
+      return autIframe.visitBlankPage(true).then(() => {
+        expect(automation).to.have.been.calledTwice
+        expect(automation.firstCall).to.have.been.calledWith('set:beforeunload:handling', true)
+        expect(automation.secondCall).to.have.been.calledWith('set:beforeunload:handling', false)
+        expect(autIframe._showTestIsolationBlankPage).to.have.been.calledOnce
+      })
+    })
+
+    it('resets the policy when starting navigation throws', () => {
+      const error = new Error('navigation failed')
+
+      Object.defineProperty(iframe, 'src', {
+        set: () => {
+          throw error
+        },
+      })
+
+      return autIframe.visitBlankPage().then(() => {
+        throw new Error('expected navigation to fail')
+      }, (err) => {
+        expect(err).to.equal(error)
+        expect(automation.secondCall).to.have.been.calledWith('set:beforeunload:handling', false)
+      })
+    })
+
+    it('does not use CDP when the iframe is absent', () => {
+      autIframe.$iframe = undefined
+
+      return autIframe.visitBlankPage().then(() => {
+        expect(automation).not.to.have.been.called
+      })
+    })
+
+    for (const browser of [{ family: 'firefox', name: 'firefox' }, { family: 'webkit', name: 'webkit' }, { family: 'chromium', name: 'electron' }]) {
+      it(`preserves existing ${browser.name} handling`, () => {
+        eventManager._testingOnlySetCypress({ browser, automation })
+
+        return autIframe.visitBlankPage().then(() => {
+          expect(automation).not.to.have.been.called
+        })
+      })
+    }
+  })
+
   context('._addElementBoxModelLayers', () => {
     let originalGetComputedStyle: typeof getComputedStyle
     let getComputedStyleCallCount: number
