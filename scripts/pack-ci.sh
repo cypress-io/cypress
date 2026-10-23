@@ -44,7 +44,7 @@ fi
 # Validate the base config (only if --validate flag is set)
 if [ "$VALIDATE" = true ]; then
   echo "🔍 Validating base configuration..."
-  if ! circleci config validate "$base_config"; then
+  if ! circleci config validate --next "$base_config"; then
     echo "❌ Warning: Base config is not valid! Fix the base config in ./.circleci/config.yml."
     exit 1
   fi
@@ -121,7 +121,7 @@ for cfg_path in "${dirs_to_process[@]}"; do
       exit 1
     fi
     echo "  🔍 Validating ${output_file}"
-    if ! circleci config validate "$output_file"; then
+    if ! circleci config validate --next "$output_file"; then
       echo "    ❌ Validating ${output_file} failed"
       exit 1
     fi
