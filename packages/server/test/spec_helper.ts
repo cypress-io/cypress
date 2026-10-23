@@ -11,15 +11,12 @@ import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 import _ from 'lodash'
 import { enable, mockElectron } from './mockery_helper'
+
 import { configureLongStackTraces } from '../lib/environment'
 
 configureLongStackTraces(undefined)
 
-chai
-.use(chaiSubset)
-.use(sinonChai)
-.use(chaiUuid)
-.use(chaiAsPromised)
+chai.use(chaiSubset)
 
 const expect = chai.expect
 
@@ -33,11 +30,15 @@ Object.assign(global, {
   sinon,
 })
 
-// The `lib` modules below are required rather than imported so they load in this
-// order: after Bluebird is configured, which it refuses once promises are in use,
-// after the globals above are set, and, for makeDataContext, after mockery has
-// substituted the electron stub.
+// `lib` modules are required, not imported, so they load after Bluebird is configured
+// (it refuses once promises exist) and, for makeDataContext, after electron is stubbed
 const { cache }: typeof import('../lib/cache') = require('../lib/cache')
+
+chai
+.use(sinonChai)
+.use(chaiUuid)
+.use(chaiAsPromised)
+
 const { GracefulExit }: typeof import('../lib/util/graceful-exit') = require('../lib/util/graceful-exit')
 
 if (process.env.UPDATE) {
@@ -52,21 +53,19 @@ if (process.env.UPDATE_SNAPSHOTS) {
   throw new Error('You\'re using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
 }
 
-let hasOnly = false
+let hasOnly = false;
 
 // hack for older version of mocha so that
 // snap-shot-it can find suite._onlyTests
-for (const fn of [it, describe, context]) {
-  const backup = fn.only
+['it', 'describe', 'context'].forEach((prop) => {
+  const backup = global[prop].only
 
-  Object.assign(fn, {
-    only (...args) {
-      hasOnly = true
+  global[prop].only = function (...args) {
+    hasOnly = true
 
-      return Reflect.apply(backup, this, args)
-    },
-  })
-}
+    return backup.apply(this, args)
+  }
+})
 
 const originalEnv = process.env
 const env = _.clone(process.env)
@@ -79,18 +78,23 @@ const {
   useFakeTimers,
 } = sinon
 
-let clock: sinon.SinonFakeTimers | undefined
+let fakeClock: sinon.SinonFakeTimers | undefined
 
 sinon.useFakeTimers = function (...args) {
-  clock = useFakeTimers.apply(sinon, args)
+  const clock = useFakeTimers.apply(sinon, args)
+
+  fakeClock = clock
 
   return clock
 }
 
 sinon.restore = function (...args) {
-  if (clock) {
-    clock.restore()
-    clock = undefined
+  let c
+
+  c = fakeClock
+
+  if (c) {
+    c.restore()
   }
 
   return restore.apply(sinon, args)
@@ -106,10 +110,11 @@ before(function () {
   }
 })
 
+// appData.ensure()
+
 const { setCtx, getCtx, clearCtx, makeDataContext }: typeof import('../lib/makeDataContext') = require('../lib/makeDataContext')
 
-// Safe because these hooks only need some context to exist between tests; a spec
-// that depends on `mode` or `modeOptions` makes its own context with them.
+// Safe because specs that depend on `mode` or `modeOptions` make their own context
 const defaultCtxOptions = {} as Parameters<typeof makeDataContext>[0]
 
 before(async () => {
@@ -132,7 +137,7 @@ beforeEach(async function () {
 
   // always clean up the cache
   // before each test
-  await cache.remove()
+  return cache.remove()
 })
 
 afterEach(async () => {
