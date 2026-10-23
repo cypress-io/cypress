@@ -1773,6 +1773,10 @@ export default {
         }
 
         const onNext = (err) => {
+          if (err) {
+            cy.cancelPendingCommands()
+          }
+
           // when done with the function set that to end
           fnDurationEnd = new Date()
 
