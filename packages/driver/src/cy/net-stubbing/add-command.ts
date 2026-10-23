@@ -156,7 +156,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
         return err(`\`${k}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`)
       }
 
-      knownFieldNames.push(k)
+      knownFieldNames.push(k.toLowerCase())
     }
   }
 
