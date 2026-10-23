@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MockInstance } from 'vitest'
 
 import { Reporter } from '../../lib/reporter'
+import { fs } from '../../lib/util/fs'
 
 // `Reporter.loadReporter` reaches the built-in reporters through a CJS `require`,
 // which `vi.mock` never sees, so seed the CJS cache instead.
@@ -243,6 +244,67 @@ describe('lib/reporter', () => {
 
       reporter.setRunnables(root)
       expect(reporter.results().tests).toHaveLength(2)
+    })
+  })
+
+  describe('JSON output files', () => {
+    const finishJsonRun = () => {
+      vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      reporter.setRunnables(root)
+      reporter.runner.emit('start')
+      reporter.runner.emit('end')
+    }
+
+    it('writes the existing Mocha JSON payload relative to the project', async () => {
+      const projectRoot = path.resolve('synthetic-project')
+      const write = vi.spyOn(fs, 'outputJson').mockResolvedValue(undefined)
+
+      reporter = new Reporter('json', { output: 'reports/results.json' }, projectRoot)
+      finishJsonRun()
+      await reporter.end()
+
+      expect(write).toHaveBeenCalledWith(path.join(projectRoot, 'reports/results.json'), reporter.runner.testResults, { spaces: 2 })
+    })
+
+    it('waits for an absolute output file to finish writing', async () => {
+      const output = path.resolve('synthetic-results.json')
+      let finishWrite!: () => void
+      const write = vi.spyOn(fs, 'outputJson').mockImplementation(() => {
+        return new Promise<void>((resolve) => {
+          finishWrite = resolve
+        })
+      })
+
+      reporter = new Reporter('json', { output })
+      finishJsonRun()
+      const result = reporter.end()
+
+      expect(write).toHaveBeenCalledWith(output, reporter.runner.testResults, { spaces: 2 })
+      expect(result).toBeInstanceOf(Promise)
+      finishWrite()
+      expect(await result).toHaveProperty('stats')
+    })
+
+    it('propagates output write failures', async () => {
+      const error = new Error('synthetic JSON write failure')
+
+      vi.spyOn(fs, 'outputJson').mockRejectedValue(error)
+      reporter = new Reporter('json', { output: 'results.json' })
+      finishJsonRun()
+
+      await expect(reporter.end()).rejects.toBe(error)
+    })
+
+    it('keeps JSON without output and other reporters unchanged', () => {
+      const write = vi.spyOn(fs, 'outputJson')
+
+      reporter = new Reporter('json')
+      finishJsonRun()
+      expect(reporter.end()).not.toBeInstanceOf(Promise)
+      reporter = new Reporter('spec', { output: 'ignored.json' })
+      reporter.setRunnables(root)
+      expect(reporter.end()).not.toBeInstanceOf(Promise)
+      expect(write).not.toHaveBeenCalled()
     })
   })
 
