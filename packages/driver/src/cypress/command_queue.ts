@@ -544,6 +544,12 @@ export class CommandQueue extends Queue<$Command> {
         return
       }
 
+      if (err == null) {
+        err = $errUtils.errByPath('miscellaneous.promise_rejected_without_error', {
+          value: String(err),
+        })
+      }
+
       if (this.state('onQueueFailed')) {
         err = this.state('onQueueFailed')(err, this)
 
