@@ -12,6 +12,6 @@ export default [
   },
   {
     // `tsc -p tsconfig.cjs.json` emits the CJS entry and its declarations next to the source
-    ignores: ['index.js', 'index.mjs', '**/*.d.ts', '**/*.d.mts'],
+    ignores: ['index.js', 'index.d.ts'],
   },
 ]
