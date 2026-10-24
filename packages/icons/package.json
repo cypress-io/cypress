@@ -18,11 +18,10 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "build-assets": "tsx ./scripts/build.ts && tsx ./scripts/ico.ts",
     "build-prod": "yarn build",
-    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
     "lint": "eslint",
     "test": "yarn test-unit",
-    "test-unit": "vitest run",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "test-unit": "vitest run"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
