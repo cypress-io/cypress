@@ -90,11 +90,11 @@ const API: PreprocessorAPI = {
     debugFn(`getFile ${filePath}`)
 
     if (!(fileObject = fileObjects[filePath])) {
-      // we should be watching the file if we are NOT
-      // in a text terminal aka cypress run
+      // Watch in open mode unless file watching is disabled.
+      // The internal override also enables watching in cypress run.
       // TODO: rename this to config.isRunMode
       // vs config.isInteractiveMode
-      const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
+      const shouldWatch = (!config.isTextTerminal && config.watchForFileChanges !== false) || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
 
       const baseFilePath = filePath.replace(config.projectRoot, '')
 
