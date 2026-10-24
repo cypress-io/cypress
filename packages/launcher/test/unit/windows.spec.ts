@@ -14,7 +14,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       homedir: vi.fn(),
       platform: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       pathExists: vi.fn(),
     },
