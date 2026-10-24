@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
+import { fs } from './util/fs'
 import { stackUtils } from '@packages/errors'
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidentally upgrading this one
@@ -276,7 +277,7 @@ const setDate = function (obj: RunnablePayload, _runnables: Record<string, Inter
   return []
 }
 
-const orNull = function <T>(prop: T | null | undefined): T | null {
+const orNull = function <T> (prop: T | null | undefined): T | null {
   if (prop == null) return null
 
   return prop
@@ -685,6 +686,13 @@ export class Reporter {
   }
 
   end (): Promise<ReporterResults> | ReporterResults {
+    if (this.reporterName.toLowerCase() === 'json' && typeof this.reporterOptions.output === 'string') {
+      const output = path.resolve(this.projectRoot ?? '', this.reporterOptions.output)
+      const { testResults } = this.runner as Mocha.Runner & { testResults: unknown }
+
+      return fs.outputJson(output, testResults, { spaces: 2 }).then(() => this.results())
+    }
+
     if (this.reporter.done) {
       const {
         failures,
