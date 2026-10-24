@@ -23,7 +23,7 @@
 
 ### Batch 4a: Core packages (part 1)
 - [ ] packages/frontend-shared
-- [ ] packages/icons
+- [x] packages/icons
 - [ ] packages/launcher
 - [ ] packages/https-proxy
 - [ ] packages/proxy
@@ -56,7 +56,8 @@
 - [ ] packages/packherd-require
 - [ ] packages/v8-snapshot-require
 - [ ] packages/web-config
-- [ ] packages/types
+- [x] packages/types
+- [x] packages/scaffold-config
 - [ ] packages/example
 
 ### Batch 5: Test and script folders
