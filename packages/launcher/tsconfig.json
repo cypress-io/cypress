@@ -1,17 +1,12 @@
 {
   "extends": "./../ts/tsconfig.json",
   "include": [
-    "**/*.ts",
-    "./index.ts"
+    "index.ts",
+    "lib/**/*.ts"
   ],
   "compilerOptions": {
   },
   "files": [
     "./../ts/index.d.ts"
-  ],
-  "exclude": [
-    "eslint.config.ts",
-    "test",
-    "vitest.config.ts"
   ]
 }

@@ -104,10 +104,14 @@ For each package in the batch:
 2. **Add a new ESLint config file:**
    - Create `eslint.config.ts` in the package root:
      ```ts
-     import { baseConfig } from '@packages/eslint-config'
-     export default baseConfig
+     import { baseConfig, jsonConfig } from '@packages/eslint-config'
+
+     export default [
+       ...baseConfig,
+       ...jsonConfig,
+     ]
      ```
-   - To keep linting the package's JSON files, spread `jsonConfig` after `baseConfig`, as described in [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig).
+   - `jsonConfig` keeps the package's JSON files linted, as described in [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig). A package that leaves it out exports `baseConfig` alone.
 3. **Ensure dependencies are up to date:**
    - Remove any package-local ESLint plugins now provided by the shared config.
    - Remove TSLint-related dependencies (the new config includes `@typescript-eslint`).
@@ -125,7 +129,7 @@ For each package in the batch:
      }
      ```
    - This ensures that when files are staged for commit, they are automatically linted and fixed using the package's local ESLint configuration.
-   - Keep `json` in the glob only when the package spreads `jsonConfig`; without it, staged `.json` files just produce a "File ignored" warning.
+   - Drop `json` from the glob if the package leaves out `jsonConfig`; otherwise staged `.json` files just produce a "File ignored" warning.
 5. **Run lint and autofix:**
    - From the package root, run:
      ```
