@@ -15,7 +15,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       arch: vi.fn(),
       platform: vi.fn(),
@@ -28,7 +28,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       readFile: vi.fn(),
     },
@@ -40,7 +40,7 @@ vi.mock('child_process', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       spawn: vi.fn(),
     },
@@ -77,7 +77,7 @@ describe('darwin browser detection', () => {
       }
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
     vi.mocked(fs.readFile).mockImplementation((file: string, _options: any): Promise<string> => {
       const foundAppParams = flatFindAppParams.find((findAppParams) => `/Applications/${findAppParams.appName}/Contents/Info.plist` === file)
 
@@ -200,7 +200,7 @@ describe('darwin browser detection', () => {
           }),
         }))
 
-        // @ts-expect-error
+        // @ts-expect-error - cp.spawn is typed as the real function, not a vi mock
         expect(cp.spawn.mock.calls[0][2].env).not.toHaveProperty('ARCHPREFERENCE')
       })
     })
