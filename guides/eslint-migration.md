@@ -24,8 +24,9 @@
 ### Batch 4a: Core packages (part 1)
 - [ ] packages/frontend-shared
 - [ ] packages/icons
-- [ ] packages/launcher
-- [ ] packages/https-proxy
+- [x] packages/launcher
+- [x] packages/https-proxy
+- [x] packages/network-interception
 - [ ] packages/proxy
 - [ ] packages/net-stubbing
 - [ ] packages/driver

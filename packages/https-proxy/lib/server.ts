@@ -101,7 +101,7 @@ export class Server {
   }
 
   _onFirstHeadBytes (req: IncomingMessage, browserSocket: net.Socket, head: Buffer) {
-    // @ts-expect-error
+    // @ts-expect-error - lodash's chain types don't allow slice() after invoke()
     debug('Got first head bytes %o', { url: req.url, head: _.chain(head).invoke('toString').slice(0, 64).join('').value() })
 
     browserSocket.pause()
@@ -162,7 +162,7 @@ export class Server {
       port = '443'
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - createRetryingSocket requires family, useTls and getDelayMsForRetry, which it defaults at runtime
     return connect.createRetryingSocket({ port: Number(port), host: hostname }, onSocket)
   }
 
