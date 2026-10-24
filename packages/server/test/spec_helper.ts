@@ -30,8 +30,7 @@ Object.assign(global, {
   sinon,
 })
 
-// `lib` modules are required, not imported, so they load after Bluebird is configured
-// (it refuses once promises exist) and, for makeDataContext, after electron is stubbed
+// The `lib` modules below are required so they load after Bluebird setup and the electron stub
 const { cache }: typeof import('../lib/cache') = require('../lib/cache')
 
 chai
@@ -71,34 +70,6 @@ const originalEnv = process.env
 const env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
-
-// backup these originals
-const {
-  restore,
-  useFakeTimers,
-} = sinon
-
-let fakeClock: sinon.SinonFakeTimers | undefined
-
-sinon.useFakeTimers = function (...args) {
-  const clock = useFakeTimers.apply(sinon, args)
-
-  fakeClock = clock
-
-  return clock
-}
-
-sinon.restore = function (...args) {
-  let c
-
-  c = fakeClock
-
-  if (c) {
-    c.restore()
-  }
-
-  return restore.apply(sinon, args)
-}
 
 enable(mockery)
 
