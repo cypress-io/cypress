@@ -24,7 +24,7 @@
     "test-unit": "vitest run"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+    "**/*.{js,jsx,ts,mts,tsx,json}": "eslint --fix"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",

@@ -11,8 +11,16 @@ export default [
     },
   },
   {
+    // Build scripts may use sync fs and the other APIs restricted in shipped code
+    files: ['scripts/**'],
+    rules: {
+      'no-restricted-properties': 'off',
+      'no-restricted-syntax': 'off',
+    },
+  },
+  {
     // no-floating-promises needs type information, so the shipped source gets a project service
-    files: ['index.ts'],
+    files: ['index.ts', 'index.mts'],
     languageOptions: {
       parserOptions: {
         projectService: true,
