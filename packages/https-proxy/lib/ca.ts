@@ -230,7 +230,7 @@ export class CA {
     certServer.setIssuer(this.CAcert.issuer.attributes)
     certServer.setExtensions(ServerExtensions.concat([{
       name: 'subjectAltName',
-      // @ts-expect-error - node-forge's extension types don't include subjectAltName's altNames
+      // @ts-expect-error - concat() is held to ServerExtensions' inferred element type, which has no altNames
       altNames: hosts.map((host: string) => {
         if (host.match(ipAddressRe)) {
           return { type: 7, ip: host }

@@ -10,4 +10,8 @@ export default [
       },
     },
   },
+  // `build-prod` compiles in place, next to the sources
+  {
+    ignores: ['index.js', 'lib/**/*.js'],
+  },
 ]

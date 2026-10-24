@@ -10,6 +10,8 @@
     "./../ts/index.d.ts"
   ],
   "exclude": [
-    "test"
+    "eslint.config.ts",
+    "test",
+    "vitest.config.ts"
   ]
 }

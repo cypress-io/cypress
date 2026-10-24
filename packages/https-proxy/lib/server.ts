@@ -162,7 +162,7 @@ export class Server {
       port = '443'
     }
 
-    // @ts-expect-error - createRetryingSocket requires family, useTls and getDelayMsForRetry, which it defaults at runtime
+    // @ts-expect-error - RetryingOptions requires family, useTls and getDelayMsForRetry, but connect handles each being absent
     return connect.createRetryingSocket({ port: Number(port), host: hostname }, onSocket)
   }
 
