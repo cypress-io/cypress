@@ -308,6 +308,105 @@ describe('src/dom/elements', () => {
     })
   })
 
+  context('.isTextLike', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
+      cy.get('body').then(($body) => {
+        $body.append('<input id="text-like-email" type="email"><button id="text-like-button">button</button>')
+      })
+    })
+
+    it('returns true for a text-like element passed as a DOM element or a jQuery object', () => {
+      cy.get('#text-like-email').then(($el) => {
+        expect(Cypress.dom.isTextLike($el[0])).to.be.true
+        expect(Cypress.dom.isTextLike($el)).to.be.true
+      })
+    })
+
+    it('returns false for an element that is not text-like, passed as a DOM element or a jQuery object', () => {
+      cy.get('#text-like-button').then(($el) => {
+        expect(Cypress.dom.isTextLike($el[0])).to.be.false
+        expect(Cypress.dom.isTextLike($el)).to.be.false
+      })
+    })
+  })
+
+  context('.isSelector', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
+    })
+
+    it('matches a selector for a DOM element or a jQuery object', () => {
+      cy.get('input:first').then(($el) => {
+        expect(Cypress.dom.isSelector($el[0], 'input')).to.be.true
+        expect(Cypress.dom.isSelector($el, 'input')).to.be.true
+        expect(Cypress.dom.isSelector($el[0], 'button')).to.be.false
+        expect(Cypress.dom.isSelector($el, 'button')).to.be.false
+      })
+    })
+  })
+
+  context('.getWindowByElement', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
+    })
+
+    it('returns the window for a DOM element, a document, a window, or a jQuery object holding one', () => {
+      cy.window().then((win) => {
+        const doc = win.document
+        const el = doc.body
+
+        expect(Cypress.dom.getWindowByElement(el)).to.equal(win)
+        expect(Cypress.dom.getWindowByElement($(el))).to.equal(win)
+        expect(Cypress.dom.getWindowByElement(doc)).to.equal(win)
+        expect(Cypress.dom.getWindowByElement($(doc))).to.equal(win)
+        expect(Cypress.dom.getWindowByElement(win)).to.equal(win)
+        expect(Cypress.dom.getWindowByElement($(win))).to.equal(win)
+      })
+    })
+  })
+
+  context('.getFirst*Parent', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
+      cy.get('body').then(($body) => {
+        $body.append(`\
+<div id="parent-scroll" style="height: 50px; overflow: auto;">
+  <div id="parent-sticky" style="position: sticky; top: 0;"><span id="parent-inner">inner</span></div>
+  <div style="height: 500px;"></div>
+</div>`)
+      })
+    })
+
+    it('finds the scrollable ancestor of a DOM element or a jQuery object', () => {
+      cy.get('#parent-inner').then(($el) => {
+        expect(Cypress.dom.getFirstScrollableParent($el[0])!.attr('id')).to.eq('parent-scroll')
+        expect(Cypress.dom.getFirstScrollableParent($el)!.attr('id')).to.eq('parent-scroll')
+      })
+    })
+
+    it('finds the sticky ancestor of a DOM element or a jQuery object', () => {
+      cy.get('#parent-inner').then(($el) => {
+        expect(Cypress.dom.getFirstStickyPositionParent($el[0])!.attr('id')).to.eq('parent-sticky')
+        expect(Cypress.dom.getFirstStickyPositionParent($el)!.attr('id')).to.eq('parent-sticky')
+      })
+    })
+
+    it('finds the fixed or sticky ancestor of a DOM element or a jQuery object', () => {
+      cy.get('#parent-inner').then(($el) => {
+        expect(Cypress.dom.getFirstFixedOrStickyPositionParent($el[0])!.attr('id')).to.eq('parent-sticky')
+        expect(Cypress.dom.getFirstFixedOrStickyPositionParent($el)!.attr('id')).to.eq('parent-sticky')
+      })
+    })
+
+    it('returns null when there is no such ancestor, for a DOM element or a jQuery object', () => {
+      cy.get('#parent-scroll').then(($el) => {
+        expect(Cypress.dom.getFirstStickyPositionParent($el[0])).to.be.null
+        expect(Cypress.dom.getFirstStickyPositionParent($el)).to.be.null
+      })
+    })
+  })
+
   context('.isDescendent', () => {
     beforeEach(() => {
       cy.visit('/fixtures/dom.html')

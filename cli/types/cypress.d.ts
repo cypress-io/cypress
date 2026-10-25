@@ -662,7 +662,8 @@ declare namespace Cypress {
        * `<textarea>`, a contenteditable element, or an `<input>` whose `type` is
        * `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`,
        * `datetime`, `datetime-local`, `search`, `url`, or `tel`.
-       * Pass a DOM element. A jQuery object throws a `TypeError`.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks its
+       * first element.
        */
       isTextLike(element: JQuery | HTMLElement): boolean
       /**
@@ -688,7 +689,7 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an element matches a jQuery selector.
        * For a jQuery object with more than one element, returns `true` if any of
-       * them match. Pass a jQuery object. A DOM element throws a `TypeError`.
+       * them match. Accepts a DOM element or a jQuery object.
        */
       isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
       /**
@@ -738,7 +739,7 @@ declare namespace Cypress {
        * holds one, an array of elements when it holds more than one, and
        * `undefined` when it is empty.
        */
-      getElements(element: JQuery): JQuery | HTMLElement[]
+      getElements(element: JQuery): HTMLElement | HTMLElement[] | undefined
       /**
        * Returns the selector that `cy.contains()` uses to find elements whose
        * text includes `text`, plus submit buttons whose `value` has `text` as one
@@ -761,15 +762,15 @@ declare namespace Cypress {
        * element is inside an `<a>`, `<button>`, `<label>`, or submit `<input>`
        * that is also in the list, it picks that ancestor instead.
        *
-       * Pass a jQuery object, and it returns a jQuery object holding the chosen
-       * element. An array of elements throws a `TypeError`.
+       * Returns a jQuery object holding the chosen element.
        */
-      getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
+      getFirstDeepestElement(elements: JQuery, index?: number): JQuery
       /**
-       * Returns the window that contains an element, or the window itself when
-       * passed a window. Pass a DOM element. A jQuery object throws a `TypeError`.
+       * Returns the window that contains an element or a document, or the window
+       * itself when passed a window. Accepts any of these, or a jQuery object
+       * holding one. For a jQuery object, uses its first element.
        */
-      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getWindowByElement(element: JQuery<HTMLElement | Document | Window> | HTMLElement | Document | Window): Window
       /**
        * Returns a sentence explaining why an element is not visible.
        * Accepts a DOM element or a jQuery object.
@@ -780,28 +781,28 @@ declare namespace Cypress {
        * object, or `null` if there is none. The element itself is not checked.
        * It walks out of shadow roots to their hosts and can return `<html>`.
        * Returns `null` right away for `<html>`, `<body>`, or the document.
-       * Pass a jQuery object. A DOM element returns `null`, or throws a
-       * `TypeError` for a `<select>` with options or a `<form>` with controls.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
        */
-      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | null
       /**
        * Returns the element, or its closest ancestor, whose CSS `position` is
        * `fixed` or `sticky`, as a jQuery object, or `null` if there is none.
        * It walks out of shadow roots to their hosts. Returns `null` right away for
        * `<html>`, `<body>`, or the document.
-       * Pass a jQuery object. A DOM element returns `null`, or throws a
-       * `TypeError` for a `<select>` with options or a `<form>` with controls.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
        */
-      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | null
       /**
        * Returns the element, or its closest ancestor, whose CSS `position` is
        * `sticky`, as a jQuery object, or `null` if there is none. It walks out of
        * shadow roots to their hosts. Returns `null` right away for `<html>`,
        * `<body>`, or the document.
-       * Pass a jQuery object. A DOM element returns `null`, or throws a
-       * `TypeError` for a `<select>` with options or a `<form>` with controls.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
        */
-      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | null
       /**
        * Rounds a point to whole pixels so it stays inside the element it targets.
        * `xPosition` (`'left'`, `'center'`, or `'right'`) and `yPosition` (`'top'`,
@@ -810,7 +811,7 @@ declare namespace Cypress {
        * and a right or bottom edge rounds down and then subtracts 1.
        * Returns an object with `x` and `y`.
        */
-      getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      getCoordsByPosition(left: number, top: number, xPosition?: 'left' | 'center' | 'right', yPosition?: 'top' | 'center' | 'bottom'): { x: number, y: number }
       /**
        * Returns an element's `width`, `height`, `scrollTop`, and `scrollLeft`, and
        * the position of its box measured three ways: `fromElViewport` is relative

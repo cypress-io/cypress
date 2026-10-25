@@ -9,7 +9,7 @@ import { findParent, getParent, isUndefinedOrHTMLBodyDoc } from './find'
 import { isInput, isTextarea, textLikeInputTypes } from './elementHelpers'
 import { getNativeProp } from './nativeProps'
 import { isWithinShadowRoot } from './shadow'
-import type { HTMLElementCanSetSelectionRange, HTMLTextLikeElement } from './types'
+import type { HTMLElementCanSetSelectionRange } from './types'
 import { isSelector } from './utils'
 import Debug from 'debug'
 
@@ -64,7 +64,8 @@ export const isButtonLike = (el: HTMLElement) => {
   ])
 }
 
-export const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
+export const isTextLike = function (elOrJquery: HTMLElement | JQuery<HTMLElement>): boolean {
+  const el = $jquery.isJquery(elOrJquery) ? elOrJquery[0] : elOrJquery
   const $el = $jquery.wrap(el)
   const sel = (selector) => {
     return isSelector($el, selector)
@@ -318,7 +319,9 @@ export const isScrollable = (subject) => {
 /**
  * Getters where DOM state like focus, styling, and actionability affect the return value
  */
-export const getFirstFixedOrStickyPositionParent = ($el): JQuery<any> | null => {
+export const getFirstFixedOrStickyPositionParent = (elOrJquery): JQuery<any> | null => {
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
+
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
@@ -340,7 +343,9 @@ export const getFirstFixedOrStickyPositionParent = ($el): JQuery<any> | null => 
   })
 }
 
-export const getFirstStickyPositionParent = ($el) => {
+export const getFirstStickyPositionParent = (elOrJquery): JQuery<any> | null => {
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
+
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
@@ -362,7 +367,9 @@ export const getFirstStickyPositionParent = ($el) => {
   })
 }
 
-export const getFirstScrollableParent = ($el) => {
+export const getFirstScrollableParent = (elOrJquery): JQuery<any> | null => {
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
+
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
