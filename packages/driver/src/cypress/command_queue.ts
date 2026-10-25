@@ -88,7 +88,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
   }
 
   const options = {
-    timeout: command.get('timeout'),
+    timeout: command.get('timeout') ?? cy.config('defaultCommandTimeout'),
     error: null,
     _log: command.get('_log'),
   }
