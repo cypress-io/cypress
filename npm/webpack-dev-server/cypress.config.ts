@@ -29,7 +29,7 @@ export default defineConfig({
   retries: {
     runMode: 2,
   },
-  // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
+  // @ts-expect-error - these internal options are not in the public config type; set them to test Cypress in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
   socketIoRoute: '/__app-socket',
