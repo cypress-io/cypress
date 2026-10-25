@@ -7,7 +7,6 @@
 
 **Bugfixes:**
 
-- Renderer-crash errors during [`cypress run`](https://on.cypress.io/command-line#cypress-run) no longer suggest lowering [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global), an option normally ignored in run mode. The suggestion remains available during `cypress open`. Fixes [#28578](https://github.com/cypress-io/cypress/issues/28578).
 - Fixed a regression in [16.0.0](#16-0-0) where, in Chrome, Chromium, and Edge, a spec hung forever at its first [`cy.visit()`](https://on.cypress.io/visit) to another origin when its bundled file was larger than about 75 MB, which a spec can reach by importing tens of megabytes of generated code. [`pageLoadTimeout`](https://on.cypress.io/configuration#Timeouts) never fired, so `cypress run` had to be killed. Setting [`forceHttp1`](https://on.cypress.io/configuration) to `true` is no longer needed to avoid it. Fixes [#34794](https://github.com/cypress-io/cypress/issues/34794).
 - Fixed an issue where `cypress open` with both a `--browser` and a testing type flag launched the browser twice the first time Cypress showed its major-version welcome screen — on first open after upgrading, or after clearing app data. Fixes [#34868](https://github.com/cypress-io/cypress/issues/34868).
 - Fixed an issue where [`.scrollTo()`](https://on.cypress.io/scrollto) and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) stopped short of the end of a scrollable element with always-visible scrollbars. Positions such as `bottom`, `right`, `bottomRight`, and `'100%'` landed short by the width of the scrollbar, and `center` or `'50%'` landed off-center by half of it. Fixed in [#34948](https://github.com/cypress-io/cypress/pull/34948).
@@ -25,6 +24,8 @@
 - Fixed an issue where `cypress run` could stop printing output and never finish when a test was retried after one of its hooks timed out on the previous attempt. Fixed in [#34997](https://github.com/cypress-io/cypress/pull/34997).
 
 **Misc:**
+
+- Renderer-crash errors during [`cypress run`](https://on.cypress.io/command-line#cypress-run) no longer suggest lowering [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global), an option normally ignored in run mode. The suggestion remains available during `cypress open`. Addresses [#28578](https://github.com/cypress-io/cypress/issues/28578).
 
 - The TypeScript types now accept a number as the expected value of the `attr`, `id`, `text`, and `value` assertions, including the `contain` and `include` forms of `text` and `value`, such as `expect($el).to.have.attr('tabindex', 0)` or `expect($el).to.have.text(123)`. Cypress already accepted numbers for these assertions at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).
 - The TypeScript types now accept a DOM element, an array of elements, a jQuery object, or a predicate function in the `match` assertion, such as `expect($el).to.match($other)` or `expect($el).to.match((index, el) => el.id === 'result')`. Cypress already supported these at runtime, but TypeScript reported an error. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).

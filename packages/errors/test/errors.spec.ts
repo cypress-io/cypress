@@ -40,6 +40,7 @@ describe('lib/errors', () => {
 
       expect(err.message).not.toContain('numTestsKeptInMemory')
       expect(err.message).toContain('Try increasing the CPU/memory')
+      expect(err.message).toContain('machine you\'re running on.\n\nYou can learn more here:')
     })
 
     it('retains snapshot memory advice in open mode', () => {
@@ -47,6 +48,7 @@ describe('lib/errors', () => {
 
       expect(err.message).toContain('numTestsKeptInMemory')
       expect(err.message).toContain('cypress open')
+      expect(err.message).toContain('machine you\'re running on.\n  - Try lowering')
     })
   })
 
