@@ -633,7 +633,6 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a DOM object.
        */
       isDom(obj: any): boolean
-      isType(element: JQuery | HTMLElement, type: string): boolean
       /**
        * Returns a boolean indicating whether an element is visible.
        */
@@ -644,15 +643,21 @@ declare namespace Cypress {
       isHidden(element: JQuery | HTMLElement, methodName?: string, options?: object): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
+       * Accepts a DOM element or a jQuery object. For a jQuery object with
+       * more than one element, returns `true` if any of them can receive focus.
        */
       isFocusable(element: JQuery | HTMLElement): boolean
       isTextLike(element: JQuery | HTMLElement): boolean
       /**
-       * Returns a boolean indicating whether an element is scrollable.
+       * Returns a boolean indicating whether an element or the window is scrollable.
+       * Accepts the window, a DOM element, or a jQuery object. For a jQuery object,
+       * checks its first element.
        */
       isScrollable(element: Window | JQuery | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element currently has focus.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks
+       * its first element.
        */
       isFocused(element: JQuery | HTMLElement): boolean
       /**
@@ -665,7 +670,9 @@ declare namespace Cypress {
       isAttached(element: JQuery | HTMLElement | Window | Document): boolean
       isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
       /**
-       * Returns a boolean indicating whether an element is a descendent of another element.
+       * Returns a boolean indicating whether `element2` is `element1` or is
+       * inside it. Each argument can be a DOM element or a jQuery object.
+       * For a jQuery object, checks its first element.
        */
       isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
       /**
@@ -689,11 +696,20 @@ declare namespace Cypress {
        */
       isJquery(obj: any): obj is JQuery
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
-      stringify(element: JQuery | HTMLElement, form: string): string
+      /**
+       * Returns a string representation of an element, the window, or the document.
+       * `'long'` (the default) returns the element's HTML with its content
+       * abbreviated, and `'short'` returns its tag name with its id or classes.
+       */
+      stringify(element: JQuery | HTMLElement | Window | Document, form?: 'long' | 'short'): string
       getElements(element: JQuery): JQuery | HTMLElement[]
       getContainsSelector(text: string, filter?: string, options?: CaseMatchable): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      /**
+       * Returns a sentence explaining why an element is not visible.
+       * Accepts a DOM element or a jQuery object.
+       */
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement

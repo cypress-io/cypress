@@ -93,7 +93,9 @@ export const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement 
  * Focusable checks and getters
  */
 
-export const isFocused = (el) => {
+export const isFocused = (elOrJquery) => {
+  const el = $jquery.isJquery(elOrJquery) ? elOrJquery[0] : elOrJquery
+
   try {
     let doc
 
@@ -118,7 +120,9 @@ export const isFocused = (el) => {
 /**
  * The element can be activeElement, receive focus events, and also receive keyboard events
  */
-export const isFocusable = ($el: JQuery<HTMLElement>) => {
+export const isFocusable = (elOrJquery: HTMLElement | JQuery<HTMLElement>) => {
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
+
   return (
     _.some(focusableSelectors, (sel) => $el.is(sel)) ||
      isDesignModeDocumentElement($el.get(0))
@@ -243,7 +247,7 @@ const isScrollOrAuto = (prop) => {
   return prop === 'scroll' || prop === 'auto'
 }
 
-export const isScrollable = ($el) => {
+export const isScrollable = (subject) => {
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
     if (win.innerHeight < documentElement.scrollHeight) {
@@ -265,13 +269,13 @@ export const isScrollable = ($el) => {
 
   // if we're the window, we want to get the document's
   // element and check its size against the actual window
-  if ($window.isWindow($el)) {
-    const win = $el
+  if ($window.isWindow(subject)) {
+    const win = subject
 
     return checkDocumentElement(win, win.document.documentElement)
   }
 
-  const el = $el[0]
+  const el = $jquery.isJquery(subject) ? subject[0] : subject
 
   // window.getComputedStyle(el) will error if el is undefined
   if (!el) {

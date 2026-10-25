@@ -256,6 +256,24 @@ describe('src/dom/elements', () => {
       })
     })
 
+    it('returns true for a focused element passed as a DOM element or a jQuery object', () => {
+      cy.get('input:first').focus().then(($el) => {
+        expect(Cypress.dom.isFocused($el[0])).to.be.true
+        expect(Cypress.dom.isFocused($el)).to.be.true
+      })
+    })
+
+    it('returns false for an unfocused element passed as a DOM element or a jQuery object', () => {
+      cy.get('input:first').then(($el) => {
+        expect(Cypress.dom.isFocused($el[0])).to.be.false
+        expect(Cypress.dom.isFocused($el)).to.be.false
+      })
+    })
+
+    it('returns false for an empty jQuery object', () => {
+      expect(Cypress.dom.isFocused($())).to.be.false
+    })
+
     describe('in the shadow dom', () => {
       it('returns true if the element is the active element of the shadow root', () => {
         cy.visit('/fixtures/shadow-dom.html')
@@ -263,7 +281,65 @@ describe('src/dom/elements', () => {
         .get('#shadow-element-1')
         .find('input', { includeShadowDom: true }).focus().then(($el) => {
           expect(isFocused($el[0])).to.be.true
+          expect(Cypress.dom.isFocused($el)).to.be.true
         })
+      })
+    })
+  })
+
+  context('.isFocusable', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/active-elements.html')
+    })
+
+    it('returns true for a focusable element passed as a DOM element or a jQuery object', () => {
+      cy.get('input:first').then(($el) => {
+        expect(Cypress.dom.isFocusable($el[0])).to.be.true
+        expect(Cypress.dom.isFocusable($el)).to.be.true
+      })
+    })
+
+    it('returns false for a non-focusable element passed as a DOM element or a jQuery object', () => {
+      cy.$$('body').append('<div id="not-focusable">not focusable</div>')
+      cy.get('#not-focusable').then(($el) => {
+        expect(Cypress.dom.isFocusable($el[0])).to.be.false
+        expect(Cypress.dom.isFocusable($el)).to.be.false
+      })
+    })
+  })
+
+  context('.isDescendent', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
+      cy.get('body').then(($body) => {
+        $body.append('<div id="descendent-outer"><p><span id="descendent-inner">inner</span></p></div>')
+      })
+    })
+
+    it('returns true when the second element is inside the first, for DOM elements and jQuery objects', () => {
+      cy.get('#descendent-outer').then(($outer) => {
+        const $inner = $outer.find('#descendent-inner')
+
+        expect(Cypress.dom.isDescendent($outer[0], $inner[0])).to.be.true
+        expect(Cypress.dom.isDescendent($outer, $inner)).to.be.true
+        expect(Cypress.dom.isDescendent($outer[0], $inner)).to.be.true
+        expect(Cypress.dom.isDescendent($outer, $inner[0])).to.be.true
+      })
+    })
+
+    it('returns true when both arguments are the same element', () => {
+      cy.get('#descendent-outer').then(($outer) => {
+        expect(Cypress.dom.isDescendent($outer[0], $outer[0])).to.be.true
+        expect(Cypress.dom.isDescendent($outer, $outer)).to.be.true
+      })
+    })
+
+    it('returns false when the second element is not inside the first, for DOM elements and jQuery objects', () => {
+      cy.get('#descendent-outer').then(($outer) => {
+        const $inner = $outer.find('#descendent-inner')
+
+        expect(Cypress.dom.isDescendent($inner[0], $outer[0])).to.be.false
+        expect(Cypress.dom.isDescendent($inner, $outer)).to.be.false
       })
     })
   })
