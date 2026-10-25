@@ -56,7 +56,7 @@ describe('src/cy/commands/querying/within', () => {
     it('reports missing content within a document as an assertion error', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('AssertionError')
-        expect(err.message).to.include('Expected to find content: \'document-scope-missing-content\'')
+        expect(err.message).to.eq('Timed out retrying after 100ms: Expected to find content: \'document-scope-missing-content\' within the element: <document> but never did.')
         done()
       })
 
