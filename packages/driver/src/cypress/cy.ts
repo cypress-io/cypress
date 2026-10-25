@@ -646,6 +646,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   stop () {
+    this.state('queueIdle', false)
     // don't do anything if we've already stopped
     if (this.queue.stopped) {
       return
@@ -655,6 +656,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   cancelPendingCommands () {
+    this.state('queueIdle', false)
     this.queue.endEarly({ canceled: false })
   }
 
@@ -699,7 +701,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   runQueue () {
-    cy.queue.run()
+    cy.state('queueIdle', false)
+    const promise = cy.queue.run()
+    const reject = cy.state('runnableReject')
+
+    if (reject) {
+      promise.catch(reject)
+    }
   }
 
   addCommand ({ name, fn, type, prevSubject }) {
@@ -979,6 +987,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // reset the promise again
     this.state('promise', undefined)
+    this.state('runnablePromise', undefined)
+    this.state('runnableReject', undefined)
+    this.state('queueIdle', false)
     this.state('hookId', hookId)
     this.state('runnable', runnable)
     this.state('ctx', runnable.ctx)
@@ -1091,18 +1102,30 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
             cy.warnMixingPromisesAndCommands()
           }
 
-          const customPromise = ret
+          const returnedPromise = Promise.resolve(ret)
+
+          cy.state('runnablePromise', returnedPromise)
+          // Observe an existing queue immediately, including early failures.
+          // Commands may also have been enqueued after an await in ret.
+          const customPromise = Promise.all([returnedPromise, cy.state('promise')]).then(([value]) => {
+            const queuePromise = cy.state('promise')
+
+            return queuePromise ? queuePromise.then(() => value) : value
+          })
 
           return new Promise((resolve, reject) => {
+            const rejectCurrentRun = (err) => {
+              if (!isStaleRun()) {
+                reject(err)
+              }
+            }
+
+            cy.state('runnableReject', rejectCurrentRun)
             customPromise.then((value) => {
               if (!isStaleRun()) {
                 resolve(value)
               }
-            }, (err) => {
-              if (!isStaleRun()) {
-                reject(err)
-              }
-            })
+            }, rejectCurrentRun)
           })
         }
 
@@ -1220,6 +1243,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private enqueue (command: $Command) {
+    if (this.queue.stopped && this.state('queueIdle') && this.state('runnablePromise')?.isPending()) {
+      this.queue.reset()
+      this.state('promise', undefined)
+    }
+
     this.queue.enqueue(command)
 
     return this.Cypress.action('cy:command:enqueued', command.attributes)
@@ -1422,6 +1450,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private doneEarly () {
+    this.state('queueIdle', false)
     this.queue.endEarly({ canceled: true })
   }
 }

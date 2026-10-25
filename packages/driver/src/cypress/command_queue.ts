@@ -238,6 +238,7 @@ export class CommandQueue extends Queue<$Command> {
   // later runnable: state('canceled') would make retrying commands in the remaining hooks give
   // up after a single attempt, and mocha has already cleared the runnable's timer.
   endEarly ({ canceled }: { canceled: boolean }) {
+    this.state('queueIdle', false)
     const isPending = !!this.state('promise')?.isPending()
 
     if (!canceled && !isPending) {
@@ -475,6 +476,7 @@ export class CommandQueue extends Queue<$Command> {
         // test is no longer stable because we cannot
         // move onto the next test until its finished
         return this.stability.whenStable(() => {
+          this.state('queueIdle', true)
           Cypress.action('cy:command:queue:end')
           this.stop()
 

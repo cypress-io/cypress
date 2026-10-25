@@ -94,6 +94,26 @@ describe('@packages/driver/src/cypress/command_queue', () => {
     delete (globalThis as any).cy
   })
 
+  it('does not overwrite idle revocation during the queue-end notification', async () => {
+    setup({ isStable: true })
+    Cypress.action.mockImplementation((event) => {
+      if (event === 'cy:command:queue:end') {
+        state('queueIdle', false)
+      }
+    })
+
+    await queue.run()
+    expect(state('queueIdle')).to.be.false
+  })
+
+  it('revokes idle eligibility when a completed chain is ended explicitly', async () => {
+    setup({ isStable: true })
+    await queue.run()
+    expect(state('queueIdle')).to.be.true
+    queue.endEarly({ canceled: false })
+    expect(state('queueIdle')).to.be.false
+  })
+
   describe('#endEarly', () => {
     let settleLate: () => void
 
