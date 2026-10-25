@@ -230,7 +230,8 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       }
 
       const waitForResponse = () => {
-        options = _.omit(options, '_runnableTimeout')
+        // Time spent finding the request must not consume its response budget.
+        options = _.omit(options, '_runnableTimeout', '_start')
         // TODO: If `responseTimeout` is `0`, is this code going to work the way
         // it was intended to?
         options.timeout = responseTimeout || Cypress.config('responseTimeout')
