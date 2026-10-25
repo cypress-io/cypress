@@ -111,6 +111,14 @@ describe('src/cypress/dom/visibility', {
           expect(fn()).to.be.true
         })
 
+        it('returns true for a scrollable window passed directly or wrapped in jQuery', function () {
+          this.add('<div style="height: 1000px; width: 10px;" />')
+          const win = cy.state('window')
+
+          expect(dom.isScrollable(win)).to.be.true
+          expect(dom.isScrollable($(win))).to.be.true
+        })
+
         it('returns false if window and body < window height', () => {
           cy.$$('body').html('<div>foo</div>')
 

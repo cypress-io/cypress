@@ -780,7 +780,8 @@ declare namespace Cypress {
        * object, or `null` if there is none. The element itself is not checked.
        * It walks out of shadow roots to their hosts and can return `<html>`.
        * Returns `null` right away for `<html>`, `<body>`, or the document.
-       * Pass a jQuery object. A DOM element always returns `null`.
+       * Pass a jQuery object. A DOM element returns `null`, or throws a
+       * `TypeError` for a `<select>` with options or a `<form>` with controls.
        */
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       /**
@@ -788,7 +789,8 @@ declare namespace Cypress {
        * `fixed` or `sticky`, as a jQuery object, or `null` if there is none.
        * It walks out of shadow roots to their hosts. Returns `null` right away for
        * `<html>`, `<body>`, or the document.
-       * Pass a jQuery object. A DOM element always returns `null`.
+       * Pass a jQuery object. A DOM element returns `null`, or throws a
+       * `TypeError` for a `<select>` with options or a `<form>` with controls.
        */
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       /**
@@ -796,7 +798,8 @@ declare namespace Cypress {
        * `sticky`, as a jQuery object, or `null` if there is none. It walks out of
        * shadow roots to their hosts. Returns `null` right away for `<html>`,
        * `<body>`, or the document.
-       * Pass a jQuery object. A DOM element always returns `null`.
+       * Pass a jQuery object. A DOM element returns `null`, or throws a
+       * `TypeError` for a `<select>` with options or a `<form>` with controls.
        */
       getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       /**

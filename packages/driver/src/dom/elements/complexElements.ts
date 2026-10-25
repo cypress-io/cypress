@@ -267,15 +267,13 @@ export const isScrollable = (subject) => {
     return false
   }
 
+  const el = $jquery.isJquery(subject) ? subject[0] : subject
+
   // if we're the window, we want to get the document's
   // element and check its size against the actual window
-  if ($window.isWindow(subject)) {
-    const win = subject
-
-    return checkDocumentElement(win, win.document.documentElement)
+  if ($window.isWindow(el)) {
+    return checkDocumentElement(el, el.document.documentElement)
   }
-
-  const el = $jquery.isJquery(subject) ? subject[0] : subject
 
   // window.getComputedStyle(el) will error if el is undefined
   if (!el) {
