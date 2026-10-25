@@ -2,6 +2,7 @@ import { AUT_FRAME_NAME_IDENTIFIER, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER } from '@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
+import { createSnapshotStyle } from './snapshot-styles'
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
 import type { DebouncedFunc } from 'lodash'
@@ -299,6 +300,10 @@ export class AutIframe {
 
     if (existingStyle.href !== style.href) {
       this.$(existingStyle).replaceWith(linkTag)
+    } else if (style.media === undefined) {
+      existingStyle.removeAttribute('media')
+    } else {
+      existingStyle.setAttribute('media', style.media)
     }
   }
 
@@ -321,11 +326,11 @@ export class AutIframe {
   }
 
   _linkTag (style) {
-    return `<link rel="stylesheet" href="${style.href}" />`
+    return createSnapshotStyle(document, style)
   }
 
   _styleTag (style) {
-    return `<style>${style}</style>`
+    return createSnapshotStyle(document, style)
   }
 
   highlightEl = ({ body }, { $el, coords, highlightAttr, scrollBy }) => {
