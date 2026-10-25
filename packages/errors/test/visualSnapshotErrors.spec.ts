@@ -642,7 +642,8 @@ describe('visual error templates', () => {
     },
     RENDERER_CRASHED: () => {
       return {
-        default: ['Electron'],
+        default: ['Electron', false],
+        runMode: ['Electron', true],
       }
     },
     BROWSER_CRASHED: () => {

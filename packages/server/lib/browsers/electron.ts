@@ -191,7 +191,7 @@ export = {
         browserCriClient?.currentlyAttachedCyPromptTarget?.markCrashed()
         browserCriClient?.currentlyAttachedStudioTarget?.markCrashed()
 
-        const err = errors.get('RENDERER_CRASHED', 'Electron')
+        const err = errors.get('RENDERER_CRASHED', 'Electron', options.isTextTerminal)
 
         await memory.endProfiling()
 
