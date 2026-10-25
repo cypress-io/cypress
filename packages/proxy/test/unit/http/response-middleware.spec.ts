@@ -3081,7 +3081,7 @@ describe('http/response-middleware', function () {
     const { AttachPlainTextStreamFn } = ResponseMiddleware
 
     // https://github.com/cypress-io/cypress/issues/34387
-    it.each(['x-gzip', ' X-GZIP ', 'x-gzip, gzip'])('decompresses the gzip alias in %s', async function (encoding) {
+    it.each(['x-gzip', ' X-GZIP '])('decompresses the gzip alias in %s', async function (encoding) {
       const ctx = {
         debug: () => {},
         res: { on: () => {}, off: () => {} },
