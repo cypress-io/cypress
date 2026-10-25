@@ -624,6 +624,16 @@ declare namespace Cypress {
        * Returns a jQuery object obtained by wrapping an object in jQuery.
        */
       wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
+      /**
+       * Returns the elements matching a jQuery selector, as a jQuery object.
+       * Without a `context`, it searches the document that Cypress's own scripts
+       * run in, not your application. To search your application, pass its
+       * document or an element in it as `context`.
+       * @example
+       *    cy.document().then((doc) => {
+       *      const $buttons = Cypress.dom.query('button', doc)
+       *    })
+       */
       query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
       /**
        * Returns an array of raw elements pulled out from a jQuery object.
@@ -647,6 +657,13 @@ declare namespace Cypress {
        * more than one element, returns `true` if any of them can receive focus.
        */
       isFocusable(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element accepts typed text: a
+       * `<textarea>`, a contenteditable element, or an `<input>` whose `type` is
+       * `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`,
+       * `datetime`, `datetime-local`, `search`, `url`, or `tel`.
+       * Pass a DOM element. A jQuery object throws a `TypeError`.
+       */
       isTextLike(element: JQuery | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element or the window is scrollable.
@@ -668,6 +685,11 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an element is attached to the DOM.
        */
       isAttached(element: JQuery | HTMLElement | Window | Document): boolean
+      /**
+       * Returns a boolean indicating whether an element matches a jQuery selector.
+       * For a jQuery object with more than one element, returns `true` if any of
+       * them match. Pass a jQuery object. A DOM element throws a `TypeError`.
+       */
       isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
       /**
        * Returns a boolean indicating whether `element2` is `element1` or is
@@ -695,6 +717,15 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a jQuery object.
        */
       isJquery(obj: any): obj is JQuery
+      /**
+       * Returns a boolean indicating whether an `<input>` or `<button>` has the
+       * given `type`, or any of the given types when `type` is an array. It reads
+       * the element's `type` property rather than its attribute, so an `<input>`
+       * with an unrecognized `type` counts as `'text'`, and a `<button>` with no
+       * `type` counts as `'submit'`. Returns `false` for any other element.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks its
+       * first element.
+       */
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
       /**
        * Returns a string representation of an element, the window, or the document.
@@ -702,24 +733,127 @@ declare namespace Cypress {
        * abbreviated, and `'short'` returns its tag name with its id or classes.
        */
       stringify(element: JQuery | HTMLElement | Window | Document, form?: 'long' | 'short'): string
+      /**
+       * Returns the raw elements in a jQuery object: the element itself when it
+       * holds one, an array of elements when it holds more than one, and
+       * `undefined` when it is empty.
+       */
       getElements(element: JQuery): JQuery | HTMLElement[]
+      /**
+       * Returns the selector that `cy.contains()` uses to find elements whose
+       * text includes `text`, plus submit buttons whose `value` has `text` as one
+       * of its space-separated words. `filter` limits the search to elements
+       * matching a selector, and can list several selectors separated by commas.
+       * Matching ignores case unless `options.matchCase` is `true`.
+       *
+       * The selector relies on pseudo-classes that only Cypress's copy of jQuery
+       * understands, so run it with `Cypress.$` or `Cypress.dom.query()`, not
+       * `document.querySelectorAll()`.
+       * @example
+       *    Cypress.dom.getContainsSelector('Log in', 'button', { matchCase: true })
+       */
       getContainsSelector(text: string, filter?: string, options?: CaseMatchable): JQuery.Selector
+      /**
+       * Picks one element from a list of matches, the way `cy.contains()` does.
+       * Starting at `index` (default `0`) and skipping `<script>` and `<style>`,
+       * it moves on to the next element in the list for as long as that element
+       * is nested inside the current one, and stops at the deepest. If that
+       * element is inside an `<a>`, `<button>`, `<label>`, or submit `<input>`
+       * that is also in the list, it picks that ancestor instead.
+       *
+       * Pass a jQuery object, and it returns a jQuery object holding the chosen
+       * element. An array of elements throws a `TypeError`.
+       */
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
+      /**
+       * Returns the window that contains an element, or the window itself when
+       * passed a window. Pass a DOM element. A jQuery object throws a `TypeError`.
+       */
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
       /**
        * Returns a sentence explaining why an element is not visible.
        * Accepts a DOM element or a jQuery object.
        */
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
+      /**
+       * Returns the closest ancestor of an element that can scroll, as a jQuery
+       * object, or `null` if there is none. The element itself is not checked.
+       * It walks out of shadow roots to their hosts and can return `<html>`.
+       * Returns `null` right away for `<html>`, `<body>`, or the document.
+       * Pass a jQuery object. A DOM element always returns `null`.
+       */
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      /**
+       * Returns the element, or its closest ancestor, whose CSS `position` is
+       * `fixed` or `sticky`, as a jQuery object, or `null` if there is none.
+       * It walks out of shadow roots to their hosts. Returns `null` right away for
+       * `<html>`, `<body>`, or the document.
+       * Pass a jQuery object. A DOM element always returns `null`.
+       */
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      /**
+       * Returns the element, or its closest ancestor, whose CSS `position` is
+       * `sticky`, as a jQuery object, or `null` if there is none. It walks out of
+       * shadow roots to their hosts. Returns `null` right away for `<html>`,
+       * `<body>`, or the document.
+       * Pass a jQuery object. A DOM element always returns `null`.
+       */
       getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      /**
+       * Rounds a point to whole pixels so it stays inside the element it targets.
+       * `xPosition` (`'left'`, `'center'`, or `'right'`) and `yPosition` (`'top'`,
+       * `'center'`, or `'bottom'`) say which edge the point sits on, and both
+       * default to `'center'`. A left or top edge rounds up, a center rounds down,
+       * and a right or bottom edge rounds down and then subtracts 1.
+       * Returns an object with `x` and `y`.
+       */
       getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      /**
+       * Returns an element's `width`, `height`, `scrollTop`, and `scrollLeft`, and
+       * the position of its box measured three ways: `fromElViewport` is relative
+       * to the viewport of the window the element is in, `fromElWindow` is
+       * relative to that window's document (so it includes the window's scroll),
+       * and `fromAutWindow` is relative to your application's top-level window,
+       * adding the offsets of any iframes in between.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, measures its
+       * first element.
+       */
       getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
+      /**
+       * Returns the topmost element at a point in `doc`'s viewport, looking inside
+       * open shadow roots, or `null` when the point is outside the viewport.
+       */
       getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
+      /**
+       * Returns the same measurements as `getElementPositioning()`, with `x` and
+       * `y` added to `fromElViewport`, `fromElWindow`, and `fromAutWindow` for a
+       * point at `position` inside the element. `position` defaults to `'center'`
+       * and can be `'topLeft'`, `'top'`, `'topRight'`, `'left'`, `'center'`,
+       * `'right'`, `'bottomLeft'`, `'bottom'`, or `'bottomRight'`. Any other value
+       * throws a `TypeError`.
+       * Accepts a DOM element or a jQuery object.
+       */
       getElementCoordinatesByPosition(element: JQuery | HTMLElement, position?: string): ElementCoordinates
+      /**
+       * Like `getElementCoordinatesByPosition()`, but the point is `x` and `y`
+       * pixels from the element's top-left corner, as in `.click(x, y)`. The
+       * returned `top` and `left` values are shifted by `x` and `y` as well.
+       * Accepts a DOM element or a jQuery object.
+       */
       getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
+      /**
+       * Returns the element that hosts editing for `element`: the closest element,
+       * starting with `element` itself, that has a `contenteditable` attribute
+       * other than `"false"`. If there is none, returns the document's `<html>`
+       * element, which is the editing host when the document is in `designMode`.
+       * Pass a DOM element.
+       */
       getHostContenteditable(element: HTMLElement): HTMLElement
+      /**
+       * Returns the start and end offsets of the current text selection in an
+       * `<input>`, a `<textarea>`, or a contenteditable element. Returns
+       * `{ start: 0, end: 0 }` for any other element. Pass a DOM element.
+       */
       getSelectionBounds(element: HTMLElement): { start: number, end: number }
     }
 
