@@ -3,6 +3,8 @@
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import * as mocha from 'mocha'
+import Bluebird from 'bluebird'
+import '../../../src/config/bluebird'
 
 import $Mocha from '../../../src/cypress/mocha'
 import { $Cy } from '../../../src/cypress/cy'
@@ -147,6 +149,58 @@ describe('@packages/driver/src/cypress/mocha', () => {
       releaseQueue()
       expect(await attempt).to.equal('finished')
       expect(completedBeforeQueue).to.be.false
+    })
+
+    for (const lateQueue of [false, true]) {
+      it(`settles a canceled ${lateQueue ? 'later' : 'initial'} queue without waiting for mocha timeout`, async () => {
+        const cy = makeCy()
+        const queuePromise = new Bluebird<void>(() => {})
+        const hook = new Hook('canceled native-promise runnable', () => {
+          if (!lateQueue) {
+            cy.state('promise', queuePromise)
+          }
+
+          return Promise.resolve().then(() => {
+            cy.state('promise', queuePromise)
+          })
+        })
+
+        hook.timeout(1000)
+        const attempt = runAttempt(hook, cy)
+
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        queuePromise.cancel()
+        const result = await attempt
+
+        hook.clearTimeout()
+        expect(result).to.equal(STOPPED)
+        expect(hook.timedOut).to.be.false
+      })
+    }
+
+    it('observes a later queue cancellation while native work is still pending', async () => {
+      const cy: any = makeCy()
+      const queuePromise = new Bluebird<void>(() => {})
+      const hook = new Hook('later queue canceled during native work', neverSettles)
+
+      hook.timeout(1000)
+      const attempt = runAttempt(hook, cy)
+
+      cy.queue.run = () => queuePromise
+
+      ;(globalThis as any).cy = cy
+
+      try {
+        $Cy.prototype.runQueue.call(cy)
+        queuePromise.cancel()
+        const result = await attempt
+
+        hook.clearTimeout()
+        expect(result).to.equal(STOPPED)
+        expect(hook.timedOut).to.be.false
+      } finally {
+        delete (globalThis as any).cy
+      }
     })
 
     it('reports an early queue rejection without waiting for the custom promise', async () => {

@@ -32,6 +32,19 @@ describe('e2e promises', () => {
     },
   })
 
+  systemTests.it('settles canceled async queues with the stop error', {
+    project: 'async-promise-completion',
+    spec: 'cancellation.cy.js',
+    expectedExitCode: 2,
+    onRun: async (exec) => {
+      const result = await exec()
+
+      expect(result.stdout).to.include('Cypress test was stopped while running this command.')
+
+      return result
+    },
+  })
+
   systemTests.it('keeps native promises and async hooks working', {
     project: 'async-promise-completion',
     spec: 'passing.cy.js',

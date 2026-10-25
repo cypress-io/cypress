@@ -706,7 +706,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const reject = cy.state('runnableReject')
 
     if (reject) {
-      promise.catch(reject)
+      promise.catch(reject).finally(() => {
+        if (promise.isCancelled()) {
+          reject($errUtils.errByPath('miscellaneous.test_stopped'))
+        }
+      })
     }
   }
 
@@ -1125,7 +1129,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
               if (!isStaleRun()) {
                 resolve(value)
               }
-            }, rejectCurrentRun)
+            }, rejectCurrentRun).finally(() => {
+              // Bluebird cancellation skips both then handlers. Finish the
+              // runnable with the existing stop error instead of timing out.
+              if (customPromise.isCancelled()) {
+                rejectCurrentRun($errUtils.errByPath('miscellaneous.test_stopped'))
+              }
+            })
           })
         }
 
