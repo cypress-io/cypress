@@ -690,15 +690,38 @@ declare namespace Cypress {
       isJquery(obj: any): obj is JQuery
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
       stringify(element: JQuery | HTMLElement, form: string): string
-      getElements(element: JQuery): JQuery | HTMLElement[]
+      /**
+       * Returns the raw elements in a jQuery object: the element itself when it
+       * holds one, an array of elements when it holds more than one, and
+       * `undefined` when it is empty.
+       */
+      getElements(element: JQuery): HTMLElement | HTMLElement[] | undefined
       getContainsSelector(text: string, filter?: string, options?: CaseMatchable): JQuery.Selector
-      getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
+      /**
+       * Picks one element from a list of matches, the way `cy.contains()` does.
+       * Starting at `index` (default `0`) and skipping `<script>` and `<style>`,
+       * it moves on to the next element in the list for as long as that element
+       * is nested inside the current one, and stops at the deepest. If that
+       * element is inside an `<a>`, `<button>`, `<label>`, or submit `<input>`
+       * that is also in the list, it picks that ancestor instead.
+       *
+       * Returns a jQuery object holding the chosen element.
+       */
+      getFirstDeepestElement(elements: JQuery, index?: number): JQuery
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      /**
+       * Rounds a point to whole pixels so it stays inside the element it targets.
+       * `xPosition` (`'left'`, `'center'`, or `'right'`) and `yPosition` (`'top'`,
+       * `'center'`, or `'bottom'`) say which edge the point sits on, and both
+       * default to `'center'`. A left or top edge rounds up, a center rounds down,
+       * and a right or bottom edge rounds down and then subtracts 1.
+       * Returns an object with `x` and `y`.
+       */
+      getCoordsByPosition(left: number, top: number, xPosition?: 'left' | 'center' | 'right', yPosition?: 'top' | 'center' | 'bottom'): { x: number, y: number }
       getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
       getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
       getElementCoordinatesByPosition(element: JQuery | HTMLElement, position?: string): ElementCoordinates
