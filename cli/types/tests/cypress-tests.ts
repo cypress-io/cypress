@@ -919,7 +919,6 @@ namespace CypressDomTests {
   Cypress.dom.query('foo', el) // $ExpectType JQuery<HTMLElement>
   Cypress.dom.unwrap(obj) // $ExpectType any
   Cypress.dom.isDom(obj) // $ExpectType boolean
-  Cypress.dom.isType(el, 'foo') // $ExpectType boolean
   Cypress.dom.isVisible(el) // $ExpectType boolean
   Cypress.dom.isHidden(el) // $ExpectType boolean
   Cypress.dom.isFocusable(el) // $ExpectType boolean
@@ -959,7 +958,7 @@ namespace CypressDomTests {
   Cypress.dom.query(el, 'foo') // $ExpectError
   Cypress.dom.unwrap() // $ExpectError
   Cypress.dom.isDom() // $ExpectError
-  Cypress.dom.isType(el) // $ExpectError
+  Cypress.dom.isType(el, 'foo') // $ExpectError
   Cypress.dom.isVisible('') // $ExpectError
   Cypress.dom.isHidden('') // $ExpectError
   Cypress.dom.isFocusable('') // $ExpectError
