@@ -42,7 +42,7 @@ describe('driver/src/cy/snapshots_css', () => {
       expect(headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
 
       expect(bodyStyleIds).to.have.length(2)
-      expect(bodyStyleIds).to.eql([{ hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' }, { hrefId: 'http://localhost:3500/fixtures/generic_styles_3.css' }])
+      expect(bodyStyleIds).to.eql([{ styleId: { hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' }, media: 'all' }, { hrefId: 'http://localhost:3500/fixtures/generic_styles_3.css' }])
       // IDs for 2 of the same stylesheets should have referential equality
       expect(headStyleIds[0]).to.equal(another.headStyleIds[0])
     })
@@ -53,10 +53,10 @@ describe('driver/src/cy/snapshots_css', () => {
       expect(headStyleIds[1]).to.equal('p { color: blue; }')
     })
 
-    it('returns { href } object for cross-origin stylesheets', () => {
+    it('returns an href and media wrapper for cross-origin stylesheets', () => {
       const { headStyleIds } = snapshotCss.getStyleIds()
 
-      expect(headStyleIds[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css' })
+      expect(headStyleIds[2]).to.eql({ styleId: { href: 'http://localhost:3501/fixtures/generic_styles.css' }, media: 'screen' })
     })
 
     it('works for media-less stylesheets', () => {
@@ -68,16 +68,16 @@ describe('driver/src/cy/snapshots_css', () => {
     it('works for media=screen stylesheets', () => {
       const { headStyleIds } = snapshotCss.getStyleIds()
 
-      expect(headStyleIds[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css' })
+      expect(headStyleIds[2]).to.eql({ styleId: { href: 'http://localhost:3501/fixtures/generic_styles.css' }, media: 'screen' })
     })
 
     it('works for media=all stylesheets', () => {
       const { bodyStyleIds } = snapshotCss.getStyleIds()
 
-      expect(bodyStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' })
+      expect(bodyStyleIds[0]).to.eql({ styleId: { hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' }, media: 'all' })
     })
 
-    it('ignores other media stylesheets', () => {
+    it('excludes print-only stylesheets', () => {
       const { headStyleIds } = snapshotCss.getStyleIds()
 
       expect(headStyleIds).to.have.length(3)
@@ -146,14 +146,14 @@ describe('driver/src/cy/snapshots_css', () => {
 
       expect(headStyles[0]).to.equal('.foo { color: green; }')
       expect(headStyles[1]).to.equal('p { color: blue; }')
-      expect(bodyStyles[0]).to.eql('.bar { color: red; }')
+      expect(bodyStyles[0]).to.eql({ css: '.bar { color: red; }', media: 'all' })
       expect(bodyStyles[1]).to.eql('.baz { color: purple; }')
     })
 
     it('returns { href } object for cross-origin stylesheets', () => {
       const { headStyles } = getStyles()
 
-      expect(headStyles[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css' })
+      expect(headStyles[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css', media: 'screen' })
     })
 
     it('includes rules injected by JavaScript', () => {

@@ -6,18 +6,11 @@ import $utils from '../cypress/utils'
 import LimitedMap from '../util/limited_map'
 
 const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
-const screenStylesheetRe = /(screen|all)/
 
 const reduceText = (arr, fn) => {
   return _.reduce(arr, ((memo, item) => {
     return memo += fn(item)
   }), '')
-}
-
-const isScreenStylesheet = (stylesheet) => {
-  const media = stylesheet.getAttribute('media')
-
-  return !_.isString(media) || screenStylesheetRe.test(media)
 }
 
 const getDocumentStylesheets = (doc) => {
@@ -153,27 +146,29 @@ export const create = ($$, state) => {
   }
 
   const getStyleIdsFor = (doc, $$, stylesheets, location) => {
-    let styles = $$(location).find('link[rel=\'stylesheet\'],style')
+    const styles = $$(location).find('link[rel=\'stylesheet\'],style')
 
-    styles = _.filter(styles, isScreenStylesheet)
-
-    return _.map(styles, (stylesheet) => {
+    return _.filter(styles, (stylesheet) => stylesheet.getAttribute('media')?.trim().toLowerCase() !== 'print').map((stylesheet) => {
       // in cases where we can get the CSS as a string, make the paths
       // absolute so that when they're restored by appending them to the page
       // in <style> tags, background images and fonts still properly load
       const href = stylesheet.href
+      const media = stylesheet.getAttribute('media')
+      // Media belongs to the element, not the href/content cache: two links
+      // can share CSS while applying under different conditions.
+      const withMedia = (styleId) => media === null ? styleId : { styleId, media }
 
       // if there's an href, it's a link tag
       // return the CSS rules as a string, or, if cross-origin,
       // a reference to the stylesheet's href
       if (href) {
-        return getStyleId(href, stylesheets[href]) || { href }
+        return withMedia(getStyleId(href, stylesheets[href]) || { href })
       }
 
       // otherwise, it's a style tag, and we can just grab its content
       const cssContents = getInlineCssContents(stylesheet, $$)
 
-      return makePathsAbsoluteToDoc(cssContents, doc)
+      return withMedia(makePathsAbsoluteToDoc(cssContents, doc))
     })
   }
 
@@ -194,11 +189,15 @@ export const create = ($$, state) => {
 
   const getStylesByIds = (ids) => {
     return _.map(ids, (idOrCss) => {
-      if (_.isString(idOrCss)) {
-        return idOrCss
+      const resolveStyle = (id) => _.isString(id) ? id : cssIdToContentsMap.get(id) || { href: id.href }
+
+      if (!_.isString(idOrCss) && 'styleId' in idOrCss) {
+        const style = resolveStyle(idOrCss.styleId)
+
+        return _.isString(style) ? { css: style, media: idOrCss.media } : { ...style, media: idOrCss.media }
       }
 
-      return cssIdToContentsMap.get(idOrCss) || { href: idOrCss.href }
+      return resolveStyle(idOrCss)
     })
   }
 
