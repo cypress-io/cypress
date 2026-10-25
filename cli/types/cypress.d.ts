@@ -633,7 +633,6 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a DOM object.
        */
       isDom(obj: any): boolean
-      isType(element: JQuery | HTMLElement, type: string): boolean
       /**
        * Returns a boolean indicating whether an element is visible.
        */

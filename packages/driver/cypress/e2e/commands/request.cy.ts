@@ -1163,6 +1163,23 @@ describe('src/cy/commands/request', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/24192
+      for (const encoding of [false, 0, '']) {
+        it(`rejects invalid falsy encoding ${JSON.stringify(encoding)}`, function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.request()` was called with invalid encoding:')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/request')
+            done()
+          })
+
+          // @ts-expect-error - intentionally passing an invalid encoding
+          cy.request({
+            url: 'http://localhost:1234/foo',
+            encoding,
+          })
+        })
+      }
+
       it('throws when encoding is not valid', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
