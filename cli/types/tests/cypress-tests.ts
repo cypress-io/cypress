@@ -923,13 +923,22 @@ namespace CypressDomTests {
   Cypress.dom.isVisible(el) // $ExpectType boolean
   Cypress.dom.isHidden(el) // $ExpectType boolean
   Cypress.dom.isFocusable(el) // $ExpectType boolean
+  Cypress.dom.isFocusable(jel) // $ExpectType boolean
   Cypress.dom.isTextLike(el) // $ExpectType boolean
+  Cypress.dom.isTextLike(jel) // $ExpectType boolean
   Cypress.dom.isScrollable(el) // $ExpectType boolean
+  Cypress.dom.isScrollable(jel) // $ExpectType boolean
+  Cypress.dom.isScrollable(window) // $ExpectType boolean
   Cypress.dom.isFocused(el) // $ExpectType boolean
+  Cypress.dom.isFocused(jel) // $ExpectType boolean
   Cypress.dom.isDetached(el) // $ExpectType boolean
   Cypress.dom.isAttached(el) // $ExpectType boolean
   Cypress.dom.isSelector(el, 'foo') // $ExpectType boolean
+  Cypress.dom.isSelector(jel, 'foo') // $ExpectType boolean
   Cypress.dom.isDescendent(el, el) // $ExpectType boolean
+  Cypress.dom.isDescendent(jel, jel) // $ExpectType boolean
+  Cypress.dom.isDescendent(el, jel) // $ExpectType boolean
+  Cypress.dom.isDescendent(jel, el) // $ExpectType boolean
   Cypress.dom.isElement(obj) // $ExpectType boolean
   Cypress.dom.isDocument(obj) // $ExpectType boolean
   Cypress.dom.isWindow(obj) // $ExpectType boolean
@@ -940,11 +949,18 @@ namespace CypressDomTests {
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
   Cypress.dom.getContainsSelector('foo', 'bar', { matchCase: true }) // $ExpectType string
   Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
-  Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getWindowByElement(el) // $ExpectType Window
+  Cypress.dom.getWindowByElement(jel) // $ExpectType Window
+  Cypress.dom.getWindowByElement(doc) // $ExpectType Window
+  Cypress.dom.getWindowByElement(window) // $ExpectType Window
   Cypress.dom.getReasonIsHidden(el) // $ExpectType string
-  Cypress.dom.getFirstScrollableParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getFirstFixedOrStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getFirstStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getReasonIsHidden(jel) // $ExpectType string
+  Cypress.dom.getFirstScrollableParent(el) // $ExpectType JQuery<HTMLElement> | null
+  Cypress.dom.getFirstScrollableParent(jel) // $ExpectType JQuery<HTMLElement> | null
+  Cypress.dom.getFirstFixedOrStickyPositionParent(el) // $ExpectType JQuery<HTMLElement> | null
+  Cypress.dom.getFirstFixedOrStickyPositionParent(jel) // $ExpectType JQuery<HTMLElement> | null
+  Cypress.dom.getFirstStickyPositionParent(el) // $ExpectType JQuery<HTMLElement> | null
+  Cypress.dom.getFirstStickyPositionParent(jel) // $ExpectType JQuery<HTMLElement> | null
   Cypress.dom.getCoordsByPosition(1, 2) // $ExpectType number
   Cypress.dom.getElementPositioning(el) // $ExpectType ElementPositioning
   Cypress.dom.getElementAtPointFromViewport(doc, 1, 2) // $ExpectType Element | null
