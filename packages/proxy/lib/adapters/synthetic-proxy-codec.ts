@@ -118,6 +118,8 @@ export type SyntheticProxyCodec = TransportCodecPort<HttpMiddlewareCtx<any>, Htt
 export function createSyntheticProxyCodec (
   options: SyntheticProxyCodecOptions,
 ): SyntheticProxyCodec {
+  // The legacy pipeline writes the client response on this transport, so the
+  // core codec must not opt into writeSynthesizedResponses.
   const coreCodec = createProxyHttpCodec()
   const inFlightExchanges = new Map<string, SyntheticExpressContext>()
 
