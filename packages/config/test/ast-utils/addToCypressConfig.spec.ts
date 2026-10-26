@@ -5,11 +5,10 @@ import dedent from 'dedent'
 import { addTestingTypeToCypressConfig } from '../../src/ast-utils/addToCypressConfig'
 
 vi.mock('fs-extra', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<{ default: typeof import('fs-extra') }>()
 
   return {
     default: {
-      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       writeFile: vi.fn(),
     },

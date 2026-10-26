@@ -40,7 +40,7 @@ export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any)
   config.projectName = projectName
   config.repoRoot = repoRoot
 
-  // @ts-expect-error - mergeDefaults is typed to return Config, but it sets resolved and the other FullConfig fields
+  // @ts-expect-error - mergeDefaults is typed to return Promise<Config>, but it sets resolved and the other FullConfig fields
   return mergeDefaults(config, options, cliConfig, getFilesByGlob)
 }
 

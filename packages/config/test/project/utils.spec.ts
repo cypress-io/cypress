@@ -29,11 +29,10 @@ import fs from 'fs-extra'
 const debug = Debug('test')
 
 vi.mock('@packages/errors', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('@packages/errors')>()
 
   return {
     default: {
-      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       throwErr: vi.fn(),
       warning: vi.fn(),
@@ -42,11 +41,10 @@ vi.mock('@packages/errors', async (importActual) => {
 })
 
 vi.mock('fs-extra', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<{ default: typeof import('fs-extra') }>()
 
   return {
     default: {
-      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       pathExists: vi.fn(),
     },
@@ -54,10 +52,9 @@ vi.mock('fs-extra', async (importActual) => {
 })
 
 vi.mock('../../src/project/utils', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('../../src/project/utils')>()
 
   return {
-    // @ts-expect-error - importActual() returns unknown
     ...actual,
     resolveModule: vi.fn(),
   }
