@@ -310,7 +310,6 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
-  // @ts-expect-error - the ERR_INVALID_CHAR fallback writes the header directly and returns nothing, but setHeader's type requires the response to be returned
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -341,6 +340,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
       }
 
       headers[name.toLowerCase()] = [name, value]
+
+      return this
     }
   }
 

@@ -2,6 +2,8 @@ import type { Mock, MockInstance } from 'vitest'
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import zlib from 'zlib'
+import http from 'http'
+import { Socket } from 'net'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
@@ -573,6 +575,32 @@ describe('http/response-middleware', function () {
         },
       }
     }
+  })
+
+  describe('PatchExpressSetHeader', function () {
+    const { PatchExpressSetHeader } = ResponseMiddleware
+    let ctx
+
+    beforeEach(async function () {
+      ctx = {
+        incomingRes: {
+          headers: {},
+        },
+        res: new http.ServerResponse(new http.IncomingMessage(new Socket())),
+      }
+
+      await testMiddleware([PatchExpressSetHeader], ctx)
+    })
+
+    it('returns the response when the header is valid', function () {
+      expect(ctx.res.setHeader('x-valid', 'value')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-valid')).toBe('value')
+    })
+
+    it('sets the header and returns the response when the value has an invalid character', function () {
+      expect(ctx.res.setHeader('x-invalid', 'a\u0000b')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-invalid')).toBe('a\u0000b')
+    })
   })
 
   describe('MaybeSetOriginAgentClusterHeader', function () {
