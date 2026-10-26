@@ -149,6 +149,48 @@ describe('src/cy/commands/waiting', () => {
         .wait('@fetch', { requestTimeout: 199 })
       })
 
+      describe('responseTimeout phase budgets', { retries: 0, defaultCommandTimeout: 10000 }, () => {
+        const startPair = (secondRequestDelay: number) => {
+          cy.intercept('GET', '/phase-a', { delay: 1000, body: 'a' }).as('phaseA')
+          cy.intercept('GET', '/phase-b', { delay: 1000, body: 'b' }).as('phaseB')
+          cy.window().then((win) => {
+            win.fetch('/phase-a')
+            win.setTimeout(() => {
+              win.fetch('/phase-b')
+            }, secondRequestDelay)
+          })
+        }
+
+        for (const delay of [0, 1000]) {
+          it(`gives each response a fresh budget with a ${delay}ms second request delay`, () => {
+            startPair(delay)
+            cy.wait(['@phaseA', '@phaseB'], { requestTimeout: 4000, responseTimeout: 1500 }).then((responses) => {
+              expect(responses[0].response?.body).to.eq('a')
+              expect(responses[1].response?.body).to.eq('b')
+            })
+          })
+        }
+
+        it('still rejects a response that exceeds its own budget', (done) => {
+          cy.once('fail', (err) => {
+            expect(err.message).to.include('1500ms')
+            expect(err.message).to.include('phaseB')
+            done()
+
+            return false
+          })
+
+          cy.intercept('GET', '/phase-b', { delay: 3000, body: 'late' }).as('phaseB')
+          cy.window().then((win) => {
+            win.setTimeout(() => {
+              win.fetch('/phase-b')
+            }, 1000)
+          })
+
+          cy.wait('@phaseB', { requestTimeout: 4000, responseTimeout: 1500 })
+        })
+      })
+
       it('waits for responseTimeout', {
         responseTimeout: 299,
       }, (done) => {
