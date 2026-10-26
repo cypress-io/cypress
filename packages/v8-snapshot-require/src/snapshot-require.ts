@@ -274,12 +274,10 @@ export function snapshotRequire (
       // The below aren't available in all environments
       const checked_process: any =
         typeof process !== 'undefined' ? process : undefined
-      const checked_window: any =
-        // @ts-expect-error - window only exists at runtime in a renderer, and this tsconfig has no DOM lib
-        typeof window !== 'undefined' ? window : undefined
-      const checked_document: any =
-        // @ts-expect-error - document only exists at runtime in a renderer, and this tsconfig has no DOM lib
-        typeof document !== 'undefined' ? document : undefined
+      // Read through globalThis because this file is type-checked both with the
+      // DOM lib (by @tooling/v8-snapshot) and without it (by this package)
+      const checked_window: any = Reflect.get(globalThis, 'window')
+      const checked_document: any = Reflect.get(globalThis, 'document')
 
       // 11. Inject those globals
 
