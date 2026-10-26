@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import $actionability from '../../../src/cy/actionability'
 import type { IStability } from '../../../src/cy/stability'
 import $Command from '../../../src/cypress/command'
 import { CommandQueue } from '../../../src/cypress/command_queue'
@@ -196,4 +197,123 @@ describe('src/cypress/command_queue', () => {
       expect(queue.stopped).to.false
     })
   })
+})
+
+describe('runtime command timeout configuration', { retries: 0 }, () => {
+  beforeEach(() => {
+    cy.visit('/fixtures/empty.html')
+  })
+
+  afterEach(() => {
+    Cypress.config('defaultCommandTimeout', 4000)
+  })
+
+  const insertLater = (timeout: number, delay: number) => {
+    cy.window().then((win) => {
+      Cypress.config('defaultCommandTimeout', timeout)
+      win.setTimeout(() => {
+        const element = win.document.createElement('p')
+
+        element.textContent = 'delayed query target'
+        win.document.body.appendChild(element)
+      }, delay)
+    })
+  }
+
+  it('uses a decreased runtime default', { defaultCommandTimeout: 4000 }, (done) => {
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('Timed out retrying after 500ms')
+      done()
+
+      return false
+    })
+
+    insertLater(500, 1000)
+    cy.contains('delayed query target').should('be.visible')
+  })
+
+  it('uses an increased runtime default', { defaultCommandTimeout: 500 }, () => {
+    insertLater(2000, 1000)
+    cy.contains('delayed query target').should('be.visible')
+  })
+
+  it('preserves an explicit timeout longer than the runtime default', { defaultCommandTimeout: 4000 }, () => {
+    insertLater(100, 500)
+    cy.contains('delayed query target', { timeout: 2000 }).should('be.visible')
+  })
+
+  it('preserves an explicit timeout shorter than the runtime default', { defaultCommandTimeout: 4000 }, (done) => {
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('Timed out retrying after 100ms')
+      done()
+
+      return false
+    })
+
+    insertLater(2000, 500)
+    cy.contains('delayed query target', { timeout: 100 }).should('be.visible')
+  })
+
+  for (const tag of ['button', 'input'] as const) {
+    const actionName = tag === 'button' ? 'click' : 'type'
+    const prepareAction = (timeout: number, delay: number) => {
+      cy.window().then((win) => {
+        const element = win.document.createElement(tag)
+
+        element.disabled = true
+        element.id = 'runtime-action'
+        element.addEventListener('click', () => element.setAttribute('data-clicked', 'yes'))
+        win.document.body.appendChild(element)
+        win.setTimeout(() => {
+          element.disabled = false
+        }, delay)
+
+        Cypress.config('defaultCommandTimeout', timeout)
+      })
+    }
+    const performAction = (options?: { timeout: number }) => {
+      if (tag === 'button') {
+        return cy.get('#runtime-action').click(options).should('have.attr', 'data-clicked', 'yes')
+      }
+
+      return cy.get('#runtime-action').type('x', options).should('have.value', 'x')
+    }
+
+    it(`uses a decreased runtime default for .${actionName}()`, { defaultCommandTimeout: 4000 }, (done) => {
+      cy.once('fail', (err) => {
+        // click already adds its actionability delay to the runnable budget.
+        const expectedTimeout = 500 + (tag === 'button' ? $actionability.delay : 0)
+
+        expect(err.message).to.include(`Timed out retrying after ${expectedTimeout}ms`)
+        done()
+
+        return false
+      })
+
+      prepareAction(500, 1000)
+      performAction()
+    })
+
+    it(`uses an increased runtime default for .${actionName}()`, { defaultCommandTimeout: 500 }, () => {
+      prepareAction(2000, 1000)
+      performAction()
+    })
+
+    it(`preserves an explicit longer .${actionName}() timeout`, { defaultCommandTimeout: 4000 }, () => {
+      prepareAction(100, 500)
+      performAction({ timeout: 2000 })
+    })
+
+    it(`preserves an explicit shorter .${actionName}() timeout`, { defaultCommandTimeout: 4000 }, (done) => {
+      cy.once('fail', (err) => {
+        expect(err.message).to.include('Timed out retrying after 100ms')
+        done()
+
+        return false
+      })
+
+      prepareAction(2000, 500)
+      performAction({ timeout: 100 })
+    })
+  }
 })

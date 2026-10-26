@@ -88,7 +88,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
   }
 
   const options = {
-    timeout: command.get('timeout') ?? cy.config('defaultCommandTimeout'),
+    timeout: command.get('timeout'),
     error: null,
     _log: command.get('_log'),
   }
@@ -495,6 +495,8 @@ export class CommandQueue extends Queue<$Command> {
       // timeout in favor of the on load timeout already running.
       if (!this.state('isStable')) {
         this.cy.clearTimeout()
+      } else {
+        this.cy.timeout(this.cy.config('defaultCommandTimeout'))
       }
 
       // store the current runnable
