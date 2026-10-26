@@ -72,6 +72,54 @@ describe('e2e reporters', () => {
     })
   })
 
+  it('supports stdout-only JSON with default reporter options', function () {
+    return systemTests.exec(this, {
+      spec: 'simple_passing.cy.js',
+      reporter: 'json',
+      expectedExitCode: 0,
+      config: { screenshotOnRunFailure: false },
+    })
+    .then(({ stdout }) => {
+      expect(stdout).to.include('"tests"')
+      expect(stdout).to.include('simple passing spec passes')
+    })
+  })
+
+  it('keeps JSON output for more than one spec with a hash template', function () {
+    return systemTests.exec(this, {
+      spec: 'simple_passing.cy.js,simple_failing.cy.js',
+      reporter: 'json',
+      reporterOptions: 'output=json-output/result.[hash].json',
+      expectedExitCode: 2,
+      config: { screenshotOnRunFailure: false },
+    })
+    .then(async () => {
+      const files = await glob(path.join(e2ePath, 'json-output', 'result.*.json'))
+
+      expect(files).to.have.length(2)
+      const reports = await Promise.all(files.map((file) => fs.readJson(file)))
+      const titles = reports.flatMap((report) => report.tests.map((test) => test.fullTitle))
+
+      expect(titles).to.include('simple passing spec passes')
+      expect(titles).to.include('simple failing spec fails1')
+      expect(titles).to.include('simple failing spec fails2')
+    })
+  })
+
+  it('reports a JSON output write failure and exits instead of hanging', function () {
+    return systemTests.exec(this, {
+      spec: 'simple_passing.cy.js',
+      reporter: 'json',
+      reporterOptions: 'output=package.json/result.json',
+      expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
+    })
+    .then(({ stdout }) => {
+      expect(stdout).to.include('Could not write JSON reporter output to')
+      expect(stdout).to.include('package.json')
+    })
+  })
+
   it('supports local custom reporter', function () {
     return systemTests.exec(this, {
       spec: 'simple_passing.cy.js',

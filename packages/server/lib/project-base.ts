@@ -10,7 +10,7 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import { Reporter } from './reporter'
+import { Reporter, ReporterOutputError } from './reporter'
 import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -650,12 +650,22 @@ export class ProjectBase extends EE {
         } else if (event === 'end') {
           debugVerbose('browserPreRequests at the end: %o', this.server.getBrowserPreRequests())
 
-          const [stats = {}] = await Promise.all([
-            (reporterInstance != null ? reporterInstance.end() : undefined),
-            this.server.end(),
-          ])
+          try {
+            const [stats = {}] = await Promise.all([
+              reporterInstance.end(),
+              this.server.end(),
+            ])
 
-          this.emit('end', stats)
+            this.emit('end', stats)
+          } catch (error) {
+            if (!(error instanceof ReporterOutputError)) {
+              throw error
+            }
+
+            // A rejected socket callback is not observed by Socket.IO. Route
+            // output failures through the existing run termination handler.
+            this.options.onError!(error)
+          }
         }
 
         return

@@ -285,6 +285,29 @@ describe('lib/reporter', () => {
       expect(await result).toHaveProperty('stats')
     })
 
+    it('keeps distinct spec payloads in distinct hash-template output files', async () => {
+      const write = vi.spyOn(fs, 'outputJson').mockResolvedValue(undefined)
+
+      for (const title of ['first spec', 'second spec']) {
+        reporter = new Reporter('json', { output: 'reports/results.[hash].json' }, path.resolve('synthetic-project'))
+        finishJsonRun()
+
+        ;(reporter.runner as any).testResults = { tests: [{ fullTitle: title }] }
+
+        await reporter.end()
+      }
+
+      const paths = write.mock.calls.map(([filename]) => filename)
+
+      expect(paths).toHaveLength(2)
+      expect(paths[0]).not.toEqual(paths[1])
+      paths.forEach((filename) => expect(filename).toMatch(/results\.[a-f0-9]{32}\.json$/))
+      expect(write.mock.calls.map(([, payload]) => payload)).toEqual([
+        { tests: [{ fullTitle: 'first spec' }] },
+        { tests: [{ fullTitle: 'second spec' }] },
+      ])
+    })
+
     it('propagates output write failures', async () => {
       const error = new Error('synthetic JSON write failure')
 
@@ -292,7 +315,20 @@ describe('lib/reporter', () => {
       reporter = new Reporter('json', { output: 'results.json' })
       finishJsonRun()
 
-      await expect(reporter.end()).rejects.toBe(error)
+      await expect(reporter.end()).rejects.toMatchObject({
+        name: 'ReporterOutputError',
+        message: expect.stringContaining('Could not write JSON reporter output to'),
+        cause: error,
+      })
+    })
+
+    it('keeps stdout-only JSON working with the configured null options', () => {
+      const write = vi.spyOn(fs, 'outputJson')
+
+      reporter = new Reporter('json', null as any)
+      finishJsonRun()
+      expect(() => reporter.end()).not.toThrow()
+      expect(write).not.toHaveBeenCalled()
     })
 
     it('keeps JSON without output and other reporters unchanged', () => {

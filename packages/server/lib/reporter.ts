@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
+import { createHash } from 'crypto'
 import { fs } from './util/fs'
 import { stackUtils } from '@packages/errors'
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
@@ -26,6 +27,13 @@ import type {
   RunnablePayload,
   RunnableState,
 } from './types/reporter'
+
+export class ReporterOutputError extends Error {
+  constructor (output: string, public readonly cause: Error) {
+    super(`Could not write JSON reporter output to "${output}": ${cause.message}`)
+    this.name = 'ReporterOutputError'
+  }
+}
 
 const debug = Debug('cypress:server:reporter')
 const mochaColor = mochaReporters.Base.color
@@ -277,7 +285,7 @@ const setDate = function (obj: RunnablePayload, _runnables: Record<string, Inter
   return []
 }
 
-const orNull = function <T> (prop: T | null | undefined): T | null {
+const orNull = function <T>(prop: T | null | undefined): T | null {
   if (prop == null) return null
 
   return prop
@@ -686,11 +694,18 @@ export class Reporter {
   }
 
   end (): Promise<ReporterResults> | ReporterResults {
-    if (this.reporterName.toLowerCase() === 'json' && typeof this.reporterOptions.output === 'string') {
-      const output = path.resolve(this.projectRoot ?? '', this.reporterOptions.output)
+    if (this.reporterName.toLowerCase() === 'json' && typeof this.reporterOptions?.output === 'string') {
       const { testResults } = this.runner as Mocha.Runner & { testResults: unknown }
+      const filename = this.reporterOptions.output.replace(/\[hash\]/g, () => {
+        return createHash('md5').update(JSON.stringify(testResults)).digest('hex')
+      })
+      const output = path.resolve(this.projectRoot ?? '', filename)
 
-      return fs.outputJson(output, testResults, { spaces: 2 }).then(() => this.results())
+      return fs.outputJson(output, testResults, { spaces: 2 })
+      .then(() => this.results())
+      .catch((error: Error) => {
+        throw new ReporterOutputError(output, error)
+      })
     }
 
     if (this.reporter.done) {
