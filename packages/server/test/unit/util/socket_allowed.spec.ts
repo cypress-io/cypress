@@ -117,6 +117,12 @@ describe('lib/util/socket_allowed', function () {
       expect(sw.isTrustedOrigin(`http://localhost:${SERVER_PORT}`)).toBe(false)
     })
 
+    it('trusts the server\'s own origin on a default port', () => {
+      sw = new SocketAllowed(createRemoteStates(), () => 80)
+
+      expect(sw.isTrustedOrigin('http://localhost')).toBe(true)
+    })
+
     it('rejects non-http origins', () => {
       for (const origin of ['null', '', 'moz-extension://abc', 'chrome-extension://abc', 'file://', 'about:blank']) {
         expect(sw.isTrustedOrigin(origin), origin).toBe(false)

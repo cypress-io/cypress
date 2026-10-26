@@ -73,7 +73,8 @@ export class SocketAllowed {
     }
 
     const serverPort = this.getServerPort()
-    let isTrusted = serverPort !== undefined && origin === `http://localhost:${serverPort}`
+    // URL drops a default port, as browsers do when reporting an origin
+    let isTrusted = serverPort !== undefined && origin === new URL(`http://localhost:${serverPort}`).origin
 
     try {
       isTrusted ||= this.remoteStates.hasPrimary() && this.remoteStates.isPrimarySuperDomainOrigin(origin)
