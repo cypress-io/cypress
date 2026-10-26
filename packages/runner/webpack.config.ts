@@ -27,6 +27,21 @@ const mainConfig: webpack.Configuration = {
   entry: {
     cypress_runner: [path.resolve(__dirname, 'src/index.ts')],
   },
+  module: {
+    ...commonConfig.module,
+    rules: [
+      ...(commonConfig.module.rules as webpack.RuleSetRule[]),
+      {
+        test: /[\\/]node_modules[\\/]popper\.js[\\/].*\.js$/,
+        use: {
+          loader: (babelLoader as { use: { loader: string } }).use.loader,
+          // Consume Popper's map before webpack wraps its code in eval.
+          // Otherwise DevTools resolves its relative URL against the runner.
+          options: { babelrc: false, configFile: false, sourceMaps: true },
+        },
+      },
+    ],
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
