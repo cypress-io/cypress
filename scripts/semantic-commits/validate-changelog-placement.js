@@ -1,4 +1,5 @@
 const childProcess = require('child_process')
+const _ = require('lodash')
 
 const CHANGELOG_PATH = 'cli/CHANGELOG.md'
 const VERSION_HEADER = /^## (\d+\.\d+\.\d+)/
@@ -75,10 +76,6 @@ function _findHeaders (changelogLines, lineNumber) {
   return {}
 }
 
-function _truncate (text) {
-  return text.length > MAX_ENTRY_LENGTH ? `${text.slice(0, MAX_ENTRY_LENGTH)}…` : text
-}
-
 function validateChangelogPlacement ({ diff, changelogContent, releasedVersions }) {
   const changelogLines = changelogContent.split('\n')
   const topVersion = changelogLines.map((line) => VERSION_HEADER.exec(line)).find(Boolean)?.[1]
@@ -96,7 +93,7 @@ function validateChangelogPlacement ({ diff, changelogContent, releasedVersions 
       ? `Move it${sectionHint} in a new "## <next version>" release added above "## ${topVersion}". Merge the latest develop first, since it may already have one.`
       : `Move it${sectionHint} in ${topVersion}, the next unreleased version.`
 
-    return [`The changelog entry on line ${lineNumber} of ${CHANGELOG_PATH} was added under ${version}, which has already been released:\n\n  ${_truncate(text)}\n\n${destination}`]
+    return [`The changelog entry on line ${lineNumber} of ${CHANGELOG_PATH} was added under ${version}, which has already been released:\n\n  ${_.truncate(text, { length: MAX_ENTRY_LENGTH, omission: '…' })}\n\n${destination}`]
   })
 }
 

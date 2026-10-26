@@ -102,7 +102,7 @@ describe('semantic-commits/validate-changelog-placement', () => {
       const content = `## 16.2.0\n\n**Bugfixes:**\n\n${longEntry}\n`
       const [error] = validateChangelogPlacement({ diff: diffOf(`@@ -4,0 +5 @@\n+${longEntry}`), changelogContent: content, releasedVersions: ['16.2.0'] })
 
-      expect(error).to.include(`  ${longEntry.slice(0, 120)}…\n`)
+      expect(error).to.include(`  ${longEntry.slice(0, 119)}…\n`)
     })
   })
 
