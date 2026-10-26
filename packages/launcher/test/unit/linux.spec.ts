@@ -14,7 +14,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       platform: vi.fn(),
       release: vi.fn(),
@@ -28,7 +28,7 @@ vi.mock('child_process', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       spawn: vi.fn(),
     },
@@ -84,7 +84,7 @@ describe('linux browser detection', () => {
       }
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const browser = await linuxHelper.detect(goal)
 
     expect(browser).toEqual({
@@ -253,7 +253,7 @@ describe('linux browser detection', () => {
 
     const goal = _.defaults({ binary: 'multiline-foo' }, _.find(goalBrowsers, { name: 'foo-browser' }))
 
-    // @ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const [browser] = await detect([goal])
 
     expect(browser).toEqual({
@@ -300,7 +300,7 @@ describe('linux browser detection', () => {
       }
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const browsers = await detect(goalBrowsers)
 
     log('Browsers: %o', browsers)
@@ -334,7 +334,7 @@ describe('linux browser detection', () => {
       }
     }
 
-    //@ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const browsers = await detect(goalBrowsers)
 
     log('Browsers: %o', browsers)

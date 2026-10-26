@@ -928,7 +928,6 @@ namespace CypressDomTests {
   Cypress.dom.query('foo', el) // $ExpectType JQuery<HTMLElement>
   Cypress.dom.unwrap(obj) // $ExpectType any
   Cypress.dom.isDom(obj) // $ExpectType boolean
-  Cypress.dom.isType(el, 'foo') // $ExpectType boolean
   Cypress.dom.isVisible(el) // $ExpectType boolean
   Cypress.dom.isHidden(el) // $ExpectType boolean
   Cypress.dom.isFocusable(el) // $ExpectType boolean
@@ -944,7 +943,11 @@ namespace CypressDomTests {
   Cypress.dom.isWindow(obj) // $ExpectType boolean
   Cypress.dom.isJquery(obj) // $ExpectType boolean
   Cypress.dom.isInputType(el, 'number') // $ExpectType boolean
-  Cypress.dom.stringify(el, 'foo') // $ExpectType string
+  Cypress.dom.stringify(el) // $ExpectType string
+  Cypress.dom.stringify(el, 'long') // $ExpectType string
+  Cypress.dom.stringify(jel, 'short') // $ExpectType string
+  Cypress.dom.stringify(window) // $ExpectType string
+  Cypress.dom.stringify(doc) // $ExpectType string
   Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
   Cypress.dom.getContainsSelector('foo', 'bar', { matchCase: true }) // $ExpectType string
@@ -964,7 +967,7 @@ namespace CypressDomTests {
   Cypress.dom.query(el, 'foo') // $ExpectError
   Cypress.dom.unwrap() // $ExpectError
   Cypress.dom.isDom() // $ExpectError
-  Cypress.dom.isType(el) // $ExpectError
+  Cypress.dom.isType(el, 'foo') // $ExpectError
   Cypress.dom.isVisible('') // $ExpectError
   Cypress.dom.isHidden('') // $ExpectError
   Cypress.dom.isFocusable('') // $ExpectError
@@ -981,6 +984,7 @@ namespace CypressDomTests {
   Cypress.dom.isJquery() // $ExpectError
   Cypress.dom.isInputType('', 'number') // $ExpectError
   Cypress.dom.stringify('', 'foo') // $ExpectError
+  Cypress.dom.stringify(el, 'foo') // $ExpectError
   Cypress.dom.getElements(el) // $ExpectError
   Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
   Cypress.dom.getContainsSelector('foo', 'bar', { invalid: false }) // $ExpectError
