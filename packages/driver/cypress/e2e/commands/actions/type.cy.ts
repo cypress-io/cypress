@@ -2673,6 +2673,67 @@ describe('src/cy/commands/actions/type - #type', () => {
           expect(trimInnerText($el)).eq('new text')
         })
       })
+
+      for (const scrollBehavior of [false, 'bottom', 'center'] as const) {
+        it(`respects explicit scrollBehavior=${scrollBehavior} while focused`, () => {
+          cy.get(':text:first').focus().then(($el) => {
+            cy.spy($el[0], 'scrollIntoView').as('focusedScroll')
+          })
+
+          cy.get(':text:first').type('abc', { scrollBehavior })
+
+          if (scrollBehavior === false) {
+            cy.get('@focusedScroll').should('not.have.been.called')
+          } else {
+            cy.get('@focusedScroll').should('have.been.calledWith', scrollBehavior === 'bottom'
+              ? { block: 'end' }
+              : { block: 'center', inline: 'center' })
+          }
+        })
+      }
+
+      describe('live geometry after clear (#16283)', { retries: 0 }, () => {
+        for (const initial of ['', 'xyz']) {
+          for (const clear of [false, true]) {
+            it(`keeps the input uncovered while typing: initial=${JSON.stringify(initial)}, clear=${clear}`, () => {
+              const samples: Array<{ key: string, top: number, headerBottom: number, hit: boolean }> = []
+
+              cy.viewport(600, 400)
+              cy.document().then((doc) => {
+                doc.body.style.cssText = 'height:200vh;padding-top:30px;'
+                doc.body.innerHTML = '<span id="fixed-cover" style="background:brown;position:fixed;top:0;left:0;width:100%;height:30px;z-index:10"></span><input id="live-input" type="text">'
+                const input = doc.getElementById('live-input') as HTMLInputElement
+                const header = doc.getElementById('fixed-cover')!
+
+                input.value = initial
+                input.addEventListener('keydown', (event) => {
+                  if (!/^[abc]$/.test(event.key) || event.ctrlKey || event.metaKey) return
+
+                  const rect = input.getBoundingClientRect()
+
+                  samples.push({ key: event.key, top: rect.top, headerBottom: header.getBoundingClientRect().bottom, hit: doc.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) === input })
+                })
+              })
+
+              if (clear) {
+                cy.get('#live-input').clear().type('abc', { delay: 1000 })
+              } else {
+                cy.get('#live-input').type('abc', { delay: 1000 })
+              }
+
+              cy.get('#live-input').should('have.value', clear ? 'abc' : `${initial}abc`).then(() => {
+                expect(samples).to.have.length(3)
+                expect(samples.map((sample) => sample.key)).to.deep.eq(['a', 'b', 'c'])
+
+                for (const sample of samples) {
+                  expect(sample.top, JSON.stringify(sample)).to.be.at.least(sample.headerBottom)
+                  expect(sample.hit, JSON.stringify(sample)).to.eq(true)
+                }
+              })
+            })
+          }
+        }
+      })
     })
 
     it('can arrow from maxlength', () => {
