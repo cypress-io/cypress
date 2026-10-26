@@ -3,11 +3,34 @@ const path = require('path')
 const { validateChangelog } = require('./validate-changelog')
 const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getReleaseData } = require('./get-binary-release-data')
+const { getChangelogDiff, validateChangelogPlacement } = require('./validate-changelog-placement')
 const checkedInBinaryVersion = require('../../package.json').version
 const SENTINEL_VERSION = '0.0.0-development'
 
+const validatePlacement = (releasedVersions) => {
+  const errors = validateChangelogPlacement({
+    diff: getChangelogDiff(),
+    changelogContent: fs.readFileSync(path.join(__dirname, '..', '..', 'cli', 'CHANGELOG.md'), 'utf8'),
+    releasedVersions,
+  })
+
+  if (errors.length) {
+    errors.forEach((err) => {
+      console.log(err)
+      console.log()
+    })
+
+    throw new Error('One or more changelog entries were added under a version that has already been released. See above for details.')
+  }
+}
+
 const changelog = async () => {
   const latestReleaseInfo = await getCurrentReleaseData()
+
+  // Runs before the branch gate below so that every pull request is checked, not only
+  // develop and release branches.
+  validatePlacement(latestReleaseInfo.versions)
+
   const hasVersionBump = checkedInBinaryVersion !== SENTINEL_VERSION &&
     !latestReleaseInfo.versions.includes(checkedInBinaryVersion) // account for branches behind develop
 

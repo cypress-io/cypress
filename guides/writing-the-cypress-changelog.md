@@ -73,7 +73,7 @@ This changelog describes the **binary**. Validation only considers changed files
     - _Example (`on.cypress.io`):_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`before:spec`](https://on.cypress.io/before-spec-api) ``.
     - _Example (`docs.cypress.io`):_ `` [`before:spec`](https://docs.cypress.io/api/plugins/before-spec-api) ``, `` [`numTestsKeptInMemory`](https://docs.cypress.io/app/references/configuration#Global) ``.
 11. If a change is only observable under a specific run context (e.g. `cypress run` vs. `cypress open`, or behind an experimental flag), state which context is affected so users can tell whether the change applies to them.
-12. A release often ships between the commit that adds an entry and the review that merges it. Re-check placement every time you pull `develop`, and again before marking a pull request ready: if a new `## X.Y.Z` heading has appeared above your entry, move the entry up into the new topmost release, keeping it under the same named section there. This is silent in both directions — the entry still reads correctly in the diff, and validation parses only the topmost release, so an entry stranded under an already-shipped version is simply never seen.
+12. A release often ships between the commit that adds an entry and the review that merges it. Re-check placement every time you pull `develop`, and again before marking a pull request ready: if a new `## X.Y.Z` heading has appeared above your entry, move the entry up into the new topmost release, keeping it under the same named section there. The entry still reads correctly in the diff, so reviewers can miss it, but validation fails any entry your branch adds under a version already published to npm and names the release to move it to. Edits to existing entries under a published version are allowed.
 
 ## Dependency Updates and Security Advisories
 
@@ -128,6 +128,7 @@ It reports one of:
 - `A changelog entry was not found in cli/CHANGELOG.md.`
 - `The changelog does not include the **<Section>:** section.`
 - `Found the changelog entry in the wrong section.`
+- `The changelog entry on line <n> of cli/CHANGELOG.md was added under <version>, which has already been released`, followed by the release to move it to. This check compares your branch with its merge base on `develop` (set `CHANGELOG_BASE_BRANCH` to compare with another branch) and runs on every branch, including in CI.
 - a missing-links error that prints the exact expected string to paste.
 - a parse error naming the offending line number, for an unknown or duplicate section header or a missing blank line.
 
