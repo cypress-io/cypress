@@ -206,10 +206,8 @@ export function snapshotRequire (
     let resolverMap: Record<string, string> | undefined
     let moduleNeedsReload: ModuleNeedsReload | undefined
 
-    // @ts-expect-error - snapshotAuxiliaryData is embedded in the snapshot but missing from the Snapshot type
     resolverMap = sr.snapshotAuxiliaryData.resolverMap
-    // @ts-expect-error - snapshotAuxiliaryData is embedded in the snapshot but missing from the Snapshot type
-    const dependencyMapArray: DependencyMapArray = sr.snapshotAuxiliaryData.dependencyMapArray
+    const dependencyMapArray = sr.snapshotAuxiliaryData.dependencyMapArray
 
     // 5. Setup the module needs reload predicate with the dependency map
     if (dependencyMapArray != null) {
@@ -281,7 +279,6 @@ export function snapshotRequire (
 
       // 11. Inject those globals
 
-      // @ts-expect-error - setGlobals is defined by the snapshot but missing from the Snapshot type
       sr.setGlobals(
         global,
         checked_process,
@@ -296,15 +293,12 @@ export function snapshotRequire (
 
       // @ts-expect-error - Module._cache is private Node API
       require.cache = Module._cache
-      // @ts-expect-error - Module._cache allows undefined entries, which the snapshot's cache type does not
       sr.customRequire.cache = require.cache
 
       // 12. Add some 'magic' functions that we can use from inside the
       //    snapshot in order to integrate module loading
       //    See ../blueprint/custom-require.js
 
-      // @ts-expect-error - _tryLoad is a custom hook the snapshot calls, not part of Node's Require type
-      require._tryLoad = tryLoad
       const oldRequireResolve = require.resolve
 
       // @ts-expect-error - this resolver takes the snapshot's GetModuleKeyOpts and has no `paths` method
@@ -316,12 +310,12 @@ export function snapshotRequire (
         return oldRequireResolve(id, opts)
       }
 
-      // @ts-expect-error - shouldBypassCache is a custom hook the snapshot calls, not part of Node's Require type
-      require.shouldBypassCache = shouldBypassCache
-      // @ts-expect-error - registerModuleLoad is a custom hook the snapshot calls, not part of Node's Require type
-      require.registerModuleLoad = registerModuleLoad
-      // @ts-expect-error - builtInModules is a custom hook the snapshot calls, not part of Node's Require type
-      require.builtInModules = new Set(Module.builtinModules)
+      Object.assign(require, {
+        _tryLoad: tryLoad,
+        shouldBypassCache,
+        registerModuleLoad,
+        builtInModules: new Set(Module.builtinModules),
+      })
     }
   }
 }
