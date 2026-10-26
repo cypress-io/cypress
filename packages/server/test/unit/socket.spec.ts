@@ -27,7 +27,7 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    runnerGraphQLHTTP: vi.fn(),
+    tapGraphQLHTTP: vi.fn(),
   }
 })
 
