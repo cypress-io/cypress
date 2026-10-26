@@ -25,7 +25,7 @@ describe('webpack preprocessor - e2e', () => {
   let file
 
   beforeEach(async () => {
-    // @ts-expect-error
+    // @ts-expect-error - __reset is private and not typed
     preprocessor.__reset()
 
     await fs.remove(outputDir)
@@ -75,7 +75,7 @@ describe('webpack preprocessor - e2e', () => {
 
   it('allows attaching catch later on syntax error without triggering unhandled rejection', async () => {
     process.on('unhandledRejection', (err) => {
-      // @ts-expect-error
+      // @ts-expect-error - `unhandledRejection` types the reason as `unknown`
       // eslint-disable-next-line no-console
       console.error('Unhandled Rejection:', err.stack)
       throw new Error('Should not have trigger unhandled rejection')

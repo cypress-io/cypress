@@ -185,23 +185,26 @@ export const isChild = ($el: JQuery<HTMLElement>, $maybeChild: JQuery<HTMLElemen
   return children.index($maybeChild) >= 0
 }
 
-export const isDescendent = ($el1: JQuery<HTMLElement>, $el2?: JQuery<HTMLElement>) => {
-  if (!$el2) {
+export const isDescendent = (elOrJquery1: HTMLElement | JQuery<HTMLElement>, elOrJquery2?: HTMLElement | JQuery<HTMLElement>) => {
+  if (!elOrJquery2) {
     return false
   }
 
+  const el1 = $jquery.isJquery(elOrJquery1) ? elOrJquery1.get(0) : elOrJquery1
+  const el2 = $jquery.isJquery(elOrJquery2) ? elOrJquery2.get(0) : elOrJquery2
+
   // if they are equal, consider them a descendent
-  if ($el1.get(0) === $el2.get(0)) {
+  if (el1 === el2) {
     return true
   }
 
   // walk up the tree until we find a parent which
   // equals the descendent, if ever
-  return findParent($el2.get(0), (node) => {
-    if (node === $el1.get(0)) {
+  return findParent(el2, (node) => {
+    if (node === el1) {
       return node
     }
-  }) === $el1.get(0)
+  }) === el1
 }
 
 // mostly useful when traversing up parent nodes and wanting to

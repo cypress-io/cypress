@@ -2,6 +2,8 @@ import type { Mock, MockInstance } from 'vitest'
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import zlib from 'zlib'
+import http from 'http'
+import { Socket } from 'net'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
@@ -573,6 +575,32 @@ describe('http/response-middleware', function () {
         },
       }
     }
+  })
+
+  describe('PatchExpressSetHeader', function () {
+    const { PatchExpressSetHeader } = ResponseMiddleware
+    let ctx
+
+    beforeEach(async function () {
+      ctx = {
+        incomingRes: {
+          headers: {},
+        },
+        res: new http.ServerResponse(new http.IncomingMessage(new Socket())),
+      }
+
+      await testMiddleware([PatchExpressSetHeader], ctx)
+    })
+
+    it('returns the response when the header is valid', function () {
+      expect(ctx.res.setHeader('x-valid', 'value')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-valid')).toBe('value')
+    })
+
+    it('sets the header and returns the response when the value has an invalid character', function () {
+      expect(ctx.res.setHeader('x-invalid', 'a\u0000b')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-invalid')).toBe('a\u0000b')
+    })
   })
 
   describe('MaybeSetOriginAgentClusterHeader', function () {
@@ -3080,6 +3108,34 @@ describe('http/response-middleware', function () {
   describe('AttachPlainTextStreamFn', function () {
     const { AttachPlainTextStreamFn } = ResponseMiddleware
 
+    // https://github.com/cypress-io/cypress/issues/34387
+    it.each(['x-gzip', ' X-GZIP '])('decompresses the gzip alias in %s', async function (encoding) {
+      const ctx = {
+        debug: () => {},
+        res: { on: () => {}, off: () => {} },
+        incomingRes: { headers: { 'content-encoding': encoding } },
+        incomingResStream: Readable.from([zlib.gzipSync(Buffer.from('aliased'))]),
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: [],
+        makeResStreamPlainText: () => {},
+        onError: (err) => {
+          throw err
+        },
+      }
+
+      await testMiddleware([AttachPlainTextStreamFn], ctx)
+      ctx.makeResStreamPlainText()
+      expect(ctx.contentEncodingOrder).toEqual(['gzip'])
+      expect(ctx.isGunzipped).toBe(true)
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+      expect(Buffer.concat(chunks).toString()).toBe('aliased')
+    })
+
     it('decompresses Brotli and sets isBrotliDecompressed when content-encoding is br', async function () {
       const compressed = zlib.brotliCompressSync(Buffer.from('hello'))
       const stream = Readable.from([compressed])
@@ -3112,7 +3168,7 @@ describe('http/response-middleware', function () {
       expect(Buffer.concat(chunks).toString()).toBe('hello')
     })
 
-    it('decompresses layered content-encoding in reverse order (br then gzip for "gzip, br")', async function () {
+    it.each(['gzip, br', 'x-gzip, br'])('decompresses layered content-encoding in reverse order for %s', async function (encoding) {
       // content-encoding: gzip, br means gzip applied first, then br. Wire format: br(gzip(data)).
       const inner = zlib.gzipSync(Buffer.from('layered'))
       const outer = zlib.brotliCompressSync(inner)
@@ -3120,7 +3176,7 @@ describe('http/response-middleware', function () {
       const ctx = {
         debug: () => {},
         res: { on: () => {}, off: () => {} },
-        incomingRes: { headers: { 'content-encoding': 'gzip, br' } },
+        incomingRes: { headers: { 'content-encoding': encoding } },
         incomingResStream: stream,
         isGunzipped: false,
         isBrotliDecompressed: false,

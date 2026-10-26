@@ -16,17 +16,18 @@
 
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
-- [ ] npm/webpack-preprocessor
-- [ ] npm/webpack-dev-server
-- [ ] npm/vite-plugin-cypress-esm
+- [x] npm/webpack-preprocessor
+- [x] npm/webpack-dev-server
+- [x] npm/vite-plugin-cypress-esm
 - [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
 - [ ] packages/frontend-shared
-- [ ] packages/icons
-- [ ] packages/launcher
-- [ ] packages/https-proxy
-- [ ] packages/proxy
+- [x] packages/icons
+- [x] packages/launcher
+- [x] packages/https-proxy
+- [x] packages/network-interception
+- [x] packages/proxy
 - [ ] packages/net-stubbing
 - [ ] packages/driver
 - [ ] packages/reporter
@@ -56,7 +57,8 @@
 - [ ] packages/packherd-require
 - [ ] packages/v8-snapshot-require
 - [ ] packages/web-config
-- [ ] packages/types
+- [x] packages/types
+- [x] packages/scaffold-config
 - [ ] packages/example
 
 ### Batch 5: Test and script folders
@@ -100,30 +102,36 @@ For each package in the batch:
    - Delete `.eslintignore` — flat config does not read it. Anything in it that is still needed becomes an `ignores` entry in `eslint.config.ts`.
    - Remove any references to `@cypress/eslint-plugin-dev` in `package.json` (if present).
    - **Remove TSLint configs:** Delete `tslint.json` and remove `tslint` dependencies from `package.json`.
+   - **Drop the `tslint` script** and its call from `check-ts`. `packages/ts/tslint.json` enforces `no-empty` for JS, which `baseConfig` already has, and `no-floating-promises`, which `baseConfig` does not run because it is type-aware. Port it by enabling `projectService` and `@typescript-eslint/no-floating-promises` for the files `check-ts` linted, as `packages/scaffold-config` does.
 2. **Add a new ESLint config file:**
    - Create `eslint.config.ts` in the package root:
      ```ts
-     import baseConfig from '@packages/eslint-config'
-     export default baseConfig
+     import { baseConfig, jsonConfig } from '@packages/eslint-config'
+
+     export default [
+       ...baseConfig,
+       ...jsonConfig,
+     ]
      ```
-   - To keep linting the package's JSON files, spread `jsonConfig` after `baseConfig`, as described in [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig).
+   - `jsonConfig` keeps the package's JSON files linted, as described in [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig). A package that leaves it out exports `baseConfig` alone.
 3. **Ensure dependencies are up to date:**
    - Remove any package-local ESLint plugins now provided by the shared config.
    - Remove TSLint-related dependencies (the new config includes `@typescript-eslint`).
    - **Add the shared ESLint config as a dev dependency:**
      - In each migrated package, add `@packages/eslint-config` to `devDependencies` (use a relative file path if not published to npm).
    - **Add ESLint as a dev dependency:**
-     - Since `@packages/eslint-config` has ESLint as a peer dependency, add `eslint: "^9.18.0"` to `devDependencies`.
+     - Since `@packages/eslint-config` has ESLint as a peer dependency, add `eslint: "^9.31.0"` to `devDependencies`.
 4. **Add lint-staged configuration:**
    - Add a `lint-staged` section to the package's `package.json`:
      ```json
      {
        "lint-staged": {
-         "**/*.{js,jsx,ts,tsx}": "eslint --fix"
+         "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
        }
      }
      ```
    - This ensures that when files are staged for commit, they are automatically linted and fixed using the package's local ESLint configuration.
+   - Drop `json` from the glob if the package leaves out `jsonConfig`; otherwise staged `.json` files just produce a "File ignored" warning.
 5. **Run lint and autofix:**
    - From the package root, run:
      ```
@@ -327,7 +335,7 @@ ESLint 9.x auto-detects file extensions, so `--ext` flag is no longer needed.
 {
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.18.0",
+    "eslint": "^9.31.0",
     "jiti": "^2.4.2"
   }
 }
@@ -340,7 +348,7 @@ ESLint 9.x auto-detects file extensions, so `--ext` flag is no longer needed.
 #### 7. **Custom Package Rules**
 If a package needs custom rules, extend the base config:
 ```ts
-import baseConfig from '@packages/eslint-config'
+import { baseConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,

@@ -3,7 +3,7 @@ import path from 'path'
 const dist = [import.meta.dirname, 'dist']
 
 function distPath (...args: string[]) {
-  return path.join.apply(path, dist.concat([...args]))
+  return path.join(...dist, ...args)
 }
 
 export const getPathToFavicon = (filename: string) => {
