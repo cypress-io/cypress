@@ -76,6 +76,7 @@ export class UrlClientCertificates {
     this.pathnameLength = new URL(url).pathname.length
     this.clientCertificates = new ClientCertificates()
   }
+
   clientCertificates: ClientCertificates
   url: string
   pathnameLength: number
@@ -228,7 +229,7 @@ export function loadClientCertificateConfig (config: Config) {
 
               try {
                 // construct to validate; throws on malformed PEM
-                // eslint-disable-next-line no-new
+
                 new X509Certificate(caRaw)
               } catch (error: any) {
                 throw new Error(`Cannot parse CA cert: ${error.message}`)
@@ -261,7 +262,6 @@ export function loadClientCertificateConfig (config: Config) {
             const pemRaw = loadBinaryFromFile(cert.cert)
 
             try {
-              // eslint-disable-next-line no-new
               new X509Certificate(pemRaw)
             } catch (error: any) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)

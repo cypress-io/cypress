@@ -147,7 +147,7 @@ describe('lib/agent', function () {
 
           fetchWithAgent = function (input: RequestInfo, init?: RequestInit) {
             return fetch(input, {
-              // @ts-expect-error
+              // @ts-expect-error - `agent` is not in fetch's RequestInit type, but cross-fetch passes it to Node's http module
               agent,
               ...init,
             })
@@ -307,7 +307,7 @@ describe('lib/agent', function () {
 
         it('HTTP websocket connections can be established and used', async () => {
           const socket = socketIo.client(`http://localhost:${HTTP_PORT}`, {
-            // @ts-expect-error
+            // @ts-expect-error - socket.io-client types `agent` as string | boolean, but passes an http.Agent through to the transport
             agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -323,13 +323,13 @@ describe('lib/agent', function () {
             expect(debugProxy.requests[0].url).toEqual(expect.stringContaining('http://localhost:31080'))
           }
 
-          // @ts-expect-error
+          // @ts-expect-error - `close` is not on the SocketShape type
           socket.close()
         })
 
         it('HTTPS websocket connections can be established and used', async () => {
           const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
-            // @ts-expect-error
+            // @ts-expect-error - socket.io-client types `agent` as string | boolean, but passes an http.Agent through to the transport
             agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -346,7 +346,7 @@ describe('lib/agent', function () {
             }))
           }
 
-          // @ts-expect-error
+          // @ts-expect-error - `close` is not on the SocketShape type
           socket.close()
         })
 
@@ -421,7 +421,7 @@ describe('lib/agent', function () {
         })
 
         const options = spy.mock.calls[0][0]
-        // @ts-expect-error
+        // @ts-expect-error - `_agentKey` is a Node internal, so the spied options give no index type
         const session = agent.httpsAgent._sessionCache.map[options._agentKey]
 
         expect(spy).toHaveBeenCalledOnce()
@@ -517,7 +517,7 @@ describe('lib/agent', function () {
           .on('response', resolve)
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - the promisified request resolves to unknown
         expect(response.req.path).toEqual('http://localhost:31080/get')
       })
     })
@@ -826,7 +826,7 @@ describe('lib/agent', function () {
 
         it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https websocket`, async function () {
           const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
-            // @ts-expect-error
+            // @ts-expect-error - socket.io-client types `agent` as string | boolean, but passes an http.Agent through to the transport
             agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -843,7 +843,7 @@ describe('lib/agent', function () {
             }))
           }
 
-          // @ts-expect-error
+          // @ts-expect-error - `close` is not on the SocketShape type
           socket.close()
         })
       })
@@ -1006,7 +1006,7 @@ describe('lib/agent', function () {
 
         await new Promise((resolve, reject) => {
           socket.on('message', reject)
-          // @ts-expect-error
+          // @ts-expect-error - `io` is not on the SocketShape type
           socket.io.on('error', resolve)
         })
 
@@ -1016,7 +1016,7 @@ describe('lib/agent', function () {
 
         expect(isHttpsRequest).toEqual(testCase.expect)
 
-        // @ts-expect-error
+        // @ts-expect-error - `close` is not on the SocketShape type
         socket.close()
       })
     })
@@ -1061,7 +1061,6 @@ describe('lib/agent', function () {
 
         // now change some stuff, regen, and expect it to work
         delete req._header
-        // @ts-ignore
         req.path = 'http://quuz.quux.invalid/abc?def=123'
         req.setHeader('Host', 'foo.fleem.invalid')
         req.setHeader('bing', 'bang')

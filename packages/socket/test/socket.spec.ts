@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import * as parser from 'socket.io-parser'
-const { hasBinary } = parser
+// Safe because patches/socket.io-parser+4.2.6.patch exports hasBinary from the
+// runtime builds but leaves socket.io-parser's type declarations untouched
+const { hasBinary } = parser as typeof parser & { hasBinary: (obj: unknown) => boolean }
 import pkg from '../package.json'
 import * as lib from '../lib/node'
 import * as browserLib from '../lib/client'
@@ -22,30 +24,30 @@ describe('Socket', function () {
   it('creates a websocket for non chromium and non webkit browsers', function () {
     const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'firefox' })
 
-    // @ts-expect-error
+    // @ts-expect-error - `io` is not on the SocketShape type
     expect(socket.io.opts.path).toEqual('/path')
     // socket.io-client 4.6+ normalizes string transports into transport classes; the websocket transport class is named "WS".
-    // @ts-expect-error
+    // @ts-expect-error - `io` is not on the SocketShape type
     expect(socket.io.opts.transports[0].name).toEqual('WS')
   })
 
   describe('automation socket browsers', function () {
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error - a bare object stands in for the browser window
       global.window = {}
     })
 
     it('creates an automation socket for chromium browsers', function () {
       const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
 
-      // @ts-expect-error
+      // @ts-expect-error - `_namespace` is not on the SocketShape type (it is a socket.io-client internal)
       expect(socket._namespace).toEqual('/path/default')
     })
 
     it('creates an automation socket for webkit browsers', function () {
       const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
 
-      // @ts-expect-error
+      // @ts-expect-error - `_namespace` is not on the SocketShape type (it is a socket.io-client internal)
       expect(socket._namespace).toEqual('/path/default')
     })
   })
@@ -97,7 +99,7 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error
+          // @ts-expect-error - `attachments` is set by the encoder and is not on the packet type
           obj.attachments = undefined
           expect(packet).toEqual(obj)
           resolve()
@@ -116,7 +118,7 @@ describe('Socket', function () {
         foo: {},
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - `foo` is typed as an empty object; the circular reference is added after creation
       circularObj.foo.circularObj = circularObj
 
       const obj = {
@@ -153,7 +155,7 @@ describe('Socket', function () {
         foo: {},
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - `foo` is typed as an empty object; the circular reference is added after creation
       circularObj.foo.circularArray = [circularObj, circularObj]
 
       const obj = {
@@ -192,7 +194,7 @@ describe('Socket', function () {
         bin: Buffer.from('abc', 'utf8'),
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - `foo` is typed as an empty object; the circular reference is added after creation
       circularObj.foo.circularObj = circularObj
 
       const obj = {
@@ -211,7 +213,7 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error
+          // @ts-expect-error - `attachments` is set by the encoder and is not on the packet type
           obj.attachments = undefined
           expect(packet.data[1] === packet.data[1].foo.circularObj).toBe(true)
           expect(packet).toEqual(obj)
@@ -247,7 +249,7 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error
+          // @ts-expect-error - `attachments` is set by the encoder and is not on the packet type
           obj.attachments = undefined
           expect(packet).toEqual(obj)
           resolve()

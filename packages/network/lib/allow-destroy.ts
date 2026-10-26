@@ -21,7 +21,7 @@ export function allowDestroy (server: net.Server) {
   server.on('connection', trackConn)
   server.on('secureConnection', trackConn)
 
-  // @ts-ignore Property 'destroy' does not exist on type 'Server'.
+  // @ts-expect-error - Property 'destroy' does not exist on type 'Server'.
   server.destroy = function (cb) {
     server.close(cb)
     connections.map((connection) => connection.destroy())
