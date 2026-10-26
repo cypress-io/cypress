@@ -181,7 +181,7 @@ export function snapshotRequire (
   // 1. Assign snapshot which is a global if it was embedded
   const sr: Snapshot =
     opts.snapshotOverride ||
-    // @ts-expect-error global getSnapshotResult
+    // @ts-expect-error - getSnapshotResult is a global that only exists when the v8 snapshot is embedded
     (typeof getSnapshotResult !== 'undefined' ? getSnapshotResult() : undefined)
 
   // If we have no snapshot we don't need to hook anything
@@ -206,9 +206,9 @@ export function snapshotRequire (
     let resolverMap: Record<string, string> | undefined
     let moduleNeedsReload: ModuleNeedsReload | undefined
 
-    // @ts-expect-error global snapshotAuxiliaryData
+    // @ts-expect-error - snapshotAuxiliaryData is embedded in the snapshot but missing from the Snapshot type
     resolverMap = sr.snapshotAuxiliaryData.resolverMap
-    // @ts-expect-error global snapshotAuxiliaryData
+    // @ts-expect-error - snapshotAuxiliaryData is embedded in the snapshot but missing from the Snapshot type
     const dependencyMapArray: DependencyMapArray = sr.snapshotAuxiliaryData.dependencyMapArray
 
     // 5. Setup the module needs reload predicate with the dependency map
@@ -271,19 +271,17 @@ export function snapshotRequire (
 
       // 10. Prepare the globals we need to inject into the snapshot
 
-      // The below aren't available in all environments.
-      // window and document are read off globalThis because this file is
-      // type-checked both with lib.dom (by @tooling/v8-snapshot) and without
-      // it (by this package), so neither a reference nor a ts directive
-      // type-checks in both.
+      // The below aren't available in all environments
       const checked_process: any =
         typeof process !== 'undefined' ? process : undefined
+      // Read through globalThis because this file is type-checked both with the
+      // DOM lib (by @tooling/v8-snapshot) and without it (by this package)
       const checked_window: any = Reflect.get(globalThis, 'window')
       const checked_document: any = Reflect.get(globalThis, 'document')
 
       // 11. Inject those globals
 
-      // @ts-expect-error setGlobals is a function on global sr
+      // @ts-expect-error - setGlobals is defined by the snapshot but missing from the Snapshot type
       sr.setGlobals(
         global,
         checked_process,
@@ -296,20 +294,20 @@ export function snapshotRequire (
 
       // 11. Setup the customRequire inside the snapshot
 
-      // @ts-expect-error private module var
+      // @ts-expect-error - Module._cache is private Node API
       require.cache = Module._cache
-      // @ts-expect-error customRequire is a property of global sr
+      // @ts-expect-error - Module._cache allows undefined entries, which the snapshot's cache type does not
       sr.customRequire.cache = require.cache
 
       // 12. Add some 'magic' functions that we can use from inside the
       //    snapshot in order to integrate module loading
       //    See ../blueprint/custom-require.js
 
-      // @ts-expect-error custom method on require
+      // @ts-expect-error - _tryLoad is a custom hook the snapshot calls, not part of Node's Require type
       require._tryLoad = tryLoad
       const oldRequireResolve = require.resolve
 
-      // @ts-expect-error opts not exactly matching
+      // @ts-expect-error - this resolver takes the snapshot's GetModuleKeyOpts and has no `paths` method
       require.resolve = function (id: string, opts: GetModuleKeyOpts & { paths?: string[] | undefined } | undefined) {
         if (opts?.fromSnapshot) {
           return resolve(id, opts)
@@ -318,11 +316,11 @@ export function snapshotRequire (
         return oldRequireResolve(id, opts)
       }
 
-      // @ts-expect-error custom method on require
+      // @ts-expect-error - shouldBypassCache is a custom hook the snapshot calls, not part of Node's Require type
       require.shouldBypassCache = shouldBypassCache
-      // @ts-expect-error custom method on require
+      // @ts-expect-error - registerModuleLoad is a custom hook the snapshot calls, not part of Node's Require type
       require.registerModuleLoad = registerModuleLoad
-      // @ts-expect-error custom property on require
+      // @ts-expect-error - builtInModules is a custom hook the snapshot calls, not part of Node's Require type
       require.builtInModules = new Set(Module.builtinModules)
     }
   }

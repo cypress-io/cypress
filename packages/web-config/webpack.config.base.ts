@@ -24,7 +24,7 @@ const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
 
 // We intentionally set the evalDevToolPlugin property to true on the plugin instance to be able to determine if the plugin is present in the driver.
 // If present, we strip it out. Otherwise, we do not get code frames in the driver tests. @see https://github.com/cypress-io/cypress/blob/v14.3.2/packages/driver/cypress/plugins/index.js#L24
-// @ts-expect-error evalDevToolPlugin is a marker we add, not part of the plugin type
+// @ts-expect-error - evalDevToolPlugin is a marker Cypress adds to the plugin, not part of webpack's type
 evalDevToolPlugin.evalDevToolPlugin = true
 
 const optimization = {

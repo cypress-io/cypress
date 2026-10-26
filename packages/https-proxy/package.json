@@ -2,12 +2,19 @@
   "name": "@packages/https-proxy",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "cjs/index.d.ts",
+  "files": [
+    "cjs/*",
+    "esm/*"
+  ],
   "scripts": {
     "build": "yarn build:esm && yarn build:cjs",
-    "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "build-prod": "yarn build",
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint",
@@ -16,6 +23,9 @@
     "test-debug": "vitest --inspect-brk --test-timeout=0 --hook-timeout=0",
     "test-unit": "vitest run",
     "test-watch": "vitest --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "debug": "^4.3.4",
@@ -35,16 +45,6 @@
     "jiti": "^2.4.2",
     "tsx": "^4.23.12",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "cjs/*",
-    "esm/*"
-  ],
-  "types": "cjs/index.d.ts",
-  "license": "MIT",
-  "module": "esm/index.js",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "nx": {}
 }
