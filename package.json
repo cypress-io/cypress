@@ -48,7 +48,7 @@
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,cypress-sessions,electron,errors,eslint-config,https-proxy,icons,launcher,network-interception,resolve-dist,root,scaffold-config,server,stderr-filtering,ts,types,v8-snapshot-require,web-config} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,cypress-sessions,electron,errors,eslint-config,https-proxy,icons,launcher,network-interception,proxy,resolve-dist,root,scaffold-config,server,stderr-filtering,ts,types,v8-snapshot-require,web-config} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
