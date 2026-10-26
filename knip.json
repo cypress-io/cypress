@@ -484,8 +484,7 @@
       "ignoreDependencies": [
         "@angular-devkit/core",
         "next",
-        "html-webpack-plugin",
-        "jiti"
+        "html-webpack-plugin"
       ]
     },
     "npm/cypress-schematic": {
