@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 import type net from 'net'
 import type { Request } from 'express'
+import type { RemoteStates } from '@packages/network-tools'
 
 const debug = Debug('cypress:server:util:socket_allowed')
 
@@ -11,6 +12,8 @@ const debug = Debug('cypress:server:util:socket_allowed')
  */
 export class SocketAllowed {
   allowedLocalPorts: number[] = []
+
+  constructor (private remoteStates: RemoteStates, private getServerPort: () => number | undefined) {}
 
   /**
    * Add a socket to the allowed list.
@@ -59,5 +62,27 @@ export class SocketAllowed {
     debug('is incoming request from localhost? %o', { isAllowed, reqUrl: req.url, remoteAddress })
 
     return isAllowed
+  }
+
+  /**
+   * Is this origin the primary remote state's origin or the server's own origin?
+   */
+  isTrustedOrigin = (origin: string) => {
+    if (!/^https?:\/\//.test(origin)) {
+      return false
+    }
+
+    const serverPort = this.getServerPort()
+    let isTrusted = serverPort !== undefined && origin === `http://localhost:${serverPort}`
+
+    try {
+      isTrusted ||= this.remoteStates.hasPrimary() && this.remoteStates.isPrimarySuperDomainOrigin(origin)
+    } catch (err) {
+      debug('could not compare origin to the primary remote state %o', { origin, err })
+    }
+
+    debug('is origin trusted? %o', { origin, isTrusted })
+
+    return isTrusted
   }
 }

@@ -44,6 +44,7 @@ declare namespace Cypress {
     (task: 'protocol:page:loading', input: any): Promise<void>
     (task: 'wait:for:prompt:ready'): Promise<{ success: boolean, error?: Error }>
     (task: 'preserve:run:state', runState: any): Promise<void>
+    (task: 'get:session', id: string): Promise<Cypress.ServerSessionData>
   }
 
   interface ActionTrigger {
