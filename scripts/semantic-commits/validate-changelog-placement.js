@@ -1,9 +1,8 @@
 const childProcess = require('child_process')
 const _ = require('lodash')
+const { VERSION_HEADER, SECTION_HEADER } = require('./parse-changelog')
 
 const CHANGELOG_PATH = 'cli/CHANGELOG.md'
-const VERSION_HEADER = /^## (\d+\.\d+\.\d+)/
-const SECTION_HEADER = /^\*\*.+?:\*\*/
 const ENTRY = /^\s*- /
 const MAX_ENTRY_LENGTH = 120
 

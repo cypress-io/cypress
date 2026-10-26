@@ -2,6 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const { userFacingChanges } = require('./change-categories')
 const userFacingSections = Object.values(userFacingChanges).map(({ section }) => section)
+const VERSION_HEADER = /^## (\d+\.\d+\.\d+)/
+const SECTION_HEADER = /^\*\*.+?:\*\*/
 
 async function parseChangelog ({ changelogContent = null } = {}) {
   const changelog = changelogContent || fs.readFileSync(path.join(__dirname, '..', '..', 'cli', 'CHANGELOG.md'), 'utf8')
@@ -25,13 +27,13 @@ async function parseChangelog ({ changelogContent = null } = {}) {
     const line = changeLogLines[index]
 
     // reached next release section
-    if (index > 1 && /^## \d+\.\d+\.\d+/.test(line)) {
+    if (index > 1 && VERSION_HEADER.test(line)) {
       sections[currentSection] = content
       parseChangelog = false
     }
 
     if (index === 1) {
-      if (!/^## \d+\.\d+\.\d+/.test(line)) {
+      if (!VERSION_HEADER.test(line)) {
         throw new Error(`Expected line number ${index + 1} to include "## x.x.x"`)
       }
 
@@ -41,7 +43,7 @@ async function parseChangelog ({ changelogContent = null } = {}) {
         throw new Error(`Expected line number ${index + 1} to be a line break`)
       }
     } else {
-      const result = /^\*\*.+?:\*\*/.exec(line)
+      const result = SECTION_HEADER.exec(line)
 
       if (currentSection === '' && !result) {
         throw new Error(`Expected line number ${index + 1} to be a valid section header. Received ${line}. Expected one of ...\n  - ${userFacingSections.join('\n  - ')}`)
@@ -75,7 +77,11 @@ async function parseChangelog ({ changelogContent = null } = {}) {
 }
 
 if (require.main !== module) {
-  module.exports.parseChangelog = parseChangelog
+  module.exports = {
+    parseChangelog,
+    VERSION_HEADER,
+    SECTION_HEADER,
+  }
 
   return
 }
