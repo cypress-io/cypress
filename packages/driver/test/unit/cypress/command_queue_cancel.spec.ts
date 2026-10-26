@@ -114,6 +114,38 @@ describe('@packages/driver/src/cypress/command_queue', () => {
     expect(state('queueIdle')).to.be.false
   })
 
+  for (const stopped of [false, true]) {
+    it(`does ${stopped ? 'not resume a stopped queue' : 'run new commands'} after the terminal stability wait`, async () => {
+      setup({ isStable: true })
+      let waiting = false
+
+      Cypress.action.mockImplementation((event) => {
+        if (event === 'cy:command:queue:before:end' && !waiting) {
+          waiting = true
+          state('isStable', false)
+        }
+
+        if (event === 'cy:command:start:async' || event === 'cy:before:stability:release') {
+          return Bluebird.resolve()
+        }
+      })
+
+      const promise = queue.run()
+
+      await flush()
+      const commandFn = vi.fn(() => null)
+
+      queue.enqueue(createCommand(commandFn))
+      if (stopped) queue.stop()
+
+      queue['stability'].isStable(true, 'terminal wait test')
+      await promise
+
+      expect(commandFn).toHaveBeenCalledTimes(stopped ? 0 : 1)
+      expect(state('queueIdle')).to.equal(stopped ? undefined : true)
+    })
+  }
+
   describe('#endEarly', () => {
     let settleLate: () => void
 

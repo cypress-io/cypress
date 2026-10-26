@@ -1,5 +1,5 @@
 describe('native promise completion controls', { defaultCommandTimeout: 1000 }, () => {
-  const pause = () => new Promise((resolve) => setTimeout(resolve, 30))
+  const pause = () => new Promise<void>((resolve) => setTimeout(resolve, 30))
 
   it('supports a native promise without Cypress commands', async () => {
     await pause()
@@ -20,7 +20,7 @@ describe('native promise completion controls', { defaultCommandTimeout: 1000 }, 
   })
 
   it('supports the existing then-and-catch promise-like shape', () => {
-    const promise = new Promise((resolve) => {
+    const promise = new Promise<void>((resolve) => {
       setTimeout(() => {
         cy.wrap(1).should('equal', 1)
         resolve()

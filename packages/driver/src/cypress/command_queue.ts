@@ -476,6 +476,10 @@ export class CommandQueue extends Queue<$Command> {
         // test is no longer stable because we cannot
         // move onto the next test until its finished
         return this.stability.whenStable(() => {
+          if (this.stopped) return null
+
+          if (this.at(this.index)) return next()
+
           this.state('queueIdle', true)
           Cypress.action('cy:command:queue:end')
           this.stop()

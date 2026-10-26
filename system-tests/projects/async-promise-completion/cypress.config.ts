@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   retries: 0,
   defaultCommandTimeout: 100,
   video: false,
