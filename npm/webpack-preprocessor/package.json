@@ -1,13 +1,30 @@
 {
   "name": "@cypress/webpack-preprocessor",
   "version": "0.0.0-development",
-  "description": "Cypress preprocessor for bundling JavaScript via webpack",
   "private": false,
+  "description": "Cypress preprocessor for bundling JavaScript via webpack",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "cypress-preprocessor",
+    "webpack"
+  ],
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
+  },
+  "license": "MIT",
   "main": "dist",
+  "types": "dist",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
     "test": "tsx ./scripts/test-webpack-5.ts",
@@ -16,6 +33,9 @@
     "test-unit": "vitest run test/unit/*.spec.ts",
     "test-watch": "vitest watch test/unit/*.spec.ts",
     "watch": "rimraf dist && tsc --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "bluebird": "3.7.1",
@@ -26,12 +46,16 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.26.0",
+    "@packages/eslint-config": "0.0.0-development",
     "@types/mocha": "9.0.0",
     "babel-loader": "^10.0.0",
     "chalk": "3.0.0",
     "cypress": "0.0.0-development",
+    "eslint": "^9.31.0",
     "fs-extra": "^10.1.0",
+    "globals": "^15.12.0",
     "globby": "^11.1.0",
+    "jiti": "^2.4.2",
     "json5": "^2.2.3",
     "mock-require": "3.0.3",
     "semantic-release": "25.0.8",
@@ -46,23 +70,6 @@
     "babel-loader": "^9 || ^10",
     "webpack": "^5"
   },
-  "files": [
-    "dist"
-  ],
-  "types": "dist",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
-  "keywords": [
-    "cypress",
-    "cypress-plugin",
-    "cypress-preprocessor",
-    "webpack"
-  ],
   "nx": {
     "targets": {
       "build": {

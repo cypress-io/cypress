@@ -205,10 +205,10 @@ export class CommandQueue extends Queue<$Command> {
     })
   }
 
-  cleanup () {
+  cleanup ({ resetTimeout = true } = {}) {
     const runnable = this.state('runnable')
 
-    if (runnable && !runnable.isPending()) {
+    if (resetTimeout && runnable && !runnable.isPending()) {
       // make sure we reset the runnable's timeout now
       runnable.resetTimeout()
     }
@@ -231,6 +231,32 @@ export class CommandQueue extends Queue<$Command> {
 
     // Mark the state as stable, so that any cypress commands can be re-queued during the after / afterEach hooks
     this.state('isStable', true)
+  }
+
+  // Ends the command chain before it settles. A stop or an early done() cancels the run. A
+  // failed runnable only has its pending chain ended, so a late reply can't resume it under a
+  // later runnable: state('canceled') would make retrying commands in the remaining hooks give
+  // up after a single attempt, and mocha has already cleared the runnable's timer.
+  endEarly ({ canceled }: { canceled: boolean }) {
+    const isPending = !!this.state('promise')?.isPending()
+
+    if (!canceled && !isPending) {
+      return
+    }
+
+    this.cleanup({ resetTimeout: canceled })
+
+    if (!isPending) {
+      return
+    }
+
+    if (canceled) {
+      this.state('canceled', true)
+      this.state('cancel')()
+      Cypress.action('cy:canceled')
+    } else {
+      this.state('cancel')()
+    }
   }
 
   private runCommand (command: $Command) {
@@ -564,11 +590,7 @@ export class CommandQueue extends Queue<$Command> {
 
     this.state('promise', promise)
     this.state('reject', reject)
-    this.state('cancel', () => {
-      cancel()
-
-      Cypress.action('cy:canceled')
-    })
+    this.state('cancel', cancel)
 
     return promise
   }

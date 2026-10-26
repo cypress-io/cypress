@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import os from 'os'
 import path from 'path'
 import Jimp from 'jimp'
 import { Buffer } from 'buffer'
@@ -772,6 +773,106 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
       })
     })
 
+    const eexist = (): NodeJS.ErrnoException => Object.assign(new Error('eexist'), { code: 'EEXIST' })
+
+    const data = {
+      specName: 'foo.js',
+      name: 'name',
+    }
+
+    it('claims the name with an exclusive create when overwrite is off', async () => {
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name.png')
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+      expect(fs.outputFileAsync).toHaveBeenCalledWith(p, '', { flag: 'wx' })
+    })
+
+    it('moves to the next suffix when the name already exists', async () => {
+      vi.mocked(fs.outputFileAsync).mockRejectedValueOnce(eexist())
+
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name (1).png')
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(2)
+      expect(fs.outputFileAsync).toHaveBeenNthCalledWith(2, p, '', { flag: 'wx' })
+    })
+
+    it('keeps moving to the next suffix while names already exist', async () => {
+      vi.mocked(fs.outputFileAsync)
+      .mockRejectedValueOnce(eexist())
+      .mockRejectedValueOnce(eexist())
+
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name (2).png')
+    })
+
+    it('reuses the base name without an exclusive create when overwrite is on', async () => {
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', true)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name.png')
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+      expect(fs.outputFileAsync).toHaveBeenCalledWith(p, '', {})
+    })
+
+    it('does not retry on an existing file when overwrite is on', async () => {
+      const err = eexist()
+
+      vi.mocked(fs.outputFileAsync).mockRejectedValueOnce(err)
+
+      await expect(screenshots.getPath(data, 'png', 'path/to/screenshots', true)).rejects.toBe(err)
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+    })
+
+    it('rethrows errors other than EEXIST and ENAMETOOLONG when overwrite is off', async () => {
+      const err: NodeJS.ErrnoException = Object.assign(new Error('eacces'), { code: 'EACCES' })
+
+      vi.mocked(fs.outputFileAsync).mockRejectedValueOnce(err)
+
+      await expect(screenshots.getPath(data, 'png', 'path/to/screenshots', false)).rejects.toBe(err)
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+    })
+
+    it('reuses and truncates an existing file on disk when overwrite is on', async () => {
+      vi.mocked(fs.outputFileAsync).mockRestore()
+
+      const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-screenshots-'))
+      const existing = path.join(folder, 'foo.js', 'name.png')
+
+      try {
+        await fs.outputFile(existing, 'previous screenshot')
+
+        const p = await screenshots.getPath(data, 'png', folder, true)
+
+        expect(p).toBe(existing)
+        expect(await fs.readFile(p, 'utf8')).toBe('')
+      } finally {
+        await fs.remove(folder)
+      }
+    })
+
+    it('gives concurrent callers distinct names on disk', async () => {
+      vi.mocked(fs.outputFileAsync).mockRestore()
+
+      const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-screenshots-'))
+
+      try {
+        const paths = await Promise.all(_.times(10, () => {
+          return screenshots.getPath(data, 'png', folder, false)
+        }))
+
+        expect(_.uniq(paths)).toHaveLength(10)
+        expect(paths).toContain(path.join(folder, 'foo.js', 'name.png'))
+
+        for (const p of paths) {
+          expect(await fs.pathExists(p), p).toBe(true)
+        }
+      } finally {
+        await fs.remove(folder)
+      }
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/2403
     it('truncates long paths with unicode in them', async () => {
       const fullPath = await screenshots.getPath({
@@ -803,6 +904,28 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
       }, 'png', '/tmp')
 
       expect(path.basename(fullPath)).toHaveLength(204)
+    })
+
+    // ENAMETOOLONG permanently lowers the module-level filename byte limit, so this runs after
+    // the test above that asserts the exact truncated length
+    it('handles EEXIST and ENAMETOOLONG in sequence', async () => {
+      const enametoolong: NodeJS.ErrnoException = Object.assign(new Error('enametoolong'), { code: 'ENAMETOOLONG' })
+
+      vi.mocked(fs.outputFileAsync)
+      .mockRejectedValueOnce(eexist())
+      .mockRejectedValueOnce(enametoolong)
+      .mockRejectedValueOnce(eexist())
+
+      const p = await screenshots.getPath({ specName: 'foo.js', name: 'a'.repeat(300) }, 'png', '/tmp', false)
+      const [first, second, third, fourth] = vi.mocked(fs.outputFileAsync).mock.calls.map((call) => path.basename(call[0] as string))
+
+      expect(first).toMatch(/^a+\.png$/)
+      expect(second).toMatch(/^a+ \(1\)\.png$/)
+      expect(third).toMatch(/^a+ \(1\)\.png$/)
+      expect(third.length).toBe(second.length - 1)
+      expect(fourth).toMatch(/^a+ \(2\)\.png$/)
+      expect(path.basename(p)).toBe(fourth)
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(4)
     })
 
     it('rejects with ENAMETOOLONG errors if name goes below MIN_PREFIX_LENGTH', async () => {

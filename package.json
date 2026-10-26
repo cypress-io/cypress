@@ -48,7 +48,7 @@
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer,react,vue,svelte} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,cypress-sessions,electron,errors,eslint-config,https-proxy,icons,launcher,network-interception,scaffold-config,server,stderr-filtering,types} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
@@ -209,7 +209,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
+    "url": "git+https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://cypress.io",
   "bugs": {
@@ -252,15 +252,6 @@
     ]
   },
   "lint-staged": {
-    "npm/vue/**/*.{js,jsx,ts,tsx,vue}": "yarn workspace @cypress/vue eslint --fix",
-    "npm/svelte/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/svelte eslint --fix",
-    "npm/react/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/react eslint --fix",
-    "npm/!(vue|svelte|react)/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "cli/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "packages/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "scripts/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
-    "system-tests/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
-    "tooling/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
     "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
     ".circleci/*.yml": "circleci config validate"
   },

@@ -116,7 +116,8 @@ function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEnco
   const order: SupportedContentEncoding[] = []
 
   for (const part of raw.split(',')) {
-    const enc = part.trim()
+    const token = part.trim()
+    const enc = token === 'x-gzip' ? 'gzip' : token
 
     if ((enc === 'gzip' || enc === 'br') && !order.includes(enc)) {
       order.push(enc)

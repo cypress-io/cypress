@@ -16,6 +16,8 @@ import { cypressSessions } from '../../lib/cypress-sessions'
 import * as serverErrors from '../../lib/errors'
 import * as fileServer from '../../lib/file_server'
 import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
+import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerMutationRule } from '@packages/data-context/graphql/runnerMutationRule'
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { GracefulExit } from '../../lib/util/graceful-exit'
@@ -26,7 +28,7 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    graphQLHTTP: vi.fn(),
+    runnerGraphQLHTTP: vi.fn(),
   }
 })
 
@@ -455,6 +457,16 @@ describe('lib/server-base', () => {
       samples.forEach(({ cdp, proxy }, index) => {
         expect(cdp, `sample ${index} reads CDP only while the CDP proxy is installed`).toBe(proxy === cdpNetworkProxy)
       })
+    })
+  })
+
+  describe('#createServer', () => {
+    it('restricts the graphql-ws endpoint to the mutations the runner sends', async () => {
+      const app = server.createExpressApp({ morgan: false })
+
+      await server.createServer(app, { socketIoRoute: '/__socket' })
+
+      expect(graphqlWS).toHaveBeenCalledWith(expect.anything(), '/__socket-graphql', { enforceOrigin: false, validationRules: [runnerMutationRule] })
     })
   })
 

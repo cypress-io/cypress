@@ -87,7 +87,7 @@ interface BundleObject {
 }
 
 // bundle promises from input spec filename to output bundled file paths
-let bundles: {[key: string]: BundleObject} = {}
+let bundles: { [key: string]: BundleObject } = {}
 
 // we don't automatically load the rules, so that the babel dependencies are
 // not required if a user passes in their own configuration
@@ -224,7 +224,7 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
   on('file:preprocessor', webpackPreprocessor(options))
   ```
  */
-// @ts-ignore
+// @ts-expect-error - `defaultOptions` is defined below with `Object.defineProperty`, and `options?` with a default initializer is TS1015
 const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options: %o', options)
 
@@ -371,7 +371,7 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
     const rejectWithErr = (err: Error) => {
       err = quietErrorMessage(err)
 
-      // @ts-ignore
+      // @ts-expect-error - `filePath` is not on `Error`; Cypress reads it to report which spec failed
       err.filePath = filePath
 
       debug(`errored bundling ${outputPath}`, err.message)
@@ -481,12 +481,9 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
     // to rerun the tests
     if (file.shouldWatch) {
       if (compiler.hooks) {
-        // TODO compile.tap takes "string | Tap"
-        // so seems we just need to pass plugin.name
-        // @ts-ignore
         compiler.hooks.compile.tap(plugin, onCompile)
       } else if ('plugin' in compiler) {
-        // @ts-ignore
+        // @ts-expect-error - `plugin` is the webpack 3 API, which webpack 5 types do not declare
         compiler.plugin('compile', onCompile)
       }
     }
@@ -528,19 +525,17 @@ Object.defineProperty(preprocessor, 'defaultOptions', {
 })
 
 // for testing purposes, but do not add this to the typescript interface
-// @ts-ignore
+// @ts-expect-error - `__reset` is deliberately left off `WebpackPreprocessor`
 preprocessor.__reset = () => {
   bundles = {}
 }
 
 // for testing purposes, but do not add this to the typescript interface
-// @ts-ignore
+// @ts-expect-error - `__bundles` is deliberately left off `WebpackPreprocessor`
 preprocessor.__bundles = () => {
   return bundles
 }
 
-// @ts-ignore - webpack.StatsError is unique to webpack 5
-// TODO: Remove this when we update to webpack 5.
 function cleanseError (err: string | webpack.StatsError) {
   let msg = typeof err === 'string' ? err : err.message
 

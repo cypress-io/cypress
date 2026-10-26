@@ -114,9 +114,9 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          // @ts-expect-error
+          // @ts-expect-error - autContextId is private
           expect(bidiAutomationInstance.autContextId).toBeUndefined()
-          // @ts-expect-error
+          // @ts-expect-error - interceptId is private
           expect(bidiAutomationInstance.interceptId).toBeUndefined()
           expect(mockWebdriverClient.networkAddIntercept).not.toHaveBeenCalled()
 
@@ -152,9 +152,9 @@ describe('lib/browsers/bidi_automation', () => {
 
           await flushPromises()
 
-          // @ts-expect-error
+          // @ts-expect-error - autContextId is private
           expect(bidiAutomationInstance.autContextId).toBeUndefined()
-          // @ts-expect-error
+          // @ts-expect-error - interceptId is private
           expect(bidiAutomationInstance.interceptId).toBeUndefined()
           expect(mockWebdriverClient.networkAddIntercept).not.toHaveBeenCalled()
         })
@@ -180,9 +180,9 @@ describe('lib/browsers/bidi_automation', () => {
             // Wait for the networkAddIntercept Promise to resolve if it was called
             await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as Mock)
 
-            // @ts-expect-error
+            // @ts-expect-error - autContextId is private
             expect(bidiAutomationInstance.autContextId).toBe('456')
-            // @ts-expect-error
+            // @ts-expect-error - interceptId is private
             expect(bidiAutomationInstance.interceptId).toBe('mockInterceptId')
             expectCalledWith(mockWebdriverClient.networkAddIntercept, { phases: ['beforeRequestSent'], contexts: ['123'] })
 
@@ -197,11 +197,11 @@ describe('lib/browsers/bidi_automation', () => {
 
             await flushPromises()
 
-            // @ts-expect-error
+            // @ts-expect-error - autContextId is private
             expect(bidiAutomationInstance.autContextId).toBe(undefined)
 
             expect(mockWebdriverClient.networkRemoveIntercept).not.toHaveBeenCalled()
-            // @ts-expect-error
+            // @ts-expect-error - topLevelContextId is private
             expect(bidiAutomationInstance.topLevelContextId).toBe('123')
           })
 
@@ -225,9 +225,9 @@ describe('lib/browsers/bidi_automation', () => {
             // Wait for the networkAddIntercept Promise to resolve if it was called
             await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as Mock)
 
-            // @ts-expect-error
+            // @ts-expect-error - autContextId is private
             expect(bidiAutomationInstance.autContextId).toBe('456')
-            // @ts-expect-error
+            // @ts-expect-error - interceptId is private
             expect(bidiAutomationInstance.interceptId).toBe('mockInterceptId')
             expectCalledWith(mockWebdriverClient.networkAddIntercept, { phases: ['beforeRequestSent'], contexts: ['123'] })
 
@@ -246,11 +246,11 @@ describe('lib/browsers/bidi_automation', () => {
               intercept: 'mockInterceptId',
             })
 
-            // @ts-expect-error
+            // @ts-expect-error - topLevelContextId is private
             expect(bidiAutomationInstance.topLevelContextId).toBeUndefined()
-            // @ts-expect-error
+            // @ts-expect-error - interceptId is private
             expect(bidiAutomationInstance.interceptId).toBeUndefined()
-            // @ts-expect-error
+            // @ts-expect-error - autContextId is private
             expect(bidiAutomationInstance.autContextId).toBe(undefined)
           })
         })
@@ -2375,7 +2375,7 @@ describe('lib/browsers/bidi_automation', () => {
             contexts: [{ context: '123', url: 'http://localhost:3500/fixtures/dom.html' }],
           })
 
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = '123'
 
           const url = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
@@ -2388,7 +2388,7 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('fails gracefully if no AUT context is initialized', async () => {
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = undefined
 
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
@@ -2399,7 +2399,7 @@ describe('lib/browsers/bidi_automation', () => {
         it('uses scriptEvaluate to reload the AUT window', async () => {
           mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue(undefined)
 
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = '123'
 
           await bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', { forceReload: false })
@@ -2416,7 +2416,7 @@ describe('lib/browsers/bidi_automation', () => {
         it('uses scriptEvaluate to reload the AUT window with the force option', async () => {
           mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue(undefined)
 
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = '123'
 
           await bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', { forceReload: true })
@@ -2431,7 +2431,7 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('fails gracefully if no AUT context is initialized', async () => {
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = undefined
 
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', undefined)).rejects.toThrow('Cannot reload AUT frame: no AUT context initialized')
@@ -2442,7 +2442,7 @@ describe('lib/browsers/bidi_automation', () => {
         it('uses scriptEvaluate to navigate the AUT window history', async () => {
           mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue(undefined)
 
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = '123'
 
           await bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', { historyNumber: -1 })
@@ -2457,7 +2457,7 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('fails gracefully if no AUT context is initialized', async () => {
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = undefined
 
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', undefined)).rejects.toThrow('Cannot navigate AUT frame history: no AUT context initialized')
@@ -2472,7 +2472,7 @@ describe('lib/browsers/bidi_automation', () => {
             },
           })
 
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = '123'
 
           const title = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)
@@ -2489,7 +2489,7 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('fails gracefully if no AUT context is initialized', async () => {
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = undefined
 
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)).rejects.toThrow('Cannot get AUT title no AUT context initialized')
@@ -2497,7 +2497,7 @@ describe('lib/browsers/bidi_automation', () => {
       })
 
       it('throws an error if an event passed in does not exist', async () => {
-        // @ts-expect-error
+        // @ts-expect-error - unknown automation command
         await expect(bidiAutomationInstance.automationMiddleware.onRequest('foo:bar:baz', {})).rejects.toThrow('Automation command \'foo:bar:baz\' not implemented by BiDiAutomation')
       })
 
@@ -2506,9 +2506,9 @@ describe('lib/browsers/bidi_automation', () => {
 
         beforeEach(() => {
           bidiAutomationInstance.setTopLevelContextId('top')
-          //@ts-expect-error
+          // @ts-expect-error - autContextResolveTimeoutMs is private
           bidiAutomationInstance.autContextResolveTimeoutMs = 500
-          //@ts-expect-error
+          // @ts-expect-error - autContextPollIntervalMs is private
           bidiAutomationInstance.autContextPollIntervalMs = 20
         })
 
@@ -2552,7 +2552,7 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         it('resolves a request issued in the gap between the AUT context being destroyed and recreated', async () => {
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = 'old-aut'
 
           mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [{ context: 'top', children: [] }] })
@@ -2617,7 +2617,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           await expect(request).rejects.toThrow('Cannot get AUT url: no AUT context initialized')
 
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           expect(bidiAutomationInstance.autContextId).toBeUndefined()
           expect(mockWebdriverClient.networkAddIntercept).not.toHaveBeenCalled()
         })
@@ -2658,7 +2658,7 @@ describe('lib/browsers/bidi_automation', () => {
           }, 60)
 
           expect(await request).toBe('http://localhost:3500/recreated.html')
-          //@ts-expect-error
+          // @ts-expect-error - autContextId is private
           expect(bidiAutomationInstance.autContextId).toBe('new-aut')
         })
 

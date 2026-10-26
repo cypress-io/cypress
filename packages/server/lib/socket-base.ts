@@ -3,7 +3,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import _ from 'lodash'
 import { getCtx } from '@packages/data-context'
-import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
+import { handleRunnerGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { ForInterceptRegistration } from '@packages/network-interception'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
@@ -24,7 +24,7 @@ import { telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
 import { openExternal } from './gui/links'
 
-import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands, SpecWithRelativeRoot } from '@packages/types'
 import { RUN_ALL_SPECS_KEY } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
@@ -414,15 +414,14 @@ export class SocketBase implements SocketBroadcaster {
           if (spec.relative === RUN_ALL_SPECS_KEY) {
             const specsToCompile = ctx.project.runAllSpecs.map((relPath) => {
               return ctx.project.specs.find((s) => s.relative === relPath)
-            }).filter(Boolean) as Cypress.Spec[]
+            }).filter((s): s is SpecWithRelativeRoot => Boolean(s))
 
             debug(`updating CT dev-server with ${specsToCompile.length} specs`)
-            // @ts-expect-error
             await devServer.updateSpecs(specsToCompile, { neededForJustInTimeCompile: true })
           } else {
             // update the dev server with the spec running
             debug(`updating CT dev-server with spec: ${spec.relative}`)
-            // @ts-expect-error
+            // @ts-expect-error - the socket payload is typed as Cypress.Spec, which lacks SpecWithRelativeRoot's fields
             await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
           }
 
@@ -676,7 +675,9 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('external:open', (url: string) => {
           debug('received external:open %o', { url })
 
-          return openExternal(url)
+          openExternal(url).catch((err) => {
+            debug('failed to open %s: %o', url, err)
+          })
         })
 
         socket.on('get:user:editor', (cb) => {
@@ -745,7 +746,7 @@ export class SocketBase implements SocketBroadcaster {
 
     this.getIos().forEach((io) => {
       (io?.of('/data-context') as ExtendedSocketIoNamespace).on('connection', (socket: Socket) => {
-        socket.on('graphql:request', handleGraphQLSocketRequest)
+        socket.on('graphql:request', handleRunnerGraphQLSocketRequest)
       })
     })
 

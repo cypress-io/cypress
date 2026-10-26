@@ -3,9 +3,10 @@ import path from 'path'
 import * as appData from '../../../lib/util/app_data'
 import * as plugins from '../../../lib/plugins'
 import preprocessor from '../../../lib/plugins/preprocessor'
+import * as specFrameScripts from '../../../lib/util/spec_frame_scripts'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Mock } from 'vitest'
+import type { Mock, MockInstance } from 'vitest'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which `graphql` rejects.
 vi.mock('@packages/data-context/graphql/schema', () => {
@@ -21,6 +22,7 @@ describe('lib/plugins/preprocessor', () => {
   let filePath: string
   let fullFilePath: string
   let plugin: Mock
+  let isSpecFrameScript: MockInstance
   let config
 
   const lastPluginFile = () => plugin.mock.lastCall[0]
@@ -37,6 +39,7 @@ describe('lib/plugins/preprocessor', () => {
 
     const output = new Promise((resolve) => resolve('/path/to/output.js'))
 
+    isSpecFrameScript = vi.spyOn(specFrameScripts, 'isSpecFrameScript').mockReturnValue(true)
     plugin = vi.fn(() => output)
     plugins.registerEvent('file:preprocessor', plugin)
 
@@ -99,6 +102,24 @@ describe('lib/plugins/preprocessor', () => {
       preprocessor.getFile(filePath, config)
 
       expect(plugin).toHaveBeenCalledTimes(1)
+    })
+
+    it('rejects and does not invoke the plugin for a file that is not a spec or the support file', async () => {
+      isSpecFrameScript.mockReturnValue(false)
+
+      const err = await preprocessor.getFile('../secret.json', config).then(
+        () => {
+          throw new Error('should have rejected')
+        },
+        (rejection: unknown) => rejection,
+      )
+
+      expect(err).toBeInstanceOf(specFrameScripts.NotSpecFrameScriptError)
+      expect(err).toMatchObject({
+        message: expect.stringContaining('../secret.json is not a spec file or the support file of this project.'),
+      })
+
+      expect(plugin).not.toHaveBeenCalled()
     })
   })
 
