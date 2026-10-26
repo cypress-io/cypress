@@ -27,7 +27,7 @@
 - [x] packages/launcher
 - [x] packages/https-proxy
 - [x] packages/network-interception
-- [ ] packages/proxy
+- [x] packages/proxy
 - [ ] packages/net-stubbing
 - [ ] packages/driver
 - [ ] packages/reporter

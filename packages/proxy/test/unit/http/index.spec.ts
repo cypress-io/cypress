@@ -169,7 +169,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({}, { on, off })
 
       expect(incomingRequest, 'incomingRequest').toHaveBeenCalledOnce()
@@ -189,7 +189,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -219,7 +219,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -248,7 +248,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -278,7 +278,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -303,7 +303,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).toHaveBeenCalledOnce()
@@ -377,7 +377,7 @@ describe('http', function () {
       middleware[HttpStages.IncomingResponse].incomingResponse2 = incomingResponse2
       middleware[HttpStages.Error].error2 = error2
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       const middlewareFunctions = [
         incomingRequest, incomingRequest2,
@@ -402,7 +402,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
 
       expect(incomingRequest).toHaveBeenCalledOnce()
