@@ -99,9 +99,7 @@ const zlibBrotliCompressOptions = {
   },
 }
 
-const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
-
-type SupportedContentEncoding = typeof SUPPORTED_CONTENT_ENCODINGS[number]
+type SupportedContentEncoding = 'gzip' | 'br'
 
 /**
  * Returns the content-encoding list in application order (first = applied first = innermost).
@@ -312,7 +310,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
-  // @ts-expect-error
+  // @ts-expect-error - the ERR_INVALID_CHAR fallback writes the header directly and returns nothing, but setHeader's type requires the response to be returned
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
