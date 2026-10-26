@@ -5,6 +5,7 @@ import dedent from 'dedent'
 import path from 'path'
 import debugLib from 'debug'
 import { parse, print } from 'recast'
+import * as typescriptParser from 'recast/parsers/typescript'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
 import type { ASTComponentDefinitionConfig } from './astConfigHelpers'
@@ -44,7 +45,7 @@ const debug = debugLib('cypress:config:addToCypressConfig')
 export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
   try {
     const ast = parse(code, {
-      parser: require('recast/parsers/typescript'),
+      parser: typescriptParser,
     })
 
     traverse(ast, addToCypressConfigPlugin(toAdd).visitor)
@@ -144,6 +145,8 @@ export function defineConfigAvailable (projectRoot: string) {
     const cypress = require.resolve('cypress', {
       paths: [projectRoot],
     })
+    // The path is only known at runtime, from the user's project, so this
+    // can't be a static import
     const api = require(cypress)
 
     return 'defineConfig' in api
@@ -186,6 +189,8 @@ function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }
 
 function maybeFormatWithPrettier (code: string, filePath: string) {
   try {
+    // Loaded lazily so prettier is only pulled in when a config file is
+    // written, and a failure to load it leaves the code unformatted
     const prettier = require('prettier') as typeof import('prettier')
 
     return prettier.format(code, {
