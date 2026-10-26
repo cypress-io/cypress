@@ -170,8 +170,6 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/system-tests/test-binary/*`](../../system-tests/test-binary) - update binary system tests to use the newly published Ubuntu and Node images mentioned above, if applicable
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)  
 
-- [ ] **Check that `better-sqlite3` still builds for Linux.** `better-sqlite3` uses Node-API, so it does not need a new version for each Electron release. CI compiles it from source in the `glibc-2.31` `base-internal` image rather than shipping its upstream prebuilds, which need a newer glibc than Cypress supports. Run [`/scripts/test-better-sqlite3-build.sh`](../../scripts/test-better-sqlite3-build.sh) against the new `glibc-2.31` image to confirm it compiles.
-
 - [ ] **Update `cypress-publish-binary`** For **binary publishing**, make sure the `electron` version that we updated in [`/package.json`](../../package.json) matches the `electron` version inside the [publish binary project](https://github.com/cypress-io/cypress-publish-binary/blob/main/package.json). This is to make sure add-on tests inside the publish-binary repository work locally, but are not required to install the correct version of `electron` in CI when publishing the binary. Ensure the `electron` target in this project's `.circleci` configuration is updated as well. Set the Remove this before merging, and ensure that branch is merged as well.
   - [ ] Create a new branch in `cypress-publish-binary`
   - [ ] Update `electron` version in `package.json`
@@ -181,7 +179,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
   - [ ] Trigger the pipeline in CircleCI's UI, and set the `publish-binary-branch` parameter to the branch you created in the `cypress-publish-binary` repository.
 
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into Cypress Cloud, and launching Electron tests still work.
-- [ ] **Manually smoke test `cypress run` in record mode** Upgrading Electron can cause `better-sqlite3` to SIGSEGV the Electron process.
+- [ ] **Manually smoke test `cypress run` in record mode with Test Replay.** Test Replay opens its database through `better-sqlite3`'s native module in the Electron main process, which no other test exercises in a packaged binary.
 - [ ] **Fix failing tests.** Usually, these are due to breaking changes in either Node.js or Electron. Check the changelogs of both to find relevant changes.
 
 - [ ] If needed, update the **[V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml)** by running the GitHub workflow. Make sure to use the branch that contains the electron updates to populate the `'workflow from'` and `'branch to update'` arguments. Select `'Generate from scratch'` and `'commit directly to branch'`. This will usually take 6-8 hours to complete and is best to not be actively developing on the branch when this workflow runs.
@@ -244,7 +242,7 @@ For more detailed information about the build system, see [BUILD.md](./BUILD.md)
 
 #### Electron crashes immediately after initializing the Protocol database
 
-*Solution*: This is often due to a mismatched prebuild of `better-sqlite3`. Ensure your repository is clear of untracked files with `git clean -xfd`, and run `yarn` again. If the issue persists, ensure you are running the latest version of your operating system. Electron prebuilds key to darwin/linux/windows, and do not differentiate between versions of the same.
+*Solution*: This is usually a missing or stale `better-sqlite3` build. Cypress loads `node_modules/better-sqlite3/build/Release/better_sqlite3.node`, which the postinstall compiles from source, rather than the package's upstream prebuilds. Rebuild it with `yarn workspace @packages/server rebuild-better-sqlite3`, or clear untracked files with `git clean -xfd` and run `yarn` again.
 
 #### node-abi out of date
 
