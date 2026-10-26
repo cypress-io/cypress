@@ -421,7 +421,7 @@ describe('lib/agent', function () {
         })
 
         const options = spy.mock.calls[0][0]
-        // @ts-expect-error - `_agentKey` is a Node internal, so the spied options give no index type
+        // @ts-expect-error - createConnection's typed options don't declare Node's internal `_agentKey`, so it can't index the session cache
         const session = agent.httpsAgent._sessionCache.map[options._agentKey]
 
         expect(spy).toHaveBeenCalledOnce()
@@ -517,7 +517,7 @@ describe('lib/agent', function () {
           .on('response', resolve)
         })
 
-        // @ts-expect-error - the promisified request resolves to unknown
+        // @ts-expect-error - the untyped `new Promise` resolves `response` to unknown
         expect(response.req.path).toEqual('http://localhost:31080/get')
       })
     })
