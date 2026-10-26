@@ -69,9 +69,8 @@ describe('utils', () => {
   })
 
   it('encodes and decodes a message with circular data', async () => {
-    const inner = { foo: 'bar' }
+    const inner: { foo: string, self?: unknown } = { foo: 'bar' }
 
-    // @ts-expect-error - `self` is added after creation to make the object circular
     inner.self = inner
     const message = [{ type: 'test', data: { inner } }]
     const encoded = await encode(message, '/namespace')

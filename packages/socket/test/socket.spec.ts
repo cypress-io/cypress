@@ -112,11 +112,10 @@ describe('Socket', function () {
     it('correctly encodes and decodes circular data', () => {
       const encoder = new parser.Encoder()
 
-      const circularObj = {
+      const circularObj: { foo: Record<string, unknown>, bin?: Buffer } = {
         foo: {},
       }
 
-      // @ts-expect-error - `foo` is typed as an empty object; the circular reference is added after creation
       circularObj.foo.circularObj = circularObj
 
       const obj = {
@@ -149,11 +148,10 @@ describe('Socket', function () {
     it('correctly encodes and decodes circular data in array', () => {
       const encoder = new parser.Encoder()
 
-      const circularObj = {
+      const circularObj: { foo: Record<string, unknown>, bin?: Buffer } = {
         foo: {},
       }
 
-      // @ts-expect-error - `foo` is typed as an empty object; the circular reference is added after creation
       circularObj.foo.circularArray = [circularObj, circularObj]
 
       const obj = {
@@ -187,12 +185,11 @@ describe('Socket', function () {
     it('correctly encodes and decodes circular data containing binary', () => {
       const encoder = new parser.Encoder()
 
-      const circularObj = {
+      const circularObj: { foo: Record<string, unknown>, bin?: Buffer } = {
         foo: {},
         bin: Buffer.from('abc', 'utf8'),
       }
 
-      // @ts-expect-error - `foo` is typed as an empty object; the circular reference is added after creation
       circularObj.foo.circularObj = circularObj
 
       const obj = {

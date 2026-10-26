@@ -510,14 +510,13 @@ describe('lib/agent', function () {
         vi.stubEnv('NO_PROXY', '')
         vi.stubEnv('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS', `http://localhost:${HTTP_PORT}`)
 
-        const response = await new Promise((resolve) => {
+        const response = await new Promise<http.IncomingMessage & { req: http.ClientRequest }>((resolve) => {
           request({
             url: `http://localhost:${HTTP_PORT}/get`,
           })
           .on('response', resolve)
         })
 
-        // @ts-expect-error - the untyped `new Promise` resolves `response` to unknown
         expect(response.req.path).toEqual('http://localhost:31080/get')
       })
     })
