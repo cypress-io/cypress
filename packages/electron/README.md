@@ -167,6 +167,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/package.json`](../../package.json) - update `engines`
     - [ ] When the **minimum major** Node version in [`/cli/package.json`](../../cli/package.json) `engines.node` changes, update esbuild's `target` in [`/packages/packherd-require/src/transpile-ts.ts`](../../packages/packherd-require/src/transpile-ts.ts) and [`/tooling/packherd/src/create-bundle.ts`](../../tooling/packherd/src/create-bundle.ts) to match (for example `node20`, `node22`) so packherd bundles and on-the-fly TypeScript transpilation stay compatible with the oldest Node still supported by the published `cypress` package.
     - [ ] [`docker-compose.yml`](../../docker-compose.yml) - update Docker image to the new matching `internal` image
+    - [ ] [`.cursor/Dockerfile`](../../.cursor/Dockerfile) - update the `FROM` image and the Node version in its comments to the new matching `internal` image
     - [ ] [`/system-tests/test-binary/*`](../../system-tests/test-binary) - update binary system tests to use the newly published Ubuntu and Node images mentioned above, if applicable
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)  
 

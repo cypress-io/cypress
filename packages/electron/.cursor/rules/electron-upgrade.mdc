@@ -81,6 +81,13 @@ If only the **minor/patch** Node version changes within the same major, this fil
 # "cypress/base-internal:22.18.0-trixie" -> "cypress/base-internal:NEW_NODE_VERSION-trixie"
 ```
 
+### Cursor Cloud Dockerfile
+```bash
+# File: /.cursor/Dockerfile
+# Update the FROM image and the Node version in its comments:
+# "FROM cypress/base-internal:22.18.0-trixie" -> "FROM cypress/base-internal:NEW_NODE_VERSION-trixie"
+```
+
 ### CircleCI Workflows
 ```bash
 # File: /.circleci/src/@workflows.yml
@@ -246,6 +253,7 @@ grep -r "OLD_ELECTRON_VERSION" . --exclude-dir=node_modules --exclude-dir=dist
 - [ ] `/.node-version` - Node.js version
 - [ ] `/.nvmrc` - Node.js version  
 - [ ] `/docker-compose.yml` - base-internal image
+- [ ] `/.cursor/Dockerfile` - base-internal image
 - [ ] `/.circleci/workflows.yml` - base-internal images
 - [ ] `/system-tests/test-binary/*` - Docker image references
 - [ ] `/system-tests/test-binary/ci_environments_spec.ts` - **if Node major changed:** `node:<major>` and every `cypress/base-internal:ubuntu*-node<major>` tag (additional Ubuntu rows may exist over time)
