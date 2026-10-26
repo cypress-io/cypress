@@ -17,13 +17,13 @@
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
 - [x] npm/webpack-preprocessor
-- [ ] npm/webpack-dev-server
+- [x] npm/webpack-dev-server
 - [x] npm/vite-plugin-cypress-esm
 - [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
 - [ ] packages/frontend-shared
-- [ ] packages/icons
+- [x] packages/icons
 - [x] packages/launcher
 - [x] packages/https-proxy
 - [x] packages/network-interception
@@ -57,8 +57,9 @@
 - [ ] packages/packherd-require
 - [x] packages/v8-snapshot-require
 - [x] packages/web-config
+- [x] packages/types
+- [x] packages/scaffold-config
 - [x] packages/ts
-- [ ] packages/types
 - [ ] packages/example
 
 ### Batch 5: Test and script folders
@@ -102,6 +103,7 @@ For each package in the batch:
    - Delete `.eslintignore` — flat config does not read it. Anything in it that is still needed becomes an `ignores` entry in `eslint.config.ts`.
    - Remove any references to `@cypress/eslint-plugin-dev` in `package.json` (if present).
    - **Remove TSLint configs:** Delete `tslint.json` and remove `tslint` dependencies from `package.json`.
+   - **Drop the `tslint` script** and its call from `check-ts`. `packages/ts/tslint.json` enforces `no-empty` for JS, which `baseConfig` already has, and `no-floating-promises`, which `baseConfig` does not run because it is type-aware. Port it by enabling `projectService` and `@typescript-eslint/no-floating-promises` for the files `check-ts` linted, as `packages/scaffold-config` does.
 2. **Add a new ESLint config file:**
    - Create `eslint.config.ts` in the package root:
      ```ts
