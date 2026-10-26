@@ -688,7 +688,12 @@ declare namespace Cypress {
        */
       isJquery(obj: any): obj is JQuery
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
-      stringify(element: JQuery | HTMLElement, form: string): string
+      /**
+       * Returns a string representation of an element, the window, or the document.
+       * `'long'` (the default) returns the element's HTML with its content
+       * abbreviated, and `'short'` returns its tag name with its id or classes.
+       */
+      stringify(element: JQuery | HTMLElement | Window | Document, form?: 'long' | 'short'): string
       getElements(element: JQuery): JQuery | HTMLElement[]
       getContainsSelector(text: string, filter?: string, options?: CaseMatchable): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement

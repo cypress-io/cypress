@@ -934,7 +934,11 @@ namespace CypressDomTests {
   Cypress.dom.isWindow(obj) // $ExpectType boolean
   Cypress.dom.isJquery(obj) // $ExpectType boolean
   Cypress.dom.isInputType(el, 'number') // $ExpectType boolean
-  Cypress.dom.stringify(el, 'foo') // $ExpectType string
+  Cypress.dom.stringify(el) // $ExpectType string
+  Cypress.dom.stringify(el, 'long') // $ExpectType string
+  Cypress.dom.stringify(jel, 'short') // $ExpectType string
+  Cypress.dom.stringify(window) // $ExpectType string
+  Cypress.dom.stringify(doc) // $ExpectType string
   Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
   Cypress.dom.getContainsSelector('foo', 'bar', { matchCase: true }) // $ExpectType string
@@ -971,6 +975,7 @@ namespace CypressDomTests {
   Cypress.dom.isJquery() // $ExpectError
   Cypress.dom.isInputType('', 'number') // $ExpectError
   Cypress.dom.stringify('', 'foo') // $ExpectError
+  Cypress.dom.stringify(el, 'foo') // $ExpectError
   Cypress.dom.getElements(el) // $ExpectError
   Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
   Cypress.dom.getContainsSelector('foo', 'bar', { invalid: false }) // $ExpectError
