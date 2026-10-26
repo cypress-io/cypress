@@ -653,15 +653,29 @@ declare namespace Cypress {
       isHidden(element: JQuery | HTMLElement, methodName?: string, options?: object): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
+       * Accepts a DOM element or a jQuery object. For a jQuery object with
+       * more than one element, returns `true` if any of them can receive focus.
        */
       isFocusable(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element accepts typed text: a
+       * `<textarea>`, a contenteditable element, or an `<input>` whose `type` is
+       * `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`,
+       * `datetime`, `datetime-local`, `search`, `url`, or `tel`.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks its
+       * first element.
+       */
       isTextLike(element: JQuery | HTMLElement): boolean
       /**
-       * Returns a boolean indicating whether an element is scrollable.
+       * Returns a boolean indicating whether an element or the window is scrollable.
+       * Accepts the window, a DOM element, or a jQuery object. For a jQuery object,
+       * checks its first element.
        */
       isScrollable(element: Window | JQuery | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element currently has focus.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks
+       * its first element.
        */
       isFocused(element: JQuery | HTMLElement): boolean
       /**
@@ -672,9 +686,16 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an element is attached to the DOM.
        */
       isAttached(element: JQuery | HTMLElement | Window | Document): boolean
+      /**
+       * Returns a boolean indicating whether an element matches a jQuery selector.
+       * For a jQuery object with more than one element, returns `true` if any of
+       * them match. Accepts a DOM element or a jQuery object.
+       */
       isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
       /**
-       * Returns a boolean indicating whether an element is a descendent of another element.
+       * Returns a boolean indicating whether `element2` is `element1` or is
+       * inside it. Each argument can be a DOM element or a jQuery object.
+       * For a jQuery object, checks its first element.
        */
       isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
       /**
@@ -744,11 +765,44 @@ declare namespace Cypress {
        * Returns a jQuery object holding the chosen element.
        */
       getFirstDeepestElement(elements: JQuery, index?: number): JQuery
-      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      /**
+       * Returns the window that contains an element or a document, or the window
+       * itself when passed a window. Accepts any of these, or a jQuery object
+       * holding one. For a jQuery object, uses its first element.
+       */
+      getWindowByElement(element: JQuery<HTMLElement | Document | Window> | HTMLElement | Document | Window): Window
+      /**
+       * Returns a sentence explaining why an element is not visible.
+       * Accepts a DOM element or a jQuery object.
+       */
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
-      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      /**
+       * Returns the closest ancestor of an element that can scroll, as a jQuery
+       * object, or `null` if there is none. The element itself is not checked.
+       * It walks out of shadow roots to their hosts and can return `<html>`.
+       * Returns `null` right away for `<html>`, `<body>`, or the document.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
+       */
+      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | null
+      /**
+       * Returns the element, or its closest ancestor, whose CSS `position` is
+       * `fixed` or `sticky`, as a jQuery object, or `null` if there is none.
+       * It walks out of shadow roots to their hosts. Returns `null` right away for
+       * `<html>`, `<body>`, or the document.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
+       */
+      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | null
+      /**
+       * Returns the element, or its closest ancestor, whose CSS `position` is
+       * `sticky`, as a jQuery object, or `null` if there is none. It walks out of
+       * shadow roots to their hosts. Returns `null` right away for `<html>`,
+       * `<body>`, or the document.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
+       */
+      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | null
       /**
        * Rounds a point to whole pixels so it stays inside the element it targets.
        * `xPosition` (`'left'`, `'center'`, or `'right'`) and `yPosition` (`'top'`,
