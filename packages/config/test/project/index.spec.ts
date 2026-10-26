@@ -7,7 +7,7 @@ vi.mock('@packages/errors', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       throwErr: vi.fn(),
     },

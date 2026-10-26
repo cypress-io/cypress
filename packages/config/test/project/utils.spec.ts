@@ -33,7 +33,7 @@ vi.mock('@packages/errors', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       throwErr: vi.fn(),
       warning: vi.fn(),
@@ -46,7 +46,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       pathExists: vi.fn(),
     },
@@ -57,7 +57,7 @@ vi.mock('../../src/project/utils', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual() returns unknown
     ...actual,
     resolveModule: vi.fn(),
   }

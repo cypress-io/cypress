@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-// @ts-ignore
+// @ts-expect-error - return-deep-diff ships no type declarations
 import deepDiff from 'return-deep-diff'
 
 import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
@@ -40,7 +40,7 @@ export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any)
   config.projectName = projectName
   config.repoRoot = repoRoot
 
-  // @ts-ignore
+  // @ts-expect-error - mergeDefaults is typed to return Config, but it sets resolved and the other FullConfig fields
   return mergeDefaults(config, options, cliConfig, getFilesByGlob)
 }
 

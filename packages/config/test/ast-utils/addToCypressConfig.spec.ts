@@ -9,7 +9,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       writeFile: vi.fn(),
     },
