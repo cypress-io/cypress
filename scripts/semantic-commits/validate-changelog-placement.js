@@ -8,10 +8,8 @@ const MAX_ENTRY_LENGTH = 120
 
 const git = (args) => childProcess.execSync(`git ${args}`, { encoding: 'utf8' }).trim()
 
-/**
- * Get the zero-context diff of cli/CHANGELOG.md between HEAD and the point where it
- * branched from the base branch, so only the lines this branch adds are reported.
- */
+// Diffing against the merge base rather than the base branch's tip keeps entries that
+// landed on the base branch after this branch was cut from being reported as its own.
 function getChangelogDiff (baseBranch = process.env.CHANGELOG_BASE_BRANCH || 'develop') {
   const baseRef = `origin/${baseBranch}`
 
@@ -26,11 +24,8 @@ function getChangelogDiff (baseBranch = process.env.CHANGELOG_BASE_BRANCH || 'de
   return git(`diff --unified=0 ${mergeBase} -- ${CHANGELOG_PATH}`)
 }
 
-/**
- * Parse a zero-context diff into the changelog entries it adds, with their line number
- * in the new file. Hunks that also remove lines edit an existing entry rather than add
- * one, so they are skipped: fixing a typo in an old release is allowed.
- */
+// A hunk that also removes lines edits an existing entry rather than adding one, so it
+// is skipped: fixing a typo in an already-released entry is allowed.
 function getAddedEntries (diff) {
   const entries = []
   let hunk = null
@@ -84,10 +79,6 @@ function _truncate (text) {
   return text.length > MAX_ENTRY_LENGTH ? `${text.slice(0, MAX_ENTRY_LENGTH)}…` : text
 }
 
-/**
- * Report every changelog entry this branch adds under a version that has already been
- * published, naming the version it should move to.
- */
 function validateChangelogPlacement ({ diff, changelogContent, releasedVersions }) {
   const changelogLines = changelogContent.split('\n')
   const topVersion = changelogLines.map((line) => VERSION_HEADER.exec(line)).find(Boolean)?.[1]
