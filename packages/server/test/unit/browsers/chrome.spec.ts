@@ -8,6 +8,7 @@ import * as launch from '@packages/launcher/lib/browsers'
 import * as plugins from '../../../lib/plugins'
 import utils from '../../../lib/browsers/utils'
 import chrome from '../../../lib/browsers/chrome'
+import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as protocol from '../../../lib/browsers/protocol'
@@ -124,6 +125,20 @@ describe('lib/browsers/chrome', () => {
     await clearCtx()
     vi.restoreAllMocks()
     vi.unstubAllEnvs()
+  })
+
+  describe('#_setAutomation', () => {
+    it('subscribes Chrome to the CDP dialog owner at initialization', async () => {
+      const cdpAutomation = { onJavascriptDialogOpening: vi.fn() }
+      const client = { send: vi.fn(), on: vi.fn(), off: vi.fn() }
+      const automation = { use: vi.fn() }
+
+      vi.spyOn(CdpAutomation, 'create').mockResolvedValue(cdpAutomation as any)
+      await chrome._setAutomation(client as any, automation as any, vi.fn(), {} as any)
+
+      expectCalledOnceWith(client.on, 'Page.javascriptDialogOpening', cdpAutomation.onJavascriptDialogOpening)
+      expectCalledWith(automation.use, cdpAutomation)
+    })
   })
 
   describe('#open', () => {

@@ -77,7 +77,6 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private gettingFrameTree: Promise<void> | undefined | null
   private autFrameId: string | undefined
   private autFrameNavigatedListener: ((url: string) => void) | undefined
-  private shouldAcceptBeforeUnload = false
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
 
@@ -86,7 +85,6 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
     onFn('Network.loadingFailed', this.onRequestFailed)
-    onFn('Page.javascriptDialogOpening', this.onJavascriptDialogOpening)
     onFn('ServiceWorker.workerRegistrationUpdated', this.onServiceWorkerRegistrationUpdated)
     onFn('ServiceWorker.workerVersionUpdated', this.onServiceWorkerVersionUpdated)
 
@@ -222,10 +220,10 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     this.automation.onRemoveBrowserPreRequest?.(params.requestId)
   }
 
-  private onJavascriptDialogOpening = (event: Protocol.Page.JavascriptDialogOpeningEvent) => {
-    if (!this.shouldAcceptBeforeUnload || event.type !== 'beforeunload') return
+  onJavascriptDialogOpening = (event: Protocol.Page.JavascriptDialogOpeningEvent) => {
+    if (event.type !== 'beforeunload') return
 
-    debugVerbose('accepting %s dialog during Cypress-owned navigation', event.type)
+    debugVerbose('accepting %s dialog', event.type)
 
     return this.sendDebuggerCommandFn('Page.handleJavaScriptDialog', { accept: true })
   }
@@ -517,12 +515,6 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     let setCookie
 
     switch (message) {
-      case 'set:beforeunload:handling':
-        if (data) await this.sendDebuggerCommandFn('Page.enable')
-
-        this.shouldAcceptBeforeUnload = data
-
-        return
       case 'get:cookies':
         if (data.url) {
           return this.getCookiesByUrl(data.url)

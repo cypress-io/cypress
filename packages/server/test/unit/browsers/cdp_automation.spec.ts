@@ -315,8 +315,7 @@ describe('lib/browsers/cdp_automation', () => {
         .withArgs('Network.responseReceived')
         .yield(browserResponseReceived)
 
-        expectCalledWith(
-          automation.onRequestEvent,
+        expectCalledWith(automation.onRequestEvent,
           'response:received', {
             requestId: browserResponseReceived.requestId,
             status: browserResponseReceived.response.status,
@@ -340,8 +339,7 @@ describe('lib/browsers/cdp_automation', () => {
         .withArgs('Network.responseReceived')
         .yield(browserResponseReceived)
 
-        expectCalledWith(
-          automation.onRequestEvent,
+        expectCalledWith(automation.onRequestEvent,
           'response:received', {
             requestId: browserResponseReceived.requestId,
             status: browserResponseReceived.response.status,
@@ -417,47 +415,18 @@ describe('lib/browsers/cdp_automation', () => {
       })
     })
 
-    describe('Cypress-owned beforeunload handling', () => {
-      const dialogHandler = (on: Stub) => callsWith(on, 'Page.javascriptDialogOpening')[0][1] as (event: { type: string }) => Promise<void> | undefined
+    describe('beforeunload dialog handling', () => {
+      it('accepts beforeunload without an automation policy request', async () => {
+        await cdpAutomation.onJavascriptDialogOpening({ type: 'beforeunload', url: 'http://localhost/', message: 'Dialog', hasBrowserHandler: true })
 
-      it('does not accept dialogs during normal application execution', async () => {
-        await dialogHandler(onFn)({ type: 'beforeunload' })
-
-        expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
-      })
-
-      it('enables Page events and accepts beforeunload during controlled navigation', async () => {
-        await onRequest('set:beforeunload:handling', true)
-        await dialogHandler(onFn)({ type: 'beforeunload' })
-
-        expectCalledWith(sendDebuggerCommand, 'Page.enable')
         expectCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog', { accept: true })
-      })
-
-      it('stops accepting dialogs when controlled navigation finishes', async () => {
-        await onRequest('set:beforeunload:handling', true)
-        await onRequest('set:beforeunload:handling', false)
-        await dialogHandler(onFn)({ type: 'beforeunload' })
-
-        expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
+        expectNotCalledWith(sendDebuggerCommand, 'Page.enable')
       })
 
       it('does not accept alert, confirm, or prompt dialogs', async () => {
-        await onRequest('set:beforeunload:handling', true)
-
-        for (const type of ['alert', 'confirm', 'prompt']) {
-          await dialogHandler(onFn)({ type })
+        for (const type of ['alert', 'confirm', 'prompt'] as const) {
+          await cdpAutomation.onJavascriptDialogOpening({ type, url: 'http://localhost/', message: 'Dialog', hasBrowserHandler: true })
         }
-
-        expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
-      })
-
-      it('does not enable the policy if Page events cannot be enabled', async () => {
-        const error = new Error('Page enable failed')
-
-        sendDebuggerCommand.withArgs('Page.enable').rejects(error)
-        await expect(onRequest('set:beforeunload:handling', true)).rejects.toBe(error)
-        await dialogHandler(onFn)({ type: 'beforeunload' })
 
         expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
       })

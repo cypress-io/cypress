@@ -160,39 +160,26 @@ export class AutIframe {
     this.$iframe?.removeAttr('src')
   }
 
-  visitBlankPage = async (testIsolation?: boolean) => {
-    const $iframe = this.$iframe
+  visitBlankPage = (testIsolation?: boolean) => {
+    return new Promise<void>((resolve) => {
+      if (!this.$iframe) {
+        resolve()
 
-    if (!$iframe) return
-
-    const Cypress = this.eventManager.getCypress()
-    // Electron handles will-prevent-unload itself. Other browser families do not
-    // use CDP; leave their existing navigation handling unchanged.
-    const acceptBeforeUnload = Cypress?.browser.family === 'chromium' && Cypress.browser.name !== 'electron'
-
-    if (acceptBeforeUnload) {
-      await Cypress.automation('set:beforeunload:handling', true)
-    }
-
-    try {
-      await new Promise<void>((resolve) => {
-        $iframe.one('load', () => {
-          if (testIsolation) {
-            this._showTestIsolationBlankPage()
-          } else {
-            this._showInitialBlankPage()
-          }
-
-          resolve()
-        })
-
-        $iframe[0].src = 'about:blank'
-      })
-    } finally {
-      if (acceptBeforeUnload) {
-        await Cypress.automation('set:beforeunload:handling', false)
+        return
       }
-    }
+
+      this.$iframe.one('load', () => {
+        if (testIsolation) {
+          this._showTestIsolationBlankPage()
+        } else {
+          this._showInitialBlankPage()
+        }
+
+        resolve()
+      })
+
+      this.$iframe[0].src = 'about:blank'
+    })
   }
 
   restoreDom = (snapshot) => {

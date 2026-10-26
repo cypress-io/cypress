@@ -196,7 +196,6 @@ export interface AutomationCommands {
   'get:heap:size:limit': CommandSignature
   'collect:garbage': CommandSignature
   'reset:browser:tabs:for:next:spec': CommandSignature
-  'set:beforeunload:handling': CommandSignature<boolean>
   'reset:browser:state': CommandSignature
   'focus:browser:window': CommandSignature
   'is:automation:client:connected': CommandSignature

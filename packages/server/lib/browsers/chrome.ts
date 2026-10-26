@@ -411,6 +411,9 @@ let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
 
+  // Electron owns beforeunload through will-prevent-unload, so only Chrome
+  // subscribes to the CDP handler to avoid answering the same dialog twice.
+  client.on('Page.javascriptDialogOpening', cdpAutomation.onJavascriptDialogOpening)
   automation.use(cdpAutomation)
 
   return cdpAutomation

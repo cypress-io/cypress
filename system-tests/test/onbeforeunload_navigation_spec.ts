@@ -14,5 +14,16 @@ describe('e2e onbeforeunload navigation', () => {
     spec: 'navigate_away_beforeunload.cy.ts',
     snapshot: false,
     expectedExitCode: 0,
+    config: { testIsolation: true },
+  })
+
+  // Chrome must handle the same prompts in CDP, including the isolation and
+  // shutdown cases, without relying on per-navigation automation requests.
+  systemTests.it('does not hang navigating away from a beforeunload prompt', {
+    browser: 'chrome',
+    spec: 'navigate_away_beforeunload.cy.ts',
+    snapshot: false,
+    expectedExitCode: 0,
+    config: { pageLoadTimeout: 5000, testIsolation: true },
   })
 })
