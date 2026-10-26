@@ -948,10 +948,11 @@ namespace CypressDomTests {
   Cypress.dom.stringify(jel, 'short') // $ExpectType string
   Cypress.dom.stringify(window) // $ExpectType string
   Cypress.dom.stringify(doc) // $ExpectType string
-  Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
+  Cypress.dom.getElements(jel) // $ExpectType HTMLElement | HTMLElement[] | undefined
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
   Cypress.dom.getContainsSelector('foo', 'bar', { matchCase: true }) // $ExpectType string
-  Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
+  Cypress.dom.getFirstDeepestElement(jel) // $ExpectType JQuery<HTMLElement>
+  Cypress.dom.getFirstDeepestElement(jel, 1) // $ExpectType JQuery<HTMLElement>
   Cypress.dom.getWindowByElement(el) // $ExpectType Window
   Cypress.dom.getWindowByElement(jel) // $ExpectType Window
   Cypress.dom.getWindowByElement(doc) // $ExpectType Window
@@ -964,7 +965,8 @@ namespace CypressDomTests {
   Cypress.dom.getFirstFixedOrStickyPositionParent(jel) // $ExpectType JQuery<HTMLElement> | null
   Cypress.dom.getFirstStickyPositionParent(el) // $ExpectType JQuery<HTMLElement> | null
   Cypress.dom.getFirstStickyPositionParent(jel) // $ExpectType JQuery<HTMLElement> | null
-  Cypress.dom.getCoordsByPosition(1, 2) // $ExpectType number
+  Cypress.dom.getCoordsByPosition(1, 2) // $ExpectType { x: number; y: number; }
+  Cypress.dom.getCoordsByPosition(1, 2, 'right', 'bottom') // $ExpectType { x: number; y: number; }
   Cypress.dom.getElementPositioning(el) // $ExpectType ElementPositioning
   Cypress.dom.getElementAtPointFromViewport(doc, 1, 2) // $ExpectType Element | null
   Cypress.dom.getElementCoordinatesByPosition(el, 'top') // $ExpectType ElementCoordinates
@@ -996,12 +998,14 @@ namespace CypressDomTests {
   Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
   Cypress.dom.getContainsSelector('foo', 'bar', { invalid: false }) // $ExpectError
   Cypress.dom.getFirstDeepestElement(el, 1) // $ExpectError
+  Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectError
   Cypress.dom.getWindowByElement('') // $ExpectError
   Cypress.dom.getReasonIsHidden('') // $ExpectError
   Cypress.dom.getFirstScrollableParent('') // $ExpectError
   Cypress.dom.getFirstFixedOrStickyPositionParent('') // $ExpectError
   Cypress.dom.getFirstStickyPositionParent('') // $ExpectError
   Cypress.dom.getCoordsByPosition(1) // $ExpectError
+  Cypress.dom.getCoordsByPosition(1, 2, 'middle') // $ExpectError
   Cypress.dom.getElementPositioning('') // $ExpectError
   Cypress.dom.getElementAtPointFromViewport(el, 1, 2) // $ExpectError
   Cypress.dom.getElementCoordinatesByPosition(doc, 'top') // $ExpectError
