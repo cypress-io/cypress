@@ -3,7 +3,7 @@ describe('promise rejection reasons', () => {
     it(`reports a promise rejected with ${reason}`, (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('CypressError')
-        expect(err.message).to.eq(`A promise was rejected with \`${reason}\`, but no error was provided.\n\nReject with an Error object to provide a useful message and stack trace.`)
+        expect(err.message).to.eq(`A command failed with \`${reason}\`, but no error was provided.\n\nThrow or reject with an Error object to provide a useful message and stack trace.`)
         expect(err.stack).to.include('promise_rejection.cy.ts')
         done()
       })
@@ -13,6 +13,21 @@ describe('promise rejection reasons', () => {
       } else {
         cy.then(() => Cypress.Promise.reject(undefined))
       }
+    })
+  }
+
+  for (const reason of [null, undefined]) {
+    it(`reports a thrown ${reason} from a command callback`, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('CypressError')
+        expect(err.message).to.eq(`A command failed with \`${reason}\`, but no error was provided.\n\nThrow or reject with an Error object to provide a useful message and stack trace.`)
+        expect(err.stack).to.include('promise_rejection.cy.ts')
+        done()
+      })
+
+      cy.then(() => {
+        throw reason
+      })
     })
   }
 

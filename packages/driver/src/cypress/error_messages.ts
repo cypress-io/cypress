@@ -846,13 +846,13 @@ export default {
   },
 
   miscellaneous: {
+    non_spec_invocation: `${cmd('{{cmd}}')} must only be invoked from the spec file or support file.`,
     promise_rejected_without_error: {
       message: stripIndent`\
-        A promise was rejected with \`{{value}}\`, but no error was provided.
+        A command failed with \`{{value}}\`, but no error was provided.
 
-        Reject with an Error object to provide a useful message and stack trace.`,
+        Throw or reject with an Error object to provide a useful message and stack trace.`,
     },
-    non_spec_invocation: `${cmd('{{cmd}}')} must only be invoked from the spec file or support file.`,
     returned_value_and_commands_from_custom_command (obj) {
       return {
         message: stripIndent`\
