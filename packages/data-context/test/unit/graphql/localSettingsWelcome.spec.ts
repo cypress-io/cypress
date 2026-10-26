@@ -10,7 +10,10 @@ describe('LocalSettingsPreferences.majorVersionWelcomeDismissed', () => {
   const originalEnv = process.env
 
   const dismissedBy = async (modeOptions: Parameters<typeof createTestDataContext>[1], saved: Record<string, number>) => {
-    const ctx = createTestDataContext('open', modeOptions)
+    // isWelcomeBypassedForAgent treats cliBrowser as no evidence of a browser given on the
+    // command line, since a config reload copies the active browser into it too. Only
+    // isBrowserGivenByCli (or a defaultBrowser) counts.
+    const ctx = createTestDataContext('open', { isBrowserGivenByCli: true, ...modeOptions })
 
     jest.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({ majorVersionWelcomeDismissed: saved })
     jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue({ name: 'electron' } as any)
