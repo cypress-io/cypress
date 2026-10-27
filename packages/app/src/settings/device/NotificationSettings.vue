@@ -76,14 +76,15 @@
         </div>
         <div class="py-[16px]">
           <!-- TODO: Use design system button when https://github.com/cypress-io/cypress-design/issues/254 is fixed -->
-          <Button
+          <ButtonDS
             variant="white"
+            size="32"
             data-cy="send-test-notification"
             :disabled="!desktopNotificationsEnabled"
             @click="showTestNotification"
           >
             {{ t('settingsPage.notifications.sendTestNotification') }}
-          </Button>
+          </ButtonDS>
           <i18n-t
             tag="p"
             scope="global"
@@ -110,7 +111,6 @@ import { SetNotificationSettingsDocument, NotificationSettings_ShowNotificationD
 import type { NotificationSettingsFragment } from '../../generated/graphql'
 import Checkbox from '@packages/frontend-shared/src/components/Checkbox.vue'
 import ButtonDS from '@cypress-design/vue-button'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { debouncedWatch } from '@vueuse/core'

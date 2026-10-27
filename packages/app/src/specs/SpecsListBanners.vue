@@ -55,11 +55,12 @@
       </i18n-t>
     </p>
     <Button
-      :prefix-icon="RefreshIcon"
       class="mt-[24px]"
+      size="32"
       data-cy="refresh-button"
       @click="emit('refetchFailedCloudData')"
     >
+      <RefreshIcon class="mr-[8px]" />
       {{ t('specPage.fetchFailedWarning.refreshButton') }}
     </Button>
   </Alert>
@@ -87,11 +88,12 @@
       </i18n-t>
     </p>
     <Button
-      :prefix-icon="ConnectIcon"
       class="mt-[24px]"
+      size="32"
       data-cy="reconnect-button"
       @click="userProjectStatusStore.openLoginConnectModal({utmMedium: 'Tests Tab'})"
     >
+      <ConnectIcon class="mr-[8px]" />
       {{ t('runs.errors.notFound.button') }}
     </Button>
   </Alert>
@@ -129,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useI18n } from '@cy/i18n'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'

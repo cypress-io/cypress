@@ -76,6 +76,11 @@
 </template>
 
 <script lang="ts">
+/**
+ * @deprecated Use `Button` from `@cypress-design/vue-button` instead.
+ * Remaining usages need router `to` links, `href` links that open through
+ * `useExternalLink`, or the `text` variant, none of which map onto it directly.
+ */
 import ButtonInternals from './ButtonInternals.vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
 import BaseLink from '../components/BaseLink.vue'

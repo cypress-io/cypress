@@ -52,6 +52,7 @@
     <template #footer>
       <div class="flex space-x-4">
         <Button
+          size="32"
           :disabled="!preferredEditor?.length"
           @click="selectEditor"
         >
@@ -59,7 +60,8 @@
         </Button>
 
         <Button
-          variant="outline"
+          variant="outline-light"
+          size="32"
           @click="close"
         >
           {{ t("globalPage.cancel") }}
@@ -76,7 +78,7 @@ import { ref } from 'vue'
 import { useMutation } from '@urql/vue'
 import ChooseExternalEditor from './ChooseExternalEditor.vue'
 import StandardModal from '../components/StandardModal.vue'
-import Button from '../components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import type { ChooseExternalEditorModalFragment } from '../generated/graphql'
 import { ChooseExternalEditorModal_SetPreferredEditorBinaryDocument } from '../generated/graphql'
 
