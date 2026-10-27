@@ -34,7 +34,7 @@
 - [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
-- [ ] packages/runner
+- [x] packages/runner
 - [x] packages/extension
 - [x] packages/network
 - [x] packages/network-tools

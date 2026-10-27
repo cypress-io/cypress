@@ -72,8 +72,7 @@ export const createTimers = () => {
 
     const wrapTimer = (fnName) => {
       return (...args) => {
-        let timerId
-        let [fnOrCode, delay, ...params] = args
+        const [fnOrCode, delay, ...params] = args
 
         const timerOverride = (...params) => {
           // if we're currently paused then we need
@@ -95,7 +94,7 @@ export const createTimers = () => {
           return invoke(fnOrCode, params)
         }
 
-        timerId = callThrough(fnName, [timerOverride, delay, ...params])
+        const timerId = callThrough(fnName, [timerOverride, delay, ...params])
 
         return timerId
       }
