@@ -41,7 +41,6 @@ import type { StateFunc } from './cypress/state'
 
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
-import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
@@ -56,7 +55,6 @@ const debug = debugFn('cypress:driver:cypress')
 declare global {
   interface Window {
     __attachToCypress?: (Cypress: Cypress.Cypress) => void
-    __cypressFakeLocation?: Location
     __cySkipValidateConfig: boolean
     Cypress: Cypress.Cypress
     Runner: any
@@ -177,8 +175,6 @@ class $Cypress {
   Log = LogUtils
   LocalStorage = $LocalStorage
   Mocha = $Mocha
-  resolveWindowReference = resolvers.resolveWindowReference
-  resolveLocationReference = resolvers.resolveLocationReference
   Mouse = {
     create: createMouse,
   }
