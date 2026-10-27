@@ -186,7 +186,9 @@ describe('stack_utils', () => {
             'test',
           )
 
-          expect(result?.stack).toEqual(stack)
+          if (!result) throw new Error('expected invocation details')
+
+          expect(result.stack).toEqual(stack)
         })
       })
 
@@ -241,7 +243,9 @@ describe('stack_utils', () => {
             'test',
           )
 
-          expect(result?.stack).toEqual(stack)
+          if (!result) throw new Error('expected invocation details')
+
+          expect(result.stack).toEqual(stack)
         })
       })
     })

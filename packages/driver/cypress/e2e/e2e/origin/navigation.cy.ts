@@ -184,6 +184,7 @@ describe('navigation events', { browser: '!webkit' }, () => {
   })
 })
 
+// skipped in WebKit: session support is needed for visiting about:blank between tests
 describe('event timing', { browser: '!webkit' }, () => {
   it('does not timeout when receiving a delaying:html event after cy.origin has started, but before the spec bridge is ready', () => {
     cy.visit('/fixtures/primary-origin.html')
@@ -204,6 +205,7 @@ describe('event timing', { browser: '!webkit' }, () => {
   })
 })
 
+// skipped in WebKit: session support is needed for visiting about:blank between tests
 describe('delayed navigation', { browser: '!webkit', defaultCommandTimeout: 4000 }, () => {
   it('localhost -> localhost', () => {
     cy.visit('/fixtures/auth/delayedNavigate.html')
@@ -242,6 +244,7 @@ describe('delayed navigation', { browser: '!webkit', defaultCommandTimeout: 4000
   })
 })
 
+// skipped in WebKit: session support is needed for visiting about:blank between tests
 describe('errors', { browser: '!webkit' }, () => {
   it('never calls cy.origin', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
