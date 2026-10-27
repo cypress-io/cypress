@@ -17,6 +17,7 @@ import xvfb from '../../../lib/exec/xvfb'
 import { start } from '../../../lib/exec/spawn'
 import { needsSandbox } from '../../../lib/tasks/verify'
 import util from '../../../lib/util'
+import { relativeToRepoRoot } from '../../../lib/relative-to-repo-root'
 import { filter as stderrFilter } from '@packages/stderr-filtering'
 
 const flushPromises = () => {
@@ -175,6 +176,15 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 vi.mock('../../../lib/tasks/verify', async () => {
   return {
     needsSandbox: vi.fn(),
+  }
+})
+
+// Passes through to the real lookup, so a test can simulate a missing start script
+vi.mock('../../../lib/relative-to-repo-root', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/relative-to-repo-root')>()
+
+  return {
+    relativeToRepoRoot: vi.fn(actual.relativeToRepoRoot),
   }
 })
 
@@ -560,6 +570,34 @@ describe('lib/exec/spawn', function () {
         debug('error message', (e as Error).message)
         expect((e as Error).message).toMatch(msg)
       }
+    })
+
+    describe('when spawning fails before the child process starts', () => {
+      it('rejects when the platform info cannot be read', async () => {
+        vi.spyOn(util, 'getPlatformInfo').mockRejectedValue(new Error('could not read platform info'))
+
+        await expect(start('--foo')).rejects.toThrow('could not read platform info')
+        expect(cp.spawn).not.toHaveBeenCalled()
+      })
+
+      it('rejects when the dev start script cannot be found', async () => {
+        const actual = await vi.importActual<typeof import('../../../lib/relative-to-repo-root')>('../../../lib/relative-to-repo-root')
+
+        vi.mocked(relativeToRepoRoot).mockImplementation((targetPath) => {
+          return targetPath === 'scripts/start.js' ? undefined : actual.relativeToRepoRoot(targetPath)
+        })
+
+        await expect(start('--foo', { dev: true })).rejects.toThrow('Cypress start script (scripts/start.js) not found')
+        expect(cp.spawn).not.toHaveBeenCalled()
+      })
+
+      it('rejects when spawn throws synchronously', async () => {
+        vi.mocked(cp.spawn).mockImplementation(() => {
+          throw new Error('spawn EACCES')
+        })
+
+        await expect(start('--foo')).rejects.toThrow('spawn EACCES')
+      })
     })
 
     describe('detached mode', () => {
