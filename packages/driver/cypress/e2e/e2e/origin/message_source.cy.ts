@@ -1,4 +1,4 @@
-describe('cross-origin messages from frames the runner did not create', () => {
+describe('cross-origin messages from other frames', () => {
   const postFromFrame = (event: string, args: unknown[]) => {
     cy.visit('/fixtures/primary-origin.html')
 
@@ -17,21 +17,19 @@ describe('cross-origin messages from frames the runner did not create', () => {
         const iframe = win.document.createElement('iframe')
         const query = new URLSearchParams({ event, args: JSON.stringify(args) })
 
-        iframe.src = `http://www.foobar.com:3500/fixtures/other/post-to-top.html?${query}`
+        iframe.src = `http://www.foobar.com:3500/fixtures/other/message.html?${query}`
         win.document.body.appendChild(iframe)
       })
     })
   }
 
-  it('does not relay automation requests', () => {
-    cy.setCookie('foo', 'bar')
-
-    postFromFrame('automation:request', ['get:cookies', { domain: 'localhost' }])
+  it('ignores automation:request', () => {
+    postFromFrame('automation:request', ['is:automation:client:connected', {}])
     .should('equal', 'no response')
   })
 
-  it('does not relay backend requests', () => {
-    postFromFrame('backend:request', ['get:fixture', 'example.json', {}])
+  it('ignores backend:request', () => {
+    postFromFrame('backend:request', ['get:rendered:html:origins'])
     .should('equal', 'no response')
   })
 })
