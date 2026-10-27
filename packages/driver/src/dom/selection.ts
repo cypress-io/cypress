@@ -58,7 +58,7 @@ const _getSelectionBoundsFromContentEditable = (el) => {
   }
 
   const range = sel.getRangeAt(0)
-  let preCaretRange = range.cloneRange()
+  const preCaretRange = range.cloneRange()
 
   preCaretRange.selectNodeContents(el)
   preCaretRange.setEnd(range.endContainer, range.endOffset)
@@ -346,7 +346,7 @@ const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
       'range',
     ]
 
-    let check = validInputTypes.some((type) => $elements.isInputType(el, type))
+    const check = validInputTypes.some((type) => $elements.isInputType(el, type))
 
     if (check) {
       if (up) {

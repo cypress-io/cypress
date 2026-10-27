@@ -653,7 +653,7 @@ describe('network stubbing', { retries: 15 }, function () {
             }).as('testRequest')
 
             cy.window().then(() => {
-              let xhr = new XMLHttpRequest()
+              const xhr = new XMLHttpRequest()
 
               xhr.open('POST', 'https://example.com/test')
               xhr.setRequestHeader('Content-Type', 'application/json')
@@ -708,9 +708,7 @@ describe('network stubbing', { retries: 15 }, function () {
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.intercept(/foo/, {}).then(() => {
-            let lastLog
-
-            lastLog = this.lastLog
+            const lastLog = this.lastLog
 
             expect(lastLog.get('numResponses')).to.eq(0)
           })

@@ -12,7 +12,7 @@ const command = function (ctx, name, ...args) {
     })
   }
 
-  return ctx[name].apply(ctx, args)
+  return ctx[name](...args)
 }
 
 export default function (Commands, Cypress, cy) {

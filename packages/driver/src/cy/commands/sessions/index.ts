@@ -36,7 +36,7 @@ export default function (Commands, Cypress, cy) {
       }
     })
 
-    Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }: {nextTestHasTestIsolationOn?: boolean} = {}) => {
+    Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }: { nextTestHasTestIsolationOn?: boolean } = {}) => {
       if (nextTestHasTestIsolationOn || nextTestHasTestIsolationOn === undefined) {
         return navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
       }
@@ -256,7 +256,6 @@ export default function (Commands, Cypress, cy) {
           return cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
             const isValidSession = true
             let caughtCommandErr = false
-            let _commandToRunAfterValidation
 
             const enhanceErr = (err) => {
               Cypress.state('onQueueFailed', null)
@@ -316,7 +315,7 @@ export default function (Commands, Cypress, cy) {
               if (step === 'restore') {
                 const commands = queue.get()
                 // determine command queue index of _commandToRunAfterValidation's index
-                let index = _.findIndex(commands, (command: any) => {
+                const index = _.findIndex(commands, (command: any) => {
                   return (
                     _commandToRunAfterValidation
                     && command.attributes.chainerId === _commandToRunAfterValidation.chainerId
@@ -361,7 +360,7 @@ export default function (Commands, Cypress, cy) {
               throw err
             }
 
-            _commandToRunAfterValidation = cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
+            const _commandToRunAfterValidation = cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
               Cypress.state('onQueueFailed', null)
 
               if (caughtCommandErr) {

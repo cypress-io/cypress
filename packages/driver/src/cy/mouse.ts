@@ -15,7 +15,7 @@ const debug = debugFn('cypress:driver:mouse')
 
 export type ForceEl = false | HTMLElement
 
-export type MouseCoords = { x?: number, y?: number}
+export type MouseCoords = { x?: number, y?: number }
 
 /**
  * @typedef Coords
@@ -435,7 +435,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       }, mouseEvtOptionsExtend)
 
       // TODO: pointer events should have fractional coordinates, not rounded
-      let pointerdown = sendPointerdown(
+      const pointerdown = sendPointerdown(
         el,
         pointerEvtOptions,
       ) as Partial<SentEvent>
@@ -461,7 +461,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         }
       }
 
-      let mousedown = sendMousedown(el, mouseEvtOptions)
+      const mousedown = sendMousedown(el, mouseEvtOptions)
 
       return {
         targetEl: el,
@@ -604,21 +604,21 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
     _upEvents (fromElViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       const win = state('window')
 
-      let defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
+      const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
       const pointerEvtOptions = _.extend({}, defaultOptions, {
         ...defaultPointerDownUpOptions,
         buttons: 0,
       }, pointerEvtOptionsExtend)
 
-      let mouseEvtOptions = _.extend({}, defaultOptions, {
+      const mouseEvtOptions = _.extend({}, defaultOptions, {
         buttons: 0,
         detail: 1,
       }, mouseEvtOptionsExtend)
 
       const el = forceEl || mouse.moveToCoords(fromElViewport)
 
-      let pointerup = sendPointerup(el, pointerEvtOptions)
+      const pointerup = sendPointerup(el, pointerEvtOptions)
 
       if (skipMouseEvent || $elements.isDetachedEl($(el))) {
         return {
@@ -632,7 +632,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         }
       }
 
-      let mouseup = sendMouseup(el, mouseEvtOptions)
+      const mouseup = sendMouseup(el, mouseEvtOptions)
 
       return {
         targetEl: el,
@@ -667,7 +667,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         detail: 1,
       }, mouseEvtOptionsExtend)
 
-      let click = sendClick(el, clickEventOptions, { force: !!forceEl })
+      const click = sendClick(el, clickEventOptions, { force: !!forceEl })
 
       return { click }
     },
@@ -685,7 +685,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         which: 3,
       }, mouseEvtOptionsExtend)
 
-      let contextmenu = sendContextmenu(el, mouseEvtOptions)
+      const contextmenu = sendContextmenu(el, mouseEvtOptions)
 
       return { contextmenu }
     },
@@ -708,7 +708,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         detail: 2,
       }, mouseEvtOptionsExtend)
 
-      let dblclick = sendDblclick(el, dblclickEvtProps)
+      const dblclick = sendDblclick(el, dblclickEvtProps)
 
       return { clickEvents1, clickEvents2, dblclick }
     },

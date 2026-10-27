@@ -2,6 +2,15 @@
   "name": "@packages/driver",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
+  "files": [
+    "patches"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "*"
+    ]
+  },
   "scripts": {
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
@@ -9,11 +18,14 @@
     "cypress:run": "node ../../scripts/cypress run --config-file ./cypress.config.ts",
     "cypress:run:inject-document-domain": "node ../../scripts/cypress run --config-file ./cypress.config-injectDocumentDomain.ts",
     "postinstall": "patch-package",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "tslint": "tslint --config ../ts/tslint.json --project ."
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {},
   "devDependencies": {
@@ -25,6 +37,7 @@
     "@module-federation/runtime": "^0.8.11",
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network-interception": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
@@ -66,11 +79,13 @@
     "dom-accessibility-api": "0.5.16",
     "error-stack-parser": "2.0.6",
     "errorhandler": "1.5.1",
+    "eslint": "^9.31.0",
     "eventemitter2": "6.4.7",
     "express": "4.21.0",
     "is-valid-domain": "0.0.20",
     "is-valid-hostname": "1.0.1",
     "jimp": "0.22.12",
+    "jiti": "^2.4.2",
     "jquery": "3.7.1",
     "js-cookie": "3.0.5",
     "jsdom": "^26.0.0",
@@ -101,15 +116,6 @@
     "vitest": "^3.2.4",
     "webpack": "^5.88.2",
     "zone.js": "0.15.0"
-  },
-  "files": [
-    "patches"
-  ],
-  "license": "MIT",
-  "workspaces": {
-    "nohoist": [
-      "*"
-    ]
   },
   "nx": {}
 }

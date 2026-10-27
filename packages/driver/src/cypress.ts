@@ -69,7 +69,7 @@ const jqueryProxyFn = function (...args) {
     $errUtils.throwErrByPath('miscellaneous.no_cy')
   }
 
-  return this.cy.$$.apply(this.cy, args)
+  return this.cy.$$(...args)
 }
 
 const throwPrivateCommandInterface = (method) => {
@@ -195,6 +195,7 @@ class $Cypress {
       })
     },
   }
+
   utils = $utils
   _ = _
   Blob = blobUtil

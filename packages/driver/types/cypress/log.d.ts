@@ -20,8 +20,8 @@ declare namespace Cypress {
   }
 
   type Snapshot = {
-    body?: {get: () => any}
-    htmlAttrs?: {[key: string]: any}
+    body?: { get: () => any }
+    htmlAttrs?: { [key: string]: any }
     name?: string
   }
 

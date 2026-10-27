@@ -37,7 +37,7 @@ function getDisplayUrl (url: string) {
 
 function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   const last = _.last(req.interceptions)
-  let alias = last ? last.interception.request.alias || last.route.alias : undefined
+  const alias = last ? last.interception.request.alias || last.route.alias : undefined
 
   return {
     alias,

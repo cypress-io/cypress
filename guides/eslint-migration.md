@@ -29,7 +29,7 @@
 - [x] packages/network-interception
 - [x] packages/proxy
 - [x] packages/net-stubbing
-- [ ] packages/driver
+- [x] packages/driver
 - [x] packages/reporter
 - [x] packages/server
 

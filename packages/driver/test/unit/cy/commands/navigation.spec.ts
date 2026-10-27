@@ -5,7 +5,7 @@ import type { Mock, MockedObject } from 'vitest'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { go, reload, resetServerState } from '../../../../src/cy/commands/navigation'
 import $utils from '../../../../src/cypress/utils'
-import type{ $Cy } from '../../../../src/cypress/cy'
+import type { $Cy } from '../../../../src/cypress/cy'
 
 vi.mock('../../../../src/cypress/utils', async () => {
   const original = await vi.importActual<typeof import('../../../../src/cypress/utils')>('../../../../src/cypress/utils')
@@ -97,7 +97,7 @@ describe('cy/commands/navigation', () => {
         })
 
         it('does not use the automation client if the browser is webkit', () => {
-          let mockWindow = {}
+          const mockWindow = {}
 
           mockState.mockImplementation((key) => {
             if (key === 'window') {

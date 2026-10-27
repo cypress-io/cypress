@@ -62,7 +62,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     }
 
     // @ts-expect-error - property() expects a [name, message?] tuple, not any[]
-    return a.property.apply(a, args)
+    return a.property(...args)
   })
 
   chai.Assertion.addMethod('class', function (className: string) {
