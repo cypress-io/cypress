@@ -138,6 +138,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'no-console': 'error',
       'prefer-spread': 'error',
       'prefer-const': 'error',
+      'no-async-promise-executor': 'error',
       // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
       // Unused args and caught errors stay allowed: callbacks and interface
@@ -224,7 +225,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-rest-params': 'off',
       'no-prototype-builtins': 'off',
       'no-global-assign': 'off',
-      'no-async-promise-executor': 'off',
 
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',

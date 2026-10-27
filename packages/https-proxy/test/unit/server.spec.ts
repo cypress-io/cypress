@@ -52,7 +52,7 @@ describe('lib/server', () => {
       socket.destroy = vi.fn()
       const head: Buffer = Buffer.from('')
 
-      return new Promise<void>(async (resolve) => {
+      return new Promise<void>((resolve, reject) => {
         const onError = function (err: Error, socket2: Socket, head2: Buffer, port: string) {
           expect(err.message).toEqual('connect ECONNREFUSED 127.0.0.1:8444')
 
@@ -65,9 +65,11 @@ describe('lib/server', () => {
           resolve()
         }
 
-        const srv = await setup({ onError })
-
-        srv._makeConnection(socket, head, '8444', 'localhost')
+        setup({ onError })
+        .then((srv) => {
+          srv._makeConnection(socket, head, '8444', 'localhost')
+        })
+        .catch(reject)
       })
     })
 
@@ -78,7 +80,7 @@ describe('lib/server', () => {
       socket.destroy = vi.fn()
       const head: Buffer = Buffer.from('')
 
-      return new Promise<void>(async (resolve) => {
+      return new Promise<void>((resolve, reject) => {
         const onError = function (err: Error, socket2: Socket, head2: Buffer, port: string) {
           expect(err.message).toEqual('getaddrinfo ENOTFOUND %7Balgolia_application_id%7D-dsn.algolia.net')
 
@@ -91,27 +93,25 @@ describe('lib/server', () => {
           resolve()
         }
 
-        const srv = await setup({ onError })
-
-        srv._makeConnection(socket, head, '443', '%7Balgolia_application_id%7D-dsn.algolia.net')
+        setup({ onError })
+        .then((srv) => {
+          srv._makeConnection(socket, head, '443', '%7Balgolia_application_id%7D-dsn.algolia.net')
+        })
+        .catch(reject)
       })
     })
 
     // https://github.com/cypress-io/cypress/issues/9220
-    it('does not crash when a blank URL is parsed and instead only destroys the socket', function () {
+    it('does not crash when a blank URL is parsed and instead only destroys the socket', async function () {
       const socket = new EE() as Socket
 
       socket.destroy = vi.fn()
       const head: Buffer = Buffer.from('')
 
-      return new Promise<void>(async (resolve) => {
-        const srv = await setup()
+      const srv = await setup()
 
-        srv.connect({ url: '%20:443' } as IncomingMessage, socket, head)
-        expect(socket.destroy).toHaveBeenCalledOnce()
-
-        resolve()
-      })
+      srv.connect({ url: '%20:443' } as IncomingMessage, socket, head)
+      expect(socket.destroy).toHaveBeenCalledOnce()
     })
   })
 })
