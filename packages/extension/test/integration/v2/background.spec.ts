@@ -9,10 +9,9 @@ import browser from 'webextension-polyfill'
 import { automation } from '../../../app/v2/background'
 
 vi.mock('../../../app/v2/client', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('../../../app/v2/client')>()
 
   return {
-    // @ts-expect-error - importActual() returns unknown
     ...actual,
     connect: vi.fn(),
   }
@@ -46,7 +45,7 @@ const PORT = 12345
 
 describe('app/background', () => {
   let httpSrv: http.Server
-  let server: http.Server
+  let server: SocketIOServer
   let connectWrapper: () => Promise<SocketShape>
 
   beforeEach(async () => {
@@ -55,7 +54,6 @@ describe('app/background', () => {
 
     httpSrv = http.createServer()
 
-    // @ts-expect-error - server is declared as http.Server but holds a SocketIOServer
     server = new SocketIOServer(httpSrv, { path: '/__socket' })
 
     // use an event emitter and wrap in in a vitest mock to assert on calls
@@ -86,8 +84,8 @@ describe('app/background', () => {
     })
   })
 
-  afterEach(function () {
-    server.close()
+  afterEach(async function () {
+    await server.close()
 
     return new Promise<void>((resolve) => {
       httpSrv.close(() => {

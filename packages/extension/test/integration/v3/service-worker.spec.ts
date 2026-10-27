@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 
 describe('app/v3/service-worker', () => {
-  let chrome: { runtime: { onConnect: { addListener: () => void } }, tabs: { query: () => void, update: () => void }, storage: { local: { set: () => void, get: () => void } } }
-  let port: { onMessage: { addListener: () => void }, postMessage: () => void }
+  let chrome: { runtime: { onConnect: { addListener: Mock } }, tabs: { query: Mock, update: Mock }, storage: { local: { set: Mock, get: Mock } } }
+  let port: { onMessage: { addListener: Mock }, postMessage: Mock }
 
   beforeAll(() => {
     chrome = {
@@ -23,8 +24,7 @@ describe('app/v3/service-worker', () => {
       },
     }
 
-    // @ts-expect-error - Node does not declare chrome on globalThis
-    global.chrome = chrome
+    vi.stubGlobal('chrome', chrome)
   })
 
   beforeEach(() => {
@@ -45,7 +45,6 @@ describe('app/v3/service-worker', () => {
   })
 
   it('adds port onMessage listener', async () => {
-    // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
     vi.mocked(chrome.runtime.onConnect.addListener).mockImplementation((fn: (port: { onMessage: { addListener: () => void } }) => void) => fn(port))
     await vi.importActual('../../../app/v3/service-worker')
 
@@ -54,7 +53,6 @@ describe('app/v3/service-worker', () => {
 
   describe('on message', () => {
     beforeEach(() => {
-      // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
       vi.mocked(chrome.runtime.onConnect.addListener).mockImplementation((fn: (port: { onMessage: { addListener: () => void } }) => void) => fn(port))
     })
 
@@ -63,18 +61,15 @@ describe('app/v3/service-worker', () => {
       const tab2 = { id: '2', url: 'some://other.url' }
 
       beforeEach(() => {
-        // @ts-expect-error - the stub is typed as () => void, so it cannot resolve to tabs
         vi.mocked(chrome.tabs.query).mockResolvedValue([tab1, tab2])
       })
 
       describe('when there is a most recent url', () => {
         beforeEach(() => {
-          // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
           vi.mocked(chrome.storage.local.get).mockImplementation((key: string, callback: (result: { mostRecentUrl: string }) => void) => callback({ mostRecentUrl: tab1.url }))
         })
 
         it('activates the tab matching the url', async () => {
-          // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
           vi.mocked(port.onMessage.addListener).mockImplementation((callback: (event: MessageEvent) => void) => callback({ message: 'activate:main:tab' } as any))
 
           await vi.importActual('../../../app/v3/service-worker')
@@ -84,12 +79,10 @@ describe('app/v3/service-worker', () => {
 
         describe('but no tab matches the most recent url', () => {
           beforeEach(() => {
-            // @ts-expect-error - the stub is typed as () => void, so it cannot resolve to tabs
             vi.mocked(chrome.tabs.query).mockResolvedValue([tab2])
           })
 
           it('does not try to activate any tabs', async () => {
-            // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
             vi.mocked(port.onMessage.addListener).mockImplementation((callback: (event: MessageEvent) => void) => callback({ message: 'activate:main:tab' } as any))
             await vi.importActual('../../../app/v3/service-worker')
 
@@ -107,7 +100,6 @@ describe('app/v3/service-worker', () => {
           })
 
           it('is a noop, logging the error', async () => {
-            // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
             vi.mocked(port.onMessage.addListener).mockImplementation((callback: (event: MessageEvent) => void) => callback({ message: 'activate:main:tab' } as any))
             await vi.importActual('../../../app/v3/service-worker')
 
@@ -119,12 +111,10 @@ describe('app/v3/service-worker', () => {
 
       describe('when there is not a most recent url', () => {
         beforeEach(() => {
-          // @ts-expect-error - the stub is typed as () => void, and the callback gets an empty result to simulate no stored URL
-          vi.mocked(chrome.storage.local.get).mockImplementation((key: string, callback: (result: { mostRecentUrl: string }) => void) => callback({}))
+          vi.mocked(chrome.storage.local.get).mockImplementation((key: string, callback: (result: { mostRecentUrl?: string }) => void) => callback({}))
         })
 
         it('does not try to activate any tabs', async () => {
-          // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
           vi.mocked(port.onMessage.addListener).mockImplementation((callback: (event: MessageEvent) => void) => callback({ message: 'activate:main:tab' } as any))
           await vi.importActual('../../../app/v3/service-worker')
 
@@ -137,7 +127,6 @@ describe('app/v3/service-worker', () => {
       it('sets the mostRecentUrl', async () => {
         const url = 'some://url'
 
-        // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
         vi.mocked(port.onMessage.addListener).mockImplementation((callback: (event: MessageEvent) => void) => callback({ message: 'url:changed', url } as any))
         await vi.importActual('../../../app/v3/service-worker')
 
@@ -146,7 +135,6 @@ describe('app/v3/service-worker', () => {
     })
 
     it('is a noop if message is not a supported message', async () => {
-      // @ts-expect-error - the stub is typed as () => void, so the mock implementation's signature does not match
       vi.mocked(port.onMessage.addListener).mockImplementation((callback: (event: MessageEvent) => void) => callback({ message: 'unsupported' } as any))
       await vi.importActual('../../../app/v3/service-worker')
 
