@@ -139,7 +139,7 @@ export function register (): void {
   const suiteStack: SuiteStackItem[] = []
 
     // @ts-expect-error - it is missing only and skip which are overridden below
-  // eslint-disable-next-line no-global-assign -- grep works by replacing the Mocha globals
+  // eslint-disable-next-line no-global-assign
   describe = function describeGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Suite {
     if (typeof options === 'function') {
       callback = options

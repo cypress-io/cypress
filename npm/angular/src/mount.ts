@@ -361,15 +361,17 @@ function setupComponent<T> (
   const injector = fixture.componentRef.injector
 
   if (config?.componentProperties) {
+    const { componentProperties } = config
+
     if (component instanceof WrapperComponent) {
-      component = Object.assign(component, config.componentProperties)
+      component = Object.assign(component, componentProperties)
     }
 
     getComponentInputs(fixture.componentRef.componentType).forEach((key) => {
       // only assign props if they are passed into the component
-      if (Object.hasOwn(config?.componentProperties ?? {}, key)) {
+      if (Object.hasOwn(componentProperties, key)) {
         // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
-        const passedInValue = config?.componentProperties[key]
+        const passedInValue = componentProperties[key]
 
         registerSignalEventsIfNeeded(
           key,
@@ -394,11 +396,11 @@ function setupComponent<T> (
       // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
       // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
       // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
-      if (property instanceof EventEmitter || (Object.hasOwn(config?.componentProperties ?? {}, key) && config?.componentProperties[key] instanceof EventEmitter)) {
+      if (property instanceof EventEmitter || (Object.hasOwn(componentProperties, key) && componentProperties[key] instanceof EventEmitter)) {
       // only assign props if they are passed into the component
-        if (Object.hasOwn(config?.componentProperties ?? {}, key)) {
+        if (Object.hasOwn(componentProperties, key)) {
         // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
-          const passedInValue = config?.componentProperties[key]
+          const passedInValue = componentProperties[key]
 
           component[key] = passedInValue
         }
