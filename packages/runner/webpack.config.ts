@@ -7,13 +7,12 @@ import type webpack from 'webpack'
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()
 
-// @ts-ignore
 const babelLoader = _.find(commonConfig.module.rules, (rule) => {
-  // @ts-ignore
+  // @ts-expect-error - rule.use is a union of loader shapes, and only some of them have a single loader
   return _.includes(rule.use.loader, 'babel-loader')
 })
 
-// @ts-ignore
+// @ts-expect-error - babelLoader.use is a union of loader shapes, and only the babel-loader one has options
 babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
   'languages': ['javascript', 'typescript', 'jsx', 'tsx'],
   'plugins': ['line-numbers', 'line-highlight'],
@@ -21,7 +20,7 @@ babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
   'css': false,
 }])
 
-// @ts-ignore
+// @ts-expect-error - getCommonConfig() returns an untyped literal, so fields such as module.rules[].enforce widen to string
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
@@ -41,7 +40,7 @@ mainConfig.resolve = {
   },
 }
 
-// @ts-ignore
+// @ts-expect-error - getCommonConfig() returns an untyped literal, so fields such as module.rules[].enforce widen to string
 const crossOriginConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
@@ -53,7 +52,7 @@ const crossOriginConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
+// @ts-expect-error - getSimpleConfig() returns an untyped literal, so resolve.fallback widens to boolean values webpack doesn't accept
 const mainInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
@@ -66,7 +65,7 @@ const mainInjectionConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
+// @ts-expect-error - getSimpleConfig() returns an untyped literal, so resolve.fallback widens to boolean values webpack doesn't accept
 const crossOriginInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
@@ -85,11 +84,9 @@ export default async function () {
   const cyIcons = await import('@packages/icons')
 
   mainConfig.plugins = [
-    // @ts-ignore
     ...mainConfig.plugins,
     new CopyWebpackPlugin({
       patterns: [{
-        // @ts-ignore // There's a race condition in how these types are generated.
         from: cyIcons.getPathToFavicon('favicon.ico'),
       }],
     }),

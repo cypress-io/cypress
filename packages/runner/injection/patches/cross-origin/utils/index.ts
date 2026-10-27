@@ -25,10 +25,9 @@ const CROSS_ORIGIN_PREFIX = 'cross:origin:'
  * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
  * @returns the data to send
  */
-export const postMessagePromise = <T>({ event, data = {}, timeout }: {event: string, data: any, timeout: number}): Promise<T> => {
+export const postMessagePromise = <T>({ event, data = {}, timeout }: { event: string, data: any, timeout: number }): Promise<T> => {
   return new Promise((resolve, reject) => {
     const eventName = `${CROSS_ORIGIN_PREFIX}${event}`
-    let timeoutId
 
     const responseEvent = `${eventName}:${Date.now()}`
 
@@ -40,7 +39,7 @@ export const postMessagePromise = <T>({ event, data = {}, timeout }: {event: str
       }
     }
 
-    timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       window.removeEventListener('message', handler)
       reject(new Error(`${eventName} failed to receive a response from the primary cypress instance within ${timeout / 1000} second.`))
     }, timeout)
@@ -60,12 +59,12 @@ export const postMessagePromise = <T>({ event, data = {}, timeout }: {event: str
  * @param args - an object containing a url, resourceType and Credential status.
  * @returns A Promise or null depending on the url parameter.
  */
-export const requestSentWithCredentials = <T>(args: {url?: string, resourceType: 'xhr' | 'fetch', credentialStatus: string | boolean}): Promise<T> | undefined => {
+export const requestSentWithCredentials = <T>(args: { url?: string, resourceType: 'xhr' | 'fetch', credentialStatus: string | boolean }): Promise<T> | undefined => {
   if (args.url) {
     // If cypress is enabled on the window use that, otherwise use post message to call out to the primary cypress instance.
     // cypress may be found on the window if this is either the primary cypress instance or if a spec bridge has already been created for this spec bridge.
     if (window.Cypress) {
-      //@ts-expect-error
+      // @ts-expect-error - 'request:sent:with:credentials' is not one of the events Cypress.backend() is typed to accept
       return Cypress.backend('request:sent:with:credentials', args)
     }
 
