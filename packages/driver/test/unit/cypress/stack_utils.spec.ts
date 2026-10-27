@@ -186,7 +186,7 @@ describe('stack_utils', () => {
             'test',
           )
 
-          expect(result.stack).toEqual(stack)
+          expect(result?.stack).toEqual(stack)
         })
       })
 
@@ -241,7 +241,7 @@ describe('stack_utils', () => {
             'test',
           )
 
-          expect(result.stack).toEqual(stack)
+          expect(result?.stack).toEqual(stack)
         })
       })
     })

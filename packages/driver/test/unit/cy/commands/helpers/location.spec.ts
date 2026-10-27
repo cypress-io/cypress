@@ -22,7 +22,7 @@ describe('cy/commands/helpers/location', () => {
     log = vi.fn<typeof Cypress['log']>()
 
     mockCypress = {
-      // The overloads for `log` don't get applied correctly here
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.log
       log,
       automation: vi.fn(),
       // @ts-expect-error - Mock Cypress config object doesn't have all required properties

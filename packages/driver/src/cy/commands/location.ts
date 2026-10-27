@@ -33,7 +33,7 @@ export function hashQueryCommand (Cypress: Cypress.Cypress, options: Partial<Cyp
   }
 }
 
-export function locationQueryCommand (Cypress: Cypress.Cypress, key: string, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+export function locationQueryCommand (Cypress: Cypress.Cypress, key?: string, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
   // normalize arguments allowing key + options to be undefined
   // key can represent the options
   if (_.isObject(key)) {
