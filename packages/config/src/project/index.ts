@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import Debug from 'debug'
-// @ts-expect-error - return-deep-diff ships no type declarations
 import deepDiff from 'return-deep-diff'
 
 import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'

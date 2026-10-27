@@ -30,8 +30,7 @@ describe('addToCypressConfig', () => {
       projectRoot: __dirname,
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
+    const secondArgTrimmed = vi.mocked(fs.writeFile).mock.calls[0]?.[1].trim()
 
     expect(secondArgTrimmed).toEqual(dedent`
       import { defineConfig } from "cypress";
@@ -58,8 +57,7 @@ describe('addToCypressConfig', () => {
       projectRoot: __dirname,
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
+    const secondArgTrimmed = vi.mocked(fs.writeFile).mock.calls[0]?.[1].trim()
 
     expect(secondArgTrimmed).toEqual(dedent`
           import { defineConfig } from "cypress";
@@ -86,8 +84,7 @@ describe('addToCypressConfig', () => {
       projectRoot: __dirname,
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
+    const secondArgTrimmed = vi.mocked(fs.writeFile).mock.calls[0]?.[1].trim()
 
     expect(secondArgTrimmed).toEqual(dedent`
           const { defineConfig } = require("cypress");
@@ -114,8 +111,7 @@ describe('addToCypressConfig', () => {
       projectRoot: '/foo',
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
+    const secondArgTrimmed = vi.mocked(fs.writeFile).mock.calls[0]?.[1].trim()
 
     expect(secondArgTrimmed).toEqual(dedent`
       module.exports = {
@@ -140,8 +136,7 @@ describe('addToCypressConfig', () => {
       projectRoot: '/foo',
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
+    const secondArgTrimmed = vi.mocked(fs.writeFile).mock.calls[0]?.[1].trim()
 
     expect(secondArgTrimmed).toEqual(dedent`
       export default {

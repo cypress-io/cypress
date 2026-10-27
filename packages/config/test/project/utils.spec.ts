@@ -204,15 +204,6 @@ describe('config/src/project/utils', () => {
   describe('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', async () => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'foo-bar')
-      // @ts-expect-error - invalid arg types
-      vi.mocked(errors.throwErr).mockImplementation((args1: string, arg2: string) => {
-        if (args1 === 'INVALID_CYPRESS_INTERNAL_ENV' && arg2 === 'foo-bar') {
-          return
-        }
-
-        throw new Error('should be unreachable')
-      })
-
       const cfg = {
         projectRoot: '/foo/bar/',
         supportFile: false,
@@ -227,7 +218,7 @@ describe('config/src/project/utils', () => {
         //
       }
 
-      expect(errors.throwErr).toHaveBeenCalledOnce
+      expect(errors.throwErr).toHaveBeenCalledExactlyOnceWith('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
     })
 
     it('allows production CYPRESS_INTERNAL_ENV', async () => {
@@ -719,11 +710,12 @@ describe('config/src/project/utils', () => {
       const e: Error & { code?: string } = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      // @ts-expect-error - invalid arg types
-      vi.mocked(resolveModule).mockImplementation((args) => {
-        if (args === supportFilename) {
+      vi.mocked(resolveModule).mockImplementation((name) => {
+        if (name === supportFilename) {
           throw e
         }
+
+        return name
       })
 
       const obj = setAbsolutePaths({
@@ -752,11 +744,12 @@ describe('config/src/project/utils', () => {
       const e: Error & { code?: string } = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      // @ts-expect-error - invalid arg types
-      vi.mocked(resolveModule).mockImplementation((args) => {
-        if (args === supportFilename) {
+      vi.mocked(resolveModule).mockImplementation((name) => {
+        if (name === supportFilename) {
           throw e
         }
+
+        return name
       })
 
       const obj = setAbsolutePaths({
