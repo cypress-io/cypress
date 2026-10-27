@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- Pages and scripts load faster in Electron, Firefox, and WebKit, and in Chrome, Chromium, and Edge when [`forceHttp1`](https://on.cypress.io/configuration) is set to `true`. Cypress no longer compresses the responses it passes to the browser it launched, and no longer re-compresses the pages and scripts it modifies before handing them over, so the app under test now receives them uncompressed. In a spec that visited a page loading a 4 MB script 20 times in Electron, the spec ran about 34% faster, from 11.2 to 7.5 seconds, and Cypress used about 37% less CPU per response. In every browser, spec files are also sent to the browser uncompressed. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**

@@ -1091,7 +1091,7 @@ describe('Routes', () => {
         return this.setup('http://www.github.com')
       })
 
-      it('unzips, injects, and then rezips initial content (full injection)', function () {
+      it('unzips and injects initial content, then sends it uncompressed (full injection)', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
@@ -1109,12 +1109,13 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.be.undefined
           expect(res.body).to.include('window.Cypress=parent.Cypress')
           expect(res.body).to.include('gzip</html>')
         })
       })
 
-      it('unzips, injects, and then rezips regular http content (partial injection)', function () {
+      it('unzips and injects regular http content, then sends it uncompressed (partial injection)', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
@@ -1133,12 +1134,12 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-
+          expect(res.headers['content-encoding']).to.be.undefined
           expect(res.body).to.eq('<html> <head> <script type=\'text/javascript\'> </script> </head>gzip</html>')
         })
       })
 
-      it('unzips, injects, and then rezips cross-origin http content (fullCrossOrigin injection)', function () {
+      it('unzips and injects cross-origin http content, then sends it uncompressed (fullCrossOrigin injection)', function () {
         nock('http://www.cypress.io')
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
@@ -1157,6 +1158,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.be.undefined
           expect(res.body).to.include('injection_cross_origin.js')
           expect(res.body).to.include('gzip</html>')
         })
@@ -1240,7 +1242,7 @@ describe('Routes', () => {
         return this.setup('http://www.github.com')
       })
 
-      it('decompresses, injects, and then recompresses initial content (full injection)', function () {
+      it('decompresses and injects initial content, then sends it uncompressed (full injection)', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/brotli')
         .matchHeader('accept-encoding', 'br')
@@ -1258,17 +1260,16 @@ describe('Routes', () => {
           },
         })
         .then((res) => {
-          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
-          const decompressed = zlib.brotliDecompressSync(body).toString('utf8')
+          const body = res.body.toString('utf8')
 
           expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-encoding']).to.eq('br')
-          expect(decompressed).to.include('window.Cypress=parent.Cypress')
-          expect(decompressed).to.include('brotli</html>')
+          expect(res.headers['content-encoding']).to.be.undefined
+          expect(body).to.include('window.Cypress=parent.Cypress')
+          expect(body).to.include('brotli</html>')
         })
       })
 
-      it('decompresses, injects, and then recompresses regular http content (partial injection)', function () {
+      it('decompresses and injects regular http content, then sends it uncompressed (partial injection)', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/brotli')
         .matchHeader('accept-encoding', 'br')
@@ -1287,16 +1288,15 @@ describe('Routes', () => {
           },
         })
         .then((res) => {
-          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
-          const decompressed = zlib.brotliDecompressSync(body).toString('utf8')
+          const body = res.body.toString('utf8')
 
           expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-encoding']).to.eq('br')
-          expect(decompressed).to.eq('<html> <head> <script type=\'text/javascript\'> </script> </head>brotli</html>')
+          expect(res.headers['content-encoding']).to.be.undefined
+          expect(body).to.eq('<html> <head> <script type=\'text/javascript\'> </script> </head>brotli</html>')
         })
       })
 
-      it('decompresses, injects, and then recompresses cross-origin http content (fullCrossOrigin injection)', function () {
+      it('decompresses and injects cross-origin http content, then sends it uncompressed (fullCrossOrigin injection)', function () {
         nock('http://www.cypress.io')
         .get('/brotli')
         .matchHeader('accept-encoding', 'br')
@@ -1314,13 +1314,12 @@ describe('Routes', () => {
           },
         })
         .then((res) => {
-          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
-          const decompressed = zlib.brotliDecompressSync(body).toString('utf8')
+          const body = res.body.toString('utf8')
 
           expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-encoding']).to.eq('br')
-          expect(decompressed).to.include('injection_cross_origin.js')
-          expect(decompressed).to.include('brotli</html>')
+          expect(res.headers['content-encoding']).to.be.undefined
+          expect(body).to.include('injection_cross_origin.js')
+          expect(body).to.include('brotli</html>')
         })
       })
 
@@ -1356,7 +1355,7 @@ describe('Routes', () => {
         return this.setup('http://www.github.com')
       })
 
-      it('decompresses, injects, and recompresses content-encoding "gzip, br" (full injection)', function () {
+      it('decompresses content-encoding "gzip, br", injects, and sends it uncompressed (full injection)', function () {
         const plaintext = '<html>layered-gzip-br</html>'
         const gzipThenBr = zlib.brotliCompressSync(zlib.gzipSync(Buffer.from(plaintext, 'utf8')))
 
@@ -1377,18 +1376,16 @@ describe('Routes', () => {
           },
         })
         .then((res) => {
-          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
-          const afterBr = zlib.brotliDecompressSync(body)
-          const decompressed = zlib.gunzipSync(afterBr).toString('utf8')
+          const body = res.body.toString('utf8')
 
           expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-encoding']).to.eq('gzip, br')
-          expect(decompressed).to.include('window.Cypress=parent.Cypress')
-          expect(decompressed).to.include('layered-gzip-br</html>')
+          expect(res.headers['content-encoding']).to.be.undefined
+          expect(body).to.include('window.Cypress=parent.Cypress')
+          expect(body).to.include('layered-gzip-br</html>')
         })
       })
 
-      it('decompresses, injects, and recompresses content-encoding "br, gzip" (full injection)', function () {
+      it('decompresses content-encoding "br, gzip", injects, and sends it uncompressed (full injection)', function () {
         const plaintext = '<html>layered-br-gzip</html>'
         const brThenGzip = zlib.gzipSync(zlib.brotliCompressSync(Buffer.from(plaintext, 'utf8')))
 
@@ -1409,14 +1406,12 @@ describe('Routes', () => {
           },
         })
         .then((res) => {
-          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
-          const afterGzip = zlib.gunzipSync(body)
-          const decompressed = zlib.brotliDecompressSync(afterGzip).toString('utf8')
+          const body = res.body.toString('utf8')
 
           expect(res.statusCode).to.eq(200)
-          expect(res.headers['content-encoding']).to.eq('br, gzip')
-          expect(decompressed).to.include('window.Cypress=parent.Cypress')
-          expect(decompressed).to.include('layered-br-gzip</html>')
+          expect(res.headers['content-encoding']).to.be.undefined
+          expect(body).to.include('window.Cypress=parent.Cypress')
+          expect(body).to.include('layered-br-gzip</html>')
         })
       })
 

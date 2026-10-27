@@ -38,16 +38,16 @@ const CONTENT_DECODERS: Record<string, (body: Buffer) => Buffer> = {
  * - security rewriting
  * - `cy.intercept()` response handlers
  *
- * On the way back out, `CompressBody` re-applies those same layers in their
- * original order. That decode/re-encode round trip is highly sensitive, so
- * we intentionally leave it alone.
+ * On the way back out, `StripDecodedContentEncoding` sends the body as decoded
+ * and drops those layers from `content-encoding`. Only a layer the middleware
+ * did not decode stays declared.
  *
  * On this transport, the browser negotiated its own `accept-encoding` and has
  * already decoded what the origin sent. Fulfillment runs no decoders, so the
  * body has to go back as identity. Undo whatever encoding the legacy
  * middleware left behind, which encompasses:
  *
- * - whatever `CompressBody` re-encoded
+ * - a layer the middleware did not decode, such as `deflate`
  * - whatever a `cy.intercept()` stub may have declared
  *
  * These scenarios are decoded back to plaintext. An encoding we cannot undo —

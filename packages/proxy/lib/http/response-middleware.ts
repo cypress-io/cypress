@@ -30,8 +30,8 @@ interface ResponseMiddlewareProps {
   isGunzipped: boolean
   isBrotliDecompressed: boolean
   /**
-   * Original content-encoding order (first = innermost). Used to re-compress in the
-   * same order when multiple encodings (e.g. gzip, br) were present.
+   * Original content-encoding order (first = innermost). Used to drop the decoded
+   * layers from content-encoding when multiple encodings (e.g. gzip, br) were present.
    */
   contentEncodingOrder: SupportedContentEncoding[]
   /**
@@ -75,14 +75,6 @@ const zlibGzipDecompressOptions = {
   finishFlush: zlib.constants.Z_SYNC_FLUSH,
 }
 
-const zlibGzipCompressOptions = {
-  flush: zlib.constants.Z_SYNC_FLUSH,
-  // Compression must use Z_FINISH so the gzip trailer (CRC + size) is written; otherwise
-  // gunzip fails with "unexpected end of file" when decoding layered encoding (e.g. gzip, br).
-  finishFlush: zlib.constants.Z_FINISH,
-  level: zlib.constants.Z_BEST_SPEED,
-}
-
 // Brotli decompression: use BROTLI_OPERATION_FLUSH for lenient decompression of truncated or
 // slightly invalid brotli from upstream (same rationale as zlibGzipDecompressOptions for createGunzip).
 const zlibBrotliDecompressOptions = {
@@ -90,21 +82,12 @@ const zlibBrotliDecompressOptions = {
   finishFlush: zlib.constants.BROTLI_OPERATION_FLUSH,
 }
 
-const zlibBrotliCompressOptions = {
-  flush: zlib.constants.BROTLI_OPERATION_FLUSH,
-  finishFlush: zlib.constants.BROTLI_OPERATION_FINISH,
-  params: {
-    // Brotli default quality is 11 (slowest). Use quality 1 for fast re-compression in the proxy.
-    [zlib.constants.BROTLI_PARAM_QUALITY]: 1,
-  },
-}
-
 type SupportedContentEncoding = 'gzip' | 'br'
 
 /**
  * Returns the content-encoding list in application order (first = applied first = innermost).
- * Only includes encodings we support (gzip, br). Used so we decompress in reverse order
- * and re-compress in the same order, preserving layered encoding semantics per RFC 7230.
+ * Only includes encodings we support (gzip, br). Used so we decompress in reverse order,
+ * preserving layered encoding semantics per RFC 7230.
  */
 function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEncoding[] {
   const raw = (res.headers['content-encoding'] || '').toLowerCase()
@@ -220,7 +203,7 @@ const FilterNonProxiedResponse: ResponseMiddleware = function () {
       'CopyResponseStatusCode',
       'MaybeEndWithEmptyBody',
       'NotifyResponseStreamReceived',
-      'CompressBody',
+      'StripDecodedContentEncoding',
       'SendResponseBodyToClient',
     ])
   }
@@ -645,33 +628,30 @@ const NotifyResponseStreamReceived: ResponseMiddleware = function () {
   return this.networkInterceptionCore.notifyResponseStreamReceived(this)
 }
 
-const CompressBody: ResponseMiddleware = function () {
-  // Re-compress in the same order as the original content-encoding (innermost first).
-  const order = this.contentEncodingOrder ?? []
+// The browser always sits on loopback, so re-encoding a body the proxy decoded
+// would only spend CPU on both ends. Send it as decoded and drop those layers
+// from content-encoding, keeping any layer that was left in place.
+const StripDecodedContentEncoding: ResponseMiddleware = function () {
+  const decoded = (this.contentEncodingOrder ?? []).filter((enc) => {
+    return enc === 'gzip' ? this.isGunzipped : this.isBrotliDecompressed
+  })
 
-  for (const enc of order) {
-    if (enc === 'gzip' && this.isGunzipped) {
-      this.debug('regzipping response body')
+  if (decoded.length) {
+    const remaining = String(this.res.getHeader('content-encoding') ?? '')
+    .split(',')
+    .map((token) => token.trim())
+    .filter((token) => {
+      const enc = token.toLowerCase() === 'x-gzip' ? 'gzip' : token.toLowerCase()
 
-      const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })
+      return token && !decoded.some((decodedEnc) => decodedEnc === enc)
+    })
 
-      this.incomingResStream = this.incomingResStream
-      .pipe(zlib.createGzip(zlibGzipCompressOptions))
-      .on('error', this.onError)
-      .once('close', () => {
-        span?.end()
-      })
-    } else if (enc === 'br' && this.isBrotliDecompressed) {
-      this.debug('re-compressing Brotli response body')
+    this.debug('sending decoded response body, content-encoding %o', remaining)
 
-      const span = telemetry.startSpan({ name: 'brotli:body', parentSpan: this.resMiddlewareSpan, isVerbose })
-
-      this.incomingResStream = this.incomingResStream
-      .pipe(zlib.createBrotliCompress(zlibBrotliCompressOptions))
-      .on('error', this.onError)
-      .once('close', () => {
-        span?.end()
-      })
+    if (remaining.length) {
+      this.res.setHeader('content-encoding', remaining.join(', '))
+    } else {
+      this.res.removeHeader('content-encoding')
     }
   }
 
@@ -712,6 +692,6 @@ export default {
   MaybeRemoveSecurity,
   MaybeInjectServiceWorker,
   NotifyResponseStreamReceived,
-  CompressBody,
+  StripDecodedContentEncoding,
   SendResponseBodyToClient,
 }

@@ -338,8 +338,8 @@ describe('createSyntheticProxyCodec', () => {
 
     const finished = onceFinish(ctx.res)
 
-    // CompressBody re-encodes rewritten documents; the browser runs no
-    // decoders on bodies handed back over this codec's transports
+    // An encoded body can still reach the codec, such as a cy.intercept() stub's;
+    // the browser runs no decoders on bodies handed back over this codec's transports
     ctx.res.status(200)
     ctx.res.set('content-type', 'text/html')
     ctx.res.set('content-encoding', 'gzip')

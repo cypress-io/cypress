@@ -115,10 +115,10 @@ function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protoc
 }
 
 /**
- * Middleware headers describe the body the pipeline produced — including any
- * re-encoding by CompressBody — so keep their content-encoding and only drop
- * stale length headers. The pause-header fallback describes the wire body, not
- * the decoded body we fulfill with, so its encoding headers are stripped too.
+ * Middleware headers describe the body the pipeline produced, so keep their
+ * content-encoding and only drop stale length headers. The pause-header
+ * fallback describes the wire body, not the decoded body we fulfill with, so
+ * its encoding headers are stripped too.
  */
 function toFulfilledHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
   const middlewareHeaders = toResponseHeaders(headers)

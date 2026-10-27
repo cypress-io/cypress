@@ -1,5 +1,4 @@
 import Bluebird from 'bluebird'
-import compression from 'compression'
 import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
@@ -194,10 +193,6 @@ const setProxiedUrl = function (req) {
   req.proxiedUrl = removeDefaultPort(req.url)
 
   req.url = getPath(req.url)
-}
-
-const notSSE = (req, res) => {
-  return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
 type WarningErr = Record<string, any>
@@ -601,7 +596,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(_forceProxyMiddleware(clientRoute, namespace, this.isBrowserNetworkMode))
 
     app.use(require('cookie-parser')())
-    app.use(compression({ filter: notSSE }))
     if (morgan) {
       app.use(this.useMorgan())
     }

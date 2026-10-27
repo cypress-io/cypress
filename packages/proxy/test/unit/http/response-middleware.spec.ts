@@ -66,7 +66,7 @@ describe('http/response-middleware', function () {
       'MaybeRemoveSecurity',
       'MaybeInjectServiceWorker',
       'NotifyResponseStreamReceived',
-      'CompressBody',
+      'StripDecodedContentEncoding',
       'SendResponseBodyToClient',
     ])
   })
@@ -2827,8 +2827,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('NotifyResponseStreamReceived and CompressBody', function () {
-    const { CompressBody, NotifyResponseStreamReceived } = ResponseMiddleware
+  describe('NotifyResponseStreamReceived and StripDecodedContentEncoding', function () {
+    const { StripDecodedContentEncoding, NotifyResponseStreamReceived } = ResponseMiddleware
     let ctx
     let responseStreamReceivedStub: Mock
 
@@ -3016,67 +3016,89 @@ describe('http/response-middleware', function () {
       )
     })
 
-    it('does not re-compress gzip when contentEncodingOrder includes gzip but isGunzipped is false', async function () {
-      const plaintext = 'foo'
-      const stream = Readable.from([plaintext])
-      const res = {
+    function resWithHeaders (headers: Record<string, string>) {
+      const store = new Map(Object.entries(headers))
+
+      return {
         on: (_e: string, _l: () => void) => {},
         off: (_e: string, _l: () => void) => {},
+        getHeader: (name: string) => store.get(name.toLowerCase()),
+        setHeader: (name: string, value: string) => store.set(name.toLowerCase(), value),
+        removeHeader: (name: string) => store.delete(name.toLowerCase()),
       }
+    }
+
+    async function readStream (stream: Readable) {
+      const chunks: Buffer[] = []
+
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk))
+      }
+
+      return Buffer.concat(chunks).toString()
+    }
+
+    it.each([
+      ['gzip', { isGunzipped: true, isBrotliDecompressed: false }, ['gzip']],
+      ['br', { isGunzipped: false, isBrotliDecompressed: true }, ['br']],
+      ['x-gzip, br', { isGunzipped: true, isBrotliDecompressed: true }, ['gzip', 'br']],
+    ] as const)('sends the decoded body without content-encoding when %s was decoded', async function (encoding, flags, order) {
+      const res = resWithHeaders({ 'content-encoding': encoding })
 
       prepareContext({
         req: {},
         res,
-        incomingRes: { headers: { 'content-encoding': 'gzip' } },
-        isGunzipped: false,
-        isBrotliDecompressed: false,
-        contentEncodingOrder: ['gzip'],
-        incomingResStream: stream,
+        incomingRes: { headers: { 'content-encoding': encoding } },
+        ...flags,
+        contentEncodingOrder: order,
+        incomingResStream: Readable.from(['<html>decoded</html>']),
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([StripDecodedContentEncoding], ctx)
 
-      const chunks: Buffer[] = []
-
-      for await (const chunk of ctx.incomingResStream) {
-        chunks.push(Buffer.from(chunk))
-      }
-
-      const output = Buffer.concat(chunks).toString()
-
-      expect(output).toBe(plaintext)
-      expect(zlib.gzipSync(Buffer.from(plaintext)).toString()).not.toBe(plaintext)
+      expect(res.getHeader('content-encoding')).toBeUndefined()
+      expect(await readStream(ctx.incomingResStream)).toBe('<html>decoded</html>')
     })
 
-    it('does not re-compress br when contentEncodingOrder includes br but isBrotliDecompressed is false', async function () {
-      const plaintext = 'bar'
-      const stream = Readable.from([plaintext])
-      const res = {
-        on: (_e: string, _l: () => void) => {},
-        off: (_e: string, _l: () => void) => {},
-      }
+    it.each([
+      ['gzip', ['gzip']],
+      ['br', ['br']],
+    ] as const)('keeps content-encoding %s when the body was not decoded', async function (encoding, order) {
+      const res = resWithHeaders({ 'content-encoding': encoding })
+      const stream = Readable.from(['still-encoded'])
 
       prepareContext({
         req: {},
         res,
-        incomingRes: { headers: { 'content-encoding': 'br' } },
+        incomingRes: { headers: { 'content-encoding': encoding } },
         isGunzipped: false,
         isBrotliDecompressed: false,
-        contentEncodingOrder: ['br'],
+        contentEncodingOrder: order,
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([StripDecodedContentEncoding], ctx)
 
-      const chunks: Buffer[] = []
+      expect(res.getHeader('content-encoding')).toBe(encoding)
+      expect(ctx.incomingResStream).toBe(stream)
+    })
 
-      for await (const chunk of ctx.incomingResStream) {
-        chunks.push(Buffer.from(chunk))
-      }
+    it('keeps an encoding layer the proxy did not decode', async function () {
+      const res = resWithHeaders({ 'content-encoding': 'deflate, gzip' })
 
-      const output = Buffer.concat(chunks).toString()
+      prepareContext({
+        req: {},
+        res,
+        incomingRes: { headers: { 'content-encoding': 'deflate, gzip' } },
+        isGunzipped: true,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: ['gzip'],
+        incomingResStream: Readable.from(['deflated']),
+      })
 
-      expect(output).toBe(plaintext)
+      await testMiddleware([StripDecodedContentEncoding], ctx)
+
+      expect(res.getHeader('content-encoding')).toBe('deflate')
     })
 
     function prepareContext (props) {
