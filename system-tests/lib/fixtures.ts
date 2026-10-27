@@ -107,10 +107,8 @@ export async function scaffoldProject (project: ProjectFixtureDir): Promise<stri
 
       await fs.copy(_path.join(projectFixtures, fixtureDir), to, { overwrite: false })
     }
-  } catch (_err) {
-    const err = _err as NodeJS.ErrnoException
-
-    if (err.code !== 'MODULE_NOT_FOUND') {
+  } catch (err) {
+    if (!(err instanceof Error && 'code' in err && err.code === 'MODULE_NOT_FOUND')) {
       throw err
     }
   }

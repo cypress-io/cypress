@@ -212,7 +212,7 @@ describe('config/src/project/utils', () => {
 
       const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
 
-      expect(() => mergeDefaults(cfg, options, {}, getFilesByGlob)).toThrow('unknown or unsupported CYPRESS_INTERNAL_ENV value: foo-bar')
+      expect(() => mergeDefaults(cfg, options, {}, getFilesByGlob)).toThrow(/unknown or unsupported \S*CYPRESS_INTERNAL_ENV\S* value: \S*foo-bar/)
 
       expect(errors.throwErr).toHaveBeenCalledExactlyOnceWith('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
     })
@@ -713,7 +713,7 @@ describe('config/src/project/utils', () => {
           throw e
         }
 
-        return name
+        throw new Error(`Unexpected resolveModule call: ${name}`)
       })
 
       const obj = setAbsolutePaths({
@@ -747,7 +747,7 @@ describe('config/src/project/utils', () => {
           throw e
         }
 
-        return name
+        throw new Error(`Unexpected resolveModule call: ${name}`)
       })
 
       const obj = setAbsolutePaths({

@@ -18,7 +18,11 @@ vi.mock('fs-extra', async (importActual) => {
 const getWrittenConfig = (): string => {
   expect(fs.writeFile).toHaveBeenCalledOnce()
 
-  return vi.mocked(fs.writeFile).mock.calls[0]?.[1].trim()
+  const [call] = vi.mocked(fs.writeFile).mock.calls
+
+  if (!call) throw new Error('fs.writeFile was not called')
+
+  return call[1].trim()
 }
 
 describe('addToCypressConfig', () => {
