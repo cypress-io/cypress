@@ -12,7 +12,7 @@ vi.mock('../../../app/v2/client', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual() returns unknown
     ...actual,
     connect: vi.fn(),
   }
@@ -55,7 +55,7 @@ describe('app/background', () => {
 
     httpSrv = http.createServer()
 
-    // @ts-expect-error
+    // @ts-expect-error - server is declared as http.Server but holds a SocketIOServer
     server = new SocketIOServer(httpSrv, { path: '/__socket' })
 
     // use an event emitter and wrap in in a vitest mock to assert on calls
@@ -115,7 +115,7 @@ describe('app/background', () => {
   describe('cookies', () => {
     it('onChanged does not emit when cause is overwrite', async function () {
       const ws = await connectWrapper()
-      // @ts-expect-error
+      // @ts-expect-error - the vi.mock factory replaces addListener with vi.fn(), which the polyfill types do not reflect
       const fn = browser.cookies.onChanged.addListener.mock.calls[0][0]
 
       fn({ cause: 'overwrite' })

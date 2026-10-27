@@ -8,7 +8,7 @@ vi.mock('../../lib/index', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual() returns unknown
     ...actual,
     getPathToExtension: vi.fn(),
   }
