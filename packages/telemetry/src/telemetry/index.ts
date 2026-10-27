@@ -5,7 +5,7 @@ import { OnStartSpanProcessor } from '../processors/on-start-span-processor'
 import { ConsoleTraceLinkExporter } from '../span-exporters/console-trace-link-exporter'
 
 import type { Span, SpanOptions, Tracer, Context, Attributes } from '@opentelemetry/api'
-import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
+import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter, ReadableSpan } from '@opentelemetry/sdk-trace-base'
 import type { DetectorSync } from '@opentelemetry/resources'
 
 export const enabledValues = ['true', '1']
@@ -32,6 +32,31 @@ export type startSpanOptions = {
 type NamedSpan = Span & { name: string }
 
 export type findActiveSpanOptions = (element: NamedSpan, index: number) => boolean
+
+// The Span API interface omits attributes, but the SDK spans the tracer creates carry them
+const hasAttributes = (span: Span): span is Span & Pick<ReadableSpan, 'attributes'> => 'attributes' in span
+
+// Keyed by every span startSpan creates, so attributes are only inherited from those parents
+const spanParents = new WeakMap<Span, Span | undefined>()
+
+/**
+ * Collects the span's attributes merged with those of its ancestors, which take precedence.
+ * @param span - span to collect attributes for
+ * @returns Attributes
+ */
+const getAllAttributes = (span: Span): Attributes => {
+  const parent = spanParents.get(span)
+
+  const allAttributes = {
+    ...(hasAttributes(span) ? span.attributes : {}),
+    ...(parent && spanParents.has(parent) ? getAllAttributes(parent) : {}),
+  }
+
+  // never propagate name
+  delete allAttributes['name']
+
+  return allAttributes
+}
 
 interface TelemetryApi {
   startSpan(arg: startSpanOptions): Span | undefined | void
@@ -194,25 +219,7 @@ export class Telemetry implements TelemetryApi {
     const spanKey = key || name
 
     this.spans[spanKey] = span
-
-    // Setup function on span to recursively get parent attributes.
-    // Not bothering with types here since we only need this function within this function.
-    // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
-    span.getAllAttributes = () => {
-      // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
-      const parentAttributes = parent && parent.getAllAttributes ? parent.getAllAttributes() : {}
-
-      const allAttributes = {
-        // @ts-expect-error - attributes lives on the SDK span implementation, not the Span interface
-        ...span.attributes,
-        ...parentAttributes,
-      }
-
-      // never propagate name
-      delete allAttributes['name']
-
-      return allAttributes
-    }
+    spanParents.set(span, parent)
 
     // override the end function to allow us to pop the span off the queue if found.
     const _end = span.end
@@ -231,10 +238,8 @@ export class Telemetry implements TelemetryApi {
       }
 
       // On span end recursively grab parent attributes
-      // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
-      if (parent && parent.getAllAttributes) {
-        // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
-        span.setAttributes(parent.getAllAttributes())
+      if (parent && spanParents.has(parent)) {
+        span.setAttributes(getAllAttributes(parent))
       }
 
       _end.call(span, endTime)
@@ -302,8 +307,7 @@ export class Telemetry implements TelemetryApi {
 
     openTelemetry.propagation.inject(ctx, myCtx)
 
-    // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
-    return { context: myCtx, attributes: rootSpan.getAllAttributes() }
+    return { context: myCtx, attributes: getAllAttributes(rootSpan) }
   }
 
   /**

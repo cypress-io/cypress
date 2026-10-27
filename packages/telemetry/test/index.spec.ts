@@ -301,6 +301,85 @@ describe('getActiveContextObject', () => {
 
     expect(context.context.traceparent).toBeDefined()
   })
+
+  it('merges ancestor attributes into the active span, preferring the ancestor and dropping name', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
+    })
+
+    tel.startSpan({ name: 'grandparent', active: true })?.setAttributes({ grandparent: 'yes', shared: 'grandparent' })
+    tel.startSpan({ name: 'parent', active: true })?.setAttributes({ parent: 'yes', shared: 'parent' })
+    tel.startSpan({ name: 'child', active: true })?.setAttributes({ child: 'yes', shared: 'child', name: 'child' })
+
+    expect(tel.getActiveContextObject().attributes).toEqual({
+      grandparent: 'yes',
+      parent: 'yes',
+      child: 'yes',
+      shared: 'grandparent',
+    })
+  })
+})
+
+describe('span end', () => {
+  it('copies the attributes of its ancestors onto the span', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
+    })
+
+    const grandparent = tel.startSpan({ name: 'grandparent' })
+
+    grandparent?.setAttributes({ grandparent: 'yes' })
+
+    const parent = tel.startSpan({ name: 'parent', parentSpan: grandparent })
+
+    parent?.setAttributes({ parent: 'yes' })
+
+    const child = tel.startSpan({ name: 'child', parentSpan: parent })
+
+    assertSdkSpan(child)
+    child.setAttributes({ child: 'yes' })
+    child.end()
+
+    expect(child.attributes).toEqual({ grandparent: 'yes', parent: 'yes', child: 'yes' })
+  })
+
+  it('does not copy attributes from a parent it did not start', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
+    })
+
+    const external = tel.tracer.startSpan('external', { attributes: { external: 'yes' } })
+    const child = tel.startSpan({ name: 'child', parentSpan: external })
+
+    assertSdkSpan(child)
+    child.end()
+
+    expect(child.attributes).toEqual({})
+  })
 })
 
 describe('getResources', () => {
