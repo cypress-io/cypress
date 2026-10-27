@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
 import { OTLPTraceExporter } from '../../src/span-exporters/cloud-span-exporter'
 
-const genericRequest = { encryption: { encryptRequest: ({ url, method, body }: {url: string, method: string, body: string}) => Promise.resolve({ jwe: 'req' }) } }
+const genericRequest = { encryption: { encryptRequest: ({ url, method, body }: { url: string, method: string, body: string }) => Promise.resolve({ jwe: 'req' }) } }
 
 describe('cloudSpanExporter', () => {
   describe('new', () => {
@@ -262,7 +262,7 @@ describe('cloudSpanExporter', () => {
         throw 'onError should not be called'
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - _shutdownOnce is protected; stub it to simulate a shut-down exporter
       exporter._shutdownOnce = { isCalled: true }
 
       expect(exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)).toBeUndefined()
@@ -301,7 +301,7 @@ describe('cloudSpanExporter', () => {
       const exporter = new OTLPTraceExporter()
 
       return new Promise((resolvePromise, rejectPromise) => {
-        // @ts-expect-error
+        // @ts-expect-error - stub convert to return a plain string instead of a trace request
         exporter.convert = (objects) => {
           expect(objects[0].name).toEqual('string')
 
@@ -333,7 +333,7 @@ describe('cloudSpanExporter', () => {
       const exporter = new OTLPTraceExporter()
 
       return new Promise((resolvePromise, rejectPromise) => {
-        // @ts-expect-error
+        // @ts-expect-error - stub convert to return a plain string instead of a trace request
         exporter.convert = (objects) => {
           expect(objects[0].name).toEqual('string')
 
@@ -346,7 +346,7 @@ describe('cloudSpanExporter', () => {
           expect(contentType).toEqual('application/json')
           expect(resolve).toBeDefined()
           expect(reject).toBeDefined()
-          // @ts-expect-error
+          // @ts-expect-error - reject with a plain string rather than an OTLPExporterError
           reject('err')
         }
 

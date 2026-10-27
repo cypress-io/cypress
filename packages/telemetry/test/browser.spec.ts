@@ -1,4 +1,4 @@
-// @ts-expect-error
+// @ts-expect-error - stub window, which does not exist in the Node test environment
 global.window = {}
 
 import { describe, it, expect, beforeAll } from 'vitest'
@@ -78,7 +78,6 @@ describe('telemetry is disabled', () => {
 
 describe('telemetry is enabled', () => {
   beforeAll(() => {
-    // @ts-expect-error
     global.window.__CYPRESS_TELEMETRY__ = {
       context: {
         context: {
@@ -176,12 +175,12 @@ describe('telemetry is enabled', () => {
 
   describe('setRootContext', () => {
     it('it sets the context', () => {
-      // @ts-expect-error
+      // @ts-expect-error - rootContext only exists on Telemetry, not TelemetryNoop
       expect(window.cypressTelemetrySingleton?.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
 
       telemetry.setRootContext({ context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' } })
 
-      // @ts-expect-error
+      // @ts-expect-error - rootContext only exists on Telemetry, not TelemetryNoop
       expect(window.cypressTelemetrySingleton?.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b1')
     })
   })

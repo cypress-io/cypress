@@ -38,7 +38,7 @@
 - [ ] packages/extension
 - [ ] packages/network
 - [ ] packages/socket
-- [ ] packages/telemetry
+- [x] packages/telemetry
 - [ ] packages/launchpad
 - [x] packages/errors
 - [ ] packages/data-context

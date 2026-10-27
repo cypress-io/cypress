@@ -7,7 +7,6 @@ import { ConsoleTraceLinkExporter } from '../span-exporters/console-trace-link-e
 import type { Span, SpanOptions, Tracer, Context, Attributes } from '@opentelemetry/api'
 import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
 import type { DetectorSync } from '@opentelemetry/resources'
-const types = ['child', 'root'] as const
 
 export const enabledValues = ['true', '1']
 
@@ -15,9 +14,9 @@ const environment = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTER
 
 const SERVICE_NAME = 'cypress-app'
 
-type AttachType = typeof types[number];
+type AttachType = 'child' | 'root'
 
-export type contextObject = {context?: { traceparent?: string }, attributes?: Attributes}
+export type contextObject = { context?: { traceparent?: string }, attributes?: Attributes }
 
 export type startSpanOptions = {
   name: string
@@ -48,7 +47,7 @@ interface TelemetryApi {
 
 export class Telemetry implements TelemetryApi {
   tracer: Tracer
-  spans: {[key: string]: Span}
+  spans: { [key: string]: Span }
   activeSpanQueue: Span[]
   rootContext?: Context
   rootAttributes?: Attributes
@@ -87,9 +86,9 @@ export class Telemetry implements TelemetryApi {
     const resource = Resource.default().merge(
       new Resource({
         ...resources,
-        [ SemanticResourceAttributes.SERVICE_NAME ]: SERVICE_NAME,
-        [ SemanticResourceAttributes.SERVICE_NAMESPACE ]: namespace,
-        [ SemanticResourceAttributes.SERVICE_VERSION ]: version,
+        [SemanticResourceAttributes.SERVICE_NAME]: SERVICE_NAME,
+        [SemanticResourceAttributes.SERVICE_NAMESPACE]: namespace,
+        [SemanticResourceAttributes.SERVICE_VERSION]: version,
       }),
     )
 
@@ -198,13 +197,13 @@ export class Telemetry implements TelemetryApi {
 
     // Setup function on span to recursively get parent attributes.
     // Not bothering with types here since we only need this function within this function.
-    // @ts-expect-error
+    // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
     span.getAllAttributes = () => {
-      // @ts-expect-error
+      // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
       const parentAttributes = parent && parent.getAllAttributes ? parent.getAllAttributes() : {}
 
       const allAttributes = {
-        // @ts-expect-error
+        // @ts-expect-error - attributes lives on the SDK span implementation, not the Span interface
         ...span.attributes,
         ...parentAttributes,
       }
@@ -232,9 +231,9 @@ export class Telemetry implements TelemetryApi {
       }
 
       // On span end recursively grab parent attributes
-      // @ts-ignore
+      // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
       if (parent && parent.getAllAttributes) {
-        // @ts-ignore
+        // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
         span.setAttributes(parent.getAllAttributes())
       }
 
@@ -299,11 +298,11 @@ export class Telemetry implements TelemetryApi {
     }
 
     const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), rootSpan)
-    let myCtx = {}
+    const myCtx = {}
 
     openTelemetry.propagation.inject(ctx, myCtx)
 
-    // @ts-expect-error
+    // @ts-expect-error - getAllAttributes is attached to the span at runtime, not part of the Span interface
     return { context: myCtx, attributes: rootSpan.getAllAttributes() }
   }
 
@@ -353,27 +352,35 @@ export class TelemetryNoop implements TelemetryApi {
   startSpan (arg: startSpanOptions): Span | undefined {
     return undefined
   }
+
   getSpan (name: string): Span | undefined {
     return undefined
   }
+
   findActiveSpan (fn: findActiveSpanOptions): Span | undefined {
     return undefined
   }
+
   endActiveSpanAndChildren (span?: Span | undefined): void {
     return undefined
   }
+
   getActiveContextObject (): contextObject {
     return {}
   }
+
   getResources (): Attributes {
     return {}
   }
+
   shutdown (): Promise<void> {
     return Promise.resolve()
   }
+
   getExporter (): SpanExporter | undefined {
     return undefined
   }
+
   setRootContext (rootContextObject?: contextObject): void {
     return undefined
   }

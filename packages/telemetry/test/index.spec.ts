@@ -24,7 +24,7 @@ describe('init', () => {
     expect(tel.provider.resource.attributes['service.namespace']).toEqual('namespace')
     expect(tel.provider.resource.attributes['service.version']).toEqual('version')
     expect(tel.provider.resource.attributes['service.name']).toEqual('cypress-app')
-    // @ts-expect-error
+    // @ts-expect-error - _spanProcessors is internal to the SDK's MultiSpanProcessor
     expect(tel.provider.activeSpanProcessor._spanProcessors[0]).toBeInstanceOf(BatchSpanProcessor)
     expect(tel.getExporter()).toEqual(exporter)
     expect(tel.rootContext).toBeUndefined()
@@ -67,12 +67,12 @@ describe('startSpan', () => {
 
     const span = tel.startSpan({ name: 'span' })
 
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(span.name).toEqual('span')
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes parentSpanId, which the Span API interface omits
     expect(span.parentSpanId).toEqual('4ad8bd26672a01b0')
     expect(tel.activeSpanQueue.length).toBeLessThan(1)
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(tel.spans[span.name]).toEqual(span)
   })
 
@@ -91,9 +91,9 @@ describe('startSpan', () => {
 
     const span = tel.startSpan({ name: 'span' })
 
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(span.name).toEqual('span')
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes parentSpanId, which the Span API interface omits
     expect(span.parentSpanId).toBeUndefined()
   })
 
@@ -114,9 +114,9 @@ describe('startSpan', () => {
 
     const span = tel.startSpan({ name: 'span', parentSpan })
 
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(span.name).toEqual('span')
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes parentSpanId, which the Span API interface omits
     expect(span.parentSpanId).toEqual(parentSpan._spanContext.spanId)
     expect(tel.activeSpanQueue.length).toBeLessThan(1)
   })
@@ -136,27 +136,27 @@ describe('startSpan', () => {
 
     const span = tel.startSpan({ name: 'span', active: true })
 
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(span.name).toEqual('span')
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes parentSpanId, which the Span API interface omits
     expect(span.parentSpanId).toBeUndefined()
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(tel.activeSpanQueue[0].name).toEqual('span')
 
     // Start a child that should have the previous span as a parent
     const spanChild = tel.startSpan({ name: 'child' })
 
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(spanChild.name).toEqual('child')
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes parentSpanId, which the Span API interface omits
     expect(spanChild.parentSpanId).toEqual(span._spanContext.spanId)
 
     // Start a root child that does not have the active parent
     const spanRoot = tel.startSpan({ name: 'root', attachType: 'root' })
 
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(spanRoot.name).toEqual('root')
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes parentSpanId, which the Span API interface omits
     expect(spanRoot.parentSpanId).toBeUndefined()
 
     // end the active span to see it removed from the queue
@@ -182,9 +182,9 @@ describe('startSpan', () => {
 
     const retrievedSpan = tel.getSpan('key')
 
-    // @ts-expect-error
+    // @ts-expect-error - the SDK span implementation exposes name, which the Span API interface omits
     expect(retrievedSpan.name).toEqual('span')
-    // @ts-expect-error
+    // @ts-expect-error - _spanContext is internal to the SDK span implementation
     expect(retrievedSpan._spanContext.spanId).toEqual(span._spanContext.spanId)
   })
 })
@@ -199,7 +199,7 @@ describe('getSpan', () => {
       detectors: [],
       exporter,
       version: 'version',
-      // @ts-expect-error
+      // @ts-expect-error - a bare traceparent does not match the contextObject shape
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
     })
@@ -309,7 +309,7 @@ describe('getResources', () => {
       detectors: [],
       exporter,
       version: 'version',
-      // @ts-expect-error
+      // @ts-expect-error - a bare traceparent does not match the contextObject shape
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
       resources: {
@@ -340,7 +340,7 @@ describe('shutdown', () => {
       detectors: [],
       exporter,
       version: 'version',
-      // @ts-expect-error
+      // @ts-expect-error - a bare traceparent does not match the contextObject shape
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
       isVerbose: false,
@@ -348,7 +348,7 @@ describe('shutdown', () => {
 
     let shutdownCalled = false
 
-    // @ts-expect-error
+    // @ts-expect-error - stub the provider with only the shutdown method under test
     tel.provider = { shutdown: () => {
       shutdownCalled = true
 
@@ -371,7 +371,7 @@ describe('getExporter', () => {
       detectors: [],
       exporter,
       version: 'version',
-      // @ts-expect-error
+      // @ts-expect-error - a bare traceparent does not match the contextObject shape
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
       isVerbose: false,
@@ -396,12 +396,12 @@ describe('setRootContext', () => {
       isVerbose: false,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - Context.getValue() returns unknown
     expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
 
     tel.setRootContext({ context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' } })
 
-    // @ts-expect-error
+    // @ts-expect-error - Context.getValue() returns unknown
     expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b1')
   })
 
@@ -419,17 +419,17 @@ describe('setRootContext', () => {
       isVerbose: false,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - Context.getValue() returns unknown
     expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
 
     tel.setRootContext()
 
-    // @ts-expect-error
+    // @ts-expect-error - Context.getValue() returns unknown
     expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
 
     tel.setRootContext({})
 
-    // @ts-expect-error
+    // @ts-expect-error - Context.getValue() returns unknown
     expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
   })
 })
