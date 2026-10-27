@@ -102,7 +102,7 @@ function makeSassLoaders () {
         },
       }, // compiles Sass to CSS, using Node Sass by default
     ],
-  }
+  } satisfies webpack.RuleSetRule
 }
 
 // the chrome version should be synced with
@@ -254,7 +254,7 @@ export const getCommonConfig = () => {
     ],
 
     cache: true,
-  }
+  } satisfies webpack.Configuration
 
   return commonConfig
 }
@@ -333,7 +333,7 @@ export const getSimpleConfig = () => ({
       },
     ],
   },
-})
+} satisfies webpack.Configuration)
 
 export { HtmlWebpackPlugin }
 

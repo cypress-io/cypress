@@ -533,7 +533,7 @@ const getSelectionBounds = function (el) {
   }
 }
 
-const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = {}) {
+const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options: { onlyIfEmptySelection?: boolean } = {}) {
   const opts = _.defaults({}, options, {
     onlyIfEmptySelection: false,
   })
@@ -608,9 +608,9 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
   return
 }
 
-const moveSelectionToEnd = _.curry(_moveSelectionTo)(false)
+const moveSelectionToEnd = (el: HTMLElement, options?: { onlyIfEmptySelection?: boolean }) => _moveSelectionTo(false, el, options)
 
-const moveSelectionToStart = _.curry(_moveSelectionTo)(true)
+const moveSelectionToStart = (el: HTMLElement, options?: { onlyIfEmptySelection?: boolean }) => _moveSelectionTo(true, el, options)
 
 const replaceSelectionContents = function (el, key) {
   if ($elements.isContentEditable(el)) {

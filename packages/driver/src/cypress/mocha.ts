@@ -56,7 +56,7 @@ type NormalizedRetriesConfig = {
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
 export function calculateTestStatus (test: CypressTest, config?: NormalizedRetriesConfig) {
-  // @ts-expect-error
+  // @ts-expect-error - currentRetry() is protected in the mocha types
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
   let shouldAttemptsContinue: boolean = true
   let outerTestStatus: 'passed' | 'failed' | undefined = undefined
@@ -587,7 +587,6 @@ const patchSuiteAddSuite = (specWindow) => {
 const patchRunnableResetTimeout = () => {
   Runnable.prototype.resetTimeout = function () {
     const runnable = this
-    // @ts-ignore Cypress.runner is not defined
     const currentRunner = Cypress.runner
 
     const ms = this.timeout() || 1e9
@@ -604,7 +603,6 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      // @ts-ignore Cypress.runner is not defined
       if (runnable.state === 'passed' || Cypress.runner !== currentRunner) {
         // this timeout can be reached at the same time that a
         // user does an asynchronous `done`, so double-check

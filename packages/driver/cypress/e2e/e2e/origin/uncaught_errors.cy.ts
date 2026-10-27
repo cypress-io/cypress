@@ -386,7 +386,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
 
         const customErrorInstance = new CustomError('custom error')
 
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a custom property added to test error serialization
         customErrorInstance.foo = 'bar'
 
         const { writable } = Object.getOwnPropertyDescriptor(CustomError, 'name') as PropertyDescriptor

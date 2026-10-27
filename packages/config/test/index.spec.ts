@@ -120,7 +120,7 @@ describe('config/src/index', () => {
     })
 
     it('returns nothing when config key does not has a default value', () => {
-      let normalizedKey = configUtil.matchesConfigKey('random')
+      const normalizedKey = configUtil.matchesConfigKey('random')
 
       expect(normalizedKey).toBeUndefined()
     })
