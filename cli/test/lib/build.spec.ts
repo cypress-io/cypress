@@ -2,6 +2,7 @@ import { vi, describe, it, beforeEach, expect } from 'vitest'
 import fs from 'fs-extra'
 import semver from 'semver'
 import makeUserPackageFile from '../../scripts/prepare-package-json'
+import { findPackageContentProblems, MAX_PACKAGE_FILES } from '../../scripts/check-package-contents'
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()
@@ -50,5 +51,31 @@ describe('package.json build', () => {
     }
 
     expect(snapshot).toMatchSnapshot()
+  })
+})
+
+describe('npm package contents', () => {
+  const files = ['package.json', 'dist/index.js', 'react/package.json', 'react/dist/index.d.ts', 'types/lodash/index.d.ts']
+
+  it('accepts a package under the file ceiling with no nested copies', () => {
+    expect(findPackageContentProblems(files, 10)).toEqual([])
+  })
+
+  it('reports a package over the file ceiling', () => {
+    expect(findPackageContentProblems(files, 4)).toEqual([
+      'the package contains 5 files, more than the ceiling of 4',
+    ])
+  })
+
+  it('reports a folder copied into an existing folder of the same name', () => {
+    const [problem] = findPackageContentProblems([...files, 'react/react/package.json', 'vue/vue/dist/index.js'], 10)
+
+    expect(problem).toContain('react/react/package.json')
+    expect(problem).toContain('vue/vue/dist/index.js')
+  })
+
+  it('stays under the default ceiling for the expected package size', () => {
+    expect(findPackageContentProblems(Array.from({ length: MAX_PACKAGE_FILES }, (_, i) => `dist/${i}.js`))).toEqual([])
+    expect(findPackageContentProblems(Array.from({ length: MAX_PACKAGE_FILES + 1 }, (_, i) => `dist/${i}.js`))).toHaveLength(1)
   })
 })

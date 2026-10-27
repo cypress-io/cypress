@@ -19,5 +19,8 @@ npmModulesToCopy.forEach((folder: string) => {
   const from: string = resolve(`${__dirname}/../${folder}`)
   const to: string = resolve(`${__dirname}/../build/${folder}`)
 
+  // `cp -R` into an existing folder nests the copy inside it (build/react/react),
+  // and the build runs this step again over an existing build folder
+  shell.rm('-rf', to)
   shell.cp('-R', from, to)
 })

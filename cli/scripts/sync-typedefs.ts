@@ -5,7 +5,7 @@
 import fs from 'fs-extra'
 import { includeTypes } from './utils'
 import shell from 'shelljs'
-import { join } from 'path'
+import { join, relative, sep } from 'path'
 import resolvePkg from 'resolve-pkg'
 
 shell.set('-v') // verbose
@@ -20,10 +20,18 @@ shell.set('-e') // any error is fatal
 
 fs.ensureDirSync(join(__dirname, '..', 'types'))
 
+// The shipped types only reference lodash/index.d.ts, which pulls in common/.
+// The fp and per-method typings would add ~700 unused files to the npm package.
+const isUsedLodashTypingsPath = (relativePath: string): boolean => {
+  return relativePath === '' || relativePath === 'index.d.ts' || relativePath === 'common' || relativePath.startsWith(`common${sep}`)
+}
+
 includeTypes.forEach((folder: string) => {
   const source: string = resolvePkg(`@types/${folder}`, { cwd: __dirname })
 
-  fs.copySync(source, join(__dirname, '..', 'types', folder))
+  fs.copySync(source, join(__dirname, '..', 'types', folder), {
+    filter: folder === 'lodash' ? (src: string) => isUsedLodashTypingsPath(relative(source, src)) : undefined,
+  })
 })
 
 // jQuery v3.3.x includes "dist" folder that just references back to itself

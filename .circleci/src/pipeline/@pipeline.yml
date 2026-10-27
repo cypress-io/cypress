@@ -1705,6 +1705,11 @@ commands:
             source ./scripts/ensure-node.sh
             yarn lerna run build-cli
       - run:
+          name: Check NPM package contents
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn workspace cypress check-package-contents
+      - run:
           command: ls -la types
           working_directory: cli/build
       - run:

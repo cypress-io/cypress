@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- The `cypress` npm package now contains 82 files instead of 793, and its download is 25% smaller, so `npm install cypress` writes about 700 fewer files and ran about a third faster with a warm cache. The package no longer ships duplicate copies of the component testing adapters, such as `cypress/vue`, or the typings for `lodash/fp` and lodash's per-method modules, which the [`Cypress._`](https://on.cypress.io/_) types never used. Projects that import `cypress/types/lodash/fp` directly with TypeScript's legacy `moduleResolution: "node"` setting need to install `@types/lodash` and import `lodash/fp` instead. Other module resolution settings already rejected that import. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
