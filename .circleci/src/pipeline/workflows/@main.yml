@@ -12,6 +12,7 @@ linux-x64:
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
+      - equal: [ 'claude/strip-macos-provenance-xattr', << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         build-better-sqlite3: true

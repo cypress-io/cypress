@@ -1683,6 +1683,19 @@ commands:
             fi
             source ./scripts/ensure-node.sh
             yarn binary-zip
+      - run:
+          name: Verify the extracted macOS binary
+          command: |
+            if [[ `uname` == 'Darwin' ]]; then
+              ls -l cypress.zip
+              echo "__MACOSX entries: $(zipinfo -1 cypress.zip | grep -c __MACOSX || true) of $(zipinfo -1 cypress.zip | wc -l)"
+              EXTRACT_DIR=$(mktemp -d)
+              # same extraction the CLI does in cli/lib/tasks/unzip.ts
+              time ditto -xkV cypress.zip "$EXTRACT_DIR" > /dev/null 2>&1
+              codesign --verify --deep --strict --verbose=2 "$EXTRACT_DIR/Cypress.app"
+              spctl -a -vvv "$EXTRACT_DIR/Cypress.app"
+              rm -rf "$EXTRACT_DIR"
+            fi
       - persist_to_workspace:
           root: ~/
           paths:

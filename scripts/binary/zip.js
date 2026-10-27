@@ -19,6 +19,20 @@ const printFileSizes = function (folder) {
   return execa(`du -hs ${paths}`, options)
 }
 
+// The build host can stamp com.apple.provenance on every file in the app, and
+// `ditto --sequesterRsrc` stores each extended attribute as its own __MACOSX
+// entry, roughly doubling the entries the CLI has to extract. The attribute is
+// not sealed by the code signature, so removing it after signing is safe; the
+// com.apple.cs.* signature attributes that --sequesterRsrc must keep are untouched.
+// -s acts on symlinks themselves instead of the files they point to.
+const stripProvenance = (src) => {
+  const args = ['-r', '-s', '-d', 'com.apple.provenance', src]
+
+  console.log(`xattr ${args.join(' ')}`)
+
+  return execa('xattr', args, { stdio: 'inherit' })
+}
+
 // resolves with zipped filename
 const macZip = (src, dest) => {
   return printFileSizes(src)
@@ -27,6 +41,9 @@ const macZip = (src, dest) => {
       throw new Error('Can only zip on Mac platform')
     }
 
+    return stripProvenance(src)
+  })
+  .then(() => {
     // Ditto (Mac) options
     // http://www.unix.com/man-page/OSX/1/ditto/
     // -c create archive
