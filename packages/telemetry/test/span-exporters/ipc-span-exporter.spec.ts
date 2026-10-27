@@ -63,7 +63,7 @@ describe('ipcSpanExporter', () => {
   })
 
   describe('send', () => {
-    it('returns if shutdownOnce.isCalled is true', () => {
+    it('returns if shutdownOnce.isCalled is true', async () => {
       const exporter = new OTLPTraceExporter()
 
       exporter.convert = (objects) => {
@@ -84,8 +84,7 @@ describe('ipcSpanExporter', () => {
         throw 'onError should not be called'
       }
 
-      // @ts-expect-error
-      exporter._shutdownOnce = { isCalled: true }
+      await exporter.shutdown()
 
       expect(exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)).toBeUndefined()
     })
@@ -94,7 +93,7 @@ describe('ipcSpanExporter', () => {
       const exporter = new OTLPTraceExporter()
 
       return new Promise((resolvePromise, rejectPromise) => {
-        // @ts-expect-error
+        // @ts-expect-error - stub convert to return a plain string instead of a trace request
         exporter.convert = (objects) => {
           expect(objects[0].name).toEqual('span')
 
@@ -124,7 +123,7 @@ describe('ipcSpanExporter', () => {
       const exporter = new OTLPTraceExporter()
 
       return new Promise((resolvePromise) => {
-        // @ts-expect-error
+        // @ts-expect-error - stub convert to return a plain string instead of a trace request
         exporter.convert = (objects) => {
           expect(objects[0].name).toEqual('span')
 

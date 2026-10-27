@@ -39,7 +39,7 @@
 - [x] packages/network
 - [x] packages/network-tools
 - [x] packages/socket
-- [ ] packages/telemetry
+- [x] packages/telemetry
 - [ ] packages/launchpad
 - [x] packages/errors
 - [ ] packages/data-context
