@@ -48,12 +48,12 @@ describe('test errors', () => {
     })
 
     it('clicking prints to console', () => {
-      cy.spy(runner, 'emit')
-      cy.get('.runnable-err-print').click().should(() => {
-        expect(runner.emit).to.be.calledWith('runner:console:error')
+      const emit = cy.spy(runner, 'emit')
 
-        // @ts-expect-error - runner.emit is wrapped by cy.spy, which its EventEmitter type does not reflect
-        const err = runner.emit.withArgs('runner:console:error').lastCall.args[1].err
+      cy.get('.runnable-err-print').click().should(() => {
+        expect(emit).to.be.calledWith('runner:console:error')
+
+        const err = emit.withArgs('runner:console:error').lastCall.args[1].err
 
         expect(err.message).to.equal(commandErr.message)
         expect(err.stack).to.equal(commandErr.stack)

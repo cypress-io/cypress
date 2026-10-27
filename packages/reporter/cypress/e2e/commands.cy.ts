@@ -559,11 +559,11 @@ describe('commands', { viewportHeight: 1000 }, () => {
     })
 
     it('unpins after clicking again, does not re-print to the console', () => {
-      cy.spy(runner, 'emit')
+      const emit = cy.spy(runner, 'emit')
+
       cy.contains('#exists').click()
       cy.contains('#exists').click()
-      // @ts-expect-error - runner.emit is wrapped by cy.spy, which its EventEmitter type does not reflect
-      cy.wrap(runner.emit.withArgs('runner:console:log')).should('be.calledOnce')
+      cy.wrap(emit.withArgs('runner:console:log')).should('be.calledOnce')
     })
 
     it('unpins after clicking another command, pins that one', () => {
@@ -967,17 +967,17 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
 
       it('unpins after clicking again, does not re-print to the console', () => {
-        cy.spy(runner, 'emit')
-        cy.get('.command-name-within').within(() => {
-          cy.contains('within').click()
-        })
+        const emit = cy.spy(runner, 'emit')
 
         cy.get('.command-name-within').within(() => {
           cy.contains('within').click()
         })
 
-        // @ts-expect-error - runner.emit is wrapped by cy.spy, which its EventEmitter type does not reflect
-        cy.wrap(runner.emit.withArgs('runner:console:log')).should('be.calledOnce')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
+        cy.wrap(emit.withArgs('runner:console:log')).should('be.calledOnce')
       })
 
       it('unpins after clicking another command, pins that one', () => {

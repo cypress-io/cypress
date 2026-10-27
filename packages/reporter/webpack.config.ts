@@ -17,8 +17,7 @@ const config: Configuration = {
 }
 
 config.plugins = [
-  // @ts-expect-error - Configuration types plugins as optional, though getCommonConfig() always sets it
-  ...config.plugins,
+  ...(config.plugins ?? []),
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, 'static/index.html'),
     inject: false,
