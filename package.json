@@ -136,7 +136,7 @@
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "del": "3.0.0",
-    "electron": "43.8.3",
+    "electron": "43.8.4",
     "electron-builder": "^25.1.8",
     "eslint": "^8.56.0",
     "eslint-plugin-cypress": "3.6.0",
