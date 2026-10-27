@@ -160,6 +160,13 @@ describe('lib/errors', () => {
       expect(obj.message).toEqual('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
     })
 
+    it('restores quotes that the ansi to html conversion escapes', () => {
+      const err = new Error(`it's "quoted" ${chalk.blue('bar')}`)
+      const obj = errors.cloneErr(err, { html: true })
+
+      expect(obj.message).toEqual('it\'s "quoted" <span class="ansi-blue-fg">bar</span>')
+    })
+
     it('does not convert err.message from ansi to html when no html option', () => {
       const err = new Error(`foo${chalk.blue('bar')}${chalk.yellow('baz')}`)
       const obj = errors.cloneErr(err)
