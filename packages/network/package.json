@@ -2,12 +2,19 @@
   "name": "@packages/network",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "./cjs/index.d.ts",
+  "files": [
+    "cjs",
+    "esm"
+  ],
   "scripts": {
     "build": "yarn build:esm && yarn build:cjs",
-    "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "build-prod": "yarn build",
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
     "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
@@ -18,6 +25,9 @@
     "test-watch": "yarn test-unit --watch",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc -p tsconfig.cjs.json --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "concat-stream": "1.6.2",
@@ -44,15 +54,5 @@
     "rimraf": "6.1.1",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "cjs",
-    "esm"
-  ],
-  "types": "./cjs/index.d.ts",
-  "license": "MIT",
-  "module": "esm/index.js",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   }
 }

@@ -2,13 +2,19 @@
   "name": "@packages/extension",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "lib-dist/index.js",
+  "files": [
+    "app-dist",
+    "lib-dist",
+    "theme"
+  ],
   "scripts": {
     "build": "gulp build",
-    "build-prod": "yarn build",
     "build:lib": "tsc -p tsconfig.lib.json",
     "build:v2": "webpack-cli",
     "build:v3": "tsc -p tsconfig.app.v3.json",
+    "build-prod": "yarn build",
     "check-ts": "tsc -p tsconfig.json --noEmit && yarn -s tslint -p tsconfig.json",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
@@ -20,6 +26,9 @@
     "test-watch": "yarn test-unit --watch",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "yarn build && chokidar 'app/**/*.*' 'app/*.*' -c 'yarn build'"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "lodash": "^4.17.21"
@@ -40,15 +49,6 @@
     "webextension-polyfill": "0.4.0",
     "webpack": "^5.88.2",
     "webpack-cli": "^6.0.1"
-  },
-  "files": [
-    "app-dist",
-    "lib-dist",
-    "theme"
-  ],
-  "license": "MIT",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "nx": {
     "implicitDependencies": [

@@ -2,7 +2,13 @@
   "name": "@packages/example",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "cypress",
+    "lib"
+  ],
   "scripts": {
     "build": "tsx ./bin/build.ts && gulp build",
     "build-prod": "tsc -p tsconfig.prod.json",
@@ -16,6 +22,9 @@
     "test": "yarn test-unit",
     "test-e2e": "cypress run",
     "test-unit": "vitest run"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
@@ -33,15 +42,6 @@
     "resolve-pkg": "2.0.0",
     "tsx": "^4.23.12",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "cypress",
-    "lib"
-  ],
-  "types": "index.d.ts",
-  "license": "MIT",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "nx": {
     "targets": {

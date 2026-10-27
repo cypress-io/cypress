@@ -2,7 +2,11 @@
   "name": "@packages/net-stubbing",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "./lib/server",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "build-prod": "tsc --project .",
     "check-ts": "tsc --noEmit && yarn -s tslint",
@@ -12,6 +16,9 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-watch": "vitest watch",
     "tslint": "tslint --config ../ts/tslint.json --project ."
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "@packages/network-interception": "0.0.0-development",
@@ -33,13 +40,6 @@
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "lib"
-  ],
-  "license": "MIT",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "nx": {}
 }
