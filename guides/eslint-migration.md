@@ -28,7 +28,7 @@
 - [x] packages/https-proxy
 - [x] packages/network-interception
 - [x] packages/proxy
-- [ ] packages/net-stubbing
+- [x] packages/net-stubbing
 - [ ] packages/driver
 - [ ] packages/reporter
 - [x] packages/server
@@ -36,8 +36,9 @@
 ### Batch 4b: Core packages (part 2)
 - [ ] packages/runner
 - [x] packages/extension
-- [ ] packages/network
-- [ ] packages/socket
+- [x] packages/network
+- [x] packages/network-tools
+- [x] packages/socket
 - [ ] packages/telemetry
 - [ ] packages/launchpad
 - [x] packages/errors
