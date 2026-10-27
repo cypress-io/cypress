@@ -5,10 +5,9 @@ import path from 'path'
 import * as extension from '../../lib/index'
 
 vi.mock('../../lib/index', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('../../lib/index')>()
 
   return {
-    // @ts-expect-error
     ...actual,
     getPathToExtension: vi.fn(),
   }
