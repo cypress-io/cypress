@@ -41,6 +41,7 @@ npm_mount_utils_tests=false
 npm_grep_tests=false
 npm_eslint_plugin_tests=false
 npm_schematic_tests=false
+lockfile_checks=false
 
 # Opt-in only — never enabled by path filtering or emit_all_true. Set via
 # Trigger Pipeline → percy-enabled=true (setup config forwards it).
@@ -57,7 +58,7 @@ fi
 
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "percy-enabled": $percy_enabled}
+{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "run-lockfile-checks": $lockfile_checks, "percy-enabled": $percy_enabled}
 EOF
 }
 
@@ -85,6 +86,7 @@ emit_all_true() {
   npm_grep_tests=true
   npm_eslint_plugin_tests=true
   npm_schematic_tests=true
+  lockfile_checks=true
   emit_json
 }
 
@@ -119,6 +121,7 @@ if [[ "$BRANCH" == "develop" ]]; then
     exit 0
   fi
   filtering_develop_push=true
+  lockfile_checks=true
 fi
 
 # ----- manual trigger override -----------------------------------------------
@@ -213,6 +216,19 @@ while IFS= read -r file; do
       echo "Global trigger matched: '$file' — running all tests" >&2
       emit_all_true
       exit 0
+      ;;
+  esac
+done <<< "$CHANGED"
+
+# ----- lockfile checks --------------------------------------------------------
+# Gates check-lockfile's `yarn install` drift check. Checked separately because
+# a workspace package.json would otherwise match its package's case below. The
+# root package.json, yarn.lock and patches/ are global triggers, so in practice
+# this only catches workspace package.json files.
+while IFS= read -r file; do
+  case "$file" in
+    yarn.lock|package.json|*/package.json|patches/*)
+      lockfile_checks=true
       ;;
   esac
 done <<< "$CHANGED"

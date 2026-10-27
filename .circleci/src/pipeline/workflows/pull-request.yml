@@ -63,9 +63,10 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - check-lockfile:
+      check-drift: << pipeline.parameters.run-lockfile-checks >>
       requires:
-        - internal-pr-build
-        - external-pr-build
+        - node_modules_install
+        - contributor-node-modules-install
   - check-ts:
       requires:
         - internal-pr-build

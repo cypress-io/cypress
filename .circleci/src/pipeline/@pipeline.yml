@@ -115,6 +115,9 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: true
+  run-lockfile-checks:
+    type: boolean
+    default: true
 
 orbs:
   browser-tools: circleci/browser-tools@2.4.1
@@ -746,6 +749,13 @@ commands:
   build-better-sqlite3:
     description: Build better-sqlite3 for glibc 2.31
     steps:
+      # The key can only be computed once yarn has installed better-sqlite3 and electron.
+      # A hit restores ~/cypress/better_sqlite3.node, which skips the Docker build below.
+      - restore_cache:
+          name: Restore better-sqlite3 build
+          key: &better-sqlite3-cache-key v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+            }}-better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
+            checksum "node_modules/electron/package.json" }}
       - setup_remote_docker
       - run:
           name: Build better-sqlite3 for glibc 2.31
@@ -763,8 +773,8 @@ commands:
               cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
             fi
       - save_cache:
-          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
-            checksum "node_modules/electron/package.json" }}
+          name: Save better-sqlite3 build
+          key: *better-sqlite3-cache-key
           paths:
             - better_sqlite3.node
       - run:
@@ -1848,6 +1858,13 @@ jobs:
   check-lockfile:
     <<: *defaults
     executor: node-slim
+    parameters:
+      <<: *defaultsParameters
+      # The drift check runs a full `yarn install`, so PR pipelines skip it
+      # unless dependency files changed (run-lockfile-checks).
+      check-drift:
+        type: boolean
+        default: true
     steps:
       - restore_cached_workspace
       - run:
@@ -1860,9 +1877,12 @@ jobs:
               echo "Run 'yarn-deduplicate --strategy=highest' and commit the resulting yarn.lock."
               exit 1
             fi
-      - run:
-          name: Check yarn.lock matches resolved dependencies 🔒
-          command: yarn check-lockfile-drift
+      - when:
+          condition: << parameters.check-drift >>
+          steps:
+            - run:
+                name: Check yarn.lock matches resolved dependencies 🔒
+                command: yarn check-lockfile-drift
 
   lint:
     <<: *defaults

@@ -21,7 +21,7 @@ linux-x64:
           - node_modules_install
     - check-lockfile:
         requires:
-          - build
+          - node_modules_install
     - check-ts:
         requires:
           - build
