@@ -22,10 +22,10 @@ describe('cy/commands/window', () => {
       automation: vi.fn(),
       isBrowser: vi.fn(),
       ensure: {
-        // @ts-expect-error
+        // @ts-expect-error - `commandCanCommunicateWithAUT` is not declared on the Ensure type
         commandCanCommunicateWithAUT: vi.fn(),
       },
-      // @ts-expect-error
+      // @ts-expect-error - vi.fn() does not match the overloads of Cypress.config
       config: vi.fn(),
     }
 
@@ -33,13 +33,13 @@ describe('cy/commands/window', () => {
       set: vi.fn(),
     }
 
-    //@ts-expect-error
+    // @ts-expect-error - getTitleFromAutomation is a vi.mock, but typed as the real function
     getTitleFromAutomation.mockReset()
   })
 
   describe('title', () => {
     it('returns the title from the automation client', () => {
-      // @ts-expect-error
+      // @ts-expect-error - getTitleFromAutomation is a vi.mock, but typed as the real function
       getTitleFromAutomation.mockReturnValue(() => 'This is the frame title')
 
       expect(getTitleQueryCommand.call(mockContext, mockCypress, {})()).toBe('This is the frame title')

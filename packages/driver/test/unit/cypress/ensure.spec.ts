@@ -41,7 +41,6 @@ describe('ensure', () => {
       autOrigin = 'http://app.foobar.com:3500'
       setSpecOrigin('http://www.foobar.com:3500')
 
-      // @ts-expect-error
       global.Cypress = {
         config: vi.fn((key) => {
           return key === 'injectDocumentDomain' ? injectDocumentDomain : undefined

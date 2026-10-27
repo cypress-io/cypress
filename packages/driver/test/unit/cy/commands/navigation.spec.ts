@@ -12,7 +12,7 @@ vi.mock('../../../../src/cypress/utils', async () => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importOriginal() returns unknown
       ...original.default,
       locReload: vi.fn(),
     },
@@ -31,21 +31,20 @@ describe('cy/commands/navigation', () => {
       automation: vi.fn(),
       isBrowser: vi.fn(),
       backend: vi.fn(),
-      // @ts-expect-error
       isCrossOriginSpecBridge: false,
       ensure: {
-        // @ts-expect-error
+        // @ts-expect-error - `commandCanCommunicateWithAUT` is not declared on the Ensure type
         commandCanCommunicateWithAUT: vi.fn(),
       },
-      // @ts-expect-error
+      // @ts-expect-error - vi.fn() does not match the overloads of Cypress.config
       config: vi.fn(),
     }
 
     mockCy = {
       clearTimeout: vi.fn(),
-      // @ts-expect-error
+      // @ts-expect-error - vi.fn() returns a $Cy, not the mocked $Cy
       once: vi.fn(),
-      // @ts-expect-error
+      // @ts-expect-error - vi.fn() returns a $Cy, not the mocked $Cy
       removeListener: vi.fn(),
     }
 
@@ -56,13 +55,13 @@ describe('cy/commands/navigation', () => {
     }
 
     mockCypress.config.mockImplementation((key) => {
-      //@ts-expect-error
+      // @ts-expect-error - the mocked config() overloads type `key` as TestConfigOverrides
       if (key === 'pageLoadTimeout') {
         return 10000
       }
     })
 
-    //@ts-expect-error
+    // @ts-expect-error - $utils.locReload is a vi.mock, but typed as the real function
     $utils.locReload.mockReset()
   })
 
@@ -126,7 +125,7 @@ describe('cy/commands/navigation', () => {
   describe('resetServerState', () => {
     beforeEach(() => {
       mockCypress.config.mockImplementation((key) => {
-        // @ts-expect-error
+        // @ts-expect-error - the mocked config() overloads type `key` as TestConfigOverrides
         if (key === 'blockHosts') {
           return ['*.foo.com']
         }
@@ -154,7 +153,6 @@ describe('cy/commands/navigation', () => {
     })
 
     it('omits blockHosts from a cross-origin spec bridge', () => {
-      // @ts-expect-error
       mockCypress.isCrossOriginSpecBridge = true
 
       resetServerState(mockCypress, mockState)

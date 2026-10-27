@@ -16,11 +16,11 @@ vi.mock('../../../../../src/cypress/error_utils', async () => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importOriginal() returns unknown
       ...original.default,
-      // @ts-expect-error
+      // @ts-expect-error - importOriginal() returns unknown
       throwErr: vi.fn().mockImplementation(original.default.throwErr),
-      // @ts-expect-error
+      // @ts-expect-error - importOriginal() returns unknown
       throwErrByPath: vi.fn().mockImplementation(original.default.throwErrByPath),
     },
   }
@@ -43,7 +43,7 @@ describe('cy/commands/actions/press', () => {
       // @ts-expect-error - <Cypress['log']> has a type conflict between Driver and CLI d.ts
       log: vi.fn(),
       automation,
-      // @ts-expect-error
+      // @ts-expect-error - partial Browser mock
       browser: {
         family: 'chromium',
         name: 'Chrome',
@@ -55,7 +55,7 @@ describe('cy/commands/actions/press', () => {
       addAll: vi.fn(),
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - partial $Cy mock
     cy = {}
 
     state = {
@@ -85,7 +85,7 @@ describe('cy/commands/actions/press', () => {
 
     expect(Commands.addAll).toHaveBeenCalledOnce()
 
-    // @ts-expect-error
+    // @ts-expect-error - mock.calls is typed with the real addAll() parameters
     const [[obj]]: [[{press: PressCommand}]] = Commands.addAll.mock.calls
 
     expect(typeof obj.press).toBe('function')
@@ -126,7 +126,7 @@ describe('cy/commands/actions/press', () => {
 
   describe('with an invalid key', () => {
     it('throws an invalid key error', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - `KeyPressSupportedKeys` is not in scope; `Foo` is deliberately an unsupported key
       const key: KeyPressSupportedKeys = 'Foo'
 
       await expect(press(key)).rejects.toThrow(`\`${key}\` is not supported by \`cy.press()\``)
