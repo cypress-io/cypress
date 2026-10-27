@@ -165,7 +165,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
             )
           }
 
-          let destructuredImports = declarations
+          const destructuredImports = declarations
           .map((decl) => {
             // support `import { foo as bar } from 'module'` syntax, converting to `const { foo: bar } ...`
             decl = decl.replace(/(?<!\*) as /g, ': ')

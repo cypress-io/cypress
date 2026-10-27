@@ -8,7 +8,7 @@ import * as appData from '../util/app_data'
 // hoist up options and allow calling menu.set({})
 // to override existing options or be called multiple
 // times to preserve existing options
-let options = {}
+const options = {}
 
 export = {
   set (opts) {

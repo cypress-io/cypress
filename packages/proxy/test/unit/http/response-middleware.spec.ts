@@ -396,7 +396,7 @@ describe('http/response-middleware', function () {
       expect(ctx.incomingResHadEmptyBody).toBe(false)
     })
 
-    let badHeaders = {
+    const badHeaders = {
       'bad-header ': 'value', //(contains trailling space)
       'Content Type': 'value', //(contains a space)
       'User-Agent:': 'value', //(contains a colon)

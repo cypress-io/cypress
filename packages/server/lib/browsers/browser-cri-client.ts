@@ -462,7 +462,8 @@ export class BrowserCriClient {
     const { browserClient, browserCriClient, CriConstructor, event, host, port, protocolManager, childTargetInterceptionTimeoutMs = CHILD_TARGET_INTERCEPTION_TIMEOUT_MS } = options
     const CreateCRI = CriConstructor || CRI
     const { sessionId, targetInfo, waitingForDebugger } = event
-    let { targetId, url } = targetInfo
+    const { targetId } = targetInfo
+    let { url } = targetInfo
 
     debug('Target.attachedToTarget %o', targetInfo)
 
