@@ -3,7 +3,6 @@ import assert from 'assert'
 import arch from 'arch'
 import os from 'os'
 import ospath from 'ospath'
-import hasha from 'hasha'
 import tty from 'tty'
 import path from 'path'
 import { isCI as isCi } from 'ci-info'
@@ -26,23 +25,6 @@ import { relativeToRepoRoot } from './relative-to-repo-root'
 const debug = Debug('cypress:cli')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
-
-/**
- * Returns SHA512 of a file
- */
-const getFileChecksum = (filename: string): any => {
-  assert.ok(_.isString(filename) && !_.isEmpty(filename), 'expected filename')
-
-  return hasha.fromFile(filename, { algorithm: 'sha512' })
-}
-
-const getFileSize = async (filename: string): Promise<any> => {
-  assert.ok(_.isString(filename) && !_.isEmpty(filename), 'expected filename')
-
-  const { size } = await fs.stat(filename)
-
-  return size
-}
 
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
@@ -577,10 +559,6 @@ const util = {
 
     return `${issuesUrl}/${number}`
   },
-
-  getFileChecksum,
-
-  getFileSize,
 
   getApplicationDataFolder,
 }

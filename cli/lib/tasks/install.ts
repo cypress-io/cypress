@@ -7,7 +7,6 @@ import { Listr, PRESET_TIMESTAMP } from 'listr2'
 import type { ListrTask, ListrContext } from 'listr2'
 import logSymbols from 'log-symbols'
 import { stripIndent } from 'common-tags'
-import timers from 'timers/promises'
 
 import fs from 'fs-extra'
 import { readFile } from 'fs/promises'
@@ -298,9 +297,6 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   )
 
   await taskRunner.run()
-
-  // delay 1 sec for UX, unless we are testing
-  await timers.setTimeout(1000)
 
   displayCompletionMsg()
 }

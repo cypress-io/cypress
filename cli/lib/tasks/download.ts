@@ -1,5 +1,6 @@
 import os from 'os'
 import assert from 'assert'
+import crypto from 'crypto'
 import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
@@ -110,45 +111,37 @@ const prettyDownloadErr = (err: any, url: string): any => {
 }
 
 /**
- * Checks checksum and file size for the given file. Allows both
- * values or just one of them to be checked.
+ * Checks the checksum and size computed while the file was written against
+ * the expected values. Allows both values or just one of them to be checked.
  */
-const verifyDownloadedFile = async (filename: string, expectedSize?: number, expectedChecksum?: string): Promise<any> => {
+const verifyDownloadedFile = (checksum: string, filesize: number, expectedSize?: number, expectedChecksum?: string): void => {
   if (expectedSize && expectedChecksum) {
     debug('verifying checksum and file size')
 
-    return Bluebird.join(
-      util.getFileChecksum(filename),
-      util.getFileSize(filename),
-      (checksum: string, filesize: number) => {
-        if (checksum === expectedChecksum && filesize === expectedSize) {
-          debug('downloaded file has the expected checksum and size ✅')
+    if (checksum === expectedChecksum && filesize === expectedSize) {
+      debug('downloaded file has the expected checksum and size ✅')
 
-          return
-        }
+      return
+    }
 
-        debug('raising error: checksum or file size mismatch')
-        const text = stripIndent`
-          Corrupted download
+    debug('raising error: checksum or file size mismatch')
+    const text = stripIndent`
+      Corrupted download
 
-          Expected downloaded file to have checksum: ${expectedChecksum}
-          Computed checksum: ${checksum}
+      Expected downloaded file to have checksum: ${expectedChecksum}
+      Computed checksum: ${checksum}
 
-          Expected downloaded file to have size: ${expectedSize}
-          Computed size: ${filesize}
-        `
+      Expected downloaded file to have size: ${expectedSize}
+      Computed size: ${filesize}
+    `
 
-        debug(text)
+    debug(text)
 
-        throw new Error(text)
-      },
-    )
+    throw new Error(text)
   }
 
   if (expectedChecksum) {
     debug('only checking expected file checksum %d', expectedChecksum)
-
-    const checksum: string = await util.getFileChecksum(filename)
 
     if (checksum === expectedChecksum) {
       debug('downloaded file has the expected checksum ✅')
@@ -171,8 +164,6 @@ const verifyDownloadedFile = async (filename: string, expectedSize?: number, exp
     // maybe we don't have a checksum, but at least CDN returns content length
     // which we can check against the file size
     debug('only checking expected file size %d', expectedSize)
-
-    const filesize: number = await util.getFileSize(filename)
 
     if (filesize === expectedSize) {
       debug('downloaded file has the expected size ✅')
@@ -288,6 +279,16 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         reject(err)
         // status codes here are all 2xx
       } else {
+        // pipe() writes every 'data' chunk to the file, so hashing the same
+        // chunks here avoids reading the whole zip back from disk to verify it
+        const hash = crypto.createHash('sha512')
+        let filesize = 0
+
+        response.on('data', (chunk: Buffer) => {
+          hash.update(chunk)
+          filesize += chunk.length
+        })
+
         // We only enable this pipe connection when we know we've got a successful return
         // and handle the completion with verify and resolve
         // there was a possible race condition between end of request and close of writeStream
@@ -297,12 +298,11 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         }), new Bluebird((r: any) => response.on('end', r))])
         .then(() => {
           debug('downloading finished')
-          verifyDownloadedFile(downloadDestination, expectedSize,
-            expectedChecksum)
-          .then(() => debug('verified'))
-          .then(() => resolve(version))
-          .catch(reject)
+          verifyDownloadedFile(hash.digest('hex'), filesize, expectedSize, expectedChecksum)
+          debug('verified')
+          resolve(version)
         })
+        .catch(reject)
       }
     })
     .on('error', (e: any) => {

@@ -7,7 +7,8 @@ import si from 'systeminformation'
 import chalk from 'chalk'
 import path from 'path'
 import nock from 'nock'
-import hasha from 'hasha'
+import crypto from 'crypto'
+import { stripIndent } from 'common-tags'
 import createDebug from 'debug'
 import execa from 'execa'
 import fs from 'fs-extra'
@@ -300,10 +301,12 @@ describe('lib/tasks/download', function () {
     let expectedFileSize: number
     let onProgress: Mock
 
-    beforeEach(function () {
-      expectedChecksum = hasha.fromFileSync(examplePath)
+    beforeEach(async function () {
+      const example = await fs.readFile(examplePath)
 
-      expectedFileSize = fs.statSync(examplePath).size
+      expectedChecksum = crypto.createHash('sha512').update(example).digest('hex')
+
+      expectedFileSize = example.length
 
       onProgress = vi.fn().mockReturnValue(undefined)
       debug('example file %s should have checksum %s and file size %d',
@@ -379,6 +382,77 @@ describe('lib/tasks/download', function () {
         version: options.version,
         progress: { onProgress },
       })).rejects.toThrow()
+    })
+
+    it('reports the expected and computed checksum on a checksum mismatch', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-checksum': 'incorrect-checksum',
+        'x-amz-meta-size': String(expectedFileSize),
+      })
+
+      await expect(download.start({
+        downloadDestination: options.downloadDestination,
+        version: options.version,
+        progress: { onProgress },
+      })).rejects.toThrow(stripIndent`
+        Corrupted download
+
+        Expected downloaded file to have checksum: incorrect-checksum
+        Computed checksum: ${expectedChecksum}
+
+        Expected downloaded file to have size: ${expectedFileSize}
+        Computed size: ${expectedFileSize}
+      `)
+    })
+
+    it('reports the expected and computed size on a size mismatch', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-size': '10',
+      })
+
+      await expect(download.start({
+        downloadDestination: options.downloadDestination,
+        version: options.version,
+        progress: { onProgress },
+      })).rejects.toThrow(stripIndent`
+        Corrupted download
+
+        Expected downloaded file to have size: 10
+        Computed size: ${expectedFileSize}
+      `)
+    })
+
+    it('computes the checksum and size from the bytes written to disk', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-checksum': expectedChecksum,
+        'x-amz-meta-size': String(expectedFileSize),
+      })
+
+      await download.start({
+        downloadDestination: options.downloadDestination,
+        version: options.version,
+        progress: { onProgress },
+      })
+
+      const written = await fs.readFile(downloadDestination)
+
+      expect(written.length).toEqual(expectedFileSize)
+      expect(crypto.createHash('sha512').update(written).digest('hex')).toEqual(expectedChecksum)
     })
 
     it('passes when checksum and file size match', async function () {

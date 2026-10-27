@@ -1,6 +1,4 @@
 import { vi, describe, it, beforeEach, expect } from 'vitest'
-import assert from 'assert'
-import hasha from 'hasha'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
 import type { Systeminformation } from 'systeminformation'
@@ -656,17 +654,6 @@ describe('util', () => {
         vi.stubEnv('FOO', '"foo.txt "')
         expect(util.getEnv('FOO', true)).toEqual('foo.txt ')
       })
-    })
-  })
-
-  describe('.getFileChecksum', () => {
-    it('computes same hash as Hasha SHA512', async () => {
-      const [checksum, expectedChecksum] = await Promise.all([
-        util.getFileChecksum(__filename),
-        hasha.fromFile(__filename, { algorithm: 'sha512' }),
-      ])
-
-      assert.ok(checksum === expectedChecksum, `checksum ${checksum} is different from expected "${expectedChecksum}"`)
     })
   })
 

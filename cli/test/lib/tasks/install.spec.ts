@@ -3,7 +3,6 @@ import os from 'os'
 import path from 'path'
 import chalk from 'chalk'
 import { stripVTControlCharacters as stripAnsi } from 'util'
-import timers from 'timers/promises'
 import fs from 'fs-extra'
 import type { Systeminformation } from 'systeminformation'
 import si from 'systeminformation'
@@ -43,18 +42,6 @@ vi.mock('os', async (importActual) => {
 // `getRealArch()` falls through to the `arch` package, which reports the real
 // machine, so pin it alongside the mocked `os.arch()`
 vi.mock('arch', () => ({ default: () => 'x64' }))
-
-vi.mock('timers/promises', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      setTimeout: vi.fn(),
-    },
-  }
-})
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()
@@ -232,8 +219,6 @@ describe('/lib/tasks/install', function () {
         distro: 'Foo',
         release: 'OsVersion',
       } as Systeminformation.OsData)
-
-      vi.mocked(timers.setTimeout).mockResolvedValue(undefined)
 
       const actualUtil = (await vi.importActual<typeof import('../../../lib/util')>('../../../lib/util')).default
 
