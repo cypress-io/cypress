@@ -69,6 +69,23 @@ async function checkMaxPathLength () {
   log(`All paths are short enough (${allRelPaths.length} checked)`)
 }
 
+/**
+ * Cypress resolves TypeScript from the user's project at runtime, so a copy in the binary
+ * only adds about 30 MB. It gets installed when a package lists it in `dependencies`.
+ */
+async function checkNoTypeScript () {
+  log('#checkNoTypeScript')
+
+  const found = await globAsync('**/node_modules/typescript/package.json', { cwd: meta.distDir() })
+
+  if (found.length) {
+    throw new Error([
+      'typescript was installed into the binary. Move it to devDependencies in the package that depends on it:',
+      ...found.map((p) => ` - ${p}`),
+    ].join('\n'))
+  }
+}
+
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
@@ -162,6 +179,8 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     cwd: DIST_DIR,
     stdio: 'inherit',
   })
+
+  await checkNoTypeScript()
 
   log('#copying better-sqlite3')
   fs.copySync(
