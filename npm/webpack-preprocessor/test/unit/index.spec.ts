@@ -36,7 +36,8 @@ describe('webpack preprocessor', function () {
 
   let statsApi: {
     hasErrors: () => boolean
-    toJson: () => { warnings: string[], errors: string[] }
+    hasWarnings: () => boolean
+    toJson: Mock<(options?: webpack.StatsOptions) => { warnings?: string[], errors?: string[] }>
   }
 
   let file: any
@@ -62,9 +63,10 @@ describe('webpack preprocessor', function () {
       hasErrors () {
         return false
       },
-      toJson () {
-        return { warnings: [], errors: [] }
+      hasWarnings () {
+        return false
       },
+      toJson: vi.fn().mockReturnValue({ warnings: [], errors: [] }),
     }
 
     const fileEventEmitter = new EventEmitter()
@@ -371,6 +373,25 @@ describe('webpack preprocessor', function () {
         ))
       })
 
+      it('does not serialize stats when the build has no errors', async function () {
+        await run()
+        expect(statsApi.toJson).not.toHaveBeenCalled()
+      })
+
+      it('does not mutate the user\'s webpack options or accumulate plugins across files', async function () {
+        const webpackOptions = { module: { rules: [] }, plugins: [] }
+        const run = preprocessor({ webpackOptions })
+
+        for (const filePath of ['a.js', 'b.js', 'c.js']) {
+          await run({ ...file, filePath })
+        }
+
+        expect(webpackOptions).toEqual({ module: { rules: [] }, plugins: [] })
+        vi.mocked(webpack).mock.calls.forEach(([options]) => {
+          expect((options as webpack.Configuration).plugins).toHaveLength(1)
+        })
+      })
+
       it('does not use default options when user options are non-default', async function () {
         await run({ webpackOptions: { module: { rules: [] } } })
         expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
@@ -420,9 +441,10 @@ describe('webpack preprocessor', function () {
           hasErrors () {
             return true
           },
-          toJson () {
-            return { warnings: [], errors: errs }
+          hasWarnings () {
+            return false
           },
+          toJson: vi.fn().mockReturnValue({ errors: errs }),
         }
 
         compilerApi.run.mockImplementation((callback) => {
@@ -435,6 +457,9 @@ describe('webpack preprocessor', function () {
         } catch (err) {
           expect(err.message).toEqual(`Webpack Compilation Error\n${errsNoStack.join('\n\n')}`)
         }
+
+        expect(statsApi.toJson).toHaveBeenCalledOnce()
+        expect(statsApi.toJson).toHaveBeenCalledWith({ all: false, errors: true })
       })
     })
 

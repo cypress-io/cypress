@@ -267,9 +267,10 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
     const watchOptions = options.watchOptions || {}
 
     // user can override the default options
+    // shallow-cloned so the entry, output and plugins set below don't leak into
+    // the caller's object and pile up across every file bundled with it
     const webpackOptions: webpack.Configuration = _
-    .chain(options.webpackOptions)
-    .defaultTo(defaultWebpackOptions)
+    .chain(options.webpackOptions ? { ...options.webpackOptions } : defaultWebpackOptions)
     .defaults({
       mode: defaultWebpackOptions.mode,
     })
@@ -391,17 +392,19 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
         return rejectWithErr(err)
       }
 
-      const jsonStats = stats.toJson()
-
-      // these stats are really only useful for debugging
-      if (jsonStats.warnings.length > 0) {
-        debug(`warnings for ${outputPath} %o`, jsonStats.warnings)
+      // a full `toJson()` serializes every module and chunk, which costs
+      // hundreds of milliseconds per rebuild on large bundles, so only
+      // request the fields that are read and only when there's something to read
+      if (debug.enabled && stats.hasWarnings()) {
+        debug(`warnings for ${outputPath} %o`, stats.toJson({ all: false, warnings: true }).warnings)
       }
 
       if (stats.hasErrors()) {
         err = new Error('Webpack Compilation Error')
 
-        const errorsToAppend = jsonStats.errors
+        const { errors = [] } = stats.toJson({ all: false, errors: true })
+
+        const errorsToAppend = errors
         // remove stack trace lines since they're useless for debugging
         .map(cleanseError)
         // multiple errors separated by newline
@@ -409,7 +412,7 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
 
         err.message += `\n${errorsToAppend}`
 
-        debug('stats had error(s) %o', jsonStats.errors)
+        debug('stats had error(s) %o', errors)
 
         return rejectWithErr(err)
       }
