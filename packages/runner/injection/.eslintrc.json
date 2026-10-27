@@ -1,6 +1,0 @@
-{
-  "globals": {
-    "window": true,
-    "parent": true
-  }
-}

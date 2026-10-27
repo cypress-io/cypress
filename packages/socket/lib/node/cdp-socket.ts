@@ -181,7 +181,7 @@ export class CDPSocketServer extends EventEmitter {
     super.emit('connection', this._cdpSocket)
   }
 
-  // @ts-expect-error TODO: fix emit type
+  // @ts-expect-error - TODO: emit is async, so it returns a Promise where EventEmitter's emit returns boolean
   emit = async (event: string, ...args: any[]) => {
     // tslint:disable-next-line:no-floating-promises
     this._cdpSocket?.emit(event, ...args)
@@ -252,7 +252,7 @@ export class CDPSocket extends EventEmitter {
     return
   }
 
-  // @ts-expect-error TODO: fix emit type
+  // @ts-expect-error - TODO: emit is async, so it returns a Promise where EventEmitter's emit returns boolean
   emit = async (event: string, ...args: any[]) => {
     // Generate a unique callback event name
     const uuid = randomUUID()

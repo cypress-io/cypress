@@ -337,9 +337,7 @@ export = {
     }
 
     const setProxy = () => {
-      let ps
-
-      ps = options.proxyServer
+      const ps = options.proxyServer
 
       if (ps) {
         return this._setProxy(win.webContents, ps, options.proxyBypassList)

@@ -135,7 +135,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
       })
     })
 
-    // @ts-ignore
+    // @ts-expect-error - `experimentalOriginDependencies` is not a test config override
     it('when experimental flag is disabled', { experimentalOriginDependencies: false }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('Using `Cypress.require()` requires enabling the `experimentalOriginDependencies` flag.')

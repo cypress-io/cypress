@@ -366,7 +366,7 @@ interface StartOptions {
 }
 
 export async function start (args: string | string[], options: StartOptions = {}): Promise<any> {
-  let executable = util.getEnv('CYPRESS_RUN_BINARY') ?
+  const executable = util.getEnv('CYPRESS_RUN_BINARY') ?
     path.resolve(util.getEnv('CYPRESS_RUN_BINARY') as string) :
     state.getPathToExecutable(state.getBinaryDir())
 

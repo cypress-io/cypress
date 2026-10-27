@@ -134,7 +134,7 @@ function setCookie (res: CypressOutgoingResponseLike, k: string, v: string, doma
   // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
   // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
   // Domain and let the cookie default to host-only. See #34143.
-  let opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
+  const opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
 
   if (!v) {
     v = ''

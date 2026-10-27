@@ -258,7 +258,7 @@ chai.use((chai, u) => {
       return (flagMsg ? `${flagMsg}: ${msg}` : msg)
     }
 
-    // @ts-expect-error chai's getMessage has two overloads; we only override the (obj, args) one.
+    // @ts-expect-error - chai's getMessage has two overloads; we only override the (obj, args) one.
     chaiUtils.getMessage = function (assert, args) {
       const obj = assert._obj
 
@@ -326,7 +326,7 @@ chai.use((chai, u) => {
       })
     }
 
-    // @ts-expect-error `makeMethodChainable` is necessary to make the method chainable but does not match the type definition.
+    // @ts-expect-error - `makeMethodChainable` is necessary to make the method chainable but does not match the type definition.
     chai.Assertion.overwriteChainableMethod('contain', containFn1, makeMethodChainable)
 
     chai.Assertion.overwriteChainableMethod('length',
@@ -394,7 +394,7 @@ chai.use((chai, u) => {
           }
         })
       },
-      // @ts-expect-error `makeMethodChainable` is necessary to make the method chainable but does not match the type definition.
+      // @ts-expect-error - `makeMethodChainable` is necessary to make the method chainable but does not match the type definition.
       makeMethodChainable)
 
     // chai registers `exist` and its `exists` alias as separate properties, so

@@ -409,7 +409,7 @@ export function toObject (argv: string[]): ParsedCypressArgv {
     options.execPath = tail[1]
   }
 
-  let { spec } = options
+  const { spec } = options
   const { env, expose, config, reporterOptions, outputPath, tag, autoCancelAfterFailures } = options
   let project = (options.project || options.runProject) as string | undefined
 

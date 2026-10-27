@@ -265,7 +265,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         done()
       })
 
-      // @ts-ignore
+      // @ts-expect-error - deliberately calls cy.origin() without arguments
       cy.origin()
     })
 
@@ -286,7 +286,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         done()
       })
 
-      // @ts-ignore
+      // @ts-expect-error - deliberately passes a string as the options argument
       cy.origin('foobar.com', 'foo', () => {})
     })
 
@@ -302,7 +302,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
       })
 
       cy.origin('foobar.com', {
-        // @ts-ignore
+        // @ts-expect-error - deliberately passes unknown options
         foo: 'foo',
         bar: 'bar',
       }, () => {})
@@ -333,7 +333,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         done()
       })
 
-      // @ts-ignore
+      // @ts-expect-error - deliberately omits the callback
       cy.origin('foobar.com')
     })
 
@@ -344,7 +344,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         done()
       })
 
-      // @ts-ignore
+      // @ts-expect-error - deliberately passes an object instead of the callback
       cy.origin('foobar.com', {})
     })
   })

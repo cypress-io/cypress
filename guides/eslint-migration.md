@@ -28,16 +28,17 @@
 - [x] packages/https-proxy
 - [x] packages/network-interception
 - [x] packages/proxy
-- [ ] packages/net-stubbing
+- [x] packages/net-stubbing
 - [ ] packages/driver
 - [ ] packages/reporter
 - [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
-- [ ] packages/runner
-- [ ] packages/extension
-- [ ] packages/network
-- [ ] packages/socket
+- [x] packages/runner
+- [x] packages/extension
+- [x] packages/network
+- [x] packages/network-tools
+- [x] packages/socket
 - [ ] packages/telemetry
 - [ ] packages/launchpad
 - [x] packages/errors
@@ -51,7 +52,7 @@
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
 - [x] packages/stderr-filtering ✅ **COMPLETED**
-- [ ] packages/config
+- [x] packages/config
 - [ ] packages/root
 - [ ] packages/resolve-dist
 - [ ] packages/packherd-require
@@ -59,7 +60,7 @@
 - [ ] packages/web-config
 - [x] packages/types
 - [x] packages/scaffold-config
-- [ ] packages/example
+- [x] packages/example
 
 ### Batch 5: Test and script folders
 - [ ] system-tests

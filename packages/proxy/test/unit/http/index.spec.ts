@@ -317,7 +317,7 @@ describe('http', function () {
       const resAdded = {}
       const errorAdded = {}
 
-      let expectedKeys = ['req', 'res', 'config', 'middleware']
+      const expectedKeys = ['req', 'res', 'config', 'middleware']
 
       incomingRequest.mockImplementation(function () {
         const keys = Object.keys(this)
