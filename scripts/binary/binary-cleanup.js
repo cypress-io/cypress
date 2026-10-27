@@ -4,6 +4,7 @@ const { consolidateDeps, getSnapshotCacheDir } = require('@tooling/v8-snapshot')
 const del = require('del')
 const esbuild = require('esbuild')
 const tempDir = require('temp-dir')
+const { UNNEEDED_FILE_GLOBS } = require('./binary-cleanup-globs')
 const workingDir = path.join(tempDir, 'binary-cleanup-workdir')
 
 fs.ensureDirSync(workingDir)
@@ -192,57 +193,7 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
   console.log(`removing unnecessary files from the binary to further lean out the distribution.`)
   // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
   // this is it's own function as we always want to clean out unneeded dependencies
-  await del([
-    // Remove test files
-    path.join(buildAppDir, '**', 'test'),
-    path.join(buildAppDir, '**', 'tests'),
-    // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
-    path.join(buildAppDir, '**', 'prettier', 'esm'),
-    path.join(buildAppDir, '**', 'prettier', 'standalone.js'),
-    path.join(buildAppDir, '**', 'prettier', 'bin-prettier.js'),
-    // ESM files are mostly not needed currently
-    path.join(buildAppDir, '**', '@babel', '**', 'esm'),
-    path.join(buildAppDir, '**', 'ramda', 'es'),
-    path.join(buildAppDir, '**', 'jimp', 'es'),
-    path.join(buildAppDir, '**', 'nexus', 'dist-esm'),
-    path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
-    path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
-    path.join(buildAppDir, '**', '@openTelemetry', '**', 'esm'),
-    path.join(buildAppDir, '**', '@openTelemetry', '**', 'esnext'),
-    // We currently do not use any map files
-    path.join(buildAppDir, '**', '*js.map'),
-    // License files need to be kept
-    path.join(buildAppDir, '**', '!(LICENSE|license|License).md'),
-    // These are type related files that are not used within the binary
-    path.join(buildAppDir, '**', '*.d.ts'),
-    path.join(buildAppDir, '**', 'ajv', 'lib', '**', '*.ts'),
-    path.join(buildAppDir, '**', '*.flow'),
-    // Documentation files are not needed
-    path.join(buildAppDir, '**', 'JSV', 'jsdoc-toolkit'),
-    path.join(buildAppDir, '**', 'JSV', 'docs'),
-    path.join(buildAppDir, '**', 'fluent-ffmpeg', 'doc'),
-    // Files used as part of prebuilding are not necessary
-    path.join(buildAppDir, '**', 'node_gyp_bins'),
-    path.join(buildAppDir, '**', 'better-sqlite3', 'bin'),
-    path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
-    path.join(buildAppDir, '**', '*.cc'),
-    path.join(buildAppDir, '**', '*.o'),
-    path.join(buildAppDir, '**', '*.c'),
-    path.join(buildAppDir, '**', '*.h'),
-    // Remove distributions that are not needed in the binary
-    path.join(buildAppDir, '**', 'ramda', 'dist'),
-    path.join(buildAppDir, '**', 'jimp', 'browser'),
-    path.join(buildAppDir, '**', '@jimp', '**', 'src'),
-    path.join(buildAppDir, '**', 'nexus', 'src'),
-    path.join(buildAppDir, '**', 'source-map', 'dist'),
-    path.join(buildAppDir, '**', 'source-map-js', 'dist'),
-    path.join(buildAppDir, '**', 'pako', 'dist'),
-    path.join(buildAppDir, '**', 'node-forge', 'dist'),
-    path.join(buildAppDir, '**', 'pngjs', 'browser.js'),
-    path.join(buildAppDir, '**', 'plist', 'dist'),
-    // Remove yarn locks
-    path.join(buildAppDir, '**', 'yarn.lock'),
-  ], { force: true })
+  await del(UNNEEDED_FILE_GLOBS.map((segments) => path.join(buildAppDir, ...segments)), { force: true })
 
   // 7. Remove any empty directories as a result of the rest of the cleanup
   await removeEmptyDirectories(buildAppDir)

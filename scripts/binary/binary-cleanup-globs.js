@@ -1,0 +1,76 @@
+// Each entry is a list of path segments, joined onto the packed app directory
+// and passed to `del`. Keep globs lowercase where package scopes are lowercase:
+// `del` matches case-insensitively on macOS and Windows but not on Linux.
+const UNNEEDED_FILE_GLOBS = [
+  // Remove test files
+  ['**', 'test'],
+  ['**', 'tests'],
+  // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
+  ['**', 'prettier', 'esm'],
+  ['**', 'prettier', 'standalone.js'],
+  ['**', 'prettier', 'bin-prettier.js'],
+  // ESM files are mostly not needed currently
+  ['**', '@babel', '**', 'esm'],
+  ['**', 'ramda', 'es'],
+  ['**', 'jimp', 'es'],
+  ['**', 'nexus', 'dist-esm'],
+  ['**', '@graphql-tools', '**', '*.mjs'],
+  ['**', 'graphql', '**', '*.mjs'],
+  ['**', '@opentelemetry', '**', 'esm'],
+  ['**', '@opentelemetry', '**', 'esnext'],
+  // We currently do not use any map files
+  ['**', '*.map'],
+  // License files need to be kept
+  ['**', '!(LICENSE|license|License).md'],
+  // These are type related files that are not used within the binary
+  ['**', '*.d.ts'],
+  ['**', '*.d.cts'],
+  ['**', '*.d.mts'],
+  ['**', '*.flow'],
+  // Dependencies ship compiled JS; their TypeScript sources are only reachable
+  // through custom export conditions (e.g. `source`) that Node and webpack don't use
+  ['**', 'node_modules', '**', '*.{ts,cts,mts}'],
+  // Documentation files are not needed
+  ['**', 'JSV', 'jsdoc-toolkit'],
+  ['**', 'JSV', 'docs'],
+  ['**', 'fluent-ffmpeg', 'doc'],
+  // Repository, CI, editor and linter configuration of dependencies
+  ['**', '.github'],
+  ['**', '.{eslintrc,prettierrc,nycrc}*'],
+  ['**', '.{eslintignore,prettierignore,npmignore,gitignore,gitattributes,gitmodules}'],
+  ['**', '.{editorconfig,jshintrc,jscsrc,jscs.json,flowconfig,DS_Store,whitesource,auto-changelog}'],
+  ['**', '.{travis,coveralls,airtap}.yml'],
+  // Executable links of nested dependencies; nothing in the binary runs them
+  ['**', 'node_modules', '.bin'],
+  // Files used as part of prebuilding are not necessary
+  ['**', 'node_gyp_bins'],
+  ['**', 'better-sqlite3', 'bin'],
+  ['**', 'registry-js', 'prebuilds'],
+  ['**', '*.bare'],
+  ['**', '*.cc'],
+  ['**', '*.o'],
+  ['**', '*.c'],
+  ['**', '*.h'],
+  ['**', '*.{cpp,hpp,gyp,gypi,mk}'],
+  ['**', 'CMakeLists.txt'],
+  ['**', 'Makefile'],
+  // patch-package has already been applied by the time the binary is packaged
+  ['**', '*.patch'],
+  // Remove distributions that are not needed in the binary
+  ['**', 'ramda', 'dist'],
+  ['**', 'jimp', 'browser'],
+  ['**', '@jimp', '**', 'src'],
+  ['**', 'nexus', 'src'],
+  ['**', 'source-map', 'dist'],
+  ['**', 'source-map-js', 'dist'],
+  ['**', 'pako', 'dist'],
+  ['**', 'node-forge', 'dist'],
+  ['**', 'pngjs', 'browser.js'],
+  ['**', 'plist', 'dist'],
+  // Remove yarn locks
+  ['**', 'yarn.lock'],
+]
+
+module.exports = {
+  UNNEEDED_FILE_GLOBS,
+}
