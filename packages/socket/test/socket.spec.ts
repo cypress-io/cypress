@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import * as parser from 'socket.io-parser'
+// Safe because patches/socket.io-parser+4.2.6.patch exports hasBinary from the
+// runtime builds but leaves socket.io-parser's type declarations untouched
 const { hasBinary } = parser as typeof parser & { hasBinary: (obj: unknown) => boolean }
 import pkg from '../package.json'
 import * as lib from '../lib/node'
