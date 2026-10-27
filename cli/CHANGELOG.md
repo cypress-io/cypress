@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- Cypress now uses about half as much CPU to handle each network request your application makes during a test, so the Cypress process keeps up with pages that load many resources at once. In a benchmark of 5,000 requests through the proxy, CPU time per request fell from 2.22 ms to 1.14 ms and the proxy handled about twice as many requests per second. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**

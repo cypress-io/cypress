@@ -138,7 +138,7 @@ export type ServerCtx = Readonly<{
   reservedPathPrefixes?: string[]
 }>
 
-const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
+const READONLY_MIDDLEWARE_KEYS = new Set<string>([
   'buffers',
   'config',
   'getFileServerToken',
@@ -151,7 +151,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'onError',
   'skipMiddleware',
   'onlyRunMiddleware',
-]
+] satisfies (keyof HttpMiddlewareThis<{}>)[])
 
 export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
   buffers: HttpBuffers
@@ -171,10 +171,16 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = (): Promise<void> => {
+    // ctx.middleware holds per-request copies of the stacks (see
+    // createMiddlewareContext), so finished steps can be deleted in place
     const middlewares = ctx.middleware[type]
 
-    // pop the first pair off the middleware
-    const middlewareName = _.keys(middlewares)[0]
+    let middlewareName: string | undefined
+
+    for (const name in middlewares) {
+      middlewareName = name
+      break
+    }
 
     if (!middlewareName) {
       return Promise.resolve()
@@ -182,20 +188,23 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
     const middleware = middlewares[middlewareName]
 
-    ctx.middleware[type] = _.omit(middlewares, middlewareName)
+    delete middlewares[middlewareName]
 
     return new Bluebird((resolve) => {
       let ended = false
 
       function copyChangedCtx () {
-        _.chain(fullCtx)
-        .omit(READONLY_MIDDLEWARE_KEYS)
-        .forEach((value, key) => {
+        for (const key in fullCtx) {
+          if (READONLY_MIDDLEWARE_KEYS.has(key)) {
+            continue
+          }
+
+          const value = fullCtx[key]
+
           if (ctx[key] !== value) {
             ctx[key] = value
           }
-        })
-        .value()
+        }
       }
 
       function _onError (error: Error) {
@@ -291,7 +300,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         },
         onError: _onError,
         skipMiddleware: (name: string) => {
-          ctx.middleware[type] = _.omit(ctx.middleware[type], name)
+          delete ctx.middleware[type][name]
         },
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
@@ -522,7 +531,12 @@ export class Http {
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
-      middleware: _.cloneDeep(this.middleware),
+      // _runStage consumes these stacks as it runs, so each request needs its own
+      middleware: {
+        [HttpStages.IncomingRequest]: { ...this.middleware[HttpStages.IncomingRequest] },
+        [HttpStages.IncomingResponse]: { ...this.middleware[HttpStages.IncomingResponse] },
+        [HttpStages.Error]: { ...this.middleware[HttpStages.Error] },
+      },
       netStubbingState: this.netStubbingState,
       networkInterceptionCore: this.networkInterceptionCore,
       networkInterception: this.networkInterception,

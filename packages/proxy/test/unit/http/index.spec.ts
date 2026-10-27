@@ -113,6 +113,110 @@ describe('http', function () {
 
       expect(onError).not.toHaveBeenCalled()
     })
+
+    const createStageCtx = (stack: Record<string, HttpMiddleware<any>>) => {
+      return {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingRequest]: stack,
+        },
+      }
+    }
+
+    it('skips a middleware removed with skipMiddleware', async function () {
+      const calls: string[] = []
+
+      const ctx = createStageCtx({
+        first () {
+          calls.push('first')
+          this.skipMiddleware('second')
+          this.next()
+        },
+        second () {
+          calls.push('second')
+          this.next()
+        },
+        third () {
+          calls.push('third')
+          this.next()
+        },
+      })
+
+      await _runStage(HttpStages.IncomingRequest, ctx, vi.fn())
+
+      expect(calls).toEqual(['first', 'third'])
+    })
+
+    it('runs only the middleware named by onlyRunMiddleware, in the order named', async function () {
+      const calls: string[] = []
+      const record = (name: string) => {
+        return function () {
+          calls.push(name)
+          this.next()
+        }
+      }
+
+      const ctx = createStageCtx({
+        first () {
+          calls.push('first')
+          this.onlyRunMiddleware(['fourth', 'second', 'missing'])
+          this.next()
+        },
+        second: record('second'),
+        third: record('third'),
+        fourth: record('fourth'),
+      })
+
+      await _runStage(HttpStages.IncomingRequest, ctx, vi.fn())
+
+      expect(calls).toEqual(['first', 'fourth', 'second'])
+    })
+
+    it('passes symbol-keyed ctx properties to middleware', async function () {
+      const key = Symbol('key')
+      const value = {}
+      const seen: unknown[] = []
+
+      const ctx = {
+        ...createStageCtx({
+          first () {
+            seen.push(this[key])
+            this.next()
+          },
+          second () {
+            seen.push(this[key])
+            this.next()
+          },
+        }),
+        [key]: value,
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, vi.fn())
+
+      expect(seen).toEqual([value, value])
+      expect(ctx[key]).toBe(value)
+    })
+
+    it('copies changes made by middleware back to ctx, except the read-only helpers', async function () {
+      const ctx: Record<string, any> = createStageCtx({
+        first () {
+          this.added = 'added'
+          this.req = { ...this.req, method: 'POST' }
+          this.next()
+        },
+      })
+      const originalReq = ctx.req
+
+      await _runStage(HttpStages.IncomingRequest, ctx, vi.fn())
+
+      expect(ctx.added).toEqual('added')
+      expect(ctx.req).not.toBe(originalReq)
+      expect(ctx.req.method).toEqual('POST')
+      expect(ctx).not.toHaveProperty('next')
+      expect(ctx).not.toHaveProperty('skipMiddleware')
+    })
   })
 
   describe('Http.handle', function () {
@@ -310,6 +414,30 @@ describe('http', function () {
       expect(error).toHaveBeenCalledOnce()
       expect(on).toHaveBeenCalledOnce()
       expect(off).toHaveBeenCalledTimes(4)
+    })
+
+    it('runs the full middleware stacks for every request without consuming the shared stacks', async function () {
+      incomingRequest.mockImplementation(function () {
+        this.incomingRes = {}
+        this.end()
+      })
+
+      incomingResponse.mockImplementation(function () {
+        this.end()
+      })
+
+      const http = createHttp()
+
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+
+      expect(incomingRequest).toHaveBeenCalledTimes(2)
+      expect(incomingResponse).toHaveBeenCalledTimes(2)
+      expect(Object.keys(middleware[HttpStages.IncomingRequest])).toEqual(['incomingRequest'])
+      expect(Object.keys(middleware[HttpStages.IncomingResponse])).toEqual(['incomingResponse'])
+      expect(Object.keys(middleware[HttpStages.Error])).toEqual(['error'])
     })
 
     it('self can be modified by middleware and passed on', async function () {
