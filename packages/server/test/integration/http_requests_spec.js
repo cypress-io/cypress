@@ -43,7 +43,7 @@ const repoPackageJson = path.resolve(__dirname, '../../../../package.json')
 const traversalTo = (absolutePath) => `${'..%2F'.repeat(20)}${encodeURIComponent(absolutePath)}`
 
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
-const sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
+const sourceMapRegex = /\n\/\/# sourceMappingURL=.*/
 
 const replaceAbsolutePaths = (content) => {
   return content.replace(absolutePathRegex, '"/<path-to-project>')
@@ -2587,7 +2587,7 @@ describe('Routes', () => {
                 .get('/bar')
                 .reply(200, 'OK', {
                   'Content-Type': 'text/html',
-                  'content-security-policy': `foo \'bar\'; ${headerValue};`,
+                  'content-security-policy': `foo 'bar'; ${headerValue};`,
                 })
 
                 return this.rp({

@@ -1883,8 +1883,8 @@ export const cloneErr = function (err: CypressError | GenericError, options: { h
     // revert back the distorted characters
     // in case there is an error in a child_process
     // that contains quotes
-    .replace(/\&\#x27;/g, '\'')
-    .replace(/\&quot\;/g, '"')
+    .replace(/&#x27;/g, '\'')
+    .replace(/&quot;/g, '"')
   }
 
   // and any own (custom) properties

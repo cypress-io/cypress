@@ -38,9 +38,9 @@ export function replaceStream (patterns: RegExp | RegExp[], replacements: string
     ;(patterns as RegExp[]).forEach((pattern, i) => {
       const replacement = replacements[i]
 
-      tail = tail.replace(pattern, function replacer (match) {
+      tail = tail.replace(pattern, function replacer (match, ...rest) {
         // ugly, but necessary due to bizarre function signature of String#replace
-        const offset = arguments[arguments.length - 2]
+        const offset = rest[rest.length - 2]
 
         if (offset + replacement.length > replacementEndIndex) {
           replacementEndIndex = offset + replacement.length

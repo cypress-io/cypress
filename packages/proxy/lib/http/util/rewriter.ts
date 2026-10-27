@@ -19,7 +19,7 @@ export type InjectionOpts = {
   shouldInjectDocumentDomain: boolean
 }
 
-const doctypeRe = /<\!doctype.*?>/i
+const doctypeRe = /<!doctype.*?>/i
 const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
 const htmlRe = /<html.*?>/i

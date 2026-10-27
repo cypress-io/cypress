@@ -11,6 +11,8 @@ cy.wrap(6).should('be.at.least', 5)
 cy.wrap(4).should('be.below', 5)
 
 function argsTest () {
+  // `be.arguments` asserts on a real arguments object, which a rest array is not
+  // eslint-disable-next-line prefer-rest-params
   cy.wrap(arguments).should('be.arguments')
 }
 

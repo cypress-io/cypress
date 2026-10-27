@@ -177,7 +177,7 @@ const mochaProps = {
 
 const toMochaProps = (testProps: Record<string, unknown>) => {
   return _.each(mochaProps, (val, key) => {
-    if (testProps.hasOwnProperty(key)) {
+    if (Object.hasOwn(testProps, key)) {
       testProps[val] = testProps[key]
 
       delete testProps[key]

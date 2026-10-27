@@ -138,6 +138,10 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'no-console': 'error',
       'prefer-spread': 'error',
       'prefer-const': 'error',
+      'no-useless-escape': 'error',
+      'no-prototype-builtins': 'error',
+      'prefer-rest-params': 'error',
+      'no-global-assign': 'error',
       // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
       // Unused args and caught errors stay allowed: callbacks and interface
@@ -220,10 +224,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // rules that are gold standard, but have many violations
     // these are off while developing eslint, but should eventually be enabled
     rules: {
-      'no-useless-escape': 'off',
-      'prefer-rest-params': 'off',
-      'no-prototype-builtins': 'off',
-      'no-global-assign': 'off',
       'no-async-promise-executor': 'off',
 
       '@typescript-eslint/no-unused-expressions': 'off',

@@ -27,19 +27,19 @@ export const stdout = function () {
   // method for windows instead of process.stdout.write
   // https://github.com/cypress-io/cypress/issues/977
   if (log) {
-    process.log = function (str: string) {
-      logs.push(str)
+    process.log = function (...args: [string, ...unknown[]]) {
+      logs.push(args[0])
 
-      // @ts-expect-error - IArguments does not match process.log's parameter tuple
-      return log.apply(this, arguments)
+      // @ts-expect-error - the rest tuple does not match process.log's parameter tuple
+      return log.apply(this, args)
     }
   }
 
-  process.stdout.write = function (str: string) {
-    logs.push(str)
+  process.stdout.write = function (...args: [string, ...unknown[]]) {
+    logs.push(args[0])
 
-    // @ts-expect-error - IArguments does not match stdout.write's parameter tuple
-    return write.apply(this, arguments)
+    // @ts-expect-error - the rest tuple does not match stdout.write's parameter tuple
+    return write.apply(this, args)
   }
 
   return {

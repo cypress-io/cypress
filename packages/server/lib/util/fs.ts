@@ -5,7 +5,7 @@ import path from 'path'
 import _ from 'lodash'
 
 const RUNNABLE_SEPARATOR = ' -- '
-const pathSeparatorRe = /[\\\/]/g
+const pathSeparatorRe = /[\\/]/g
 
 // many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
 // the smallest common denominator of safe filenames, which is 255 bytes. when ENAMETOOLONG

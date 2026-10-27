@@ -13,9 +13,9 @@ import json5 from 'json5'
 
 const _spawn = cp.spawn
 
-cp.spawn = function () {
-  arguments[2].stdio = 'pipe'
-  const ret = _spawn.apply(this, arguments)
+cp.spawn = function (...args) {
+  args[2].stdio = 'pipe'
+  const ret = _spawn.apply(this, args)
 
   return ret
 }
