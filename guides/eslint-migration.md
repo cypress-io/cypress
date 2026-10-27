@@ -30,7 +30,7 @@
 - [x] packages/proxy
 - [x] packages/net-stubbing
 - [ ] packages/driver
-- [ ] packages/reporter
+- [x] packages/reporter
 - [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
