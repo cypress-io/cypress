@@ -4,7 +4,6 @@ import type { Configuration } from 'webpack'
 
 const CleanWebpackPlugin = getCleanWebpackPlugin()
 
-// @ts-expect-error - getCommonConfig() infers `mode` as `string`, not webpack's mode union
 const config: Configuration = {
   ...getCommonConfig(),
   entry: {
