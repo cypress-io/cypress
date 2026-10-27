@@ -261,21 +261,21 @@ describe('config/src/validation', () => {
     })
 
     it('returns error message for openMode as boolean without strategy', () => {
-      let result = validation.isValidRetriesConfig(mockKey, { openMode: true })
+      const result = validation.isValidRetriesConfig(mockKey, { openMode: true })
 
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot()
     })
 
     it('returns error message for runMode as boolean without strategy', () => {
-      let result = validation.isValidRetriesConfig(mockKey, { runMode: true })
+      const result = validation.isValidRetriesConfig(mockKey, { runMode: true })
 
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot()
     })
 
     it('returns true for valid retry object with experimental keys (default)', () => {
-      let result = validation.isValidRetriesConfig(mockKey, {
+      const result = validation.isValidRetriesConfig(mockKey, {
         openMode: 0,
         runMode: 0,
         experimentalStrategy: undefined,
@@ -871,7 +871,7 @@ describe('config/src/validation', () => {
       const key = 'fakeKey'
       const validateFail = validation.isArrayIncludingAny(true, false)
 
-      let msg = validateFail(key, value)
+      const msg = validateFail(key, value)
 
       expect(msg).not.toBe(true)
       expect(msg).toMatchSnapshot('not an array error message')

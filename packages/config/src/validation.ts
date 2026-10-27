@@ -1,5 +1,5 @@
 import path from 'path'
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
 import { BROWSER_FAMILY } from '@packages/types'
@@ -39,7 +39,7 @@ const isFalse = (value: any): boolean => {
   return value === false
 }
 
-type ValidationResult = ErrResult | boolean | string;
+type ValidationResult = ErrResult | boolean | string
 type ValidationFn = (key: string, value: any) => ValidationResult
 
 export const validateAny = (...validations: ValidationFn[]): ValidationFn => {
@@ -106,7 +106,7 @@ export const isValidBrowserList = (_key: string, browsers: any): ErrResult | tru
   }
 
   for (let k = 0; k < browsers.length; k += 1) {
-    const validationResult: boolean | {key: string, value: string, type: string, list?: string} = isValidBrowser(browsers[k])
+    const validationResult: boolean | { key: string, value: string, type: string, list?: string } = isValidBrowser(browsers[k])
 
     if (validationResult !== true) {
       validationResult.list = 'browsers'
@@ -167,7 +167,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
   return true
 }
 
-const isValidRetryValue = (key: string, value: any, minimumValue: 0|1): ErrResult | true => {
+const isValidRetryValue = (key: string, value: any, minimumValue: 0 | 1): ErrResult | true => {
   if (_.isNull(value)) return true
 
   if (Number.isInteger(value) && value >= minimumValue) return true
@@ -372,18 +372,18 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     key: string
     cert: string
     pfx: string
-  }>}>): ErrResult | true | string => {
+  }> }>): ErrResult | true | string => {
   debug('clientCerts: %o', certsForUrls)
 
   if (!Array.isArray(certsForUrls)) {
     return errMsg(`clientCertificates.certs`, certsForUrls, 'an array of certs for URLs')
   }
 
-  let urls: string[] = []
+  const urls: string[] = []
 
   for (let i = 0; i < certsForUrls.length; i++) {
     debug(`Processing clientCertificates: ${i}`)
-    let certsForUrl = certsForUrls[i]
+    const certsForUrl = certsForUrls[i]
 
     if (!certsForUrl) {
       continue
@@ -395,7 +395,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
 
     if (certsForUrl.url !== '*') {
       try {
-        let parsed = new URL(certsForUrl.url)
+        const parsed = new URL(certsForUrl.url)
 
         if (parsed.protocol !== 'https:') {
           return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'an https protocol')
@@ -420,7 +420,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     }
 
     for (let j = 0; j < certsForUrl.certs.length; j++) {
-      let certInfo = certsForUrl.certs[j]!
+      const certInfo = certsForUrl.certs[j]!
 
       // Only one of PEM or PFX cert allowed
       if (certInfo.cert && certInfo.pfx) {
