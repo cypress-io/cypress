@@ -29,6 +29,9 @@ const disabledFeatures = [
   // servers (e.g. login/redirect/OAuth flows) are blocked, breaking tests that
   // worked in Chrome 140. Cypress fully controls the browser under test, so it's
   // safe to opt out of these checks entirely.
+  // The browser network path also depends on it: internal Cypress routes the
+  // page requests from the AUT origin are redirected to the Cypress server on
+  // localhost, which LNA would block for a public AUT origin.
   // https://github.com/cypress-io/cypress/issues/32708
   // https://developer.chrome.com/blog/local-network-access
   'LocalNetworkAccessChecks',

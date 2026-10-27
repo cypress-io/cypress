@@ -246,6 +246,12 @@ export class ProjectLifecycleManager {
            *      The empty specs are handled within the @cypress/webpack-dev-server package as this has no impact on vite.
            */
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+          .catch((err) => {
+            span?.end()
+            const devServer = this.loadedConfigFile?.component?.devServer
+
+            throw getError('DEV_SERVER_START_FAILED', this.configFile, typeof devServer === 'object' ? devServer.bundler : undefined, err)
+          })
 
           // If we received a cypressConfig.port we want to null it out
           // because we propagated it into the devServer.port and it is
@@ -340,8 +346,8 @@ export class ProjectLifecycleManager {
       const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
 
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
-      // by a mutation called from the client side when the user dismisses the welcome screen
+      // but if the user needs to dismiss a landing page, don't continue: dismissing it renders OpenBrowser
+      // in the launchpad, whose auto-launch opens the active browser once the config is ready
       if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {

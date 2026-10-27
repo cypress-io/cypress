@@ -65,7 +65,7 @@ describe('CloudRequest', () => {
   })
 
   describe('Proxy Requests', () => {
-    let prevEnv = {
+    const prevEnv = {
       HTTP_PROXY: undefined,
       HTTPS_PROXY: undefined,
       CYPRESS_INTERNAL_ENV: undefined,
@@ -480,7 +480,7 @@ describe('CloudRequest', () => {
     it('handles https requests properly', async () => {
       nock.restore()
 
-      // @ts-ignore
+      // @ts-expect-error - addRequest is typed as async but the mock is sync
       const addRequestSpy = vi.spyOn(strictAgent.httpsAgent, 'addRequest').mockImplementation((req, options) => {
         // fake IncomingMessage
         const res = new PassThrough() as any

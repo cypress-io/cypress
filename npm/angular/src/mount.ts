@@ -49,7 +49,7 @@ export interface MountConfig<T> extends TestModuleMetadata {
    * })
    */
   // allow InputSignals to be type primitive and WritableSignal for type compliance
-  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P]}>
+  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P] }>
 }
 
 let activeFixture: ComponentFixture<any> | null = null
@@ -97,7 +97,7 @@ export type MountResponse<T> = {
    * @see https://angular.io/api/core/testing/ComponentFixture#componentInstance
    */
   component: T
-};
+}
 
 @Injectable()
 class CypressAngularErrorHandler implements ErrorHandler {
@@ -317,13 +317,13 @@ function registerSignalEventsIfNeeded<T> (
 function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, component: { [key: string]: any } & Partial<OnChanges>, key: string, injector: Injector): void {
   if (config.componentProperties) {
     const expectedChangeKey = `${key}Change`
-    let changeKeyIfExists = !!Object.keys(config.componentProperties).find(
+    const changeKeyIfExists = !!Object.keys(config.componentProperties).find(
       (componentKey) => componentKey === expectedChangeKey,
     )
 
     if (changeKeyIfExists) {
       component[expectedChangeKey] =
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
         config.componentProperties[expectedChangeKey]
     }
 
@@ -368,7 +368,7 @@ function setupComponent<T> (
     getComponentInputs(fixture.componentRef.componentType).forEach((key) => {
       // only assign props if they are passed into the component
       if (config?.componentProperties?.hasOwnProperty(key)) {
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
         const passedInValue = config?.componentProperties[key]
 
         registerSignalEventsIfNeeded(
@@ -393,11 +393,11 @@ function setupComponent<T> (
 
       // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
       // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
-      // @ts-expect-error
+      // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
       if (property instanceof EventEmitter || (config?.componentProperties?.hasOwnProperty(key) && config?.componentProperties[key] instanceof EventEmitter)) {
       // only assign props if they are passed into the component
         if (config?.componentProperties?.hasOwnProperty(key)) {
-        // @ts-expect-error
+        // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
           const passedInValue = config?.componentProperties[key]
 
           component[key] = passedInValue
@@ -416,7 +416,7 @@ function setupComponent<T> (
       acc[key] = new SimpleChange(null, value, true)
 
       return acc
-    }, {} as {[key: string]: SimpleChange})
+    }, {} as { [key: string]: SimpleChange })
 
     if (Object.keys(componentProperties).length > 0) {
       component.ngOnChanges(simpleChanges)
@@ -488,7 +488,7 @@ export function mount<T> (
 
   let mountResponsePromiseResolver: any
   let mountResponsePromiseRejector: any
-  let mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
+  const mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
     mountResponsePromiseResolver = resolve
     mountResponsePromiseRejector = reject
   })

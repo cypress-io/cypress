@@ -261,7 +261,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           log.snapshot()
         }
 
-        // @ts-ignore
+        // @ts-expect-error - issuesCommunicatingOrFinding is a Cypress-specific error property
         if (err && (!hasLoggedError || (err.issuesCommunicatingOrFinding && index === logs.length - 1))) {
           hasLoggedError = true
 
@@ -377,7 +377,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         if (_.isFunction(onRetry)) {
-          //@ts-expect-error
+          // @ts-expect-error - options is a Record<string, any>, which retryOptions does not accept
           return cy.retry(onRetry, options)
         }
 

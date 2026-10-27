@@ -65,6 +65,9 @@ Verify an arch or platform mock is load-bearing rather than decorative: flip its
 - The main CLI build uses Rollup (configured in `rollup.config.mjs`). Entry points are `lib/index.ts`, `lib/cli.ts`, `lib/cypress.ts`, `lib/exec/xvfb.ts`, `lib/exec/spawn.ts`, and `lib/bin/cypress.ts`. Output goes to `dist/` and is copied to `build/` via `sync-build-dist.ts`.
 - The `cli/react`, `cli/vue`, `cli/angular`, `cli/svelte`, and `cli/mount-utils` directories are build output, not sources — each adapter's `postbuild` writes them, and the adapter sources live in `npm/`. See [`npm/AGENTS.md`](../npm/AGENTS.md) for the mechanism.
 - Unit tests for the CLI itself live in `cli/test/` and run under Vitest (`test/**/*.spec.ts`).
-- TypeScript type definitions for the public Cypress API live in `cli/types/`. The `dtslint` tool is used to validate them.
+- TypeScript type definitions for the public Cypress API live in `cli/types/`. The `dtslint` tool is used to validate them, configured by `cli/types/tslint.json`. That file must stay plain JSON, so the reasons behind its settings are recorded here:
+  - `no-single-declare-module` is off because the Cypress npm module API is kept in its own file on purpose.
+  - `no-unnecessary-qualifier` is off because it flags qualifiers the types need.
+  - `linterOptions.exclude` lists the bundled third-party typings (lodash, chai, sinon and so on), which don't follow our rules. It also lists `net-stubbing.d.ts`, which is copied in from `@packages/network-interception` and renamed, so it was never written as a declaration file.
 - The `CYPRESS_INSTALL_BINARY` environment variable can be set to a path or URL to override the binary downloaded during `postinstall`.
 - The `cypress` package sets `"private": true` in its monorepo `package.json` — publishing is handled by CI scripts that prepare a separate `package.json`.

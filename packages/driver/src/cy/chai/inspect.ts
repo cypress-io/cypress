@@ -109,7 +109,7 @@ export function create (chai) {
 
       // Attempt to serialize it
       try {
-        // @ts-ignore
+        // @ts-expect-error - xmlVersion is deprecated and not in the DOM lib types
         if (document.xmlVersion) {
           let xmlSerializer = new XMLSerializer()
 

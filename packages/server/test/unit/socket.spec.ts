@@ -12,6 +12,7 @@ import { SocketE2E } from '../../lib/socket-e2e'
 import { ServerBase } from '../../lib/server-base'
 import { Automation } from '../../lib/automation'
 import preprocessor from '../../lib/plugins/preprocessor'
+import * as specFrameScripts from '../../lib/util/spec_frame_scripts'
 import { fs } from '../../lib/util/fs'
 import * as session from '../../lib/session'
 import devServer from '../../lib/plugins/dev-server'
@@ -26,8 +27,16 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    graphQLHTTP: vi.fn(),
+    runnerGraphQLHTTP: vi.fn(),
   }
+})
+
+const openExternal = vi.hoisted(() => {
+  return vi.fn()
+})
+
+vi.mock('../../lib/gui/links', () => {
+  return { openExternal }
 })
 
 vi.mock('@packages/data-context/graphql/schema', () => {
@@ -300,6 +309,35 @@ describe('lib/socket', () => {
 
             return done()
           })
+        })
+      })
+    })
+
+    describe('on(external:open)', () => {
+      let onUnhandledRejection: MockInstance
+
+      beforeEach(() => {
+        onUnhandledRejection = vi.fn()
+        process.on('unhandledRejection', onUnhandledRejection as any)
+      })
+
+      afterEach(() => {
+        process.off('unhandledRejection', onUnhandledRejection as any)
+      })
+
+      it('handles a url the OS fails to open', () => {
+        return new Promise<void>((done) => {
+          openExternal.mockImplementationOnce(() => {
+            setImmediate(() => {
+              expect(onUnhandledRejection).not.toHaveBeenCalled()
+
+              done()
+            })
+
+            return Promise.reject(new Error('no handler for https'))
+          })
+
+          client.emit('external:open', 'https://on.cypress.io')
         })
       })
     })
@@ -840,7 +878,7 @@ describe('lib/socket', () => {
     describe('on(backend:request, clear:sessions)', () => {
       it('clears spec sessions', () => {
         return new Promise<void>((done) => {
-          let state: any = session.getState()
+          const state: any = session.getState()
 
           state.globalSessions = {
             global: { id: 'global' },
@@ -865,7 +903,7 @@ describe('lib/socket', () => {
 
       it('clears all sessions', () => {
         return new Promise<void>((done) => {
-          let state: any = session.getState()
+          const state: any = session.getState()
 
           state.globalSessions = {
             global: { id: 'global' },
@@ -1221,11 +1259,29 @@ describe('lib/socket', () => {
 
       describe('#watchTestFileByPath', () => {
         let getFile: MockInstance
+        let isSpecFrameScript: MockInstance
 
         beforeEach(() => {
           socket.testsDir = Fixtures.project('todos/tests')
 
+          isSpecFrameScript = vi.spyOn(specFrameScripts, 'isSpecFrameScript').mockReturnValue(true)
           getFile = vi.spyOn(preprocessor, 'getFile').mockResolvedValue(undefined as any)
+        })
+
+        it('refuses to watch a path that is not a spec or the support file', () => {
+          isSpecFrameScript.mockReturnValue(false)
+          const removeFile = vi.spyOn(preprocessor, 'removeFile')
+
+          socket.testFilePath = 'test1.js'
+
+          const result = socket.watchTestFileByPath(cfg, {
+            relative: '../secret.json',
+          })
+
+          expect(result).toBeUndefined()
+          expect(getFile).not.toHaveBeenCalled()
+          expect(removeFile).not.toHaveBeenCalled()
+          expect(socket.testFilePath).toBe('test1.js')
         })
 
         it('returns undefined if trying to watch special path __all', () => {

@@ -675,7 +675,7 @@ export const AllCypressErrors = {
       return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string })
     }
 
-    let systemErr = error.errors.find((err) => {
+    const systemErr = error.errors.find((err) => {
       return err.kind === 'SystemError'
     })
     const recommendation = systemErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(systemErr.url)}` : null
@@ -1667,6 +1667,20 @@ export const AllCypressErrors = {
     `
   },
 
+  DEV_SERVER_START_FAILED: (configFile: string, bundler: string | undefined, err: ErrorLike) => {
+    const devServer = bundler ? errPartial`the ${fmt.highlight(bundler)} dev server` : errPartial`your dev server`
+
+    return errTemplate`
+      Cypress could not start ${devServer} for component testing. Fix the error below, then run Cypress again.
+
+      Read about configuring the dev server: https://on.cypress.io/dev-server
+
+      The ${fmt.highlight('component.devServer')} set in ${fmt.path(configFile)} threw this error:
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+
   UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
     return errTemplate`
       An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
@@ -1803,7 +1817,7 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
     return err
   }
 
-  // @ts-expect-error
+  // @ts-expect-error - `args` is not typed as the parameter tuple of the template selected by `type`
   const result = AllCypressErrors[type](...args) as ErrTemplateResult
 
   const { message, details, originalError, messageMarkdown } = result

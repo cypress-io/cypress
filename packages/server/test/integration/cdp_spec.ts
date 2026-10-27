@@ -322,7 +322,7 @@ describe('CDP Clients', () => {
     })
 
     it('reattaches subscriptions, reenables enablements, and sends pending commands on reconnect', async () => {
-      let reconnectPromise = Promise.withResolvers()
+      const reconnectPromise = Promise.withResolvers()
       let commandSent = Promise.withResolvers()
       let wsClient
       const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {

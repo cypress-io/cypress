@@ -5,16 +5,25 @@ import dedent from 'dedent'
 import { addTestingTypeToCypressConfig } from '../../src/ast-utils/addToCypressConfig'
 
 vi.mock('fs-extra', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<{ default: typeof import('fs-extra') }>()
 
   return {
     default: {
-      // @ts-expect-error
       ...actual.default,
       writeFile: vi.fn(),
     },
   }
 })
+
+const getWrittenConfig = (): string => {
+  expect(fs.writeFile).toHaveBeenCalledOnce()
+
+  const [call] = vi.mocked(fs.writeFile).mock.calls
+
+  if (!call) throw new Error('fs.writeFile was not called')
+
+  return call[1].trim()
+}
 
 describe('addToCypressConfig', () => {
   beforeEach(() => {
@@ -31,10 +40,7 @@ describe('addToCypressConfig', () => {
       projectRoot: __dirname,
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
-
-    expect(secondArgTrimmed).toEqual(dedent`
+    expect(getWrittenConfig()).toEqual(dedent`
       import { defineConfig } from "cypress";
 
       export default defineConfig({
@@ -59,10 +65,7 @@ describe('addToCypressConfig', () => {
       projectRoot: __dirname,
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
-
-    expect(secondArgTrimmed).toEqual(dedent`
+    expect(getWrittenConfig()).toEqual(dedent`
           import { defineConfig } from "cypress";
 
           export default defineConfig({
@@ -87,10 +90,7 @@ describe('addToCypressConfig', () => {
       projectRoot: __dirname,
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
-
-    expect(secondArgTrimmed).toEqual(dedent`
+    expect(getWrittenConfig()).toEqual(dedent`
           const { defineConfig } = require("cypress");
 
           module.exports = defineConfig({
@@ -115,10 +115,7 @@ describe('addToCypressConfig', () => {
       projectRoot: '/foo',
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
-
-    expect(secondArgTrimmed).toEqual(dedent`
+    expect(getWrittenConfig()).toEqual(dedent`
       module.exports = {
         e2e: {
           setupNodeEvents(on, config) {
@@ -141,10 +138,7 @@ describe('addToCypressConfig', () => {
       projectRoot: '/foo',
     })
 
-    // @ts-expect-error - mock argument
-    const secondArgTrimmed = fs.writeFile.mock.calls[0][1].trim()
-
-    expect(secondArgTrimmed).toEqual(dedent`
+    expect(getWrittenConfig()).toEqual(dedent`
       export default {
         e2e: {
           setupNodeEvents(on, config) {
@@ -168,7 +162,7 @@ describe('addToCypressConfig', () => {
     })
 
     expect(result.result).toEqual('NEEDS_MERGE')
-    expect(result.error.message).toEqual('Unable to automerge with the config file')
+    expect(result.error?.message).toEqual('Unable to automerge with the config file')
   })
 
   it('will error if the key we are adding already exists', async () => {
@@ -182,6 +176,6 @@ describe('addToCypressConfig', () => {
     })
 
     expect(result.result).toEqual('NEEDS_MERGE')
-    expect(result.error.message).toEqual('Unable to automerge with the config file')
+    expect(result.error?.message).toEqual('Unable to automerge with the config file')
   })
 })

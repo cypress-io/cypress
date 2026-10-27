@@ -22,14 +22,14 @@ describe('key:press automation command', () => {
     const topFrameId = 'abc'
     const autFrameId = 'def'
 
-    // @ts-expect-error
+    // @ts-expect-error - partial mock of the execution context
     const topExecutionContext: Protocol.Runtime.ExecutionContextDescription = {
       id: 123,
       auxData: {
         frameId: topFrameId,
       },
     }
-    // @ts-expect-error
+    // @ts-expect-error - partial mock of the execution context
     const autExecutionContext: Protocol.Runtime.ExecutionContextDescription = {
       id: 456,
       auxData: {

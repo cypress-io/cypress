@@ -496,7 +496,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const ps = options.proxyServer
 
   if (ps) {
-    let { hostname, port, protocol } = urlUtil.parse(ps)
+    const parsedProxy = urlUtil.parse(ps)
+    const { hostname, protocol } = parsedProxy
+    let { port } = parsedProxy
 
     if (port == null) {
       port = protocol === 'https:' ? '443' : '80'
@@ -637,8 +639,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   // since we no longer directly control the browser with webdriver, we need to make the browserInstance
   // a simulated wrapper that kills the process IDs that come back from webdriver
-  // @ts-expect-error
-  let browserInstanceWrapper: BrowserInstance = new EventEmitter()
+  // @ts-expect-error - a bare EventEmitter lacks BrowserInstance's kill until it is assigned below
+  const browserInstanceWrapper: BrowserInstance = new EventEmitter()
 
   browserInstanceWrapper.kill = () => undefined
 

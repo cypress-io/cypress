@@ -7,7 +7,7 @@ import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
 import { needsSandbox } from '../tasks/verify'
-import { throwFormErrorText, getErrorSync, errors } from '../errors'
+import { throwFormErrorText, errors } from '../errors'
 import readline from 'readline'
 import process, { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
@@ -366,7 +366,7 @@ interface StartOptions {
 }
 
 export async function start (args: string | string[], options: StartOptions = {}): Promise<any> {
-  let executable = util.getEnv('CYPRESS_RUN_BINARY') ?
+  const executable = util.getEnv('CYPRESS_RUN_BINARY') ?
     path.resolve(util.getEnv('CYPRESS_RUN_BINARY') as string) :
     state.getPathToExecutable(state.getBinaryDir())
 

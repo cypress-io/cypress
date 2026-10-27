@@ -81,7 +81,7 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
     titles,
     testId: runnable.id,
     takenPaths: state('screenshotPaths'),
-    // @ts-ignore
+    // @ts-expect-error - _currentRetry is private in the mocha types
     testAttemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry,
   }, _.omit(options, 'runnable', 'timeout', 'log', 'subject'))
 
@@ -223,7 +223,7 @@ const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning
     return elPosition
   }
 
-  // @ts-ignore
+  // @ts-expect-error - padding is normalized to four numbers, but this type still uses the public Padding union
   const [paddingTop, paddingRight, paddingBottom, paddingLeft] = automationOptions.padding
 
   return {
@@ -362,7 +362,7 @@ const takeScreenshot = (
   const getOptions = (isOpen) => {
     return {
       id: runnable.id,
-      // @ts-ignore
+      // @ts-expect-error - _currentRetry is private in the mocha types
       testAttemptIndex: $utils.getTestFromRunnable(runnable)?._currentRetry,
       isOpen,
       appOnly: isAppOnly(screenshotConfig),

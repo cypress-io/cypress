@@ -506,7 +506,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
   }
 
   // TODO: remove the need to extend options and avoid the type error
-  // @ts-expect-error
+  // @ts-expect-error - setScreenshotMetadata is not declared on the run options type
   options.setScreenshotMetadata = (data) => {
     return currentSetScreenshotMetadata(data)
   }
@@ -1142,7 +1142,7 @@ async function ready (options: ReadyOptions) {
   }
 
   // alias and coerce to null
-  let specPatternFromCli = options.spec || null
+  const specPatternFromCli = options.spec || null
 
   // ensure the project exists
   // and open up the project

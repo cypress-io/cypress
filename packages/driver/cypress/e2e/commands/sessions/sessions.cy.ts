@@ -156,25 +156,43 @@ describe('cy.session', { retries: 0 }, () => {
 
     describe('test:before:run:async', () => {
       it('clears session data before each run', async () => {
-        const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
+        const backendSpy = cy.spy(Cypress, 'backend').log(false)
+        const automationSpy = cy.spy(Cypress, 'automation').log(false)
 
         await Cypress.action('runner:test:before:run:async', {
           id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
-        expect(clearCurrentSessionData).to.be.called
+        expect(backendSpy).to.be.calledWith('get:rendered:html:origins')
+        expect(automationSpy).to.be.calledWith('get:cookies')
       })
 
-      it('resets rendered html origins before each run', async () => {
-        const backendSpy = cy.spy(Cypress, 'backend').log(false)
+      it('resets rendered html origins before each run when origins were rendered', async () => {
+        const backendStub = cy.stub(Cypress, 'backend').log(false).callThrough()
+
+        backendStub.withArgs('get:rendered:html:origins').resolves({ [window.location.origin]: true })
 
         await Cypress.action('runner:test:before:run:async', {
           id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
-        expect(backendSpy).to.be.calledWith('reset:rendered:html:origins')
+        expect(backendStub).to.be.calledWith('reset:rendered:html:origins')
+      })
+
+      it('does not reset rendered html origins before each run when no origins were rendered', async () => {
+        const backendStub = cy.stub(Cypress, 'backend').log(false).callThrough()
+
+        backendStub.withArgs('get:rendered:html:origins').resolves({})
+
+        await Cypress.action('runner:test:before:run:async', {
+          id: 'r1',
+          currentRetry: 0,
+        }, Cypress.state('runnable'))
+
+        expect(backendStub).to.be.calledWith('get:rendered:html:origins')
+        expect(backendStub).not.to.be.calledWith('reset:rendered:html:origins')
       })
 
       it('clears the browser context before each run', () => {
@@ -265,11 +283,15 @@ describe('cy.session', { retries: 0 }, () => {
       }
 
       describe('create session flow', () => {
+        let yielded
+
         before(() => {
           setupTestContext()
           cy.log('Creating new session to test against')
           expect(clearPageCount, 'total times session cleared the page').to.eq(0)
-          cy.session('session-1', setup)
+          cy.session('session-1', setup).then((status) => {
+            yielded = status
+          })
         })
 
         // test must be first to run before blank page visit between each test
@@ -280,6 +302,10 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully creates new session', () => {
           expect(setup).to.be.calledOnce
           expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+        })
+
+        it('yields created', () => {
+          expect(yielded).to.eq('created')
         })
 
         it('groups session logs correctly', () => {
@@ -500,6 +526,7 @@ describe('cy.session', { retries: 0 }, () => {
 
       describe('restores saved session flow', () => {
         let sessionId
+        let yielded
 
         before(() => {
           setupTestContext()
@@ -512,7 +539,9 @@ describe('cy.session', { retries: 0 }, () => {
           })
 
           cy.log('restore session to test against')
-          cy.session(sessionId, setup)
+          cy.session(sessionId, setup).then((status) => {
+            yielded = status
+          })
         })
 
         // test must be first to run before blank page visit between each test
@@ -524,6 +553,10 @@ describe('cy.session', { retries: 0 }, () => {
           expect(setup).to.not.be.called
           expect(validate).to.not.be.called
           expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+        })
+
+        it('yields restored', () => {
+          expect(yielded).to.eq('restored')
         })
 
         it('groups session logs correctly', () => {
@@ -559,6 +592,34 @@ describe('cy.session', { retries: 0 }, () => {
             displayName: 'Restore saved session',
             group: sessionGroupId,
           })
+        })
+      })
+
+      describe('restores saved session when validate returns false synchronously', () => {
+        let sessionId
+        let yielded
+
+        before(() => {
+          setupTestContext()
+          validate.callsFake(() => false)
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup, { validate })
+          .then(() => {
+            resetMocks()
+            validate.callsFake(() => false)
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup, { validate }).then((status) => {
+            yielded = status
+          })
+        })
+
+        it('restores the session without running setup again', () => {
+          expect(setup).to.not.be.called
+          expect(validate).to.be.calledOnce
+          expect(yielded).to.eq('restored')
         })
       })
 
@@ -640,6 +701,7 @@ describe('cy.session', { retries: 0 }, () => {
 
       describe('recreates existing session flow', () => {
         let sessionId
+        let yielded
 
         before(() => {
           setupTestContext()
@@ -659,7 +721,9 @@ describe('cy.session', { retries: 0 }, () => {
           })
 
           cy.log('restore session to test against')
-          cy.session(sessionId, setup, { validate })
+          cy.session(sessionId, setup, { validate }).then((status) => {
+            yielded = status
+          })
         })
 
         // test must be first to run before blank page visit between each test
@@ -671,6 +735,10 @@ describe('cy.session', { retries: 0 }, () => {
           expect(setup).to.be.calledOnce
           expect(validate).to.be.calledTwice
           expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+        })
+
+        it('yields recreated', () => {
+          expect(yielded).to.eq('recreated')
         })
 
         it('groups session logs correctly', () => {

@@ -17,7 +17,7 @@ import Promise from 'bluebird'
 import sanitizeFilename from 'sanitize-filename'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import HarCapturer from 'chrome-har-capturer'
-import performance from '@tooling/system-tests/lib/performance'
+import * as performance from '@tooling/system-tests/lib/performance'
 import { CA } from '@packages/https-proxy'
 import { setupFullConfigWithDefaults } from '@packages/config'
 import { getCtx, setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
@@ -565,7 +565,7 @@ const runBrowserTest = (urlUnderTest: string, testCase: TestCase, { onHar, onWir
     proxyDisabledServer.remoteStates.set(urlUnderTest)
   }
 
-  let cmd = CHROME_PATH
+  const cmd = CHROME_PATH
 
   debug('Launching Chrome: ', cmd, args.join(' '))
 
