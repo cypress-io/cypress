@@ -26,7 +26,7 @@ describe('test errors', () => {
 
     cy.visit('/').then((win) => {
       setError = (err: Error) => {
-        // @ts-expect-error - the fixture types suites as optional, and a plain Error stands in for ErrProps
+        // @ts-expect-error - RootRunnable types suites as optional, and a plain Error stands in for ErrProps
         runnablesWithErr.suites[0].tests[0].err = err
 
         cy.get('.reporter.mounted').then(() => {
@@ -304,7 +304,7 @@ describe('test errors', () => {
     })
 
     it('falls back to text language class', () => {
-      // @ts-expect-error - the command_error fixture types codeFrame as optional
+      // @ts-expect-error - commandErr is a Partial<Err>, so codeFrame is optional
       commandErr.codeFrame.language = null
       setError(commandErr)
       cy

@@ -132,9 +132,8 @@ export default class Hook implements HookProps {
 
   commandMatchingErr (errToMatch: Err): CommandModel | undefined {
     return _(this.commands)
-    // @ts-expect-error - the filter callback returns `undefined` when a command has no err, which lodash's predicate overloads reject
     .filter(({ err }) => {
-      return err && err.message === errToMatch.message && err.message !== undefined
+      return !!err && err.message === errToMatch.message && err.message !== undefined
     })
     .last()
   }

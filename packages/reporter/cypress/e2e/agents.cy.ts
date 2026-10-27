@@ -40,7 +40,7 @@ describe('agents', () => {
   })
 
   it('does not render agents if there are no agents', () => {
-    // @ts-expect-error - the runnables fixture types tests as optional
+    // @ts-expect-error - RootRunnable types tests as optional
     runnables.tests[0].agents = []
     start()
 

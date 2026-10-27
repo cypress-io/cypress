@@ -165,8 +165,7 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
-      // @ts-expect-error - sessionInfo exists only on CommandProps, which is not part of every member of LogProps
-      if (props.sessionInfo) {
+      if ('sessionInfo' in props && props.sessionInfo) {
         this._updateOrAddSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
       }
 
@@ -186,14 +185,15 @@ export default class Attempt {
   }
 
   commandMatchingErr (): Command | undefined {
-    if (!this.err) {
+    const err = this.err
+
+    if (!err) {
       return undefined
     }
 
     return _(this.hooks)
     .map((hook) => {
-      // @ts-expect-error - this.err is checked above, but the narrowing does not carry into the callback
-      return hook.commandMatchingErr(this.err)
+      return hook.commandMatchingErr(err)
     })
     .compact()
     .last()
