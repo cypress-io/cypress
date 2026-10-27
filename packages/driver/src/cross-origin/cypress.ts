@@ -28,7 +28,7 @@ import { patchXmlHttpRequest } from '@packages/runner/injection/patches/cross-or
 import $Mocha from '../cypress/mocha'
 
 const createCypress = () => {
-  // @ts-ignore
+  // @ts-expect-error - $Cypress is not assignable to the public Cypress type
   const Cypress = window.Cypress = new $Cypress() as Cypress.Cypress
 
   Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, expose, isProtocolEnabled }) => {
@@ -101,21 +101,19 @@ const setup = ({ cypressConfig, expose, isProtocolEnabled }: { cypressConfig: Cy
 
   Cypress.state('isProtocolEnabled', isProtocolEnabled)
 
-  // @ts-ignore
-  const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
+  // @ts-expect-error - $Cy is not assignable to the public cy type
+  const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config)
 
-  // @ts-ignore
+  // @ts-expect-error - createLog does not match the overloaded Cypress.log type
   Cypress.log = createLog(Cypress, cy, Cypress.state, Cypress.config)
 
   Cypress.mocha = $Mocha.create(window, Cypress, Cypress.config)
 
-  // @ts-ignore
   Cypress.runner = {
     addLog () {},
   }
 
   Cypress.cy = cy
-  // @ts-ignore
   Cypress.events.proxyTo(Cypress.cy)
 
   const { state, config } = Cypress
@@ -126,18 +124,18 @@ const setup = ({ cypressConfig, expose, isProtocolEnabled }: { cypressConfig: Cy
 
   Cypress.handleCrossOriginSocketEvent = handleCrossOriginSocketEvent
 
-  // @ts-ignore
+  // @ts-expect-error - $Commands.create does not return the public Commands type
   Cypress.Commands = $Commands.create(Cypress, cy, state, config)
-  // @ts-ignore
+  // @ts-expect-error - cy.isCy is not a type guard like Cypress.isCy
   Cypress.isCy = cy.isCy
 
   // this is "valid" inside the cy.origin() callback (as long as the experimental
   // flag is enabled), but it should be replaced by the preprocessor at runtime
   // with an actual require() before it's run in the browser. if it's not,
   // something unexpected has gone wrong
-  // @ts-expect-error
+  // @ts-expect-error - this stub does not match the generic Cypress.require signature
   Cypress.require = () => {
-    // @ts-ignore
+    // @ts-expect-error - experimentalOriginDependencies is e2e-only, so it is not a key of Cypress.Config
     if (!Cypress.config('experimentalOriginDependencies')) {
       $errUtils.throwErrByPath('require.invalid_without_flag')
     }
@@ -170,7 +168,7 @@ const attachToWindow = (autWindow: Window) => {
 
   // this communicates to the injection code that Cypress is now available so
   // it can safely subscribe to Cypress events, etc
-  // @ts-ignore
+  // @ts-expect-error - __attachToCypress is not declared on Window
   autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
 
   Cypress.state('window', autWindow)

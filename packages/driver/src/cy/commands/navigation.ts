@@ -476,13 +476,13 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
   }
 
   // clear the current timeout
-  // @ts-expect-error
+  // @ts-expect-error - cy is typed as Cypress.Cypress here, which has no clearTimeout
   cy.clearTimeout('reload')
 
   let cleanup: (() => any) | null = null
   const options = _.defaults({}, userOptions, {
     log: true,
-    // @ts-expect-error
+    // @ts-expect-error - config is typed as the Cypress.Config object, not the config() function
     timeout: config('pageLoadTimeout'),
   })
 
@@ -533,7 +533,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
     if (Cypress.isBrowser('webkit')) {
       // Make sure the reload command can communicate with the AUT.
       // if we failed for any other reason, we need to display the correct error to the user.
-      // @ts-expect-error
+      // @ts-expect-error - commandCanCommunicateWithAUT is not declared on the Cypress.ensure type
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
     }
 
@@ -544,7 +544,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
 export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, numberOrString: number | string, userOptions = {}) => {
   const options: Record<string, any> = _.defaults({}, userOptions, {
     log: true,
-    // @ts-expect-error
+    // @ts-expect-error - config is typed as the Cypress.Config object, not the config() function
     timeout: config('pageLoadTimeout'),
   })
 
@@ -570,7 +570,7 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         }
 
         // clear the current timeout
-        // @ts-expect-error
+        // @ts-expect-error - cy is typed as Cypress.Cypress here, which has no clearTimeout
         cy.clearTimeout()
 
         cy.once('window:before:unload', beforeUnload)
@@ -629,7 +629,7 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
       if (Cypress.isBrowser('webkit')) {
         // Make sure the reload command can communicate with the AUT.
         // if we failed for any other reason, we need to display the correct error to the user.
-        // @ts-expect-error
+        // @ts-expect-error - commandCanCommunicateWithAUT is not declared on the Cypress.ensure type
         Cypress.ensure.commandCanCommunicateWithAUT(cy)
       }
 

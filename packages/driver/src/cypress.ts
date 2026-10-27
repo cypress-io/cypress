@@ -337,7 +337,7 @@ class $Cypress {
     this.Cookies = $Cookies.create(config.namespace, domainName)
 
     // TODO: Remove this after $Events functions are added to $Cypress.
-    // @ts-ignore
+    // @ts-expect-error - ProxyLogging expects the public Cypress type, not $Cypress
     this.ProxyLogging = new ProxyLogging(this)
 
     return this.action('cypress:config', config)
@@ -416,7 +416,7 @@ class $Cypress {
     this.stackUtils = $stackUtils
 
     // wire up command create to cy
-    // @ts-expect-error
+    // @ts-expect-error - $Commands.create expects the public Cypress type, not $Cypress
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
 
     this.events.proxyTo(this.cy)
