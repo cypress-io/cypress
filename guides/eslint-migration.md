@@ -35,7 +35,7 @@
 
 ### Batch 4b: Core packages (part 2)
 - [ ] packages/runner
-- [ ] packages/extension
+- [x] packages/extension
 - [ ] packages/network
 - [ ] packages/socket
 - [ ] packages/telemetry
