@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import * as parser from 'socket.io-parser'
@@ -31,8 +31,7 @@ describe('Socket', function () {
 
   describe('automation socket browsers', function () {
     beforeEach(() => {
-      // @ts-expect-error - a bare object stands in for the browser window
-      global.window = {}
+      vi.stubGlobal('window', {})
     })
 
     it('creates an automation socket for chromium browsers', function () {
@@ -80,7 +79,7 @@ describe('Socket', function () {
     it('correctly encodes and decodes binary blob data', () => {
       const encoder = new parser.Encoder()
 
-      const obj = {
+      const obj: parser.Packet = {
         type: PacketType.EVENT,
         data: ['a', Buffer.from('abc', 'utf8')],
         // data: ['a', { foo: 'bar' }],
@@ -97,7 +96,6 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error - `attachments` is set by the encoder and is not on the packet type
           obj.attachments = undefined
           expect(packet).toEqual(obj)
           resolve()
@@ -192,7 +190,7 @@ describe('Socket', function () {
 
       circularObj.foo.circularObj = circularObj
 
-      const obj = {
+      const obj: parser.Packet = {
         type: PacketType.EVENT,
         data: ['a', circularObj],
         id: 23,
@@ -208,7 +206,6 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error - `attachments` is set by the encoder and is not on the packet type
           obj.attachments = undefined
           expect(packet.data[1] === packet.data[1].foo.circularObj).toBe(true)
           expect(packet).toEqual(obj)
@@ -228,7 +225,7 @@ describe('Socket', function () {
 
       noProtoObj.foo = 'foo'
 
-      const obj = {
+      const obj: parser.Packet = {
         type: PacketType.EVENT,
         data: ['a', noProtoObj, Buffer.from('123', 'utf8')],
         id: 23,
@@ -244,7 +241,6 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error - `attachments` is set by the encoder and is not on the packet type
           obj.attachments = undefined
           expect(packet).toEqual(obj)
           resolve()
