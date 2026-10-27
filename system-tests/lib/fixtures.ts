@@ -108,7 +108,8 @@ export async function scaffoldProject (project: ProjectFixtureDir): Promise<stri
       await fs.copy(_path.join(projectFixtures, fixtureDir), to, { overwrite: false })
     }
   } catch (err) {
-    if (!(err instanceof Error && 'code' in err && err.code === 'MODULE_NOT_FOUND')) {
+    // Jest's resolver throws this from another realm, where `instanceof Error` is false
+    if (!(typeof err === 'object' && err !== null && 'code' in err && err.code === 'MODULE_NOT_FOUND')) {
       throw err
     }
   }
