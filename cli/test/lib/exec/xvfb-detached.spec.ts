@@ -70,6 +70,16 @@ describe.skipIf(os.platform() === 'win32')('lib/exec/xvfb DetachedXvfb', functio
     expect(proc.stderr).toBeNull()
   })
 
+  it('starts Xvfb with -terminate, so it exits once the app it was started for has closed', async function () {
+    const argsFile = path.join(binDir, 'args')
+
+    installFakeXvfb(`echo "$@" > ${argsFile}\ntouch ${LOCK_FILE}\nexec sleep 30`)
+
+    await start(new DetachedXvfb({ displayNum: DISPLAY_NUM, timeout: 5000, xvfb_args: ['-screen', '0', '1280x1024x24'] }))
+
+    expect(fs.readFileSync(argsFile, 'utf8').trim()).toBe(`:${DISPLAY_NUM} -terminate -screen 0 1280x1024x24`)
+  })
+
   it('reports an Xvfb that exits with an error as a non-zero exit', async function () {
     installFakeXvfb('exit 3')
 

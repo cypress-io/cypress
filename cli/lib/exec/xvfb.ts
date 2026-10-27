@@ -29,6 +29,8 @@ const xvfbOptions: any = {
 // after the CLI exits keeps its display when a host ends the CLI's process group or closes its
 // output. @cypress/xvfb offers no option for this, so only the spawn is replaced and the display
 // choice, lock file wait and timeout stay the library's.
+// Once the CLI has exited nothing is left to stop this Xvfb, so `-terminate` has it exit, and remove
+// its lock file, when its last client disconnects: when the app closes or crashes.
 // The library ships no usable types for the members the override reaches into
 const XvfbBase: any = Xvfb
 
@@ -50,7 +52,7 @@ export class DetachedXvfb extends XvfbBase {
       return
     }
 
-    const proc = cp.spawn('Xvfb', [display, ...this._xvfb_args], { detached: true, stdio: 'ignore' })
+    const proc = cp.spawn('Xvfb', [display, '-terminate', ...this._xvfb_args], { detached: true, stdio: 'ignore' })
 
     this._process = proc
 
