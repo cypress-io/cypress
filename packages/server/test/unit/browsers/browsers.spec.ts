@@ -678,6 +678,50 @@ describe('lib/browsers/index', () => {
     })
   })
 
+  describe('launch padding', () => {
+    const openElectron = (isTextTerminal: boolean) => {
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      vi.spyOn(electron, 'open').mockResolvedValue(browserInstance)
+
+      const onBrowserOpen = vi.fn()
+      const setBrowserStatus = vi.spyOn(ctx.actions.app, 'setBrowserStatus')
+      const delay = vi.spyOn(Promise, 'delay').mockResolvedValue(undefined as any)
+
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url: 'http://localhost:3000', isTextTerminal, onBrowserOpen } as any, null, ctx)
+      .then((instance) => {
+        return { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay }
+      })
+    }
+
+    afterEach(() => {
+      return browsers.close()
+    })
+
+    // run mode waits for the socket to connect instead
+    it('does not pad the launch in run mode', async () => {
+      const { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay } = await openElectron(true)
+
+      expect(delay).not.toHaveBeenCalled()
+      expect(instance).toBe(browserInstance)
+      expect(onBrowserOpen).toHaveBeenCalledOnce()
+      expect(setBrowserStatus).toHaveBeenLastCalledWith('open')
+    })
+
+    it('pads the launch before reporting the browser open in open mode', async () => {
+      const { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay } = await openElectron(false)
+
+      expect(delay).toHaveBeenCalledWith(1000)
+      expect(delay.mock.invocationCallOrder[0]).toBeLessThan(onBrowserOpen.mock.invocationCallOrder[0])
+      expect(instance).toBe(browserInstance)
+      expect(setBrowserStatus).toHaveBeenLastCalledWith('open')
+    })
+  })
+
   describe('didBrowserPreviouslyHaveUnexpectedExit', () => {
     it('sets didBrowserPreviouslyHaveUnexpectedExit when the browser unexpectedly closes', () => {
       const url: TestUrl = 'http://localhost:3000'

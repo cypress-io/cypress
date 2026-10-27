@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- `cypress run` now starts a spec about 0.6 seconds sooner whenever it launches a new browser for that spec. Electron launches a new browser for every spec unless component testing's `experimentalSingleTabRunMode` is enabled, and other browsers do so for the first spec. In a run of 30 short specs in Electron, total run time dropped by about 18 seconds, or 22% for end-to-end specs and 21% for component specs. `cypress open` is unchanged. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
