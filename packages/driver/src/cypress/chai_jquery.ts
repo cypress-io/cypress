@@ -61,7 +61,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
       a = a.not
     }
 
-    // @ts-expect-error - TODO: Fix this
+    // @ts-expect-error - property() expects a [name, message?] tuple, not any[]
     return a.property.apply(a, args)
   })
 

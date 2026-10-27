@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises'
 export const getPathToExtension = (...args: string[]) => {
   args = [__dirname, '..', 'app-dist', 'v2'].concat(args)
 
-  return path.join.apply(path, args)
+  return path.join(...args)
 }
 
 export const getPathToV3Extension = (...args: string[]) => {

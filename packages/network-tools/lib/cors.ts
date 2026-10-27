@@ -193,7 +193,6 @@ export function urlMatchesOriginProtectionSpace (urlStr: string, origin: string)
  * ex: http://www.example.com:8081/my/path -> http://example.com:8081
  */
 export function getSuperDomainOrigin (url: string) {
-  // @ts-ignore
   const { port, protocol } = new URL(url)
 
   // super domain origin is comprised of:

@@ -98,7 +98,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
           return consoleProps
         },
-        // @ts-ignore TODO: revisit once log-grouping has more implementations
+        // @ts-expect-error - the log callback does not match ApiCallback. TODO: revisit once log-grouping has more implementations
       }, (_log) => {
         log = _log
       })
@@ -261,8 +261,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
               file,
               // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
               // this should only be used for internal testing. Cast to boolean to guarantee serialization
-              // @ts-ignore
-              skipConfigValidation: !!window.top.__cySkipValidateConfig,
+              skipConfigValidation: !!window.top?.__cySkipValidateConfig,
               state: {
                 viewportWidth: Cypress.state('viewportWidth'),
                 viewportHeight: Cypress.state('viewportHeight'),
@@ -304,9 +303,10 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
               },
             }, stack)
 
-            // @ts-ignore - This keeps Bluebird from messing with the stack.
+            // This keeps Bluebird from messing with the stack.
             // It tries to add a bunch of stuff that's not useful and ends up
             // messing up the stack that we want on the error
+            // @ts-expect-error - __stackCleaned__ is a Bluebird flag, not declared on CypressError
             wrappedErr.__stackCleaned__ = true
             _reject(wrappedErr)
           }
