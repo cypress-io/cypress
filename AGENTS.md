@@ -279,7 +279,7 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 ### Changelog & Template
 
 - The semantic title prefix decides whether an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) is required, which section it belongs in, and how it must be phrased. The [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) is the source of truth for all of it — read it rather than guessing, and note that a `fix` prefix always requires an entry.
-- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
+- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. A release can ship while a branch is open, so run it after every edit to `cli/CHANGELOG.md`, after resolving a merge conflict in it, and after merging or pulling `develop`, even with no conflict. It needs a root `yarn` install, a working token, and history back to the last release tag, and a rejected token passes silently. [Verifying Your Entry](./guides/writing-the-cypress-changelog.md#verifying-your-entry) covers each prerequisite and how to tell a real pass from an empty one.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
@@ -350,6 +350,16 @@ echo "export PATH=\"$(nvm which current | xargs dirname):\$PATH\"" >> ~/.bashrc
 Verify with `node -v` in a *fresh* shell rather than the one that ran `nvm use`.
 
 Prefer this over `yarn --ignore-engines`: the flag only silences the check for the install itself. `yarn <script>` still refuses to run afterwards (`Commands cannot run with an incompatible environment`), and the postinstall rebuilds native modules such as `better-sqlite3` against the wrong Node.
+
+### Scripts that call the GitHub API
+
+Hosts that route outbound HTTPS through a proxy, such as Claude Code on the web, may hand out a `gh auth token` that only works through that proxy. Node's built-in `fetch`, which `@octokit/core` uses, ignores `HTTPS_PROXY` unless `NODE_USE_ENV_PROXY=1` is set, so its requests skip the proxy and GitHub answers `401 Bad credentials`. Set it for any Node script that calls the GitHub API, such as the changelog check:
+
+```bash
+NODE_USE_ENV_PROXY=1 GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js
+```
+
+Hosted containers also tend to clone shallow and without tags, which that check needs. [Verifying Your Entry](./guides/writing-the-cypress-changelog.md#prerequisites) has the commands to fetch them.
 
 ### Key caveats
 

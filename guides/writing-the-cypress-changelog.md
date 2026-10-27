@@ -73,7 +73,7 @@ This changelog describes the **binary**. Validation only considers changed files
     - _Example (`on.cypress.io`):_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`before:spec`](https://on.cypress.io/before-spec-api) ``.
     - _Example (`docs.cypress.io`):_ `` [`before:spec`](https://docs.cypress.io/api/plugins/before-spec-api) ``, `` [`numTestsKeptInMemory`](https://docs.cypress.io/app/references/configuration#Global) ``.
 11. If a change is only observable under a specific run context (e.g. `cypress run` vs. `cypress open`, or behind an experimental flag), state which context is affected so users can tell whether the change applies to them.
-12. A release often ships between the commit that adds an entry and the review that merges it. Re-check placement every time you pull `develop`, and again before marking a pull request ready: if a new `## X.Y.Z` heading has appeared above your entry, move the entry up into the new topmost release, keeping it under the same named section there. The entry still reads correctly in the diff, so reviewers can miss it, but validation fails any entry your branch adds under a version already published to npm and names the release to move it to. Edits to existing entries under a published version are allowed.
+12. A release often ships between the commit that adds an entry and the review that merges it. Re-check placement every time you pull `develop`, and again before marking a pull request ready, by running [the validation script](#when-to-run-it): if a new `## X.Y.Z` heading has appeared above your entry, move the entry up into the new topmost release, keeping it under the same named section there. The entry still reads correctly in the diff, so reviewers can miss it, but validation fails any entry your branch adds under a version already published to npm and names the release to move it to. Edits to existing entries under a published version are allowed.
 
 ## Dependency Updates and Security Advisories
 
@@ -116,10 +116,34 @@ Run the same check CI's `verify-release-readiness` job runs:
 GH_TOKEN=<token> node ./scripts/semantic-commits/validate-binary-changelog.js
 ```
 
-Two prerequisites, both of which fail before the script reaches any changelog logic:
+### When to run it
+
+A release can ship at any time, which moves the line between released and unreleased versions without touching your branch. Run the check:
+
+- after you add or edit an entry in `cli/CHANGELOG.md`;
+- after you resolve a merge conflict in `cli/CHANGELOG.md`, since keeping both sides can leave your entry under a version that has since shipped;
+- after you merge or pull the latest `develop` into your branch, even when nothing conflicts;
+- before you mark a pull request ready for review.
+
+### Prerequisites
 
 - **A root `yarn` install.** The script loads `bluebird` and `@octokit/core` from the root `node_modules`. Without them it exits at `Cannot find module 'bluebird'` — a missing dependency, not a problem with your entry.
-- **`GH_TOKEN`.** It queries the GitHub API for the last release and this branch's commits, and throws `The GH_TOKEN env is not set.` without one. Any token with public repo read access works; `gh auth token` supplies one.
+- **A working `GH_TOKEN`.** It queries the GitHub API for every pull request merged since the last release, and throws `The GH_TOKEN env is not set.` without one. Any token with public repo read access works; `gh auth token` supplies one.
+- **Git history back to the last release, and its tag.** The script diffs against the commit npm reports for the latest release and reads commits since its `vX.Y.Z` tag. A normal clone has both. A shallow clone (`git rev-parse --is-shallow-repository` prints `true`) needs them fetched:
+
+  ```bash
+  VERSION=$(yarn -s info cypress version)
+  git fetch --shallow-since="$(yarn -s info cypress buildInfo.commitDate)" origin develop
+  git fetch origin "refs/tags/v$VERSION:refs/tags/v$VERSION"
+  ```
+
+  Without the release commit, the script fails at `Command failed: git diff <sha>..`. Without the tag, it reports the wrong next version and checks the wrong set of commits.
+
+### Confirm the run checked your changes
+
+A failed pull request lookup does not fail the run. With a rejected token, every lookup fails, and the script prints `0 pull requests have merged since <version> was released` and then `Does not contain any user-facing changes`, and exits 0. If pull requests have merged since the last release, a count of 0 means the lookups failed. Rerun with `DEBUG=scripts:semantic-commits:get-binary-release-data` to see each lookup's error.
+
+### Reading the result
 
 Run it on your feature branch. The gate that limits full-changelog validation to `develop` and `release/X.Y.Z` applies only under `CIRCLECI`, so a local run validates the whole changelog whatever branch you are on.
 
