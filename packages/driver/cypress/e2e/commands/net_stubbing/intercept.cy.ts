@@ -793,7 +793,7 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        // @ts-expect-error - deliberately passes both a static response and a handler
+        // @ts-expect-error - deliberately repeats `url` in the RouteMatcher
         cy.intercept(url, { url }, () => {})
       })
 

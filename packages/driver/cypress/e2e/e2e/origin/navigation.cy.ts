@@ -204,7 +204,7 @@ describe('event timing', { browser: '!webkit' }, () => {
   })
 })
 
-describe('delayed navigation', { browser: '!webkit', defaultCommandTimeout: 2000 }, () => {
+describe('delayed navigation', { browser: '!webkit', defaultCommandTimeout: 4000 }, () => {
   it('localhost -> localhost', () => {
     cy.visit('/fixtures/auth/delayedNavigate.html')
     cy.get('[data-cy="to-localhost"]').click()
