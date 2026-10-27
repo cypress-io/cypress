@@ -10,8 +10,8 @@ import { typescript as resolveTypescript } from '../../util/resolve'
 import { wrapBefore as wrapBeforeBrowserLaunch } from './browser_launch'
 import { nonNodeRequires, serializeError, wrapChildPromise } from '../util'
 import { validateEvent } from './validate_event'
-import { processCallback as processCrossOriginCallback } from './cross_origin'
 import type {
+  CrossOriginCallbackArgs,
   PluginChildIpc,
   PluginExecuteEvent,
   PluginInvokeIds,
@@ -108,7 +108,14 @@ export class RunPlugins {
     // events used for parent/child communication
     registerChildEvent('_get:task:body', () => {})
     registerChildEvent('_get:task:keys', () => {})
-    registerChildEvent('_process:cross:origin:callback', processCrossOriginCallback)
+    // webpack, which cross_origin loads, is only needed for Cypress.require() inside cy.origin()
+    registerChildEvent('_process:cross:origin:callback', async (args: CrossOriginCallbackArgs) => {
+      const { processCallback } = await import('./cross_origin')
+
+      return processCallback(args)
+    })
+
+    let preloadDefaultPreprocessor: (() => void) | undefined
 
     return Promise
     .try(() => {
@@ -119,7 +126,14 @@ export class RunPlugins {
     .tap(() => {
       if (!this.registeredEventsByName['file:preprocessor']) {
         debug('register default preprocessor')
-        registerChildEvent('file:preprocessor', this._getDefaultPreprocessor(initialConfig))
+        const defaultPreprocessor = this._getDefaultPreprocessor(initialConfig)
+
+        registerChildEvent('file:preprocessor', defaultPreprocessor.handler)
+
+        // component testing serves specs from its dev server and never calls the preprocessor
+        if (initialConfig.testingType === 'e2e') {
+          preloadDefaultPreprocessor = defaultPreprocessor.load
+        }
       } else {
         const handler = this.registeredEventsById[this.registeredEventsByName['file:preprocessor']].handler
 
@@ -134,6 +148,21 @@ export class RunPlugins {
         registrations: this.registrations,
         requires: nonNodeRequires(),
       })
+
+      if (preloadDefaultPreprocessor) {
+        const preload = preloadDefaultPreprocessor
+
+        // Loading it after the reply overlaps with the server's startup instead of delaying it.
+        // setImmediate lets the reply go out first, since the require blocks this process.
+        setImmediate(() => {
+          try {
+            preload()
+          } catch (err) {
+            // the first file:preprocessor call loads it again and reports the error
+            debug('preloading the default preprocessor failed: %o', err)
+          }
+        })
+      }
     })
     .catch((err) => {
       debug('plugins file errored:', err && err.stack)
@@ -236,7 +265,25 @@ export class RunPlugins {
     wrapChildPromise(this.ipc, invoke, ids, [arg])
   }
 
+  /**
+   * The webpack preprocessor is slow to require, so it is created on first use
+   */
   _getDefaultPreprocessor (config: Cypress.PluginConfigOptions) {
+    let preprocessor: ((...args: any[]) => any) | undefined
+
+    const load = () => {
+      preprocessor ??= this._createDefaultPreprocessor(config)
+
+      return preprocessor
+    }
+
+    return {
+      handler: (...args: any[]) => load()(...args),
+      load,
+    }
+  }
+
+  _createDefaultPreprocessor (config: Cypress.PluginConfigOptions): (...args: any[]) => any {
     const tsPath = resolveTypescript(config.projectRoot)
     const options = {
       ...tsPath && { typescript: tsPath },

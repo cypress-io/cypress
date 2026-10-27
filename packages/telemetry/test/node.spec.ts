@@ -1,3 +1,5 @@
+import { execFileSync } from 'child_process'
+import path from 'path'
 import { describe, it, expect, beforeAll, vi } from 'vitest'
 import { telemetry, encodeTelemetryContext, decodeTelemetryContext } from '../src/node'
 import { OTLPTraceExporter as OTLPTraceExporterCloud } from '../src/span-exporters/cloud-span-exporter'
@@ -204,5 +206,36 @@ describe('encode/decode', () => {
 
     expect(decodedContext.context).toBeUndefined()
     expect(decodedContext.version).toBeUndefined()
+  })
+})
+
+describe('module loading', () => {
+  // Runs in a fresh process, since this one has loaded the SDK for the other specs
+  const loadedOpenTelemetryModules = (script: string, env: Record<string, string> = {}): string[] => {
+    const output = execFileSync(process.execPath, ['--import', 'tsx', '-e', `
+      const { telemetry, createIpcExporter } = require(${JSON.stringify(path.join(__dirname, '../src/node.ts'))})
+      ${script}
+      console.log(JSON.stringify(Object.keys(require.cache).filter((m) => m.includes('@opentelemetry'))))
+    `], { env: { ...process.env, CYPRESS_INTERNAL_ENABLE_TELEMETRY: '', CYPRESS_INTERNAL_ENABLE_TELEMETRY_VERBOSE: '', ...env } })
+
+    return JSON.parse(output.toString())
+  }
+
+  it('does not load the OpenTelemetry SDK when telemetry is disabled', () => {
+    const modules = loadedOpenTelemetryModules(`
+      telemetry.init({ namespace: 'namespace', version: 'version', exporter: undefined })
+      telemetry.startSpan({ name: 'span' })
+    `)
+
+    expect(modules).toEqual([])
+  })
+
+  it('loads the OpenTelemetry SDK when telemetry is initialized', () => {
+    const modules = loadedOpenTelemetryModules(`
+      telemetry.init({ namespace: 'namespace', version: 'version', exporter: createIpcExporter() })
+    `, { CYPRESS_INTERNAL_ENABLE_TELEMETRY: 'true' })
+
+    expect(modules.some((m) => m.includes('@opentelemetry/sdk-trace-node'))).toBe(true)
+    expect(modules.some((m) => m.includes('@opentelemetry/resources'))).toBe(true)
   })
 })

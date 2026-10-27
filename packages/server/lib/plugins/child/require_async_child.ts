@@ -2,7 +2,8 @@ process.title = 'Cypress: Config Manager'
 
 import os from 'os'
 import Debug from 'debug'
-import { telemetry, OTLPTraceExporterIpc, decodeTelemetryContext } from '@packages/telemetry'
+import { telemetry, createIpcExporter, decodeTelemetryContext } from '@packages/telemetry'
+import type { OTLPTraceExporterIpc } from '@packages/telemetry'
 import minimist from 'minimist'
 import fs from 'fs'
 import * as util from '../util'
@@ -34,9 +35,11 @@ debug('initializing telemetry')
 
 const { context, version } = decodeTelemetryContext(telemetryCtx ?? '')
 
-const exporter = new OTLPTraceExporterIpc()
+let exporter: OTLPTraceExporterIpc | undefined
 
-if (version && context) {
+// The parent passes a context even when its own telemetry is off, so check the env as well
+if (version && context && telemetry.isEnabled()) {
+  exporter = createIpcExporter()
   telemetry.init({ namespace: 'cypress:child:process', context, version, exporter })
 }
 
@@ -49,7 +52,7 @@ suppressWarnings({ showTlsWarning: true })
 gracefulify(fs)
 const ipc = util.wrapIpc(process as unknown as util.WrappedIpcProcess)
 
-exporter.attachIPC(ipc)
+exporter?.attachIPC(ipc)
 
 let disconnection: Promise<void> | null = null
 let resolveWillDisconnect!: () => void

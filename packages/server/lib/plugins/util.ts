@@ -6,7 +6,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import Debug from 'debug'
 import type { CompilerErrorLocation, ProcessIpcWrapper, TransformError } from '@packages/types'
-import { stackUtils } from '@packages/errors'
 import type { SerializedError } from '@packages/errors'
 import type { PluginInvokeIds } from './child/types'
 
@@ -75,6 +74,9 @@ export const buildErrorLocationFromConfigFileError = async (
   const resolvedConfigPath = path.resolve(configFilePath)
 
   if (err.stack) {
+    // loaded here so the config child, which imports this module, only pays for it on an error
+    const { stackUtils }: typeof import('@packages/errors') = require('@packages/errors')
+
     const stackLines = stackUtils.getStackLines(err.stack)
 
     for (let stackLineIndex = stackLines.length - 1; stackLineIndex >= 0; stackLineIndex--) {

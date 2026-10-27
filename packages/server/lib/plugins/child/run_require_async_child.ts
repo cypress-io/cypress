@@ -3,11 +3,13 @@ import { pathToFileURL } from 'url'
 import * as util from '../util'
 import { RunPlugins } from './run_plugins'
 import type { ConfigFileExport, DevServerInfo, PluginChildIpc, SetupNodeEventsFn } from './types'
-import { getError } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 import type { TransformError } from '@packages/types'
 
 const debug = debugLib(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
+
+// @packages/errors is only needed on the error paths, so it loads on first use
+const errors = (): typeof import('@packages/errors') => require('@packages/errors')
 
 const dynamicImport = new Function('id', 'return import(id)') as (id: string) => Promise<unknown>
 
@@ -53,7 +55,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
 
     if (testingTypeConfig?.setupNodeEvents && typeof testingTypeConfig.setupNodeEvents !== 'function') {
       ipc.send('setupTestingType:error', util.serializeError(
-        getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', file, testingType, testingTypeConfig.setupNodeEvents),
+        errors().getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', file, testingType, testingTypeConfig.setupNodeEvents),
       ))
 
       return false
@@ -85,7 +87,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
     }
 
     ipc.send('setupTestingType:error', util.serializeError(
-      getError('CONFIG_FILE_DEV_SERVER_IS_NOT_VALID', file, config),
+      errors().getError('CONFIG_FILE_DEV_SERVER_IS_NOT_VALID', file, config),
     ))
 
     return false
@@ -154,7 +156,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
 
             const onConfigNotFound = (devServerName: 'vite' | 'webpack', root: string, searchedFor: string[]) => {
               ipc.send('setupTestingType:error', util.serializeError(
-                getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServerName, root, searchedFor),
+                errors().getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServerName, root, searchedFor),
               ))
             }
 
@@ -218,7 +220,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
       }
 
       ipc.send('loadConfig:error', util.serializeError(
-        getError('CONFIG_FILE_REQUIRE_ERROR', file, loadErr),
+        errors().getError('CONFIG_FILE_REQUIRE_ERROR', file, loadErr),
       ))
     }
   })

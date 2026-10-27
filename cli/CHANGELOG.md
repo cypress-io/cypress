@@ -4,6 +4,7 @@
 **Performance:**
 
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
+- Cypress now reads your config file about twice as fast each time `cypress open` or `cypress run` starts, the config file changes, or you switch testing types. The separate Node process that loads the config file no longer loads Cypress's telemetry, the bundler used by [`Cypress.require()`](https://on.cypress.io/origin) inside [`cy.origin()`](https://on.cypress.io/origin), or the default spec preprocessor until they are needed, so it reads a minimal config file in about 180 ms instead of about 350 ms. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Bugfixes:**
 

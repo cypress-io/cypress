@@ -1,6 +1,6 @@
 const Debug = require('debug')
 const { isRunning: isElectronRunning } = require('./lib/util/electron-app')
-const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
+const { telemetry, createCloudExporter } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
@@ -39,14 +39,14 @@ if (isRunningElectron) {
   // To pass unencrypted telemetry data to an independent open telemetry endpoint,
   // disable the encryption header, update the url, and add any other required headers.
   // For example:
-  // const exporter = new OTLPTraceExporterCloud({
+  // const exporter = createCloudExporter({
   //   url: 'https://api.honeycomb.io/v1/traces',
   //   headers: {
   //     'x-honeycomb-team': 'key',
   //   },
   // })
   // See additional information here: https://github.com/cypress-io/cypress/blob/develop/packages/telemetry/README.md#otlptraceexportercloud
-  const exporter = new OTLPTraceExporterCloud({
+  const exporter = createCloudExporter({
     url: apiRoutes.telemetry(),
     encryption,
   })

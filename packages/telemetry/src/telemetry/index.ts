@@ -8,7 +8,7 @@ import type { Span, SpanOptions, Tracer, Context, Attributes } from '@openteleme
 import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter, ReadableSpan } from '@opentelemetry/sdk-trace-base'
 import type { DetectorSync } from '@opentelemetry/resources'
 
-export const enabledValues = ['true', '1']
+export { TelemetryNoop } from './noop'
 
 const environment = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -58,7 +58,7 @@ const getAllAttributes = (span: Span): Attributes => {
   return allAttributes
 }
 
-interface TelemetryApi {
+export interface TelemetryApi {
   startSpan(arg: startSpanOptions): Span | undefined | void
   getSpan(name: string): Span | undefined
   findActiveSpan(fn: findActiveSpanOptions): Span | undefined
@@ -344,48 +344,5 @@ export class Telemetry implements TelemetryApi {
       this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject.context)
       this.rootAttributes = rootContextObject.attributes
     }
-  }
-}
-
-/**
- * The telemetry Noop class is used when telemetry is disabled.
- * It should mirror all the existing functions in telemetry, but no-op for
- * all operations.
- */
-export class TelemetryNoop implements TelemetryApi {
-  startSpan (arg: startSpanOptions): Span | undefined {
-    return undefined
-  }
-
-  getSpan (name: string): Span | undefined {
-    return undefined
-  }
-
-  findActiveSpan (fn: findActiveSpanOptions): Span | undefined {
-    return undefined
-  }
-
-  endActiveSpanAndChildren (span?: Span | undefined): void {
-    return undefined
-  }
-
-  getActiveContextObject (): contextObject {
-    return {}
-  }
-
-  getResources (): Attributes {
-    return {}
-  }
-
-  shutdown (): Promise<void> {
-    return Promise.resolve()
-  }
-
-  getExporter (): SpanExporter | undefined {
-    return undefined
-  }
-
-  setRootContext (rootContextObject?: contextObject): void {
-    return undefined
   }
 }

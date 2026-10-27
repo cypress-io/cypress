@@ -78,16 +78,16 @@ const { telemetry } = require('@packages/telemetry')
 telemetry.init({options})
 ```
 
-The node telemetry instance has a couple of exporters to choose from, the `OTLPTraceExporterCloud` and `OTLPTraceExporterIpc`.
+The node telemetry instance has a couple of exporters to choose from, the `OTLPTraceExporterCloud` and `OTLPTraceExporterIpc`. They are exported as types and created with `createCloudExporter` and `createIpcExporter`, so the exporter and the OpenTelemetry SDK only load in processes that use them.
 
 #### OTLPTraceExporterCloud
 
 The `OTLPTraceExporterCloud` will send telemetry as an http request to the supplied url and can be configured to encrypt the data. Within Cypress the exporter will encrypt data by default and send it to the cloud telemetry endpoint.
 
 ```js
-const { OTLPTraceExporterCloud } = require('@packages/telemetry')
+const { createCloudExporter } = require('@packages/telemetry')
 
-const exporter = new OTLPTraceExporterCloud({
+const exporter = createCloudExporter({
   url: apiRoutes.telemetry(),
   encryption,
 })
@@ -96,7 +96,8 @@ const exporter = new OTLPTraceExporterCloud({
 When sending data to the cloud telemetry endpoint you must attach the project id and the record key to the exporter as a header when it is available.
 
 ```js
-const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
+import { telemetry } from '@packages/telemetry'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 
 (telemetry.exporter() as OTLPTraceExporterCloud)?.attachProjectId(config.projectId)
 
@@ -107,8 +108,8 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 When developing Cypress locally it is possible to override the telemetry endpoint and send unencrypted data to your own honeycomb instance. This is recommended when verifying newly added spans and any sort of local telemetry development.
 
 ```js
-const { OTLPTraceExporterCloud } = require('@packages/telemetry')
-const exporter = new OTLPTraceExporterCloud({
+const { createCloudExporter } = require('@packages/telemetry')
+const exporter = createCloudExporter({
   url: 'https://api.honeycomb.io/v1/traces',
   headers: {
     'x-honeycomb-team': 'key',
@@ -121,8 +122,8 @@ const exporter = new OTLPTraceExporterCloud({
 The `OTLPTraceExporterCloud` will send telemetry as an ipc message, the receiver of the message is responsible for forwarding it on to an OTEL collector. This is used in the child process. The ipc connection must be attached before telemetry data will be sent.
 
 ```js
-const { OTLPTraceExporterIPC } = require('@packages/telemetry')
-const exporter = new OTLPTraceExporterIpc.OTLPTraceExporterIpc()
+const { createIpcExporter } = require('@packages/telemetry')
+const exporter = createIpcExporter()
 
 exporter.attachIPC(ipc)
 ```
@@ -130,7 +131,8 @@ exporter.attachIPC(ipc)
 The `OTLPTraceExporterCloud` exporter has a handy send method you can use to forward on the telemetry requests.
 
 ```js
-const { OTLPTraceExporterIPC } = require('@packages/telemetry')
+import { telemetry } from '@packages/telemetry'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 
 (telemetry.exporter() as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
   debug('error exporting telemetry data %s', err)
@@ -167,7 +169,8 @@ The receiver of the websocket message is responsible for forwarding it on to an 
 The `OTLPTraceExporterCloud` exporter has a handy send method you can use to forward on the telemetry requests.
 
 ```js
-const { OTLPTraceExporterIPC } = require('@packages/telemetry')
+import { telemetry } from '@packages/telemetry'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 
 (telemetry.exporter() as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
   debug('error exporting telemetry data %s', err)

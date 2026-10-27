@@ -78,9 +78,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
         const registrations = sentPayload('setupTestingType:reply').registrations
 
-        expect(webpackPreprocessor).toHaveBeenCalledWith({
-          typescript: '/path/to/typescript.js',
-        })
+        expect(webpackPreprocessor).not.toHaveBeenCalled()
 
         expect(_.last(registrations)).toStrictEqual({
           event: 'file:preprocessor',
@@ -88,7 +86,45 @@ describe('lib/plugins/child/run_plugins', () => {
         })
 
         yieldExecutePlugins('file:preprocessor', { eventId: 5, invocationId: '00' }, ['arg1', 'arg2'])
-        expect(webpackPreprocessorFn, 'webpackPreprocessor').toHaveBeenCalled()
+        yieldExecutePlugins('file:preprocessor', { eventId: 5, invocationId: '01' }, ['arg1', 'arg2'])
+
+        await vi.waitFor(() => expect(webpackPreprocessorFn, 'webpackPreprocessor').toHaveBeenCalledTimes(2))
+        expect(webpackPreprocessor).toHaveBeenCalledOnce()
+        expect(webpackPreprocessor).toHaveBeenCalledWith({
+          typescript: '/path/to/typescript.js',
+        })
+      })
+
+      it('creates the default preprocessor after the reply for e2e', async () => {
+        const webpackPreprocessor = vi.fn().mockReturnValue(vi.fn())
+
+        vi.spyOn(resolve, 'typescript').mockReturnValue(null)
+        registerWebpackPreprocessorMock(webpackPreprocessor)
+
+        await runPlugins.runSetupNodeEvents({ ...config, testingType: 'e2e' }, setupNodeEventsFn)
+
+        expect(ipc.send).toHaveBeenCalledWith('setupTestingType:reply', expect.anything())
+        expect(webpackPreprocessor).not.toHaveBeenCalled()
+
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(webpackPreprocessor).toHaveBeenCalledOnce()
+
+        yieldExecutePlugins('file:preprocessor', { eventId: 5, invocationId: '00' }, ['arg1'])
+
+        expect(webpackPreprocessor).toHaveBeenCalledOnce()
+      })
+
+      it('does not create the default preprocessor for component testing until it is called', async () => {
+        const webpackPreprocessor = vi.fn().mockReturnValue(vi.fn())
+
+        vi.spyOn(resolve, 'typescript').mockReturnValue(null)
+        registerWebpackPreprocessorMock(webpackPreprocessor)
+
+        await runPlugins.runSetupNodeEvents({ ...config, testingType: 'component' }, setupNodeEventsFn)
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(webpackPreprocessor).not.toHaveBeenCalled()
       })
 
       it('does not register default preprocessor if registered by user', async () => {
@@ -276,13 +312,14 @@ describe('lib/plugins/child/run_plugins', () => {
       describe('_process:cross:origin:callback', () => {
         it('calls processCallback with args', async () => {
           const ids = { eventId: '2' }
+          const args = { file: 'spec.cy.js', fn: 'fn', projectRoot: 'proj-root' }
 
           vi.spyOn(crossOrigin, 'processCallback').mockImplementation(() => undefined as never)
 
           await runPlugins.runSetupNodeEvents({}, setupNodeEventsFn)
-          await runPlugins.execute('_process:cross:origin:callback', ids, ['arg1', 'arg2'])
+          await runPlugins.execute('_process:cross:origin:callback', ids, [args])
 
-          expect(crossOrigin.processCallback).toHaveBeenCalledWith('arg1', 'arg2')
+          expect(crossOrigin.processCallback).toHaveBeenCalledWith(args)
         })
       })
     })

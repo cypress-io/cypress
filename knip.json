@@ -418,6 +418,9 @@
     "packages/telemetry": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tsx"
       ]
     },
     "packages/types": {

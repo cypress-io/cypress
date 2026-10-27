@@ -1,16 +1,16 @@
 import type { Span } from '@opentelemetry/api'
-import type { startSpanOptions, findActiveSpanOptions, contextObject } from './telemetry/index'
-import {
-  envDetectorSync, hostDetectorSync, osDetectorSync, processDetectorSync,
-} from '@opentelemetry/resources'
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { circleCiDetectorSync } from './detectors/circleCiDetectorSync'
-import { enabledValues, Telemetry as TelemetryClass, TelemetryNoop } from './telemetry/index'
-import { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'
-import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
+import type { startSpanOptions, findActiveSpanOptions, contextObject, Telemetry as TelemetryClass } from './telemetry/index'
+import type { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'
+import type { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
+import { TelemetryNoop } from './telemetry/noop'
 
-export { OTLPTraceExporterIpc, OTLPTraceExporterCloud, Span }
+export type { OTLPTraceExporterIpc, OTLPTraceExporterCloud, Span }
+
+// The OpenTelemetry SDK and the exporters are required on demand rather than at module scope.
+// Telemetry is off by default, and processes without a V8 snapshot, like the config child on
+// the user's Node, would otherwise pay to load them on every start.
+
+const enabledValues = ['true', '1']
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
@@ -55,12 +55,19 @@ const init = ({
     return
   }
 
+  const { Telemetry }: typeof import('./telemetry/index') = require('./telemetry/index')
+
   // Telemetry only needs to be initialized once.
-  if (telemetryInstance instanceof TelemetryClass) {
+  if (telemetryInstance instanceof Telemetry) {
     throw ('Telemetry instance has already be initialized')
   }
 
-  telemetryInstance = new TelemetryClass({
+  const { envDetectorSync, hostDetectorSync, osDetectorSync, processDetectorSync }: typeof import('@opentelemetry/resources') = require('@opentelemetry/resources')
+  const { BatchSpanProcessor }: typeof import('@opentelemetry/sdk-trace-base') = require('@opentelemetry/sdk-trace-base')
+  const { NodeTracerProvider }: typeof import('@opentelemetry/sdk-trace-node') = require('@opentelemetry/sdk-trace-node')
+  const { circleCiDetectorSync }: typeof import('./detectors/circleCiDetectorSync') = require('./detectors/circleCiDetectorSync')
+
+  telemetryInstance = new Telemetry({
     namespace,
     Provider: NodeTracerProvider,
     detectors: [
@@ -74,6 +81,25 @@ const init = ({
   })
 
   return
+}
+
+/**
+ * Creates the exporter that sends spans as http requests, encrypted by default, to Cypress Cloud.
+ * @param options - the exporter options
+ */
+export const createCloudExporter = (options?: ConstructorParameters<typeof OTLPTraceExporterCloud>[0]): OTLPTraceExporterCloud => {
+  const { OTLPTraceExporter }: typeof import('./span-exporters/cloud-span-exporter') = require('./span-exporters/cloud-span-exporter')
+
+  return new OTLPTraceExporter(options)
+}
+
+/**
+ * Creates the exporter that sends spans over ipc to the parent process, which forwards them.
+ */
+export const createIpcExporter = (): OTLPTraceExporterIpc => {
+  const { OTLPTraceExporter }: typeof import('./span-exporters/ipc-span-exporter') = require('./span-exporters/ipc-span-exporter')
+
+  return new OTLPTraceExporter()
 }
 
 export const telemetry = {
