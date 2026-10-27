@@ -27,13 +27,15 @@ describe('cy/commands/navigation', () => {
 
   beforeEach(() => {
     mockCypress = {
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.log
       log: vi.fn(),
       automation: vi.fn(),
       isBrowser: vi.fn(),
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.backend
       backend: vi.fn(),
       isCrossOriginSpecBridge: false,
       ensure: {
-        // @ts-expect-error - `commandCanCommunicateWithAUT` is not declared on the Ensure type
+        // @ts-expect-error - the public Cypress.Ensure type omits the internal `commandCanCommunicateWithAUT`
         commandCanCommunicateWithAUT: vi.fn(),
       },
       // @ts-expect-error - vi.fn() does not match the overloads of Cypress.config
@@ -59,6 +61,8 @@ describe('cy/commands/navigation', () => {
       if (key === 'pageLoadTimeout') {
         return 10000
       }
+
+      return undefined
     })
 
     // @ts-expect-error - $utils.locReload is a vi.mock, but typed as the real function
@@ -100,6 +104,8 @@ describe('cy/commands/navigation', () => {
             if (key === 'window') {
               return mockWindow
             }
+
+            return undefined
           })
 
           reload.call(mockContext, mockCypress, mockCy, mockState, mockCypress.config, [true])
@@ -129,6 +135,8 @@ describe('cy/commands/navigation', () => {
         if (key === 'blockHosts') {
           return ['*.foo.com']
         }
+
+        return undefined
       })
     })
 

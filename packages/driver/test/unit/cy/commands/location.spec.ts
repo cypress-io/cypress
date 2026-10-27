@@ -18,11 +18,12 @@ describe('cy/commands/location', () => {
 
   beforeEach(() => {
     mockCypress = {
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.log
       log: vi.fn(),
       automation: vi.fn(),
       isBrowser: vi.fn(),
       ensure: {
-        // @ts-expect-error - `commandCanCommunicateWithAUT` is not declared on the Ensure type
+        // @ts-expect-error - the public Cypress.Ensure type omits the internal `commandCanCommunicateWithAUT`
         commandCanCommunicateWithAUT: vi.fn(),
       },
       // @ts-expect-error - vi.fn() does not match the overloads of Cypress.config

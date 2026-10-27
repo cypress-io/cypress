@@ -831,7 +831,7 @@ describe('network stubbing', { retries: 15 }, function () {
             done()
           })
 
-          // @ts-expect-error - deliberately passes both a static response and a handler
+          // @ts-expect-error - deliberately passes a fourth argument after the static response
           cy.intercept(url, { middleware: true }, { forceNetworkError: true }, () => {})
         })
 
@@ -843,7 +843,7 @@ describe('network stubbing', { retries: 15 }, function () {
             done()
           })
 
-          // @ts-expect-error - deliberately passes both a static response and a handler
+          // @ts-expect-error - deliberately passes a fourth argument after the static response
           cy.intercept('POST', url, { forceNetworkError: true }, () => {})
         })
       })

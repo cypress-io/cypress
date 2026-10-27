@@ -126,8 +126,7 @@ describe('cy/commands/actions/press', () => {
 
   describe('with an invalid key', () => {
     it('throws an invalid key error', async () => {
-      // @ts-expect-error - `KeyPressSupportedKeys` is not in scope; `Foo` is deliberately an unsupported key
-      const key: KeyPressSupportedKeys = 'Foo'
+      const key = 'Foo'
 
       await expect(press(key)).rejects.toThrow(`\`${key}\` is not supported by \`cy.press()\``)
       expect($errUtils.throwErrByPath).toHaveBeenCalledWith('press.invalid_key', {

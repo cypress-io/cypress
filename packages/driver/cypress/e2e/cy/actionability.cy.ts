@@ -1,4 +1,4 @@
-// @ts-expect-error - spec is a script, so destructuring `$` and `_` redeclares the globals
+// @ts-expect-error - spec is a script, so `$` redeclares the global jQuery and `_` clashes with the lodash namespace
 const { $, _ } = Cypress
 
 describe('src/cy/actionability', () => {
