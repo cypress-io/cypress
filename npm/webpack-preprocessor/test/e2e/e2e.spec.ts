@@ -100,16 +100,12 @@ const runTest = async (options: { spec?: string } = {}) => {
 
 const captureStdio = (stdio: NodeJS.WriteStream, tty?: boolean) => {
   const logs = []
-  const passThrough = null
 
   const write = stdio.write
   const isTTY = stdio.isTTY
 
   stdio.write = function (str) {
     logs.push(str)
-    if (passThrough) {
-      return write.apply(this, [passThrough(str)])
-    }
   }
 
   if (tty !== undefined) stdio.isTTY = tty
