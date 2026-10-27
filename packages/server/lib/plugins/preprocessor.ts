@@ -139,8 +139,6 @@ const API: PreprocessorAPI = {
   },
 
   removeFile (filePath: string, config: Cfg) {
-    let fileObject: FileObject
-
     filePath = path.resolve(config.projectRoot, filePath)
 
     if (!(filePath in fileProcessors)) {
@@ -151,7 +149,7 @@ const API: PreprocessorAPI = {
 
     baseEmitter.emit('close', filePath)
 
-    fileObject = fileObjects[filePath]
+    const fileObject: FileObject = fileObjects[filePath]
 
     if (fileObject) {
       fileObject.emit('close')

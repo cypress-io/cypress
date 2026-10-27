@@ -98,7 +98,7 @@ export class WebKitAutomation {
 
     if (options.videoApi) this.recordVideo(options.videoApi, contextStarted)
 
-    let promises: Promise<any>[] = []
+    const promises: Promise<any>[] = []
 
     promises.push(this.markAutIframeRequests())
 
