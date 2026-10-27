@@ -125,7 +125,7 @@ export async function handleInterceptRequest (
   })
 
   mergeChanges(req, modifiedReq)
-  // @ts-expect-error request.req is the live proxied request object
+  // @ts-expect-error - IncomingHttpHeaders allows undefined values, which IncomingRequest's headers don't
   mergeChanges(request.req, req)
 
   if (request.responseSent) {
