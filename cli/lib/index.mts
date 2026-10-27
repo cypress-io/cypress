@@ -2,7 +2,7 @@ import module from 'module'
 
 const require = module.createRequire(import.meta.url)
 
-const cypress = require('./cypress')
+const cypress = require('./module-api')
 
 export default cypress
 

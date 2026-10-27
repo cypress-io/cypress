@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- Config files that import `defineConfig` or `defineComponentFramework` from `cypress` now load faster. Importing `cypress` took about 235 ms, or about 380 ms in a TypeScript config file, and now takes about 3 ms, because the rest of the package loads only when a [Module API](https://on.cypress.io/module-api) command such as `cypress.run()` is called. Cypress loads your config file at the start of every `cypress run`, and in `cypress open` each time you switch testing types or edit the config file. Fixed in [#TBD].
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
