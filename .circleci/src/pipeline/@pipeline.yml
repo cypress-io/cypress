@@ -748,14 +748,23 @@ commands:
   # project directory so volume mounts are not possible. The built plugin is copied to the project directory so it can be injected into the final binary.
   build-better-sqlite3:
     description: Build better-sqlite3 for glibc 2.31
+    # Both feed the cache key, so changing either one rebuilds instead of
+    # restoring a binary built with the old value.
+    parameters:
+      builder-image:
+        type: string
+        default: cypress/base-internal:24.15.0-glibc-2.31
+      electron-target:
+        type: string
+        default: 41.7.0
     steps:
       # The key can only be computed once yarn has installed better-sqlite3 and electron.
       # A hit restores ~/cypress/better_sqlite3.node, which skips the Docker build below.
       - restore_cache:
           name: Restore better-sqlite3 build
           key: &better-sqlite3-cache-key v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
-            }}-better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
-            checksum "node_modules/electron/package.json" }}
+            }}-better-sqlite3-<< parameters.builder-image >>-electron-<< parameters.electron-target >>-{{
+            checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
       - setup_remote_docker
       - run:
           name: Build better-sqlite3 for glibc 2.31
@@ -763,9 +772,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:24.15.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder << parameters.builder-image >> /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.7.0 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t << parameters.electron-target >> --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node

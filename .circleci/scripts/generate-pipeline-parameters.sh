@@ -190,6 +190,8 @@ else
   else
     echo "Could not find merge base with upstream develop, falling back to HEAD~1" >&2
     CHANGED=$(git -c core.quotepath=false diff --no-renames --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+    # HEAD~1 misses dependency changes from earlier commits in the PR.
+    lockfile_checks=true
   fi
 fi
 
@@ -221,16 +223,14 @@ while IFS= read -r file; do
 done <<< "$CHANGED"
 
 # ----- lockfile checks --------------------------------------------------------
-# Gates check-lockfile's `yarn install` drift check. Checked separately because
-# a workspace package.json would otherwise match its package's case below. The
-# root package.json, yarn.lock and patches/ are global triggers, so in practice
-# this only catches workspace package.json files.
+# Gates check-lockfile's `yarn install` drift check. The root package.json,
+# yarn.lock and patches/ are global triggers above, so only workspace manifests
+# are left. Matched exactly so system-test fixture manifests, which yarn.lock
+# does not cover, don't trigger it.
 while IFS= read -r file; do
-  case "$file" in
-    yarn.lock|package.json|*/package.json|patches/*)
-      lockfile_checks=true
-      ;;
-  esac
+  if [[ "$file" =~ ^(cli|system-tests|(packages|npm|tooling)/[^/]+)/package\.json$ ]]; then
+    lockfile_checks=true
+  fi
 done <<< "$CHANGED"
 
 # ----- targeted path mapping --------------------------------------------------
