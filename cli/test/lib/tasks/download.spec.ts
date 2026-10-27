@@ -2,8 +2,6 @@ import type { Mock } from 'vitest'
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import os from 'os'
-import type { Systeminformation } from 'systeminformation'
-import si from 'systeminformation'
 import chalk from 'chalk'
 import path from 'path'
 import nock from 'nock'
@@ -43,18 +41,6 @@ const normalize = (str: string): string => {
 
 vi.mock('execa')
 
-vi.mock('systeminformation', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      osInfo: vi.fn(),
-    },
-  }
-})
-
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
 
@@ -93,6 +79,7 @@ vi.mock('../../../lib/util', async (importActual) => {
       ...actual.default,
       pkgVersion: vi.fn(),
       cwd: vi.fn(),
+      getOsVersionAsync: vi.fn(),
     },
   }
 })
@@ -144,10 +131,7 @@ describe('lib/tasks/download', function () {
 
     vi.mocked(os.platform).mockReturnValue('OS' as NodeJS.Platform)
     vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
-    vi.mocked(si.osInfo).mockResolvedValue({
-      distro: 'Foo',
-      release: 'OsVersion',
-    } as Systeminformation.OsData)
+    vi.mocked(util.getOsVersionAsync).mockResolvedValue('Foo - OsVersion')
 
     vi.mocked(util.cwd).mockReturnValue(rootFolder)
 

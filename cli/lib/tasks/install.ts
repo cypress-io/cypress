@@ -71,10 +71,10 @@ const displayCompletionMsg = (): void => {
   logger.log()
 }
 
-const validateOS = async (): Promise<RegExpMatchArray | null> => {
-  const platformInfo = await util.getPlatformInfo()
+const SUPPORTED_PLATFORMS = ['win32-x64', 'win32-arm64', 'linux-x64', 'linux-arm64', 'darwin-x64', 'darwin-arm64']
 
-  return platformInfo.match(/(win32-x64|win32-arm64|linux-x64|linux-arm64|darwin-x64|darwin-arm64)/)
+const validateOS = (arch: string): boolean => {
+  return SUPPORTED_PLATFORMS.includes(`${os.platform()}-${arch}`)
 }
 
 /**
@@ -180,7 +180,7 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   const cacheDir = state.getCacheDir()
   const binaryDir = state.getBinaryDir(pkgVersion)
 
-  if (!(await validateOS())) {
+  if (!validateOS(arch)) {
     return throwFormErrorText(errors.invalidOS)()
   }
 

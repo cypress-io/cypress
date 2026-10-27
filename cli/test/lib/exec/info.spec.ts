@@ -2,8 +2,6 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
 import chalk from 'chalk'
 import { Console } from 'console'
-import type { Systeminformation } from 'systeminformation'
-import si from 'systeminformation'
 import util from '../../../lib/util'
 import state from '../../../lib/tasks/state'
 import info from '../../../lib/exec/info'
@@ -23,18 +21,6 @@ vi.mock('os', async (importActual) => {
   }
 })
 
-vi.mock('systeminformation', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      osInfo: vi.fn(),
-    },
-  }
-})
-
 vi.mock('../../../lib/exec/spawn', async () => {
   return {
     start: vi.fn(),
@@ -50,6 +36,7 @@ vi.mock('../../../lib/util', async (importActual) => {
       ...actual.default,
       getApplicationDataFolder: vi.fn(),
       pkgBuildInfo: vi.fn(),
+      getOsVersionAsync: vi.fn(),
     },
   }
 })
@@ -117,10 +104,7 @@ describe('exec info', () => {
 
     vi.mocked(state.getCacheDir).mockReturnValue('/user/path/to/binary/cache')
 
-    vi.mocked(si.osInfo).mockResolvedValue({
-      distro: 'Foo',
-      release: 'OsVersion',
-    } as Systeminformation.OsData)
+    vi.mocked(util.getOsVersionAsync).mockResolvedValue('Foo - OsVersion')
   })
 
   afterEach(() => {

@@ -6,8 +6,6 @@ import cp from 'child_process'
 import createDebug from 'debug'
 import readline from 'readline'
 import fs from 'fs-extra'
-import type { Systeminformation } from 'systeminformation'
-import si from 'systeminformation'
 import { Console } from 'console'
 
 import logger from '../../../lib/logger'
@@ -24,18 +22,6 @@ vi.mock('../../../lib/tasks/extract-with-yauzl')
 vi.mock('child_process')
 vi.mock('readline')
 vi.mock('fs-extra')
-
-vi.mock('systeminformation', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      osInfo: vi.fn(),
-    },
-  }
-})
 
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
@@ -62,6 +48,7 @@ vi.mock('../../../lib/util', async (importActual) => {
       // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pkgVersion: vi.fn(),
+      getOsVersionAsync: vi.fn(),
     },
   }
 })
@@ -87,10 +74,7 @@ describe('lib/tasks/unzip', function () {
     vi.mocked(os.platform).mockReturnValue('darwin')
     vi.mocked(os.arch).mockReturnValue('x64')
     vi.mocked(util.pkgVersion).mockReturnValue(version)
-    vi.mocked(si.osInfo).mockResolvedValue({
-      distro: 'Foo',
-      release: 'OsVersion',
-    } as Systeminformation.OsData)
+    vi.mocked(util.getOsVersionAsync).mockResolvedValue('Foo - OsVersion')
 
     const actualExtract = (await vi.importActual<typeof import('../../../lib/tasks/extract-with-yauzl')>('../../../lib/tasks/extract-with-yauzl')).default
 

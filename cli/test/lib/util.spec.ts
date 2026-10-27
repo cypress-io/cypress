@@ -1,9 +1,8 @@
-import { vi, describe, it, beforeEach, expect } from 'vitest'
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import assert from 'assert'
 import hasha from 'hasha'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
-import type { Systeminformation } from 'systeminformation'
 
 describe('util', () => {
   beforeEach(() => {
@@ -467,84 +466,172 @@ describe('util', () => {
   })
 
   describe('.getOsVersionAsync', () => {
+    const platform = vi.fn<() => NodeJS.Platform>()
+    const release = vi.fn<() => string>()
+    const version = vi.fn<() => string>()
+    const readFile = vi.fn<(file: string) => Promise<string>>()
+    const execa = vi.fn<(file: string) => Promise<{ stdout: string }>>()
+
+    const mockFiles = (files: Record<string, string>) => {
+      readFile.mockImplementation(async (file) => {
+        if (file in files) {
+          return files[file]
+        }
+
+        throw new Error(`ENOENT: no such file or directory, open '${file}'`)
+      })
+    }
+
+    const getOsVersion = async (osPlatform: NodeJS.Platform) => {
+      platform.mockReturnValue(osPlatform)
+
+      const util = (await import('../../lib/util')).default
+
+      return util.getOsVersionAsync()
+    }
+
     beforeEach(() => {
+      vi.resetAllMocks()
+      release.mockReturnValue('kernel-release')
+
       vi.doMock('os', async (importActual) => {
         const actual = await importActual()
 
         return {
           // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
-          default: {
-            platform: vi.fn(),
-            release: vi.fn(),
-          },
+          default: { platform, release, version },
         }
       })
 
-      vi.doMock('systeminformation', async (importActual) => {
+      vi.doMock('fs-extra', async (importActual) => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error - importActual returns unknown, which cannot be spread
-          ...actual,
           default: {
-            osInfo: vi.fn(),
+            // @ts-expect-error - importActual returns unknown, so .default is untyped
+            ...actual.default,
+            readFile,
           },
         }
       })
+
+      vi.doMock('execa', () => ({ default: execa }))
     })
 
-    it('calls os.release when systeminformation fails', async () => {
-      const os = (await import('os')).default
-      const si = (await import('systeminformation')).default
-
-      vi.mocked(os.release).mockReturnValue('some-release')
-      vi.mocked(si.osInfo).mockRejectedValue(new Error('systeminformation failed'))
-
-      const util = (await import('../../lib/util')).default
-
-      const result = await util.getOsVersionAsync()
-
-      expect(result).toEqual('some-release')
-      expect(os.release).toHaveBeenCalled()
-      expect(si.osInfo).toHaveBeenCalled()
+    afterEach(() => {
+      vi.doUnmock('os')
+      vi.doUnmock('fs-extra')
+      vi.doUnmock('execa')
     })
 
-    it('uses systeminformation when it succeeds', async () => {
-      const os = (await import('os')).default
-      const si = (await import('systeminformation')).default
+    describe('on Linux', () => {
+      it('reports the distro and point release from /etc/os-release', async () => {
+        mockFiles({
+          '/etc/os-release': [
+            'PRETTY_NAME="Ubuntu 24.04.5 LTS"',
+            'NAME="Ubuntu"',
+            'VERSION_ID="24.04"',
+            'VERSION="24.04.5 LTS (Noble Numbat)"',
+            'VERSION_CODENAME=noble',
+          ].join('\n'),
+        })
 
-      vi.mocked(si.osInfo).mockResolvedValue({
-        distro: 'Ubuntu',
-        release: '22.04',
-      } as Systeminformation.OsData)
+        expect(await getOsVersion('linux')).toEqual('Ubuntu - 24.04.5 LTS')
+        expect(execa).not.toHaveBeenCalled()
+      })
 
-      const util = (await import('../../lib/util')).default
+      it('drops the codename from the release', async () => {
+        mockFiles({
+          '/etc/os-release': [
+            'PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"',
+            'NAME="Debian GNU/Linux"',
+            'VERSION_ID="12"',
+            'VERSION="12 (bookworm)"',
+          ].join('\n'),
+        })
 
-      const result = await util.getOsVersionAsync()
+        expect(await getOsVersion('linux')).toEqual('Debian GNU/Linux - 12')
+      })
 
-      expect(result).toEqual('Ubuntu - 22.04')
-      expect(si.osInfo).toHaveBeenCalled()
-      expect(os.release).not.toHaveBeenCalled()
+      it('uses VERSION when PRETTY_NAME has no version in it', async () => {
+        mockFiles({
+          '/etc/os-release': [
+            'NAME="openSUSE Tumbleweed"',
+            'VERSION="20240101"',
+            'PRETTY_NAME="openSUSE Tumbleweed"',
+          ].join('\n'),
+        })
+
+        expect(await getOsVersion('linux')).toEqual('openSUSE Tumbleweed - 20240101')
+      })
+
+      it('reads /usr/lib/os-release when /etc/os-release is missing', async () => {
+        mockFiles({
+          '/usr/lib/os-release': 'NAME="Fedora Linux"\nVERSION="40 (Workstation Edition)"\nPRETTY_NAME="Fedora Linux 40 (Workstation Edition)"',
+        })
+
+        expect(await getOsVersion('linux')).toEqual('Fedora Linux - 40')
+      })
+
+      it('falls back to os.release() for a distro without a version', async () => {
+        mockFiles({
+          '/etc/os-release': 'NAME="Arch Linux"\nPRETTY_NAME="Arch Linux"\nBUILD_ID=rolling',
+        })
+
+        expect(await getOsVersion('linux')).toEqual('kernel-release')
+      })
+
+      it('falls back to os.release() when no os-release file exists', async () => {
+        mockFiles({})
+
+        expect(await getOsVersion('linux')).toEqual('kernel-release')
+      })
     })
 
-    it('falls back to os.release when systeminformation returns incomplete data', async () => {
-      const os = (await import('os')).default
-      const si = (await import('systeminformation')).default
+    describe('on macOS', () => {
+      it('reports the product name and version from sw_vers', async () => {
+        execa.mockResolvedValue({ stdout: 'ProductName:\t\tmacOS\nProductVersion:\t\t14.5\nBuildVersion:\t\t23F79' })
 
-      vi.mocked(os.release).mockReturnValue('5.15.0')
-      vi.mocked(si.osInfo).mockResolvedValue({
-        distro: 'Ubuntu',
-        // missing release property
-      } as Systeminformation.OsData)
+        expect(await getOsVersion('darwin')).toEqual('macOS - 14.5')
+        expect(execa).toHaveBeenCalledWith('sw_vers')
+        expect(readFile).not.toHaveBeenCalled()
+      })
 
-      const util = (await import('../../lib/util')).default
+      it('includes a Rapid Security Response suffix', async () => {
+        execa.mockResolvedValue({ stdout: 'ProductName:\tmacOS\nProductVersion:\t13.4.1\nProductVersionExtra:\t(a)\nBuildVersion:\t22F770820d' })
 
-      const result = await util.getOsVersionAsync()
+        expect(await getOsVersion('darwin')).toEqual('macOS - 13.4.1 (a)')
+      })
 
-      expect(result).toEqual('5.15.0')
-      expect(si.osInfo).toHaveBeenCalled()
-      expect(os.release).toHaveBeenCalled()
+      it('falls back to os.release() when sw_vers fails', async () => {
+        execa.mockRejectedValue(new Error('spawn sw_vers ENOENT'))
+
+        expect(await getOsVersion('darwin')).toEqual('kernel-release')
+      })
+    })
+
+    describe('on Windows', () => {
+      it('reports the product name and kernel version', async () => {
+        version.mockReturnValue('Windows 10 Pro')
+        release.mockReturnValue('10.0.19045')
+
+        expect(await getOsVersion('win32')).toEqual('Windows 10 Pro - 10.0.19045')
+        expect(execa).not.toHaveBeenCalled()
+      })
+
+      it('reports Windows 11 by build number', async () => {
+        version.mockReturnValue('Windows 10 Pro')
+        release.mockReturnValue('10.0.26100')
+
+        expect(await getOsVersion('win32')).toEqual('Windows 11 Pro - 10.0.26100')
+      })
+    })
+
+    it('reports os.release() on other platforms', async () => {
+      expect(await getOsVersion('freebsd')).toEqual('kernel-release')
+      expect(readFile).not.toHaveBeenCalled()
+      expect(execa).not.toHaveBeenCalled()
     })
   })
 

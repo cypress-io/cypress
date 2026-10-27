@@ -8,7 +8,6 @@ import tty from 'tty'
 import path from 'path'
 import { isCI as isCi } from 'ci-info'
 import execa from 'execa'
-import si from 'systeminformation'
 import chalk from 'chalk'
 import Bluebird from 'bluebird'
 import cachedir from 'cachedir'
@@ -75,6 +74,69 @@ const isBrokenGtkDisplay = (str: string): boolean => {
 
 const isPossibleLinuxWithIncorrectDisplay = (): boolean => {
   return isLinux() && !!process.env.DISPLAY
+}
+
+// Parses `KEY="value"` (os-release) and `Key: value` (sw_vers) lines
+const parseKeyValueLines = (text: string, separator: string): Record<string, string> => {
+  const fields: Record<string, string> = {}
+
+  for (const line of text.split('\n')) {
+    const separatorIndex = line.indexOf(separator)
+
+    if (separatorIndex > 0) {
+      fields[line.slice(0, separatorIndex).trim()] = line.slice(separatorIndex + 1).trim().replace(/^(["'])(.*)\1$/, '$2')
+    }
+  }
+
+  return fields
+}
+
+// https://www.freedesktop.org/software/systemd/man/latest/os-release.html
+const getLinuxOsVersion = async (): Promise<string | undefined> => {
+  const contents = await fs.readFile('/etc/os-release', 'utf8')
+  .catch(() => fs.readFile('/usr/lib/os-release', 'utf8'))
+
+  const { NAME: distro, PRETTY_NAME: prettyName = '', VERSION: version = '', VERSION_ID: versionId } = parseKeyValueLines(contents, '=')
+
+  if (!distro) return
+
+  // PRETTY_NAME carries the point release that VERSION_ID leaves out, e.g. "Ubuntu 24.04.5 LTS"
+  const fullVersion = prettyName.startsWith(`${distro} `) ? prettyName.slice(distro.length + 1) : version
+  // drop a trailing codename, e.g. "12 (bookworm)"
+  const release = fullVersion.split('(')[0].trim() || versionId
+
+  return release ? `${distro} - ${release}` : undefined
+}
+
+const getMacOsVersion = async (): Promise<string | undefined> => {
+  const { stdout } = await execa('sw_vers')
+  const { ProductName: distro, ProductVersion: version, ProductVersionExtra: rapidSecurityResponse } = parseKeyValueLines(stdout, ':')
+  const release = [version, rapidSecurityResponse].filter(Boolean).join(' ')
+
+  return distro && release ? `${distro} - ${release}` : undefined
+}
+
+const getWindowsOsVersion = (): string => {
+  const release = os.release()
+  // os.version() reads a registry product name that still says "Windows 10" on Windows 11,
+  // which Microsoft tells apart by build number instead
+  const isWindows11 = Number(release.split('.')[2]) >= 22000
+  const distro = isWindows11 ? os.version().replace('Windows 10', 'Windows 11') : os.version()
+
+  return `${distro} - ${release}`
+}
+
+const getOsVersionForPlatform = async (): Promise<string | undefined> => {
+  switch (os.platform()) {
+    case 'linux':
+      return getLinuxOsVersion()
+    case 'darwin':
+      return getMacOsVersion()
+    case 'win32':
+      return getWindowsOsVersion()
+    default:
+      return undefined
+  }
 }
 
 const logBrokenGtkDisplayWarning = (): void => {
@@ -429,15 +491,15 @@ const util = {
 
   isLinux,
 
-  async getOsVersionAsync (): Promise<any> {
+  async getOsVersionAsync (): Promise<string> {
     try {
-      const osInfo = await si.osInfo()
+      const version = await getOsVersionForPlatform()
 
-      if (osInfo.distro && osInfo.release) {
-        return `${osInfo.distro} - ${osInfo.release}`
+      if (version) {
+        return version
       }
     } catch (err) {
-      return os.release()
+      debug('could not detect the OS version, falling back to os.release(): %o', err)
     }
 
     return os.release()

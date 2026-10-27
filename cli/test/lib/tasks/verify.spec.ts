@@ -9,8 +9,6 @@ import mockfs from 'mock-fs'
 import { geteuid } from 'process'
 import { Console } from 'console'
 import fs from 'fs-extra'
-import type { Systeminformation } from 'systeminformation'
-import si from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 
@@ -24,18 +22,6 @@ const cacheDir = '/cache/Cypress'
 const executablePath = '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
 const binaryStatePath = '/cache/Cypress/1.2.3/binary_state.json'
 const DEFAULT_VERIFY_TIMEOUT = 30000
-
-vi.mock('systeminformation', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      osInfo: vi.fn(),
-    },
-  }
-})
 
 vi.mock('@cypress/xvfb', async () => {
   const XVFB_MOCK = vi.fn()
@@ -186,10 +172,7 @@ describe('lib/tasks/verify', () => {
     vi.mocked(os.platform).mockReturnValue('darwin')
     vi.mocked(os.release).mockReturnValue('0.0.0')
     vi.mocked(os.arch).mockReturnValue('x64')
-    vi.mocked(si.osInfo).mockResolvedValue({
-      distro: 'Foo',
-      release: 'OsVersion',
-    } as Systeminformation.OsData)
+    vi.mocked(util.getOsVersionAsync).mockResolvedValue('Foo - OsVersion')
 
     vi.mocked(util.getCacheDir).mockReturnValue(cacheDir)
     vi.mocked(util.isCi).mockReturnValue(false)

@@ -142,12 +142,6 @@ function createSpawnFunction (
       debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
       debug('spawning Cypress with executable: %s', executable)
 
-      const platform = await util.getPlatformInfo().catch((e) => reject(e))
-
-      if (!platform) {
-        return
-      }
-
       function resolveOn (event: any): any {
         return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })

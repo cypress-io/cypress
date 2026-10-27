@@ -5,8 +5,6 @@ import chalk from 'chalk'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import timers from 'timers/promises'
 import fs from 'fs-extra'
-import type { Systeminformation } from 'systeminformation'
-import si from 'systeminformation'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import download from '../../../lib/tasks/download'
@@ -14,18 +12,6 @@ import unzip from '../../../lib/tasks/unzip'
 import install from '../../../lib/tasks/install'
 import state from '../../../lib/tasks/state'
 import { Console } from 'console'
-
-vi.mock('systeminformation', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      osInfo: vi.fn(),
-    },
-  }
-})
 
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
@@ -81,7 +67,7 @@ vi.mock('../../../lib/util', async (importActual) => {
       pkgBuildInfo: vi.fn(),
       isCi: vi.fn(),
       isPostInstall: vi.fn(),
-      getPlatformInfo: vi.fn(),
+      getOsVersionAsync: vi.fn(),
       isInstalledGlobally: vi.fn(),
     },
   }
@@ -214,7 +200,7 @@ describe('/lib/tasks/install', function () {
   })
 
   describe('.start', function () {
-    beforeEach(async () => {
+    beforeEach(() => {
       logger.reset()
       vi.mocked(util.isCi).mockReturnValue(false)
       vi.mocked(util.isPostInstall).mockReturnValue(false)
@@ -228,16 +214,9 @@ describe('/lib/tasks/install', function () {
       vi.mocked(fs.ensureDir).mockResolvedValue(undefined)
       vi.mocked(os.platform).mockReturnValue('darwin')
       vi.mocked(os.arch).mockReturnValue('x64')
-      vi.mocked(si.osInfo).mockResolvedValue({
-        distro: 'Foo',
-        release: 'OsVersion',
-      } as Systeminformation.OsData)
+      vi.mocked(util.getOsVersionAsync).mockResolvedValue('Foo - OsVersion')
 
       vi.mocked(timers.setTimeout).mockResolvedValue(undefined)
-
-      const actualUtil = (await vi.importActual<typeof import('../../../lib/util')>('../../../lib/util')).default
-
-      vi.mocked(util.getPlatformInfo).mockImplementation(actualUtil.getPlatformInfo)
     })
 
     describe('skips install', function () {
@@ -719,7 +698,8 @@ describe('/lib/tasks/install', function () {
     it('exits with error when installing on unsupported os', async function () {
       const output = createStdoutCapture()
 
-      vi.mocked(util.getPlatformInfo).mockResolvedValue('Platform: win32-ia32')
+      vi.mocked(os.platform).mockReturnValue('win32')
+      vi.spyOn(util, 'getRealArch').mockResolvedValue('ia32')
 
       try {
         await install.start()

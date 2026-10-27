@@ -4,8 +4,6 @@ import os from 'os'
 import tty from 'tty'
 import path from 'path'
 import treeKill from 'tree-kill'
-import type { Systeminformation } from 'systeminformation'
-import si from 'systeminformation'
 import { EventEmitter } from 'events'
 import readline from 'readline'
 import createDebug from 'debug'
@@ -24,18 +22,6 @@ const flushPromises = () => {
     setTimeout(resolve, 100)
   })
 }
-
-vi.mock('systeminformation', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      osInfo: vi.fn(),
-    },
-  }
-})
 
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
@@ -209,10 +195,6 @@ describe('lib/exec/spawn', function () {
 
     vi.mocked(os.platform).mockReturnValue('darwin')
     vi.mocked(os.arch).mockReturnValue('x64')
-    vi.mocked(si.osInfo).mockResolvedValue({
-      distro: 'Foo',
-      release: 'OsVersion',
-    } as Systeminformation.OsData)
 
     spawnedProcess = new EventEmitter()
     spawnedProcess.unref = vi.fn().mockReturnValue(undefined)
@@ -304,6 +286,22 @@ describe('lib/exec/spawn', function () {
         detached: false,
         stdio: ['inherit', 'inherit', 'pipe'],
       }))
+    })
+
+    it('spawns without detecting the OS version or arch', async () => {
+      vi.mocked(needsSandbox).mockReturnValue(false)
+      vi.spyOn(util, 'getOsVersionAsync')
+      vi.spyOn(util, 'getRealArch')
+
+      const startPromise = start('--foo')
+
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
+
+      expect(util.getOsVersionAsync).not.toHaveBeenCalled()
+      expect(util.getRealArch).not.toHaveBeenCalled()
     })
 
     it('uses --no-sandbox when needed', async function () {

@@ -1,8 +1,6 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
-import type { Systeminformation } from 'systeminformation'
-import si from 'systeminformation'
 import util from '../../lib/util'
 import { errors, getError, formErrorText } from '../../lib/errors'
 
@@ -24,18 +22,6 @@ vi.mock('os', async (importActual) => {
 // machine, so pin it alongside the mocked `os.arch()`
 vi.mock('arch', () => ({ default: () => 'x64' }))
 
-vi.mock('systeminformation', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error - importActual returns unknown, so .default is untyped
-      ...actual.default,
-      osInfo: vi.fn(),
-    },
-  }
-})
-
 vi.mock('../../lib/util', async (importActual) => {
   const actual = await importActual()
 
@@ -44,6 +30,7 @@ vi.mock('../../lib/util', async (importActual) => {
       // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pkgVersion: vi.fn(),
+      getOsVersionAsync: vi.fn(),
     },
   }
 })
@@ -53,10 +40,7 @@ describe('errors', function () {
     vi.mocked(os.platform).mockReturnValue('test platform' as NodeJS.Platform)
     vi.mocked(os.arch).mockReturnValue('x64')
     vi.mocked(os.release).mockReturnValue('release')
-    vi.mocked(si.osInfo).mockResolvedValue({
-      distro: 'Foo',
-      release: 'OsVersion',
-    } as Systeminformation.OsData)
+    vi.mocked(util.getOsVersionAsync).mockResolvedValue('Foo - OsVersion')
 
     vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
   })
