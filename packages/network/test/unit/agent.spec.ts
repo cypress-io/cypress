@@ -421,7 +421,7 @@ describe('lib/agent', function () {
         })
 
         const options = spy.mock.calls[0][0]
-        // @ts-expect-error - createConnection's typed options don't declare Node's internal `_agentKey`, so it can't index the session cache
+        // @ts-expect-error - `_agentKey` is typed Optional<symbol>, and its void member can't index the session cache
         const session = agent.httpsAgent._sessionCache.map[options._agentKey]
 
         expect(spy).toHaveBeenCalledOnce()
