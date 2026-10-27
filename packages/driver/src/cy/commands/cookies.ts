@@ -249,7 +249,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         // or the command times out (matching the previous
         // retryIfCommandAUTOriginMismatch behavior).
         if (checkAUTCommunication) {
-          // @ts-expect-error - commandCanCommunicateWithAUT is not declared on the Cypress.ensure type
           Cypress.ensure.commandCanCommunicateWithAUT(cy)
         }
 

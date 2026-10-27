@@ -94,8 +94,6 @@ export default (Commands, Cypress, cy) => {
       )) {
         // Force selection to end in WebKit, unless selection
         // has been set by user.
-        // It's a curried function, so the 2 arguments are valid.
-        // @ts-expect-error - _.curry() drops the options parameter from moveSelectionToEnd's type
         $selection.moveSelectionToEnd(el, {
           onlyIfEmptySelection: true,
         })

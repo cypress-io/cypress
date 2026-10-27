@@ -101,7 +101,7 @@ const setup = ({ cypressConfig, expose, isProtocolEnabled }: { cypressConfig: Cy
 
   Cypress.state('isProtocolEnabled', isProtocolEnabled)
 
-  // @ts-expect-error - $Cy is not assignable to the public cy type
+  // @ts-expect-error - $Cy is not assignable to the public cy type, and the public Cypress type is not assignable to $Cypress
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config)
 
   // @ts-expect-error - createLog does not match the overloaded Cypress.log type
@@ -168,7 +168,6 @@ const attachToWindow = (autWindow: Window) => {
 
   // this communicates to the injection code that Cypress is now available so
   // it can safely subscribe to Cypress events, etc
-  // @ts-expect-error - __attachToCypress is not declared on Window
   autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
 
   Cypress.state('window', autWindow)

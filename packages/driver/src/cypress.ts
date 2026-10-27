@@ -55,6 +55,8 @@ const debug = debugFn('cypress:driver:cypress')
 
 declare global {
   interface Window {
+    __attachToCypress?: (Cypress: Cypress.Cypress) => void
+    __cypressFakeLocation?: Location
     __cySkipValidateConfig: boolean
     Cypress: Cypress.Cypress
     Runner: any

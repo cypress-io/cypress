@@ -104,10 +104,8 @@ export function resolveWindowReference (this: Cypress.Cypress, currentWindow: Wi
  *
  * @param currentWindow the value of `globalThis` from the scope of the location reference in question
  */
-export function resolveLocationReference (currentWindow: Window) {
-  // @ts-expect-error - __cypressFakeLocation is not declared on Window
+export function resolveLocationReference (currentWindow: Window): Location {
   if (currentWindow.__cypressFakeLocation) {
-    // @ts-expect-error - __cypressFakeLocation is not declared on Window
     return currentWindow.__cypressFakeLocation
   }
 
@@ -143,7 +141,7 @@ export function resolveLocationReference (currentWindow: Window) {
     return acc
   }, {})
 
-  // @ts-expect-error - __cypressFakeLocation is not declared on Window
+  // @ts-expect-error - the proxy target is a placeholder object; the proxy forwards every Location property
   return currentWindow.__cypressFakeLocation = new Proxy(fakeLocation, {
     get (_target, prop, _receiver) {
       if (prop === 'assign') {

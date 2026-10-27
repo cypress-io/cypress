@@ -39,6 +39,12 @@ type InternalKeyboard = typeof import('../src/cy/keyboard').default
 type InternalScreenshot = typeof import('../src/cypress/screenshot').default
 
 declare namespace Cypress {
+  // Checks that `$ensure` exposes for internal callers only
+  interface Ensure {
+    commandCanCommunicateWithAUT: typeof import('../src/cypress/ensure').default.commandCanCommunicateWithAUT
+    isStrictlyVisible: typeof import('../src/cypress/ensure').default.isStrictlyVisible
+  }
+
   interface Cypress {
     browserMajorVersion: () => number
     backend: (eventName: string, ...args: any[]) => Promise<any>

@@ -223,7 +223,7 @@ const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning
     return elPosition
   }
 
-  // @ts-expect-error - Padding also allows a single number, which cannot be destructured
+  // @ts-expect-error - padding is normalized to four numbers, but this type still uses the public Padding union
   const [paddingTop, paddingRight, paddingBottom, paddingLeft] = automationOptions.padding
 
   return {

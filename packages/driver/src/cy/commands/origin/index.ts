@@ -261,8 +261,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
               file,
               // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
               // this should only be used for internal testing. Cast to boolean to guarantee serialization
-              // @ts-expect-error - window.top is nullable and __cySkipValidateConfig is not declared on Window
-              skipConfigValidation: !!window.top.__cySkipValidateConfig,
+              skipConfigValidation: !!window.top?.__cySkipValidateConfig,
               state: {
                 viewportWidth: Cypress.state('viewportWidth'),
                 viewportHeight: Cypress.state('viewportHeight'),

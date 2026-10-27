@@ -507,8 +507,6 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
       if (shouldMoveCursorToEndAfterMousedown(el)) {
         debug('moveSelectionToEnd due to click', el)
-        // It's a curried function, so the 2 arguments are valid.
-        // @ts-expect-error - _.curry() drops the options parameter from moveSelectionToEnd's type
         $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
       }
 
