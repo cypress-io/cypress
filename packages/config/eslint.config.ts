@@ -19,8 +19,8 @@ export default [
     },
   },
   {
-    // no-floating-promises needs type information, so the shipped source gets a project service
-    files: ['src/**/*.ts'],
+    // no-floating-promises needs type information, so src and test get a project service
+    files: ['src/**/*.ts', 'test/**/*.ts'],
     languageOptions: {
       parserOptions: {
         projectService: true,

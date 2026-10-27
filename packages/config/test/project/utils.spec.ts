@@ -202,7 +202,7 @@ describe('config/src/project/utils', () => {
   })
 
   describe('environment name check', () => {
-    it('throws an error for unknown CYPRESS_INTERNAL_ENV', async () => {
+    it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'foo-bar')
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -212,11 +212,7 @@ describe('config/src/project/utils', () => {
 
       const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
 
-      try {
-        await mergeDefaults(cfg, options, {}, getFilesByGlob)
-      } catch {
-        //
-      }
+      expect(() => mergeDefaults(cfg, options, {}, getFilesByGlob)).toThrow('unknown or unsupported CYPRESS_INTERNAL_ENV value: foo-bar')
 
       expect(errors.throwErr).toHaveBeenCalledExactlyOnceWith('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
     })
@@ -234,7 +230,7 @@ describe('config/src/project/utils', () => {
 
       await mergeDefaults(cfg, options, {}, getFilesByGlob)
 
-      expect(errors.throwErr).not.toHaveBeenCalled
+      expect(errors.throwErr).not.toHaveBeenCalled()
     })
   })
 
@@ -514,13 +510,13 @@ describe('config/src/project/utils', () => {
 
     for (const folder of ['fileServerFolder', 'fixturesFolder']) {
       it(`converts relative ${folder} to absolute path`, () => {
-        const obj = {
+        const obj: Record<string, string> = {
           projectRoot: '/_test-output/path/to/project',
         }
 
         obj[folder] = 'foo/bar'
 
-        const expected = {
+        const expected: Record<string, string> = {
           projectRoot: '/_test-output/path/to/project',
         }
 
@@ -694,6 +690,8 @@ describe('config/src/project/utils', () => {
       try {
         await setSupportFileAndFolder(obj, getFilesByGlob)
       } catch (err) {
+        if (!(err instanceof Error)) throw err
+
         expect(stripAnsi(err.message)).toContain('Your project does not contain a default supportFile')
 
         return
