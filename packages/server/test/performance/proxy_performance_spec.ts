@@ -565,7 +565,7 @@ const runBrowserTest = (urlUnderTest: string, testCase: TestCase, { onHar, onWir
     proxyDisabledServer.remoteStates.set(urlUnderTest)
   }
 
-  let cmd = CHROME_PATH
+  const cmd = CHROME_PATH
 
   debug('Launching Chrome: ', cmd, args.join(' '))
 
