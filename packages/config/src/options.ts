@@ -454,7 +454,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: (key: string, value: any, opts: ValidationOptions) => {
       const { testingType } = opts
 
-      let configOpts = [true, false]
+      const configOpts = [true, false]
 
       if (testingType === 'component') {
         configOpts.pop()

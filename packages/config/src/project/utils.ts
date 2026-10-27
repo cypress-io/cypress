@@ -437,7 +437,7 @@ export function mergeDefaults (
     }
   }).value()
 
-  let url = config.baseUrl
+  const url = config.baseUrl
 
   if (url) {
     // replace multiple slashes at the end of string to single slash

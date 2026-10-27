@@ -63,7 +63,7 @@ interface AddProjectIdToCypressConfigOptions {
 
 export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
-    let result = await fs.readFile(options.filePath, 'utf8')
+    const result = await fs.readFile(options.filePath, 'utf8')
     const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
       t.identifier('projectId'),
       t.identifier(options.projectId),

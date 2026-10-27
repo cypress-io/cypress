@@ -379,11 +379,11 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     return errMsg(`clientCertificates.certs`, certsForUrls, 'an array of certs for URLs')
   }
 
-  let urls: string[] = []
+  const urls: string[] = []
 
   for (let i = 0; i < certsForUrls.length; i++) {
     debug(`Processing clientCertificates: ${i}`)
-    let certsForUrl = certsForUrls[i]
+    const certsForUrl = certsForUrls[i]
 
     if (!certsForUrl) {
       continue
@@ -395,7 +395,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
 
     if (certsForUrl.url !== '*') {
       try {
-        let parsed = new URL(certsForUrl.url)
+        const parsed = new URL(certsForUrl.url)
 
         if (parsed.protocol !== 'https:') {
           return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'an https protocol')
@@ -420,7 +420,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     }
 
     for (let j = 0; j < certsForUrl.certs.length; j++) {
-      let certInfo = certsForUrl.certs[j]!
+      const certInfo = certsForUrl.certs[j]!
 
       // Only one of PEM or PFX cert allowed
       if (certInfo.cert && certInfo.pfx) {
