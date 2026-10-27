@@ -6,7 +6,7 @@ dayjs.extend(duration)
 const parse = (ms) => {
   const duration = dayjs.duration(ms)
   const hours = duration.hours()
-  let mins = hours * 60
+  const mins = hours * 60
 
   return {
     mins,
@@ -16,7 +16,9 @@ const parse = (ms) => {
 }
 
 export const long = (ms, alwaysIncludeSeconds = true) => {
-  let { mins, duration } = parse(ms)
+  const parsed = parse(ms)
+  const { duration } = parsed
+  let { mins } = parsed
   let word
   const msg: string[] = []
 
@@ -38,7 +40,9 @@ export const long = (ms, alwaysIncludeSeconds = true) => {
 }
 
 export const short = (ms, fixed: number | undefined = undefined) => {
-  let { mins, duration } = parse(ms)
+  const parsed = parse(ms)
+  const { duration } = parsed
+  let { mins } = parsed
   const msg: string[] = []
 
   mins += duration.minutes()

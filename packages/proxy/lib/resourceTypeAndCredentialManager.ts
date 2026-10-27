@@ -64,7 +64,7 @@ class ResourceTypeAndCredentialManagerClass {
 
     debug(`credentials request stored for request url ${url}, resourceType ${resourceType}, hashKey ${hashKey}`)
 
-    let urlHashValue = _appliedCredentialByUrlAndResourceMap.get(hashKey)
+    const urlHashValue = _appliedCredentialByUrlAndResourceMap.get(hashKey)
 
     if (!urlHashValue) {
       _appliedCredentialByUrlAndResourceMap.set(hashKey, [{

@@ -137,6 +137,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'no-console': 'error',
       'prefer-spread': 'error',
+      'prefer-const': 'error',
       // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
       // Unused args and caught errors stay allowed: callbacks and interface
@@ -220,7 +221,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // these are off while developing eslint, but should eventually be enabled
     rules: {
       'no-useless-escape': 'off',
-      'prefer-const': 'off',
       'prefer-rest-params': 'off',
       'no-prototype-builtins': 'off',
       'no-global-assign': 'off',

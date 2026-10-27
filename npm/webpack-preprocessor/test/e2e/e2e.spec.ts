@@ -99,8 +99,8 @@ const runTest = async (options: { spec?: string } = {}) => {
 }
 
 const captureStdio = (stdio: NodeJS.WriteStream, tty?: boolean) => {
-  let logs = []
-  let passThrough = null
+  const logs = []
+  const passThrough = null
 
   const write = stdio.write
   const isTTY = stdio.isTTY
