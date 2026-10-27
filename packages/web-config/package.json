@@ -33,6 +33,7 @@
     "sass": "1.99.0",
     "sass-loader": "13.3.2",
     "stream-browserify": "3.0.0",
+    "terser-webpack-plugin": "5.3.14",
     "url": "0.11.1",
     "webpack": "^5.88.2",
     "webpack-livereload-plugin": "3.0.2"

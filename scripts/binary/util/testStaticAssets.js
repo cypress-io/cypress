@@ -13,12 +13,33 @@ const globAsync = Promise.promisify(glob)
 const testStaticAssets = async (buildResourcePath) => {
   await Promise.all([
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/runner/dist/cypress_runner.js`,
+      assetGlob: `${buildResourcePath}/packages/runner/dist/{cypress_runner,cypress_cross_origin_runner}.js`,
       badStrings: [
         // should only exist during development
         'webpack-livereload-plugin',
         // indicates eval source maps were included, which cause cross-origin errors
         '//# sourceURL=cypress://',
+      ],
+      testAssetStrings: [
+        [
+          (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
+          'sourcemaps were detected, ensure `web-config/webpack.config.base.ts` does not have sourcemaps enabled in production',
+        ],
+        [
+          (str) => str.split('\n').length < 5000,
+          'the bundle is not minified, ensure webpack is run with NODE_ENV=production',
+        ],
+        [
+          // V8 stores a source with any character above U+00FF as a two-byte string, doubling its memory
+          (str) => !/[\u0100-\uffff]/.test(str),
+          'characters above U+00FF were detected, escape them in the source or ensure terser runs with `ascii_only`',
+        ],
+      ],
+    }),
+    testPackageStaticAssets({
+      // terser extracts license banners here, so this is where the bundled React build shows its name
+      assetGlob: `${buildResourcePath}/packages/runner/dist/cypress_runner.js.LICENSE.txt`,
+      badStrings: [
         // make sure webpack is not run with NODE_ENV=development
         'react.development.js',
       ],
@@ -26,13 +47,6 @@ const testStaticAssets = async (buildResourcePath) => {
         // make sure webpack is run with NODE_ENV=production
         'react.production.min.js',
       ],
-      testAssetStrings: [
-        [
-          (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
-          'sourcemaps were detected, ensure `web-config/webpack.config.base.ts` does not have sourcemaps enabled in production',
-        ],
-      ],
-      minLineCount: 5000,
     }),
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,

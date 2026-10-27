@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- The code Cypress loads into the browser to run your tests is now less than half its previous size: 4.6 MB instead of 10.3 MB, and 3.6 MB instead of 8.6 MB for each [`cy.origin()`](https://on.cypress.io/origin) block. It compiles about 40% faster, and the Cypress page uses about 1 MB less memory while your tests run. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**

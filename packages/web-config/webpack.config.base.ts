@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+import TerserPlugin from 'terser-webpack-plugin'
 import webpack from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
@@ -38,6 +39,44 @@ const optimization = {
   mergeDuplicateChunks: true,
   flagIncludedChunks: true,
   removeEmptyChunks: true,
+}
+
+// The driver finds its own frames in stack traces by function name, such as
+// `__stackReplacementMarker` and `cy.<computed>`, so minification must keep
+// every function, and its name, that the source declares.
+const productionOptimization = {
+  ...optimization,
+  // Concatenation renames top-level functions and classes that collide across
+  // modules, e.g. `__stackReplacementMarker` to `cy_stackReplacementMarker`
+  concatenateModules: false,
+  minimize: true,
+  minimizer: [
+    new TerserPlugin({
+      parallel: true,
+      // Keep third-party license banners out of the bundle but ship them alongside it
+      extractComments: true,
+      terserOptions: {
+        keep_fnames: true,
+        keep_classnames: true,
+        compress: {
+          // Each of these can fold a function into its caller, dropping its frame and name
+          inline: false,
+          reduce_vars: false,
+          collapse_vars: false,
+        },
+        mangle: {
+          // V8 names `cy[name] = function () {}` after the variable, and the driver
+          // strips `cy.<computed>` frames from user invocation stacks by that name
+          reserved: ['cy'],
+        },
+        format: {
+          // A single non-Latin-1 character makes V8 hold the whole source as a two-byte string
+          ascii_only: true,
+          comments: false,
+        },
+      },
+    }),
+  ],
 }
 
 const stats = {
@@ -135,7 +174,7 @@ export const getCommonConfig = () => {
     },
 
     stats,
-    optimization,
+    optimization: env === 'production' ? productionOptimization : optimization,
 
     module: {
       rules: [

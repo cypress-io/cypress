@@ -1031,7 +1031,7 @@ export const AllCypressErrors = {
 
         ${fmt.stringify(browsers)}
 
-        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine \u2014 it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
 
         To run your tests in a specific browser, remove that value and pass the browser by name instead:
 
@@ -1730,7 +1730,7 @@ export const AllCypressErrors = {
     return errTemplate`
       The testing type selected (${fmt.highlight(testingType)}) is not configured in your config file.
 
-      Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
+      Please run \u2018cypress open\u2019 and choose your testing type to automatically update your configuration file.
 
       https://on.cypress.io/configuration
     `
