@@ -22,8 +22,8 @@ describe('cy/commands/window', () => {
       log: vi.fn(),
       automation: vi.fn(),
       isBrowser: vi.fn(),
+      // @ts-expect-error - partial Ensure mock
       ensure: {
-        // @ts-expect-error - the public Cypress.Ensure type omits the internal `commandCanCommunicateWithAUT`
         commandCanCommunicateWithAUT: vi.fn(),
       },
       // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.config

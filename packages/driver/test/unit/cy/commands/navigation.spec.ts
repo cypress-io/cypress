@@ -35,8 +35,8 @@ describe('cy/commands/navigation', () => {
       // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.backend
       backend: vi.fn(),
       isCrossOriginSpecBridge: false,
+      // @ts-expect-error - partial Ensure mock
       ensure: {
-        // @ts-expect-error - the public Cypress.Ensure type omits the internal `commandCanCommunicateWithAUT`
         commandCanCommunicateWithAUT: vi.fn(),
       },
       // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.config
