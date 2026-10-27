@@ -1,8 +1,9 @@
 import debug from 'debug'
 import { DefaultTranspileCache } from './default-transpile-cache'
-import {
+import type {
   GetModuleKeyOpts,
-  ModuleLoaderOpts,
+  ModuleLoaderOpts } from './loader'
+import {
   PackherdModuleLoader,
 } from './loader'
 import type {

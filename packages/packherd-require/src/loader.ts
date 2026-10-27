@@ -232,6 +232,7 @@ export class PackherdModuleLoader {
     definitionHits: number
     misses: number
   }
+
   private readonly getModuleKey: GetModuleKey
   private readonly moduleExports: Record<string, Module>
   private readonly moduleDefinitions: Record<string, ModuleDefinition>
@@ -456,7 +457,7 @@ export class PackherdModuleLoader {
    */
   tryResolve (moduleUri: string, opts?: GetModuleKeyOpts): ModuleResolveResult {
     // 1. Resolve via module key
-    let { moduleKey, moduleRelativePath } = this.getModuleKey({
+    const { moduleKey, moduleRelativePath } = this.getModuleKey({
       moduleUri,
       baseDir: this.projectBaseDir,
       opts,
@@ -490,14 +491,15 @@ export class PackherdModuleLoader {
     }
 
     const directFullPath = fullPath
-    let resolved: ModuleResolveResult['resolved']
-
-    ;({ resolved, fullPath } = this._resolvePaths(
+    const res = this._resolvePaths(
       moduleUri,
       opts as NodeModule | undefined,
       false,
       directFullPath,
-    ))
+    )
+    const { resolved } = res
+
+    fullPath = res.fullPath
 
     return { fullPath, resolved }
   }
@@ -615,7 +617,7 @@ export class PackherdModuleLoader {
       }
 
       // 6. Try to locate this module inside the cache, either export or definition
-      let loadedModule = this._loadCacheDirect(
+      const loadedModule = this._loadCacheDirect(
         moduleUri,
         moduleKey,
         fullPath,
@@ -639,14 +641,15 @@ export class PackherdModuleLoader {
     // 7. Lastly try to resolve the module via Node.js resolution which requires expensive I/O and may fail
     //    in which case it throws an error
     const directFullPath = fullPath ?? moduleUri
-    let resolved: ModuleResolveResult['resolved']
-
-    ;({ resolved, fullPath } = this._resolvePaths(
+    const res = this._resolvePaths(
       moduleUri,
       parent,
       isMain,
       directFullPath,
-    ))
+    )
+    const { resolved } = res
+
+    fullPath = res.fullPath
 
     // 8. Something like './foo' might now have been resolved to './foo.js' and
     // thus we may find it inside our cache that way
@@ -938,7 +941,6 @@ export class PackherdModuleLoader {
 
     override.main = require.main
     override.cache = require.cache
-    // @ts-ignore deprecated
     override.extensions = require.extensions
     override.resolve = require.resolve.bind(require)
 
@@ -1098,11 +1100,11 @@ function moduleNotFoundError (msg: string, moduleUri: string) {
   // https://github.com/nodejs/node/blob/da0ede1ad55a502a25b4139f58aab3fb1ee3bf3f/lib/internal/modules/cjs/loader.js#L353-L359
   const err = new Error(msg)
 
-  // @ts-ignore replicating Node.js module not found error
+  // @ts-expect-error - Error has no code, but Node.js's MODULE_NOT_FOUND error does
   err.code = 'MODULE_NOT_FOUND'
-  // @ts-ignore replicating Node.js module not found error
+  // @ts-expect-error - Error has no path, but Node.js's MODULE_NOT_FOUND error does
   err.path = moduleUri
-  // @ts-ignore replicating Node.js module not found error
+  // @ts-expect-error - Error has no requestPath, but Node.js's MODULE_NOT_FOUND error does
   err.requestPath = moduleUri
 
   return err

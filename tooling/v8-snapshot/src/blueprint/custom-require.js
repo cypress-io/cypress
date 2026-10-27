@@ -49,7 +49,7 @@ function customRequire (
   }
 
   // The relative path to the module is used to resolve modules from the various caches
-  let key = modulePathFromAppRoot
+  const key = modulePathFromAppRoot
 
   // 3. Try to determine the parent module from the `this` variable.
   //    This is a somewhat brittle attempt to resolve the parent if it is the
@@ -286,22 +286,18 @@ function createResolveOpts (relFilename, relDirname) {
  * @returns result of invoking `require.resolve` with enhanced info
  */
 customRequire.resolve = function (mod, ...args) {
-  try {
-    // Handle the case where args is { paths: string[] }. The module is expected to be outside of the cypress snapshot.
-    if (args.length === 0 || (args[0] != null && typeof args[0] !== 'string')) {
-      return require.resolve(mod, ...args)
-    }
-
-    const [relFilename = null, relDirname = null] = args
-    const opts =
-      relFilename != null && relDirname != null
-        ? createResolveOpts(relFilename, relDirname)
-        : undefined
-
-    return require.resolve(mod, opts)
-  } catch (err) {
-    throw err
+  // Handle the case where args is { paths: string[] }. The module is expected to be outside of the cypress snapshot.
+  if (args.length === 0 || (args[0] != null && typeof args[0] !== 'string')) {
+    return require.resolve(mod, ...args)
   }
+
+  const [relFilename = null, relDirname = null] = args
+  const opts =
+    relFilename != null && relDirname != null
+      ? createResolveOpts(relFilename, relDirname)
+      : undefined
+
+  return require.resolve(mod, opts)
 }
 
 //

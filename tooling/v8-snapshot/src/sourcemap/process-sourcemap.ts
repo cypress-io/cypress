@@ -1,10 +1,11 @@
-import {
-  SourceMapConsumer,
-  SourceMapGenerator,
+import type {
   RawSourceMap,
   MappingItem,
   Mapping,
-  Position,
+  Position } from 'source-map-js'
+import {
+  SourceMapConsumer,
+  SourceMapGenerator,
 } from 'source-map-js'
 
 import path from 'path'

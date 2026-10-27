@@ -1,12 +1,11 @@
-// eslint-disable-next-line no-unused-vars
-/* globals globalFunctionTrampoline, window, document, __pathResolver */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- read by globals.js once blueprint.ts concatenates the two
+/* globals globalFunctionTrampoline, __pathResolver */
 
 /**
  * Replaces globals that have been stubbed during snapshot creation with the
  * instances that are present in the app on startup.
  */
 
-// eslint-disable-next-line no-unused-vars
 (function () {
   let numberOfSetGlobalsCalls = 0
 
@@ -28,14 +27,14 @@
     // Populate the global function trampoline with the real global functions defined on newGlobal.
     globalFunctionTrampoline = newGlobal
 
-    for (let key of Object.keys(global)) {
+    for (const key of Object.keys(global)) {
       newGlobal[key] = global[key]
     }
 
     global = newGlobal
 
     if (typeof newProcess !== 'undefined') {
-      for (let key of Object.keys(process)) {
+      for (const key of Object.keys(process)) {
         newProcess[key] = process[key]
       }
     }
@@ -43,7 +42,7 @@
     process = newProcess
 
     if (typeof newWindow !== 'undefined') {
-      for (let key of Object.keys(window)) {
+      for (const key of Object.keys(window)) {
         newWindow[key] = window[key]
       }
     }
@@ -51,14 +50,14 @@
     window = newWindow
 
     if (typeof newDocument !== 'undefined') {
-      for (let key of Object.keys(document)) {
+      for (const key of Object.keys(document)) {
         newDocument[key] = document[key]
       }
     }
 
     document = newDocument
 
-    for (let key of Object.keys(console)) {
+    for (const key of Object.keys(console)) {
     // eslint-disable-next-line no-console
       newConsole[key] = console[key]
     }

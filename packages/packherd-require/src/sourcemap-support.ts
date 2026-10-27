@@ -1,6 +1,7 @@
 import debug from 'debug'
 import path from 'path'
-import { MappedPosition, RawSourceMap, SourceMapConsumer } from 'source-map-js'
+import type { MappedPosition, RawSourceMap } from 'source-map-js'
+import { SourceMapConsumer } from 'source-map-js'
 import type {
   MapAndSourceContent,
   TranspileCache,
@@ -371,7 +372,7 @@ function CallSiteToString (this: CallSite) {
     fileLocation = 'native'
   } else {
     // TODO(thlorenz): may not be needed as this is for in browser callsites
-    // @ts-ignore getScriptNameOrSourceURL exists only in the browser
+    // @ts-expect-error - getScriptNameOrSourceURL exists only in the browser
     fileName = this.getScriptNameOrSourceURL()
     if (fileName == null && this.isEval()) {
       fileLocation = this.getEvalOrigin()
@@ -391,7 +392,7 @@ function CallSiteToString (this: CallSite) {
 
     if (lineNumber != null) {
       fileLocation += `:${ lineNumber}`
-      let columnNumber = this.getColumnNumber()
+      const columnNumber = this.getColumnNumber()
 
       if (columnNumber) {
         fileLocation += `:${ columnNumber}`

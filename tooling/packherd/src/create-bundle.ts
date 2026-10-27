@@ -1,4 +1,5 @@
-import { BuildOptions, build } from 'esbuild'
+import type { BuildOptions } from 'esbuild'
+import { build } from 'esbuild'
 import type { CreateBundleOpts, CreateBundleResult } from './types'
 
 const DEFAULT_BUNDLE_OPTS: Partial<CreateBundleOpts> = {
@@ -20,7 +21,7 @@ export function createBundle (
   }) as BuildOptions & { write: false }
 
   // This is not ideal, but esbuild throws if it encounters an unknown opt
-  // @ts-ignore
+  // @ts-expect-error - entryFilePath is packherd's own option, not part of esbuild's BuildOptions
   delete opts.entryFilePath
 
   // NOTE: we just changed Output file to either have text: string or contents: UInt8Array, never both
