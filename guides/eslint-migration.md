@@ -60,7 +60,7 @@
 - [ ] packages/web-config
 - [x] packages/types
 - [x] packages/scaffold-config
-- [ ] packages/example
+- [x] packages/example
 
 ### Batch 5: Test and script folders
 - [ ] system-tests
