@@ -192,7 +192,7 @@ const expectLoadsAngularCLiModules = async (projectRoot: string) => {
 }
 const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
   const tsConfig = 'tsconfig.cypress.json'
-  let finalBuildOptions = getAngularBuildOptions(buildOptions, tsConfig)
+  const finalBuildOptions = getAngularBuildOptions(buildOptions, tsConfig)
 
   expect(finalBuildOptions.aot).toBe(false)
   expect(finalBuildOptions.optimization).toBe(false)

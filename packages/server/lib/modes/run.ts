@@ -1142,7 +1142,7 @@ async function ready (options: ReadyOptions) {
   }
 
   // alias and coerce to null
-  let specPatternFromCli = options.spec || null
+  const specPatternFromCli = options.spec || null
 
   // ensure the project exists
   // and open up the project

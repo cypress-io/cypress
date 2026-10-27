@@ -24,7 +24,9 @@ export const isSame = function ($el1, $el2) {
   return el1 && el2 && _.isEqual(el1, el2)
 }
 
-export const isSelector = ($el: JQuery<HTMLElement>, selector) => {
+export const isSelector = (elOrJquery: HTMLElement | JQuery<HTMLElement>, selector) => {
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
+
   return $el.is(selector)
 }
 

@@ -20,11 +20,6 @@ const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket ti
 const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 
-// Store the user's original value so the config process can restore it for their Node code
-if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
-  process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
-}
-
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const convertSameSiteToughToExtension = (sameSite, setCookie) => {
@@ -105,7 +100,7 @@ const pipeEvent = (source, destination, event) => {
 const caseInsensitiveGet = function (obj, property) {
   const lowercaseProperty = property.toLowerCase()
 
-  for (let key of Object.keys(obj)) {
+  for (const key of Object.keys(obj)) {
     if (key.toLowerCase() === lowercaseProperty) {
       return obj[key]
     }
@@ -117,7 +112,7 @@ const caseInsensitiveGet = function (obj, property) {
 const caseInsensitiveSet = function (obj, property, val) {
   const lowercaseProperty = property.toLowerCase()
 
-  for (let key of Object.keys(obj)) {
+  for (const key of Object.keys(obj)) {
     if (key.toLowerCase() === lowercaseProperty) {
       obj[key] = val
     }
@@ -722,7 +717,7 @@ export class Request {
 
     // normalize case sensitivity
     // to be lowercase
-    let accept = options.headers!.Accept
+    const accept = options.headers!.Accept
 
     if (accept) {
       delete options.headers!.Accept

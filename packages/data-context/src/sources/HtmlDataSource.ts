@@ -133,7 +133,6 @@ export class HtmlDataSource {
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
           window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
           ${telemetry.isEnabled() ? `window.__CYPRESS_TELEMETRY__ = ${JSON.stringify({ context: telemetry.getActiveContextObject(), resources: telemetry.getResources(), isVerbose: telemetry.isVerbose() })}` : ''}
-          ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';` : ''}
           ${isBrowserNetworkMode ? `window.__CYPRESS_BROWSER_NETWORK_MODE__ = true;` : ''}
         </script>
     `)

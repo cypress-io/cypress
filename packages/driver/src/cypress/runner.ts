@@ -1599,7 +1599,7 @@ export default {
       getNewTestLineNumber,
       setIsStudioCreatedTest,
       getIsStudioCreatedTest,
-      normalizeAll (tests, skipCollectingLogs, testFilter) {
+      normalizeAll (tests, skipCollectingLogs, testFilter?) {
         _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
         // all of the tests and suites and just generate
@@ -1773,6 +1773,10 @@ export default {
         }
 
         const onNext = (err) => {
+          if (err) {
+            cy.cancelPendingCommands()
+          }
+
           // when done with the function set that to end
           fnDurationEnd = new Date()
 

@@ -1,6 +1,5 @@
 export const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
-    // @ts-ignore
     const docsUrl = Array.isArray(err.docsUrl) ? err.docsUrl[0] : err.docsUrl
 
     expect(docsUrl).to.eq(expectedDocsUrl)

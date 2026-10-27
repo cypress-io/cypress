@@ -10,7 +10,7 @@ const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 
 const builtInCommands = [
   // `default` is necessary if a file uses `export default` syntax.
-  // @ts-ignore
+  // @ts-expect-error - not every command module has a default export
   ..._.toArray(allCommands).map((c) => c.default || c),
   addNetstubbingCommand,
 ]

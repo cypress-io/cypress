@@ -56,7 +56,7 @@ type NormalizedRetriesConfig = {
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
 export function calculateTestStatus (test: CypressTest, config?: NormalizedRetriesConfig) {
-  // @ts-expect-error
+  // @ts-expect-error - currentRetry() is protected in the mocha types
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
   let shouldAttemptsContinue: boolean = true
   let outerTestStatus: 'passed' | 'failed' | undefined = undefined
@@ -410,11 +410,20 @@ const patchRunnerFail = () => {
   }
 }
 
+// Cypress re-runs the same hook object when it retries a test, and mocha ignores done()
+// while timedOut is still set from the previous attempt's runnable timeout, so the retried
+// hook could never finish. Clear it when mocha actually starts this attempt.
+function runFreshAttempt (this: Mocha.Runnable & { timedOut?: boolean }, ...args) {
+  this.timedOut = false
+
+  return runnableRun.apply(this, args)
+}
+
 const patchRunnableRun = (Cypress) => {
   Runnable.prototype.run = function (...args) {
     const runnable = this
 
-    Cypress.action('mocha:runnable:run', runnableRun, runnable, args)
+    Cypress.action('mocha:runnable:run', runFreshAttempt, runnable, args)
   }
 }
 
@@ -578,7 +587,6 @@ const patchSuiteAddSuite = (specWindow) => {
 const patchRunnableResetTimeout = () => {
   Runnable.prototype.resetTimeout = function () {
     const runnable = this
-    // @ts-ignore Cypress.runner is not defined
     const currentRunner = Cypress.runner
 
     const ms = this.timeout() || 1e9
@@ -595,7 +603,6 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      // @ts-ignore Cypress.runner is not defined
       if (runnable.state === 'passed' || Cypress.runner !== currentRunner) {
         // this timeout can be reached at the same time that a
         // user does an asynchronous `done`, so double-check

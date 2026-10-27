@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 import { $Location } from '../../../cypress/location'
-import { getAllHtmlOrigins, mapOrigins } from './origins'
+import { getRenderedHtmlOrigins, mapOrigins, withCurrentOrigin } from './origins'
 import { getCurrentOriginStorage, getPostMessageLocalStorage, setPostMessageLocalStorage } from './utils'
 
 export type StorageType = 'localStorage' | 'sessionStorage'
@@ -82,9 +82,13 @@ export async function getStorage (Cypress: Cypress.Cypress, options: GetStorageO
   return results
 }
 
-export async function clearStorage (Cypress: Cypress.Cypress, type?: StorageType) {
-  const origins = await getAllHtmlOrigins(Cypress)
-  const originOptions = origins.map((origin) => ({ origin, clear: true }))
+/**
+ * Resolves to the origins the server reported as having rendered HTML,
+ * which does not include the current origin unless it rendered HTML too.
+ */
+export async function clearStorage (Cypress: Cypress.Cypress, type?: StorageType): Promise<string[]> {
+  const renderedOrigins = await getRenderedHtmlOrigins(Cypress)
+  const originOptions = withCurrentOrigin(renderedOrigins).map((origin) => ({ origin, clear: true }))
   const options: SetStoragesOptions = {}
 
   if (!type || type === 'localStorage') {
@@ -96,6 +100,8 @@ export async function clearStorage (Cypress: Cypress.Cypress, type?: StorageType
   }
 
   await setStorage(Cypress, options)
+
+  return renderedOrigins
 }
 
 async function setStorageOnOrigins (Cypress: Cypress.Cypress, originOptions) {
