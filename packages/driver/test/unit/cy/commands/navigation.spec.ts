@@ -1,18 +1,17 @@
 /**
  * @vitest-environment jsdom
  */
-import type { MockedObject } from 'vitest'
+import type { Mock, MockedObject } from 'vitest'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { go, reload, resetServerState } from '../../../../src/cy/commands/navigation'
 import $utils from '../../../../src/cypress/utils'
 import type{ $Cy } from '../../../../src/cypress/cy'
 
 vi.mock('../../../../src/cypress/utils', async () => {
-  const original = await vi.importActual('../../../../src/cypress/utils')
+  const original = await vi.importActual<typeof import('../../../../src/cypress/utils')>('../../../../src/cypress/utils')
 
   return {
     default: {
-      // @ts-expect-error - importOriginal() returns unknown
       ...original.default,
       locReload: vi.fn(),
     },
@@ -22,10 +21,12 @@ vi.mock('../../../../src/cypress/utils', async () => {
 describe('cy/commands/navigation', () => {
   let mockCypress: MockedObject<Cypress.Cypress>
   let mockCy: MockedObject<$Cy>
+  let config: Mock<(key: string) => any>
   let mockContext: MockedObject<any>
   let mockState: MockedObject<any>
 
   beforeEach(() => {
+    config = vi.fn()
     mockCypress = {
       // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.log
       log: vi.fn(),
@@ -38,15 +39,15 @@ describe('cy/commands/navigation', () => {
         // @ts-expect-error - the public Cypress.Ensure type omits the internal `commandCanCommunicateWithAUT`
         commandCanCommunicateWithAUT: vi.fn(),
       },
-      // @ts-expect-error - vi.fn() does not match the overloads of Cypress.config
-      config: vi.fn(),
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.config
+      config,
     }
 
     mockCy = {
       clearTimeout: vi.fn(),
-      // @ts-expect-error - vi.fn() returns a $Cy, not the mocked $Cy
+      // @ts-expect-error - MockedObject<$Cy> expects the listener to return the mocked $Cy, not the real one
       once: vi.fn(),
-      // @ts-expect-error - vi.fn() returns a $Cy, not the mocked $Cy
+      // @ts-expect-error - MockedObject<$Cy> expects the listener to return the mocked $Cy, not the real one
       removeListener: vi.fn(),
     }
 
@@ -56,8 +57,7 @@ describe('cy/commands/navigation', () => {
       set: vi.fn(),
     }
 
-    mockCypress.config.mockImplementation((key) => {
-      // @ts-expect-error - the mocked config() overloads type `key` as TestConfigOverrides
+    config.mockImplementation((key) => {
       if (key === 'pageLoadTimeout') {
         return 10000
       }
@@ -65,8 +65,7 @@ describe('cy/commands/navigation', () => {
       return undefined
     })
 
-    // @ts-expect-error - $utils.locReload is a vi.mock, but typed as the real function
-    $utils.locReload.mockReset()
+    vi.mocked($utils.locReload).mockReset()
   })
 
   describe('reload', () => {
@@ -130,8 +129,7 @@ describe('cy/commands/navigation', () => {
 
   describe('resetServerState', () => {
     beforeEach(() => {
-      mockCypress.config.mockImplementation((key) => {
-        // @ts-expect-error - the mocked config() overloads type `key` as TestConfigOverrides
+      config.mockImplementation((key) => {
         if (key === 'blockHosts') {
           return ['*.foo.com']
         }

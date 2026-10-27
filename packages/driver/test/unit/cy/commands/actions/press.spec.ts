@@ -12,15 +12,12 @@ import $errUtils from '../../../../../src/cypress/error_utils'
 import Keyboard from '../../../../../src/cy/keyboard'
 
 vi.mock('../../../../../src/cypress/error_utils', async () => {
-  const original = await vi.importActual('../../../../../src/cypress/error_utils')
+  const original = await vi.importActual<typeof import('../../../../../src/cypress/error_utils')>('../../../../../src/cypress/error_utils')
 
   return {
     default: {
-      // @ts-expect-error - importOriginal() returns unknown
       ...original.default,
-      // @ts-expect-error - importOriginal() returns unknown
       throwErr: vi.fn().mockImplementation(original.default.throwErr),
-      // @ts-expect-error - importOriginal() returns unknown
       throwErrByPath: vi.fn().mockImplementation(original.default.throwErrByPath),
     },
   }

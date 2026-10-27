@@ -14,19 +14,24 @@ const flushPromises = () => {
 
 describe('cy/commands/helpers/location', () => {
   let log: Mock<typeof Cypress['log']>
+  let automation: Mock<(...args: any[]) => Bluebird<any>>
+  let config: Mock<(key: string) => any>
   let mockCypress: MockedObject<Cypress.Cypress>
   let mockLogReturnValue: Cypress.Log
   let mockContext: MockedObject<any>
 
   beforeEach(() => {
     log = vi.fn<typeof Cypress['log']>()
+    automation = vi.fn()
+    config = vi.fn()
 
     mockCypress = {
       // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.log
       log,
-      automation: vi.fn(),
-      // @ts-expect-error - Mock Cypress config object doesn't have all required properties
-      config: vi.fn(),
+      // @ts-expect-error - the driver's automation() resolves a Bluebird promise, but Cypress.automation is typed as a native Promise
+      automation,
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.config
+      config,
     }
 
     mockLogReturnValue = {
@@ -59,8 +64,7 @@ describe('cy/commands/helpers/location', () => {
       })
 
       it('otherwise sets timeout to defaultCommandTimeout', async () => {
-        mockCypress.config.mockImplementation((key) => {
-        // @ts-expect-error - the mocked config() overloads type `key` as TestConfigOverrides
+        config.mockImplementation((key) => {
           if (key === 'defaultCommandTimeout') {
             return 1000
           }
@@ -86,8 +90,7 @@ describe('cy/commands/helpers/location', () => {
       })
 
       it('throws an error when the automation promise has not yet resolved', async () => {
-        // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-        mockCypress.automation.mockImplementation(() => {
+        automation.mockImplementation(() => {
           // no-op promise to simulate the waiting for the automation client
           return new Bluebird.Promise((resolve) => undefined)
         })
@@ -102,8 +105,7 @@ describe('cy/commands/helpers/location', () => {
       })
 
       it('returns the url object when the automation promise is resolved', async () => {
-        // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-        mockCypress.automation.mockImplementation(() => {
+        automation.mockImplementation(() => {
           // no-op promise to simulate the waiting for the automation client
           return new Bluebird.Promise((resolve) => resolve('https://www.example.com#foobar'))
         })
@@ -134,14 +136,12 @@ describe('cy/commands/helpers/location', () => {
       })
 
       it('retries returning the url object after the automation promise is resolved and { retryAfterResolve: true } is passed', async () => {
-        // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-        mockCypress.automation.mockImplementationOnce(() => {
+        automation.mockImplementationOnce(() => {
           // no-op promise to simulate the waiting for the automation client
           return new Bluebird.Promise((resolve) => resolve('https://www.example.com#foobar'))
         })
 
-        // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-        mockCypress.automation.mockImplementation(() => {
+        automation.mockImplementation(() => {
           // no-op promise to simulate the waiting for the automation client
           return new Bluebird.Promise((resolve) => resolve('https://www.foobar.com#foobar'))
         })
@@ -195,8 +195,7 @@ describe('cy/commands/helpers/location', () => {
       })
 
       it('throws an error when the automation promise is rejected and propagates the error', async () => {
-        // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-        mockCypress.automation.mockImplementation(() => {
+        automation.mockImplementation(() => {
           // no-op promise to simulate the waiting for the automation client
           return new Bluebird.Promise((resolve, reject) => reject(new Error('The automation client threw an error')))
         })
@@ -221,8 +220,7 @@ describe('cy/commands/helpers/location', () => {
           // for this test, the automation client will be called twice
           let automationCallCount = 0
 
-          // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-          mockCypress.automation.mockImplementation(() => {
+          automation.mockImplementation(() => {
             automationCallCount++
 
             // no-op promise to simulate the waiting for the automation client
@@ -258,8 +256,7 @@ describe('cy/commands/helpers/location', () => {
           // for this test, the automation client will be called twice
           let automationCallCount = 0
 
-          // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-          mockCypress.automation.mockImplementation(() => {
+          automation.mockImplementation(() => {
             automationCallCount++
 
             // no-op promise to simulate the waiting for the automation client
@@ -299,8 +296,7 @@ describe('cy/commands/helpers/location', () => {
           // for this test, the automation client will be called once
           let automationCallCount = 0
 
-          // @ts-expect-error - mock returns a Bluebird promise, not a native Promise
-          mockCypress.automation.mockImplementation(() => {
+          automation.mockImplementation(() => {
             automationCallCount++
 
             // no-op promise to simulate the waiting for the automation client
