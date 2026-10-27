@@ -237,6 +237,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-wrapper-object-types': 'off',
 
       'mocha/no-exclusive-tests': 'error',
+      'mocha/no-nested-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
       'mocha/no-setup-in-describe': 'off',
       'mocha/max-top-level-suites': 'off',
@@ -245,12 +246,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'mocha/consistent-spacing-between-blocks': 'off',
       'mocha/no-global-tests': 'off',
       'mocha/no-sibling-hooks': 'off',
-      'mocha/no-skipped-tests': 'off',
       'mocha/no-exports': 'off',
-      'mocha/no-async-describe': 'off',
       'mocha/no-return-and-callback': 'off',
       'mocha/no-pending-tests': 'off',
-      'mocha/no-nested-tests': 'off',
 
       'vue/multi-word-component-names': 'off',
       'vue/html-closing-bracket-spacing': 'off',
