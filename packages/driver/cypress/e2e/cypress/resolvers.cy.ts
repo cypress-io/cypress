@@ -201,6 +201,14 @@ describe('src/cypress/resolvers', function () {
       expect(fakeWindow.location.someProp).to.eq('bar')
     })
 
+    it('exposes the same keys as the real location', () => {
+      const loc = Cypress.resolveLocationReference(fakeWindow)
+
+      expect(Object.keys(loc)).to.deep.eq(Object.keys(fakeWindow.location))
+      expect('href' in loc).to.be.true
+      expect({ ...loc }.href).to.eq('original')
+    })
+
     it('returns the same object between calls', () => {
       const loc1 = Cypress.resolveLocationReference(fakeWindow)
       const loc2 = Cypress.resolveLocationReference(fakeWindow)

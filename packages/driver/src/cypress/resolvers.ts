@@ -139,7 +139,7 @@ export function resolveLocationReference (currentWindow: Window): Location {
     acc[cur] = Symbol.for('Proxied')
 
     return acc
-  }, {})
+  }, fakeLocation)
 
   // @ts-expect-error - the proxy target is a placeholder object; the proxy forwards every Location property
   return currentWindow.__cypressFakeLocation = new Proxy(fakeLocation, {
