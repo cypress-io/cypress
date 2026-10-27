@@ -357,7 +357,7 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
 
     const compiler = webpack(webpackOptions)
 
-    let firstBundle = utils.createDeferred<string>()
+    const firstBundle = utils.createDeferred<string>()
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
@@ -537,7 +537,7 @@ preprocessor.__bundles = () => {
 }
 
 function cleanseError (err: string | webpack.StatsError) {
-  let msg = typeof err === 'string' ? err : err.message
+  const msg = typeof err === 'string' ? err : err.message
 
   return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }

@@ -1016,7 +1016,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }: a
   }
   const binaryStateText = JSON.stringify(binaryState)
 
-  let mockFiles: any = {
+  const mockFiles: any = {
     [binaryStateFolder]: {
       'binary_state.json': binaryStateText,
     },
