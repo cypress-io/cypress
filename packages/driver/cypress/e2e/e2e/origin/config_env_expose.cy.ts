@@ -19,13 +19,13 @@
     }
 
     afterEach(() => {
-      // @ts-ignore
+      // @ts-expect-error - window.top is possibly null and `__cySkipValidateConfig` is internal
       window.top.__cySkipValidateConfig = true
     })
 
     if (fnName === 'config') {
       it(`throws if mutating read-only config values with Cypress.config()`, (done) => {
-        // @ts-ignore
+        // @ts-expect-error - window.top is possibly null and `__cySkipValidateConfig` is internal
         window.top.__cySkipValidateConfig = false
         cy.on('fail', (err) => {
           expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` because it is a read-only configuration option.')
@@ -33,7 +33,7 @@
         })
 
         cy.origin('http://www.foobar.com:3500', () => {
-          // @ts-ignore
+          // @ts-expect-error - deliberately sets read-only config to assert it throws
           Cypress.config('chromeWebSecurity', false)
         })
       })

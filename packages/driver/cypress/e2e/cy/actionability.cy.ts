@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error - spec is a script, so destructuring `$` and `_` redeclares the globals
 const { $, _ } = Cypress
 
 describe('src/cy/actionability', () => {

@@ -329,7 +329,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
         })
 
         cy.origin('http://www.foobar.com:3500', () => {
-          // @ts-ignore
+          // @ts-expect-error - deliberately passes a second alias as the options argument
           cy.wait('@foo', '@bar')
         })
       })

@@ -21,7 +21,7 @@ describe('src/cypress/resolvers', function () {
         parent: unboundFn,
       }
 
-      // @ts-ignore
+      // @ts-expect-error - cy.spy() does not accept `bind` as a method name of a function
       cy.spy(unboundFn, 'bind')
 
       const actual = Cypress.resolveWindowReference({}, unboundFnWindow, 'parent')

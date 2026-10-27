@@ -182,11 +182,10 @@ describe('network stubbing', { retries: 15 }, function () {
         const url = uniqueRoute('/foo')
 
         const handler = (req) => {
-          // @ts-ignore
           const routeId = _.findKey(state('routes'), { handler })
           const route = state('routes')[routeId!]
 
-          // @ts-ignore
+          // @ts-expect-error - `routeId` is not part of the expected event literal
           expectedEvent.routeId = routeId
           expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
 
@@ -225,11 +224,10 @@ describe('network stubbing', { retries: 15 }, function () {
         const regexUrl = new RegExp(`^${url}.*`)
 
         const handler = (req) => {
-          // @ts-ignore
           const routeId = _.findKey(state('routes'), { handler })
           const route = state('routes')[routeId!]
 
-          // @ts-ignore
+          // @ts-expect-error - `routeId` is not part of the expected event literal
           expectedEvent.routeId = routeId
           expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
 
@@ -743,7 +741,6 @@ describe('network stubbing', { retries: 15 }, function () {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
-          // @ts-ignore
           if (log.get('name') !== 'intercept') {
             return
           }
@@ -760,9 +757,8 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        // @ts-ignore: should fail
         cy.intercept({
-          // @ts-ignore
+          // @ts-expect-error - deliberately passes an object as the url
           url: {},
         })
       })
@@ -784,7 +780,7 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        // @ts-ignore - should fail
+        // @ts-expect-error - deliberately calls cy.intercept() without arguments
         cy.intercept()
       })
 
@@ -797,7 +793,7 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        // @ts-ignore - should fail
+        // @ts-expect-error - deliberately passes both a static response and a handler
         cy.intercept(url, { url }, () => {})
       })
 
@@ -823,7 +819,7 @@ describe('network stubbing', { retries: 15 }, function () {
             done()
           })
 
-          // @ts-ignore
+          // @ts-expect-error - deliberately passes both a static response and a handler
           cy.intercept(url, { forceNetworkError: true }, () => {})
         })
 
@@ -835,7 +831,7 @@ describe('network stubbing', { retries: 15 }, function () {
             done()
           })
 
-          // @ts-ignore
+          // @ts-expect-error - deliberately passes both a static response and a handler
           cy.intercept(url, { middleware: true }, { forceNetworkError: true }, () => {})
         })
 
@@ -847,7 +843,7 @@ describe('network stubbing', { retries: 15 }, function () {
             done()
           })
 
-          // @ts-ignore
+          // @ts-expect-error - deliberately passes both a static response and a handler
           cy.intercept('POST', url, { forceNetworkError: true }, () => {})
         })
       })
@@ -875,12 +871,11 @@ describe('network stubbing', { retries: 15 }, function () {
             done()
           })
 
-          // @ts-ignore this is invalid on purpose
           cy.intercept({
             headers: {
               good: 'string',
               fine: /regexp/,
-              // @ts-ignore
+              // @ts-expect-error - deliberately passes a number as a header matcher
               wrong: 3,
             },
           })
@@ -893,7 +888,7 @@ describe('network stubbing', { retries: 15 }, function () {
             done()
           })
 
-          // @ts-ignore
+          // @ts-expect-error - deliberately passes an unknown RouteMatcher property
           cy.intercept({ wrong: true })
         })
 
@@ -938,7 +933,7 @@ describe('network stubbing', { retries: 15 }, function () {
               done()
             })
 
-            // @ts-ignore - this should error
+            // @ts-expect-error - deliberately passes an invalid handler
             cy.intercept('/', handler)
           })
         })
@@ -980,7 +975,6 @@ describe('network stubbing', { retries: 15 }, function () {
               done()
             })
 
-            // @ts-ignore - this should error
             cy.intercept('/', handler)
           })
         })

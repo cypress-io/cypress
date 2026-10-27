@@ -375,7 +375,7 @@ describe('cannot set override configuration options that', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - deliberately sets a config value that cannot be overridden at runtime
     Cypress.config('chromeWebSecurity', false)
   })
 
@@ -417,13 +417,13 @@ describe('cannot set override configuration options that', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - deliberately sets a config value that cannot be overridden at runtime
     Cypress.config('env', { FOO: 'bar' })
   })
 
   it('does not throw for non-Cypress config values', () => {
     expect(() => {
-      // @ts-expect-error
+      // @ts-expect-error - deliberately sets a non-Cypress config key
       Cypress.config('foo', 'bar')
     }).to.not.throw()
   })
