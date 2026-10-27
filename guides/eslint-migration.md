@@ -35,7 +35,7 @@
 
 ### Batch 4b: Core packages (part 2)
 - [ ] packages/runner
-- [ ] packages/extension
+- [x] packages/extension
 - [ ] packages/network
 - [ ] packages/socket
 - [ ] packages/telemetry
@@ -51,7 +51,7 @@
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
 - [x] packages/stderr-filtering ✅ **COMPLETED**
-- [ ] packages/config
+- [x] packages/config
 - [ ] packages/root
 - [ ] packages/resolve-dist
 - [ ] packages/packherd-require
