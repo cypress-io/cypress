@@ -63,7 +63,7 @@ describe('ipcSpanExporter', () => {
   })
 
   describe('send', () => {
-    it('returns if shutdownOnce.isCalled is true', () => {
+    it('returns if shutdownOnce.isCalled is true', async () => {
       const exporter = new OTLPTraceExporter()
 
       exporter.convert = (objects) => {
@@ -84,8 +84,7 @@ describe('ipcSpanExporter', () => {
         throw 'onError should not be called'
       }
 
-      // @ts-expect-error - _shutdownOnce is protected; stub it to simulate a shut-down exporter
-      exporter._shutdownOnce = { isCalled: true }
+      await exporter.shutdown()
 
       expect(exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)).toBeUndefined()
     })
