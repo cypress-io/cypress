@@ -16,13 +16,10 @@ const parse = (ms) => {
 }
 
 export const long = (ms, alwaysIncludeSeconds = true) => {
-  const parsed = parse(ms)
-  const { duration } = parsed
-  let { mins } = parsed
+  const { mins: hourMins, duration } = parse(ms)
+  const mins = hourMins + duration.minutes()
   let word
   const msg: string[] = []
-
-  mins += duration.minutes()
 
   if (mins) {
     word = mins === 1 ? 'minute' : 'minutes'
@@ -40,12 +37,9 @@ export const long = (ms, alwaysIncludeSeconds = true) => {
 }
 
 export const short = (ms, fixed: number | undefined = undefined) => {
-  const parsed = parse(ms)
-  const { duration } = parsed
-  let { mins } = parsed
+  const { mins: hourMins, duration } = parse(ms)
+  const mins = hourMins + duration.minutes()
   const msg: string[] = []
-
-  mins += duration.minutes()
 
   if (mins) {
     msg.push(`${mins}m`)
