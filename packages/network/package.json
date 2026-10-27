@@ -11,7 +11,7 @@
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
     "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "test": "yarn test-unit",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
     "test-unit": "vitest run",
@@ -31,13 +31,16 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@types/concat-stream": "1.6.1",
     "@types/node": "24.10.1",
     "@types/proxy-from-env": "1.0.4",
     "cross-fetch": "^4.1.0",
+    "eslint": "^9.31.0",
     "express": "4.21.0",
+    "jiti": "^2.4.2",
     "rimraf": "6.1.1",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
@@ -48,5 +51,8 @@
   ],
   "types": "./cjs/index.d.ts",
   "license": "MIT",
-  "module": "esm/index.js"
+  "module": "esm/index.js",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  }
 }

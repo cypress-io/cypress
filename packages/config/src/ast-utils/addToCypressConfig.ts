@@ -63,7 +63,7 @@ interface AddProjectIdToCypressConfigOptions {
 
 export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
-    let result = await fs.readFile(options.filePath, 'utf8')
+    const result = await fs.readFile(options.filePath, 'utf8')
     const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
       t.identifier('projectId'),
       t.identifier(options.projectId),
@@ -156,7 +156,7 @@ type OutputExtension = '.ts' | '.mjs' | '.js'
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string}) {
+function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string }) {
   if (defineConfigAvailable(projectRoot)) {
     if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
       return dedent`

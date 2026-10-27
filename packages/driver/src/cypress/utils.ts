@@ -291,7 +291,7 @@ export default {
     return _
     .chain(values)
     .map(_.bind(this.stringifyActual, this))
-    // @ts-expect-error
+    // @ts-expect-error - lodash infers the wrong element type after _.bind(), so without(undefined) does not type-check
     .without(undefined)
     .join(', ')
     .value()
@@ -393,7 +393,6 @@ export default {
       return 0
     }
 
-    // @ts-ignore - _currentRetry is an internal mocha property
     return this.getTestFromRunnable(r)._currentRetry || 0
   },
 
@@ -478,7 +477,6 @@ export default {
   },
 
   isPromiseLike (ret) {
-    // @ts-ignore
     return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
   },
 

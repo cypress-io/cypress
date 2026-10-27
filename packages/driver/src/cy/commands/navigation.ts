@@ -477,8 +477,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, conf
   }
 
   // clear the current timeout
-  // @ts-expect-error
-  cy.clearTimeout('reload')
+  cy.clearTimeout()
 
   let cleanup: (() => any) | null = null
   const options = _.defaults({}, userOptions, {
@@ -533,7 +532,6 @@ export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, conf
     if (Cypress.isBrowser('webkit')) {
       // Make sure the reload command can communicate with the AUT.
       // if we failed for any other reason, we need to display the correct error to the user.
-      // @ts-expect-error
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
     }
 
@@ -627,7 +625,6 @@ export const go = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: 
       if (Cypress.isBrowser('webkit')) {
         // Make sure the reload command can communicate with the AUT.
         // if we failed for any other reason, we need to display the correct error to the user.
-        // @ts-expect-error
         Cypress.ensure.commandCanCommunicateWithAUT(cy)
       }
 

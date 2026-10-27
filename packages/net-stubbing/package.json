@@ -7,7 +7,7 @@
     "build-prod": "tsc --project .",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint --ext .ts,.json, .",
+    "lint": "eslint",
     "test": "vitest",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-watch": "vitest watch",
@@ -25,15 +25,21 @@
   },
   "devDependencies": {
     "@packages/errors": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@types/mime": "^3.0.1",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "vitest": "^3.2.4"
   },
   "files": [
     "lib"
   ],
   "license": "MIT",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "nx": {}
 }

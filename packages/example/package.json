@@ -12,20 +12,24 @@
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build -b gh-pages",
     "postinstall": "echo '@packages/example needs: yarn build'",
+    "lint": "eslint",
     "test": "yarn test-unit",
     "test-e2e": "cypress run",
     "test-unit": "vitest run"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
     "@types/fs-extra": "^9.0.13",
     "@types/glob": "7.1.1",
     "cypress-example-kitchensink": "7.0.0",
+    "eslint": "^9.31.0",
     "fs-extra": "9.1.0",
     "gh-pages": "5.0.0",
     "glob": "7.1.6",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-rev-all": "2.0.2",
+    "jiti": "^2.4.2",
     "resolve-pkg": "2.0.0",
     "tsx": "^4.23.12",
     "vitest": "^3.2.4"
@@ -36,6 +40,9 @@
   ],
   "types": "index.d.ts",
   "license": "MIT",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "nx": {
     "targets": {
       "build": {

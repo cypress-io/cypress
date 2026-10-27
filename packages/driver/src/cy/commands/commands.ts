@@ -19,7 +19,7 @@ export default function (Commands, Cypress, cy) {
   $Chainer.add('command', function (chainer, userInvocationStack, args) {
     // `...args` below is the shorthand of `args[0], ...args.slice(1)`
     // TypeScript doesn't allow this.
-    // @ts-ignore
+    // @ts-expect-error - args is not a tuple, so it cannot be spread into command()
     return command(chainer, ...args)
   })
 
