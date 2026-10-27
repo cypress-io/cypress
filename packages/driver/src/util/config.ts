@@ -40,7 +40,6 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
  * @returns Cypress.ObjectLike
  */
 const syncToCurrentOrigin = (valuesFromOtherOrigin: Cypress.ObjectLike, valuesFromCurrentOrigin: Cypress.ObjectLike): Cypress.ObjectLike => {
-  // @ts-ignore
   const shallowDifferencesInConfig = _.omitBy(valuesFromOtherOrigin, (value: any, key: string) => {
     const valueToSync = value
     const currentOriginValue = valuesFromCurrentOrigin[key]

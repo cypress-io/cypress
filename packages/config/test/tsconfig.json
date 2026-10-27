@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    ".",
+    "../src"
+  ],
+  "exclude": [
+    "__babel_fixtures__",
+    "__fixtures__",
+    "__snapshots__"
+  ],
+  "compilerOptions": {
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "types": [
+      "node",
+      "vitest/globals"
+    ]
+  }
+}
