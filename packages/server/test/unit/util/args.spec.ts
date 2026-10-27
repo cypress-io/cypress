@@ -213,10 +213,10 @@ describe('lib/util/args', () => {
 
     // https://github.com/cypress-io/cypress/issues/20794
     it('correctly splits at comma with escaped glob pattern', () => {
-      const options = toObject(['--spec', 'cypress/integration/foo/bar/[baz]/test.ts,cypress/integration/foo1/bar/[baz1]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts'])
+      const options = toObject(['--spec', 'cypress/integration/foo/bar/\\[baz\\]/test.ts,cypress/integration/foo1/bar/\\[baz1\\]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts'])
 
-      expect(options.spec[0]).toBe(`${getCwd()}/cypress/integration/foo/bar/[baz]/test.ts`)
-      expect(options.spec[1]).toBe(`${getCwd()}/cypress/integration/foo1/bar/[baz1]/test.ts`)
+      expect(options.spec[0]).toBe(`${getCwd()}/cypress/integration/foo/bar/\\[baz\\]/test.ts`)
+      expect(options.spec[1]).toBe(`${getCwd()}/cypress/integration/foo1/bar/\\[baz1\\]/test.ts`)
       expect(options.spec[2]).toBe(`${getCwd()}/cypress/integration/foo2/bar/baz/test.ts`)
       expect(options.spec[3]).toBe(`${getCwd()}/cypress/integration/foo3/bar/baz/foo4.ts`)
     })
