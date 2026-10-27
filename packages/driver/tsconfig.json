@@ -14,7 +14,6 @@
     "resolveJsonModule": true
   },
   "exclude": [
-    "dist",
-    "test"
+    "dist"
   ]
 }
