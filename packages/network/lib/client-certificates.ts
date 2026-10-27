@@ -15,7 +15,7 @@ export class ParsedUrl {
       this.path = undefined
       this.port = undefined
     } else {
-      let parsed = new URL(url)
+      const parsed = new URL(url)
 
       this.host = parsed.hostname
       this.port = !parsed.port ? undefined : parseInt(parsed.port)

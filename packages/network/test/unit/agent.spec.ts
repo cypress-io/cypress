@@ -154,7 +154,7 @@ describe('lib/agent', function () {
           }
 
           if (testCase.proxyUrl) {
-            let options: any = {
+            const options: any = {
               keepRequests: true,
               https: false,
               auth: false,
@@ -598,7 +598,7 @@ describe('lib/agent', function () {
             caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
           }
 
-          let options: any = {
+          const options: any = {
             keepRequests: true,
             https: {
               ...servers.https,
@@ -736,7 +736,7 @@ describe('lib/agent', function () {
             agent,
           })
 
-          let options: any = {
+          const options: any = {
             keepRequests: true,
             https: servers.https,
             auth: false,

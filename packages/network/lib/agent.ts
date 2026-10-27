@@ -109,7 +109,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
   const isHttps = opts.proxy.protocol === 'https:'
   const port = opts.proxy.port || (isHttps ? 443 : 80)
 
-  let connectOpts: any = {
+  const connectOpts: any = {
     port: Number(port),
     host: opts.proxy.hostname,
     useTls: isHttps,
