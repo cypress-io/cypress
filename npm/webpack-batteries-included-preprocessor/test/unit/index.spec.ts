@@ -1,4 +1,6 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
+import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import getTsConfig from 'get-tsconfig'
 import webpackPreprocessor from '@cypress/webpack-preprocessor'
@@ -62,6 +64,42 @@ describe('webpack-batteries-included-preprocessor', () => {
       expect(result.plugins).toHaveLength(2)
       expect(result.plugins[1].constructor.name).toEqual('BundleAnalyzerPlugin')
       Debug.disable()
+    })
+
+    describe('JavaScript babel-loader rule', () => {
+      const getJsBabelOptions = (webpackOptions: ReturnType<typeof getFullWebpackOptions>) => {
+        return webpackOptions.module.rules[1].use[0].options
+      }
+
+      it('caches uncompressed transforms and targets the browsers Cypress launches', () => {
+        const options = getJsBabelOptions(getFullWebpackOptions('foo'))
+        const [presetEnvPath, presetEnvOptions] = options.presets[0] as [string, { targets: Record<string, string> }]
+
+        expect(options.cacheDirectory).toBe(true)
+        expect(options.cacheCompression).toBe(false)
+        expect(presetEnvPath).toContain('preset-env')
+        expect(presetEnvOptions.targets).toEqual({ chrome: '100', firefox: '140', safari: '16.4' })
+      })
+
+      it('leaves class fields and object rest/spread to the browser', () => {
+        const plugins = getJsBabelOptions(getFullWebpackOptions('foo')).plugins.map((p) => (Array.isArray(p) ? p[0] : p) as string)
+
+        expect(plugins.some((p) => p.includes('plugin-transform-class-properties'))).toBe(false)
+        expect(plugins.some((p) => p.includes('plugin-transform-object-rest-spread'))).toBe(false)
+      })
+
+      it('caches in the OS temp folder when no package.json sits above the cwd', async () => {
+        const existsSync = vi.spyOn(fs, 'existsSync').mockReturnValue(false)
+
+        try {
+          vi.resetModules()
+          const getOptions = (await import('../../index')).getFullWebpackOptions
+
+          expect(getJsBabelOptions(getOptions('foo')).cacheDirectory).toEqual(path.join(os.tmpdir(), 'babel-loader'))
+        } finally {
+          existsSync.mockRestore()
+        }
+      })
     })
   })
 
@@ -351,6 +389,12 @@ describe('webpack-batteries-included-preprocessor', () => {
 
           expect(metadataIdx).toBeGreaterThanOrEqual(0)
           expect(decoratorsIdx).toBeGreaterThan(metadataIdx)
+          // legacy decorators need decorated class fields lowered in the same pass
+          const classPropertiesIdx = plugins.findIndex((p: string) => p.includes('plugin-transform-class-properties'))
+
+          expect(classPropertiesIdx).toBeGreaterThan(decoratorsIdx)
+          expect(plugins.some((p: string) => p.includes('plugin-transform-object-rest-spread'))).toBe(true)
+          expect(loader.options.cacheDirectory).toBe(true)
         },
       )
 

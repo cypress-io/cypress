@@ -1,3 +1,5 @@
+import fs from 'fs'
+import os from 'os'
 import path from 'path'
 import Debug from 'debug'
 import type { EventEmitter } from 'events'
@@ -33,10 +35,30 @@ class TypeScriptNotFoundError extends Error {
 
 const typescriptExtensionRegex = /\.m?tsx?$/
 
+// Every browser Cypress launches supports class fields and object rest/spread
+// natively, so preset-env only transpiles what these floors are missing.
+// firefox matches the minimum in packages/launcher/lib/known-browsers.ts;
+// chrome and safari sit below the "Runtime targets" floors in AGENTS.md.
+const babelTargets = { chrome: '100', firefox: '140', safari: '16.4' }
+
+// `true` caches in the nearest package.json's node_modules/.cache and falls
+// back to the OS temp folder when that can't be written to. babel-loader 10.0
+// throws instead when no package.json sits above the cwd (a project run without
+// one, e.g. a mounted Docker volume), so point it at the temp folder directly.
+const getBabelCacheDirectory = (): true | string => {
+  for (let dir = process.cwd(); ; dir = path.dirname(dir)) {
+    if (fs.existsSync(path.join(dir, 'package.json'))) return true
+
+    if (path.dirname(dir) === dir) return path.join(os.tmpdir(), 'babel-loader')
+  }
+}
+
 // Shared by the JS spec rule and the TypeScript 7+ rule. `typescript: true`
 // adds preset-typescript.
 const getBabelLoaderOptions = ({ typescript = false }: { typescript?: boolean } = {}) => {
   return {
+    cacheDirectory: getBabelCacheDirectory(),
+    cacheCompression: false,
     plugins: [
       // Legacy decorators + metadata, ordered before class-properties, to keep
       // emitDecoratorMetadata parity with ts-loader.
@@ -44,20 +66,19 @@ const getBabelLoaderOptions = ({ typescript = false }: { typescript?: boolean } 
         require.resolve('babel-plugin-transform-typescript-metadata'),
         [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
       ] : []),
-      ...[
-        'babel-plugin-add-module-exports',
-        '@babel/plugin-transform-class-properties',
-        '@babel/plugin-transform-object-rest-spread',
-      ].map((plugin) => require.resolve(plugin)),
+      require.resolve('babel-plugin-add-module-exports'),
+      // Legacy decorators need decorated class fields lowered in the same pass,
+      // so these stay for TypeScript even though the targets support both.
+      ...(typescript ? [
+        require.resolve('@babel/plugin-transform-class-properties'),
+        require.resolve('@babel/plugin-transform-object-rest-spread'),
+      ] : []),
       [require.resolve('@babel/plugin-transform-runtime'), {
         absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
       }],
     ],
     presets: [
-      // the chrome version should be synced with
-      // packages/web-config/webpack.config.base.ts and
-      // packages/server/lib/browsers/chrome.ts
-      [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
+      [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: babelTargets }],
       require.resolve('@babel/preset-react'),
       // Last preset runs first: strip types before preset-env/react.
       ...(typescript ? [require.resolve('@babel/preset-typescript')] : []),
