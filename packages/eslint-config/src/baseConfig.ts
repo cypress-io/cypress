@@ -89,13 +89,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@stylistic/template-curly-spacing': 'off',
       '@stylistic/no-mixed-operators': 'off',
       '@stylistic/jsx-tag-spacing': 'off',
-      '@stylistic/jsx-function-call-newline': 'off',
       '@stylistic/jsx-wrap-multilines': 'off',
       '@stylistic/jsx-closing-tag-location': 'off',
-      '@stylistic/jsx-first-prop-new-line': 'off',
-      '@stylistic/jsx-closing-bracket-location': 'off',
       '@stylistic/jsx-one-expression-per-line': 'off',
-      '@stylistic/jsx-max-props-per-line': 'off',
       '@stylistic/jsx-curly-brace-presence': 'off',
       '@stylistic/jsx-quotes': 'off',
     },
@@ -254,10 +250,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
       'vue/multi-word-component-names': 'off',
       'vue/html-closing-bracket-spacing': 'off',
-      'vue/no-dupe-keys': 'off',
-      'vue/v-on-event-hyphenation': 'off',
-      'vue/attribute-hyphenation': 'off',
-      'vue/no-useless-template-attributes': 'off',
 
       'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',
@@ -278,6 +270,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // the Vue recommended config ships these as warnings, and
     // flatConfigs.typescript leaves import-x/namespace unset
     rules: {
+      'vue/attribute-hyphenation': 'error',
       'vue/attributes-order': 'error',
       'vue/block-order': 'error',
       'vue/component-definition-name-casing': 'error',
@@ -306,6 +299,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/singleline-html-element-content-newline': 'error',
       'vue/this-in-template': 'error',
       'vue/v-bind-style': 'error',
+      'vue/v-on-event-hyphenation': 'error',
       'vue/v-on-style': 'error',
       'vue/v-slot-style': 'error',
 
