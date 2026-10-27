@@ -42,7 +42,7 @@ export default class Err {
   parsedStack: ParsedStackLine[] | null = null
   docsUrl = '' as string | string[]
   templateType = ''
-  // @ts-ignore
+  // @ts-expect-error - codeFrame is only assigned by update(), so it is not definitely assigned in the constructor
   codeFrame: CodeFrame
   isRecovered: boolean = false
   docsUrlTitle: string | null = null

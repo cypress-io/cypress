@@ -68,9 +68,9 @@ describe('runnables store', () => {
   let scroller: Scroller
 
   beforeEach(() => {
-    // @ts-ignore
+    // @ts-expect-error - the stub returns void rather than a request ID
     global.requestAnimationFrame = (cb: FrameRequestCallback) => {
-      // @ts-ignore
+      // @ts-expect-error - the stub calls back without a timestamp
       return cb()
     }
 

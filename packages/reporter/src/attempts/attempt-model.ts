@@ -31,7 +31,6 @@ export default class Attempt {
   _testOuterStatus?: TestState = undefined
   _invocationCount: number = 0
   invocationDetails?: FileDetails
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hookCount: { [name in HookName]: number } = {
     'before all': 0,
     'before each': 0,
@@ -40,7 +39,8 @@ export default class Attempt {
     'test body': 0,
     'studio commands': 0,
   }
-  _isOpen: boolean|null = null
+
+  _isOpen: boolean | null = null
 
   isOpenWhenLast: boolean | null = null
   _callbackAfterUpdate: Function | null = null
@@ -49,7 +49,7 @@ export default class Attempt {
   id: number
   test: Test
 
-  _logs: {[key: string]: Log} = {}
+  _logs: { [key: string]: Log } = {}
 
   constructor (props: TestProps, test: Test) {
     makeObservable(this, {
@@ -165,7 +165,7 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
-      // @ts-ignore satisfied by CommandProps
+      // @ts-expect-error - sessionInfo exists only on CommandProps, which is not part of every member of LogProps
       if (props.sessionInfo) {
         this._updateOrAddSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
       }
@@ -192,7 +192,7 @@ export default class Attempt {
 
     return _(this.hooks)
     .map((hook) => {
-      // @ts-ignore
+      // @ts-expect-error - this.err is checked above, but the narrowing does not carry into the callback
       return hook.commandMatchingErr(this.err)
     })
     .compact()

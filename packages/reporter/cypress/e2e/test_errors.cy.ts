@@ -26,7 +26,7 @@ describe('test errors', () => {
 
     cy.visit('/').then((win) => {
       setError = (err: Error) => {
-        // @ts-ignore
+        // @ts-expect-error - the fixture types suites as optional, and a plain Error stands in for ErrProps
         runnablesWithErr.suites[0].tests[0].err = err
 
         cy.get('.reporter.mounted').then(() => {
@@ -52,7 +52,7 @@ describe('test errors', () => {
       cy.get('.runnable-err-print').click().should(() => {
         expect(runner.emit).to.be.calledWith('runner:console:error')
 
-        // @ts-ignore
+        // @ts-expect-error - runner.emit is wrapped by cy.spy, which its EventEmitter type does not reflect
         const err = runner.emit.withArgs('runner:console:error').lastCall.args[1].err
 
         expect(err.message).to.equal(commandErr.message)
@@ -304,7 +304,7 @@ describe('test errors', () => {
     })
 
     it('falls back to text language class', () => {
-      // @ts-ignore
+      // @ts-expect-error - the command_error fixture types codeFrame as optional
       commandErr.codeFrame.language = null
       setError(commandErr)
       cy

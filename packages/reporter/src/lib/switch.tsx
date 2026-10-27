@@ -19,7 +19,7 @@ const Switch: React.FC<Props> = observer(({ value, 'data-cy': dataCy, size = 'lg
       className={`switch switch-${size}`}
       role="switch"
       aria-checked={value}
-      // @ts-expect-error
+      // @ts-expect-error - _onClick takes the DOM MouseEvent rather than React's synthetic MouseEvent
       onClick={_onClick}
     >
       <span className="indicator" />

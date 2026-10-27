@@ -4,7 +4,7 @@ import type { Configuration } from 'webpack'
 
 const CleanWebpackPlugin = getCleanWebpackPlugin()
 
-// @ts-ignore
+// @ts-expect-error - getCommonConfig() infers `mode` as `string`, not webpack's mode union
 const config: Configuration = {
   ...getCommonConfig(),
   entry: {
@@ -17,9 +17,8 @@ const config: Configuration = {
   },
 }
 
-// @ts-ignore
 config.plugins = [
-  // @ts-ignore
+  // @ts-expect-error - Configuration types plugins as optional, though getCommonConfig() always sets it
   ...config.plugins,
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, 'static/index.html'),

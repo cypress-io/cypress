@@ -562,7 +562,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
       cy.contains('#exists').click()
-      // @ts-ignore
+      // @ts-expect-error - runner.emit is wrapped by cy.spy, which its EventEmitter type does not reflect
       cy.wrap(runner.emit.withArgs('runner:console:log')).should('be.calledOnce')
     })
 
@@ -976,7 +976,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
           cy.contains('within').click()
         })
 
-        // @ts-ignore
+        // @ts-expect-error - runner.emit is wrapped by cy.spy, which its EventEmitter type does not reflect
         cy.wrap(runner.emit.withArgs('runner:console:log')).should('be.calledOnce')
       })
 
