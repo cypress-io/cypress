@@ -66,12 +66,12 @@ describe('AUT window patches', () => {
       // the spec, so restore the value for the tests that follow
       beforeEach(() => {
         modifyObstructiveCode = Cypress.config('modifyObstructiveCode')
-        // @ts-expect-error
+        // @ts-expect-error - `modifyObstructiveCode` is not a test config override
         Cypress.config('modifyObstructiveCode', false)
       })
 
       afterEach(() => {
-        // @ts-expect-error
+        // @ts-expect-error - `modifyObstructiveCode` is not a test config override
         Cypress.config('modifyObstructiveCode', modifyObstructiveCode)
       })
 

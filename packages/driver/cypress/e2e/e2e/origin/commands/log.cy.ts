@@ -224,8 +224,8 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         logs = []
 
         cy.origin('http://www.foobar.com:3500', () => {
-          // @ts-ignore
           // add custom command to logs are associated to a command like typical cypress command logs would be
+          // @ts-expect-error - `commandToRun` is a test-only custom command not declared on Chainable
           Cypress.Commands.add('commandToRun', () => {
             Cypress.log({ name: 'log 1', message: 'log without snapshots' })?.end()
             Cypress.log({ name: 'log 2', message: 'log().snapshot()' })?.snapshot().end()
@@ -240,7 +240,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
             Cypress.log({ name: 'log 10', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).finish()
           })
 
-          // @ts-ignore
+          // @ts-expect-error - `commandToRun` is a test-only custom command not declared on Chainable
           cy.commandToRun()
         })
         .then(() => {

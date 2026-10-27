@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import * as parser from 'socket.io-parser'
-const { hasBinary } = parser
+// Safe because patches/socket.io-parser+4.2.6.patch exports hasBinary from the
+// runtime builds but leaves socket.io-parser's type declarations untouched
+const { hasBinary } = parser as typeof parser & { hasBinary: (obj: unknown) => boolean }
 import pkg from '../package.json'
 import * as lib from '../lib/node'
 import * as browserLib from '../lib/client'
@@ -22,30 +24,29 @@ describe('Socket', function () {
   it('creates a websocket for non chromium and non webkit browsers', function () {
     const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'firefox' })
 
-    // @ts-expect-error
+    // @ts-expect-error - `io` is not on the SocketShape type
     expect(socket.io.opts.path).toEqual('/path')
     // socket.io-client 4.6+ normalizes string transports into transport classes; the websocket transport class is named "WS".
-    // @ts-expect-error
+    // @ts-expect-error - `io` is not on the SocketShape type
     expect(socket.io.opts.transports[0].name).toEqual('WS')
   })
 
   describe('automation socket browsers', function () {
     beforeEach(() => {
-      // @ts-expect-error
-      global.window = {}
+      vi.stubGlobal('window', {})
     })
 
     it('creates an automation socket for chromium browsers', function () {
       const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
 
-      // @ts-expect-error
+      // @ts-expect-error - `_namespace` is not on the SocketShape type (it is a socket.io-client internal)
       expect(socket._namespace).toEqual('/path/default')
     })
 
     it('creates an automation socket for webkit browsers', function () {
       const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
 
-      // @ts-expect-error
+      // @ts-expect-error - `_namespace` is not on the SocketShape type (it is a socket.io-client internal)
       expect(socket._namespace).toEqual('/path/default')
     })
   })
@@ -80,7 +81,7 @@ describe('Socket', function () {
     it('correctly encodes and decodes binary blob data', () => {
       const encoder = new parser.Encoder()
 
-      const obj = {
+      const obj: parser.Packet = {
         type: PacketType.EVENT,
         data: ['a', Buffer.from('abc', 'utf8')],
         // data: ['a', { foo: 'bar' }],
@@ -97,7 +98,6 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error
           obj.attachments = undefined
           expect(packet).toEqual(obj)
           resolve()
@@ -112,11 +112,10 @@ describe('Socket', function () {
     it('correctly encodes and decodes circular data', () => {
       const encoder = new parser.Encoder()
 
-      const circularObj = {
+      const circularObj: { foo: Record<string, unknown>, bin?: Buffer } = {
         foo: {},
       }
 
-      // @ts-expect-error
       circularObj.foo.circularObj = circularObj
 
       const obj = {
@@ -149,11 +148,10 @@ describe('Socket', function () {
     it('correctly encodes and decodes circular data in array', () => {
       const encoder = new parser.Encoder()
 
-      const circularObj = {
+      const circularObj: { foo: Record<string, unknown>, bin?: Buffer } = {
         foo: {},
       }
 
-      // @ts-expect-error
       circularObj.foo.circularArray = [circularObj, circularObj]
 
       const obj = {
@@ -187,15 +185,14 @@ describe('Socket', function () {
     it('correctly encodes and decodes circular data containing binary', () => {
       const encoder = new parser.Encoder()
 
-      const circularObj = {
+      const circularObj: { foo: Record<string, unknown>, bin?: Buffer } = {
         foo: {},
         bin: Buffer.from('abc', 'utf8'),
       }
 
-      // @ts-expect-error
       circularObj.foo.circularObj = circularObj
 
-      const obj = {
+      const obj: parser.Packet = {
         type: PacketType.EVENT,
         data: ['a', circularObj],
         id: 23,
@@ -211,7 +208,6 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error
           obj.attachments = undefined
           expect(packet.data[1] === packet.data[1].foo.circularObj).toBe(true)
           expect(packet).toEqual(obj)
@@ -231,7 +227,7 @@ describe('Socket', function () {
 
       noProtoObj.foo = 'foo'
 
-      const obj = {
+      const obj: parser.Packet = {
         type: PacketType.EVENT,
         data: ['a', noProtoObj, Buffer.from('123', 'utf8')],
         id: 23,
@@ -247,7 +243,6 @@ describe('Socket', function () {
       return new Promise<void>((resolve) => {
         decoder.on('decoded', (packet) => {
           obj.data = originalData
-          // @ts-expect-error
           obj.attachments = undefined
           expect(packet).toEqual(obj)
           resolve()

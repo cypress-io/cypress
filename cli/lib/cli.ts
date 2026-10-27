@@ -454,7 +454,7 @@ const cliModule = {
     if (util.isNonProductionCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
       debug('non-production CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)
 
-      let msg = `
+      const msg = `
         ${logSymbols.warning} Warning: It looks like you're passing CYPRESS_INTERNAL_ENV=${CYPRESS_INTERNAL_ENV}
 
         The environment variable "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.

@@ -1,18 +1,17 @@
 /**
  * @vitest-environment jsdom
  */
-import type { MockedObject } from 'vitest'
+import type { Mock, MockedObject } from 'vitest'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { go, reload, resetServerState } from '../../../../src/cy/commands/navigation'
 import $utils from '../../../../src/cypress/utils'
 import type{ $Cy } from '../../../../src/cypress/cy'
 
 vi.mock('../../../../src/cypress/utils', async () => {
-  const original = await vi.importActual('../../../../src/cypress/utils')
+  const original = await vi.importActual<typeof import('../../../../src/cypress/utils')>('../../../../src/cypress/utils')
 
   return {
     default: {
-      // @ts-expect-error
       ...original.default,
       locReload: vi.fn(),
     },
@@ -22,30 +21,33 @@ vi.mock('../../../../src/cypress/utils', async () => {
 describe('cy/commands/navigation', () => {
   let mockCypress: MockedObject<Cypress.Cypress>
   let mockCy: MockedObject<$Cy>
+  let config: Mock<(key: string) => any>
   let mockContext: MockedObject<any>
   let mockState: MockedObject<any>
 
   beforeEach(() => {
+    config = vi.fn()
     mockCypress = {
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.log
       log: vi.fn(),
       automation: vi.fn(),
       isBrowser: vi.fn(),
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.backend
       backend: vi.fn(),
-      // @ts-expect-error
       isCrossOriginSpecBridge: false,
+      // @ts-expect-error - partial Ensure mock
       ensure: {
-        // @ts-expect-error
         commandCanCommunicateWithAUT: vi.fn(),
       },
-      // @ts-expect-error
-      config: vi.fn(),
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.config
+      config,
     }
 
     mockCy = {
       clearTimeout: vi.fn(),
-      // @ts-expect-error
+      // @ts-expect-error - MockedObject<$Cy> expects the listener to return the mocked $Cy, not the real one
       once: vi.fn(),
-      // @ts-expect-error
+      // @ts-expect-error - MockedObject<$Cy> expects the listener to return the mocked $Cy, not the real one
       removeListener: vi.fn(),
     }
 
@@ -55,15 +57,15 @@ describe('cy/commands/navigation', () => {
       set: vi.fn(),
     }
 
-    mockCypress.config.mockImplementation((key) => {
-      //@ts-expect-error
+    config.mockImplementation((key) => {
       if (key === 'pageLoadTimeout') {
         return 10000
       }
+
+      return undefined
     })
 
-    //@ts-expect-error
-    $utils.locReload.mockReset()
+    vi.mocked($utils.locReload).mockReset()
   })
 
   describe('reload', () => {
@@ -101,6 +103,8 @@ describe('cy/commands/navigation', () => {
             if (key === 'window') {
               return mockWindow
             }
+
+            return undefined
           })
 
           reload.call(mockContext, mockCypress, mockCy, mockState, mockCypress.config, [true])
@@ -125,11 +129,12 @@ describe('cy/commands/navigation', () => {
 
   describe('resetServerState', () => {
     beforeEach(() => {
-      mockCypress.config.mockImplementation((key) => {
-        // @ts-expect-error
+      config.mockImplementation((key) => {
         if (key === 'blockHosts') {
           return ['*.foo.com']
         }
+
+        return undefined
       })
     })
 
@@ -154,7 +159,6 @@ describe('cy/commands/navigation', () => {
     })
 
     it('omits blockHosts from a cross-origin spec bridge', () => {
-      // @ts-expect-error
       mockCypress.isCrossOriginSpecBridge = true
 
       resetServerState(mockCypress, mockState)
