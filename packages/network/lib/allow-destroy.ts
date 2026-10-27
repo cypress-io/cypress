@@ -7,7 +7,7 @@ import type net from 'net'
  * Note: `server-destroy` NPM package cannot be used - it does not track
  * `secureConnection` events.
  */
-export function allowDestroy (server: net.Server) {
+export function allowDestroy<T extends net.Server> (server: T) {
   let connections: net.Socket[] = []
 
   function trackConn (conn: net.Socket) {
@@ -21,11 +21,10 @@ export function allowDestroy (server: net.Server) {
   server.on('connection', trackConn)
   server.on('secureConnection', trackConn)
 
-  // @ts-expect-error - Property 'destroy' does not exist on type 'Server'.
-  server.destroy = function (cb) {
-    server.close(cb)
-    connections.map((connection) => connection.destroy())
-  }
-
-  return server
+  return Object.assign(server, {
+    destroy (cb?: (err?: Error) => void) {
+      server.close(cb)
+      connections.map((connection) => connection.destroy())
+    },
+  })
 }
