@@ -5,7 +5,6 @@ import getTsConfig from 'get-tsconfig'
 import webpack from 'webpack'
 import webpackPreprocessor from '@cypress/webpack-preprocessor'
 import semver from 'semver'
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer'
@@ -29,6 +28,14 @@ class TypeScriptNotFoundError extends Error {
     super('No typescript installable was found. ts-loader needs a version of typescript to work properly. Please install typescript in your project\'s package.json.')
     this.name = 'TypeScriptNotFoundError'
   }
+}
+
+// webpack-bundle-analyzer is only needed when debugging a bundle, so load it on demand
+// rather than paying its startup cost on every preprocessor require.
+const makeBundleAnalyzerPlugin = () => {
+  const { BundleAnalyzerPlugin }: typeof import('webpack-bundle-analyzer') = require('webpack-bundle-analyzer')
+
+  return new BundleAnalyzerPlugin()
 }
 
 const typescriptExtensionRegex = /\.m?tsx?$/
@@ -255,7 +262,7 @@ const getDefaultWebpackOptions = () => {
       // If the user is trying to debug their bundle, we'll add the BundleAnalyzerPlugin
       // to see the size of the support file (first bundle when running `cypress open`)
       // and spec files (subsequent bundles when running `cypress open`)
-      ...(Debug.enabled(WBADebugNamespace) ? [new BundleAnalyzerPlugin()] : []),
+      ...(Debug.enabled(WBADebugNamespace) ? [makeBundleAnalyzerPlugin()] : []),
     ],
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs'],

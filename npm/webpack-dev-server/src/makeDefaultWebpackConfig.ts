@@ -4,7 +4,6 @@ import type { Configuration } from 'webpack'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import { isWebpackBundleAnalyzerEnabled, WBADebugNamespace } from './util'
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 const debug = debugLib('cypress:webpack-dev-server:makeDefaultWebpackConfig')
 
@@ -12,6 +11,14 @@ const OUTPUT_PATH = path.join(__dirname, 'dist')
 
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
+
+// webpack-bundle-analyzer is only needed when debugging a bundle, so load it on demand
+// rather than paying its startup cost every time the dev server is required.
+const makeBundleAnalyzerPlugin = () => {
+  const { BundleAnalyzerPlugin }: typeof import('webpack-bundle-analyzer') = require('webpack-bundle-analyzer')
+
+  return new BundleAnalyzerPlugin()
+}
 
 export function makeCypressWebpackConfig (
   config: CreateFinalWebpackConfig,
@@ -97,7 +104,7 @@ export function makeCypressWebpackConfig (
         webpack,
         indexHtmlFile,
       }),
-      ...(isWebpackBundleAnalyzerEnabled() ? [new BundleAnalyzerPlugin()] : []),
+      ...(isWebpackBundleAnalyzerEnabled() ? [makeBundleAnalyzerPlugin()] : []),
     ],
     devtool: 'inline-source-map',
   } as any
