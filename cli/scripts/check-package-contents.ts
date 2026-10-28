@@ -3,8 +3,8 @@ import os from 'os'
 import path from 'path'
 import { execFileSync } from 'child_process'
 
-// The package ships about 80 files. The ceiling leaves room for growth while
-// still catching a whole dependency's typings or a duplicated adapter.
+// Well above the current file count, but far below what a whole dependency's
+// typings or a duplicated adapter would add
 export const MAX_PACKAGE_FILES = 150
 
 export function findPackageContentProblems (files: string[], maxFiles: number = MAX_PACKAGE_FILES): string[] {

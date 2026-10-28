@@ -74,7 +74,7 @@ describe('npm package contents', () => {
     expect(problem).toContain('vue/vue/dist/index.js')
   })
 
-  it('stays under the default ceiling for the expected package size', () => {
+  it('defaults the ceiling to MAX_PACKAGE_FILES', () => {
     expect(findPackageContentProblems(Array.from({ length: MAX_PACKAGE_FILES }, (_, i) => `dist/${i}.js`))).toEqual([])
     expect(findPackageContentProblems(Array.from({ length: MAX_PACKAGE_FILES + 1 }, (_, i) => `dist/${i}.js`))).toHaveLength(1)
   })
