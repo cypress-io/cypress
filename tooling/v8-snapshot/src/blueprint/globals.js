@@ -45,7 +45,7 @@ Object.defineProperties(document, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_document () {
   return document
 }
@@ -71,7 +71,7 @@ Object.defineProperties(global, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_global () {
   return global
 } // Globally visible function and constructor names that are available in an Electron renderer window, but not visible
@@ -828,7 +828,7 @@ Object.defineProperties(window, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_window () {
   return window
 }
@@ -872,7 +872,7 @@ Object.defineProperties(console, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_console () {
   return console
 }
@@ -891,7 +891,6 @@ Object.defineProperties(__pathResolver, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
 function __resolve_path (dir) {
   return __pathResolver.resolve(dir)
 }
