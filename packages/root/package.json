@@ -2,20 +2,27 @@
   "name": "@packages/root",
   "version": "0.0.0-development",
   "description": "bundles the root package.json as an installable package",
+  "license": "MIT",
   "main": "index.js",
+  "module": "index.mjs",
   "scripts": {
     "build": "yarn build:cjs && yarn build:esm",
     "build:cjs": "rimraf index.js && rollup -c rollup.config.mjs -f cjs -o index.js",
     "build:esm": "rimraf index.mjs && rollup -c rollup.config.mjs -f esm -o index.mjs",
-    "build:prod": "yarn build"
+    "build:prod": "yarn build",
+    "lint": "eslint"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
     "@rollup/plugin-json": "^6.1.0",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "rimraf": "^6.1.1",
     "rollup": "^4.52.0",
     "typescript": "^5.6.3"
   },
-  "license": "MIT",
-  "module": "index.mjs",
   "nx": {}
 }
