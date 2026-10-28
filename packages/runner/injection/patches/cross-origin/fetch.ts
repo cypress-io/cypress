@@ -39,9 +39,10 @@ export const patchFetch = (window) => {
         resourceType: 'fetch',
         credentialStatus: credentials,
       })
-    } finally {
+    } catch {
       // if our internal logic errors for whatever reason, do NOT block the end user and continue the request
-      return originalFetch.apply(this, args)
     }
+
+    return originalFetch.apply(this, args)
   }
 }

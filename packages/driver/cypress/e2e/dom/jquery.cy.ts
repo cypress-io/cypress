@@ -18,7 +18,7 @@ describe('src/dom/jquery', () => {
 
       cy.get('#dom').then(($el) => {
         expect(Cypress.dom.isJquery($el[0])).to.eql(false)
-        // @ts-expect-error
+        // @ts-expect-error - deliberately calls isJquery() without an argument
         expect(Cypress.dom.isJquery()).to.eql(false)
       })
     })

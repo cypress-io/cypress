@@ -42,6 +42,7 @@ describe('source_map_utils', () => {
 
   // Helper function to run tests with Windows path behavior
   const withWindowsPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config: vi.fn().mockReturnValue('win32'),
     }
@@ -69,6 +70,7 @@ describe('source_map_utils', () => {
   }
 
   const withLinuxPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config: vi.fn().mockReturnValue('linux'),
     }

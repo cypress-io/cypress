@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { SourceMapConsumer } from 'source-map'
 
 import type { BasicSourceMapConsumer } from 'source-map'
-// @ts-ignore
+// @ts-expect-error - source-map has no type declarations for its .wasm file
 import mappingsWasm from 'source-map/lib/mappings.wasm'
 
 import $utils from './utils'
@@ -18,7 +18,7 @@ let sourceMapProjectRoot: string = ''
 const initializeSourceMapConsumer = async (script, sourceMap): Promise<BasicSourceMapConsumer | null> => {
   if (!sourceMap) return null
 
-  // @ts-ignore
+  // @ts-expect-error - initialize() is not declared in the source-map types
   SourceMapConsumer.initialize({
     'lib/mappings.wasm': mappingsWasm,
   })
@@ -86,9 +86,9 @@ const getSourcePosition = (filePath, position) => {
   // if the file is outside of the projectRoot
   // originalPositionFor will not provide the correct relative path
   // https://github.com/cypress-io/cypress/issues/16255
-  // @ts-expect-error
+  // @ts-expect-error - _absoluteSources is internal and not in the source-map types
   const sourceIndex = sourceMapConsumer._absoluteSources.indexOf(source)
-  // @ts-expect-error
+  // @ts-expect-error - _sources is internal and not in the source-map types
   const file = sourceMapConsumer._sources.at(sourceIndex)
 
   return {
@@ -153,7 +153,7 @@ const setSourceMapProjectRoot = (relativePath: string, absolutePath: string, pro
     const strippedSource = $utils.stripCustomProtocol(source)
 
     if (strippedSource !== undefined && absolutePath?.endsWith(strippedSource)) {
-      // @ts-expect-error
+      // @ts-expect-error - _sources is internal and not in the source-map types
       const relativeSource = consumer._sources.at(index)
       const strippedRelativeSource = $utils.stripCustomProtocol(relativeSource)
 
