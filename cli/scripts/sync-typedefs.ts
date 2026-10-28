@@ -21,7 +21,7 @@ shell.set('-e') // any error is fatal
 fs.ensureDirSync(join(__dirname, '..', 'types'))
 
 // The shipped types only reference lodash/index.d.ts, which pulls in common/.
-// The fp and per-method typings would add ~700 unused files to the npm package.
+// The fp and per-method typings go unused and add hundreds of files to the npm package.
 const isUsedLodashTypingsPath = (relativePath: string): boolean => {
   return relativePath === '' || relativePath === 'index.d.ts' || relativePath === 'common' || relativePath.startsWith(`common${sep}`)
 }
