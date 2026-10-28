@@ -105,7 +105,6 @@ describe('detect', () => {
     })
   })
 
-  // see the comment in detect() before making this concurrent
   it('checks browser definitions one at a time and keeps their order', async () => {
     let inFlight = 0
     let maxInFlight = 0

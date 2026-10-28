@@ -115,7 +115,6 @@ describe('darwin browser detection', () => {
       vi.stubEnv('env2', 'false')
       vi.stubEnv('env3', 'true')
       vi.mocked(os.platform).mockReturnValue('darwin')
-      // version detection falls back to the linux helper, which only spawns binaries it finds
       vi.spyOn(utils, 'which').mockResolvedValue('/usr/local/bin/google-chrome')
       vi.mocked(cp.spawn).mockImplementation(() => {
         const mock: any = {
