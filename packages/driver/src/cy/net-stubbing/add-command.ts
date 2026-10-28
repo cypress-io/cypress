@@ -254,7 +254,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     function getMatcherOptions (): RouteMatcherOptions {
       if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
-        // @ts-ignore
+        // @ts-expect-error - hasOnlyRouteMatcherKeys() does not narrow handler to RouteMatcherOptions
         if (handler.url) {
           $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
         }

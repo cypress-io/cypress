@@ -1240,7 +1240,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // make sure our current subject is valid for
       // what we expect in this command
 
-      // @ts-ignore
+      // @ts-expect-error - ensure.isType expects a Chainable, not the $Cy instance
       Cypress.ensure.isType(subject, prevSubject as any, this.state('current').get('name'), this)
     }
 

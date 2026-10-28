@@ -128,7 +128,7 @@ export class RunnablesStore {
     const parentTitles: string[] = []
 
     // Find the immediate parent suite by looking for the last suite at a lower level
-    let parentLevel = level - 1
+    const parentLevel = level - 1
 
     for (let i = this._runnablesQueue.length - 1; i >= 0; i--) {
       const runnable = this._runnablesQueue[i]

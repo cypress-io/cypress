@@ -1,5 +1,4 @@
 import * as socketIoParser from 'socket.io-parser'
-// @ts-ignore
 import * as engineParser from 'engine.io-parser'
 
 // socket.io-parser 4.2.x defaults the Decoder's maxAttachments to 10 as part of

@@ -332,7 +332,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
  * @param [string] downloadDestination Local filename to save as
  */
 const start = async (opts: any): Promise<any> => {
-  let { version, downloadDestination, progress, redirectTTL } = opts
+  const { version, downloadDestination, redirectTTL } = opts
+  let { progress } = opts
 
   if (!downloadDestination) {
     assert.ok(_.isString(downloadDestination) && !_.isEmpty(downloadDestination), 'missing download dir')
