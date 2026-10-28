@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "build": "tsc || echo 'built, with errors'",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "lint": "eslint . --no-warn-ignored",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0"

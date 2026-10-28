@@ -28,7 +28,7 @@
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "build-prod": "yarn build",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "cypress:open": "node ../../scripts/cypress.js open",
     "cypress:run": "node ../../scripts/cypress.js run --browser chrome",
     "lint": "eslint",

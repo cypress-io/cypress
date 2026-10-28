@@ -6,7 +6,7 @@
   "main": "dist/v8-snapshot.js",
   "scripts": {
     "build": "yarn ensure-typedefs && tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
     "ensure-typedefs": "yarn workspace @packages/server ensure-cloud-validations",

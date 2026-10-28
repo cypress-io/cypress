@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "lint": "eslint",
     "watch": "tsc -w"
   },

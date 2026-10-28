@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",

@@ -30,7 +30,7 @@
     "build:node": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:node:esm": "rimraf esm && tsc -p tsconfig.esm.json",
     "build-prod": "yarn build",
-    "check-ts": "tsc -p tsconfig.browser.json --noEmit && tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint",
+    "check-ts": "tsc -p tsconfig.browser.json --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.browser.tsbuildinfo && tsc -p tsconfig.cjs.json --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.cjs.tsbuildinfo && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
     "lint": "eslint",

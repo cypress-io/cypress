@@ -18,7 +18,7 @@
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build-binary": "node ./bin/cypress-electron --install",
-    "check-ts": "tsc -p tsconfig.json --noEmit",
+    "check-ts": "tsc -p tsconfig.json --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "lint": "eslint",

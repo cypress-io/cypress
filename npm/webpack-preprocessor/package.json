@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "lint": "eslint",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",

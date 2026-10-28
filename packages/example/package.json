@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsx ./bin/build.ts && gulp build",
     "build-prod": "tsc -p tsconfig.prod.json",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "predeploy": "yarn build",

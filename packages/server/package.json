@@ -26,7 +26,7 @@
   },
   "scripts": {
     "build-prod": "yarn ensure-cloud-validations && (tsc || echo 'built, with type errors')",
-    "check-ts": "yarn ensure-cloud-validations && tsc --noEmit",
+    "check-ts": "yarn ensure-cloud-validations && tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "clean-deps": "rimraf node_modules",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",

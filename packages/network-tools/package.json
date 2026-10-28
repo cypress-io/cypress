@@ -15,7 +15,7 @@
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
     "build-prod": "yarn build",
-    "check-ts": "tsc -p tsconfig.check.json && yarn -s tslint -p tsconfig.cjs.json",
+    "check-ts": "tsc -p tsconfig.check.json --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.check.tsbuildinfo && yarn -s tslint -p tsconfig.cjs.json",
     "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint",

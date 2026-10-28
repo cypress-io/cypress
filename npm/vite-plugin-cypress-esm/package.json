@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "cypress:open": "node ../../scripts/cypress open --project . --component",
     "cypress:run": "node ../../scripts/cypress run --project . --component",
     "lint": "eslint",

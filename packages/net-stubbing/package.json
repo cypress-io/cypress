@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint",
     "test": "vitest",

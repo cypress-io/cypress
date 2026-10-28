@@ -7,7 +7,7 @@
   "files": [],
   "scripts": {
     "build-for-tests": "node ../../scripts/run-webpack",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",

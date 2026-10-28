@@ -1887,8 +1887,49 @@ jobs:
       - restore_cached_workspace
       - install-required-node
       - run:
+          name: Generate TypeScript version key
+          # A .tsbuildinfo is only reused by the compiler version that wrote it
+          command: |
+            for f in node_modules/{typescript,vue-tsc}/package.json */node_modules/{typescript,vue-tsc}/package.json */*/node_modules/{typescript,vue-tsc}/package.json; do
+              if [ -f "$f" ]; then echo "$f $(node -p "require('./$f').version")"; fi
+            done > typescript_version_key
+            cat typescript_version_key
+      - restore_cache:
+          name: Restore check-ts build info cache
+          # Revision-suffixed keys, so prefix matching picks this branch's newest
+          # cache, then develop's. tsc compares file hashes, so a stale cache only
+          # costs time.
+          keys:
+            - v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-{{ .Branch }}-
+            - v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-develop-
+      - run:
+          name: Unpack check-ts build info
+          command: |
+            if [ -f ~/check-ts-buildinfo.tgz ]; then tar -xzf ~/check-ts-buildinfo.tgz; fi
+      - run:
           name: Check TS Types
-          command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
+          # Incremental checking can infer some types differently from a full check
+          # and keep reporting the resulting errors, so confirm a failure without the cache
+          command: |
+            export NODE_OPTIONS=--max_old_space_size=4096
+            if ! yarn check-ts --concurrency=1; then
+              if [ ! -f ~/check-ts-buildinfo.tgz ]; then exit 1; fi
+              echo "check-ts failed with restored build info; re-running without it"
+              rm -rf */node_modules/.cache/tsc */*/node_modules/.cache/tsc
+              yarn check-ts --concurrency=1
+            fi
+      - run:
+          name: Pack check-ts build info
+          # Each workspace writes its own node_modules/.cache/tsc, so collect them
+          # into one file for save_cache
+          command: |
+            tar -czf ~/check-ts-buildinfo.tgz $(ls -d */node_modules/.cache/tsc */*/node_modules/.cache/tsc 2>/dev/null)
+            ls -l ~/check-ts-buildinfo.tgz
+      - save_cache:
+          name: Save check-ts build info cache
+          key: v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ~/check-ts-buildinfo.tgz
 
   health-check:
     <<: *defaults

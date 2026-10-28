@@ -6,7 +6,7 @@
   "main": "dist/mksnapshot.js",
   "scripts": {
     "build": "tsc",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",

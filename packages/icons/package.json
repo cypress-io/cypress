@@ -18,7 +18,7 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "build-assets": "tsx ./scripts/build.ts && tsx ./scripts/ico.ts",
     "build-prod": "yarn build",
-    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.cjs.tsbuildinfo",
     "lint": "eslint",
     "test": "yarn test-unit",
     "test-unit": "vitest run"

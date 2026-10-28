@@ -16,7 +16,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit && tsc --project cypress/tsconfig.json",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo && tsc --project cypress/tsconfig.json --incremental --tsBuildInfoFile node_modules/.cache/tsc/cypress-tsconfig.tsbuildinfo",
     "clean": "rimraf dist",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",

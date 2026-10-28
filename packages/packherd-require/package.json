@@ -6,7 +6,7 @@
   "main": "dist/require.js",
   "scripts": {
     "build": "tsc",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo && yarn -s tslint",
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",

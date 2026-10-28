@@ -27,7 +27,7 @@
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "lint": "eslint"
   },
   "lint-staged": {

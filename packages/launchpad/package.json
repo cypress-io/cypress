@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "vite build",
-    "check-ts": "vue-tsc --noEmit && yarn -s tslint",
+    "check-ts": "vue-tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc/tsconfig.tsbuildinfo && yarn -s tslint",
     "clean": "rimraf dist && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
