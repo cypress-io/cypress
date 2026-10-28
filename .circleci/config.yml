@@ -15,7 +15,7 @@ workflows:
 parameters:
   publish-binary-branch:
     type: string
-    default: electron/43.8.3
+    default: main
   force-persist-artifacts:
     type: boolean
     default: false
