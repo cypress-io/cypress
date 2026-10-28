@@ -71,7 +71,7 @@ async function checkMaxPathLength () {
 
 /**
  * Cypress resolves TypeScript from the user's project at runtime, so a copy in the binary
- * only adds about 30 MB. It gets installed when a package lists it in `dependencies`.
+ * is never used and only adds size. It gets installed when a package lists it in `dependencies`.
  */
 async function checkNoTypeScript () {
   log('#checkNoTypeScript')

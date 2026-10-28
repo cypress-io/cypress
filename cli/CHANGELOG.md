@@ -4,7 +4,7 @@
 **Performance:**
 
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
-- The Cypress binary no longer includes its own copy of TypeScript, which it never used, because Cypress loads TypeScript from your project. The Linux download is about 5.8 MB smaller and takes about 31 MB less disk space once installed. On Linux arm64, where Cypress runs without a V8 snapshot, Cypress also no longer tries to load TypeScript as it starts; in our measurements of a Linux build without the snapshot, this made startup 110–200 ms faster. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, where Cypress runs without a V8 snapshot, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Bugfixes:**
 
