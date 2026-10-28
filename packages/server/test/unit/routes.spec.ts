@@ -8,7 +8,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { clearCtx, getCtx, setCtx } from '@packages/data-context'
 import { createCommonRoutes } from '../../lib/routes'
 import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
-import { runnerGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
+import { tapGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
+import { cypressSessions } from '../../lib/cypress-sessions'
 
 const expressStubs = vi.hoisted(() => {
   return {
@@ -32,7 +33,7 @@ vi.mock('express', async (importActual) => {
 // the first realm's types then refuse to mix with. Nothing here calls it.
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
-    runnerGraphQLHTTP: vi.fn(),
+    tapGraphQLHTTP: vi.fn(),
   }
 })
 
@@ -355,16 +356,61 @@ describe('lib/routes', () => {
         return router.use.mock.calls.find((args) => args[0] === path)
       }
 
-      it('mounts the runner graphql handler on the namespaced mount', () => {
+      it('does not mount a graphql handler under the namespace', () => {
         const { router } = setupCommonRoutes()
 
-        expect(graphqlMount(router, '/namespace/graphql/*')).toEqual(['/namespace/graphql/*', runnerGraphQLHTTP])
+        expect(router.use.mock.calls.filter((args) => typeof args[0] === 'string' && args[0].startsWith('/namespace/graphql'))).toEqual([])
       })
 
-      it('mounts the runner graphql handler on the tap mount in open mode', () => {
+      it('mounts the tap graphql handler on the tap mount in open mode', () => {
         const { router } = setupCommonRoutes()
 
-        expect(graphqlMount(router, '/__cypress/tap/graphql/*')).toEqual(['/__cypress/tap/graphql/*', runnerGraphQLHTTP])
+        expect(graphqlMount(router, '/__cypress/tap/graphql/*')).toEqual(['/__cypress/tap/graphql/*', expect.any(Function), tapGraphQLHTTP])
+      })
+
+      describe('tap mount session guard', () => {
+        const guard = (headers: Record<string, string | string[]>) => {
+          const { router } = setupCommonRoutes()
+          const middleware = graphqlMount(router, '/__cypress/tap/graphql/*')?.[1]
+          const res = { sendStatus: vi.fn() }
+          const next = vi.fn()
+
+          middleware({ headers }, res, next)
+
+          return { res, next }
+        }
+
+        beforeEach(() => {
+          vi.spyOn(cypressSessions, 'getCurrent').mockReturnValue({ sessionId: 'abc' } as any)
+        })
+
+        it('passes a request carrying the current session id', () => {
+          const { res, next } = guard({ 'x-cypress-session-id': 'abc' })
+
+          expect(next).toHaveBeenCalled()
+          expect(res.sendStatus).not.toHaveBeenCalled()
+        })
+
+        it('answers 404 without the session id header', () => {
+          const { res, next } = guard({})
+
+          expect(res.sendStatus).toHaveBeenCalledWith(404)
+          expect(next).not.toHaveBeenCalled()
+        })
+
+        it('answers 404 for a repeated session id header', () => {
+          const { res, next } = guard({ 'x-cypress-session-id': ['abc', 'abc'] })
+
+          expect(res.sendStatus).toHaveBeenCalledWith(404)
+          expect(next).not.toHaveBeenCalled()
+        })
+
+        it('answers 404 for a session id that is not current', () => {
+          const { res, next } = guard({ 'x-cypress-session-id': 'nope' })
+
+          expect(res.sendStatus).toHaveBeenCalledWith(404)
+          expect(next).not.toHaveBeenCalled()
+        })
       })
     })
   })

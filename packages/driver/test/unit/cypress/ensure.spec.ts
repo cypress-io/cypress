@@ -1,6 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
+/// <reference types="vitest/jsdom" />
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import ensure from '../../../src/cypress/ensure'
 import { isRunnerAbleToCommunicateWithAut } from '../../../src/util/commandAUTCommunication'
@@ -20,8 +21,7 @@ describe('ensure', () => {
     let cy
 
     const setSpecOrigin = (origin: string) => {
-      // @ts-expect-error - vitest's jsdom environment exposes the JSDOM instance on window
-      window.jsdom.reconfigure({ url: `${origin}/` })
+      jsdom.reconfigure({ url: `${origin}/` })
     }
 
     const getError = (err?: Error) => {

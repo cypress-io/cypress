@@ -37,7 +37,7 @@ function getDisplayUrl (url: string) {
 
 function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   const last = _.last(req.interceptions)
-  let alias = last ? last.interception.request.alias || last.route.alias : undefined
+  const alias = last ? last.interception.request.alias || last.route.alias : undefined
 
   return {
     alias,
@@ -273,7 +273,6 @@ export default class ProxyLogging {
 
     proxyRequest.updateConsoleProps()
 
-    // @ts-expect-error - snapshot entries are typed as never, so v.name does not type-check
     const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
 
     if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')

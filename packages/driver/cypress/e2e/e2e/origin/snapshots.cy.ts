@@ -20,7 +20,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
         return (props?.consoleProps?.props?.Selector === selector)
       })
     }
-    let logs: Map<string, any> = new Map()
+    const logs: Map<string, any> = new Map()
 
     cy.on('log:changed', (attrs, log) => {
       logs.set(attrs.id, log)

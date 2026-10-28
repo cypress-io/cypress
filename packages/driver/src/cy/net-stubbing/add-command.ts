@@ -36,7 +36,7 @@ import isValidHostname from 'is-valid-hostname'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
-function hasOnlyRouteMatcherKeys (obj: any) {
+function hasOnlyRouteMatcherKeys (obj: any): obj is RouteMatcherOptions {
   return !_.isEmpty(obj) && !_.isArray(obj) && _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
 }
 
@@ -254,7 +254,6 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     function getMatcherOptions (): RouteMatcherOptions {
       if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
-        // @ts-expect-error - hasOnlyRouteMatcherKeys() does not narrow handler to RouteMatcherOptions
         if (handler.url) {
           $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
         }
