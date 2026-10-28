@@ -319,7 +319,7 @@ describe('detect', () => {
 
     it('reports what the command wrote to stderr', async () => {
       try {
-        // @ts-expect-error
+        // @ts-expect-error - goal fixtures are partial Browser objects
         await detectByPath('/crashes', goalBrowsers)
 
         throw Error('Should not find a browser')
@@ -331,7 +331,7 @@ describe('detect', () => {
 
     it('keeps a very long report short', async () => {
       try {
-        // @ts-expect-error
+        // @ts-expect-error - goal fixtures are partial Browser objects
         await detectByPath('/very/noisy', goalBrowsers)
 
         throw Error('Should not find a browser')
@@ -343,7 +343,7 @@ describe('detect', () => {
 
     it('says so when the command printed nothing', async () => {
       try {
-        // @ts-expect-error
+        // @ts-expect-error - goal fixtures are partial Browser objects
         await detectByPath('/not/a/real/path', goalBrowsers)
 
         throw Error('Should not find a browser')
