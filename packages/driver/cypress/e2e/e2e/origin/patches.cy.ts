@@ -307,7 +307,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
                 },
               }, ({ credentialOption }) => {
                 cy.then(() => {
-                  let urlObj = new URL('/test-request-credentials', 'http://www.foobar.com:3500')
+                  const urlObj = new URL('/test-request-credentials', 'http://www.foobar.com:3500')
 
                   if (credentialOption) {
                     return fetch(urlObj, {
@@ -352,7 +352,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
         cy.origin('http://www.foobar.com:3500',
           () => {
             cy.then(() => {
-              let url = new URL('/test-request', 'http://app.foobar.com:3500').toString()
+              const url = new URL('/test-request', 'http://app.foobar.com:3500').toString()
 
               return new Promise<void>((resolve, reject) => {
                 // tslint:disable:no-floating-promises
@@ -533,10 +533,10 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
             },
             ({ withCredentials = false }) => {
               cy.then(() => {
-                let url = new URL('/test-request-credentials', 'http://www.foobar.com:3500').toString()
+                const url = new URL('/test-request-credentials', 'http://www.foobar.com:3500').toString()
 
                 return new Promise<void>((resolve, reject) => {
-                  let xhr = new XMLHttpRequest()
+                  const xhr = new XMLHttpRequest()
 
                   xhr.open('GET', url)
                   xhr.withCredentials = withCredentials
@@ -584,10 +584,10 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           cy.origin('http://www.foobar.com:3500',
             () => {
               cy.then(() => {
-                let url = new URL('/test-request', 'http://app.foobar.com:3500').toString()
+                const url = new URL('/test-request', 'http://app.foobar.com:3500').toString()
 
                 return new Promise<void>((resolve, reject) => {
-                  let xhr = new XMLHttpRequest()
+                  const xhr = new XMLHttpRequest()
 
                   xhr.open('GET', url)
                   xhr.withCredentials = true
@@ -650,10 +650,10 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
 
       // expect spec to NOT be patched in primary
       cy.then(async () => {
-        let url = new URL('/test-request-credentials', 'http://www.foobar.com:3500').toString()
+        const url = new URL('/test-request-credentials', 'http://www.foobar.com:3500').toString()
 
         await new Promise<void>((resolve, reject) => {
-          let xhr = new XMLHttpRequest()
+          const xhr = new XMLHttpRequest()
 
           xhr.open('GET', url)
           xhr.onload = function () {
@@ -672,10 +672,10 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
 
       // expect AUT to NOT be patched in primary
       cy.window().then(async (win) => {
-        let url = new URL('/test-request-credentials', 'http://www.foobar.com:3500').toString()
+        const url = new URL('/test-request-credentials', 'http://www.foobar.com:3500').toString()
 
         await new Promise<void>((resolve, reject) => {
-          let xhr = new win.XMLHttpRequest()
+          const xhr = new win.XMLHttpRequest()
 
           xhr.open('GET', url)
           xhr.onload = function () {

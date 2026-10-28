@@ -623,6 +623,33 @@ describe('cy.session', { retries: 0 }, () => {
         })
       })
 
+      describe('recreates existing session when validate throws synchronously', () => {
+        let sessionId
+        let yielded
+
+        before(() => {
+          setupTestContext()
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup, { validate })
+          .then(() => {
+            resetMocks()
+            validate.onFirstCall().throws(new Error('validate error'))
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup, { validate }).then((status) => {
+            yielded = status
+          })
+        })
+
+        it('recreates the session', () => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledTwice
+          expect(yielded).to.eq('recreated')
+        })
+      })
+
       describe('restores saved session with validation flow', () => {
         let sessionId
 
