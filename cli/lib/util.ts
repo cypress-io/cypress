@@ -96,14 +96,15 @@ const getLinuxOsVersion = async (): Promise<string | undefined> => {
   const contents = await fs.readFile('/etc/os-release', 'utf8')
   .catch(() => fs.readFile('/usr/lib/os-release', 'utf8'))
 
-  const { NAME: distro, VERSION: version = '', VERSION_ID: versionId } = parseKeyValueLines(contents, '=')
+  const { NAME: distro, VERSION: version = '', VERSION_ID: versionId, BUILD_ID: buildId, VERSION_CODENAME: codename } = parseKeyValueLines(contents, '=')
 
   if (!distro) return
 
-  // drop a trailing codename, e.g. "12 (bookworm)"
-  const release = version.split('(')[0].trim() || versionId
+  // drop a trailing codename, e.g. "12 (bookworm)" or "11.0, Aramo"; rolling releases such as
+  // Arch only set BUILD_ID, and Debian testing only sets VERSION_CODENAME
+  const release = version.split(/[(,]/)[0].trim() || versionId || buildId || codename || os.release()
 
-  return release ? `${distro} - ${release}` : undefined
+  return `${distro} - ${release}`
 }
 
 const getMacOsVersion = async (): Promise<string | undefined> => {

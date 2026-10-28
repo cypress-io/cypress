@@ -596,9 +596,46 @@ describe('util', () => {
         expect(await getOsVersion('linux')).toEqual('Fedora Linux - 40')
       })
 
-      it('falls back to os.release() for a distro without a version', async () => {
+      it('drops a codename that follows a comma', async () => {
+        mockFiles({
+          '/etc/os-release': [
+            'NAME="Trisquel GNU/Linux"',
+            'VERSION="11.0, Aramo"',
+            'PRETTY_NAME="Trisquel GNU/Linux Aramo (11.0)"',
+            'VERSION_ID="11.0"',
+          ].join('\n'),
+        })
+
+        expect(await getOsVersion('linux')).toEqual('Trisquel GNU/Linux - 11.0')
+      })
+
+      it('uses BUILD_ID for a rolling release', async () => {
         mockFiles({
           '/etc/os-release': 'NAME="Arch Linux"\nPRETTY_NAME="Arch Linux"\nBUILD_ID=rolling',
+        })
+
+        expect(await getOsVersion('linux')).toEqual('Arch Linux - rolling')
+      })
+
+      it('uses VERSION_CODENAME when there is no version', async () => {
+        mockFiles({
+          '/etc/os-release': 'PRETTY_NAME="Debian GNU/Linux trixie/sid"\nNAME="Debian GNU/Linux"\nVERSION_CODENAME=trixie',
+        })
+
+        expect(await getOsVersion('linux')).toEqual('Debian GNU/Linux - trixie')
+      })
+
+      it('keeps the distro name with the kernel release when os-release has no version at all', async () => {
+        mockFiles({
+          '/etc/os-release': 'NAME="Void"\nPRETTY_NAME="Void Linux"',
+        })
+
+        expect(await getOsVersion('linux')).toEqual('Void - kernel-release')
+      })
+
+      it('falls back to os.release() when os-release has no NAME', async () => {
+        mockFiles({
+          '/etc/os-release': 'VERSION="33 (Container Image)"\nVERSION_ID=33',
         })
 
         expect(await getOsVersion('linux')).toEqual('kernel-release')
