@@ -4,10 +4,10 @@ import type { AddressInfo, Socket } from 'net'
 import { DataContext, getCtx, globalPubSub } from '../src'
 import type { GraphQLRequestInfo } from '../src'
 import cors from 'cors'
-import { corsOriginDelegate, isOriginAllowed } from './corsOriginDelegate'
+import { corsOriginDelegate, isHostAllowed, isOriginAllowed } from './corsOriginDelegate'
 import { SocketIOServer } from '@packages/socket'
 import type { SocketIONamespace } from '@packages/socket'
-import type { Server } from 'http'
+import type { IncomingHttpHeaders, Server } from 'http'
 import { graphqlHTTP } from 'express-graphql'
 import serverDestroy from 'server-destroy'
 import send from 'send'
@@ -37,9 +37,17 @@ globalPubSub.on('reset:data-context', (ctx) => {
   ctx.actions.servers.setGqlGraphqlWsDispose(gqlGraphqlWsDispose)
 })
 
+function isUpgradeAllowed (req: { headers: IncomingHttpHeaders, socket: { localPort?: number } }): boolean {
+  return isHostAllowed(req.headers.host, req.socket.localPort) && isOriginAllowed(req.headers.origin, req.socket.localPort)
+}
+
 export async function makeGraphQLServer () {
   const dfd = Promise.withResolvers<number>()
   const app = express()
+
+  app.use((req, res, next) => {
+    return isHostAllowed(req.headers.host, req.socket.localPort) ? next() : res.sendStatus(403)
+  })
 
   app.use(cors(corsOriginDelegate))
 
@@ -71,7 +79,9 @@ export async function makeGraphQLServer () {
     res.sendStatus(200)
   })
 
-  app.use('/__launchpad/graphql/:operationName?', graphQLHTTP)
+  app.use('/__launchpad/graphql/:operationName?', (req, res, next) => {
+    return isOriginAllowed(req.headers.origin, req.socket.localPort) ? next() : res.sendStatus(403)
+  }, graphQLHTTP)
 
   function makeProxy (): express.Handler {
     if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -125,7 +135,7 @@ export async function makeGraphQLServer () {
     path: '/__launchpad/socket',
     transports: ['websocket'],
     allowRequest: (req, callback) => {
-      callback(null, isOriginAllowed(req.headers.origin, req.socket.localPort))
+      callback(null, isUpgradeAllowed(req))
     },
   })
 
@@ -231,7 +241,7 @@ async function executeGraphQLSocketRequest (validationRules: readonly Validation
  *
  * @param httpServer The http server we are utilizing for the websocket
  * @param targetRoute Route to target in the server upgrade event
- * @param options.enforceOrigin Defaults to true: reject upgrades whose Origin port does not match the server's listen port. Set to false only when the server receives proxied upgrades whose Origin reflects an upstream host (i.e. the test-runner server) and another allowlist gates inbound connections.
+ * @param options.enforceOrigin Defaults to true: reject upgrades whose Host or Origin is not localhost on the server's listen port. Set to false only when the server receives proxied upgrades whose Origin reflects an upstream host (i.e. the test-runner server) and another allowlist gates inbound connections.
  * @param options.validationRules Applied to every operation in addition to the specified rules.
  * @returns WebSocket server and graphql-ws dispose — call `dispose()` before destroying the HTTP server.
  */
@@ -252,7 +262,7 @@ export const graphqlWS = (httpServer: Server, targetRoute: string, options: Grap
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
     if (req.url?.startsWith(targetRoute)) {
-      if (enforceOrigin && !isOriginAllowed(req.headers.origin, req.socket.localPort)) {
+      if (enforceOrigin && !isUpgradeAllowed(req)) {
         socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
         socket.destroy()
 
