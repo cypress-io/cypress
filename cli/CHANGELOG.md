@@ -4,7 +4,7 @@
 **Performance:**
 
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
-- End-to-end specs now start faster in Chrome, Chromium, Edge, Electron, and Firefox, especially specs that import large libraries. Before running each spec, Cypress reads the source maps embedded in the spec and support files so it can show your original code in errors, and it now does this much more quickly. The larger the spec file, the more time this saves. Fixed in [#TBD].
+- End-to-end specs now start faster in Chrome, Chromium, Edge, Electron, and Firefox. Before running each spec, Cypress reads the source maps embedded in the spec and support files so it can show your original code in errors, and it now does this much more quickly. Specs that import large libraries benefit most. Fixed in [#TBD].
 
 **Bugfixes:**
 
