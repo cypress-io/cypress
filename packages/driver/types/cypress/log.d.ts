@@ -127,7 +127,7 @@ declare namespace Cypress {
     }
     // whether or not to collect snapshots for the command
     snapshot?: boolean
-    snapshots?: []
+    snapshots?: Array<{ name?: string }>
     state?: 'failed' | 'passed' | 'pending' // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
     status?: number
     testCurrentRetry?: number

@@ -29,8 +29,7 @@ export default function (Commands, Cypress, cy) {
   const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
-    // @ts-expect-error - Object.values() returns unknown[] because the state value is untyped
-    Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: Cypress.ServerSessionData) => {
+    Object.values<Cypress.ServerSessionData>(Cypress.state('activeSessions') || {}).forEach((sessionData) => {
       if (sessionData.cacheAcrossSpecs) {
         sessionsManager.registeredSessions.set(sessionData.id, true)
       }

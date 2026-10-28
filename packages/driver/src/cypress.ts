@@ -158,6 +158,7 @@ class $Cypress {
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
   on: any
+  once: any
   stackUtils: typeof $stackUtils | null = null
 
   // attach to $Cypress to access

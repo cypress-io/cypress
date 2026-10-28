@@ -757,13 +757,10 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
   const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable, composed }))
 
   if (bubbles) {
-    evt.stopPropagation = function (...args) {
+    evt.stopPropagation = function () {
       evt._hasStoppedPropagation = true
 
-      // stopPropagation doesn't have any arguments. So, we cannot type-safely pass the second argument.
-      // But we're passing it just in case.
-      // @ts-expect-error - args is not a tuple, so it cannot be spread into apply()
-      return stopPropagation.apply(this, ...args)
+      return stopPropagation.call(this)
     }
   }
 

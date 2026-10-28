@@ -273,7 +273,6 @@ export default class ProxyLogging {
 
     proxyRequest.updateConsoleProps()
 
-    // @ts-expect-error - snapshot entries are typed as never, so v.name does not type-check
     const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
 
     if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
