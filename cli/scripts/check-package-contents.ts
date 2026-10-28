@@ -1,7 +1,7 @@
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
-import { execSync } from 'child_process'
+import execa from 'execa'
 
 // Well above the current file count, but far below what a whole dependency's
 // typings or a duplicated adapter would add
@@ -37,10 +37,7 @@ async function listPackedFiles (buildDir: string): Promise<string[]> {
 
     await fs.copy(buildDir, pkgDir)
 
-    const stdout = execSync('npm pack --dry-run --json --ignore-scripts', {
-      cwd: pkgDir,
-      encoding: 'utf8',
-    })
+    const { stdout } = execa.sync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], { cwd: pkgDir })
     const [result] = JSON.parse(stdout)
 
     return result.files.map((file: { path: string }) => file.path)
