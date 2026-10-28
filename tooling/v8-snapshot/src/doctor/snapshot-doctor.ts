@@ -13,9 +13,9 @@ import {
   ensureDirSync,
   tryRemoveFile,
 } from '../utils'
+import type { Warning } from './warnings-processor'
 import {
   stringifyWarning,
-  Warning,
   WarningConsequence,
   WarningsProcessor,
 } from './warnings-processor'

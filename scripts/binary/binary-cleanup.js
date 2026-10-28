@@ -224,6 +224,8 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     // Files used as part of prebuilding are not necessary
     path.join(buildAppDir, '**', 'node_gyp_bins'),
     path.join(buildAppDir, '**', 'better-sqlite3', 'bin'),
+    // better-sqlite3 loads these ahead of build/Release; the Linux ones need a newer glibc than Cypress supports
+    path.join(buildAppDir, '**', 'better-sqlite3', 'prebuilds'),
     path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
     path.join(buildAppDir, '**', '*.cc'),
     path.join(buildAppDir, '**', '*.o'),
