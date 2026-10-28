@@ -82,6 +82,8 @@ vi.mock('os', async (importActual) => {
       platform: vi.fn(),
       release: vi.fn(),
       arch: vi.fn(),
+      machine: vi.fn(),
+      version: vi.fn(),
     },
   }
 })
@@ -186,6 +188,8 @@ describe('lib/tasks/verify', () => {
     vi.mocked(os.platform).mockReturnValue('darwin')
     vi.mocked(os.release).mockReturnValue('0.0.0')
     vi.mocked(os.arch).mockReturnValue('x64')
+    vi.mocked(os.machine).mockReturnValue('x86_64')
+    vi.mocked(os.version).mockReturnValue('Darwin Kernel Version 23.6.0: root:xnu-10063.141.2~1/RELEASE_X86_64')
     vi.mocked(si.osInfo).mockResolvedValue({
       distro: 'Foo',
       release: 'OsVersion',
@@ -317,6 +321,70 @@ describe('lib/tasks/verify', () => {
     expect(output()).toEqual('')
 
     expect(util.exec).not.toHaveBeenCalled()
+  })
+
+  describe('when the binary was verified on another machine', () => {
+    it('runs the smoke test if that machine had another architecture', async () => {
+      createfs({
+        alreadyVerified: true,
+        verifiedPlatform: 'darwin-arm64',
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      await start()
+
+      expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
+      expect(await fs.readJson(binaryStatePath)).toEqual({ verified: true, verifiedPlatform: 'darwin-x64' })
+    })
+
+    it('runs the smoke test if the state file does not record the machine', async () => {
+      createfs({
+        alreadyVerified: true,
+        verifiedPlatform: null,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      await start()
+
+      expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
+      expect(await fs.readJson(binaryStatePath)).toEqual({ verified: true, verifiedPlatform: 'darwin-x64' })
+    })
+
+    it('reports this machine\'s platform if the binary cannot run here', async () => {
+      const output = createStdoutCapture()
+
+      createfs({
+        alreadyVerified: true,
+        verifiedPlatform: 'darwin-arm64',
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      // what the shell prints when it is handed a binary built for another architecture
+      vi.mocked(util.exec).mockRejectedValue({
+        exitCode: 2,
+        stderr: `${executablePath}: 1: Syntax error: "(" unexpected`,
+      })
+
+      try {
+        await start()
+      } catch (err) {
+        logger.error(err)
+
+        const out = plain(output)
+
+        expect(out).toContain('Cypress failed to start')
+        expect(out).toContain('Syntax error: "(" unexpected')
+        expect(out).toContain('Platform: darwin-x64')
+        expect(await fs.pathExists(binaryStatePath)).toEqual(false)
+
+        return
+      }
+
+      throw new Error('Should have thrown')
+    })
   })
 
   it('logs warning when installed version does not match verified version', async () => {
@@ -1002,7 +1070,8 @@ describe('lib/tasks/verify', () => {
 })
 
 // TODO this needs documentation with examples badly.
-function createfs ({ alreadyVerified, executable, packageVersion, customDir }: any) {
+// `verifiedPlatform: null` writes a state file without the field, as older CLIs did
+function createfs ({ alreadyVerified, verifiedPlatform = 'darwin-x64', executable, packageVersion, customDir }: any) {
   if (!customDir) {
     customDir = '/cache/Cypress/1.2.3/Cypress.app'
   }
@@ -1013,6 +1082,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }: a
 
   const binaryState = {
     verified: alreadyVerified,
+    ...(verifiedPlatform && { verifiedPlatform }),
   }
   const binaryStateText = JSON.stringify(binaryState)
 

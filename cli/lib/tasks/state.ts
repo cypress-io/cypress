@@ -146,8 +146,20 @@ const getBinaryStateContentsAsync = async (binaryDir: string): Promise<any> => {
   }
 }
 
+// The cache folder is named for the version alone, and CI restores it onto
+// other machines, so a binary verified on one architecture is not proof that
+// it runs on another. A state file without this field is verified again.
+const getVerifiedPlatform = (): string => `${os.platform()}-${util.getRealArchSync()}`
+
 const getBinaryVerifiedAsync = async (binaryDir: string): Promise<boolean> => {
   const contents = await getBinaryStateContentsAsync(binaryDir)
+  const platform = getVerifiedPlatform()
+
+  if (contents.verified && contents.verifiedPlatform !== platform) {
+    debug('binary was verified on %s, not on this machine (%s)', contents.verifiedPlatform, platform)
+
+    return false
+  }
 
   return contents.verified
 }
@@ -167,7 +179,7 @@ const writeBinaryVerifiedAsync = async (verified: boolean, binaryDir: string): P
 
   await fs.outputJson(
     getBinaryStatePath(binaryDir),
-    _.extend(contents, { verified }),
+    _.extend(contents, { verified, verifiedPlatform: getVerifiedPlatform() }),
     { spaces: 2 },
   )
 }

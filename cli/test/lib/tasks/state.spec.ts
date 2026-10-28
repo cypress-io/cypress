@@ -47,6 +47,9 @@ vi.mock('os', async (importActual) => {
       // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
+      arch: vi.fn(),
+      machine: vi.fn(),
+      version: vi.fn(),
     },
   }
 })
@@ -109,6 +112,9 @@ describe('lib/tasks/state', function () {
     })
 
     vi.mocked(os.platform).mockReturnValue('darwin')
+    vi.mocked(os.arch).mockReturnValue('x64')
+    vi.mocked(os.machine).mockReturnValue('x86_64')
+    vi.mocked(os.version).mockReturnValue('Darwin Kernel Version 23.6.0: root:xnu-10063.141.2~1/RELEASE_X86_64')
 
     // @ts-expect-error - default import
     const actualProcess = (await vi.importActual<typeof import('process')>('process')).default
@@ -265,12 +271,47 @@ describe('lib/tasks/state', function () {
   })
 
   describe('.getBinaryVerifiedAsync', function () {
-    it('resolves true if verified', async function () {
-      vi.mocked(fs.readJson).mockResolvedValue({ verified: true } as any)
+    it('resolves true if verified on this kind of machine', async function () {
+      vi.mocked(fs.readJson).mockResolvedValue({ verified: true, verifiedPlatform: 'darwin-x64' } as any)
 
       const isVerified = await state.getBinaryVerifiedAsync('/asdf')
 
       expect(isVerified).toEqual(true)
+    })
+
+    it('resolves false if verified on a machine with another architecture', async function () {
+      vi.mocked(fs.readJson).mockResolvedValue({ verified: true, verifiedPlatform: 'darwin-arm64' } as any)
+
+      const isVerified = await state.getBinaryVerifiedAsync('/asdf')
+
+      expect(isVerified).toEqual(false)
+    })
+
+    it('resolves false if verified without recording the machine', async function () {
+      vi.mocked(fs.readJson).mockResolvedValue({ verified: true } as any)
+
+      const isVerified = await state.getBinaryVerifiedAsync('/asdf')
+
+      expect(isVerified).toEqual(false)
+    })
+
+    it('treats x64 Node under Rosetta as the arm64 machine it runs on', async function () {
+      vi.mocked(os.version).mockReturnValue('Darwin Kernel Version 23.6.0: root:xnu-10063.141.2~1/RELEASE_ARM64_T6000')
+      vi.mocked(fs.readJson).mockResolvedValue({ verified: true, verifiedPlatform: 'darwin-arm64' } as any)
+
+      const isVerified = await state.getBinaryVerifiedAsync('/asdf')
+
+      expect(isVerified).toEqual(true)
+    })
+
+    it('treats x64 Node on an arm64 Linux kernel as arm64', async function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(os.machine).mockReturnValue('aarch64')
+      vi.mocked(fs.readJson).mockResolvedValue({ verified: true, verifiedPlatform: 'linux-x64' } as any)
+
+      const isVerified = await state.getBinaryVerifiedAsync('/asdf')
+
+      expect(isVerified).toEqual(false)
     })
 
     it('resolves undefined if not verified', async function () {
@@ -297,7 +338,7 @@ describe('lib/tasks/state', function () {
 
       vi.mocked(fs.readJson).mockImplementation((args) => {
         if (args === binaryStatePath) {
-          return { verified: true }
+          return { verified: true, verifiedPlatform: 'darwin-x64' }
         }
       })
 
@@ -310,12 +351,12 @@ describe('lib/tasks/state', function () {
   describe('.writeBinaryVerified', function () {
     const binaryStateFilename = path.join(versionDir, 'binary_state.json')
 
-    it('writes to binary state verified:true', async function () {
+    it('writes to binary state verified:true with the machine it ran on', async function () {
       vi.mocked(fs.outputJson).mockResolvedValue()
 
       await state.writeBinaryVerifiedAsync(true, binaryDir)
 
-      expect(fs.outputJson).toHaveBeenCalledWith(binaryStateFilename, { verified: true }, { spaces: 2 })
+      expect(fs.outputJson).toHaveBeenCalledWith(binaryStateFilename, { verified: true, verifiedPlatform: 'darwin-x64' }, { spaces: 2 })
     })
 
     it('write to binary state verified:false', async function () {
@@ -325,7 +366,7 @@ describe('lib/tasks/state', function () {
 
       expect(fs.outputJson).toHaveBeenCalledWith(
         binaryStateFilename,
-        { verified: false },
+        { verified: false, verifiedPlatform: 'darwin-x64' },
         { spaces: 2 },
       )
     })

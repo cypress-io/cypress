@@ -27,6 +27,9 @@ const debug = Debug('cypress:cli')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
+// list of names for reference: https://stackoverflow.com/a/45125525/3474615
+const ARM64_MACHINE_NAMES = ['aarch64_be', 'aarch64', 'armv8b', 'armv8l']
+
 /**
  * Returns SHA512 of a file
  */
@@ -483,11 +486,10 @@ const util = {
 
       if (osPlatform === 'linux') {
         // could possibly be x64 node on arm64 linux, check the "machine hardware name"
-        // list of names for reference: https://stackoverflow.com/a/45125525/3474615
         const { stdout } = await execa('uname', ['-m']).catch(() => ({ stdout: '' }))
 
         debug('arm uname -m result: %o ', { stdout })
-        if (['aarch64_be', 'aarch64', 'armv8b', 'armv8l'].includes(stdout)) return 'arm64'
+        if (ARM64_MACHINE_NAMES.includes(stdout)) return 'arm64'
       }
 
       const pkgArch = arch()
@@ -498,6 +500,26 @@ const util = {
     }
 
     return (this._cachedArch = await _getRealArch())
+  },
+
+  /**
+   * The arm64 cases of getRealArch(), worked out without spawning a process so it
+   * is cheap enough to call before every command. Node reads os.machine() and
+   * os.version() from uname(2) in-process.
+   */
+  getRealArchSync (): string {
+    const osPlatform = os.platform()
+    const osArch = os.arch()
+
+    if (osArch === 'arm64') return 'arm64'
+
+    if (osPlatform === 'linux' && ARM64_MACHINE_NAMES.includes(os.machine())) return 'arm64'
+
+    // Rosetta reports x86_64 as the machine to a translated process, but the
+    // kernel version still names the arm64 kernel build, e.g. RELEASE_ARM64_T8101
+    if (osPlatform === 'darwin' && os.version().includes('RELEASE_ARM64')) return 'arm64'
+
+    return osArch
   },
 
   // attention:
