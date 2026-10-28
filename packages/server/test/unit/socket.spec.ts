@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { EventEmitter } from 'events'
 import path from 'path'
 import httpsAgent from 'https-proxy-agent'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -6,6 +7,7 @@ import type { MockInstance } from 'vitest'
 // NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
 // we are unable to import ESM into a CommonJS test context, even if we await import() the module.
 import * as socketIo from '@packages/socket/lib/client'
+import { encode } from '@packages/socket/lib/utils'
 import Fixtures from '@tooling/system-tests'
 import * as errors from '../../lib/errors'
 import { SocketE2E } from '../../lib/socket-e2e'
@@ -28,6 +30,7 @@ vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
     tapGraphQLHTTP: vi.fn(),
+    handleRunnerGraphQLSocketRequest: vi.fn(),
   }
 })
 
@@ -1237,6 +1240,68 @@ describe('lib/socket', () => {
         })
       })
 
+      describe('#createCDPIo', () => {
+        const MAIN_FRAME_ID = 'main-frame'
+
+        // attaches a fake CDP client and returns the origins/frames whose binding calls reach the socket
+        const acceptedCallers = async (cdpIo, callers: { origin: string, frameId: string }[]) => {
+          const client = Object.assign(new EventEmitter(), {
+            send: vi.fn(async (command: string) => {
+              return command === 'Page.getFrameTree' ? { frameTree: { frame: { id: MAIN_FRAME_ID }, childFrames: [{ frame: { id: 'aut-frame' } }] } } : {}
+            }),
+          })
+          let cdpSocket
+
+          cdpIo.on('connection', (s) => cdpSocket = s)
+          await cdpIo.attachCDPClient(client)
+
+          const accepted: string[] = []
+
+          cdpSocket.on('caller:test', (caller) => accepted.push(caller))
+
+          for (const [index, { origin, frameId }] of callers.entries()) {
+            const id = index + 1
+            const caller = `${frameId} ${origin}`
+
+            client.emit('Runtime.executionContextCreated', { context: { id, origin, name: '', uniqueId: String(id), auxData: { frameId, isDefault: true } } })
+            client.emit('Runtime.bindingCalled', {
+              name: 'cypressSendToServer-/__socket/default',
+              payload: JSON.stringify(await encode(['caller:test', 'callback-id', [caller]], '/__socket/default')),
+              executionContextId: id,
+            })
+          }
+
+          await new Promise((resolve) => setImmediate(resolve))
+
+          return accepted
+        }
+
+        afterEach(() => {
+          vi.unstubAllEnvs()
+        })
+
+        it('accepts binding calls only from the main frame at the server\'s trusted origins', async () => {
+          const serverOrigin = `http://localhost:${server._port()}`
+
+          expect(await acceptedCallers(socket.cdpIo, [
+            { origin: serverOrigin, frameId: MAIN_FRAME_ID },
+            { origin: serverOrigin, frameId: 'aut-frame' },
+            { origin: 'http://other.test', frameId: MAIN_FRAME_ID },
+          ])).toStrictEqual([`${MAIN_FRAME_ID} ${serverOrigin}`])
+        })
+
+        it('also accepts children of the main frame for Cypress-in-Cypress', async () => {
+          vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
+
+          const cdpIo = new SocketE2E(cfg).createCDPIo('/__socket', (origin) => origin === 'http://localhost:4455')
+
+          expect(await acceptedCallers(cdpIo, [
+            { origin: 'http://localhost:4455', frameId: 'aut-frame' },
+            { origin: 'http://other.test', frameId: 'aut-frame' },
+          ])).toStrictEqual(['aut-frame http://localhost:4455'])
+        })
+      })
+
       describe('#sendFocusBrowserMessage', () => {
         it('sends an automation request of focus:browser:window', () => {
           const request = vi.spyOn(automation, 'request').mockReturnValue(undefined)
@@ -1373,7 +1438,7 @@ describe('lib/socket', () => {
       describe('#startListening', () => {
         describe('watch:test:file', () => {
           it('listens for watch:test:file event', () => {
-            socket.startListening(server.getHttpServer(), automation, cfg, {})
+            socket.startListening(server.getHttpServer(), automation, cfg, { isTrustedOrigin: () => true })
 
             expectCalledWith(mockClient.on, 'watch:test:file')
           })
@@ -1387,7 +1452,7 @@ describe('lib/socket', () => {
               }
             })
 
-            socket.startListening(server.getHttpServer(), automation, cfg, {})
+            socket.startListening(server.getHttpServer(), automation, cfg, { isTrustedOrigin: () => true })
 
             expectCalledWith(watchTestFileByPath, cfg, { relative: 'foo/bar/baz' })
           })

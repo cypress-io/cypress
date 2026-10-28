@@ -2,20 +2,9 @@ import _ from 'lodash'
 import Debug from 'debug'
 import type net from 'net'
 import type { Request } from 'express'
-import { isLocalhost } from '@packages/network-tools'
 import type { RemoteStates } from '@packages/network-tools'
 
 const debug = Debug('cypress:server:util:socket_allowed')
-
-function isOwnOrigin (origin: string, serverPort: number): boolean {
-  try {
-    const url = new URL(origin)
-
-    return url.protocol === 'http:' && isLocalhost(url) && url.port === String(serverPort)
-  } catch {
-    return false
-  }
-}
 
 /**
  * Utility to validate incoming, local socket connections against a list of
@@ -24,7 +13,7 @@ function isOwnOrigin (origin: string, serverPort: number): boolean {
 export class SocketAllowed {
   allowedLocalPorts: number[] = []
 
-  constructor (private _remoteStates?: Pick<RemoteStates, 'hasPrimary' | 'isPrimarySuperDomainOrigin'>) {}
+  constructor (private remoteStates: RemoteStates, private getServerPort: () => number | undefined) {}
 
   /**
    * Add a socket to the allowed list.
@@ -62,50 +51,44 @@ export class SocketAllowed {
   }
 
   /**
-   * A browser stamps WebSocket handshakes and POSTs with the opening document's
-   * Origin, and the runner document is served either at the primary remote
-   * state's origin or at the server's own localhost origin. Component testing
-   * always uses the latter, since its primary is the dev server. Any other
-   * origin is a different page in some browser. The primary match is exact
-   * unless `injectDocumentDomain` is on, where it is by superdomain because top
-   * can then sit on a sibling subdomain. The Firefox extension's background page
-   * connects from its own moz-extension:// origin, which no web page can claim.
+   * A browser stamps WebSocket handshakes with the opening document's Origin,
+   * and only Cypress serves the runner document at a trusted origin. The Firefox
+   * extension's background page connects from its own moz-extension:// origin,
+   * which no web page can claim.
    */
-  isTrustedOrigin (origin: string | undefined, { allowExtension = false, serverPort }: { allowExtension?: boolean, serverPort?: number } = {}): boolean {
-    if (!origin || origin === 'null') {
-      return false
-    }
-
-    if (allowExtension && origin.startsWith('moz-extension://')) {
-      return true
-    }
-
-    if (serverPort && isOwnOrigin(origin, serverPort)) {
-      return true
-    }
-
-    if (!this._remoteStates?.hasPrimary()) {
-      return false
-    }
-
-    try {
-      return this._remoteStates.isPrimarySuperDomainOrigin(origin)
-    } catch {
-      return false
-    }
-  }
-
-  isRequestFromTrustedOrigin (req: Pick<Request, 'headers'> & { socket?: { localPort?: number } }, { allowExtension = false } = {}): boolean {
+  isRequestFromTrustedOrigin (req: Pick<Request, 'headers'>, { allowExtension = false } = {}): boolean {
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && req.headers['x-cypress-forwarded-from-cypress']) {
       return true
     }
 
-    const origin = req.headers.origin
-    const serverPort = req.socket?.localPort
-    const isAllowed = this.isTrustedOrigin(origin, { allowExtension, serverPort })
+    const { origin } = req.headers
+    const isAllowed = typeof origin === 'string' && ((allowExtension && origin.startsWith('moz-extension://')) || this.isTrustedOrigin(origin))
 
-    debug('is incoming request from a trusted origin? %o', { isAllowed, origin, serverPort })
+    debug('is incoming request from a trusted origin? %o', { isAllowed, origin })
 
     return isAllowed
+  }
+
+  /**
+   * Is this origin the primary remote state's origin or the server's own origin?
+   */
+  isTrustedOrigin = (origin: string) => {
+    if (!/^https?:\/\//.test(origin)) {
+      return false
+    }
+
+    const serverPort = this.getServerPort()
+    // URL drops a default port, as browsers do when reporting an origin
+    let isTrusted = serverPort !== undefined && origin === new URL(`http://localhost:${serverPort}`).origin
+
+    try {
+      isTrusted ||= this.remoteStates.hasPrimary() && this.remoteStates.isPrimarySuperDomainOrigin(origin)
+    } catch (err) {
+      debug('could not compare origin to the primary remote state %o', { origin, err })
+    }
+
+    debug('is origin trusted? %o', { origin, isTrusted })
+
+    return isTrusted
   }
 }

@@ -1450,6 +1450,8 @@ describe('lib/server-base', () => {
       server.remoteStates.set('http://localhost:4456')
 
       const serverPort = 4455
+
+      server._server = { address: () => ({ port: serverPort }) }
       const remotePort = 12345
       const write = vi.fn()
       const upgrade = (origin: string) => {
@@ -1457,7 +1459,7 @@ describe('lib/server-base', () => {
         server.proxyWebsockets(proxy, '/foo', {
           url: '/foo-graphql',
           headers: { origin },
-          socket: { remotePort, remoteAddress: '127.0.0.1', localPort: serverPort },
+          socket: { remotePort, remoteAddress: '127.0.0.1' },
         }, { ...socket, write }, head)
 
         return write.mock.calls.length > 0 ? 'refused' : 'allowed'

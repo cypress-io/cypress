@@ -1,15 +1,21 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Request } from 'express'
 import { SocketAllowed } from '../../../lib/util/socket_allowed'
-import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import type { Socket } from 'net'
+import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
+
+const SERVER_PORT = 4455
+
+const createRemoteStates = (injectDocumentDomain = false) => {
+  return new RemoteStates(() => ({ server: SERVER_PORT, fileServer: 4456 }), DocumentDomainInjection.InjectionBehavior({ injectDocumentDomain, testingType: 'e2e' }))
+}
 
 describe('lib/util/socket_allowed', function () {
   let sw: SocketAllowed
 
   beforeEach(() => {
-    sw = new SocketAllowed()
+    sw = new SocketAllowed(createRemoteStates(), () => SERVER_PORT)
   })
 
   describe('#add', () => {
@@ -40,19 +46,10 @@ describe('lib/util/socket_allowed', function () {
   })
 
   describe('#isRequestFromTrustedOrigin', () => {
-    const primary = 'http://localhost:3000'
-    const remoteStates = {
-      hasPrimary: () => true,
-      isPrimarySuperDomainOrigin: (url: string) => url === primary,
-    }
     const reqWithOrigin = (origin?: string) => ({ headers: origin === undefined ? {} : { origin } }) as Request
 
-    beforeEach(() => {
-      sw = new SocketAllowed(remoteStates)
-    })
-
-    it('allows the primary origin', () => {
-      expect(sw.isRequestFromTrustedOrigin(reqWithOrigin(primary))).toBe(true)
+    it('allows a trusted origin', () => {
+      expect(sw.isRequestFromTrustedOrigin(reqWithOrigin(`http://localhost:${SERVER_PORT}`))).toBe(true)
     })
 
     it('rejects other, opaque, and missing origins', () => {
@@ -67,73 +64,70 @@ describe('lib/util/socket_allowed', function () {
       expect(sw.isRequestFromTrustedOrigin(req)).toBe(false)
       expect(sw.isRequestFromTrustedOrigin(req, { allowExtension: true })).toBe(true)
     })
-
-    it('allows the server\'s own localhost origin, which component testing serves the runner from', () => {
-      const req = (origin: string) => ({ headers: { origin }, socket: { localPort: 4455 } }) as unknown as Request
-
-      for (const origin of ['http://localhost:4455', 'http://127.0.0.1:4455']) {
-        expect(sw.isRequestFromTrustedOrigin(req(origin)), origin).toBe(true)
-      }
-
-      for (const origin of ['http://localhost:4456', 'https://localhost:4455', 'http://other.example.com:4455']) {
-        expect(sw.isRequestFromTrustedOrigin(req(origin)), origin).toBe(false)
-      }
-    })
-
-    it('rejects everything but the server\'s own origin before a primary remote state exists', () => {
-      sw = new SocketAllowed({ ...remoteStates, hasPrimary: () => false })
-
-      expect(sw.isRequestFromTrustedOrigin(reqWithOrigin(primary))).toBe(false)
-      expect(sw.isRequestFromTrustedOrigin({ headers: { origin: 'http://localhost:4455' }, socket: { localPort: 4455 } } as unknown as Request)).toBe(true)
-    })
-
-    it('rejects an origin the remote states cannot parse', () => {
-      sw = new SocketAllowed({ ...remoteStates, isPrimarySuperDomainOrigin: () => {
-        throw new TypeError('Invalid URL')
-      } })
-
-      expect(sw.isRequestFromTrustedOrigin(reqWithOrigin('not a url'))).toBe(false)
-    })
   })
 
-  describe('#isTrustedOrigin with real remote states', () => {
-    const makeSocketAllowed = (injectDocumentDomain: boolean) => {
-      const remoteStates = new RemoteStates(() => ({ server: 4455 }), DocumentDomainInjection.InjectionBehavior({ injectDocumentDomain, testingType: 'e2e' }))
-
-      remoteStates.set('http://app.example.com:3000')
-
-      return { remoteStates, socketAllowed: new SocketAllowed(remoteStates) }
-    }
-
-    it('requires an exact origin match by default', () => {
-      sw = makeSocketAllowed(false).socketAllowed
-
-      expect(sw.isTrustedOrigin('http://app.example.com:3000')).toBe(true)
-      expect(sw.isTrustedOrigin('http://www.example.com:3000')).toBe(false)
-      expect(sw.isTrustedOrigin('http://example.com:3000')).toBe(false)
-      expect(sw.isTrustedOrigin('http://app.example.com:4000')).toBe(false)
-      expect(sw.isTrustedOrigin('https://app.example.com:3000')).toBe(false)
+  describe('#isTrustedOrigin', () => {
+    it('trusts the server\'s own origin before a primary is set', () => {
+      expect(sw.isTrustedOrigin(`http://localhost:${SERVER_PORT}`)).toBe(true)
+      expect(sw.isTrustedOrigin('http://localhost:3500')).toBe(false)
     })
 
-    it('matches by superdomain with injectDocumentDomain', () => {
-      sw = makeSocketAllowed(true).socketAllowed
+    it('trusts only the exact primary origin', () => {
+      const remoteStates = createRemoteStates()
 
-      expect(sw.isTrustedOrigin('http://app.example.com:3000')).toBe(true)
-      expect(sw.isTrustedOrigin('http://www.example.com:3000')).toBe(true)
-      expect(sw.isTrustedOrigin('http://example.com:3000')).toBe(true)
-      expect(sw.isTrustedOrigin('http://app.example.com:4000')).toBe(false)
-      expect(sw.isTrustedOrigin('https://app.example.com:3000')).toBe(false)
-      expect(sw.isTrustedOrigin('http://app.other.com:3000')).toBe(false)
+      sw = new SocketAllowed(remoteStates, () => SERVER_PORT)
+      remoteStates.set('http://www.foobar.com:3500/index.html')
+
+      expect(sw.isTrustedOrigin('http://www.foobar.com:3500')).toBe(true)
+      expect(sw.isTrustedOrigin(`http://localhost:${SERVER_PORT}`)).toBe(true)
+      expect(sw.isTrustedOrigin('http://app.foobar.com:3500')).toBe(false)
+      expect(sw.isTrustedOrigin('https://www.foobar.com:3500')).toBe(false)
+      expect(sw.isTrustedOrigin('http://www.foobar.com:3501')).toBe(false)
     })
 
-    it('follows the primary as it changes', () => {
-      const { remoteStates, socketAllowed } = makeSocketAllowed(false)
+    it('trusts the primary\'s superdomain when injecting document.domain', () => {
+      const remoteStates = createRemoteStates(true)
 
-      sw = socketAllowed
-      remoteStates.set('https://next.example.org')
+      sw = new SocketAllowed(remoteStates, () => SERVER_PORT)
+      remoteStates.set('http://www.foobar.com:3500/index.html')
 
-      expect(sw.isTrustedOrigin('https://next.example.org')).toBe(true)
-      expect(sw.isTrustedOrigin('http://app.example.com:3000')).toBe(false)
+      expect(sw.isTrustedOrigin('http://app.foobar.com:3500')).toBe(true)
+      expect(sw.isTrustedOrigin('http://www.barbaz.com:3500')).toBe(false)
+    })
+
+    it('follows the primary as it moves', () => {
+      const remoteStates = createRemoteStates()
+
+      sw = new SocketAllowed(remoteStates, () => SERVER_PORT)
+      remoteStates.set('http://localhost:3500')
+      expect(sw.isTrustedOrigin('http://localhost:3500')).toBe(true)
+
+      remoteStates.set('http://www.foobar.com:3500')
+      expect(sw.isTrustedOrigin('http://localhost:3500')).toBe(false)
+      expect(sw.isTrustedOrigin('http://www.foobar.com:3500')).toBe(true)
+    })
+
+    it('judges only by the primary while the server has no port', () => {
+      const remoteStates = createRemoteStates()
+
+      sw = new SocketAllowed(remoteStates, () => undefined)
+      remoteStates.set('http://localhost:3500')
+
+      expect(sw.isTrustedOrigin('http://localhost:3500')).toBe(true)
+      expect(sw.isTrustedOrigin('http://localhost:undefined')).toBe(false)
+      expect(sw.isTrustedOrigin(`http://localhost:${SERVER_PORT}`)).toBe(false)
+    })
+
+    it('trusts the server\'s own origin on a default port', () => {
+      sw = new SocketAllowed(createRemoteStates(), () => 80)
+
+      expect(sw.isTrustedOrigin('http://localhost')).toBe(true)
+    })
+
+    it('rejects non-http origins', () => {
+      for (const origin of ['null', '', 'moz-extension://abc', 'chrome-extension://abc', 'file://', 'about:blank']) {
+        expect(sw.isTrustedOrigin(origin), origin).toBe(false)
+      }
     })
   })
 })
