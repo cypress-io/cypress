@@ -105,9 +105,6 @@ function makeSassLoaders () {
   } satisfies webpack.RuleSetRule
 }
 
-// the chrome version should be synced with
-// npm/webpack-batteries-included-preprocessor/dist/index.js and
-// packages/server/lib/browsers/chrome.ts
 const babelPresetEnvConfig = [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }]
 const babelPresetTypeScriptConfig = [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }]
 

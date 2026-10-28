@@ -1,4 +1,5 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
+import * as babel from '@babel/core'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -77,6 +78,12 @@ describe('webpack-batteries-included-preprocessor', () => {
 
         expect(options.cacheDirectory).toBe(true)
         expect(options.cacheCompression).toBe(false)
+        expect(JSON.parse(options.cacheIdentifier)).toMatchObject({
+          '@babel/core': require('@babel/core/package.json').version,
+          'babel-loader': require('babel-loader/package.json').version,
+          '@babel/preset-env': require('@babel/preset-env/package.json').version,
+        })
+
         expect(presetEnvPath).toContain('preset-env')
         expect(presetEnvOptions.targets).toEqual({ chrome: '100', firefox: '140', safari: '16.4' })
       })
@@ -88,16 +95,22 @@ describe('webpack-batteries-included-preprocessor', () => {
         expect(plugins.some((p) => p.includes('plugin-transform-object-rest-spread'))).toBe(false)
       })
 
-      it('caches in the OS temp folder when no package.json sits above the cwd', async () => {
-        const existsSync = vi.spyOn(fs, 'existsSync').mockReturnValue(false)
+      it('caches in a per-user OS temp folder when no package.json file sits above the cwd', async () => {
+        // eslint-disable-next-line no-restricted-syntax
+        const statSync = fs.statSync
+        // A directory named package.json must not count as a project root.
+        const statSpy = vi.spyOn(fs, 'statSync').mockImplementation(((p: fs.PathLike, opts?: fs.StatSyncOptions) => {
+          return String(p).endsWith('package.json') ? { isFile: () => false } : statSync(p, opts)
+        }) as typeof fs.statSync)
 
         try {
           vi.resetModules()
           const getOptions = (await import('../../index')).getFullWebpackOptions
+          const uid = process.getuid?.()
 
-          expect(getJsBabelOptions(getOptions('foo')).cacheDirectory).toEqual(path.join(os.tmpdir(), 'babel-loader'))
+          expect(getJsBabelOptions(getOptions('foo')).cacheDirectory).toEqual(path.join(os.tmpdir(), uid === undefined ? 'babel-loader' : `babel-loader-${uid}`))
         } finally {
-          existsSync.mockRestore()
+          statSpy.mockRestore()
         }
       })
     })
@@ -393,10 +406,55 @@ describe('webpack-batteries-included-preprocessor', () => {
           const classPropertiesIdx = plugins.findIndex((p: string) => p.includes('plugin-transform-class-properties'))
 
           expect(classPropertiesIdx).toBeGreaterThan(decoratorsIdx)
-          expect(plugins.some((p: string) => p.includes('plugin-transform-object-rest-spread'))).toBe(true)
           expect(loader.options.cacheDirectory).toBe(true)
         },
       )
+
+      it('compiles decorators alongside the class features the targets support natively', () => {
+        vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('7.0.2')
+
+        vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+          config: {
+            compilerOptions: {
+              module: 'ESNext',
+              moduleResolution: 'Bundler',
+            },
+          },
+          path: fixtureTsconfigPath,
+        })
+
+        preprocessor({
+          typescript: true,
+          webpackOptions,
+        })({
+          filePath: 'foo.ts',
+          outputPath: '.js',
+        } as any)
+
+        // cache* options belong to babel-loader, not @babel/core
+        const { cacheDirectory, cacheIdentifier, cacheCompression, ...babelOptions } = webpackOptions.module.rules[0].use[0].options
+        const source = `
+          function inject (target: any, key: string) {}
+          class Service {}
+          class Widget {
+            @inject service!: Service
+            #count = 0
+            static registry = new Map<string, Widget>()
+            static { Widget.registry.clear() }
+            #bump () { return ++this.#count }
+            static isWidget (o: object) { return #count in o }
+            constructor (public name: string) {}
+            @inject render (svc: Service): number { return this.#bump() }
+          }
+          export const { name, ...rest } = new Widget('w')
+        `
+
+        const { code } = babel.transformSync(source, { ...babelOptions, filename: path.join(__dirname, 'widget.ts') })!
+
+        expect(code).toContain('_applyDecoratedDescriptor')
+        expect(code).toContain('Reflect.metadata')
+        expect(code).toContain('...rest')
+      })
 
       it('still registers the tsconfig paths plugin so path aliases resolve', () => {
         vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('7.0.2')

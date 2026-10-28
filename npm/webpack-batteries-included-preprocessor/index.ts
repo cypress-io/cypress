@@ -41,23 +41,54 @@ const typescriptExtensionRegex = /\.m?tsx?$/
 // chrome and safari sit below the "Runtime targets" floors in AGENTS.md.
 const babelTargets = { chrome: '100', firefox: '140', safari: '16.4' }
 
+let babelCacheDirectory: true | string | undefined
+
 // `true` caches in the nearest package.json's node_modules/.cache and falls
 // back to the OS temp folder when that can't be written to. babel-loader 10.0
 // throws instead when no package.json sits above the cwd (a project run without
-// one, e.g. a mounted Docker volume), so point it at the temp folder directly.
+// one, e.g. a mounted Docker volume), so name the temp folder ourselves. It is
+// per user so a folder another user created can't block the write. Resolved
+// once per process, as babel-loader resolves its own default.
 const getBabelCacheDirectory = (): true | string => {
-  for (let dir = process.cwd(); ; dir = path.dirname(dir)) {
-    if (fs.existsSync(path.join(dir, 'package.json'))) return true
+  if (babelCacheDirectory) return babelCacheDirectory
 
-    if (path.dirname(dir) === dir) return path.join(os.tmpdir(), 'babel-loader')
+  for (let dir = process.cwd(); ; dir = path.dirname(dir)) {
+    // Loader options are built synchronously, and this runs once per process.
+    // eslint-disable-next-line no-restricted-syntax
+    if (fs.statSync(path.join(dir, 'package.json'), { throwIfNoEntry: false })?.isFile()) {
+      return babelCacheDirectory = true
+    }
+
+    if (path.dirname(dir) === dir) {
+      const uid = process.getuid?.()
+
+      return babelCacheDirectory = path.join(os.tmpdir(), uid === undefined ? 'babel-loader' : `babel-loader-${uid}`)
+    }
   }
 }
+
+// babel-loader's default key only covers @babel/core and babel-loader, and the
+// options it hashes hold plugin paths that stay the same across upgrades. Key
+// on every Babel package in the config so an upgrade can't serve stale output.
+const babelCacheIdentifier = JSON.stringify(Object.fromEntries([
+  '@babel/core',
+  'babel-loader',
+  '@babel/preset-env',
+  '@babel/preset-react',
+  '@babel/preset-typescript',
+  '@babel/plugin-proposal-decorators',
+  '@babel/plugin-transform-class-properties',
+  '@babel/plugin-transform-runtime',
+  'babel-plugin-add-module-exports',
+  'babel-plugin-transform-typescript-metadata',
+].map((name) => [name, require(`${name}/package.json`).version])))
 
 // Shared by the JS spec rule and the TypeScript 7+ rule. `typescript: true`
 // adds preset-typescript.
 const getBabelLoaderOptions = ({ typescript = false }: { typescript?: boolean } = {}) => {
   return {
     cacheDirectory: getBabelCacheDirectory(),
+    cacheIdentifier: babelCacheIdentifier,
     cacheCompression: false,
     plugins: [
       // Legacy decorators + metadata, ordered before class-properties, to keep
@@ -67,18 +98,21 @@ const getBabelLoaderOptions = ({ typescript = false }: { typescript?: boolean } 
         [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
       ] : []),
       require.resolve('babel-plugin-add-module-exports'),
-      // Legacy decorators need decorated class fields lowered in the same pass,
-      // so these stay for TypeScript even though the targets support both.
-      ...(typescript ? [
-        require.resolve('@babel/plugin-transform-class-properties'),
-        require.resolve('@babel/plugin-transform-object-rest-spread'),
-      ] : []),
+      // Legacy decorators need decorated class fields lowered, even though the
+      // targets support class fields natively.
+      ...(typescript ? [require.resolve('@babel/plugin-transform-class-properties')] : []),
       [require.resolve('@babel/plugin-transform-runtime'), {
         absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
       }],
     ],
     presets: [
-      [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: babelTargets }],
+      [require.resolve('@babel/preset-env'), {
+        modules: 'commonjs',
+        targets: babelTargets,
+        // Once class-properties runs, Babel requires every other class feature
+        // in the file to be lowered too, so force the ones these targets skip.
+        ...(typescript ? { include: ['transform-private-methods', 'transform-class-static-block'] } : {}),
+      }],
       require.resolve('@babel/preset-react'),
       // Last preset runs first: strip types before preset-env/react.
       ...(typescript ? [require.resolve('@babel/preset-typescript')] : []),
