@@ -1279,6 +1279,7 @@ describe('config/src/project/utils', () => {
         const cfg = await mergeDefaults(obj, options, {}, getFilesByGlob)
 
         expect(cfg.resolved).toEqual({
+          alwaysDelayActions: { value: false, from: 'default' },
           animationDistanceThreshold: { value: 5, from: 'default' },
           arch: { value: os.arch(), from: 'default' },
           baseUrl: { value: null, from: 'default' },
@@ -1383,6 +1384,7 @@ describe('config/src/project/utils', () => {
 
         expect(cfg.resolved).toEqual({
           arch: { value: os.arch(), from: 'default' },
+          alwaysDelayActions: { value: false, from: 'default' },
           animationDistanceThreshold: { value: 5, from: 'default' },
           baseUrl: { value: 'http://localhost:8080', from: 'config' },
           blockHosts: { value: null, from: 'default' },

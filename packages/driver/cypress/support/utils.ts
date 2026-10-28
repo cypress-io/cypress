@@ -6,6 +6,28 @@ const getReporterDocument = () => {
   return top!.document.querySelector<HTMLIFrameElement>('#reporter-frame')!.contentDocument!
 }
 
+// The support file keeps a test in memory in every mode so driver specs can
+// assert on snapshots. Pair this with a `numTestsKeptInMemory: 0` test config
+// override, which restores the original value after the test.
+export const keepNoTestsInMemory = () => {
+  Cypress.config('numTestsKeptInMemory', 0)
+}
+
+// Spy on `Cypress.Promise.delay` and `cy.timeout` before the action. With
+// `numTestsKeptInMemory: 0` the command log keeps no snapshots, so the action
+// should pause only when Test Replay records the run.
+export const expectActionDelayOnlyWithTestReplay = (...names: string[]) => {
+  const expectCalled = (spy) => {
+    return cy.state('isProtocolEnabled') ? expect(spy).to.be : expect(spy).not.to.be
+  }
+
+  names.forEach((name) => {
+    expectCalled(Promise.delay).calledWith(50, name)
+  })
+
+  expectCalled(cy.timeout).calledWith(50, true)
+}
+
 export const getCommandLogWithText = (command, type?) => {
   if (!type) {
     type = 'method'

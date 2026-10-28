@@ -5,6 +5,8 @@ import {
   trimInnerText,
   shouldBeCalledWithCount,
   shouldBeCalledOnce,
+  expectActionDelayOnlyWithTestReplay,
+  keepNoTestsInMemory,
 } from '../../../support/utils'
 
 const { _, $ } = Cypress
@@ -143,6 +145,16 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     cy.get(':text:first').type('foo{enter}').then(() => {
       expect(Promise.delay).to.be.calledWith(50, 'type')
+    })
+  })
+
+  it('skips the focus click and typing delays when no snapshot will be taken', { numTestsKeptInMemory: 0 }, () => {
+    keepNoTestsInMemory()
+    cy.spy(Promise, 'delay')
+    cy.spy(cy, 'timeout')
+
+    cy.get(':text:first').type('foo').then(() => {
+      expectActionDelayOnlyWithTestReplay('click', 'type')
     })
   })
 

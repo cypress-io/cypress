@@ -152,6 +152,11 @@ export const defaultExcludeSpecPattern = {
 // Add options in alphabetical order for better readability
 const driverConfigOptions: Array<DriverConfigOption> = [
   {
+    name: 'alwaysDelayActions',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    overrideLevel: 'any',
+  }, {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: validate.isNumber,

@@ -537,10 +537,15 @@ export default function (Commands, Cypress, cy, state, config) {
 
     return handleFocused()
     .then(() => {
-      cy.timeout($actionability.delay, true, 'type')
+      const shouldDelay = $actionability.shouldDelay(config, state)
 
-      return Promise
-      .delay($actionability.delay, 'type')
+      if (shouldDelay) {
+        cy.timeout($actionability.delay, true, 'type')
+      }
+
+      const pause: Promise<unknown> = shouldDelay ? Promise.delay($actionability.delay, 'type') : Promise.resolve()
+
+      return pause
       .then(() => {
         // command which consume cy.type may
         // want to handle verification themselves

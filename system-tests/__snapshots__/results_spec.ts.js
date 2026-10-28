@@ -10,6 +10,7 @@ exports['module api and after:run results'] = `
     "configFile": "cypress.config.js",
     "isTextTerminal": true,
     "retries": 2,
+    "alwaysDelayActions": false,
     "animationDistanceThreshold": 5,
     "arch": "x64",
     "baseUrl": null,

@@ -135,9 +135,13 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
         })
       }
 
+      const shouldDelay = $actionability.shouldDelay(config, state)
+
       // add this delay delta to the runnables timeout because we delay
       // by it below before performing each click
-      cy.timeout($actionability.delay, true)
+      if (shouldDelay) {
+        cy.timeout($actionability.delay, true)
+      }
 
       const createLog = (domEvents, fromElWindow, fromAutWindow) => {
         const elClicked = domEvents.moveEvents.el
@@ -163,8 +167,9 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
           return consoleObj
         }
 
-        return Promise
-        .delay($actionability.delay, 'click')
+        const pause: Promise<unknown> = shouldDelay ? Promise.delay($actionability.delay, 'click') : Promise.resolve()
+
+        return pause
         .then(() => {
           // display the red dot at these coords
           // because we snapshot and output a command per click

@@ -9,11 +9,21 @@ import type { ElWindowPosition, ElViewportPosition, ElementPositioning } from '.
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
 import { callNativeMethod, getNativeProp } from '../dom/elements/nativeProps'
+import { willTakeSnapshots } from '../cypress/log'
+import type { StateFunc } from '../cypress/state'
 const debug = debugFn('cypress:driver:actionability')
 // for logs emitted on every retry iteration of an actionability check
 const debugVerbose = debugFn('cypress-verbose:driver:actionability')
 
 const delay = 50
+
+// Actions pause for `delay` after dispatching so the after-snapshot shows the
+// app's response. Without a snapshot the pause only slows the run, but it also
+// gives the app time to settle before the next command, so `alwaysDelayActions`
+// lets suites that rely on that keep it.
+const shouldDelay = (config, state: StateFunc): boolean => {
+  return Boolean(config('alwaysDelayActions')) || willTakeSnapshots(config, state)
+}
 
 const getFixedOrStickyEl = $dom.getFirstFixedOrStickyPositionParent
 const getStickyEl = $dom.getFirstStickyPositionParent
@@ -663,6 +673,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
 
 export default {
   delay,
+  shouldDelay,
   verify,
   dispatchPrimedChangeEvents,
   getPositionFromArguments,

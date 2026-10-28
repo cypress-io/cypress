@@ -10,6 +10,8 @@ import {
   shouldBeCalledWithCount,
   shouldBeCalled,
   shouldBeCalledOnce,
+  expectActionDelayOnlyWithTestReplay,
+  keepNoTestsInMemory,
   shouldNotBeCalled,
 } from '../../../support/utils'
 
@@ -672,6 +674,25 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.get('button:first').click({ multiple: true }).then(() => {
         expect(Promise.delay).to.be.calledWith(50, 'click')
+      })
+    })
+
+    it('keeps the delay when alwaysDelayActions is true and no snapshot will be taken', { alwaysDelayActions: true, numTestsKeptInMemory: 0 }, () => {
+      keepNoTestsInMemory()
+      cy.spy(Promise, 'delay')
+
+      cy.get('#button').click().then(() => {
+        expect(Promise.delay).to.be.calledWith(50, 'click')
+      })
+    })
+
+    it('skips the delay when no snapshot will be taken', { numTestsKeptInMemory: 0 }, () => {
+      keepNoTestsInMemory()
+      cy.spy(Promise, 'delay')
+      cy.spy(cy, 'timeout')
+
+      cy.get('#button').click().then(() => {
+        expectActionDelayOnlyWithTestReplay('click')
       })
     })
 

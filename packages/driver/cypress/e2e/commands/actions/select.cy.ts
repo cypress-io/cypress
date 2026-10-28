@@ -1,4 +1,4 @@
-import { assertLogLength } from '../../../support/utils'
+import { assertLogLength, keepNoTestsInMemory, expectActionDelayOnlyWithTestReplay } from '../../../support/utils'
 
 const { _, $ } = Cypress
 
@@ -13,6 +13,16 @@ describe('src/cy/commands/actions/select', () => {
 
       cy.get('select[name=maps]').select('train').then(($select) => {
         expect($select.get(0)).to.eq(select.get(0))
+      })
+    })
+
+    it('skips the click delays when no snapshot will be taken', { numTestsKeptInMemory: 0 }, () => {
+      keepNoTestsInMemory()
+      cy.spy(Cypress.Promise, 'delay')
+      cy.spy(cy, 'timeout')
+
+      cy.get('select[name=maps]').select('de_train').then(() => {
+        expectActionDelayOnlyWithTestReplay('click')
       })
     })
 

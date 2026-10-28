@@ -3531,6 +3531,14 @@ declare namespace Cypress {
      */
     viewportWidth: number
     /**
+     * Whether action commands such as `.click()`, `.type()` and `.check()` always pause for 50ms after acting.
+     * By default they pause only when a DOM snapshot will be taken: in `cypress open` while tests are kept
+     * in memory, or when Test Replay records the run. Set to `true` to pause after every action, as Cypress
+     * did before this option existed.
+     * @default false
+     */
+    alwaysDelayActions: boolean
+    /**
      * The distance in pixels an element must exceed over time to be considered animating
      * @default 5
      */
@@ -3788,7 +3796,7 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'alwaysDelayActions' | 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3796,7 +3804,7 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'alwaysDelayActions' | 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number

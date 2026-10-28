@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- Action commands such as [`.click()`](https://on.cypress.io/click), [`.type()`](https://on.cypress.io/type), [`.check()`](https://on.cypress.io/check), [`.select()`](https://on.cypress.io/select), and [`.submit()`](https://on.cypress.io/submit) no longer pause for 50ms after each action during `cypress run` without Test Replay, where no DOM snapshot is taken. In a benchmark in Electron, each `.click()` and `.check()` finished about 50ms sooner (about 21ms instead of about 72ms), and each `.type()` into a field that was not focused finished about 100ms sooner (about 24ms instead of about 126ms). `cypress open` and runs recorded with Test Replay still pause so that their snapshots show the result of each action. If a test relied on the pause to let your app finish updating before the next command, add an assertion that waits for the update, or set the new [`alwaysDelayActions`](https://on.cypress.io/configuration) configuration option to `true` to restore it. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**

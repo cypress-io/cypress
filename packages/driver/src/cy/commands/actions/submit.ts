@@ -12,7 +12,7 @@ interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeo
   $el: JQuery<HTMLFormElement>
 }
 
-export default (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy, state, config) => {
   Commands.addAll({ prevSubject: 'element' }, {
     submit (subject: JQuery<HTMLFormElement>, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalSubmitOptions = _.defaults({}, userOptions, {
@@ -69,10 +69,15 @@ export default (Commands, Cypress, cy) => {
         form.submit()
       }
 
-      cy.timeout($actionability.delay, true)
+      const shouldDelay = $actionability.shouldDelay(config, state)
 
-      return Promise
-      .delay($actionability.delay, 'submit')
+      if (shouldDelay) {
+        cy.timeout($actionability.delay, true)
+      }
+
+      const pause: Promise<unknown> = shouldDelay ? Promise.delay($actionability.delay, 'submit') : Promise.resolve()
+
+      return pause
       .then(() => {
         const verifyAssertions = () => {
           return cy.verifyUpcomingAssertions(options.$el, options, {

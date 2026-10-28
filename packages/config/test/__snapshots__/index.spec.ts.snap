@@ -21,6 +21,7 @@ exports[`config/src/index > .getBreakingKeys > returns list of breaking config k
 exports[`config/src/index > .getDefaultValues > returns list of public config keys 1`] = `
 {
   "additionalIgnorePattern": [],
+  "alwaysDelayActions": false,
   "animationDistanceThreshold": 5,
   "autoOpen": false,
   "baseUrl": null,
@@ -118,6 +119,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
 exports[`config/src/index > .getDefaultValues > returns list of public config keys for selected testing type 1`] = `
 {
   "additionalIgnorePattern": [],
+  "alwaysDelayActions": false,
   "animationDistanceThreshold": 5,
   "autoOpen": false,
   "baseUrl": null,
@@ -214,6 +216,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
 
 exports[`config/src/index > .getPublicConfigKeys > returns list of public config keys 1`] = `
 [
+  "alwaysDelayActions",
   "animationDistanceThreshold",
   "arch",
   "baseUrl",
