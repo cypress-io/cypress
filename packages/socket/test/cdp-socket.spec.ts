@@ -405,6 +405,20 @@ describe('CDPSocket', () => {
         expect(listener.mock.calls.map(([arg]) => arg)).toStrictEqual(['existing child', 'attached child'])
       })
 
+      it('accepts a child whose context is reported before the frame is attached', async () => {
+        const { client, socket } = await attachServer({ allowMainFrameChildren: true })
+        const listener = vi.fn()
+
+        createContext(client, { id: 2, frameId: 'late-child' })
+        client.emit('Page.frameAttached', { frameId: 'late-child', parentFrameId: MAIN_FRAME_ID })
+        socket.on('some:event', listener)
+
+        await callBinding(client, 2, 'some:event')
+        await flush()
+
+        expect(listener).toHaveBeenCalledOnce()
+      })
+
       it('drops calls from deeper or detached frames', async () => {
         const { client, socket } = await attachServer({ allowMainFrameChildren: true }, ['child'])
         const listener = vi.fn()

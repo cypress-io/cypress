@@ -95,7 +95,10 @@ class BindingCallerContexts {
   }
 
   private _onContextCreated = ({ context }: Protocol.Runtime.ExecutionContextCreatedEvent) => {
-    if (!context.auxData?.isDefault || !this._mayHostRunner(context.auxData.frameId)) {
+    // a child's context can arrive before its frameAttached, so isAllowed checks the frame at call time
+    const mayHostRunner = this._options.allowMainFrameChildren || this._mayHostRunner(context.auxData?.frameId)
+
+    if (!context.auxData?.isDefault || !mayHostRunner) {
       return
     }
 
