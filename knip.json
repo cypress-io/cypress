@@ -36,6 +36,7 @@
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mock-fs",
+        "node-gyp",
         "playwright-webkit",
         "proxyquire",
         "react-dom",
