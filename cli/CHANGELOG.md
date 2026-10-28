@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. The improvement is largest on Linux. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
