@@ -468,7 +468,7 @@ export class PackherdModuleLoader {
     }
 
     // 2. Try to obtain a full path via the resolved relative path
-    let fullPath = this._tryResolveFullPath(moduleUri, moduleRelativePath, opts)
+    const fullPath = this._tryResolveFullPath(moduleUri, moduleRelativePath, opts)
 
     if (fullPath != null) {
       return { fullPath, resolved: 'module-fullpath:node' }
@@ -490,18 +490,12 @@ export class PackherdModuleLoader {
       throw moduleNotFoundError(msg, moduleUri)
     }
 
-    const directFullPath = fullPath
-    const res = this._resolvePaths(
+    return this._resolvePaths(
       moduleUri,
       opts as NodeModule | undefined,
       false,
-      directFullPath,
+      fullPath,
     )
-    const { resolved } = res
-
-    fullPath = res.fullPath
-
-    return { fullPath, resolved }
   }
 
   /**

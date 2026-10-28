@@ -27,14 +27,14 @@
     // Populate the global function trampoline with the real global functions defined on newGlobal.
     globalFunctionTrampoline = newGlobal
 
-    for (const key of Object.keys(global)) {
+    for (let key of Object.keys(global)) {
       newGlobal[key] = global[key]
     }
 
     global = newGlobal
 
     if (typeof newProcess !== 'undefined') {
-      for (const key of Object.keys(process)) {
+      for (let key of Object.keys(process)) {
         newProcess[key] = process[key]
       }
     }
@@ -42,7 +42,7 @@
     process = newProcess
 
     if (typeof newWindow !== 'undefined') {
-      for (const key of Object.keys(window)) {
+      for (let key of Object.keys(window)) {
         newWindow[key] = window[key]
       }
     }
@@ -50,14 +50,14 @@
     window = newWindow
 
     if (typeof newDocument !== 'undefined') {
-      for (const key of Object.keys(document)) {
+      for (let key of Object.keys(document)) {
         newDocument[key] = document[key]
       }
     }
 
     document = newDocument
 
-    for (const key of Object.keys(console)) {
+    for (let key of Object.keys(console)) {
     // eslint-disable-next-line no-console
       newConsole[key] = console[key]
     }

@@ -2,7 +2,8 @@ import type {
   RawSourceMap,
   MappingItem,
   Mapping,
-  Position } from 'source-map-js'
+  Position,
+} from 'source-map-js'
 import {
   SourceMapConsumer,
   SourceMapGenerator,

@@ -16,11 +16,13 @@ export function createBundle (
 ): Promise<CreateBundleResult> {
   // esbuild throws on unknown options, so packherd's own entryFilePath stays out
   const { entryFilePath, ...buildArgs } = args
-  const opts = Object.assign({}, DEFAULT_BUNDLE_OPTS, buildArgs, {
+  const opts: BuildOptions & { write: false } = {
+    ...DEFAULT_BUNDLE_OPTS,
+    ...buildArgs,
     entryPoints: [entryFilePath],
     bundle: true,
     write: false,
-  }) as BuildOptions & { write: false }
+  }
 
   // NOTE: we just changed Output file to either have text: string or contents: UInt8Array, never both
   return (build(opts) as unknown) as Promise<CreateBundleResult>

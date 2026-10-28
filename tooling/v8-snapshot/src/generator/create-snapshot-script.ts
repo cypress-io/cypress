@@ -11,7 +11,8 @@ import type {
   CreateBundle,
   CreateBundleOpts as PackherdCreateBundleOpts,
   CreateBundleResult,
-  CreateBundleSourcemap } from '@tooling/packherd'
+  CreateBundleSourcemap,
+} from '@tooling/packherd'
 import {
   packherd,
 } from '@tooling/packherd'

@@ -49,7 +49,7 @@ function customRequire (
   }
 
   // The relative path to the module is used to resolve modules from the various caches
-  const key = modulePathFromAppRoot
+  let key = modulePathFromAppRoot
 
   // 3. Try to determine the parent module from the `this` variable.
   //    This is a somewhat brittle attempt to resolve the parent if it is the

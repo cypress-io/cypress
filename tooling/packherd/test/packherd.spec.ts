@@ -2,7 +2,8 @@ import type {
   CreateBundle,
   CreateBundleOpts,
   CreateBundleResult,
-  CreateBundleOutputFile } from '../src/packherd'
+  CreateBundleOutputFile,
+} from '../src/packherd'
 import {
   packherd,
 } from '../src/packherd'

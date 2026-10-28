@@ -14,7 +14,7 @@ function createElement (_type) {
   }
 }
 
-const documentElement = {
+let documentElement = {
   textContent: '',
   style: {
     cssFloat: '',

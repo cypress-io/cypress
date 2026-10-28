@@ -15,10 +15,8 @@ export default [
     },
   },
   {
-    // Build-time tooling that never ships in the app, so sync fs and the
-    // other APIs restricted in shipped code are fine here
+    // Build-time tooling that never ships in the app, so sync fs is fine here
     rules: {
-      'no-restricted-properties': 'off',
       'no-restricted-syntax': 'off',
     },
   },
