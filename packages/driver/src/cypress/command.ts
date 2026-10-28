@@ -140,7 +140,8 @@ export class $Command {
   }
 
   stringify () {
-    let { name, args } = this.attributes
+    const { name } = this.attributes
+    let { args } = this.attributes
 
     args = _.reduce(args, (memo: string[], arg) => {
       arg = _.isString(arg) ? _.truncate(arg, { length: 20 }) : '...'
@@ -168,9 +169,7 @@ export class $Command {
   }
 
   pick (...args) {
-    args.unshift(this.attributes)
-
-    return _.pick.apply(_, args as [Record<string, any>, any[]])
+    return _.pick(this.attributes, ...args)
   }
 
   static create (obj) {

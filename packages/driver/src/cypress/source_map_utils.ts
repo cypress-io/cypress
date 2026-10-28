@@ -34,7 +34,7 @@ const extractSourceMap = (fileContents) => {
   let dataUrlMatch
 
   try {
-    let sourceMapMatch = fileContents.match(sourceMapExtractionRegex)
+    const sourceMapMatch = fileContents.match(sourceMapExtractionRegex)
 
     if (!sourceMapMatch) return null
 

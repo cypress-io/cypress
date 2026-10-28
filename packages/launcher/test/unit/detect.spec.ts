@@ -105,6 +105,41 @@ describe('detect', () => {
     })
   })
 
+  it('checks browser definitions one at a time and keeps their order', async () => {
+    let inFlight = 0
+    let maxInFlight = 0
+
+    const stubDetect = async (browser: Browser) => {
+      inFlight++
+      maxInFlight = Math.max(maxInFlight, inFlight)
+
+      // later definitions finish first, so completion order differs from input order
+      await new Promise((resolve) => setTimeout(resolve, 20 - Number(browser.name.split('-')[1])))
+
+      inFlight--
+
+      return {
+        name: browser.name,
+        path: `/path/to/${browser.name}`,
+        version: '1.0.0',
+      }
+    }
+
+    // @ts-expect-error - stub resolves a partial FoundBrowser
+    vi.mocked(linuxDetect).mockImplementation(stubDetect)
+    vi.mocked(darwinDetect).mockImplementation(stubDetect)
+    // @ts-expect-error - stub resolves a partial FoundBrowser
+    vi.mocked(windowsDetect).mockImplementation(stubDetect)
+
+    const goal = _.range(10).map((i) => ({ name: `browser-${i}`, binary: `browser-${i}`, versionRegex: /(\S+)/ }))
+
+    // @ts-expect-error - goal fixtures are partial Browser objects
+    const browsers = await detect(goal)
+
+    expect(browsers.map(({ name }) => name)).toEqual(goal.map(({ name }) => name))
+    expect(maxInFlight).toBe(1)
+  })
+
   describe('#getMajorVersion', () => {
     it('parses major version from provided string', () => {
       expect(getMajorVersion('123.45.67')).toEqual('123')
