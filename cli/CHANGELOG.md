@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.2.2
+
+**Performance:**
+
+- In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
+
 ## 16.2.1
 
 **Performance:**

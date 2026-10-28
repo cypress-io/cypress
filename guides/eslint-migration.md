@@ -55,12 +55,17 @@
 - [x] packages/config
 - [ ] packages/root
 - [ ] packages/resolve-dist
-- [ ] packages/packherd-require
+- [x] packages/packherd-require
 - [ ] packages/v8-snapshot-require
 - [ ] packages/web-config
 - [x] packages/types
 - [x] packages/scaffold-config
 - [x] packages/example
+
+### Batch 4d: Tooling
+- [x] tooling/electron-mksnapshot
+- [x] tooling/packherd
+- [x] tooling/v8-snapshot
 
 ### Batch 5: Test and script folders
 - [ ] system-tests
