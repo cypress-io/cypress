@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- Installing the `cypress` npm package is now faster, because the package is smaller and contains far fewer files. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- Installing the `cypress` npm package is now faster, because the package is a 25% smaller download and contains about 700 fewer files. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
