@@ -177,6 +177,20 @@ describe('lib/privileged-commands/privileged-commands-manager', () => {
       expectNonSpecError(() => privilegedCommandsManager.runPrivilegedCommand(e2eConfig, { commandName: 'readFile', options: readFileOptions }))
     })
 
+    it('verifies a command posted without an origin when web security is disabled', () => {
+      privilegedCommandsManager.addVerifiedCommand({ hash: hash(readFileOptions), name: 'readFile', key, url: specFrameUrl }, undefined, true)
+
+      privilegedCommandsManager.runPrivilegedCommand(e2eConfig, { commandName: 'readFile', options: readFileOptions })
+
+      expect(files.readFile).toHaveBeenCalled()
+    })
+
+    it('does not verify a command posted from a different origin when web security is disabled', () => {
+      privilegedCommandsManager.addVerifiedCommand({ hash: hash(readFileOptions), name: 'readFile', key, url: specFrameUrl }, 'http://other.com', true)
+
+      expectNonSpecError(() => privilegedCommandsManager.runPrivilegedCommand(e2eConfig, { commandName: 'readFile', options: readFileOptions }))
+    })
+
     it('runs a command whose binary options match the verified ones', async () => {
       const options = { fileName: 'foo.bin', contents: Buffer.from('contents') }
 

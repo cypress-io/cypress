@@ -88,7 +88,7 @@ class PrivilegedCommandsManager {
     })`
   }
 
-  addVerifiedCommand ({ hash, name, key, url }, requestOrigin: string | undefined) {
+  addVerifiedCommand ({ hash, name, key, url }, requestOrigin: string | undefined, isWebSecurityDisabled = false) {
     // if the key isn't valid, don't add it as a verified command. once the
     // command attempts to run, it will fail at that point
     if (typeof key !== 'string' || key !== this.channelKeys[url]) return
@@ -96,7 +96,10 @@ class PrivilegedCommandsManager {
     // the channel posts from the origin of the document it was issued to
     const origin = getOrigin(url)
 
-    if (!origin || origin !== requestOrigin) return
+    if (!origin) return
+
+    // chrome launched with --disable-web-security sends no Origin header
+    if (requestOrigin === undefined ? !isWebSecurityDisabled : origin !== requestOrigin) return
 
     this.verifiedCommands.push({ name, hash })
   }
