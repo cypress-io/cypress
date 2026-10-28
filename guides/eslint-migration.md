@@ -53,13 +53,14 @@
 - [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [x] packages/config
-- [ ] packages/root
-- [ ] packages/resolve-dist
+- [x] packages/root
+- [x] packages/resolve-dist
 - [x] packages/packherd-require
-- [ ] packages/v8-snapshot-require
-- [ ] packages/web-config
+- [x] packages/v8-snapshot-require
+- [x] packages/web-config
 - [x] packages/types
 - [x] packages/scaffold-config
+- [x] packages/ts
 - [x] packages/example
 
 ### Batch 4d: Tooling
