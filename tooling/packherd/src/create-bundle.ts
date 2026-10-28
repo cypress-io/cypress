@@ -14,15 +14,13 @@ const DEFAULT_BUNDLE_OPTS: Partial<CreateBundleOpts> = {
 export function createBundle (
   args: CreateBundleOpts,
 ): Promise<CreateBundleResult> {
-  const opts = Object.assign({}, DEFAULT_BUNDLE_OPTS, args, {
-    entryPoints: [args.entryFilePath],
+  // esbuild throws on unknown options, so packherd's own entryFilePath stays out
+  const { entryFilePath, ...buildArgs } = args
+  const opts = Object.assign({}, DEFAULT_BUNDLE_OPTS, buildArgs, {
+    entryPoints: [entryFilePath],
     bundle: true,
     write: false,
   }) as BuildOptions & { write: false }
-
-  // This is not ideal, but esbuild throws if it encounters an unknown opt
-  // @ts-expect-error - entryFilePath is packherd's own option, not part of esbuild's BuildOptions
-  delete opts.entryFilePath
 
   // NOTE: we just changed Output file to either have text: string or contents: UInt8Array, never both
   return (build(opts) as unknown) as Promise<CreateBundleResult>

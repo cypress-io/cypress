@@ -1098,14 +1098,9 @@ export class PackherdModuleLoader {
  */
 function moduleNotFoundError (msg: string, moduleUri: string) {
   // https://github.com/nodejs/node/blob/da0ede1ad55a502a25b4139f58aab3fb1ee3bf3f/lib/internal/modules/cjs/loader.js#L353-L359
-  const err = new Error(msg)
-
-  // @ts-expect-error - Error has no code, but Node.js's MODULE_NOT_FOUND error does
-  err.code = 'MODULE_NOT_FOUND'
-  // @ts-expect-error - Error has no path, but Node.js's MODULE_NOT_FOUND error does
-  err.path = moduleUri
-  // @ts-expect-error - Error has no requestPath, but Node.js's MODULE_NOT_FOUND error does
-  err.requestPath = moduleUri
-
-  return err
+  return Object.assign(new Error(msg), {
+    code: 'MODULE_NOT_FOUND',
+    path: moduleUri,
+    requestPath: moduleUri,
+  })
 }

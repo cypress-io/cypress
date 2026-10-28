@@ -5,8 +5,12 @@ export default [
   ...baseConfig,
   ...jsonConfig,
   {
-    // a snapshot script the specs expect mksnapshot to reject
-    ignores: ['test/fixtures/**'],
+    ignores: [
+      // a snapshot script the specs expect mksnapshot to reject
+      'test/fixtures/**',
+      // the downloaded mksnapshot binary and its support files
+      'bin/**',
+    ],
   },
   {
     languageOptions: {
