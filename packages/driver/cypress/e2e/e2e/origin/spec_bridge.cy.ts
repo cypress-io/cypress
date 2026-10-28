@@ -23,7 +23,7 @@ it('keeps the verification error when cy.origin() is not verified', { browser: '
   const notVerified = Object.assign(new Error('not verified'), { isNonSpec: true })
   let originLog
 
-  cy.stub(Cypress, 'backend').callThrough().withArgs('run:privileged').rejects(notVerified)
+  cy.stub(Cypress, 'backend').log(false).callThrough().withArgs('run:privileged').rejects(notVerified)
 
   cy.on('log:added', (attrs, log) => {
     if (attrs.name === 'origin') originLog = log
