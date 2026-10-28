@@ -117,7 +117,7 @@ export async function makeGraphQLServer () {
     dfd.resolve(port)
   }
 
-  srv = graphqlPort ? app.listen(graphqlPort, listenCallback) : app.listen(listenCallback)
+  srv = app.listen(Number(graphqlPort) || 0, '127.0.0.1', listenCallback)
 
   serverDestroy(srv)
 
