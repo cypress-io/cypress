@@ -566,6 +566,28 @@ describe('util', () => {
         expect(await getOsVersion('linux')).toEqual('openSUSE Tumbleweed - 20240101')
       })
 
+      it('ignores a non-version word in PRETTY_NAME', async () => {
+        mockFiles({
+          '/etc/os-release': [
+            'PRETTY_NAME="Kali GNU/Linux Rolling"',
+            'NAME="Kali GNU/Linux"',
+            'VERSION_ID="2024.2"',
+            'VERSION="2024.2"',
+            'VERSION_CODENAME=kali-rolling',
+          ].join('\n'),
+        })
+
+        expect(await getOsVersion('linux')).toEqual('Kali GNU/Linux - 2024.2')
+      })
+
+      it('uses VERSION_ID when there is no VERSION', async () => {
+        mockFiles({
+          '/etc/os-release': 'NAME=Gentoo\nID=gentoo\nPRETTY_NAME="Gentoo Linux"\nVERSION_ID="2.15"',
+        })
+
+        expect(await getOsVersion('linux')).toEqual('Gentoo - 2.15')
+      })
+
       it('reads /usr/lib/os-release when /etc/os-release is missing', async () => {
         mockFiles({
           '/usr/lib/os-release': 'NAME="Fedora Linux"\nVERSION="40 (Workstation Edition)"\nPRETTY_NAME="Fedora Linux 40 (Workstation Edition)"',
@@ -616,7 +638,7 @@ describe('util', () => {
         version.mockReturnValue('Windows 10 Pro')
         release.mockReturnValue('10.0.19045')
 
-        expect(await getOsVersion('win32')).toEqual('Windows 10 Pro - 10.0.19045')
+        expect(await getOsVersion('win32')).toEqual('Microsoft Windows 10 Pro - 10.0.19045')
         expect(execa).not.toHaveBeenCalled()
       })
 
@@ -624,7 +646,7 @@ describe('util', () => {
         version.mockReturnValue('Windows 10 Pro')
         release.mockReturnValue('10.0.26100')
 
-        expect(await getOsVersion('win32')).toEqual('Windows 11 Pro - 10.0.26100')
+        expect(await getOsVersion('win32')).toEqual('Microsoft Windows 11 Pro - 10.0.26100')
       })
     })
 

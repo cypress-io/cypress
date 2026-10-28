@@ -96,14 +96,12 @@ const getLinuxOsVersion = async (): Promise<string | undefined> => {
   const contents = await fs.readFile('/etc/os-release', 'utf8')
   .catch(() => fs.readFile('/usr/lib/os-release', 'utf8'))
 
-  const { NAME: distro, PRETTY_NAME: prettyName = '', VERSION: version = '', VERSION_ID: versionId } = parseKeyValueLines(contents, '=')
+  const { NAME: distro, VERSION: version = '', VERSION_ID: versionId } = parseKeyValueLines(contents, '=')
 
   if (!distro) return
 
-  // PRETTY_NAME carries the point release that VERSION_ID leaves out, e.g. "Ubuntu 24.04.5 LTS"
-  const fullVersion = prettyName.startsWith(`${distro} `) ? prettyName.slice(distro.length + 1) : version
   // drop a trailing codename, e.g. "12 (bookworm)"
-  const release = fullVersion.split('(')[0].trim() || versionId
+  const release = version.split('(')[0].trim() || versionId
 
   return release ? `${distro} - ${release}` : undefined
 }
@@ -123,7 +121,8 @@ const getWindowsOsVersion = (): string => {
   const isWindows11 = Number(release.split('.')[2]) >= 22000
   const distro = isWindows11 ? os.version().replace('Windows 10', 'Windows 11') : os.version()
 
-  return `${distro} - ${release}`
+  // match the WMI Caption that the binary reports to Cypress Cloud, e.g. "Microsoft Windows 11 Pro"
+  return `Microsoft ${distro} - ${release}`
 }
 
 const getOsVersionForPlatform = async (): Promise<string | undefined> => {

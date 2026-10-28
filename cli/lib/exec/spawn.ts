@@ -63,7 +63,7 @@ function createSpawnFunction (
   options: any,
 ) {
   return (overrides: any = {}): any => {
-    return new Promise(async (resolve: any, reject: any) => {
+    return new Promise((resolve: any, reject: any) => {
       _.defaults(overrides, {
         onStderrData: false,
       })

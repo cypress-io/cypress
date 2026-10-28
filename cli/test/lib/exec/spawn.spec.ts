@@ -304,6 +304,15 @@ describe('lib/exec/spawn', function () {
       expect(util.getRealArch).not.toHaveBeenCalled()
     })
 
+    it('rejects when spawn throws synchronously', async () => {
+      vi.mocked(needsSandbox).mockReturnValue(false)
+      vi.mocked(cp.spawn).mockImplementation(() => {
+        throw new Error('spawn EINVAL')
+      })
+
+      await expect(start('--foo')).rejects.toThrow('spawn EINVAL')
+    })
+
     it('uses --no-sandbox when needed', async function () {
       vi.mocked(needsSandbox).mockReturnValue(true)
 
