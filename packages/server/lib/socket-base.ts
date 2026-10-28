@@ -32,7 +32,7 @@ type StartListeningCallbacks = {
 
 const debug = Debug('cypress:server:socket-base')
 
-function getInterceptRegistration (options: { interceptRegistration: ForInterceptRegistration }): ForInterceptRegistration {
+function getInterceptRegistration (options: StartListeningOptions): ForInterceptRegistration {
   return options.interceptRegistration
 }
 
@@ -45,6 +45,8 @@ type ExtendedSocketIoServer = socketIo.SocketIOServer & GenericHandler
 type ExtendedSocketIoNamespace = socketIo.SocketIONamespace & GenericHandler
 
 type ExtendedCDPSocketServer = CDPSocketServer & GenericHandler
+
+export type StartListeningOptions = Record<string, any> & { isTrustedOrigin: (origin: string) => boolean }
 
 export class SocketBase implements SocketBroadcaster {
   private _sendResetBrowserTabsForNextSpecMessage
@@ -121,8 +123,12 @@ export class SocketBase implements SocketBroadcaster {
     throw new Error(`Could not process '${message}'. No automation clients connected.`)
   }
 
-  createCDPIo (socketIoRoute: string) {
-    return new CDPSocketServer({ path: socketIoRoute })
+  createCDPIo (socketIoRoute: string, isTrustedOrigin: (origin: string) => boolean) {
+    return new CDPSocketServer({
+      path: socketIoRoute,
+      isTrustedOrigin,
+      allowMainFrameChildren: !!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF,
+    })
   }
 
   createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
@@ -139,7 +145,7 @@ export class SocketBase implements SocketBroadcaster {
     server: DestroyableHttpServer,
     automation: Automation,
     config,
-    options,
+    options: StartListeningOptions,
     callbacks: StartListeningCallbacks,
   ) {
     let runState: RunState | undefined = undefined
@@ -172,7 +178,7 @@ export class SocketBase implements SocketBroadcaster {
     const { socketIoRoute, socketIoCookie } = config
 
     const socketIo = this._socketIo = this.createSocketIo(server, socketIoRoute, socketIoCookie) as ExtendedSocketIoServer
-    const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute)
+    const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute, options.isTrustedOrigin)
 
     automation.use({
       onPush: async (message, data) => {

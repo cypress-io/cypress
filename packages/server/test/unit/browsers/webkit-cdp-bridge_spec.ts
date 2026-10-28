@@ -7,26 +7,79 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
   let page: any
   let mainFrame: any
   let bridge: WebKitCDPBridge
-  let frameDetachedHandler: (frame: any) => void
+  let frameNavigatedHandler: (frame: any) => void
+
+  const navigateMainFrame = (url: string) => {
+    mainFrame.url.returns(url)
+    frameNavigatedHandler(mainFrame)
+  }
 
   beforeEach(() => {
-    mainFrame = { evaluate: sinon.stub().resolves() }
+    mainFrame = { evaluate: sinon.stub().resolves(), url: sinon.stub().returns('about:blank') }
     page = {
       exposeBinding: sinon.stub().resolves(),
       mainFrame: sinon.stub().returns(mainFrame),
       on: sinon.stub().callsFake((event, handler) => {
-        if (event === 'framedetached') frameDetachedHandler = handler
+        if (event === 'framenavigated') frameNavigatedHandler = handler
       }),
     }
 
     bridge = new WebKitCDPBridge(page)
   })
 
-  it('resolves Runtime.enable without side effects', async () => {
-    await bridge.send('Runtime.enable')
+  it('reports the main frame as the root of the frame tree', async () => {
+    await expect(bridge.send('Page.getFrameTree')).to.eventually.deep.equal({ frameTree: { frame: { id: 'main' }, childFrames: [] } })
+  })
 
-    expect(page.exposeBinding).not.to.be.called
-    expect(mainFrame.evaluate).not.to.be.called
+  context('execution contexts', () => {
+    let created: any[]
+    let destroyed: any[]
+
+    beforeEach(() => {
+      created = []
+      destroyed = []
+      bridge.on('Runtime.executionContextCreated', (event) => created.push(event.context))
+      bridge.on('Runtime.executionContextDestroyed', (event) => destroyed.push(event.executionContextId))
+    })
+
+    it('reports the main frame\'s current context on Runtime.enable', async () => {
+      mainFrame.url.returns('http://localhost:3500/__/')
+
+      await bridge.send('Runtime.enable')
+      await bridge.send('Runtime.enable')
+
+      expect(created).to.deep.equal([
+        { id: 1, origin: 'http://localhost:3500', name: '', uniqueId: '1', auxData: { frameId: 'main', isDefault: true } },
+        { id: 1, origin: 'http://localhost:3500', name: '', uniqueId: '1', auxData: { frameId: 'main', isDefault: true } },
+      ])
+
+      expect(page.exposeBinding).not.to.be.called
+      expect(mainFrame.evaluate).not.to.be.called
+    })
+
+    it('creates a new context when the main frame navigates to another origin', async () => {
+      await bridge.send('Runtime.enable')
+
+      navigateMainFrame('http://localhost:3500/__/')
+      navigateMainFrame('http://localhost:3500/__/#/specs')
+      navigateMainFrame('http://other.test/')
+
+      expect(created.map(({ id, origin }) => ({ id, origin }))).to.deep.equal([
+        { id: 1, origin: 'null' },
+        { id: 2, origin: 'http://localhost:3500' },
+        { id: 3, origin: 'http://other.test' },
+      ])
+
+      expect(destroyed).to.deep.equal([1, 2])
+    })
+
+    it('ignores child frame navigations', async () => {
+      await bridge.send('Runtime.enable')
+
+      frameNavigatedHandler({ url: () => 'http://other.test/' })
+
+      expect(created).to.have.length(1)
+    })
   })
 
   it('throws on unknown commands', async () => {
@@ -48,7 +101,7 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
       expect(page.exposeBinding).to.be.calledOnce
     })
 
-    it('emits Runtime.bindingCalled with a stable executionContextId per frame', async () => {
+    it('emits Runtime.bindingCalled with the main frame\'s current executionContextId', async () => {
       await bridge.send('Runtime.addBinding', { name: 'binding-1' })
 
       const bindingHandler = page.exposeBinding.firstCall.args[1]
@@ -56,18 +109,31 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
 
       bridge.on('Runtime.bindingCalled', (event) => events.push(event))
 
-      const frameA = {}
-      const frameB = {}
-
-      bindingHandler({ frame: frameA }, 'payload-1')
-      bindingHandler({ frame: frameB }, 'payload-2')
-      bindingHandler({ frame: frameA }, 'payload-3')
+      navigateMainFrame('http://localhost:3500/__/')
+      bindingHandler({ frame: mainFrame }, 'payload-1')
+      bindingHandler({ frame: mainFrame }, 'payload-2')
+      navigateMainFrame('http://other.test/')
+      bindingHandler({ frame: mainFrame }, 'payload-3')
 
       expect(events).to.deep.equal([
         { name: 'binding-1', payload: 'payload-1', executionContextId: 1 },
-        { name: 'binding-1', payload: 'payload-2', executionContextId: 2 },
-        { name: 'binding-1', payload: 'payload-3', executionContextId: 1 },
+        { name: 'binding-1', payload: 'payload-2', executionContextId: 1 },
+        { name: 'binding-1', payload: 'payload-3', executionContextId: 2 },
       ])
+    })
+
+    it('drops calls from child frames', async () => {
+      await bridge.send('Runtime.addBinding', { name: 'binding-1' })
+
+      const bindingHandler = page.exposeBinding.firstCall.args[1]
+      const events: any[] = []
+
+      bridge.on('Runtime.bindingCalled', (event) => events.push(event))
+      bridge.on('Runtime.executionContextCreated', (event) => events.push(event))
+
+      bindingHandler({ frame: { url: () => 'http://other.test/' } }, 'payload')
+
+      expect(events).to.deep.equal([])
     })
   })
 
@@ -78,17 +144,21 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
       expect(mainFrame.evaluate).to.be.calledWith('(() => {if (true) { doWork() }})()')
     })
 
-    it('evaluates in the frame that last called the binding for the given contextId', async () => {
-      await bridge.send('Runtime.addBinding', { name: 'binding-1' })
-
-      const bindingHandler = page.exposeBinding.firstCall.args[1]
-      const frame = { evaluate: sinon.stub().resolves() }
-
-      bindingHandler({ frame }, 'payload')
+    it('evaluates in the main frame for its current contextId', async () => {
+      mainFrame.url.returns('http://localhost:3500/__/')
+      await bridge.send('Runtime.enable')
 
       await bridge.send('Runtime.evaluate', { expression: 'reply()', contextId: 1 })
 
-      expect(frame.evaluate).to.be.calledWith('(() => {reply()})()')
+      expect(mainFrame.evaluate).to.be.calledWith('(() => {reply()})()')
+    })
+
+    it('rejects a contextId left behind by a navigation to another origin', async () => {
+      mainFrame.url.returns('http://localhost:3500/__/')
+      await bridge.send('Runtime.enable')
+      navigateMainFrame('http://other.test/')
+
+      await expect(bridge.send('Runtime.evaluate', { expression: 'reply()', contextId: 1 })).to.be.rejectedWith('Cannot find context with specified id: 1')
       expect(mainFrame.evaluate).not.to.be.called
     })
 
@@ -183,21 +253,6 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
 
       await expect(bridge.send('Runtime.evaluate', { expression: 'one()' })).to.be.rejectedWith('Execution context was destroyed')
       await expect(bridge.send('Runtime.evaluate', { expression: 'two()' })).to.eventually.equal('ok')
-    })
-
-    it('falls back to the main frame for a detached frame\'s contextId', async () => {
-      await bridge.send('Runtime.addBinding', { name: 'binding-1' })
-
-      const bindingHandler = page.exposeBinding.firstCall.args[1]
-      const frame = { evaluate: sinon.stub().resolves() }
-
-      bindingHandler({ frame }, 'payload')
-      frameDetachedHandler(frame)
-
-      await bridge.send('Runtime.evaluate', { expression: 'reply()', contextId: 1 })
-
-      expect(frame.evaluate).not.to.be.called
-      expect(mainFrame.evaluate).to.be.calledWith('(() => {reply()})()')
     })
   })
 })

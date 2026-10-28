@@ -676,7 +676,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
     }
 
-    const ios = this.socket.startListening(this.server, automation, config, options)
+    const ios = this.socket.startListening(this.server, automation, config, Object.assign(options, { isTrustedOrigin: this.socketAllowed.isTrustedOrigin }))
 
     this._normalizeReqUrl(this.server)
 

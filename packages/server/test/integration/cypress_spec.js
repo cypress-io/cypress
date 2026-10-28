@@ -1109,6 +1109,8 @@ describe('lib/cypress', () => {
             off: sinon.stub(),
             send: sinon.stub(),
           }
+
+          criClient.send.withArgs('Page.getFrameTree').resolves({ frameTree: { frame: { id: 'main-frame' } } })
           const browserCriClient = {
             attachToTargetUrl: sinon.stub().resolves(criClient),
             close: sinon.stub().resolves(),
@@ -1178,6 +1180,8 @@ describe('lib/cypress', () => {
             off: sinon.stub(),
             send: sinon.stub(),
           }
+
+          criClient.send.withArgs('Page.getFrameTree').resolves({ frameTree: { frame: { id: 'main-frame' } } })
           const browserCriClient = {
             attachToTargetUrl: sinon.stub().resolves(criClient),
             currentlyAttachedTarget: criClient,
