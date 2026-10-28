@@ -12,15 +12,12 @@ import $errUtils from '../../../../../src/cypress/error_utils'
 import Keyboard from '../../../../../src/cy/keyboard'
 
 vi.mock('../../../../../src/cypress/error_utils', async () => {
-  const original = await vi.importActual('../../../../../src/cypress/error_utils')
+  const original = await vi.importActual<typeof import('../../../../../src/cypress/error_utils')>('../../../../../src/cypress/error_utils')
 
   return {
     default: {
-      // @ts-expect-error
       ...original.default,
-      // @ts-expect-error
       throwErr: vi.fn().mockImplementation(original.default.throwErr),
-      // @ts-expect-error
       throwErrByPath: vi.fn().mockImplementation(original.default.throwErrByPath),
     },
   }
@@ -43,7 +40,7 @@ describe('cy/commands/actions/press', () => {
       // @ts-expect-error - <Cypress['log']> has a type conflict between Driver and CLI d.ts
       log: vi.fn(),
       automation,
-      // @ts-expect-error
+      // @ts-expect-error - partial Browser mock
       browser: {
         family: 'chromium',
         name: 'Chrome',
@@ -55,7 +52,7 @@ describe('cy/commands/actions/press', () => {
       addAll: vi.fn(),
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - partial $Cy mock
     cy = {}
 
     state = {
@@ -85,7 +82,7 @@ describe('cy/commands/actions/press', () => {
 
     expect(Commands.addAll).toHaveBeenCalledOnce()
 
-    // @ts-expect-error
+    // @ts-expect-error - mock.calls is typed with the real addAll() parameters
     const [[obj]]: [[{press: PressCommand}]] = Commands.addAll.mock.calls
 
     expect(typeof obj.press).toBe('function')
@@ -126,8 +123,7 @@ describe('cy/commands/actions/press', () => {
 
   describe('with an invalid key', () => {
     it('throws an invalid key error', async () => {
-      // @ts-expect-error
-      const key: KeyPressSupportedKeys = 'Foo'
+      const key = 'Foo'
 
       await expect(press(key)).rejects.toThrow(`\`${key}\` is not supported by \`cy.press()\``)
       expect($errUtils.throwErrByPath).toHaveBeenCalledWith('press.invalid_key', {

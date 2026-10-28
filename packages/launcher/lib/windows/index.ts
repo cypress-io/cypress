@@ -142,7 +142,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       throw notInstalledErr(browser.name)
     }
 
-    let path = doubleEscape(exePath)
+    const path = doubleEscape(exePath)
 
     return fs.pathExists(path)
     .then((exists) => {

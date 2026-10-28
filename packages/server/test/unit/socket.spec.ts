@@ -27,7 +27,7 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    runnerGraphQLHTTP: vi.fn(),
+    tapGraphQLHTTP: vi.fn(),
   }
 })
 
@@ -878,7 +878,7 @@ describe('lib/socket', () => {
     describe('on(backend:request, clear:sessions)', () => {
       it('clears spec sessions', () => {
         return new Promise<void>((done) => {
-          let state: any = session.getState()
+          const state: any = session.getState()
 
           state.globalSessions = {
             global: { id: 'global' },
@@ -903,7 +903,7 @@ describe('lib/socket', () => {
 
       it('clears all sessions', () => {
         return new Promise<void>((done) => {
-          let state: any = session.getState()
+          const state: any = session.getState()
 
           state.globalSessions = {
             global: { id: 'global' },

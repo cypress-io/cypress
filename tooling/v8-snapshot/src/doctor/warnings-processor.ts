@@ -214,7 +214,7 @@ export class WarningsProcessor {
    * @category snapshot
    */
   warningFromError (err: Error, file: string, hist: WarningsProcessHistory) {
-    let location: Warning['location'] = {
+    const location: Warning['location'] = {
       file,
       namespace: 'file:',
       line: 1,
@@ -223,9 +223,9 @@ export class WarningsProcessor {
       lineText: '<unknown>',
       suggestion: '',
     }
-    let text = err.toString()
+    const text = err.toString()
 
-    let warning: Omit<Warning, 'detail' | 'notes' | 'pluginName' | 'id'> = {
+    const warning: Omit<Warning, 'detail' | 'notes' | 'pluginName' | 'id'> = {
       location,
       text,
     }

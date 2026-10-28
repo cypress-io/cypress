@@ -507,8 +507,6 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
       if (shouldMoveCursorToEndAfterMousedown(el)) {
         debug('moveSelectionToEnd due to click', el)
-        // It's a curried function, so the 2 arguments are valid.
-        // @ts-ignore
         $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
       }
 
@@ -764,7 +762,7 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
 
       // stopPropagation doesn't have any arguments. So, we cannot type-safely pass the second argument.
       // But we're passing it just in case.
-      // @ts-ignore
+      // @ts-expect-error - args is not a tuple, so it cannot be spread into apply()
       return stopPropagation.apply(this, ...args)
     }
   }

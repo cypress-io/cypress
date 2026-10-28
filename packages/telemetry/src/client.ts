@@ -8,7 +8,7 @@ import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 declare global {
   interface Window {
-    __CYPRESS_TELEMETRY__?: {context: {context: {traceparent: string}, attributes: Attributes}, resources: Attributes, isVerbose: boolean}
+    __CYPRESS_TELEMETRY__?: { context: { context: { traceparent: string }, attributes: Attributes }, resources: Attributes, isVerbose: boolean }
     cypressTelemetrySingleton?: TelemetryClass | TelemetryNoop
   }
 }
@@ -21,7 +21,7 @@ let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
  * @param config - object containing the version
  * @returns void
  */
-const init = ({ namespace, config }: { namespace: string, config: {version: string}}): void => {
+const init = ({ namespace, config }: { namespace: string, config: { version: string } }): void => {
   // If we don't have cypress_telemetry setup on window don't even bother making the global instance
   if (!window.__CYPRESS_TELEMETRY__) {
     return

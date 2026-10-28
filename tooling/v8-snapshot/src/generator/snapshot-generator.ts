@@ -3,7 +3,8 @@ import debug from 'debug'
 import fs from 'fs'
 import { dirname, join, basename } from 'path'
 import { minify } from 'terser'
-import { createSnapshotScript, SnapshotScript } from './create-snapshot-script'
+import type { SnapshotScript } from './create-snapshot-script'
+import { createSnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
 import { determineDeferred } from '../doctor/determine-deferred'
 import {
@@ -15,7 +16,8 @@ import {
   getBundlerPath,
   resolveElectronVersion,
 } from '../utils'
-import { createExportScript, ExportScript } from './create-snapshot-bundle'
+import type { ExportScript } from './create-snapshot-bundle'
+import { createExportScript } from './create-snapshot-bundle'
 import { Flag, GeneratorFlags } from './snapshot-generator-flags'
 import { syncAndRun } from '@tooling/electron-mksnapshot'
 import tempDir from 'temp-dir'
