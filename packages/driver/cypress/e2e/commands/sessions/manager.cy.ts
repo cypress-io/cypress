@@ -5,7 +5,6 @@ describe('src/cy/commands/sessions/manager.ts', () => {
   let CypressInstance
 
   beforeEach(function () {
-    // @ts-ignore
     CypressInstance = new $Cypress()
   })
 

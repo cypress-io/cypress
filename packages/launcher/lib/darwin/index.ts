@@ -105,7 +105,7 @@ export const getVersionNumber = linuxHelper.getVersionNumber
 export const getPathData = linuxHelper.getPathData
 
 export function detect (browser: Browser): Promise<DetectedBrowser> {
-  let findAppParams = get(browsers, [browser.name, browser.channel])
+  const findAppParams = get(browsers, [browser.name, browser.channel])
 
   if (!findAppParams) {
     // ok, maybe it is custom alias?

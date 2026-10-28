@@ -203,10 +203,9 @@ export function snapshotRequire (
     logDebug('initializing packherd require')
 
     // 4. Attempt to pull out the resolver map as well as the dependency map
-    let resolverMap: Record<string, string> | undefined
     let moduleNeedsReload: ModuleNeedsReload | undefined
 
-    resolverMap = sr.snapshotAuxiliaryData.resolverMap
+    const resolverMap = sr.snapshotAuxiliaryData.resolverMap
     const dependencyMapArray = sr.snapshotAuxiliaryData.dependencyMapArray
 
     // 5. Setup the module needs reload predicate with the dependency map

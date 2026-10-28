@@ -567,7 +567,6 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
           if (Cypress.config('visibilityStrategy') === 'modern') {
             Cypress.ensure.isVisible($el, name, _log)
           } else {
-            // @ts-expect-error - isStrictlyVisible is not declared on the Cypress.ensure type
             Cypress.ensure.isStrictlyVisible($el, name, _log)
           }
         }

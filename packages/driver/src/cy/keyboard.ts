@@ -1012,7 +1012,7 @@ export class Keyboard {
     debug('event options:', eventType, eventOptions)
     if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
       event = document.createEvent('TextEvent')
-      // @ts-ignore
+      // @ts-expect-error - initTextEvent is deprecated and not in the DOM lib types
       event.initTextEvent(
         eventType,
         eventOptions.bubbles,
