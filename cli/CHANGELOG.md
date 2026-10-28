@@ -1,9 +1,20 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.2.1
+## 16.2.2
 
 **Performance:**
 
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
+
+**Dependency Updates:**
+
+- Upgraded `electron` from `41.7.0` to `43.8.4` to address the [compromised eMudhra intermediate certificates](https://github.com/electron/electron/security/advisories/GHSA-jr5w-w6x2-84p9) vulnerability reported in security scans. Connections that Cypress makes itself, such as to Cypress Cloud, now reject certificates issued through these intermediates. Node code in the config process, such as [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), runs on the Node.js version that runs the `cypress` CLI, so it needs a Node.js release that includes the same fix. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+
+## 16.2.1
+
+**Performance:**
+
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
