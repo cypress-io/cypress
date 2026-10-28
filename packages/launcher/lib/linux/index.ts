@@ -37,7 +37,7 @@ async function isFirefoxSnap (binary: string): Promise<boolean> {
 }
 
 // Forking is slow from a large parent process such as the Electron main process,
-// so only spawn `--version` for binaries that exist, and only once per binary.
+// so only spawn `--version` for binaries that exist.
 async function getInstalledVersionString (binary: string, versionStringCache: VersionStringCache): Promise<string> {
   const resolvedPath = await utils.which(binary)
 

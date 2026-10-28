@@ -163,11 +163,9 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   // Several definitions probe the same binary (e.g. `chrome`), so share its `--version` output
   const versionStringCache: VersionStringCache = new Map()
 
-  // Definitions are checked one at a time on purpose. Most candidate binaries
-  // are filtered out by a cheap `which` lookup before anything is spawned, so
-  // there is little left to overlap: checking 4 at a time measured no faster
-  // in `cypress run` (within ~20ms of detection time, no change to time to
-  // first spec), while also changing how Windows detection reads browser files.
+  // Checked one at a time on purpose: the `which` lookup filters out missing
+  // binaries before anything is spawned, so checking definitions concurrently
+  // leaves little to overlap and does not make startup faster.
   return Bluebird.mapSeries(goalBrowsers, (browser) => checkBrowser(browser, versionStringCache))
   .then((val) => _.flatten(val))
   .then(compactFalse)
