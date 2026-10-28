@@ -99,9 +99,7 @@ const zlibBrotliCompressOptions = {
   },
 }
 
-const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
-
-type SupportedContentEncoding = typeof SUPPORTED_CONTENT_ENCODINGS[number]
+type SupportedContentEncoding = 'gzip' | 'br'
 
 /**
  * Returns the content-encoding list in application order (first = applied first = innermost).
@@ -116,7 +114,8 @@ function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEnco
   const order: SupportedContentEncoding[] = []
 
   for (const part of raw.split(',')) {
-    const enc = part.trim()
+    const token = part.trim()
+    const enc = token === 'x-gzip' ? 'gzip' : token
 
     if ((enc === 'gzip' || enc === 'br') && !order.includes(enc)) {
       order.push(enc)
@@ -135,7 +134,7 @@ function setCookie (res: CypressOutgoingResponseLike, k: string, v: string, doma
   // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
   // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
   // Domain and let the cookie default to host-only. See #34143.
-  let opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
+  const opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
 
   if (!v) {
     v = ''
@@ -311,7 +310,6 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
-  // @ts-expect-error
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -342,6 +340,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
       }
 
       headers[name.toLowerCase()] = [name, value]
+
+      return this
     }
   }
 

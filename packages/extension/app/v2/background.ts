@@ -64,8 +64,8 @@ const connect = function (host: string, path: string) {
     }
 
     return Promise.resolve().then(() => {
-      // @ts-expect-error
-      return automation[method].apply(automation, args.concat(respond))
+      // @ts-expect-error - method is an arbitrary string from the socket, not a key of automation
+      return automation[method](...args, respond)
     }).catch((err) => {
       return fail(id, err)
     })

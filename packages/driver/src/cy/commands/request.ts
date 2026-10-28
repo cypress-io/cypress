@@ -201,7 +201,7 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      if (options.encoding) {
+      if (options.encoding !== null) {
         if (!_.isString(options.encoding) || !Buffer.isEncoding(options.encoding)) {
           $errUtils.throwErrByPath('request.encoding_invalid', {
             args: {

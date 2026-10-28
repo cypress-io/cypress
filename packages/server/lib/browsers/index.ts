@@ -317,18 +317,14 @@ const browsers = {
       }
     })
 
-    // TODO: instead of waiting an arbitrary
-    // amount of time here we could instead
-    // wait for the socket.io connect event
-    // which would mean that our browser is
-    // completely rendered and open. that would
-    // mean moving this code out of here and
-    // into the project itself
-    // (just like headless code)
-    // ----------------------------
-    // give a little padding around
-    // the browser opening
-    await Bluebird.delay(1000)
+    // Run mode already waits for the browser's socket to connect before it
+    // considers the browser launched, so padding here only delays every spec.
+    // Open mode reports the browser as 'open' once this resolves, so give the
+    // window a moment to render before saying so.
+    // TODO: wait for the socket.io connect event in open mode too
+    if (!options.isTextTerminal) {
+      await Bluebird.delay(1000)
+    }
 
     if (instance === null) {
       return null

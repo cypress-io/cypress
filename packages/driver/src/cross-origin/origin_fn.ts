@@ -73,7 +73,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
 // 4. Eval the callback like normal
 const getCallbackFn = async (fn: string, file?: string) => {
   if (
-    // @ts-expect-error
+    // @ts-expect-error - experimentalOriginDependencies is e2e-only, so it is not a key of Cypress.Config
     !Cypress.config('experimentalOriginDependencies')
     || !fn.includes('Cypress.require')
   ) {
@@ -152,7 +152,6 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     // Set the counter for log ids
     LogUtils.setCounter(logCounter)
 
-    // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
 
     // resync the config/expose before running the origin:fn

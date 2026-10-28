@@ -41,8 +41,8 @@ describe('ensure', () => {
       autOrigin = 'http://app.foobar.com:3500'
       setSpecOrigin('http://www.foobar.com:3500')
 
-      // @ts-expect-error
       global.Cypress = {
+        // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.config
         config: vi.fn((key) => {
           return key === 'injectDocumentDomain' ? injectDocumentDomain : undefined
         }),
