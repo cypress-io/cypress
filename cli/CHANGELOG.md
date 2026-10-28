@@ -4,7 +4,7 @@
 **Performance:**
 
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
-- Installing the Cypress binary, with [`cypress install`](https://on.cypress.io/command-line#cypress-install) or when `npm install cypress` downloads it, now finishes sooner. Cypress no longer pauses after the install completes, and it checks the downloaded archive while it downloads instead of reading the whole archive again afterwards. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- Installing the Cypress binary, with [`cypress install`](https://on.cypress.io/command-line#cypress-install) or when `npm install cypress` downloads it, now finishes sooner. Verifying the download takes less time, and Cypress no longer pauses after the install completes. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Bugfixes:**
 
