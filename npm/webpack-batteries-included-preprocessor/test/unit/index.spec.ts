@@ -1,4 +1,4 @@
-import { describe, it, beforeEach, expect, vi } from 'vitest'
+import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
 import * as babel from '@babel/core'
 import fs from 'node:fs'
 import os from 'node:os'
@@ -72,46 +72,103 @@ describe('webpack-batteries-included-preprocessor', () => {
         return webpackOptions.module.rules[1].use[0].options
       }
 
+      const entryName = (entry: unknown): string => {
+        const name = Array.isArray(entry) ? entry[0] : entry
+
+        if (typeof name !== 'string') throw new Error(`expected a resolved plugin or preset path, got ${JSON.stringify(entry)}`)
+
+        return name
+      }
+
       it('caches uncompressed transforms and targets the browsers Cypress launches', () => {
         const options = getJsBabelOptions(getFullWebpackOptions('foo'))
-        const [presetEnvPath, presetEnvOptions] = options.presets[0] as [string, { targets: Record<string, string> }]
+        const presetEnv = options.presets.find((preset) => entryName(preset).includes('preset-env'))
 
-        expect(options.cacheDirectory).toBe(true)
         expect(options.cacheCompression).toBe(false)
-        expect(JSON.parse(options.cacheIdentifier)).toMatchObject({
-          '@babel/core': require('@babel/core/package.json').version,
-          'babel-loader': require('babel-loader/package.json').version,
-          '@babel/preset-env': require('@babel/preset-env/package.json').version,
-        })
+        expect(Array.isArray(presetEnv) && presetEnv[1]).toMatchObject({ targets: { chrome: '100', firefox: '140', safari: '16.4' } })
+      })
 
-        expect(presetEnvPath).toContain('preset-env')
-        expect(presetEnvOptions.targets).toEqual({ chrome: '100', firefox: '140', safari: '16.4' })
+      it('keys the cache on the configured Babel packages and their direct dependencies', () => {
+        const { cacheIdentifier } = getJsBabelOptions(getFullWebpackOptions('foo'))
+
+        expect(cacheIdentifier).toContain(`@babel/core@${require('@babel/core/package.json').version}`)
+        expect(cacheIdentifier).toContain(`babel-loader@${require('babel-loader/package.json').version}`)
+        expect(cacheIdentifier).toContain(`@babel/preset-env@${require('@babel/preset-env/package.json').version}`)
+        // preset-env's targets data, whose package.json `exports` hides
+        expect(cacheIdentifier).toMatch(/(^|,)@babel\/compat-data@\d/)
+        expect(cacheIdentifier).toMatch(/(^|,)@babel\/plugin-transform-private-methods@\d/)
+        expect(cacheIdentifier).not.toContain('@missing')
       })
 
       it('leaves class fields and object rest/spread to the browser', () => {
-        const plugins = getJsBabelOptions(getFullWebpackOptions('foo')).plugins.map((p) => (Array.isArray(p) ? p[0] : p) as string)
+        const plugins = getJsBabelOptions(getFullWebpackOptions('foo')).plugins.map(entryName)
 
         expect(plugins.some((p) => p.includes('plugin-transform-class-properties'))).toBe(false)
         expect(plugins.some((p) => p.includes('plugin-transform-object-rest-spread'))).toBe(false)
       })
 
-      it('caches in a per-user OS temp folder when no package.json file sits above the cwd', async () => {
-        // eslint-disable-next-line no-restricted-syntax
-        const statSync = fs.statSync
-        // A directory named package.json must not count as a project root.
-        const statSpy = vi.spyOn(fs, 'statSync').mockImplementation(((p: fs.PathLike, opts?: fs.StatSyncOptions) => {
-          return String(p).endsWith('package.json') ? { isFile: () => false } : statSync(p, opts)
-        }) as typeof fs.statSync)
+      describe('cache directory', () => {
+        const originalCwd = process.cwd()
+        const originalCacheDir = process.env.CACHE_DIR
+        let tmp: string
 
-        try {
-          vi.resetModules()
-          const getOptions = (await import('../../index')).getFullWebpackOptions
-          const uid = process.getuid?.()
+        beforeEach(async () => {
+          tmp = await fs.promises.realpath(await fs.promises.mkdtemp(path.join(os.tmpdir(), 'wbip-cache-')))
+          delete process.env.CACHE_DIR
+        })
 
-          expect(getJsBabelOptions(getOptions('foo')).cacheDirectory).toEqual(path.join(os.tmpdir(), uid === undefined ? 'babel-loader' : `babel-loader-${uid}`))
-        } finally {
-          statSpy.mockRestore()
+        afterEach(async () => {
+          process.chdir(originalCwd)
+
+          if (originalCacheDir === undefined) {
+            delete process.env.CACHE_DIR
+          } else {
+            process.env.CACHE_DIR = originalCacheDir
+          }
+
+          await fs.promises.rm(tmp, { recursive: true, force: true })
+        })
+
+        // The module was loaded from the package folder, so this also covers a
+        // cwd that changes after load.
+        const getCacheDirectoryFrom = async (cwd: string) => {
+          process.chdir(cwd)
+
+          return getJsBabelOptions(getFullWebpackOptions('foo')).cacheDirectory
         }
+
+        it('creates and uses node_modules/.cache of the nearest package.json', async () => {
+          await fs.promises.mkdir(path.join(tmp, 'project/cypress/e2e'), { recursive: true })
+          await fs.promises.writeFile(path.join(tmp, 'project/package.json'), '{}')
+
+          const expected = path.join(tmp, 'project/node_modules/.cache/babel-loader')
+
+          expect(await getCacheDirectoryFrom(path.join(tmp, 'project/cypress/e2e'))).toEqual(expected)
+          expect((await fs.promises.stat(expected)).isDirectory()).toBe(true)
+        })
+
+        it('uses CACHE_DIR when it is set', async () => {
+          process.env.CACHE_DIR = path.join(tmp, 'shared-cache')
+
+          expect(await getCacheDirectoryFrom(tmp)).toEqual(path.join(tmp, 'shared-cache/babel-loader'))
+        })
+
+        // Assumes no package.json sits above the OS temp folder.
+        it('turns the cache off when no package.json file sits above the cwd', async () => {
+          // a folder named package.json is not a project root
+          await fs.promises.mkdir(path.join(tmp, 'project/package.json'), { recursive: true })
+
+          expect(await getCacheDirectoryFrom(path.join(tmp, 'project'))).toBe(false)
+        })
+
+        it('turns the cache off when its folder cannot be created', async () => {
+          await fs.promises.mkdir(path.join(tmp, 'project'))
+          await fs.promises.writeFile(path.join(tmp, 'project/package.json'), '{}')
+          // a file where node_modules should be makes mkdir fail, even for root
+          await fs.promises.writeFile(path.join(tmp, 'project/node_modules'), '')
+
+          expect(await getCacheDirectoryFrom(path.join(tmp, 'project'))).toBe(false)
+        })
       })
     })
   })
@@ -406,7 +463,8 @@ describe('webpack-batteries-included-preprocessor', () => {
           const classPropertiesIdx = plugins.findIndex((p: string) => p.includes('plugin-transform-class-properties'))
 
           expect(classPropertiesIdx).toBeGreaterThan(decoratorsIdx)
-          expect(loader.options.cacheDirectory).toBe(true)
+          expect(loader.options.cacheDirectory).toEqual(path.resolve(__dirname, '../../node_modules/.cache/babel-loader'))
+          expect(loader.options.cacheIdentifier).toContain('@babel/preset-typescript@')
         },
       )
 

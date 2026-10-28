@@ -1,5 +1,4 @@
 import fs from 'fs'
-import os from 'os'
 import path from 'path'
 import Debug from 'debug'
 import type { EventEmitter } from 'events'
@@ -41,82 +40,164 @@ const typescriptExtensionRegex = /\.m?tsx?$/
 // chrome and safari sit below the "Runtime targets" floors in AGENTS.md.
 const babelTargets = { chrome: '100', firefox: '140', safari: '16.4' }
 
-let babelCacheDirectory: true | string | undefined
+/* eslint-disable no-restricted-syntax -- loader options are built synchronously, and each lookup is cached */
 
-// `true` caches in the nearest package.json's node_modules/.cache and falls
-// back to the OS temp folder when that can't be written to. babel-loader 10.0
-// throws instead when no package.json sits above the cwd (a project run without
-// one, e.g. a mounted Docker volume), so name the temp folder ourselves. It is
-// per user so a folder another user created can't block the write. Resolved
-// once per process, as babel-loader resolves its own default.
-const getBabelCacheDirectory = (): true | string => {
-  if (babelCacheDirectory) return babelCacheDirectory
+// The folder babel-loader would pick for `cacheDirectory: true`: CACHE_DIR,
+// else the nearest package.json's node_modules/.cache.
+const findBabelCacheDirectory = (cwd: string, cacheDirEnv: string | undefined) => {
+  if (cacheDirEnv && !['true', 'false', '1', '0'].includes(cacheDirEnv)) return path.resolve(cwd, cacheDirEnv, 'babel-loader')
 
-  for (let dir = process.cwd(); ; dir = path.dirname(dir)) {
-    // Loader options are built synchronously, and this runs once per process.
-    // eslint-disable-next-line no-restricted-syntax
+  for (let dir = cwd; ; dir = path.dirname(dir)) {
     if (fs.statSync(path.join(dir, 'package.json'), { throwIfNoEntry: false })?.isFile()) {
-      return babelCacheDirectory = true
+      return path.join(dir, 'node_modules', '.cache', 'babel-loader')
     }
 
-    if (path.dirname(dir) === dir) {
-      const uid = process.getuid?.()
-
-      return babelCacheDirectory = path.join(os.tmpdir(), uid === undefined ? 'babel-loader' : `babel-loader-${uid}`)
-    }
+    if (path.dirname(dir) === dir) return undefined
   }
 }
 
+// Keyed on the cwd and CACHE_DIR, since options are built both when this
+// module loads and when the preprocessor first runs, and the cwd can change
+// in between.
+const babelCacheDirectories = new Map<string, string | false>()
+
+// A failed cache write fails the build, and babel-loader 10.0 throws when no
+// package.json sits above the cwd, so the cache stays off unless its folder
+// exists and can be written. The shared OS temp folder is never used, since
+// another user could create it first or plant entries in it.
+const getBabelCacheDirectory = (): string | false => {
+  const cwd = process.cwd()
+  const cacheDirEnv = process.env.CACHE_DIR
+  const key = JSON.stringify([cwd, cacheDirEnv])
+  const cached = babelCacheDirectories.get(key)
+
+  if (cached !== undefined) return cached
+
+  const directory = findBabelCacheDirectory(cwd, cacheDirEnv)
+  let result: string | false = false
+
+  if (!directory) {
+    debug('babel-loader cache disabled: no package.json above %s', cwd)
+  } else {
+    try {
+      fs.mkdirSync(directory, { recursive: true })
+      fs.accessSync(directory, fs.constants.W_OK)
+      result = directory
+    } catch (err) {
+      debug('babel-loader cache disabled: %s is not writable: %s', directory, err)
+    }
+  }
+
+  babelCacheDirectories.set(key, result)
+
+  return result
+}
+
+// `name@version` of a package and of each of its direct dependencies, keyed by
+// the package's folder.
+const packageVersions = new Map<string, string[]>()
+
+// The nearest package.json above `file` that names a package, skipping nested
+// {"type": "commonjs"} markers.
+const findOwningPackage = (file: string) => {
+  for (let dir = path.dirname(file); path.dirname(dir) !== dir; dir = path.dirname(dir)) {
+    const packageJsonPath = path.join(dir, 'package.json')
+
+    if (fs.existsSync(packageJsonPath) && require(packageJsonPath).name) return dir
+  }
+
+  return undefined
+}
+
+// Looks through node_modules the way Node does rather than resolving
+// `<name>/package.json`, which `exports` hides in packages like @babel/compat-data.
+const findDependency = (name: string, fromDir: string) => {
+  for (let dir = fromDir; ; dir = path.dirname(dir)) {
+    const dependencyDir = path.join(dir, 'node_modules', name)
+
+    if (fs.existsSync(path.join(dependencyDir, 'package.json'))) return dependencyDir
+
+    if (path.dirname(dir) === dir) return undefined
+  }
+}
+
+const getPackageVersions = (packageDir: string) => {
+  let versions = packageVersions.get(packageDir)
+
+  if (!versions) {
+    const { name, version, dependencies = {} } = require(path.join(packageDir, 'package.json'))
+
+    versions = [`${name}@${version}`, ...Object.keys(dependencies).map((dependency) => {
+      const dependencyDir = findDependency(dependency, packageDir)
+
+      return `${dependency}@${dependencyDir ? require(path.join(dependencyDir, 'package.json')).version : 'missing'}`
+    })]
+
+    packageVersions.set(packageDir, versions)
+  }
+
+  return versions
+}
+
+/* eslint-enable no-restricted-syntax */
+
 // babel-loader's default key only covers @babel/core and babel-loader, and the
 // options it hashes hold plugin paths that stay the same across upgrades. Key
-// on every Babel package in the config so an upgrade can't serve stale output.
-const babelCacheIdentifier = JSON.stringify(Object.fromEntries([
-  '@babel/core',
-  'babel-loader',
-  '@babel/preset-env',
-  '@babel/preset-react',
-  '@babel/preset-typescript',
-  '@babel/plugin-proposal-decorators',
-  '@babel/plugin-transform-class-properties',
-  '@babel/plugin-transform-runtime',
-  'babel-plugin-add-module-exports',
-  'babel-plugin-transform-typescript-metadata',
-].map((name) => [name, require(`${name}/package.json`).version])))
+// on the version of every configured plugin and preset and of their direct
+// dependencies, such as the transforms and @babel/compat-data preset-env uses.
+// Deeper dependencies count only through the versions of their dependents.
+const getBabelCacheIdentifier = (entries: unknown[]) => {
+  const files = [require.resolve('@babel/core'), require.resolve('babel-loader'), ...entries.map((entry) => {
+    return Array.isArray(entry) ? entry[0] : entry
+  }).filter((file): file is string => typeof file === 'string')]
+
+  const versions = new Set(files.flatMap((file) => {
+    const packageDir = findOwningPackage(file)
+
+    return packageDir ? getPackageVersions(packageDir) : []
+  }))
+
+  return [...versions].sort().join(',')
+}
 
 // Shared by the JS spec rule and the TypeScript 7+ rule. `typescript: true`
 // adds preset-typescript.
 const getBabelLoaderOptions = ({ typescript = false }: { typescript?: boolean } = {}) => {
+  const plugins = [
+    // Legacy decorators + metadata, ordered before class-properties, to keep
+    // emitDecoratorMetadata parity with ts-loader.
+    ...(typescript ? [
+      require.resolve('babel-plugin-transform-typescript-metadata'),
+      [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
+    ] : []),
+    require.resolve('babel-plugin-add-module-exports'),
+    // Legacy decorators need decorated class fields lowered, even though the
+    // targets support class fields natively.
+    ...(typescript ? [require.resolve('@babel/plugin-transform-class-properties')] : []),
+    [require.resolve('@babel/plugin-transform-runtime'), {
+      absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
+    }],
+  ]
+
+  const presets = [
+    [require.resolve('@babel/preset-env'), {
+      modules: 'commonjs',
+      targets: babelTargets,
+      // Once class-properties runs, Babel requires every other class feature
+      // in the file to be lowered too, so force the ones these targets skip.
+      ...(typescript ? { include: ['transform-private-methods', 'transform-class-static-block'] } : {}),
+    }],
+    require.resolve('@babel/preset-react'),
+    // Last preset runs first: strip types before preset-env/react.
+    ...(typescript ? [require.resolve('@babel/preset-typescript')] : []),
+  ]
+
   return {
     cacheDirectory: getBabelCacheDirectory(),
-    cacheIdentifier: babelCacheIdentifier,
+    cacheIdentifier: getBabelCacheIdentifier([...plugins, ...presets]),
     cacheCompression: false,
-    plugins: [
-      // Legacy decorators + metadata, ordered before class-properties, to keep
-      // emitDecoratorMetadata parity with ts-loader.
-      ...(typescript ? [
-        require.resolve('babel-plugin-transform-typescript-metadata'),
-        [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
-      ] : []),
-      require.resolve('babel-plugin-add-module-exports'),
-      // Legacy decorators need decorated class fields lowered, even though the
-      // targets support class fields natively.
-      ...(typescript ? [require.resolve('@babel/plugin-transform-class-properties')] : []),
-      [require.resolve('@babel/plugin-transform-runtime'), {
-        absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
-      }],
-    ],
-    presets: [
-      [require.resolve('@babel/preset-env'), {
-        modules: 'commonjs',
-        targets: babelTargets,
-        // Once class-properties runs, Babel requires every other class feature
-        // in the file to be lowered too, so force the ones these targets skip.
-        ...(typescript ? { include: ['transform-private-methods', 'transform-class-static-block'] } : {}),
-      }],
-      require.resolve('@babel/preset-react'),
-      // Last preset runs first: strip types before preset-env/react.
-      ...(typescript ? [require.resolve('@babel/preset-typescript')] : []),
-    ],
+    plugins,
+    presets,
     configFile: false,
     babelrc: false,
   }
