@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- `cypress run` now starts running specs sooner on Linux. It looks for installed browsers once per run instead of twice, and no longer tries to start each supported browser that is not installed just to read its version. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- `cypress run` now starts running specs sooner. It looks for installed browsers once per run instead of twice, and on Linux no longer tries to start each supported browser that is not installed just to read its version. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
