@@ -255,6 +255,9 @@ export default function (Commands, Cypress, cy) {
           return cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
             const isValidSession = true
             let caughtCommandErr = false
+            // Declared up front because onQueueFailed reads it when validate() throws
+            // synchronously, before the cy.then() below has assigned it
+            let _commandToRunAfterValidation: any = undefined
 
             const enhanceErr = (err) => {
               Cypress.state('onQueueFailed', null)
@@ -359,7 +362,7 @@ export default function (Commands, Cypress, cy) {
               throw err
             }
 
-            const _commandToRunAfterValidation = cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
+            _commandToRunAfterValidation = cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
               Cypress.state('onQueueFailed', null)
 
               if (caughtCommandErr) {
