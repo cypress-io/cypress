@@ -263,7 +263,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   constructor (config: Cfg) {
     this.isListening = false
     this.request = new Request()
-    this.socketAllowed = new SocketAllowed()
     this._eventBus = new EventEmitter()
     this._middleware = null
     this._baseUrl = null
@@ -279,6 +278,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._remoteStates = new RemoteStates(remoteStatePorts, this._documentDomainInjection)
+    this.socketAllowed = new SocketAllowed(this._remoteStates, () => {
+      // address() is null once the server closes
+      const address = this._server?.address()
+
+      return address && typeof address === 'object' ? address.port : undefined
+    })
   }
 
   ensureProp = ensureProp
@@ -842,7 +847,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
     }
 
-    const ios = this.socket.startListening(this.server, automation, config, options)
+    const ios = this.socket.startListening(this.server, automation, config, Object.assign(options, { isTrustedOrigin: this.socketAllowed.isTrustedOrigin }))
 
     this._normalizeReqUrl(this.server)
 
