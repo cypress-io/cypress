@@ -343,6 +343,17 @@ describe('driver/src/cypress/utils', () => {
 
       expect(decoded).to.equal('サイプリスは一番')
     })
+
+    it('decodes characters outside the basic multilingual plane', () => {
+      const decoded = $utils.decodeBase64Unicode('eyJzdGF0ZSI6IvCfmYIifQ==')
+
+      expect(decoded).to.equal('{"state":"🙂"}')
+    })
+
+    it('throws when the decoded bytes are not valid utf-8', () => {
+      // '/w==' decodes to the single byte 0xFF, which never appears in utf-8
+      expect(() => $utils.decodeBase64Unicode('/w==')).to.throw()
+    })
   })
 
   context('.encodeBase64Unicode', () => {

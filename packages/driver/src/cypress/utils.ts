@@ -457,9 +457,18 @@ export default {
     ```
   */
   decodeBase64Unicode (str) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
+    const binary = atob(str)
+    const bytes = new Uint8Array(binary.length)
+
+    // A plain loop, since `Uint8Array.from(binary, mapFn)` is far slower on
+    // multi-megabyte inline source maps
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i)
+    }
+
+    // `fatal` throws on invalid UTF-8 instead of inserting U+FFFD, so callers
+    // can tell a corrupt payload apart from a valid one
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
   },
 
   /**
