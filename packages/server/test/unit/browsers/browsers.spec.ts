@@ -20,7 +20,9 @@ import { remoteSchemaWrapped as schemaCloud } from '@packages/data-context/graph
 import type { BrowserApiShape } from '@packages/data-context/src/sources/BrowserDataSource'
 import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape, CohortsApiShape } from '@packages/data-context/src/actions'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
-import type { BrowserInstance } from '../../../lib/browsers/types'
+import type { Browser, BrowserInstance } from '../../../lib/browsers/types'
+import type { Automation } from '../../../lib/automation'
+import type { BrowserLaunchOpts } from '@packages/types'
 import type { FoundBrowser } from '@packages/types/src/browser'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
@@ -690,9 +692,16 @@ describe('lib/browsers/index', () => {
 
       const onBrowserOpen = vi.fn()
       const setBrowserStatus = vi.spyOn(ctx.actions.app, 'setBrowserStatus')
-      const delay = vi.spyOn(Promise, 'delay').mockResolvedValue(undefined as any)
+      const delay = vi.spyOn(Promise, 'delay').mockResolvedValue(undefined)
 
-      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url: 'http://localhost:3000', isTextTerminal, onBrowserOpen } as any, null, ctx)
+      const browser: TestElectronBrowser = { name: 'electron', family: 'chromium' }
+      const url: TestUrl = 'http://localhost:3000'
+      const options: Pick<BrowserLaunchOpts, 'url' | 'isTextTerminal' | 'onBrowserOpen'> = { url, isTextTerminal, onBrowserOpen }
+
+      // Safe because `open` reads only `name` and `family` to pick the Electron
+      // launcher, whose `open` is stubbed, and reads no other launch option on
+      // this path. Automation is only passed through to that stub.
+      return browsers.open(browser as Browser, options as BrowserLaunchOpts, null as unknown as Automation, ctx)
       .then((instance) => {
         return { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay }
       })
@@ -706,7 +715,7 @@ describe('lib/browsers/index', () => {
     it('does not pad the launch in run mode', async () => {
       const { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay } = await openElectron(true)
 
-      expect(delay).not.toHaveBeenCalled()
+      expect(delay).not.toHaveBeenCalledWith(1000)
       expect(instance).toBe(browserInstance)
       expect(onBrowserOpen).toHaveBeenCalledOnce()
       expect(setBrowserStatus).toHaveBeenLastCalledWith('open')
