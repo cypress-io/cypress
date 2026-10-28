@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- `cypress run`, `cypress open`, and `cypress info` now launch the Cypress app sooner because the CLI no longer gathers operating system details before every launch. On Linux, this saves about 70–90 ms per command, roughly a fifth of the CLI's own startup time. The `cypress` npm package also installs about 870 KB smaller because it no longer depends on `systeminformation`. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- `cypress run`, `cypress open`, and `cypress info` now launch the Cypress app sooner because the CLI no longer gathers operating system details before every launch. The `cypress` npm package is also smaller to install because it no longer depends on `systeminformation`. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
