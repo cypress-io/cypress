@@ -126,9 +126,11 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
       return new Bluebird((resolve, reject, onCancel) => {
         let settled = false
+        let timeoutId: ReturnType<typeof setTimeout> | undefined
 
         const cleanup = (): void => {
           settled = true
+          clearTimeout(timeoutId)
           cy.state('currentActiveOrigin', undefined)
 
           communicator.off('queue:finished', onQueueFinished)
@@ -216,7 +218,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
         }
 
         // If the spec bridge isn't created in time, it likely failed and we shouldn't hang the test.
-        const timeoutId = setTimeout(() => {
+        timeoutId = setTimeout(() => {
           _reject($errUtils.errByPath('origin.failed_to_create_spec_bridge'))
         }, timeout)
 
