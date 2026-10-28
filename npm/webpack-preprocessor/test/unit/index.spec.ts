@@ -380,10 +380,10 @@ describe('webpack preprocessor', function () {
 
       it('does not mutate the user\'s webpack options or accumulate plugins across files', async function () {
         const webpackOptions = { module: { rules: [] }, plugins: [] }
-        const run = preprocessor({ webpackOptions })
+        const bundle = preprocessor({ webpackOptions })
 
         for (const filePath of ['a.js', 'b.js', 'c.js']) {
-          await run({ ...file, filePath })
+          await bundle({ ...file, filePath })
         }
 
         expect(webpackOptions).toEqual({ module: { rules: [] }, plugins: [] })
@@ -459,7 +459,7 @@ describe('webpack preprocessor', function () {
         }
 
         expect(statsApi.toJson).toHaveBeenCalledOnce()
-        expect(statsApi.toJson).toHaveBeenCalledWith({ all: false, errors: true })
+        expect(statsApi.toJson).toHaveBeenCalledWith(expect.objectContaining({ all: false, errors: true }))
       })
     })
 

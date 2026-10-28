@@ -392,25 +392,32 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
         return rejectWithErr(err)
       }
 
+      const hasErrors = stats.hasErrors()
+      const logWarnings = debug.enabled && stats.hasWarnings()
+
       // a full `toJson()` serializes every module and chunk, which costs
       // hundreds of milliseconds per rebuild on large bundles, so only
       // request the fields that are read and only when there's something to read
-      if (debug.enabled && stats.hasWarnings()) {
-        debug(`warnings for ${outputPath} %o`, stats.toJson({ all: false, warnings: true }).warnings)
+      const { errors = [], warnings = [] } = hasErrors || logWarnings
+        ? stats.toJson({
+          all: false,
+          errors: hasErrors,
+          warnings: logWarnings,
+          // only shown in debug output
+          errorDetails: debug.enabled,
+          errorStack: debug.enabled,
+          moduleTrace: debug.enabled,
+        })
+        : {}
+
+      // these stats are really only useful for debugging
+      if (warnings.length > 0) {
+        debug(`warnings for ${outputPath} %o`, warnings)
       }
 
-      if (stats.hasErrors()) {
-        err = new Error('Webpack Compilation Error')
-
-        const { errors = [] } = stats.toJson({ all: false, errors: true })
-
-        const errorsToAppend = errors
-        // remove stack trace lines since they're useless for debugging
-        .map(cleanseError)
-        // multiple errors separated by newline
-        .join('\n\n')
-
-        err.message += `\n${errorsToAppend}`
+      if (hasErrors) {
+        // stack trace lines are stripped since they're useless for debugging
+        err = new Error(`Webpack Compilation Error\n${errors.map(cleanseError).join('\n\n')}`)
 
         debug('stats had error(s) %o', errors)
 
