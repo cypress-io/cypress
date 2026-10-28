@@ -234,7 +234,7 @@ export const createCommonRoutes = ({
   })
 
   router.post(`/${config.namespace}/add-verified-command`, bodyParser.json(), (req, res) => {
-    privilegedCommandsManager.addVerifiedCommand(req.body)
+    privilegedCommandsManager.addVerifiedCommand(req.body, req.headers.origin)
 
     res.sendStatus(204)
   })

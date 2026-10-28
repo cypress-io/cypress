@@ -7,3 +7,5 @@ export type { SocketBroadcaster } from './socket-broadcaster'
 export { CDPSocketServer } from './cdp-socket'
 
 export type { CDPSocketBridge } from './cdp-socket'
+
+export { encodeEventParts } from '../utils'

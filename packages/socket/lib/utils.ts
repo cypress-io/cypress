@@ -23,6 +23,15 @@ export const cypressParser = {
   Decoder: UnlimitedAttachmentsDecoder,
 }
 
+// the packet string and binary attachments socket.io sends for `data` as an event
+export const encodeEventParts = (data: any): any[] => {
+  return new socketIoParser.Encoder().encode({
+    type: socketIoParser.PacketType.EVENT,
+    data,
+    nsp: '/',
+  })
+}
+
 export const encode = (data: any, namespace: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     try {
