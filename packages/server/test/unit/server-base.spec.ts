@@ -17,7 +17,8 @@ import * as serverErrors from '../../lib/errors'
 import * as fileServer from '../../lib/file_server'
 import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
-import { runnerMutationRule } from '@packages/data-context/graphql/runnerMutationRule'
+import { runnerMutationRule } from '@packages/data-context/graphql/rootFieldRules'
+import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptionOnlyRule'
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { GracefulExit } from '../../lib/util/graceful-exit'
@@ -28,7 +29,7 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    runnerGraphQLHTTP: vi.fn(),
+    tapGraphQLHTTP: vi.fn(),
   }
 })
 
@@ -298,10 +299,6 @@ describe('lib/server-base', () => {
         expect(skip('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).toBe(false)
       })
 
-      it('logs a graphql request from the app, which sends no session id header', () => {
-        expect(skip('/__cypress/graphql/Specs')).toBe(false)
-      })
-
       it('logs a proxied request that mimics the probe path', () => {
         expect(skip('http://example.com/__cypress/sessions/abc')).toBe(false)
       })
@@ -461,12 +458,12 @@ describe('lib/server-base', () => {
   })
 
   describe('#createServer', () => {
-    it('restricts the graphql-ws endpoint to the mutations the runner sends', async () => {
+    it('restricts the graphql-ws endpoint to subscriptions and the mutations the runner sends', async () => {
       const app = server.createExpressApp({ morgan: false })
 
       await server.createServer(app, { socketIoRoute: '/__socket' })
 
-      expect(graphqlWS).toHaveBeenCalledWith(expect.anything(), '/__socket-graphql', { enforceOrigin: false, validationRules: [runnerMutationRule] })
+      expect(graphqlWS).toHaveBeenCalledWith(expect.anything(), '/__socket-graphql', { enforceOrigin: false, validationRules: [runnerMutationRule, subscriptionOnlyRule] })
     })
   })
 
@@ -1354,7 +1351,7 @@ describe('lib/server-base', () => {
 
       await enterBrowserNetworkMode(server)
 
-      server.proxyWebsockets(proxy, '/foo', req, { ...socket, write }, head)
+      server.proxyWebsockets(proxy, '/foo', { ...req, url: '/foo-graphql' }, { ...socket, write }, head)
 
       expect(write, 'loopback is the only gate on the browser (CDP) network path').not.toHaveBeenCalled()
       expect(server.socketAllowed.allowedLocalPorts).toHaveLength(0)
@@ -1372,6 +1369,42 @@ describe('lib/server-base', () => {
       server.proxyWebsockets(proxy, '/foo', req, { ...socket, write }, head)
 
       expect(write, 'the CONNECT that precedes the upgrade re-registers the port').not.toHaveBeenCalled()
+    })
+
+    describe('on the browser (CDP) network path', () => {
+      const upgrade = (url: string, remoteAddress = '127.0.0.1') => {
+        const write = vi.fn()
+        const end = vi.fn()
+
+        server.proxyWebsockets(proxy, '/__socket', { url, socket: { remotePort: 12345, remoteAddress } }, { end, write }, head)
+
+        return { write, end }
+      }
+
+      beforeEach(async () => {
+        server._openConfig = config
+        await enterBrowserNetworkMode(server)
+      })
+
+      it('refuses socket.io upgrades from loopback', () => {
+        const { write, end } = upgrade('/__socket/?EIO=4&transport=websocket')
+
+        expect(write).toHaveBeenCalledWith(expect.stringContaining('400 Bad Request'))
+        expect(end).toHaveBeenCalled()
+      })
+
+      it('lets graphql-ws upgrades from loopback through', () => {
+        const { write, end } = upgrade('/__socket-graphql')
+
+        expect(write).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+
+      it('refuses graphql-ws upgrades from a non-loopback address', () => {
+        const { write } = upgrade('/__socket-graphql', '192.168.0.10')
+
+        expect(write).toHaveBeenCalledWith(expect.stringContaining('400 Bad Request'))
+      })
     })
 
     it('calls proxy.ws with hostname + port', () => {

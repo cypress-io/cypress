@@ -18,7 +18,7 @@ import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { graphqlSchema } from './schema'
-import { runnerMutationRule } from './runnerMutationRule'
+import { runnerMutationRule, tapOperationRule } from './rootFieldRules'
 import { execute, Kind, locatedError, parse, specifiedRules, validate } from 'graphql'
 import type { DefinitionNode, DocumentNode, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
 
@@ -329,10 +329,10 @@ const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]) => {
 const graphQLHTTP = makeGraphQLHTTP([])
 
 /**
- * The runner server's HTTP handler, which also restricts mutations to the ones
- * the runner app and `cypress tap` send.
+ * The runner server's HTTP handler for `cypress tap`, which also restricts
+ * operations to the ones `cypress tap` sends.
  */
-export const runnerGraphQLHTTP = makeGraphQLHTTP([runnerMutationRule])
+export const tapGraphQLHTTP = makeGraphQLHTTP([tapOperationRule])
 
 interface GraphQLRequestContextOptions {
   app?: 'launchpad' | 'app'

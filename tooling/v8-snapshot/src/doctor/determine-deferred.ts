@@ -69,9 +69,9 @@ export async function determineDeferred (
   const currentHash = await createHashForFile(hashFilePath)
   const res = await matchFileHash(hashFilePath, deferredHash)
 
-  let nodeModulesHealthy: string[] = []
-  let projectHealthy: string[] = []
-  let currentHealthy = opts.nodeModulesOnly ? nodeModulesHealthy : healthy
+  const nodeModulesHealthy: string[] = []
+  const projectHealthy: string[] = []
+  const currentHealthy = opts.nodeModulesOnly ? nodeModulesHealthy : healthy
 
   healthy.forEach((dependency) => {
     if (dependency.includes('node_modules')) {
@@ -81,9 +81,9 @@ export async function determineDeferred (
     }
   })
 
-  let nodeModulesDeferred: string[] = []
-  let projectDeferred: string[] = []
-  let currentDeferred = opts.nodeModulesOnly ? nodeModulesDeferred : deferred
+  const nodeModulesDeferred: string[] = []
+  const projectDeferred: string[] = []
+  const currentDeferred = opts.nodeModulesOnly ? nodeModulesDeferred : deferred
 
   deferred.forEach((dependency) => {
     if (dependency.includes('node_modules')) {
@@ -93,9 +93,9 @@ export async function determineDeferred (
     }
   })
 
-  let nodeModulesNorewrite: string[] = []
-  let projectNorewrite: string[] = []
-  let currentNorewrite = opts.nodeModulesOnly ? nodeModulesNorewrite : norewrite
+  const nodeModulesNorewrite: string[] = []
+  const projectNorewrite: string[] = []
+  const currentNorewrite = opts.nodeModulesOnly ? nodeModulesNorewrite : norewrite
 
   norewrite.forEach((dependency) => {
     if (dependency.includes('node_modules')) {
