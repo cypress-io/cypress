@@ -4,7 +4,7 @@ import { URL } from 'url'
 import { DocumentDomainInjection } from '@packages/network-tools'
 import { resolveInjectionLevel, resolveWantsSecurityRemoved } from '@packages/network-interception'
 import { telemetry } from '@packages/telemetry'
-import { isVerboseTelemetry as isVerbose } from '../http'
+import { debugVerbose, isVerboseTelemetry as isVerbose } from '../http'
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders } from '../http/util/csp-header'
 import {
   reqMatchesPolicyBasedOnDomain,
@@ -157,7 +157,9 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
     wantsSecurityRemoved: mw.res.wantsSecurityRemoved,
   })
 
-  mw.debug('injection levels: %o', _.pick(mw.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+  if (debugVerbose.enabled) {
+    mw.debug('injection levels: %o', _.pick(mw.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+  }
 
   span?.end()
   mw.next()
