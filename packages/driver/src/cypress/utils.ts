@@ -439,7 +439,7 @@ export default {
   },
 
   /**
-   * Correctly decodes Unicode string in encoded in base64
+   * Correctly decodes a Unicode string encoded in base64
    * @see https://github.com/cypress-io/cypress/issues/5435
    * @see https://github.com/cypress-io/cypress/issues/7507
    * @see https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
@@ -452,7 +452,7 @@ export default {
     // atob('eyJzdGF0ZSI6IvCfmYIifQ==')
     // "{"state":"ð"}"
     // but this function works
-    b64DecodeUnicode('eyJzdGF0ZSI6IvCfmYIifQ==')
+    decodeBase64Unicode('eyJzdGF0ZSI6IvCfmYIifQ==')
     '{"state":"🙂"}'
     ```
   */
