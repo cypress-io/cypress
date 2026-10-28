@@ -257,7 +257,7 @@ export default function (Commands, Cypress, cy) {
             let caughtCommandErr = false
             // Declared up front because onQueueFailed reads it when validate() throws
             // synchronously, before the cy.then() below has assigned it
-            let _commandToRunAfterValidation: any = undefined
+            let _commandToRunAfterValidation
 
             const enhanceErr = (err) => {
               Cypress.state('onQueueFailed', null)
