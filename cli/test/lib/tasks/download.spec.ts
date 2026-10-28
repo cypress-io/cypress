@@ -1,6 +1,7 @@
 import type { Mock } from 'vitest'
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import { stripVTControlCharacters as stripAnsi } from 'util'
+import { Writable } from 'stream'
 import os from 'os'
 import type { Systeminformation } from 'systeminformation'
 import si from 'systeminformation'
@@ -430,6 +431,36 @@ describe('lib/tasks/download', function () {
         Expected downloaded file to have size: 10
         Computed size: ${expectedFileSize}
       `)
+    })
+
+    it('rejects when the file cannot be written', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-checksum': expectedChecksum,
+        'x-amz-meta-size': String(expectedFileSize),
+      })
+
+      const createWriteStream = vi.spyOn(fs, 'createWriteStream').mockImplementation(() => {
+        return new Writable({
+          write (chunk, encoding, callback) {
+            callback(Object.assign(new Error('ENOSPC: no space left on device, write'), { code: 'ENOSPC' }))
+          },
+        }) as fs.WriteStream
+      })
+
+      try {
+        await expect(download.start({
+          downloadDestination: options.downloadDestination,
+          version: options.version,
+          progress: { onProgress },
+        })).rejects.toThrow('ENOSPC: no space left on device, write')
+      } finally {
+        createWriteStream.mockRestore()
+      }
     })
 
     it('computes the checksum and size from the bytes written to disk', async function () {

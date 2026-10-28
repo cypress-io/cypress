@@ -141,7 +141,7 @@ const verifyDownloadedFile = (checksum: string, filesize: number, expectedSize?:
   }
 
   if (expectedChecksum) {
-    debug('only checking expected file checksum %d', expectedChecksum)
+    debug('only checking expected file checksum %s', expectedChecksum)
 
     if (checksum === expectedChecksum) {
       debug('downloaded file has the expected checksum ✅')
@@ -289,12 +289,22 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
           filesize += chunk.length
         })
 
+        const writeStream = fs.createWriteStream(downloadDestination)
+
+        // a failed write, such as a full disk, leaves a truncated file, so stop
+        // downloading and fail the install instead of crashing on the unhandled error
+        writeStream.on('error', (err) => {
+          debug('failed writing %s: %s', downloadDestination, err.message)
+          response.destroy()
+          reject(err)
+        })
+
         // We only enable this pipe connection when we know we've got a successful return
         // and handle the completion with verify and resolve
         // there was a possible race condition between end of request and close of writeStream
         // that is made ordered with this Promise.all
         Bluebird.all([new Bluebird((r: any) => {
-          return response.pipe(fs.createWriteStream(downloadDestination).on('close', r))
+          return response.pipe(writeStream.on('close', r))
         }), new Bluebird((r: any) => response.on('end', r))])
         .then(() => {
           debug('downloading finished')
