@@ -81,6 +81,7 @@ describe('lib/exec/xvfb', function () {
 
       expect(failure.message).toContain('Xvfb is installed but could not start.')
       expect(failure.message).toContain('XVFB_DISPLAY_NUM')
+      expect(failure.message).toContain(`within ${xvfb._xvfbOptions.timeout / 1000} seconds`)
       expect(failure.message).toContain(e.message)
       expect(failure.message).not.toContain('missing the dependency')
       expect(failure.known).toBe(true)

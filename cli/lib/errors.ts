@@ -139,19 +139,21 @@ const missingXvfb = {
     `,
 }
 
-const xvfbFailedToStart = {
-  description: 'Xvfb is installed but could not start.',
-  solution: stripIndent`
-    Cypress could not start Xvfb, the virtual display it uses on Linux when DISPLAY is not set.
+const xvfbFailedToStart = (timeoutSeconds: number) => {
+  return {
+    description: 'Xvfb is installed but could not start.',
+    solution: stripIndent`
+      Cypress could not start Xvfb, the virtual display it uses on Linux when DISPLAY is not set.
 
-    Common causes:
+      Common causes:
 
-    - The display number is already in use, for example by an Xvfb left running from an earlier run. Stop that Xvfb, or set the XVFB_DISPLAY_NUM environment variable to a free number.
-    - Xvfb did not create its display within 30 seconds.
-    - The Xvfb binary cannot be run by the user running Cypress, or that user cannot write to /tmp.
+      - The display number is already in use, for example by an Xvfb left running from an earlier run. Stop that Xvfb, or set the XVFB_DISPLAY_NUM environment variable to a free number.
+      - Xvfb did not create its display within ${timeoutSeconds} seconds.
+      - The Xvfb binary cannot be run by the user running Cypress, or that user cannot write to /tmp.
 
-    Run Cypress again with DEBUG=cypress:xvfb to see what Xvfb printed.
-    `,
+      Run Cypress again with DEBUG=cypress:xvfb to see what Xvfb printed.
+      `,
+  }
 }
 
 const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
