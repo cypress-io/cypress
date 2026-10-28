@@ -183,3 +183,17 @@ As warnings are removed from packages, those warnings should be converted to err
 * If you're working on converting a large file with many exports, try extracting each export into its own file. This can help reduce the scope of necessary changes, and may help resolve circular dependencies.
 * Circular dependencies can cause havoc - use [madge](https://www.npmjs.com/package/madge) to detect if the file you're working on is included in a circular dependency cycle, and resolve that before converting the file.
 * If you find yourself on a change cascade, pause and back up. Use `any` types to help get to the finish line - we'll warn on them, and they can be fixed later.
+
+## Incremental Type Checking
+
+`yarn check-ts` runs each workspace's `tsc` and `vue-tsc` with `--incremental`, which saves build info to that workspace's `node_modules/.cache/tsc/`. On the next run, files that haven't changed and don't depend on a changed file aren't checked again; their errors are replayed from the cache.
+
+TypeScript works out some types lazily, so re-checking only part of a program can occasionally infer a type differently from a full check. Because errors are replayed, a wrong result keeps appearing until the cache is cleared. If `check-ts` reports an error that `tsc --noEmit` (or `vue-tsc --noEmit`) in the same workspace doesn't, clear the cache from the repo root and run it again:
+
+```bash
+rm -rf */node_modules/.cache/tsc */*/node_modules/.cache/tsc
+```
+
+CI handles this itself: a branch run that fails with a restored cache runs again without it, and `develop` and `release/*` never use the cache.
+
+When adding a `check-ts` command, pass `--incremental --tsBuildInfoFile node_modules/.cache/tsc/<config name>.tsbuildinfo` on the command line instead of setting `incremental` in a tsconfig. Most tsconfigs also drive emit builds, where leftover build info can make `tsc` skip writing output after `rimraf` deletes it. `@packages/driver` stays non-incremental; its [AGENTS.md](../packages/driver/AGENTS.md#gotchas--notes) explains why.

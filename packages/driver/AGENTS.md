@@ -41,6 +41,7 @@ src/
 - Cypress tests for the driver itself use a local Express server (spawned automatically in `e2e.setupNodeEvents`) rather than a manually started dev server.
 - `postinstall` runs `patch-package` to apply local patches to dependencies. File an upstream issue for each patch and link it from a comment in the patch and from the PR, and note in the PR any way the patch makes Cypress behave differently from other tools built on the same library.
 - Elements and shadow roots in the AUT come from its iframe, a different realm from the driver, so `instanceof HTMLInputElement` or `instanceof ShadowRoot` is `false` for them. Check `element.localName` or the object's string tag instead, as `isShadowRoot` in `src/dom/elements/shadow.ts` does.
+- `check-ts` runs `tsc` without `--incremental`, unlike the other workspaces. After any edit to `src/cypress/error_utils.ts`, an incremental re-check infers `unknown` for the Bluebird chains in `src/cy/commands/screenshot.ts` and reports errors a full check doesn't, then replays them on every run. Give those chains explicit types before making this check incremental. See [Incremental Type Checking](../../guides/typescript.md#incremental-type-checking).
 - Cross-origin testing (`cy.origin`) relies on the `cross-origin/` spec bridge and a secondary `cypress.ts` bundle injected into cross-origin frames.
 
 ## Regression tests for GitHub issues

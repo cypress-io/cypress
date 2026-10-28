@@ -1887,21 +1887,35 @@ jobs:
       - restore_cached_workspace
       - install-required-node
       - run:
-          name: Generate TypeScript version key
-          # A .tsbuildinfo is only reused by the compiler version that wrote it
+          name: Generate check-ts cache keys
+          # A .tsbuildinfo is only reused by the compiler version that wrote it.
+          # Branches are keyed by checksum so that one branch name can't
+          # prefix-match another's caches (fix vs fix-foo).
           command: |
             for f in node_modules/{typescript,vue-tsc}/package.json */node_modules/{typescript,vue-tsc}/package.json */*/node_modules/{typescript,vue-tsc}/package.json; do
               if [ -f "$f" ]; then echo "$f $(node -p "require('./$f').version")"; fi
             done > typescript_version_key
             cat typescript_version_key
-      - restore_cache:
-          name: Restore check-ts build info cache
-          # Revision-suffixed keys, so prefix matching picks this branch's newest
-          # cache, then develop's. tsc compares file hashes, so a stale cache only
-          # costs time.
-          keys:
-            - v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-{{ .Branch }}-
-            - v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-develop-
+            echo "<< pipeline.git.branch >>" > check_ts_branch_key
+            echo "develop" > check_ts_develop_key
+      # develop and release branches always run a full check, since an incremental
+      # check can infer types differently and miss an error a full check reports.
+      # Their passing runs seed the cache that other branches fall back to.
+      - unless:
+          condition:
+            or:
+              - equal: [ develop, << pipeline.git.branch >> ]
+              - matches:
+                  pattern: ^release/.+$
+                  value: << pipeline.git.branch >>
+          steps:
+            - restore_cache:
+                name: Restore check-ts build info cache
+                # Revision-suffixed keys, so prefix matching picks this branch's
+                # newest cache, then develop's
+                keys:
+                  - v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-{{ checksum "check_ts_branch_key" }}-
+                  - v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-{{ checksum "check_ts_develop_key" }}-
       - run:
           name: Unpack check-ts build info
           command: |
@@ -1923,11 +1937,16 @@ jobs:
           # Each workspace writes its own node_modules/.cache/tsc, so collect them
           # into one file for save_cache
           command: |
-            tar -czf ~/check-ts-buildinfo.tgz $(ls -d */node_modules/.cache/tsc */*/node_modules/.cache/tsc 2>/dev/null)
+            dirs=$(ls -d */node_modules/.cache/tsc */*/node_modules/.cache/tsc 2>/dev/null || true)
+            if [ -z "$dirs" ]; then
+              echo "No check-ts build info found; nothing to cache"
+              exit 0
+            fi
+            tar -czf ~/check-ts-buildinfo.tgz $dirs
             ls -l ~/check-ts-buildinfo.tgz
       - save_cache:
           name: Save check-ts build info cache
-          key: v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-{{ .Branch }}-{{ .Revision }}
+          key: v{{ checksum ".circleci/cache-version.txt" }}-check-ts-buildinfo-{{ checksum "typescript_version_key" }}-{{ checksum "yarn.lock" }}-{{ checksum "check_ts_branch_key" }}-{{ .Revision }}
           paths:
             - ~/check-ts-buildinfo.tgz
 

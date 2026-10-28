@@ -89,7 +89,8 @@ yarn cypress:run:ct -- --spec "path/to/spec.cy.ts"
 # Type-check all TypeScript across the monorepo
 yarn type-check
 
-# Lerna-only type check pass
+# Lerna-only type check pass. Incremental: to clear a stale cache, see
+# guides/typescript.md#incremental-type-checking
 yarn check-ts
 ```
 
