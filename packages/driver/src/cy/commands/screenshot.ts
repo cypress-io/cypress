@@ -33,7 +33,7 @@ type TakeScreenshotOptions = {
   timeout?: number
 }
 
-type ScreenshotAutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions, 'onBeforeScreenshot'| 'onAfterScreenshot' | 'disableTimersAndAnimations' | 'scale' | 'padding'> & Partial<Cypress.ScreenshotOptions>
+type ScreenshotAutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions, 'onBeforeScreenshot' | 'onAfterScreenshot' | 'disableTimersAndAnimations' | 'scale' | 'padding'> & Partial<Cypress.ScreenshotOptions>
 
 const getViewportHeight = (state: StateFunc) => {
   // TODO this doesn't seem correct
@@ -52,7 +52,7 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
   // if this a hook then push both the current test title
   // and our own hook title
   if (runnable.type === 'hook') {
-    let ct = runnable.ctx?.currentTest
+    const ct = runnable.ctx?.currentTest
 
     if (runnable.ctx && ct) {
       titles.push(ct.title, runnable.title)
@@ -310,7 +310,7 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
 }
 
 // "app only" means we're hiding the runner UI
-const isAppOnly = ({ capture }: { capture: Cypress.ScreenshotOptions['capture']}) => {
+const isAppOnly = ({ capture }: { capture: Cypress.ScreenshotOptions['capture'] }) => {
   return (capture === 'viewport') || (capture === 'fullPage')
 }
 

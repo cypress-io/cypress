@@ -51,7 +51,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     )
   }
 
-  chai.Assertion.addMethod('data', function (...args) {
+  chai.Assertion.addMethod('data', function (...args: [name: string, value?: unknown, message?: string]) {
     // @ts-expect-error - Custom assertions expect messages for failures
     assertDom(this, chaiUtils, callbacks, 'data')
 
@@ -61,8 +61,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
       a = a.not
     }
 
-    // @ts-expect-error - property() expects a [name, message?] tuple, not any[]
-    return a.property.apply(a, args)
+    return a.property(...args)
   })
 
   chai.Assertion.addMethod('class', function (className: string) {

@@ -181,7 +181,7 @@ export function snapshotRequire (
   // 1. Assign snapshot which is a global if it was embedded
   const sr: Snapshot =
     opts.snapshotOverride ||
-    // @ts-ignore global getSnapshotResult
+    // @ts-expect-error - getSnapshotResult is a global that only exists when the v8 snapshot is embedded
     (typeof getSnapshotResult !== 'undefined' ? getSnapshotResult() : undefined)
 
   // If we have no snapshot we don't need to hook anything
@@ -203,13 +203,10 @@ export function snapshotRequire (
     logDebug('initializing packherd require')
 
     // 4. Attempt to pull out the resolver map as well as the dependency map
-    let resolverMap: Record<string, string> | undefined
     let moduleNeedsReload: ModuleNeedsReload | undefined
 
-    // @ts-ignore global snapshotAuxiliaryData
-    resolverMap = sr.snapshotAuxiliaryData.resolverMap
-    // @ts-ignore global snapshotAuxiliaryData
-    const dependencyMapArray: DependencyMapArray = sr.snapshotAuxiliaryData.dependencyMapArray
+    const resolverMap = sr.snapshotAuxiliaryData.resolverMap
+    const dependencyMapArray = sr.snapshotAuxiliaryData.dependencyMapArray
 
     // 5. Setup the module needs reload predicate with the dependency map
     if (dependencyMapArray != null) {
@@ -274,16 +271,13 @@ export function snapshotRequire (
       // The below aren't available in all environments
       const checked_process: any =
         typeof process !== 'undefined' ? process : undefined
-      const checked_window: any =
-        // @ts-ignore ignore window as it's something that will only be available at runtime
-        typeof window !== 'undefined' ? window : undefined
-      const checked_document: any =
-        // @ts-ignore ignore document as it's something that will only be available at runtime
-        typeof document !== 'undefined' ? document : undefined
+      // Read through globalThis because this file is type-checked both with the
+      // DOM lib (by @tooling/v8-snapshot) and without it (by this package)
+      const checked_window: any = Reflect.get(globalThis, 'window')
+      const checked_document: any = Reflect.get(globalThis, 'document')
 
       // 11. Inject those globals
 
-      // @ts-ignore setGlobals is a function on global sr
       sr.setGlobals(
         global,
         checked_process,
@@ -296,20 +290,17 @@ export function snapshotRequire (
 
       // 11. Setup the customRequire inside the snapshot
 
-      // @ts-ignore private module var
+      // @ts-expect-error - Module._cache is private Node API
       require.cache = Module._cache
-      // @ts-ignore customRequire is a property of global sr
       sr.customRequire.cache = require.cache
 
       // 12. Add some 'magic' functions that we can use from inside the
       //    snapshot in order to integrate module loading
       //    See ../blueprint/custom-require.js
 
-      // @ts-ignore custom method on require
-      require._tryLoad = tryLoad
       const oldRequireResolve = require.resolve
 
-      // @ts-ignore opts not exactly matching
+      // @ts-expect-error - this resolver takes the snapshot's GetModuleKeyOpts and has no `paths` method
       require.resolve = function (id: string, opts: GetModuleKeyOpts & { paths?: string[] | undefined } | undefined) {
         if (opts?.fromSnapshot) {
           return resolve(id, opts)
@@ -318,12 +309,12 @@ export function snapshotRequire (
         return oldRequireResolve(id, opts)
       }
 
-      // @ts-ignore custom method on require
-      require.shouldBypassCache = shouldBypassCache
-      // @ts-ignore custom method on require
-      require.registerModuleLoad = registerModuleLoad
-      // @ts-ignore custom property on require
-      require.builtInModules = new Set(Module.builtinModules)
+      Object.assign(require, {
+        _tryLoad: tryLoad,
+        shouldBypassCache,
+        registerModuleLoad,
+        builtInModules: new Set(Module.builtinModules),
+      })
     }
   }
 }

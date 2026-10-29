@@ -131,8 +131,7 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
               contentClass='runnable-err-stack-trace'
             >
               <ErrorStack err={err} />
-            </Collapsible>
-          }
+            </Collapsible>}
         </div>
       </div>
     </div>

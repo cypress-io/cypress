@@ -5,8 +5,8 @@ import _ from 'lodash'
 // to `string`.
 const testOptions = <const T>(commandName: string, options: T, order: number, f: (options: T) => void) => {
   it(commandName, () => {
-    let usedOptions = _.clone(options)
-    let expectedOptions = _.clone(options)
+    const usedOptions = _.clone(options)
+    const expectedOptions = _.clone(options)
     let count = 0
 
     cy.on('log:added', () => {

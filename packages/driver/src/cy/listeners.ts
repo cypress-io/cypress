@@ -14,7 +14,7 @@ type BoundEvent<K extends keyof WindowEventMap> = [
   win: Window,
   event: keyof WindowEventMap,
   fn: BoundEventHandler<K>,
-  capture?: boolean
+  capture?: boolean,
 ]
 
 let events: BoundEvent<any>[] = []
@@ -23,7 +23,7 @@ let listenersAdded: boolean | null = null
 const removeAllListeners = () => {
   listenersAdded = false
 
-  for (let e of events) {
+  for (const e of events) {
     const [win, event, cb, capture] = e
 
     // Cast to `any` to ignore `GuardedEvent`/`GuardedAnchorEvent`.
@@ -106,7 +106,7 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
     callbacks.onNavigation('hashchange', e)
   })
 
-  for (let attr of HISTORY_NAV_ATTRS) {
+  for (const attr of HISTORY_NAV_ATTRS) {
     const orig = contentWindow.history?.[attr]
 
     if (!orig) {
@@ -120,7 +120,7 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
     }
   }
 
-  for (let attr of HISTORY_ATTRS) {
+  for (const attr of HISTORY_ATTRS) {
     const orig = contentWindow.history?.[attr]
 
     if (!orig) {

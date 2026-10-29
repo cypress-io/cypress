@@ -22,7 +22,7 @@ const format = (data) => {
 }
 
 function removeLeadingSlash (str: string) {
-  let li = Math.max(str.indexOf('/'), str.indexOf('\\'))
+  const li = Math.max(str.indexOf('/'), str.indexOf('\\'))
 
   return str.substring(li + 1)
 }
@@ -1473,7 +1473,6 @@ export default {
         If you're trying to send a \`x-www-form-urlencoded\` request then pass either a string or object literal to the \`body\` property.`,
       docsUrl: 'https://on.cypress.io/request',
     },
-    /* eslint-disable indent */
     loading_failed (obj) {
       return {
         message: cyStripIndent(`\
@@ -1562,7 +1561,6 @@ export default {
         docsUrl: 'https://on.cypress.io/request',
       }
     },
-    /* eslint-enable indent */
     url_missing: {
       message: `${cmd('request')} requires a \`url\`. You did not provide a \`url\`.`,
       docsUrl: 'https://on.cypress.io/request',
