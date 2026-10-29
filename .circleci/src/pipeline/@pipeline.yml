@@ -10,8 +10,8 @@ chrome-beta-version: &chrome-beta-version "158.0.8127.2"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "156.0.8078.73"
 firefox-stable-version: &firefox-stable-version "154.0"
-base-internal-trixie: &base-internal-trixie cypress/base-internal:24.15.0-trixie
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.15.0-yarn-berry
+base-internal-trixie: &base-internal-trixie cypress/base-internal:24.22.1-trixie
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.22.1-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
@@ -27,7 +27,7 @@ parameters:
     type: boolean
     default: false
   # Opt-in Percy visual snapshots. Default false; set true via Trigger Pipeline
-  # (the setup config forwards it). Requires PERCY_TOKEN (test-runner:percy context).
+  # (inherited from the setup config). Requires PERCY_TOKEN (test-runner:percy context).
   percy-enabled:
     type: boolean
     default: false
@@ -154,7 +154,7 @@ executors:
   # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check)
   node-slim:
     docker:
-      - image: cimg/node:24.15.0
+      - image: cimg/node:24.22.1
     resource_class: medium.gen2
     environment:
       PLATFORM: linux
@@ -755,9 +755,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:24.15.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:24.22.1-glibc-2.31 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.7.0 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install node-gyp rebuild --force_build=1"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node

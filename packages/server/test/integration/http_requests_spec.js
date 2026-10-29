@@ -43,7 +43,7 @@ const repoPackageJson = path.resolve(__dirname, '../../../../package.json')
 const traversalTo = (absolutePath) => `${'..%2F'.repeat(20)}${encodeURIComponent(absolutePath)}`
 
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
-let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
+const sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 const replaceAbsolutePaths = (content) => {
   return content.replace(absolutePathRegex, '"/<path-to-project>')
@@ -496,6 +496,34 @@ describe('Routes', () => {
 
         expect(_.map(scripts, 'relative')).to.include(specPath)
       })
+    })
+  })
+
+  context('privileged channel', () => {
+    beforeEach(function () {
+      return this.setup('http://www.foobar.com:8080')
+    })
+
+    it('includes the privileged channel in the spec frame on the primary origin', async function () {
+      const res = await this.rp('http://www.foobar.com:8080/__cypress/iframes/cypress/e2e/spec.cy.js')
+
+      expect(res.statusCode).to.eq(200)
+      expect(res.body).to.include('add-verified-command')
+    })
+
+    it('omits the privileged channel from the spec frame on another origin', async function () {
+      const res = await this.rp('http://www.other.com:8080/__cypress/iframes/cypress/e2e/spec.cy.js')
+
+      expect(res.statusCode).to.eq(200)
+      expect(res.body).not.to.include('add-verified-command')
+    })
+
+    it('omits the privileged channel from a spec bridge for an origin the spec has not passed to cy.origin()', async function () {
+      const res = await this.rp('http://www.other.com:8080/__cypress/spec-bridge-iframes')
+
+      expect(res.statusCode).to.eq(200)
+      expect(res.body).to.include('cypress_cross_origin_runner.js')
+      expect(res.body).not.to.include('add-verified-command')
     })
   })
 

@@ -16,7 +16,7 @@ vi.mock('child_process', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       spawn: vi.fn(),
     },
@@ -27,7 +27,7 @@ vi.mock('../../lib/linux', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual() returns unknown
     ...actual,
     detect: vi.fn(),
   }
@@ -37,7 +37,7 @@ vi.mock('../../lib/darwin', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual() returns unknown
     ...actual,
     detect: vi.fn(),
   }
@@ -47,7 +47,7 @@ vi.mock('../../lib/windows', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual() returns unknown
     ...actual,
     detect: vi.fn(),
   }
@@ -83,10 +83,10 @@ describe('detect', () => {
       })
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - stub resolves a partial FoundBrowser
     vi.mocked(linuxDetect).mockImplementation(stubDetect)
     vi.mocked(darwinDetect).mockImplementation(stubDetect)
-    // @ts-expect-error
+    // @ts-expect-error - stub resolves a partial FoundBrowser
     vi.mocked(windowsDetect).mockImplementation(stubDetect)
 
     const browsers = await detect()
@@ -103,6 +103,41 @@ describe('detect', () => {
     browsers.forEach((browser) => {
       expect(browser.majorVersion).toEqual('130')
     })
+  })
+
+  it('checks browser definitions one at a time and keeps their order', async () => {
+    let inFlight = 0
+    let maxInFlight = 0
+
+    const stubDetect = async (browser: Browser) => {
+      inFlight++
+      maxInFlight = Math.max(maxInFlight, inFlight)
+
+      // later definitions finish first, so completion order differs from input order
+      await new Promise((resolve) => setTimeout(resolve, 20 - Number(browser.name.split('-')[1])))
+
+      inFlight--
+
+      return {
+        name: browser.name,
+        path: `/path/to/${browser.name}`,
+        version: '1.0.0',
+      }
+    }
+
+    // @ts-expect-error - stub resolves a partial FoundBrowser
+    vi.mocked(linuxDetect).mockImplementation(stubDetect)
+    vi.mocked(darwinDetect).mockImplementation(stubDetect)
+    // @ts-expect-error - stub resolves a partial FoundBrowser
+    vi.mocked(windowsDetect).mockImplementation(stubDetect)
+
+    const goal = _.range(10).map((i) => ({ name: `browser-${i}`, binary: `browser-${i}`, versionRegex: /(\S+)/ }))
+
+    // @ts-expect-error - goal fixtures are partial Browser objects
+    const browsers = await detect(goal)
+
+    expect(browsers.map(({ name }) => name)).toEqual(goal.map(({ name }) => name))
+    expect(maxInFlight).toBe(1)
   })
 
   describe('#getMajorVersion', () => {
@@ -124,7 +159,7 @@ describe('detect', () => {
     }
 
     it('validates browser with own validator property', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - stub resolves a partial FoundBrowser
       vi.mocked(linuxDetect).mockImplementation((browser) => {
         return Promise.resolve({
           name: browser.name,
@@ -141,7 +176,7 @@ describe('detect', () => {
         })
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - stub resolves a partial FoundBrowser
       vi.mocked(windowsDetect).mockImplementation((browser) => {
         return Promise.resolve({
           name: browser.name,
@@ -236,7 +271,7 @@ describe('detect', () => {
     })
 
     it('detects by path', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - goal fixtures are partial Browser objects
       const foundBrowser = await detectByPath('/foo/bar/browser', goalBrowsers)
 
       const expectedBrowser = goalBrowsers.find(({ name }) => name === 'foo-browser')
@@ -254,7 +289,7 @@ describe('detect', () => {
 
     it('rejects when there was no matching versionRegex', async () => {
       try {
-        // @ts-expect-error
+        // @ts-expect-error - goal fixtures are partial Browser objects
         await detectByPath('/not/a/browser', goalBrowsers)
 
         throw Error('Should not find a browser')
@@ -265,7 +300,7 @@ describe('detect', () => {
 
     it('rejects when there was an error executing the command', async () => {
       try {
-        // @ts-expect-error
+        // @ts-expect-error - goal fixtures are partial Browser objects
         await detectByPath('/not/a/real/path', goalBrowsers)
         throw Error('Should not find a browser')
       } catch (err) {
@@ -274,7 +309,7 @@ describe('detect', () => {
     })
 
     it('works with spaces in the path', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - goal fixtures are partial Browser objects
       const foundBrowser = await detectByPath('/Applications/My Shiny New Browser.app', goalBrowsers)
 
       const expectedBrowser = goalBrowsers.find(({ name }) => name === 'foo-browser')

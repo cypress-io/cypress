@@ -176,16 +176,29 @@ export type Snapshot = {
     definitions: Record<string, NodeRequireFunction>
     exports: Record<string, NodeModule>
     // Module._cache === require.cache
-    cache: Record<string, NodeModule>
+    cache: NodeJS.Dict<NodeModule>
   }
+  snapshotAuxiliaryData: SnapshotAuxiliaryData
+  setGlobals: (
+    global: typeof globalThis,
+    process: NodeJS.Process | undefined,
+    window: unknown,
+    document: unknown,
+    console: Console,
+    pathResolver: unknown,
+    require: NodeRequireFunction
+  ) => void
 }
 
 /**
- * Extra data we include in the snapshot, namely the embedded `sourceMap`.
+ * Extra data we include in the snapshot: the embedded `sourceMap` and the
+ * maps that let modules resolve without querying the file system.
  * @category snapshot
  */
 export type SnapshotAuxiliaryData = {
   sourceMap?: RawSourceMap
+  resolverMap?: Record<string, string>
+  dependencyMapArray?: DependencyMapArray
 }
 
 /**

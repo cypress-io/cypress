@@ -8,7 +8,7 @@ export const export4 = 'export4'
 
 export const export5 = 'export5'
 
-// @ts-expect-error
+// @ts-expect-error - sideEffect is a test-only property that Window does not declare
 window.sideEffect = 'Side Effect'
 
 export default {

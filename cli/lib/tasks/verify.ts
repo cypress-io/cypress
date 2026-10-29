@@ -123,7 +123,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
     } catch (err: any) {
       debug('Smoke test failed:', err)
 
-      let errMessage = err.stderr || err.message
+      const errMessage = err.stderr || err.message
 
       debug('error message:', errMessage)
 

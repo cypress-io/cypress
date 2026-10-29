@@ -121,7 +121,7 @@ describe('Component with arguments', () => {
   // the component definition
   const appComponent = {
     render (this: { elementtype: string, $slots: Slots }): VNode {
-      let a = this.elementtype.split(',')
+      const a = this.elementtype.split(',')
 
       return createElement(
         a[0],

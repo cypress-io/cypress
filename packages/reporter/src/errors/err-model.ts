@@ -42,8 +42,7 @@ export default class Err {
   parsedStack: ParsedStackLine[] | null = null
   docsUrl = '' as string | string[]
   templateType = ''
-  // @ts-ignore
-  codeFrame: CodeFrame
+  codeFrame?: CodeFrame
   isRecovered: boolean = false
   docsUrlTitle: string | null = null
   triggerAction: 'loginModal' | 'projectConnectModal' | null = null

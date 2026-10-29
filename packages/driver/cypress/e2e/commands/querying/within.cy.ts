@@ -44,6 +44,27 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/24178
+    it('finds content within a document subject', () => {
+      cy.document().within(() => {
+        cy.contains('#nested-div span', 'foo').should('exist')
+        cy.contains('foo').should('exist')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24178
+    it('reports missing content within a document as an assertion error', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('AssertionError')
+        expect(err.message).to.eq('Timed out retrying after 100ms: Expected to find content: \'document-scope-missing-content\' within the element: <document> but never did.')
+        done()
+      })
+
+      cy.document().within(() => {
+        cy.contains('document-scope-missing-content', { timeout: 100 })
+      })
+    })
+
     it('does not change the subject', () => {
       const form = cy.$$('#by-name')
 

@@ -36,7 +36,7 @@ import isValidHostname from 'is-valid-hostname'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
-function hasOnlyRouteMatcherKeys (obj: any) {
+function hasOnlyRouteMatcherKeys (obj: any): obj is RouteMatcherOptions {
   return !_.isEmpty(obj) && !_.isArray(obj) && _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
 }
 
@@ -156,7 +156,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
         return err(`\`${k}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`)
       }
 
-      knownFieldNames.push(k)
+      knownFieldNames.push(k.toLowerCase())
     }
   }
 
@@ -254,7 +254,6 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     function getMatcherOptions (): RouteMatcherOptions {
       if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
-        // @ts-ignore
         if (handler.url) {
           $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
         }

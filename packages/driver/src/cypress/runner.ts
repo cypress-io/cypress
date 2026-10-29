@@ -43,14 +43,13 @@ const isStudioMode = () => {
   }
 }
 
-const RUNNER_EVENTS = [
-  TEST_BEFORE_RUN_ASYNC_EVENT,
-  TEST_BEFORE_RUN_EVENT,
-  TEST_BEFORE_AFTER_RUN_ASYNC_EVENT,
-  TEST_AFTER_RUN_ASYNC_EVENT,
-  TEST_AFTER_RUN_EVENT,
-  RUNNABLE_AFTER_RUN_ASYNC_EVENT,
-] as const
+type RunnerEvent =
+  | typeof TEST_BEFORE_RUN_ASYNC_EVENT
+  | typeof TEST_BEFORE_RUN_EVENT
+  | typeof TEST_BEFORE_AFTER_RUN_ASYNC_EVENT
+  | typeof TEST_AFTER_RUN_ASYNC_EVENT
+  | typeof TEST_AFTER_RUN_EVENT
+  | typeof RUNNABLE_AFTER_RUN_ASYNC_EVENT
 
 export type HandlerType = 'error' | 'unhandledrejection'
 
@@ -58,7 +57,7 @@ const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
-const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) => {
+const fire = (event: RunnerEvent, runnable, Cypress, ...args) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -74,7 +73,7 @@ const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) =
   return Cypress.action(event, wrap(runnable), runnable, ...args)
 }
 
-const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
+const fired = (event: RunnerEvent, runnable) => {
   return !!(runnable._fired && runnable._fired[event])
 }
 
@@ -129,7 +128,7 @@ const testAfterRun = (test, Cypress) => {
     // perf loop only through
     // a tests OWN properties and not
     // inherited properties from its shared ctx
-    for (let key of Object.keys(test.ctx || {})) {
+    for (const key of Object.keys(test.ctx || {})) {
       const value = test.ctx[key]
 
       if (_.isObject(value) && !mochaCtxKeysRe.test(key)) {
@@ -230,7 +229,7 @@ const forceGc = (obj) => {
   // aggressively forces GC by purging
   // references to ctx, and removes callback
   // functions for closures
-  for (let key of Object.keys(obj.ctx || {})) {
+  for (const key of Object.keys(obj.ctx || {})) {
     obj.ctx[key] = undefined
   }
 
@@ -240,8 +239,8 @@ const forceGc = (obj) => {
 }
 
 const eachHookInSuite = (suite, fn) => {
-  for (let type of HOOKS) {
-    for (let hook of suite[`_${type}`]) {
+  for (const type of HOOKS) {
+    for (const hook of suite[`_${type}`]) {
       fn(hook)
     }
   }
@@ -1274,7 +1273,8 @@ export default {
 
     // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
     const onSpecError = (handlerType: HandlerType) => (event) => {
-      let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+      const { originalErr, err: uncaughtErr } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+      let err = uncaughtErr
 
       debugErrors('uncaught spec error: %o', originalErr)
 
@@ -1599,7 +1599,7 @@ export default {
       getNewTestLineNumber,
       setIsStudioCreatedTest,
       getIsStudioCreatedTest,
-      normalizeAll (tests, skipCollectingLogs, testFilter) {
+      normalizeAll (tests, skipCollectingLogs, testFilter?) {
         _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
         // all of the tests and suites and just generate
@@ -1930,7 +1930,7 @@ export default {
         // search through all of the tests
         // until we find the current test
         // and break then
-        for (let testRunnable of _tests) {
+        for (const testRunnable of _tests) {
           if (testRunnable.id === id) {
             break
           } else {
@@ -1948,7 +1948,7 @@ export default {
       getAllTestsState (): Record<string, SerializedTest> {
         const tests: Record<string, SerializedTest> = {}
 
-        for (let testRunnable of _tests) {
+        for (const testRunnable of _tests) {
           const test = serializeTest(testRunnable)
 
           // `_titlePath` is only stamped on the normalized runnable copy;
@@ -1966,7 +1966,7 @@ export default {
       getAllTestStates (): Record<string, SerializedTest['state']> {
         const states: Record<string, SerializedTest['state']> = {}
 
-        for (let testRunnable of _tests) {
+        for (const testRunnable of _tests) {
           states[testRunnable.id] = testRunnable.state
         }
 
@@ -1976,7 +1976,7 @@ export default {
       getAllTestsSummary (): Record<string, SerializedTest> {
         const tests: Record<string, SerializedTest> = {}
 
-        for (let testRunnable of _tests) {
+        for (const testRunnable of _tests) {
           const test = wrap(testRunnable) as SerializedTest
 
           test._titlePath = testRunnable.titlePath()
@@ -2084,7 +2084,7 @@ export default {
 
         _emissions = emissions
 
-        for (let test of _tests) {
+        for (const test of _tests) {
           if (getTestIndexFromId(test.id) !== _resumedAtTestIndex) {
             test._ALREADY_RAN = true
             test.pending = true
@@ -2168,7 +2168,7 @@ export default {
           return
         }
 
-        let test = getTestById(attrs.testId)
+        const test = getTestById(attrs.testId)
 
         // bail if for whatever reason we
         // cannot associate this log to a test

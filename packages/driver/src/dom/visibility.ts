@@ -426,7 +426,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   }
 
   if (elHasDisplayContents($el)) {
-    let $parent = getParent($el)
+    const $parent = getParent($el)
 
     return elIsHiddenByAncestors($parent, checkOpacity, $parent)
   }
@@ -524,14 +524,15 @@ const parentHasOpacityZero = function ($el) {
 }
 
 /* eslint-disable no-cond-assign */
-export const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
+export const getReasonIsHidden = function (elOrJquery, options = { checkOpacity: true }) {
   // TODO: need to add in the reason an element
   // is hidden when its fixed position and its
   // either being covered or there is no el
 
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
   const node = stringifyElement($el, 'short')
-  let width = elClientWidth($el)
-  let height = elClientHeight($el)
+  const width = elClientWidth($el)
+  const height = elClientHeight($el)
   let $parent
   let parentNode
   let $select
@@ -641,8 +642,8 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 
   if ($parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))) {
     parentNode = stringifyElement($parent, 'short')
-    let width = elClientWidth($parent)
-    let height = elClientHeight($parent)
+    const width = elClientWidth($parent)
+    const height = elClientHeight($parent)
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }

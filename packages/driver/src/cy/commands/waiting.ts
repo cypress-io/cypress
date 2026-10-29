@@ -81,7 +81,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
 
     const checkForXhr = async function (
       alias: string,
-      type: 'request'|'response',
+      type: 'request' | 'response',
       num: string,
       options: waitOptions,
     ) {
@@ -109,7 +109,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
         return checkForXhr.apply(window, [alias, type, num, options])
       },
       // TODO: What should `_log`'s type be?
-      // @ts-expect-error - Incompatible types.
+      // @ts-expect-error - waitOptions is not assignable to retryOptions
       options)
     }
 

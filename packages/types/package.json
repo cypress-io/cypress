@@ -2,46 +2,52 @@
   "name": "@packages/types",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "cjs/index.js",
+  "module": "esm/index.js",
   "browser": "esm/index.js",
+  "types": "cjs/index.d.ts",
+  "files": [
+    "cjs/*",
+    "esm/*"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "devtools-protocol"
+    ]
+  },
   "scripts": {
     "build": "yarn build:esm && yarn build:cjs",
-    "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "build-prod": "yarn build",
     "check-ts": "tsc -p tsconfig.check.json",
     "clean": "rimraf cjs esm",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "test": "vitest run",
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "semver": "^7.7.3"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@types/mocha": "8.0.3",
     "@types/node": "24.10.1",
     "axios": "^1.20.0",
-    "better-sqlite3": "12.8.0",
+    "better-sqlite3": "13.0.3",
     "devtools-protocol": "0.0.1687809",
+    "eslint": "^9.31.0",
     "express": "4.21.0",
+    "jiti": "^2.4.2",
     "rimraf": "^6.1.1",
     "socket.io": "4.8.3",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "cjs/*",
-    "esm/*"
-  ],
-  "types": "cjs/index.d.ts",
-  "license": "MIT",
-  "module": "esm/index.js",
-  "workspaces": {
-    "nohoist": [
-      "devtools-protocol"
-    ]
   },
   "nx": {}
 }

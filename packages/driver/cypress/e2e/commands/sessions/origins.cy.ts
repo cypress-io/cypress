@@ -6,7 +6,6 @@ describe('src/cy/commands/sessions/origins', () => {
   let baseUrl
 
   beforeEach(function () {
-    // @ts-ignore
     CypressInstance = new $Cypress()
     baseUrl = Cypress.config('baseUrl')
   })

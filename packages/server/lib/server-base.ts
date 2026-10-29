@@ -34,7 +34,7 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import type { InitializeRoutes } from './routes'
 import { createCommonRoutes } from './routes'
-import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
+import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
@@ -46,7 +46,8 @@ import type { FileServer } from './file_server'
 import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
-import { runnerMutationRule } from '@packages/data-context/graphql/runnerMutationRule'
+import { runnerMutationRule } from '@packages/data-context/graphql/rootFieldRules'
+import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptionOnlyRule'
 import * as statusCode from './util/status_code'
 import { getContentType } from './util/headers'
 import stream from 'stream'
@@ -91,18 +92,11 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _hasValidSessionIdHeader = (req): boolean => {
-  const provided = req.headers[SESSION_ID_HEADER]
-  const current = cypressSessions.getCurrent()?.sessionId
-
-  return Boolean(current) && typeof provided === 'string' && provided === current
-}
-
 const _isTapRequest = (req): boolean => {
   const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
   return trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
-    (trimmedUrl.startsWith(TAP_GRAPHQL_ROUTE_PREFIX) && _hasValidSessionIdHeader(req))
+    (trimmedUrl.startsWith(TAP_GRAPHQL_ROUTE_PREFIX) && cypressSessions.hasCurrentSessionIdHeader(req.headers))
 }
 
 // `isNativeBrowserNetwork`: on that path the browser intercepts its own
@@ -269,7 +263,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   constructor (config: Cfg) {
     this.isListening = false
     this.request = new Request()
-    this.socketAllowed = new SocketAllowed()
     this._eventBus = new EventEmitter()
     this._middleware = null
     this._baseUrl = null
@@ -285,6 +278,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._remoteStates = new RemoteStates(remoteStatePorts, this._documentDomainInjection)
+    this.socketAllowed = new SocketAllowed(this._remoteStates, () => {
+      // address() is null once the server closes
+      const address = this._server?.address()
+
+      return address && typeof address === 'object' ? address.port : undefined
+    })
   }
 
   ensureProp = ensureProp
@@ -358,10 +357,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
-    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
+    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed in proxyWebsockets, which requires a trusted Origin instead.
     this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, {
       enforceOrigin: false,
-      validationRules: [runnerMutationRule],
+      validationRules: [runnerMutationRule, subscriptionOnlyRule],
     })
 
     // Start the file server first so its port is known before we begin
@@ -848,7 +847,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
     }
 
-    const ios = this.socket.startListening(this.server, automation, config, options)
+    const ios = this.socket.startListening(this.server, automation, config, Object.assign(options, { isTrustedOrigin: this.socketAllowed.isTrustedOrigin }))
 
     this._normalizeReqUrl(this.server)
 
@@ -979,11 +978,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     if (req.url.startsWith(socketIoRoute)) {
       // Without the proxy, upgrades arrive on direct connections the CONNECT
-      // port allow-list never saw — a loopback remoteAddress is the only
-      // available gate (see #34513).
+      // port allow-list never saw, so the Origin is the only gate. The runner
+      // reaches socket.io over the automation binding on that path, so only
+      // graphql-ws upgrades remain. Firefox always takes the proxy path, so
+      // only there can its extension connect.
       const isAllowed = this.isBrowserNetworkMode()
-        ? this.socketAllowed.isRequestFromLocalhost(req)
-        : this.socketAllowed.isRequestAllowed(req)
+        ? req.url.startsWith(`${socketIoRoute}-graphql`) && this.socketAllowed.isRequestFromTrustedOrigin(req)
+        : this.socketAllowed.isRequestAllowed(req) && this.socketAllowed.isRequestFromTrustedOrigin(req, { allowExtension: true })
 
       if (!isAllowed) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')

@@ -3,6 +3,7 @@ import _ from 'lodash'
 import cp from 'child_process'
 import { EventEmitter } from 'events'
 import * as linuxHelper from '../../lib/linux'
+import { utils } from '../../lib/utils'
 import { log } from '../log'
 import { detect } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
@@ -14,7 +15,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       platform: vi.fn(),
       release: vi.fn(),
@@ -28,7 +29,7 @@ vi.mock('child_process', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       spawn: vi.fn(),
     },
@@ -44,6 +45,8 @@ describe('linux browser detection', () => {
 
     vi.mocked(os.platform).mockReturnValue('linux')
     vi.mocked(os.release).mockReturnValue('1.0.0')
+
+    vi.spyOn(utils, 'which').mockImplementation((cmd) => Promise.resolve(`/usr/bin/${cmd}`))
 
     vi.mocked(cp.spawn).mockImplementation((cmd, args, opts) => {
       const cpSpawnMock = {
@@ -84,7 +87,7 @@ describe('linux browser detection', () => {
       }
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const browser = await linuxHelper.detect(goal)
 
     expect(browser).toEqual({
@@ -253,7 +256,7 @@ describe('linux browser detection', () => {
 
     const goal = _.defaults({ binary: 'multiline-foo' }, _.find(goalBrowsers, { name: 'foo-browser' }))
 
-    // @ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const [browser] = await detect([goal])
 
     expect(browser).toEqual({
@@ -300,7 +303,7 @@ describe('linux browser detection', () => {
       }
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const browsers = await detect(goalBrowsers)
 
     log('Browsers: %o', browsers)
@@ -334,12 +337,75 @@ describe('linux browser detection', () => {
       }
     }
 
-    //@ts-expect-error
+    // @ts-expect-error - goal fixtures are partial Browser objects
     const browsers = await detect(goalBrowsers)
 
     log('Browsers: %o', browsers)
     log('Expected browsers: %o', expected)
     expect(browsers).toEqual(expected)
+  })
+
+  it('does not spawn --version for binaries that are not on the PATH', async () => {
+    vi.mocked(utils.which).mockResolvedValue(null)
+    cpSpawnCallback = vi.fn()
+
+    // @ts-expect-error - goal fixtures are partial Browser objects
+    const browsers = await detect(goalBrowsers)
+
+    expect(browsers).toEqual([])
+    expect(utils.which).toHaveBeenCalledWith('test-browser')
+    expect(utils.which).toHaveBeenCalledWith('foo-bar-browser')
+    expect(cp.spawn).not.toHaveBeenCalled()
+  })
+
+  it('spawns --version once per binary when several browsers share it', async () => {
+    const goalBrowsers = [
+      {
+        name: 'shared-stable',
+        versionRegex: /shared-browser v(\S+)$/,
+        binary: 'shared-browser',
+      },
+      {
+        name: 'shared-for-testing',
+        versionRegex: /shared-browser v(\S+)$/,
+        binary: ['shared-browser', 'other-browser'],
+      },
+    ]
+
+    cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
+      if (cmd === 'shared-browser') {
+        setTimeout(() => {
+          cpSpawnMock.stdout.emit('data', 'shared-browser v100.1.2.3')
+        }, 0)
+      }
+    }
+
+    // @ts-expect-error - goal fixtures are partial Browser objects
+    const browsers = await detect(goalBrowsers)
+
+    expect(browsers.map(({ name, path, version }) => ({ name, path, version }))).toEqual([
+      { name: 'shared-stable', path: 'shared-browser', version: '100.1.2.3' },
+      { name: 'shared-for-testing', path: 'shared-browser', version: '100.1.2.3' },
+    ])
+
+    expect(vi.mocked(cp.spawn).mock.calls.map(([cmd]) => cmd).sort()).toEqual(['other-browser', 'shared-browser'])
+  })
+
+  it('does not reuse --version output across detect calls', async () => {
+    cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
+      if (cmd === 'test-browser') {
+        setTimeout(() => {
+          cpSpawnMock.stdout.emit('data', 'test-browser v100.1.2.3')
+        }, 0)
+      }
+    }
+
+    // @ts-expect-error - goal fixtures are partial Browser objects
+    await detect([goalBrowsers[0]])
+    // @ts-expect-error - goal fixtures are partial Browser objects
+    await detect([goalBrowsers[0]])
+
+    expect(cp.spawn).toHaveBeenCalledTimes(2)
   })
 
   describe('#getVersionString', () => {

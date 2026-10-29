@@ -379,6 +379,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
           get name () {
             return this._name
           }
+
           set name (name: string) {
             this._name = name
           }
@@ -386,7 +387,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
 
         const customErrorInstance = new CustomError('custom error')
 
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a custom property added to test error serialization
         customErrorInstance.foo = 'bar'
 
         const { writable } = Object.getOwnPropertyDescriptor(CustomError, 'name') as PropertyDescriptor
@@ -415,6 +416,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
           get metasyntaticList (): string[] {
             return this._metasyntaticList
           }
+
           set metasyntaticList (itemsToAdd: string[]) {
             this._metasyntaticList = this._metasyntaticList.concat(itemsToAdd)
           }
