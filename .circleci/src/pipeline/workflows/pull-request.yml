@@ -26,7 +26,7 @@ jobs:
       build-better-sqlite3: true
       filters:
         branches:
-          ignore: /^pull\/[0-9]+/
+          ignore: /^pull\/[0-9]+(\/head)?$/
   - build:
       name: internal-pr-build
       context: test-runner:env-canary
@@ -34,14 +34,14 @@ jobs:
         - node_modules_install
       filters:
         branches:
-          ignore: /^pull\/[0-9]+/
+          ignore: /^pull\/[0-9]+(\/head)?$/
 
   # External (contributor) PRs — everything gates behind manual approval
   - approve-contributor-pr:
       type: approval
       filters:
         branches:
-          only: /^pull\/[0-9]+/
+          only: /^pull\/[0-9]+(\/head)?$/
   - node_modules_install:
       name: contributor-node-modules-install
       build-better-sqlite3: true
@@ -49,14 +49,14 @@ jobs:
         - approve-contributor-pr
       filters:
         branches:
-          only: /^pull\/[0-9]+/
+          only: /^pull\/[0-9]+(\/head)?$/
   - build:
       name: external-pr-build
       requires:
         - contributor-node-modules-install
       filters:
         branches:
-          only: /^pull\/[0-9]+/
+          only: /^pull\/[0-9]+(\/head)?$/
   - ready-to-test:
       requires:
         - internal-pr-build
