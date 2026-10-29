@@ -69,7 +69,7 @@ const jqueryProxyFn = function (...args) {
     $errUtils.throwErrByPath('miscellaneous.no_cy')
   }
 
-  return this.cy.$$.apply(this.cy, args)
+  return this.cy.$$(...args)
 }
 
 const throwPrivateCommandInterface = (method) => {
@@ -158,6 +158,7 @@ class $Cypress {
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
   on: any
+  once: any
   stackUtils: typeof $stackUtils | null = null
 
   // attach to $Cypress to access
@@ -195,6 +196,7 @@ class $Cypress {
       })
     },
   }
+
   utils = $utils
   _ = _
   Blob = blobUtil

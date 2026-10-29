@@ -29,14 +29,13 @@ export default function (Commands, Cypress, cy) {
   const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
-    // @ts-expect-error - Object.values() returns unknown[] because the state value is untyped
-    Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: Cypress.ServerSessionData) => {
+    Object.values<Cypress.ServerSessionData>(Cypress.state('activeSessions') || {}).forEach((sessionData) => {
       if (sessionData.cacheAcrossSpecs) {
         sessionsManager.registeredSessions.set(sessionData.id, true)
       }
     })
 
-    Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }: {nextTestHasTestIsolationOn?: boolean} = {}) => {
+    Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }: { nextTestHasTestIsolationOn?: boolean } = {}) => {
       if (nextTestHasTestIsolationOn || nextTestHasTestIsolationOn === undefined) {
         return navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
       }
@@ -256,6 +255,8 @@ export default function (Commands, Cypress, cy) {
           return cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
             const isValidSession = true
             let caughtCommandErr = false
+            // Declared up front because onQueueFailed reads it when validate() throws
+            // synchronously, before the cy.then() below has assigned it
             let _commandToRunAfterValidation
 
             const enhanceErr = (err) => {
@@ -316,7 +317,7 @@ export default function (Commands, Cypress, cy) {
               if (step === 'restore') {
                 const commands = queue.get()
                 // determine command queue index of _commandToRunAfterValidation's index
-                let index = _.findIndex(commands, (command: any) => {
+                const index = _.findIndex(commands, (command: any) => {
                   return (
                     _commandToRunAfterValidation
                     && command.attributes.chainerId === _commandToRunAfterValidation.chainerId

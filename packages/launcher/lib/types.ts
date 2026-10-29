@@ -19,3 +19,6 @@ export type PathData = {
   path: string
   browserKey?: string
 }
+
+/** `--version` output keyed by the resolved path of the binary that produced it */
+export type VersionStringCache = Map<string, Promise<string>>

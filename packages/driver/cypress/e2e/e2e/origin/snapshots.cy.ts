@@ -20,7 +20,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
         return (props?.consoleProps?.props?.Selector === selector)
       })
     }
-    let logs: Map<string, any> = new Map()
+    const logs: Map<string, any> = new Map()
 
     cy.on('log:changed', (attrs, log) => {
       logs.set(attrs.id, log)
@@ -31,7 +31,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
 
     cy.origin('http://www.foobar.com:3500', () => {
       // need to set isInteractive in the spec bridge in order to take snapshots in run mode, similar to how isInteractive is set within support/defaults.ts
-      // @ts-ignore
+      // @ts-expect-error - `isInteractive` is not a test config override
       Cypress.config('isInteractive', true)
       cy.get(`[data-cy="assertion-header"]`)
     })
@@ -159,7 +159,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
 
       cy.origin('http://www.barbaz.com:3500', () => {
         // need to set isInteractive in the spec bridge in order to take xhr snapshots in run mode, similar to how isInteractive is set within support/defaults.ts
-        // @ts-ignore
+        // @ts-expect-error - `isInteractive` is not a test config override
         Cypress.config('isInteractive', true)
 
         cy.task('log', 'test before get')

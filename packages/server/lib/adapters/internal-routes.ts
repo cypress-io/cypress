@@ -177,8 +177,9 @@ export function isReadMethod (method: string | undefined): boolean {
 //     which the parent must inject, plus its static assets. Answering it in
 //     the inner's pipeline would preempt the parent's interception, so
 //     window:before:load would die silently.
-//   - concrete subresource types (xhr/fetch/script/...): e.g. the app's
-//     /__cypress/graphql calls, which the parent's cy.intercept must see.
+//   - concrete subresource types (xhr/fetch/script/...): e.g. the Studio
+//     bundle at /__cypress-studio/app-studio.js, which the parent's
+//     cy.intercept must see.
 //     Injection never touches non-documents.
 // Everything else stays with Cypress. Documents normalize to 'other', so a
 // non-clientRoute document such as the CT fixture iframe

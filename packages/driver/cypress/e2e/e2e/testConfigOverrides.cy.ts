@@ -1,5 +1,3 @@
-/* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
-
 // Cypress resolves user-defined config values alongside its own, but `Cypress.Config`
 // enumerates only the options Cypress owns. Read the user-defined ones back through here.
 const userConfig = () => Cypress.config() as Record<string, any>
@@ -375,7 +373,7 @@ describe('cannot set override configuration options that', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - deliberately sets a config value that cannot be overridden at runtime
     Cypress.config('chromeWebSecurity', false)
   })
 
@@ -417,13 +415,13 @@ describe('cannot set override configuration options that', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - deliberately sets a config value that cannot be overridden at runtime
     Cypress.config('env', { FOO: 'bar' })
   })
 
   it('does not throw for non-Cypress config values', () => {
     expect(() => {
-      // @ts-expect-error
+      // @ts-expect-error - deliberately sets a non-Cypress config key
       Cypress.config('foo', 'bar')
     }).to.not.throw()
   })

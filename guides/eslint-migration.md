@@ -29,17 +29,17 @@
 - [x] packages/network-interception
 - [x] packages/proxy
 - [x] packages/net-stubbing
-- [ ] packages/driver
-- [ ] packages/reporter
+- [x] packages/driver
+- [x] packages/reporter
 - [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
-- [ ] packages/runner
+- [x] packages/runner
 - [x] packages/extension
 - [x] packages/network
 - [x] packages/network-tools
 - [x] packages/socket
-- [ ] packages/telemetry
+- [x] packages/telemetry
 - [ ] packages/launchpad
 - [x] packages/errors
 - [ ] packages/data-context
@@ -53,14 +53,20 @@
 - [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [x] packages/config
-- [ ] packages/root
-- [ ] packages/resolve-dist
-- [ ] packages/packherd-require
-- [ ] packages/v8-snapshot-require
-- [ ] packages/web-config
+- [x] packages/root
+- [x] packages/resolve-dist
+- [x] packages/packherd-require
+- [x] packages/v8-snapshot-require
+- [x] packages/web-config
 - [x] packages/types
 - [x] packages/scaffold-config
+- [x] packages/ts
 - [x] packages/example
+
+### Batch 4d: Tooling
+- [x] tooling/electron-mksnapshot
+- [x] tooling/packherd
+- [x] tooling/v8-snapshot
 
 ### Batch 5: Test and script folders
 - [ ] system-tests

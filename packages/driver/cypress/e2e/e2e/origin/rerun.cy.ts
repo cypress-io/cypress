@@ -1,4 +1,3 @@
-// @ts-ignore
 describe('cy.origin - rerun', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
@@ -6,16 +5,15 @@ describe('cy.origin - rerun', { browser: '!webkit' }, () => {
   })
 
   it('successfully reruns tests', () => {
-    // @ts-ignore
     cy.origin('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {
       const top = window.top!
 
-      // @ts-ignore
+      // @ts-expect-error - `hasRunOnce` is a test-only flag on window.top
       if (!top.hasRunOnce) {
-        // @ts-ignore
+        // @ts-expect-error - `hasRunOnce` is a test-only flag on window.top
         top.hasRunOnce = true
 
         // cause a rerun event to occur by triggering a hash change

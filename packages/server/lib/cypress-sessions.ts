@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { Browser, TestingType } from '@packages/types'
-import { SCHEMA_VERSION, cypressSessionsDir, recordPath } from '@packages/cypress-sessions'
+import { SCHEMA_VERSION, SESSION_ID_HEADER, cypressSessionsDir, recordPath } from '@packages/cypress-sessions'
 import type { CypressSession, LiveSessionState } from '@packages/cypress-sessions'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
@@ -88,6 +88,13 @@ export const cypressSessions = {
 
   getCurrent (): LiveSessionState | null {
     return currentState
+  },
+
+  hasCurrentSessionIdHeader (headers: Record<string, string | string[] | undefined>): boolean {
+    const provided = headers[SESSION_ID_HEADER]
+    const current = cypressSessions.getCurrent()?.sessionId
+
+    return Boolean(current) && typeof provided === 'string' && provided === current
   },
 
   async remove (): Promise<void> {

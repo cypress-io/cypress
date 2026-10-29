@@ -15,7 +15,7 @@ import Button from '@cypress-design/react-button'
 import events from '../lib/events'
 
 const getConnectors = (num: number) => {
-  let connectors: JSX.Element[] = []
+  const connectors: JSX.Element[] = []
 
   for (let i = 0; i < num; i++) {
     connectors.push(
@@ -37,7 +37,7 @@ const getParentTitlesListElements = (parentTitles: string[]) => {
 }
 
 const StatusIcon = ({ test }: { test: Test }) => {
-  let className = 'state-icon'
+  const className = 'state-icon'
 
   if (test.state === 'active') {
     return <IconStatusRunningOutline className={className} data-cy='running-icon' size='16' fillColor='gray-700' strokeColor='indigo-400' />
@@ -129,7 +129,7 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
                 <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
                   {getParentTitlesListElements(parentTitles)}
                 </ul>}
-                wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
+                  wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
                   'studio-tooltip cy-tooltip',
                 )}>
                   {testTitle}
