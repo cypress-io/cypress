@@ -367,7 +367,6 @@
     "./node_modules/fast-glob/node_modules/glob-parent/index.js",
     "./node_modules/fast-glob/out/settings.js",
     "./node_modules/fast-glob/out/utils/path.js",
-    "./node_modules/file-uri-to-path/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/fs/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/json/index.js",
@@ -1771,10 +1770,12 @@
     "./node_modules/baseline-browser-mapping/dist/index.cjs",
     "./node_modules/basic-auth/index.js",
     "./node_modules/bcrypt-pbkdf/index.js",
+    "./node_modules/better-sqlite3/lib/binding.js",
     "./node_modules/better-sqlite3/lib/database.js",
     "./node_modules/better-sqlite3/lib/index.js",
     "./node_modules/better-sqlite3/lib/methods/aggregate.js",
     "./node_modules/better-sqlite3/lib/methods/backup.js",
+    "./node_modules/better-sqlite3/lib/methods/explain.js",
     "./node_modules/better-sqlite3/lib/methods/function.js",
     "./node_modules/better-sqlite3/lib/methods/inspect.js",
     "./node_modules/better-sqlite3/lib/methods/pragma.js",
@@ -1787,7 +1788,6 @@
     "./node_modules/binary-extensions/binary-extensions.json",
     "./node_modules/binary-extensions/index.js",
     "./node_modules/binaryextensions/edition-es5/index.js",
-    "./node_modules/bindings/bindings.js",
     "./node_modules/brace-expansion/index.js",
     "./node_modules/braces/index.js",
     "./node_modules/braces/lib/compile.js",
@@ -3374,7 +3374,8 @@
     "./packages/cypress-sessions/dist/tap-operations.js",
     "./packages/data-context/graphql/corsOriginDelegate.ts",
     "./packages/data-context/graphql/index.ts",
-    "./packages/data-context/graphql/runnerMutationRule.ts",
+    "./packages/data-context/graphql/rootFieldRules.ts",
+    "./packages/data-context/graphql/subscriptionOnlyRule.ts",
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/@babel/parser/lib/index.js",
     "./packages/data-context/node_modules/body-parser/lib/read.js",
@@ -3945,5 +3946,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "98691bb1629ba4b9ddf2243c57539761ce96afb5539c55fd87e003649a5ea106"
+  "deferredHash": "8aad70bfb098654fa911ee8efcc9c7637e805847bea1d49e8999bbddfec1686e"
 }
