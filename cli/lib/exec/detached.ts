@@ -23,9 +23,11 @@ export interface ReadyResult {
   code: number
 }
 
+export const signalExitCode = (signal: NodeJS.Signals): number => 128 + os.constants.signals[signal]
+
 // Files rather than pipes: a pipe breaks once the CLI exits, while the app keeps logging
 export async function openDetachedOutput (): Promise<DetachedOutput> {
-  await pruneStaleDetachedOutput()
+  void pruneStaleDetachedOutput()
 
   const stem = path.join(os.tmpdir(), `cypress-open-${process.pid}-${Date.now()}`)
 
@@ -60,15 +62,32 @@ export async function openDetachedOutput (): Promise<DetachedOutput> {
 }
 
 const STALE_OUTPUT_MS = 7 * 24 * 60 * 60 * 1000
-const OUTPUT_FILE = /^cypress-open-\d+-\d+(-\d+)?\.(out|err)$/
+const OUTPUT_FILE = /^cypress-open-\d+-\d+(?:-\d+)?(?:-app(\d+))?\.(?:out|err)$/
+
+function isRunning (pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+
+    return true
+  } catch (err) {
+    return err instanceof Error && 'code' in err && err.code === 'EPERM'
+  }
+}
 
 // The app keeps writing to these files after the CLI exits, so they cannot be removed
-// on success. Older ones are removed the next time a detached run starts.
+// on success. Older ones are removed the next time a detached run starts, unless the app
+// they are named for is still running and has only been quiet.
 export async function pruneStaleDetachedOutput (now: number = Date.now()): Promise<void> {
   try {
     const dir = os.tmpdir()
 
-    await Promise.all((await fs.readdir(dir)).filter((name) => OUTPUT_FILE.test(name)).map(async (name) => {
+    await Promise.all((await fs.readdir(dir)).map(async (name) => {
+      const match = OUTPUT_FILE.exec(name)
+
+      if (!match || (match[1] && isRunning(Number(match[1])))) {
+        return
+      }
+
       const file = path.join(dir, name)
 
       if (now - (await fs.stat(file)).mtimeMs > STALE_OUTPUT_MS) {
@@ -88,31 +107,52 @@ export async function removeDetachedOutput ({ outPath, errPath }: DetachedOutput
   await Promise.all([outPath, errPath].map((file) => fs.remove(file).catch(() => undefined)))
 }
 
+const withAppPid = (file: string, pid: number): string => file.replace(/\.(out|err)$/, `-app${pid}.$1`)
+
+// Puts the app's pid in the names of its output files, so pruning can tell they are still in use.
+// A file that cannot be renamed keeps its name, which only makes it prunable after a week.
+export async function nameForApp (output: DetachedOutput, pid: number | undefined): Promise<DetachedOutput> {
+  if (!pid) {
+    return output
+  }
+
+  const rename = async (file: string): Promise<string> => {
+    const named = withAppPid(file, pid)
+
+    return fs.rename(file, named).then(() => named, () => file)
+  }
+
+  const [outPath, errPath] = await Promise.all([rename(output.outPath), rename(output.errPath)])
+
+  return { ...output, outPath, errPath }
+}
+
 // For output that no app was started with
 export async function discardDetachedOutput (output: DetachedOutput): Promise<void> {
   await closeDetachedOutput(output)
   await removeDetachedOutput(output)
 }
 
+// Undefined when the file cannot be opened yet, so the next poll tries again
+const openForReading = (file: string): Promise<number | undefined> => fs.open(file, 'r').catch(() => undefined)
+
 // Only the bytes after `offset`, so a long-running app's log is not read again from the start on every poll
-async function readFrom (file: string, offset: number): Promise<Buffer> {
+async function readFrom (fd: number | undefined, offset: number): Promise<Buffer> {
+  if (fd === undefined) {
+    return Buffer.alloc(0)
+  }
+
   try {
-    const handle = await fs.open(file, 'r')
+    const { size } = await fs.fstat(fd)
 
-    try {
-      const { size } = await fs.fstat(handle)
-
-      if (size <= offset) {
-        return Buffer.alloc(0)
-      }
-
-      const chunk = Buffer.alloc(size - offset)
-      const { bytesRead } = await fs.read(handle, chunk, 0, chunk.length, offset)
-
-      return chunk.subarray(0, bytesRead)
-    } finally {
-      await fs.close(handle)
+    if (size <= offset) {
+      return Buffer.alloc(0)
     }
+
+    const chunk = Buffer.alloc(size - offset)
+    const { bytesRead } = await fs.read(fd, chunk, 0, chunk.length, offset)
+
+    return chunk.subarray(0, bytesRead)
   } catch {
     return Buffer.alloc(0)
   }
@@ -160,9 +200,13 @@ export function waitForReadyMessage (
     let errOffset = 0
     let held = ''
     let exit: number | undefined
+    let outFd: number | undefined
+    let errFd: number | undefined
 
     const forwardStderr = async () => {
-      const chunk = await readFrom(errPath, errOffset)
+      errFd = errFd ?? await openForReading(errPath)
+
+      const chunk = await readFrom(errFd, errOffset)
 
       errOffset += chunk.length
       if (chunk.length) onStderr(chunk)
@@ -170,7 +214,9 @@ export function waitForReadyMessage (
 
     // Returns true when the ready message was found
     const forwardStdout = async (): Promise<boolean> => {
-      const chunk = await readFrom(outPath, outOffset)
+      outFd = outFd ?? await openForReading(outPath)
+
+      const chunk = await readFrom(outFd, outOffset)
 
       outOffset += chunk.length
 
@@ -215,29 +261,33 @@ export function waitForReadyMessage (
     }
 
     child.once('close', (code: number | null, signal: NodeJS.Signals | null) => {
-      onExit(code ?? (signal ? 128 + os.constants.signals[signal] : 1))
+      onExit(code ?? (signal ? signalExitCode(signal) : 1))
     })
 
     child.once('error', () => onExit(1))
 
     const poll = async (): Promise<ReadyResult> => {
-      for (;;) {
-        // Reads that start after the child is known to be gone also drain what it wrote just before exiting
-        const exitedWith = exit
+      try {
+        for (;;) {
+          // Reads that start after the child is known to be gone also drain what it wrote just before exiting
+          const exitedWith = exit
 
-        const ready = await forwardStdout()
+          const ready = await forwardStdout()
 
-        await forwardStderr()
+          await forwardStderr()
 
-        if (ready) {
-          return { ready: true, code: 0 }
+          if (ready) {
+            return { ready: true, code: 0 }
+          }
+
+          if (exitedWith !== undefined) {
+            return { ready: false, code: exitedWith }
+          }
+
+          await sleep()
         }
-
-        if (exitedWith !== undefined) {
-          return { ready: false, code: exitedWith }
-        }
-
-        await sleep()
+      } finally {
+        await Promise.all([outFd, errFd].map((fd) => (fd === undefined ? undefined : fs.close(fd).catch(() => undefined))))
       }
     }
 

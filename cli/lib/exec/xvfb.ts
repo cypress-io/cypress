@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import cp from 'child_process'
@@ -8,6 +9,7 @@ import { stripIndent } from 'common-tags'
 import Debug from 'debug'
 import { throwFormErrorText, errors } from '../errors'
 import util from '../util'
+import logger from '../logger'
 
 const debug: any = Debug('cypress:cli')
 const debugXvfb: any = Debug('cypress:xvfb')
@@ -29,8 +31,8 @@ const xvfbOptions: any = {
 
 // Starts Xvfb in a session of its own with no pipes to the CLI, so an app that keeps running
 // after the CLI exits keeps its display when a host ends the CLI's process group or closes its
-// output. @cypress/xvfb offers no option for this, so only the spawn is replaced and the display
-// choice, lock file wait and timeout stay the library's.
+// output. @cypress/xvfb offers no option for this, so only the spawn is replaced and the lock file
+// wait and timeout stay the library's.
 // Once the CLI has exited nothing is left to stop this Xvfb, so `-terminate` has it exit, and remove
 // its lock file, when its last client disconnects: when the app closes or crashes.
 // The library ships no usable types for the members the override reaches into
@@ -58,11 +60,28 @@ async function openStderrFile (): Promise<StderrFile> {
 
 export class DetachedXvfb extends XvfbBase {
   _stderrFile?: StderrFile
+  _avoidDisplays: number[]
 
   // Without it the class takes no arguments as far as the type checker can tell
-
   constructor (options: any) {
     super(options)
+    this._avoidDisplays = options.avoidDisplays ?? []
+  }
+
+  // Picks the first free display as the library does, but skips `avoidDisplays`, so a Xvfb left
+  // running for the app does not hold a display that a later run in this process will use
+  display (): string {
+    if (!this._display) {
+      let displayNum = 99
+
+      while (this._avoidDisplays.includes(displayNum) || fs.existsSync(this._lockFile(displayNum))) {
+        displayNum++
+      }
+
+      this._display = `:${displayNum}`
+    }
+
+    return this._display
   }
 
   // What Xvfb prints is only read when it fails to start, so it reaches DEBUG=cypress:xvfb and
@@ -115,6 +134,8 @@ export class DetachedXvfb extends XvfbBase {
   }
 
   _spawnProcess (lockFileExists: boolean, onAsyncSpawnError: (err: Error) => void): void {
+    // A process that cannot be spawned emits both 'error' and 'exit', and start reports only one
+    const onError = _.once(onAsyncSpawnError)
     const display = this.display()
 
     if (lockFileExists) {
@@ -130,14 +151,14 @@ export class DetachedXvfb extends XvfbBase {
 
     this._process = proc
 
-    proc.once('error', onAsyncSpawnError)
+    proc.once('error', onError)
 
     proc.once('exit', (code: number | null, signal: NodeJS.Signals | null) => {
       if (code !== 0) {
         const err: any = new Error(code === null ? `Xvfb was killed by ${signal}` : `Xvfb exited with code ${code}`)
 
         err.nonZeroExitCode = true
-        onAsyncSpawnError(err)
+        onError(err)
       }
     })
 
@@ -157,10 +178,24 @@ export const _xvfb = xvfb
 
 export const _xvfbOptions = xvfbOptions
 
+// The Xvfb started for a detached app keeps its display for as long as the app runs, so it leaves
+// XVFB_DISPLAY_NUM, and the display the Xvfb that stops with the CLI has already picked, to that one
+function createDetachedXvfb (): DetachedXvfb {
+  if (xvfbOptions.displayNum) {
+    logger.warn('XVFB_DISPLAY_NUM is set and was ignored because a detached Cypress app keeps its display running after Cypress returns.')
+  }
+
+  const avoidDisplays = [xvfbOptions.displayNum, xvfb._display?.slice(1)]
+  .filter(Boolean)
+  .map(Number)
+
+  return new DetachedXvfb({ ..._.omit(xvfbOptions, 'displayNum'), avoidDisplays })
+}
+
 export async function start ({ detached = false }: { detached?: boolean } = {}): Promise<any> {
   debug('Starting Xvfb', { detached })
 
-  running = detached ? Bluebird.promisifyAll(new DetachedXvfb(xvfbOptions)) : xvfb
+  running = detached ? Bluebird.promisifyAll(createDetachedXvfb()) : xvfb
 
   try {
     await running.startAsync()

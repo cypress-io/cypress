@@ -8,6 +8,7 @@ import {
   waitForReadyMessage,
   openDetachedOutput,
   closeDetachedOutput,
+  nameForApp,
   pruneStaleDetachedOutput,
   CYPRESS_OPEN_READY_MESSAGE,
 } from '../../../lib/exec/detached'
@@ -74,10 +75,56 @@ describe('lib/exec/detached', function () {
       expect(await fs.pathExists(other)).toBe(true)
     })
 
+    it('keeps old output of an app that is still running, and removes that of one that is not', async () => {
+      vi.spyOn(os, 'tmpdir').mockReturnValue(dir)
+
+      // Above the highest pid any supported platform hands out
+      const deadPid = 2 ** 31 - 2
+      const running = path.join(dir, `cypress-open-111-1000-app${process.pid}.out`)
+      const exited = path.join(dir, `cypress-open-111-1000-app${deadPid}.err`)
+
+      await Promise.all([running, exited].map((file) => fs.writeFile(file, 'x')))
+
+      const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)
+
+      await Promise.all([running, exited].map((file) => fs.utimes(file, eightDaysAgo, eightDaysAgo)))
+
+      await pruneStaleDetachedOutput()
+
+      expect(await fs.pathExists(running)).toBe(true)
+      expect(await fs.pathExists(exited)).toBe(false)
+    })
+
     it('does not throw when the directory cannot be read', async () => {
       vi.spyOn(os, 'tmpdir').mockReturnValue(path.join(dir, 'missing'))
 
       await expect(pruneStaleDetachedOutput()).resolves.toBeUndefined()
+    })
+  })
+
+  describe('nameForApp', () => {
+    const output = () => ({ outPath, errPath, outFd: -1, errFd: -1 })
+
+    it('renames the output files to carry the app pid', async () => {
+      const named = await nameForApp(output(), 4321)
+
+      expect(named.outPath).toBe(path.join(dir, 'open-app4321.out'))
+      expect(named.errPath).toBe(path.join(dir, 'open-app4321.err'))
+      expect(await fs.pathExists(named.outPath)).toBe(true)
+      expect(await fs.pathExists(outPath)).toBe(false)
+    })
+
+    it('keeps the name of a file that cannot be renamed', async () => {
+      await fs.remove(errPath)
+
+      const named = await nameForApp(output(), 4321)
+
+      expect(named.outPath).toBe(path.join(dir, 'open-app4321.out'))
+      expect(named.errPath).toBe(errPath)
+    })
+
+    it('leaves the names alone without a pid', async () => {
+      expect(await nameForApp(output(), undefined)).toEqual(output())
     })
   })
 
@@ -237,6 +284,17 @@ describe('lib/exec/detached', function () {
       expect(forwardedErr).toBe('a warning\nanother warning\n')
     })
 
+    it('keeps trying to open an output file that could not be opened at first', async () => {
+      await fs.remove(outPath)
+
+      const result = waitForReadyMessage(outPath, errPath, child as any)
+
+      await pause()
+      await fs.writeFile(outPath, CYPRESS_OPEN_READY_MESSAGE)
+
+      await expect(result).resolves.toEqual({ ready: true, code: 0 })
+    })
+
     it('resolves with the exit code if the child closes first', async () => {
       const result = waitForReadyMessage(outPath, errPath, child as any)
 
@@ -279,10 +337,12 @@ describe('lib/exec/detached', function () {
 
   describe('openDetachedOutput', () => {
     it('opens two distinct files under the temp directory', async () => {
+      vi.spyOn(os, 'tmpdir').mockReturnValue(dir)
+
       const opened = await openDetachedOutput()
 
       try {
-        expect(path.dirname(opened.outPath)).toBe(os.tmpdir())
+        expect(path.dirname(opened.outPath)).toBe(dir)
         expect(path.basename(opened.outPath)).toMatch(/^cypress-open-\d+-\d+(-\d+)?\.out$/)
         expect(path.basename(opened.errPath)).toMatch(/^cypress-open-\d+-\d+(-\d+)?\.err$/)
         expect(opened.outFd).not.toBe(opened.errFd)

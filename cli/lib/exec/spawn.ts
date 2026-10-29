@@ -6,7 +6,7 @@ import Debug from 'debug'
 import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
-import { openDetachedOutput, closeDetachedOutput, removeDetachedOutput, discardDetachedOutput, waitForReadyMessage } from './detached'
+import { openDetachedOutput, closeDetachedOutput, removeDetachedOutput, discardDetachedOutput, nameForApp, signalExitCode, waitForReadyMessage } from './detached'
 import type { DetachedOutput } from './detached'
 import { needsSandbox } from '../tasks/verify'
 import { throwFormErrorText, errors } from '../errors'
@@ -76,7 +76,38 @@ function pipeToFilteredStderr (): PassThrough {
 
 const INTERRUPT_SIGNALS: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
 
-const exitCodeFor = (signal: NodeJS.Signals): number => 128 + os.constants.signals[signal]
+// The signal reaches the processes the app started too, as Ctrl-C does for an app that is not
+// detached. On Windows that takes the process tree; elsewhere the app leads a process group of its own.
+function killApp (child: cp.ChildProcess, signal: NodeJS.Signals = 'SIGTERM'): void {
+  const pid = child.pid
+
+  if (pid && isPlatform('win32')) {
+    const killOnlyApp = (err: unknown) => {
+      debug('could not kill the process tree of the app, signalling only the app %o', err)
+      child.kill(signal)
+    }
+
+    void import('tree-kill').then(({ default: kill }) => {
+      kill(pid, signal, (err) => {
+        if (err) killOnlyApp(err)
+      })
+    }).catch(killOnlyApp)
+
+    return
+  }
+
+  if (pid) {
+    try {
+      process.kill(-pid, signal)
+
+      return
+    } catch (err) {
+      debug('could not signal the process group of the app, signalling only the app %o', err)
+    }
+  }
+
+  child.kill(signal)
+}
 
 function createSpawnFunction (
   executable: string,
@@ -99,7 +130,7 @@ function createSpawnFunction (
       debug('%s received before the app was ready, stopping it', signal)
 
       if (startingChild) {
-        startingChild.kill(handoff.signal ? 'SIGKILL' : signal)
+        killApp(startingChild, handoff.signal ? 'SIGKILL' : signal)
       } else {
         void xvfb.stop()
       }
@@ -205,7 +236,7 @@ function createSpawnFunction (
       }
 
       if (handoff.signal) {
-        return resolve(exitCodeFor(handoff.signal))
+        return resolve(signalExitCode(handoff.signal))
       }
 
       function resolveOn (event: any): any {
@@ -216,7 +247,7 @@ function createSpawnFunction (
             if (signal === 'SIGINT') {
               resolve(0)
             } else {
-              resolve(128 + os.constants.signals[signal])
+              resolve(signalExitCode(signal))
             }
 
             return
@@ -238,7 +269,7 @@ function createSpawnFunction (
         if (handoff.signal) {
           await discardDetachedOutput(detachedOutput)
 
-          return resolve(exitCodeFor(handoff.signal))
+          return resolve(signalExitCode(handoff.signal))
         }
 
         stdioOptions.stdio = ['ignore', detachedOutput.outFd, detachedOutput.errFd]
@@ -285,7 +316,7 @@ function createSpawnFunction (
             filteredStderr.write(chunk)
           }))
         } catch (err) {
-          child.kill()
+          killApp(child)
           await removeDetachedOutput(output)
 
           return reject(err)
@@ -294,6 +325,9 @@ function createSpawnFunction (
 
           await closeDetachedOutput(output)
         }
+
+        // Renamed while an interrupt still stops the app, so no app is handed off under the old names
+        const named = ready && !handoff.signal ? await nameForApp(output, child.pid) : output
 
         // An app that was told to stop after it printed the ready message is still shutting down.
         // It stays the starting child until it has exited, so another interrupt still kills it.
@@ -307,11 +341,11 @@ function createSpawnFunction (
           child.unref()
           handoff.done = true
           disarmInterrupts()
-          stdout.write(`Cypress is running in the background. Its output is written to "${output.outPath}" and "${output.errPath}"\n`)
+          stdout.write(`Cypress is running in the background. Its output is written to "${named.outPath}" and "${named.errPath}"\n`)
           resolve(0)
         } else {
-          await removeDetachedOutput(output)
-          resolve(handoff.signal ? exitCodeFor(handoff.signal) : code)
+          await removeDetachedOutput(named)
+          resolve(handoff.signal ? signalExitCode(handoff.signal) : code)
         }
 
         return
@@ -426,7 +460,7 @@ async function waitForExit (child: cp.ChildProcess): Promise<void> {
 
   await new Promise<void>((resolve) => {
     const timer = setTimeout(() => {
-      child.kill('SIGKILL')
+      killApp(child, 'SIGKILL')
       resolve()
     }, STOP_GRACE_MS)
 
@@ -448,7 +482,7 @@ async function spawnInXvfb (spawn: ReturnType<typeof createSpawnFunction>): Prom
       if (signal) {
         debug('xvfb was stopped by %s while it started', signal)
 
-        return exitCodeFor(signal)
+        return signalExitCode(signal)
       }
 
       throw err
@@ -572,9 +606,8 @@ export async function start (args: string | string[], options: StartOptions = {}
     }
   } finally {
     spawn.disarmInterrupts()
+    reraiseInterrupt(spawn.interruptedBy())
   }
-
-  reraiseInterrupt(spawn.interruptedBy())
 
   return code
 }
