@@ -558,19 +558,17 @@ export interface DetachedTapSession extends TapSession {
 export interface OpenDetachedTapSessionOptions {
   /**
    * Launch with no DISPLAY, so the CLI starts a Xvfb of its own rather than using the one
-   * this run has, on a display number no other Xvfb holds.
+   * this run has. Linux only.
    */
   ownDisplay?: boolean
 }
 
-const FIRST_TEST_DISPLAY_NUM = 150
+// The CLI picks the display of a detached app's Xvfb itself, ignoring XVFB_DISPLAY_NUM, so the
+// display is read back from the environment the app was started with
+const displayOf = async (pid: number): Promise<string | undefined> => {
+  const environ = await fs.readFile(`/proc/${pid}/environ`, 'utf8').catch(() => '')
 
-const freeDisplayNum = async (): Promise<number> => {
-  for (let num = FIRST_TEST_DISPLAY_NUM; ; num++) {
-    if (!await fs.pathExists(`/tmp/.X${num}-lock`) && !await fs.pathExists(`/tmp/.X11-unix/X${num}`)) {
-      return num
-    }
-  }
+  return environ.split('\0').find((entry) => entry.startsWith('DISPLAY='))?.slice('DISPLAY='.length)
 }
 
 /**
@@ -580,8 +578,8 @@ const freeDisplayNum = async (): Promise<number> => {
  */
 export const openDetachedTapSession = async (project: ProjectFixtureDir, options: OpenDetachedTapSessionOptions = {}): Promise<DetachedTapSession> => {
   const projectRoot = await prepareProject(project, {})
-  const displayNum = options.ownDisplay ? await freeDisplayNum() : undefined
-  const env = displayNum === undefined ? spawnEnv() : { ..._.omit(spawnEnv(), 'DISPLAY'), XVFB_DISPLAY_NUM: String(displayNum) }
+  // XVFB_DISPLAY_NUM is dropped too, since the CLI would only warn that it ignored it
+  const env = options.ownDisplay ? _.omit(spawnEnv(), 'DISPLAY', 'XVFB_DISPLAY_NUM') : spawnEnv()
 
   const launch = await new Promise<DetachedLaunch>((resolve, reject) => {
     const child = cp.spawn(process.execPath, [
@@ -617,5 +615,19 @@ export const openDetachedTapSession = async (project: ProjectFixtureDir, options
     exitReason: () => null,
   })
 
-  return { ...session, launch, xvfbLockFile: displayNum === undefined ? undefined : `/tmp/.X${displayNum}-lock` }
+  if (!options.ownDisplay) {
+    return { ...session, launch }
+  }
+
+  const pid = await recordedPid(projectRoot)
+  const display = pid ? await displayOf(pid) : undefined
+
+  if (!display) {
+    await session.kill()
+
+    throw new Error(`Could not read the display of the app started by cypress open --detached (pid ${pid})\n${launch.stdout}${launch.stderr}`)
+  }
+
+  // DISPLAY is `:<number>` or `:<number>.<screen>`
+  return { ...session, launch, xvfbLockFile: `/tmp/.X${display.slice(1).split('.')[0]}-lock` }
 }
