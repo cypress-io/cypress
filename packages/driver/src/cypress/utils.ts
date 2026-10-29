@@ -456,11 +456,11 @@ export default {
     ```
   */
   decodeBase64Unicode (str) {
-    // Inline source maps can be very large, so decode through one byte array
-    // instead of an intermediate string per byte, which can exhaust the
-    // renderer's heap. `fatal` keeps throwing on invalid UTF-8 so callers can
-    // fall back rather than receive replacement characters, and `ignoreBOM`
-    // returns a leading byte order mark instead of dropping it.
+    // Inline source maps can be very large, so decode into a single byte array:
+    // a string per byte can exhaust the renderer's heap. `fatal` makes invalid
+    // UTF-8 throw so callers can fall back instead of getting replacement
+    // characters, and `ignoreBOM` keeps a leading byte order mark so the result
+    // is exactly the encoded text.
     const binary = atob(str)
     const bytes = new Uint8Array(binary.length)
 
