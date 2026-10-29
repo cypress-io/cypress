@@ -139,6 +139,7 @@ describe('lib/browsers/electron', () => {
           setUserAgent: vi.fn(),
           getUserAgent: vi.fn(),
           clearCache: vi.fn(),
+          clearStorageData: vi.fn(),
         },
         on: vi.fn(),
         getOSProcessId: vi.fn().mockReturnValue(ELECTRON_PID),
@@ -690,8 +691,11 @@ describe('lib/browsers/electron', () => {
     it('expects the browser to be reset', () => {
       return electron._launch(win, url, automation, options, undefined, undefined, { attachCDPClient: vi.fn() })
       .then(() => {
-        expectCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
-        expectCalledWith(pageCriClient.send, 'Network.clearBrowserCache')
+        expect(win.webContents.session.clearStorageData).toHaveBeenCalledWith({
+          storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
+        })
+
+        expectNotCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin')
       })
     })
 

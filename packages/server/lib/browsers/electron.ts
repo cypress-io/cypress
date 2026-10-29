@@ -364,10 +364,7 @@ export = {
         this._handleDownloads(win, options.downloadsFolder, automation),
         utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
-        // Note that we are omitting `file_systems` as it is very non-performant to clear:
-        // https://github.com/cypress-io/cypress/pull/32703
-        pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
-        pageCriClient.send('Network.clearBrowserCache'),
+        this._clearStorageData(win.webContents),
       ])
     }
 
@@ -452,6 +449,17 @@ export = {
     debug('clearing cache')
 
     return webContents.session.clearCache()
+  },
+
+  _clearStorageData (webContents) {
+    debug('clearing storage data')
+
+    // Clears every origin in the session, which Chrome's CDP no longer allows
+    // in one call. `filesystem` is left out because it is very slow to clear:
+    // https://github.com/cypress-io/cypress/pull/32703
+    return webContents.session.clearStorageData({
+      storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
+    })
   },
 
   _getUserAgent (webContents) {
