@@ -741,13 +741,27 @@ describe('lib/browsers/cdp_automation', () => {
         expect(clearedOrigins()).toEqual(['http://localhost:3500'])
       })
 
-      it('resolves when a clear fails and retries that origin on the next reset', async () => {
-        sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: 'http://localhost:3500', storageTypes }).rejects(new Error('* is not a valid URL'))
+      it('runs every clear, then rejects naming each one that failed', async () => {
+        sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: 'http://localhost:3500', storageTypes }).rejects(new Error('Permission denied'))
+        sendDebuggerCommand.withArgs('Network.clearBrowserCache').rejects(new Error('cache is busy'))
         request('http://localhost:3500/fixtures/a.html')
         request('http://localhost:3501/fixtures/b.html')
 
-        await expect(onRequest('reset:browser:state')).resolves.toBeUndefined()
-        await onRequest('reset:browser:state')
+        await expect(onRequest('reset:browser:state')).rejects.toThrow(
+          `Cypress could not clear the browser's state before the next spec:\n\nNetwork.clearBrowserCache: cache is busy\nStorage.clearDataForOrigin for http://localhost:3500: Permission denied`,
+        )
+
+        expect(clearedOrigins()).toEqual(['http://localhost:3500', 'http://localhost:3501'])
+        expectCalledWith(sendDebuggerCommand, 'Network.clearBrowserCookies')
+      })
+
+      it('retries an origin whose clear failed on the next reset', async () => {
+        sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: 'http://localhost:3500', storageTypes }).rejects(new Error('Permission denied'))
+        request('http://localhost:3500/fixtures/a.html')
+        request('http://localhost:3501/fixtures/b.html')
+
+        await expect(onRequest('reset:browser:state')).rejects.toThrow()
+        await expect(onRequest('reset:browser:state')).rejects.toThrow()
 
         expect(clearedOrigins()).toEqual(['http://localhost:3500', 'http://localhost:3501', 'http://localhost:3500'])
       })

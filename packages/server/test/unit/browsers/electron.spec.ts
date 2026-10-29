@@ -695,7 +695,9 @@ describe('lib/browsers/electron', () => {
           storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
         })
 
-        expectNotCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin')
+        expectCalledWith(pageCriClient.send, 'Network.clearBrowserCookies')
+        expectCalledWith(pageCriClient.send, 'Network.clearBrowserCache')
+        expectNotCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin', { origin: '*' })
       })
     })
 

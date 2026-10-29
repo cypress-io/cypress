@@ -36,6 +36,10 @@ const ELECTRON_DEBUG_EVENTS = [
 let instance: BrowserInstance | null = null
 let browserCriClient: BrowserCriClient | null = null
 
+// Outlives each spec's window, so the reset when the next spec launches can
+// clear the origins the previous spec's window requested.
+const storageOrigins = new Set<string>()
+
 const tryToCall = function (win, method) {
   try {
     if (!win.isDestroyed()) {
@@ -81,7 +85,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -363,8 +367,11 @@ export = {
         handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
         utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
-        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
+        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron.
+        // The session clear reaches every origin, including ones left by an earlier `cypress open`,
+        // but has no option for interest groups or shared storage, which the per-origin reset covers.
         this._clearStorageData(win.webContents),
+        cdpAutomation.onRequest('reset:browser:state', undefined),
       ])
     }
 

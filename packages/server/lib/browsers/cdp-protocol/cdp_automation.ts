@@ -232,9 +232,10 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   }
 
   // Chrome rejects `origin: '*'` from version 158 on, so each origin the
-  // browser has requested is cleared by name. A failure is logged rather than
-  // thrown: one origin left uncleared must not abort the run, and the origin
-  // is kept for the next reset.
+  // browser has requested is cleared by name. Every clear runs even when one
+  // fails, and any failure is then thrown: a spec that starts with the last
+  // spec's data fails in ways that are hard to trace back to this. An origin
+  // that failed is kept for the next reset.
   private async resetBrowserState () {
     const origins = [...this.storageOrigins]
 
@@ -242,22 +243,26 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     debug('resetting browser state for origins %o', origins)
 
-    const results = await Promise.allSettled([
-      this.sendDebuggerCommandFn('Network.clearBrowserCookies'),
-      this.sendDebuggerCommandFn('Network.clearBrowserCache'),
-      ...origins.map((origin) => {
-        return this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin, storageTypes: RESET_STORAGE_TYPES })
+    const clears: [string, Promise<unknown>][] = [
+      ['Network.clearBrowserCookies', this.sendDebuggerCommandFn('Network.clearBrowserCookies')],
+      ['Network.clearBrowserCache', this.sendDebuggerCommandFn('Network.clearBrowserCache')],
+      ...origins.map((origin): [string, Promise<unknown>] => {
+        return [`Storage.clearDataForOrigin for ${origin}`, this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin, storageTypes: RESET_STORAGE_TYPES })
         .catch((err) => {
           this.storageOrigins.add(origin)
           throw err
-        })
+        })]
       }),
-    ])
+    ]
 
-    for (const result of results) {
-      if (result.status === 'rejected') {
-        debug('failed to reset browser state: %o', result.reason)
-      }
+    const results = await Promise.allSettled(clears.map(([, clear]) => clear))
+
+    const failures = results.flatMap((result, i) => {
+      return result.status === 'rejected' ? [`${clears[i][0]}: ${result.reason?.message ?? result.reason}`] : []
+    })
+
+    if (failures.length) {
+      throw new Error(`Cypress could not clear the browser's state before the next spec:\n\n${failures.join('\n')}`)
     }
   }
 
