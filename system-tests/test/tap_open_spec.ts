@@ -2,6 +2,8 @@
 // and needs none of systemTests.it's spawn/snapshot machinery or its global setup.
 import { expect } from 'chai'
 import path from 'path'
+import os from 'os'
+import cp from 'child_process'
 import fs from 'fs-extra'
 import stripAnsi from 'strip-ansi'
 import { TAP_ERROR_COPY } from '@packages/cypress-sessions'
@@ -1099,10 +1101,16 @@ describe('tap CLI against a Module-API-booted session', function () {
   })
 })
 
+// The app keeps writing to these after the command returns, so nothing but the test removes them
+const removeDetachedOutput = async (session: DetachedTapSession | undefined): Promise<void> => {
+  const written = /written to "([^"]+)" and "([^"]+)"/.exec(session?.launch.stdout ?? '')
+
+  await Promise.all((written ? [written[1], written[2]] : []).map((file) => fs.remove(file)))
+}
+
 /**
- * `cypress open --detached` returns once the app is ready and leaves it running on its own.
- * It used to close the app's output pipes as it exited, and stop a Xvfb it had started, so
- * the app stopped shortly after the command returned.
+ * `cypress open --detached` returns once the app is ready and leaves it running on its own. The
+ * app's output and display must outlive the command, or the app stops soon after it returns.
  */
 describe('tap CLI against a session started with cypress open --detached', function () {
   this.timeout(SUITE_TIMEOUT_MS)
@@ -1115,11 +1123,7 @@ describe('tap CLI against a session started with cypress open --detached', funct
 
   after(async () => {
     await session?.kill()
-
-    // The app keeps writing to these after the command returns, so nothing but the test removes them
-    const written = /written to "([^"]+)" and "([^"]+)"/.exec(session?.launch.stdout ?? '')
-
-    await Promise.all((written ? [written[1], written[2]] : []).map((file) => fs.remove(file)))
+    await removeDetachedOutput(session)
   })
 
   it('returns once the app is ready, saying where its output is written', async () => {
@@ -1147,6 +1151,83 @@ describe('tap CLI against a session started with cypress open --detached', funct
     const status = await session.runSpec(SPEC)
 
     expect(status.status).to.eq('passed')
+  })
+})
+
+/**
+ * With no DISPLAY the CLI starts a Xvfb of its own. That Xvfb has to outlive the command, and
+ * nothing is left to stop it once the command has returned, so it has to stop by itself once
+ * the app has closed.
+ */
+describe('tap CLI against a session started with cypress open --detached and no DISPLAY', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: DetachedTapSession | undefined
+  let xvfbPid: number | undefined
+  let closed = false
+
+  // A process that exited but was not reaped yet still answers a signal, so read its state instead
+  const isRunning = async (pid: number): Promise<boolean> => {
+    try {
+      return !/^\d+ \(.*\) Z/.test(await fs.readFile(`/proc/${pid}/stat`, 'utf8'))
+    } catch {
+      return false
+    }
+  }
+
+  before(async function () {
+    if (os.platform() !== 'linux') {
+      return this.skip()
+    }
+
+    session = await openDetachedTapSession('tap-retries', { ownDisplay: true })
+
+    // Xvfb writes its pid to its lock file
+    xvfbPid = Number((await fs.readFile(session.xvfbLockFile!, 'utf8')).trim())
+  })
+
+  after(async () => {
+    if (!closed) {
+      await session?.kill()
+    }
+
+    await removeDetachedOutput(session)
+
+    if (xvfbPid && await isRunning(xvfbPid)) {
+      process.kill(xvfbPid, 'SIGKILL')
+      await fs.remove(session!.xvfbLockFile!)
+    }
+  })
+
+  it('starts Xvfb in a session of its own', function () {
+    expect(session!.launch.exitCode, `${session!.launch.stdout}${session!.launch.stderr}`).to.eq(0)
+
+    const sessionId = Number(cp.execFileSync('ps', ['-o', 'sid=', '-p', String(xvfbPid)]).toString().trim())
+
+    expect(sessionId).to.eq(xvfbPid)
+  })
+
+  it('keeps the app connected to its display after the command returned', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+
+    const status = await session!.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+    expect(await isRunning(xvfbPid!)).to.eq(true)
+  })
+
+  it('stops Xvfb and removes its lock file once the app has closed', async () => {
+    await session!.kill()
+    closed = true
+
+    const deadline = Date.now() + 30000
+
+    while ((await isRunning(xvfbPid!) || await fs.pathExists(session!.xvfbLockFile!)) && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 250))
+    }
+
+    expect(await isRunning(xvfbPid!), 'Xvfb is still running').to.eq(false)
+    expect(await fs.pathExists(session!.xvfbLockFile!), 'the lock file is still there').to.eq(false)
   })
 })
 

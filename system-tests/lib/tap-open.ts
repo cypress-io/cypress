@@ -551,6 +551,26 @@ export interface DetachedLaunch {
 export interface DetachedTapSession extends TapSession {
   /** What `cypress open --detached` itself printed, and how it exited. */
   launch: DetachedLaunch
+  /** The lock file of the Xvfb the CLI started, when it was made to start one. */
+  xvfbLockFile?: string
+}
+
+export interface OpenDetachedTapSessionOptions {
+  /**
+   * Launch with no DISPLAY, so the CLI starts a Xvfb of its own rather than using the one
+   * this run has, on a display number no other Xvfb holds.
+   */
+  ownDisplay?: boolean
+}
+
+const FIRST_TEST_DISPLAY_NUM = 150
+
+const freeDisplayNum = async (): Promise<number> => {
+  for (let num = FIRST_TEST_DISPLAY_NUM; ; num++) {
+    if (!await fs.pathExists(`/tmp/.X${num}-lock`) && !await fs.pathExists(`/tmp/.X11-unix/X${num}`)) {
+      return num
+    }
+  }
 }
 
 /**
@@ -558,8 +578,10 @@ export interface DetachedTapSession extends TapSession {
  * running on its own. The harness has no handle on the app, so it ends it through the pid in
  * the session record, as it does for the Module API.
  */
-export const openDetachedTapSession = async (project: ProjectFixtureDir): Promise<DetachedTapSession> => {
+export const openDetachedTapSession = async (project: ProjectFixtureDir, options: OpenDetachedTapSessionOptions = {}): Promise<DetachedTapSession> => {
   const projectRoot = await prepareProject(project, {})
+  const displayNum = options.ownDisplay ? await freeDisplayNum() : undefined
+  const env = displayNum === undefined ? spawnEnv() : { ..._.omit(spawnEnv(), 'DISPLAY'), XVFB_DISPLAY_NUM: String(displayNum) }
 
   const launch = await new Promise<DetachedLaunch>((resolve, reject) => {
     const child = cp.spawn(process.execPath, [
@@ -569,7 +591,7 @@ export const openDetachedTapSession = async (project: ProjectFixtureDir): Promis
       '--e2e',
       '--browser', 'chrome',
       '--dev',
-    ], { cwd: projectRoot, env: spawnEnv() })
+    ], { cwd: projectRoot, env })
 
     let stdout = ''
     let stderr = ''
@@ -595,5 +617,5 @@ export const openDetachedTapSession = async (project: ProjectFixtureDir): Promis
     exitReason: () => null,
   })
 
-  return { ...session, launch }
+  return { ...session, launch, xvfbLockFile: displayNum === undefined ? undefined : `/tmp/.X${displayNum}-lock` }
 }

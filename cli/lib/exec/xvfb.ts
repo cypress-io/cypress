@@ -1,5 +1,7 @@
 import os from 'os'
+import path from 'path'
 import cp from 'child_process'
+import fs from 'fs-extra'
 import Bluebird from 'bluebird'
 import Xvfb from '@cypress/xvfb'
 import { stripIndent } from 'common-tags'
@@ -34,11 +36,82 @@ const xvfbOptions: any = {
 // The library ships no usable types for the members the override reaches into
 const XvfbBase: any = Xvfb
 
+interface StderrFile {
+  dir: string
+  file: string
+  fd: number
+}
+
+// A file rather than a pipe: once the CLI exits, Xvfb's next write to a pipe would end it
+async function openStderrFile (): Promise<StderrFile> {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'cypress-xvfb-'))
+  const file = path.join(dir, 'stderr')
+
+  try {
+    return { dir, file, fd: await fs.open(file, 'wx', 0o600) }
+  } catch (err) {
+    await fs.remove(dir).catch(() => undefined)
+
+    throw err
+  }
+}
+
 export class DetachedXvfb extends XvfbBase {
+  _stderrFile?: StderrFile
+
   // Without it the class takes no arguments as far as the type checker can tell
 
   constructor (options: any) {
     super(options)
+  }
+
+  // What Xvfb prints is only read when it fails to start, so it reaches DEBUG=cypress:xvfb and
+  // the error as it does for an Xvfb started with pipes. Without a file for it, Xvfb still starts.
+  start (cb?: (err: Error | null, proc?: cp.ChildProcess) => void): void {
+    openStderrFile().catch((err) => {
+      debug('no file for the output of Xvfb, discarding it', err)
+    }).then((stderrFile) => {
+      this._stderrFile = stderrFile ?? undefined
+
+      super.start(async (err: any, proc?: cp.ChildProcess) => {
+        await this._drainStderr(err)
+        cb?.(err, proc)
+      })
+    })
+  }
+
+  // Removing the file once Xvfb has started leaves it writing to a file nobody can open, so
+  // nothing is left in the temp directory for an Xvfb that outlives the CLI
+  async _drainStderr (err: any): Promise<void> {
+    const stderrFile = this._stderrFile
+
+    if (!stderrFile) {
+      return
+    }
+
+    this._stderrFile = undefined
+
+    try {
+      await fs.close(stderrFile.fd)
+
+      if (!err) {
+        return
+      }
+
+      const output = (await fs.readFile(stderrFile.file, 'utf8')).trim()
+
+      if (output) {
+        this._onStderrData(output)
+
+        if (err.nonZeroExitCode) {
+          err.message = `${err.message}:\n${output}`
+        }
+      }
+    } catch {
+      // Best effort: the start error is reported either way
+    } finally {
+      await fs.remove(stderrFile.dir).catch(() => undefined)
+    }
   }
 
   _spawnProcess (lockFileExists: boolean, onAsyncSpawnError: (err: Error) => void): void {
@@ -52,15 +125,16 @@ export class DetachedXvfb extends XvfbBase {
       return
     }
 
-    const proc = cp.spawn('Xvfb', [display, '-terminate', ...this._xvfb_args], { detached: true, stdio: 'ignore' })
+    const stderr = this._stderrFile?.fd ?? 'ignore'
+    const proc = cp.spawn('Xvfb', [display, '-terminate', ...this._xvfb_args], { detached: true, stdio: ['ignore', 'ignore', stderr] })
 
     this._process = proc
 
     proc.once('error', onAsyncSpawnError)
 
-    proc.once('exit', (code: number | null) => {
+    proc.once('exit', (code: number | null, signal: NodeJS.Signals | null) => {
       if (code !== 0) {
-        const err: any = new Error(`Xvfb exited with code ${code}`)
+        const err: any = new Error(code === null ? `Xvfb was killed by ${signal}` : `Xvfb exited with code ${code}`)
 
         err.nonZeroExitCode = true
         onAsyncSpawnError(err)
@@ -72,9 +146,9 @@ export class DetachedXvfb extends XvfbBase {
 }
 
 const xvfb: any = Bluebird.promisifyAll(new Xvfb(xvfbOptions))
-const detachedXvfb: any = Bluebird.promisifyAll(new DetachedXvfb(xvfbOptions))
 
-// The instance that was started, so `stop` ends that one
+// The instance that was started, so `stop` ends that one. Each detached launch gets its own, since
+// the Xvfb a previous one left for its app may still hold its display.
 let running: any = xvfb
 
 export const _debugXvfb = debugXvfb
@@ -86,7 +160,7 @@ export const _xvfbOptions = xvfbOptions
 export async function start ({ detached = false }: { detached?: boolean } = {}): Promise<any> {
   debug('Starting Xvfb', { detached })
 
-  running = detached ? detachedXvfb : xvfb
+  running = detached ? Bluebird.promisifyAll(new DetachedXvfb(xvfbOptions)) : xvfb
 
   try {
     await running.startAsync()
@@ -119,6 +193,13 @@ export async function stop (): Promise<null> {
   } catch (e) {
     return null
   }
+}
+
+// Leaves a detached Xvfb running for the app it was started for. The CLI gets its own DISPLAY back
+// and forgets that Xvfb, so a later launch from the same process neither uses nor stops it.
+export function release (): void {
+  running._restoreDisplayEnvVariable()
+  running = xvfb
 }
 
 export function isNeeded (env: NodeJS.ProcessEnv = process.env): boolean {
@@ -176,9 +257,9 @@ export default {
   _debugXvfb,
   _xvfb,
   _xvfbOptions,
-  _detachedXvfb: detachedXvfb,
   start,
   stop,
+  release,
   isNeeded,
   verify,
 }

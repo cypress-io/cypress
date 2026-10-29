@@ -1,9 +1,10 @@
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import { execSync } from 'child_process'
 import fs from 'fs'
+import fsExtra from 'fs-extra'
 import os from 'os'
 import path from 'path'
-import { DetachedXvfb } from '../../../lib/exec/xvfb'
+import xvfb, { DetachedXvfb } from '../../../lib/exec/xvfb'
 
 // The real @cypress/xvfb, with a stand-in `Xvfb` first on PATH: it takes the same lock file a real
 // one does, so what is under test is how the process is started, not the X server.
@@ -84,6 +85,75 @@ describe.skipIf(os.platform() === 'win32')('lib/exec/xvfb DetachedXvfb', functio
     installFakeXvfb('exit 3')
 
     await expect(start(new DetachedXvfb({ displayNum: DISPLAY_NUM, timeout: 5000 }))).rejects.toMatchObject({ nonZeroExitCode: true })
+  })
+
+  it('names the signal that killed an Xvfb that did not start', async function () {
+    installFakeXvfb('kill -9 $$')
+
+    await expect(start(new DetachedXvfb({ displayNum: DISPLAY_NUM, timeout: 5000 }))).rejects.toThrow('Xvfb was killed by SIGKILL')
+  })
+
+  it('starts a Xvfb of its own for each launch, and gives DISPLAY back once released', async function () {
+    // Each fake Xvfb takes the lock file of the display it was given and records its pid there
+    installFakeXvfb('echo $$ > "/tmp/.X${1#:}-lock"\nexec sleep 30')
+    delete process.env.DISPLAY
+
+    const displays: string[] = []
+
+    try {
+      await xvfb.start({ detached: true })
+      displays.push(process.env.DISPLAY!)
+      xvfb.release()
+
+      expect(process.env.DISPLAY).toBeUndefined()
+
+      await xvfb.start({ detached: true })
+      displays.push(process.env.DISPLAY!)
+
+      expect(displays[1]).not.toBe(displays[0])
+    } finally {
+      for (const display of displays) {
+        const lockFile = `/tmp/.X${display.slice(1)}-lock`
+        const pid = Number((await fsExtra.readFile(lockFile, 'utf8')).trim())
+
+        process.kill(pid)
+        await fsExtra.remove(lockFile)
+      }
+
+      xvfb.release()
+    }
+  })
+
+  it('reports what an Xvfb that exits with an error printed', async function () {
+    installFakeXvfb('echo "Fatal server error: no screens found" >&2\nexit 1')
+
+    const onStderrData = vi.fn()
+
+    await expect(start(new DetachedXvfb({ displayNum: DISPLAY_NUM, timeout: 5000, onStderrData }))).rejects.toThrow('Xvfb exited with code 1:\nFatal server error: no screens found')
+    expect(onStderrData).toHaveBeenCalledWith('Fatal server error: no screens found')
+  })
+
+  it('reports what an Xvfb that never creates its display printed', async function () {
+    installFakeXvfb('echo "waiting for a lock" >&2\nexec sleep 30')
+
+    const onStderrData = vi.fn()
+
+    await expect(start(new DetachedXvfb({ displayNum: DISPLAY_NUM, timeout: 200, onStderrData }))).rejects.toMatchObject({ timedOut: true })
+    expect(onStderrData).toHaveBeenCalledWith('waiting for a lock')
+  })
+
+  it('leaves no file for its output behind once started', async function () {
+    installFakeXvfb(`echo "started" >&2\ntouch ${LOCK_FILE}\nexec sleep 30`)
+
+    const mkdtemp = vi.spyOn(fsExtra, 'mkdtemp')
+    const onStderrData = vi.fn()
+
+    await start(new DetachedXvfb({ displayNum: DISPLAY_NUM, timeout: 5000, onStderrData }))
+
+    const dir = await mkdtemp.mock.results[0].value
+
+    expect(fs.existsSync(dir)).toBe(false)
+    expect(onStderrData).not.toHaveBeenCalled()
   })
 
   it('refuses a display that is already in use', async function () {

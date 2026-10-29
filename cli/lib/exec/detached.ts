@@ -50,7 +50,7 @@ export async function openDetachedOutput (): Promise<DetachedOutput> {
         await fs.remove(outPath).catch(() => undefined)
       }
 
-      if ((err as NodeJS.ErrnoException).code === 'EEXIST' && attempt < MAX_NAME_ATTEMPTS) {
+      if (err instanceof Error && 'code' in err && err.code === 'EEXIST' && attempt < MAX_NAME_ATTEMPTS) {
         continue
       }
 
@@ -86,6 +86,12 @@ export async function closeDetachedOutput ({ outFd, errFd }: DetachedOutput): Pr
 
 export async function removeDetachedOutput ({ outPath, errPath }: DetachedOutput): Promise<void> {
   await Promise.all([outPath, errPath].map((file) => fs.remove(file).catch(() => undefined)))
+}
+
+// For output that no app was started with
+export async function discardDetachedOutput (output: DetachedOutput): Promise<void> {
+  await closeDetachedOutput(output)
+  await removeDetachedOutput(output)
 }
 
 // Only the bytes after `offset`, so a long-running app's log is not read again from the start on every poll
@@ -217,7 +223,7 @@ export function waitForReadyMessage (
     const poll = async (): Promise<ReadyResult> => {
       for (;;) {
         // Reads that start after the child is known to be gone also drain what it wrote just before exiting
-        const exited = exit !== undefined
+        const exitedWith = exit
 
         const ready = await forwardStdout()
 
@@ -227,8 +233,8 @@ export function waitForReadyMessage (
           return { ready: true, code: 0 }
         }
 
-        if (exited) {
-          return { ready: false, code: exit as number }
+        if (exitedWith !== undefined) {
+          return { ready: false, code: exitedWith }
         }
 
         await sleep()

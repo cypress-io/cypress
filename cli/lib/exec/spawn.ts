@@ -6,7 +6,7 @@ import Debug from 'debug'
 import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
-import { openDetachedOutput, closeDetachedOutput, removeDetachedOutput, waitForReadyMessage } from './detached'
+import { openDetachedOutput, closeDetachedOutput, removeDetachedOutput, discardDetachedOutput, waitForReadyMessage } from './detached'
 import type { DetachedOutput } from './detached'
 import { needsSandbox } from '../tasks/verify'
 import { throwFormErrorText, errors } from '../errors'
@@ -74,14 +74,50 @@ function pipeToFilteredStderr (): PassThrough {
   return sourceStream
 }
 
+const INTERRUPT_SIGNALS: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
+
+const exitCodeFor = (signal: NodeJS.Signals): number => 128 + os.constants.signals[signal]
+
 function createSpawnFunction (
   executable: string,
-  args: string[],
+  baseArgs: string[],
   options: any,
 ) {
   // `done` is set once a detached app is running on its own, so its Xvfb is not stopped with the
   // CLI. `signal` is the interrupt that stopped a detached app before it was ready.
   const handoff: { done: boolean, signal?: NodeJS.Signals } = { done: false }
+
+  // The detached app that has been spawned but is not ready yet
+  let startingChild: cp.ChildProcess | undefined
+
+  // Until a detached app is ready there is nothing to hand off, so an interrupt stops the launch
+  // instead of leaving the app, or a Xvfb started for it in a session of its own, running unseen.
+  // Before the app is spawned that means stopping the Xvfb, which also ends a wait for one that is
+  // slow to start. A second interrupt does not wait for an app that ignored the first.
+  const interruptHandlers = INTERRUPT_SIGNALS.map((signal) => {
+    const handler = () => {
+      debug('%s received before the app was ready, stopping it', signal)
+
+      if (startingChild) {
+        startingChild.kill(handoff.signal ? 'SIGKILL' : signal)
+      } else {
+        void xvfb.stop()
+      }
+
+      handoff.signal = handoff.signal ?? signal
+    }
+
+    return { signal, handler }
+  })
+
+  const armInterrupts = () => {
+    interruptHandlers.forEach(({ signal, handler }) => process.on(signal, handler))
+  }
+
+  // Safe to call again once disarmed: removing a handler that is not there does nothing
+  const disarmInterrupts = () => {
+    interruptHandlers.forEach(({ signal, handler }) => process.off(signal, handler))
+  }
 
   const spawnFunction = (overrides: any = {}): any => {
     return new Promise(async (resolve: any, reject: any) => {
@@ -90,6 +126,8 @@ function createSpawnFunction (
       })
 
       const { onStderrData } = overrides
+      // Copied, so a retry inside Xvfb starts from the same arguments as the first attempt
+      let args = [...baseArgs]
       const envOverrides = util.getEnvOverrides(options)
       const electronArgs: string[] = []
       const node11WindowsFix = isPlatform('win32')
@@ -133,7 +171,7 @@ function createSpawnFunction (
         stdioOptions.env.DISPLAY = process.env.DISPLAY
       }
 
-      if (stdioOptions.detached && !args.includes('--emit-when-ready')) {
+      if (stdioOptions.detached) {
         // Ask interactive mode to print a ready sentinel on stdout
         args.push('--emit-when-ready')
       }
@@ -166,6 +204,10 @@ function createSpawnFunction (
         return
       }
 
+      if (handoff.signal) {
+        return resolve(exitCodeFor(handoff.signal))
+      }
+
       function resolveOn (event: any): any {
         return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })
@@ -193,6 +235,12 @@ function createSpawnFunction (
           return reject(err)
         }
 
+        if (handoff.signal) {
+          await discardDetachedOutput(detachedOutput)
+
+          return resolve(exitCodeFor(handoff.signal))
+        }
+
         stdioOptions.stdio = ['ignore', detachedOutput.outFd, detachedOutput.errFd]
       }
 
@@ -202,8 +250,7 @@ function createSpawnFunction (
         child = cp.spawn(executable, args, stdioOptions)
       } catch (err) {
         if (detachedOutput) {
-          await closeDetachedOutput(detachedOutput)
-          await removeDetachedOutput(detachedOutput)
+          await discardDetachedOutput(detachedOutput)
         }
 
         return reject(err)
@@ -224,21 +271,7 @@ function createSpawnFunction (
         const output = detachedOutput
         const filteredStderr = pipeToFilteredStderr()
 
-        // Until the app is ready there is nothing to hand off, so an interrupt stops the app
-        // and the wait ends with its exit, instead of leaving it running unseen. A second
-        // interrupt does not wait for an app that ignored the first.
-
-        const interrupt = (signal: NodeJS.Signals) => {
-          return () => {
-            debug('%s received before the app was ready, stopping it', signal)
-            child.kill(handoff.signal ? 'SIGKILL' : signal)
-            handoff.signal = handoff.signal ?? signal
-          }
-        }
-
-        const handlers = (['SIGINT', 'SIGTERM'] as NodeJS.Signals[]).map((signal) => [signal, interrupt(signal)] as const)
-
-        handlers.forEach(([signal, handler]) => process.on(signal, handler))
+        startingChild = child
 
         let ready: boolean
         let code: number
@@ -251,33 +284,34 @@ function createSpawnFunction (
 
             filteredStderr.write(chunk)
           }))
-
-          // The wait ends at the ready message, so an app that was told to stop is still shutting
-          // down. Waiting here keeps the interrupt handlers, so another interrupt still kills it.
-          if (ready && handoff.signal) {
-            await waitForExit(child)
-          }
         } catch (err) {
           child.kill()
           await removeDetachedOutput(output)
 
           return reject(err)
         } finally {
-          handlers.forEach(([signal, handler]) => process.off(signal, handler))
-
           filteredStderr.end()
 
           await closeDetachedOutput(output)
         }
 
+        // An app that was told to stop after it printed the ready message is still shutting down.
+        // It stays the starting child until it has exited, so another interrupt still kills it.
+        if (ready && handoff.signal) {
+          await waitForExit(child)
+        }
+
+        startingChild = undefined
+
         if (ready && !handoff.signal) {
           child.unref()
           handoff.done = true
+          disarmInterrupts()
           stdout.write(`Cypress is running in the background. Its output is written to "${output.outPath}" and "${output.errPath}"\n`)
           resolve(0)
         } else {
           await removeDetachedOutput(output)
-          resolve(handoff.signal ? 128 + os.constants.signals[handoff.signal] : code)
+          resolve(handoff.signal ? exitCodeFor(handoff.signal) : code)
         }
 
         return
@@ -371,7 +405,13 @@ function createSpawnFunction (
     })
   }
 
-  return Object.assign(spawnFunction, { handedOff: () => handoff.done, interruptedBy: () => handoff.signal, isDetached: () => Boolean(options.detached) })
+  return Object.assign(spawnFunction, {
+    handedOff: () => handoff.done,
+    interruptedBy: () => handoff.signal,
+    isDetached: () => Boolean(options.detached),
+    armInterrupts,
+    disarmInterrupts,
+  })
 }
 
 const STOP_GRACE_MS = 5000
@@ -399,7 +439,20 @@ async function waitForExit (child: cp.ChildProcess): Promise<void> {
 
 async function spawnInXvfb (spawn: ReturnType<typeof createSpawnFunction>): Promise<number> {
   try {
-    await xvfb.start({ detached: spawn.isDetached() })
+    try {
+      await xvfb.start({ detached: spawn.isDetached() })
+    } catch (err) {
+      const signal = spawn.interruptedBy()
+
+      // An interrupt stops a Xvfb that is still starting, so this failure is the interrupt working
+      if (signal) {
+        debug('xvfb was stopped by %s while it started', signal)
+
+        return exitCodeFor(signal)
+      }
+
+      throw err
+    }
 
     debug('xvfb started')
     const code = await userFriendlySpawn(spawn)
@@ -408,6 +461,7 @@ async function spawnInXvfb (spawn: ReturnType<typeof createSpawnFunction>): Prom
   } finally {
     if (spawn.handedOff()) {
       debug('app was handed off, leaving xvfb running')
+      xvfb.release()
     } else {
       await xvfb.stop()
     }
@@ -495,19 +549,29 @@ export async function start (args: string | string[], options: StartOptions = {}
 
   let code: number
 
-  if (needsXvfb) {
-    debug('starting xvfb')
+  // Armed before Xvfb starts, and kept until it is stopped, so no interrupt can end the CLI
+  // between the two and leave a Xvfb in a session of its own that no app ever connects to
+  if (detached) {
+    spawn.armInterrupts()
+  }
 
-    code = await spawnInXvfb(spawn)
-  } else {
-    // if we are on linux and there's already a DISPLAY
-    // set, then we may need to rerun cypress after
-    // spawning our own Xvfb server
-    const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
+  try {
+    if (needsXvfb) {
+      debug('starting xvfb')
 
-    debug('linuxWithDisplayEnv', linuxWithDisplayEnv)
+      code = await spawnInXvfb(spawn)
+    } else {
+      // if we are on linux and there's already a DISPLAY
+      // set, then we may need to rerun cypress after
+      // spawning our own Xvfb server
+      const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
 
-    code = await userFriendlySpawn(spawn, linuxWithDisplayEnv)
+      debug('linuxWithDisplayEnv', linuxWithDisplayEnv)
+
+      code = await userFriendlySpawn(spawn, linuxWithDisplayEnv)
+    }
+  } finally {
+    spawn.disarmInterrupts()
   }
 
   reraiseInterrupt(spawn.interruptedBy())
