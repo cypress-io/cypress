@@ -42,7 +42,7 @@ By default, installing the `cypress` package downloads the Cypress binary over H
 
 Patches for security vulnerabilities primarily focus on the latest major version.
 
-Security fixes are backported to the previous major version for 12 months after the current major version is released only for vulnerabilities with High or Critical CVSS Scores. The decision to backport is made based on severity assessment and the feasibility of implementing the patch in those versions.
+High and Critical CVSS security fixes in code authored and maintained by Cypress are backported to the previous major version for up to 12 months after the current major version is released. The decision to backport is made based on severity assessment and the feasibility of implementing the patch in those versions.
 
 Updates for vulnerabilities in third-party dependencies, such as Electron, Chromium, Node.js, or npm packages, are not backported.
 
