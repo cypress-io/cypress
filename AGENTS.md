@@ -241,6 +241,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
 - **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
 - **Name the reason, not the predecessor** — "Matches what the old plugin did" is not a *why*, and it rots once that plugin is deleted. State the reason the old code had, and put parity with replaced tooling in the commit message or guide.
+- **No measurements** — Don't cite benchmark numbers in a comment. They depend on the machine they came from and go stale with the code around them. State the reason instead, and keep the numbers in the commit message or pull request.
 
 Bad examples:
 
@@ -278,7 +279,7 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 ### Changelog & Template
 
 - The semantic title prefix decides whether an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) is required, which section it belongs in, and how it must be phrased. The [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) is the source of truth for all of it — read it rather than guessing, and note that a `fix` prefix always requires an entry.
-- Never put exact performance numbers in a changelog entry — no seconds, percentages, or "N times faster". Say what got faster in plain terms ("now finishes sooner", "starts slightly faster"), and keep the measurements in the commit message and PR description. See guideline 6 in [Writing Guidelines](./guides/writing-the-cypress-changelog.md#writing-guidelines).
+- Never put exact performance numbers in a changelog entry — no seconds, percentages, or "N times faster". Say what got faster in plain terms ("now finishes sooner", "starts slightly faster"), and keep the measurements in the commit message and PR description. See guideline 13 in [Writing Guidelines](./guides/writing-the-cypress-changelog.md#writing-guidelines).
 - Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 

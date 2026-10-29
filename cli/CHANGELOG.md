@@ -1,10 +1,29 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.2.2
+
+**Performance:**
+
+- In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
+- The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
+- `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
+- Installing the Cypress binary, with [`cypress install`](https://on.cypress.io/command-line#cypress-install) or when `npm install cypress` downloads it, now finishes sooner. Verifying the download takes less time, and Cypress no longer pauses after the install completes. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+
+**Bugfixes:**
+
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) silently ignored a header matcher when the same header name appeared more than once with different casing, such as `Content-Type` and `content-type`. Only the last matcher was applied. `cy.intercept()` now throws an error that names the duplicated header. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
+- When the Cypress binary cannot be saved while it downloads, such as when the disk is full, [`cypress install`](https://on.cypress.io/command-line#cypress-install) and `npm install cypress` now fail with the underlying error, such as `ENOSPC: no space left on device`, and delete the partially downloaded file, instead of crashing with a Node.js stack trace and leaving the file behind in the temporary folder. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+
+**Dependency Updates:**
+
+- Upgraded `electron` from `41.7.0` to `43.8.4` to address the [compromised eMudhra intermediate certificates](https://github.com/electron/electron/security/advisories/GHSA-jr5w-w6x2-84p9) vulnerability reported in security scans. Connections that Cypress makes itself, such as to Cypress Cloud, now reject certificates issued through these intermediates. Node code in the config process, such as [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), runs on the Node.js version that runs the `cypress` CLI, so it needs a Node.js release that includes the same fix. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+
 ## 16.2.1
 
 **Performance:**
 
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
-- Installing the Cypress binary, with [`cypress install`](https://on.cypress.io/command-line#cypress-install) or when `npm install cypress` downloads it, now finishes sooner. Verifying the download takes less time, and Cypress no longer pauses after the install completes. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Bugfixes:**
 
@@ -27,7 +46,6 @@
 - Requests to an origin that serves only HTTP/2 now fail immediately at the TLS handshake instead of returning a misleading `403: Forbidden` or hanging until they time out. Cypress advertised no protocol over ALPN when opening a TLS connection, leaving such an origin nothing to negotiate against; it now advertises `http/1.1`. Origins that serve both protocols are unaffected. Where such an origin previously answered with a `403`, [`cy.request()`](https://on.cypress.io/request) with `failOnStatusCode: false` yielded a response object and now reports a network error instead. Fixed in [#34951](https://github.com/cypress-io/cypress/pull/34951).
 - Fixed an issue where `cypress run` could stop printing output and never finish when a test was retried after one of its hooks timed out on the previous attempt. Fixed in [#34997](https://github.com/cypress-io/cypress/pull/34997).
 - These [`Cypress.dom`](https://on.cypress.io/dom) methods now accept either a DOM element or a jQuery object, as their types already said: `isFocused()`, `isScrollable()`, `isFocusable()`, `isDescendent()`, `getReasonIsHidden()`, `isTextLike()`, `isSelector()`, `getWindowByElement()`, `getFirstScrollableParent()`, `getFirstStickyPositionParent()`, and `getFirstFixedOrStickyPositionParent()`. Previously, passing the other form threw a `TypeError` or returned a wrong result, such as `isFocused()` returning `false` for a focused element. Fixed in [#35155](https://github.com/cypress-io/cypress/pull/35155).
-- When the Cypress binary cannot be saved while it downloads, such as when the disk is full, [`cypress install`](https://on.cypress.io/command-line#cypress-install) and `npm install cypress` now fail with the underlying error, such as `ENOSPC: no space left on device`, and delete the partially downloaded file, instead of crashing with a Node.js stack trace and leaving the file behind in the temporary folder. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Misc:**
 

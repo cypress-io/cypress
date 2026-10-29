@@ -32,6 +32,16 @@ export function isOriginAllowed (origin: string | undefined, expectedPort: numbe
   return isOwnOrigin(origin, expectedPort)
 }
 
+// Requests without an Origin, such as same-origin GETs, carry nothing else to
+// check, so Host must name localhost on the server's port.
+export function isHostAllowed (host: string | undefined, expectedPort: number | undefined): boolean {
+  if (!host || !expectedPort) {
+    return false
+  }
+
+  return isOwnOrigin(`http://${host}`, expectedPort)
+}
+
 export const corsOriginDelegate: CorsOptionsDelegate<Request> = (req, callback) => {
   const origin = req.headers.origin
   const allowed: CorsOptions = { origin: true }

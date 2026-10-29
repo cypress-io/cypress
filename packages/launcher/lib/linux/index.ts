@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import type { FoundBrowser, Browser } from '@packages/types'
-import type { PathData } from '../types'
+import type { PathData, VersionStringCache } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'
@@ -36,10 +36,30 @@ async function isFirefoxSnap (binary: string): Promise<boolean> {
   }
 }
 
+// Forking is slow from a large parent process such as the Electron main process,
+// so only spawn `--version` for binaries that exist.
+async function getInstalledVersionString (binary: string, versionStringCache: VersionStringCache): Promise<string> {
+  const resolvedPath = await utils.which(binary)
+
+  if (!resolvedPath) {
+    throw notInstalledErr(binary)
+  }
+
+  let versionString = versionStringCache.get(resolvedPath)
+
+  if (!versionString) {
+    versionString = Promise.resolve(getVersionString(binary))
+    versionStringCache.set(resolvedPath, versionString)
+  }
+
+  return versionString
+}
+
 function getLinuxBrowser (
   name: string,
   binary: string,
   versionRegex: RegExp,
+  versionStringCache: VersionStringCache,
 ): Promise<FoundBrowser> {
   const foundBrowser: any = {
     name,
@@ -95,7 +115,7 @@ function getLinuxBrowser (
     }
   }
 
-  return getVersionString(binary)
+  return Bluebird.resolve(getInstalledVersionString(binary, versionStringCache))
   .tap(maybeSetSnapProfilePath)
   .then(getVersion)
   .then((version?: string): FoundBrowser => {
@@ -130,10 +150,11 @@ export function getPathData (pathStr: string): PathData {
   return { path: pathStr }
 }
 
-export function detect (browser: Browser) {
+export function detect (browser: Browser, versionStringCache: VersionStringCache = new Map()) {
   return getLinuxBrowser(
     browser.name,
     browser.binary as string,
     browser.versionRegex,
+    versionStringCache,
   )
 }
