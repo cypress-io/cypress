@@ -9,6 +9,8 @@ describe('driver/src/cypress/utils', () => {
       // Runs in a child process with a capped heap, so a decoder that builds an
       // intermediate string per byte exits with an out-of-memory error. In the
       // runner the same allocation crashes the browser tab instead of failing.
+      // The child receives the decoder as source text, so the decoder must not
+      // reference anything outside its own body.
       const script = `
         const decode = ({ ${$utils.decodeBase64Unicode.toString()} }).decodeBase64Unicode
         const json = JSON.stringify({ mappings: 'AAAA;'.repeat(16e6 / 5) })
