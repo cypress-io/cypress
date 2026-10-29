@@ -16,6 +16,7 @@
 - Upgraded `electron` from `41.7.0` to `43.8.4` to address the [compromised eMudhra intermediate certificates](https://github.com/electron/electron/security/advisories/GHSA-jr5w-w6x2-84p9) vulnerability reported in security scans. Connections that Cypress makes itself, such as to Cypress Cloud, now reject certificates issued through these intermediates. Node code in the config process, such as [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), runs on the Node.js version that runs the `cypress` CLI, so it needs a Node.js release that includes the same fix. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
 
 ## 16.2.1
 
