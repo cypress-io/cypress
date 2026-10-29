@@ -1,0 +1,39 @@
+packages/server/test/unit/browsers/cdp_automation.spec.ts
+  s_dd25433b37e964::t_a3d7e1c2542f87 693-704,706-707,709,712,715-767
+packages/server/lib/browsers/electron.ts
+  s_dd25433b37e964::t_f70e4eca4459ee 367,454-462
+  s_dd25433b37e964::t_4b2768860d4084 463-464
+cli/CHANGELOG.md
+  s_dd25433b37e964::t_acc9df9d5999be 12
+packages/server/test/unit/browsers/electron.spec.ts
+  s_dd25433b37e964::t_02cc685519f015 142,694-698
+system-tests/projects/e2e/cypress/e2e/browser_reset_first_spec.cy.js
+  s_dd25433b37e964::t_3adf7205e43bff 43-61,67-68
+system-tests/projects/e2e/cypress/e2e/browser_reset_second_spec.cy.js
+  s_dd25433b37e964::t_3adf7205e43bff 45-63,69-70
+packages/server/lib/browsers/chrome.ts
+  s_dd25433b37e964::t_3f656516bea631 49-52,416
+system-tests/projects/e2e/browser_reset_iframe.html
+  s_dd25433b37e964::t_3adf7205e43bff 1-33
+system-tests/test/browser_reset_spec.js
+  s_dd25433b37e964::t_3adf7205e43bff 37,40-43
+packages/server/lib/browsers/cdp-protocol/cdp_automation.ts
+  s_dd25433b37e964::t_3f656516bea631 234-237
+  s_dd25433b37e964::t_a9aedc6fc6c454 35,38-42,89,122-129,199-200,222-233,238-263,663
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5c003f17a67b1d9c8aa87ae9fadd9cf3b665c667",
+  "prompts": {},
+  "sessions": {
+    "s_dd25433b37e964": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db8cb11a-c786-46d5-b027-ec423b631dcb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
