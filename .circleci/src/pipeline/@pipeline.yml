@@ -27,7 +27,7 @@ parameters:
     type: boolean
     default: false
   # Opt-in Percy visual snapshots. Default false; set true via Trigger Pipeline
-  # (the setup config forwards it). Requires PERCY_TOKEN (test-runner:percy context).
+  # (inherited from the setup config). Requires PERCY_TOKEN (test-runner:percy context).
   percy-enabled:
     type: boolean
     default: false
