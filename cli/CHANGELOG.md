@@ -10,6 +10,7 @@
 **Bugfixes:**
 
 - Fixed an issue where, in Chrome 158 and later, `cypress run` stopped with the error `* is not a valid URL` when it opened a second spec. Fixes [#35195](https://github.com/cypress-io/cypress/issues/35195).
+- Fixed an issue where, in Chrome 158 and later with [`injectDocumentDomain`](https://docs.cypress.io/app/references/configuration#e2e) enabled, navigating the application under test within [`cy.origin()`](https://on.cypress.io/origin) could fail with errors such as `Blocked a frame with origin` or `does not have permission to navigate the target frame`. Chrome 158 stopped firing `unload` events, which Cypress uses to track navigations. Fixed in [#35198](https://github.com/cypress-io/cypress/pull/35198).
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) silently ignored a header matcher when the same header name appeared more than once with different casing, such as `Content-Type` and `content-type`. Only the last matcher was applied. `cy.intercept()` now throws an error that names the duplicated header. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
 
 **Dependency Updates:**
