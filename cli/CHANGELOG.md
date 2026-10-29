@@ -9,6 +9,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`cy.wait()`](https://on.cypress.io/wait) could time out waiting for a route's response even when the response arrived within [`responseTimeout`](https://on.cypress.io/configuration#Timeouts), because time spent waiting for the request counted against the response timeout budget. Fixed in [#34940](https://github.com/cypress-io/cypress/pull/34940).
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) silently ignored a header matcher when the same header name appeared more than once with different casing, such as `Content-Type` and `content-type`. Only the last matcher was applied. `cy.intercept()` now throws an error that names the duplicated header. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
 
 **Dependency Updates:**
@@ -25,7 +26,6 @@
 
 **Bugfixes:**
 
-- Fixed an issue where [`cy.wait()`](https://on.cypress.io/wait) could time out waiting for a route's response even when the response arrived within [`responseTimeout`](https://on.cypress.io/configuration#Timeouts), because time spent waiting for the request counted against the response timeout budget. Fixed in [#34940](https://github.com/cypress-io/cypress/pull/34940).
 - [`cy.contains()`](https://on.cypress.io/contains) now works inside [`cy.document().within()`](https://on.cypress.io/within). Missing content reports an assertion error instead of `TypeError: subject.each is not a function`. Fixes [#24178](https://github.com/cypress-io/cypress/issues/24178).
 - Responses compressed with `Content-Encoding: x-gzip` are now decoded correctly when Cypress's HTTP proxy rewrites their contents, preventing compressed pages from becoming corrupted during script injection. Fixes [#34387](https://github.com/cypress-io/cypress/issues/34387).
 - [`cy.request()`](https://on.cypress.io/request) now fails with an invalid encoding error when passed `encoding: false`, `0`, or an empty string, instead of crashing Cypress with `TypeError [ERR_UNKNOWN_ENCODING]: Unknown encoding: false`. Fixes [#24192](https://github.com/cypress-io/cypress/issues/24192).
