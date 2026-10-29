@@ -340,29 +340,6 @@ describe('App: Settings', () => {
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device settings"]').click()
-
-      cy.get('[data-cy="custom-editor"]').should('not.exist')
-    })
-
-    it('allows custom editor', () => {
-      cy.contains('Choose your editor...').click()
-      cy.contains('Custom').click()
-
-      // doing invoke instead of `type` since `type` enters keys on-by-one, triggering a mutation
-      // for each keystroke, making it hard to intercept **only** the final request, which I want to
-      // assert contains `/usr/local/bin/vim'
-      cy.findByPlaceholderText('/path/to/editor').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
-      cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/local/bin/vim')
-      })
-
-      // navigate away and come back
-      // preferred editor entered from input should have been persisted
-      cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(100)
-      cy.get('[data-cy="Device settings"]').click()
-
-      cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
     })
 
     it('lists file browser as available editor', () => {
@@ -372,8 +349,6 @@ describe('App: Settings', () => {
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('computer')
       })
-
-      cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
 
     it('handles null binary field in editor', () => {
@@ -390,8 +365,6 @@ describe('App: Settings', () => {
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device settings"]').click()
-
-      cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
   })
 

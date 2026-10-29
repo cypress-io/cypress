@@ -23,16 +23,6 @@ const createEditor = (editor: Editor): Editor => {
   }
 }
 
-const getOtherEditor = (preferredOpener?: Editor): Editor | undefined => {
-  // if preferred editor is the 'other' option, use it since it has the
-  // path (binary) saved with it
-  if (preferredOpener && preferredOpener.id === 'other') {
-    return preferredOpener
-  }
-
-  return
-}
-
 const computerOpener = (): Editor => {
   return {
     id: 'computer',
@@ -41,29 +31,28 @@ const computerOpener = (): Editor => {
   }
 }
 
+const launchEditorOpener = (): Editor[] => {
+  const binary = process.env.LAUNCH_EDITOR
+
+  if (!binary) {
+    return []
+  }
+
+  return [{
+    id: 'launch-editor',
+    name: `LAUNCH_EDITOR (${binary})`,
+    binary,
+  }]
+}
+
 const getUserEditors = async (): Promise<Editor[]> => {
-  return Bluebird.filter(getEnvEditors(), (editor) => {
+  return Bluebird.filter([...getEnvEditors(), ...launchEditorOpener()], (editor) => {
     return shell.commandExists(editor.binary)
   })
   .then((editors: Editor[] = []) => {
     debug('user has the following editors: %o', editors)
 
-    return savedState.create()
-    .then((state) => {
-      return state.get().then((state) => state.preferredOpener)
-    })
-    .then((preferredOpener: Editor | undefined) => {
-      debug('saved preferred editor: %o', preferredOpener)
-
-      const cyEditors = _.map(editors, createEditor)
-      const preferred = getOtherEditor(preferredOpener)
-
-      if (!preferred) {
-        return [computerOpener()].concat(cyEditors)
-      }
-
-      return [computerOpener()].concat(cyEditors, preferred)
-    })
+    return [computerOpener()].concat(_.map(editors, createEditor))
   })
 }
 

@@ -48,6 +48,8 @@ describe('lib/util/editors', () => {
         return Promise.resolve(exists)
       })
 
+      vi.stubEnv('LAUNCH_EDITOR', '')
+
       platform = process.platform
       setPlatform('darwin')
     })
@@ -55,14 +57,43 @@ describe('lib/util/editors', () => {
     afterEach(() => {
       setPlatform(platform)
       vi.restoreAllMocks()
+      vi.unstubAllEnvs()
     })
 
-    it('includes user-set path for "Other" option if available', () => {
+    it('does not list a saved custom editor', async () => {
       vi.spyOn(savedState, 'create').mockResolvedValue({
         get () {
-          return Promise.resolve({ isOther: true, binary: '/path/to/editor', id: 'other' })
+          return Promise.resolve({ preferredOpener: { id: 'other', name: 'Other', binary: '/path/to/editor' } })
         },
       } as any)
+
+      const { availableEditors } = await getUserEditor(true)
+
+      expect(availableEditors.map((editor) => editor.binary)).not.toContain('/path/to/editor')
+    })
+
+    describe('LAUNCH_EDITOR', () => {
+      it('is listed when it names a command that exists', async () => {
+        vi.stubEnv('LAUNCH_EDITOR', 'code')
+
+        const { availableEditors } = await getUserEditor(true)
+
+        expect(availableEditors).toContainEqual({ id: 'launch-editor', name: 'LAUNCH_EDITOR (code)', binary: 'code' })
+      })
+
+      it('is not listed when its command does not exist', async () => {
+        vi.stubEnv('LAUNCH_EDITOR', '/missing/editor')
+
+        const { availableEditors } = await getUserEditor(true)
+
+        expect(availableEditors.map((editor) => editor.id)).not.toContain('launch-editor')
+      })
+
+      it('is not listed when unset', async () => {
+        const { availableEditors } = await getUserEditor(true)
+
+        expect(availableEditors.map((editor) => editor.id)).not.toContain('launch-editor')
+      })
     })
 
     it('computer option is Finder on MacOS', () => {

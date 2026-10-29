@@ -31,19 +31,10 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     cy.contains('On Computer').should('be.visible')
     cy.contains('Atom').should('be.visible')
     cy.contains('Vim').should('be.visible')
+    cy.contains('Custom').should('not.exist')
 
     cy.contains('Vim').click()
     cy.contains('Vim').should('be.visible')
     cy.contains('Atom').should('not.exist')
-
-    cy.get('[data-cy="custom-editor"]').should('not.exist')
-
-    cy.get('@chooseEditor').click()
-    cy.contains('Custom').click()
-    cy.get('[data-cy="custom-editor"]').should('exist')
-
-    cy.findByLabelText(defaultMessages.settingsPage.editor.customPathPlaceholder)
-    .type('test/path')
-    .should('have.value', 'test/path')
   })
 })

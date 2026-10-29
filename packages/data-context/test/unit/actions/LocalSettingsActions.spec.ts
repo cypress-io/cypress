@@ -14,6 +14,43 @@ describe('LocalSettingsActions', () => {
     actions = new LocalSettingsActions(ctx)
   })
 
+  describe('getLaunchableEditor', () => {
+    beforeEach(() => {
+      ctx.coreData.localSettings.availableEditors = [
+        { id: 'computer', name: 'Finder', binary: 'computer' },
+        { id: 'code', name: 'Visual Studio Code', binary: 'code' },
+      ]
+    })
+
+    it('returns the preferred editor when Cypress detected it', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+
+      expect(await actions.getLaunchableEditor()).toEqual('code')
+    })
+
+    it('returns undefined for an editor Cypress did not detect', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = '/bin/sh'
+
+      expect(await actions.getLaunchableEditor()).toBeUndefined()
+    })
+
+    it('returns undefined when no editor is saved', async () => {
+      expect(await actions.getLaunchableEditor()).toBeUndefined()
+    })
+
+    it('waits for detection to finish', async () => {
+      ctx.coreData.localSettings.availableEditors = []
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+      ctx.coreData.localSettings.refreshing = Promise.resolve().then(() => {
+        ctx.coreData.localSettings.availableEditors = [{ id: 'code', name: 'Visual Studio Code', binary: 'code' }]
+
+        return ctx.coreData.localSettings.availableEditors
+      })
+
+      expect(await actions.getLaunchableEditor()).toEqual('code')
+    })
+  })
+
   describe('refreshLocalSettings', () => {
     describe('notifyWhenRunCompletes', () => {
       it('should fix false value', async () => {

@@ -518,8 +518,7 @@
     "editor": {
       "title": "External editor",
       "description": "External editor to use for editing code opened when using Cypress.",
-      "noEditorSelectedPlaceholder": "Choose your editor...",
-      "customPathPlaceholder": "/path/to/editor"
+      "noEditorSelectedPlaceholder": "Choose your editor..."
     },
     "notifications": {
       "title": "Desktop notifications",

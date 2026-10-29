@@ -32,40 +32,14 @@
       </template>
     </Select>
   </div>
-
-  <div
-    v-if="editorToUse === 'custom'"
-    class="flex py-[16px] pb-[4px] items-center"
-  >
-    <div class="w-[400px]">
-      <Input
-        id="customPath"
-        v-model="customBinary"
-        data-cy="custom-editor"
-        input-classes="text-sm text-gray-500"
-        :placeholder="t('settingsPage.editor.customPathPlaceholder')"
-      >
-        <template #prefix>
-          <i-cy-technology-command-line_x16
-            class="text-md icon-dark-gray-500"
-          />
-        </template>
-      </Input>
-      <label
-        for="customPath"
-        class="sr-only"
-      >{{ t('settingsPage.editor.customPathPlaceholder') }}</label>
-    </div>
-  </div>
 </template>
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
-import Input from '@cy/components/Input.vue'
 import Cursor from '~icons/logos/cursor'
 import VSCode from '~icons/logos/visual-studio-code'
 import Atom from '~icons/logos/atom-icon'
@@ -92,17 +66,10 @@ const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'computer': Computer,
   'File Explorer': Computer,
   'File System': Computer,
-  'custom': Terminal,
 }
 
-const customEditor = { id: 'custom', icon: Terminal, name: 'Custom', binary: 'custom' }
-
 const editorOptions = computed(() => {
-  const editors = props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] ?? icons['custom'] })) || []
-
-  editors.push(customEditor)
-
-  return editors
+  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] ?? Terminal })) || []
 })
 
 gql`
@@ -129,49 +96,17 @@ const { t } = useI18n()
 
 type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][number]
 
-type EditorType = 'found' | 'custom'
-
-const selectedWellKnownEditor: Editor | undefined = props.gql.localSettings.availableEditors.find((editor) => {
+const selectedEditor = ref<Editor | undefined>(props.gql.localSettings.availableEditors.find((editor) => {
   return editor.binary && editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
-})
-
-const customBinary = ref<string>(
-  selectedWellKnownEditor
-    ? ''
-    : props.gql.localSettings.preferences.preferredEditorBinary ?? '',
-)
-
-const editorToUse = ref<EditorType>(
-  customBinary.value ? 'custom' : 'found',
-)
-
-const selectedEditor = ref<Editor | undefined>(
-  editorToUse.value === 'custom' ? customEditor : selectedWellKnownEditor,
-)
+}))
 
 const emit = defineEmits<{
   (e: 'choseEditor', binary: string | null): void
 }>()
 
-watch(customBinary, (val) => {
-  if (editorToUse.value !== 'custom') {
-    editorToUse.value = 'custom'
-  }
-
-  emit('choseEditor', val)
-})
-
 const updateEditor = (editor: Editor) => {
   selectedEditor.value = editor
 
-  if (editor.id === 'custom') {
-    editorToUse.value = 'custom'
-    if (customBinary.value) {
-      emit('choseEditor', customBinary.value)
-    }
-  } else {
-    editorToUse.value = 'found'
-    emit('choseEditor', selectedEditor.value.binary)
-  }
+  emit('choseEditor', editor.binary)
 }
 </script>

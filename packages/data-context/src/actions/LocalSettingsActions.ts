@@ -4,6 +4,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 
 import type { DataContext } from '..'
+import { isLaunchableEditor } from '../util/isLaunchableEditor'
 
 const debug = Debug('cypress:data-context:actions:LocalSettingsActions')
 
@@ -43,6 +44,14 @@ export class LocalSettingsActions {
 
     // persist to project appData - for example projects/launchpad/state.json
     return this.ctx._apis.projectApi.setProjectPreferences(combinedResult)
+  }
+
+  async getLaunchableEditor (): Promise<string | undefined> {
+    await this.ctx.coreData.localSettings.refreshing
+
+    const binary = this.ctx.coreData.localSettings.preferences.preferredEditorBinary
+
+    return isLaunchableEditor(this.ctx.coreData.localSettings.availableEditors, binary) ? binary : undefined
   }
 
   async refreshLocalSettings () {

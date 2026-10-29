@@ -1,5 +1,6 @@
 import { objectType } from 'nexus'
 import { Editor } from './gql-Editor'
+import { isLaunchableEditor } from '../../../src/util/isLaunchableEditor'
 import { maskProxyPassword } from '../../../src/util/maskProxyPassword'
 
 export const LocalSettingsPreferences = objectType({
@@ -8,7 +9,15 @@ export const LocalSettingsPreferences = objectType({
   definition (t) {
     t.boolean('autoScrollingEnabled')
     t.boolean('codeEditorLineWrap')
-    t.string('preferredEditorBinary')
+    t.string('preferredEditorBinary', {
+      // A saved editor Cypress can't launch, such as an old custom path, reads as unset so the app asks for one
+      resolve: (source, args, ctx) => {
+        const binary = source.preferredEditorBinary
+
+        return isLaunchableEditor(ctx.coreData.localSettings.availableEditors, binary) ? binary : null
+      },
+    })
+
     t.boolean('isSpecsListOpen')
     t.boolean('showFetchRequests')
     t.int('reporterWidth')
