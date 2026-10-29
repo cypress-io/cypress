@@ -6,6 +6,7 @@
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
 - The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
 - `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
+- Cypress now uses about half as much CPU to handle each network request your application makes during a test, so the Cypress process keeps up with pages that load many resources at once. In a benchmark of 5,000 requests through the proxy, CPU time per request fell from 1.61 ms to 0.88 ms and the proxy handled about twice as many requests per second. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Bugfixes:**
 
@@ -21,7 +22,6 @@
 
 **Performance:**
 
-- Cypress now uses about half as much CPU to handle each network request your application makes during a test, so the Cypress process keeps up with pages that load many resources at once. In a benchmark of 5,000 requests through the proxy, CPU time per request fell from 2.22 ms to 1.14 ms and the proxy handled about twice as many requests per second. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
