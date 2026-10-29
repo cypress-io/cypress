@@ -57,6 +57,7 @@ const _summaries: StringValues = {
   experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
   experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially',
   experimentalOriginDependencies: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
+  experimentalRemoteDriver: 'Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser\'s automation protocol, so they work against a cross-origin AUT without `cy.origin()`. Chromium-based browsers only.',
 }
 
 /**
@@ -76,6 +77,7 @@ const _names: StringValues = {
   experimentalWebKitSupport: 'WebKit Support',
   experimentalRunAllSpecs: 'Run All Specs',
   experimentalOriginDependencies: 'Origin Dependencies',
+  experimentalRemoteDriver: 'Remote Driver',
 }
 
 /**

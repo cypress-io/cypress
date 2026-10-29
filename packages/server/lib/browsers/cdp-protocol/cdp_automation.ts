@@ -27,6 +27,7 @@ import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
+import { CdpRemoteAgent } from '../../automation/commands/remote_agent'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -79,6 +80,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
+  private remoteAgent: CdpRemoteAgent
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -94,6 +96,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     this.on = onFn
     this.off = offFn
     this.send = sendDebuggerCommandFn
+    this.remoteAgent = new CdpRemoteAgent(sendDebuggerCommandFn, this.executionContexts)
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -628,6 +631,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return cdpNavigateHistory(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame(), data.historyNumber)
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+      case 'remote:agent':
+        return this.remoteAgent.call(await this._getAutFrame(), data)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

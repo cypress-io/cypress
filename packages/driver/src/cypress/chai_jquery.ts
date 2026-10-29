@@ -3,6 +3,7 @@ import $dom from '../dom'
 import $elements from '../dom/elements'
 import type { Callbacks as AssertCallbacks, Methods, PartialAssertionArgs } from './assertions/assert'
 import { assert, assertDom, accessors, selectors, wrap } from './assertions/assert'
+import { isRemoteElement } from '../cy/remote/remote_element'
 
 const maybeCastNumberToString = (num: number | string) => {
   // if this is a finite number (no Infinity or NaN)
@@ -199,7 +200,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
 
   chai.Assertion.overwriteProperty('empty', (_super) => {
     return (function (...args) {
-      if ($dom.isDom(this._obj)) {
+      if ($dom.isDom(this._obj) || isRemoteElement(this._obj)) {
         return assert(
           this,
           chaiUtils,

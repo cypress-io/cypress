@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Frames</title>
+  <style>
+    iframe { width: 420px; height: 220px; border: 1px solid #999; }
+  </style>
+</head>
+<body>
+  <h1>Checkout</h1>
+  <p id="not-a-frame">Not a frame</p>
+
+  <h2>Same-origin iframe</h2>
+  <iframe id="same" src="/fixtures/remote-driver-frame-child.html?label=same-origin"></iframe>
+
+  <h2>Cross-origin iframe</h2>
+  <iframe id="cross" src="http://www.foobar.com:3500/fixtures/remote-driver-frame-child.html?label=cross-origin"></iframe>
+
+  <h2>Cross-origin iframe with a nested iframe</h2>
+  <iframe id="outer" src="http://www.foobar.com:3500/fixtures/remote-driver-frame-child.html?label=outer&nested=1" style="height: 420px"></iframe>
+
+  <button id="add-late">Add a late iframe</button>
+  <div id="late-slot"></div>
+
+  <script>
+    document.getElementById('add-late').addEventListener('click', () => {
+      setTimeout(() => {
+        const iframe = document.createElement('iframe')
+
+        iframe.id = 'late'
+        iframe.src = 'http://www.foobar.com:3500/fixtures/remote-driver-frame-child.html?label=late'
+        document.getElementById('late-slot').appendChild(iframe)
+      }, 500)
+    })
+  </script>
+</body>
+</html>

@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import { isRemoteDriverEnabled } from '../remote'
 
 const COOKIE_PROPS = 'name value path secure hostOnly httpOnly expiry domain sameSite'.split(' ')
 
@@ -102,8 +103,8 @@ interface GetAndClearOptions {
 
 export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, config) {
   function getDefaultDomain () {
-    const win = state('window') as Window | undefined
-    const hostname = win?.location.hostname
+    // the remote driver can't read a cross-origin AUT's location, so it uses the one from automation
+    const hostname = isRemoteDriverEnabled(Cypress) ? state('autLocation')?.hostname : (state('window') as Window | undefined)?.location.hostname
 
     // if hostname is undefined, the AUT is on about:blank, so use the
     // spec frame's hostname instead
@@ -248,7 +249,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         // mismatch here is retryable - keep retrying until the AUT is reachable
         // or the command times out (matching the previous
         // retryIfCommandAUTOriginMismatch behavior).
-        if (checkAUTCommunication) {
+        if (checkAUTCommunication && !isRemoteDriverEnabled(Cypress)) {
           Cypress.ensure.commandCanCommunicateWithAUT(cy)
         }
 

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Isolation spike</title>
+</head>
+<body>
+  <p id="page"></p>
+  <a id="nav" href="remote-driver-isolation.html?page=2">Next page</a>
+
+  <button id="throw">Throw</button>
+  <button id="reject">Reject</button>
+  <button id="alert">Alert</button>
+  <button id="confirm">Confirm</button>
+  <p id="dialog-result"></p>
+
+  <button id="delayed">Delayed</button>
+  <p id="delayed-result"></p>
+
+  <button id="fetch">Fetch</button>
+  <p id="fetch-result"></p>
+
+  <button id="dbl">Double</button>
+  <button id="right">Right</button>
+  <button id="hover">Hover</button>
+  <p id="event-result"></p>
+
+  <input id="focus-me" type="text" value="prefilled" />
+  <input id="agree" type="checkbox" />
+  <select id="fruit">
+    <option value="apple">Apple</option>
+    <option value="banana">Banana</option>
+  </select>
+
+  <div id="scroller" style="height: 50px; overflow: auto">
+    <div style="height: 500px"></div>
+    <p id="far">Far away</p>
+  </div>
+
+  <button id="read-top">Read top</button>
+  <button id="bust">Navigate top</button>
+  <button id="js-cookie">document.cookie</button>
+  <button id="storage">localStorage</button>
+  <a id="cookie-login" href="/cookie-login?cookie=user%3Dbob%3B%20SameSite%3DLax%3B%20Path%3D%2F&username=bob&redirect=/fixtures/remote-driver-isolation.html">Cookie login</a>
+  <button id="fetch-cookie">Fetch with cookie</button>
+  <p id="probe-result"></p>
+
+  <div id="tall" style="height: 3000px"></div>
+  <p id="bottom">Bottom</p>
+
+  <script>
+    window.appState = { clicks: 0 }
+    document.body.dataset.cypress = String(!!window.Cypress)
+    document.getElementById('page').textContent = new URLSearchParams(location.search).get('page') || '1'
+
+    const result = (id, text) => { document.getElementById(id).textContent = text }
+
+    document.getElementById('throw').addEventListener('click', () => { throw new Error('app boom') })
+    document.getElementById('reject').addEventListener('click', () => { Promise.reject(new Error('app rejection')) })
+    document.getElementById('alert').addEventListener('click', () => { alert('app alert'); result('dialog-result', 'alerted') })
+    document.getElementById('confirm').addEventListener('click', () => { result('dialog-result', `confirmed:${confirm('app confirm')}`) })
+    document.getElementById('delayed').addEventListener('click', () => { setTimeout(() => result('delayed-result', 'done'), 10000) })
+    document.getElementById('fetch').addEventListener('click', () => {
+      fetch('/fixtures/remote-driver-isolation.html?fetched=1').then((res) => result('fetch-result', `status:${res.status}`))
+    })
+    document.getElementById('dbl').addEventListener('dblclick', () => result('event-result', 'dblclick'))
+    document.getElementById('right').addEventListener('contextmenu', () => result('event-result', 'contextmenu'))
+    document.getElementById('hover').addEventListener('mouseover', () => result('event-result', 'mouseover'))
+    document.body.addEventListener('click', () => { window.appState.clicks++ })
+
+    // looked up by computed name so the proxy's top/parent rewriting leaves it alone
+    const topWindow = () => window['to' + 'p']
+
+    document.getElementById('read-top').addEventListener('click', () => {
+      try {
+        result('probe-result', `read:${topWindow().document.title}`)
+      } catch (err) {
+        result('probe-result', `blocked:${err.name}`)
+      }
+    })
+    document.getElementById('bust').addEventListener('click', () => {
+      try {
+        topWindow().location.href = location.href
+        result('probe-result', 'navigated')
+      } catch (err) {
+        result('probe-result', `blocked:${err.name}`)
+      }
+    })
+    document.getElementById('js-cookie').addEventListener('click', () => {
+      document.cookie = 'js=1; path=/'
+      result('probe-result', `cookie:${document.cookie.includes('js=1')}`)
+    })
+    document.getElementById('fetch-cookie').addEventListener('click', () => {
+      fetch('/verify-cookie-login?username=bob&redirect=/', { credentials: 'same-origin' })
+      .then((res) => res.text())
+      .then((text) => result('probe-result', `fetch-cookie:${text.includes('Not logged in') ? 'missing' : 'sent'}`))
+    })
+    document.getElementById('storage').addEventListener('click', () => {
+      localStorage.setItem('probe', 'stored')
+      result('probe-result', `storage:${localStorage.getItem('probe')}`)
+    })
+  </script>
+</body>
+</html>

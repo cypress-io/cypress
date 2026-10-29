@@ -23,6 +23,10 @@ export const getRunnerCrossOriginInjectionContents = () => {
   return getRunnerContents('injection_cross_origin.js')
 }
 
+export const getRunnerRemoteAgentContents = () => {
+  return getRunnerContents('cypress_remote_agent.js')
+}
+
 export const getPathToDesktopIndex = (graphqlPort: number) => {
   return `http://localhost:${graphqlPort}/__launchpad/index.html`
 }

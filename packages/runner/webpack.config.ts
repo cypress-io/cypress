@@ -79,6 +79,18 @@ const crossOriginInjectionConfig: webpack.Configuration = {
   },
 }
 
+// @ts-ignore
+const remoteAgentConfig: webpack.Configuration = {
+  ...commonConfig,
+  entry: {
+    cypress_remote_agent: [path.resolve(__dirname, '../driver/src/remote/agent/index.ts')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
 export default async function () {
   await waitUntilIconsBuilt()
 
@@ -100,5 +112,6 @@ export default async function () {
     mainInjectionConfig,
     crossOriginConfig,
     crossOriginInjectionConfig,
+    remoteAgentConfig,
   ]
 }

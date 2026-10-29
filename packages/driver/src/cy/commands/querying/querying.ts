@@ -8,6 +8,7 @@ import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 import { aliasRe, aliasIndexRe, aliasDisplayName } from '../../aliases'
+import { extendRemoteSubject, isRemoteDriverEnabled, isRemoteSubject, throwUnsupportedOption } from '../../remote'
 
 type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {
   _log?: Log
@@ -180,6 +181,18 @@ export default (Commands, Cypress, cy, state) => {
 
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
+    if (isRemoteDriverEnabled(Cypress)) {
+      if (withinSubject || userOptions.withinSubject !== undefined) {
+        throwUnsupportedOption('get', 'within')
+      }
+
+      if (includeShadowDom) {
+        throwUnsupportedOption('get', 'includeShadowDom')
+      }
+
+      return () => extendRemoteSubject('get', undefined, { type: 'get', selector }, selector)
+    }
+
     return () => {
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
 
@@ -339,6 +352,14 @@ export default (Commands, Cypress, cy, state) => {
 
     const withinSubject = cy.state('withinSubjectChain')
 
+    if (isRemoteDriverEnabled(Cypress)) {
+      if (withinSubject) {
+        throwUnsupportedOption('contains', 'within')
+      }
+
+      return (subject) => extendRemoteSubject('contains', subject, { type: 'contains', selector }, displayName)
+    }
+
     return (subject) => {
       Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
 
@@ -379,6 +400,24 @@ export default (Commands, Cypress, cy, state) => {
       })
 
       return $el
+    }
+  })
+
+  Commands.addQuery('frame', function frame (userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
+    const log = userOptions.log !== false && Cypress.log({ timeout: userOptions.timeout })
+
+    this.set('timeout', userOptions.timeout)
+
+    if (!isRemoteDriverEnabled(Cypress)) {
+      $errUtils.throwErrByPath('remote_driver.frame_requires_remote_driver', { onFail: log })
+    }
+
+    return (subject) => {
+      if (!isRemoteSubject(subject)) {
+        $errUtils.throwErrByPath('remote_driver.unsupported_subject', { onFail: log, args: { cmd: 'frame' } })
+      }
+
+      return extendRemoteSubject('frame', subject, { type: 'frame', selector: subject.selector }, `${subject.selector} (frame)`)
     }
   })
 

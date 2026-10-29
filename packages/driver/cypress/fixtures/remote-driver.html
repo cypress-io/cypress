@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Remote driver</title>
+</head>
+<body>
+  <a id="cross-origin-link" href="http://www.foobar.com:3500/fixtures/remote-driver.html">Cross origin</a>
+  <a id="isolation-link" href="http://www.foobar.com:3500/fixtures/remote-driver-isolation.html">Isolation spike</a>
+
+  <h1 class="title main" data-test="heading">Remote driver</h1>
+
+  <ul id="list">
+    <li class="item">One</li>
+    <li class="item two">Two</li>
+    <li class="item">Three</li>
+  </ul>
+
+  <p id="count">0</p>
+  <button id="increment">Increment</button>
+  <button id="disabled" disabled>Disabled</button>
+  <button id="reveal">Reveal</button>
+  <div id="hidden" style="display: none">Hidden</div>
+
+  <label><input id="agree" type="checkbox" /> Agree</label>
+  <input id="name" type="text" />
+  <p id="typed"></p>
+
+  <script>
+    document.getElementById('increment').addEventListener('click', () => {
+      const count = document.getElementById('count')
+
+      count.textContent = String(Number(count.textContent) + 1)
+    })
+
+    document.getElementById('reveal').addEventListener('click', () => {
+      setTimeout(() => {
+        const late = document.createElement('p')
+
+        late.id = 'late'
+        late.textContent = 'Arrived late'
+        document.body.appendChild(late)
+      }, 300)
+    })
+
+    document.getElementById('name').addEventListener('input', (e) => {
+      document.getElementById('typed').textContent = e.target.value
+    })
+  </script>
+</body>
+</html>

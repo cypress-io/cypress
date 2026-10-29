@@ -8,6 +8,8 @@ import $actionability from '../../actionability'
 import type { ElViewportPosition } from '../../../dom/coordinates'
 import type { $Cy } from '../../../cypress/cy'
 import type { ForceEl } from '../../mouse'
+import { isRemoteSubject } from '../../remote'
+import { remoteClick } from '../../remote/actions'
 
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
@@ -56,6 +58,14 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
     let x
 
     ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
+
+    if (isRemoteSubject(subject)) {
+      if (eventName !== 'click') {
+        $errUtils.throwErrByPath('remote_driver.unsupported_subject', { args: { cmd: eventName } })
+      }
+
+      return remoteClick(Cypress, cy, subject, { position, x, y, ...userOptions })
+    }
 
     const options = _.defaults({}, userOptions, {
       $el: subject,

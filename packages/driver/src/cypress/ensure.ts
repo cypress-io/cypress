@@ -6,6 +6,7 @@ import $errUtils from './error_utils'
 import type { $Cy } from './cy'
 import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
 import { getSuperDomainOrigin } from '@packages/network-tools'
+import { isRemoteSubject } from '../cy/remote/remote_element'
 
 // verbose since subject validation runs on every retry of a query
 const debugVerbose = Debug('cypress-verbose:driver:ensure')
@@ -190,7 +191,8 @@ const isAttached = (subject, name: string, cy: $Cy, onFail?) => {
 }
 
 const isElement = (subject, name: string, cy: $Cy, onFail?) => {
-  if (!$dom.isElement(subject)) {
+  // existence of a remote subject's elements is checked when the agent resolves it
+  if (!$dom.isElement(subject) && !isRemoteSubject(subject)) {
     const current = cy.state('current')
 
     if ($dom.isJquery(subject) && subject.length === 0) {

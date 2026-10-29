@@ -259,6 +259,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
   }, {
+    name: 'experimentalRemoteDriver',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    overrideLevel: 'any',
+  }, {
     name: 'experimentalSingleTabRunMode',
     defaultValue: false,
     validation: validate.isBoolean,

@@ -608,6 +608,10 @@
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
         "description": "Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback."
+      },
+      "experimentalRemoteDriver": {
+        "name": "Remote Driver",
+        "description": "Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser's automation protocol, so they work against a cross-origin AUT without `cy.origin()`. Chromium-based browsers only."
       }
     },
     "device": {

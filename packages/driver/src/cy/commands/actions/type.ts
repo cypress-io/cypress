@@ -8,6 +8,8 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
+import { isRemoteSubject } from '../../remote'
+import { remoteType } from '../../remote/actions'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
@@ -152,6 +154,10 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     chars = `${chars}`
+
+    if (isRemoteSubject(options.$el)) {
+      return remoteType(Cypress, cy, options.$el, chars, options)
+    }
 
     const win = state('window')
 

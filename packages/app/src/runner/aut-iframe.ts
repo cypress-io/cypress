@@ -10,6 +10,22 @@ import { getElementDimensions, setOffset } from './dimensions'
 import { getOrCreateHelperDom, getSelectorHighlightStyles, INT32_MAX } from './dom'
 import highlightMounter from './selector-playground/highlight-mounter'
 import Highlight from './selector-playground/Highlight.ce.vue'
+import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
+
+// Everything except allow-top-navigation*
+const REMOTE_DRIVER_AUT_SANDBOX = [
+  'allow-downloads',
+  'allow-forms',
+  'allow-modals',
+  'allow-orientation-lock',
+  'allow-pointer-lock',
+  'allow-popups',
+  'allow-popups-to-escape-sandbox',
+  'allow-presentation',
+  'allow-same-origin',
+  'allow-scripts',
+  'allow-storage-access-by-user-activation',
+].join(' ')
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -44,6 +60,13 @@ export class AutIframe {
       title: `${AUT_FRAME_NAME_IDENTIFIER} '${this.projectName}'`,
       class: 'aut-iframe',
     })
+
+    // Chromium lets a same-site, cross-origin frame navigate top without user activation
+    const config = getRunnerConfigFromWindow()
+
+    if ('experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true) {
+      $iframe.attr('sandbox', REMOTE_DRIVER_AUT_SANDBOX)
+    }
 
     this.$iframe = $iframe
 

@@ -5,6 +5,8 @@ import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
 import type { Log } from '../cypress/log'
+import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
+import { isRemoteDriverEnabled } from './remote'
 
 export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
@@ -248,6 +250,11 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // also, do not take the snapshot here if it has already been taken and
     // preprocessed in a spec bridge.
     if (!preprocessedSnapshot && !state('document')) {
+      return null
+    }
+
+    // the remote driver can run against a cross-origin AUT, whose document the runner can't clone
+    if (!preprocessedSnapshot && isRemoteDriverEnabled(Cypress) && !isRunnerAbleToCommunicateWithAut()) {
       return null
     }
 

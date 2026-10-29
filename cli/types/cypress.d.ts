@@ -2295,6 +2295,18 @@ declare namespace Cypress {
     setCookie(name: string, value: string, options?: Partial<SetCookieOptions>): Chainable<Cookie>
 
     /**
+     * Traverse into the `<body>` of an iframe's document, whatever its origin.
+     * Requires `experimentalRemoteDriver`.
+     *
+     * @example
+     *    cy.get('iframe#checkout')
+     *    .frame()
+     *    .find('#card-number')
+     *    .type('4242 4242 4242 4242')
+     */
+    frame(options?: Partial<LogTimeoutOptions>): Chainable<JQuery<HTMLBodyElement>>
+
+    /**
      * Traverse into an element's shadow root.
      *
      * @example
@@ -3707,6 +3719,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalOriginDependencies?: boolean
+    /**
+     * Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser's automation protocol, so they work against a cross-origin AUT without `cy.origin()`. Chromium-based browsers only.
+     * @default false
+     */
+    experimentalRemoteDriver?: boolean
   }
 
   /**
@@ -3789,7 +3806,7 @@ declare namespace Cypress {
 
   interface SuiteConfigOverrides extends Partial<
     Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
-  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>>, Partial<Pick<EndToEndConfigOptions, 'experimentalRemoteDriver'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
     expose?: Record<string, any>
@@ -3797,7 +3814,7 @@ declare namespace Cypress {
 
   interface TestConfigOverrides extends Partial<
     Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
-  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>>, Partial<Pick<EndToEndConfigOptions, 'experimentalRemoteDriver'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
     expose?: Record<string, any>

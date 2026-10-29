@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment form</title>
+</head>
+<body>
+  <p id="label"></p>
+  <p id="origin"></p>
+  <input id="card" placeholder="Card number" />
+  <button id="pay">Pay</button>
+  <p id="result"></p>
+  <div id="nested-slot"></div>
+
+  <script>
+    const params = new URLSearchParams(location.search)
+
+    document.getElementById('label').textContent = params.get('label') || ''
+    document.getElementById('origin').textContent = location.origin
+    document.getElementById('pay').addEventListener('click', () => {
+      document.getElementById('result').textContent = `paid with ${document.getElementById('card').value}`
+    })
+
+    if (params.get('nested')) {
+      const iframe = document.createElement('iframe')
+
+      iframe.id = 'inner'
+      iframe.src = 'http://localhost:3500/fixtures/remote-driver-frame-child.html?label=inner'
+      document.getElementById('nested-slot').appendChild(iframe)
+    }
+  </script>
+</body>
+</html>

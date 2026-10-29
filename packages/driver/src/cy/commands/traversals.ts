@@ -3,7 +3,10 @@ import _ from 'lodash'
 import $dom from '../../dom'
 import $elements from '../../dom/elements'
 import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
+import $errUtils from '../../cypress/error_utils'
+import type { QueryStep } from '../../remote/protocol'
 import { subjectChainToString } from '../../cypress/error_messages'
+import { extendRemoteSubject, isRemoteDriverEnabled, isRemoteSubject } from '../remote'
 
 type TraversalOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Shadow>
 
@@ -82,6 +85,17 @@ export default (Commands, Cypress, cy) => {
     return subject[traversal].call(subject, arg1, arg2)
   }
 
+  const getRemoteStep = (traversal: string, arg1): QueryStep => {
+    switch (traversal) {
+      case 'find':
+        return { type: 'find', selector: arg1 }
+      case 'eq':
+        return { type: 'eq', index: arg1 }
+      default:
+        return $errUtils.throwErrByPath('remote_driver.unsupported_subject', { args: { cmd: traversal } })
+    }
+  }
+
   _.each(traversals, (traversal) => {
     Commands.addQuery(traversal, function traversalFn (arg1, arg2, userOptions: TraversalOptions = {}) {
       if (_.isObject(arg1) && !_.isFunction(arg1)) {
@@ -123,6 +137,10 @@ export default (Commands, Cypress, cy) => {
       const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
       return (subject) => {
+        if (isRemoteDriverEnabled(Cypress) && isRemoteSubject(subject)) {
+          return extendRemoteSubject(traversal, subject, getRemoteStep(traversal, arg1), selector || traversal)
+        }
+
         Cypress.ensure.isType(subject, ['element', 'document'], traversal, cy)
 
         const $el = getEl(traversal, includeShadowDom, cy.$$(subject), arg1, arg2)

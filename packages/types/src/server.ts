@@ -180,6 +180,19 @@ export interface KeyPressParams {
   key: SupportedKey
 }
 
+export interface RemoteAgentFrameOwner {
+  steps: unknown
+  selector: string
+}
+
+export interface RemoteAgentRequest {
+  method: string
+  context: unknown
+  args: unknown
+  // iframes to enter, outermost first, before calling `method`
+  frames?: RemoteAgentFrameOwner[]
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -207,6 +220,7 @@ export interface AutomationCommands {
   'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>
   'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>
   'get:aut:title': CommandSignature<void, string>
+  'remote:agent': CommandSignature<RemoteAgentRequest, unknown>
 }
 
 export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>
