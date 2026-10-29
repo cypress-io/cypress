@@ -7,7 +7,7 @@ import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, httpUtils } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
-import { debugVerbose, hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
+import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 
 import type { CookieOptions } from 'express'
 import type { CypressOutgoingResponseLike } from '../types'
@@ -193,7 +193,7 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = function () {
-  if (debugVerbose.enabled) {
+  if (this.debug.enabled) {
     this.debug('received response %o', {
       browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
       req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),

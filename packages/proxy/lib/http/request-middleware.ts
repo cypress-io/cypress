@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
-import { debugVerbose, isVerboseTelemetry as isVerbose } from '.'
+import { isVerboseTelemetry as isVerbose } from '.'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
@@ -17,7 +17,7 @@ export type RequestMiddleware = HttpMiddleware<{
 }>
 
 const LogRequest: RequestMiddleware = function () {
-  if (debugVerbose.enabled) {
+  if (this.debug.enabled) {
     this.debug('proxying request %o', {
       req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     })

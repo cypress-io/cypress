@@ -1,7 +1,7 @@
 import type { Mock } from 'vitest'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import type { HttpMiddleware, HttpMiddlewareStacks, ServerCtx } from '../../../lib/http'
-import { Http, HttpStages, _runStage } from '../../../lib/http'
+import { Http, HttpStages, _runStage, debugVerbose } from '../../../lib/http'
 import type { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 import { HttpIntercept } from '@packages/network-interception'
@@ -414,6 +414,22 @@ describe('http', function () {
       expect(error).toHaveBeenCalledOnce()
       expect(on).toHaveBeenCalledOnce()
       expect(off).toHaveBeenCalledTimes(4)
+    })
+
+    it('reports on ctx.debug whether verbose proxy debugging is enabled', function () {
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      const ctx = createHttp().createMiddlewareContext({ method: 'GET', proxiedUrl: 'url', headers: {} }, { on, off })
+      const wasEnabled = debugVerbose.enabled
+
+      try {
+        debugVerbose.enabled = false
+        expect(ctx.debug.enabled).toBe(false)
+
+        debugVerbose.enabled = true
+        expect(ctx.debug.enabled).toBe(true)
+      } finally {
+        debugVerbose.enabled = wasEnabled
+      }
     })
 
     it('runs the full middleware stacks for every request without consuming the shared stacks', async function () {

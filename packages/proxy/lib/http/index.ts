@@ -171,8 +171,6 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = (): Promise<void> => {
-    // ctx.middleware holds per-request copies of the stacks (see
-    // createMiddlewareContext), so finished steps can be deleted in place
     const middlewares = ctx.middleware[type]
 
     let middlewareName: string | undefined
@@ -521,6 +519,15 @@ export class Http {
       (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
       : undefined
 
+    const debug = (formatter, ...args) => {
+      if (!debugVerbose.enabled) return
+
+      debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
+    }
+
+    // Lets middleware skip building log arguments when nothing will be logged
+    Object.defineProperty(debug, 'enabled', { get: () => debugVerbose.enabled })
+
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
@@ -531,7 +538,7 @@ export class Http {
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
-      // _runStage consumes these stacks as it runs, so each request needs its own
+      // _runStage deletes steps from these stacks as it runs, so each request needs its own copy
       middleware: {
         [HttpStages.IncomingRequest]: { ...this.middleware[HttpStages.IncomingRequest] },
         [HttpStages.IncomingResponse]: { ...this.middleware[HttpStages.IncomingResponse] },
@@ -544,11 +551,7 @@ export class Http {
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,
       simulatedCookies: [],
-      debug: (formatter, ...args) => {
-        if (!debugVerbose.enabled) return
-
-        debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
-      },
+      debug,
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
       getAUTUrl: this.getAUTUrl,
       setAUTUrl: this.setAUTUrl,
