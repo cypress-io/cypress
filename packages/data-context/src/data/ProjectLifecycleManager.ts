@@ -322,9 +322,24 @@ export class ProjectLifecycleManager {
 
     // Neither `cliBrowser` nor `modeOptions.browser` is evidence of this: a config reload copies the
     // active browser into both. `isBrowserGivenByCli` is set once, from the command line.
-    const hasBrowser = Boolean(isBrowserGivenByCli || this.loadedFullConfig?.defaultBrowser)
+    const hasBrowser = Boolean(isBrowserGivenByCli || this.configDefaultBrowser)
 
     return this.ctx.isOpenMode && isAgentMode() && Boolean(project && testingType && hasBrowser)
+  }
+
+  /**
+   * The Launchpad asks about the welcome screen as soon as the config file loads, while
+   * `setupNodeEvents` may still be running, so until the full config exists this reads
+   * `defaultBrowser` from the config file, where a testing type's own value wins.
+   */
+  private get configDefaultBrowser () {
+    if (this.loadedFullConfig) {
+      return this.loadedFullConfig.defaultBrowser
+    }
+
+    const testingType = this.ctx.modeOptions.testingType
+
+    return (testingType && this.loadedConfigFile?.[testingType]?.defaultBrowser) || this.loadedConfigFile?.defaultBrowser
   }
 
   /**

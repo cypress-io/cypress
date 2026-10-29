@@ -188,6 +188,38 @@ describe('ProjectLifecycleManager', () => {
         expect(agent.actions.project.launchProject).toHaveBeenCalledTimes(1)
       })
 
+      it('applies to a defaultBrowser in the config file before setupNodeEvents finishes', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+
+        expect(agent.lifecycleManager.loadedFullConfig).toBeNull()
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+      })
+
+      it('applies to a defaultBrowser in the config file\'s testing type before setupNodeEvents finishes', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ e2e: { defaultBrowser: 'electron' } })
+
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+      })
+
+      it('follows the full config once it exists, even when setupNodeEvents removed the defaultBrowser', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+        jest.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: null } as unknown as FullConfig)
+
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+      })
+
       it('is not bypassed without --testingType', () => {
         process.env.CLAUDECODE = '1'
 
