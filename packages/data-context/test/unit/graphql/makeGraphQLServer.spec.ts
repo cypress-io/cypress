@@ -42,6 +42,10 @@ describe('makeGraphQLServer (integration)', () => {
     })
   })
 
+  it('listens on loopback only', () => {
+    expect((ctx.coreData.servers.gqlServer?.address() as AddressInfo).address).toBe('127.0.0.1')
+  })
+
   describe('HTTP CORS', () => {
     it('echoes Access-Control-Allow-Origin for the server\'s own origin on /__launchpad/graphql', async () => {
       const res = await fetch(`${baseUrl}/__launchpad/graphql`, {
