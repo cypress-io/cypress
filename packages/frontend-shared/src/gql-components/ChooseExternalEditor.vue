@@ -32,6 +32,19 @@
       </template>
     </Select>
   </div>
+  <p
+    class="mt-[8px] max-w-[400px] text-sm text-gray-600"
+    data-cy="launch-editor-hint"
+  >
+    <i18n-t
+      scope="global"
+      keypath="settingsPage.editor.launchEditorHint"
+    >
+      <ExternalLink href="https://on.cypress.io/file-opener-preference">
+        <code class="font-medium">LAUNCH_EDITOR</code>
+      </ExternalLink>
+    </i18n-t>
+  </p>
 </template>
 
 <script lang="ts" setup>
@@ -40,6 +53,7 @@ import { ref, computed } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
+import ExternalLink from './ExternalLink.vue'
 import Cursor from '~icons/logos/cursor'
 import VSCode from '~icons/logos/visual-studio-code'
 import Atom from '~icons/logos/atom-icon'

@@ -22,6 +22,9 @@ describe('ChooseExternalEditorModal', () => {
     cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription1)
     cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription2.replace('{0}', 'Settings'))
 
+    cy.findByTestId('launch-editor-hint').should('have.text', defaultMessages.settingsPage.editor.launchEditorHint.replace('{0}', 'LAUNCH_EDITOR'))
+    .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
+
     cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
     .should('be.visible')
     .as('chooseEditor')

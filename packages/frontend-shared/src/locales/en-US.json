@@ -518,7 +518,8 @@
     "editor": {
       "title": "External editor",
       "description": "External editor to use for editing code opened when using Cypress.",
-      "noEditorSelectedPlaceholder": "Choose your editor..."
+      "noEditorSelectedPlaceholder": "Choose your editor...",
+      "launchEditorHint": "Editor not listed? Set {0} and restart."
     },
     "notifications": {
       "title": "Desktop notifications",

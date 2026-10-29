@@ -23,6 +23,9 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
       },
     })
 
+    cy.findByTestId('launch-editor-hint').should('have.text', defaultMessages.settingsPage.editor.launchEditorHint.replace('{0}', 'LAUNCH_EDITOR'))
+    .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
+
     cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
     .should('be.visible')
     .as('chooseEditor')
