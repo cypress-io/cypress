@@ -291,8 +291,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
 
         const writeStream = fs.createWriteStream(downloadDestination)
 
-        // a failed write, such as a full disk, leaves a truncated file, so stop
-        // downloading and fail the install instead of crashing on the unhandled error
+        // a failed write, such as a full disk, leaves a truncated file, and an
+        // unhandled 'error' event would crash the CLI, so stop downloading and fail
         writeStream.on('error', (err) => {
           debug('failed writing %s: %s', downloadDestination, err.message)
           response.destroy()

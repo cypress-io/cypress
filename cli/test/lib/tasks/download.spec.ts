@@ -445,6 +445,8 @@ describe('lib/tasks/download', function () {
       })
 
       const createWriteStream = vi.spyOn(fs, 'createWriteStream').mockImplementation(() => {
+        // Safe because download only pipes into the stream and listens for
+        // 'error' and 'close', which every Writable supports
         return new Writable({
           write (chunk, encoding, callback) {
             callback(Object.assign(new Error('ENOSPC: no space left on device, write'), { code: 'ENOSPC' }))
