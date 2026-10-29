@@ -46,6 +46,6 @@ High and Critical CVSS security fixes in code authored and maintained by Cypress
 
 Updates for vulnerabilities in third-party dependencies, such as Electron, Chromium, Node.js, or npm packages, are not backported.
 
-* Latest major version: All security vulnerabilities
-* Previous major version: High or Critical CVSS scores (Up to 12 months after the current major’s release, subject to feasibility)
+* Latest major version: All security vulnerabilities in Cypress authored and maintained code
+* Previous major version: High or Critical CVSS scores in Cypress authored and maintained code (Up to 12 months after the current major’s release, subject to feasibility)
 * Older versions: Not supported (Users should upgrade to a supported version)
