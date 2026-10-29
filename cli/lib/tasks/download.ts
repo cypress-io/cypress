@@ -290,13 +290,21 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         })
 
         const writeStream = fs.createWriteStream(downloadDestination)
+        let writeFailed = false
 
         // a failed write, such as a full disk, leaves a truncated file, and an
-        // unhandled 'error' event would crash the CLI, so stop downloading and fail
+        // unhandled 'error' event would crash the CLI, so stop downloading, delete
+        // the partial file once the stream has closed so it doesn't keep holding
+        // the disk space, and fail
         writeStream.on('error', (err) => {
           debug('failed writing %s: %s', downloadDestination, err.message)
+          writeFailed = true
           response.destroy()
-          reject(err)
+          writeStream.once('close', () => {
+            fs.remove(downloadDestination)
+            .catch((removeErr) => debug('failed removing %s: %s', downloadDestination, removeErr.message))
+            .finally(() => reject(err))
+          })
         })
 
         // We only enable this pipe connection when we know we've got a successful return
@@ -307,6 +315,12 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
           return response.pipe(writeStream.on('close', r))
         }), new Bluebird((r: any) => response.on('end', r))])
         .then(() => {
+          // the hash counts bytes that never reached the disk, so a failed
+          // write must not be verified; the error handler rejects instead
+          if (writeFailed) {
+            return
+          }
+
           debug('downloading finished')
           verifyDownloadedFile(hash.digest('hex'), filesize, expectedSize, expectedChecksum)
           debug('verified')

@@ -433,7 +433,9 @@ describe('lib/tasks/download', function () {
       `)
     })
 
-    it('rejects when the file cannot be written', async function () {
+    it('rejects and deletes the partial file when the file cannot be written', async function () {
+      await fs.remove(downloadDestination)
+
       nock('https://download.cypress.io')
       .get('/desktop/1.2.3')
       .query(true)
@@ -444,12 +446,19 @@ describe('lib/tasks/download', function () {
         'x-amz-meta-size': String(expectedFileSize),
       })
 
+      let wrotePartialFile = false
+
       const createWriteStream = vi.spyOn(fs, 'createWriteStream').mockImplementation(() => {
         // Safe because download only pipes into the stream and listens for
         // 'error' and 'close', which every Writable supports
         return new Writable({
+          // write the bytes, as a disk that fills up partway through would,
+          // then fail the write
           write (chunk, encoding, callback) {
-            callback(Object.assign(new Error('ENOSPC: no space left on device, write'), { code: 'ENOSPC' }))
+            fs.appendFile(downloadDestination, chunk).then(() => {
+              wrotePartialFile = true
+              callback(Object.assign(new Error('ENOSPC: no space left on device, write'), { code: 'ENOSPC' }))
+            }, callback)
           },
         }) as fs.WriteStream
       })
@@ -463,6 +472,9 @@ describe('lib/tasks/download', function () {
       } finally {
         createWriteStream.mockRestore()
       }
+
+      expect(wrotePartialFile).toBe(true)
+      expect(await fs.pathExists(downloadDestination)).toBe(false)
     })
 
     it('computes the checksum and size from the bytes written to disk', async function () {
