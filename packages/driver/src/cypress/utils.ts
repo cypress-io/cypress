@@ -291,8 +291,7 @@ export default {
     return _
     .chain(values)
     .map(_.bind(this.stringifyActual, this))
-    // @ts-expect-error - lodash infers the wrong element type after _.bind(), so without(undefined) does not type-check
-    .without(undefined)
+    .filter((value) => value !== undefined)
     .join(', ')
     .value()
   },

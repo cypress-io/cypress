@@ -114,7 +114,7 @@ describe('src/cypress/screenshot', () => {
         [[20, 10, 20, 10], [20, 10, 20, 10]],
       ]
 
-      for (let test of tests) {
+      for (const test of tests) {
         const [input, expected] = test
 
         Screenshot.defaults({

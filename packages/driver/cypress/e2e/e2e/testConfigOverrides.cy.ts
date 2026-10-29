@@ -1,5 +1,3 @@
-/* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
-
 // Cypress resolves user-defined config values alongside its own, but `Cypress.Config`
 // enumerates only the options Cypress owns. Read the user-defined ones back through here.
 const userConfig = () => Cypress.config() as Record<string, any>

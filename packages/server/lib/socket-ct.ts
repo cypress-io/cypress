@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import devServer from './plugins/dev-server'
 import { SocketBase } from './socket-base'
+import type { StartListeningOptions } from './socket-base'
 import type { Socket } from '@packages/socket'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import assert from 'assert'
@@ -42,7 +43,7 @@ export class SocketCt extends SocketBase {
     devServer.emitter.off('dev-server:compile:success', this.onCloudTestFileChange)
   }
 
-  startListening (server: DestroyableHttpServer, automation: Automation, config, options) {
+  startListening (server: DestroyableHttpServer, automation: Automation, config, options: StartListeningOptions) {
     return super.startListening(server, automation, config, options, {
       onSocketConnection: (socket: Socket) => {
         debug('do onSocketConnection')

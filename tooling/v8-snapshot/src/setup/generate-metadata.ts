@@ -1,5 +1,6 @@
 import { writeFileSync } from 'fs'
-import { BundlerMetadata, generateBundlerMetadata } from '../generator/snapshot-generate-entry-via-dependencies'
+import type { BundlerMetadata } from '../generator/snapshot-generate-entry-via-dependencies'
+import { generateBundlerMetadata } from '../generator/snapshot-generate-entry-via-dependencies'
 import debug from 'debug'
 import { ensureDirSync } from 'fs-extra'
 import path from 'path'
