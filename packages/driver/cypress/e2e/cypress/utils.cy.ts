@@ -352,6 +352,11 @@ describe('driver/src/cypress/utils', () => {
       // '/w==' decodes to the single byte 0xFF, which never appears in UTF-8
       expect(() => $utils.decodeBase64Unicode('/w==')).to.throw()
     })
+
+    it('keeps a leading byte order mark', () => {
+      // '77u/e30=' is the UTF-8 byte order mark followed by '{}'
+      expect($utils.decodeBase64Unicode('77u/e30=')).to.equal('﻿{}')
+    })
   })
 
   context('.encodeBase64Unicode', () => {

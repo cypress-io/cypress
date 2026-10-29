@@ -102,7 +102,6 @@ describe('source_map_utils', () => {
       return `it('test', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${mapBase64}\n`
     }
 
-    // https://github.com/cypress-io/cypress/issues/35201
     it('decodes an inline map whose sources contain multi-byte UTF-8 characters', async () => {
       await withLinuxPaths((sourceMapUtils) => {
         const sourceMap = {

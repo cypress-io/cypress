@@ -27,7 +27,7 @@ export function decodeBase64Unicode (str: string) {
     bytes[i] = binary.charCodeAt(i)
   }
 
-  return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)
 }
 
 /**
