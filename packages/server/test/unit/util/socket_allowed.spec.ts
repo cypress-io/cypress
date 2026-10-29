@@ -45,23 +45,24 @@ describe('lib/util/socket_allowed', function () {
     })
   })
 
-  describe('#isRequestFromLocalhost', () => {
-    it('allows loopback remote addresses without any port allow-list entry', () => {
-      expect(sw.allowedLocalPorts).toStrictEqual([])
+  describe('#isRequestFromTrustedOrigin', () => {
+    const reqWithOrigin = (origin?: string) => ({ headers: origin === undefined ? {} : { origin } }) as Request
 
-      for (const remoteAddress of ['127.0.0.1', '::1']) {
-        const req = { socket: { remoteAddress } } as Request
+    it('allows a trusted origin', () => {
+      expect(sw.isRequestFromTrustedOrigin(reqWithOrigin(`http://localhost:${SERVER_PORT}`))).toBe(true)
+    })
 
-        expect(sw.isRequestFromLocalhost(req), remoteAddress).toBe(true)
+    it('rejects other, opaque, and missing origins', () => {
+      for (const origin of ['https://other.example.com', 'http://localhost:4000', 'null', undefined]) {
+        expect(sw.isRequestFromTrustedOrigin(reqWithOrigin(origin)), String(origin)).toBe(false)
       }
     })
 
-    it('rejects non-loopback remote addresses', () => {
-      for (const remoteAddress of ['192.168.1.20', '10.0.0.5', undefined]) {
-        const req = { socket: { remoteAddress } } as Request
+    it('allows a moz-extension origin only when asked to', () => {
+      const req = reqWithOrigin('moz-extension://3f1c2b2e-0000-4000-8000-000000000000')
 
-        expect(sw.isRequestFromLocalhost(req), String(remoteAddress)).toBe(false)
-      }
+      expect(sw.isRequestFromTrustedOrigin(req)).toBe(false)
+      expect(sw.isRequestFromTrustedOrigin(req, { allowExtension: true })).toBe(true)
     })
   })
 

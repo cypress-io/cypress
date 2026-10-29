@@ -239,6 +239,7 @@ describe('lib/socket', () => {
             agent,
             path: socketIoRoute,
             transports: ['websocket'],
+            extraHeaders: { origin: new URL(proxyUrl).origin },
           })
         })
         .catch(reject)
@@ -1118,6 +1119,7 @@ describe('lib/socket', () => {
           agent,
           path: socketIoRoute,
           transports: ['websocket'],
+          extraHeaders: { origin: new URL(proxyUrl).origin },
         })
       })
     })

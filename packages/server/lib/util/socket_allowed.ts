@@ -51,15 +51,20 @@ export class SocketAllowed {
   }
 
   /**
-   * The port allow-list is populated by proxy CONNECT tracking, which never
-   * happens with the MITM proxy disabled — a loopback remoteAddress is the
-   * only available gate for direct websocket upgrades there.
+   * A browser stamps WebSocket handshakes with the opening document's Origin,
+   * and only Cypress serves the runner document at a trusted origin. The Firefox
+   * extension's background page connects from its own moz-extension:// origin,
+   * which no web page can claim.
    */
-  isRequestFromLocalhost (req: Request) {
-    const { remoteAddress } = req.socket
-    const isAllowed = ['127.0.0.1', '::1'].includes(remoteAddress!)
+  isRequestFromTrustedOrigin (req: Pick<Request, 'headers'>, { allowExtension = false } = {}): boolean {
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && req.headers['x-cypress-forwarded-from-cypress']) {
+      return true
+    }
 
-    debug('is incoming request from localhost? %o', { isAllowed, reqUrl: req.url, remoteAddress })
+    const { origin } = req.headers
+    const isAllowed = typeof origin === 'string' && ((allowExtension && origin.startsWith('moz-extension://')) || this.isTrustedOrigin(origin))
+
+    debug('is incoming request from a trusted origin? %o', { isAllowed, origin })
 
     return isAllowed
   }
