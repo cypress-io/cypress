@@ -1,0 +1,23 @@
+cli/CHANGELOG.md
+  s_dd25433b37e964::t_a9eae825670a78 13
+packages/server/test/unit/util/chromium_flags.spec.ts
+  s_dd25433b37e964::t_a9eae825670a78 36-41,50-55
+packages/server/lib/util/chromium_flags.ts
+  s_dd25433b37e964::t_ebce3892da4420 2-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ff83e4209de09cd67a230aa78baf88d4f6de4533",
+  "prompts": {},
+  "sessions": {
+    "s_dd25433b37e964": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db8cb11a-c786-46d5-b027-ec423b631dcb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
