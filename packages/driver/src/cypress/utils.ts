@@ -456,9 +456,18 @@ export default {
     ```
   */
   decodeBase64Unicode (str) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
+    // Specs can carry inline source maps of 100+ MB, so decode through one byte
+    // array instead of an intermediate string per byte, which can exhaust the
+    // renderer's heap. `fatal` keeps throwing on invalid UTF-8 so callers can
+    // fall back rather than receive replacement characters.
+    const binary = atob(str)
+    const bytes = new Uint8Array(binary.length)
+
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i)
+    }
+
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
   },
 
   /**
