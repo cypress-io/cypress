@@ -46,7 +46,7 @@ export default defineConfig({
             const page = await browser.newPage()
 
             // Text comes from the test invocation of `cy.puppeteer()`
-            await page.goto(`http://localhost:${serverPort}/cypress/fixtures/page-4.html?text=${text}`)
+            await page.goto(`http://localhost:${serverPort}/cypress/fixtures/page-4.html?text=${encodeURIComponent(text)}`)
 
             const paragraph = (await page.waitForSelector('p'))!
             const paragraphText = await page.evaluate((el) => el.textContent, paragraph)
