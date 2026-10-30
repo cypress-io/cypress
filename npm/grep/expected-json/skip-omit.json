@@ -1,0 +1,11 @@
+[
+  {
+    "name": "omit-filtered-hooks.cy.ts",
+    "tests": [
+      {
+        "name": "Suite that runs",
+        "state": "passed"
+      }
+    ]
+  }
+]
