@@ -50,6 +50,21 @@ const file1 = createFile('file1')
 const file2 = createFile('file2')
 
 describe('driver/src/cypress/source_map_utils', () => {
+  it('does not ship a dangling Popper source-map URL in the runner (#23648)', { retries: 0 }, () => {
+    cy.then(() => {
+      const runnerUrl = new URL('/__cypress/runner/cypress_runner.js', window.location.href).href
+
+      return window.fetch(runnerUrl, { cache: 'no-store' }).then((response) => {
+        expect(response.status, 'served runner asset').to.eq(200)
+
+        return response.text()
+      }).then((code) => {
+        expect(code.length, 'runner JavaScript rather than an error page').to.be.greaterThan(100000)
+        expect(code.includes('sourceMappingURL=popper.js.map'), 'dangling vendor map URL').to.eq(false)
+      })
+    })
+  })
+
   context('.extractSourceMap', () => {
     it('returns null if there is no source map embedded', () => {
       const sourceMap = $sourceMapUtils.extractSourceMap(testContent)
