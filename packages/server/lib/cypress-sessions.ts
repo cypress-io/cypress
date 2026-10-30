@@ -21,6 +21,11 @@ const getRecordPath = (pid: number): string => {
 
 let currentState: LiveSessionState | null = null
 
+// Set while the record on disk is the one written before the server started. A record
+// has the same file name every time this process writes one, so the id is what tells a
+// newer pending record from the one a slow caller meant to remove.
+let pendingId: string | null = null
+
 let persistChain: Promise<void> = Promise.resolve()
 const persist = (record: CypressSession): Promise<void> => {
   const run = async () => {
@@ -43,6 +48,66 @@ const persist = (record: CypressSession): Promise<void> => {
 }
 
 export const cypressSessions = {
+  /**
+   * Records that the project could not load, so `cypress tap status` can say why instead of
+   * reporting that Cypress cannot be reached. The record names no server; `addSession`
+   * replaces it once one starts.
+   */
+  async addPendingSession ({ projectRoot, testingType = null, loadError }: { projectRoot: string, testingType?: TestingType | null, loadError: string }): Promise<void> {
+    if (currentState) {
+      return
+    }
+
+    const record: CypressSession = {
+      schemaVersion: SCHEMA_VERSION,
+      pid: process.pid,
+      projectRoot: path.resolve(projectRoot),
+      serverPort: 0,
+      sessionId: crypto.randomUUID(),
+      testingType,
+      status: 'starting',
+      loadError: { message: loadError },
+    }
+
+    pendingId = record.sessionId
+
+    try {
+      await persist(record)
+      debug('wrote pending cypress sessions record %o', record)
+    } catch (err) {
+      debug('failed to write pending cypress sessions record: %o', err)
+    }
+  },
+
+  /**
+   * Removes the record written by `addPendingSession`, once the error it reports is gone.
+   * A record for a running session is not touched.
+   */
+  async clearPending (): Promise<void> {
+    const pending = pendingId
+
+    if (pending === null || currentState) {
+      return
+    }
+
+    try {
+      await persistChain
+
+      // A session or a newer pending record may have taken over the file while this waited
+      if (currentState || pendingId !== pending) {
+        debug('skipping clearing the pending cypress sessions record; it was replaced')
+
+        return
+      }
+
+      pendingId = null
+      await fs.remove(getRecordPath(process.pid))
+      debug('cleared pending cypress sessions record')
+    } catch (err) {
+      debug('failed to clear pending cypress sessions record: %o', err)
+    }
+  },
+
   async addSession ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
     const record: CypressSession = {
       schemaVersion: SCHEMA_VERSION,
@@ -56,6 +121,7 @@ export const cypressSessions = {
     // machineId/userId are read fresh from the data context when the probe route
     // answers; the in-memory state only carries the browser attachment.
     currentState = { ...record, cdpBrowserWsUrl: null, browserName: null, browserFamily: null, machineId: null, userId: null }
+    pendingId = null
 
     try {
       await persist(record)
@@ -99,10 +165,21 @@ export const cypressSessions = {
 
   async remove (): Promise<void> {
     const state = currentState
+    const pending = pendingId
 
     currentState = null
+    pendingId = null
 
     if (!state) {
+      if (pending !== null) {
+        await persistChain
+
+        // A session or a newer pending record written while this waited owns the file now
+        if (!currentState && pendingId === null) {
+          await fs.remove(getRecordPath(process.pid)).catch((err) => debug('failed to remove pending cypress sessions record: %o', err))
+        }
+      }
+
       return
     }
 
@@ -125,5 +202,6 @@ export const cypressSessions = {
 
 export const _resetForTesting = (): void => {
   currentState = null
+  pendingId = null
   persistChain = Promise.resolve()
 }

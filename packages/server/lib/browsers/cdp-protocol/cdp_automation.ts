@@ -32,7 +32,13 @@ export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
 
+const debug = debugModule('cypress:server:browsers:cdp_automation')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
+
+// `cookies` is left out because Network.clearBrowserCookies clears every
+// cookie at once, and `file_systems` because it is very slow to clear:
+// https://github.com/cypress-io/cypress/pull/32703
+const RESET_STORAGE_TYPES = 'indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage'
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {
@@ -80,7 +86,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
 
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false, private storageOrigins: Set<string> = new Set()) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
@@ -113,8 +119,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
+  /**
+   * @param storageOrigins the origins the browser has sent requests to since
+   * the last `reset:browser:state`. Pass the same set to every instance created
+   * for one browser, so a reset clears origins that an earlier tab's instance
+   * recorded.
+   */
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean, storageOrigins?: Set<string>): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless, storageOrigins)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
@@ -184,6 +196,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       return
     }
 
+    this.recordStorageOrigin(url)
+
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
     // Firefox lacks support for urlFragment and initiator, two nice-to-haves
     const browserPreRequest: BrowserPreRequest = {
@@ -203,6 +217,53 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
 
     await this.automation.onBrowserPreRequest?.(browserPreRequest)
+  }
+
+  private recordStorageOrigin (url: string) {
+    try {
+      const { protocol, origin } = new URL(url)
+
+      if (protocol === 'http:' || protocol === 'https:') {
+        this.storageOrigins.add(origin)
+      }
+    } catch {
+      // not a parseable URL, so it has no origin that could hold storage
+    }
+  }
+
+  // Chrome rejects `origin: '*'` from version 158 on, so each origin the
+  // browser has requested is cleared by name. Every clear runs even when one
+  // fails, and any failure is then thrown: a spec that starts with the last
+  // spec's data fails in ways that are hard to trace back to this. An origin
+  // that failed is kept for the next reset.
+  private async resetBrowserState () {
+    const origins = [...this.storageOrigins]
+
+    this.storageOrigins.clear()
+
+    debug('resetting browser state for origins %o', origins)
+
+    const clears: [string, Promise<unknown>][] = [
+      ['Network.clearBrowserCookies', this.sendDebuggerCommandFn('Network.clearBrowserCookies')],
+      ['Network.clearBrowserCache', this.sendDebuggerCommandFn('Network.clearBrowserCache')],
+      ...origins.map((origin): [string, Promise<unknown>] => {
+        return [`Storage.clearDataForOrigin for ${origin}`, this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin, storageTypes: RESET_STORAGE_TYPES })
+        .catch((err) => {
+          this.storageOrigins.add(origin)
+          throw err
+        })]
+      }),
+    ]
+
+    const results = await Promise.allSettled(clears.map(([, clear]) => clear))
+
+    const failures = results.flatMap((result, i) => {
+      return result.status === 'rejected' ? [`${clears[i][0]}: ${result.reason?.message ?? result.reason}`] : []
+    })
+
+    if (failures.length) {
+      throw new Error(`Cypress could not clear the browser's state before the next spec:\n\n${failures.join('\n')}`)
+    }
   }
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
@@ -604,12 +665,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return `data:image/png;base64,${screenshot.data}`
       }
       case 'reset:browser:state':
-        return Promise.all([
-          // Note that we are omitting `file_systems` as it is very non-performant to clear:
-          // https://github.com/cypress-io/cypress/pull/32703
-          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
-          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
-        ])
+        return this.resetBrowserState()
       case 'reset:browser:tabs:for:next:spec':
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':

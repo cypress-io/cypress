@@ -42,7 +42,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.31.0",
     "execa": "4.1.0",
-    "systeminformation": "^5.27.7",
+    "systeminformation": "^5.33.16",
     "vitest": "^3.2.4"
   },
   "nx": {}

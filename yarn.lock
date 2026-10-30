@@ -30585,10 +30585,10 @@ syntax-error@1.4.0:
   dependencies:
     acorn-node "^1.2.0"
 
-systeminformation@^5.25.11, systeminformation@^5.27.7, systeminformation@^5.31.1:
-  version "5.33.1"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.33.1.tgz#499f06a859d2abeafaae6d69f71dd3516919f0f4"
-  integrity sha512-DEN6ICHk3Tk0Uf/hrAHh7xlt7iL5CJFBtPZinA0H62DrGG/KPKqq/Nzj6lCXPS4Ay/sf/14zNnk9LpqKzBIc+w==
+systeminformation@^5.25.11, systeminformation@^5.33.16:
+  version "5.33.18"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.33.18.tgz#cae5983875ba291f6f036cfde86a26b422c5b71c"
+  integrity sha512-SF8DBQx3ypa8zDqZlezpHQ6M2g7TrqSEWpAtC4OsHCdLmi7J2WdxaSbA8/DJyEn2l/CHPrW0VFenoqoDccrw6g==
 
 systemjs@^6.15.1:
   version "6.15.1"

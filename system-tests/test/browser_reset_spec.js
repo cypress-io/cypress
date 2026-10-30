@@ -34,10 +34,13 @@ const onServer = function (app) {
 
 describe('e2e browser reset', () => {
   systemTests.setup({
-    servers: {
+    servers: [{
       port: 1515,
       onServer,
-    },
+    }, {
+      port: 1516,
+      onServer: (app) => app.use(express.static(e2ePath)),
+    }],
   })
 
   systemTests.it('executes two specs with a cached call', {

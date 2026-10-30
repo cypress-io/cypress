@@ -260,6 +260,22 @@ describe('detect', () => {
           return
         }
 
+        if (command === '/crashes') {
+          setTimeout(() => {
+            cpSpawnMock.stderr.emit('data', 'error while loading shared libraries: libnss3.so')
+          }, 0)
+
+          return
+        }
+
+        if (command === '/very/noisy') {
+          setTimeout(() => {
+            cpSpawnMock.stderr.emit('data', 'x'.repeat(5000))
+          }, 0)
+
+          return
+        }
+
         if (command === '/not/a/real/path') {
           setTimeout(() => {
             cpSpawnMock.stdout.emit('data', '')
@@ -295,6 +311,44 @@ describe('detect', () => {
         throw Error('Should not find a browser')
       } catch (err) {
         expect(err.notDetectedAtPath).toBe(true)
+        // The caller needs to see what the binary printed to know why it was not recognized
+        expect(err.message).toContain('/not/a/browser --version')
+        expect(err.message).toContain('not a browser version string')
+      }
+    })
+
+    it('reports what the command wrote to stderr', async () => {
+      try {
+        // @ts-expect-error - goal fixtures are partial Browser objects
+        await detectByPath('/crashes', goalBrowsers)
+
+        throw Error('Should not find a browser')
+      } catch (err) {
+        expect(err.message).toContain('printed: (nothing)')
+        expect(err.message).toContain('wrote to stderr: error while loading shared libraries: libnss3.so')
+      }
+    })
+
+    it('keeps a very long report short', async () => {
+      try {
+        // @ts-expect-error - goal fixtures are partial Browser objects
+        await detectByPath('/very/noisy', goalBrowsers)
+
+        throw Error('Should not find a browser')
+      } catch (err) {
+        expect(err.message.length).toBeLessThan(1500)
+        expect(err.message).toContain('...')
+      }
+    })
+
+    it('says so when the command printed nothing', async () => {
+      try {
+        // @ts-expect-error - goal fixtures are partial Browser objects
+        await detectByPath('/not/a/real/path', goalBrowsers)
+
+        throw Error('Should not find a browser')
+      } catch (err) {
+        expect(err.message).toContain('printed: (nothing)')
       }
     })
 
