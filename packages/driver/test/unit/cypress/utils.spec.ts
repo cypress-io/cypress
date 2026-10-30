@@ -5,11 +5,10 @@ import $utils from '../../../src/cypress/utils'
 describe('driver/src/cypress/utils', () => {
   describe('.decodeBase64Unicode', () => {
     // https://github.com/cypress-io/cypress/issues/35201
-    it('decodes a large payload without allocating per byte', () => {
-      // Runs in a child process with a capped heap, so a decoder that builds an
-      // intermediate string per byte exits with an out-of-memory error. In the
-      // runner the same allocation crashes the browser tab instead of failing.
-      // The child receives the decoder as source text, so the decoder must not
+    it('decodes a large payload within a capped heap', () => {
+      // Runs in a child process so that exhausting the capped heap fails this
+      // test with a non-zero exit instead of taking down the test runner. The
+      // child receives the decoder as source text, so the decoder must not
       // reference anything outside its own body.
       const script = `
         const decode = ({ ${$utils.decodeBase64Unicode.toString()} }).decodeBase64Unicode
