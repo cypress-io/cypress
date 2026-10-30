@@ -11,6 +11,10 @@
 
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) silently ignored a header matcher when the same header name appeared more than once with different casing, such as `Content-Type` and `content-type`. Only the last matcher was applied. `cy.intercept()` now throws an error that names the duplicated header. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
 
+**Misc:**
+
+- The editor chooser now lists only the editors Cypress detects, and the **Custom** option has been removed. To use an editor that isn't listed, set the `LAUNCH_EDITOR` environment variable before starting Cypress. Addressed in [#35208](https://github.com/cypress-io/cypress/pull/35208).
+
 **Dependency Updates:**
 
 - Upgraded `electron` from `41.7.0` to `43.8.4` to address the [compromised eMudhra intermediate certificates](https://github.com/electron/electron/security/advisories/GHSA-jr5w-w6x2-84p9) vulnerability reported in security scans. Connections that Cypress makes itself, such as to Cypress Cloud, now reject certificates issued through these intermediates. Node code in the config process, such as [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), runs on the Node.js version that runs the `cypress` CLI, so it needs a Node.js release that includes the same fix. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
