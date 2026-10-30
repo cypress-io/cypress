@@ -10,6 +10,7 @@
 **Bugfixes:**
 
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) silently ignored a header matcher when the same header name appeared more than once with different casing, such as `Content-Type` and `content-type`. Only the last matcher was applied. `cy.intercept()` now throws an error that names the duplicated header. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
+- Fixed an issue where `cypress tap` commands could delete the record of a running `cypress open` session, and report that no session was running, when run from a process that cannot see the session's process ID, such as a different PID namespace in a container or sandbox. The record is now kept while the session responds. Fixed in [#35103](https://github.com/cypress-io/cypress/pull/35103).
 
 **Dependency Updates:**
 

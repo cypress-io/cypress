@@ -373,6 +373,18 @@ describe('lib/cypress-sessions', () => {
       expect(fs.existsSync(`${SESSIONS_DIR}/111.json`)).toBe(false)
     })
 
+    it('resolves a session whose pid cannot be signalled from here but whose server answers', async () => {
+      const port = await startReadySession(SESSION_ID)
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      stubKill({ alive: [] })
+
+      const { session } = await resolveSession({ cwd: PROJECT })
+
+      expect(session.pid).toBe(444)
+      expect(fs.existsSync(`${SESSIONS_DIR}/444.json`)).toBe(true)
+    })
+
     it('throws STALE_SESSION when the pid is taken but nothing answers the probe (recycled pid)', async () => {
       const port = await getClosedPort()
 
@@ -638,8 +650,8 @@ describe('lib/cypress-sessions', () => {
       mockfs({
         [SESSIONS_DIR]: {
           '111.json': makeRecord({ pid: 111, serverPort: livePort }),
-          // pid is dead — skipped without a probe
-          '222.json': makeRecord({ pid: 222, serverPort: livePort }),
+          // pid is dead and nothing answers — the writer is gone, skipped
+          '222.json': makeRecord({ pid: 222, serverPort: closedPort }),
           // pid looks alive but nothing answers — recycled pid, skipped
           '333.json': makeRecord({ pid: 333, serverPort: closedPort }),
         },
@@ -650,13 +662,25 @@ describe('lib/cypress-sessions', () => {
       expect((await listLiveSessions()).map((session) => session.pid)).toEqual([111])
     })
 
+    it('lists a session whose pid cannot be signalled from here but whose server answers', async () => {
+      const port = await startFakeSession()
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      // Another PID namespace: the writer is alive, but its pid is not visible.
+      stubKill({ alive: [] })
+
+      expect((await listLiveSessions()).map((session) => session.pid)).toEqual([444])
+      expect(fs.existsSync(`${SESSIONS_DIR}/444.json`)).toBe(true)
+    })
+
     it('still lists live sessions when a dead record cannot be reaped', async () => {
       const livePort = await startFakeSession()
+      const closedPort = await getClosedPort()
 
       mockfs({
         [SESSIONS_DIR]: {
           '111.json': makeRecord({ pid: 111, serverPort: livePort }),
-          '222.json': makeRecord({ pid: 222, serverPort: livePort }),
+          '222.json': makeRecord({ pid: 222, serverPort: closedPort }),
         },
       })
 
@@ -701,6 +725,26 @@ describe('lib/cypress-sessions', () => {
       expect(await fs.pathExists(`${SESSIONS_DIR}/111.json`)).toBe(true)
       expect(await fs.pathExists(`${SESSIONS_DIR}/222.json`)).toBe(false)
       expect(await fs.pathExists(`${SESSIONS_DIR}/keep.txt`)).toBe(true)
+    })
+
+    it('keeps a dead-pid record whose server still answers the probe', async () => {
+      const port = await startFakeSession()
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      stubKill({ alive: [] })
+
+      expect(await pruneDeadSessionRecords()).toBe(0)
+      expect(await fs.pathExists(`${SESSIONS_DIR}/444.json`)).toBe(true)
+    })
+
+    it('removes a dead-pid record whose port is answered by a different session', async () => {
+      const port = await startFakeSession({ sessionId: 'someone-else' })
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      stubKill({ alive: [] })
+
+      expect(await pruneDeadSessionRecords()).toBe(1)
+      expect(await fs.pathExists(`${SESSIONS_DIR}/444.json`)).toBe(false)
     })
 
     it('keeps a live-pid record whose server does not answer the probe', async () => {
