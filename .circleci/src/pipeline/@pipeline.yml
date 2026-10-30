@@ -1455,6 +1455,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
       - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
+          no_output_timeout: 20m
           command: |
             source ./ci-ensure-node.sh
             if [[ -f yarn.lock ]]; then
