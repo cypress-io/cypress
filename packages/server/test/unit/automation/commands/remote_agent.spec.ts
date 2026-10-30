@@ -3,7 +3,7 @@ import type { Mock } from 'vitest'
 import type { Protocol } from 'devtools-protocol'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
 import type { ScriptRemoteValue } from 'webdriver/build/bidi/localTypes'
-import { BidiRemoteAgent, CdpRemoteAgent } from '../../../../lib/automation/commands/remote_agent'
+import { BidiRemoteAgent, CdpRemoteAgent, WebKitRemoteAgent } from '../../../../lib/automation/commands/remote_agent'
 import { evaluateInFrameContext } from '../../../../lib/automation/helpers/evaluate_in_frame_context'
 
 type MockedSendDebuggerCommand = SendDebuggerCommand & Mock
@@ -229,6 +229,99 @@ describe('remote:agent automation command', () => {
         })
 
         expect(evaluated().map(({ target }) => target.context)).not.toContain('child')
+      })
+    })
+  })
+
+  describe('in WebKit', () => {
+    const callExpression = `window.__cypressAgent.call("resolve", {"config":{}}, [{"type":"get","selector":"#input"}])`
+    const guarded = (expr: string) => `window.__cypressAgent === undefined ? "__cypress_remote_agent_missing__" : ${expr}`
+    const utility = { world: 'utility', isFunction: false }
+
+    let ownerHandle: { _value?: unknown, asElement: Mock, dispose: Mock }
+    let serverFrames: Map<object, any>
+    let autFrame: any
+    let webkitAgent: WebKitRemoteAgent
+
+    const makeServerFrame = () => {
+      let installed = false
+
+      return {
+        _evaluateExpression: vi.fn(async (expression: string) => {
+          if (expression === 'agent source') {
+            installed = true
+
+            return undefined
+          }
+
+          if (expression.startsWith('window.__cypressAgent === undefined') && !installed) {
+            return '__cypress_remote_agent_missing__'
+          }
+
+          return { ok: true, value: { elements: [] } }
+        }),
+        _evaluateExpressionHandle: vi.fn(async () => ownerHandle),
+      }
+    }
+
+    beforeEach(() => {
+      serverFrames = new Map()
+      autFrame = { _connection: { toImpl: (clientObject: object) => serverFrames.get(clientObject) } }
+      serverFrames.set(autFrame, makeServerFrame())
+      ownerHandle = { asElement: vi.fn(() => ({ _contentFrame: async () => childFrame })), dispose: vi.fn() }
+
+      webkitAgent = new WebKitRemoteAgent(() => Promise.resolve('agent source'))
+    })
+
+    const childFrame = makeServerFrame()
+
+    it('installs the agent in Playwright\'s utility world when it is missing and calls it there', async () => {
+      expect(await webkitAgent.call(autFrame, request)).toEqual({ ok: true, value: { elements: [] } })
+      await webkitAgent.call(autFrame, request)
+
+      expect(serverFrames.get(autFrame)._evaluateExpression.mock.calls).toEqual([
+        [guarded(callExpression), utility],
+        ['agent source', utility],
+        [callExpression, utility],
+        [guarded(callExpression), utility],
+      ])
+    })
+
+    it('throws when the agent call throws in the page', async () => {
+      serverFrames.get(autFrame)._evaluateExpression.mockRejectedValueOnce(new Error('TypeError: boom'))
+
+      await expect(webkitAgent.call(autFrame, request)).rejects.toThrow(`The remote agent threw while running 'resolve': TypeError: boom`)
+    })
+
+    it('fails clearly when the frame comes from a client that is not in-process', async () => {
+      await expect(webkitAgent.call({} as any, request)).rejects.toThrow('In WebKit, `experimentalRemoteDriver` must be enabled in the config file')
+    })
+
+    describe('with frames to enter', () => {
+      const framedRequest = { ...request, frames: [{ steps: [{ type: 'get', selector: '#pay' }], selector: '#pay' }] }
+
+      beforeEach(() => {
+        childFrame._evaluateExpression.mockClear()
+      })
+
+      it('finds the iframe\'s frame and calls the agent in it', async () => {
+        expect(await webkitAgent.call(autFrame, framedRequest)).toEqual({ ok: true, value: { elements: [] } })
+
+        expect(serverFrames.get(autFrame)._evaluateExpressionHandle).toHaveBeenCalledWith('window.__cypressAgent.frameOwner([{"type":"get","selector":"#pay"}])', utility)
+        expect(ownerHandle.dispose).toHaveBeenCalled()
+        expect(childFrame._evaluateExpression.mock.calls.at(-1)).toEqual([callExpression, utility])
+      })
+
+      it('returns a retryable error without calling the agent when there is no iframe', async () => {
+        ownerHandle = { _value: 'found <p>, which is not an iframe', asElement: vi.fn(() => null), dispose: vi.fn() }
+
+        expect(await webkitAgent.call(autFrame, framedRequest)).toEqual({
+          ok: false,
+          error: { name: 'Error', message: 'Expected `#pay` to be an iframe, but found <p>, which is not an iframe.', retry: true },
+        })
+
+        expect(ownerHandle.dispose).toHaveBeenCalled()
+        expect(childFrame._evaluateExpression).not.toHaveBeenCalled()
       })
     })
   })

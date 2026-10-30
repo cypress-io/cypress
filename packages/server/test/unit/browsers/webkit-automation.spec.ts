@@ -23,6 +23,7 @@ function createMockBrowser () {
       name: () => `Your project: 'some-project'`,
       url: () => 'http://localhost:3000/index.html',
       title: vi.fn(async () => 'My App'),
+      evaluate: vi.fn(async () => undefined),
       childFrames: () => [],
     }
 
@@ -208,6 +209,24 @@ describe('lib/browsers/webkit-automation', () => {
       mock.getLastContext().pages = () => []
 
       await wk.onRequest('focus:browser:window', {})
+    })
+  })
+
+  describe('reload:aut:frame / navigate:aut:history', () => {
+    it('reloads the AUT frame', async () => {
+      const wk = await createAutomation()
+
+      await wk.onRequest('reload:aut:frame', { forceReload: true })
+
+      expect(mock.getLastPage().mainFrame().childFrames()[0].evaluate).toHaveBeenCalledWith('window.location.reload(true)')
+    })
+
+    it('navigates the AUT frame history', async () => {
+      const wk = await createAutomation()
+
+      await wk.onRequest('navigate:aut:history', { historyNumber: -1 })
+
+      expect(mock.getLastPage().mainFrame().childFrames()[0].evaluate).toHaveBeenCalledWith('window.history.go(-1)')
     })
   })
 

@@ -4,6 +4,7 @@ import type { RemoteAgentFrameOwner, RemoteAgentRequest } from '@packages/types'
 import { getRunnerRemoteAgentContents } from '@packages/resolve-dist'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client as WebDriverClient } from 'webdriver'
+import type playwright from 'playwright-webkit'
 import type { ScriptEvaluateResult, ScriptRemoteValue } from 'webdriver/build/bidi/localTypes'
 
 const debug = Debug('cypress:server:automation:command:remote_agent')
@@ -224,5 +225,117 @@ export class BidiRemoteAgent {
     }
 
     return result.result
+  }
+}
+
+type UtilityEvaluateOptions = { world: 'utility', isFunction: false }
+
+interface PlaywrightServerHandle {
+  _value?: unknown
+  asElement (): PlaywrightServerElementHandle | null
+  dispose (): void
+}
+
+interface PlaywrightServerElementHandle extends PlaywrightServerHandle {
+  _contentFrame (): Promise<PlaywrightServerFrame | null>
+}
+
+interface PlaywrightServerFrame {
+  _evaluateExpression (expression: string, options: UtilityEvaluateOptions): Promise<unknown>
+  _evaluateExpressionHandle (expression: string, options: UtilityEvaluateOptions): Promise<PlaywrightServerHandle>
+}
+
+const UTILITY: UtilityEvaluateOptions = { world: 'utility', isFunction: false }
+
+const isServerFrame = (frame: unknown): frame is PlaywrightServerFrame => {
+  return typeof frame === 'object' && frame !== null
+    && '_evaluateExpression' in frame && typeof frame._evaluateExpression === 'function'
+    && '_evaluateExpressionHandle' in frame && typeof frame._evaluateExpressionHandle === 'function'
+}
+
+// Only a Playwright client created in-process can reach the server-side object behind it
+export const toPlaywrightServerObject = (clientObject: object): unknown => {
+  const connection: unknown = Reflect.get(clientObject, '_connection')
+  const toImpl: unknown = typeof connection === 'object' && connection !== null ? Reflect.get(connection, 'toImpl') : undefined
+
+  return typeof toImpl === 'function' ? toImpl(clientObject) : undefined
+}
+
+// Playwright has no public API for an isolated world, so this reaches the
+// server frame for the utility world Playwright keeps in every frame
+const toServerFrame = (frame: playwright.Frame): PlaywrightServerFrame => {
+  const serverFrame = toPlaywrightServerObject(frame)
+
+  if (!isServerFrame(serverFrame)) {
+    throw new Error('The remote agent could not reach Playwright\'s isolated world. In WebKit, `experimentalRemoteDriver` must be enabled in the config file, and playwright-webkit must be 1.59.0 or later.')
+  }
+
+  return serverFrame
+}
+
+// The WebKit counterpart of CdpRemoteAgent, run in Playwright's utility world.
+// The world is recreated on navigation, which also clears the agent installed in it.
+export class WebKitRemoteAgent {
+  private source: Promise<string> | undefined
+
+  constructor (private getSource: () => Promise<Buffer | string> = getRunnerRemoteAgentContents) {}
+
+  async call (autFrame: playwright.Frame, request: RemoteAgentRequest): Promise<unknown> {
+    let frame = toServerFrame(autFrame)
+
+    for (const owner of request.frames ?? []) {
+      const child = await this.getOwnedFrame(frame, owner)
+
+      if (!isServerFrame(child)) {
+        return child
+      }
+
+      frame = child
+    }
+
+    const { method, context, args } = request
+
+    return this.withAgent(frame, `running '${method}'`, `window.${AGENT_GLOBAL}.call(${JSON.stringify(method)}, ${JSON.stringify(context)}, ${JSON.stringify(args)})`)
+  }
+
+  private async getOwnedFrame (frame: PlaywrightServerFrame, owner: RemoteAgentFrameOwner) {
+    await this.withAgent(frame, `finding \`${owner.selector}\``, 'undefined')
+
+    const handle = await frame._evaluateExpressionHandle(`window.${AGENT_GLOBAL}.frameOwner(${JSON.stringify(owner.steps)})`, UTILITY)
+
+    try {
+      const element = handle.asElement()
+
+      if (!element) {
+        return frameNotFound(owner, String(handle._value))
+      }
+
+      return await element._contentFrame() ?? frameNotFound(owner, 'its document is not loaded')
+    } finally {
+      handle.dispose()
+    }
+  }
+
+  // Installs the agent first when the frame has none, so the common case is one round trip
+  private async withAgent (frame: PlaywrightServerFrame, action: string, expression: string): Promise<unknown> {
+    const guarded = `window.${AGENT_GLOBAL} === undefined ? ${JSON.stringify(AGENT_MISSING)} : ${expression}`
+    let result = await this.evaluate(frame, action, guarded)
+
+    if (result === AGENT_MISSING) {
+      this.source ??= Promise.resolve(this.getSource()).then(String)
+      await this.evaluate(frame, 'loading', await this.source)
+      debug('installed agent in the utility world of a WebKit frame')
+      result = await this.evaluate(frame, action, expression)
+    }
+
+    return result
+  }
+
+  private async evaluate (frame: PlaywrightServerFrame, action: string, expression: string) {
+    try {
+      return await frame._evaluateExpression(expression, UTILITY)
+    } catch (err) {
+      throw new Error(`The remote agent threw while ${action}: ${err instanceof Error ? err.message : String(err)}`)
+    }
   }
 }

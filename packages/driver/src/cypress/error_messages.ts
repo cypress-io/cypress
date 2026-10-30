@@ -1777,9 +1777,6 @@ export default {
 
   remote_driver: {
     frame_requires_remote_driver: `${cmd('frame')} requires \`experimentalRemoteDriver\` to be enabled.`,
-    unsupported_browser ({ cmd: command, browser }) {
-      return `${cmd(command)} failed because \`experimentalRemoteDriver\` only supports Chromium-based browsers and Firefox, and this test is running in ${browser}.`
-    },
     unsupported_option ({ cmd: command, option }) {
       return `${cmd(command)} does not support the \`${option}\` option when \`experimentalRemoteDriver\` is enabled.`
     },

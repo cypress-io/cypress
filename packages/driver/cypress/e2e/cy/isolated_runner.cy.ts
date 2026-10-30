@@ -7,7 +7,7 @@ const ORIGINS = {
 
 const PAGE = '/fixtures/remote-driver-isolation.html'
 
-describe('isolated runner', { browser: [{ family: 'chromium' }, { family: 'firefox' }], defaultCommandTimeout: 2000 }, () => {
+describe('isolated runner', { defaultCommandTimeout: 2000 }, () => {
   Object.entries(ORIGINS).forEach(([label, origin]) => {
     describe(label, () => {
       beforeEach(() => {

@@ -139,6 +139,8 @@ export type BrowserLaunchOpts = {
    * no suite-level override can be known yet.
    */
   shouldClearPersistedServiceWorkers?: boolean
+  // From the project config, since a per-test override can't change how the browser was launched
+  experimentalRemoteDriver?: boolean
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

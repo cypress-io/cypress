@@ -142,6 +142,7 @@ export class OpenProject extends EventEmitter {
       downloadsFolder: cfg.downloadsFolder,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
+      experimentalRemoteDriver: 'experimentalRemoteDriver' in cfg && cfg.experimentalRemoteDriver === true,
       ...prevOptions || {},
       useBrowserNetworkInterception,
       // proxy launch opts must win over prevOptions: args may carry a normalized

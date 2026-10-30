@@ -8,6 +8,7 @@ import * as unhandledExceptions from '../unhandled_exceptions'
 import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import utils from './utils'
+import { toPlaywrightServerObject } from '../automation/commands/remote_agent'
 
 const debug = Debug('cypress:server:browsers:webkit')
 
@@ -76,6 +77,37 @@ function removeBadExitListener () {
   else debug('did not find killProcessAndCleanup, which may cause interactive mode to unexpectedly open')
 }
 
+type LaunchedWebKit = { pwBrowser: playwright.Browser, websocketUrl: string, pid?: number }
+
+async function launchServer (pw: typeof playwright, preferences: playwright.LaunchOptions): Promise<LaunchedWebKit> {
+  const pwServer = await pw.webkit.launchServer(preferences)
+
+  removeBadExitListener()
+
+  const websocketUrl = pwServer.wsEndpoint()
+
+  return { pwBrowser: await pw.webkit.connect(websocketUrl), websocketUrl, pid: pwServer.process().pid }
+}
+
+// The remote driver's agent needs Playwright's isolated world, which only an in-process client
+// can reach; `bind` still serves the websocket that `after:browser:launch` hands to users
+async function launchInProcess (pw: typeof playwright, preferences: playwright.LaunchOptions): Promise<LaunchedWebKit> {
+  const pwBrowser = await pw.webkit.launch(preferences)
+
+  removeBadExitListener()
+
+  if (typeof pwBrowser.bind !== 'function') {
+    await pwBrowser.close()
+
+    throw new Error('`experimentalRemoteDriver` requires playwright-webkit 1.59.0 or later.')
+  }
+
+  const { endpoint } = await pwBrowser.bind('cypress', { host: '127.0.0.1', port: 0 })
+  const pid: unknown = Reflect.get(Object(toPlaywrightServerObject(pwBrowser)), 'options')?.browserProcess?.process?.pid
+
+  return { pwBrowser, websocketUrl: endpoint, pid: typeof pid === 'number' ? pid : undefined }
+}
+
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance> {
   if (!options.experimentalWebKitSupport) {
     throw new Error('WebKit was launched, but the experimental feature was not enabled. Please add `experimentalWebKitSupport: true` to your config file to launch WebKit.')
@@ -111,19 +143,18 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   launchOptions.preferences.args = [...launchOptions.args, ...(launchOptions.preferences.args || [])]
 
-  let pwServer: playwright.BrowserServer
+  let launched: LaunchedWebKit
 
   try {
-    pwServer = await pw.webkit.launchServer(launchOptions.preferences)
+    launched = options.experimentalRemoteDriver
+      ? await launchInProcess(pw, launchOptions.preferences)
+      : await launchServer(pw, launchOptions.preferences)
   } catch (err) {
     err.message = `There was an error launching \`playwright-webkit\`: \n\n\`\`\`${err.message}\n\`\`\``
     throw err
   }
 
-  removeBadExitListener()
-
-  const websocketUrl = pwServer.wsEndpoint()
-  const pwBrowser = await pw.webkit.connect(websocketUrl)
+  const { pwBrowser, websocketUrl } = launched
 
   wkAutomation = await WebKitAutomation.create({
     automation,
@@ -139,7 +170,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   automation.use(wkAutomation)
 
   class WkInstance extends EventEmitter implements BrowserInstance {
-    pid = pwServer.process().pid
+    pid = launched.pid
 
     constructor () {
       super()

@@ -14,6 +14,9 @@ import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
+import { WebKitRemoteAgent } from '../automation/commands/remote_agent'
+import { webkitReloadFrame } from '../automation/commands/reload_frame'
+import { webkitNavigateHistory } from '../automation/commands/navigate_history'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -39,6 +42,7 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
+  private remoteAgent = new WebKitRemoteAgent()
   cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
@@ -407,6 +411,12 @@ export class WebKitAutomation {
         return this.getAutFrame().url()
       case 'get:aut:title':
         return await this.getAutFrame().title()
+      case 'reload:aut:frame':
+        return await webkitReloadFrame(this.getAutFrame(), data.forceReload)
+      case 'navigate:aut:history':
+        return await webkitNavigateHistory(this.getAutFrame(), data.historyNumber)
+      case 'remote:agent':
+        return await this.remoteAgent.call(this.getAutFrame(), data)
       case 'focus:browser:window':
         return await this.context.pages()[0]?.bringToFront()
       case 'reset:browser:state':

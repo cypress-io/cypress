@@ -30,7 +30,7 @@ const runRemoteAction = ({ Cypress, cy, name, subject, options, log, perform }: 
   // the agent enforces `timeout`, so the runnable's own timer must not race it
   cy.clearTimeout()
 
-  return resolveRemoteSubject(Cypress, name, subject)
+  return resolveRemoteSubject(Cypress, subject)
   .then((resolved) => {
     if (!resolved.length) {
       $errUtils.throwErrByPath('subject.not_element_empty_subject', {
@@ -93,7 +93,7 @@ export const remoteClick = (Cypress: ICypress, cy: $Cy, subject: RemoteLocator, 
     options,
     log,
     perform: (index, timeout) => {
-      return callAgent(Cypress, 'click', 'click', {
+      return callAgent(Cypress, 'click', {
         steps: subject.steps,
         index,
         timeout,
@@ -112,7 +112,7 @@ export const remoteType = (Cypress: ICypress, cy: $Cy, subject: RemoteLocator, c
     options,
     log: options._log,
     perform: (index, timeout) => {
-      return callAgent(Cypress, 'type', 'type', {
+      return callAgent(Cypress, 'type', {
         steps: subject.steps,
         index,
         timeout,

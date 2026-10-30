@@ -447,6 +447,9 @@ interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
   hasAlreadyVisitedUrl: boolean
 }
 
+// the remote driver keeps the AUT cross-origin, so even WebKit has to reload and navigate it through automation
+const usesLegacyWebKitNavigation = (Cypress: Cypress.Cypress) => Cypress.isBrowser('webkit') && !isRemoteDriverEnabled(Cypress)
+
 export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: Cypress.Cypress['config'], args: any[]) => {
   let forceReload
   let userOptions
@@ -515,7 +518,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, conf
       cy.once('window:load', resolve)
 
       // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to reload the page
-      return Cypress.isBrowser('webkit') ? $utils.locReload(forceReload, state('window')) : Cypress.automation('reload:aut:frame', {
+      return usesLegacyWebKitNavigation(Cypress) ? $utils.locReload(forceReload, state('window')) : Cypress.automation('reload:aut:frame', {
         forceReload,
       })
     })
@@ -531,7 +534,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, conf
       cleanup()
     }
 
-    if (Cypress.isBrowser('webkit')) {
+    if (usesLegacyWebKitNavigation(Cypress)) {
       // Make sure the reload command can communicate with the AUT.
       // if we failed for any other reason, we need to display the correct error to the user.
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
@@ -592,7 +595,7 @@ export const go = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: 
         const retWin = () => state('window')
 
         // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
-        const navigated = Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
+        const navigated = usesLegacyWebKitNavigation(Cypress) ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
 
         // the automation round trip can outlast the 100ms unload check, so only start it once the navigation is issued
         return Promise
@@ -624,7 +627,7 @@ export const go = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: 
         cleanup()
       }
 
-      if (Cypress.isBrowser('webkit')) {
+      if (usesLegacyWebKitNavigation(Cypress)) {
         // Make sure the reload command can communicate with the AUT.
         // if we failed for any other reason, we need to display the correct error to the user.
         Cypress.ensure.commandCanCommunicateWithAUT(cy)

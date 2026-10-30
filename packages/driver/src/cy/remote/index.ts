@@ -58,14 +58,8 @@ const splitAtFrames = (allSteps: QueryStep[]) => {
   return { frames, steps: steps.length ? steps : [{ type: 'get', selector: 'body' } as const] }
 }
 
-export const callAgent = <M extends keyof AgentMethods>(Cypress: ICypress, cmd: string, method: M, args: Parameters<AgentMethods[M]>[0], timeout?: number): Promise<ReturnType<AgentMethods[M]>> => {
+export const callAgent = <M extends keyof AgentMethods>(Cypress: ICypress, method: M, args: Parameters<AgentMethods[M]>[0], timeout?: number): Promise<ReturnType<AgentMethods[M]>> => {
   return Promise.try(() => {
-    if (!Cypress.isBrowser({ family: 'chromium' }) && !Cypress.isBrowser({ family: 'firefox' })) {
-      $errUtils.throwErrByPath('remote_driver.unsupported_browser', {
-        args: { cmd, browser: Cypress.browser.displayName },
-      })
-    }
-
     const { frames, steps } = splitAtFrames(args.steps)
 
     return Cypress.automation('remote:agent', { method, context: getContext(Cypress), args: { ...args, steps }, frames })
@@ -82,8 +76,8 @@ export const callAgent = <M extends keyof AgentMethods>(Cypress: ICypress, cmd: 
   })
 }
 
-export const resolveRemoteSubject = (Cypress: ICypress, cmd: string, locator: RemoteLocator, log?: Log) => {
-  return callAgent(Cypress, cmd, 'resolve', { steps: locator.steps })
+export const resolveRemoteSubject = (Cypress: ICypress, locator: RemoteLocator, log?: Log) => {
+  return callAgent(Cypress, 'resolve', { steps: locator.steps })
   .then(({ elements }) => {
     const resolved = new RemoteElement(locator, elements)
 

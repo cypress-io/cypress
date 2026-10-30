@@ -58,7 +58,7 @@ const runCases = () => {
   })
 }
 
-describe('experimentalRemoteDriver', { browser: [{ family: 'chromium' }, { family: 'firefox' }] }, () => {
+describe('experimentalRemoteDriver', () => {
   describe('legacy driver', { experimentalRemoteDriver: false }, runCases)
 
   describe('remote driver', { experimentalRemoteDriver: true }, runCases)

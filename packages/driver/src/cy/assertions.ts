@@ -401,7 +401,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       // A remote subject is only a locator, so every attempt asks the agent for
       // the current elements before running the assertions against them.
       if (isRemoteSubject(subject) && !callbacks._remoteSubjectResolved) {
-        return resolveRemoteSubject(Cypress, cy.state('current')?.get('name'), subject, options._log)
+        return resolveRemoteSubject(Cypress, subject, options._log)
         .then((resolved) => {
           if (options.$el !== undefined) {
             options.$el = resolved

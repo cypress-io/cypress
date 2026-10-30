@@ -105,6 +105,42 @@ describe('lib/browsers/webkit', () => {
       expect(mocks.WebKitAutomation.create).toHaveBeenCalledWith(expect.objectContaining({ cdpSocketServer }))
     })
 
+    describe('with experimentalRemoteDriver', () => {
+      let inProcessBrowser
+
+      beforeEach(() => {
+        hasSpy.mockReturnValue(true)
+        options.experimentalRemoteDriver = true
+
+        inProcessBrowser = {
+          on: vi.fn(),
+          close: vi.fn().mockResolvedValue(undefined),
+          bind: vi.fn().mockResolvedValue({ endpoint: 'ws://bound' }),
+          _connection: { toImpl: () => ({ options: { browserProcess: { process: { pid: 123 } } } }) },
+        }
+
+        mocks.pwWebkit.webkit = { ...mocks.pwWebkit.webkit as object, launch: vi.fn().mockResolvedValue(inProcessBrowser) }
+      })
+
+      it('launches in-process and sends the bound endpoint to after:browser:launch', async () => {
+        const instance = await webkit.open(browser as any, 'http://the.url', options as any, automation as any)
+        const pwWebkit = mocks.pwWebkit.webkit as Record<string, Mock>
+
+        expect(pwWebkit.launchServer).not.toHaveBeenCalled()
+        expect(inProcessBrowser.bind).toHaveBeenCalledWith('cypress', { host: '127.0.0.1', port: 0 })
+        expect(mocks.WebKitAutomation.create).toHaveBeenCalledWith(expect.objectContaining({ browser: inProcessBrowser }))
+        expect(afterBrowserLaunchCalls()).toContainEqual(['after:browser:launch', browser, { webSocketDebuggerUrl: 'ws://bound' }])
+        expect(instance.pid).toBe(123)
+      })
+
+      it('fails clearly when playwright-webkit has no bind', async () => {
+        delete inProcessBrowser.bind
+
+        await expect(webkit.open(browser as any, 'http://the.url', options as any, automation as any)).rejects.toThrow('`experimentalRemoteDriver` requires playwright-webkit 1.59.0 or later.')
+        expect(inProcessBrowser.close).toHaveBeenCalled()
+      })
+    })
+
     describe('#connectToNewSpec', () => {
       let specOptions
 
