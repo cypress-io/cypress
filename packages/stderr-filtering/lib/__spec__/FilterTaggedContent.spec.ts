@@ -145,8 +145,8 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes to the waste stream', () => {
-          filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
+        it('writes to the waste stream', async () => {
+          await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
           expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
         })
       })
@@ -158,8 +158,8 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes to the waste stream', () => {
-          filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
+        it('writes to the waste stream', async () => {
+          await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
           expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
         })
       })

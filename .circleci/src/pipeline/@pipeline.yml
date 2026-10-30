@@ -1868,11 +1868,74 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      # The formatter prints the usual output and writes eslint-findings.json
+      # (finding count per rule) next to each package's config, so this one lint
+      # run feeds the ratchet below
       - run:
           name: Linting 🧹
           command: |
             git clean -df
-            yarn lint
+            yarn lint:ci
+      # Prefix match restores the newest report saved from develop
+      - restore_cache:
+          name: Restore develop lint findings baseline
+          keys:
+            - v{{ checksum ".circleci/cache-version.txt" }}-lint-findings-baseline-
+      - run:
+          name: Total lint findings
+          command: |
+            mkdir -p lint-findings-report
+            find . -name eslint-findings.json -not -path '*/node_modules/*' -print0 | xargs -0 jq -n --arg sha "$CIRCLE_SHA1" '
+              [inputs | {pkg: (input_filename | ltrimstr("./") | sub("/eslint-findings.json$"; "")), total: .total, counts: .counts}] as $files
+              | {
+                  sha: $sha,
+                  total: ($files | map(.total) | add // 0),
+                  byPackage: ($files | map({key: .pkg, value: .total}) | from_entries),
+                  byRule: ($files | map(.counts | to_entries[]) | group_by(.key) | map({key: .[0].key, value: (map(.value) | add)}) | from_entries)
+                }' > lint-findings-report/report.json
+            jq -r '"Lint findings: \(.total) across \(.byPackage | length) package(s)"' lint-findings-report/report.json
+      # Fails only when this branch has more findings than develop. A missing
+      # baseline (expired or empty cache) passes so it never blocks a merge.
+      - run:
+          name: Compare lint findings to develop 📉
+          command: |
+            if [ "$CIRCLE_BRANCH" = "develop" ]; then
+              mkdir -p lint-findings-baseline
+              cp lint-findings-report/report.json lint-findings-baseline/report.json
+              exit 0
+            fi
+
+            if [ ! -f lint-findings-baseline/report.json ]; then
+              echo "No develop report in the cache; skipping comparison."
+              exit 0
+            fi
+
+            current=lint-findings-report/report.json
+            baseline=lint-findings-baseline/report.json
+            delta=$(( $(jq .total "$current") - $(jq .total "$baseline") ))
+
+            printf 'develop (%s): %s   this branch: %s   delta: %+d\n' "$(jq -r '.sha[:9]' "$baseline")" "$(jq .total "$baseline")" "$(jq .total "$current")" "$delta"
+            jq -r -n --slurpfile now "$current" --slurpfile base "$baseline" '
+              ($now[0].byRule + $base[0].byRule | keys[]) as $rule
+              | (($now[0].byRule[$rule] // 0) - ($base[0].byRule[$rule] // 0)) as $change
+              | select($change != 0)
+              | "  \($rule): \(if $change > 0 then "+" else "" end)\($change)"'
+
+            if [ "$delta" -gt 0 ]; then
+              echo "This branch adds $delta lint finding(s) over develop. Fix them, or reduce findings elsewhere to offset." >&2
+              exit 1
+            fi
+      - when:
+          condition:
+            equal: [ develop, << pipeline.git.branch >> ]
+          steps:
+            - save_cache:
+                name: Save develop lint findings baseline
+                key: v{{ checksum ".circleci/cache-version.txt" }}-lint-findings-baseline-{{ .Revision }}
+                paths:
+                  - lint-findings-baseline
+      - store_artifacts:
+          path: lint-findings-report
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
