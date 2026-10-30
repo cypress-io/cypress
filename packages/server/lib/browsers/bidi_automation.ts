@@ -25,6 +25,7 @@ import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
+import { BidiRemoteAgent } from '../automation/commands/remote_agent'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -122,6 +123,7 @@ export class BidiAutomation {
 
   private webDriverClient: WebDriverClient
   private automation: Automation
+  private remoteAgent: BidiRemoteAgent
   private autContextId: string | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
@@ -145,6 +147,7 @@ export class BidiAutomation {
     debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
+    this.remoteAgent = new BidiRemoteAgent(webDriverClient)
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error - webdriver types request.destination as string, wider than our RequestDestination
@@ -844,6 +847,12 @@ export class BidiAutomation {
           const autContextId = await this.ensureAutContextId('Cannot get AUT title no AUT context initialized')
 
           return bidiGetFrameTitle(this.webDriverClient, autContextId)
+        }
+        case 'remote:agent':
+        {
+          const autContextId = await this.ensureAutContextId('Cannot run the remote agent: no AUT context initialized')
+
+          return this.remoteAgent.call(autContextId, data)
         }
         default:
           debug('BiDi automation not implemented for message: %s', message)

@@ -60,8 +60,8 @@ const splitAtFrames = (allSteps: QueryStep[]) => {
 
 export const callAgent = <M extends keyof AgentMethods>(Cypress: ICypress, cmd: string, method: M, args: Parameters<AgentMethods[M]>[0], timeout?: number): Promise<ReturnType<AgentMethods[M]>> => {
   return Promise.try(() => {
-    if (!Cypress.isBrowser({ family: 'chromium' })) {
-      $errUtils.throwErrByPath('remote_driver.chromium_only', {
+    if (!Cypress.isBrowser({ family: 'chromium' }) && !Cypress.isBrowser({ family: 'firefox' })) {
+      $errUtils.throwErrByPath('remote_driver.unsupported_browser', {
         args: { cmd, browser: Cypress.browser.displayName },
       })
     }

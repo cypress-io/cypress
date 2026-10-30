@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Mock } from 'vitest'
 import type { Protocol } from 'devtools-protocol'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
-import { CdpRemoteAgent } from '../../../../lib/automation/commands/remote_agent'
+import type { ScriptRemoteValue } from 'webdriver/build/bidi/localTypes'
+import { BidiRemoteAgent, CdpRemoteAgent } from '../../../../lib/automation/commands/remote_agent'
 import { evaluateInFrameContext } from '../../../../lib/automation/helpers/evaluate_in_frame_context'
 
 type MockedSendDebuggerCommand = SendDebuggerCommand & Mock
@@ -141,5 +142,94 @@ describe('remote:agent automation command', () => {
     await evaluateInFrameContext('window.location.href', send, contexts, frame)
 
     expect(callsTo('Runtime.evaluate')).toEqual([['Runtime.evaluate', { expression: 'window.location.href', contextId: 6 }]])
+  })
+
+  describe('over BiDi', () => {
+    const callExpression = `(async () => JSON.stringify(await window.__cypressAgent.call("resolve", {"config":{}}, [{"type":"get","selector":"#input"}])))()`
+    const guarded = (expr: string) => `window.__cypressAgent === undefined ? "__cypress_remote_agent_missing__" : ${expr}`
+
+    let installed: Set<string>
+    let ownerValue: ScriptRemoteValue
+    let scriptEvaluate: Mock
+    let bidiAgent: BidiRemoteAgent
+
+    const evaluated = () => scriptEvaluate.mock.calls.map(([params]) => params)
+
+    beforeEach(() => {
+      installed = new Set()
+      ownerValue = { type: 'window', value: { context: 'child' } }
+
+      scriptEvaluate = vi.fn(async ({ expression, target }) => {
+        const success = (result: ScriptRemoteValue) => ({ type: 'success', result, realm: 'realm' })
+
+        if (expression === 'agent source') {
+          installed.add(target.context)
+
+          return success({ type: 'undefined' })
+        }
+
+        if (expression.startsWith('window.__cypressAgent === undefined') && !installed.has(target.context)) {
+          return success({ type: 'string', value: '__cypress_remote_agent_missing__' })
+        }
+
+        if (expression.includes('__cypressAgent.frameOwner')) {
+          return success(ownerValue)
+        }
+
+        return success({ type: 'string', value: JSON.stringify({ ok: true, value: { elements: [] } }) })
+      })
+
+      // @ts-expect-error - partial mock of the webdriver client
+      bidiAgent = new BidiRemoteAgent({ scriptEvaluate }, () => Promise.resolve('agent source'))
+    })
+
+    it('installs the agent in the frame\'s sandbox when it is missing and calls it there', async () => {
+      expect(await bidiAgent.call('aut', request)).toEqual({ ok: true, value: { elements: [] } })
+      await bidiAgent.call('aut', request)
+
+      const target = { context: 'aut', sandbox: '__cypress_remote_agent' }
+
+      expect(evaluated()).toEqual([
+        { target, expression: guarded(callExpression), awaitPromise: true },
+        { target, expression: 'agent source', awaitPromise: false },
+        { target, expression: callExpression, awaitPromise: true },
+        { target, expression: guarded(callExpression), awaitPromise: true },
+      ])
+    })
+
+    it('throws when the agent call throws in the page', async () => {
+      installed.add('aut')
+      scriptEvaluate.mockResolvedValueOnce({ type: 'exception', exceptionDetails: { text: 'TypeError: boom' }, realm: 'realm' })
+
+      await expect(bidiAgent.call('aut', request)).rejects.toThrow(`The remote agent threw while running 'resolve': TypeError: boom`)
+    })
+
+    describe('with frames to enter', () => {
+      const framedRequest = { ...request, frames: [{ steps: [{ type: 'get', selector: '#pay' }], selector: '#pay' }] }
+
+      it('finds the iframe\'s browsing context and calls the agent in it', async () => {
+        expect(await bidiAgent.call('aut', framedRequest)).toEqual({ ok: true, value: { elements: [] } })
+
+        expect(evaluated().map(({ target, expression }) => [target.context, expression.includes('frameOwner') ? 'frameOwner' : expression])).toEqual([
+          ['aut', 'frameOwner'],
+          ['aut', 'agent source'],
+          ['aut', 'frameOwner'],
+          ['child', guarded(callExpression)],
+          ['child', 'agent source'],
+          ['child', callExpression],
+        ])
+      })
+
+      it('returns a retryable error without calling the agent when there is no iframe', async () => {
+        ownerValue = { type: 'string', value: 'found <p>, which is not an iframe' }
+
+        expect(await bidiAgent.call('aut', framedRequest)).toEqual({
+          ok: false,
+          error: { name: 'Error', message: 'Expected `#pay` to be an iframe, but found <p>, which is not an iframe.', retry: true },
+        })
+
+        expect(evaluated().map(({ target }) => target.context)).not.toContain('child')
+      })
+    })
   })
 })

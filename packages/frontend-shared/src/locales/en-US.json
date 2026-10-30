@@ -611,7 +611,7 @@
       },
       "experimentalRemoteDriver": {
         "name": "Remote Driver",
-        "description": "Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser's automation protocol, so they work against a cross-origin AUT without `cy.origin()`. Chromium-based browsers only."
+        "description": "Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser's automation protocol, so they work against a cross-origin AUT without `cy.origin()`. Chromium-based browsers and Firefox only."
       }
     },
     "device": {

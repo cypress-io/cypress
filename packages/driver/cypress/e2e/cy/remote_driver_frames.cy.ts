@@ -1,6 +1,6 @@
 const PAGE = 'http://localhost:3500/fixtures/remote-driver-frames.html'
 
-describe('remote driver: iframes in the AUT', { browser: { family: 'chromium' }, experimentalRemoteDriver: true }, () => {
+describe('remote driver: iframes in the AUT', { browser: [{ family: 'chromium' }, { family: 'firefox' }], experimentalRemoteDriver: true }, () => {
   beforeEach(() => {
     cy.visit(PAGE)
   })
@@ -42,7 +42,7 @@ describe('remote driver: iframes in the AUT', { browser: { family: 'chromium' },
   })
 })
 
-describe('legacy driver: iframes in the AUT', { browser: { family: 'chromium' }, experimentalRemoteDriver: false }, () => {
+describe('legacy driver: iframes in the AUT', { browser: [{ family: 'chromium' }, { family: 'firefox' }], experimentalRemoteDriver: false }, () => {
   beforeEach(() => {
     cy.visit(PAGE)
   })

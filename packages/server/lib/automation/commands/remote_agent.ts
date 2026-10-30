@@ -3,11 +3,21 @@ import type { Protocol } from 'devtools-protocol'
 import type { RemoteAgentFrameOwner, RemoteAgentRequest } from '@packages/types'
 import { getRunnerRemoteAgentContents } from '@packages/resolve-dist'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
+import type { Client as WebDriverClient } from 'webdriver'
+import type { ScriptEvaluateResult, ScriptRemoteValue } from 'webdriver/build/bidi/localTypes'
 
 const debug = Debug('cypress:server:automation:command:remote_agent')
 
 const WORLD_NAME = '__cypress_remote_agent'
 const AGENT_GLOBAL = '__cypressAgent'
+
+// An agent error response, which the driver retries until the iframe exists
+const frameNotFound = (owner: RemoteAgentFrameOwner, reason: string) => {
+  return {
+    ok: false,
+    error: { name: 'Error', message: `Expected \`${owner.selector}\` to be an iframe, but ${reason}.`, retry: true },
+  }
+}
 
 const isMissingContextError = (err: unknown) => {
   return err instanceof Error && err.message.includes('Cannot find context with specified id')
@@ -57,16 +67,7 @@ export class CdpRemoteAgent {
     }
   }
 
-  // Returns the id of the frame the owner element holds, or an agent error
-  // response the driver retries until the iframe exists
   private async getOwnedFrameId (contextId: Protocol.Runtime.ExecutionContextId, owner: RemoteAgentFrameOwner) {
-    const notFound = (reason: string) => {
-      return {
-        ok: false,
-        error: { name: 'Error', message: `Expected \`${owner.selector}\` to be an iframe, but ${reason}.`, retry: true },
-      }
-    }
-
     const { result, exceptionDetails } = await this.send('Runtime.evaluate', {
       contextId,
       expression: `${AGENT_GLOBAL}.frameOwner(${JSON.stringify(owner.steps)})`,
@@ -77,13 +78,13 @@ export class CdpRemoteAgent {
     }
 
     if (!result.objectId) {
-      return notFound(String(result.value))
+      return frameNotFound(owner, String(result.value))
     }
 
     try {
       const { node } = await this.send('DOM.describeNode', { objectId: result.objectId })
 
-      return node.frameId ?? notFound('its document is not loaded')
+      return node.frameId ?? frameNotFound(owner, 'its document is not loaded')
     } finally {
       await this.send('Runtime.releaseObject', { objectId: result.objectId }).catch(() => {})
     }
@@ -132,5 +133,96 @@ export class CdpRemoteAgent {
     this.worlds.set(frameId, executionContextId)
 
     return executionContextId
+  }
+}
+
+const AGENT_MISSING = '__cypress_remote_agent_missing__'
+
+// The BiDi counterpart of CdpRemoteAgent. A named sandbox shares the frame's
+// DOM but not its JS globals, and lives until the frame navigates, which also
+// clears the agent installed in it.
+export class BidiRemoteAgent {
+  private source: Promise<string> | undefined
+
+  constructor (
+    private client: WebDriverClient,
+    private getSource: () => Promise<Buffer | string> = getRunnerRemoteAgentContents,
+  ) {}
+
+  async call (autContextId: string, request: RemoteAgentRequest): Promise<unknown> {
+    let contextId = autContextId
+
+    for (const owner of request.frames ?? []) {
+      const child = await this.getOwnedContextId(contextId, owner)
+
+      if (typeof child !== 'string') {
+        return child
+      }
+
+      contextId = child
+    }
+
+    const { method, context, args } = request
+    const result = await this.withAgent(contextId, `running '${method}'`, `(async () => JSON.stringify(await window.${AGENT_GLOBAL}.call(${JSON.stringify(method)}, ${JSON.stringify(context)}, ${JSON.stringify(args)})))()`)
+
+    return JSON.parse(String(result.value))
+  }
+
+  // BiDi has no DOM.describeNode, but serializes a WindowProxy as the id of its browsing context
+  private async getOwnedContextId (contextId: string, owner: RemoteAgentFrameOwner) {
+    const result = await this.withAgent(contextId, `finding \`${owner.selector}\``, `(() => {
+      const owner = window.${AGENT_GLOBAL}.frameOwner(${JSON.stringify(owner.steps)})
+
+      return typeof owner === 'string' ? owner : (owner.contentWindow ?? 'its document is not loaded')
+    })()`)
+
+    if (result.type === 'window') {
+      return result.value.context
+    }
+
+    return frameNotFound(owner, String(result.type === 'string' ? result.value : result.type))
+  }
+
+  // Installs the agent first when the frame has none, so the common case is one round trip
+  private async withAgent (contextId: string, action: string, expression: string): Promise<ScriptRemoteValue & { value?: any }> {
+    const guarded = `window.${AGENT_GLOBAL} === undefined ? ${JSON.stringify(AGENT_MISSING)} : ${expression}`
+    let result = await this.evaluate(contextId, action, guarded)
+
+    if (result.type === 'string' && result.value === AGENT_MISSING) {
+      await this.install(contextId)
+      result = await this.evaluate(contextId, action, expression)
+    }
+
+    return result
+  }
+
+  private async install (contextId: string) {
+    this.source ??= Promise.resolve(this.getSource()).then(String)
+
+    const result = await this.client.scriptEvaluate({
+      expression: await this.source,
+      target: { context: contextId, sandbox: WORLD_NAME },
+      awaitPromise: false,
+    }) as ScriptEvaluateResult
+
+    if (result.type === 'exception') {
+      throw new Error(`The remote agent failed to load: ${result.exceptionDetails.text}`)
+    }
+
+    debug('installed agent in sandbox for browsing context %s', contextId)
+  }
+
+  private async evaluate (contextId: string, action: string, expression: string) {
+    const result = await this.client.scriptEvaluate({
+      expression,
+      target: { context: contextId, sandbox: WORLD_NAME },
+      awaitPromise: true,
+    }) as ScriptEvaluateResult
+
+    if (result.type === 'exception') {
+      throw new Error(`The remote agent threw while ${action}: ${result.exceptionDetails.text}`)
+    }
+
+    return result.result
   }
 }
