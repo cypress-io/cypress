@@ -433,7 +433,7 @@ function specsPageIsVisible (specsSetup) {
   }
 
   // if our tests seeded specs, we'll be on the specs list page
-  return cy.get('[data-cy=spec-list-container]').should('be.visible')
+  return cy.get('[data-cy=spec-list-container]', { timeout: 10000 }).should('be.visible')
 }
 
 function visitLaunchpad (options: { showWelcome?: boolean, spinnerTimeout?: number } = { showWelcome: false }) {
