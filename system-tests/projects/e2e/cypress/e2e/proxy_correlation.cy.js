@@ -3,6 +3,7 @@ describe('lots of requests', () => {
     describe('test isolation on', { testIsolation: true }, () => {
       it('test 1', () => {
         cy.visit('/lots-of-requests?test=1&i=1')
+        cy.get('#done').should('contain', 'Done')
       })
 
       it('test 2', () => {
@@ -14,6 +15,7 @@ describe('lots of requests', () => {
     describe('test isolation off', { testIsolation: false }, () => {
       it('test 3', () => {
         cy.visit('/lots-of-requests?test=3&i=1')
+        cy.get('#done').should('contain', 'Done')
       })
 
       it('test 4', () => {
@@ -24,6 +26,7 @@ describe('lots of requests', () => {
     describe('test isolation back on', { testIsolation: true }, () => {
       it('test 5', () => {
         cy.visit('/lots-of-requests?test=5&i=1')
+        cy.get('#done').should('contain', 'Done')
       })
 
       it('test 6', () => {
