@@ -193,6 +193,8 @@ export interface RemoteAgentRequest {
   args: unknown
   // iframes to enter, outermost first, before calling `method`
   frames?: RemoteAgentFrameOwner[]
+  // a tab the app opened to run in, instead of the AUT
+  tab?: { url?: string | { source: string, flags: string } }
 }
 
 export interface AutomationCommands {

@@ -8,6 +8,11 @@ export type QueryStep =
   | { type: 'contains', selector: string }
   // enters the document of the iframe the steps before it found
   | { type: 'frame', selector: string }
+  // starts the steps in another tab instead of the AUT
+  | { type: 'tab', url?: TabUrl }
+
+// A RegExp doesn't survive JSON, so its parts are sent instead
+export type TabUrl = string | { source: string, flags: string }
 
 // The steps that find one iframe, run in the frame that contains it
 export interface FrameOwner {

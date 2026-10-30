@@ -9,7 +9,7 @@ import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
 import type { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands, RemoteAgentRequest } from '@packages/types'
 import type { Automation } from '../../automation'
 import type { CyCookie, CyCookieFilter } from '../../automation/cookie/util'
 import { cookieMatches } from '../../automation/cookie/util'
@@ -27,7 +27,8 @@ import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
-import { CdpRemoteAgent } from '../../automation/commands/remote_agent'
+import { CdpRemoteAgent, CdpRemoteTabs, RemoteTabs, tabsNotSupported } from '../../automation/commands/remote_agent'
+import type { CdpTab } from '../../automation/commands/remote_agent'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -81,6 +82,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
   private remoteAgent: CdpRemoteAgent
+  private remoteTabs: RemoteTabs | undefined
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -114,6 +116,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     })
 
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
+  }
+
+  useRemoteTabs (getTabs: () => CdpTab[]) {
+    const cdpTabs = new CdpRemoteTabs(getTabs)
+
+    this.remoteTabs = new RemoteTabs(() => cdpTabs.list(), async () => {
+      await this.sendDebuggerCommandFn('Page.bringToFront')
+    })
   }
 
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
@@ -632,7 +642,16 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
       case 'remote:agent':
-        return this.remoteAgent.call(await this._getAutFrame(), data)
+      {
+        const request: RemoteAgentRequest = data
+        const callInAut = async () => this.remoteAgent.call(await this._getAutFrame(), request)
+
+        if (!this.remoteTabs) {
+          return request.tab ? tabsNotSupported('Electron') : callInAut()
+        }
+
+        return this.remoteTabs.call(request, callInAut)
+      }
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

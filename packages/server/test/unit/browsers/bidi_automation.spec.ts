@@ -2464,6 +2464,48 @@ describe('lib/browsers/bidi_automation', () => {
         })
       })
 
+      describe('tabs the app opened', () => {
+        beforeEach(() => {
+          bidiAutomationInstance.setTopLevelContextId('runner')
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
+            contexts: [
+              { context: 'runner', url: 'http://localhost:3500/__/' },
+              { context: 'popup', url: 'http://login.idp.test/popup' },
+            ],
+          })
+
+          mockWebdriverClient.browsingContextActivate = vi.fn().mockResolvedValue({})
+          mockWebdriverClient.browsingContextClose = vi.fn().mockResolvedValue({})
+        })
+
+        it('runs the remote agent in the matching tab, bringing it to the front for actions', async () => {
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ type: 'success', result: { type: 'string', value: JSON.stringify({ ok: true, value: { coords: { x: 1, y: 2 } } }) } })
+
+          const response = await bidiAutomationInstance.automationMiddleware.onRequest('remote:agent', { method: 'click', context: {}, args: {}, tab: { url: 'idp' } })
+
+          expect(response).toEqual({ ok: true, value: { coords: { x: 1, y: 2 } } })
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, { maxDepth: 0 })
+          expectCalledWith(mockWebdriverClient.browsingContextActivate, { context: 'popup' })
+          expect(vi.mocked(mockWebdriverClient.scriptEvaluate).mock.calls[0][0].target).toEqual({ context: 'popup', sandbox: '__cypress_remote_agent' })
+        })
+
+        it('closes every top-level context but the runner\'s, ignoring errors', async () => {
+          vi.mocked(mockWebdriverClient.browsingContextGetTree).mockResolvedValue({
+            contexts: [
+              { context: 'runner', url: 'http://localhost:3500/__/' },
+              { context: 'popup', url: 'http://login.idp.test/popup' },
+              { context: 'help', url: 'http://www.app.test/help' },
+            ],
+          } as any)
+
+          vi.mocked(mockWebdriverClient.browsingContextClose).mockRejectedValueOnce(new Error('no such frame'))
+
+          await bidiAutomationInstance.closeExtraTabs()
+
+          expect(vi.mocked(mockWebdriverClient.browsingContextClose).mock.calls).toEqual([[{ context: 'popup' }], [{ context: 'help' }]])
+        })
+      })
+
       describe('get:aut:title', () => {
         it('uses scriptEvaluate to get the AUT title', async () => {
           mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({

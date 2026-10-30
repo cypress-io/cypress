@@ -137,6 +137,153 @@ export class CdpRemoteAgent {
   }
 }
 
+type TabMatcher = NonNullable<RemoteAgentRequest['tab']>
+
+const matchesTab = (url: string, matcher: TabMatcher) => {
+  if (matcher.url === undefined) {
+    return true
+  }
+
+  if (typeof matcher.url === 'string') {
+    return url.includes(matcher.url)
+  }
+
+  return new RegExp(matcher.url.source, matcher.url.flags).test(url)
+}
+
+const describeTab = (matcher: TabMatcher) => {
+  if (matcher.url === undefined) {
+    return 'any tab'
+  }
+
+  return typeof matcher.url === 'string' ? `\`${matcher.url}\`` : `/${matcher.url.source}/${matcher.url.flags}`
+}
+
+export const tabsNotSupported = (browser: string) => {
+  return { ok: false, error: { name: 'Error', message: `\`cy.tab()\` is not supported in ${browser} yet.`, retry: false } }
+}
+
+// A tab the app opened, however the browser's protocol drives it
+export interface RemoteTab {
+  url (): Promise<string>
+  bringToFront (): Promise<void>
+  call (request: RemoteAgentRequest): Promise<unknown>
+}
+
+// Sends each agent call to the AUT or to the tab it names, and returns focus
+// to the runner once a call in the AUT follows one that brought a tab forward
+export class RemoteTabs {
+  private tabInFront = false
+
+  constructor (
+    private getTabs: () => RemoteTab[] | Promise<RemoteTab[]>,
+    private bringRunnerToFront: () => Promise<void>,
+  ) {}
+
+  async call (request: RemoteAgentRequest, callInAut: () => Promise<unknown>): Promise<unknown> {
+    const { tab: matcher } = request
+
+    if (!matcher) {
+      if (this.tabInFront) {
+        this.tabInFront = false
+        await this.bringRunnerToFront()
+      }
+
+      return callInAut()
+    }
+
+    const tab = await this.find(matcher)
+
+    if (!tab) {
+      // a missing tab has no elements, which lets `cy.tab(url).should('not.exist')` wait for it to close
+      return request.method === 'resolve'
+        ? { ok: true, value: { elements: [] } }
+        : { ok: false, error: { name: 'Error', message: `Expected to find a tab matching ${describeTab(matcher)}, but never found one.`, retry: true } }
+    }
+
+    // a background tab doesn't get focus, which typing and focus events depend on
+    if (request.method !== 'resolve') {
+      await tab.bringToFront()
+      this.tabInFront = true
+    }
+
+    return tab.call(request)
+  }
+
+  // newest first, so a matcher that fits several tabs picks the one opened last
+  private async find (matcher: TabMatcher) {
+    const tabs = [...await this.getTabs()].reverse()
+
+    for (const tab of tabs) {
+      try {
+        if (matchesTab(await tab.url(), matcher)) {
+          return tab
+        }
+      } catch (err) {
+        debug('could not read the URL of a tab, skipping it: %o', err)
+      }
+    }
+
+    return undefined
+  }
+}
+
+export interface CdpTab {
+  targetId: string
+  send: SendDebuggerCommand
+  on: (event: 'Runtime.executionContextCreated' | 'Runtime.executionContextDestroyed' | 'Runtime.executionContextsCleared', cb: (params: any) => void) => void
+}
+
+// Each CDP tab has its own client, so each gets its own agent and execution context tracking
+export class CdpRemoteTabs {
+  private agents = new Map<string, Promise<CdpRemoteAgent>>()
+
+  constructor (
+    private getTabs: () => CdpTab[],
+    private getSource: () => Promise<Buffer | string> = getRunnerRemoteAgentContents,
+  ) {}
+
+  list (): RemoteTab[] {
+    const tabs = this.getTabs()
+
+    for (const targetId of this.agents.keys()) {
+      if (!tabs.some((tab) => tab.targetId === targetId)) {
+        this.agents.delete(targetId)
+      }
+    }
+
+    return tabs.map((tab) => {
+      const getFrame = async () => (await tab.send('Page.getFrameTree')).frameTree.frame
+
+      return {
+        url: async () => (await getFrame()).url,
+        bringToFront: async () => {
+          await tab.send('Page.bringToFront')
+        },
+        call: async (request) => (await this.getAgent(tab)).call(await getFrame(), request),
+      }
+    })
+  }
+
+  private getAgent (tab: CdpTab) {
+    let agent = this.agents.get(tab.targetId)
+
+    if (!agent) {
+      const contexts = new Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>()
+
+      tab.on('Runtime.executionContextCreated', ({ context }) => contexts.set(context.id, context))
+      tab.on('Runtime.executionContextDestroyed', ({ executionContextId }) => contexts.delete(executionContextId))
+      tab.on('Runtime.executionContextsCleared', () => contexts.clear())
+
+      agent = tab.send('Runtime.enable').then(() => new CdpRemoteAgent(tab.send, contexts, this.getSource))
+      agent.catch(() => this.agents.delete(tab.targetId))
+      this.agents.set(tab.targetId, agent)
+    }
+
+    return agent
+  }
+}
+
 const AGENT_MISSING = '__cypress_remote_agent_missing__'
 
 // The BiDi counterpart of CdpRemoteAgent. A named sandbox shares the frame's

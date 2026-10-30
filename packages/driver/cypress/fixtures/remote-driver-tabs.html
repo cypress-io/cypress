@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Opens tabs</title>
+</head>
+<body>
+  <button id="open">Sign in (popup)</button>
+  <button id="open-late">Sign in (popup after a delay)</button>
+  <a id="blank" href="/fixtures/remote-driver-tab-child.html?label=blank" target="_blank">Help (new tab)</a>
+  <p id="status">Signed out</p>
+
+  <script>
+    const popupUrl = 'http://www.foobar.com:3500/fixtures/remote-driver-tab-child.html?label=popup'
+
+    document.getElementById('open').addEventListener('click', () => {
+      window.open(popupUrl, 'popup', 'width=400,height=400')
+    })
+
+    document.getElementById('open-late').addEventListener('click', () => {
+      setTimeout(() => window.open(popupUrl, 'popup', 'width=400,height=400'), 500)
+    })
+
+    window.addEventListener('message', (event) => {
+      if (event.origin === 'http://www.foobar.com:3500' && event.data.user) {
+        document.getElementById('status').textContent = `Signed in as ${event.data.user}`
+      }
+    })
+  </script>
+</body>
+</html>

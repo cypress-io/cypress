@@ -3,7 +3,8 @@ import type { Mock } from 'vitest'
 import type { Protocol } from 'devtools-protocol'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
 import type { ScriptRemoteValue } from 'webdriver/build/bidi/localTypes'
-import { BidiRemoteAgent, CdpRemoteAgent, WebKitRemoteAgent } from '../../../../lib/automation/commands/remote_agent'
+import { BidiRemoteAgent, CdpRemoteAgent, CdpRemoteTabs, RemoteTabs, WebKitRemoteAgent } from '../../../../lib/automation/commands/remote_agent'
+import type { CdpTab } from '../../../../lib/automation/commands/remote_agent'
 import { evaluateInFrameContext } from '../../../../lib/automation/helpers/evaluate_in_frame_context'
 
 type MockedSendDebuggerCommand = SendDebuggerCommand & Mock
@@ -323,6 +324,144 @@ describe('remote:agent automation command', () => {
         expect(ownerHandle.dispose).toHaveBeenCalled()
         expect(childFrame._evaluateExpression).not.toHaveBeenCalled()
       })
+    })
+  })
+
+  describe('tabs', () => {
+    const makeTab = (url: string) => {
+      return {
+        url: vi.fn(async () => url),
+        bringToFront: vi.fn(async () => {}),
+        call: vi.fn(async () => ({ ok: true, value: { elements: [], url } })),
+      }
+    }
+
+    let tabs: Array<ReturnType<typeof makeTab>>
+    let bringRunnerToFront: Mock
+    let callInAut: Mock
+    let remoteTabs: RemoteTabs
+
+    beforeEach(() => {
+      tabs = [makeTab('http://login.idp.test/popup'), makeTab('http://www.app.test/help')]
+      bringRunnerToFront = vi.fn(async () => {})
+      callInAut = vi.fn(async () => 'in aut')
+      remoteTabs = new RemoteTabs(() => tabs, bringRunnerToFront)
+    })
+
+    it('calls the AUT when the request names no tab', async () => {
+      expect(await remoteTabs.call(request, callInAut)).toBe('in aut')
+      expect(bringRunnerToFront).not.toHaveBeenCalled()
+    })
+
+    it('runs in the tab whose URL matches a RegExp', async () => {
+      expect(await remoteTabs.call({ ...request, tab: { url: { source: 'idp\\.test', flags: '' } } }, callInAut)).toMatchObject({ value: { url: 'http://login.idp.test/popup' } })
+      expect(callInAut).not.toHaveBeenCalled()
+    })
+
+    it('matches a string anywhere in the URL', async () => {
+      expect(await remoteTabs.call({ ...request, tab: { url: 'help' } }, callInAut)).toMatchObject({ value: { url: 'http://www.app.test/help' } })
+    })
+
+    it('uses the newest tab when no URL is given', async () => {
+      expect(await remoteTabs.call({ ...request, tab: {} }, callInAut)).toMatchObject({ value: { url: 'http://www.app.test/help' } })
+    })
+
+    it('skips a tab whose URL can\'t be read', async () => {
+      tabs[1].url.mockRejectedValue(new Error('tab closed'))
+
+      expect(await remoteTabs.call({ ...request, tab: {} }, callInAut)).toMatchObject({ value: { url: 'http://login.idp.test/popup' } })
+    })
+
+    it('brings the tab to the front for actions, and the runner back on the next call in the AUT', async () => {
+      await remoteTabs.call({ ...request, tab: { url: 'idp' } }, callInAut)
+      expect(tabs[0].bringToFront).not.toHaveBeenCalled()
+
+      await remoteTabs.call({ ...request, method: 'click', tab: { url: 'idp' } }, callInAut)
+      expect(tabs[0].bringToFront).toHaveBeenCalledTimes(1)
+
+      await remoteTabs.call(request, callInAut)
+      await remoteTabs.call(request, callInAut)
+      expect(bringRunnerToFront).toHaveBeenCalledTimes(1)
+    })
+
+    it('resolves no elements when no tab matches, so the tab can be awaited closing', async () => {
+      expect(await remoteTabs.call({ ...request, tab: { url: 'nowhere' } }, callInAut)).toEqual({ ok: true, value: { elements: [] } })
+    })
+
+    it('returns a retryable error for an action when no tab matches', async () => {
+      expect(await remoteTabs.call({ ...request, method: 'click', tab: { url: 'nowhere' } }, callInAut)).toEqual({
+        ok: false,
+        error: { name: 'Error', message: 'Expected to find a tab matching `nowhere`, but never found one.', retry: true },
+      })
+    })
+  })
+
+  describe('CDP tabs', () => {
+    const makeCdpTab = (targetId: string, url: string) => {
+      const listeners = new Map<string, (params: any) => void>()
+      let nextId = 100
+
+      const tabSend = vi.fn(async (method: string, params?: any) => {
+        switch (method) {
+          case 'Page.getFrameTree':
+            return { frameTree: { frame: { id: `${targetId}-frame`, url } } }
+          case 'Page.createIsolatedWorld': {
+            const id = nextId++
+
+            listeners.get('Runtime.executionContextCreated')?.({ context: { id, auxData: { frameId: params.frameId, isDefault: false } } })
+
+            return { executionContextId: id }
+          }
+          case 'Runtime.evaluate':
+            return params.expression === 'agent source'
+              ? { result: { type: 'undefined' } }
+              : { result: { type: 'object', value: { ok: true, value: { elements: [], tab: targetId } } } }
+          default:
+            return {}
+        }
+      })
+
+      return {
+        targetId,
+        send: tabSend as SendDebuggerCommand & Mock,
+        on: (event: string, cb: (params: any) => void) => listeners.set(event, cb),
+      }
+    }
+
+    const tabCalls = (tab: { send: Mock }) => tab.send.mock.calls.map(([method]) => method)
+
+    let cdpTabs: Array<CdpTab & { send: Mock }>
+    let cdpRemoteTabs: CdpRemoteTabs
+
+    beforeEach(() => {
+      cdpTabs = [makeCdpTab('first', 'http://login.idp.test/popup')]
+      cdpRemoteTabs = new CdpRemoteTabs(() => cdpTabs, () => Promise.resolve('agent source'))
+    })
+
+    it('reads a tab\'s URL from its frame tree and brings it to the front', async () => {
+      const [tab] = cdpRemoteTabs.list()
+
+      expect(await tab.url()).toBe('http://login.idp.test/popup')
+      await tab.bringToFront()
+      expect(tabCalls(cdpTabs[0])).toContain('Page.bringToFront')
+    })
+
+    it('runs the agent in the tab, enabling Runtime and creating the world once', async () => {
+      expect(await cdpRemoteTabs.list()[0].call(request)).toEqual({ ok: true, value: { elements: [], tab: 'first' } })
+      await cdpRemoteTabs.list()[0].call(request)
+
+      expect(tabCalls(cdpTabs[0]).filter((method) => method === 'Runtime.enable')).toHaveLength(1)
+      expect(tabCalls(cdpTabs[0]).filter((method) => method === 'Page.createIsolatedWorld')).toHaveLength(1)
+    })
+
+    it('starts a new agent for a tab that closed and reopened under the same id', async () => {
+      await cdpRemoteTabs.list()[0].call(request)
+      cdpTabs = []
+      cdpRemoteTabs.list()
+      cdpTabs = [makeCdpTab('first', 'http://login.idp.test/popup')]
+      await cdpRemoteTabs.list()[0].call(request)
+
+      expect(tabCalls(cdpTabs[0])).toContain('Runtime.enable')
     })
   })
 })

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sign in</title>
+</head>
+<body>
+  <h1 id="label"></h1>
+  <input id="username" placeholder="Username" />
+  <button id="sign-in">Sign in</button>
+
+  <script>
+    document.getElementById('label').textContent = new URLSearchParams(location.search).get('label') || ''
+    document.getElementById('sign-in').addEventListener('click', () => {
+      window.opener && window.opener.postMessage({ user: document.getElementById('username').value }, '*')
+      window.close()
+    })
+  </script>
+</body>
+</html>

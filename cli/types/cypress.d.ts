@@ -2307,6 +2307,17 @@ declare namespace Cypress {
     frame(options?: Partial<LogTimeoutOptions>): Chainable<JQuery<HTMLBodyElement>>
 
     /**
+     * Get the `<body>` of a tab the app opened, such as a login popup. A string matches any
+     * part of the tab's URL, and with no URL the newest tab is used.
+     * Requires `experimentalRemoteDriver`.
+     *
+     * @example
+     *    cy.get('#sign-in-with-idp').click()
+     *    cy.tab(/login\.idp/).find('#username').type('ada')
+     */
+    tab(url?: string | RegExp, options?: Partial<LogTimeoutOptions>): Chainable<JQuery<HTMLBodyElement>>
+
+    /**
      * Traverse into an element's shadow root.
      *
      * @example

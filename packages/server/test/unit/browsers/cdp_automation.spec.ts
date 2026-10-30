@@ -1021,6 +1021,26 @@ describe('lib/browsers/cdp_automation', () => {
       })
     })
 
+    describe('remote:agent with a tab', () => {
+      const tabRequest = { method: 'click', context: {}, args: {}, tab: { url: 'login' } }
+
+      it('fails clearly when the browser has no tab tracking', async () => {
+        expect(await onRequest('remote:agent', tabRequest)).toEqual({
+          ok: false,
+          error: { name: 'Error', message: '`cy.tab()` is not supported in Electron yet.', retry: false },
+        })
+      })
+
+      it('looks for the tab among the ones it was given', async () => {
+        const getTabs = vi.fn(() => [])
+
+        cdpAutomation.useRemoteTabs(getTabs)
+
+        expect(await onRequest('remote:agent', { ...tabRequest, method: 'resolve' })).toEqual({ ok: true, value: { elements: [] } })
+        expect(getTabs).toHaveBeenCalled()
+      })
+    })
+
     describe('get:aut:title', () => {
       it('is able to get the AUT title', async () => {
         sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({

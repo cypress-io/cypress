@@ -212,6 +212,78 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
+  describe('AUT request marking', () => {
+    const getRouteHandler = () => mock.getLastContext().route.mock.calls[0][1]
+
+    it('marks requests for the AUT iframe', async () => {
+      await createAutomation()
+
+      const route = { continue: vi.fn() }
+      const runnerFrame = { parentFrame: () => null }
+      const request = {
+        resourceType: () => 'document',
+        url: () => 'http://localhost:3000/index.html',
+        headers: () => ({ accept: 'text/html' }),
+        frame: () => ({ parentFrame: () => runnerFrame }),
+      }
+
+      await getRouteHandler()(route, request)
+
+      expect(route.continue).toHaveBeenCalledWith({ headers: { 'accept': 'text/html', 'X-Cypress-Is-AUT-Frame': 'true' } })
+    })
+
+    it('lets a new tab\'s first navigation through, though its frame does not exist yet', async () => {
+      await createAutomation()
+
+      const route = { continue: vi.fn() }
+      const request = {
+        resourceType: () => 'document',
+        url: () => 'http://localhost:3000/help.html',
+        headers: () => ({}),
+        frame: () => {
+          throw new Error('Frame for this navigation request is not available')
+        },
+      }
+
+      await getRouteHandler()(route, request)
+
+      expect(route.continue).toHaveBeenCalledWith()
+    })
+  })
+
+  describe('tabs the app opened', () => {
+    const makePage = (url: string) => {
+      return {
+        url: () => url,
+        bringToFront: vi.fn(async () => {}),
+        close: vi.fn(async () => {}),
+        mainFrame: () => ({}),
+      }
+    }
+
+    it('closes every page but the runner\'s', async () => {
+      const wk = await createAutomation()
+      const runner = mock.getLastPage()
+      const popup = makePage('http://login.idp.test/popup')
+
+      mock.getLastContext().pages = () => [runner, popup]
+      await wk.closeExtraPages()
+
+      expect(popup.close).toHaveBeenCalled()
+      expect(runner.close).not.toHaveBeenCalled()
+    })
+
+    it('fails a call in a matching tab clearly when WebKit was not launched in-process', async () => {
+      const wk = await createAutomation()
+      const popup = makePage('http://login.idp.test/popup')
+
+      mock.getLastContext().pages = () => [mock.getLastPage(), popup]
+
+      await expect(wk.onRequest('remote:agent', { method: 'click', context: {}, args: {}, tab: { url: 'idp' } })).rejects.toThrow('could not reach Playwright\'s isolated world')
+      expect(popup.bringToFront).toHaveBeenCalled()
+    })
+  })
+
   describe('reload:aut:frame / navigate:aut:history', () => {
     it('reloads the AUT frame', async () => {
       const wk = await createAutomation()

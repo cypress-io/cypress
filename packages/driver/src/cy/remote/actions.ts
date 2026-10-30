@@ -72,6 +72,8 @@ const runRemoteAction = ({ Cypress, cy, name, subject, options, log, perform }: 
     const verifyAssertions = () => {
       return cy.verifyUpcomingAssertions(subject, options, {
         onRetry: verifyAssertions,
+        // the elements existed when acted on; an action can remove them, or close the tab they're in
+        ensureExistenceFor: false,
       })
     }
 

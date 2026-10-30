@@ -25,7 +25,7 @@ import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
-import { BidiRemoteAgent } from '../automation/commands/remote_agent'
+import { BidiRemoteAgent, RemoteTabs } from '../automation/commands/remote_agent'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -124,6 +124,7 @@ export class BidiAutomation {
   private webDriverClient: WebDriverClient
   private automation: Automation
   private remoteAgent: BidiRemoteAgent
+  private remoteTabs: RemoteTabs
   private autContextId: string | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
@@ -148,6 +149,22 @@ export class BidiAutomation {
     this.automation = automation
     this.webDriverClient = webDriverClient
     this.remoteAgent = new BidiRemoteAgent(webDriverClient)
+    this.remoteTabs = new RemoteTabs(async () => {
+      return (await this.getExtraTabs()).map((tab) => {
+        return {
+          url: async () => tab.url,
+          bringToFront: async () => {
+            await this.webDriverClient.browsingContextActivate({ context: tab.context })
+          },
+          call: (request) => this.remoteAgent.call(tab.context, request),
+        }
+      })
+    }, async () => {
+      if (this.topLevelContextId) {
+        await this.webDriverClient.browsingContextActivate({ context: this.topLevelContextId })
+      }
+    })
+
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error - webdriver types request.destination as string, wider than our RequestDestination
@@ -157,6 +174,25 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+  }
+
+  // top-level contexts other than the runner's are tabs the app opened
+  private async getExtraTabs () {
+    const { contexts } = await this.webDriverClient.browsingContextGetTree({ maxDepth: 0 })
+
+    return contexts.filter((tab) => tab.context !== this.topLevelContextId)
+  }
+
+  async closeExtraTabs () {
+    for (const tab of await this.getExtraTabs()) {
+      debug('closing extra tab %s', tab.context)
+
+      try {
+        await this.webDriverClient.browsingContextClose({ context: tab.context })
+      } catch (err) {
+        debug('closing extra tab %s errored: %o', tab.context, err)
+      }
+    }
   }
 
   setTopLevelContextId = (contextId?: string) => {
@@ -849,11 +885,11 @@ export class BidiAutomation {
           return bidiGetFrameTitle(this.webDriverClient, autContextId)
         }
         case 'remote:agent':
-        {
-          const autContextId = await this.ensureAutContextId('Cannot run the remote agent: no AUT context initialized')
+          return this.remoteTabs.call(data, async () => {
+            const autContextId = await this.ensureAutContextId('Cannot run the remote agent: no AUT context initialized')
 
-          return this.remoteAgent.call(autContextId, data)
-        }
+            return this.remoteAgent.call(autContextId, data)
+          })
         default:
           debug('BiDi automation not implemented for message: %s', message)
           throw new AutomationNotImplemented(message, 'BiDiAutomation')

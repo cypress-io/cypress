@@ -411,6 +411,16 @@ let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
 
+  cdpAutomation.useRemoteTabs(() => {
+    return Array.from(browserCriClient?.extraTargetClients ?? [], ([targetId, { client: tabClient }]) => {
+      return {
+        targetId,
+        send: (command, params) => tabClient.send(command, params),
+        on: (event, cb) => tabClient.on(event, cb),
+      }
+    })
+  })
+
   automation.use(cdpAutomation)
 
   return cdpAutomation

@@ -4,7 +4,7 @@ import $errUtils from '../../cypress/error_utils'
 import type { ICypress } from '../../cypress'
 import type { Log } from '../../cypress/log'
 import type { LocationObject } from '../../cypress/location'
-import type { AgentContext, AgentError, AgentMethods, AgentResponse, FrameOwner, QueryStep } from '../../remote/protocol'
+import type { AgentContext, AgentError, AgentMethods, AgentResponse, FrameOwner, QueryStep, TabUrl } from '../../remote/protocol'
 import { RemoteElement, RemoteLocator, isRemoteSubject } from './remote_element'
 
 export { isRemoteElement, isRemoteSubject } from './remote_element'
@@ -44,10 +44,13 @@ const toError = (agentError: AgentError, timeout?: number) => {
 // frame step in the frame that contains it and the rest in the innermost frame
 const splitAtFrames = (allSteps: QueryStep[]) => {
   const frames: FrameOwner[] = []
+  let tab: { url?: TabUrl } | undefined
   let steps: QueryStep[] = []
 
   for (const step of allSteps) {
-    if (step.type === 'frame') {
+    if (step.type === 'tab') {
+      tab = { url: step.url }
+    } else if (step.type === 'frame') {
       frames.push({ steps, selector: step.selector })
       steps = []
     } else {
@@ -55,14 +58,14 @@ const splitAtFrames = (allSteps: QueryStep[]) => {
     }
   }
 
-  return { frames, steps: steps.length ? steps : [{ type: 'get', selector: 'body' } as const] }
+  return { tab, frames, steps: steps.length ? steps : [{ type: 'get', selector: 'body' } as const] }
 }
 
 export const callAgent = <M extends keyof AgentMethods>(Cypress: ICypress, method: M, args: Parameters<AgentMethods[M]>[0], timeout?: number): Promise<ReturnType<AgentMethods[M]>> => {
   return Promise.try(() => {
-    const { frames, steps } = splitAtFrames(args.steps)
+    const { tab, frames, steps } = splitAtFrames(args.steps)
 
-    return Cypress.automation('remote:agent', { method, context: getContext(Cypress), args: { ...args, steps }, frames })
+    return Cypress.automation('remote:agent', { method, context: getContext(Cypress), args: { ...args, steps }, frames, tab })
   })
   .then((reply) => {
     // Safe because `remote:agent` returns whatever the agent's `call` resolved with

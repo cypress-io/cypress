@@ -403,6 +403,21 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
+  Commands.addQuery('tab', function tab (url?: string | RegExp, userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
+    const displayName = url === undefined ? 'a tab' : `a tab matching ${String(url)}`
+    const log = userOptions.log !== false && Cypress.log({ message: url === undefined ? '' : String(url), timeout: userOptions.timeout })
+
+    this.set('timeout', userOptions.timeout)
+
+    if (!isRemoteDriverEnabled(Cypress)) {
+      $errUtils.throwErrByPath('remote_driver.tab_requires_remote_driver', { onFail: log })
+    }
+
+    const tabUrl = _.isRegExp(url) ? { source: url.source, flags: url.flags } : url
+
+    return () => extendRemoteSubject('tab', undefined, { type: 'tab', url: tabUrl }, displayName)
+  })
+
   Commands.addQuery('frame', function frame (userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
     const log = userOptions.log !== false && Cypress.log({ timeout: userOptions.timeout })
 

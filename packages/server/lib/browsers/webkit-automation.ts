@@ -14,7 +14,7 @@ import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
-import { WebKitRemoteAgent } from '../automation/commands/remote_agent'
+import { RemoteTabs, WebKitRemoteAgent } from '../automation/commands/remote_agent'
 import { webkitReloadFrame } from '../automation/commands/reload_frame'
 import { webkitNavigateHistory } from '../automation/commands/navigate_history'
 
@@ -43,6 +43,16 @@ export class WebKitAutomation {
   private userAgent: string | null
   private isHeadless: boolean
   private remoteAgent = new WebKitRemoteAgent()
+  private remoteTabs = new RemoteTabs(() => {
+    return this.getExtraPages().map((page) => {
+      return {
+        url: async () => page.url(),
+        bringToFront: () => page.bringToFront(),
+        call: (request) => this.remoteAgent.call(page.mainFrame(), request),
+      }
+    })
+  }, () => this.page.bringToFront())
+
   cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
@@ -154,9 +164,19 @@ export class WebKitAutomation {
   private async markAutIframeRequests () {
     function isAutIframeRequest (request: playwright.Request) {
       // is an iframe
-      return (request.resourceType() === 'document')
-        // is a top-level iframe (only 1 parent in chain)
-        && request.frame().parentFrame() && !request.frame().parentFrame()?.parentFrame()
+      if (request.resourceType() !== 'document') return false
+
+      let frame: playwright.Frame
+
+      try {
+        frame = request.frame()
+      } catch (err) {
+        // a new tab's first navigation, such as a target=_blank link, is issued before its frame exists
+        return false
+      }
+
+      // is a top-level iframe (only 1 parent in chain)
+      return !!frame.parentFrame() && !frame.parentFrame()?.parentFrame()
         // is not the runner itself
         && !request.url().includes('__cypress')
     }
@@ -376,6 +396,17 @@ export class WebKitAutomation {
     return autFrame
   }
 
+  // pages other than the runner's are tabs the app opened
+  private getExtraPages () {
+    return this.context.pages().filter((page) => page !== this.page)
+  }
+
+  async closeExtraPages () {
+    await Promise.all(this.getExtraPages().map((page) => {
+      return page.close().catch((err) => debug('closing extra page errored: %o', err))
+    }))
+  }
+
   private async takeScreenshot (data) {
     const buffer = await this.page.screenshot({
       fullPage: data.capture === 'fullPage',
@@ -416,7 +447,7 @@ export class WebKitAutomation {
       case 'navigate:aut:history':
         return await webkitNavigateHistory(this.getAutFrame(), data.historyNumber)
       case 'remote:agent':
-        return await this.remoteAgent.call(this.getAutFrame(), data)
+        return await this.remoteTabs.call(data, () => this.remoteAgent.call(this.getAutFrame(), data))
       case 'focus:browser:window':
         return await this.context.pages()[0]?.bringToFront()
       case 'reset:browser:state':
