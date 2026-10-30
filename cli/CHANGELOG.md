@@ -9,7 +9,7 @@
 
 **Features:**
 
-- In [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), every handler registered for [`before:run`](https://on.cypress.io/before-run-api), [`after:run`](https://on.cypress.io/after-run-api), [`before:spec`](https://on.cypress.io/before-spec-api), or [`after:spec`](https://on.cypress.io/after-spec-api) now runs, one after another in the order they were registered. Previously, only the last handler registered for each of these events ran, so two plugins listening to the same event could not be used together. If a handler throws or rejects, the handlers registered after it do not run. Addresses [#5240](https://github.com/cypress-io/cypress/issues/5240).
+- In [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), registering the same event more than once no longer replaces the handlers registered before it, so plugins that listen to the same event can now be used together. Every handler registered for [`before:run`](https://on.cypress.io/before-run-api), [`after:run`](https://on.cypress.io/after-run-api), [`before:spec`](https://on.cypress.io/before-spec-api), [`after:spec`](https://on.cypress.io/after-spec-api), or [`before:browser:launch`](https://on.cypress.io/browser-launch-api) now runs, one after another in the order they were registered. Each `before:browser:launch` handler receives the launch options returned by the handlers before it, and the browser launches with the launch options returned by the last one. If a handler throws or rejects, the handlers registered after it do not run. Addresses [#5240](https://github.com/cypress-io/cypress/issues/5240) and [#19809](https://github.com/cypress-io/cypress/issues/19809).
 
 **Bugfixes:**
 

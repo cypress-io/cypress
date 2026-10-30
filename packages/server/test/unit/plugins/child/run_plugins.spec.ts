@@ -167,6 +167,60 @@ describe('lib/plugins/child/run_plugins', () => {
         expect(calls).toStrictEqual(['first:details', 'second:details'])
       })
 
+      describe('combined before:browser:launch handlers', () => {
+        const browser = { name: 'chrome' }
+
+        const invokeBeforeBrowserLaunch = async (...handlers) => {
+          await runPlugins.runSetupNodeEvents(config, (on) => {
+            handlers.forEach((handler) => on('before:browser:launch', handler))
+          })
+
+          const registrations = sentPayload('setupTestingType:reply').registrations.filter((registration) => registration.event === 'before:browser:launch')
+
+          expect(registrations).toHaveLength(1)
+
+          return runPlugins.invoke(registrations[0].eventId, [browser, browserUtils.getDefaultLaunchOptions({ env: { BASE: 'base' } })])
+        }
+
+        it('passes each handler the launch options returned by the handlers before it', async () => {
+          const second = vi.fn((browser, launchOptions) => {
+            launchOptions.args.push('--second')
+
+            return launchOptions
+          })
+
+          const result = await invokeBeforeBrowserLaunch(
+            (browser, launchOptions) => {
+              launchOptions.args.push('--first')
+
+              return launchOptions
+            },
+            second,
+          )
+
+          expect(second).toHaveBeenCalledWith(browser, expect.objectContaining({ args: ['--first', '--second'] }))
+          expect(result.args).toStrictEqual(['--first', '--second'])
+        })
+
+        it('keeps the launch options a handler leaves out of a partial result', async () => {
+          const second = vi.fn(() => undefined)
+
+          const result = await invokeBeforeBrowserLaunch(
+            () => ({ env: { FIRST: 'first' } }),
+            second,
+          )
+
+          expect(second).toHaveBeenCalledWith(browser, expect.objectContaining({ args: [], env: { BASE: 'base', FIRST: 'first' } }))
+          expect(result).toMatchObject({ args: [], env: { BASE: 'base', FIRST: 'first' } })
+        })
+
+        it('returns undefined when no handler returns launch options', async () => {
+          const result = await invokeBeforeBrowserLaunch(() => undefined, () => undefined, () => undefined)
+
+          expect(result).toBeUndefined()
+        })
+      })
+
       it('does not run later handlers when an earlier combined handler rejects', async () => {
         const second = vi.fn()
 

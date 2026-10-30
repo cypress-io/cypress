@@ -7,7 +7,7 @@ import _ from 'lodash'
 import { wrap as wrapPreprocessor } from './preprocessor'
 import { wrap as wrapDevServer } from './dev-server'
 import { typescript as resolveTypescript } from '../../util/resolve'
-import { wrapBefore as wrapBeforeBrowserLaunch } from './browser_launch'
+import { chainBefore as chainBeforeBrowserLaunch, wrapBefore as wrapBeforeBrowserLaunch } from './browser_launch'
 import { nonNodeRequires, serializeError, wrapChildPromise } from '../util'
 import { validateEvent } from './validate_event'
 import { processCallback as processCrossOriginCallback } from './cross_origin'
@@ -25,9 +25,23 @@ import type {
 
 const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
 
-// The server ignores what these handlers return, so every handler registered
-// for them can run in turn instead of the last registration replacing the rest
-const COMBINABLE_EVENTS = ['before:run', 'after:run', 'before:spec', 'after:spec']
+const runInSequence = (first: PluginEventHandler, second: PluginEventHandler): PluginEventHandler => {
+  return async (...args: any[]) => {
+    await first(...args)
+    await second(...args)
+  }
+}
+
+// Repeat registrations of these events are combined into one handler instead
+// of the last registration replacing the rest. The server ignores what the
+// run and spec handlers return, so they only need to run in turn.
+const combineHandlersByEvent: Record<string, (first: PluginEventHandler, second: PluginEventHandler) => PluginEventHandler> = {
+  'before:run': runInSequence,
+  'after:run': runInSequence,
+  'before:spec': runInSequence,
+  'after:spec': runInSequence,
+  'before:browser:launch': chainBeforeBrowserLaunch,
+}
 
 export class RunPlugins {
   private ipc: PluginChildIpc
@@ -97,13 +111,15 @@ export class RunPlugins {
         }
       }
 
-      if (COMBINABLE_EVENTS.includes(event)) {
+      const combineHandlers = combineHandlersByEvent[event]
+
+      if (combineHandlers) {
         const existingEventId = this.registeredEventsByName[event]
 
         if (existingEventId !== undefined) {
           this.registeredEventsById[existingEventId] = {
             event,
-            handler: this.combineHandlers(
+            handler: combineHandlers(
               this.registeredEventsById[existingEventId].handler as PluginEventHandler,
               handler as PluginEventHandler,
             ),
@@ -224,13 +240,6 @@ export class RunPlugins {
     const invoke = () => _.keys(taskEvent ? taskEvent.handler : {})
 
     wrapChildPromise(this.ipc, invoke, ids)
-  }
-
-  combineHandlers (first: PluginEventHandler, second: PluginEventHandler): PluginEventHandler {
-    return async (...args: any[]) => {
-      await first(...args)
-      await second(...args)
-    }
   }
 
   taskMerge (target: TaskEventHandler, events: TaskEventHandler) {
