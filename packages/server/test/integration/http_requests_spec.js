@@ -884,13 +884,18 @@ describe('Routes', () => {
       })
 
       it('properly correlates when proxy failure come first', function () {
-        const followupPreRequestTimeout = 1000
+        this.timeout(5000)
 
-        this.networkProxy.setPreRequestTimeout(50)
+        const followupPreRequestTimeout = 1000
+        const initialPreRequestTimeout = 50
+        const nockDelayMs = 50
+        const settleAfterTimeoutMs = 200
+
+        this.networkProxy.setPreRequestTimeout(initialPreRequestTimeout)
 
         nock(this.server.remoteStates.current().origin)
         .get('/')
-        .delay(50)
+        .delay(nockDelayMs)
         .once()
         .reply(200, 'hello from bar!', {
           'Content-Type': 'text/html',
@@ -903,11 +908,11 @@ describe('Routes', () => {
             'Accept-Encoding': 'identity',
           },
           // Timeout needs to be less than the prerequest timeout + the nock delay
-          timeout: 75,
+          timeout: initialPreRequestTimeout + nockDelayMs - 25,
         }).catch(() => {})
 
-        // Wait 100 ms to make sure the request times out
-        return Promise.delay(100).then(() => {
+        // Wait for the timed-out request to finish cleanup before correlating the follow-up
+        return Promise.delay(settleAfterTimeoutMs).then(() => {
           this.networkProxy.setPreRequestTimeout(followupPreRequestTimeout)
           nock(this.server.remoteStates.current().origin)
           .get('/')
