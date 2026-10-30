@@ -15,7 +15,7 @@
       <template #input-prefix="{ value }">
         <Icon
           v-if="value"
-          :icon="icons[value.id] ?? Terminal"
+          :icon="icons[value.id] ?? IconTechnologyCodeEditor"
           class="text-md text-gray-500"
           icon-class="icon-dark-gray-500"
         />
@@ -62,7 +62,7 @@ import Vim from '~icons/logos/vim'
 import Sublime from '~icons/logos/sublimetext-icon'
 import Computer from '~icons/mdi/computer'
 import Emacs from '~icons/logos/emacs'
-import Terminal from '~icons/cy/terminal_x16.svg'
+import { IconTechnologyCodeEditor } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
 
@@ -83,7 +83,7 @@ const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
 }
 
 const editorOptions = computed(() => {
-  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] ?? Terminal })) || []
+  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] ?? IconTechnologyCodeEditor })) || []
 })
 
 gql`
