@@ -37,6 +37,7 @@
 
 **Bugfixes:**
 
+- Application code can now access `window.Cypress` when navigating back to the primary origin after [`cy.origin()`](https://on.cypress.io/origin), including during page startup after a redirect. The `window:before:load` event also fires before the returning page's scripts run. Fixes [#25394](https://github.com/cypress-io/cypress/issues/25394).
 - [`cy.contains()`](https://on.cypress.io/contains) now works inside [`cy.document().within()`](https://on.cypress.io/within). Missing content reports an assertion error instead of `TypeError: subject.each is not a function`. Fixes [#24178](https://github.com/cypress-io/cypress/issues/24178).
 - Responses compressed with `Content-Encoding: x-gzip` are now decoded correctly when Cypress's HTTP proxy rewrites their contents, preventing compressed pages from becoming corrupted during script injection. Fixes [#34387](https://github.com/cypress-io/cypress/issues/34387).
 - [`cy.request()`](https://on.cypress.io/request) now fails with an invalid encoding error when passed `encoding: false`, `0`, or an empty string, instead of crashing Cypress with `TypeError [ERR_UNKNOWN_ENCODING]: Unknown encoding: false`. Fixes [#24192](https://github.com/cypress-io/cypress/issues/24192).
