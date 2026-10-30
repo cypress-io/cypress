@@ -407,6 +407,7 @@ export class ProjectConfigManager {
         (cypressError: CypressError, title?: string | undefined) => {
           this._state = 'errored'
           this.options.ctx.onError(cypressError, title)
+          this.options.ctx.reportLoadErrorToTap(cypressError)
         },
         this.options.ctx.onWarning,
         (debugData: DebugData) => {
