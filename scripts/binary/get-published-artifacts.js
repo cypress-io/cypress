@@ -49,6 +49,10 @@ function getPipelineId (pipelineInfoFilePath) {
   return parsedPipelineId
 }
 
+const TERMINAL_WORKFLOW_STATUSES = new Set(['success', 'failed', 'error', 'canceled', 'failing'])
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 async function getWorkflows (pipelineId) {
   const response = await rp(getRequestOptions(`https://circleci.com/api/v2/pipeline/${pipelineId}/workflow`))
 
@@ -64,6 +68,26 @@ async function getWorkflows (pipelineId) {
   }
 
   return parsed.items
+}
+
+async function waitForWorkflowTerminal (pipelineId, options = {}) {
+  const pollIntervalMs = options.pollIntervalMs ?? 30_000
+  const maxWaitMs = options.maxWaitMs ?? 45 * 60_000
+  const start = Date.now()
+
+  while (Date.now() - start < maxWaitMs) {
+    const workflows = await module.exports.getWorkflows(pipelineId)
+    const workflow = workflows[0]
+
+    if (TERMINAL_WORKFLOW_STATUSES.has(workflow.status)) {
+      return workflow
+    }
+
+    console.log(`Workflow ${chalk.cyan(workflow.name)} is still ${chalk.yellow(workflow.status)}; checking again in ${pollIntervalMs / 1000}s...`)
+    await sleep(pollIntervalMs)
+  }
+
+  throw new Error(`timed out after ${maxWaitMs / 1000}s waiting for publish-binary workflow to finish`)
 }
 
 async function getWorkflowJobs (workflowId) {
@@ -115,9 +139,7 @@ async function run (args) {
   const pipelineId = module.exports.getPipelineId(pipelineInfoFilePath)
 
   console.log(`Getting workflows from pipeline ${chalk.cyan(pipelineId)}...`)
-  const workflows = await module.exports.getWorkflows(pipelineId)
-
-  const workflow = workflows[0]
+  const workflow = await module.exports.waitForWorkflowTerminal(pipelineId)
 
   if (workflow.status !== 'success') {
     console.error(chalk.red(`\nThe ${chalk.cyan(workflow.name)} workflow that we triggered in the ${chalk.cyan('cypress-publish-binary')} project did not succeed.\n
@@ -164,6 +186,7 @@ ${chalk.cyan.underline(`https://app.circleci.com/pipelines/workflows/${workflow.
 module.exports = {
   getPipelineId,
   getWorkflows,
+  waitForWorkflowTerminal,
   getWorkflowJobs,
   getJobArtifacts,
   downloadArtifact,
