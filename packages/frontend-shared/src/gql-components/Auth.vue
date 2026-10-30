@@ -4,22 +4,18 @@
     class="flex gap-[16px]"
   >
     <Button
-      size="lg"
+      size="40"
       data-cy="auth-try-again-button"
       @click="handleTryAgain"
     >
-      <template
-        #prefix
-      >
-        <i-cy-action-restart_x16
-          class=" icon-light-white"
-        />
-      </template>
+      <i-cy-action-restart_x16
+        class="icon-light-white mr-[8px]"
+      />
       {{ t('topNav.login.actionTryAgain') }}
     </Button>
     <Button
-      variant="outline"
-      size="lg"
+      variant="outline-light"
+      size="40"
       @click="handleCancel"
     >
       {{ t('topNav.login.actionCancel') }}
@@ -36,31 +32,31 @@
   <div v-else>
     <Button
       v-if="loginMutationIsPending"
-      size="lg"
-      variant="pending"
+      size="40"
+      variant="disabled"
       aria-live="polite"
       :disabled="true"
     >
-      <template
-        #prefix
-      >
-        <i-cy-loading_x16
-          class="animate-spin icon-dark-white icon-light-gray-400"
-        />
-      </template>
+      <i-cy-loading_x16
+        class="animate-spin icon-dark-white icon-light-gray-400 mr-[8px]"
+      />
       {{ browserOpened ? t('topNav.login.actionWaiting') : t('topNav.login.actionOpening') }}
     </Button>
     <Button
       v-else
       ref="loginButtonRef"
-      size="lg"
-      variant="primary"
+      size="40"
+      variant="indigo-dark"
       data-cy="auth-login-button"
       aria-live="polite"
       :disabled="!cloudViewer && !isOnline"
-      :prefix-icon="buttonPrefixIcon"
       @click="handleLoginOrContinue"
     >
+      <component
+        :is="buttonPrefixIcon"
+        v-if="buttonPrefixIcon"
+        class="mr-[8px]"
+      />
       {{ buttonText }}
     </Button>
   </div>
@@ -83,7 +79,7 @@ import {
 import type {
   AuthFragment,
 } from '../generated/graphql'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { useI18n } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import type { AuthFlow } from '@packages/frontend-shared/src/store/user-project-status-store'

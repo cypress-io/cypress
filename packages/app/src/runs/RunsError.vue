@@ -15,11 +15,14 @@
       <slot />
     </p>
     <Button
-      :prefix-icon="buttonIcon"
-      prefix-icon-class="icon-dark-white icon-light-transparent"
+      size="32"
       :disabled="buttonDisabled"
       @click="emit('button-click')"
     >
+      <component
+        :is="buttonIcon"
+        class="icon-dark-white icon-light-transparent mr-[8px]"
+      />
       {{ buttonText }}
     </Button>
   </div>
@@ -27,7 +30,7 @@
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 
 defineProps<{
   icon: 'access' | 'error'

@@ -26,7 +26,8 @@
         <Button
           v-for="cta in message.ctas"
           :key="cta.id"
-          :variant="cta.style === 'primary' ? 'primary' : 'outline'"
+          :variant="cta.style === 'primary' ? 'indigo-dark' : 'outline-light'"
+          size="32"
           :data-cy="`cloud-message-cta-${cta.style}`"
           @click="onCtaClick(cta, bannerInstanceId)"
         >
@@ -40,7 +41,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import TrackedBanner from './TrackedBanner.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useExternalLink } from '@packages/frontend-shared/src/gql-components/useExternalLink'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'

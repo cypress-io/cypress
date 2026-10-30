@@ -24,19 +24,17 @@
         :gql="props.gql"
       >
         <Button
-          size="lg"
+          size="40"
           data-cy="open-config-file"
           @click="onClick"
         >
-          <template #prefix>
-            <i-cy-code-editor_x16 class="icon-dark-white" />
-          </template>
+          <i-cy-code-editor_x16 class="icon-dark-white mr-[8px]" />
           {{ t('createSpec.updateSpecPattern') }}
         </Button>
       </OpenConfigFileInIDE>
       <Button
-        variant="outline"
-        size="lg"
+        variant="outline-light"
+        size="40"
         @click="emits('close')"
       >
         {{ t('components.modal.dismiss') }}
@@ -52,7 +50,7 @@ import { useI18n } from '@cy/i18n'
 import type { SpecPatternModalFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`

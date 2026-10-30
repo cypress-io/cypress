@@ -12,11 +12,10 @@
           {{ t('runner.automation.disconnected.description') }}
         </p>
         <Button
-          size="md"
-          :prefix-icon="RefreshIcon"
-          prefix-icon-class="icon-dark-white"
+          size="32"
           @click="relaunch"
         >
+          <RefreshIcon class="icon-dark-white mr-[8px]" />
           {{ t('runner.automation.disconnected.reload') }}
         </Button>
         <ExternalLink
@@ -33,7 +32,7 @@
 
 <script setup lang="ts">
 import AutInfo from './AutInfo.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import RefreshIcon from '~icons/cy/refresh_x16'
 import { gql } from '@urql/core'
