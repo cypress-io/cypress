@@ -1,11 +1,15 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.2.2
+## 16.3.0
 
 **Performance:**
 
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
 - The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
 - `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
+
+**Features:**
+
+- In [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), every handler registered for [`before:run`](https://on.cypress.io/before-run-api), [`after:run`](https://on.cypress.io/after-run-api), [`before:spec`](https://on.cypress.io/before-spec-api), or [`after:spec`](https://on.cypress.io/after-spec-api) now runs, one after another in the order they were registered. Previously, only the last handler registered for each of these events ran, so two plugins listening to the same event could not be used together. If a handler throws or rejects, the handlers registered after it do not run. Addresses [#5240](https://github.com/cypress-io/cypress/issues/5240).
 
 **Bugfixes:**
 

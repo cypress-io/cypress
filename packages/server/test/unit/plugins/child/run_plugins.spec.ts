@@ -143,6 +143,44 @@ describe('lib/plugins/child/run_plugins', () => {
         expect(requires).toBeInstanceOf(Array)
       })
 
+      it.each(['before:run', 'after:run', 'before:spec', 'after:spec'])('combines every handler registered for %s into one registration', async (event) => {
+        const calls: string[] = []
+        const first = vi.fn(async (arg) => {
+          await Promise.resolve()
+          calls.push(`first:${arg}`)
+        })
+        const second = vi.fn((arg) => {
+          calls.push(`second:${arg}`)
+        })
+
+        await runPlugins.runSetupNodeEvents(config, (on) => {
+          on(event, first)
+          on(event, second)
+        })
+
+        const registrations = sentPayload('setupTestingType:reply').registrations.filter((registration) => registration.event === event)
+
+        expect(registrations).toHaveLength(1)
+
+        await runPlugins.invoke(registrations[0].eventId, ['details'])
+
+        expect(calls).toStrictEqual(['first:details', 'second:details'])
+      })
+
+      it('does not run later handlers when an earlier combined handler rejects', async () => {
+        const second = vi.fn()
+
+        await runPlugins.runSetupNodeEvents(config, (on) => {
+          on('before:run', () => Promise.reject(new Error('first failed')))
+          on('before:run', second)
+        })
+
+        const { eventId } = sentPayload('setupTestingType:reply').registrations.find((registration) => registration.event === 'before:run')
+
+        await expect(runPlugins.invoke(eventId, [])).rejects.toThrow('first failed')
+        expect(second).not.toHaveBeenCalled()
+      })
+
       it('sends error if setupNodeEvents function rejects the promise', async () => {
         const err = new Error('foo')
         const setupNodeEventsFn = vi.fn().mockRejectedValue(err)

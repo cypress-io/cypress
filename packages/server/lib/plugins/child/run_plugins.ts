@@ -15,6 +15,7 @@ import type {
   PluginChildIpc,
   PluginExecuteEvent,
   PluginInvokeIds,
+  PluginEventHandler,
   PluginRegistration,
   RegisteredPluginEvent,
   RegisteredPluginHandler,
@@ -23,6 +24,10 @@ import type {
 } from './types'
 
 const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
+
+// The server ignores what these handlers return, so every handler registered
+// for them can run in turn instead of the last registration replacing the rest
+const COMBINABLE_EVENTS = ['before:run', 'after:run', 'before:spec', 'after:spec']
 
 export class RunPlugins {
   private ipc: PluginChildIpc
@@ -87,6 +92,24 @@ export class RunPlugins {
 
           this.registeredEventsById[existingEventId] = { event, handler }
           debug('extend task events with id', existingEventId)
+
+          return
+        }
+      }
+
+      if (COMBINABLE_EVENTS.includes(event)) {
+        const existingEventId = this.registeredEventsByName[event]
+
+        if (existingEventId !== undefined) {
+          this.registeredEventsById[existingEventId] = {
+            event,
+            handler: this.combineHandlers(
+              this.registeredEventsById[existingEventId].handler as PluginEventHandler,
+              handler as PluginEventHandler,
+            ),
+          }
+
+          debug('combine %s handlers with id', event, existingEventId)
 
           return
         }
@@ -201,6 +224,13 @@ export class RunPlugins {
     const invoke = () => _.keys(taskEvent ? taskEvent.handler : {})
 
     wrapChildPromise(this.ipc, invoke, ids)
+  }
+
+  combineHandlers (first: PluginEventHandler, second: PluginEventHandler): PluginEventHandler {
+    return async (...args: any[]) => {
+      await first(...args)
+      await second(...args)
+    }
   }
 
   taskMerge (target: TaskEventHandler, events: TaskEventHandler) {
