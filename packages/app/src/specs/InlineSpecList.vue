@@ -15,6 +15,7 @@
     />
     <InlineSpecListTree
       :specs="specs"
+      :tree-expansion-cache="treeExpansionCache"
       class="pb-[32px]"
     />
     <!-- Fading top and bottom of the container. It may make sense for this to exist in a css utility or class. -->
@@ -34,6 +35,7 @@ import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils
 import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
+import { useTreeExpansionCache } from './tree/useTreeExpansionCache'
 
 gql`
 fragment SpecNode_InlineSpecList on Spec {
@@ -85,4 +87,9 @@ const specs = computed<FuzzyFoundSpec[]>(() => {
 
 const runAllSpecsStore = useRunAllSpecsStore()
 
+const treeExpansionCache = useTreeExpansionCache(
+  props.gql.currentProject?.savedState?.specsListTreeExpansion ?? undefined,
+  () => debouncedSpecFilterModel?.value,
+  () => cachedSpecs.value,
+)
 </script>

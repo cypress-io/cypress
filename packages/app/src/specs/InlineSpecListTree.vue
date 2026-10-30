@@ -82,6 +82,7 @@ import { posixify } from '../paths'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
+  treeExpansionCache?: Record<string, boolean>
 }>()
 
 const router = useRouter()
@@ -96,7 +97,7 @@ const isCurrentSpec = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>
   return row.data.relative === specStore.activeSpec?.relative
 }
 
-const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec>(props.specs), { dropRoot: true }))
+const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec>(props.specs), { dropRoot: true, cache: props.treeExpansionCache }))
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const findCurrentSpecIndex = computed(() => {
