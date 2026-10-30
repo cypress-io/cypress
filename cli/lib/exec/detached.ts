@@ -8,7 +8,8 @@ import { stdout, stderr } from 'process'
 // Must match CYPRESS_OPEN_READY_MESSAGE in packages/server/lib/modes/interactive.ts
 export const CYPRESS_OPEN_READY_MESSAGE = 'Cypress is ready'
 
-const POLL_INTERVAL_MS = 100
+export const POLL_INTERVAL_MS = 100
+
 const MAX_NAME_ATTEMPTS = 5
 
 export interface DetachedOutput {
@@ -183,8 +184,10 @@ function partialSentinelLength (text: string): number {
 /**
  * Polls the files the app writes to, forwarding anything printed before the
  * ready message to the CLI's own output.
- * Resolves with `ready: true` once the ready message is seen, or with the
- * child's exit code if it closes first.
+ * Resolves with `ready: true` once the ready message is seen and the child is
+ * still running one poll interval later. Resolves with `ready: false` and the
+ * child's exit code if it exits before then, forwarding what it printed after
+ * the ready message, since nothing is handed off.
  */
 export function waitForReadyMessage (
   outPath: string,
@@ -199,6 +202,9 @@ export function waitForReadyMessage (
     let outOffset = 0
     let errOffset = 0
     let held = ''
+    let readySeen = false
+    // Only shown if the app turns out to be gone, since otherwise it keeps going to the files
+    let afterReady = ''
     let exit: number | undefined
     let outFd: number | undefined
     let errFd: number | undefined
@@ -220,11 +226,19 @@ export function waitForReadyMessage (
 
       outOffset += chunk.length
 
+      if (readySeen) {
+        afterReady += outDecoder.write(chunk)
+
+        return true
+      }
+
       const text = held + outDecoder.write(chunk)
       const readyIndex = text.indexOf(CYPRESS_OPEN_READY_MESSAGE)
 
       if (readyIndex !== -1) {
+        readySeen = true
         held = ''
+        afterReady = text.slice(readyIndex + CYPRESS_OPEN_READY_MESSAGE.length)
         if (readyIndex > 0) write(stdout, text.slice(0, readyIndex))
 
         return true
@@ -244,8 +258,13 @@ export function waitForReadyMessage (
 
     let wake: (() => void) | undefined
 
+    // An exit that arrived during the reads had no sleep to wake, so it is not waited out
     const sleep = () => {
       return new Promise<void>((done) => {
+        if (exit !== undefined) {
+          return done()
+        }
+
         const timer = setTimeout(done, POLL_INTERVAL_MS)
 
         wake = () => {
@@ -260,7 +279,9 @@ export function waitForReadyMessage (
       wake?.()
     }
 
-    child.once('close', (code: number | null, signal: NodeJS.Signals | null) => {
+    // 'exit' rather than 'close', which also waits for any stdio pipes to close: the app's output is
+    // read from files, and the ready check needs to see the exit as soon as Node reports it
+    child.once('exit', (code: number | null, signal: NodeJS.Signals | null) => {
       onExit(code ?? (signal ? signalExitCode(signal) : 1))
     })
 
@@ -277,7 +298,28 @@ export function waitForReadyMessage (
           await forwardStderr()
 
           if (ready) {
-            return { ready: true, code: 0 }
+            // An app that crashes just after printing the ready message may not be reported as exited
+            // yet, so its exit gets one more interval to arrive before the app is handed off. Timers
+            // run before Node handles an exit that is already pending, so `exit` is only read once
+            // setImmediate has let that happen.
+            await sleep()
+            await new Promise((resolve) => setImmediate(resolve))
+
+            if (exit === undefined) {
+              return { ready: true, code: 0 }
+            }
+
+            // An app that printed the ready message and has already exited is not running to be handed off
+            if (exitedWith === undefined) {
+              await forwardStdout()
+              await forwardStderr()
+            }
+
+            const remaining = afterReady.replace(/^\r?\n/, '')
+
+            if (remaining) write(stdout, remaining)
+
+            return { ready: false, code: exit }
           }
 
           if (exitedWith !== undefined) {

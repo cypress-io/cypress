@@ -2,6 +2,7 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
 import { EventEmitter } from 'events'
+import cp from 'child_process'
 import fs from 'fs-extra'
 import { stdout, stderr } from 'process'
 import {
@@ -11,6 +12,7 @@ import {
   nameForApp,
   pruneStaleDetachedOutput,
   CYPRESS_OPEN_READY_MESSAGE,
+  POLL_INTERVAL_MS,
 } from '../../../lib/exec/detached'
 
 describe('lib/exec/detached', function () {
@@ -295,24 +297,144 @@ describe('lib/exec/detached', function () {
       await expect(result).resolves.toEqual({ ready: true, code: 0 })
     })
 
-    it('resolves with the exit code if the child closes first', async () => {
+    it('resolves with the exit code if the child exits first', async () => {
       const result = waitForReadyMessage(outPath, errPath, child as any)
 
       await fs.appendFile(outPath, 'about to fail')
       await fs.appendFile(errPath, 'it broke\n')
-      child.emit('close', 3, null)
+      child.emit('exit', 3, null)
 
       await expect(result).resolves.toEqual({ ready: false, code: 3 })
       expect(forwardedOut).toBe('about to fail')
       expect(forwardedErr).toBe('it broke\n')
     })
 
-    it('flushes held-back partial sentinel text when the child closes', async () => {
+    it('does not report an app that printed the ready message and then exited as ready', async () => {
+      await fs.appendFile(outPath, `starting up\n${CYPRESS_OPEN_READY_MESSAGE}\ncrashed\n`)
+      await fs.appendFile(errPath, 'it broke\n')
+
+      const result = waitForReadyMessage(outPath, errPath, child as any)
+
+      child.emit('exit', 2, null)
+
+      await expect(result).resolves.toEqual({ ready: false, code: 2 })
+      expect(forwardedOut).toBe('starting up\ncrashed\n')
+      expect(forwardedErr).toBe('it broke\n')
+    })
+
+    describe('when the app exits around its ready message', () => {
+      // Timers only move when a spec advances them, so otherwise no poll runs until the exit wakes it
+      // and the exit always arrives in time
+      let timerDelays: (number | undefined)[]
+      let fakeSetTimeout: typeof setTimeout
+
+      // The poll is asleep once it has set its interval timer, which only an exit ends unless the spec
+      // advances timers. A result that settles first ends the wait too, so a regression fails on the
+      // result instead of timing out. vi.waitFor advances fake timers as it checks, so this waits
+      // on setImmediate, which is not faked.
+      const untilPollSleeps = async (result: Promise<unknown>) => {
+        let settled = false
+        const done = () => {
+          settled = true
+        }
+
+        result.then(done, done)
+
+        while (!settled && !timerDelays.includes(POLL_INTERVAL_MS)) {
+          await new Promise((resolve) => setImmediate(resolve))
+        }
+      }
+
+      beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+        // Not vi.spyOn: vi.restoreAllMocks would put the fake setTimeout back after vi.useRealTimers
+        fakeSetTimeout = globalThis.setTimeout
+        timerDelays = []
+        globalThis.setTimeout = ((callback: (...args: any[]) => void, ms?: number, ...args: any[]) => {
+          timerDelays.push(ms)
+
+          return fakeSetTimeout(callback, ms, ...args)
+        }) as typeof setTimeout
+      })
+
+      afterEach(() => {
+        // vi.useRealTimers only restores the real setTimeout over its own fake
+        globalThis.setTimeout = fakeSetTimeout
+        vi.useRealTimers()
+      })
+
+      it('reports an exit that arrives during the reads without waiting out the interval', async () => {
+        await fs.appendFile(outPath, 'about to fail')
+
+        const result = waitForReadyMessage(outPath, errPath, child as any)
+
+        child.emit('exit', 3, null)
+
+        await expect(result).resolves.toEqual({ ready: false, code: 3 })
+        expect(forwardedOut).toBe('about to fail')
+      })
+
+      it('does not report an app as ready when the ready message is only found in the read after it exited', async () => {
+        await fs.appendFile(outPath, 'starting up\n')
+
+        const result = waitForReadyMessage(outPath, errPath, child as any)
+
+        await untilPollSleeps(result)
+        expect(forwardedOut).toBe('starting up\n')
+        await fs.appendFile(outPath, `${CYPRESS_OPEN_READY_MESSAGE}\n`)
+        child.emit('exit', 0, null)
+
+        await expect(result).resolves.toEqual({ ready: false, code: 0 })
+        expect(forwardedOut).toBe('starting up\n')
+      })
+
+      it('does not report an app that exits just after printing the ready message as ready', async () => {
+        await fs.appendFile(outPath, `starting up\n${CYPRESS_OPEN_READY_MESSAGE}\n`)
+
+        const result = waitForReadyMessage(outPath, errPath, child as any)
+
+        await untilPollSleeps(result)
+        expect(forwardedOut).toBe('starting up\n')
+        child.emit('exit', 1, null)
+
+        await expect(result).resolves.toEqual({ ready: false, code: 1 })
+      })
+
+      it('does not report an app as ready when its exit is handled just after the interval ends', async () => {
+        await fs.appendFile(outPath, `${CYPRESS_OPEN_READY_MESSAGE}\n`)
+
+        const result = waitForReadyMessage(outPath, errPath, child as any)
+
+        await untilPollSleeps(result)
+        // As for an exit that is already pending, Node handles it after the timer that ends the interval
+        setImmediate(() => child.emit('exit', 1, null))
+        vi.advanceTimersByTime(POLL_INTERVAL_MS)
+
+        await expect(result).resolves.toEqual({ ready: false, code: 1 })
+      })
+
+      it('forwards what the app printed after the ready message without the line ending that follows it', async () => {
+        await fs.appendFile(outPath, `starting up\n${CYPRESS_OPEN_READY_MESSAGE}`)
+
+        const result = waitForReadyMessage(outPath, errPath, child as any)
+
+        await untilPollSleeps(result)
+        expect(forwardedOut).toBe('starting up\n')
+        await fs.appendFile(outPath, '\ncrashed\n')
+        child.emit('exit', 1, null)
+
+        await expect(result).resolves.toEqual({ ready: false, code: 1 })
+        expect(forwardedOut).toBe('starting up\ncrashed\n')
+      })
+    })
+
+    it('flushes held-back partial sentinel text when the child exits', async () => {
       const result = waitForReadyMessage(outPath, errPath, child as any)
 
       await fs.appendFile(outPath, 'Cypress')
       await pause()
-      child.emit('close', 1, null)
+      child.emit('exit', 1, null)
 
       await expect(result).resolves.toEqual({ ready: false, code: 1 })
       expect(forwardedOut).toBe('Cypress')
@@ -321,7 +443,7 @@ describe('lib/exec/detached', function () {
     it('maps a signal exit to 128 plus the signal number', async () => {
       const result = waitForReadyMessage(outPath, errPath, child as any)
 
-      child.emit('close', null, 'SIGKILL')
+      child.emit('exit', null, 'SIGKILL')
 
       await expect(result).resolves.toEqual({ ready: false, code: 128 + os.constants.signals.SIGKILL })
     })
@@ -332,6 +454,42 @@ describe('lib/exec/detached', function () {
       child.emit('error', new Error('spawn ENOENT'))
 
       await expect(result).resolves.toEqual({ ready: false, code: 1 })
+    })
+
+    // A real app, writing to the files as a detached one does, so the exit is reported by Node itself
+    describe('with an app process', () => {
+      const spawnApp = async (script: string): Promise<cp.ChildProcess> => {
+        const [outFd, errFd] = await Promise.all([fs.open(outPath, 'a'), fs.open(errPath, 'a')])
+
+        try {
+          return cp.spawn(process.execPath, ['-e', script], { stdio: ['ignore', outFd, errFd] })
+        } finally {
+          await Promise.all([fs.close(outFd), fs.close(errFd)])
+        }
+      }
+
+      const printReady = `process.stdout.write(${JSON.stringify(`${CYPRESS_OPEN_READY_MESSAGE}\n`)})`
+
+      it('does not report an app that exits right after printing the ready message as ready', async () => {
+        const app = await spawnApp(`${printReady}; process.stderr.write('crashed\\n'); process.exit(4)`)
+
+        await expect(waitForReadyMessage(outPath, errPath, app)).resolves.toEqual({ ready: false, code: 4 })
+        expect(forwardedErr).toBe('crashed\n')
+      })
+
+      it('reports an app that keeps running after printing the ready message as ready', async () => {
+        const app = await spawnApp(`${printReady}; setInterval(() => {}, 1000)`)
+
+        try {
+          await expect(waitForReadyMessage(outPath, errPath, app)).resolves.toEqual({ ready: true, code: 0 })
+        } finally {
+          // Windows will not remove the output files while the app still has them open
+          const exited = new Promise((resolve) => app.once('exit', resolve))
+
+          app.kill()
+          await exited
+        }
+      })
     })
   })
 
