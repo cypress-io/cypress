@@ -6940,6 +6940,7 @@ declare namespace Cypress {
     chainerId: string
     injected: boolean
     userInvocationStack?: string
+    timeout?: number
     query?: boolean
     fn(...args: any[]): any
   }

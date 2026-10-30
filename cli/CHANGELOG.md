@@ -59,6 +59,7 @@
 
 **Misc:**
 
+- The TypeScript types now allow custom queries to set and read a numeric `timeout` on their command instance. Addresses [#30198](https://github.com/cypress-io/cypress/issues/30198). Addressed in [#35135](https://github.com/cypress-io/cypress/pull/35135).
 - The [`before:run`](https://on.cypress.io/before-run-api) event's `details.config` is now typed as the resolved plugin configuration, so TypeScript can access fields such as `projectRoot`, `configFile`, `testingType`, and `browsers` without a cast. Addresses [#30420](https://github.com/cypress-io/cypress/issues/30420). Addressed in [#35134](https://github.com/cypress-io/cypress/pull/35134).
 - The TypeScript types now accept a number as the expected value of the `attr`, `id`, `text`, and `value` assertions, including the `contain` and `include` forms of `text` and `value`, such as `expect($el).to.have.attr('tabindex', 0)` or `expect($el).to.have.text(123)`. Cypress already accepted numbers for these assertions at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).
 - The TypeScript types now accept a DOM element, an array of elements, a jQuery object, or a predicate function in the `match` assertion, such as `expect($el).to.match($other)` or `expect($el).to.match((index, el) => el.id === 'result')`. Cypress already supported these at runtime, but TypeScript reported an error. Addressed in [#35051](https://github.com/cypress-io/cypress/pull/35051).
