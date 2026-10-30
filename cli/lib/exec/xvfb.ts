@@ -16,9 +16,11 @@ const debugXvfb: any = Debug('cypress:xvfb')
 
 debug.Debug = debugXvfb.Debug = Debug
 
+const XVFB_START_TIMEOUT_SECONDS = 30
+
 const xvfbOptions: any = {
   displayNum: process.env.XVFB_DISPLAY_NUM,
-  timeout: 30000, // milliseconds
+  timeout: XVFB_START_TIMEOUT_SECONDS * 1000,
   // need to explicitly define screen otherwise electron will crash
   // https://github.com/cypress-io/cypress/issues/6184
   xvfb_args: ['-screen', '0', '1280x1024x24'],
@@ -212,7 +214,8 @@ export async function start ({ detached = false }: { detached?: boolean } = {}):
       throw e
     }
 
-    const raiseErrorFn = throwFormErrorText(errors.missingXvfb)
+    // Only a binary that is not there is a missing dependency
+    const raiseErrorFn = throwFormErrorText(e.code === 'ENOENT' ? errors.missingXvfb : errors.xvfbFailedToStart(XVFB_START_TIMEOUT_SECONDS))
 
     await raiseErrorFn(e)
   }

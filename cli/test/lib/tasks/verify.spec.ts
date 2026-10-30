@@ -559,6 +559,26 @@ describe('lib/tasks/verify', () => {
       expect(plain(output)).toContain('Opening Cypress...')
     })
 
+    it('names the system libraries the app could not load, with the packages that provide them', async () => {
+      const output = createStdoutCapture()
+      const stderr = [
+        'error while loading shared libraries: libnss3.so: cannot open shared object file: No such file or directory',
+        'error while loading shared libraries: libweird.so.9: cannot open shared object file: No such file or directory',
+      ].join('\n')
+
+      vi.mocked(util.exec).mockRejectedValue({ code: 127, stderr })
+
+      await start({ force: true }).catch((err) => logger.error(err))
+
+      const out = plain(output)
+
+      expect(out).toContain('Cypress failed to start')
+      expect(out).toContain('apt-get install -y libnss3')
+      expect(out).toContain('apt-file search libweird.so.9')
+      // the original output is still shown
+      expect(out).toContain('cannot open shared object file')
+    })
+
     it('clears verified version from state if verification fails', async () => {
       const output = createStdoutCapture()
 
