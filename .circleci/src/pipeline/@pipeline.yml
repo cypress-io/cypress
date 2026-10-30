@@ -3009,9 +3009,47 @@ jobs:
     resource_class: medium+.gen2
     steps:
       - restore_cached_workspace
+      # npm trusted publishing: npm exchanges this OIDC token for a short-lived publish
+      # token. Packages without a trusted publisher yet fall back to NPM_TOKEN from the
+      # context. https://docs.npmjs.com/trusted-publishers
       - run:
           name: Release packages after all jobs pass
-          command: yarn npm-release
+          command: |
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            yarn npm-release
+
+  # Publishes a no-op prerelease of every public npm/* package under the dev dist-tag
+  # (never latest). This proves each package's trusted publisher end to end without
+  # releasing anything real. Run it by pushing the npm-dev-publish branch.
+  npm-publish-dev:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Publish dev tag for every public npm package
+          environment:
+            # lerna's yarn workspace root would otherwise make npm try to update it
+            NPM_CONFIG_WORKSPACES_UPDATE: 'false'
+          command: |
+            version="0.0.0-dev.<< pipeline.number >>"
+            failed=""
+            for dir in $(node -e "
+              const fs = require('fs')
+              for (const d of fs.readdirSync('npm')) {
+                try {
+                  const pkg = JSON.parse(fs.readFileSync('npm/' + d + '/package.json'))
+                  if (!pkg.private) console.log('npm/' + d)
+                } catch (e) {}
+              }
+            "); do
+              echo "== $dir"
+              export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+              (cd "$dir" && npm pkg set version="$version" && npm publish --tag dev) || failed="$failed $dir"
+            done
+            if [ -n "$failed" ]; then
+              echo "Failed to publish:$failed"
+              exit 1
+            fi
 
   create-build-artifacts:
     <<: *defaults

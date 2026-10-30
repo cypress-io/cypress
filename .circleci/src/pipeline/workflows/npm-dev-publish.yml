@@ -1,0 +1,8 @@
+# Publishes a no-op dev prerelease of every public npm package to finalize npm trusted
+# publishing. Runs only on the npm-dev-publish branch.
+when:
+  equal: [ 'npm-dev-publish', << pipeline.git.branch >> ]
+
+jobs:
+  - npm-publish-dev:
+      context: [test-runner:npm-release, org-npm-credentials]
