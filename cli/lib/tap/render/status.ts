@@ -8,6 +8,7 @@ import { pinnedBlock } from './pinned'
 const PHASE = {
   passed: { icon: stateBadge.passed.icon, tint: color.pass },
   failed: { icon: stateBadge.failed.icon, tint: color.fail },
+  error: { icon: color.fail('●'), tint: color.fail },
   running: { icon: color.pending('●'), tint: color.pending },
 } as const
 

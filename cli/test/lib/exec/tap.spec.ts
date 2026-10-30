@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import logger from '../../../lib/logger'
-import { listLiveSessions, resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
+import { listLiveSessions, resolveLiveSession, resolveSession, findStartingSession } from '../../../lib/cypress-sessions'
 import type { LiveSessionSelection, LiveSessionState } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { FIND_SESSION_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
@@ -32,6 +32,7 @@ vi.mock('../../../lib/cypress-sessions', async (importActual) => {
     listLiveSessions: vi.fn(),
     resolveLiveSession: vi.fn(),
     resolveSession: vi.fn(),
+    findStartingSession: vi.fn(),
   }
 })
 
@@ -42,7 +43,10 @@ vi.mock('../../../lib/tap/aut/frame', async (importActual) => {
 })
 
 describe('lib/exec/tap', () => {
-  beforeEach(resetTapMocks)
+  beforeEach(() => {
+    resetTapMocks()
+    vi.mocked(findStartingSession).mockReset()
+  })
 
   afterEach(() => {
     vi.useRealTimers()
@@ -499,6 +503,29 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('select a testing type')
     })
 
+    it('points to status instead of telling the reader to start Cypress when a project failed to load', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([])
+      vi.mocked(findStartingSession).mockResolvedValue({ pid: 1 } as any)
+
+      expect(await tap.start(['sessions'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('could not load')
+      expect(output).toContain('cypress tap status')
+      expect(output).not.toContain('Start Cypress')
+    })
+
+    it('looks for the failed project with the session and directory it was given', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([])
+      vi.mocked(findStartingSession).mockResolvedValue(null)
+
+      expect(await tap.start(['sessions'], { session: 4242 })).toBe(0)
+
+      expect(findStartingSession).toHaveBeenCalledWith({ session: 4242, cwd: process.cwd() })
+      expect(logger.print()).toContain('select a testing type')
+    })
+
     it('forwards --session as the discovery filter', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([])
 
@@ -580,6 +607,51 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+    })
+
+    describe('when the project failed to load', () => {
+      const starting = {
+        schemaVersion: 1,
+        pid: 111,
+        projectRoot: '/projects/app',
+        serverPort: 0,
+        sessionId: 'starting-session',
+        testingType: 'e2e' as const,
+        status: 'starting' as const,
+        loadError: { message: 'Your configFile is invalid: /projects/app/cypress.config.js' },
+      }
+
+      it('reports the error and the project instead of "not connected"', async () => {
+        vi.mocked(resolveLiveSession).mockRejectedValue(tapError('NO_SESSION', 'none'))
+        vi.mocked(findStartingSession).mockResolvedValue(starting)
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print())).toEqual({
+          status: 'error',
+          pid: 111,
+          projectRoot: '/projects/app',
+          testingType: 'e2e',
+          error: 'Your configFile is invalid: /projects/app/cypress.config.js',
+        })
+      })
+
+      it('shows the error to a person reading the output', async () => {
+        vi.mocked(resolveLiveSession).mockRejectedValue(tapError('STALE_SESSION', 'stale'))
+        vi.mocked(findStartingSession).mockResolvedValue(starting)
+
+        expect(await tap.start(['status'], {})).toBe(0)
+        expect(logger.print()).toContain('error')
+        expect(logger.print()).toContain('Your configFile is invalid')
+      })
+
+      it('looks for the session the caller named', async () => {
+        vi.mocked(resolveLiveSession).mockRejectedValue(new SessionNotFoundTapError(111))
+        vi.mocked(findStartingSession).mockResolvedValue(starting)
+
+        await tap.start(['status'], { session: 111, json: true })
+
+        expect(findStartingSession).toHaveBeenCalledWith(expect.objectContaining({ session: 111 }))
+      })
     })
 
     // A poller watching one pid should read "not connected" once it exits, rather
