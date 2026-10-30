@@ -9,6 +9,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`cy.wait()`](https://on.cypress.io/wait) could time out waiting for a route's response even when the response arrived within [`responseTimeout`](https://on.cypress.io/configuration#Timeouts), because time spent waiting for the request counted against the response timeout budget. Fixed in [#34940](https://github.com/cypress-io/cypress/pull/34940).
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) silently ignored a header matcher when the same header name appeared more than once with different casing, such as `Content-Type` and `content-type`. Only the last matcher was applied. `cy.intercept()` now throws an error that names the duplicated header. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
 
 **Dependency Updates:**
