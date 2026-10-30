@@ -10,6 +10,8 @@ import nock from 'nock'
 import hasha from 'hasha'
 import createDebug from 'debug'
 import execa from 'execa'
+import http from 'http'
+import type { AddressInfo } from 'net'
 import fs from 'fs-extra'
 import { Console } from 'console'
 import logger from '../../../lib/logger'
@@ -729,6 +731,185 @@ describe('lib/tasks/download', function () {
 
       expect(output()).toMatchSnapshot('download status errors 1')
     }
+  })
+
+  describe('retries', () => {
+    const stubOk = () => {
+      return nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => fs.createReadStream(examplePath))
+    }
+
+    const connectionReset = () => Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' })
+
+    beforeEach(() => {
+      options.retryDelayMs = 1
+    })
+
+    it('retries after ECONNRESET and then succeeds', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .replyWithError(connectionReset())
+
+      stubOk()
+
+      const onProgress = vi.fn()
+
+      await download.start({ ...options, progress: { onProgress } })
+
+      await fs.stat(downloadDestination)
+      expect(onProgress).toHaveBeenCalledWith(0, 0)
+    })
+
+    it('retries after a 503 and then succeeds', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(503, 'Service Unavailable')
+
+      stubOk()
+
+      await download.start(options)
+
+      await fs.stat(downloadDestination)
+    })
+
+    it.each([408, 429])('retries after a %d and then succeeds', async function (status) {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(status, 'Try again')
+
+      stubOk()
+
+      await download.start(options)
+
+      await fs.stat(downloadDestination)
+    })
+
+    it('retries when the connection goes quiet for longer than the timeout', async function () {
+      const quiet = nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .delayConnection(1000)
+      .reply(200, 'too late')
+
+      const succeeding = stubOk()
+
+      await download.start({ ...options, timeoutMs: 50 })
+
+      await fs.stat(downloadDestination)
+      expect(quiet.isDone()).toBe(true)
+      expect(succeeding.isDone()).toBe(true)
+    })
+
+    it('retries after the connection resets in the middle of the body and closes the file it was writing', async function () {
+      const fileContent = await fs.readFile(examplePath)
+      let requests = 0
+
+      const server = http.createServer((req, res) => {
+        requests++
+
+        if (requests === 1) {
+          res.writeHead(200, { 'content-length': String(fileContent.length) })
+          res.write(fileContent.subarray(0, 10))
+          setTimeout(() => res.socket?.destroy(), 20)
+
+          return
+        }
+
+        res.writeHead(200, { 'content-length': String(fileContent.length) })
+        res.end(fileContent)
+      })
+
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+
+      try {
+        vi.stubEnv('CYPRESS_DOWNLOAD_MIRROR', `http://127.0.0.1:${(server.address() as AddressInfo).port}`)
+
+        const createWriteStream = vi.spyOn(fs, 'createWriteStream')
+
+        await download.start(options)
+
+        expect(requests).toBe(2)
+        expect(createWriteStream).toHaveBeenCalledTimes(2)
+        expect(createWriteStream.mock.results[0].value.destroyed).toBe(true)
+        expect(await fs.readFile(downloadDestination)).toEqual(fileContent)
+      } finally {
+        await new Promise((resolve) => server.close(resolve))
+      }
+    })
+
+    it('does not download again when the connection resets after the whole file arrived', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        const body = fs.createReadStream(examplePath)
+
+        body.on('end', () => setImmediate(() => body.emit('error', connectionReset())))
+
+        return body
+      })
+
+      const second = stubOk()
+
+      await download.start(options)
+
+      expect(second.isDone()).toBe(false)
+      expect((await fs.readFile(downloadDestination)).toString()).toEqual((await fs.readFile(examplePath)).toString())
+    })
+
+    it('does not retry a 404', async function () {
+      const failing = nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(404, 'Not Found')
+
+      const succeeding = stubOk()
+
+      await expect(download.start(options)).rejects.toThrow('404')
+
+      expect(failing.isDone()).toBe(true)
+      expect(succeeding.isDone()).toBe(false)
+    })
+
+    it('reports the failure after the attempts are exhausted', async function () {
+      const scope = nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .times(3)
+      .reply(503, 'Service Unavailable')
+
+      const succeeding = stubOk()
+
+      const output = createStdoutCapture()
+
+      try {
+        await download.start(options)
+        throw new Error('should have caught')
+      } catch (error: any) {
+        expect(error.message).not.toEqual('should have caught')
+        logger.error(error)
+      }
+
+      expect(scope.isDone()).toBe(true)
+      expect(succeeding.isDone()).toBe(false)
+      expect(normalize(output())).toContain('503')
+      expect(normalize(output())).toContain('The Cypress App could not be downloaded.')
+    })
+
+    it('fails instead of hanging when the connection keeps resetting', async function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .times(3)
+      .replyWithError(connectionReset())
+
+      await expect(download.start(options)).rejects.toThrow('socket hang up')
+    })
   })
 })
 

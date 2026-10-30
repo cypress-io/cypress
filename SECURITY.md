@@ -37,3 +37,15 @@ Opening or running a project in Cypress runs its config file, and every plugin t
 ### Know what you take on when you redirect the install
 
 By default, installing the `cypress` package downloads the Cypress binary over HTTPS from an official Cypress host. Setting `CYPRESS_INSTALL_BINARY`, `CYPRESS_DOWNLOAD_MIRROR` or `CYPRESS_DOWNLOAD_PATH_TEMPLATE` makes you responsible for where the binary comes from: use HTTPS and a host you trust, and make sure whatever serves the binary is as protected as the rest of your build infrastructure. These values can also come from npm configuration, such as a project's `.npmrc`, and from a project's own `package.json`, so check for them when you adopt an unfamiliar repository.
+
+## Security Updates
+
+Patches for security vulnerabilities primarily focus on the latest major version.
+
+High and Critical CVSS security fixes in code authored and maintained by Cypress are backported to the previous major version for up to 12 months after the current major version is released. The decision to backport is made based on severity assessment and the feasibility of implementing the patch in those versions.
+
+Updates for vulnerabilities in third-party dependencies, such as Electron, Chromium, Node.js, or npm packages, are not backported.
+
+* Latest major version: All security vulnerabilities in Cypress authored and maintained code
+* Previous major version: High or Critical CVSS scores in Cypress authored and maintained code (Up to 12 months after the current major’s release, subject to feasibility)
+* Older versions: Not supported (Users should upgrade to a supported version)

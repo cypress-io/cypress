@@ -122,6 +122,29 @@ describe('lib/exec/xvfb', function () {
       expect(xvfb.isNeeded()).toBe(false)
     })
 
+    it('does not need xvfb when the given env has ELECTRON_RUN_AS_NODE', function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.stubEnv('DISPLAY', undefined)
+
+      expect(xvfb.isNeeded({ ELECTRON_RUN_AS_NODE: '1' })).toBe(false)
+    })
+
+    it('reads DISPLAY from the given env instead of process.env', function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.stubEnv('DISPLAY', ':99')
+
+      expect(xvfb.isNeeded({})).toBe(true)
+      expect(xvfb.isNeeded({ DISPLAY: ':1' })).toBe(false)
+    })
+
+    it('ignores ELECTRON_RUN_AS_NODE in process.env when given a clean env', function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+      vi.stubEnv('DISPLAY', undefined)
+
+      expect(xvfb.isNeeded({})).toBe(true)
+    })
+
     it('does need xvfb on linux when no DISPLAY is set', function () {
       vi.stubEnv('DISPLAY', undefined)
       vi.mocked(os.platform).mockReturnValue('linux')

@@ -16,6 +16,7 @@ import {
   pruneDeadSessionRecords,
   resolvedSessionId,
   resolvedSessionIdentity,
+  findStartingSession,
   TapError,
 } from '../../lib/cypress-sessions'
 import { tapErrorCopy } from '@packages/cypress-sessions'
@@ -373,6 +374,18 @@ describe('lib/cypress-sessions', () => {
       expect(fs.existsSync(`${SESSIONS_DIR}/111.json`)).toBe(false)
     })
 
+    it('resolves a session whose pid cannot be signalled from here but whose server answers', async () => {
+      const port = await startReadySession(SESSION_ID)
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      stubKill({ alive: [] })
+
+      const { session } = await resolveSession({ cwd: PROJECT })
+
+      expect(session.pid).toBe(444)
+      expect(fs.existsSync(`${SESSIONS_DIR}/444.json`)).toBe(true)
+    })
+
     it('throws STALE_SESSION when the pid is taken but nothing answers the probe (recycled pid)', async () => {
       const port = await getClosedPort()
 
@@ -638,8 +651,8 @@ describe('lib/cypress-sessions', () => {
       mockfs({
         [SESSIONS_DIR]: {
           '111.json': makeRecord({ pid: 111, serverPort: livePort }),
-          // pid is dead — skipped without a probe
-          '222.json': makeRecord({ pid: 222, serverPort: livePort }),
+          // pid is dead and nothing answers — the writer is gone, skipped
+          '222.json': makeRecord({ pid: 222, serverPort: closedPort }),
           // pid looks alive but nothing answers — recycled pid, skipped
           '333.json': makeRecord({ pid: 333, serverPort: closedPort }),
         },
@@ -650,13 +663,25 @@ describe('lib/cypress-sessions', () => {
       expect((await listLiveSessions()).map((session) => session.pid)).toEqual([111])
     })
 
+    it('lists a session whose pid cannot be signalled from here but whose server answers', async () => {
+      const port = await startFakeSession()
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      // Another PID namespace: the writer is alive, but its pid is not visible.
+      stubKill({ alive: [] })
+
+      expect((await listLiveSessions()).map((session) => session.pid)).toEqual([444])
+      expect(fs.existsSync(`${SESSIONS_DIR}/444.json`)).toBe(true)
+    })
+
     it('still lists live sessions when a dead record cannot be reaped', async () => {
       const livePort = await startFakeSession()
+      const closedPort = await getClosedPort()
 
       mockfs({
         [SESSIONS_DIR]: {
           '111.json': makeRecord({ pid: 111, serverPort: livePort }),
-          '222.json': makeRecord({ pid: 222, serverPort: livePort }),
+          '222.json': makeRecord({ pid: 222, serverPort: closedPort }),
         },
       })
 
@@ -685,6 +710,233 @@ describe('lib/cypress-sessions', () => {
     })
   })
 
+  describe('a starting record (the project failed to load)', () => {
+    const startingRecord = (overrides: Record<string, any> = {}) => {
+      return makeRecord({ serverPort: 0, status: 'starting', loadError: { message: 'Your configFile is invalid' }, ...overrides })
+    }
+
+    it('is read as a compatible record', async () => {
+      mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111 }) } })
+
+      expect(await readSessionRecords()).toEqual([expect.objectContaining({ pid: 111, status: 'starting', loadError: { message: 'Your configFile is invalid' } })])
+    })
+
+    it.each([
+      ['an unknown status', { status: 'booting' }],
+      ['a load error that is not an object with a message', { loadError: 'text' }],
+    ])('is skipped with %s', async (_name, overrides) => {
+      mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111, ...overrides }) } })
+
+      expect(await readSessionRecords()).toEqual([])
+    })
+
+    it('is not listed as a live session and is not probed', async () => {
+      mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111 }) } })
+      stubKill({ alive: [111] })
+
+      expect(await listLiveSessions()).toEqual([])
+    })
+
+    it('does not resolve as a session to drive, and reads as no session to every command', async () => {
+      mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111 }) } })
+      stubKill({ alive: [111] })
+
+      await expect(resolveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+      await expect(resolveLiveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+    })
+
+    it('names the project that failed to load, not a missing pid, when its pid is asked for', async () => {
+      mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111 }) } })
+      stubKill({ alive: [111] })
+
+      await expect(resolveSession({ cwd: PROJECT, session: 111 })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+      await expect(resolveSession({ cwd: PROJECT, session: 222 })).rejects.toMatchObject({ code: 'SESSION_NOT_FOUND' })
+    })
+
+    it('does not hide a live session of another process from a command that names no session', async () => {
+      const port = await startFakeSession()
+
+      mockfs({
+        [SESSIONS_DIR]: {
+          '111.json': startingRecord({ pid: 111 }),
+          '222.json': makeRecord({ pid: 222, serverPort: port }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      // The live session is the one resolved, so what is missing is its browser, not its project
+      await expect(resolveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
+    })
+
+    it('reports the project that failed to load at the caller\'s directory, not a live session of another project', async () => {
+      const port = await startFakeSession()
+
+      mockfs({
+        [SESSIONS_DIR]: {
+          '111.json': startingRecord({ pid: 111 }),
+          '222.json': makeRecord({ pid: 222, serverPort: port, projectRoot: '/some/other/project' }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      await expect(resolveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+    })
+
+    it('uses the live session at the caller\'s directory over a project that failed to load elsewhere', async () => {
+      const port = await startFakeSession()
+
+      mockfs({
+        [SESSIONS_DIR]: {
+          '111.json': startingRecord({ pid: 111, projectRoot: '/some/other/project' }),
+          '222.json': makeRecord({ pid: 222, serverPort: port }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      await expect(resolveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
+    })
+
+    it('resolves the live pid it was asked about even when another process has a project that failed to load', async () => {
+      const port = await startFakeSession()
+
+      mockfs({
+        [SESSIONS_DIR]: {
+          '111.json': startingRecord({ pid: 111 }),
+          '222.json': makeRecord({ pid: 222, serverPort: port }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      await expect(resolveSession({ cwd: PROJECT, session: 222 })).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
+    })
+
+    it('still reports the failed project for the pid it was asked about when another session is live', async () => {
+      const port = await startFakeSession()
+
+      mockfs({
+        [SESSIONS_DIR]: {
+          '111.json': startingRecord({ pid: 111 }),
+          '222.json': makeRecord({ pid: 222, serverPort: port }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      await expect(resolveSession({ cwd: PROJECT, session: 111 })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+    })
+
+    it('points to status instead of telling the caller to start Cypress, which is already running', async () => {
+      mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111 }) } })
+      stubKill({ alive: [111] })
+
+      const err = await resolveSession({ cwd: PROJECT }).catch((e) => e)
+
+      expect(err.code).toBe('PROJECT_NOT_LOADED')
+    })
+
+    it('adds nothing when no project failed to load', async () => {
+      mockfs({ [CACHE_DIR]: {} })
+
+      const err = await resolveSession({ cwd: PROJECT }).catch((e) => e)
+
+      expect(err.code).toBe('NO_SESSION')
+    })
+
+    it('does not hide a live session that is running alongside it', async () => {
+      const port = await startFakeSession()
+
+      mockfs({
+        [SESSIONS_DIR]: {
+          '111.json': startingRecord({ pid: 111 }),
+          '222.json': makeRecord({ pid: 222, serverPort: port }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      expect((await listLiveSessions()).map((session) => session.pid)).toEqual([222])
+    })
+
+    it('is skipped when it names no server but is not marked as starting', async () => {
+      mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: 0 }) } })
+
+      expect(await readSessionRecords()).toEqual([])
+    })
+
+    it('is kept while its process is alive and reaped when it is gone', async () => {
+      mockfs({
+        [SESSIONS_DIR]: {
+          '111.json': startingRecord({ pid: 111 }),
+          '222.json': startingRecord({ pid: 222 }),
+        },
+      })
+
+      stubKill({ alive: [111] })
+
+      expect(await pruneDeadSessionRecords()).toBe(1)
+      expect(await fs.pathExists(`${SESSIONS_DIR}/111.json`)).toBe(true)
+      expect(await fs.pathExists(`${SESSIONS_DIR}/222.json`)).toBe(false)
+    })
+
+    describe('.findStartingSession', () => {
+      it('finds the record of a project that failed to load', async () => {
+        mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111 }) } })
+        stubKill({ alive: [111] })
+
+        expect(await findStartingSession({ cwd: PROJECT })).toEqual(expect.objectContaining({ pid: 111, loadError: { message: 'Your configFile is invalid' } }))
+      })
+
+      it('is null when no project failed to load', async () => {
+        const port = await startFakeSession()
+
+        mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+        stubKill({ alive: [111] })
+
+        expect(await findStartingSession({ cwd: PROJECT })).toBeNull()
+      })
+
+      it('is null once the process is gone', async () => {
+        mockfs({ [SESSIONS_DIR]: { '111.json': startingRecord({ pid: 111 }) } })
+        stubKill({ alive: [] })
+
+        expect(await findStartingSession({ cwd: PROJECT })).toBeNull()
+      })
+
+      it('prefers the project at the cwd, then the lowest pid', async () => {
+        mockfs({
+          [SESSIONS_DIR]: {
+            '111.json': startingRecord({ pid: 111, projectRoot: '/projects/other' }),
+            '333.json': startingRecord({ pid: 333, projectRoot: PROJECT }),
+            '222.json': startingRecord({ pid: 222, projectRoot: PROJECT }),
+          },
+        })
+
+        stubKill({ alive: [111, 222, 333] })
+
+        expect((await findStartingSession({ cwd: PROJECT }))!.pid).toBe(222)
+        expect((await findStartingSession({ cwd: '/elsewhere' }))!.pid).toBe(111)
+      })
+
+      it('honors the pid the caller named', async () => {
+        mockfs({
+          [SESSIONS_DIR]: {
+            '111.json': startingRecord({ pid: 111 }),
+            '222.json': startingRecord({ pid: 222 }),
+          },
+        })
+
+        stubKill({ alive: [111, 222] })
+
+        expect((await findStartingSession({ cwd: PROJECT, session: 222 }))!.pid).toBe(222)
+        expect(await findStartingSession({ cwd: PROJECT, session: 999 })).toBeNull()
+      })
+    })
+  })
+
   describe('.pruneDeadSessionRecords', () => {
     it('removes dead-pid records, keeps live ones and non-record files', async () => {
       mockfs({
@@ -701,6 +953,26 @@ describe('lib/cypress-sessions', () => {
       expect(await fs.pathExists(`${SESSIONS_DIR}/111.json`)).toBe(true)
       expect(await fs.pathExists(`${SESSIONS_DIR}/222.json`)).toBe(false)
       expect(await fs.pathExists(`${SESSIONS_DIR}/keep.txt`)).toBe(true)
+    })
+
+    it('keeps a dead-pid record whose server still answers the probe', async () => {
+      const port = await startFakeSession()
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      stubKill({ alive: [] })
+
+      expect(await pruneDeadSessionRecords()).toBe(0)
+      expect(await fs.pathExists(`${SESSIONS_DIR}/444.json`)).toBe(true)
+    })
+
+    it('removes a dead-pid record whose port is answered by a different session', async () => {
+      const port = await startFakeSession({ sessionId: 'someone-else' })
+
+      mockfs({ [SESSIONS_DIR]: { '444.json': makeRecord({ pid: 444, serverPort: port }) } })
+      stubKill({ alive: [] })
+
+      expect(await pruneDeadSessionRecords()).toBe(1)
+      expect(await fs.pathExists(`${SESSIONS_DIR}/444.json`)).toBe(false)
     })
 
     it('keeps a live-pid record whose server does not answer the probe', async () => {
