@@ -16,7 +16,8 @@ describe('remote driver: tabs the AUT opens', { browser: '!electron', experiment
 
   it('drives a target=_blank tab, then the AUT again', () => {
     cy.get('#blank').click()
-    cy.tab('label=blank').find('#username').type('grace').should('have.value', 'grace')
+    cy.tab('label=blank').find('#username').type('grace').should('have.value', 'grace').and('be.focused')
+    cy.tab('label=blank').find('#events').should('contain', 'focus keydown input')
     cy.get('#open').should('be.visible')
     cy.get('#status').should('have.text', 'Signed out')
   })

@@ -266,7 +266,7 @@ const defaultPreferences = {
   'browser.EULA.override': true,
   'browser.EULA.3.accepted': true,
   'browser.link.open_external': 2,
-  'browser.link.open_newwindow': 2,
+  'browser.link.open_newwindow': 3,
   'browser.offline': false,
   'browser.reader.detectedFirstArticle': true,
   'browser.selfsupport.url': '',
@@ -309,6 +309,8 @@ const defaultPreferences = {
   'media.navigator.permission.disabled': true,
 
   'dom.min_background_timeout_value': 4,
+  // the floor Firefox applies instead, since budget throttling is off below
+  'dom.min_background_timeout_value_without_budget_throttling': 4,
   'dom.timeout.enable_budget_timer_throttling': false,
 
   // allow getUserMedia APIs on insecure domains

@@ -47,11 +47,10 @@ export class WebKitAutomation {
     return this.getExtraPages().map((page) => {
       return {
         url: async () => page.url(),
-        bringToFront: () => page.bringToFront(),
         call: (request) => this.remoteAgent.call(page.mainFrame(), request),
       }
     })
-  }, () => this.page.bringToFront())
+  })
 
   cdpSocketServer?: CDPSocketServer
 

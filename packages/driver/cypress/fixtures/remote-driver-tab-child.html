@@ -7,8 +7,17 @@
   <h1 id="label"></h1>
   <input id="username" placeholder="Username" />
   <button id="sign-in">Sign in</button>
+  <p id="events"></p>
 
   <script>
+    const username = document.getElementById('username')
+
+    for (const type of ['focus', 'keydown', 'input', 'blur']) {
+      username.addEventListener(type, (event) => {
+        document.getElementById('events').textContent += `${event.type} `
+      })
+    }
+
     document.getElementById('label').textContent = new URLSearchParams(location.search).get('label') || ''
     document.getElementById('sign-in').addEventListener('click', () => {
       window.opener && window.opener.postMessage({ user: document.getElementById('username').value }, '*')

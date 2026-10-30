@@ -255,7 +255,6 @@ describe('lib/browsers/webkit-automation', () => {
     const makePage = (url: string) => {
       return {
         url: () => url,
-        bringToFront: vi.fn(async () => {}),
         close: vi.fn(async () => {}),
         mainFrame: () => ({}),
       }
@@ -280,7 +279,6 @@ describe('lib/browsers/webkit-automation', () => {
       mock.getLastContext().pages = () => [mock.getLastPage(), popup]
 
       await expect(wk.onRequest('remote:agent', { method: 'click', context: {}, args: {}, tab: { url: 'idp' } })).rejects.toThrow('could not reach Playwright\'s isolated world')
-      expect(popup.bringToFront).toHaveBeenCalled()
     })
   })
 

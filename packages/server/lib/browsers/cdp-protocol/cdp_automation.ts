@@ -121,9 +121,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   useRemoteTabs (getTabs: () => CdpTab[]) {
     const cdpTabs = new CdpRemoteTabs(getTabs)
 
-    this.remoteTabs = new RemoteTabs(() => cdpTabs.list(), async () => {
-      await this.sendDebuggerCommandFn('Page.bringToFront')
-    })
+    this.remoteTabs = new RemoteTabs(() => cdpTabs.list())
   }
 
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {

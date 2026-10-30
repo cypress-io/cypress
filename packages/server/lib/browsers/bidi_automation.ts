@@ -153,16 +153,9 @@ export class BidiAutomation {
       return (await this.getExtraTabs()).map((tab) => {
         return {
           url: async () => tab.url,
-          bringToFront: async () => {
-            await this.webDriverClient.browsingContextActivate({ context: tab.context })
-          },
           call: (request) => this.remoteAgent.call(tab.context, request),
         }
       })
-    }, async () => {
-      if (this.topLevelContextId) {
-        await this.webDriverClient.browsingContextActivate({ context: this.topLevelContextId })
-      }
     })
 
     // bind Bidi Events to update the standard automation client

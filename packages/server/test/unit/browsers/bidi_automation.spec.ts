@@ -2474,18 +2474,16 @@ describe('lib/browsers/bidi_automation', () => {
             ],
           })
 
-          mockWebdriverClient.browsingContextActivate = vi.fn().mockResolvedValue({})
           mockWebdriverClient.browsingContextClose = vi.fn().mockResolvedValue({})
         })
 
-        it('runs the remote agent in the matching tab, bringing it to the front for actions', async () => {
+        it('runs the remote agent in the matching tab', async () => {
           mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ type: 'success', result: { type: 'string', value: JSON.stringify({ ok: true, value: { coords: { x: 1, y: 2 } } }) } })
 
           const response = await bidiAutomationInstance.automationMiddleware.onRequest('remote:agent', { method: 'click', context: {}, args: {}, tab: { url: 'idp' } })
 
           expect(response).toEqual({ ok: true, value: { coords: { x: 1, y: 2 } } })
           expectCalledWith(mockWebdriverClient.browsingContextGetTree, { maxDepth: 0 })
-          expectCalledWith(mockWebdriverClient.browsingContextActivate, { context: 'popup' })
           expect(vi.mocked(mockWebdriverClient.scriptEvaluate).mock.calls[0][0].target).toEqual({ context: 'popup', sandbox: '__cypress_remote_agent' })
         })
 

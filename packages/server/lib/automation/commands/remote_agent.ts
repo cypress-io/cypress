@@ -166,29 +166,18 @@ export const tabsNotSupported = (browser: string) => {
 // A tab the app opened, however the browser's protocol drives it
 export interface RemoteTab {
   url (): Promise<string>
-  bringToFront (): Promise<void>
   call (request: RemoteAgentRequest): Promise<unknown>
 }
 
-// Sends each agent call to the AUT or to the tab it names, and returns focus
-// to the runner once a call in the AUT follows one that brought a tab forward
+// Sends each agent call to the AUT or to the tab it names. The tab stays where
+// it is: the agent fires focus events itself when its document isn't focused.
 export class RemoteTabs {
-  private tabInFront = false
-
-  constructor (
-    private getTabs: () => RemoteTab[] | Promise<RemoteTab[]>,
-    private bringRunnerToFront: () => Promise<void>,
-  ) {}
+  constructor (private getTabs: () => RemoteTab[] | Promise<RemoteTab[]>) {}
 
   async call (request: RemoteAgentRequest, callInAut: () => Promise<unknown>): Promise<unknown> {
     const { tab: matcher } = request
 
     if (!matcher) {
-      if (this.tabInFront) {
-        this.tabInFront = false
-        await this.bringRunnerToFront()
-      }
-
       return callInAut()
     }
 
@@ -199,12 +188,6 @@ export class RemoteTabs {
       return request.method === 'resolve'
         ? { ok: true, value: { elements: [] } }
         : { ok: false, error: { name: 'Error', message: `Expected to find a tab matching ${describeTab(matcher)}, but never found one.`, retry: true } }
-    }
-
-    // a background tab doesn't get focus, which typing and focus events depend on
-    if (request.method !== 'resolve') {
-      await tab.bringToFront()
-      this.tabInFront = true
     }
 
     return tab.call(request)
@@ -257,9 +240,6 @@ export class CdpRemoteTabs {
 
       return {
         url: async () => (await getFrame()).url,
-        bringToFront: async () => {
-          await tab.send('Page.bringToFront')
-        },
         call: async (request) => (await this.getAgent(tab)).call(await getFrame(), request),
       }
     })

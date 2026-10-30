@@ -331,26 +331,23 @@ describe('remote:agent automation command', () => {
     const makeTab = (url: string) => {
       return {
         url: vi.fn(async () => url),
-        bringToFront: vi.fn(async () => {}),
         call: vi.fn(async () => ({ ok: true, value: { elements: [], url } })),
       }
     }
 
     let tabs: Array<ReturnType<typeof makeTab>>
-    let bringRunnerToFront: Mock
     let callInAut: Mock
     let remoteTabs: RemoteTabs
 
     beforeEach(() => {
       tabs = [makeTab('http://login.idp.test/popup'), makeTab('http://www.app.test/help')]
-      bringRunnerToFront = vi.fn(async () => {})
       callInAut = vi.fn(async () => 'in aut')
-      remoteTabs = new RemoteTabs(() => tabs, bringRunnerToFront)
+      remoteTabs = new RemoteTabs(() => tabs)
     })
 
     it('calls the AUT when the request names no tab', async () => {
       expect(await remoteTabs.call(request, callInAut)).toBe('in aut')
-      expect(bringRunnerToFront).not.toHaveBeenCalled()
+      expect(tabs[0].call).not.toHaveBeenCalled()
     })
 
     it('runs in the tab whose URL matches a RegExp', async () => {
@@ -370,18 +367,6 @@ describe('remote:agent automation command', () => {
       tabs[1].url.mockRejectedValue(new Error('tab closed'))
 
       expect(await remoteTabs.call({ ...request, tab: {} }, callInAut)).toMatchObject({ value: { url: 'http://login.idp.test/popup' } })
-    })
-
-    it('brings the tab to the front for actions, and the runner back on the next call in the AUT', async () => {
-      await remoteTabs.call({ ...request, tab: { url: 'idp' } }, callInAut)
-      expect(tabs[0].bringToFront).not.toHaveBeenCalled()
-
-      await remoteTabs.call({ ...request, method: 'click', tab: { url: 'idp' } }, callInAut)
-      expect(tabs[0].bringToFront).toHaveBeenCalledTimes(1)
-
-      await remoteTabs.call(request, callInAut)
-      await remoteTabs.call(request, callInAut)
-      expect(bringRunnerToFront).toHaveBeenCalledTimes(1)
     })
 
     it('resolves no elements when no tab matches, so the tab can be awaited closing', async () => {
@@ -438,12 +423,8 @@ describe('remote:agent automation command', () => {
       cdpRemoteTabs = new CdpRemoteTabs(() => cdpTabs, () => Promise.resolve('agent source'))
     })
 
-    it('reads a tab\'s URL from its frame tree and brings it to the front', async () => {
-      const [tab] = cdpRemoteTabs.list()
-
-      expect(await tab.url()).toBe('http://login.idp.test/popup')
-      await tab.bringToFront()
-      expect(tabCalls(cdpTabs[0])).toContain('Page.bringToFront')
+    it('reads a tab\'s URL from its frame tree', async () => {
+      expect(await cdpRemoteTabs.list()[0].url()).toBe('http://login.idp.test/popup')
     })
 
     it('runs the agent in the tab, enabling Runtime and creating the world once', async () => {
