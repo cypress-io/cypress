@@ -44,10 +44,9 @@ const runInSequence: CombineHandlers = (first, second) => {
   }
 }
 
-// Passes each handler the value as updated by the results of the handlers
-// before it. Each handler gets its own copy, so like a single handler, only
-// what it returns is applied. When no handler returns anything the server
-// uses, the combined handler returns undefined so the server keeps its own value.
+// Each handler gets its own copy, so like a single handler, only what it
+// returns is applied. When no handler returns anything the server uses, the
+// combined handler returns undefined so the server keeps its own value.
 const chainResults = (valueIndex: number, merge: MergeResult): CombineHandlers => {
   return (first, second) => {
     assertFunctionHandler(first)
@@ -71,8 +70,8 @@ const mergeLaunchOptionsResult: MergeResult = (launchOptions, result) => {
   return result ? mergeLaunchOptions(launchOptions, result) : undefined
 }
 
-// Repeat registrations of these events are combined into one handler instead
-// of the last registration replacing the rest
+// Events not listed here keep only their last registered handler, since each
+// should have exactly one (such as file:preprocessor)
 export const combineHandlersByEvent: Record<string, CombineHandlers> = {
   'task': mergeTasks,
   'before:run': runInSequence,
