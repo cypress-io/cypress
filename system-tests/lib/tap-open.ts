@@ -10,6 +10,7 @@ import pkg from '@packages/root'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { toHashName } from '@packages/server/lib/util/app_data'
 import Fixtures from './fixtures'
+import * as DepInstaller from './dep-installer'
 import type { ProjectFixtureDir } from './fixtureDirs'
 
 const debug = Debug('cypress:system-tests:tap-open')
@@ -56,8 +57,8 @@ export interface TapStatus {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const spawnEnv = (): NodeJS.ProcessEnv => {
-  return {
+const spawnEnv = (overrides: Record<string, string | undefined> = {}): NodeJS.ProcessEnv => {
+  const env: NodeJS.ProcessEnv = {
     // The cy-in-cy markers would redirect app data and change how the browser is
     // launched; a real `cypress open` session must not look like a nested one.
     // CYPRESS_INTERNAL_ENV is reserved — the CLI sets it for its own child and warns
@@ -66,6 +67,16 @@ const spawnEnv = (): NodeJS.ProcessEnv => {
     CYPRESS_CONFIG_ENV: CONFIG_ENV,
     CYPRESS_CACHE_FOLDER: CACHE_FOLDER,
   }
+
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === undefined) {
+      delete env[key]
+    } else {
+      env[key] = value
+    }
+  }
+
+  return env
 }
 
 /**
@@ -87,6 +98,14 @@ const seedWelcomeDismissed = async (projectRoot: string): Promise<void> => {
 
     await fs.outputJson(file, state)
     debug('seeded welcome dismissal at %s', file)
+  }
+}
+
+// Undoes seedWelcomeDismissed, which writes outside the cache folder and so outlives the
+// session that wrote it, for the sessions that must start with the welcome screen undismissed.
+const clearWelcomeDismissed = async (projectRoot: string): Promise<void> => {
+  for (const dir of ['__global__', toHashName(projectRoot)]) {
+    await fs.remove(path.join(APP_DATA_PROJECTS, dir, 'state.json'))
   }
 }
 
@@ -167,6 +186,13 @@ export interface TapSession {
 
 export interface OpenTapSessionOptions {
   /**
+   * Whether to record the welcome screen as dismissed, as a person clicking Continue would.
+   * Defaults to true. Without it, only an AI agent's `cypress open` launches the browser by itself.
+   */
+  seedWelcome?: boolean
+  /** Environment for the `cypress open` process on top of this process's; `undefined` removes a variable. */
+  env?: Record<string, string | undefined>
+  /**
    * Boot alongside the sessions already running rather than from an empty
    * sessions dir, and leave that shared dir in place when killed — so the
    * sessions it was booted beside stay discoverable.
@@ -231,6 +257,11 @@ const buildSession = async (booted: BootedSession, options: OpenTapSessionOption
         // falls back to that one until this one's own record lands.
         const isThisSession = typeof current.projectRoot === 'string'
           && path.resolve(current.projectRoot) === path.resolve(projectRoot)
+
+        // The project could not load, so no browser is coming: say why now, not after the timeout
+        if (isThisSession && current.status === 'error') {
+          return failWithContext(`the project failed to load: ${String(current.error)}`)
+        }
 
         if (isThisSession && current.status !== 'not connected' && current.status !== 'browser not selected') {
           debug('session ready at stage %s', current.status)
@@ -308,11 +339,19 @@ const buildSession = async (booted: BootedSession, options: OpenTapSessionOption
 const prepareProject = async (project: ProjectFixtureDir, options: OpenTapSessionOptions): Promise<string> => {
   const projectRoot = await Fixtures.scaffoldProject(project)
 
+  // A project Cypress sets up for itself gets a config that requires `cypress`, which a
+  // fixture has no node_modules to resolve; systemTests.exec links it for the same reason
+  await DepInstaller.scaffoldCommonNodeModules()
+
   if (!options.additional) {
     await fs.remove(CACHE_FOLDER)
   }
 
-  await seedWelcomeDismissed(projectRoot)
+  if (options.seedWelcome === false) {
+    await clearWelcomeDismissed(projectRoot)
+  } else {
+    await seedWelcomeDismissed(projectRoot)
+  }
 
   return projectRoot
 }
@@ -331,7 +370,7 @@ export const openTapSession = async (project: ProjectFixtureDir, options: OpenTa
     '--e2e',
     '--browser', 'chrome',
     '--dev',
-  ], { cwd: projectRoot, env: spawnEnv(), detached: true })
+  ], { cwd: projectRoot, env: spawnEnv(options.env), detached: true })
 
   let output = ''
 

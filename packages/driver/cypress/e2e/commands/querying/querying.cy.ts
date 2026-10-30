@@ -95,8 +95,7 @@ describe('src/cy/commands/querying', () => {
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 100)
+        }, 100)
       })
 
       cy.on('command:retry', () => {
@@ -1353,8 +1352,7 @@ describe('src/cy/commands/querying', () => {
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 50)
+        }, 50)
       })
 
       cy.on('command:retry', () => {

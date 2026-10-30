@@ -49,7 +49,7 @@
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
     "lint:ci": "lerna run lint --no-bail --concurrency 2 -- --format \"$PWD/packages/eslint-config/src/ratchetFormatter.cjs\"",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,config,cypress-sessions,electron,errors,eslint-config,example,extension,https-proxy,icons,launcher,net-stubbing,network,network-interception,network-tools,packherd-require,proxy,reporter,runner,scaffold-config,server,socket,stderr-filtering,telemetry,types} --scope=@tooling/{electron-mksnapshot,packherd,v8-snapshot} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,config,cypress-sessions,driver,electron,errors,eslint-config,example,extension,https-proxy,icons,launcher,net-stubbing,network,network-interception,network-tools,packherd-require,proxy,reporter,resolve-dist,root,runner,scaffold-config,server,socket,stderr-filtering,telemetry,ts,types,v8-snapshot-require,web-config} --scope=@tooling/{electron-mksnapshot,packherd,v8-snapshot} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
@@ -137,7 +137,7 @@
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "del": "3.0.0",
-    "electron": "41.7.0",
+    "electron": "43.8.4",
     "electron-builder": "^25.1.8",
     "eslint": "^8.56.0",
     "eslint-plugin-cypress": "3.6.0",
@@ -176,6 +176,7 @@
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "5.4.0",
+    "node-gyp": "12.4.0",
     "npm-packlist": "9.0.0",
     "patch-package": "8.0.1",
     "playwright-webkit": "1.61.0",
@@ -203,7 +204,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=24.15.0",
+    "node": ">=24.22.1",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
@@ -282,7 +283,7 @@
     "browserify-sign": "4.2.5",
     "devtools-protocol": "0.0.1687809",
     "eslint-plugin-import": "2.29.1",
-    "node-abi": "4.28.0",
+    "node-abi": "4.39.0",
     "vue-template-compiler": "2.6.12",
     "yargs-unparser": "1.6.4"
   },

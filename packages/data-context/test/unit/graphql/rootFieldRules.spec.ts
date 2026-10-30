@@ -1,11 +1,11 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals'
-import path from 'path'
 import express from 'express'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
 import { createServer } from 'http'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
+import path from 'path'
 import { TypeInfo, parse, validate, visit, visitWithTypeInfo } from 'graphql'
 import { loadDocuments } from '@graphql-tools/load'
 import { CodeFileLoader } from '@graphql-tools/code-file-loader'
@@ -13,8 +13,9 @@ import { CodeFileLoader } from '@graphql-tools/code-file-loader'
 import { clearCtx, setCtx } from '../../../src'
 import type { DataContext } from '../../../src'
 import { graphqlSchema } from '../../../graphql/schema'
-import { RUNNER_MUTATIONS, runnerMutationRule } from '../../../graphql/runnerMutationRule'
-import { graphqlWS, handleGraphQLSocketRequest, handleRunnerGraphQLSocketRequest, runnerGraphQLHTTP } from '../../../graphql/makeGraphQLServer'
+import { RUNNER_MUTATIONS, TAP_MUTATIONS, TAP_QUERIES, runnerMutationRule, tapOperationRule } from '../../../graphql/rootFieldRules'
+import { subscriptionOnlyRule } from '../../../graphql/subscriptionOnlyRule'
+import { graphqlWS, handleGraphQLSocketRequest, handleRunnerGraphQLSocketRequest, tapGraphQLHTTP } from '../../../graphql/makeGraphQLServer'
 import { createTestDataContext } from '../helper'
 
 const DISALLOWED_MUTATION = 'mutation { openDirectoryInIDE(path: "/tmp") }'
@@ -23,35 +24,55 @@ const validateForRunner = (source: string) => {
   return validate(graphqlSchema, parse(source), [runnerMutationRule]).map((error) => error.message)
 }
 
-describe('runnerMutationRule', () => {
-  it('lists exactly the mutations the runner app and `cypress tap` send', async () => {
-    const packagesDir = path.join(__dirname, '..', '..', '..', '..')
-    // Same documents as the `../app/src/generated/graphql.ts` target in graphql-codegen.yml, plus tap's.
-    const sources = await loadDocuments([
-      path.join(packagesDir, 'app/src/**/*.{vue,ts,tsx,js,jsx}'),
-      path.join(packagesDir, 'frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'),
-      path.join(packagesDir, 'cypress-sessions/lib/tap-operations.ts'),
-    ], { loaders: [new CodeFileLoader()] })
+const packagesDir = path.join(__dirname, '..', '..', '..', '..')
 
-    // Collected the way `runnerMutationRule` sees them, so mutations selected through fragments count too.
-    const typeInfo = new TypeInfo(graphqlSchema)
-    const sentMutations = new Set<string>()
+/**
+ * Root fields selected by the GraphQL documents in `pointers` (globs under
+ * `packages/`), collected the way `allowRootFields` sees them, so fields
+ * selected through fragments count too.
+ */
+async function collectSentRootFields (pointers: string[]) {
+  const sources = await loadDocuments(pointers.map((pointer) => path.join(packagesDir, pointer)), { loaders: [new CodeFileLoader()] })
+  const typeInfo = new TypeInfo(graphqlSchema)
+  const sent = { query: new Set<string>(), mutation: new Set<string>(), subscription: new Set<string>() }
+  const rootTypes = [
+    ['query', graphqlSchema.getQueryType()],
+    ['mutation', graphqlSchema.getMutationType()],
+    ['subscription', graphqlSchema.getSubscriptionType()],
+  ] as const
 
-    for (const { document } of sources) {
-      if (!document) {
-        continue
-      }
-
-      visit(document, visitWithTypeInfo(typeInfo, {
-        Field (node) {
-          if (typeInfo.getParentType() === graphqlSchema.getMutationType() && !node.name.value.startsWith('__')) {
-            sentMutations.add(node.name.value)
-          }
-        },
-      }))
+  for (const { document } of sources) {
+    if (!document) {
+      continue
     }
 
-    expect([...RUNNER_MUTATIONS].sort()).toEqual([...sentMutations].sort())
+    visit(document, visitWithTypeInfo(typeInfo, {
+      Field (node) {
+        const kind = rootTypes.find(([, type]) => type && type === typeInfo.getParentType())?.[0]
+
+        if (kind && !node.name.value.startsWith('__')) {
+          sent[kind].add(node.name.value)
+        }
+      },
+    }))
+  }
+
+  return {
+    query: [...sent.query].sort(),
+    mutation: [...sent.mutation].sort(),
+    subscription: [...sent.subscription].sort(),
+  }
+}
+
+describe('runnerMutationRule', () => {
+  it('lists exactly the mutations the runner app sends', async () => {
+    // Same documents as the `../app/src/generated/graphql.ts` target in graphql-codegen.yml.
+    const { mutation } = await collectSentRootFields([
+      'app/src/**/*.{vue,ts,tsx,js,jsx}',
+      'frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}',
+    ])
+
+    expect([...RUNNER_MUTATIONS].sort()).toEqual(mutation)
   }, 60_000)
 
   it('allows a mutation the runner sends', () => {
@@ -80,6 +101,42 @@ describe('runnerMutationRule', () => {
 
   it('does not restrict queries', () => {
     expect(validateForRunner('{ localSettings { preferences { preferredEditorBinary } } }')).toEqual([])
+  })
+})
+
+const validateForTap = (source: string) => {
+  return validate(graphqlSchema, parse(source), [tapOperationRule]).map((error) => error.message)
+}
+
+describe('tapOperationRule', () => {
+  it('lists exactly the root fields `cypress tap` selects', async () => {
+    const sent = await collectSentRootFields(['cypress-sessions/lib/tap-operations.ts'])
+
+    expect({ query: [...TAP_QUERIES].sort(), mutation: [...TAP_MUTATIONS].sort(), subscription: [] }).toEqual(sent)
+  })
+
+  it('allows the query tap sends', () => {
+    expect(validateForTap('{ currentProject { specs { relative } } }')).toEqual([])
+  })
+
+  it('allows the mutation tap sends', () => {
+    expect(validateForTap('mutation { runSpec(specPath: "cypress/e2e/spec.cy.ts") { __typename } }')).toEqual([])
+  })
+
+  it('rejects a query tap does not send', () => {
+    expect(validateForTap('{ localSettings { preferences { preferredEditorBinary } } }')).toEqual(['The "localSettings" query is not available from `cypress tap`.'])
+  })
+
+  it('rejects a mutation only the runner app sends', () => {
+    expect(validateForTap('mutation { openExternal(url: "https://on.cypress.io") }')).toEqual(['The "openExternal" mutation is not available from `cypress tap`.'])
+  })
+
+  it('rejects a subscription', () => {
+    expect(validateForTap('subscription { errorWarningChange { __typename } }')).toEqual(['The "errorWarningChange" subscription is not available from `cypress tap`.'])
+  })
+
+  it('allows __typename on the query root', () => {
+    expect(validateForTap('{ __typename }')).toEqual([])
   })
 })
 
@@ -178,14 +235,14 @@ describe('runner GraphQL transports', () => {
     })
   })
 
-  describe('HTTP', () => {
+  describe('tap HTTP', () => {
     let server: Server
     let url: string
 
     beforeAll(async () => {
-      server = express().use('/__cypress/graphql/*', runnerGraphQLHTTP).listen(0, '127.0.0.1')
+      server = express().use('/__cypress/tap/graphql/*', tapGraphQLHTTP).listen(0, '127.0.0.1')
       await new Promise((resolve) => server.once('listening', resolve))
-      url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/__cypress/graphql/op`
+      url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/__cypress/tap/graphql/op`
     })
 
     afterAll(async () => {
@@ -200,11 +257,18 @@ describe('runner GraphQL transports', () => {
       const res = await post(DISALLOWED_MUTATION)
 
       expect(res.status).toBe(400)
-      expect(await res.json()).toEqual({ errors: [expect.objectContaining({ message: 'The "openDirectoryInIDE" mutation is not available from the test runner.' })] })
+      expect(await res.json()).toEqual({ errors: [expect.objectContaining({ message: 'The "openDirectoryInIDE" mutation is not available from `cypress tap`.' })] })
       expect(openDirectoryInIDE).not.toHaveBeenCalled()
     })
 
-    it('runs an operation the runner sends', async () => {
+    it('rejects a query tap does not send', async () => {
+      const res = await post('{ localSettings { preferences { preferredEditorBinary } } }')
+
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ errors: [expect.objectContaining({ message: 'The "localSettings" query is not available from `cypress tap`.' })] })
+    })
+
+    it('runs a query', async () => {
       const res = await post('{ __typename }')
 
       expect(res.status).toBe(200)
@@ -219,7 +283,7 @@ describe('runner GraphQL transports', () => {
 
     beforeAll(async () => {
       server = createServer()
-      dispose = graphqlWS(server, '/__socket-graphql', { enforceOrigin: false, validationRules: [runnerMutationRule] }).dispose
+      dispose = graphqlWS(server, '/__socket-graphql', { enforceOrigin: false, validationRules: [runnerMutationRule, subscriptionOnlyRule] }).dispose
       await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
       port = (server.address() as AddressInfo).port
     })
@@ -251,18 +315,38 @@ describe('runner GraphQL transports', () => {
       })
     }
 
+    const errorMessages = (message: { payload: { message: string }[] }) => message.payload.map((error) => error.message)
+
     it('rejects a disallowed mutation without running it', async () => {
       const message = await subscribe(DISALLOWED_MUTATION)
 
       expect(message.type).toBe('error')
-      expect(message.payload).toEqual([expect.objectContaining({ message: 'The "openDirectoryInIDE" mutation is not available from the test runner.' })])
+      expect(errorMessages(message)).toEqual([
+        'Only subscriptions are accepted on this endpoint, not mutation operations.',
+        'The "openDirectoryInIDE" mutation is not available from the test runner.',
+      ])
+
       expect(openDirectoryInIDE).not.toHaveBeenCalled()
     })
 
-    it('runs an operation the runner sends', async () => {
+    it('rejects a mutation the runner sends over the socket', async () => {
+      const message = await subscribe('mutation { setPromptShown(slug: "ci1") }')
+
+      expect(message.type).toBe('error')
+      expect(errorMessages(message)).toEqual(['Only subscriptions are accepted on this endpoint, not mutation operations.'])
+    })
+
+    it('rejects a query', async () => {
       const message = await subscribe('{ __typename }')
 
-      expect(message).toEqual(expect.objectContaining({ type: 'next', payload: { data: { __typename: 'Query' } } }))
+      expect(message.type).toBe('error')
+      expect(errorMessages(message)).toEqual(['Only subscriptions are accepted on this endpoint, not query operations.'])
+    })
+
+    it('runs a subscription', async () => {
+      const message = await subscribe('subscription { errorWarningChange { __typename } }')
+
+      expect(message).toEqual(expect.objectContaining({ type: 'next', payload: { data: { errorWarningChange: { __typename: 'Query' } } } }))
     })
   })
 })

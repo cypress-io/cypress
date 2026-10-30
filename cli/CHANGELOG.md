@@ -1,9 +1,33 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.2.1
+## 16.2.2
 
 **Performance:**
 
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
+- The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
+- `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
+
+**Bugfixes:**
+
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) silently ignored a header matcher when the same header name appeared more than once with different casing, such as `Content-Type` and `content-type`. Only the last matcher was applied. `cy.intercept()` now throws an error that names the duplicated header. Fixes [#34975](https://github.com/cypress-io/cypress/issues/34975).
+- Fixed an issue where `cypress tap` commands could delete the record of a running `cypress open` session, and report that no session was running, when run from a process that cannot see the session's process ID, such as a different PID namespace in a container or sandbox. The record is now kept while the session responds. Fixed in [#35103](https://github.com/cypress-io/cypress/pull/35103).
+- `cypress open` now prints configuration errors and warnings, including the stack trace of a config file that fails to load, to the terminal. Previously they only appeared in the Cypress window, so a script or AI agent running `cypress open` saw nothing while it waited. Fixed in [#35104](https://github.com/cypress-io/cypress/pull/35104).
+- `cypress open --project <path> --e2e --browser <browser>` run by an AI coding agent now launches the browser without waiting for the welcome screen to be dismissed in the Cypress window. Set `CYPRESS_AGENT_MODE=1` to force this behavior for an agent Cypress does not detect, or `CYPRESS_AGENT_MODE=0` to turn it off. Fixed in [#35105](https://github.com/cypress-io/cypress/pull/35105).
+- `cypress open --e2e --project <path>` run by an AI coding agent in a project with no Cypress configuration file now creates the configuration and support files and starts the project in one launch, and prints the files it created. Previously the project did not start until Continue was pressed in the Cypress window. Fixed in [#35106](https://github.com/cypress-io/cypress/pull/35106).
+- `cypress tap status` now reports an `error` stage, with the reason, when `cypress open` could not load the project, for example because the configuration file has a syntax error, and the other `cypress tap` commands say that the project could not load instead of that no session is running. Previously `cypress tap status` reported `not connected`. Fixed in [#35107](https://github.com/cypress-io/cypress/pull/35107).
+- When the path given to `--browser` is not recognized as a browser, the warning now includes what running the path with `--version` printed, so a missing library or an unsupported binary can be told apart. Fixed in [#35108](https://github.com/cypress-io/cypress/pull/35108).
+
+**Dependency Updates:**
+
+- Upgraded `electron` from `41.7.0` to `43.8.4` to address the [compromised eMudhra intermediate certificates](https://github.com/electron/electron/security/advisories/GHSA-jr5w-w6x2-84p9) vulnerability reported in security scans. Connections that Cypress makes itself, such as to Cypress Cloud, now reject certificates issued through these intermediates. Node code in the config process, such as [`setupNodeEvents`](https://docs.cypress.io/app/plugins/plugins-guide), runs on the Node.js version that runs the `cypress` CLI, so it needs a Node.js release that includes the same fix. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
+- Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
+
+## 16.2.1
+
+**Performance:**
+
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**

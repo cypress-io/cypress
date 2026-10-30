@@ -3,9 +3,9 @@ import path from 'path'
 import Debug from 'debug'
 
 import state from '../tasks/state'
-import { isCompatibleRecord, parseRecordPid, cypressSessionsDir } from './record'
+import { isCompatibleRecord, isStartingRecord, parseRecordPid, cypressSessionsDir } from './record'
 import type { CypressSession } from './record'
-import { isPidAlive } from './liveness'
+import { isPidAlive, verifySessionRecord } from './liveness'
 
 const debug = Debug('cypress:cli:cypress-sessions')
 
@@ -65,13 +65,22 @@ const readCompatibleRecord = async (filePath: string): Promise<CypressSession | 
 }
 
 // Reaps a record whose writer process is gone, returning whether it was dead.
+// A pid that fails the signal check is not proof of death: a caller in another
+// PID namespace cannot see the writer's pid, so a record whose server still
+// answers its probe is kept. A record we could not read has no probe to try, so
+// its pid check stands alone.
 // Removal is best-effort: a file we can't delete (permissions, a Windows lock)
 // must not abort discovery of the other, live sessions, so the failure is
 // swallowed and the record is still reported dead.
-const reapIfDead = async (file: { path: string, pid: number }): Promise<boolean> => {
+const reapIfDead = async (file: RecordFile, record: CypressSession | null): Promise<boolean> => {
   const { path, pid } = file
 
   if (isPidAlive(pid)) {
+    return false
+  }
+
+  // A starting record names no server to ask, so its pid check stands alone.
+  if (record && !isStartingRecord(record) && await verifySessionRecord(record)) {
     return false
   }
 
@@ -107,7 +116,7 @@ export const readLiveSessions = async (): Promise<CypressSession[]> => {
       return null
     }
 
-    if (await reapIfDead(file)) {
+    if (await reapIfDead(file, record)) {
       return null
     }
 
@@ -117,10 +126,32 @@ export const readLiveSessions = async (): Promise<CypressSession[]> => {
   return records.filter((record): record is CypressSession => record !== null)
 }
 
+/**
+ * Reads the records of projects that could not load, whose writer process is still running.
+ * They are not live sessions: they name no server.
+ */
+export const readStartingSessions = async (): Promise<CypressSession[]> => {
+  const files = await listRecordFiles(getSessionsDir())
+
+  const records = await Promise.all(files.map(async (file): Promise<CypressSession | null> => {
+    const record = await readCompatibleRecord(file.path)
+
+    if (!record || !isStartingRecord(record)) {
+      return null
+    }
+
+    return await reapIfDead(file, record) ? null : record
+  }))
+
+  return records.filter((record): record is CypressSession => record !== null)
+}
+
 export const pruneDeadSessionRecords = async (): Promise<number> => {
   const files = await listRecordFiles(getSessionsDir())
 
-  const pruned = await Promise.all(files.map((file) => reapIfDead(file)))
+  const pruned = await Promise.all(files.map(async (file) => {
+    return reapIfDead(file, await readCompatibleRecord(file.path))
+  }))
 
   const removed = pruned.filter(Boolean).length
 

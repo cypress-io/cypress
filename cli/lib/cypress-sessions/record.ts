@@ -1,6 +1,7 @@
 export {
   SESSIONS_DIRNAME,
   isCompatibleRecord,
+  isStartingRecord,
   isTapSupportedBrowser,
   parseRecordPid,
   cypressSessionsDir,

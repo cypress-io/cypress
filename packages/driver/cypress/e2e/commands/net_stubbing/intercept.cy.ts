@@ -653,7 +653,7 @@ describe('network stubbing', { retries: 15 }, function () {
             }).as('testRequest')
 
             cy.window().then(() => {
-              let xhr = new XMLHttpRequest()
+              const xhr = new XMLHttpRequest()
 
               xhr.open('POST', 'https://example.com/test')
               xhr.setRequestHeader('Content-Type', 'application/json')
@@ -708,9 +708,7 @@ describe('network stubbing', { retries: 15 }, function () {
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.intercept(/foo/, {}).then(() => {
-            let lastLog
-
-            lastLog = this.lastLog
+            const lastLog = this.lastLog
 
             expect(lastLog.get('numResponses')).to.eq(0)
           })
@@ -861,6 +859,28 @@ describe('network stubbing', { retries: 15 }, function () {
               foo: 'bar',
               FOO: 'bar',
             },
+          })
+        })
+
+        // https://github.com/cypress-io/cypress/issues/34975
+        ;[
+          ['FOO', 'foo'],
+          ['Content-Type', 'content-type'],
+          ['Foo', 'FOO'],
+        ].forEach(([first, second]) => {
+          it(`requires unique header names regardless of casing order (${first} and ${second})`, function (done) {
+            testFail((err) => {
+              expect(err.message).to.include(`\`${second}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`)
+
+              done()
+            })
+
+            cy.intercept({
+              headers: {
+                [first]: 'bar',
+                [second]: 'bar',
+              },
+            })
           })
         })
 

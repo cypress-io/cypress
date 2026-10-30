@@ -146,7 +146,7 @@ export const isFocusedOrInFocused = (el: HTMLElement) => {
     root = doc
   }
 
-  let { activeElement } = root
+  const { activeElement } = root
 
   let elToCheckCurrentlyFocused
 
@@ -333,7 +333,7 @@ export const getFirstFixedOrStickyPositionParent = (elOrJquery): JQuery<any> | n
   // walk up the tree until we find an element
   // with a fixed/sticky position
   return findParent($el.get(0), (node) => {
-    let wrapped = $jquery.wrap(node)
+    const wrapped = $jquery.wrap(node)
 
     if (fixedOrStickyRe.test(wrapped.css('position'))) {
       return wrapped
@@ -357,7 +357,7 @@ export const getFirstStickyPositionParent = (elOrJquery): JQuery<any> | null => 
   // walk up the tree until we find an element
   // with a sticky position
   return findParent($el.get(0), (node) => {
-    let wrapped = $jquery.wrap(node)
+    const wrapped = $jquery.wrap(node)
 
     if (wrapped.css('position') === 'sticky') {
       return wrapped
@@ -377,7 +377,7 @@ export const getFirstScrollableParent = (elOrJquery): JQuery<any> | null => {
   // walk up the tree until we find a scrollable
   // parent
   return findParent($el.get(0), (node) => {
-    let wrapped = $jquery.wrap(node)
+    const wrapped = $jquery.wrap(node)
 
     if (isScrollable(wrapped)) {
       return wrapped

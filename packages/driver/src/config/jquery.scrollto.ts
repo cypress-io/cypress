@@ -51,7 +51,7 @@ export function scrollTo (target, duration, settings) {
   // Speed is still recognized for backwards compatibility
   duration = duration || settings.duration
   // Make sure the settings are given right
-  let queue = settings.queue && settings.axis.length > 1
+  const queue = settings.queue && settings.axis.length > 1
 
   if (queue) {
     // Let's keep the overall duration
@@ -65,9 +65,9 @@ export function scrollTo (target, duration, settings) {
     // Null target yields nothing, just like jQuery does
     if (target === null) return
 
-    let win = isWin(this)
-    let elem = win ? this.contentWindow || window : this
-    let $elem = $(elem)
+    const win = isWin(this)
+    const elem = win ? this.contentWindow || window : this
+    const $elem = $(elem)
     let targ = target
     let attr = {}
     let toff
@@ -101,14 +101,14 @@ export function scrollTo (target, duration, settings) {
         break
     }
 
-    let offset = isFunction(settings.offset) && settings.offset(elem, targ) || settings.offset
+    const offset = isFunction(settings.offset) && settings.offset(elem, targ) || settings.offset
 
     $.each(settings.axis.split(''), function (i, axis) {
-      let Pos	= axis === 'x' ? 'Left' : 'Top'
-      let pos = Pos.toLowerCase()
-      let key = `scroll${ Pos}`
-      let prev = $elem[key]()
-      let max = $scrollTo.max(elem, axis)
+      const Pos = axis === 'x' ? 'Left' : 'Top'
+      const pos = Pos.toLowerCase()
+      const key = `scroll${ Pos}`
+      const prev = $elem[key]()
+      const max = $scrollTo.max(elem, axis)
 
       if (toff) { // jQuery / DOMElement
         attr[key] = toff[pos] + (win ? 0 : prev - $elem.offset()![pos])
@@ -126,7 +126,7 @@ export function scrollTo (target, duration, settings) {
           attr[key] += targ[axis === 'x' ? 'width' : 'height']() * settings.over[pos]
         }
       } else {
-        let val = targ[pos]
+        const val = targ[pos]
 
         // Handle percentage values
         attr[key] = val.slice && val.slice(-1) === '%' ?
@@ -157,7 +157,7 @@ export function scrollTo (target, duration, settings) {
     animate(settings.onAfter)
 
     function animate (callback) {
-      let opts = $.extend({}, settings, {
+      const opts = $.extend({}, settings, {
         // The queue setting conflicts with animate()
         // Force it to always be true
         queue: true,
@@ -175,8 +175,8 @@ export function scrollTo (target, duration, settings) {
 // Max scrolling position, works on quirks mode
 // It only fails (not too badly) on IE, quirks mode.
 $scrollTo.max = function (elem, axis) {
-  let Dim = axis === 'x' ? 'Width' : 'Height'
-  let scroll = `scroll${Dim}`
+  const Dim = axis === 'x' ? 'Width' : 'Height'
+  const scroll = `scroll${Dim}`
 
   if (!isWin(elem)) {
     // Uses `client*` rather than upstream's CSS size because it leaves out a
@@ -184,10 +184,10 @@ $scrollTo.max = function (elem, axis) {
     return elem[scroll] - elem[`client${Dim}`]
   }
 
-  let size = `client${ Dim}`
-  let doc = elem.ownerDocument || elem.document
-  let html = doc.documentElement
-  let body = doc.body
+  const size = `client${ Dim}`
+  const doc = elem.ownerDocument || elem.document
+  const html = doc.documentElement
+  const body = doc.body
 
   return Math.max(html[scroll], body[scroll]) - Math.min(html[size], body[size])
 }
@@ -208,7 +208,7 @@ $.Tween.propHooks.scrollTop = {
     return $(t.elem)[t.prop]()
   },
   set (t: Tween) {
-    let curr = this.get(t)
+    const curr = this.get(t)
 
     // If interrupt is true and user scrolled, stop animating
     if (t.options.interrupt && t._last && t._last !== curr) {
@@ -217,7 +217,7 @@ $.Tween.propHooks.scrollTop = {
       return
     }
 
-    let next = Math.round(t.now)
+    const next = Math.round(t.now)
 
     // Don't waste CPU
     // Browsers don't render floating point scroll

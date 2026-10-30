@@ -1146,7 +1146,8 @@ async function ready (options: ReadyOptions) {
 
   // ensure the project exists
   // and open up the project
-  const browsers = await browserUtils.get()
+  // Use the data context's cached detection so browsers are detected once per run
+  const browsers: FoundBrowser[] = await require('@packages/data-context').getCtx().browser.machineBrowsers()
 
   debug('found all system browsers %o', browsers.map(createPublicBrowser))
   // TODO: refactor this so we don't need to extend options
