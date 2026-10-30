@@ -541,3 +541,93 @@ export const openTapSessionViaModuleApi = async (project: ProjectFixtureDir): Pr
     throw err
   }
 }
+
+export interface DetachedLaunch {
+  stdout: string
+  stderr: string
+  exitCode: number
+}
+
+export interface DetachedTapSession extends TapSession {
+  /** What `cypress open --detached` itself printed, and how it exited. */
+  launch: DetachedLaunch
+  /** The lock file of the Xvfb the CLI started, when it was made to start one. */
+  xvfbLockFile?: string
+}
+
+export interface OpenDetachedTapSessionOptions {
+  /**
+   * Launch with no DISPLAY, so the CLI starts a Xvfb of its own rather than using the one
+   * this run has. Linux only.
+   */
+  ownDisplay?: boolean
+}
+
+// The CLI picks the display of a detached app's Xvfb itself, ignoring XVFB_DISPLAY_NUM, so the
+// display is read back from the environment the app was started with
+const displayOf = async (pid: number): Promise<string | undefined> => {
+  const environ = await fs.readFile(`/proc/${pid}/environ`, 'utf8').catch(() => '')
+
+  return environ.split('\0').find((entry) => entry.startsWith('DISPLAY='))?.slice('DISPLAY='.length)
+}
+
+/**
+ * Boots through `cypress open --detached`, which returns once the app is ready and leaves it
+ * running on its own. The harness has no handle on the app, so it ends it through the pid in
+ * the session record, as it does for the Module API.
+ */
+export const openDetachedTapSession = async (project: ProjectFixtureDir, options: OpenDetachedTapSessionOptions = {}): Promise<DetachedTapSession> => {
+  const projectRoot = await prepareProject(project, {})
+  // XVFB_DISPLAY_NUM is dropped too, since the CLI would only warn that it ignored it
+  const env = options.ownDisplay ? _.omit(spawnEnv(), 'DISPLAY', 'XVFB_DISPLAY_NUM') : spawnEnv()
+
+  const launch = await new Promise<DetachedLaunch>((resolve, reject) => {
+    const child = cp.spawn(process.execPath, [
+      CLI_BIN, 'open',
+      '--detached',
+      '--project', projectRoot,
+      '--e2e',
+      '--browser', 'chrome',
+      '--dev',
+    ], { cwd: projectRoot, env })
+
+    let stdout = ''
+    let stderr = ''
+
+    child.stdout.on('data', (buf) => {
+      stdout += buf.toString()
+    })
+
+    child.stderr.on('data', (buf) => {
+      stderr += buf.toString()
+    })
+
+    child.on('error', reject)
+    child.on('close', (code) => resolve({ stdout, stderr, exitCode: code ?? -1 }))
+  })
+
+  const session = await buildSession({
+    projectRoot,
+    terminate: () => signalRecorded(projectRoot, 'SIGKILL'),
+    suspend: () => signalRecorded(projectRoot, 'SIGSTOP'),
+    resume: () => signalRecorded(projectRoot, 'SIGCONT'),
+    context: () => `${launch.stdout}${launch.stderr}` || '(no output captured)',
+    exitReason: () => null,
+  })
+
+  if (!options.ownDisplay) {
+    return { ...session, launch }
+  }
+
+  const pid = await recordedPid(projectRoot)
+  const display = pid ? await displayOf(pid) : undefined
+
+  if (!display) {
+    await session.kill()
+
+    throw new Error(`Could not read the display of the app started by cypress open --detached (pid ${pid})\n${launch.stdout}${launch.stderr}`)
+  }
+
+  // DISPLAY is `:<number>` or `:<number>.<screen>`
+  return { ...session, launch, xvfbLockFile: `/tmp/.X${display.slice(1).split('.')[0]}-lock` }
+}
