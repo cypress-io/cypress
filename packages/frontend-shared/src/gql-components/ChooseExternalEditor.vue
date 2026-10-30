@@ -15,7 +15,7 @@
       <template #input-prefix="{ value }">
         <Icon
           v-if="value"
-          :icon="icons[value.id]"
+          :icon="icons[value.id] ?? Terminal"
           class="text-md text-gray-500"
           icon-class="icon-dark-gray-500"
         />

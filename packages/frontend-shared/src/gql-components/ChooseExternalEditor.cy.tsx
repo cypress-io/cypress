@@ -40,4 +40,19 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     cy.contains('Vim').should('be.visible')
     cy.contains('Atom').should('not.exist')
   })
+
+  it('shows an icon for a selected editor without its own', () => {
+    cy.mountFragment(ChooseExternalEditorFragmentDoc, {
+      onResult (result) {
+        result.localSettings.availableEditors = [
+          { id: 'launch-editor', name: 'LAUNCH_EDITOR (zed)', binary: 'zed', __typename: 'Editor' },
+        ]
+
+        result.localSettings.preferences.preferredEditorBinary = 'zed'
+      },
+      render: (gql) => <ChooseExternalEditor gql={gql} labelId="example-label" />,
+    })
+
+    cy.contains('button', 'LAUNCH_EDITOR (zed)').find('svg').not('[data-testid=icon-caret]').should('be.visible')
+  })
 })
