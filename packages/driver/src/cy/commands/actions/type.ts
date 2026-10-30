@@ -473,6 +473,9 @@ export default function (Commands, Cypress, cy, state, config) {
       // of contenteditables
       if ($elements.isFocusedOrInFocused(options.$el.get(0))) {
         debug('element is already focused, only checking readOnly property')
+        // Automatic scrolling here can move a focused input behind a fixed
+        // element without a coverage check. Keep explicit scroll options.
+        _.defaults(options, { scrollBehavior: false })
         options.ensure = {
           notReadonly: true,
         }
