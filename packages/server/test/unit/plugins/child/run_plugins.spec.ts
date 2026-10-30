@@ -143,7 +143,7 @@ describe('lib/plugins/child/run_plugins', () => {
         expect(requires).toBeInstanceOf(Array)
       })
 
-      it.each(['before:run', 'after:run', 'before:spec', 'after:spec'])('combines every handler registered for %s into one registration', async (event) => {
+      it.each(['before:run', 'after:run', 'before:spec', 'after:spec', 'after:browser:launch'])('combines every handler registered for %s into one registration', async (event) => {
         const calls: string[] = []
         const first = vi.fn(async (arg) => {
           await Promise.resolve()
@@ -212,6 +212,20 @@ describe('lib/plugins/child/run_plugins', () => {
 
           expect(second).toHaveBeenCalledWith(browser, expect.objectContaining({ args: [], env: { BASE: 'base', FIRST: 'first' } }))
           expect(result).toMatchObject({ args: [], env: { BASE: 'base', FIRST: 'first' } })
+        })
+
+        it('does not apply launch options a handler changes without returning them', async () => {
+          const result = await invokeBeforeBrowserLaunch(
+            (browser, launchOptions) => {
+              launchOptions.args.push('--not-returned')
+            },
+            (browser, launchOptions) => {
+              return { env: { ...launchOptions.env, SECOND: 'second' } }
+            },
+          )
+
+          expect(result.args).toStrictEqual([])
+          expect(result.env).toStrictEqual({ BASE: 'base', SECOND: 'second' })
         })
 
         it('returns undefined when no handler returns launch options', async () => {

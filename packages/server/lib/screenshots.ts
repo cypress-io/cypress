@@ -7,6 +7,7 @@ import Jimp from 'jimp'
 import sizeOf from 'image-size'
 import colorString from 'color-string'
 import * as plugins from './plugins'
+import { mergeScreenshotDetails } from './plugins/merge_plugin_results'
 import { fs, getPath } from './util/fs'
 import type { Data, ScreenshotsFolder } from './util/fs'
 
@@ -458,11 +459,7 @@ const screenshots = {
 
     return plugins.execute('after:screenshot', details)
     .then((updates) => {
-      if (!_.isPlainObject(updates)) {
-        return details
-      }
-
-      return _.extend(details, _.pick(updates, 'size', 'dimensions', 'path'))
+      return mergeScreenshotDetails(details, updates) ?? details
     })
   },
 

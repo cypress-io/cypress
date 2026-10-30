@@ -16,7 +16,6 @@ import type {
   PluginChildIpc,
   PluginExecuteEvent,
   PluginInvokeIds,
-  PluginEventHandler,
   PluginRegistration,
   RegisteredPluginEvent,
   RegisteredPluginHandler,
@@ -78,40 +77,18 @@ export class RunPlugins {
         return
       }
 
-      if (event === 'task') {
-        const existingEventId = this.registeredEventsByName[event]
-
-        if (existingEventId !== undefined) {
-          handler = this.taskMerge(
-            this.registeredEventsById[existingEventId].handler as TaskEventHandler,
-            handler as TaskEventHandler,
-          )
-
-          this.registeredEventsById[existingEventId] = { event, handler }
-          debug('extend task events with id', existingEventId)
-
-          return
-        }
-      }
-
       const combineHandlers = combineHandlersByEvent[event]
+      const existingEventId = this.registeredEventsByName[event]
 
-      if (combineHandlers) {
-        const existingEventId = this.registeredEventsByName[event]
-
-        if (existingEventId !== undefined) {
-          this.registeredEventsById[existingEventId] = {
-            event,
-            handler: combineHandlers(
-              this.registeredEventsById[existingEventId].handler as PluginEventHandler,
-              handler as PluginEventHandler,
-            ),
-          }
-
-          debug('combine %s handlers with id', event, existingEventId)
-
-          return
+      if (combineHandlers && existingEventId !== undefined) {
+        this.registeredEventsById[existingEventId] = {
+          event,
+          handler: combineHandlers(this.registeredEventsById[existingEventId].handler, handler),
         }
+
+        debug('combine %s handlers with id', event, existingEventId)
+
+        return
       }
 
       const eventId = this.eventIdCount++
@@ -223,16 +200,6 @@ export class RunPlugins {
     const invoke = () => _.keys(taskEvent ? taskEvent.handler : {})
 
     wrapChildPromise(this.ipc, invoke, ids)
-  }
-
-  taskMerge (target: TaskEventHandler, events: TaskEventHandler) {
-    const duplicates = _.intersection(_.keys(target), _.keys(events))
-
-    if (duplicates.length) {
-      require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates)
-    }
-
-    return _.extend(target, events)
   }
 
   taskExecute (ids: PluginInvokeIds, args: any[]) {
