@@ -19,6 +19,7 @@
 - Fixed an issue where `cypress open` did not open the app window when the `ELECTRON_RUN_AS_NODE` environment variable was set, as in some AI agent environments. `cypress open` now ignores the variable and prints a warning, while `cypress run` still honors it. Fixed in [#35111](https://github.com/cypress-io/cypress/pull/35111).
 - Fixed an issue where the Cypress app started with `cypress open --detached` could stop working or exit shortly after the command returned, particularly on Linux where Cypress starts its own virtual display. The app's output is now written to files in the system temp directory, and the command prints where those files are. Because the virtual display now keeps running with the app, `cypress open --detached` no longer uses the display set by `XVFB_DISPLAY_NUM`, and prints a warning when it is set. Fixed in [#35112](https://github.com/cypress-io/cypress/pull/35112).
 - Fixed an issue where installing the Cypress binary could hang or fail outright when the connection was reset or the download server returned a temporary error. The download is now retried up to 3 times with an increasing delay before the install fails. Fixed in [#35115](https://github.com/cypress-io/cypress/pull/35115).
+- Fixed an issue where `cypress open` and `cypress run` on Linux failed to start with a "Missing X server or $DISPLAY" error when `DISPLAY` pointed to an X server that was not running. Cypress now starts its own Xvfb and retries. Fixed in [#35114](https://github.com/cypress-io/cypress/pull/35114).
 
 **Dependency Updates:**
 
