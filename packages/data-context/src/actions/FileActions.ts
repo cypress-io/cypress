@@ -3,6 +3,7 @@ import path from 'path'
 // @ts-ignore - no types available
 import launchEditor from 'launch-editor'
 import type { DataContext } from '..'
+import { quoteEditorBinary } from '../util/quoteEditorBinary'
 import assert from 'assert'
 
 export class FileActions {
@@ -57,9 +58,9 @@ export class FileActions {
     )
   }
 
-  openFile (filePath: string, line: number = 1, column: number = 1) {
+  async openFile (filePath: string, line: number = 1, column: number = 1) {
     assert(this.ctx.currentProject)
-    const binary = this.ctx.coreData.localSettings.preferences.preferredEditorBinary
+    const binary = await this.ctx.actions.localSettings.getLaunchableEditor()
 
     const absolute = path.resolve(this.ctx.currentProject, filePath)
 
@@ -79,7 +80,7 @@ export class FileActions {
       return
     }
 
-    launchEditor(`${absolute}:${line}:${column}`, `"${binary}"`, (__: unknown, errMsg: string) => {
+    launchEditor(`${absolute}:${line}:${column}`, quoteEditorBinary(binary), (__: unknown, errMsg: string) => {
       this.ctx.debug('error opening file: %s', errMsg)
     })
   }

@@ -22,6 +22,9 @@ describe('ChooseExternalEditorModal', () => {
     cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription1)
     cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription2.replace('{0}', 'Settings'))
 
+    cy.findByTestId('launch-editor-hint').should('have.text', defaultMessages.settingsPage.editor.launchEditorHint.replace('{0}', 'LAUNCH_EDITOR'))
+    .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
+
     cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
     .should('be.visible')
     .as('chooseEditor')
@@ -35,6 +38,7 @@ describe('ChooseExternalEditorModal', () => {
     cy.contains('On Computer').should('be.visible')
     cy.contains('Atom').should('be.visible')
     cy.contains('Vim').should('be.visible')
+    cy.contains('Custom').should('not.exist')
 
     cy.percySnapshot('open')
 
@@ -43,17 +47,5 @@ describe('ChooseExternalEditorModal', () => {
     cy.contains('Atom').should('not.exist')
 
     cy.percySnapshot('selected')
-
-    cy.get('[data-cy="custom-editor"]').should('not.exist')
-
-    cy.get('@chooseEditor').click()
-    cy.contains('Custom').click()
-    cy.get('[data-cy="custom-editor"]').should('exist')
-
-    cy.findByLabelText(defaultMessages.settingsPage.editor.customPathPlaceholder)
-    .type('test/path')
-    .should('have.value', 'test/path')
-
-    cy.percySnapshot('custom editor input')
   })
 })

@@ -4,11 +4,6 @@ export interface Editor {
   name: string
 }
 
-export interface EditorsResult {
-  preferredOpener?: Editor
-  availableEditors: Editor[]
-}
-
 export interface FileDetails {
   absoluteFile: string
   column: number

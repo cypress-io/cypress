@@ -2,9 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as shellUtil from '../../../lib/util/shell'
 import * as envEditors from '../../../lib/util/env-editors'
-import * as savedState from '../../../lib/saved_state'
 
-import { getUserEditor, setUserEditor } from '../../../lib/util/editors'
+import { getUserEditors } from '../../../lib/util/editors'
 
 const setPlatform = (platform: string) => {
   Object.defineProperty(process, 'platform', {
@@ -13,18 +12,7 @@ const setPlatform = (platform: string) => {
 }
 
 describe('lib/util/editors', () => {
-  let stateMock: { get: ReturnType<typeof vi.fn>, set: ReturnType<typeof vi.fn> }
-
-  beforeEach(() => {
-    stateMock = {
-      get: vi.fn().mockResolvedValue({}),
-      set: vi.fn(),
-    }
-
-    vi.spyOn(savedState, 'create').mockResolvedValue(stateMock as any)
-  })
-
-  describe('#getUserEditor', () => {
+  describe('#getUserEditors', () => {
     let platform: string
 
     beforeEach(() => {
@@ -40,13 +28,19 @@ describe('lib/util/editors', () => {
         id: 'vim',
         binary: 'vim',
         name: 'Vim',
+      }, {
+        id: 'atom',
+        binary: 'atom',
+        name: 'Atom',
       }])
 
       vi.spyOn(shellUtil, 'commandExists').mockImplementation((command) => {
-        const exists = ['code', 'subl', 'vim'].includes(command)
+        const exists = ['code', 'subl', 'vim', 'zed'].includes(command)
 
         return Promise.resolve(exists)
       })
+
+      vi.stubEnv('LAUNCH_EDITOR', '')
 
       platform = process.platform
       setPlatform('darwin')
@@ -55,101 +49,60 @@ describe('lib/util/editors', () => {
     afterEach(() => {
       setPlatform(platform)
       vi.restoreAllMocks()
+      vi.unstubAllEnvs()
     })
 
-    it('includes user-set path for "Other" option if available', () => {
-      vi.spyOn(savedState, 'create').mockResolvedValue({
-        get () {
-          return Promise.resolve({ isOther: true, binary: '/path/to/editor', id: 'other' })
-        },
-      } as any)
+    it('lists the file system opener first, then editors that exist', async () => {
+      const editors = await getUserEditors()
+
+      expect(editors.map((editor) => editor.id)).toEqual(['computer', 'sublimetext', 'code', 'vim'])
     })
 
-    it('computer option is Finder on MacOS', () => {
-      return getUserEditor().then(({ availableEditors }) => {
-        expect(availableEditors[0].name).toBe('Finder')
-      })
+    it('computer option is Finder on MacOS', async () => {
+      expect((await getUserEditors())[0].name).toBe('Finder')
     })
 
-    it('computer option is File System on Linux', () => {
+    it('computer option is File System on Linux', async () => {
       setPlatform('linux')
 
-      return getUserEditor().then(({ availableEditors }) => {
-        expect(availableEditors[0].name).toBe('File System')
-      })
+      expect((await getUserEditors())[0].name).toBe('File System')
     })
 
-    it('computer option is File Explorer on Windows', () => {
+    it('computer option is File Explorer on Windows', async () => {
       setPlatform('win32')
 
-      return getUserEditor().then(({ availableEditors }) => {
-        expect(availableEditors[0].name).toBe('File Explorer')
-      })
+      expect((await getUserEditors())[0].name).toBe('File Explorer')
     })
 
-    it('computer option defaults to File System', () => {
+    it('computer option defaults to File System', async () => {
       setPlatform('unknown')
 
-      return getUserEditor().then(({ availableEditors }) => {
-        expect(availableEditors[0].name).toBe('File System')
-      })
+      expect((await getUserEditors())[0].name).toBe('File System')
     })
 
-    describe('when alwaysIncludeEditors is true', () => {
-      it('returns editors along with preferred opener', () => {
-        const preferredOpener = {}
+    describe('LAUNCH_EDITOR', () => {
+      it('is listed when it names a command that exists', async () => {
+        vi.stubEnv('LAUNCH_EDITOR', 'zed')
 
-        vi.spyOn(savedState, 'create').mockResolvedValue({
-          get () {
-            return Promise.resolve({ preferredOpener })
-          },
-        } as any)
-
-        return getUserEditor(true).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).toHaveLength(4)
-          expect(preferredOpener).toBe(preferredOpener)
-        })
-      })
-    })
-
-    describe('when alwaysIncludeEditors is false', () => {
-      it('only returns preferred opener if one has been saved', () => {
-        const preferredOpener = {}
-
-        vi.spyOn(savedState, 'create').mockResolvedValue({
-          get () {
-            return Promise.resolve({ preferredOpener })
-          },
-        } as any)
-
-        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).toHaveLength(0)
-          expect(preferredOpener).toBe(preferredOpener)
-        })
+        expect(await getUserEditors()).toContainEqual({ id: 'launch-editor', name: 'LAUNCH_EDITOR (zed)', binary: 'zed' })
       })
 
-      it('returns available editors if preferred opener has not been saved', () => {
-        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).toHaveLength(4)
-          expect(preferredOpener).toBeUndefined()
-        })
+      it('is not listed when its command does not exist', async () => {
+        vi.stubEnv('LAUNCH_EDITOR', '/missing/editor')
+
+        expect((await getUserEditors()).map((editor) => editor.id)).not.toContain('launch-editor')
       })
 
-      it('is default', () => {
-        return getUserEditor().then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).toHaveLength(4)
-          expect(preferredOpener).toBeUndefined()
-        })
+      it('is not listed when unset', async () => {
+        expect((await getUserEditors()).map((editor) => editor.id)).not.toContain('launch-editor')
       })
-    })
-  })
 
-  describe('#setUserEditor', () => {
-    it('sets the preferred editor', () => {
-      const editor = {}
+      it('is not listed again when it names an editor that is already detected', async () => {
+        vi.stubEnv('LAUNCH_EDITOR', 'code')
 
-      return setUserEditor(editor).then(() => {
-        expect(stateMock.set).toHaveBeenCalledWith({ preferredOpener: editor })
+        const editors = await getUserEditors()
+
+        expect(editors.filter((editor) => editor.binary === 'code')).toEqual([{ id: 'code', name: 'Visual Studio Code', binary: 'code' }])
       })
     })
   })

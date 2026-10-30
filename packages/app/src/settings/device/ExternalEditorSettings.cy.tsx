@@ -43,20 +43,16 @@ describe('<ExternalEditorSettings />', () => {
     cy.get('[aria-expanded="false"]').contains('VS Code')
   })
 
-  it('can input a custom binary', () => {
+  it('does not offer a custom editor', () => {
     cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
       render: (gqlVal) => {
         return <ExternalEditorSettings gql={gqlVal} />
       },
     })
 
-    const inputSelector = '[aria-haspopup=true]'
+    cy.get('[aria-haspopup=true]').click()
 
-    cy.get(inputSelector).click()
-
-    cy.contains('Custom').click()
-    cy.get('[data-cy="custom-editor"]').should('exist')
-
-    cy.findByPlaceholderText(editorText.customPathPlaceholder).type('/usr/bin').should('have.value', '/usr/bin')
+    cy.get('[role=option]').should('have.length.greaterThan', 0)
+    cy.contains('[role=option]', 'Custom').should('not.exist')
   })
 })

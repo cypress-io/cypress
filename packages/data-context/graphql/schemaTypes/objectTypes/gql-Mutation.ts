@@ -475,8 +475,8 @@ export const mutation = mutationType({
       args: {
         path: nonNull(stringArg()),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.openDirectoryInIDE(args.path)
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.openDirectoryInIDE(args.path)
 
         return true
       },
@@ -503,8 +503,8 @@ export const mutation = mutationType({
           type: FileDetailsInput,
         })),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.file.openFile(
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.file.openFile(
           args.input.filePath,
           args.input.line || 1,
           args.input.column || 1,
