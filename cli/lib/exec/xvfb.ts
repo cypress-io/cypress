@@ -68,8 +68,8 @@ export async function stop (): Promise<null> {
   }
 }
 
-export function isNeeded (): boolean {
-  if (process.env.ELECTRON_RUN_AS_NODE) {
+export function isNeeded (env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env.ELECTRON_RUN_AS_NODE) {
     debug('Environment variable ELECTRON_RUN_AS_NODE detected, xvfb is not needed')
 
     return false // xvfb required for electron processes only.
@@ -79,11 +79,11 @@ export function isNeeded (): boolean {
     return false
   }
 
-  if (process.env.DISPLAY) {
+  if (env.DISPLAY) {
     const issueUrl = util.getGitHubIssueUrl(4034)
 
     const message = stripIndent`
-      DISPLAY environment variable is set to ${process.env.DISPLAY} on Linux
+      DISPLAY environment variable is set to ${env.DISPLAY} on Linux
       Assuming this DISPLAY points at working X11 server,
       Cypress will not spawn own Xvfb
 
