@@ -99,6 +99,172 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.actions.project.launchProject).toHaveBeenCalledTimes(1)
     })
 
+    describe('when the welcome screen has not been dismissed', () => {
+      const originalEnv = process.env
+
+      const agentCtx = (modeOptions: Parameters<typeof createDataContext>[0] = { project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true }) => {
+        const agent = createDataContext(modeOptions)
+
+        jest.spyOn(agent.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        jest.spyOn(agent._apis.localSettingsApi, 'getPreferences').mockResolvedValue({})
+        jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[0])
+        agent.coreData.activeBrowser = null
+        agent.coreData.cliBrowser = 'electron'
+
+        return agent
+      }
+
+      beforeEach(() => {
+        process.env = { PATH: originalEnv.PATH }
+      })
+
+      afterEach(() => {
+        process.env = originalEnv
+      })
+
+      it('launches the project for an agent that gave --project, --testingType and --browser', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx()
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).toHaveBeenCalledTimes(1)
+      })
+
+      it('launches the project when CYPRESS_AGENT_MODE forces agent mode on', async () => {
+        process.env.CYPRESS_AGENT_MODE = '1'
+
+        const agent = agentCtx()
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).toHaveBeenCalledTimes(1)
+      })
+
+      it('does not launch when the browser it was given cannot be found', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx()
+
+        jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+        jest.spyOn(agent.project, 'getProjectPreferences').mockResolvedValue(null)
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('waits for the person to dismiss it when no agent is detected', async () => {
+        const person = agentCtx()
+
+        await person.lifecycleManager.setInitialActiveBrowser()
+
+        expect(person.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('waits for the person to dismiss it when CYPRESS_AGENT_MODE forces agent mode off', async () => {
+        process.env.CLAUDECODE = '1'
+        process.env.CYPRESS_AGENT_MODE = '0'
+
+        const person = agentCtx()
+
+        await person.lifecycleManager.setInitialActiveBrowser()
+
+        expect(person.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('applies when the browser comes from defaultBrowser in the config, which stands in for --browser', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        agent.coreData.cliBrowser = null
+
+        jest.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).toHaveBeenCalledTimes(1)
+      })
+
+      it('applies to a defaultBrowser in the config file before setupNodeEvents finishes', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+
+        expect(agent.lifecycleManager.loadedFullConfig).toBeNull()
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+      })
+
+      it('applies to a defaultBrowser in the config file\'s testing type before setupNodeEvents finishes', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ e2e: { defaultBrowser: 'electron' } })
+
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+      })
+
+      it('follows the full config once it exists, even when setupNodeEvents removed the defaultBrowser', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+        jest.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: null } as unknown as FullConfig)
+
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+      })
+
+      it('is not bypassed without --testingType', () => {
+        process.env.CLAUDECODE = '1'
+
+        expect(agentCtx({ project: 'foo' }).lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+      })
+
+      it('is not bypassed without --browser or a defaultBrowser', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
+
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+      })
+
+      it('is not bypassed by a browser that a config reload copied into cliBrowser', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
+
+        agent.coreData.cliBrowser = null
+
+        // the first load has no browser to launch, so one is chosen without launching it
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.coreData.activeBrowser).not.toBeNull()
+
+        // a reload then copies the active browser into cliBrowser
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.coreData.cliBrowser).not.toBeNull()
+        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('is not bypassed in run mode', () => {
+        process.env.CLAUDECODE = '1'
+
+        const runCtx = createDataContext({ project: 'foo', testingType: 'e2e' }, 'run')
+
+        runCtx.coreData.cliBrowser = 'electron'
+
+        expect(runCtx.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+      })
+    })
+
     it('uses lastBrowser if available', async () => {
       jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
       ctx.coreData.activeBrowser = null
