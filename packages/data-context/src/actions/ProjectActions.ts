@@ -163,7 +163,9 @@ export class ProjectActions {
       return
     }
 
-    execa(binary, [projectPath])
+    execa(binary, [projectPath]).catch((err) => {
+      this.ctx.debug('error opening %s in %s: %o', projectPath, binary, err)
+    })
   }
 
   setAndLoadCurrentTestingType (type: TestingType) {

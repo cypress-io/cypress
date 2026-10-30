@@ -2,10 +2,9 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
-import type { Editor, EditorsResult } from '@packages/types'
+import type { Editor } from '@packages/types'
 import { getEnvEditors } from './env-editors'
 import * as shell from './shell'
-import * as savedState from '../saved_state'
 
 export const osFileSystemExplorer = {
   darwin: 'Finder',
@@ -45,44 +44,17 @@ const launchEditorOpener = (): Editor[] => {
   }]
 }
 
-const getUserEditors = async (): Promise<Editor[]> => {
-  return Bluebird.filter([...getEnvEditors(), ...launchEditorOpener()], (editor) => {
+export const getUserEditors = async (): Promise<Editor[]> => {
+  const editors = await Bluebird.filter([...getEnvEditors(), ...launchEditorOpener()], (editor) => {
     return shell.commandExists(editor.binary)
   })
-  .then((editors: Editor[] = []) => {
-    debug('user has the following editors: %o', editors)
 
-    return [computerOpener()].concat(_.map(editors, createEditor))
-  })
-}
+  debug('user has the following editors: %o', editors)
 
-export const getUserEditor = async (alwaysIncludeEditors = false): Promise<EditorsResult> => {
-  debug('get user editor')
+  if (process.env.LAUNCH_EDITOR && !editors.some((editor) => editor.id === 'launch-editor')) {
+    debug('LAUNCH_EDITOR is not a command Cypress can find: %s', process.env.LAUNCH_EDITOR)
+  }
 
-  return savedState.create()
-  .then((state) => state.get())
-  .then((state) => {
-    const preferredOpener = state.preferredOpener ?? undefined
-
-    if (preferredOpener) {
-      debug('return preferred editor: %o', preferredOpener)
-      if (!alwaysIncludeEditors) {
-        return { preferredOpener, availableEditors: [] }
-      }
-    }
-
-    return getUserEditors().then((availableEditors) => {
-      debug('return available editors: %o', availableEditors)
-
-      return { availableEditors, preferredOpener }
-    })
-  })
-}
-
-export const setUserEditor = async (editor: Editor) => {
-  debug('set user editor: %o', editor)
-
-  const state = await savedState.create()
-
-  await state.set({ preferredOpener: editor })
+  // LAUNCH_EDITOR can name an editor that's already detected
+  return [computerOpener(), ..._.uniqBy(editors, 'binary').map(createEditor)]
 }

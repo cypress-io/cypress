@@ -388,7 +388,7 @@ describe('ProjectActions', () => {
 
   describe('openDirectoryInIDE', () => {
     beforeEach(() => {
-      jest.mocked(execa).mockClear()
+      jest.mocked(execa).mockReset().mockReturnValue(Promise.resolve() as any)
       ctx._apis.electronApi.showItemInFolder = jest.fn()
       ctx.coreData.localSettings.availableEditors = [
         { id: 'computer', name: 'Finder', binary: 'computer' },
@@ -412,6 +412,13 @@ describe('ProjectActions', () => {
 
       expect(execa).toHaveBeenCalledWith('code', ['/project'])
       expect(ctx._apis.electronApi.showItemInFolder).not.toHaveBeenCalled()
+    })
+
+    it('does not let a failed editor launch reject', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+      jest.mocked(execa).mockReturnValueOnce(Promise.reject(new Error('spawn code ENOENT')) as any)
+
+      await expect(actions.openDirectoryInIDE('/project')).resolves.toBeUndefined()
     })
 
     it('does not run an editor Cypress did not detect', async () => {

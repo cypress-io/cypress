@@ -11,7 +11,9 @@ export const LocalSettingsPreferences = objectType({
     t.boolean('codeEditorLineWrap')
     t.string('preferredEditorBinary', {
       // A saved editor Cypress can't launch, such as an old custom path, reads as unset so the app asks for one
-      resolve: (source, args, ctx) => {
+      resolve: async (source, args, ctx) => {
+        await ctx.coreData.localSettings.refreshing
+
         const { availableEditors, preferences } = ctx.coreData.localSettings
 
         return isLaunchableEditor(availableEditors, preferences.preferredEditorBinary) ? preferences.preferredEditorBinary : null

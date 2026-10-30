@@ -40,6 +40,18 @@ describe('LocalSettingsPreferences', () => {
       expect(await queryPreferredEditorBinary()).toBeNull()
     })
 
+    it('waits for editor detection before checking the saved editor', async () => {
+      ctx.coreData.localSettings.availableEditors = []
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+      ctx.coreData.localSettings.refreshing = Promise.resolve().then(() => {
+        ctx.coreData.localSettings.availableEditors = [{ id: 'code', name: 'Visual Studio Code', binary: 'code' }]
+
+        return ctx.coreData.localSettings.availableEditors
+      })
+
+      expect(await queryPreferredEditorBinary()).toEqual('code')
+    })
+
     it('returns null when no editor is saved', async () => {
       expect(await queryPreferredEditorBinary()).toBeNull()
     })

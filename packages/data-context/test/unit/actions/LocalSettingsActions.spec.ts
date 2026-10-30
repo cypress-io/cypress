@@ -51,7 +51,50 @@ describe('LocalSettingsActions', () => {
     })
   })
 
+  describe('setPreferences', () => {
+    beforeEach(() => {
+      ctx.coreData.localSettings.availableEditors = [{ id: 'code', name: 'Visual Studio Code', binary: 'code' }]
+    })
+
+    it('saves a detected editor', async () => {
+      await actions.setPreferences(JSON.stringify({ preferredEditorBinary: 'code' }), 'global')
+
+      expect(ctx.coreData.localSettings.preferences.preferredEditorBinary).toEqual('code')
+      expect(ctx._apis.localSettingsApi.setPreferences).toHaveBeenCalledWith(expect.objectContaining({ preferredEditorBinary: 'code' }))
+    })
+
+    it('rejects an editor Cypress did not detect without saving it', async () => {
+      await expect(actions.setPreferences(JSON.stringify({ preferredEditorBinary: '/bin/sh' }), 'global')).rejects.toThrow('/bin/sh')
+
+      expect(ctx.coreData.localSettings.preferences.preferredEditorBinary).toBeUndefined()
+      expect(ctx._apis.localSettingsApi.setPreferences).not.toHaveBeenCalled()
+    })
+
+    it('allows clearing the editor', async () => {
+      await actions.setPreferences(JSON.stringify({ preferredEditorBinary: null }), 'global')
+
+      expect(ctx._apis.localSettingsApi.setPreferences).toHaveBeenCalledWith(expect.objectContaining({ preferredEditorBinary: null }))
+    })
+  })
+
   describe('refreshLocalSettings', () => {
+    it('settles and allows a retry when detecting editors fails', async () => {
+      jest.mocked(ctx._apis.localSettingsApi.getAvailableEditors).mockRejectedValueOnce(new Error('detection failed'))
+
+      const refreshing = actions.refreshLocalSettings()
+      const pending = ctx.coreData.localSettings.refreshing
+
+      await expect(refreshing).rejects.toThrow('detection failed')
+      await expect(pending).resolves.toEqual([])
+      expect(ctx.coreData.localSettings.refreshing).toBeNull()
+
+      jest.mocked(ctx._apis.localSettingsApi.getAvailableEditors).mockResolvedValueOnce([{ id: 'code', name: 'Visual Studio Code', binary: 'code' }])
+
+      await actions.refreshLocalSettings()
+
+      expect(ctx.coreData.localSettings.availableEditors).toEqual([{ id: 'code', name: 'Visual Studio Code', binary: 'code' }])
+    })
+
     describe('notifyWhenRunCompletes', () => {
       it('should fix false value', async () => {
         jest.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({
