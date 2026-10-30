@@ -7,7 +7,8 @@ import _ from 'lodash'
 import { wrap as wrapPreprocessor } from './preprocessor'
 import { wrap as wrapDevServer } from './dev-server'
 import { typescript as resolveTypescript } from '../../util/resolve'
-import { chainBefore as chainBeforeBrowserLaunch, wrapBefore as wrapBeforeBrowserLaunch } from './browser_launch'
+import { wrapBefore as wrapBeforeBrowserLaunch } from './browser_launch'
+import { combineHandlersByEvent } from './combine_handlers'
 import { nonNodeRequires, serializeError, wrapChildPromise } from '../util'
 import { validateEvent } from './validate_event'
 import { processCallback as processCrossOriginCallback } from './cross_origin'
@@ -24,24 +25,6 @@ import type {
 } from './types'
 
 const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
-
-const runInSequence = (first: PluginEventHandler, second: PluginEventHandler): PluginEventHandler => {
-  return async (...args: any[]) => {
-    await first(...args)
-    await second(...args)
-  }
-}
-
-// Repeat registrations of these events are combined into one handler instead
-// of the last registration replacing the rest. The server ignores what the
-// run and spec handlers return, so they only need to run in turn.
-const combineHandlersByEvent: Record<string, (first: PluginEventHandler, second: PluginEventHandler) => PluginEventHandler> = {
-  'before:run': runInSequence,
-  'after:run': runInSequence,
-  'before:spec': runInSequence,
-  'after:spec': runInSequence,
-  'before:browser:launch': chainBeforeBrowserLaunch,
-}
 
 export class RunPlugins {
   private ipc: PluginChildIpc

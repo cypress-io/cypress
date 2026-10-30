@@ -221,6 +221,52 @@ describe('lib/plugins/child/run_plugins', () => {
         })
       })
 
+      describe('combined after:screenshot handlers', () => {
+        const details = { path: '/screenshots/original.png', size: 100, dimensions: { width: 10, height: 10 }, name: 'shot' }
+
+        const invokeAfterScreenshot = async (...handlers) => {
+          await runPlugins.runSetupNodeEvents(config, (on) => {
+            handlers.forEach((handler) => on('after:screenshot', handler))
+          })
+
+          const registrations = sentPayload('setupTestingType:reply').registrations.filter((registration) => registration.event === 'after:screenshot')
+
+          expect(registrations).toHaveLength(1)
+
+          return runPlugins.invoke(registrations[0].eventId, [details])
+        }
+
+        it('passes each handler the details as updated by the handlers before it', async () => {
+          const second = vi.fn((updated) => ({ path: updated.path.replace('.png', '-copy.png') }))
+
+          const result = await invokeAfterScreenshot(
+            () => ({ path: '/screenshots/renamed.png', size: 200 }),
+            second,
+          )
+
+          expect(second).toHaveBeenCalledWith({ ...details, path: '/screenshots/renamed.png', size: 200 })
+          expect(result).toStrictEqual({ ...details, path: '/screenshots/renamed-copy.png', size: 200 })
+        })
+
+        it('passes the next handler only the properties the server would apply', async () => {
+          const second = vi.fn(() => undefined)
+
+          const result = await invokeAfterScreenshot(
+            () => ({ size: 300, name: 'ignored' }),
+            second,
+          )
+
+          expect(second).toHaveBeenCalledWith({ ...details, size: 300 })
+          expect(result).toStrictEqual({ ...details, size: 300 })
+        })
+
+        it('returns undefined when no handler returns updated details', async () => {
+          const result = await invokeAfterScreenshot(() => undefined, () => 'not an object')
+
+          expect(result).toBeUndefined()
+        })
+      })
+
       it('does not run later handlers when an earlier combined handler rejects', async () => {
         const second = vi.fn()
 
