@@ -60,11 +60,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
     ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
     if (isRemoteSubject(subject)) {
-      if (eventName !== 'click') {
-        $errUtils.throwErrByPath('remote_driver.unsupported_subject', { args: { cmd: eventName } })
-      }
-
-      return remoteClick(Cypress, cy, subject, { position, x, y, ...userOptions })
+      return remoteClick(Cypress, cy, subject, { position, x, y, ...userOptions }, eventName)
     }
 
     const options = _.defaults({}, userOptions, {

@@ -2,10 +2,14 @@
 // Everything here crosses the automation protocol, so it must stay JSON-serializable.
 
 export type QueryStep =
-  | { type: 'get', selector: string }
-  | { type: 'find', selector: string }
-  | { type: 'eq', index: number }
+  | { type: 'get', selector: string, includeShadowDom?: boolean }
+  // a jQuery traversal such as find, eq, closest or nextAll, run like the legacy driver's
+  | { type: 'traversal', method: string, args: (string | number)[], includeShadowDom?: boolean }
   | { type: 'contains', selector: string }
+  // the shadow roots of the elements before it
+  | { type: 'shadow' }
+  // the focused element, or nothing
+  | { type: 'focused' }
   // enters the document of the iframe the steps before it found
   | { type: 'frame', selector: string }
   // starts the steps in another tab instead of the AUT
@@ -42,6 +46,7 @@ export interface RemoteElementProps {
   selected: boolean
   disabled: boolean
   focused: boolean
+  focusable: boolean
   empty: boolean
 }
 
@@ -85,11 +90,61 @@ export interface ClickArgs extends ResolveArgs {
   index: number
   timeout: number
   options: ActionOptions
+  // the mouse action to perform; a plain click when unset
+  event?: 'click' | 'dblclick' | 'rightclick'
 }
 
 export interface TypeArgs extends ClickArgs {
   chars: string
   options: TypeOptions
+  // cy.clear, which only acts on text-like elements
+  clear?: boolean
+}
+
+export interface ElementArgs extends ResolveArgs {
+  index: number
+}
+
+export interface TriggerArgs extends ClickArgs {
+  eventName: string
+  eventOptions: Record<string, unknown>
+}
+
+export interface SelectArgs extends ClickArgs {
+  values: (string | number)[]
+}
+
+export interface SelectFileArgs extends ClickArgs {
+  action: 'select' | 'drag-drop'
+  // contents cross as base64
+  files: { contents: string, fileName?: string, mimeType?: string, lastModified?: number }[]
+}
+
+// cy.scrollTo / cy.scrollIntoView options the driver has already validated, passed to jquery.scrollTo
+export interface ScrollOptions {
+  axis: string
+  duration?: number | string
+  easing?: string
+  offset?: object
+  ensureScrollable?: boolean
+}
+
+export interface ScrollIntoViewArgs extends ElementArgs {
+  scroll: ScrollOptions
+}
+
+export interface ScrollToArgs extends ResolveArgs {
+  // scrolls the window instead of the elements the steps find
+  window: boolean
+  x: number | string
+  y: number | string
+  timeout: number
+  scroll: ScrollOptions
+}
+
+// a RegExp crosses as its parts, like a tab's URL
+export interface ClearLocalStorageArgs extends ResolveArgs {
+  keys: string | { source: string, flags: string } | null
 }
 
 export interface ActionResult {
@@ -100,6 +155,15 @@ export type AgentMethods = {
   resolve: (args: ResolveArgs) => ResolveResult
   click: (args: ClickArgs) => ActionResult
   type: (args: TypeArgs) => ActionResult
+  clearLocalStorage: (args: ClearLocalStorageArgs) => null
+  focus: (args: ElementArgs) => null
+  blur: (args: ElementArgs) => null
+  submit: (args: ElementArgs) => null
+  trigger: (args: TriggerArgs) => ActionResult
+  select: (args: SelectArgs) => ActionResult
+  selectFile: (args: SelectFileArgs) => ActionResult
+  scrollIntoView: (args: ScrollIntoViewArgs) => null
+  scrollTo: (args: ScrollToArgs) => null
 }
 
 export type AgentResponse<T> = { ok: true, value: T } | { ok: false, error: AgentError }

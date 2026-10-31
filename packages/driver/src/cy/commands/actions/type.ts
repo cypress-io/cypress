@@ -9,7 +9,7 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
 import { isRemoteSubject } from '../../remote'
-import { remoteType } from '../../remote/actions'
+import { remoteClear, remoteType } from '../../remote/actions'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
@@ -573,6 +573,10 @@ export default function (Commands, Cypress, cy, state, config) {
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
     })
+
+    if (isRemoteSubject(subject)) {
+      return remoteClear(Cypress, cy, subject, options)
+    }
 
     // blow up if any member of the subject
     // isnt a textarea or text-like

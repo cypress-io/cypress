@@ -10,7 +10,10 @@ export { isRemoteElement, isRemoteSubject } from './remote_element'
 
 export const isRemoteDriverEnabled = (Cypress: Pick<ICypress, 'config'>) => Cypress.config('experimentalRemoteDriver' as keyof Cypress.Config) === true
 
-const getContext = (Cypress: ICypress): AgentContext => {
+// what callAgent uses of Cypress
+type AgentCypress = Pick<ICypress, 'config' | 'browser'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
+
+const getContext = (Cypress: AgentCypress): AgentContext => {
   return {
     browser: Cypress.browser,
     config: {
@@ -60,7 +63,7 @@ const splitAtFrames = (allSteps: QueryStep[]) => {
   return { tab, frames, steps: steps.length ? steps : [{ type: 'get', selector: 'body' } as const] }
 }
 
-export const callAgent = <M extends keyof AgentMethods>(Cypress: ICypress, method: M, args: Parameters<AgentMethods[M]>[0], timeout?: number): Promise<ReturnType<AgentMethods[M]>> => {
+export const callAgent = <M extends keyof AgentMethods>(Cypress: AgentCypress, method: M, args: Parameters<AgentMethods[M]>[0], timeout?: number): Promise<ReturnType<AgentMethods[M]>> => {
   return Promise.try(() => {
     const { tab, frames, steps } = splitAtFrames(args.steps)
 

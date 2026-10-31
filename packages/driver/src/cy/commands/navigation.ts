@@ -913,7 +913,15 @@ export default (Commands, Cypress, cy, state, config) => {
           // @see https://github.com/cypress-io/cypress/issues/652
           // also, the page doesn't fully reload on hashchange, so we
           // can't and don't wait for before:window:load
-          if (event === 'hashchange') {
+          if (event === 'hashchange' && isRemoteDriverEnabled(Cypress)) {
+            // a cross-origin window takes no listener, so wait for automation to report the new URL
+            const waitForUrl = () => {
+              return Promise.resolve(Cypress.automation('get:aut:url', {}))
+              .then((href) => href === url ? resolve(win) : Promise.delay(50).then(waitForUrl))
+            }
+
+            Promise.delay(0).then(waitForUrl).catch(reject)
+          } else if (event === 'hashchange') {
             win.addEventListener('hashchange', resolve)
           } else {
             // listen for window:before:load and reject if it errors
@@ -924,7 +932,9 @@ export default (Commands, Cypress, cy, state, config) => {
 
           cleanup = () => {
             if (event === 'hashchange') {
-              win.removeEventListener('hashchange', resolve)
+              if (!isRemoteDriverEnabled(Cypress)) {
+                win.removeEventListener('hashchange', resolve)
+              }
             } else {
               cy.removeListener(event, onEvent)
               cy.removeListener('window:before:load', onBeforeLoad)
@@ -1015,7 +1025,8 @@ export default (Commands, Cypress, cy, state, config) => {
         return Promise.resolve(win)
       }
 
-      const visit = () => {
+      // the remote driver reads a cross-origin AUT's URL from automation; legacy reads the window
+      const visit = (autHref?: string) => {
         // hold onto our existing url
         const existing = $utils.locExisting()
 
@@ -1053,7 +1064,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // the AUT hasn't yet navigated to the secondary origin
         if (win) {
           try {
-            const current = $Location.create(win.location.href)
+            const current = $Location.create(autHref ?? win.location.href)
 
             // if all that is changing is the hash then we know
             // the browser won't actually make a new http request
@@ -1223,8 +1234,9 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      return visit()
-      .timeout(options.timeout, 'visit')
+      return Promise.resolve(isRemoteDriverEnabled(Cypress) ? Cypress.automation('get:aut:url', {}).catch(() => undefined) : undefined)
+      .then((autHref) => visit(typeof autHref === 'string' ? autHref : undefined))
+      .timeout(options.timeout ?? config('pageLoadTimeout'), 'visit')
       .catch(Promise.TimeoutError, () => {
         return timedOutWaitingForPageLoad(options.timeout, options._log)
       }).finally(() => {

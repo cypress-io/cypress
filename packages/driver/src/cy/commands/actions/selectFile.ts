@@ -1,81 +1,13 @@
 import { basename } from 'path'
 import _ from 'lodash'
-import mime from 'mime'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
-import { addEventCoords, dispatch } from './trigger'
+import { SELECT_FILE_ACTIONS, createDataTransfer } from './select_file_dom'
 import { runPrivilegedCommand } from '../../../util/privileged_channel'
-
-/* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
- * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
- * The behavior here varies between browsers, and though unpleasant, we have to attempt
- * to replicate it as far as possible.
- *
- * In webkit browsers, item.webkitGetAsEntry() returns null, because our File()
- * instances don't actually correspond with a file on disk. But the property is writeable,
- * so we're able to override it with our own implementation that returns a proper object.
- *
- * In Firefox, the builtin webkitGetAsEntry() returns a useful value, but attempting to
- * override webkitGetAsEntry() throws an error.
- *
- */
-const tryMockWebKit = (item) => {
-  try {
-    item.webkitGetAsEntry = () => {
-      return {
-        isFile: true,
-        file: (callback) => callback(item.getAsFile()),
-      }
-    }
-  } catch (e) {
-    // We're in a browser where webkitGetAsEntry cannot be mocked (probably Firefox).
-  }
-
-  return item
-}
-
-const createDataTransfer = (files: Cypress.FileReferenceObject[], eventTarget: JQuery<any>): DataTransfer => {
-  // obtain a reference to the `targetWindow` so we can use the right instances of the `File` and `DataTransfer` classes
-  const targetWindow = (eventTarget[0] as HTMLElement).ownerDocument.defaultView || window
-  const dataTransfer = new targetWindow.DataTransfer()
-
-  files.forEach(({
-    contents,
-    fileName = '',
-    mimeType = mime.getType(fileName) || '',
-    lastModified = Date.now(),
-  }) => {
-    const file = new targetWindow.File([contents], fileName, { lastModified, type: mimeType })
-
-    dataTransfer.items.add(file)
-  })
-
-  const oldItems = dataTransfer.items
-
-  // dataTransfer.items is a getter, and it - and the items read from its
-  // returned DataTransferItemList - cannot be assigned to. DataTransferItemLists
-  // also cannot be constructed, so we have to use an array instead.
-  Object.defineProperty(dataTransfer, 'items', {
-    get () {
-      return _.map(oldItems, tryMockWebKit)
-    },
-  })
-
-  // When a real user drags file(s) over an element, dataTransfer.types always contains `['Files']`.
-  // In Firefox however, the 'types' array is not properly populated when we construct our dataTransfer.
-  if (files.length !== 0 && dataTransfer.types.length === 0) {
-    Object.defineProperty(dataTransfer, 'types', {
-      get () {
-        // This is the value observed from real user events in Firefox 90.
-        return ['application/x-moz-file', 'Files']
-      },
-    })
-  }
-
-  return dataTransfer
-}
+import { isRemoteSubject } from '../../remote'
+import { remoteSelectFile } from '../../remote/actions'
 
 interface InternalSelectFileOptions extends Cypress.SelectFileOptions {
   _log: any
@@ -90,44 +22,6 @@ interface FilePathObject {
   lastModified?: number
   mimeType?: string
   path: string
-}
-
-const ACTIONS = {
-  select: (element, dataTransfer, coords, state) => {
-    (element as HTMLInputElement).files = dataTransfer.files
-    const inputEventOptions = addEventCoords({
-      bubbles: true,
-      composed: true,
-    }, coords)
-
-    const changeEventOptions = addEventCoords({
-      bubbles: true,
-    }, coords)
-
-    dispatch(element, state('window'), 'input', inputEventOptions)
-    dispatch(element, state('window'), 'change', changeEventOptions)
-  },
-  'drag-drop': (element, dataTransfer, coords, state) => {
-    const dragEventOptions = addEventCoords({
-      bubbles: true,
-      composed: true,
-      cancelable: true,
-      dataTransfer,
-    }, coords)
-
-    dispatch(element, state('window'), 'drag', dragEventOptions)
-    dispatch(element, state('window'), 'dragenter', dragEventOptions)
-    dispatch(element, state('window'), 'dragover', dragEventOptions)
-    dispatch(element, state('window'), 'drop', dragEventOptions)
-
-    // If a user drops file over an <input type="file"> element, browsers attach the file
-    // to it, exactly as if they'd selected one from a file list.
-    // If a user drops multiple files over an input without the "multiple" attribute,
-    // the browser does nothing, and we want to mimic this behavior.
-    if ($dom.isInputType(element, 'file') && (dataTransfer.files.length === 1 || element.multiple)) {
-      ACTIONS['select'](element, dataTransfer, coords, state)
-    }
-  },
 }
 
 export default (Commands, Cypress, cy, state, config) => {
@@ -304,7 +198,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       options._log?.snapshot('before', { next: 'after' })
 
-      if (!options.action || !ACTIONS[options.action]) {
+      if (!options.action || !SELECT_FILE_ACTIONS[options.action]) {
         $errUtils.throwErrByPath('selectFile.invalid_action', {
           onFail: options._log,
           args: { action: options.action },
@@ -345,6 +239,18 @@ export default (Commands, Cypress, cy, state, config) => {
 
       // Make sure files is an array even if the user only passed in one
       const filesArray = await collectFiles(files, options)
+
+      // the agent builds the files in the AUT, so their contents cross as base64
+      if (isRemoteSubject(subject)) {
+        const remoteFiles = filesArray.map(({ contents, fileName, mimeType, lastModified }) => {
+          const bytes = ArrayBuffer.isView(contents) ? Cypress.Buffer.from(contents.buffer, contents.byteOffset, contents.byteLength) : Cypress.Buffer.from(contents)
+
+          return { contents: bytes.toString('base64'), fileName, mimeType, lastModified }
+        })
+
+        return remoteSelectFile(Cypress, cy, subject, remoteFiles, options.action === 'drag-drop' ? 'drag-drop' : 'select', options)
+      }
+
       const subjectChain = cy.subjectChain()
 
       // We verify actionability on the subject, rather than the eventTarget,
@@ -377,7 +283,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           const dataTransfer = createDataTransfer(filesArray, options.eventTarget as JQuery<HTMLElement>)
 
-          ACTIONS[options.action as string](options.eventTarget?.get(0), dataTransfer, coords, state)
+          SELECT_FILE_ACTIONS[options.action as string](options.eventTarget?.get(0), dataTransfer, coords, state)
 
           return $elToClick
         },

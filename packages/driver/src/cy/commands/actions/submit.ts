@@ -6,6 +6,8 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
+import { isRemoteSubject } from '../../remote'
+import { remoteSubmit } from '../../remote/actions'
 
 interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
   _log?: Log
@@ -19,6 +21,10 @@ export default (Commands, Cypress, cy) => {
         log: true,
         $el: subject,
       })
+
+      if (isRemoteSubject(subject)) {
+        return remoteSubmit(Cypress, cy, subject, options)
+      }
 
       // changing this to a promise .map() causes submit events
       // to break when they need to be triggered synchronously

@@ -7,22 +7,9 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
-
-const findScrollableParent = ($el, win) => {
-  const $parent = $dom.getParent($el)
-
-  // if we're at the body, we just want to pass in
-  // window into jQuery scrollTo
-  if ($parent.is('body,html') || $dom.isDocument($parent)) {
-    return win
-  }
-
-  if ($dom.isScrollable($parent)) {
-    return $parent
-  }
-
-  return findScrollableParent($parent, win)
-}
+import { findScrollableParent } from './scroll_parent'
+import { isRemoteDriverEnabled, isRemoteSubject } from '../../remote'
+import { remoteScrollIntoView, remoteScrollTo } from '../../remote/actions'
 
 const isNaNOrInfinity = (item) => {
   const num = Number.parseFloat(item)
@@ -77,6 +64,20 @@ export default (Commands, Cypress, cy, state) => {
       // figure out the options which actually change the behavior of clicks
       let deltaOptions = $utils.filterOutOptions(options)
 
+      // if we cannot parse an integer out of duration
+      // which could be 500 or "500", then it's NaN...throw
+      if (isNaNOrInfinity(options.duration)) {
+        $errUtils.throwErrByPath('scrollIntoView.invalid_duration', { args: { duration: options.duration } })
+      }
+
+      if (!((options.easing === 'swing') || (options.easing === 'linear'))) {
+        $errUtils.throwErrByPath('scrollIntoView.invalid_easing', { args: { easing: options.easing } })
+      }
+
+      if (isRemoteSubject(subject)) {
+        return remoteScrollIntoView(Cypress, cy, subject, { axis: options.axis, duration: options.duration, easing: options.easing, offset: options.offset }, options)
+      }
+
       // here we want to figure out what has to actually
       // be scrolled to get to this element, cause we need
       // to scrollTo passing in that element.
@@ -89,16 +90,6 @@ export default (Commands, Cypress, cy, state) => {
         // jQuery scrollTo looks for the prop contentWindow
         // otherwise it'll use the wrong window to scroll :(
         options.$parent.contentWindow = options.$parent
-      }
-
-      // if we cannot parse an integer out of duration
-      // which could be 500 or "500", then it's NaN...throw
-      if (isNaNOrInfinity(options.duration)) {
-        $errUtils.throwErrByPath('scrollIntoView.invalid_duration', { args: { duration: options.duration } })
-      }
-
-      if (!((options.easing === 'swing') || (options.easing === 'linear'))) {
-        $errUtils.throwErrByPath('scrollIntoView.invalid_easing', { args: { easing: options.easing } })
       }
 
       deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
@@ -321,6 +312,10 @@ export default (Commands, Cypress, cy, state) => {
           return obj
         },
       })
+
+      if (isRemoteDriverEnabled(Cypress) && (subject == null || isRemoteSubject(subject))) {
+        return remoteScrollTo(Cypress, cy, subject ?? undefined, options.x, options.y, { axis: options.axis, duration: options.duration, easing: options.easing, ensureScrollable: options.ensureScrollable }, options)
+      }
 
       const subjectChain = cy.subjectChain()
 

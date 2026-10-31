@@ -1,102 +1,28 @@
 import _ from 'lodash'
 
 import $dom from '../../dom'
-import $elements from '../../dom/elements'
 import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
 import $errUtils from '../../cypress/error_utils'
 import type { QueryStep } from '../../remote/protocol'
 import { subjectChainToString } from '../../cypress/error_messages'
 import { extendRemoteSubject, isRemoteDriverEnabled, isRemoteSubject } from '../remote'
+import { TRAVERSALS, traverse } from '../../dom/traversal'
 
 type TraversalOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Shadow>
 
-const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
-
 export default (Commands, Cypress, cy) => {
-  const sortedUnique = ($el) => {
-    // we want _.uniq() to keep the elements with higher indexes instead of lower
-    // so we reverse, uniq, then reverse again
-    // so [div1, body, html, div2, body, html]
-    // becomes [div1, div2, body, html] and not [div1, body, html, div2]
-    return cy.$$(_($el).reverse().uniq().reverse().value())
+  // the agent runs the traversal in the AUT, so its arguments have to cross as JSON
+  const getRemoteStep = (traversal: string, includeShadowDom: boolean, arg1, arg2): QueryStep => {
+    const args = [arg1, arg2].filter((arg) => arg !== undefined)
+
+    if (!args.every((arg) => typeof arg === 'string' || typeof arg === 'number')) {
+      $errUtils.throwErrByPath('remote_driver.unsupported_argument', { args: { cmd: traversal } })
+    }
+
+    return { type: 'traversal', method: traversal, args, includeShadowDom }
   }
 
-  const getEl = (traversal, includeShadowDom, subject, arg1, arg2) => {
-    if (traversal === 'find' && includeShadowDom) {
-      const roots = subject.map((i, el) => $dom.findAllShadowRoots(el))
-
-      // add the roots to the existing selection
-      const elementsWithShadow = subject.add(_.flatten(roots))
-
-      // query the entire set of [selection + shadow roots]
-      return elementsWithShadow.find(arg1, arg2)
-    }
-
-    if (traversal === 'closest' && $dom.isWithinShadowRoot(subject[0])) {
-      const nodes = _.reduce(subject, (nodes, el) => {
-        const getClosest = (node) => {
-          const closestNode = node.closest(arg1)
-
-          if (closestNode) {
-            nodes.push(closestNode)
-
-            return nodes
-          }
-
-          const root = el.getRootNode()
-
-          if (!$elements.isShadowRoot(root)) return nodes
-
-          return getClosest(root.host)
-        }
-
-        return getClosest(el)
-      }, [] as Element[])
-
-      return sortedUnique(nodes)
-    }
-
-    if (traversal === 'parent' && $dom.isWithinShadowRoot(subject[0])) {
-      const parents = subject.map((i, el) => $elements.getParentNode(el))
-
-      return sortedUnique(parents)
-    }
-
-    if (traversal === 'parents' && $dom.isWithinShadowRoot(subject[0])) {
-      let $parents = subject.map((i, el) => $elements.getAllParents(el))
-
-      if (subject.length > 1) {
-        $parents = sortedUnique($parents)
-      }
-
-      return arg1 ? $parents.filter(arg1) : $parents
-    }
-
-    if (traversal === 'parentsUntil' && $dom.isWithinShadowRoot(subject[0])) {
-      let $parents = subject.map((i, el) => $elements.getAllParents(el, arg1))
-
-      if (subject.length > 1) {
-        $parents = sortedUnique($parents)
-      }
-
-      return arg2 ? $parents.filter(arg2) : $parents
-    }
-
-    return subject[traversal].call(subject, arg1, arg2)
-  }
-
-  const getRemoteStep = (traversal: string, arg1): QueryStep => {
-    switch (traversal) {
-      case 'find':
-        return { type: 'find', selector: arg1 }
-      case 'eq':
-        return { type: 'eq', index: arg1 }
-      default:
-        return $errUtils.throwErrByPath('remote_driver.unsupported_subject', { args: { cmd: traversal } })
-    }
-  }
-
-  _.each(traversals, (traversal) => {
+  _.each(TRAVERSALS, (traversal) => {
     Commands.addQuery(traversal, function traversalFn (arg1, arg2, userOptions: TraversalOptions = {}) {
       if (_.isObject(arg1) && !_.isFunction(arg1)) {
         userOptions = arg1
@@ -138,12 +64,12 @@ export default (Commands, Cypress, cy) => {
 
       return (subject) => {
         if (isRemoteDriverEnabled(Cypress) && isRemoteSubject(subject)) {
-          return extendRemoteSubject(traversal, subject, getRemoteStep(traversal, arg1), selector || traversal)
+          return extendRemoteSubject(traversal, subject, getRemoteStep(traversal, includeShadowDom, arg1, arg2), selector || traversal)
         }
 
         Cypress.ensure.isType(subject, ['element', 'document'], traversal, cy)
 
-        const $el = getEl(traversal, includeShadowDom, cy.$$(subject), arg1, arg2)
+        const $el = traverse(cy.$$, traversal, includeShadowDom, cy.$$(subject), arg1, arg2)
 
         // normalize the selector since jQuery won't have it
         // or completely borks it

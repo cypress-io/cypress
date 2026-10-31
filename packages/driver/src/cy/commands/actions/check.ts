@@ -5,6 +5,8 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
+import { isRemoteSubject } from '../../remote'
+import { remoteCheck } from '../../remote/actions'
 
 const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOptions = {}) => {
   // we're not handling conversion of values to strings
@@ -30,6 +32,10 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
     log: true,
     force: false,
   })
+
+  if (isRemoteSubject(subject)) {
+    return remoteCheck(Cypress, cy, type, subject, values, options)
+  }
 
   const isNoop = ($el) => {
     return type === 'check'

@@ -25,7 +25,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     prevUntil: () => cy.get('.item').last().prevUntil('.item:first').should('have.length', 1),
     shadow: () => cy.get('#host').shadow().find('#in-shadow').should('have.text', 'In shadow'),
     includeShadowDom: () => cy.get('#in-shadow', { includeShadowDom: true }).should('have.text', 'In shadow'),
-    root: () => cy.root().should('match', 'html'),
+    root: () => cy.root().find('#two').should('have.text', 'Two'),
     focused: () => {
       cy.get('#text').click()
       cy.focused().should('have.id', 'text')
@@ -212,52 +212,17 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
   },
 }
 
-const REMOTE_SUBJECT = 'the remote driver only chains .get(), .find(), .eq(), .contains() and .frame() on a remote subject'
+const REMOTE_SUBJECT = 'a remote subject can\'t be handed to a callback or read as a property'
 const READS_AUT_WINDOW = 'reads the AUT\'s window directly, which is cross-origin to the runner'
 
 const UNSUPPORTED: Record<string, string> = {
-  first: REMOTE_SUBJECT,
-  last: REMOTE_SUBJECT,
-  filter: REMOTE_SUBJECT,
-  not: REMOTE_SUBJECT,
-  children: REMOTE_SUBJECT,
-  parent: REMOTE_SUBJECT,
-  parents: REMOTE_SUBJECT,
-  parentsUntil: REMOTE_SUBJECT,
-  closest: REMOTE_SUBJECT,
-  siblings: REMOTE_SUBJECT,
-  next: REMOTE_SUBJECT,
-  nextAll: REMOTE_SUBJECT,
-  nextUntil: REMOTE_SUBJECT,
-  prev: REMOTE_SUBJECT,
-  prevAll: REMOTE_SUBJECT,
-  prevUntil: REMOTE_SUBJECT,
-  shadow: REMOTE_SUBJECT,
-  includeShadowDom: 'the remote driver rejects the includeShadowDom option',
   its: REMOTE_SUBJECT,
   invoke: REMOTE_SUBJECT,
   each: REMOTE_SUBJECT,
   within: 'the remote driver rejects .within()',
   'then($el)': 'a remote subject isn\'t a jQuery object',
-  dblclick: REMOTE_SUBJECT,
-  rightclick: REMOTE_SUBJECT,
-  clear: REMOTE_SUBJECT,
-  check: REMOTE_SUBJECT,
-  uncheck: REMOTE_SUBJECT,
-  select: REMOTE_SUBJECT,
-  selectFile: REMOTE_SUBJECT,
-  focus: REMOTE_SUBJECT,
-  blur: REMOTE_SUBJECT,
-  submit: REMOTE_SUBJECT,
-  trigger: REMOTE_SUBJECT,
-  scrollIntoView: REMOTE_SUBJECT,
-  'scrollTo an element': REMOTE_SUBJECT,
-  root: READS_AUT_WINDOW,
   document: READS_AUT_WINDOW,
-  focused: READS_AUT_WINDOW,
   getByRole: READS_AUT_WINDOW,
-  'scrollTo the window': READS_AUT_WINDOW,
-  clearLocalStorage: READS_AUT_WINDOW,
   'screenshot of the page': 'cy.screenshot fails internally with the remote driver',
   'screenshot of an element': 'cy.screenshot fails internally with the remote driver',
 }
@@ -266,7 +231,6 @@ const UNSUPPORTED: Record<string, string> = {
 const UNSUPPORTED_IN: Record<string, { browser: string, reason: string }> = {
   press: { browser: 'webkit', reason: 'cy.press() isn\'t supported in WebKit' },
   origin: { browser: 'webkit', reason: 'cy.origin() isn\'t supported in WebKit' },
-  hash: { browser: 'firefox', reason: 'a visit that only changes the hash never sees a load in Firefox' },
 }
 
 describe('remote driver: commands against a cross-origin AUT', { experimentalRemoteDriver: true, retries: 0, defaultCommandTimeout: 3000 }, () => {

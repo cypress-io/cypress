@@ -186,11 +186,7 @@ export default (Commands, Cypress, cy, state) => {
         throwUnsupportedOption('get', 'within')
       }
 
-      if (includeShadowDom) {
-        throwUnsupportedOption('get', 'includeShadowDom')
-      }
-
-      return () => extendRemoteSubject('get', undefined, { type: 'get', selector }, selector)
+      return () => extendRemoteSubject('get', undefined, { type: 'get', selector, includeShadowDom }, selector)
     }
 
     return () => {
@@ -464,6 +460,10 @@ export default (Commands, Cypress, cy, state) => {
     })
 
     return (subject) => {
+      if (isRemoteDriverEnabled(Cypress) && isRemoteSubject(subject)) {
+        return extendRemoteSubject('shadow', subject, { type: 'shadow' }, 'shadow')
+      }
+
       Cypress.ensure.isType(subject, 'element', 'shadow', cy)
 
       // find all shadow roots of the subject(s), if any exist

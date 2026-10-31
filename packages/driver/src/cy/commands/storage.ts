@@ -5,6 +5,7 @@ import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
 import type { StorageType } from './sessions/storage'
 import { clearStorage, getStorage } from './sessions/storage'
+import { callAgent, isRemoteDriverEnabled } from '../remote'
 
 type Options = Partial<Cypress.Loggable & Cypress.Timeoutable>
 
@@ -143,6 +144,13 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
       // bail if we have keys and we're not a string and we're not a regexp
       if (keys && !_.isString(keys) && !_.isRegExp(keys)) {
         $errUtils.throwErrByPath('clearLocalStorage.invalid_argument')
+      }
+
+      // the AUT is cross-origin to the runner, so the agent clears its storage, and there's no Storage to yield
+      if (isRemoteDriverEnabled(Cypress)) {
+        Cypress.log({ hidden: options.log === false, end: true })
+
+        return callAgent(Cypress, 'clearLocalStorage', { steps: [], keys: _.isRegExp(keys) ? { source: keys.source, flags: keys.flags } : keys ?? null })
       }
 
       const remote = clearLocalStorage(state, keys)

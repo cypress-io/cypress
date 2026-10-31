@@ -1,10 +1,15 @@
 import $dom from '../../../dom'
+import { extendRemoteSubject, isRemoteDriverEnabled } from '../../remote'
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('focused', function focused (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     const log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
     this.set('timeout', options.timeout)
+
+    if (isRemoteDriverEnabled(Cypress)) {
+      return () => extendRemoteSubject('focused', undefined, { type: 'focused' }, 'focused')
+    }
 
     return () => {
       let $el = cy.getFocused()

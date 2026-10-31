@@ -6,6 +6,8 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
 import type { Log } from '../../../cypress/log'
+import { isRemoteSubject } from '../../remote'
+import { remoteSelect } from '../../remote/actions'
 
 const newLineRe = /\n/g
 
@@ -13,6 +15,20 @@ interface InternalSelectOptions extends Partial<Cypress.SelectOptions> {
   _log?: Log
   $el: JQuery<HTMLSelectElement>
   error?: any
+}
+
+// normalize valueOrTextOrIndex if its not an array
+const normalizeValues = (valueOrTextOrIndex) => {
+  return [].concat(valueOrTextOrIndex).map((v: any) => {
+    if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) {
+      $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
+    }
+
+    // https://github.com/cypress-io/cypress/issues/16045
+    // replace `&nbsp;` in the text to `\us00a0` to find match.
+    // @see https://stackoverflow.com/a/53306311/1038927
+    return _.isNumber(v) ? v : v.replace(/&nbsp;/g, '\u00a0')
+  })
 }
 
 export default (Commands, Cypress, cy) => {
@@ -74,6 +90,10 @@ export default (Commands, Cypress, cy) => {
       // or texts and clear the previous selections which matches jQuery's
       // behavior
 
+      if (isRemoteSubject(subject)) {
+        return remoteSelect(Cypress, cy, subject, normalizeValues(valueOrTextOrIndex), options)
+      }
+
       if (!options.$el.is('select')) {
         node = $dom.stringify(options.$el)
         $errUtils.throwErrByPath('select.invalid_element', { args: { node } })
@@ -83,17 +103,7 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
       }
 
-      // normalize valueOrTextOrIndex if its not an array
-      valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v: any) => {
-        if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) {
-          $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
-        }
-
-        // https://github.com/cypress-io/cypress/issues/16045
-        // replace `&nbsp;` in the text to `\us00a0` to find match.
-        // @see https://stackoverflow.com/a/53306311/1038927
-        return _.isNumber(v) ? v : v.replace(/&nbsp;/g, '\u00a0')
-      })
+      valueOrTextOrIndex = normalizeValues(valueOrTextOrIndex)
 
       const multiple = options.$el.prop('multiple')
 
