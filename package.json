@@ -48,7 +48,7 @@
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,config,cypress-sessions,driver,electron,errors,eslint-config,example,extension,https-proxy,icons,launcher,net-stubbing,network,network-interception,network-tools,packherd-require,proxy,reporter,resolve-dist,root,runner,scaffold-config,server,socket,stderr-filtering,telemetry,ts,types,v8-snapshot-require,web-config} --scope=@tooling/{electron-mksnapshot,packherd,v8-snapshot} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=@packages/{agent-info,config,cypress-sessions,driver,electron,errors,eslint-config,example,extension,https-proxy,icons,launcher,net-stubbing,network,network-interception,network-tools,packherd-require,proxy,reporter,resolve-dist,root,runner,scaffold-config,server,socket,stderr-filtering,telemetry,ts,types,v8-snapshot-require,web-config} --scope=@tooling/{electron-mksnapshot,packherd,system-tests,v8-snapshot} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
