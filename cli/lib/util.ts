@@ -22,6 +22,7 @@ import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
 import { relativeToRepoRoot } from './relative-to-repo-root'
+import { normalizeModuleOptions } from './normalize-module-options'
 
 const debug = Debug('cypress:cli')
 
@@ -45,14 +46,6 @@ const getFileSize = async (filename: string): Promise<any> => {
 }
 
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
-
-const stringify = (val: any): string => {
-  return _.isObject(val) ? JSON.stringify(val) : val
-}
-
-function normalizeModuleOptions (options: any = {}): any {
-  return _.mapValues(options, stringify)
-}
 
 /**
  * Returns true if the platform is Linux. We do a lot of different

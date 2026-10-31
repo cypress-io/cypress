@@ -50,6 +50,31 @@ describe('module-api', function () {
     expect(cypressModule.run).toHaveBeenCalledWith({ spec: 'foo' })
   })
 
+  it('.run uses the options as they were when it was called', async () => {
+    const moduleApi = await import('../../lib/module-api')
+    const options = { spec: 'a.cy.js', config: { baseUrl: 'http://one' } }
+
+    const run = moduleApi.run(options)
+
+    options.spec = 'b.cy.js'
+    options.config.baseUrl = 'http://two'
+    await run
+
+    expect(cypressModule.run).toHaveBeenCalledWith({ spec: 'a.cy.js', config: '{"baseUrl":"http://one"}' })
+  })
+
+  it('.cli.parseRunArguments uses the arguments as they were when it was called', async () => {
+    const moduleApi = await import('../../lib/module-api')
+    const args = ['cypress', 'run', '--browser', 'chrome']
+
+    const parsed = moduleApi.cli.parseRunArguments(args)
+
+    args.push('--headed')
+    await parsed
+
+    expect(cypressModule.parseRunArguments).toHaveBeenCalledWith(['cypress', 'run', '--browser', 'chrome'])
+  })
+
   it('.run rejects when cypress.run throws', async () => {
     cypressModule.run.mockRejectedValue(new Error('Invalid project path parameter: '))
     const moduleApi = await import('../../lib/module-api')
