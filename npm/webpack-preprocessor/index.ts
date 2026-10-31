@@ -395,15 +395,14 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
       const hasErrors = stats.hasErrors()
       const logWarnings = debug.enabled && stats.hasWarnings()
 
-      // a full `toJson()` serializes every module and chunk, which costs
-      // hundreds of milliseconds per rebuild on large bundles, so only
-      // request the fields that are read and only when there's something to read
+      // a full `toJson()` serializes every module and chunk, which is slow on
+      // large bundles and runs on every watch rebuild, so only request the
+      // fields that are read and only when there's something to read
       const { errors = [], warnings = [] } = hasErrors || logWarnings
         ? stats.toJson({
           all: false,
           errors: hasErrors,
           warnings: logWarnings,
-          // only shown in debug output
           errorDetails: debug.enabled,
           errorStack: debug.enabled,
           moduleTrace: debug.enabled,
