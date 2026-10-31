@@ -11,6 +11,9 @@ import $dom from '../../dom'
 import $elements from '../../dom/elements'
 import $selection from '../../dom/selection'
 import { traverse } from '../../dom/traversal'
+import { getRoleSelector } from '../../dom/accessibility'
+import { findMatches } from '../../cy/commands/querying/get_by'
+import { matchesRole } from '../../cy/commands/querying/role_match'
 import $LocalStorage from '../../cypress/local_storage'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
@@ -98,6 +101,17 @@ const runSteps = (steps: QueryStep[]): JQuery<any> => {
       case 'focused':
         $current = focused.getFocused(document) ?? $()
         break
+      case 'document':
+        $current = $(document)
+        break
+      case 'role': {
+        const scope: Element[] = ($current ?? $(document.body)).toArray()
+        const roots = step.includeShadowDom ? _.flatMap(scope, (root) => [root, ...findAllShadowRoots(root).filter($elements.isShadowRoot)]) : scope
+        const name = typeof step.name === 'object' ? new RegExp(step.name.source, step.name.flags) : step.name
+
+        $current = $(findMatches(roots, getRoleSelector(step.role), (el, cache) => matchesRole(el, step.role, { name, hidden: step.hidden, native: step.native }, cache)))
+        break
+      }
       case 'contains': {
         const $scope = $current?.length ? $current : $(document.body)
         let $el = $()
@@ -621,14 +635,16 @@ const fromDriverValue = (value: unknown) => {
 
 const evaluate = (context: AgentContext, { steps, kind, path, args }: EvaluateArgs): EvaluateResult => {
   const $subject = runSteps(steps)
+  // like the legacy driver's cy.document(), a document subject is the document itself
+  const target = _.last(steps)?.type === 'document' ? document : $subject
 
   if (kind === 'its') {
-    return { value: toDriverValue($subject, _.get($subject, path)), has: _.has($subject, path) }
+    return { value: toDriverValue($subject, _.get(target, path)), has: _.has(target, path) }
   }
 
   const parts = path.split('.')
   const last = parts.pop() as string
-  const parent = parts.length ? _.get($subject, parts) : $subject
+  const parent = parts.length ? _.get(target, parts) : target
   const fn = parent?.[last]
 
   if (typeof fn !== 'function') {

@@ -10,6 +10,10 @@ export type QueryStep =
   | { type: 'shadow' }
   // the focused element, or nothing
   | { type: 'focused' }
+  // the AUT's document, which .its() and .invoke() read directly rather than through jQuery
+  | { type: 'document' }
+  // cy.getByRole's matches within the elements before it, or the body; a RegExp name crosses as its parts
+  | { type: 'role', role: string, name?: string | number | { source: string, flags: string }, hidden?: boolean, native?: boolean, includeShadowDom?: boolean }
   // enters the document of the iframe the steps before it found
   | { type: 'frame', selector: string }
   // starts the steps in another tab instead of the AUT

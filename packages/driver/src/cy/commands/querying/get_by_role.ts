@@ -6,21 +6,16 @@ import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import {
   AccessibilityCache,
   describeMatcher,
-  getAccessibleName,
   getNativeTagNames,
   getRoleSelector,
   hasNativeRole,
-  hasRole,
-  identityNormalizer,
-  isInaccessible,
-  matches,
   summarizeRoles,
 } from '../../../dom/accessibility'
 import { explainMiss, findMatches, logQuery, pickOptions, searchScope, validateOptions, yieldMatches } from './get_by'
+import { isNativeOnly, matchesRole } from './role_match'
+import { extendRemoteSubject, getRemoteWithinSubject, isRemoteDriverEnabled } from '../../remote'
+import type { GetByRoleOptions } from './role_match'
 import type { GetByQuery, GetByRoot, Search } from './get_by'
-
-// The public option types, so the runtime validation can't drift from them.
-type GetByRoleOptions = Partial<Pick<Cypress.GetByRoleOptions, 'name' | 'hidden' | 'native'>>
 
 // Keeps the error readable on large pages.
 const MAX_ROLES_IN_HINT = 20
@@ -31,27 +26,6 @@ const formatNames = (names: string[]) => {
   const remaining = names.length - shown.length
 
   return remaining > 0 ? `${shown.join(', ')} and ${remaining} more` : shown.join(', ')
-}
-
-// `native` defaults to on wherever HTML has an element for the role. A widget
-// role such as `tab` has none, so for those it defaults to off rather than
-// matching nothing.
-const isNativeOnly = (role: string, native?: boolean) => native ?? getNativeTagNames(role).length > 0
-
-// Cheapest check first: most candidates are ruled out by role alone, and
-// computing a name walks the element's whole subtree.
-const matchesRole = (element: Element, role: string, { name, hidden = false, native }: GetByRoleOptions, cache: AccessibilityCache) => {
-  if (!hasRole(element, role, cache) || (isNativeOnly(role, native) && !hasNativeRole(element, role))) {
-    return false
-  }
-
-  if (!hidden && isInaccessible(element, cache)) {
-    return false
-  }
-
-  // The name computation already trims the name and collapses runs of
-  // whitespace, so it's matched as computed, as Testing Library does.
-  return name === undefined || matches(getAccessibleName(element, cache), element, name, { normalizer: identityNormalizer })
 }
 
 // Explains a failure caused by `native`: an element would have matched, but
@@ -158,6 +132,23 @@ export default (Commands, Cypress, cy) => {
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
     const withinSubject = cy.state('withinSubjectChain')
     const log = logQuery(this, Cypress, role, options, userOptions)
+
+    // the matching runs in the AUT, so the name has to cross as JSON; a failure there has no search to describe
+    if (isRemoteDriverEnabled(Cypress)) {
+      const { name: matcher } = options
+
+      if (typeof matcher === 'function') {
+        return $errUtils.throwErrByPath('remote_driver.unsupported_argument', { args: { cmd: 'getByRole' } })
+      }
+
+      const name = _.isRegExp(matcher) ? { source: matcher.source, flags: matcher.flags } : matcher
+
+      return (subject) => {
+        const scope = subject ?? (withinSubject ? getRemoteWithinSubject(() => cy.getSubjectFromChain(withinSubject), 'getByRole') : undefined)
+
+        return extendRemoteSubject('getByRole', scope, { type: 'role', role, name, hidden: options.hidden, native: options.native, includeShadowDom }, describeQuery(role, options))
+      }
+    }
 
     // Kept from the most recent attempt so a failure can describe it.
     let lastSearch: Search | undefined

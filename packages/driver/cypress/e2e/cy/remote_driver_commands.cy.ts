@@ -30,7 +30,8 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
       cy.get('#text').click()
       cy.focused().should('have.id', 'text')
     },
-    document: () => cy.document().should('have.property', 'title', 'Audit Page'),
+    document: () => cy.document().its('title').should('eq', 'Audit Page'),
+    'document find': () => cy.document().find('#two').should('have.text', 'Two'),
     title: () => cy.title().should('eq', 'Audit Page'),
     url: () => cy.url().should('eq', AUDIT_PAGE),
     location: () => cy.location('pathname').should('eq', '/fixtures/remote-driver-audit.html'),
@@ -38,7 +39,13 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
       cy.visit(`${AUDIT_PAGE}#section`)
       cy.hash().should('eq', '#section')
     },
-    getByRole: () => cy.getByRole('button', { name: 'Role button' }).should('have.id', 'role-button'),
+    getByRole: () => cy.getByRole('button', { name: 'Role button', native: false }).should('have.id', 'role-button'),
+    'getByRole with a RegExp name': () => cy.getByRole('button', { name: /^submit$/i }).should('have.id', 'submit-button'),
+    'getByRole within': () => {
+      cy.get('#form').within(() => {
+        cy.getByRole('checkbox').should('have.id', 'check')
+      })
+    },
     'as and get(@alias)': () => {
       cy.get('#two').as('two')
       cy.get('@two').should('have.text', 'Two')
@@ -240,12 +247,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
   },
 }
 
-const READS_AUT_WINDOW = 'reads the AUT\'s window directly, which is cross-origin to the runner'
-
-const UNSUPPORTED: Record<string, string> = {
-  document: READS_AUT_WINDOW,
-  getByRole: READS_AUT_WINDOW,
-}
+const UNSUPPORTED: Record<string, string> = {}
 
 // unsupported in a browser for reasons the remote driver doesn't change, or a bug in one browser
 const UNSUPPORTED_IN: Record<string, { browser: string, reason: string }> = {

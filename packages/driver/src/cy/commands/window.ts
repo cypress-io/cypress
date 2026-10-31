@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { getTitleFromAutomation } from './helpers/window'
-import { isRemoteDriverEnabled } from '../remote'
+import { extendRemoteSubject, isRemoteDriverEnabled } from '../remote'
 import { createRemoteWindow } from '../remote/remote_window'
 
 const viewports = {
@@ -128,6 +128,14 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    // the AUT's document is cross-origin to the spec, so the remote driver yields it as a remote subject
+    if (isRemoteDriverEnabled(Cypress)) {
+      this.set('timeout', options.timeout)
+      Cypress.log({ hidden: options.log === false, timeout: options.timeout })
+
+      return () => extendRemoteSubject('document', undefined, { type: 'document' }, 'document')
+    }
+
     // Make sure the document command can communicate with the AUT.
     Cypress.ensure.commandCanCommunicateWithAUT(cy)
     this.set('timeout', options.timeout)
