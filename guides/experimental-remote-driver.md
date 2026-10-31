@@ -9,7 +9,7 @@ This guide records where the remote driver behaves differently from the legacy d
 - **`baseUrl` is required.** Config validation fails without it. Set it to the URL of the app under test.
 - **The runner never moves.** It's served from `cypress-runner.<baseUrl's site>` (or Cypress's own `localhost:<port>` when `baseUrl` is localhost or an IP), cross-origin to the AUT, and every `cy.visit` only changes the AUT iframe's `src`. Legacy moves the runner to the first origin a test visits and restarts the test; the remote driver never restarts a test.
 - **The AUT iframe is sandboxed**, so the app can't navigate the top frame.
-- **Nothing is injected into the AUT** when the project config enables the remote driver. The proxy skips the driver bootstrap, so the app's `document.cookie`, `fetch`, XHR, `frameElement` and timers are its own.
+- **Nothing is injected into the AUT** when the project config enables the remote driver. The proxy skips the driver bootstrap, so the app's `document.cookie`, `fetch`, XHR, `frameElement` and timers are its own. Two exceptions: iframes inside the AUT still get the bootstrap (see Uncaught errors), and a run that records to Test Replay injects its recorder (see Test Replay).
 - **The option is read from the project config** for anything decided at launch or by the proxy: the runner's location, AUT injection and WebKit's launch mode. A per-test `experimentalRemoteDriver` override switches the driver code path only, so a test that turns the legacy driver back on in a remote-driver project can't reach the AUT (and a remote-driver test in a legacy project runs against an AUT that still has the injected bootstrap).
 - **WebKit** must enable it in the config file. It then launches Playwright in-process, which needs playwright-webkit 1.59.0 or later, and depends on Playwright internals (its utility world, its page's console handling).
 
@@ -45,6 +45,8 @@ Where the commands that work behave differently from the legacy driver:
 - **The `match` assertion** (`.should('match', selector)`) isn't supported on a remote element.
 - **`.frame()`** enters the first element that matches, and each iframe level adds a round trip to every retry.
 - **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it.
+- **A URL change without a page load** (the app's `history.pushState`, `replaceState` or a hash change) doesn't add a "new url" log or update the runner's URL bar. `cy.url()` and `cy.location()` are still correct.
+- **Page loads after the first** don't add a "page load" log.
 
 ## Tabs
 
@@ -64,6 +66,7 @@ Where the commands that work behave differently from the legacy driver:
 - **Errors reach `uncaught:exception` asynchronously**, reported by the browser's protocol rather than a listener in the AUT, so an error after the test's last command may not fail it. The handler's third argument (the promise) is always `undefined`.
 - **Firefox** reports an unhandled rejection as a plain error, without the "unhandled promise rejection" note.
 - **WebKit** doesn't report unhandled rejections (they carry no location to tell the AUT's from the spec's), and attributes an error to the AUT when its script isn't on the runner's origin, so errors from the AUT's own iframes count too.
+- **Iframes inside the AUT still get the driver bootstrap**, which can't find Cypress there and throws `Something went terribly wrong…`. It shows in the browser console and in Test Replay.
 - **Firefox's preload-script error** "Permission denied to access property "length"" is filtered when it has no stack, so an AUT error with exactly that text and no stack would be missed.
 
 ## Dialogs
@@ -88,6 +91,18 @@ Where the commands that work behave differently from the legacy driver:
 - **`clock.tick()` returns a promise** of the new time instead of the time itself; use `cy.tick()`, which waits for it. `clock.details()`, used by the command log, returns the state after the last install or tick.
 - **`clock.setSystemTime()` and `clock.restore()`** are sent without waiting; later commands still see their effect.
 - **Timers in the AUT's own iframes aren't faked**, as with legacy.
+
+## Test Replay
+
+Findings from recording the same spec under both drivers in Chrome and Electron against the cloud stub; nothing here has been fixed yet.
+
+- **Only Chrome and Electron are recorded**, as with the legacy driver.
+- **Recording injects into the AUT.** The capture protocol injects its recorder into the AUT's main world over CDP, so "nothing is injected into the AUT" holds only for runs that don't record.
+- **The AUT's DOM, network, console and uncaught errors are recorded**, including for a cross-site AUT and its iframes.
+- **Commands have no snapshots or highlights**, so selecting a command doesn't jump to its moment in the recording. The protocol takes its snapshot from the runner's view of the AUT's document, which a cross-origin AUT doesn't have.
+- **Actions show as pending**, and each reports a capture error, because the agent sends only `{ x, y }` coordinates where the protocol expects the full set.
+- **URL changes without a page load, and page loads after the first, are missing**, as in the command log.
+- **Tabs driven with `cy.tab()` aren't recorded**, since the protocol is connected only to the runner's tab.
 
 ## Changes that affect every run
 
