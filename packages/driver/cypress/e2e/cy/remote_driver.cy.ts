@@ -65,7 +65,7 @@ describe('experimentalRemoteDriver', () => {
 
   describe('cross-origin AUT', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/remote-driver.html')
+      cy.visit('http://localhost:3500/fixtures/remote-driver.html')
       cy.get('#cross-origin-link').click()
     })
 

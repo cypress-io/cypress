@@ -2,13 +2,13 @@
 import { defineConfig } from 'cypress'
 import { baseConfig } from './cypress.config'
 
-// Same-site runner spike: the run starts with the runner on a Cypress-reserved
-// host under foobar.com, so a www.foobar.com AUT is same-site but cross-origin.
+// Same-site runner spike: the runner is served from cypress-runner.foobar.com,
+// so the www.foobar.com app is same-site but cross-origin to it.
 export default defineConfig({
   ...baseConfig,
   e2e: {
     ...baseConfig.e2e,
-    baseUrl: 'http://cypress-runner.foobar.com:3500',
+    baseUrl: 'http://www.foobar.com:3500',
     specPattern: 'cypress/e2e/cy/isolated_runner*.cy.ts',
     experimentalRemoteDriver: true,
   },

@@ -507,6 +507,10 @@ export function mergeDefaults (
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   }, testingType)
 
+  if (config.experimentalRemoteDriver === true && !config.baseUrl) {
+    return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, '`experimentalRemoteDriver` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
+  }
+
   // `browsers` is omitted from the validation above because it is typically an empty
   // array at this point and is populated with the list of detected browsers later (see
   // buildBaseFullConfig). A non-array value still needs to be rejected here though,

@@ -201,6 +201,23 @@ describe('config/src/project/utils', () => {
     })
   })
 
+  describe('experimentalRemoteDriver', () => {
+    it('requires baseUrl', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+        experimentalRemoteDriver: true,
+      }
+
+      const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
+
+      expect(() => mergeDefaults(cfg, {}, {}, getFilesByGlob)).toThrow()
+
+      expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_VALIDATION_MSG_ERROR', null, null, '`experimentalRemoteDriver` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
+    })
+  })
+
   describe('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'foo-bar')

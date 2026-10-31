@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { toBoolean } from 'underscore.string'
-import { origin } from '@packages/network-tools'
+import { getRemoteRunnerOrigin, origin } from '@packages/network-tools'
 
 export const hideKeys = (token?: string | number | boolean) => {
   if (!token) {
@@ -19,15 +19,26 @@ export const hideKeys = (token?: string | number | boolean) => {
   ].join('...')
 }
 
+const getRootUrl = (obj: any, proxyUrl: string) => {
+  if (!obj.baseUrl) {
+    return proxyUrl
+  }
+
+  // the remote driver serves the runner on the app's site and never moves it
+  if (obj.experimentalRemoteDriver === true) {
+    return getRemoteRunnerOrigin(obj.baseUrl, obj.port)
+  }
+
+  return origin(obj.baseUrl)
+}
+
 export function setUrls (obj: any) {
   obj = _.clone(obj)
 
   // TODO: rename this to be proxyServer
   const proxyUrl = `http://localhost:${obj.port}`
 
-  const rootUrl = obj.baseUrl
-    ? origin(obj.baseUrl)
-    : proxyUrl
+  const rootUrl = getRootUrl(obj, proxyUrl)
 
   return {
     ...obj,

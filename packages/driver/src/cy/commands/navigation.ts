@@ -13,8 +13,7 @@ import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
 import type { StateFunc } from '../../cypress/state'
 import type { $Cy } from '../../cypress/cy'
-import { getRemoteRunnerOrigin, isRemoteDriverEnabled } from '../remote'
-import { urlSameSiteMatch } from '@packages/network-tools'
+import { isRemoteDriverEnabled } from '../remote'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -1089,15 +1088,8 @@ export default (Commands, Cypress, cy, state, config) => {
           const remoteOrigin = Cypress.config('injectDocumentDomain') ? remote.superDomainOrigin : remote.origin
           const existingOrigin = Cypress.config('injectDocumentDomain') ? existing.superDomainOrigin : existing.origin
 
-          const isRemoteDriver = isRemoteDriverEnabled(Cypress)
-
-          // the remote driver keeps the AUT cross-origin to the top frame and only moves the top frame to change site.
-          // Moving it restarts the test, so only a test's first visit may move it, or a multi-site test would never settle.
-          const canChangeIframeSrc = isRemoteDriver
-            ? urlSameSiteMatch(remote.href, existing.href) || previouslyVisitedLocation
-            : remoteOrigin === existingOrigin || previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge
-
-          if (canChangeIframeSrc) {
+          // the remote driver drives a cross-origin AUT, so the runner never follows it to another origin
+          if (isRemoteDriverEnabled(Cypress) || remoteOrigin === existingOrigin || previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
@@ -1114,7 +1106,7 @@ export default (Commands, Cypress, cy, state, config) => {
           .then(() => {
             // and now we must change the url to be the new
             // origin but include the test that we're currently on
-            const newUri = new UrlParse(isRemoteDriver ? getRemoteRunnerOrigin(Cypress, remote) : remote.origin)
+            const newUri = new UrlParse(remote.origin)
 
             newUri
             .set('pathname', existing.pathname)

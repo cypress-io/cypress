@@ -3731,7 +3731,7 @@ declare namespace Cypress {
      */
     experimentalOriginDependencies?: boolean
     /**
-     * Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser's automation protocol, so they work against a cross-origin AUT without `cy.origin()`.
+     * Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser's automation protocol, so they work against a cross-origin AUT without `cy.origin()`. Requires `baseUrl`: the runner is served from that site and stays there.
      * @default false
      */
     experimentalRemoteDriver?: boolean

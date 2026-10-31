@@ -3,7 +3,6 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import type { ICypress } from '../../cypress'
 import type { Log } from '../../cypress/log'
-import type { LocationObject } from '../../cypress/location'
 import type { AgentContext, AgentError, AgentMethods, AgentResponse, FrameOwner, QueryStep, TabUrl } from '../../remote/protocol'
 import { RemoteElement, RemoteLocator, isRemoteSubject } from './remote_element'
 
@@ -113,14 +112,4 @@ export const extendRemoteSubject = (cmd: string, subject: unknown, step: QuerySt
   }
 
   return $errUtils.throwErrByPath('remote_driver.unsupported_subject', { args: { cmd } })
-}
-
-// Cross-origin to the AUT keeps it out of the top frame; same-site keeps its cookies first-party
-export const getRemoteRunnerOrigin = (Cypress: Pick<ICypress, 'config'>, aut: LocationObject) => {
-  // localhost and IPs have no registrable domain to put a subdomain under
-  if (aut.superDomain === aut.hostname) {
-    return `${aut.protocol}//${aut.hostname}:${Cypress.config('port')}`
-  }
-
-  return `${aut.protocol}//cypress-runner.${aut.superDomain}${aut.port ? `:${aut.port}` : ''}`
 }

@@ -2,13 +2,13 @@
 import { defineConfig } from 'cypress'
 import { baseConfig } from './cypress.config'
 
-// Isolated-runner spike: no baseUrl, so the runner is served from Cypress's own
-// origin, and the remote driver keeps the top frame there for every cy.visit.
+// Isolated-runner spike: a localhost baseUrl serves the runner from Cypress's own
+// origin, so every AUT is cross-origin to it.
 export default defineConfig({
   ...baseConfig,
   e2e: {
     ...baseConfig.e2e,
-    baseUrl: null,
+    baseUrl: 'http://localhost:3500',
     specPattern: 'cypress/e2e/cy/isolated_runner*.cy.ts',
     experimentalRemoteDriver: true,
   },

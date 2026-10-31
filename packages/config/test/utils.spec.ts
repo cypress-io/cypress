@@ -55,6 +55,19 @@ describe('config/src/utils', () => {
       expect(urls.proxyUrl).toEqual('http://localhost:65432')
     })
 
+    it('serves the runner from the app\'s site with experimentalRemoteDriver', () => {
+      const urls = setUrls({
+        port: 65432,
+        baseUrl: 'http://shop.example.com:8080/app',
+        clientRoute: '/__/',
+        reporterRoute: '/__cypress/reporter',
+        experimentalRemoteDriver: true,
+      })
+
+      expect(urls.browserUrl).toEqual('http://cypress-runner.example.com:8080/__/')
+      expect(urls.reporterUrl).toEqual('http://cypress-runner.example.com:8080/__cypress/reporter')
+    })
+
     it('strips baseUrl to host when set', () => {
       const obj = {
         port: 65432,

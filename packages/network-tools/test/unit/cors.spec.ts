@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { parseUrlIntoHostProtocolDomainTldPort, urlOriginsMatch, urlSameSiteMatch, urlMatchesPolicyProps, urlMatchesOriginProtectionSpace, getSuperDomainOrigin, policyFromConfig } from '../../lib'
+import { parseUrlIntoHostProtocolDomainTldPort, urlOriginsMatch, urlSameSiteMatch, urlMatchesPolicyProps, urlMatchesOriginProtectionSpace, getSuperDomainOrigin, getRemoteRunnerOrigin, policyFromConfig } from '../../lib'
 import type { Policy } from '../../lib/cors'
 import type { ParsedHostWithProtocolAndHost } from '../../lib/types'
 
@@ -550,6 +550,18 @@ describe('lib/cors', () => {
     it('subdomain', () => {
       expect(getSuperDomainOrigin('http://www.example.com')).toEqual('http://example.com')
       expect(getSuperDomainOrigin('http://www.app.herokuapp.com:8080')).toEqual('http://app.herokuapp.com:8080')
+    })
+  })
+
+  describe('.getRemoteRunnerOrigin', () => {
+    it('uses the cypress-runner host on the app\'s site', () => {
+      expect(getRemoteRunnerOrigin('http://shop.example.com:8080/cart', 1234)).toEqual('http://cypress-runner.example.com:8080')
+      expect(getRemoteRunnerOrigin('https://example.co.uk', 1234)).toEqual('https://cypress-runner.example.co.uk')
+    })
+
+    it('uses Cypress\'s own port for localhost and IPs', () => {
+      expect(getRemoteRunnerOrigin('http://localhost:3000', 1234)).toEqual('http://localhost:1234')
+      expect(getRemoteRunnerOrigin('http://127.0.0.1:3000', 1234)).toEqual('http://127.0.0.1:1234')
     })
   })
 

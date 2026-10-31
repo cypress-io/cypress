@@ -199,3 +199,21 @@ export function getSuperDomainOrigin (url: string) {
   // protocol + superdomain + port (subdomain is not factored in)
   return _.compact([`${protocol}//${getSuperDomain(url)}`, port]).join(':')
 }
+
+/**
+ * The origin the remote driver serves the runner from: cross-origin to the AUT so the AUT can't
+ * reach the top frame, and same-site so the AUT's cookies stay first-party.
+ * ex: http://shop.example.com:8081 -> http://cypress-runner.example.com:8081
+ */
+export function getRemoteRunnerOrigin (autUrl: string, cypressPort: number | string) {
+  const { hostname, port, protocol } = new URL(autUrl)
+  const parsedHost = parseUrlIntoHostProtocolDomainTldPort(autUrl)
+  const superDomain = getSuperDomainFromParsedHost(parsedHost)
+
+  // localhost and IPs have no registrable domain to put a subdomain under
+  if (!parsedHost.domain) {
+    return `${protocol}//${hostname}:${cypressPort}`
+  }
+
+  return _.compact([`${protocol}//cypress-runner.${superDomain}`, port]).join(':')
+}
