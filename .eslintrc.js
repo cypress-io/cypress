@@ -39,10 +39,6 @@ module.exports = {
     'cli/types/**',
     // these fixtures are supposed to fail linting
     'npm/eslint-plugin-dev/test/fixtures/**',
-    // Cloud generated
-    'system-tests/lib/validations/**',
-    // ignore as the file has invalid syntax
-    'system-tests/projects/no-specs-babel-conflict/src/Invalid.jsx',
     // Build output, ignored here rather than per package: a package's
     // `.eslintignore` is re-based onto this directory with its patterns
     // unchanged, so any entry containing a `/` silently matches nothing.
@@ -90,18 +86,6 @@ module.exports = {
       ],
       rules: {
         'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-      },
-    },
-    {
-      // Sample user apps compiled by their own toolchains. Angular resolves a
-      // constructor parameter's type to a DI token at runtime, so a type-only
-      // import erases the token and the app fails to compile (NG2003).
-      files: [
-        'system-tests/project-fixtures/**',
-        'system-tests/projects/**',
-      ],
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'off',
       },
     },
     {

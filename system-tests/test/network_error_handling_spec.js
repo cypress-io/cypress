@@ -97,8 +97,7 @@ const controllers = {
 
     return setTimeout(() => {
       return req.socket.destroy()
-    }
-    , 1000)
+    }, 1000)
   },
 
   duringBodyReset (req, res) {
@@ -107,8 +106,7 @@ const controllers = {
 
     return setTimeout(() => {
       return req.socket.destroy()
-    }
-    , 1000)
+    }, 1000)
   },
 
   worksThirdTime (req, res) {

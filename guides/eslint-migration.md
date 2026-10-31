@@ -69,7 +69,7 @@
 - [x] tooling/v8-snapshot
 
 ### Batch 5: Test and script folders
-- [ ] system-tests
+- [x] system-tests
 - [ ] scripts
 
 ---
@@ -224,7 +224,7 @@ When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfi
 ### 8. **Deprecate and Remove Old Plugin**
 - `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
 - Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
-- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
+- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js` and `eslint` 8 from the root `package.json`.
 
 ### 9. **Lint-Staged After the Migration**
 The root `lint-staged` config is already a single catch-all pattern, so it needs no change when the last package migrates. Once the root itself moves to flat config, that same pattern runs ESLint 9.

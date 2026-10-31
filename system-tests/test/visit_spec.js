@@ -72,8 +72,7 @@ const onServer = function (app) {
 
     return setTimeout(() => {
       return res.send(`<html>timeout: <span>${ms}</span></html>`)
-    }
-    , ms)
+    }, ms)
   })
 
   app.get('/response_never_finishes', (req, res) => {

@@ -60,13 +60,12 @@ const copyFor = (code: keyof typeof TAP_ERROR_COPY): string => {
   return (TAP_ERROR_COPY[code] as TapErrorCopy).description!.replace(/`/g, '')
 }
 
+const snapshot = require('snap-shot-it')
+
 /**
  * Snapshots human-readable output after scrubbing paths, ports, and timing so failures
  * represent rendering changes rather than environment differences.
  */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const snapshot = require('snap-shot-it')
-
 const snapshotRendering = (name: string, text: string, extra: Array<[RegExp, string]> = []): void => {
   // The patched snap-shot-core resolves the snapshot file from this global (see
   // patches/snap-shot-core*), but still creates the directory relative to the real
