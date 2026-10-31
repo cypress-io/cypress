@@ -24,7 +24,8 @@ const layoutRulesOff = Object.fromEntries(
 
 export default [
   ...baseConfig,
-  // Fixture package.json files mirror the user projects they stand in for
+  // Fixture package.json files keep the layout and key order of the user
+  // projects they stand in for
   ...jsonConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
   {
     languageOptions: {
@@ -69,6 +70,7 @@ export default [
       // runtime, so a type-only import erases the token and the app fails to
       // compile (NG2003)
       '@typescript-eslint/consistent-type-imports': 'off',
+      // these flag the way users write their apps rather than bugs
       '@typescript-eslint/ban-ts-comment': 'off',
       'no-restricted-properties': 'off',
       'no-restricted-syntax': 'off',
@@ -82,13 +84,16 @@ export default [
     },
   },
   {
+    // Specs that check the preprocessor compiles their syntax, so their
+    // bindings exist only to be compiled
     files: ['projects/ids/cypress/**'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
   {
-    // Exercise how the snapshot bundler loads modules, unused bindings included
+    // These exercise how the V8 snapshot bundler loads modules, so unused
+    // bindings and the `debugger` statement are deliberate
     files: ['projects/v8-snapshot/**'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
@@ -103,11 +108,13 @@ export default [
       'lib/validations/**',
       // scaffold output that must match what the scaffold tool generates
       'projects/pristine*/expected-cypress-*/**',
-      // 3rd party
+      // vendored third-party code
       'projects/e2e/static/jquery.js',
-      // disable `@typescript-eslint/ban-types`, which typescript-eslint has removed
+      // These Vite scaffold files disable `@typescript-eslint/ban-types`, which
+      // typescript-eslint has removed, and ESLint reports a disable directive
+      // for an unknown rule as an error
       'projects/vue3-vite-ts-*/src/env.d.ts',
-      // invalid on purpose
+      // invalid on purpose: system tests assert on the errors they produce
       'project-fixtures/react/src/AppCompilationError.cy.jsx',
       'projects/config-with-ts-module-error/cypress.config.ts',
       'projects/config-with-ts-syntax-error/cypress.config.ts',
@@ -121,6 +128,7 @@ export default [
       'projects/plugins-root-syntax-error/cypress.config.js',
       'projects/qwik-app/cypress-ct-bad-missing-value/**',
       'projects/qwik-app/cypress-ct-bad-syntax/**',
+      // `cy.fixture` data written as bare object literals, not modules
       'projects/todos/tests/_fixtures/**/*.js',
     ],
   },
