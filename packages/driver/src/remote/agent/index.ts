@@ -31,6 +31,10 @@ import type {
   ClearLocalStorageArgs,
   ClickArgs,
   ElementArgs,
+  ScreenshotCleanupArgs,
+  ScreenshotElementPosition,
+  ScreenshotPrepareArgs,
+  ScreenshotScrollArgs,
   ScrollIntoViewArgs,
   ScrollOptions,
   ScrollToArgs,
@@ -482,6 +486,80 @@ const scrollTo = (context: AgentContext, args: ScrollToArgs) => {
   return attempt()
 }
 
+// cy.screenshot's changes to the AUT's document, made here since the AUT is cross-origin to the runner
+const screenshotPrepare = (context: AgentContext, { steps, index, element, blackout, disableAnimations }: ScreenshotPrepareArgs) => {
+  const $body = $<HTMLBodyElement>('body')
+  const $container = element ? resolveSubject(steps, index) : $(document.documentElement)
+
+  if (disableAnimations) {
+    $dom.addCssAnimationDisabler($body)
+  }
+
+  blackout.forEach((selector) => $dom.addBlackouts($body, $container, selector))
+
+  return null
+}
+
+const screenshotCleanup = (context: AgentContext, { disableAnimations }: ScreenshotCleanupArgs) => {
+  const $body = $<HTMLBodyElement>('body')
+
+  if (disableAnimations) {
+    $dom.removeCssAnimationDisabler($body)
+  }
+
+  $dom.removeBlackouts($body)
+
+  return null
+}
+
+let resetScrollOverrides: (() => void) | undefined
+
+const screenshotOverrideScroll = () => {
+  const { documentElement, body } = document
+  const originalOverflow = documentElement.style.overflow
+  const originalBodyOverflowY = body.style.overflowY
+  const { scrollX, scrollY } = window
+
+  // overflow-y: scroll can break `window.scrollTo`
+  body.style.overflowY = 'visible'
+  // hide scrollbars
+  documentElement.style.overflow = 'hidden'
+  // lets elements that resize on scroll settle before the height is measured
+  window.dispatchEvent(new Event('scroll'))
+
+  resetScrollOverrides = () => {
+    documentElement.style.overflow = originalOverflow
+    body.style.overflowY = originalBodyOverflowY
+    window.scrollTo(scrollX, scrollY)
+  }
+
+  return { documentHeight: $(document).height() ?? 0 }
+}
+
+const screenshotResetScroll = () => {
+  resetScrollOverrides?.()
+  resetScrollOverrides = undefined
+
+  return null
+}
+
+const screenshotScrollTo = (context: AgentContext, { y }: ScreenshotScrollArgs) => {
+  window.scrollTo(0, y)
+
+  return null
+}
+
+const screenshotElementPosition = (context: AgentContext, { steps, index }: ElementArgs): ScreenshotElementPosition => {
+  const rect = resolveSubject(steps, index).get(0).getBoundingClientRect()
+
+  return {
+    width: rect.width,
+    height: rect.height,
+    fromElViewport: { top: rect.top, left: rect.left, bottom: rect.bottom },
+    fromElWindow: { top: Math.ceil(rect.top + window.scrollY) },
+  }
+}
+
 // the agent shares the AUT's origin, and so its localStorage
 const clearLocalStorage = (context: AgentContext, { keys }: ClearLocalStorageArgs) => {
   $LocalStorage.setStorages(null, window.localStorage)
@@ -514,6 +592,12 @@ const methods = {
   selectFile,
   scrollIntoView,
   scrollTo,
+  screenshotPrepare,
+  screenshotCleanup,
+  screenshotOverrideScroll,
+  screenshotResetScroll,
+  screenshotScrollTo,
+  screenshotElementPosition,
 }
 
 const call = async (method: keyof typeof methods, context: AgentContext, args: any): Promise<AgentResponse<unknown>> => {

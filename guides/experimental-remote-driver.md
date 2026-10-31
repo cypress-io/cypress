@@ -23,10 +23,9 @@ This guide records where the remote driver behaves differently from the legacy d
 
 | | Commands |
 | --- | --- |
-| **Work** | `cy.get` (including `includeShadowDom`), `.find`, `.eq`, `.contains`, every other traversal (`.first`, `.last`, `.filter`, `.not`, `.children`, `.parent`, `.parents`, `.parentsUntil`, `.closest`, `.siblings`, `.next`, `.nextAll`, `.nextUntil`, `.prev`, `.prevAll`, `.prevUntil`), `.shadow`, `.frame`, `cy.tab`, `cy.root`, `cy.focused`, aliases (`.as` / `cy.get('@alias')`), `.should` (including a callback), `.click`, `.dblclick`, `.rightclick`, `.type`, `.clear`, `.check`, `.uncheck`, `.select`, `.selectFile`, `.focus`, `.blur`, `.submit`, `.trigger`, `.scrollIntoView`, `.scrollTo` (an element or the window), `cy.visit`, `cy.reload`, `cy.go`, `cy.url`, `cy.location`, `cy.hash`, `cy.title`, `cy.viewport`, `cy.session`, every cookie command, every storage command, `cy.press` |
+| **Work** | `cy.get` (including `includeShadowDom`), `.find`, `.eq`, `.contains`, every other traversal (`.first`, `.last`, `.filter`, `.not`, `.children`, `.parent`, `.parents`, `.parentsUntil`, `.closest`, `.siblings`, `.next`, `.nextAll`, `.nextUntil`, `.prev`, `.prevAll`, `.prevUntil`), `.shadow`, `.frame`, `cy.tab`, `cy.root`, `cy.focused`, aliases (`.as` / `cy.get('@alias')`), `.should` (including a callback), `.click`, `.dblclick`, `.rightclick`, `.type`, `.clear`, `.check`, `.uncheck`, `.select`, `.selectFile`, `.focus`, `.blur`, `.submit`, `.trigger`, `.scrollIntoView`, `.scrollTo` (an element or the window), `cy.visit`, `cy.reload`, `cy.go`, `cy.url`, `cy.location`, `cy.hash`, `cy.title`, `cy.viewport`, `cy.session`, `cy.screenshot` and `.screenshot`, every cookie command, every storage command, `cy.press` |
 | **Rejected on a remote subject** | `.its`, `.invoke`, `.each`, `.within`, `.then($el => …)`: each hands the element itself to the test, which a remote subject isn't |
 | **Read the AUT's window directly, so they fail** | `cy.document`, `cy.getByRole` |
-| **Broken** | `cy.screenshot` and `.screenshot` fail with an internal error. |
 | **Not needed** | `cy.origin` still runs, but the remote driver reaches a cross-origin AUT without it, so there's no reason to use it. `cy.window` yields a stand-in for `cy.stub` / `cy.spy` (see below). |
 
 Unchanged by the remote driver, and so not probed: commands that never touch the AUT (`cy.request`, `cy.intercept`, `cy.wait`, `cy.task`, `cy.exec`, `cy.fixture`, `cy.readFile`, `cy.writeFile`, `cy.log`, `cy.wrap`, `.spread`, `cy.debug`, `cy.pause`), and limits WebKit already has with the legacy driver (`cy.press` and `cy.origin` aren't supported there).
@@ -39,6 +38,7 @@ Where the commands that work behave differently from the legacy driver:
 - **`.selectFile()`** sends the files' contents to the AUT as base64.
 - **`cy.clearLocalStorage()`** yields `null` rather than the AUT's `Storage` object.
 - **A `cy.visit()` that only changes the hash** waits until automation reports the new URL, instead of listening for `hashchange` in the AUT's window.
+- **`cy.screenshot()`** has the agent scroll the AUT, add blackouts and pause animations. Its `onBeforeScreenshot` / `onAfterScreenshot` callbacks get an empty jQuery object instead of the element or the AUT's document element, and `.screenshot()` on a remote subject that matches several elements captures the first rather than failing.
 - **The `match` assertion** (`.should('match', selector)`) isn't supported on a remote element.
 - **`.frame()`** enters the first element that matches, and each iframe level adds a round trip to every retry.
 - **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it.

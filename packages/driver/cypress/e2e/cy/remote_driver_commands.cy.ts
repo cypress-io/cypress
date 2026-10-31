@@ -132,7 +132,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     },
     'scrollTo the window': () => {
       cy.scrollTo('bottom')
-      expectStatus('window-scrolled')
+      cy.get('#window-scroll').should('have.text', 'window-scrolled')
     },
     press: () => {
       cy.get('#text').click()
@@ -223,8 +223,6 @@ const UNSUPPORTED: Record<string, string> = {
   'then($el)': 'a remote subject isn\'t a jQuery object',
   document: READS_AUT_WINDOW,
   getByRole: READS_AUT_WINDOW,
-  'screenshot of the page': 'cy.screenshot fails internally with the remote driver',
-  'screenshot of an element': 'cy.screenshot fails internally with the remote driver',
 }
 
 // unsupported in a browser for reasons the remote driver doesn't change, or a bug in one browser

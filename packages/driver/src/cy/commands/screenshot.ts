@@ -10,6 +10,9 @@ import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 import type { Log } from '../../cypress/log'
 import type { StateFunc } from '../../cypress/state'
+import type { ScreenshotElementPosition } from '../../remote/protocol'
+import { callAgent, isRemoteDriverEnabled, isRemoteSubject } from '../remote'
+import type { RemoteLocator } from '../remote/remote_element'
 
 interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
   _log?: Log
@@ -18,12 +21,12 @@ interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.T
 type Scroll = {
   y: number
   clip?: Cypress.ScreenshotOptions['clip']
-  afterScroll?: () => Cypress.Dimensions
+  afterScroll?: () => Promise<Cypress.Dimensions>
 }
 
 type TakeScreenshotOptions = {
   name?: string
-  subject?: JQuery<HTMLElement>
+  subject?: JQuery<HTMLElement> | RemoteLocator
   simple?: boolean
   testFailure?: boolean
   runnable: (Mocha.Test | Mocha.Hook) & {
@@ -110,42 +113,121 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
   })
 }
 
-const scrollOverrides = (win: Window, doc: Document) => {
-  const originalOverflow = doc.documentElement.style.overflow
-  const originalBodyOverflowY = doc.body.style.overflowY
-  const originalX = win.scrollX
-  const originalY = win.scrollY
+// What cy.screenshot does to the AUT's document around a capture. The legacy driver reaches into
+// the AUT's window; the remote driver's AUT is cross-origin to the runner, so its agent does.
+interface ScreenshotPage {
+  prepare: (blackout: string[], disableAnimations: boolean) => Promise<unknown>
+  cleanup: (disableAnimations: boolean) => Promise<unknown>
+  // resolves with null when there's no document to scroll
+  overrideScroll: () => Promise<{ documentHeight: number } | null>
+  resetScroll: () => Promise<unknown>
+  scrollTo: (y: number) => Promise<unknown>
+  elementPosition: () => Promise<ScreenshotElementPosition>
+}
 
-  // overflow-y: scroll can break `window.scrollTo`
-  if (doc.body) {
-    doc.body.style.overflowY = 'visible'
+const logDomError = (err) => {
+  /* eslint-disable no-console */
+  console.error('Failed to modify app dom:')
+  console.error(err)
+  /* eslint-enable no-console */
+}
+
+const createLegacyPage = (state: StateFunc, $el: JQuery<HTMLElement>): ScreenshotPage => {
+  // get the current body of the AUT to accurately calculate screenshot blackouts
+  // as well as properly enable/disable CSS animations while screenshotting is happening
+  const $body: JQuery<HTMLBodyElement> = Cypress.$('body')
+  let reset: (() => void) | undefined
+
+  return {
+    prepare: (blackout, disableAnimations) => {
+      // could fail if iframe is cross-origin, so fail gracefully
+      try {
+        if (disableAnimations) {
+          $dom.addCssAnimationDisabler($body)
+        }
+
+        _.each(blackout, (selector) => {
+          $dom.addBlackouts($body, $el, selector)
+        })
+      } catch (err) {
+        logDomError(err)
+      }
+
+      return Promise.resolve()
+    },
+    cleanup: (disableAnimations) => {
+      // could fail if iframe is cross-origin, so fail gracefully
+      try {
+        if (disableAnimations) {
+          $dom.removeCssAnimationDisabler($body)
+        }
+
+        $dom.removeBlackouts($body)
+      } catch (err) {
+        logDomError(err)
+      }
+
+      return Promise.resolve()
+    },
+    overrideScroll: () => {
+      const win = state('window')
+      const doc = state('document')
+
+      if (!doc) {
+        return Promise.resolve(null)
+      }
+
+      const originalOverflow = doc.documentElement.style.overflow
+      const originalBodyOverflowY = doc.body.style.overflowY
+      const originalX = win.scrollX
+      const originalY = win.scrollY
+
+      // overflow-y: scroll can break `window.scrollTo`
+      if (doc.body) {
+        doc.body.style.overflowY = 'visible'
+      }
+
+      // hide scrollbars
+      doc.documentElement.style.overflow = 'hidden'
+
+      // in the case that an element might change size on scroll
+      // we trigger a scroll event to ensure that all elements are
+      // at their final size before we calculate the total height
+      // since we scroll down the page in takeScrollingScreenshots
+      // and don't want the page size to change once we start
+      // https://github.com/cypress-io/cypress/issues/6099
+      win.dispatchEvent(new Event('scroll'))
+
+      reset = () => {
+        doc.documentElement.style.overflow = originalOverflow
+        if (doc.body) {
+          doc.body.style.overflowY = originalBodyOverflowY
+        }
+
+        win.scrollTo(originalX, originalY)
+      }
+
+      return Promise.resolve({ documentHeight: $(doc).height() as number })
+    },
+    resetScroll: () => Promise.resolve(reset?.()),
+    scrollTo: (y) => Promise.resolve(state('window').scrollTo(0, y)),
+    elementPosition: () => Promise.resolve($dom.getElementPositioning($el)),
   }
+}
 
-  // hide scrollbars
-  doc.documentElement.style.overflow = 'hidden'
+const createRemotePage = (Cypress: Cypress.Cypress, subject?: RemoteLocator): ScreenshotPage => {
+  const steps = subject?.steps ?? []
 
-  // this body class is used to set some other overflow-related CSS
-  // around the resizable panels in the Runner
-  document.querySelector('body')?.classList.add('screenshot-scrolling')
+  // like the legacy driver, a capture goes ahead when the AUT's document can't be changed
+  const quietly = (call: PromiseLike<unknown>) => Promise.resolve(call).catch(logDomError)
 
-  // in the case that an element might change size on scroll
-  // we trigger a scroll event to ensure that all elements are
-  // at their final size before we calculate the total height
-  // since we scroll down the page in takeScrollingScreenshots
-  // and don't want the page size to change once we start
-  // https://github.com/cypress-io/cypress/issues/6099
-
-  win.dispatchEvent(new Event('scroll'))
-
-  return () => {
-    doc.documentElement.style.overflow = originalOverflow
-    if (doc.body) {
-      doc.body.style.overflowY = originalBodyOverflowY
-    }
-
-    document.querySelector('body')?.classList.remove('screenshot-scrolling')
-
-    return win.scrollTo(originalX, originalY)
+  return {
+    prepare: (blackout, disableAnimations) => quietly(callAgent(Cypress, 'screenshotPrepare', { steps, index: 0, element: !!subject, blackout, disableAnimations })),
+    cleanup: (disableAnimations) => quietly(callAgent(Cypress, 'screenshotCleanup', { steps: [], disableAnimations })),
+    overrideScroll: () => Promise.resolve(callAgent(Cypress, 'screenshotOverrideScroll', { steps: [] })),
+    resetScroll: () => quietly(callAgent(Cypress, 'screenshotResetScroll', { steps: [] })),
+    scrollTo: (y) => Promise.resolve(callAgent(Cypress, 'screenshotScrollTo', { steps: [], y })),
+    elementPosition: () => Promise.resolve(callAgent(Cypress, 'screenshotElementPosition', { steps, index: 0 })),
   }
 }
 
@@ -157,20 +239,19 @@ const validateNumScreenshots = (numScreenshots: number, automationOptions: Scree
   }
 }
 
-const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
+const takeScrollingScreenshots = (scrolls: Scroll[], page: ScreenshotPage, state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
   const scrollAndTake = ({ y, clip, afterScroll }: Scroll, index) => {
-    win.scrollTo(0, y)
-    if (afterScroll) {
-      clip = afterScroll()
-    }
+    return page.scrollTo(y)
+    .then(() => (afterScroll ? afterScroll() : clip))
+    .then((scrolledClip) => {
+      const options = _.extend({}, automationOptions, {
+        current: index + 1,
+        total: scrolls.length,
+        clip: scrolledClip,
+      })
 
-    const options = _.extend({}, automationOptions, {
-      current: index + 1,
-      total: scrolls.length,
-      clip,
+      return automateScreenshot(state, options)
     })
-
-    return automateScreenshot(state, options)
   }
 
   return Promise
@@ -178,47 +259,63 @@ const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFu
   .then(_.last)
 }
 
-const takeFullPageScreenshot = (state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
-  const win = state('window')
-  const doc = state('document')
+// runs `fn` with the AUT's scrollbars hidden, then puts its scrolling back
+const withScrollOverrides = <T>(page: ScreenshotPage, fn: (documentHeight: number) => PromiseLike<T>) => {
+  // this body class is used to set some other overflow-related CSS
+  // around the resizable panels in the Runner
+  document.querySelector('body')?.classList.add('screenshot-scrolling')
 
-  if (!doc) {
-    return
-  }
+  const resetRunner = () => document.querySelector('body')?.classList.remove('screenshot-scrolling')
 
-  const resetScrollOverrides = scrollOverrides(win, doc)
+  return page.overrideScroll()
+  .then((overridden) => {
+    if (!overridden) {
+      resetRunner()
 
-  const docHeight = $(doc).height() as number
-  const viewportHeight = getViewportHeight(state)
-  const numScreenshots = Math.ceil(docHeight / viewportHeight)
-
-  validateNumScreenshots(numScreenshots, automationOptions)
-
-  const scrolls = _.map(_.times(numScreenshots), (index) => {
-    const y = viewportHeight * index
-    let clip
-
-    if ((index + 1) === numScreenshots) {
-      const heightLeft = docHeight - (viewportHeight * index)
-
-      clip = {
-        x: automationOptions.clip.x,
-        y: viewportHeight - heightLeft,
-        width: automationOptions.clip.width,
-        height: heightLeft,
-      }
-    } else {
-      clip = automationOptions.clip
+      return undefined
     }
 
-    return { y, clip }
-  })
+    return Promise.resolve(fn(overridden.documentHeight))
+    .finally(() => {
+      resetRunner()
 
-  return takeScrollingScreenshots(scrolls, win, state, automationOptions)
-  .finally(resetScrollOverrides)
+      return page.resetScroll()
+    })
+  })
 }
 
-const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning, automationOptions: ScreenshotAutomationOptions) => {
+const takeFullPageScreenshot = (page: ScreenshotPage, state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
+  return withScrollOverrides(page, (docHeight) => {
+    const viewportHeight = getViewportHeight(state)
+    const numScreenshots = Math.ceil(docHeight / viewportHeight)
+
+    validateNumScreenshots(numScreenshots, automationOptions)
+
+    const scrolls = _.map(_.times(numScreenshots), (index) => {
+      const y = viewportHeight * index
+      let clip
+
+      if ((index + 1) === numScreenshots) {
+        const heightLeft = docHeight - (viewportHeight * index)
+
+        clip = {
+          x: automationOptions.clip.x,
+          y: viewportHeight - heightLeft,
+          width: automationOptions.clip.width,
+          height: heightLeft,
+        }
+      } else {
+        clip = automationOptions.clip
+      }
+
+      return { y, clip }
+    })
+
+    return takeScrollingScreenshots(scrolls, page, state, automationOptions)
+  })
+}
+
+const applyPaddingToElementPositioning = (elPosition: ScreenshotElementPosition, automationOptions: ScreenshotAutomationOptions): ScreenshotElementPosition => {
   if (!automationOptions.padding) {
     return elPosition
   }
@@ -240,73 +337,65 @@ const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning
   }
 }
 
-const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
-  const win = state('window')
-  const doc = state('document')
+const takeElementScreenshot = (page: ScreenshotPage, state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
+  return withScrollOverrides(page, () => {
+    return page.elementPosition()
+    .then((initialPosition) => {
+      let elPosition = applyPaddingToElementPositioning(initialPosition, automationOptions)
+      const viewportHeight = getViewportHeight(state)
+      const viewportWidth = getViewportWidth(state)
+      const numScreenshots = Math.ceil(elPosition.height / viewportHeight)
 
-  if (!doc) {
-    return
-  }
+      validateNumScreenshots(numScreenshots, automationOptions)
 
-  const resetScrollOverrides = scrollOverrides(win, doc)
+      const scrolls: Scroll[] = _.map(_.times(numScreenshots), (index) => {
+        const y = elPosition.fromElWindow.top + (viewportHeight * index)
 
-  let elPosition = applyPaddingToElementPositioning(
-    $dom.getElementPositioning($el),
-    automationOptions,
-  )
-  const viewportHeight = getViewportHeight(state)
-  const viewportWidth = getViewportWidth(state)
-  const numScreenshots = Math.ceil(elPosition.height / viewportHeight)
+        const afterScroll = () => {
+          return page.elementPosition()
+          .then((position) => {
+            elPosition = applyPaddingToElementPositioning(position, automationOptions)
 
-  validateNumScreenshots(numScreenshots, automationOptions)
+            const x = Math.min(viewportWidth, elPosition.fromElViewport.left)
+            const width = Math.min(viewportWidth - x, elPosition.width)
 
-  const scrolls: Scroll[] = _.map(_.times(numScreenshots), (index) => {
-    const y = elPosition.fromElWindow.top + (viewportHeight * index)
+            if (numScreenshots === 1) {
+              return {
+                x,
+                y: elPosition.fromElViewport.top,
+                width,
+                height: elPosition.height,
+              }
+            }
 
-    const afterScroll = () => {
-      elPosition = applyPaddingToElementPositioning(
-        $dom.getElementPositioning($el),
-        automationOptions,
-      )
+            if ((index + 1) === numScreenshots) {
+              const overlap = ((numScreenshots - 1) * viewportHeight) + elPosition.fromElViewport.top
+              const heightLeft = elPosition.fromElViewport.bottom - overlap
 
-      const x = Math.min(viewportWidth, elPosition.fromElViewport.left)
-      const width = Math.min(viewportWidth - x, elPosition.width)
+              return {
+                x,
+                y: overlap,
+                width,
+                height: heightLeft,
+              }
+            }
 
-      if (numScreenshots === 1) {
-        return {
-          x,
-          y: elPosition.fromElViewport.top,
-          width,
-          height: elPosition.height,
+            return {
+              x,
+              y: Math.max(0, elPosition.fromElViewport.top),
+              width,
+              // TODO: try simplifying to just 'viewportHeight'
+              height: Math.min(viewportHeight, elPosition.fromElViewport.top + elPosition.height),
+            }
+          })
         }
-      }
 
-      if ((index + 1) === numScreenshots) {
-        const overlap = ((numScreenshots - 1) * viewportHeight) + elPosition.fromElViewport.top
-        const heightLeft = elPosition.fromElViewport.bottom - overlap
+        return { y, afterScroll }
+      })
 
-        return {
-          x,
-          y: overlap,
-          width,
-          height: heightLeft,
-        }
-      }
-
-      return {
-        x,
-        y: Math.max(0, elPosition.fromElViewport.top),
-        width,
-        // TODO: try simplifying to just 'viewportHeight'
-        height: Math.min(viewportHeight, elPosition.fromElViewport.top + elPosition.height),
-      }
-    }
-
-    return { y, afterScroll }
+      return takeScrollingScreenshots(scrolls, page, state, automationOptions)
+    })
   })
-
-  return takeScrollingScreenshots(scrolls, win, state, automationOptions)
-  .finally(resetScrollOverrides)
 }
 
 // "app only" means we're hiding the runner UI
@@ -374,7 +463,18 @@ const takeScreenshot = (
     }
   }
 
-  const before = ($body: JQuery<HTMLBodyElement>, $container: JQuery<HTMLElement>) => {
+  const isRemoteElement = isRemoteSubject(subject)
+
+  // use the subject as $el or yield the wrapped documentElement, which is empty for a cross-origin AUT
+  const $el: JQuery<HTMLElement> = $dom.isElement(subject)
+    ? subject
+    : $dom.wrap(state('document')?.documentElement)
+
+  const page = isRemoteDriverEnabled(Cypress)
+    ? createRemotePage(Cypress, isRemoteElement ? subject : undefined)
+    : createLegacyPage(state, $el)
+
+  const before = () => {
     return Promise.try(() => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(true)
@@ -382,45 +482,15 @@ const takeScreenshot = (
 
       return null
     })
-    .then(() => {
-      // could fail if iframe is cross-origin, so fail gracefully
-      try {
-        if (disableTimersAndAnimations) {
-          $dom.addCssAnimationDisabler($body)
-        }
-
-        _.each(getBlackout(screenshotConfig), (selector) => {
-          $dom.addBlackouts($body, $container, selector)
-        })
-      } catch (err) {
-        /* eslint-disable no-console */
-        console.error('Failed to modify app dom:')
-        console.error(err)
-        /* eslint-enable no-console */
-      }
-
-      return sendAsync('before:screenshot', getOptions(true))
-    })
+    .then(() => page.prepare(getBlackout(screenshotConfig), !!disableTimersAndAnimations))
+    .then(() => sendAsync('before:screenshot', getOptions(true)))
   }
 
-  const after = ($body: JQuery<HTMLBodyElement>) => {
-    // could fail if iframe is cross-origin, so fail gracefully
-    try {
-      if (disableTimersAndAnimations) {
-        $dom.removeCssAnimationDisabler($body)
-      }
+  const after = () => {
+    return page.cleanup(!!disableTimersAndAnimations)
+    .then(() => {
+      send('after:screenshot', getOptions(false))
 
-      $dom.removeBlackouts($body)
-    } catch (err) {
-      /* eslint-disable no-console */
-      console.error('Failed to modify app dom:')
-      console.error(err)
-      /* eslint-enable no-console */
-    }
-
-    send('after:screenshot', getOptions(false))
-
-    return Promise.try(() => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(false)
       }
@@ -451,16 +521,7 @@ const takeScreenshot = (
     hideRunnerUi: Cypress.config('hideRunnerUi'),
   })
 
-  // use the subject as $el or yield the wrapped documentElement
-  const $el: JQuery<HTMLElement> = $dom.isElement(subject)
-    ? subject
-    : $dom.wrap(state('document')?.documentElement)
-
-  // get the current body of the AUT to accurately calculate screenshot blackouts
-  // as well as properly enable/disable CSS animations while screenshotting is happening
-  const $body: JQuery<HTMLBodyElement> = Cypress.$('body')
-
-  return before($body, $el)
+  return before()
   .then(() => {
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
@@ -468,12 +529,12 @@ const takeScreenshot = (
 
     $Screenshot.onBeforeScreenshot($el)
 
-    if ($dom.isElement(subject)) {
-      return takeElementScreenshot($el, state, automationOptions)
+    if ($dom.isElement(subject) || isRemoteElement) {
+      return takeElementScreenshot(page, state, automationOptions)
     }
 
     if (capture === 'fullPage') {
-      return takeFullPageScreenshot(state, automationOptions)
+      return takeFullPageScreenshot(page, state, automationOptions)
     }
 
     return automateScreenshot(state, automationOptions)
@@ -487,7 +548,7 @@ const takeScreenshot = (
 
     return props
   })
-  .finally(() => after($body))
+  .finally(() => after())
 }
 
 export default function (Commands, Cypress, cy, state, config) {
@@ -584,7 +645,7 @@ export default function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      if ($dom.isElement(subject)) {
+      if ($dom.isElement(subject) || isRemoteSubject(subject)) {
         screenshotConfig.capture = 'viewport'
       }
 

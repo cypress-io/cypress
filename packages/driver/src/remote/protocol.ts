@@ -147,6 +147,31 @@ export interface ClearLocalStorageArgs extends ResolveArgs {
   keys: string | { source: string, flags: string } | null
 }
 
+// what cy.screenshot does to the AUT's document around a capture
+export interface ScreenshotPrepareArgs extends ResolveArgs {
+  // blackouts are scoped to the subject element, or to the whole document when there's none
+  element: boolean
+  index: number
+  blackout: string[]
+  disableAnimations: boolean
+}
+
+export interface ScreenshotCleanupArgs extends ResolveArgs {
+  disableAnimations: boolean
+}
+
+export interface ScreenshotScrollArgs extends ResolveArgs {
+  y: number
+}
+
+// the parts of an element's positioning cy.screenshot reads, relative to the AUT's viewport and window
+export interface ScreenshotElementPosition {
+  width: number
+  height: number
+  fromElViewport: { top: number, left: number, bottom: number }
+  fromElWindow: { top: number }
+}
+
 export interface ActionResult {
   coords: { x: number, y: number }
 }
@@ -164,6 +189,12 @@ export type AgentMethods = {
   selectFile: (args: SelectFileArgs) => ActionResult
   scrollIntoView: (args: ScrollIntoViewArgs) => null
   scrollTo: (args: ScrollToArgs) => null
+  screenshotPrepare: (args: ScreenshotPrepareArgs) => null
+  screenshotCleanup: (args: ScreenshotCleanupArgs) => null
+  screenshotOverrideScroll: (args: ResolveArgs) => { documentHeight: number }
+  screenshotResetScroll: (args: ResolveArgs) => null
+  screenshotScrollTo: (args: ScreenshotScrollArgs) => null
+  screenshotElementPosition: (args: ElementArgs) => ScreenshotElementPosition
 }
 
 export type AgentResponse<T> = { ok: true, value: T } | { ok: false, error: AgentError }
