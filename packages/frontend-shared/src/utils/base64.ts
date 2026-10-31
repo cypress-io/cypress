@@ -20,9 +20,14 @@
 */
 
 export function decodeBase64Unicode (str: string) {
-  return decodeURIComponent(atob(str).split('').map((char) => {
-    return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-  }).join(''))
+  const binary = atob(str)
+  const bytes = new Uint8Array(binary.length)
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+
+  return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)
 }
 
 /**
