@@ -69,7 +69,7 @@
 - [x] tooling/v8-snapshot
 
 ### Batch 5: Test and script folders
-- [ ] system-tests
+- [x] system-tests (`lib/`, `test/`, `scripts/`, `test-binary/`) — `projects/` and `project-fixtures/` are ignored until they get their own config
 - [ ] scripts
 
 ---

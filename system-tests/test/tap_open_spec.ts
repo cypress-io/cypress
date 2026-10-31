@@ -64,7 +64,7 @@ const copyFor = (code: keyof typeof TAP_ERROR_COPY): string => {
  * Snapshots human-readable output after scrubbing paths, ports, and timing so failures
  * represent rendering changes rather than environment differences.
  */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const snapshot = require('snap-shot-it')
 
 const snapshotRendering = (name: string, text: string, extra: Array<[RegExp, string]> = []): void => {

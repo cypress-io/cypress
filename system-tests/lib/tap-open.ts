@@ -508,7 +508,6 @@ export const openTapSessionViaModuleApi = async (project: ProjectFixtureDir): Pr
 
   applyEnv(overrides)
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const cypress = require('cypress')
 
   let settled: string | null = null
