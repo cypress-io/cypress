@@ -6,6 +6,7 @@
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
 - The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
 - `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
+- Config files that import `defineConfig` or `defineComponentFramework` from `cypress` now load faster, so `cypress run` starts sooner, and `cypress open` reloads sooner when you switch testing types or edit the config file. Fixed in [#TBD].
 
 **Bugfixes:**
 
@@ -36,7 +37,6 @@
 
 **Performance:**
 
-- Config files that import `defineConfig` or `defineComponentFramework` from `cypress` now load faster. Importing `cypress` took about 235 ms, or about 380 ms in a TypeScript config file, and now takes about 3 ms, because the rest of the package loads only when a [Module API](https://on.cypress.io/module-api) command such as `cypress.run()` is called. Cypress loads your config file at the start of every `cypress run`, and in `cypress open` each time you switch testing types or edit the config file. Fixed in [#TBD].
 - Tests that run with [`testIsolation`](https://docs.cypress.io/app/references/configuration#e2e) enabled now start slightly faster when the previous test did not load any pages, such as an API test that only uses [`cy.request()`](https://on.cypress.io/request). Fixed in [#35089](https://github.com/cypress-io/cypress/pull/35089).
 
 **Bugfixes:**
