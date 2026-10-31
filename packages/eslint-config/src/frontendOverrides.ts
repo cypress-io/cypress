@@ -1,15 +1,13 @@
 /* Rule overrides shared by the Vue frontend packages: app, launchpad and frontend-shared */
 import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 
-// Spread after `baseConfig`. A later `.vue` block that sets
-// `@typescript-eslint/no-restricted-imports` replaces these options rather
-// than merging with them, so add any new pattern here instead.
-// The rule stays on `.vue` files: some `.ts` modules, like the urql client,
-// import browser-safe values from data-context on purpose.
 export const frontendOverrides = [
   {
+    // Not `.ts`: modules like the urql client import browser-safe values from data-context
     files: ['**/*.vue'],
     rules: {
+      // A later block that sets this rule replaces these options instead of
+      // merging with them, so add new patterns here rather than in a consumer
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [
           {
