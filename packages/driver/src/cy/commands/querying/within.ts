@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { $Command } from '../../../cypress/command'
 import $errUtils from '../../../cypress/error_utils'
 import group from '../../logGroup'
+import { isRemoteElement, isRemoteSubject, resolveRemoteSubject } from '../../remote'
 
 export default (Commands, Cypress, cy, state) => {
   const withinFn = (subject, fn) => {
@@ -105,6 +106,17 @@ export default (Commands, Cypress, cy, state) => {
       return group(Cypress, groupOptions, (log) => {
         if (!_.isFunction(fn)) {
           $errUtils.throwErrByPath('within.invalid_argument', { onFail: log })
+        }
+
+        // the callback gets a snapshot of a remote subject; the queries inside it are scoped by its steps
+        if (isRemoteSubject(subject) && !isRemoteElement(subject)) {
+          return resolveRemoteSubject(Cypress, subject).then((resolved) => {
+            if (resolved.length > 1) {
+              $errUtils.throwErrByPath('within.multiple_elements', { args: { num: resolved.length }, onFail: log })
+            }
+
+            return withinFn(resolved, fn)
+          })
         }
 
         if (subject.length > 1) {

@@ -3,7 +3,8 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import type { ICypress } from '../../cypress'
 import type { Log } from '../../cypress/log'
-import type { AgentContext, AgentError, AgentMethods, AgentResponse, FrameOwner, QueryStep, TabUrl } from '../../remote/protocol'
+import type { AgentContext, AgentError, AgentMethods, AgentResponse, EvaluateArgs, EvaluateResult, FrameOwner, QueryStep, TabUrl } from '../../remote/protocol'
+import { fromPageValue, toPageValue } from './stub_values'
 import { RemoteElement, RemoteLocator, isRemoteSubject } from './remote_element'
 
 export { isRemoteElement, isRemoteSubject } from './remote_element'
@@ -127,4 +128,67 @@ export const serializeCallback = (fn: Function) => {
   }
 
   return `Object.values({ ${source} })[0]`
+}
+
+// The remote subject a query inside .within() is scoped to, which only a remote subject can be
+export const getRemoteWithinSubject = (getSubject: () => unknown, cmd: string) => {
+  const within = getSubject()
+
+  if (!isRemoteSubject(within)) {
+    return throwUnsupportedOption(cmd, 'within')
+  }
+
+  return within
+}
+
+// .its() and .invoke() are synchronous queries that retry, while the agent answers asynchronously,
+// so each attempt starts a call and the query reads what the last finished call returned
+export const createRemoteEvaluator = (Cypress: AgentCypress, kind: EvaluateArgs['kind'], path: string | number, args: unknown[], cmd: string) => {
+  let result: EvaluateResult | undefined
+  let error: Error | undefined
+  let pending = false
+
+  return (subject: RemoteLocator): EvaluateResult => {
+    if (args.some((arg) => typeof arg === 'function')) {
+      $errUtils.throwErrByPath('remote_driver.unsupported_argument', { args: { cmd }, errProps: { retry: false } })
+    }
+
+    if (!pending) {
+      pending = true
+
+      callAgent(Cypress, 'evaluate', { steps: subject.steps, kind, path: String(path), args: args.map(toPageValue) })
+      .then((value) => {
+        result = value
+        error = undefined
+      }, (err) => {
+        error = err
+      })
+      .finally(() => {
+        pending = false
+      })
+    }
+
+    if (error) {
+      throw error
+    }
+
+    if (!result) {
+      throw $errUtils.cypressErrByPath('remote_driver.awaiting_aut', { args: { cmd } })
+    }
+
+    return result
+  }
+}
+
+// an index path like its(0) yields that element as a remote subject; the subject itself comes back tagged
+export const fromEvaluatedValue = (subject: RemoteLocator, path: string | number, { value, has }: EvaluateResult) => {
+  if (/^\d+$/.test(String(path))) {
+    return has ? subject.extend({ type: 'traversal', method: 'eq', args: [Number(path)] }, subject.selector) : undefined
+  }
+
+  if (_.isPlainObject(value) && Reflect.get(value as object, '__cypressRemote') === 'subject') {
+    return subject
+  }
+
+  return fromPageValue(value)
 }

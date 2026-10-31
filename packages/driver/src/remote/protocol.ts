@@ -172,6 +172,23 @@ export interface ScreenshotElementPosition {
   fromElWindow: { top: number }
 }
 
+// .its() / .invoke() run against the jQuery object a remote subject's steps find
+export interface EvaluateArgs extends ResolveArgs {
+  kind: 'its' | 'invoke'
+  path: string
+  // invoke's arguments, as values that survive JSON
+  args: unknown[]
+}
+
+export interface EvaluateResult {
+  // JSON, with undefined, functions and elements tagged as in stub_values
+  value: unknown
+  // whether the path exists, which the legacy errors tell apart from a null value
+  has: boolean
+  // for invoke, the friendly type of a path that isn't a function
+  notFunction?: string
+}
+
 export interface ActionResult {
   coords: { x: number, y: number }
 }
@@ -195,6 +212,7 @@ export type AgentMethods = {
   screenshotResetScroll: (args: ResolveArgs) => null
   screenshotScrollTo: (args: ScreenshotScrollArgs) => null
   screenshotElementPosition: (args: ElementArgs) => ScreenshotElementPosition
+  evaluate: (args: EvaluateArgs) => EvaluateResult
 }
 
 export type AgentResponse<T> = { ok: true, value: T } | { ok: false, error: AgentError }

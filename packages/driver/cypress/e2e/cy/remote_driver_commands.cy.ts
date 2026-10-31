@@ -64,6 +64,34 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
         expect($el.text()).to.eq('Two')
       })
     },
+    'its an element\'s property': () => cy.get('#text').its('0.value').should('eq', ''),
+    'its an index yields the element': () => cy.get('.item').its(1).should('have.text', 'Two'),
+    'invoke a method that returns a value': () => cy.get('#two').invoke('attr', 'id').should('eq', 'two'),
+    'invoke a method that changes the element': () => {
+      cy.get('#text').invoke('val', 'from invoke').should('have.value', 'from invoke')
+    },
+    'each acts on each element': () => {
+      cy.get('.item').each(($el) => {
+        if ($el.hasClass('two')) {
+          cy.wrap($el).click()
+        }
+      })
+
+      expectStatus('item:Two')
+    },
+    'within scopes contains and root': () => {
+      cy.get('#list').within(() => {
+        cy.contains('Three').should('have.class', 'item')
+        cy.root().should('have.id', 'list')
+      })
+    },
+    'a snapshot fails loudly on what it can\'t answer': () => {
+      cy.get('#two').then(($el) => {
+        expect(() => $el[0]).to.throw('is not supported on a subject from `experimentalRemoteDriver`')
+        expect(() => $el.css('color')).to.throw('`.css(\'color\')` is not supported')
+        expect(() => $el.find('span')).to.throw('`.find()` is not supported')
+      })
+    },
     'should(callback)': () => {
       cy.get('#two').should(($el) => {
         expect($el).to.have.text('Two')
@@ -212,15 +240,9 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
   },
 }
 
-const REMOTE_SUBJECT = 'a remote subject can\'t be handed to a callback or read as a property'
 const READS_AUT_WINDOW = 'reads the AUT\'s window directly, which is cross-origin to the runner'
 
 const UNSUPPORTED: Record<string, string> = {
-  its: REMOTE_SUBJECT,
-  invoke: REMOTE_SUBJECT,
-  each: REMOTE_SUBJECT,
-  within: 'the remote driver rejects .within()',
-  'then($el)': 'a remote subject isn\'t a jQuery object',
   document: READS_AUT_WINDOW,
   getByRole: READS_AUT_WINDOW,
 }

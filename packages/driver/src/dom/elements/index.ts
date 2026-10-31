@@ -58,6 +58,7 @@ import {
   isHTML,
   isSvg,
   isValueNumberTypeElement,
+  isValueNumberTypeTagName,
   isNeedSingleValueChangeInputElement,
   isAttrType,
 } from './elementHelpers'
@@ -147,6 +148,7 @@ export default {
   isHTML,
   isSvg,
   isValueNumberTypeElement,
+  isValueNumberTypeTagName,
   isNeedSingleValueChangeInputElement,
   isAttrType,
   tryCallNativeMethod,

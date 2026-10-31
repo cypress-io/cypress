@@ -1785,7 +1785,10 @@ export default {
     stub_not_applied: `Cypress could not apply \`{{method}}\` in the AUT: {{message}}`,
     visit_before_load_did_not_run: `${cmd('visit')} could not run its \`onBeforeLoad\` callback in the page before it loaded.`,
     unsupported_argument ({ cmd: command }) {
-      return `${cmd(command)} only takes selectors and numbers when \`experimentalRemoteDriver\` is enabled, since it runs in the AUT.`
+      return `${cmd(command)} only takes arguments that can be sent to the AUT as JSON, such as selectors, numbers and plain objects, when \`experimentalRemoteDriver\` is enabled, since it runs there.`
+    },
+    awaiting_aut ({ cmd: command }) {
+      return `${cmd(command)} is waiting for the AUT to answer.`
     },
     unsupported_subject ({ cmd: command }) {
       return `${cmd(command)} does not support this subject when \`experimentalRemoteDriver\` is enabled. A remote subject only chains queries such as \`.get()\`, \`.find()\`, \`.contains()\` and the traversals, \`.frame()\`, \`.shadow()\`, and actions and assertions.`

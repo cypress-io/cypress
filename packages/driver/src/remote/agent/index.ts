@@ -13,6 +13,7 @@ import $selection from '../../dom/selection'
 import { traverse } from '../../dom/traversal'
 import $LocalStorage from '../../cypress/local_storage'
 import $errUtils from '../../cypress/error_utils'
+import $utils from '../../cypress/utils'
 import { addEventCoords, dispatch } from '../../cy/commands/actions/dispatch_event'
 import { SELECT_FILE_ACTIONS, createDataTransfer } from '../../cy/commands/actions/select_file_dom'
 import { findScrollableParent } from '../../cy/commands/actions/scroll_parent'
@@ -31,6 +32,8 @@ import type {
   ClearLocalStorageArgs,
   ClickArgs,
   ElementArgs,
+  EvaluateArgs,
+  EvaluateResult,
   ScreenshotCleanupArgs,
   ScreenshotElementPosition,
   ScreenshotPrepareArgs,
@@ -560,6 +563,81 @@ const screenshotElementPosition = (context: AgentContext, { steps, index }: Elem
   }
 }
 
+// Values that cross back to the driver as JSON. Elements can't, so they're tagged: the subject
+// itself (as an invoke that returns `this` yields), or any other element by description.
+const toDriverValue = ($subject: JQuery<any>, value: unknown) => {
+  const seen = new Set()
+
+  const walk = (value: unknown, depth: number) => {
+    if (value === undefined) {
+      return { __cypressRemote: 'undefined' }
+    }
+
+    if (typeof value === 'function') {
+      return { __cypressRemote: 'function', name: value.name }
+    }
+
+    if (value === null || typeof value !== 'object') {
+      return typeof value === 'number' && !Number.isFinite(value) ? String(value) : value
+    }
+
+    if ($dom.isJquery(value) || $dom.isElement(value)) {
+      const $value = $(value)
+
+      if ($value.length === $subject.length && $value.toArray().every((el, index) => el === $subject[index])) {
+        return { __cypressRemote: 'subject' }
+      }
+
+      return String($dom.stringify($value, 'short'))
+    }
+
+    if (seen.has(value) || depth > 5) {
+      return '[Circular]'
+    }
+
+    seen.add(value)
+
+    if (Array.isArray(value)) {
+      return value.map((item) => walk(item, depth + 1))
+    }
+
+    return _.mapValues(value, (item) => walk(item, depth + 1))
+  }
+
+  return walk(value, 0)
+}
+
+const fromDriverValue = (value: unknown) => {
+  if (Array.isArray(value)) {
+    return value.map(fromDriverValue)
+  }
+
+  if (_.isPlainObject(value)) {
+    return Reflect.get(value as object, '__cypressRemote') === 'undefined' ? undefined : _.mapValues(value as object, fromDriverValue)
+  }
+
+  return value
+}
+
+const evaluate = (context: AgentContext, { steps, kind, path, args }: EvaluateArgs): EvaluateResult => {
+  const $subject = runSteps(steps)
+
+  if (kind === 'its') {
+    return { value: toDriverValue($subject, _.get($subject, path)), has: _.has($subject, path) }
+  }
+
+  const parts = path.split('.')
+  const last = parts.pop() as string
+  const parent = parts.length ? _.get($subject, parts) : $subject
+  const fn = parent?.[last]
+
+  if (typeof fn !== 'function') {
+    return { value: toDriverValue($subject, fn), has: parent != null && last in Object(parent), notFunction: String($utils.stringifyFriendlyTypeof(fn)) }
+  }
+
+  return { value: toDriverValue($subject, fn.apply(parent, args.map(fromDriverValue))), has: true }
+}
+
 // the agent shares the AUT's origin, and so its localStorage
 const clearLocalStorage = (context: AgentContext, { keys }: ClearLocalStorageArgs) => {
   $LocalStorage.setStorages(null, window.localStorage)
@@ -598,6 +676,7 @@ const methods = {
   screenshotResetScroll,
   screenshotScrollTo,
   screenshotElementPosition,
+  evaluate,
 }
 
 const call = async (method: keyof typeof methods, context: AgentContext, args: any): Promise<AgentResponse<unknown>> => {

@@ -8,7 +8,7 @@ import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 import { aliasRe, aliasIndexRe, aliasDisplayName } from '../../aliases'
-import { extendRemoteSubject, isRemoteDriverEnabled, isRemoteSubject, throwUnsupportedOption } from '../../remote'
+import { extendRemoteSubject, getRemoteWithinSubject, isRemoteDriverEnabled, isRemoteSubject, throwUnsupportedOption } from '../../remote'
 
 type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {
   _log?: Log
@@ -182,11 +182,19 @@ export default (Commands, Cypress, cy, state) => {
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
     if (isRemoteDriverEnabled(Cypress)) {
-      if (withinSubject || userOptions.withinSubject !== undefined) {
+      if (userOptions.withinSubject !== undefined) {
         throwUnsupportedOption('get', 'within')
       }
 
-      return () => extendRemoteSubject('get', undefined, { type: 'get', selector, includeShadowDom }, selector)
+      return () => {
+        if (withinSubject) {
+          const within = getRemoteWithinSubject(() => cy.getSubjectFromChain(withinSubject), 'get')
+
+          return extendRemoteSubject('get', within, { type: 'traversal', method: 'find', args: [selector], includeShadowDom }, selector)
+        }
+
+        return extendRemoteSubject('get', undefined, { type: 'get', selector, includeShadowDom }, selector)
+      }
     }
 
     return () => {
@@ -349,11 +357,11 @@ export default (Commands, Cypress, cy, state) => {
     const withinSubject = cy.state('withinSubjectChain')
 
     if (isRemoteDriverEnabled(Cypress)) {
-      if (withinSubject) {
-        throwUnsupportedOption('contains', 'within')
-      }
+      return (subject) => {
+        const scope = subject ?? (withinSubject ? getRemoteWithinSubject(() => cy.getSubjectFromChain(withinSubject), 'contains') : undefined)
 
-      return (subject) => extendRemoteSubject('contains', subject, { type: 'contains', selector }, displayName)
+        return extendRemoteSubject('contains', scope, { type: 'contains', selector }, displayName)
+      }
     }
 
     return (subject) => {

@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import $dom from '../../dom'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import { createRemoteEvaluator, fromEvaluatedValue, isRemoteElement, isRemoteSubject, resolveRemoteSubject } from '../remote'
 
 const returnFalseIfThenable = (key, ...args): boolean => {
   if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
@@ -47,6 +48,11 @@ export default function (Commands, Cypress, cy, state) {
   // until they're 'really' resolved, so naturally this API
   // supports nesting promises
   const thenFn = function (subject, userOptions, fn) {
+    // a callback gets a snapshot of a remote subject's elements, which are in the AUT
+    if (isRemoteSubject(subject) && !isRemoteElement(subject)) {
+      return resolveRemoteSubject(Cypress, subject).then((resolved) => thenFn.call(this, resolved, userOptions, fn))
+    }
+
     const ctx = state('ctx')
 
     if (_.isFunction(userOptions)) {
@@ -179,11 +185,33 @@ export default function (Commands, Cypress, cy, state) {
     this.set('timeout', options.timeout)
     this.set('ensureExistenceFor', 'subject')
 
+    const evaluateRemote = createRemoteEvaluator(Cypress, 'its', path, [], cmd)
+
     return (subject) => {
       if (subject == null) {
         $errUtils.throwErrByPath(`${cmd}.subject_null_or_undefined`, {
           args: { prop: path, cmd, value: subject },
         })
+      }
+
+      // the elements are in the AUT, so the property is read there
+      if (isRemoteSubject(subject)) {
+        const result = evaluateRemote(subject)
+        const value = fromEvaluatedValue(subject, path, result)
+
+        cy.state('current') === this && log?.set({
+          consoleProps: () => ({ Property: `.${path}`, Subject: subject.selector, Yielded: value }),
+        })
+
+        if (value == null && !upcomingAssertion(this.get('next'))) {
+          if (!result.has) {
+            $errUtils.throwErrByPath('invoke_its.nonexistent_prop', { args: { cmd, prop: path, value } })
+          }
+
+          $errUtils.throwErrByPath(`${cmd}.null_or_undefined_prop_value`, { args: { prop: path, value } })
+        }
+
+        return value
       }
 
       subject = cy.getRemotejQueryInstance(subject) || subject
@@ -253,6 +281,7 @@ export default function (Commands, Cypress, cy, state) {
     this.set('_log', log)
 
     const itsFn = cy.now('its', path, options)
+    const invokeRemote = createRemoteEvaluator(Cypress, 'invoke', path, args, 'invoke')
 
     // .its() has an implicit assertions that the return value shouldn't be null, but
     // .invoke() has no such requirement. Removing ensureExistenceFor resets implicit
@@ -260,6 +289,27 @@ export default function (Commands, Cypress, cy, state) {
     this.set('ensureExistenceFor', null)
 
     return (subject) => {
+      // the elements are in the AUT, so the method runs there
+      if (isRemoteSubject(subject)) {
+        const result = invokeRemote(subject)
+
+        if (result.notFunction !== undefined) {
+          if (!result.has) {
+            $errUtils.throwErrByPath('invoke_its.nonexistent_prop', { args: { cmd: 'invoke', prop: path, value: undefined } })
+          }
+
+          $errUtils.throwErrByPath('invoke.prop_not_a_function', { args: { prop: path, type: result.notFunction } })
+        }
+
+        const value = fromEvaluatedValue(subject, path, result)
+
+        log && cy.state('current') === this && log.set({
+          consoleProps: () => ({ name: 'invoke', Function: `.${path}(${$utils.stringify(args)})`, Subject: subject.selector, 'With Arguments': args, Yielded: value }),
+        })
+
+        return value
+      }
+
       subject = cy.getRemotejQueryInstance(subject) || subject
 
       // We use its for its validation, even though we ignore the returned value.
@@ -320,53 +370,65 @@ export default function (Commands, Cypress, cy, state) {
         $errUtils.throwErrByPath('each.invalid_argument')
       }
 
-      if (subject?.length === undefined) {
-        return $errUtils.throwErrByPath('each.non_array', {
-          args: { subject: $utils.stringify(subject) },
+      const eachItem = (subject) => {
+        if (subject?.length === undefined) {
+          return $errUtils.throwErrByPath('each.non_array', {
+            args: { subject: $utils.stringify(subject) },
+          })
+        }
+
+        if (subject.length === 0) {
+          return subject
+        }
+
+        let endEarly = false
+
+        const yieldItem = (el, index) => {
+          if (endEarly) {
+            return
+          }
+
+          if ($dom.isElement(el)) {
+            el = $dom.wrap(el)
+          }
+
+          const callback = () => {
+            const ret = fn.call(ctx, el, index, subject)
+
+            // if the return value is false then return early
+            if (ret === false) {
+              endEarly = true
+            }
+
+            return ret
+          }
+
+          return thenFn(el, userOptions, callback)
+        }
+
+        // a snapshot's elements are reached one at a time, each with steps that find just it
+        const items = isRemoteElement(subject) ? _.times(subject.length, (index) => subject.eq(index)) : _.toArray(subject)
+
+        // generate a real array since bluebird is finicky and
+        // doesnt want an 'array-like' structure like jquery instances
+        return Promise
+        .each(items, yieldItem)
+        .then(() => {
+          // cy.each does *not* want to use any subjects that the user's callback generated - therefore we break
+          // cypress' subject chaining logic, which by default would override this with any subjects generated by
+          // the callback function.
+          cy.breakSubjectLinksToCurrentChainer()
+
+          return subject
         })
       }
 
-      if (subject.length === 0) {
-        return subject
+      // each callback gets a snapshot of one of a remote subject's elements, which are in the AUT
+      if (isRemoteSubject(subject) && !isRemoteElement(subject)) {
+        return resolveRemoteSubject(Cypress, subject).then((resolved) => eachItem(resolved))
       }
 
-      let endEarly = false
-
-      const yieldItem = (el, index) => {
-        if (endEarly) {
-          return
-        }
-
-        if ($dom.isElement(el)) {
-          el = $dom.wrap(el)
-        }
-
-        const callback = () => {
-          const ret = fn.call(ctx, el, index, subject)
-
-          // if the return value is false then return early
-          if (ret === false) {
-            endEarly = true
-          }
-
-          return ret
-        }
-
-        return thenFn(el, userOptions, callback)
-      }
-
-      // generate a real array since bluebird is finicky and
-      // doesnt want an 'array-like' structure like jquery instances
-      return Promise
-      .each(_.toArray(subject), yieldItem)
-      .then(() => {
-        // cy.each does *not* want to use any subjects that the user's callback generated - therefore we break
-        // cypress' subject chaining logic, which by default would override this with any subjects generated by
-        // the callback function.
-        cy.breakSubjectLinksToCurrentChainer()
-
-        return subject
-      })
+      return eachItem(subject)
     },
   })
 

@@ -155,7 +155,9 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
 
     // some elements return a number for the .value property
     // in this case, we don't want to cast the expected value to a string
-    if ($el[0] && !$elements.isValueNumberTypeElement($el[0])) {
+    const firstTagName = isRemoteElement($el) ? $el.elements[0]?.tagName : $el[0] && $elements.getTagName($el[0])
+
+    if (firstTagName && !$elements.isValueNumberTypeTagName(firstTagName)) {
       value = maybeCastNumberToString(value)
     }
 

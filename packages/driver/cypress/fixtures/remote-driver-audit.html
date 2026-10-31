@@ -56,6 +56,7 @@
     byId('role-button').addEventListener('dblclick', () => status('dblclicked'))
     byId('role-button').addEventListener('contextmenu', () => status('rightclicked'))
     byId('two').addEventListener('custom-event', () => status('custom-event'))
+    document.querySelectorAll('.item').forEach((item) => item.addEventListener('click', () => status(`item:${item.textContent}`)))
     byId('scroller').addEventListener('scroll', () => status('scrolled'))
     // kept apart from #status, since actionability can scroll the window before an action
     window.addEventListener('scroll', () => { byId('window-scroll').textContent = 'window-scrolled' })

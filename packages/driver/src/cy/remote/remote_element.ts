@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import $ from 'jquery'
 import type { QueryStep, RemoteElementProps } from '../../remote/protocol'
 
 const SUPPORTED_PSEUDOS = {
@@ -23,7 +24,7 @@ const PROPS = {
 }
 
 const unsupported = (what: string) => {
-  const err = new Error(`\`${what}\` is not supported on a subject from \`experimentalRemoteDriver\`.`)
+  const err = new Error(`\`${what}\` is not supported on a subject from \`experimentalRemoteDriver\`, since the element is in the AUT. Use \`.invoke()\` or \`.its()\` to run it there.`)
 
   // @ts-expect-error - retry is a Cypress error prop
   err.retry = false
@@ -50,6 +51,30 @@ export class RemoteElement extends RemoteLocator {
   constructor (locator: RemoteLocator, readonly elements: RemoteElementProps[]) {
     super(locator.steps, locator.selector)
     this.length = elements.length
+
+    // the elements are in the AUT, so indexing fails loudly instead of yielding undefined
+    elements.forEach((el, index) => {
+      Object.defineProperty(this, index, {
+        get: () => {
+          throw unsupported(`[${index}]`)
+        },
+      })
+    })
+  }
+
+  eq (index: number) {
+    const resolvedIndex = index < 0 ? this.length + index : index
+    const element = this.elements[resolvedIndex]
+
+    return new RemoteElement(this.extend({ type: 'traversal', method: 'eq', args: [index] }, this.selector), element ? [element] : [])
+  }
+
+  first () {
+    return this.eq(0)
+  }
+
+  last () {
+    return this.eq(-1)
   }
 
   get node () {
@@ -110,6 +135,20 @@ export class RemoteElement extends RemoteLocator {
     throw unsupported(`.has('${selector}')`)
   }
 }
+
+// Any other jQuery method a test calls on a snapshot fails with a clear error. Only methods are
+// stubbed, so `jquery` stays undefined and the snapshot is never mistaken for a jQuery object.
+Object.keys($.fn).forEach((name) => {
+  if (typeof $.fn[name] !== 'function' || name in RemoteElement.prototype) {
+    return
+  }
+
+  Object.defineProperty(RemoteElement.prototype, name, {
+    value () {
+      throw unsupported(`.${name}()`)
+    },
+  })
+})
 
 export const isRemoteSubject = (subject: unknown): subject is RemoteLocator => subject instanceof RemoteLocator
 
