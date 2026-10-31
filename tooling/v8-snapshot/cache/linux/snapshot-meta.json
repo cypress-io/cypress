@@ -3363,6 +3363,7 @@
     "./node_modules/zod/v3/helpers/util.cjs",
     "./node_modules/zod/v3/locales/en.cjs",
     "./node_modules/zod/v3/types.cjs",
+    "./packages/agent-info/dist/index.js",
     "./packages/cypress-sessions/dist/contracts/command.js",
     "./packages/cypress-sessions/dist/contracts/pin.js",
     "./packages/cypress-sessions/dist/contracts/pinned.js",
