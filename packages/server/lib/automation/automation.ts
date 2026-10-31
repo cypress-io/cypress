@@ -237,6 +237,8 @@ export class Automation {
         case 'canceled:download':
         case 'complete:download':
         case 'remote:uncaught:exception':
+        case 'remote:stub:call':
+        case 'remote:dialog':
           return data
         default:
           return automate(data)

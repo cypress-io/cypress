@@ -29,6 +29,8 @@ import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
 import { CdpRemoteAgent, CdpRemoteTabs, RemoteTabs, tabsNotSupported } from '../../automation/commands/remote_agent'
 import { RemoteVisit } from '../../automation/commands/remote_visit'
+import { answerRemoteDialog } from '../../automation/commands/remote_dialogs'
+import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../../automation/commands/remote_stubs'
 import { cdpUncaughtException } from '../../automation/commands/remote_errors'
 import { evaluateInFrameContext } from '../../automation/helpers/evaluate_in_frame_context'
 import type { CdpTab } from '../../automation/commands/remote_agent'
@@ -87,6 +89,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private remoteAgent: CdpRemoteAgent
   private remoteTabs: RemoteTabs | undefined
   private remoteVisit: RemoteVisit
+  private remoteStubs: RemoteStubs
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -99,11 +102,28 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     onFn('Runtime.executionContextCreated', this.onExecutionContextCreated)
     onFn('Runtime.executionContextDestroyed', this.onExecutionContextDestroyed)
     onFn('Runtime.exceptionThrown', this.onExceptionThrown)
+    onFn('Page.javascriptDialogOpening', this.onJavascriptDialogOpening)
+    onFn('Runtime.bindingCalled', this.onBindingCalled)
 
     this.on = onFn
     this.off = offFn
     this.send = sendDebuggerCommandFn
     this.remoteAgent = new CdpRemoteAgent(sendDebuggerCommandFn, this.executionContexts)
+    this.remoteStubs = new RemoteStubs({
+      addPreloadScript: async (source) => {
+        const { identifier } = await sendDebuggerCommandFn('Page.addScriptToEvaluateOnNewDocument', { source: `(${source})(window.${REMOTE_STUB_BINDING})` })
+
+        return () => sendDebuggerCommandFn('Page.removeScriptToEvaluateOnNewDocument', { identifier })
+      },
+      callInAut: async (source) => {
+        const { exceptionDetails } = await evaluateInFrameContext(`(${source})(window.${REMOTE_STUB_BINDING})`, sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+
+        if (exceptionDetails) {
+          throw new Error(exceptionDetails.exception?.description ?? exceptionDetails.text)
+        }
+      },
+    })
+
     this.remoteVisit = new RemoteVisit({
       addPreloadScript: async (source) => {
         const { identifier } = await sendDebuggerCommandFn('Page.addScriptToEvaluateOnNewDocument', { source })
@@ -149,6 +169,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
+    await sendDebuggerCommandFn('Runtime.addBinding', { name: REMOTE_STUB_BINDING })
 
     return cdpAutomation
   }
@@ -285,18 +306,44 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     this.executionContexts.set(event.context.id, event.context)
   }
 
+  private isAutMainWorld = async (executionContextId: Protocol.Runtime.ExecutionContextId) => {
+    const context = this.executionContexts.get(executionContextId)
+
+    return !!context?.auxData?.isDefault && this._isAUTFrame(context.auxData.frameId)
+  }
+
   // the remote driver can't listen for errors in a cross-origin AUT, so it learns of them here
   private onExceptionThrown = async ({ exceptionDetails }: Protocol.Runtime.ExceptionThrownEvent) => {
-    const context = exceptionDetails.executionContextId ? this.executionContexts.get(exceptionDetails.executionContextId) : undefined
-
     try {
-      if (!context?.auxData?.isDefault || !(await this._isAUTFrame(context.auxData.frameId))) {
+      if (!exceptionDetails.executionContextId || !(await this.isAutMainWorld(exceptionDetails.executionContextId))) {
         return
       }
 
       await this.automation.push('remote:uncaught:exception', await cdpUncaughtException(this.sendDebuggerCommandFn, exceptionDetails))
     } catch (err) {
       debugVerbose('failed to report AUT exception: %s', err?.message)
+    }
+  }
+
+  private onBindingCalled = async ({ name, payload, executionContextId }: Protocol.Runtime.BindingCalledEvent) => {
+    if (name !== REMOTE_STUB_BINDING) {
+      return
+    }
+
+    try {
+      if (await this.isAutMainWorld(executionContextId)) {
+        await this.automation.push('remote:stub:call', parseStubCall(payload))
+      }
+    } catch (err) {
+      debugVerbose('failed to report a stub call: %s', err?.message)
+    }
+  }
+
+  private onJavascriptDialogOpening = async ({ type, message }: Protocol.Page.JavascriptDialogOpeningEvent) => {
+    try {
+      await answerRemoteDialog(this.automation, type, message, (accept) => this.sendDebuggerCommandFn('Page.handleJavaScriptDialog', { accept }))
+    } catch (err) {
+      debugVerbose('failed to report dialog: %s', err?.message)
     }
   }
 
@@ -686,6 +733,12 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
         return this.remoteTabs.call(request, callInAut)
       }
+      case 'remote:stub:add':
+        return this.remoteStubs.add(data)
+      case 'remote:stub:update':
+        return this.remoteStubs.update(data)
+      case 'remote:stubs:reset':
+        return this.remoteStubs.reset()
       case 'remote:visit:before:load':
         return this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

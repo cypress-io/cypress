@@ -12,6 +12,10 @@
   <button id="reject">Reject</button>
   <button id="alert">Alert</button>
   <button id="confirm">Confirm</button>
+  <button id="prompt">Prompt</button>
+  <button id="open">Open</button>
+  <button id="log">Log</button>
+  <button id="compute">Compute</button>
   <p id="dialog-result"></p>
 
   <button id="delayed">Delayed</button>
@@ -60,6 +64,16 @@
     document.getElementById('reject').addEventListener('click', () => { Promise.reject(new Error('app rejection')) })
     document.getElementById('alert').addEventListener('click', () => { alert('app alert'); result('dialog-result', 'alerted') })
     document.getElementById('confirm').addEventListener('click', () => { result('dialog-result', `confirmed:${confirm('app confirm')}`) })
+    document.getElementById('prompt').addEventListener('click', () => { result('dialog-result', `prompted:${prompt('app prompt')}`) })
+    document.getElementById('open').addEventListener('click', () => {
+      result('probe-result', `opened:${window.open('http://www.foobar.com:3500/fixtures/remote-driver-isolation.html?page=popup', '_blank') === null ? 'null' : 'window'}`)
+    })
+    document.getElementById('log').addEventListener('click', () => {
+      console.log('app log', { clicks: window.appState.clicks })
+      result('probe-result', 'logged')
+    })
+    window.appMath = { double: (n) => n * 2 }
+    document.getElementById('compute').addEventListener('click', () => { result('probe-result', `computed:${window.appMath.double(2)},${window.appMath.double(3)}`) })
     document.getElementById('delayed').addEventListener('click', () => { setTimeout(() => result('delayed-result', 'done'), 10000) })
     document.getElementById('fetch').addEventListener('click', () => {
       fetch('/fixtures/remote-driver-isolation.html?fetched=1').then((res) => result('fetch-result', `status:${res.status}`))

@@ -27,7 +27,7 @@ import { create as createAssertions } from '../cy/assertions'
 import { bindToListeners } from '../cy/listeners'
 import { isRemoteDriverEnabled } from '../cy/remote'
 import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
-import type { RemoteUncaughtException } from '@packages/types'
+import type { RemoteDialog, RemoteUncaughtException } from '@packages/types'
 import { $Chainer } from './chainer'
 import type { ITimer } from '../cy/timers'
 import { create as createTimer } from '../cy/timers'
@@ -267,6 +267,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.onRemoteUncaughtException = this.onRemoteUncaughtException.bind(this)
+    this.onRemoteDialog = this.onRemoteDialog.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.getSubjectFromChain = this.getSubjectFromChain.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
@@ -974,6 +975,26 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     return
+  }
+
+  // The server has already answered a dialog from the remote driver's AUT; the dialog blocks the
+  // runner too while it's open. A window:confirm handler can't change that answer, so it's flagged.
+  onRemoteDialog ({ type, message, accepted }: RemoteDialog) {
+    if (!isRemoteDriverEnabled(this.Cypress)) {
+      return
+    }
+
+    if (type === 'alert') {
+      this.Cypress.action('app:window:alert', message)
+    }
+
+    if (type === 'confirm') {
+      if (_.some(this.Cypress.action('app:window:confirm', message), returnedFalse)) {
+        $errUtils.warnByPath('remote_driver.confirm_answered', { args: { message } })
+      }
+
+      this.Cypress.action('app:window:confirmed', message, accepted)
+    }
   }
 
   // the server reports errors from an AUT the runner can't listen to itself

@@ -94,7 +94,7 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any, remoteDriver: boolean }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
@@ -104,6 +104,7 @@ describe('lib/browsers/webkit-automation', () => {
       userAgent: opts.userAgent,
       isHeadless: opts.isHeadless ?? true,
       cdpSocketServer: opts.cdpSocketServer,
+      remoteDriver: opts.remoteDriver,
     })
   }
 
@@ -299,6 +300,45 @@ describe('lib/browsers/webkit-automation', () => {
       await new Promise((resolve) => setImmediate(resolve))
 
       expect(automation.push).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('remote driver dialogs and stubs', () => {
+    const listenersFor = (event: string) => mock.getLastPage().on.mock.calls.filter(([name]) => name === event).map(([, listener]) => listener)
+    const bindingFor = (name: string) => mock.getLastContext().exposeBinding.mock.calls.find(([bindingName]) => bindingName === name)?.[1]
+
+    beforeEach(() => {
+      automation.push = vi.fn(async () => {})
+    })
+
+    it('leaves dialogs to Playwright and exposes no binding without the remote driver', async () => {
+      await createAutomation()
+
+      expect(listenersFor('dialog')).toHaveLength(0)
+      expect(bindingFor('__cypressRemoteStubCall')).toBeUndefined()
+    })
+
+    it('answers a dialog, then reports it', async () => {
+      await createAutomation({ remoteDriver: true })
+
+      const dialog = { type: () => 'confirm', message: () => 'sure?', accept: vi.fn(async () => {}), dismiss: vi.fn(async () => {}) }
+
+      await listenersFor('dialog')[0](dialog)
+
+      expect(dialog.accept).toHaveBeenCalledOnce()
+      expect(automation.push).toHaveBeenCalledWith('remote:dialog', { type: 'confirm', message: 'sure?', accepted: true })
+    })
+
+    it('pushes a stub call from the AUT frame only', async () => {
+      await createAutomation({ remoteDriver: true })
+
+      const binding = bindingFor('__cypressRemoteStubCall')
+      const autFrame = mock.getLastPage().mainFrame().childFrames()[0]
+
+      await binding({ frame: autFrame }, '{"id":"stub-1","args":[]}')
+      await binding({ frame: mock.getLastPage().mainFrame() }, '{"id":"stub-1","args":[1]}')
+
+      expect(automation.push).toHaveBeenCalledExactlyOnceWith('remote:stub:call', { id: 'stub-1', args: [] })
     })
   })
 

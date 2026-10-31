@@ -5,11 +5,21 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import type { RemoteStubBehavior, RemoteStubCall } from '@packages/types'
+import { serializeCallback } from '../remote'
+import { getRemoteWindowPath } from '../remote/remote_window'
+import { fromPageValue, toPageError, toPageValue } from '../remote/stub_values'
 
 type Counts = {
   spy: number
   stub: number
   children: Record<string, number>
+}
+
+// the spec's half of a stub or spy on the AUT's window, which records the calls the AUT reports
+interface RemoteAgent {
+  agent: sinon.SinonSpy
+  setReturned: (value: unknown) => void
 }
 
 let counts: Counts | null = null
@@ -148,9 +158,36 @@ export default function (Commands, Cypress, cy, state) {
     return state('sandbox', sandbox)
   }
 
+  // stubs and spies on the AUT's window under the remote driver, by the id the AUT reports calls with
+  const remoteAgents = new Map<string, RemoteAgent>()
+
+  const resetRemoteAgents = () => {
+    if (!remoteAgents.size) {
+      return
+    }
+
+    remoteAgents.clear()
+    Cypress.automation('remote:stubs:reset', {}).catch(() => {})
+  }
+
   // before each of our tests we always want
   // to reset the counts + the sandbox
   Cypress.on('test:before:run', resetAndSetSandbox)
+  Cypress.on('test:before:run', resetRemoteAgents)
+
+  // the AUT reports each call to a remote stub or spy, which is replayed on its agent so sinon records it
+  Cypress.on('internal:remote:stub:call', ({ id, args, returned }: RemoteStubCall) => {
+    const remote = remoteAgents.get(id)
+
+    if (!remote) {
+      return
+    }
+
+    const replayArgs = fromPageValue(args)
+
+    remote.setReturned(fromPageValue(returned))
+    remote.agent(...(Array.isArray(replayArgs) ? replayArgs : []))
+  })
 
   const wrap = function (ctx, type, agent, obj, method, count?) {
     if (!count) {
@@ -261,13 +298,80 @@ export default function (Commands, Cypress, cy, state) {
     return agent
   }
 
+  // The AUT's window is cross-origin to the spec under the remote driver, so the agent is split in two:
+  // a recorder in the AUT replaces the property and returns what the stub's behaviors say, and the
+  // agent here records each call it reports, for assertions, aliases and the command log.
+  const remoteAgent = function (ctx, type: 'spy' | 'stub', path: string[]) {
+    const id = `${type}-${_.uniqueId()}-${Date.now()}`
+    const behaviors: RemoteStubBehavior[] = []
+    let returned: unknown
+
+    const agent = wrap(ctx, type, sandbox.spy(function () {
+      return returned
+    }), `[AUT window]`, path.join('.'))
+
+    remoteAgents.set(id, { agent, setReturned: (value) => returned = value })
+
+    const send = (message: 'remote:stub:add' | 'remote:stub:update', data) => {
+      Cypress.automation(message, data).catch((err) => $errUtils.warnByPath('remote_driver.stub_not_applied', { args: { method: path.join('.'), message: err.message } }))
+    }
+
+    const addBehaviors = (target, args?: unknown[]) => {
+      const add = (behavior: RemoteStubBehavior) => {
+        behaviors.push(args ? { ...behavior, args } : behavior)
+        send('remote:stub:update', { id, behaviors })
+
+        return target
+      }
+
+      Object.assign(target, {
+        returns: (value) => add({ kind: 'returns', value: toPageValue(value) }),
+        resolves: (value) => add({ kind: 'resolves', value: toPageValue(value) }),
+        throws: (error) => add({ kind: 'throws', error: toPageError(error) }),
+        rejects: (error) => add({ kind: 'rejects', error: toPageError(error) }),
+        callsFake: (fn) => add({ kind: 'callsFake', source: serializeCallback(fn) }),
+        callThrough: () => add({ kind: 'callThrough' }),
+      })
+    }
+
+    if (type === 'stub') {
+      addBehaviors(agent)
+
+      const { withArgs } = agent
+
+      agent.withArgs = function (...args) {
+        const child = withArgs.apply(this, args)
+
+        addBehaviors(child, args.map(toPageValue))
+
+        return child
+      }
+    }
+
+    send('remote:stub:add', { id, type, path, behaviors })
+
+    return agent
+  }
+
   const spy = function (obj, method) {
+    const remotePath = getRemoteWindowPath(obj)
+
+    if (remotePath) {
+      return remoteAgent(this, 'spy', [...remotePath, method])
+    }
+
     const theSpy = sandbox.spy(obj, method)
 
     return wrap(this, 'spy', theSpy, obj, method)
   }
 
   const stub = function (obj, method: string) {
+    const remotePath = getRemoteWindowPath(obj)
+
+    if (remotePath) {
+      return remoteAgent(this, 'stub', [...remotePath, method])
+    }
+
     // TODO: make the code below work with `packages/runner` type check without casting to `never`.
     let theStub = sandbox.stub.call(sandbox, obj, method as never)
 

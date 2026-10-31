@@ -791,6 +791,12 @@ class $Cypress {
       case 'app:remote:uncaught:exception':
         return this.cy.onRemoteUncaughtException(args[0])
 
+      case 'app:remote:stub:call':
+        return this.emit('internal:remote:stub:call', args[0])
+
+      case 'app:remote:dialog':
+        return this.cy.onRemoteDialog(args[0])
+
       case 'app:window:alert':
         return this.emit('window:alert', args[0])
 

@@ -4,6 +4,8 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { getTitleFromAutomation } from './helpers/window'
+import { isRemoteDriverEnabled } from '../remote'
+import { createRemoteWindow } from '../remote/remote_window'
 
 const viewports = {
   'macbook-16': '1536x960',
@@ -107,7 +109,14 @@ export default (Commands, Cypress, cy, state) => {
       timeout: options.timeout,
     })
 
+    // the AUT's window is cross-origin to the spec, so the remote driver yields a stand-in for cy.stub and cy.spy
+    const remoteWindow = isRemoteDriverEnabled(Cypress) ? createRemoteWindow() : undefined
+
     return () => {
+      if (remoteWindow) {
+        return remoteWindow
+      }
+
       const win = state('window')
 
       if (!win) {

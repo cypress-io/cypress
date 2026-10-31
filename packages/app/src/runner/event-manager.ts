@@ -147,6 +147,12 @@ export class EventManager {
         case 'remote:uncaught:exception':
           Cypress.action('app:remote:uncaught:exception', data)
           break
+        case 'remote:stub:call':
+          Cypress.action('app:remote:stub:call', data)
+          break
+        case 'remote:dialog':
+          Cypress.action('app:remote:dialog', data)
+          break
         default:
           break
       }

@@ -326,6 +326,18 @@ describe('lib/browsers/firefox', () => {
       }))
     })
 
+    it('leaves the AUT\'s dialogs for the remote driver to answer', async () => {
+      await firefox.open(browser as any, 'http://', { ...options, experimentalRemoteDriver: true } as any, automation as any)
+
+      expectCalledWith(vi.mocked(webdriver.newSession), matchSubset({
+        capabilities: {
+          alwaysMatch: {
+            unhandledPromptBehavior: 'ignore',
+          },
+        },
+      }))
+    })
+
     it('sets preferences if returned by before:browser:launch', async () => {
       vi.mocked(plugins.has).mockImplementation((event) => event === 'before:browser:launch' ? true : undefined as any)
       vi.mocked(plugins.execute).mockResolvedValue({
@@ -418,6 +430,9 @@ describe('lib/browsers/firefox', () => {
           'network.fetchError',
           'browsingContext.contextCreated',
           'browsingContext.contextDestroyed',
+          'log.entryAdded',
+          'browsingContext.userPromptOpened',
+          'script.message',
         ] })
 
         expectCalledWith(wdInstance.browsingContextGetTree, {})

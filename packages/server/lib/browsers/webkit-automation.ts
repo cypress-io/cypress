@@ -16,6 +16,8 @@ import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
 import { RemoteTabs, WebKitRemoteAgent, toPlaywrightServerObject } from '../automation/commands/remote_agent'
 import { RemoteVisit } from '../automation/commands/remote_visit'
+import { answerRemoteDialog, isRemoteDialogType } from '../automation/commands/remote_dialogs'
+import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
 import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { webkitReloadFrame } from '../automation/commands/reload_frame'
 import { webkitNavigateHistory } from '../automation/commands/navigate_history'
@@ -35,6 +37,8 @@ type WebKitAutomationOpts = {
   userAgent?: string | null
   isHeadless: boolean
   cdpSocketServer?: CDPSocketServer
+  // launched for experimentalRemoteDriver, which drives the AUT from outside the page
+  remoteDriver?: boolean
 }
 
 interface WebKitConsoleMessage {
@@ -85,6 +89,7 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
+  private remoteDriver: boolean
   private remoteAgent = new WebKitRemoteAgent()
   private remoteTabs = new RemoteTabs(() => {
     return this.getExtraPages().map((page) => {
@@ -105,6 +110,15 @@ export class WebKitAutomation {
     evaluateInAut: (expression) => this.getAutFrame().evaluate(expression),
   })
 
+  private remoteStubs = new RemoteStubs({
+    addPreloadScript: async (source) => {
+      const script = await this.page.addInitScript({ content: `(${source})(window.${REMOTE_STUB_BINDING})` })
+
+      return async () => script?.dispose?.()
+    },
+    callInAut: (source) => this.getAutFrame().evaluate(`(${source})(window.${REMOTE_STUB_BINDING})`),
+  })
+
   cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
@@ -112,6 +126,7 @@ export class WebKitAutomation {
     this.browser = opts.browser
     this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
+    this.remoteDriver = !!opts.remoteDriver
     this.cdpSocketServer = opts.cdpSocketServer
   }
 
@@ -160,6 +175,30 @@ export class WebKitAutomation {
 
     this.handleRequestEvents()
     this.listenForAutErrors()
+
+    if (this.remoteDriver) {
+      await this.context.exposeBinding(REMOTE_STUB_BINDING, async (source, payload: string) => {
+        try {
+          if (source.frame === this.getAutFrame()) {
+            await this.automation.push('remote:stub:call', parseStubCall(payload))
+          }
+        } catch (err) {
+          debug('failed to report a stub call: %s', err?.message)
+        }
+      })
+
+      // Playwright dismisses a dialog itself only while nothing listens for them
+      this.page.on('dialog', (dialog) => {
+        const type = dialog.type()
+
+        if (!isRemoteDialogType(type)) {
+          return dialog.dismiss()
+        }
+
+        return answerRemoteDialog(this.automation, type, dialog.message(), (accept) => accept ? dialog.accept() : dialog.dismiss())
+        .catch((err) => debug('failed to report dialog: %s', err?.message))
+      })
+    }
 
     if (options.downloadsFolder) this.handleDownloadEvents(options.downloadsFolder)
 
@@ -537,6 +576,12 @@ export class WebKitAutomation {
         return await webkitReloadFrame(this.getAutFrame(), data.forceReload)
       case 'navigate:aut:history':
         return await webkitNavigateHistory(this.getAutFrame(), data.historyNumber)
+      case 'remote:stub:add':
+        return await this.remoteStubs.add(data)
+      case 'remote:stub:update':
+        return await this.remoteStubs.update(data)
+      case 'remote:stubs:reset':
+        return await this.remoteStubs.reset()
       case 'remote:visit:before:load':
         return await this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

@@ -1781,6 +1781,8 @@ export default {
     unsupported_option ({ cmd: command, option }) {
       return `${cmd(command)} does not support the \`${option}\` option when \`experimentalRemoteDriver\` is enabled.`
     },
+    confirm_answered: `A \`window:confirm\` handler returned \`false\`, but with \`experimentalRemoteDriver\` the confirm \`{{message}}\` was already accepted. Stub it instead: \`cy.window().then((win) => cy.stub(win, 'confirm').returns(false))\`.`,
+    stub_not_applied: `Cypress could not apply \`{{method}}\` in the AUT: {{message}}`,
     visit_before_load_did_not_run: `${cmd('visit')} could not run its \`onBeforeLoad\` callback in the page before it loaded.`,
     unsupported_subject ({ cmd: command }) {
       return `${cmd(command)} does not support this subject when \`experimentalRemoteDriver\` is enabled. Only \`.get()\`, \`.find()\`, \`.eq()\`, \`.contains()\` and \`.frame()\` can be chained together.`

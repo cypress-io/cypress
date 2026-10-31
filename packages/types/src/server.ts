@@ -220,6 +220,35 @@ export interface RemoteUncaughtException {
   error: { name?: string, message: string, stack?: string }
 }
 
+// what a cy.stub or cy.spy on the AUT's window does when the app calls it; `args` limits it to matching calls
+export type RemoteStubBehavior = { args?: unknown[] } & (
+  | { kind: 'returns' | 'resolves', value: unknown }
+  | { kind: 'throws' | 'rejects', error: { name?: string, message: string } }
+  // a function's source, run in the AUT
+  | { kind: 'callsFake', source: string }
+  | { kind: 'callThrough' }
+)
+
+export interface RemoteStubSpec {
+  id: string
+  type: 'spy' | 'stub'
+  // property path from the AUT's window, such as ['console', 'log']
+  path: string[]
+  behaviors: RemoteStubBehavior[]
+}
+
+export interface RemoteStubCall {
+  id: string
+  args: unknown[]
+  returned?: unknown
+}
+
+export interface RemoteDialog {
+  type: 'alert' | 'confirm' | 'prompt' | 'beforeunload'
+  message: string
+  accepted: boolean
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -251,6 +280,11 @@ export interface AutomationCommands {
   'remote:visit:before:load': CommandSignature<RemoteVisitBeforeLoad, void>
   'remote:visit:on:load': CommandSignature<RemoteVisitCallbacks, RemoteVisitResult>
   'remote:uncaught:exception': CommandSignature<RemoteUncaughtException, void>
+  'remote:stub:add': CommandSignature<RemoteStubSpec, void>
+  'remote:stub:update': CommandSignature<Pick<RemoteStubSpec, 'id' | 'behaviors'>, void>
+  'remote:stubs:reset': CommandSignature<void, void>
+  'remote:stub:call': CommandSignature<RemoteStubCall, void>
+  'remote:dialog': CommandSignature<RemoteDialog, void>
 }
 
 export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>

@@ -2401,6 +2401,9 @@ declare namespace Cypress {
     spy(func: (...args: any[]) => any): Agent<sinon.SinonSpy>
     /**
      * Spy on a method.
+     *
+     * With `experimentalRemoteDriver`, a method on the window from `cy.window()` is spied on inside the page,
+     * and the calls the page reports are recorded here, with copies of their arguments.
      * @see https://on.cypress.io/spy
      * @example
      *    // assume App.start calls util.addListeners
@@ -2442,6 +2445,11 @@ declare namespace Cypress {
     stub(obj: any): Agent<sinon.SinonStub>
     /**
      * Stubs single method of an object.
+     *
+     * With `experimentalRemoteDriver`, a method on the window from `cy.window()` is stubbed inside the page:
+     * `returns()` and `resolves()` take serializable values, `callsFake()` runs in the page without access to the
+     * test's variables, and calls are recorded here with copies of their arguments. A stub made before `cy.visit()`
+     * applies to every page the test loads, before the page's own scripts run.
      *
      * @see https://on.cypress.io/stub
      * @example
@@ -2793,6 +2801,9 @@ declare namespace Cypress {
 
     /**
      * Get the window object of the page that is currently active.
+     *
+     * With `experimentalRemoteDriver`, it yields a stand-in for the page's window that only `cy.stub()` and
+     * `cy.spy()` can use, such as `cy.stub(win, 'open')` or `cy.spy(win.console, 'log')`.
      *
      * @see https://on.cypress.io/window
      * @example

@@ -1079,6 +1079,26 @@ describe('lib/browsers/cdp_automation', () => {
         })
       })
 
+      it('pushes a stub call from the AUT\'s main world only', async () => {
+        await emit('Runtime.bindingCalled', { name: '__cypressRemoteStubCall', executionContextId: 7, payload: '{"id":"stub-1","args":[1]}' })
+        await emit('Runtime.bindingCalled', { name: '__cypressRemoteStubCall', executionContextId: 9, payload: '{"id":"stub-1","args":[2]}' })
+
+        expect(automation.push).toHaveBeenCalledOnce()
+        expect(automation.push).toHaveBeenCalledWith('remote:stub:call', { id: 'stub-1', args: [1] })
+      })
+
+      it('answers a dialog, then reports it', async () => {
+        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').resolves({})
+
+        await emit('Page.javascriptDialogOpening', { type: 'confirm', message: 'sure?' })
+        await emit('Page.javascriptDialogOpening', { type: 'prompt', message: 'name?' })
+
+        expectCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog', { accept: true })
+        expectCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog', { accept: false })
+        expect(automation.push).toHaveBeenCalledWith('remote:dialog', { type: 'confirm', message: 'sure?', accepted: true })
+        expect(automation.push).toHaveBeenCalledWith('remote:dialog', { type: 'prompt', message: 'name?', accepted: false })
+      })
+
       it('ignores errors from an isolated world or another frame', async () => {
         await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 8, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
         await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 9, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })

@@ -76,6 +76,8 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextCreated')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextDestroyed')
       expectCalledWith(mockWebdriverClient.on, 'log.entryAdded')
+      expectCalledWith(mockWebdriverClient.on, 'browsingContext.userPromptOpened')
+      expectCalledWith(mockWebdriverClient.on, 'script.message')
     })
 
     it('unbinds BIDI_EVENTS when close() is called', () => {
@@ -128,6 +130,40 @@ describe('lib/browsers/bidi_automation', () => {
         await flushPromises()
 
         expect(mockAutomationClient.push).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('remote driver dialogs and stubs', () => {
+      let bidiAutomationInstance: BidiAutomation
+
+      beforeEach(() => {
+        mockAutomationClient.push = vi.fn().mockResolvedValue(undefined)
+        mockWebdriverClient.browsingContextHandleUserPrompt = vi.fn().mockResolvedValue({})
+        bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+        // @ts-expect-error - autContextId is private
+        bidiAutomationInstance.autContextId = 'aut'
+      })
+
+      it('answers a prompt Firefox left for it, then reports it', async () => {
+        mockWebdriverClient.emit('browsingContext.userPromptOpened', { context: 'top', type: 'alert', message: 'hi', handler: 'ignore' })
+        mockWebdriverClient.emit('browsingContext.userPromptOpened', { context: 'top', type: 'alert', message: 'handled', handler: 'dismiss' })
+
+        await flushPromises()
+
+        expect(mockWebdriverClient.browsingContextHandleUserPrompt).toHaveBeenCalledExactlyOnceWith({ context: 'top', accept: true })
+        expect(mockAutomationClient.push).toHaveBeenCalledExactlyOnceWith('remote:dialog', { type: 'alert', message: 'hi', accepted: true })
+      })
+
+      it('pushes a stub call sent on its channel from the AUT', async () => {
+        const message = (overrides: object) => ({ channel: 'cypress-remote-stubs', data: { type: 'string', value: '{"id":"stub-1","args":[]}' }, source: { realm: 'r', context: 'aut' }, ...overrides })
+
+        mockWebdriverClient.emit('script.message', message({}))
+        mockWebdriverClient.emit('script.message', message({ channel: 'other' }))
+        mockWebdriverClient.emit('script.message', message({ source: { realm: 'r', context: 'runner' } }))
+
+        await flushPromises()
+
+        expect(mockAutomationClient.push).toHaveBeenCalledExactlyOnceWith('remote:stub:call', { id: 'stub-1', args: [] })
       })
     })
 

@@ -18,6 +18,8 @@ import type {
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
   LogEntry,
+  BrowsingContextUserPromptOpenedParameters,
+  ScriptMessageParameters,
 } from 'webdriver/build/bidi/localTypes'
 import type { CyCookie as CyBaseCookie } from '../automation/cookie/util'
 import type { BidiCyCookie as CyCookie, StoragePartialCookie } from '../automation/cookie/converters/bidi'
@@ -28,6 +30,8 @@ import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
 import { BidiRemoteAgent, RemoteTabs } from '../automation/commands/remote_agent'
 import { RemoteVisit } from '../automation/commands/remote_visit'
+import { answerRemoteDialog } from '../automation/commands/remote_dialogs'
+import { RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
 import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
@@ -113,6 +117,9 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartia
   return cookieToClearFilter
 }
 
+// passed to the stub recorder in place of a global binding, so the AUT can't see it
+const REMOTE_STUB_CHANNEL = { type: 'channel', value: { channel: 'cypress-remote-stubs' } } as const
+
 const FIREFOX_PRELOAD_SCRIPT_ERROR = 'Error: Permission denied to access property "length"'
 
 export class BidiAutomation {
@@ -125,6 +132,8 @@ export class BidiAutomation {
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
     'log.entryAdded',
+    'browsingContext.userPromptOpened',
+    'script.message',
   ]
 
   private webDriverClient: WebDriverClient
@@ -132,6 +141,7 @@ export class BidiAutomation {
   private remoteAgent: BidiRemoteAgent
   private remoteTabs: RemoteTabs
   private remoteVisit: RemoteVisit
+  private remoteStubs: RemoteStubs
   private autContextId: string | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
@@ -163,6 +173,26 @@ export class BidiAutomation {
           call: (request) => this.remoteAgent.call(tab.context, request),
         }
       })
+    })
+
+    this.remoteStubs = new RemoteStubs({
+      addPreloadScript: async (source) => {
+        const { script } = await webDriverClient.scriptAddPreloadScript({
+          functionDeclaration: source,
+          arguments: [REMOTE_STUB_CHANNEL],
+          ...(this.topLevelContextId ? { contexts: [this.topLevelContextId] } : {}),
+        })
+
+        return () => webDriverClient.scriptRemovePreloadScript({ script })
+      },
+      callInAut: async (source) => {
+        const autContextId = await this.ensureAutContextId('Cannot stub the AUT: no AUT context initialized')
+        const result = await webDriverClient.scriptCallFunction({ functionDeclaration: source, arguments: [REMOTE_STUB_CHANNEL], target: { context: autContextId }, awaitPromise: false })
+
+        if (result.type === 'exception') {
+          throw new Error(result.exceptionDetails.text)
+        }
+      },
     })
 
     this.remoteVisit = new RemoteVisit({
@@ -200,6 +230,33 @@ export class BidiAutomation {
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
     this.webDriverClient.on('log.entryAdded', this.onLogEntryAdded)
+    this.webDriverClient.on('browsingContext.userPromptOpened', this.onUserPromptOpened)
+    this.webDriverClient.on('script.message', this.onScriptMessage)
+  }
+
+  private onScriptMessage = async ({ channel, data, source }: ScriptMessageParameters) => {
+    if (channel !== REMOTE_STUB_CHANNEL.value.channel || source.context !== this.autContextId || data.type !== 'string') {
+      return
+    }
+
+    try {
+      await this.automation.push('remote:stub:call', parseStubCall(data.value))
+    } catch (err) {
+      debug('failed to report a stub call: %s', err?.message)
+    }
+  }
+
+  private onUserPromptOpened = async ({ context, type, message, handler }: BrowsingContextUserPromptOpenedParameters) => {
+    // any other handler means Firefox answers the prompt itself
+    if (handler !== 'ignore') {
+      return
+    }
+
+    try {
+      await answerRemoteDialog(this.automation, type, message, (accept) => this.webDriverClient.browsingContextHandleUserPrompt({ context, accept }))
+    } catch (err) {
+      debug('failed to report dialog: %s', err?.message)
+    }
   }
 
   // the remote driver can't listen for errors in a cross-origin AUT, so it learns of them here
@@ -933,6 +990,12 @@ export class BidiAutomation {
 
           return bidiGetFrameTitle(this.webDriverClient, autContextId)
         }
+        case 'remote:stub:add':
+          return this.remoteStubs.add(data)
+        case 'remote:stub:update':
+          return this.remoteStubs.update(data)
+        case 'remote:stubs:reset':
+          return this.remoteStubs.reset()
         case 'remote:visit:before:load':
           return this.remoteVisit.beforeLoad(data)
         case 'remote:visit:on:load':
