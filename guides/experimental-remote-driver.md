@@ -17,12 +17,22 @@ This guide records where the remote driver behaves differently from the legacy d
 
 - **The app is first-party only on `baseUrl`'s site.** Any other site the test visits is cross-site to the runner, so its cookies are third-party and Chrome partitions its storage, the same as a site visited inside `cy.origin` with the legacy driver. Legacy instead moves the runner to the first site a test visits.
 
-## Queries, actions and assertions
+## Commands
 
-- **Only `.get()`, `.find()`, `.eq()`, `.contains()`, `.frame()` and `cy.tab()` chain on a remote subject.** `.then($el => …)`, `.invoke()`, `.its()`, `.within()`, the `includeShadowDom` option and aliases of remote elements aren't supported.
+`packages/driver/cypress/e2e/cy/remote_driver_commands.cy.ts` runs every command that touches the AUT against a cross-origin AUT, one per test. A command the remote driver doesn't support yet is listed in its `UNSUPPORTED` table with the reason, and skipped; remove the entry when support lands. Results in Chrome, Firefox and WebKit:
+
+| | Commands |
+| --- | --- |
+| **Work** | `cy.get`, `.find`, `.eq`, `.contains`, `.frame`, `cy.tab`, aliases (`.as` / `cy.get('@alias')`), `.should` (including a callback), `.click`, `.type`, `cy.visit`, `cy.reload`, `cy.go`, `cy.url`, `cy.location`, `cy.hash`, `cy.title`, `cy.viewport`, `cy.session`, every cookie command, `cy.getAllLocalStorage`, `cy.clearAllLocalStorage`, `cy.getAllSessionStorage`, `cy.clearAllSessionStorage`, `cy.press` |
+| **Rejected on a remote subject** | traversals (`.first`, `.last`, `.filter`, `.not`, `.children`, `.parent`, `.parents`, `.parentsUntil`, `.closest`, `.siblings`, `.next`, `.nextAll`, `.nextUntil`, `.prev`, `.prevAll`, `.prevUntil`), `.shadow` and the `includeShadowDom` option, `.its`, `.invoke`, `.each`, `.within`, `.then($el => …)` (the subject isn't a jQuery object), and the actions `.dblclick`, `.rightclick`, `.clear`, `.check`, `.uncheck`, `.select`, `.selectFile`, `.focus`, `.blur`, `.submit`, `.trigger`, `.scrollIntoView`, `.scrollTo` |
+| **Read the AUT's window directly, so they fail** | `cy.root`, `cy.document`, `cy.focused`, `cy.getByRole`, `cy.scrollTo` (the window), `cy.clearLocalStorage` |
+| **Broken** | `cy.screenshot` and `.screenshot` fail with an internal error. In Firefox, a `cy.visit` that only changes the hash never sees a load and times out. |
+| **Not needed** | `cy.origin` still runs, but the remote driver reaches a cross-origin AUT without it, so there's no reason to use it. `cy.window` yields a stand-in for `cy.stub` / `cy.spy` (see below). |
+
+Unchanged by the remote driver, and so not probed: commands that never touch the AUT (`cy.request`, `cy.intercept`, `cy.wait`, `cy.task`, `cy.exec`, `cy.fixture`, `cy.readFile`, `cy.writeFile`, `cy.log`, `cy.wrap`, `.spread`, `cy.debug`, `cy.pause`), and limits WebKit already has with the legacy driver (`cy.press` and `cy.origin` aren't supported there).
+
 - **`.frame()`** enters the first element that matches, and each iframe level adds a round trip to every retry.
 - **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it.
-- **`cy.document()`** and other commands that read the AUT's window directly still need it to be same-origin. Not yet checked one by one.
 
 ## Tabs
 

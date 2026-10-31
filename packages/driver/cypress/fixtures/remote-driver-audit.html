@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Audit Page</title>
+</head>
+<body>
+  <p id="status"></p>
+  <a id="next-page" href="remote-driver-audit.html?page=2">Next page</a>
+  <p id="page"></p>
+
+  <ul id="list">
+    <li class="item">One</li>
+    <li class="item two" id="two">Two</li>
+    <li class="item">Three</li>
+  </ul>
+
+  <form id="form">
+    <input id="text" name="text" autocomplete="off" />
+    <input id="check" type="checkbox" />
+    <select id="fruit">
+      <option value="apple">Apple</option>
+      <option value="banana">Banana</option>
+    </select>
+    <input id="file" type="file" />
+    <button id="submit-button" type="submit">Submit</button>
+  </form>
+
+  <div role="button" id="role-button">Role button</div>
+  <div id="host"></div>
+
+  <div id="scroller" style="height: 50px; overflow: auto">
+    <div style="height: 500px"></div>
+    <p id="far">Far</p>
+  </div>
+
+  <div style="height: 3000px"></div>
+  <p id="bottom">Bottom</p>
+
+  <script>
+    const status = (text) => { document.getElementById('status').textContent = text }
+    const byId = (id) => document.getElementById(id)
+
+    byId('page').textContent = new URLSearchParams(location.search).get('page') || '1'
+
+    byId('form').addEventListener('submit', (e) => {
+      e.preventDefault()
+      status(`submitted:${byId('text').value}`)
+    })
+    byId('text').addEventListener('focus', () => status('focus:text'))
+    byId('text').addEventListener('blur', () => status('blur:text'))
+    byId('check').addEventListener('change', (e) => status(`checked:${e.target.checked}`))
+    byId('fruit').addEventListener('change', (e) => status(`selected:${e.target.value}`))
+    byId('file').addEventListener('change', (e) => status(`file:${e.target.files[0] ? e.target.files[0].name : 'none'}`))
+    byId('role-button').addEventListener('click', () => status('clicked'))
+    byId('role-button').addEventListener('dblclick', () => status('dblclicked'))
+    byId('role-button').addEventListener('contextmenu', () => status('rightclicked'))
+    byId('two').addEventListener('custom-event', () => status('custom-event'))
+    byId('scroller').addEventListener('scroll', () => status('scrolled'))
+    window.addEventListener('scroll', () => status('window-scrolled'), { once: true })
+    window.addEventListener('resize', () => status(`width:${window.innerWidth}`))
+
+    byId('host').attachShadow({ mode: 'open' }).innerHTML = '<button id="in-shadow">In shadow</button>'
+
+    localStorage.setItem('audit', 'local')
+    sessionStorage.setItem('audit', 'session')
+    document.cookie = 'audit=1; path=/'
+  </script>
+</body>
+</html>
