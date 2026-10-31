@@ -81,6 +81,13 @@ If only the **minor/patch** Node version changes within the same major, this fil
 # "cypress/base-internal:22.18.0-trixie" -> "cypress/base-internal:NEW_NODE_VERSION-trixie"
 ```
 
+### Cursor Cloud Dockerfile
+```bash
+# File: /.cursor/Dockerfile
+# Update the FROM image and the Node version in its comments:
+# "FROM cypress/base-internal:22.18.0-trixie" -> "FROM cypress/base-internal:NEW_NODE_VERSION-trixie"
+```
+
 ### CircleCI Workflows
 ```bash
 # File: /.circleci/src/@workflows.yml
@@ -91,16 +98,6 @@ If only the **minor/patch** Node version changes within the same major, this fil
 ```
 
 ## Step 4: Update Dependencies
-
-### Better SQLite3
-
-```bash
-# Check if better-sqlite3 needs updating for new Electron prebuilds looking through https://github.com/WiseLibs/better-sqlite3/commits/master/ to find the version number released after 'Prebuild for Election NEW_VERSION'.
-# Files to update:
-# /packages/server/package.json
-# /packages/types/package.json
-# Look for versions that support the new Electron version
-```
 
 ### Node ABI Resolution
 ```bash
@@ -227,9 +224,8 @@ yarn test
 
 ### Electron Crashes After Protocol Database Init
 ```bash
-# Usually due to mismatched better-sqlite3 prebuild
-# Solution: git clean -xfd && yarn
-# Ensure latest OS version
+# Usually a missing or stale node_modules/better-sqlite3/build/Release/better_sqlite3.node
+# Solution: yarn workspace @packages/server rebuild-better-sqlite3 (or git clean -xfd && yarn)
 ```
 
 ### Node ABI Out of Date
@@ -257,9 +253,8 @@ grep -r "OLD_ELECTRON_VERSION" . --exclude-dir=node_modules --exclude-dir=dist
 - [ ] `/.node-version` - Node.js version
 - [ ] `/.nvmrc` - Node.js version  
 - [ ] `/docker-compose.yml` - base-internal image
+- [ ] `/.cursor/Dockerfile` - base-internal image
 - [ ] `/.circleci/workflows.yml` - base-internal images
-- [ ] `/packages/server/package.json` - better-sqlite3 version
-- [ ] `/packages/types/package.json` - better-sqlite3 version
 - [ ] `/system-tests/test-binary/*` - Docker image references
 - [ ] `/system-tests/test-binary/ci_environments_spec.ts` - **if Node major changed:** `node:<major>` and every `cypress/base-internal:ubuntu*-node<major>` tag (additional Ubuntu rows may exist over time)
 - [ ] All `@types/node` references across monorepo

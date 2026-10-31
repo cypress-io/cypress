@@ -163,6 +163,7 @@ describe('config/src/project/utils', () => {
     it('does not return CYPRESS_RESERVED_ENV_VARS', () => {
       const envs = {
         CYPRESS_INTERNAL_ENV: 'value',
+        CYPRESS_AGENT_MODE: '1',
       } as unknown as NodeJS.ProcessEnv
 
       expect(getProcessEnvVars(envs)).toEqual({})

@@ -1,14 +1,22 @@
 {
   "name": "@tooling/system-tests",
   "version": "0.0.0-development",
-  "description": "Internal cypress tests for running across multiple projects which have their own configuration for E2E and CT",
   "private": true,
+  "description": "Internal cypress tests for running across multiple projects which have their own configuration for E2E and CT",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
   "main": "lib/fixtures.ts",
   "browser": "lib/fixtureDirs.ts",
+  "types": "lib/fixtures.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
   "scripts": {
     "build": "node ./scripts/scaffold.js",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
-    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
+    "lint": "eslint",
     "preprojects:yarn:install": "yarn clean-deps",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "pretest": "yarn gulp ensureCloudValidations",
@@ -18,6 +26,9 @@
     "type-check": "tsc --project .",
     "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "devDependencies": {
     "@babel/core": "7.28.0",
     "@babel/preset-env": "7.28.0",
@@ -26,6 +37,7 @@
     "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-preprocessor": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/https-proxy": "0.0.0-development",
     "@packages/launcher": "0.0.0-development",
     "@packages/network": "0.0.0-development",
@@ -35,8 +47,6 @@
     "@packages/ts": "0.0.0-development",
     "@types/chai": "4.2.15",
     "@types/mocha": "9.1.0",
-    "@typescript-eslint/eslint-plugin": "7.2.0",
-    "@typescript-eslint/parser": "7.2.0",
     "babel-loader": "10.0.0",
     "base64url": "^3.0.1",
     "bluebird": "3.7.2",
@@ -56,6 +66,7 @@
     "dedent": "^0.7.0",
     "dockerode": "4.0.9",
     "esbuild": "^0.28.1",
+    "eslint": "^9.31.0",
     "execa": "4.1.0",
     "express": "4.21.0",
     "express-session": "1.16.1",
@@ -63,10 +74,12 @@
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "9.1.0",
     "glob": "7.2.0",
+    "globals": "^15.12.0",
     "globby": "^11.1.0",
     "https-proxy-agent": "3.0.1",
     "human-interval": "1.0.0",
     "image-size": "1.2.1",
+    "jiti": "^2.4.2",
     "jose": "^4.15.5",
     "lazy-ass": "1.6.0",
     "lodash": "^4.17.21",
@@ -86,18 +99,10 @@
     "ssestream": "1.0.1",
     "strip-ansi": "6.0.1",
     "supertest": "4.0.2",
-    "systeminformation": "^5.27.7",
+    "systeminformation": "^5.33.16",
     "temp-dir": "^2.0.0",
     "tree-kill": "1.2.2",
     "ws": "5.2.4"
-  },
-  "types": "lib/fixtures.ts",
-  "license": "ISC",
-  "author": "",
-  "keywords": [],
-  "directories": {
-    "lib": "lib",
-    "test": "test"
   },
   "nx": {
     "targets": {

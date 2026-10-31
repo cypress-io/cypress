@@ -2,11 +2,14 @@
 // and needs none of systemTests.it's spawn/snapshot machinery or its global setup.
 import { expect } from 'chai'
 import path from 'path'
+import os from 'os'
+import cp from 'child_process'
+import fs from 'fs-extra'
 import stripAnsi from 'strip-ansi'
 import { TAP_ERROR_COPY } from '@packages/cypress-sessions'
 import type { TapErrorCopy } from '@packages/cypress-sessions'
-import { openTapSession, openTapSessionViaModuleApi, tapWithoutSession } from '../lib/tap-open'
-import type { TapSession } from '../lib/tap-open'
+import { openTapSession, openDetachedTapSession, openTapSessionViaModuleApi, tapWithoutSession } from '../lib/tap-open'
+import type { TapSession, DetachedTapSession } from '../lib/tap-open'
 
 const SPEC = 'cypress/e2e/aut-content.cy.js'
 const SLOW_SPEC = 'cypress/e2e/slow.cy.js'
@@ -61,7 +64,7 @@ const copyFor = (code: keyof typeof TAP_ERROR_COPY): string => {
  * Snapshots human-readable output after scrubbing paths, ports, and timing so failures
  * represent rendering changes rather than environment differences.
  */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const snapshot = require('snap-shot-it')
 
 const snapshotRendering = (name: string, text: string, extra: Array<[RegExp, string]> = []): void => {
@@ -933,6 +936,76 @@ describe('tap CLI with more than one session running', function () {
 })
 
 /**
+ * Without the welcome screen dismissed, open mode waits for a person to click Continue
+ * before it launches the browser. An AI agent running `cypress open` with the project,
+ * testing type and browser given has no one to click, so it skips the wait. Nothing is
+ * seeded here, so this session only gets a browser if that holds.
+ */
+describe('tap CLI against a session an AI agent opened with the welcome screen undismissed', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: TapSession
+
+  before(async () => {
+    session = await openTapSession('tap-retries', {
+      seedWelcome: false,
+      env: { CLAUDECODE: '1', CYPRESS_AGENT_MODE: undefined },
+    })
+  })
+
+  after(async () => {
+    await session?.kill()
+  })
+
+  it('has a browser attached without anyone dismissing the welcome screen', async () => {
+    const status = await session.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+  })
+
+  it('runs a spec', async () => {
+    const status = await session.runSpec(SPEC)
+
+    expect(status.status).to.eq('passed')
+  })
+})
+
+/**
+ * In a project with no Cypress configuration, open mode creates the configuration and
+ * support files and then waits for a person to press Continue in the Launchpad before it
+ * loads them. An AI agent running `cypress open --e2e` has no one to press it, so it
+ * continues on its own: one launch is enough for a session to register.
+ */
+describe('tap CLI against a session an AI agent opened in a project with no Cypress configuration', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: TapSession
+
+  before(async () => {
+    session = await openTapSession('pristine', {
+      seedWelcome: false,
+      env: { CLAUDECODE: '1', CYPRESS_AGENT_MODE: undefined },
+    })
+  })
+
+  after(async () => {
+    await session?.kill()
+  })
+
+  it('registers a session with a browser attached from a single launch', async () => {
+    const status = await session.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+  })
+
+  it('creates the configuration and support files it started with', async () => {
+    for (const file of ['cypress.config.js', 'cypress/support/e2e.js']) {
+      expect(await fs.pathExists(path.join(session.projectRoot, file)), file).to.eq(true)
+    }
+  })
+})
+
+/**
  * A pid alive but no longer answering: the only state that reports
  * STALE_SESSION rather than NO_SESSION.
  */
@@ -1025,6 +1098,136 @@ describe('tap CLI against a Module-API-booted session', function () {
 
     expect(result.exitCode).to.eq(1)
     expect(result.json()).to.deep.include({ ambiguous: true, count: 3 })
+  })
+})
+
+// The app keeps writing to these after the command returns, so nothing but the test removes them
+const removeDetachedOutput = async (session: DetachedTapSession | undefined): Promise<void> => {
+  const written = /written to "([^"]+)" and "([^"]+)"/.exec(session?.launch.stdout ?? '')
+
+  await Promise.all((written ? [written[1], written[2]] : []).map((file) => fs.remove(file)))
+}
+
+/**
+ * `cypress open --detached` returns once the app is ready and leaves it running on its own. The
+ * app's output and display must outlive the command, or the app stops soon after it returns.
+ */
+describe('tap CLI against a session started with cypress open --detached', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: DetachedTapSession
+
+  before(async () => {
+    session = await openDetachedTapSession('tap-retries')
+  })
+
+  after(async () => {
+    await session?.kill()
+    await removeDetachedOutput(session)
+  })
+
+  it('returns once the app is ready, saying where its output is written', async () => {
+    expect(session.launch.exitCode, `${session.launch.stdout}${session.launch.stderr}`).to.eq(0)
+
+    const written = /written to "([^"]+)" and "([^"]+)"/.exec(session.launch.stdout)
+
+    expect(written, session.launch.stdout).to.not.eq(null)
+
+    for (const file of [written![1], written![2]]) {
+      expect(await fs.pathExists(file), file).to.eq(true)
+    }
+  })
+
+  it('keeps the app running after the command returned', async () => {
+    // The pipes closed as the command exited, so the app's first later write was the failure.
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+
+    const status = await session.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+  })
+
+  it('runs a spec', async () => {
+    const status = await session.runSpec(SPEC)
+
+    expect(status.status).to.eq('passed')
+  })
+})
+
+/**
+ * With no DISPLAY the CLI starts a Xvfb of its own. That Xvfb has to outlive the command, and
+ * nothing is left to stop it once the command has returned, so it has to stop by itself once
+ * the app has closed.
+ */
+describe('tap CLI against a session started with cypress open --detached and no DISPLAY', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: DetachedTapSession | undefined
+  let xvfbPid: number | undefined
+  let closed = false
+
+  // A process that exited but was not reaped yet still answers a signal, so read its state instead
+  const isRunning = async (pid: number): Promise<boolean> => {
+    try {
+      return !/^\d+ \(.*\) Z/.test(await fs.readFile(`/proc/${pid}/stat`, 'utf8'))
+    } catch {
+      return false
+    }
+  }
+
+  before(async function () {
+    if (os.platform() !== 'linux') {
+      return this.skip()
+    }
+
+    session = await openDetachedTapSession('tap-retries', { ownDisplay: true })
+
+    // Xvfb writes its pid to its lock file
+    xvfbPid = Number((await fs.readFile(session.xvfbLockFile!, 'utf8')).trim())
+  })
+
+  after(async () => {
+    if (!closed) {
+      await session?.kill()
+    }
+
+    await removeDetachedOutput(session)
+
+    if (xvfbPid && await isRunning(xvfbPid)) {
+      process.kill(xvfbPid, 'SIGKILL')
+      await fs.remove(session!.xvfbLockFile!)
+    }
+  })
+
+  it('starts Xvfb in a session of its own', function () {
+    expect(session!.launch.exitCode, `${session!.launch.stdout}${session!.launch.stderr}`).to.eq(0)
+
+    const sessionId = Number(cp.execFileSync('ps', ['-o', 'sid=', '-p', String(xvfbPid)]).toString().trim())
+
+    expect(sessionId).to.eq(xvfbPid)
+  })
+
+  it('keeps the app connected to its display after the command returned', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+
+    const status = await session!.status()
+
+    expect(status.browserAttached, JSON.stringify(status)).to.eq(true)
+    expect(await isRunning(xvfbPid!)).to.eq(true)
+  })
+
+  it('stops Xvfb and removes its lock file once the app has closed', async () => {
+    await session!.kill()
+    closed = true
+
+    const deadline = Date.now() + 30000
+
+    while ((await isRunning(xvfbPid!) || await fs.pathExists(session!.xvfbLockFile!)) && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 250))
+    }
+
+    expect(await isRunning(xvfbPid!), 'Xvfb is still running').to.eq(false)
+    expect(await fs.pathExists(session!.xvfbLockFile!), 'the lock file is still there').to.eq(false)
   })
 })
 

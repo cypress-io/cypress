@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
-import { randomUUID } from 'crypto'
+import { createHash, randomUUID } from 'crypto'
 
 import * as exec from '../exec'
 import * as files from '../files'
@@ -8,19 +8,45 @@ import { fs } from '../util/fs'
 import * as task from '../task'
 import { getUserDefinedEnvironmentVariables } from '../getUserDefinedEnvs'
 import { serializeForInlineScript } from '@packages/network-tools'
+import { encodeEventParts } from '@packages/socket'
 
 interface SpecOriginatedCommand {
   name: string
-  args: string[]
+  hash: string
 }
 
 type NonSpecError = Error & { isNonSpec: boolean | undefined }
 type ChannelUrl = string
 type ChannelKey = string
 
+const sha256 = (data: string | Uint8Array) => {
+  return createHash('sha256').update(data).digest('hex')
+}
+
+const toBytes = (binary: ArrayBuffer | ArrayBufferView) => {
+  return ArrayBuffer.isView(binary) ? new Uint8Array(binary.buffer, binary.byteOffset, binary.byteLength) : new Uint8Array(binary)
+}
+
+// the driver verifies the same encoding of the options it sends (see encodeOptionsAsSent)
+const hashOptions = (options: unknown) => {
+  const [packet, ...binaries] = encodeEventParts(options ?? null)
+  const binaryHashes = binaries.map((binary) => sha256(toBytes(binary)))
+
+  return sha256(JSON.stringify([packet, binaryHashes]))
+}
+
+const getOrigin = (url: string) => {
+  try {
+    return new URL(url).origin
+  } catch {
+    return undefined
+  }
+}
+
 class PrivilegedCommandsManager {
   channelKeys: Record<ChannelUrl, ChannelKey> = {}
   verifiedCommands: SpecOriginatedCommand[] = []
+  specBridgeOrigins = new Set<string>()
 
   async getPrivilegedChannel (options: {
     isSpecBridge: boolean
@@ -36,12 +62,17 @@ class PrivilegedCommandsManager {
       this.reset()
     }
 
-    // no-op if already set up for url
-    if (this.channelKeys[options.url]) return
+    // a spec bridge only needs a channel for an origin the spec passed to a
+    // verified cy.origin(), and only one per origin
+    const url = options.isSpecBridge ? getOrigin(options.url) : options.url
+
+    if (!url || this.channelKeys[url]) return
+
+    if (options.isSpecBridge && !this.specBridgeOrigins.has(url)) return
 
     const key = randomUUID()
 
-    this.channelKeys[options.url] = key
+    this.channelKeys[url] = key
 
     const script = (await fs.readFileAsync(path.join(__dirname, 'privileged-channel.js'))).toString()
     const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => relativeUrl))
@@ -52,33 +83,43 @@ class PrivilegedCommandsManager {
       key: ${serializeForInlineScript(key)},
       namespace: ${serializeForInlineScript(options.namespace)},
       scripts: ${serializeForInlineScript(specScripts)},
-      url: ${serializeForInlineScript(options.url)},
+      url: ${serializeForInlineScript(url)},
       documentDomainContext: ${serializeForInlineScript(!!options.documentDomainContext)},
     })`
   }
 
-  addVerifiedCommand ({ args, name, key, url }) {
+  addVerifiedCommand ({ hash, name, key, url }, requestOrigin: string | undefined, isWebSecurityDisabled = false) {
     // if the key isn't valid, don't add it as a verified command. once the
     // command attempts to run, it will fail at that point
-    if (key !== this.channelKeys[url]) return
+    if (typeof key !== 'string' || key !== this.channelKeys[url]) return
 
-    this.verifiedCommands.push({ name, args })
+    // the channel posts from the origin of the document it was issued to
+    const origin = getOrigin(url)
+
+    if (!origin) return
+
+    // chrome launched with --disable-web-security sends no Origin header
+    if (requestOrigin === undefined ? !isWebSecurityDisabled : origin !== requestOrigin) return
+
+    this.verifiedCommands.push({ name, hash })
   }
 
-  // finds and returns matching command from the verified commands array. it
-  // also removes that command from the verified commands array
-  hasVerifiedCommand (command) {
-    const matchingCommand = _.find(this.verifiedCommands, ({ name, args }) => {
-      return command.name === name && _.isEqual(args, command.args)
+  // removes and reports the matching verified command, so each verification
+  // allows the command to run once
+  consumeVerifiedCommand (command: SpecOriginatedCommand) {
+    const index = _.findIndex(this.verifiedCommands, ({ name, hash }) => {
+      return command.name === name && command.hash === hash
     })
 
-    return !!matchingCommand
+    if (index === -1) return false
+
+    this.verifiedCommands.splice(index, 1)
+
+    return true
   }
 
-  runPrivilegedCommand (config, { commandName, options, args }) {
-    // the presence of the command within the verifiedCommands array indicates
-    // the command being run is verified
-    const hasCommand = this.hasVerifiedCommand({ name: commandName, args })
+  runPrivilegedCommand (config, { commandName, options }) {
+    const hasCommand = this.consumeVerifiedCommand({ name: commandName, hash: hashOptions(options) })
 
     if (config.testingType === 'e2e' && !hasCommand) {
       // this error message doesn't really matter as each command will catch it
@@ -96,7 +137,8 @@ class PrivilegedCommandsManager {
       case 'exec':
         return exec.run()
       case 'origin':
-        // only need to verify that it's spec-originated above
+        this.specBridgeOrigins.add(options.specBridgeOrigin)
+
         return
       case 'readFile':
         return files.readFile(config.projectRoot, options)
@@ -119,6 +161,7 @@ class PrivilegedCommandsManager {
   reset () {
     this.channelKeys = {}
     this.verifiedCommands = []
+    this.specBridgeOrigins.clear()
   }
 }
 

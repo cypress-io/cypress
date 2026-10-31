@@ -45,7 +45,9 @@ const getFileSize = async (filename: string): Promise<any> => {
   return size
 }
 
-const isBrokenGtkDisplayRe = /Gtk: cannot open display/
+// When DISPLAY is set but nothing is listening on it, Electron prints either the Gtk
+// message or the X server one, depending on its version.
+const isBrokenGtkDisplayRe = /Gtk: cannot open display|Missing X server or \$DISPLAY/
 
 /**
  * Returns true if the platform is Linux. We do a lot of different

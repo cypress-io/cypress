@@ -6,7 +6,7 @@ describe('src/cypress/downloads', () => {
   let end
   let error
   let downloads
-  let downloadItem = {
+  const downloadItem = {
     id: '1',
     filePath: '/path/to/save/location.csv',
     url: 'http://localhost:1234/location.csv',

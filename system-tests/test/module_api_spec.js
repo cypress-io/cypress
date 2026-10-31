@@ -34,7 +34,7 @@ describe('module api', () => {
 
       // now what we want to do is read in the outputPath
       // and snapshot it so its what we expect after normalizing it
-      let json = await fs.readJsonAsync(outputPath)
+      const json = await fs.readJsonAsync(outputPath)
 
       json.runs = systemTests.normalizeRuns(json.runs)
 
@@ -56,7 +56,7 @@ describe('module api', () => {
     },
     async onRun (execFn) {
       await execFn()
-      let json = await fs.readJsonAsync(outputPath)
+      const json = await fs.readJsonAsync(outputPath)
 
       json.runs = systemTests.normalizeRuns(json.runs)
 

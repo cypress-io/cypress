@@ -29,7 +29,7 @@
 - [x] packages/network-interception
 - [x] packages/proxy
 - [x] packages/net-stubbing
-- [ ] packages/driver
+- [x] packages/driver
 - [x] packages/reporter
 - [x] packages/server
 
@@ -53,17 +53,23 @@
 - [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [x] packages/config
-- [ ] packages/root
-- [ ] packages/resolve-dist
-- [ ] packages/packherd-require
-- [ ] packages/v8-snapshot-require
-- [ ] packages/web-config
+- [x] packages/root
+- [x] packages/resolve-dist
+- [x] packages/packherd-require
+- [x] packages/v8-snapshot-require
+- [x] packages/web-config
 - [x] packages/types
 - [x] packages/scaffold-config
+- [x] packages/ts
 - [x] packages/example
 
+### Batch 4d: Tooling
+- [x] tooling/electron-mksnapshot
+- [x] tooling/packherd
+- [x] tooling/v8-snapshot
+
 ### Batch 5: Test and script folders
-- [ ] system-tests
+- [x] system-tests (`lib/`, `test/`, `scripts/`, `test-binary/`) — `projects/` and `project-fixtures/` are ignored until they get their own config
 - [ ] scripts
 
 ---
@@ -226,6 +232,46 @@ The root `lint-staged` config is already a single catch-all pattern, so it needs
 ### 10. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
+
+### 11. **Migrate the Vue Frontend Packages**
+
+`packages/app`, `packages/launchpad` and `packages/frontend-shared` share one set of overrides. Spread `vueTsxOverrides` and then `frontendOverrides` after `baseConfig`:
+
+```ts
+import { baseConfig, frontendOverrides, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...jsonConfig,
+  ...vueTsxOverrides,
+  ...frontendOverrides,
+]
+```
+
+`frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
+
+Drop the `defineProps`, `defineEmits`, `defineExpose` and `withDefaults` globals from the old config: `vue-eslint-parser` 10 defines the compiler macros in `<script setup>`.
+
+The old config turned `vue/no-v-html` off. `baseConfig` makes it an error, and the shared config keeps it that way, so each package fixes its own uses as it migrates. Two render text, not HTML, and switch to `{{ }}` interpolation:
+
+| Package | Call site | Why it is text |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `baseError.errorStack` | The stack has only ANSI codes stripped, so `<` in an error message is parsed as markup |
+| launchpad | `src/setup/ManualInstall.vue`, `dep.description` | Dependency descriptions are plain text |
+
+The rest render HTML that is built to be rendered. Keep them, wrapped in `<!-- eslint-disable vue/no-v-html -->` / `<!-- eslint-enable vue/no-v-html -->` with a note on where the HTML comes from. A `disable-next-line` comment does not reach a `v-html` attribute on a later line of the tag:
+
+| Package | Call site | Source of the HTML |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `markdown` | `useMarkdown` (markdown-it) |
+| frontend-shared | `src/warning/Warning.vue` | `useMarkdown` |
+| frontend-shared | `src/composables/examples/UseMarkdownExample.vue` | `useMarkdown` |
+| frontend-shared | `src/components/ShikiHighlight.vue` | Shiki, which escapes the code it highlights |
+| launchpad | `src/setup/SelectFrameworkOrBundler.vue` (twice) | Framework SVG icons |
+| app | `src/runs/RunsContainer.vue` | `useMarkdown` |
+| app | `src/settings/project/ExperimentRow.vue` | `useMarkdown` |
+| app | `src/specs/banners/CloudMessageBanner.vue` | `useMarkdown` with `html: false` |
+| app | `src/runner/ScriptError.vue` | `ansi-to-html` with `escapeXML: true` |
 
 ---
 

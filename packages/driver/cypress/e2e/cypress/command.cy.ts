@@ -50,7 +50,7 @@ describe('driver/src/cypress/command', () => {
         })
 
         const spy = cy.spy(command, '_removeNonPrimitives')
-        let clonedCommand = command.clone()
+        const clonedCommand = command.clone()
 
         expect(clonedCommand).to.be.instanceOf($Command)
         expect(spy).to.have.been.calledWith(args)
@@ -65,7 +65,7 @@ describe('driver/src/cypress/command', () => {
         })
 
         const spy = cy.spy(command, '_removeNonPrimitives')
-        let clonedCommand = command.clone()
+        const clonedCommand = command.clone()
 
         expect(clonedCommand).to.be.instanceOf($Command)
         expect(spy).to.have.been.calledWith(undefined)
