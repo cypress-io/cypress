@@ -14,7 +14,9 @@ import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
-import { RemoteTabs, WebKitRemoteAgent } from '../automation/commands/remote_agent'
+import { RemoteTabs, WebKitRemoteAgent, toPlaywrightServerObject } from '../automation/commands/remote_agent'
+import { RemoteVisit } from '../automation/commands/remote_visit'
+import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { webkitReloadFrame } from '../automation/commands/reload_frame'
 import { webkitNavigateHistory } from '../automation/commands/navigate_history'
 
@@ -35,6 +37,47 @@ type WebKitAutomationOpts = {
   cdpSocketServer?: CDPSocketServer
 }
 
+interface WebKitConsoleMessage {
+  source: string
+  level: string
+  text: string
+  url?: string
+  stackTrace?: { callFrames?: { functionName: string, url: string, lineNumber: number, columnNumber: number }[] }
+}
+
+// Wraps the console handlers of the WKPage behind a Playwright page. Its session listeners
+// call them by name, so they keep firing after WebKit swaps the page's inspector session.
+// Only reachable when Playwright runs in-process.
+const tapConsole = (page: playwright.Page, onMessage: (message: WebKitConsoleMessage) => void, onRepeat: () => void) => {
+  const serverPage = toPlaywrightServerObject(page)
+  const delegate = typeof serverPage === 'object' && serverPage !== null ? Reflect.get(serverPage, 'delegate') : undefined
+
+  if (typeof delegate !== 'object' || delegate === null) {
+    return false
+  }
+
+  const onConsoleMessage: unknown = Reflect.get(delegate, '_onConsoleMessage')
+  const onRepeatCountUpdated: unknown = Reflect.get(delegate, '_onConsoleRepeatCountUpdated')
+
+  if (typeof onConsoleMessage !== 'function' || typeof onRepeatCountUpdated !== 'function') {
+    return false
+  }
+
+  Reflect.set(delegate, '_onConsoleMessage', function (this: unknown, event: { message: WebKitConsoleMessage }) {
+    onMessage(event.message)
+
+    return onConsoleMessage.call(this, event)
+  })
+
+  Reflect.set(delegate, '_onConsoleRepeatCountUpdated', function (this: unknown, event: unknown) {
+    onRepeat()
+
+    return onRepeatCountUpdated.call(this, event)
+  })
+
+  return true
+}
+
 export class WebKitAutomation {
   automation: Automation
   private browser: playwright.Browser
@@ -50,6 +93,16 @@ export class WebKitAutomation {
         call: (request) => this.remoteAgent.call(page.mainFrame(), request),
       }
     })
+  })
+
+  private remoteVisit = new RemoteVisit({
+    addPreloadScript: async (source) => {
+      const script = await this.page.addInitScript({ content: source })
+
+      // older playwright-webkit can't remove an init script, so there onBeforeLoad also runs on later AUT loads
+      return async () => script?.dispose?.()
+    },
+    evaluateInAut: (expression) => this.getAutFrame().evaluate(expression),
   })
 
   cdpSocketServer?: CDPSocketServer
@@ -106,6 +159,7 @@ export class WebKitAutomation {
     await this.cdpSocketServer?.attachCDPClient(new WebKitCDPBridge(this.page))
 
     this.handleRequestEvents()
+    this.listenForAutErrors()
 
     if (options.downloadsFolder) this.handleDownloadEvents(options.downloadsFolder)
 
@@ -368,6 +422,44 @@ export class WebKitAutomation {
    * back to its `id` attribute, both of which the runner sets to
    * `Your project: '<projectName>'` (see AUT_FRAME_NAME_IDENTIFIER).
    */
+  // Playwright drops an error WebKit reports only as a repeat of the previous console message
+  private listenForAutErrors () {
+    let lastError: WebKitConsoleMessage | undefined
+
+    const tapped = tapConsole(this.page, (message) => {
+      lastError = message.level === 'error' && message.source === 'javascript' ? message : undefined
+
+      if (lastError) {
+        this.onAutError(lastError)
+      }
+    }, () => {
+      if (lastError) {
+        this.onAutError(lastError)
+      }
+    })
+
+    if (!tapped) {
+      debug('could not reach Playwright\'s WebKit page; AUT errors will not be reported')
+    }
+  }
+
+  // WebKit doesn't say which frame an error came from, so an error thrown by a script
+  // outside the runner's origin is taken to be the AUT's. An unhandled rejection has no
+  // script location at all, so it can't be told apart from the spec's and isn't reported.
+  private onAutError = async ({ text, url, stackTrace }: WebKitConsoleMessage) => {
+    try {
+      if (!url || new URL(url).origin === new URL(this.page.url()).origin) {
+        return
+      }
+
+      const frames = stackTrace?.callFrames?.map((frame) => `    at ${frame.functionName || '<anonymous>'} (${frame.url}:${frame.lineNumber}:${frame.columnNumber})`)
+
+      await this.automation.push('remote:uncaught:exception', parseUncaughtErrorText(text, frames?.length ? [text, ...frames].join('\n') : undefined, false))
+    } catch (err) {
+      debug('failed to report AUT exception: %s', err?.message)
+    }
+  }
+
   private getAutFrame (): playwright.Frame {
     const childFrames = this.page.mainFrame().childFrames()
 
@@ -445,6 +537,10 @@ export class WebKitAutomation {
         return await webkitReloadFrame(this.getAutFrame(), data.forceReload)
       case 'navigate:aut:history':
         return await webkitNavigateHistory(this.getAutFrame(), data.historyNumber)
+      case 'remote:visit:before:load':
+        return await this.remoteVisit.beforeLoad(data)
+      case 'remote:visit:on:load':
+        return await this.remoteVisit.onLoad(data)
       case 'remote:agent':
         return await this.remoteTabs.call(data, () => this.remoteAgent.call(this.getAutFrame(), data))
       case 'focus:browser:window':

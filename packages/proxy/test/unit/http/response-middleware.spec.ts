@@ -718,6 +718,27 @@ describe('http/response-middleware', function () {
       expect(ctx.res.wantsInjection).toEqual('fullCrossOrigin')
     })
 
+    it('doesn\'t inject anything into the AUT with experimentalRemoteDriver', async function () {
+      prepareContext({
+        config: { experimentalRemoteDriver: true },
+        req: {
+          isAUTFrame: true,
+          cookies: {
+            '__cypress.initial': 'true',
+          },
+          headers: {},
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+      expect(ctx.res.wantsInjection).toBe(false)
+    })
+
     it('performs full injection on initial AUT html origin', async function () {
       prepareContext({
         req: {

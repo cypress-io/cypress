@@ -788,6 +788,9 @@ class $Cypress {
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
 
+      case 'app:remote:uncaught:exception':
+        return this.cy.onRemoteUncaughtException(args[0])
+
       case 'app:window:alert':
         return this.emit('window:alert', args[0])
 

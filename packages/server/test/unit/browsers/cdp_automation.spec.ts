@@ -1041,6 +1041,52 @@ describe('lib/browsers/cdp_automation', () => {
       })
     })
 
+    describe('Runtime.exceptionThrown', () => {
+      const emit = (event: string, params: unknown) => callsWith(onFn, event)[0][1](params)
+
+      beforeEach(async () => {
+        automation.push = vi.fn()
+
+        const client = {
+          send: createStub(() => Promise.resolve({})),
+          on: vi.fn(),
+          off: vi.fn(),
+        }
+
+        client.send.withArgs('Page.getFrameTree').resolves({
+          frameTree: {
+            frame: { id: 'root', url: 'about:blank' },
+            childFrames: [{ frame: { id: '1', name: 'Your project: foobar', url: 'http://www.foobar.com/' } }],
+          },
+        })
+
+        await cdpAutomation.seedFrameTree(client as any)
+
+        emit('Runtime.executionContextCreated', { context: { id: 7, auxData: { frameId: '1', isDefault: true } } })
+        emit('Runtime.executionContextCreated', { context: { id: 8, auxData: { frameId: '1', isDefault: false } } })
+        emit('Runtime.executionContextCreated', { context: { id: 9, auxData: { frameId: 'root', isDefault: true } } })
+
+        sendDebuggerCommand.withArgs('Runtime.callFunctionOn').resolves({ result: { value: { name: 'Error', message: 'app boom', stack: 'Error: app boom' } } })
+        sendDebuggerCommand.withArgs('Runtime.releaseObject').resolves({})
+      })
+
+      it('pushes an error thrown in the AUT\'s main world', async () => {
+        await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 7, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
+
+        expect(automation.push).toHaveBeenCalledWith('remote:uncaught:exception', {
+          handlerType: 'error',
+          error: { name: 'Error', message: 'app boom', stack: 'Error: app boom' },
+        })
+      })
+
+      it('ignores errors from an isolated world or another frame', async () => {
+        await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 8, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
+        await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 9, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
+
+        expect(automation.push).not.toHaveBeenCalled()
+      })
+    })
+
     describe('get:aut:title', () => {
       it('is able to get the AUT title', async () => {
         sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({

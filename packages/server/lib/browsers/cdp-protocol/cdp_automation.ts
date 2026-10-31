@@ -28,6 +28,9 @@ import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
 import { CdpRemoteAgent, CdpRemoteTabs, RemoteTabs, tabsNotSupported } from '../../automation/commands/remote_agent'
+import { RemoteVisit } from '../../automation/commands/remote_visit'
+import { cdpUncaughtException } from '../../automation/commands/remote_errors'
+import { evaluateInFrameContext } from '../../automation/helpers/evaluate_in_frame_context'
 import type { CdpTab } from '../../automation/commands/remote_agent'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
@@ -83,6 +86,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
   private remoteAgent: CdpRemoteAgent
   private remoteTabs: RemoteTabs | undefined
+  private remoteVisit: RemoteVisit
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -94,11 +98,28 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     onFn('Runtime.executionContextCreated', this.onExecutionContextCreated)
     onFn('Runtime.executionContextDestroyed', this.onExecutionContextDestroyed)
+    onFn('Runtime.exceptionThrown', this.onExceptionThrown)
 
     this.on = onFn
     this.off = offFn
     this.send = sendDebuggerCommandFn
     this.remoteAgent = new CdpRemoteAgent(sendDebuggerCommandFn, this.executionContexts)
+    this.remoteVisit = new RemoteVisit({
+      addPreloadScript: async (source) => {
+        const { identifier } = await sendDebuggerCommandFn('Page.addScriptToEvaluateOnNewDocument', { source })
+
+        return () => sendDebuggerCommandFn('Page.removeScriptToEvaluateOnNewDocument', { identifier })
+      },
+      evaluateInAut: async (expression) => {
+        const { result, exceptionDetails } = await evaluateInFrameContext(expression, sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+
+        if (exceptionDetails) {
+          throw new Error(exceptionDetails.exception?.description ?? exceptionDetails.text)
+        }
+
+        return result.value
+      },
+    })
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -262,6 +283,21 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private onExecutionContextCreated = (event: Protocol.Runtime.ExecutionContextCreatedEvent) => {
     debugVerbose('new execution context:', event)
     this.executionContexts.set(event.context.id, event.context)
+  }
+
+  // the remote driver can't listen for errors in a cross-origin AUT, so it learns of them here
+  private onExceptionThrown = async ({ exceptionDetails }: Protocol.Runtime.ExceptionThrownEvent) => {
+    const context = exceptionDetails.executionContextId ? this.executionContexts.get(exceptionDetails.executionContextId) : undefined
+
+    try {
+      if (!context?.auxData?.isDefault || !(await this._isAUTFrame(context.auxData.frameId))) {
+        return
+      }
+
+      await this.automation.push('remote:uncaught:exception', await cdpUncaughtException(this.sendDebuggerCommandFn, exceptionDetails))
+    } catch (err) {
+      debugVerbose('failed to report AUT exception: %s', err?.message)
+    }
   }
 
   private onExecutionContextDestroyed = (event: Protocol.Runtime.ExecutionContextDestroyedEvent) => {
@@ -650,6 +686,10 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
         return this.remoteTabs.call(request, callInAut)
       }
+      case 'remote:visit:before:load':
+        return this.remoteVisit.beforeLoad(data)
+      case 'remote:visit:on:load':
+        return this.remoteVisit.onLoad(data)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

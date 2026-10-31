@@ -4428,16 +4428,30 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
+     * With `experimentalRemoteDriver`, it runs inside the page itself, so it can't use values from the test
+     * other than `args`, or commands such as `cy.stub()`.
+     *
      * @param {AUTWindow} win the remote page's window object
+     * @param args the `args` option
      */
-    onBeforeLoad(win: AUTWindow): void
+    onBeforeLoad(win: AUTWindow, args?: any): void
 
     /**
      * Called once your page has fired its load event.
      *
+     * With `experimentalRemoteDriver`, it runs inside the page itself, so it can't use values from the test
+     * other than `args`, or commands such as `cy.stub()`.
+     *
      * @param {AUTWindow} win the remote page's window object
+     * @param args the `args` option
      */
-    onLoad(win: AUTWindow): void
+    onLoad(win: AUTWindow, args?: any): void
+
+    /**
+     * With `experimentalRemoteDriver`, values passed as the second argument to `onBeforeLoad` and `onLoad`.
+     * They must be serializable as JSON.
+     */
+    args: any
 
     /**
      * Cypress will automatically apply the right authorization headers

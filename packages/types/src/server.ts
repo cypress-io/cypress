@@ -197,6 +197,29 @@ export interface RemoteAgentRequest {
   tab?: { url?: string | { source: string, flags: string } }
 }
 
+// cy.visit's onBeforeLoad / onLoad, serialized to run in the AUT's own window
+export interface RemoteVisitCallbacks {
+  token: string
+  args: unknown
+  onBeforeLoad?: string
+  onLoad?: string
+}
+
+export interface RemoteVisitBeforeLoad extends RemoteVisitCallbacks {
+  // the AUT iframe's name, which scopes the preload script to the AUT's document
+  frameName: string
+}
+
+export interface RemoteVisitResult {
+  beforeLoadRan: boolean
+  error?: { phase: 'onBeforeLoad' | 'onLoad', name?: string, message: string, stack?: string }
+}
+
+export interface RemoteUncaughtException {
+  handlerType: 'error' | 'unhandledrejection'
+  error: { name?: string, message: string, stack?: string }
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -225,6 +248,9 @@ export interface AutomationCommands {
   'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>
   'get:aut:title': CommandSignature<void, string>
   'remote:agent': CommandSignature<RemoteAgentRequest, unknown>
+  'remote:visit:before:load': CommandSignature<RemoteVisitBeforeLoad, void>
+  'remote:visit:on:load': CommandSignature<RemoteVisitCallbacks, RemoteVisitResult>
+  'remote:uncaught:exception': CommandSignature<RemoteUncaughtException, void>
 }
 
 export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>

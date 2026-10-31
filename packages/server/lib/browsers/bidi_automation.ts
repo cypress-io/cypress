@@ -17,6 +17,7 @@ import type {
   NetworkResponseCompletedParameters,
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
+  LogEntry,
 } from 'webdriver/build/bidi/localTypes'
 import type { CyCookie as CyBaseCookie } from '../automation/cookie/util'
 import type { BidiCyCookie as CyCookie, StoragePartialCookie } from '../automation/cookie/converters/bidi'
@@ -26,6 +27,8 @@ import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
 import { BidiRemoteAgent, RemoteTabs } from '../automation/commands/remote_agent'
+import { RemoteVisit } from '../automation/commands/remote_visit'
+import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -110,6 +113,8 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartia
   return cookieToClearFilter
 }
 
+const FIREFOX_PRELOAD_SCRIPT_ERROR = 'Error: Permission denied to access property "length"'
+
 export class BidiAutomation {
   // events needed to subscribe to in order for our BiDi automation to work properly
   static BIDI_EVENTS = [
@@ -119,12 +124,14 @@ export class BidiAutomation {
     'network.fetchError',
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
+    'log.entryAdded',
   ]
 
   private webDriverClient: WebDriverClient
   private automation: Automation
   private remoteAgent: BidiRemoteAgent
   private remoteTabs: RemoteTabs
+  private remoteVisit: RemoteVisit
   private autContextId: string | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
@@ -158,6 +165,31 @@ export class BidiAutomation {
       })
     })
 
+    this.remoteVisit = new RemoteVisit({
+      addPreloadScript: async (source) => {
+        const { script } = await webDriverClient.scriptAddPreloadScript({
+          functionDeclaration: `() => ${source}`,
+          ...(this.topLevelContextId ? { contexts: [this.topLevelContextId] } : {}),
+        })
+
+        return () => webDriverClient.scriptRemovePreloadScript({ script })
+      },
+      evaluateInAut: async (expression) => {
+        const autContextId = await this.ensureAutContextId('Cannot run the visit callbacks: no AUT context initialized')
+        const result = await webDriverClient.scriptEvaluate({ expression, target: { context: autContextId }, awaitPromise: false })
+
+        if (result.type === 'exception') {
+          throw new Error(result.exceptionDetails.text)
+        }
+
+        if (result.result.type !== 'string') {
+          throw new Error(`Expected the visit callbacks to return a string, but got ${result.result.type}`)
+        }
+
+        return result.result.value
+      },
+    })
+
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error - webdriver types request.destination as string, wider than our RequestDestination
@@ -167,6 +199,30 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+    this.webDriverClient.on('log.entryAdded', this.onLogEntryAdded)
+  }
+
+  // the remote driver can't listen for errors in a cross-origin AUT, so it learns of them here
+  private onLogEntryAdded = async (entry: LogEntry) => {
+    if (entry.type !== 'javascript' || !this.autContextId || entry.source.context !== this.autContextId) {
+      return
+    }
+
+    const text = entry.text ?? ''
+
+    // Firefox logs this, with no stack, from its own preload-script handling in a cross-origin frame
+    if (!entry.stackTrace && text === FIREFOX_PRELOAD_SCRIPT_ERROR) {
+      return
+    }
+
+    const frames = entry.stackTrace?.callFrames.map((frame) => `    at ${frame.functionName || '<anonymous>'} (${frame.url}:${frame.lineNumber + 1}:${frame.columnNumber + 1})`)
+
+    try {
+      // BiDi reports an unhandled rejection the same way as a thrown error
+      await this.automation.push('remote:uncaught:exception', parseUncaughtErrorText(text, frames?.length ? [text, ...frames].join('\n') : undefined, false))
+    } catch (err) {
+      debug('failed to report AUT exception: %s', err?.message)
+    }
   }
 
   // top-level contexts other than the runner's are tabs the app opened
@@ -877,6 +933,10 @@ export class BidiAutomation {
 
           return bidiGetFrameTitle(this.webDriverClient, autContextId)
         }
+        case 'remote:visit:before:load':
+          return this.remoteVisit.beforeLoad(data)
+        case 'remote:visit:on:load':
+          return this.remoteVisit.onLoad(data)
         case 'remote:agent':
           return this.remoteTabs.call(data, async () => {
             const autContextId = await this.ensureAutContextId('Cannot run the remote agent: no AUT context initialized')

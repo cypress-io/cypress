@@ -113,3 +113,15 @@ export const extendRemoteSubject = (cmd: string, subject: unknown, step: QuerySt
 
   return $errUtils.throwErrByPath('remote_driver.unsupported_subject', { args: { cmd } })
 }
+
+// A cy.visit callback runs in the AUT's own window, so it's sent as source and can't close over test values
+export const serializeCallback = (fn: Function) => {
+  const source = fn.toString()
+
+  // a method shorthand such as `onLoad (win) {}` is only valid source as an object member
+  if (/^(async\s+)?(function\b|\(|[\w$]+\s*=>)/.test(source)) {
+    return source
+  }
+
+  return `Object.values({ ${source} })[0]`
+}

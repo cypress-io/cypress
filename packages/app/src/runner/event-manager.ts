@@ -144,6 +144,9 @@ export class EventManager {
         case 'canceled:download':
           Cypress.downloads.end(data, true)
           break
+        case 'remote:uncaught:exception':
+          Cypress.action('app:remote:uncaught:exception', data)
+          break
         default:
           break
       }

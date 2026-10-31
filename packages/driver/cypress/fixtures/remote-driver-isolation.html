@@ -5,6 +5,7 @@
 </head>
 <body>
   <p id="page"></p>
+  <p id="preset"></p>
   <a id="nav" href="remote-driver-isolation.html?page=2">Next page</a>
 
   <button id="throw">Throw</button>
@@ -49,6 +50,7 @@
 
   <script>
     window.appState = { clicks: 0 }
+    document.getElementById('preset').textContent = window.presetBeforeLoad || 'none'
     document.body.dataset.cypress = String(!!window.Cypress)
     document.getElementById('page').textContent = new URLSearchParams(location.search).get('page') || '1'
 

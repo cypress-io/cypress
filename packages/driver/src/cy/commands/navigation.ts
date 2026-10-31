@@ -13,7 +13,7 @@ import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
 import type { StateFunc } from '../../cypress/state'
 import type { $Cy } from '../../cypress/cy'
-import { isRemoteDriverEnabled } from '../remote'
+import { isRemoteDriverEnabled, serializeCallback } from '../remote'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -23,7 +23,7 @@ let knownCommandCausedInstability: boolean = false
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
 .split(' ')
 
-const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
+const VISIT_OPTS = 'url log onBeforeLoad onLoad args timeout requestTimeout'
 .split(' ')
 .concat(REQUEST_URL_OPTS)
 
@@ -806,6 +806,19 @@ export default (Commands, Cypress, cy, state, config) => {
 
       options.hasAlreadyVisitedUrl = !!previouslyVisitedLocation
 
+      // the remote driver runs the callbacks inside the AUT, which is cross-origin to the runner
+      const remoteCallbacks = isRemoteDriverEnabled(Cypress) && (onBeforeLoadIsUserDefined || onLoadIsUserDefined) ? {
+        token: `${Date.now()}-${_.uniqueId()}`,
+        args: userOptions.args,
+        onBeforeLoad: userOptions.onBeforeLoad && serializeCallback(userOptions.onBeforeLoad),
+        onLoad: userOptions.onLoad && serializeCallback(userOptions.onLoad),
+      } : undefined
+
+      if (remoteCallbacks) {
+        options.onBeforeLoad = () => {}
+        options.onLoad = () => {}
+      }
+
       if (!_.isUndefined(options.qs) && !_.isObject(options.qs)) {
         $errUtils.throwErrByPath('visit.invalid_qs', { args: { qs: String(options.qs) } })
       }
@@ -928,7 +941,26 @@ export default (Commands, Cypress, cy, state, config) => {
             return Cypress.specBridgeCommunicator.toPrimary('visit:url', { url })
           }
 
-          return $utils.iframeSrc($autIframe, url)
+          if (!remoteCallbacks?.onBeforeLoad) {
+            return $utils.iframeSrc($autIframe, url)
+          }
+
+          return Promise.resolve(Cypress.automation('remote:visit:before:load', { ...remoteCallbacks, frameName: $autIframe.attr('name') }))
+          .then(() => $utils.iframeSrc($autIframe, url))
+          .catch(reject)
+        })
+      }
+
+      const runRemoteCallbacks = () => {
+        return Promise.resolve(Cypress.automation('remote:visit:on:load', remoteCallbacks))
+        .then(({ beforeLoadRan, error }) => {
+          if (error) {
+            throw Object.assign($errUtils.makeErrFromObj(_.omit(error, 'phase')), { isCallbackError: true })
+          }
+
+          if (remoteCallbacks?.onBeforeLoad && !beforeLoadRan) {
+            $errUtils.throwErrByPath('remote_driver.visit_before_load_did_not_run', { onFail: options._log, errProps: { isCallbackError: true } })
+          }
         })
       }
 
@@ -939,8 +971,19 @@ export default (Commands, Cypress, cy, state, config) => {
         // reset window on load
         win = state('window')
 
+        if (remoteCallbacks && runOnLoadCallback !== false) {
+          return runRemoteCallbacks().then(() => finishLoad({ totalTime }))
+        }
+
+        return finishLoad({ runOnLoadCallback, totalTime })
+      }
+
+      const finishLoad = ({ runOnLoadCallback, totalTime }: {
+        runOnLoadCallback?: boolean
+        totalTime?: number
+      }) => {
         // If we are visiting a cross origin domain and have onLoad or onBeforeLoad options specified, throw an error.
-        if (!isRunnerAbleToCommunicateWithAut()) {
+        if (!remoteCallbacks && !isRunnerAbleToCommunicateWithAut()) {
           if (onLoadIsUserDefined) {
             $errUtils.throwErrByPath('visit.invalid_cross_origin_on_load', { args: { url, autLocation: Cypress.state('autLocation') }, errProps: { isCallbackError: true } })
           }

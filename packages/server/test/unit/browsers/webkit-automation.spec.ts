@@ -251,6 +251,57 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
+  describe('AUT errors', () => {
+    const onConsoleMessage = vi.fn()
+    const onConsoleRepeatCountUpdated = vi.fn()
+    let delegate: any
+
+    const error = (overrides: object = {}) => {
+      return { message: { source: 'javascript', level: 'error', text: 'Error: app boom', url: 'http://www.foobar.com/', ...overrides } }
+    }
+
+    beforeEach(async () => {
+      delegate = { _onConsoleMessage: onConsoleMessage, _onConsoleRepeatCountUpdated: onConsoleRepeatCountUpdated }
+      automation.push = vi.fn(async () => {})
+
+      const newContext = mock.browser.newContext.getMockImplementation()
+
+      mock.browser.newContext.mockImplementationOnce(async () => {
+        const context = await newContext()
+        const page = mock.getLastPage()
+
+        page.url = () => 'http://cypress-runner.foobar.com/__/'
+        // the in-process Playwright client reaches its server page through the connection
+        page._connection = { toImpl: () => ({ delegate }) }
+
+        return context
+      })
+
+      await createAutomation()
+    })
+
+    it('pushes an error from the AUT and each repeat of it, and keeps Playwright\'s handling', async () => {
+      delegate._onConsoleMessage(error())
+      delegate._onConsoleRepeatCountUpdated({ count: 2 })
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(automation.push).toHaveBeenCalledTimes(2)
+      expect(automation.push).toHaveBeenCalledWith('remote:uncaught:exception', { handlerType: 'error', error: { name: 'Error', message: 'app boom', stack: undefined } })
+      expect(onConsoleMessage).toHaveBeenCalledWith(error())
+      expect(onConsoleRepeatCountUpdated).toHaveBeenCalledWith({ count: 2 })
+    })
+
+    it('ignores the runner\'s errors, rejections with no location, and repeats of other messages', async () => {
+      delegate._onConsoleMessage(error({ url: 'http://cypress-runner.foobar.com/__cypress/runner.js' }))
+      delegate._onConsoleMessage(error({ text: 'Unhandled Promise Rejection: Error: nope', url: '' }))
+      delegate._onConsoleMessage(error({ level: 'log' }))
+      delegate._onConsoleRepeatCountUpdated({ count: 2 })
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(automation.push).not.toHaveBeenCalled()
+    })
+  })
+
   describe('tabs the app opened', () => {
     const makePage = (url: string) => {
       return {

@@ -25,6 +25,9 @@ import { create as createLocation } from '../cy/location'
 import type { IAssertions } from '../cy/assertions'
 import { create as createAssertions } from '../cy/assertions'
 import { bindToListeners } from '../cy/listeners'
+import { isRemoteDriverEnabled } from '../cy/remote'
+import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
+import type { RemoteUncaughtException } from '@packages/types'
 import { $Chainer } from './chainer'
 import type { ITimer } from '../cy/timers'
 import { create as createTimer } from '../cy/timers'
@@ -263,6 +266,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.now = this.now.bind(this)
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
+    this.onRemoteUncaughtException = this.onRemoteUncaughtException.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.getSubjectFromChain = this.getSubjectFromChain.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
@@ -970,6 +974,18 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     return
+  }
+
+  // the server reports errors from an AUT the runner can't listen to itself
+  onRemoteUncaughtException ({ handlerType, error }: RemoteUncaughtException) {
+    if (!isRemoteDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
+      return
+    }
+
+    const err = $errUtils.makeErrFromObj(error)
+    const handled = this.onUncaughtException({ err, handlerType, frameType: 'app', promise: undefined })
+
+    $errUtils.logError(this.Cypress, handlerType, err, handled)
   }
 
   setRunnable (runnable, hookId) {

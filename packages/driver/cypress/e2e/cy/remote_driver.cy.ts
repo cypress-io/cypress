@@ -79,7 +79,10 @@ describe('experimentalRemoteDriver', () => {
       cy.contains('li', 'Two').should('have.class', 'two')
     })
 
-    it('needs cy.origin with the legacy driver', { experimentalRemoteDriver: false }, (done) => {
+    // a project with experimentalRemoteDriver injects nothing into the AUT, which the legacy driver needs
+    const itWithLegacyInjection = Cypress.config('experimentalRemoteDriver' as keyof Cypress.Config) ? it.skip : it
+
+    itWithLegacyInjection('needs cy.origin with the legacy driver', { experimentalRemoteDriver: false }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('but the application is at origin `http://www.foobar.com:3500`')
 
