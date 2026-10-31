@@ -1,12 +1,23 @@
 import _ from 'lodash'
+import Promise from 'bluebird'
 
 import type { Clock } from '../../cypress/clock'
 import { create as createClock } from '../../cypress/clock'
 import $errUtils from '../../cypress/error_utils'
+import { isRemoteDriverEnabled } from '../remote'
+import { createRemoteClock } from '../remote/clock'
+import type { RemoteClock } from '../remote/clock'
 
-type CyClock = Clock & {
-  tick(ms, options?: any): number
+// what the legacy clock and the remote driver's clock share
+type CyClock = Pick<Clock | RemoteClock, 'setSystemTime' | 'details'> & {
+  // the remote driver's clock runs in the AUT, so its tick resolves once the AUT has ticked
+  tick(ms, options?: any): number | PromiseLike<number>
   restore(options?: any): void
+  bind(win): unknown
+}
+
+const isThenable = (value: unknown): value is PromiseLike<unknown> => {
+  return typeof value === 'object' && value !== null && typeof Reflect.get(value, 'then') === 'function'
 }
 
 // create a global clock
@@ -98,7 +109,9 @@ export default function (Commands, Cypress, cy, state) {
         })
       }
 
-      clock = createClock(state('window'), now, methods)
+      const remoteClock = isRemoteDriverEnabled(Cypress) ? createRemoteClock(Cypress, now, methods) : undefined
+
+      clock = remoteClock ?? createClock(state('window'), now, methods)
 
       const { tick } = clock
 
@@ -126,9 +139,21 @@ export default function (Commands, Cypress, cy, state) {
 
         const ret = tick.apply(this, [ms])
 
-        if (theLog) {
-          theLog.snapshot().end()
+        const endLog = () => {
+          if (theLog) {
+            theLog.snapshot().end()
+          }
         }
+
+        if (isThenable(ret)) {
+          return ret.then((value) => {
+            endLog()
+
+            return value
+          })
+        }
+
+        endLog()
 
         return ret
       }
@@ -153,11 +178,20 @@ export default function (Commands, Cypress, cy, state) {
         return ret
       }
 
-      log('clock', options.log)
-
       state('clock', clock)
 
       ctx.clock = clock
+
+      // the remote driver logs once the AUT reports which methods the clock replaced
+      if (remoteClock) {
+        return remoteClock.installed.then(() => {
+          log('clock', options.log)
+
+          return clock
+        })
+      }
+
+      log('clock', options.log)
 
       return clock
     },
@@ -167,7 +201,11 @@ export default function (Commands, Cypress, cy, state) {
         $errUtils.throwErrByPath('tick.no_clock')
       }
 
-      clock!.tick(ms, options)
+      const ticked = clock!.tick(ms, options)
+
+      if (isThenable(ticked)) {
+        return Promise.resolve(ticked).then(() => clock)
+      }
 
       return clock
     },

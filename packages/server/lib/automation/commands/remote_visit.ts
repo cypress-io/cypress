@@ -1,3 +1,4 @@
+import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { RemoteVisitBeforeLoad, RemoteVisitCallbacks, RemoteVisitResult } from '@packages/types'
 
 const RESULT_KEY = 'Symbol.for(\'cypress:remote:visit\')'
@@ -40,7 +41,11 @@ export const onLoadExpression = ({ token, args, onLoad }: RemoteVisitCallbacks) 
   })()`
 }
 
-export interface RemoteVisitTransport {
+// A preload script runs in every frame of the runner's tab; this picks out the AUT's
+export const IS_AUT_DOCUMENT = `window.name.startsWith(${JSON.stringify(AUT_FRAME_NAME_IDENTIFIER)})`
+
+// runs scripts in the AUT's main world over the browser's automation protocol
+export interface AutScripts {
   // registers a script to run in every new document, and returns a function that unregisters it
   addPreloadScript: (source: string) => Promise<() => Promise<unknown>>
   // evaluates an expression in the AUT's main world and returns its string result
@@ -50,7 +55,7 @@ export interface RemoteVisitTransport {
 export class RemoteVisit {
   private removePreloadScript: (() => Promise<unknown>) | undefined
 
-  constructor (private transport: RemoteVisitTransport) {}
+  constructor (private transport: AutScripts) {}
 
   async beforeLoad (data: RemoteVisitBeforeLoad) {
     // a visit that failed before its load never collected its script

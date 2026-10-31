@@ -29,6 +29,8 @@ import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
 import { CdpRemoteAgent, CdpRemoteTabs, RemoteTabs, tabsNotSupported } from '../../automation/commands/remote_agent'
 import { RemoteVisit } from '../../automation/commands/remote_visit'
+import type { AutScripts } from '../../automation/commands/remote_visit'
+import { RemoteClock } from '../../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../../automation/commands/remote_stubs'
 import { cdpUncaughtException } from '../../automation/commands/remote_errors'
@@ -89,6 +91,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private remoteAgent: CdpRemoteAgent
   private remoteTabs: RemoteTabs | undefined
   private remoteVisit: RemoteVisit
+  private remoteClock: RemoteClock
   private remoteStubs: RemoteStubs
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
@@ -124,7 +127,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       },
     })
 
-    this.remoteVisit = new RemoteVisit({
+    const autScripts: AutScripts = {
       addPreloadScript: async (source) => {
         const { identifier } = await sendDebuggerCommandFn('Page.addScriptToEvaluateOnNewDocument', { source })
 
@@ -139,7 +142,10 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
         return result.value
       },
-    })
+    }
+
+    this.remoteVisit = new RemoteVisit(autScripts)
+    this.remoteClock = new RemoteClock(autScripts)
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -739,6 +745,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return this.remoteStubs.update(data)
       case 'remote:stubs:reset':
         return this.remoteStubs.reset()
+      case 'remote:clock:install':
+        return this.remoteClock.install(data)
+      case 'remote:clock:tick':
+        return this.remoteClock.tick(data)
+      case 'remote:clock:set:system:time':
+        return this.remoteClock.setSystemTime(data)
+      case 'remote:clock:restore':
+        return this.remoteClock.restore()
       case 'remote:visit:before:load':
         return this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

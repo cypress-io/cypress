@@ -105,3 +105,6 @@ export type AgentMethods = {
 export type AgentResponse<T> = { ok: true, value: T } | { ok: false, error: AgentError }
 
 export const AGENT_GLOBAL = '__cypressAgent'
+
+// the Symbol.for() key the cy.clock bundle keeps its controls under in the AUT's main world
+export const REMOTE_CLOCK_GLOBAL = 'cypress:remote:clock'

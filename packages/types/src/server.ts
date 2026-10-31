@@ -249,6 +249,11 @@ export interface RemoteDialog {
   accepted: boolean
 }
 
+export interface RemoteClockDetails {
+  now: number
+  methods: string[]
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -285,6 +290,10 @@ export interface AutomationCommands {
   'remote:stubs:reset': CommandSignature<void, void>
   'remote:stub:call': CommandSignature<RemoteStubCall, void>
   'remote:dialog': CommandSignature<RemoteDialog, void>
+  'remote:clock:install': CommandSignature<{ now?: number, methods?: string[] }, RemoteClockDetails>
+  'remote:clock:tick': CommandSignature<{ ms: number }, RemoteClockDetails>
+  'remote:clock:set:system:time': CommandSignature<{ now: number }, RemoteClockDetails>
+  'remote:clock:restore': CommandSignature<Record<string, never>, void>
 }
 
 export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>

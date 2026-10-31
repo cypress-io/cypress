@@ -27,6 +27,10 @@ export const getRunnerRemoteAgentContents = () => {
   return getRunnerContents('cypress_remote_agent.js')
 }
 
+export const getRunnerRemoteClockContents = () => {
+  return getRunnerContents('cypress_remote_clock.js')
+}
+
 export const getPathToDesktopIndex = (graphqlPort: number) => {
   return `http://localhost:${graphqlPort}/__launchpad/index.html`
 }

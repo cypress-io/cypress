@@ -6932,7 +6932,8 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
-     * @returns The clock's new `now`, in ms since the unix epoch
+     * @returns The clock's new `now`, in ms since the unix epoch. With `experimentalRemoteDriver` the clock runs in the
+     * page, so this returns a promise of it instead; use `cy.tick()`, which waits for it.
      * @see https://on.cypress.io/tick
      */
     tick(time: number): number

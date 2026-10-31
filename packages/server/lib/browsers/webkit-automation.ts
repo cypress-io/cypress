@@ -16,6 +16,8 @@ import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
 import { RemoteTabs, WebKitRemoteAgent, toPlaywrightServerObject } from '../automation/commands/remote_agent'
 import { RemoteVisit } from '../automation/commands/remote_visit'
+import type { AutScripts } from '../automation/commands/remote_visit'
+import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog, isRemoteDialogType } from '../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
 import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
@@ -100,7 +102,7 @@ export class WebKitAutomation {
     })
   })
 
-  private remoteVisit = new RemoteVisit({
+  private autScripts: AutScripts = {
     addPreloadScript: async (source) => {
       const script = await this.page.addInitScript({ content: source })
 
@@ -108,7 +110,11 @@ export class WebKitAutomation {
       return async () => script?.dispose?.()
     },
     evaluateInAut: (expression) => this.getAutFrame().evaluate(expression),
-  })
+  }
+
+  private remoteVisit = new RemoteVisit(this.autScripts)
+
+  private remoteClock = new RemoteClock(this.autScripts)
 
   private remoteStubs = new RemoteStubs({
     addPreloadScript: async (source) => {
@@ -582,6 +588,14 @@ export class WebKitAutomation {
         return await this.remoteStubs.update(data)
       case 'remote:stubs:reset':
         return await this.remoteStubs.reset()
+      case 'remote:clock:install':
+        return await this.remoteClock.install(data)
+      case 'remote:clock:tick':
+        return await this.remoteClock.tick(data)
+      case 'remote:clock:set:system:time':
+        return await this.remoteClock.setSystemTime(data)
+      case 'remote:clock:restore':
+        return await this.remoteClock.restore()
       case 'remote:visit:before:load':
         return await this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

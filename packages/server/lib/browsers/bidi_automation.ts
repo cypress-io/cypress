@@ -30,6 +30,8 @@ import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
 import { BidiRemoteAgent, RemoteTabs } from '../automation/commands/remote_agent'
 import { RemoteVisit } from '../automation/commands/remote_visit'
+import type { AutScripts } from '../automation/commands/remote_visit'
+import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../automation/commands/remote_dialogs'
 import { RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
 import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
@@ -141,6 +143,7 @@ export class BidiAutomation {
   private remoteAgent: BidiRemoteAgent
   private remoteTabs: RemoteTabs
   private remoteVisit: RemoteVisit
+  private remoteClock: RemoteClock
   private remoteStubs: RemoteStubs
   private autContextId: string | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
@@ -195,7 +198,7 @@ export class BidiAutomation {
       },
     })
 
-    this.remoteVisit = new RemoteVisit({
+    const autScripts: AutScripts = {
       addPreloadScript: async (source) => {
         const { script } = await webDriverClient.scriptAddPreloadScript({
           functionDeclaration: `() => ${source}`,
@@ -218,7 +221,10 @@ export class BidiAutomation {
 
         return result.result.value
       },
-    })
+    }
+
+    this.remoteVisit = new RemoteVisit(autScripts)
+    this.remoteClock = new RemoteClock(autScripts)
 
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
@@ -996,6 +1002,14 @@ export class BidiAutomation {
           return this.remoteStubs.update(data)
         case 'remote:stubs:reset':
           return this.remoteStubs.reset()
+        case 'remote:clock:install':
+          return this.remoteClock.install(data)
+        case 'remote:clock:tick':
+          return this.remoteClock.tick(data)
+        case 'remote:clock:set:system:time':
+          return this.remoteClock.setSystemTime(data)
+        case 'remote:clock:restore':
+          return this.remoteClock.restore()
         case 'remote:visit:before:load':
           return this.remoteVisit.beforeLoad(data)
         case 'remote:visit:on:load':

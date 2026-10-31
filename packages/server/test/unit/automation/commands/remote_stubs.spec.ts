@@ -111,7 +111,7 @@ describe('remote stubs', () => {
       await stubs.add(second)
 
       expect(transport.remove).toHaveBeenCalledOnce()
-      expect(transport.addPreloadScript).toHaveBeenLastCalledWith(installStubsSource([first, second]))
+      expect(transport.addPreloadScript).toHaveBeenLastCalledWith(installStubsSource([first, second], { autOnly: true }))
       expect(transport.callInAut).toHaveBeenLastCalledWith(installStubsSource([second]))
     })
 
@@ -123,7 +123,7 @@ describe('remote stubs', () => {
 
       await Promise.all([added, updated])
 
-      expect(transport.addPreloadScript).toHaveBeenLastCalledWith(installStubsSource([spec({ behaviors: [{ kind: 'returns', value: 1 }] })]))
+      expect(transport.addPreloadScript).toHaveBeenLastCalledWith(installStubsSource([spec({ behaviors: [{ kind: 'returns', value: 1 }] })], { autOnly: true }))
     })
 
     it('removes the preload script and restores the document on reset', async () => {

@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import type { RemoteStubCall, RemoteStubSpec } from '@packages/types'
+import { IS_AUT_DOCUMENT } from './remote_visit'
 
 const debug = Debug('cypress:server:automation:remote_stubs')
 
@@ -42,7 +43,7 @@ const SERIALIZE = `(value) => {
 // Installs each stub in the AUT's main world, or updates the behaviors of one already installed.
 // `send` reports each call to the spec. A callsFake source is embedded as code rather than evaluated,
 // so it runs under the AUT's Content-Security-Policy as any injected protocol script does.
-export const installStubsSource = (specs: RemoteStubSpec[]) => {
+export const installStubsSource = (specs: RemoteStubSpec[], { autOnly = false } = {}) => {
   const fakes = specs.flatMap((spec) => {
     return spec.behaviors.map((behavior, index) => {
       return behavior.kind === 'callsFake' ? `${JSON.stringify(`${spec.id}/${index}`)}: (${behavior.source}),` : ''
@@ -50,6 +51,7 @@ export const installStubsSource = (specs: RemoteStubSpec[]) => {
   }).join('\n')
 
   return `(send) => {
+  ${autOnly ? `if (!${IS_AUT_DOCUMENT}) return` : ''}
   const registry = window[${REGISTRY_KEY}] || Object.defineProperty(window, ${REGISTRY_KEY}, { value: { stubs: new Map() }, configurable: true })[${REGISTRY_KEY}]
   registry.send = send
   const serialize = ${SERIALIZE}
@@ -177,7 +179,7 @@ export class RemoteStubs {
 
   private async apply (changed: RemoteStubSpec) {
     await this.clearPreloadScript()
-    this.removePreloadScript = await this.transport.addPreloadScript(installStubsSource([...this.specs.values()]))
+    this.removePreloadScript = await this.transport.addPreloadScript(installStubsSource([...this.specs.values()], { autOnly: true }))
     // there may be no document to stub yet, and the preload script covers the next one
     await this.transport.callInAut(installStubsSource([changed])).catch((err) => debug('could not stub the current document: %s', err?.message))
   }

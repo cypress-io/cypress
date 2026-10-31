@@ -6,6 +6,10 @@
 <body>
   <p id="page"></p>
   <p id="preset"></p>
+  <p id="loaded-at"></p>
+  <button id="start-timer">Start timer</button>
+  <button id="show-time">Show time</button>
+  <p id="timer-result"></p>
   <a id="nav" href="remote-driver-isolation.html?page=2">Next page</a>
 
   <button id="throw">Throw</button>
@@ -54,6 +58,7 @@
 
   <script>
     window.appState = { clicks: 0 }
+    document.getElementById('loaded-at').textContent = String(Date.now())
     document.getElementById('preset').textContent = window.presetBeforeLoad || 'none'
     document.body.dataset.cypress = String(!!window.Cypress)
     document.getElementById('page').textContent = new URLSearchParams(location.search).get('page') || '1'
@@ -73,6 +78,11 @@
       result('probe-result', 'logged')
     })
     window.appMath = { double: (n) => n * 2 }
+    document.getElementById('start-timer').addEventListener('click', () => {
+      result('timer-result', 'waiting')
+      setTimeout(() => result('timer-result', 'fired'), 1000)
+    })
+    document.getElementById('show-time').addEventListener('click', () => { result('timer-result', `now:${Date.now()}`) })
     document.getElementById('compute').addEventListener('click', () => { result('probe-result', `computed:${window.appMath.double(2)},${window.appMath.double(3)}`) })
     document.getElementById('delayed').addEventListener('click', () => { setTimeout(() => result('delayed-result', 'done'), 10000) })
     document.getElementById('fetch').addEventListener('click', () => {

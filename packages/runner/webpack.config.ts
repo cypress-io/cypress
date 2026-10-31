@@ -91,6 +91,21 @@ const remoteAgentConfig: webpack.Configuration = {
   },
 }
 
+// @ts-ignore
+const remoteClockConfig: webpack.Configuration = {
+  ...commonConfig,
+  // runs in the AUT's main world, where a Content-Security-Policy may forbid the eval the dev build wraps modules in
+  // @ts-ignore
+  plugins: commonConfig.plugins.filter((plugin) => !plugin.evalDevToolPlugin),
+  entry: {
+    cypress_remote_clock: [path.resolve(__dirname, '../driver/src/remote/clock/index.ts')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
 export default async function () {
   await waitUntilIconsBuilt()
 
@@ -113,5 +128,6 @@ export default async function () {
     crossOriginConfig,
     crossOriginInjectionConfig,
     remoteAgentConfig,
+    remoteClockConfig,
   ]
 }
