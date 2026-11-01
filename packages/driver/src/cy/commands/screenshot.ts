@@ -112,7 +112,7 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
 
 const scrollOverrides = (win: Window, doc: Document) => {
   const originalOverflow = doc.documentElement.style.overflow
-  const originalBodyOverflowY = doc.body.style.overflowY
+  const originalBodyOverflowY = doc.body?.style.overflowY ?? ''
   const originalX = win.scrollX
   const originalY = win.scrollY
 
@@ -368,7 +368,8 @@ const takeScreenshot = (
     }
   }
 
-  const isScrollingCapture = $dom.isElement(subject) || capture === 'fullPage'
+  const isElementCapture = $dom.isElement(subject)
+  const isFullPageCapture = !isElementCapture && capture === 'fullPage'
 
   let resetScrollOverrides: (() => void) | undefined
 
@@ -385,7 +386,7 @@ const takeScreenshot = (
 
       // Hiding the scrollbar widens the layout and can reflow the page, so it
       // has to happen before the blackouts measure where their elements are.
-      if (isScrollingCapture && doc) {
+      if ((isElementCapture || isFullPageCapture) && doc) {
         resetScrollOverrides = scrollOverrides(state('window'), doc)
       }
 
@@ -423,8 +424,6 @@ const takeScreenshot = (
       console.error(err)
       /* eslint-enable no-console */
     }
-
-    resetScrollOverrides?.()
 
     send('after:screenshot', getOptions(false))
 
@@ -476,16 +475,17 @@ const takeScreenshot = (
 
     $Screenshot.onBeforeScreenshot($el)
 
-    if ($dom.isElement(subject)) {
+    if (isElementCapture) {
       return takeElementScreenshot($el, state, automationOptions)
     }
 
-    if (capture === 'fullPage') {
+    if (isFullPageCapture) {
       return takeFullPageScreenshot(state, automationOptions)
     }
 
     return automateScreenshot(state, automationOptions)
   })
+  .finally(() => resetScrollOverrides?.())
   .then((props) => {
     if (onAfterScreenshot) {
       onAfterScreenshot.call(state('ctx'), $el, props)

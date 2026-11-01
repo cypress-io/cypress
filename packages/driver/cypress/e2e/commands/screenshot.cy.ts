@@ -691,7 +691,19 @@ describe('src/cy/commands/screenshot', () => {
         .then(expectBoxesToCoverTargets)
       })
 
-      it('removes the blackouts and scroll overrides when the capture fails', () => {
+      it('restores the scroll overrides before onAfterScreenshot runs', () => {
+        cy.screenshot({
+          capture: 'fullPage',
+          blackout: ['.avatar'],
+          onAfterScreenshot () {
+            const doc: Document = cy.state('document')
+
+            expect(doc.documentElement.style.overflow).to.eq('')
+          },
+        })
+      })
+
+      it('removes the blackouts and scroll overrides when the capture fails', (done) => {
         automation.withArgs('take:screenshot').rejects(new Error('capture failed'))
 
         cy.on('fail', (err) => {
@@ -700,6 +712,8 @@ describe('src/cy/commands/screenshot', () => {
           expect(err.message).to.include('capture failed')
           expect(doc.querySelectorAll('.__cypress-blackout')).to.have.length(0)
           expect(doc.documentElement.style.overflow).to.eq('')
+
+          done()
         })
 
         cy.screenshot({ capture: 'fullPage', blackout: ['.avatar'] })
