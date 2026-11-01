@@ -6,6 +6,7 @@
 <body>
   <p id="label"></p>
   <p id="origin"></p>
+  <p id="scripts"></p>
   <input id="card" placeholder="Card number" />
   <button id="pay">Pay</button>
   <p id="result"></p>
@@ -16,6 +17,7 @@
 
     document.getElementById('label').textContent = params.get('label') || ''
     document.getElementById('origin').textContent = location.origin
+    document.getElementById('scripts').textContent = String(document.scripts.length)
     document.getElementById('pay').addEventListener('click', () => {
       document.getElementById('result').textContent = `paid with ${document.getElementById('card').value}`
     })

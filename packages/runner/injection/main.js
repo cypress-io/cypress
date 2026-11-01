@@ -11,49 +11,34 @@ import { createTimers } from './timers'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 import { patchElementIntegrity } from './patches/integrity'
 
-const inject = (Cypress) => {
-  window.Cypress = Cypress
+const Cypress = window.Cypress = parent.Cypress
 
-  if (!Cypress) {
-    throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
+if (!Cypress) {
+  throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
 Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
-  }
-
-  patchXmlHttpRequest(window)
-
-  // Strip SRI from <script>/<link> in the primary AUT frame so proxy-rewritten first-party
-  // resources aren't blocked. Cross-origin frames are handled in cross-origin.js.
-  if (Cypress.config('removeSRIAttributes')) {
-    patchElementIntegrity(window)
-  }
-
-  // We wrap timers in the injection code because if we do it in the driver (like
-  // we used to do), any uncaught errors thrown in the timer callbacks would
-  // get picked up by the top frame's 'error' handler instead of the AUT's.
-  // We need to wrap the timer callbacks in the AUT itself for errors to
-  // propagate properly.
-  const timers = createTimers()
-
-  Cypress.removeAllListeners('app:timers:reset')
-  Cypress.removeAllListeners('app:timers:pause')
-
-  Cypress.on('app:timers:reset', timers.reset)
-  Cypress.on('app:timers:pause', timers.pause)
-
-  timers.wrap()
-
-  Cypress.action('app:window:before:load', window)
 }
 
-const canReachRunner = () => {
-  try {
-    return !!parent.location.href
-  } catch (err) {
-    return false
-  }
+patchXmlHttpRequest(window)
+
+// Strip SRI from <script>/<link> in the primary AUT frame so proxy-rewritten first-party
+// resources aren't blocked. Cross-origin frames are handled in cross-origin.js.
+if (Cypress.config('removeSRIAttributes')) {
+  patchElementIntegrity(window)
 }
 
-// with experimentalRemoteDriver the runner is cross-origin to the AUT and drives it over the automation protocol
-if (canReachRunner()) {
-  inject(parent.Cypress)
-}
+// We wrap timers in the injection code because if we do it in the driver (like
+// we used to do), any uncaught errors thrown in the timer callbacks would
+// get picked up by the top frame's 'error' handler instead of the AUT's.
+// We need to wrap the timer callbacks in the AUT itself for errors to
+// propagate properly.
+const timers = createTimers()
+
+Cypress.removeAllListeners('app:timers:reset')
+Cypress.removeAllListeners('app:timers:pause')
+
+Cypress.on('app:timers:reset', timers.reset)
+Cypress.on('app:timers:pause', timers.pause)
+
+timers.wrap()
+
+Cypress.action('app:window:before:load', window)

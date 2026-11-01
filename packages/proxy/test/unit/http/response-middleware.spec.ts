@@ -739,6 +739,35 @@ describe('http/response-middleware', function () {
       expect(ctx.res.wantsInjection).toBe(false)
     })
 
+    it('doesn\'t inject anything into frames inside the AUT with experimentalRemoteDriver', async function () {
+      prepareContext({
+        config: { experimentalRemoteDriver: true },
+        renderedHTMLOrigins: {},
+        getRenderedHTMLOrigins () {
+          return this.renderedHTMLOrigins
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/iframe',
+          isAUTFrame: false,
+          cookies: {},
+          headers: {
+            'accept': [
+              'text/html',
+              'application/xhtml+xml',
+            ],
+          },
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+      expect(ctx.res.wantsInjection).toBe(false)
+    })
+
     it('performs full injection on initial AUT html origin', async function () {
       prepareContext({
         req: {

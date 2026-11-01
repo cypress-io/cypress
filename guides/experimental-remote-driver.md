@@ -9,7 +9,7 @@ This guide records where the remote driver behaves differently from the legacy d
 - **`baseUrl` is required.** Config validation fails without it. Set it to the URL of the app under test.
 - **The runner never moves.** It's served from `cypress-runner.<baseUrl's site>` (or Cypress's own `localhost:<port>` when `baseUrl` is localhost or an IP), cross-origin to the AUT, and every `cy.visit` only changes the AUT iframe's `src`. Legacy moves the runner to the first origin a test visits and restarts the test; the remote driver never restarts a test.
 - **The AUT iframe is sandboxed**, so the app can't navigate the top frame.
-- **Nothing is injected into the AUT** when the project config enables the remote driver. The proxy skips the driver bootstrap, so the app's `document.cookie`, `fetch`, XHR, `frameElement` and timers are its own. Two exceptions: iframes inside the AUT still get the bootstrap (see Uncaught errors), and a run that records to Test Replay injects its recorder (see Test Replay).
+- **Nothing is injected into the AUT** when the project config enables the remote driver. The proxy skips the driver bootstrap for the AUT and every frame inside it, so the app's `document.cookie`, `fetch`, XHR, `frameElement` and timers are its own. The one exception is a run that records to Test Replay, which injects its recorder (see Test Replay).
 - **The option is read from the project config** for anything decided at launch or by the proxy: the runner's location, AUT injection and WebKit's launch mode. A per-test `experimentalRemoteDriver` override switches the driver code path only, so a test that turns the legacy driver back on in a remote-driver project can't reach the AUT (and a remote-driver test in a legacy project runs against an AUT that still has the injected bootstrap).
 - **WebKit** must enable it in the config file. It then launches Playwright in-process, which needs playwright-webkit 1.59.0 or later, and depends on Playwright internals (its utility world, its page's console handling).
 
@@ -66,7 +66,6 @@ Where the commands that work behave differently from the legacy driver:
 - **Errors reach `uncaught:exception` asynchronously**, reported by the browser's protocol rather than a listener in the AUT, so an error after the test's last command may not fail it. The handler's third argument (the promise) is always `undefined`.
 - **Firefox** reports an unhandled rejection as a plain error, without the "unhandled promise rejection" note.
 - **WebKit** doesn't report unhandled rejections (they carry no location to tell the AUT's from the spec's), and attributes an error to the AUT when its script isn't on the runner's origin, so errors from the AUT's own iframes count too.
-- **Iframes inside the AUT still get the driver bootstrap**, which can't find Cypress there and throws `Something went terribly wrong…`. It shows in the browser console and in Test Replay.
 - **Firefox's preload-script error** "Permission denied to access property "length"" is filtered when it has no stack, so an AUT error with exactly that text and no stack would be missed.
 
 ## Dialogs
@@ -111,5 +110,4 @@ These ship with the remote driver work but change behavior without it:
 - **Firefox** opens `target=_blank` links as tabs (`browser.link.open_newwindow` = 3) and clamps background tab timers to 4ms instead of 1s.
 - **Firefox and WebKit** close leftover tabs before each test, as Chrome does.
 - **WebKit** no longer leaves a new tab's first request hanging, so `target=_blank` tabs open.
-- **The injected driver bootstrap** does nothing when it can't reach the runner, instead of throwing into the AUT.
 - **Chrome and Electron** answer a dialog from a frame Cypress didn't patch, such as an iframe inside the AUT, instead of leaving it to block the page: it's accepted, and a prompt gets `null`. Without the remote driver no Cypress events fire for it.

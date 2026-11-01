@@ -5,6 +5,12 @@ describe('remote driver: iframes in the AUT', { experimentalRemoteDriver: true }
     cy.visit(PAGE)
   })
 
+  it('injects nothing into the iframes', () => {
+    cy.get('#same').frame().find('#scripts').should('have.text', '1')
+    cy.get('#cross').frame().find('#scripts').should('have.text', '1')
+    cy.get('#outer').frame().find('#inner').frame().find('#scripts').should('have.text', '1')
+  })
+
   it('types and clicks in a same-origin iframe', () => {
     cy.get('#same').frame().find('#origin').should('have.text', 'http://localhost:3500')
     cy.get('#same').frame().find('#card').type('4242 4242').should('have.value', '4242 4242')
