@@ -99,7 +99,6 @@ describe('transformRequires', () => {
 
     if (debug.enabled) {
       debug('returned file system')
-
       console.error(files)
     }
 

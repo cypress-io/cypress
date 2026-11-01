@@ -43,7 +43,6 @@ export async function graphqlCodegenWatch () {
     cwd: monorepoPaths.pkgDataContext,
   })
   const dfd = Promise.withResolvers()
-  const hasResolved = false
 
   spawned.stdout.on('data', (chunk) => {
     const strs = `${chunk}`.split('\n').filter((f) => f)
@@ -53,7 +52,7 @@ export async function graphqlCodegenWatch () {
     strs.forEach((str) => {
       let codegenMsg = timestampRegex.test(str) ? str.slice(10) : str
 
-      if (codegenMsg.includes('Watching for changes') && !hasResolved) {
+      if (codegenMsg.includes('Watching for changes')) {
         dfd.resolve({})
       }
 
