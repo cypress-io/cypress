@@ -5,7 +5,6 @@ import path from 'path'
 // mis-cased one still matches on the case-insensitive file systems of macOS and
 // Windows but matches nothing on Linux.
 export const UNNEEDED_FILE_GLOBS: string[][] = [
-  // Remove test files
   ['**', 'test'],
   ['**', 'tests'],
   // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
@@ -37,19 +36,19 @@ export const UNNEEDED_FILE_GLOBS: string[][] = [
   ['**', 'JSV', 'jsdoc-toolkit'],
   ['**', 'JSV', 'docs'],
   ['**', 'fluent-ffmpeg', 'doc'],
-  // Repository, CI, editor and linter configuration of dependencies
+  // Repository, CI, editor and linter configuration is only used to develop a dependency
   ['**', '.github'],
   ['**', '.{eslintrc,prettierrc,nycrc}*'],
   ['**', '.{eslintignore,prettierignore,npmignore,gitignore,gitattributes,gitmodules}'],
   ['**', '.{editorconfig,jshintrc,jscsrc,jscs.json,flowconfig,DS_Store,whitesource,auto-changelog}'],
   ['**', '.{travis,coveralls,airtap}.yml'],
+  ['**', 'yarn.lock'],
   // Executable links of nested dependencies; nothing in the binary runs them
   ['**', 'node_modules', '.bin'],
   // Files used as part of prebuilding are not necessary
   ['**', 'node_gyp_bins'],
   ['**', 'better-sqlite3', 'bin'],
   ['**', 'registry-js', 'prebuilds'],
-  ['**', '*.bare'],
   ['**', '*.cc'],
   ['**', '*.o'],
   ['**', '*.c'],
@@ -57,6 +56,8 @@ export const UNNEEDED_FILE_GLOBS: string[][] = [
   ['**', '*.{cpp,hpp,gyp,gypi,mk}'],
   ['**', 'CMakeLists.txt'],
   ['**', 'Makefile'],
+  // Prebuilt addons for the Bare runtime; the binary runs on Node
+  ['**', '*.bare'],
   // patch-package has already been applied by the time the binary is packaged
   ['**', '*.patch'],
   // Remove distributions that are not needed in the binary
@@ -70,8 +71,6 @@ export const UNNEEDED_FILE_GLOBS: string[][] = [
   ['**', 'node-forge', 'dist'],
   ['**', 'pngjs', 'browser.js'],
   ['**', 'plist', 'dist'],
-  // Remove yarn locks
-  ['**', 'yarn.lock'],
 ]
 
 export const getUnneededFileGlobs = (buildAppDir: string) => {
