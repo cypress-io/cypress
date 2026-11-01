@@ -118,6 +118,18 @@ linux-x64:
         context: test-runner:cypress-record-key
         requires:
           - build
+    - driver-integration-tests-chrome-remote-driver:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-firefox-remote-driver:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-webkit-remote-driver:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - driver-integration-tests-chrome-beta:
         context: test-runner:cypress-record-key
         requires:

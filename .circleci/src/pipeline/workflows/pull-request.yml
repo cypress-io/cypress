@@ -153,6 +153,21 @@ jobs:
       filters: *runDriverTests
       requires:
         - ready-to-test
+  - driver-integration-tests-chrome-remote-driver:
+      context: test-runner:cypress-record-key
+      filters: *runDriverTests
+      requires:
+        - ready-to-test
+  - driver-integration-tests-firefox-remote-driver:
+      context: test-runner:cypress-record-key
+      filters: *runDriverTests
+      requires:
+        - ready-to-test
+  - driver-integration-tests-webkit-remote-driver:
+      context: test-runner:cypress-record-key
+      filters: *runDriverTests
+      requires:
+        - ready-to-test
   - driver-integration-tests-chrome-beta:
       context: test-runner:cypress-record-key
       filters: *runDriverTests
@@ -451,6 +466,9 @@ jobs:
         - system-tests-chrome-force-http1-smoke
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
+        - driver-integration-tests-chrome-remote-driver
+        - driver-integration-tests-firefox-remote-driver
+        - driver-integration-tests-webkit-remote-driver
         - driver-integration-tests-chrome-beta
         - driver-integration-tests-chrome-beta-inject-document-domain
         - driver-integration-tests-firefox

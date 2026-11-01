@@ -1,0 +1,1078 @@
+type Credentials = 'same-origin' | 'include' | 'omit' | boolean
+
+let requestId = 0
+
+// The AUT is cross-origin, so code reaches it as an inline handler rather than through cy.window()
+const runInAut = (code: string) => {
+  cy.get('body').invoke('attr', 'onclick', `document.body.removeAttribute('onclick'); ${code}`)
+  cy.get('body').trigger('click', { force: true })
+}
+
+const makeRequest = (url: string, client: 'fetch' | 'xmlHttpRequest' = 'xmlHttpRequest', credentials: Credentials = false) => {
+  const id = `request-${++requestId}`
+  const request = client === 'fetch'
+    ? `fetch(${JSON.stringify(url)}, { credentials: ${JSON.stringify(typeof credentials === 'boolean' ? 'same-origin' : credentials)} })`
+    : `new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', ${JSON.stringify(url)})
+        xhr.withCredentials = ${typeof credentials === 'boolean' ? credentials : false}
+        xhr.onload = resolve
+        xhr.onerror = reject
+        xhr.send()
+      })`
+
+  runInAut(`${request}.then(() => document.body.dataset.request = '${id}:ok', () => document.body.dataset.request = '${id}:error')`)
+  cy.get('body').should('have.attr', 'data-request', `${id}:ok`)
+}
+
+describe('remote driver: cookie behavior in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+  const serverConfig = {
+    http: {
+      sameOriginPort: 3500,
+      crossOriginPort: 3501,
+    },
+    https: {
+      sameOriginPort: 3502,
+      crossOriginPort: 3503,
+    },
+  }
+
+  beforeEach(() => {
+    cy.clearCookies()
+  })
+
+  Object.keys(serverConfig).forEach((scheme) => {
+    const sameOriginPort = serverConfig[scheme].sameOriginPort
+    const crossOriginPort = serverConfig[scheme].crossOriginPort
+
+    describe(`Scheme: ${scheme}://`, () => {
+      // the AUT is cross-site to the runner, so the server side cookie jar needs to simulate the AUT url as top
+      describe('AUT reached by a link from the base url', () => {
+        const originUrl = `${scheme}://www.foobar.com:${sameOriginPort}`
+
+        describe('same site / same origin', () => {
+          describe('XMLHttpRequest', () => {
+            // withCredentials option should have no effect on same-site requests
+            it('sets and attaches same-site cookies to request', () => {
+              cy.intercept(`${originUrl}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest(`${originUrl}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest')
+
+              makeRequest(`${originUrl}/test-request`, 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('fetch', () => {
+            it('sets and attaches same-site cookies to request by default (same-origin)', () => {
+              cy.intercept(`${originUrl}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch')
+
+              makeRequest('/test-request', 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            // this test should behave exactly the same as the (same-origin) test, but adding here incase our implementation is not consistent
+            it('sets and attaches same-site cookies to request if "include" credentials option is specified', () => {
+              cy.intercept(`${originUrl}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch')
+
+              makeRequest('/test-request', 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('does NOT attach same-site cookies to request if "omit" credentials option is specified', () => {
+              cy.intercept(`${originUrl}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              // set the cookie in the browser
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch')
+
+              // but omit the cookies in the request
+              makeRequest('/test-request', 'fetch', 'omit')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('does NOT set same-site cookies from request if "omit" credentials option is specified', () => {
+              cy.intercept(`${originUrl}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              // do NOT set the cookie in the browser
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch', 'omit')
+
+              // but send the cookies in the request
+              makeRequest('/test-request', 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+        })
+
+        describe('same site / cross origin', () => {
+          describe('XMLHttpRequest', () => {
+            it('does NOT set and attach same-site cookies to request when the request is cross-origin', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              // do NOT set the cookie in the browser
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest')
+
+              // but send the cookies in the request
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets cookie on same-site request if withCredentials is true, but does not attach to same-site request if withCredentials is false', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              // do NOT set the cookie in the browser
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true)
+
+              // though request is cross origin, site should have access directly to cookie because it is same site
+              // assert cookie value is actually set in the browser
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              // but send the cookies in the request
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets cookie on same-site request if withCredentials is true, and attaches to same-site request if withCredentials is true', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              // do NOT set the cookie in the browser
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true)
+
+              // though request is cross origin, site should have access directly to cookie because it is same site
+              // assert cookie value is actually set in the browser
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              // but send the cookies in the request
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'xmlHttpRequest', true)
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('fetch', () => {
+            it('does not set same-site cookies from request nor send same-site cookies by default (same-origin)', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets same-site cookies from request and sends same-site cookies if "include" credentials option is specified', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include')
+
+              // assert cookie value is actually set in the browser
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'include')
+            })
+
+            it('sets same-site cookies if "include" credentials option is specified from request, but does not attach same-site cookies to request by default (same-origin)', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include')
+
+              // assert cookie value is actually set in the browser
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            // this should have the same effect as same-origin option for same-site/cross-origin requests, but adding here incase our implementation is not consistent
+            it('does not set or send same-site cookies if "omit" credentials option is specified', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'omit')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'omit')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+        })
+
+        describe('cross site / cross origin', () => {
+          describe('XMLHttpRequest', () => {
+            it('does NOT set or send cookies with request by default', () => {
+              cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'xmlHttpRequest')
+
+              makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+
+            // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
+            if (scheme === 'https') {
+              it('does set cookie if withCredentials is true, but does not send cookie if withCredentials is false', () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                  expect(req['headers']['cookie']).to.equal(undefined)
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit('/fixtures/primary-origin.html')
+                cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true)
+
+                if (scheme === 'https') {
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
+                } else {
+                  cy.getCookie('bar1').should('equal', null)
+                }
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest')
+
+                cy.wait('@cookieCheck')
+              })
+
+              it('does set cookie if withCredentials is true, and sends cookie if withCredentials is true', () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                  expect(req['headers']['cookie']).to.equal('bar1=baz1')
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit('/fixtures/primary-origin.html')
+                cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true)
+
+                // assert cookie value is actually set in the browser, even if in a different domain
+                cy.getCookie('bar1', {
+                  domain: 'barbaz.com',
+                }).its('value').should('equal', 'baz1')
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'xmlHttpRequest', true)
+
+                cy.wait('@cookieCheck')
+              })
+            }
+          })
+
+          describe('fetch', () => {
+            ['same-origin', 'omit'].forEach((credentialOption) => {
+              it(`does NOT set or send cookies with request if credentials is ${credentialOption}`, () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                  expect(req['headers']['cookie']).to.equal(undefined)
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit('/fixtures/primary-origin.html')
+                cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'fetch', credentialOption as 'same-origin' | 'omit')
+
+                cy.getCookie('bar1').should('equal', null)
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit')
+
+                cy.wait('@cookieCheck')
+              })
+
+              it(`does set cookie if credentials is "include", but does not send cookie if credentials is ${credentialOption}`, () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                  expect(req['headers']['cookie']).to.equal(undefined)
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit('/fixtures/primary-origin.html')
+                cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include')
+
+                if (scheme === 'https') {
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
+                } else {
+                  cy.getCookie('bar1').should('equal', null)
+                }
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit')
+
+                cy.wait('@cookieCheck')
+              })
+            })
+
+            // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
+            if (scheme === 'https') {
+              it('does set cookie if credentials is "include", and sends cookie if credentials is "include"', () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                  expect(req['headers']['cookie']).to.equal('bar1=baz1')
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit('/fixtures/primary-origin.html')
+                cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include')
+
+                // assert cookie value is actually set in the browser, even if in a different domain
+                cy.getCookie('bar1', {
+                  domain: 'barbaz.com',
+                }).its('value').should('equal', 'baz1')
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include')
+
+                cy.wait('@cookieCheck')
+              })
+            }
+          })
+        })
+
+        describe('misc', () => {
+          describe('domains', () => {
+            it('attaches subdomain and TLD cookies when making subdomain requests', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('bar=baz; baz=quux')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest('/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch', 'include')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=bar=baz; Domain=.foobar.com`, 'fetch', 'include')
+
+              // Cookie should not be sent with app.foobar.com:3500/test as it does NOT fit the domain
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=baz=quux; Domain=app.foobar.com`, 'fetch', 'include')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'fetch', 'include')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('attaches TLD cookies ONLY when making top level requests', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest('/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch')
+
+              makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch')
+
+              makeRequest(`${scheme}://app.foobar.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('paths', () => {
+            it('gives specific path precedent over generic path, regardless of matching domain', () => {
+              cy.intercept(`/test-request`, (req) => {
+                // @ts-expect-error - the cookie header should always be present here. Order is not guaranteed.
+                const cookieHeaders = req['headers']['cookie'].split(';').map((cookie) => cookie.trim()).sort().join('; ')
+
+                expect(cookieHeaders).to.equal('bar=baz; foo=bar')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest('/set-cookie?cookie=foo=bar; Domain=www.foobar.com; Path=/', 'fetch')
+
+              makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com; Path=/test-request`, 'fetch')
+
+              makeRequest(`/test-request`, 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('creation time', () => {
+            it('places cookies created earlier BEFORE newly created cookies', () => {
+              cy.intercept(`${scheme}://www.foobar.com:${sameOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              makeRequest(`/set-cookie?cookie=foo=bar; Domain=www.foobar.com`, 'fetch')
+
+              cy.wait(200)
+
+              makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch')
+
+              makeRequest(`${scheme}://www.foobar.com:${sameOriginPort}/test-request`, 'fetch', 'include')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+        })
+      })
+
+      describe('AUT visited directly', () => {
+        describe('same site / same origin', () => {
+          describe('XMLHttpRequest', () => {
+            // withCredentials option should have no effect on same-site requests
+            it('sets and attaches same-site cookies to request', () => {
+              cy.intercept('/test-request', (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'xmlHttpRequest')
+
+              makeRequest('/test-request', 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('fetch', () => {
+            it('sets and attaches same-site cookies to request by default (same-origin)', () => {
+              cy.intercept('/test-request', (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch')
+
+              makeRequest('/test-request', 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            // this test should behave exactly the same as the (same-origin) test, but adding here incase our implementation is not consistent
+            it('sets and attaches same-site cookies to request if "include" credentials option is specified', () => {
+              cy.intercept('/test-request', (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch')
+
+              makeRequest('/test-request', 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('does NOT attach same-site cookies to request if "omit" credentials option is specified', () => {
+              cy.intercept('/test-request', (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              // set the cookie in the browser
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch')
+
+              // but omit the cookies in the request
+              makeRequest('/test-request', 'fetch', 'omit')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('does NOT set same-site cookies from request if "omit" credentials option is specified', () => {
+              cy.intercept('/test-request', (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              // do NOT set the cookie in the browser
+              makeRequest('/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch', 'omit')
+
+              // but send the cookies in the request
+              makeRequest('/test-request', 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+        })
+
+        describe('same site / cross origin', () => {
+          describe('XMLHttpRequest', () => {
+            it('does NOT set and attach same-site cookies to request when the request is cross-origin', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets cookie on same-site request if withCredentials is true, but does not attach to same-site request if withCredentials is false', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              // do NOT set the cookie in the browser
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true)
+
+              // firefox actually sets the cookie correctly
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              // but send the cookies in the request
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets cookie on same-site request if withCredentials is true, and attaches to same-site request if withCredentials is true', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              // do NOT set the cookie in the browser
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true)
+
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              // but send the cookies in the request
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'xmlHttpRequest', true)
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('fetch', () => {
+            it('does not set same-site cookies from request nor send same-site cookies by default (same-origin)', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets same-site cookies from request and sends same-site cookies if "include" credentials option is specified', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include')
+
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'include')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets same-site cookies if "include" credentials option is specified from request, but does not attach same-site cookies to request by default (same-origin)', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include')
+
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+
+            // this should have the same effect as same-origin option for same-site/cross-origin requests, but adding here incase our implementation is not consistent
+            it('does not set or send same-site cookies if "omit" credentials option is specified', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'omit')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'omit')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+        })
+
+        describe('cross site / cross origin', () => {
+          describe('XMLHttpRequest', () => {
+            it('does NOT set or send cookies with request by default', () => {
+              cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'xmlHttpRequest')
+
+              makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest')
+
+              cy.wait('@cookieCheck')
+            })
+
+            // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
+            if (scheme === 'https') {
+              it('does set cookie if withCredentials is true, but does not send cookie if withCredentials is false', () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                  expect(req['headers']['cookie']).to.equal(undefined)
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true)
+
+                if (scheme === 'https') {
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
+                } else {
+                  cy.getCookie('bar1').should('equal', null)
+                }
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest')
+
+                cy.wait('@cookieCheck')
+              })
+
+              it('does set cookie if withCredentials is true, and sends cookie if withCredentials is true', () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                  expect(req['headers']['cookie']).to.equal('bar1=baz1')
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true)
+
+                // assert cookie value is actually set in the browser, even if in a different domain
+                cy.getCookie('bar1', {
+                  domain: 'barbaz.com',
+                }).its('value').should('equal', 'baz1')
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'xmlHttpRequest', true)
+
+                cy.wait('@cookieCheck')
+              })
+            }
+          })
+
+          describe('fetch', () => {
+            ['same-origin', 'omit'].forEach((credentialOption) => {
+              it(`does NOT set or send cookies with request by credentials is ${credentialOption}`, () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                  expect(req['headers']['cookie']).to.equal(undefined)
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'fetch', credentialOption as 'same-origin' | 'omit')
+
+                cy.getCookie('bar1').should('equal', null)
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit')
+
+                cy.wait('@cookieCheck')
+              })
+
+              it(`does set cookie if credentials is "include", but does not send cookie if credentials is ${credentialOption}`, () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
+                  expect(req['headers']['cookie']).to.equal(undefined)
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include')
+
+                if (scheme === 'https') {
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
+                } else {
+                  cy.getCookie('bar1').should('equal', null)
+                }
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit')
+
+                cy.wait('@cookieCheck')
+              })
+            })
+
+            // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
+            if (scheme === 'https') {
+              it('does set cookie if credentials is "include", and sends cookie if credentials is "include"', () => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                  expect(req['headers']['cookie']).to.equal('bar1=baz1')
+
+                  req.reply({
+                    statusCode: 200,
+                  })
+                }).as('cookieCheck')
+
+                cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include')
+
+                // assert cookie value is actually set in the browser, even if in a different domain
+                cy.getCookie('bar1', {
+                  domain: 'barbaz.com',
+                }).its('value').should('equal', 'baz1')
+
+                makeRequest(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include')
+
+                cy.wait('@cookieCheck')
+              })
+            }
+          })
+        })
+
+        describe('misc', () => {
+          describe('domains', () => {
+            it('attaches subdomain and TLD cookies when making subdomain requests', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${sameOriginPort}`)
+              makeRequest('/set-cookie?cookie=foo=bar; Domain=app.foobar.com', 'fetch')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=bar=baz; Domain=.foobar.com`, 'fetch', 'include')
+
+              // Cookie should not be sent with app.foobar.com:3500/test as it does NOT fit the domain
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=baz=quux; Domain=www.foobar.com`, 'fetch', 'include')
+
+              makeRequest(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'fetch', 'include')
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('attaches TLD cookies ONLY when making top level requests', () => {
+              cy.intercept(`${scheme}://www.foobar.com:${sameOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${crossOriginPort}`)
+              makeRequest('/set-cookie?cookie=foo=bar; Domain=app.foobar.com', 'fetch')
+
+              makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch')
+
+              makeRequest(`${scheme}://www.foobar.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('paths', () => {
+            it('gives specific path precedent over generic path, regardless of matching domain', () => {
+              cy.intercept(`/test-request`, (req) => {
+                // @ts-expect-error - the cookie header should always be present here. Order is not guaranteed.
+                const cookieHeaders = req['headers']['cookie'].split(';').map((cookie) => cookie.trim()).sort().join('; ')
+
+                expect(cookieHeaders).to.equal('bar=baz; foo=bar')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${crossOriginPort}`)
+              makeRequest('/set-cookie?cookie=foo=bar; Domain=app.foobar.com; Path=/', 'fetch')
+
+              makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com; Path=/test-request`, 'fetch')
+
+              makeRequest(`/test-request`, 'fetch')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+
+          describe('creation time', () => {
+            it('places cookies created earlier BEFORE newly created cookies', () => {
+              cy.intercept(`${scheme}://www.foobar.com:${sameOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://app.foobar.com:${crossOriginPort}`)
+
+              makeRequest(`/set-cookie?cookie=foo=bar; Domain=.foobar.com`, 'fetch')
+
+              cy.wait(200)
+
+              makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch')
+
+              makeRequest(`${scheme}://www.foobar.com:${sameOriginPort}/test-request`, 'fetch', 'include')
+
+              cy.wait('@cookieCheck')
+            })
+          })
+        })
+      })
+    })
+  })
+})
+
+export {}
