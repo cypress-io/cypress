@@ -62,8 +62,19 @@ export const cdpUncaughtException = async (send: SendDebuggerCommand, details: P
   const handlerType = details.text.includes('(in promise)') ? 'unhandledrejection' : 'error'
   const { exception } = details
 
-  if (!exception?.objectId) {
-    return { handlerType, error: { message: String(exception?.value ?? exception?.description ?? details.text) } }
+  if (!exception) {
+    return { handlerType, error: { message: details.text } }
+  }
+
+  if (!exception.objectId) {
+    if (exception.type === 'string') {
+      return { handlerType, error: { message: exception.value } }
+    }
+
+    // worded as the driver words a non-error value it catches in the AUT itself
+    const value = exception.unserializableValue ?? (exception.type === 'undefined' ? 'undefined' : JSON.stringify(exception.value))
+
+    return { handlerType, error: { message: `An unknown error has occurred: ${value}` } }
   }
 
   try {

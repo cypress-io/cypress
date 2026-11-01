@@ -157,5 +157,15 @@ describe('remote uncaught exceptions', () => {
 
       expect(send).not.toHaveBeenCalled()
     })
+
+    it('words a rejection with a value that is not an error the way the driver does', async () => {
+      const send = vi.fn() as unknown as SendDebuggerCommand
+      const rejection = (exception: Protocol.Runtime.RemoteObject) => cdpUncaughtException(send, details({ text: 'Uncaught (in promise)', exception }))
+
+      await expect(rejection({ type: 'undefined' })).resolves.toEqual({ handlerType: 'unhandledrejection', error: { message: 'An unknown error has occurred: undefined' } })
+      await expect(rejection({ type: 'object', subtype: 'null', value: null })).resolves.toEqual({ handlerType: 'unhandledrejection', error: { message: 'An unknown error has occurred: null' } })
+      await expect(rejection({ type: 'number', value: 42 })).resolves.toEqual({ handlerType: 'unhandledrejection', error: { message: 'An unknown error has occurred: 42' } })
+      await expect(rejection({ type: 'number', unserializableValue: 'NaN' })).resolves.toEqual({ handlerType: 'unhandledrejection', error: { message: 'An unknown error has occurred: NaN' } })
+    })
   })
 })
