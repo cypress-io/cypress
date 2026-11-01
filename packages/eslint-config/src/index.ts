@@ -4,6 +4,8 @@ export * from './cliOverrides'
 
 export * from './frontendOverrides'
 
+export * from './graphqlConfig'
+
 export * from './jsonConfig'
 
 export * from './vueTsxOverrides'
