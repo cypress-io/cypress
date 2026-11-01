@@ -1,12 +1,15 @@
-# @cypress/puppeteer [beta]
+# @cypress/puppeteer
 
 Use [Puppeteer's browser API](https://pptr.dev/api) from your Cypress tests with a single command.
 
-> This plugin is in public beta, and we'd love your feedback to help improve it. Please share it in [this discussion](https://github.com/cypress-io/cypress/discussions/28410).
+Cypress runs your tests in a single tab, so it can't switch to a tab or window that your app opens, or work with several pages at once. This plugin gives you a Puppeteer `Browser` connected to the browser Cypress launched. You do that work with Puppeteer, then pass the results back to your test for assertions.
+
+For anything Cypress can do on its own, use Cypress commands instead. They retry automatically and show each step in the Command Log, while `cy.puppeteer()` doesn't retry and logs a single entry for the whole handler.
 
 ## Table of Contents
 
 - [Installation](#installation)
+- [Upgrading to 1.0](#upgrading-to-10)
 - [Compatibility](#compatibility)
 - [How it works](#how-it-works)
 - [Usage](#usage)
@@ -44,11 +47,62 @@ To get types for `cy.puppeteer()`, add the support types to your `tsconfig.json`
 
 The `setup` and `retry` functions ship with their own type definitions, so no extra configuration is needed for your Cypress config file.
 
+## Upgrading to 1.0
+
+Version 1.0 upgrades the bundled `puppeteer-core` from v21 to v24 and requires Cypress 14.0.0 or later. The plugin's own API hasn't changed: `setup`, `retry`, and `cy.puppeteer()` work the same way. Your message handlers, however, receive a Puppeteer `Browser` directly, so Puppeteer's breaking changes between v21 and v24 can affect the code inside them.
+
+We made this upgrade so the plugin stays compatible with current Chrome releases and picks up Puppeteer's more reliable connection handling. Puppeteer v24 needs Node.js 18 or later, which is why Cypress 13, which still supports Node.js 16, is no longer supported.
+
+### Does this affect me?
+
+It affects you if either of these is true:
+
+- **You use Cypress 13.** Upgrade to Cypress 14.0.0 or later first.
+- **Your message handlers use a Puppeteer API that changed.**
+
+These are the Puppeteer changes most likely to show up in handlers:
+
+| Puppeteer v21 | Puppeteer v24 |
+| --- | --- |
+| `page.waitForTimeout(ms)` | Removed. Wait for a specific condition with `page.waitForSelector()` or `page.waitForFunction()`, or use `new Promise((resolve) => setTimeout(resolve, ms))`. |
+| `page.$x(expression)` and `page.waitForXPath(expression)` | Removed. Use the `::-p-xpath()` selector, for example `page.$$('::-p-xpath(//h2)')` or `page.waitForSelector('::-p-xpath(//h2)')`. |
+| `browser.createIncognitoBrowserContext()` | Renamed to `browser.createBrowserContext()`. |
+| `puppeteer.devices` | Removed. Import `KnownDevices` from `puppeteer-core` instead. |
+| `addEventListener()` and `removeEventListener()` on Puppeteer objects | Removed. Use `on()` and `off()`. |
+| Screenshot and PDF methods are typed as returning a Node.js `Buffer` | They're typed as returning a `Uint8Array`. In TypeScript, wrap the result in `Buffer.from()` if you need `Buffer` methods. |
+| `HTTPRequest.url()` and `HTTPResponse.url()` leave out the URL fragment | They include the fragment, such as `#section`. |
+
+For the complete list, see the breaking changes for versions 22.0.0, 23.0.0, and 24.0.0 in the [puppeteer-core changelog](https://github.com/puppeteer/puppeteer/blob/main/packages/puppeteer-core/CHANGELOG.md).
+
+### What to do next
+
+1. If you're on Cypress 13, upgrade to Cypress 14.0.0 or later.
+2. Search your message handlers for the APIs in the table above and update them.
+3. If you pass your own Puppeteer module with the [`puppeteer` option](#options), upgrade it to v24 as well.
+4. Run your specs that call `cy.puppeteer()`.
+
+If you can't make these changes yet, stay on the previous release with `npm install --save-dev @cypress/puppeteer@0` until you're ready.
+
 ## Compatibility
 
-- **Cypress 13.6.0 or later.** The plugin relies on the `after:browser:launch` event, which was added in 13.6.0.
-- **Chromium-family browsers only**, such as Electron, Chrome for Testing, Chromium, and Edge. Calling `cy.puppeteer()` in Firefox or WebKit fails with an error.
-- **Google Chrome 137 and later is not supported in headed mode** (`cypress open` or `cypress run --headed`). Chrome removed the `--load-extension` flag in version 137, and the plugin needs the Cypress extension in headed Chromium browsers (see [How it works](#how-it-works)). When the plugin detects this combination, it throws an error at browser launch. Headless `cypress run` works in any Chrome version. For headed runs, use Electron, Chrome for Testing, or Chromium instead. The Cypress Docker images repository has examples for [Chrome for Testing](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chrome-for-testing) and [Chromium](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chromium).
+- **Cypress 14.0.0 or later.**
+- **Node.js 18 or later** for the process that loads your Cypress config, which every Node.js version Cypress 14 supports already meets. The bundled `puppeteer-core` v24 needs it.
+- **Chromium-family browsers only.** Calling `cy.puppeteer()` in Firefox or WebKit fails with an error.
+
+What works depends on the browser and on whether it runs headless (`cypress run`) or headed (`cypress open` or `cypress run --headed`):
+
+| Browser | Headless | Headed | Open new tabs with `browser.newPage()` |
+| --- | --- | --- | --- |
+| Electron | Yes | Yes | No |
+| Chrome for Testing, Chromium | Yes | Yes | Yes |
+| Google Chrome 136 and earlier | Yes | Yes | Yes |
+| Google Chrome 137 and later | Yes | No | Yes, headless only |
+| Other Chromium-based browsers, such as Edge | Yes | Only if the browser can load the Cypress extension | Yes |
+| Firefox, WebKit | No | No | No |
+
+**Electron can't open new tabs or windows from Puppeteer.** Electron doesn't support creating pages through the Chrome DevTools Protocol, so `browser.newPage()` fails with `Protocol error (Target.createTarget): Not supported`. Working with tabs and windows that your app opens, as in [Switching to a new tab](#switching-to-a-new-tab), works in Electron.
+
+**Google Chrome 137 and later can't run the plugin headed.** In headed Chromium browsers, the plugin needs the Cypress extension (see [How it works](#how-it-works)), and Chrome 137 removed the `--load-extension` flag that loads it. When the plugin detects this combination, it throws an error at browser launch. For headed runs, use Electron, Chrome for Testing, or Chromium instead. The Cypress Docker images repository has examples for [Chrome for Testing](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chrome-for-testing) and [Chromium](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chromium).
 
 ## How it works
 
@@ -67,6 +121,20 @@ Each time `cy.puppeteer()` runs, the plugin:
 
 Because the connection is created fresh for every call and closed at the end, don't hold on to `Browser`, `Page`, or element references between `cy.puppeteer()` calls. Look them up again inside each handler.
 
+### Retries
+
+`cy.puppeteer()` runs your handler once. If an assertion chained after it fails, such as `.should('include', '/new-page')`, Cypress doesn't run the handler again. When a handler depends on something that takes time to appear, like a tab that's still opening, wait for it inside the handler with [`retry`](#retryfunctiontoretry-options) or a Puppeteer method such as `page.waitForSelector()`.
+
+### Timeouts
+
+Each `cy.puppeteer()` call is limited by the Cypress [`taskTimeout`](https://on.cypress.io/configuration#Timeouts) setting, which defaults to 60000 milliseconds. `cy.puppeteer()` doesn't take its own timeout option, so to give a slow handler more time, raise `taskTimeout` in your Cypress config or for a single test:
+
+```typescript
+it('waits for a slow tab', { taskTimeout: 120000 }, () => {
+  cy.puppeteer('waitForSlowTab')
+})
+```
+
 ## Usage
 
 ### 1. Register message handlers in your Cypress config
@@ -74,7 +142,7 @@ Because the connection is created fresh for every call and closed at the end, do
 ```typescript
 // cypress.config.ts
 import { defineConfig } from 'cypress'
-import { setup } from '@cypress/puppeteer'
+import { setup, retry } from '@cypress/puppeteer'
 
 export default defineConfig({
   e2e: {
@@ -82,12 +150,19 @@ export default defineConfig({
       setup({
         on,
         onMessage: {
-          async getNewTabUrl (browser) {
-            // Use the Puppeteer API to interact with the browser here.
-            // Whatever you return is yielded by cy.puppeteer() in your spec.
-            const pages = await browser.pages()
+          async getNewTabTitle (browser, urlFragment) {
+            // cy.puppeteer() doesn't retry, so wait here until the tab has opened
+            const page = await retry(async () => {
+              const pages = await browser.pages()
+              const page = pages.find((page) => page.url().includes(urlFragment))
 
-            return pages[pages.length - 1].url()
+              if (!page) throw new Error(`No tab with a URL containing ${urlFragment} yet`)
+
+              return page
+            })
+
+            // Whatever you return is yielded by cy.puppeteer() in your spec
+            return page.title()
           },
         },
       })
@@ -111,7 +186,7 @@ it('opens a new tab', () => {
   cy.visit('/')
   cy.get('button').click() // opens a new tab
 
-  cy.puppeteer('getNewTabUrl').should('include', '/new-page')
+  cy.puppeteer('getNewTabTitle', '/new-page').should('equal', 'New page')
 })
 ```
 
@@ -133,7 +208,7 @@ setup({ on, onMessage, puppeteer })
 | --- | --- | --- |
 | `on` | Yes | The `on` event registration function that `setupNodeEvents` receives. |
 | `onMessage` | Yes | An object whose keys are message names and whose values are handler functions. See [Message handlers](#message-handlers). |
-| `puppeteer` | No | A Puppeteer module (from `puppeteer` or `puppeteer-core`) to use instead of the version of `puppeteer-core` bundled with this plugin. Handy when you want to pin your own Puppeteer version. |
+| `puppeteer` | No | A Puppeteer module (from `puppeteer` or `puppeteer-core`) to use instead of the `puppeteer-core` bundled with this plugin. Install a version that satisfies this plugin's `puppeteer-core` dependency, so your package manager shares one copy between your project and the plugin. In TypeScript, a module from a different copy fails to type-check, even within the same major version. |
 
 `setup` throws right away if `options`, `on`, or `onMessage` is missing, or if `onMessage` isn't a plain object.
 
@@ -295,9 +370,10 @@ export default defineConfig({
 
 ### Creating a new tab
 
+> This example doesn't work in Electron, because Electron can't open new tabs from Puppeteer. Run it in Chrome for Testing, Chromium, or Edge. See [Compatibility](#compatibility) for details.
+
 This example shows how to:
 
-- Pass your own Puppeteer module to `setup`
 - Pass arguments from `cy.puppeteer()` to a message handler
 - Open a new tab and visit a page with Puppeteer
 - Pass content from that tab back to Cypress for assertions
@@ -320,7 +396,6 @@ _cypress.config.ts_
 
 ```typescript
 import { defineConfig } from 'cypress'
-import puppeteer from 'puppeteer-core'
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core'
 import { setup } from '@cypress/puppeteer'
 
@@ -329,8 +404,6 @@ export default defineConfig({
     setupNodeEvents (on) {
       setup({
         on,
-        // Use your own installed Puppeteer instead of the version bundled with the plugin
-        puppeteer,
         onMessage: {
           async createTabAndGetContent (browser: PuppeteerBrowser, text: string) {
             // Opens a new tab in the Cypress-launched browser
@@ -374,6 +447,14 @@ After each handler runs in a headed Chromium browser, the plugin asks the Cypres
 ### `Lost the reference to the browser`
 
 This usually happens when your Cypress config reloads but the browser doesn't relaunch. Close the browser and open it again from Cypress.
+
+### `cy.task('__cypressPuppeteer__') timed out after waiting 60000ms`
+
+A message handler took longer than the Cypress `taskTimeout`. Check whether the handler is waiting for something that never happens, such as a tab with a URL that doesn't match. If the handler is just slow, raise `taskTimeout`. See [Timeouts](#timeouts).
+
+### `Protocol error (Target.createTarget): Not supported`
+
+Your message handler called `browser.newPage()` while running in Electron, which can't open new tabs or windows from Puppeteer. Run the spec in Chrome for Testing, Chromium, or Edge instead. Tabs and windows that your app opens itself still work in Electron.
 
 ### `Only browsers in the "Chromium" family are supported`
 
