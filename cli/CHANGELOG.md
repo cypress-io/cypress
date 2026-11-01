@@ -1,11 +1,15 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.2.2
+## 16.3.0
 
 **Performance:**
 
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
 - The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
 - `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
+
+**Features:**
+
+- Registering the same event more than once in [`setupNodeEvents`](https://on.cypress.io/plugins-guide) now runs every handler in registration order, instead of only the last one, for [`before:run`](https://on.cypress.io/before-run-api), [`after:run`](https://on.cypress.io/after-run-api), [`before:spec`](https://on.cypress.io/before-spec-api), [`after:spec`](https://on.cypress.io/after-spec-api), [`before:browser:launch`](https://on.cypress.io/browser-launch-api), and [`after:screenshot`](https://on.cypress.io/after-screenshot-api). `before:browser:launch` and `after:screenshot` handlers each receive the result of the handler before them. If a handler throws, later handlers do not run. If you re-registered one of these events to replace a plugin's handler, both now run; to keep only yours, pass the plugin an `on` that skips that event. Addresses [#5240](https://github.com/cypress-io/cypress/issues/5240), [#19809](https://github.com/cypress-io/cypress/issues/19809) and [#27524](https://github.com/cypress-io/cypress/issues/27524).
 
 **Bugfixes:**
 
