@@ -50,7 +50,8 @@
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
     "vitest": "^3.2.4",
-    "webpack": "npm:webpack@^5"
+    "webpack": "npm:webpack@^5",
+    "webpack-dev-server-6": "npm:webpack-dev-server@^6"
   },
   "peerDependencies": {
     "cypress": ">=15.0.0"

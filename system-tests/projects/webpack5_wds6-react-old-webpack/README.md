@@ -1,0 +1,1 @@
+NOTE: This project should NOT work as webpack-dev-server 6 requires webpack 5.101.0 or newer, and this project uses webpack 5.100.2. We use this project to make sure @cypress/webpack-dev-server throws a descriptive error if a user is using webpack-dev-server 6 with an older webpack.
