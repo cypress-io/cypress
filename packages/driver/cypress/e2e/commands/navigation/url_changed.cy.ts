@@ -455,4 +455,22 @@ describe('src/cy/commands/navigation', () => {
       })
     })
   })
+
+  describe('a url:changed listener that throws on the blank page between tests', () => {
+    const throwOnBlank = (url) => {
+      if (url === '') {
+        throw new Error('listener threw on the blank page')
+      }
+    }
+
+    it('registers the listener', () => {
+      Cypress.on('url:changed', throwOnBlank)
+
+      cy.visit('/fixtures/generic.html')
+    })
+
+    it('still runs the next test', () => {
+      Cypress.removeListener('url:changed', throwOnBlank)
+    })
+  })
 })

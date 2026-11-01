@@ -213,7 +213,12 @@ function navigateAboutBlank ({ inBetweenTestsAndNextTestHasTestIsolationOn }: { 
   return new Promise((resolve) => {
     cy.once('window:load', resolve)
 
-    Cypress.action('cy:url:changed', '')
+    // between tests there's no test for a throwing url:changed listener to fail, and the page must still reset
+    try {
+      Cypress.action('cy:url:changed', '')
+    } catch (err) {
+      debug('url:changed listener threw while resetting the page: %o', err)
+    }
 
     return Cypress.action('cy:visit:blank', { testIsolation: true })
   })
