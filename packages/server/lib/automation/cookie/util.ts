@@ -42,7 +42,8 @@ export function isHostOnlyCookie (cookie) {
 
 export const cookieMatches = (cookie: CyCookie | playwright.Cookie, filter?: CyCookieFilter, options?: { strictDomain: boolean }) => {
   if (filter?.domain) {
-    if (options?.strictDomain ? filter?.domain !== cookie.domain : !domainMatch(filter?.domain, cookie.domain)) {
+    // a domain cookie's leading dot doesn't change which host it's for
+    if (options?.strictDomain ? filter.domain.replace(/^\./, '') !== cookie.domain.replace(/^\./, '') : !domainMatch(filter?.domain, cookie.domain)) {
       return false
     }
   }
