@@ -156,13 +156,15 @@ export const createRemoteEvaluator = (Cypress: AgentCypress, kind: EvaluateArgs[
   let result: EvaluateResult | undefined
   let error: Error | undefined
   let pending = false
+  // a call starts only once a retry has seen the last outcome, so .invoke() runs once unless an assertion retries it
+  let unseen = false
 
   return (subject: RemoteLocator): EvaluateResult => {
     if (args.some((arg) => typeof arg === 'function')) {
       $errUtils.throwErrByPath('remote_driver.unsupported_argument', { args: { cmd }, errProps: { retry: false } })
     }
 
-    if (!pending) {
+    if (!pending && !unseen) {
       pending = true
 
       callAgent(Cypress, 'evaluate', { steps: subject.steps, kind, path: String(path), args: args.map(toPageValue) })
@@ -174,7 +176,12 @@ export const createRemoteEvaluator = (Cypress: AgentCypress, kind: EvaluateArgs[
       })
       .finally(() => {
         pending = false
+        unseen = true
       })
+    }
+
+    if (!pending) {
+      unseen = false
     }
 
     if (error) {

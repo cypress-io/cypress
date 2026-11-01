@@ -115,6 +115,15 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
     })
   })
 
+  describe('.invoke()', () => {
+    it('calls the method once when nothing retries it', () => {
+      cy.visit(AUT_PAGE)
+      cy.document().invoke('body.insertAdjacentHTML', 'beforeend', '<i class="invoked"></i>')
+      cy.get('body').should('exist')
+      cy.get('.invoked').should('have.length', 1)
+    })
+  })
+
   describe('cy.$$', () => {
     beforeEach(() => {
       cy.visit(AUT_PAGE)
