@@ -93,6 +93,7 @@ export default [
 `jsonConfig` enforces two-space JSON layout, `package.json` key order and sorted `scripts` and dependency maps, using `eslint-plugin-jsonc` and `eslint-plugin-package-json`. See the [ESLint migration guide](../../guides/eslint-migration.md#7-lint-json-with-jsonconfig).
 
 ### With GraphQL Linting
+
 ```typescript
 // eslint.config.ts
 import { baseConfig, graphqlConfig } from '@packages/eslint-config'
