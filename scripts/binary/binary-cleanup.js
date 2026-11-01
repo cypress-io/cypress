@@ -4,7 +4,7 @@ const { consolidateDeps, getSnapshotCacheDir } = require('@tooling/v8-snapshot')
 const del = require('del')
 const esbuild = require('esbuild')
 const tempDir = require('temp-dir')
-const { UNNEEDED_FILE_GLOBS } = require('./binary-cleanup-globs')
+const { getUnneededFileGlobs } = require('./binary-cleanup-globs')
 const workingDir = path.join(tempDir, 'binary-cleanup-workdir')
 
 fs.ensureDirSync(workingDir)
@@ -193,7 +193,7 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
   console.log(`removing unnecessary files from the binary to further lean out the distribution.`)
   // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
   // this is it's own function as we always want to clean out unneeded dependencies
-  await del(UNNEEDED_FILE_GLOBS.map((segments) => path.join(buildAppDir, ...segments)), { force: true })
+  await del(getUnneededFileGlobs(buildAppDir), { force: true })
 
   // 7. Remove any empty directories as a result of the rest of the cleanup
   await removeEmptyDirectories(buildAppDir)

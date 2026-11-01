@@ -1,7 +1,10 @@
+import path from 'path'
+
 // Each entry is a list of path segments, joined onto the packed app directory
-// and passed to `del`. Keep globs lowercase where package scopes are lowercase:
-// `del` matches case-insensitively on macOS and Windows but not on Linux.
-const UNNEEDED_FILE_GLOBS = [
+// and passed to `del`. Segments without wildcards are looked up on disk, so a
+// mis-cased one still matches on the case-insensitive file systems of macOS and
+// Windows but matches nothing on Linux.
+export const UNNEEDED_FILE_GLOBS: string[][] = [
   // Remove test files
   ['**', 'test'],
   ['**', 'tests'],
@@ -71,6 +74,6 @@ const UNNEEDED_FILE_GLOBS = [
   ['**', 'yarn.lock'],
 ]
 
-module.exports = {
-  UNNEEDED_FILE_GLOBS,
+export const getUnneededFileGlobs = (buildAppDir: string) => {
+  return UNNEEDED_FILE_GLOBS.map((segments) => path.join(buildAppDir, ...segments))
 }

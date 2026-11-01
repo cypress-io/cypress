@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
 
-import { UNNEEDED_FILE_GLOBS } from '../../binary/binary-cleanup-globs'
+import { getUnneededFileGlobs, UNNEEDED_FILE_GLOBS } from '../../binary/binary-cleanup-globs'
 
 // One real-world path per deny-list glob, as they appear in the packed app
 const REMOVED_FIXTURES = [
@@ -81,10 +81,28 @@ const KEPT_FIXTURES = [
   'node_modules/some-module/.gitkeep',
 ]
 
-// `del` matches case-insensitively by default on macOS and Windows, which hid
-// a mis-cased scope on every platform but Linux. Match the way Linux does.
-const findMatches = (root: string, segments: string[]) => {
-  return del(path.join(root, ...segments), { force: true, dryRun: true, nocase: false })
+// `del` resolves literal glob segments on disk and returns them as written in
+// the glob, so on macOS and Windows a mis-cased segment still yields matches.
+// Comparing each match against the names on disk catches it on every platform.
+const existsWithExactCase = async (root: string, match: string) => {
+  let dir = root
+
+  for (const segment of path.relative(root, match).split(path.sep)) {
+    if (!(await fs.readdir(dir)).includes(segment)) {
+      return false
+    }
+
+    dir = path.join(dir, segment)
+  }
+
+  return true
+}
+
+const findMatches = async (root: string, segments: string[]) => {
+  const matches: string[] = await del(path.join(root, ...segments), { force: true, dryRun: true })
+  const exact = await Promise.all(matches.map((match) => existsWithExactCase(root, match)))
+
+  return matches.filter((_match, i) => exact[i])
 }
 
 describe('binary-cleanup', () => {
@@ -109,7 +127,7 @@ describe('binary-cleanup', () => {
   })
 
   it('removes every denied fixture and keeps the rest', async () => {
-    await del(UNNEEDED_FILE_GLOBS.map((segments) => path.join(root, ...segments)), { force: true, nocase: false })
+    await del(getUnneededFileGlobs(root), { force: true })
 
     const remaining = REMOVED_FIXTURES.filter((fixture) => fs.existsSync(path.join(root, fixture)))
     const missing = KEPT_FIXTURES.filter((fixture) => !fs.existsSync(path.join(root, fixture)))
