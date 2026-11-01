@@ -9,8 +9,8 @@ import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
  */
 export const graphqlConfig = (): InfiniteDepthConfigWithExtends[] => {
   // Required on call rather than imported, so the packages that never lint
-  // GraphQL don't load graphql-eslint, graphql 16 and the Vue SFC compiler
-  // every time ESLint starts
+  // GraphQL don't load graphql-eslint, its own copy of graphql and the Vue SFC
+  // compiler every time ESLint starts
   const { graphqlBlocks }: typeof import('./graphqlBlocks') = require('./graphqlBlocks')
 
   return graphqlBlocks

@@ -131,7 +131,8 @@ const vueScriptProcessor: Linter.Processor = {
   },
 }
 
-/** The blocks behind `graphqlConfig()`, which documents how to use them */
+// Reach these through `graphqlConfig()`. A static import loads graphql-eslint
+// for every package that imports `@packages/eslint-config`
 export const graphqlBlocks = [
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
