@@ -1,9 +1,15 @@
 describe('combined after:screenshot handlers', () => {
   it('reports the screenshot details returned by the last handler', () => {
-    cy.screenshot('combined', { capture: 'runner' }, {
-      onAfterScreenshot (details) {
-        expect(details.path).to.include('screenshot-replacement.png')
+    let reportedPath: string | undefined
+
+    cy.screenshot('combined', {
+      capture: 'runner',
+      onAfterScreenshot ($el, details) {
+        reportedPath = details.path
       },
+    })
+    .then(() => {
+      expect(reportedPath).to.include('screenshot-replacement.png')
     })
   })
 })
