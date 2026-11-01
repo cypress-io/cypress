@@ -449,6 +449,15 @@ describe('lib/browsers/firefox', () => {
         expectCalledWith(vi.mocked(BidiAutomation.create), wdInstance, automation)
         expectCalledWith(automation.use, bidiAutomationClient.automationMiddleware)
         expectCalledWith(bidiAutomationClient.setTopLevelContextId as Mock, mockContextId)
+        expect(bidiAutomationClient.patchSyncXhr).not.toHaveBeenCalled()
+      })
+
+      it('marks synchronous XHRs in the AUT with experimentalRemoteDriver', async () => {
+        browser.family = 'firefox'
+        browser.majorVersion = '135'
+        await firefox.open(browser as any, 'http://', { ...options, experimentalRemoteDriver: true } as any, automation as any)
+
+        expect(bidiAutomationClient.patchSyncXhr).toHaveBeenCalledOnce()
       })
 
       afterEach(() => {

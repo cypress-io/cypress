@@ -47,10 +47,12 @@ export default {
     automation,
     url,
     webdriverClient: wdInstance,
+    remoteDriver,
   }: {
     automation: Automation
     url: string
     webdriverClient: WebDriverClient
+    remoteDriver?: boolean
   }): Promise<BidiAutomation> {
     // set the WebDriver classic instance instantiated from geckodriver
     webdriverClient = wdInstance
@@ -62,6 +64,10 @@ export default {
     // at this point there should only be one context: the top level context.
     // we need to set this to bind our AUT intercepts correctly. Hopefully we can move this in the future on a more sure implementation
     client.setTopLevelContextId(contexts[0].context)
+
+    if (remoteDriver) {
+      await client.patchSyncXhr()
+    }
 
     automation.use(client.automationMiddleware)
 

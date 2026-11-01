@@ -20,6 +20,7 @@ import type { AutScripts } from '../automation/commands/remote_visit'
 import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog, isRemoteDialogType } from '../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
+import { SYNC_XHR_PATCH } from '../automation/commands/remote_sync_xhr'
 import { RemoteErrorReports, parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { webkitReloadFrame } from '../automation/commands/reload_frame'
 import { webkitNavigateHistory } from '../automation/commands/navigate_history'
@@ -185,6 +186,7 @@ export class WebKitAutomation {
     this.listenForAutErrors()
 
     if (this.remoteDriver) {
+      await this.page.addInitScript({ content: SYNC_XHR_PATCH })
       await this.context.exposeBinding(REMOTE_STUB_BINDING, async (source, payload: string) => {
         try {
           if (source.frame === this.getAutFrame()) {

@@ -11,6 +11,7 @@ import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as protocol from '../../../lib/browsers/protocol'
+import { SYNC_XHR_PATCH } from '../../../lib/automation/commands/remote_sync_xhr'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
@@ -222,6 +223,12 @@ describe('lib/browsers/chrome', () => {
       expectCalledWith(pageCriClient.send, 'ServiceWorker.enable')
 
       expectCalledOnceWith(utils.initializeCDP as any, pageCriClient, automation, false)
+    })
+
+    it('marks synchronous XHRs in the AUT with experimentalRemoteDriver', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, experimentalRemoteDriver: true } as any, automation)
+
+      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
     })
 
     it('leaves Fetch to the network runtime on the browser (CDP) network path', async () => {

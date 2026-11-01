@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
+import { SYNC_XHR_PATCH } from '../../../lib/automation/commands/remote_sync_xhr'
 import type { RunModeVideoApi } from '@packages/types'
 import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
@@ -340,6 +341,14 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(automation.push).toHaveBeenCalledExactlyOnceWith('remote:stub:call', { id: 'stub-1', args: [] })
     })
+  })
+
+  it('marks synchronous XHRs in the AUT with the remote driver only', async () => {
+    await createAutomation()
+    expect(mock.getLastPage().addInitScript).not.toHaveBeenCalledWith({ content: SYNC_XHR_PATCH })
+
+    await createAutomation({ remoteDriver: true })
+    expect(mock.getLastPage().addInitScript).toHaveBeenCalledWith({ content: SYNC_XHR_PATCH })
   })
 
   describe('remote driver navigation', () => {

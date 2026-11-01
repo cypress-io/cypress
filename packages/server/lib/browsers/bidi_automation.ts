@@ -36,6 +36,7 @@ import type { AutScripts } from '../automation/commands/remote_visit'
 import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../automation/commands/remote_dialogs'
 import { RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
+import { SYNC_XHR_PATCH } from '../automation/commands/remote_sync_xhr'
 import { RemoteErrorReports, parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
@@ -863,6 +864,11 @@ export class BidiAutomation {
     this.webDriverClient.off('network.fetchError', this.onFetchError)
     this.webDriverClient.off('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.off('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+  }
+
+  // not tied to a context, so it covers every tab of the session
+  async patchSyncXhr () {
+    await this.webDriverClient.scriptAddPreloadScript({ functionDeclaration: `() => ${SYNC_XHR_PATCH}` })
   }
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {

@@ -89,6 +89,32 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
     })
   })
 
+  describe('synchronous XHR', () => {
+    it('skips an intercept\'s route handler for it instead of blocking the AUT', () => {
+      cy.intercept('/sync-xhr', {
+        headers: { 'content-type': 'text/html' },
+        body: `<!DOCTYPE html>
+          <html><body>
+            <div id="sync_response"></div>
+            <script>
+              const xhr = new XMLHttpRequest()
+              xhr.open('GET', '/fixtures/valid.json', false)
+              xhr.send()
+              document.querySelector('#sync_response').textContent = JSON.parse(xhr.responseText).foo
+            </script>
+          </body></html>`,
+      })
+
+      const handler = cy.stub()
+
+      cy.intercept('/fixtures/valid.json', handler)
+      cy.visit('/sync-xhr')
+      cy.get('#sync_response').should('have.text', '1').then(() => {
+        expect(handler).not.to.be.called
+      })
+    })
+  })
+
   describe('cy.$$', () => {
     beforeEach(() => {
       cy.visit(AUT_PAGE)

@@ -34,6 +34,7 @@ import { RemoteClock } from '../../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../../automation/commands/remote_stubs'
 import { RemoteErrorReports, cdpUncaughtException } from '../../automation/commands/remote_errors'
+import { SYNC_XHR_PATCH } from '../../automation/commands/remote_sync_xhr'
 import { evaluateInFrameContext } from '../../automation/helpers/evaluate_in_frame_context'
 import type { CdpTab } from '../../automation/commands/remote_agent'
 
@@ -175,6 +176,10 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     })
 
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
+  }
+
+  async patchSyncXhr () {
+    await this.send('Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
   }
 
   useRemoteTabs (getTabs: () => CdpTab[]) {

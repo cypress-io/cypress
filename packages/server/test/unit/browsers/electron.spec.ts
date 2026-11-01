@@ -8,6 +8,7 @@ import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as electronApp from '../../../lib/util/electron-app'
 import utils from '../../../lib/browsers/utils'
 import { screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
+import { SYNC_XHR_PATCH } from '../../../lib/automation/commands/remote_sync_xhr'
 import menu from '../../../lib/gui/menu'
 import * as plugins from '../../../lib/plugins'
 import * as Windows from '../../../lib/gui/windows'
@@ -329,6 +330,22 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expectNotCalledWith(plugins.execute, 'after:browser:launch')
       })
+    })
+  })
+
+  describe('._getAutomation', () => {
+    it('marks synchronous XHRs in the AUT with experimentalRemoteDriver', async () => {
+      // @ts-expect-error - partial launch options
+      await electron._getAutomation({}, { onError: () => {}, experimentalRemoteDriver: true }, {})
+
+      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
+    })
+
+    it('leaves XHRs alone without it', async () => {
+      // @ts-expect-error - partial launch options
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      expectNotCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
     })
   })
 
