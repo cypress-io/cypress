@@ -42,6 +42,7 @@ Where the commands that work behave differently from the legacy driver:
 - **`cy.clearLocalStorage()`** yields `null` rather than the AUT's `Storage` object.
 - **A `cy.visit()` that only changes the hash** waits until automation reports the new URL, instead of listening for `hashchange` in the AUT's window.
 - **`cy.screenshot()`** has the agent scroll the AUT, add blackouts and pause animations. Its `onBeforeScreenshot` / `onAfterScreenshot` callbacks get an empty jQuery object instead of the element or the AUT's document element, and `.screenshot()` on a remote subject that matches several elements captures the first rather than failing.
+- **`cy.$$(selector)` and `Cypress.$(selector)` fail with an error.** Without a context, jQuery searches the runner's document, not the cross-origin AUT's. Building elements from HTML (`Cypress.$('<div>')`) and wrapping elements still work.
 - **The `match` assertion** (`.should('match', selector)`) isn't supported on a remote element.
 - **`.frame()`** enters the first element that matches, and each iframe level adds a round trip to every retry.
 - **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it.

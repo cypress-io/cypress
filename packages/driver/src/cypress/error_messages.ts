@@ -1790,6 +1790,7 @@ export default {
     awaiting_aut ({ cmd: command }) {
       return `${cmd(command)} is waiting for the AUT to answer.`
     },
+    unsupported_jquery: `\`cy.$$('{{selector}}')\` and \`Cypress.$('{{selector}}')\` can't query the AUT when \`experimentalRemoteDriver\` is enabled, since it's cross-origin to the test. Use \`cy.get('{{selector}}')\` instead.`,
     unsupported_subject ({ cmd: command }) {
       return `${cmd(command)} does not support this subject when \`experimentalRemoteDriver\` is enabled. A remote subject only chains queries such as \`.get()\`, \`.find()\`, \`.contains()\` and the traversals, \`.frame()\`, \`.shadow()\`, and actions and assertions.`
     },

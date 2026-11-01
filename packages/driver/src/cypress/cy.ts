@@ -304,7 +304,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     const jquery = createJQuery(state)
 
-    this.$$ = jquery.$$
+    this.$$ = (selector, context?) => {
+      // without a context jQuery searches the runner's document, since the AUT's is cross-origin
+      if (context == null && typeof selector === 'string' && !selector.trim().startsWith('<') && isRemoteDriverEnabled(this.Cypress) && !isRunnerAbleToCommunicateWithAut()) {
+        $errUtils.throwErrByPath('remote_driver.unsupported_jquery', { args: { selector } })
+      }
+
+      return jquery.$$(selector, context)
+    }
+
     this.getRemotejQueryInstance = jquery.getRemotejQueryInstance
 
     const location = createLocation(state)
@@ -348,7 +356,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.aliasNotFoundFor = aliases.aliasNotFoundFor
     this.getXhrTypeByAlias = aliases.getXhrTypeByAlias
 
-    const snapshots = createSnapshots(this.$$, state)
+    const snapshots = createSnapshots(jquery.$$, state)
 
     this.createSnapshot = snapshots.createSnapshot
     this.detachDom = snapshots.detachDom

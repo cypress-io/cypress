@@ -89,6 +89,21 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
     })
   })
 
+  describe('cy.$$', () => {
+    beforeEach(() => {
+      cy.visit(AUT_PAGE)
+    })
+
+    it('fails instead of querying the runner', () => {
+      expect(() => cy.$$('body')).to.throw('`cy.$$(\'body\')` and `Cypress.$(\'body\')` can\'t query the AUT')
+      expect(() => Cypress.$('body')).to.throw('can\'t query the AUT')
+    })
+
+    it('still builds elements from HTML', () => {
+      expect(Cypress.$('<div id="detached"></div>').attr('id')).to.eq('detached')
+    })
+  })
+
   describe('cy.visit callbacks', () => {
     it('runs onBeforeLoad in the page before its scripts', () => {
       cy.visit(AUT_PAGE, {
