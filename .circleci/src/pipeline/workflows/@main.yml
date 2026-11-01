@@ -58,7 +58,7 @@ linux-x64:
         requires:
           - build
     - verify-release-readiness:
-        context: [test-runner:npm-release, org-npm-credentials]
+        context: test-runner:npm-release
         requires:
           - build
     - server-unit-tests:
