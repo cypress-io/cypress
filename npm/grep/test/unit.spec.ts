@@ -1,3 +1,4 @@
+import path from 'path'
 import { expect, describe, it, vi } from 'vitest'
 import {
   parseGrep,
@@ -563,6 +564,52 @@ describe('utils', () => {
 
         expect(warnCalls).not.toContain(noMatchMessage)
         vi.restoreAllMocks()
+      })
+    })
+
+    describe('grepFilterSpecs with tags inherited from suites', () => {
+      const filterSpecs = (specPattern: string, grepTags: string) => {
+        vi.spyOn(console, 'log').mockImplementation(() => {})
+
+        const result = plugin({
+          specPattern,
+          excludeSpecPattern: [],
+          expose: { grepFilterSpecs: true, grepTags },
+        })
+
+        vi.restoreAllMocks()
+
+        return result.specPattern
+      }
+
+      it('keeps a spec whose matching tag is only on the parent suite', () => {
+        const specPattern = 'cypress/e2e/nested-describe.cy.ts'
+
+        expect(filterSpecs(specPattern, '@smoke')).toEqual([path.resolve(specPattern)])
+      })
+
+      it('keeps a spec when AND tags are split between a suite and a test', () => {
+        const specPattern = 'cypress/e2e/inherits-tag.cy.ts'
+
+        expect(filterSpecs(specPattern, '@sanity+@screen-b')).toEqual([path.resolve(specPattern)])
+      })
+
+      it('keeps a spec when AND tags are split between nested suites', () => {
+        const specPattern = 'cypress/e2e/nested-describe.cy.ts'
+
+        expect(filterSpecs(specPattern, '@smoke+@fast')).toEqual([path.resolve(specPattern)])
+      })
+
+      it('filters out specs whose tests do not match the AND tags', () => {
+        const specPattern = 'cypress/e2e/{inherits-tag,nested-describe}.cy.ts'
+
+        expect(filterSpecs(specPattern, '@sanity+@fast')).toEqual(specPattern)
+      })
+
+      it('excludes a test whose inherited tag is negated', () => {
+        const specPattern = 'cypress/e2e/inherits-tag.cy.ts'
+
+        expect(filterSpecs(specPattern, '@screen-b+-@sanity')).toEqual(specPattern)
       })
     })
 
