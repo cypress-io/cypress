@@ -112,13 +112,21 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     this.off = offFn
     this.send = sendDebuggerCommandFn
     this.remoteAgent = new CdpRemoteAgent(sendDebuggerCommandFn, this.executionContexts)
+    // registered on first use, since the binding is a global on every page of the target
+    let stubBinding: Promise<unknown> | undefined
+    const addStubBinding = () => stubBinding ??= sendDebuggerCommandFn('Runtime.addBinding', { name: REMOTE_STUB_BINDING })
+
     this.remoteStubs = new RemoteStubs({
       addPreloadScript: async (source) => {
+        await addStubBinding()
+
         const { identifier } = await sendDebuggerCommandFn('Page.addScriptToEvaluateOnNewDocument', { source: `(${source})(window.${REMOTE_STUB_BINDING})` })
 
         return () => sendDebuggerCommandFn('Page.removeScriptToEvaluateOnNewDocument', { identifier })
       },
       callInAut: async (source) => {
+        await addStubBinding()
+
         const { exceptionDetails } = await evaluateInFrameContext(`(${source})(window.${REMOTE_STUB_BINDING})`, sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
 
         if (exceptionDetails) {
@@ -175,7 +183,6 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
-    await sendDebuggerCommandFn('Runtime.addBinding', { name: REMOTE_STUB_BINDING })
 
     return cdpAutomation
   }
