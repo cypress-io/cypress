@@ -1777,6 +1777,7 @@ export default {
 
   remote_driver: {
     frame_requires_remote_driver: `${cmd('frame')} requires \`experimentalRemoteDriver\` to be enabled.`,
+    origin_unavailable: `${cmd('origin')} is not available when \`experimentalRemoteDriver\` is enabled. The remote driver runs commands against a cross-origin AUT directly, so run them without ${cmd('origin')}.`,
     tab_requires_remote_driver: `${cmd('tab')} requires \`experimentalRemoteDriver\` to be enabled.`,
     unsupported_option ({ cmd: command, option }) {
       return `${cmd(command)} does not support the \`${option}\` option when \`experimentalRemoteDriver\` is enabled.`

@@ -12,6 +12,7 @@ import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
 import { runPrivilegedCommand } from '../../../util/privileged_channel'
 import $sourceMapUtils from '../../../cypress/source_map_utils'
+import { isRemoteDriverEnabled } from '../../remote'
 
 const reHttp = /^https?:\/\//
 
@@ -34,6 +35,10 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
   Commands.addAll({
     origin<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>, ...extras: never[]) {
+      if (isRemoteDriverEnabled(Cypress)) {
+        return $errUtils.throwErrByPath('remote_driver.origin_unavailable')
+      }
+
       if (Cypress.isBrowser('webkit')) {
         return $errUtils.throwErrByPath('webkit.origin')
       }

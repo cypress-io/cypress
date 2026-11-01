@@ -24,7 +24,8 @@ This guide records where the remote driver behaves differently from the legacy d
 | | Commands |
 | --- | --- |
 | **Work** | `cy.get` (including `includeShadowDom`), `.find`, `.eq`, `.contains`, every other traversal (`.first`, `.last`, `.filter`, `.not`, `.children`, `.parent`, `.parents`, `.parentsUntil`, `.closest`, `.siblings`, `.next`, `.nextAll`, `.nextUntil`, `.prev`, `.prevAll`, `.prevUntil`), `.shadow`, `.frame`, `cy.tab`, `cy.root`, `cy.focused`, `cy.document`, `cy.getByRole`, aliases (`.as` / `cy.get('@alias')`), `.should` (including a callback), `.then`, `.each`, `.within`, `.its`, `.invoke`, `.click`, `.dblclick`, `.rightclick`, `.type`, `.clear`, `.check`, `.uncheck`, `.select`, `.selectFile`, `.focus`, `.blur`, `.submit`, `.trigger`, `.scrollIntoView`, `.scrollTo` (an element or the window), `cy.visit`, `cy.reload`, `cy.go`, `cy.url`, `cy.location`, `cy.hash`, `cy.title`, `cy.viewport`, `cy.session`, `cy.screenshot` and `.screenshot`, every cookie command, every storage command, `cy.press` |
-| **Not needed** | `cy.origin` still runs, but the remote driver reaches a cross-origin AUT without it, so there's no reason to use it. `cy.window` yields a stand-in for `cy.stub` / `cy.spy` (see below). |
+| **Not available** | `cy.origin` fails with an error: the remote driver runs commands against a cross-origin AUT directly, so tests drop it and run its commands in place. |
+| **Limited** | `cy.window` yields a stand-in for `cy.stub` / `cy.spy` (see below). |
 
 Unchanged by the remote driver, and so not probed: commands that never touch the AUT (`cy.request`, `cy.intercept`, `cy.wait`, `cy.task`, `cy.exec`, `cy.fixture`, `cy.readFile`, `cy.writeFile`, `cy.log`, `cy.wrap`, `.spread`, `cy.debug`, `cy.pause`), and limits WebKit already has with the legacy driver (`cy.press` and `cy.origin` aren't supported there).
 

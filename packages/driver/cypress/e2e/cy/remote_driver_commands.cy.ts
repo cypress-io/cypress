@@ -239,11 +239,6 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
       cy.visit(AUDIT_PAGE)
       cy.getCookie('session-cookie').should('have.property', 'value', 'kept')
     },
-    origin: () => {
-      cy.origin(AUDIT_ORIGIN, () => {
-        cy.get('#two').should('have.text', 'Two')
-      })
-    },
   },
 }
 
@@ -252,12 +247,22 @@ const UNSUPPORTED: Record<string, string> = {}
 // unsupported in a browser for reasons the remote driver doesn't change, or a bug in one browser
 const UNSUPPORTED_IN: Record<string, { browser: string, reason: string }> = {
   press: { browser: 'webkit', reason: 'cy.press() isn\'t supported in WebKit' },
-  origin: { browser: 'webkit', reason: 'cy.origin() isn\'t supported in WebKit' },
 }
 
 describe('remote driver: commands against a cross-origin AUT', { experimentalRemoteDriver: true, retries: 0, defaultCommandTimeout: 3000 }, () => {
   beforeEach(() => {
     cy.visit(AUDIT_PAGE)
+  })
+
+  it('fails cy.origin, which a cross-origin AUT doesn\'t need', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.include('`cy.origin()` is not available when `experimentalRemoteDriver` is enabled')
+      done()
+    })
+
+    cy.origin(AUDIT_ORIGIN, () => {
+      cy.get('#two')
+    })
   })
 
   Object.entries(AUDIT_CASES).forEach(([group, cases]) => {
