@@ -34,7 +34,7 @@ function external (id, parent, resolved) {
 }
 
 // NOTE: module-api.ts is included here because it is the CJS "entrypoint" used by the ESM build
-const inputFiles = ['lib/index.ts', 'lib/module-api.ts', 'lib/cli.ts', 'lib/cypress.ts', 'lib/exec/xvfb.ts', 'lib/exec/spawn.ts', 'lib/bin/cypress.ts']
+const inputFiles = ['lib/index.ts', 'lib/module-api.ts', 'lib/postinstall.ts', 'lib/cli.ts', 'lib/cypress.ts', 'lib/exec/xvfb.ts', 'lib/exec/spawn.ts', 'lib/bin/cypress.ts']
 
 export default [
   {

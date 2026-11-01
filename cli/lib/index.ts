@@ -1,27 +1,11 @@
-import minimist from 'minimist'
 import * as cypress from './module-api'
 
-const args: any = minimist(process.argv.slice(2))
-
-// we're being used from the command line, such as by the postinstall script.
-// The tasks are loaded lazily so that require('cypress') stays cheap.
-function handleExec (): Promise<void> {
-  switch (args.exec) {
-    case 'install': {
-      return import('./tasks/install').then(({ default: installModule }) => installModule.start({ force: args.force }))
-    }
-    case 'verify': {
-      // for simple testing in the monorepo
-      return import('./tasks/verify').then(({ start }) => start({ force: true })) // always force verification
-    }
-    default: {
-      return Promise.resolve()
-    }
-  }
-}
-
-if (args.exec) {
-  import('./util').then(({ default: util }) => handleExec().catch(util.logErrorExit1))
+// Running this file directly with `--exec install|verify` runs the postinstall
+// tasks, for scripts that call it by path. Requiring it never does, because the
+// process that requires it, such as a tool loading a config file, may have been
+// started with an `--exec` flag of its own.
+if (typeof module !== 'undefined' && require.main === module) {
+  void import('./postinstall')
 }
 
 // this is how the module needs to be exported to avoid a breaking change
