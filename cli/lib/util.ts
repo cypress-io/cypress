@@ -26,7 +26,9 @@ const debug = Debug('cypress:cli')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
-const isBrokenGtkDisplayRe = /Gtk: cannot open display/
+// When DISPLAY is set but nothing is listening on it, Electron prints either the Gtk
+// message or the X server one, depending on its version.
+const isBrokenGtkDisplayRe = /Gtk: cannot open display|Missing X server or \$DISPLAY/
 
 const stringify = (val: any): string => {
   return _.isObject(val) ? JSON.stringify(val) : val

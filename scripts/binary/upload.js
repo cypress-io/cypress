@@ -36,7 +36,8 @@ module.exports = {
   // store uploaded application in subfolders by version and platform
   // something like desktop/0.20.1/darwin-x64/
   getFullUploadPath (options) {
-    let { folder, version, platformArch, name } = options
+    const { version, platformArch, name } = options
+    let { folder } = options
 
     if (!folder) {
       folder = uploadUtils.S3Configuration.releaseFolder

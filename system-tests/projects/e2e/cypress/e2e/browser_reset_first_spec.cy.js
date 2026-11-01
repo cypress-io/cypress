@@ -40,9 +40,30 @@ const swReq = (win) => {
   return win.navigator?.serviceWorker?.ready.then(() => win)
 }
 
+const iframeIndexedDB = (query) => {
+  return (win) => {
+    return new Promise((resolve, reject) => {
+      const iframe = win.document.createElement('iframe')
+
+      win.addEventListener('message', function onMessage ({ data }) {
+        if (data?.type !== 'browser-reset-iframe') return
+
+        win.removeEventListener('message', onMessage)
+
+        return data.error ? reject(new Error(data.error)) : resolve(data.hasStore)
+      })
+
+      iframe.src = `http://localhost:1516/browser_reset_iframe.html${query}`
+      win.document.body.appendChild(iframe)
+    })
+  }
+}
+
 it('makes cached request', () => {
   cy.visit('http://localhost:1515/browser_reset.html')
   .then(req) // this creates the disk cache
   .then(indexedDB) // this creates the indexedDB
   .then(swReq) // this creates the service worker
+  .then(iframeIndexedDB('?write')) // this creates an indexedDB on an origin that is never visited
+  .should('be.true')
 })

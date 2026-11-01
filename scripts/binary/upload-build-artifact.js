@@ -88,7 +88,7 @@ const validateOptions = (options) => {
 
 const uploadArtifactToS3 = function (args = []) {
   const supportedOptions = ['type', 'version', 'file', 'hash', 'platform', 'dry-run']
-  let options = minimist(args, {
+  const options = minimist(args, {
     string: supportedOptions,
   })
 

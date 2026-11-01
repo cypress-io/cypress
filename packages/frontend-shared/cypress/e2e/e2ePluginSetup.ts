@@ -60,6 +60,11 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
 
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
 
+  // The app under test runs in this process and reads its environment, so a run started from
+  // an AI agent's shell would skip the welcome screen and the setup confirmation these tests
+  // expect to see.
+  process.env.CYPRESS_AGENT_MODE = '0'
+
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
   delete process.env.CYPRESS_INTERNAL_VITE_APP_PORT
@@ -209,6 +214,8 @@ async function makeE2ETasks () {
      */
     __internal__afterEach () {
       delete process.env.CYPRESS_IN_CYPRESS_MOCK_FULL_SNAPSHOT
+      // A test that turned agent mode on does not leave it on for the next one
+      process.env.CYPRESS_AGENT_MODE = '0'
       nock.cleanAll()
 
       return null

@@ -17,6 +17,34 @@ const debug = Debug('cypress:cli')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
 const defaultMaxRedirects = 10
+const maxDownloadAttempts = 3
+const defaultRetryDelayMs = 1000
+// How long the connection or the transfer can go quiet, so a network that drops packets fails and is retried instead of waiting for the operating system to give up
+const defaultTimeoutMs = 60000
+
+const retryableErrorCodes = new Set([
+  'ECONNRESET',
+  'ETIMEDOUT',
+  'ECONNREFUSED',
+  'EAI_AGAIN',
+  'EPIPE',
+  'ESOCKETTIMEDOUT',
+])
+
+const isRetryableDownloadError = (err: any): boolean => {
+  if (err?.statusCode) {
+    return err.statusCode === 408 || err.statusCode === 429 || err.statusCode >= 500
+  }
+
+  return retryableErrorCodes.has(err?.code)
+}
+
+// Jitter keeps concurrent installs from retrying in lockstep
+const getRetryDelay = (attempt: number, baseDelayMs: number): number => {
+  const backoff = baseDelayMs * 2 ** (attempt - 1)
+
+  return Math.round(backoff * (0.5 + Math.random() / 2))
+}
 
 const getProxyForUrlWithNpmConfig = (url: string): string | null => {
   return getProxyForUrl(url) ||
@@ -190,7 +218,7 @@ const verifyDownloadedFile = (checksum: string, filesize: number, expectedSize?:
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redirectTTL = defaultMaxRedirects }: any): any => {
+const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redirectTTL = defaultMaxRedirects, timeoutMs = defaultTimeoutMs }: any): any => {
   if (redirectTTL <= 0) {
     return Promise.reject(new Error(
       stripIndent`
@@ -220,11 +248,22 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
       ...(ca ? { agentOptions: { ca } } : {}),
       method: 'GET',
       followRedirect: false,
+      timeout: timeoutMs,
     }
     const req = request(reqOptions)
 
     // closure
     let started: Date | null = null
+    let bodyComplete = false
+    let redirected = false
+    let writeFailed = false
+    let fileStream: fs.WriteStream | undefined
+
+    // A failed attempt closes the file it was writing, so a retry does not leave it open behind it
+    const fail = (err: any) => {
+      fileStream?.destroy()
+      reject(err)
+    }
     let expectedSize: number | undefined
     let expectedChecksum: string | undefined
 
@@ -261,14 +300,16 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
 
         debug('redirect version:', redirectVersion)
         debug('redirect url:', redirectUrl)
-        downloadFromUrl({ url: redirectUrl, progress, ca, downloadDestination, version: redirectVersion, redirectTTL: redirectTTL - 1 })
+        redirected = true
+
+        downloadFromUrl({ url: redirectUrl, progress, ca, downloadDestination, version: redirectVersion, redirectTTL: redirectTTL - 1, timeoutMs })
         .then(resolve).catch(reject)
 
         // if our status code does not start with 200
       } else if (!/^2/.test(response.statusCode)) {
         debug('response code %d', response.statusCode)
 
-        const err = new Error(
+        const err: any = new Error(
           stripIndent`
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
@@ -276,7 +317,10 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         `,
         )
 
-        reject(err)
+        err.statusCode = response.statusCode
+        err.statusMessage = response.statusMessage
+
+        fail(err)
         // status codes here are all 2xx
       } else {
         // pipe() writes every 'data' chunk to the file, so hashing the same
@@ -290,7 +334,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         })
 
         const writeStream = fs.createWriteStream(downloadDestination)
-        let writeFailed = false
+
+        fileStream = writeStream
 
         // a failed write, such as a full disk, leaves a truncated file, and an
         // unhandled 'error' event would crash the CLI, so stop downloading, delete
@@ -311,6 +356,10 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         // and handle the completion with verify and resolve
         // there was a possible race condition between end of request and close of writeStream
         // that is made ordered with this Promise.all
+        response.on('end', () => {
+          bodyComplete = true
+        })
+
         Bluebird.all([new Bluebird((r: any) => {
           return response.pipe(writeStream.on('close', r))
         }), new Bluebird((r: any) => response.on('end', r))])
@@ -330,9 +379,17 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
       }
     })
     .on('error', (e: any) => {
-      if (e.code === 'ECONNRESET') return // sometimes proxies give ECONNRESET but we don't care
+      // The connection can reset after the whole file arrived. The file is complete, and
+      // verifying it decides the outcome, so downloading it all again would be wasted.
+      // A failed write stops the response itself and fails with the write error, which a
+      // connection error from that stop must not replace with a retry.
+      if (bodyComplete || redirected || writeFailed) {
+        debug('ignoring error after the download completed or moved on: %s', e.message)
 
-      reject(e)
+        return
+      }
+
+      fail(e)
     })
     .on('progress', (state: any) => {
       // total time we've elapsed
@@ -356,7 +413,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
  * @param [string] downloadDestination Local filename to save as
  */
 const start = async (opts: any): Promise<any> => {
-  const { version, downloadDestination, redirectTTL } = opts
+  const { version, downloadDestination, redirectTTL, retryDelayMs = defaultRetryDelayMs, timeoutMs = defaultTimeoutMs } = opts
   let { progress } = opts
 
   if (!downloadDestination) {
@@ -383,8 +440,22 @@ const start = async (opts: any): Promise<any> => {
     await fs.ensureDir(path.dirname(downloadDestination))
     const ca: string | undefined = await getCA()
 
-    return downloadFromUrl({ url: versionUrl, downloadDestination, progress, ca, version,
-      ...(redirectTTL ? { redirectTTL } : {}) })
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await downloadFromUrl({ url: versionUrl, downloadDestination, progress, ca, version,
+          timeoutMs, ...(redirectTTL ? { redirectTTL } : {}) })
+      } catch (err: any) {
+        if (attempt >= maxDownloadAttempts || !isRetryableDownloadError(err)) {
+          throw err
+        }
+
+        const delay = getRetryDelay(attempt, retryDelayMs)
+
+        debug('download attempt %d of %d failed (%s), retrying in %dms', attempt, maxDownloadAttempts, err.code || err.statusCode, delay)
+        progress.onProgress(0, 0)
+        await Bluebird.delay(delay)
+      }
+    }
   } catch (err: any) {
     return prettyDownloadErr(err, versionUrl)
   }
