@@ -1020,11 +1020,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return
     }
 
-    // ends a navigation with no load event (a download or a 204), or one reported after its load
+    // ends a navigation with no load event (a download or a 204), or one reported before the runner sees its load,
+    // so commands waiting on it must see the new location
     if (navigation.event === 'stopped') {
-      this.isStable(true, 'load')
-
-      return
+      return this.getCrossOriginRemoteLocation()
+      .then((remoteLocation) => {
+        this.state('autLocation', remoteLocation)
+      })
+      .finally(() => {
+        this.isStable(true, 'load')
+      })
     }
 
     return this.Cypress.action('app:navigation:changed', navigation.source)

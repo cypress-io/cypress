@@ -21,7 +21,7 @@ export const flushRemoteErrors = (Cypress: AgentCypress) => {
 }
 
 // what callAgent uses of Cypress
-type AgentCypress = Pick<ICypress, 'config' | 'browser'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
+type AgentCypress = Pick<ICypress, 'config' | 'browser' | 'action'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
 
 const getContext = (Cypress: AgentCypress): AgentContext => {
   return {
@@ -82,6 +82,10 @@ export const callAgent = <M extends keyof AgentMethods>(Cypress: AgentCypress, m
   .then((reply) => {
     // Safe because `remote:agent` returns whatever the agent's `call` resolved with
     const response = reply as AgentResponse<ReturnType<AgentMethods[M]>>
+
+    if (response.navigating) {
+      Cypress.action('app:remote:navigation', { event: 'started' })
+    }
 
     if (response.ok) {
       return response.value

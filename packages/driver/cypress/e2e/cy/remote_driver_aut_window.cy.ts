@@ -75,6 +75,13 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
       })
     })
 
+    it('waits for the page a click starts loading before running a command that does not retry', () => {
+      cy.visit('http://localhost:3500/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      cy.setCookie('after-click', 'set')
+      cy.getCookie('after-click', { domain: 'www.foobar.com' }).should('have.property', 'value', 'set')
+    })
+
     it('reports a hash change', () => {
       cy.get('#hash').click()
       cy.wrap(urls).should('include', `${AUT_PAGE}#section`)

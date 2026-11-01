@@ -698,10 +698,20 @@ const methods = {
 const call = async (method: keyof typeof methods, context: AgentContext, args: any): Promise<AgentResponse<unknown>> => {
   shim.setContext(context)
 
+  // the driver hears about the navigation from the browser too, but only after the next command may have started
+  let navigating = false
+  const onBeforeUnload = () => {
+    navigating = true
+  }
+
+  window.addEventListener('beforeunload', onBeforeUnload)
+
   try {
-    return { ok: true, value: await methods[method](context, args) }
+    return { ok: true, value: await methods[method](context, args), navigating }
   } catch (err) {
-    return { ok: false, error: serializeError(err) }
+    return { ok: false, error: serializeError(err), navigating }
+  } finally {
+    window.removeEventListener('beforeunload', onBeforeUnload)
   }
 }
 

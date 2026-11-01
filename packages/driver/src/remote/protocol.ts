@@ -219,7 +219,7 @@ export type AgentMethods = {
   evaluate: (args: EvaluateArgs) => EvaluateResult
 }
 
-export type AgentResponse<T> = { ok: true, value: T } | { ok: false, error: AgentError }
+export type AgentResponse<T> = ({ ok: true, value: T } | { ok: false, error: AgentError }) & { navigating?: boolean }
 
 export const AGENT_GLOBAL = '__cypressAgent'
 
