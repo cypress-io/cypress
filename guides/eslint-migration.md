@@ -69,7 +69,7 @@
 - [x] tooling/v8-snapshot
 
 ### Batch 5: Test and script folders
-- [ ] system-tests
+- [x] system-tests — `projects/` and `project-fixtures/` are sample user apps, so they get correctness rules only (see [Lint fixture projects for correctness only](#12-lint-fixture-projects-for-correctness-only))
 - [ ] scripts
 
 ---
@@ -224,7 +224,7 @@ When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfi
 ### 8. **Deprecate and Remove Old Plugin**
 - `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
 - Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
-- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
+- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js` and `eslint` 8 from the root `package.json`.
 
 ### 9. **Lint-Staged After the Migration**
 The root `lint-staged` config is already a single catch-all pattern, so it needs no change when the last package migrates. Once the root itself moves to flat config, that same pattern runs ESLint 9.
@@ -232,6 +232,57 @@ The root `lint-staged` config is already a single catch-all pattern, so it needs
 ### 10. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
+
+### 11. **Migrate the Vue Frontend Packages**
+
+`packages/app`, `packages/launchpad` and `packages/frontend-shared` share one set of overrides. Spread `vueTsxOverrides` and then `frontendOverrides` after `baseConfig`:
+
+```ts
+import { baseConfig, frontendOverrides, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...jsonConfig,
+  ...vueTsxOverrides,
+  ...frontendOverrides,
+]
+```
+
+`frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
+
+Drop the `defineProps`, `defineEmits`, `defineExpose` and `withDefaults` globals from the old config: `vue-eslint-parser` 10 defines the compiler macros in `<script setup>`.
+
+The old config turned `vue/no-v-html` off. `baseConfig` makes it an error, and the shared config keeps it that way, so each package fixes its own uses as it migrates. Two render text, not HTML, and switch to `{{ }}` interpolation:
+
+| Package | Call site | Why it is text |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `baseError.errorStack` | The stack has only ANSI codes stripped, so `<` in an error message is parsed as markup |
+| launchpad | `src/setup/ManualInstall.vue`, `dep.description` | Dependency descriptions are plain text |
+
+The rest render HTML that is built to be rendered. Keep them, wrapped in `<!-- eslint-disable vue/no-v-html -->` / `<!-- eslint-enable vue/no-v-html -->` with a note on where the HTML comes from. A `disable-next-line` comment does not reach a `v-html` attribute on a later line of the tag:
+
+| Package | Call site | Source of the HTML |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `markdown` | `useMarkdown` (markdown-it) |
+| frontend-shared | `src/warning/Warning.vue` | `useMarkdown` |
+| frontend-shared | `src/composables/examples/UseMarkdownExample.vue` | `useMarkdown` |
+| frontend-shared | `src/components/ShikiHighlight.vue` | Shiki, which escapes the code it highlights |
+| launchpad | `src/setup/SelectFrameworkOrBundler.vue` (twice) | Framework SVG icons |
+| app | `src/runs/RunsContainer.vue` | `useMarkdown` |
+| app | `src/settings/project/ExperimentRow.vue` | `useMarkdown` |
+| app | `src/specs/banners/CloudMessageBanner.vue` | `useMarkdown` with `html: false` |
+| app | `src/runner/ScriptError.vue` | `ansi-to-html` with `escapeXML: true` |
+
+### 12. **Lint Fixture Projects for Correctness Only**
+
+`system-tests/projects/**` and `system-tests/project-fixtures/**` are sample user apps, and system-test snapshots assert on line and column numbers inside them. Reformatting one can shift a snapshot, so `system-tests/eslint.config.ts` lints them for correctness only:
+
+- Every rule whose `meta.type` is `layout` is off, which covers all `@stylistic` rules and the Vue template layout rules. The list is computed from `baseConfig`, so a layout rule added there later is off for fixtures too.
+- Unused `eslint-disable` directives are not reported, since deleting one moves every line below it.
+- Rules that flag ordinary user-app code (`ban-ts-comment`, `prefer-const`, `react/prop-types` and similar) are off, and so is `@typescript-eslint/consistent-type-imports`: Angular resolves a constructor parameter's type to a DI token at runtime, so a type-only import breaks the app.
+- Files that fail to parse on purpose are listed in `ignores`. Fixture `package.json` files are left out of `jsonConfig`, because they mirror the user projects they stand in for.
+
+Do not run a bulk `eslint --fix` over the fixtures to clear a new rule. The rules that still autofix there only rewrite code that already fails `yarn lint`, so a new violation should be fixed by hand, with the affected system tests rerun.
 
 ---
 

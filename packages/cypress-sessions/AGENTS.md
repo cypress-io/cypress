@@ -32,6 +32,13 @@ yarn workspace @packages/cypress-sessions test
   / `ReadySessionState` interfaces, `isCompatibleRecord` validator, schema version
   constants, `SESSIONS_DIRNAME`, `<pid>.json` filename helpers, and the
   `SESSIONS_ROUTE_PREFIX` / `sessionProbePath` route helpers.
+- A record with `status: 'starting'` is written before the project server is up, or
+  when the project could not load. It names no server (`serverPort` is 0, the only
+  record that may), carries `loadError` saying why, and is replaced by the full
+  record when the server starts. `isCompatibleRecord` rejects a starting record with
+  no `loadError`, and `isStartingRecord` tells the two apart. The CLI never probes
+  one. `cypress tap status` reports its error, and the other commands report that the
+  project could not load and point to `status`.
 
 **Gotchas / Notes**
 
