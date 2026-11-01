@@ -559,8 +559,15 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = async function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    const isCached = this.incomingRes.statusCode === 304
+
+    // the AUT frame commits a cached document too, and an AUT that isn't injected doesn't stop the browser revalidating it
+    if (isCached && this.req.isAUTFrame) {
+      this.setAUTUrl(this.req.proxiedUrl)
+    }
+
     this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, {
-      isCached: this.incomingRes.statusCode === 304,
+      isCached,
     })
 
     this.res.end()

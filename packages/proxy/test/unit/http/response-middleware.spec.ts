@@ -2162,6 +2162,27 @@ describe('http/response-middleware', function () {
       responseEndedWithEmptyBodyStub = vi.fn()
     })
 
+    it('records the AUT url for a cached document the AUT frame commits', async function () {
+      const setAUTUrl = vi.fn()
+
+      prepareContext({ setAUTUrl, req: { isAUTFrame: true, proxiedUrl: 'http://www.foobar.com/page' }, incomingRes: { statusCode: 304 } })
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      expect(setAUTUrl).toHaveBeenCalledExactlyOnceWith('http://www.foobar.com/page')
+    })
+
+    it('does not record the AUT url for a response the AUT frame does not commit', async function () {
+      const setAUTUrl = vi.fn()
+
+      prepareContext({ setAUTUrl, req: { isAUTFrame: true, proxiedUrl: 'http://www.foobar.com/page' }, incomingRes: { statusCode: 204 } })
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      prepareContext({ setAUTUrl, req: { isAUTFrame: false, proxiedUrl: 'http://www.foobar.com/image' }, incomingRes: { statusCode: 304 } })
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      expect(setAUTUrl).not.toHaveBeenCalled()
+    })
+
     it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and request is correlated and response must have empty body and response is cached', async function () {
       prepareContext({
         protocolManager: {
@@ -2454,6 +2475,7 @@ describe('http/response-middleware', function () {
         incomingRes: props.incomingRes,
         protocolManager: props.protocolManager,
         req: props.req,
+        setAUTUrl: props.setAUTUrl,
         incomingResHadEmptyBody: props.incomingResHadEmptyBody,
         netStubbingState: props.netStubbingState,
         res: props.res || {
