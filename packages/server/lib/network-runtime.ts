@@ -95,6 +95,7 @@ export type CdpFetchNetworkRuntime = {
   attachExtraTarget (client: Pick<ICriClient, 'send' | 'on' | 'off'>): Promise<ExtraTargetDetach>
   start (): Promise<void>
   reset (): void
+  endBodyCaptures (): void
   stop (): Promise<void>
 }
 
@@ -450,6 +451,13 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
       for (const extraTransport of extraTargetTransports) {
         extraTransport.reset()
+      }
+    },
+    endBodyCaptures () {
+      fetchTransport.endBodyCaptures()
+
+      for (const extraTransport of extraTargetTransports) {
+        extraTransport.endBodyCaptures()
       }
     },
     async stop () {

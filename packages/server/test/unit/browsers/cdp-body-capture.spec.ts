@@ -268,6 +268,34 @@ describe('CdpBodyCapture', () => {
     expect(nextStream).not.toBe(stream)
   })
 
+  // At spec end Test Replay waits for every capture stream to end; an
+  // open-ended body (SSE, long-poll) would otherwise never reach loadingFinished.
+  it('endAll ends (does not destroy) every in-flight capture, delivering what was captured so far', async () => {
+    const { capture, dataReceived } = createCapture()
+    const first = await armAndCollect(capture, 'network-1')
+    const second = await armAndCollect(capture, 'network-2', 'session-1')
+    const errored = vi.fn()
+
+    first.stream.on('error', errored)
+    second.stream.on('error', errored)
+
+    dataReceived({ requestId: 'network-1', data: Buffer.from('first event').toString('base64') })
+
+    const ended = Promise.all([onceEvent(first.stream, 'end'), onceEvent(second.stream, 'end')])
+
+    capture.endAll()
+
+    await ended
+
+    expect(errored).not.toHaveBeenCalled()
+    expect(Buffer.concat(first.chunks).toString()).toBe('first event')
+
+    // the ended captures are dropped, so later chunks have nowhere to go
+    expect(() => {
+      dataReceived({ requestId: 'network-1', data: Buffer.from('after spec').toString('base64') })
+    }).not.toThrow()
+  })
+
   it('release destroys and drops a single armed capture, leaving a sibling capture untouched and still pumping', async () => {
     const { capture, dataReceived } = createCapture()
     const released = await capture.arm('network-1', 'session-1')

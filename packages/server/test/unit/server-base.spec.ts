@@ -829,6 +829,28 @@ describe('lib/server-base', () => {
       expect(callsFor(client.send, 'Fetch.disable')).toHaveLength(0)
     })
 
+    it('ends in-flight body captures without resetting or disabling CDP Fetch', async () => {
+      const client = createClient()
+
+      await server.createCdpFetchNetworkRuntime(client)
+      client.send.mockClear()
+
+      const { fetchTransport } = server._cdpFetchRuntime
+      const endSpy = vi.spyOn(fetchTransport, 'endBodyCaptures')
+      const resetSpy = vi.spyOn(fetchTransport, 'reset')
+
+      server.endCdpBodyCaptures()
+
+      expect(endSpy).toHaveBeenCalledTimes(1)
+      expect(resetSpy).not.toHaveBeenCalled()
+      expect(callsFor(client.send, 'Fetch.disable')).toHaveLength(0)
+    })
+
+    it('ending body captures is a no-op without a CDP Fetch runtime', () => {
+      expect(server._cdpFetchRuntime).toBeUndefined()
+      expect(() => server.endCdpBodyCaptures()).not.toThrow()
+    })
+
     it('stops and disposes the CDP Fetch runtime on server close', async () => {
       const client = createClient()
 

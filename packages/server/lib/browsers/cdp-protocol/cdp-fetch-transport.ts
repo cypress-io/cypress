@@ -386,6 +386,10 @@ export class CdpFetchTransport {
     this.bodyCapture.reset()
   }
 
+  endBodyCaptures (): void {
+    this.bodyCapture.endAll()
+  }
+
   async stop (): Promise<void> {
     if (!this.isStarted) {
       debug('stop skipped (not started)')

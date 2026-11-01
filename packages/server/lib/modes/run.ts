@@ -707,6 +707,12 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
   await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
 
+  if (protocolManager) {
+    // Test Replay's afterSpec waits for every captured body to end, and a
+    // stream still open at spec end (SSE, long-poll) never would.
+    project.server.endCdpBodyCaptures()
+  }
+
   await protocolManager?.afterSpec()
 
   const videoName = videoRecording?.api.videoName

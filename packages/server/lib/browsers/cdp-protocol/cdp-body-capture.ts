@@ -131,6 +131,21 @@ export class CdpBodyCapture {
   }
 
   /**
+   * Ends and clears every live capture stream, delivering what was captured so
+   * far. Used at spec end, before Test Replay waits on these streams: an
+   * open-ended body (SSE, long-poll) never reaches loadingFinished on its own.
+   */
+  endAll (): void {
+    debug('ending %d in-flight capture(s)', this.captures.size)
+
+    for (const entry of this.captures.values()) {
+      entry.stream.end()
+    }
+
+    this.captures.clear()
+  }
+
+  /**
    * Destroys and clears every live capture stream. Used between tests
    * (transport.reset) so a spec boundary never leaks a pump into the next.
    */

@@ -757,6 +757,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._cdpFetchRuntime?.attachExtraTarget(client)
   }
 
+  endCdpBodyCaptures () {
+    try {
+      this._cdpFetchRuntime?.endBodyCaptures()
+    } catch (err) {
+      debug('ending CDP body captures failed: %s', err?.stack || err)
+    }
+  }
+
   private resetCdpFetchRuntime () {
     try {
       this._cdpFetchRuntime?.reset()
