@@ -198,4 +198,23 @@ describe('lib/automation', () => {
       })
     })
   })
+
+  describe('.normalize get:cookies and get:cookie', () => {
+    const cookie = (name: string, expirationDate?: number) => {
+      return { name, value: '1', domain: 'localhost', path: '/', secure: false, httpOnly: false, sameSite: 'lax', expirationDate }
+    }
+
+    const now = Date.now() / 1000
+
+    it('leaves out a cookie past its expiry that the browser has not purged', async () => {
+      const cookies = await automation.normalize('get:cookies', {}, () => Promise.resolve([cookie('expired', now - 1), cookie('session'), cookie('later', now + 60)]))
+
+      expect(cookies.map(({ name }) => name)).toStrictEqual(['later', 'session'])
+    })
+
+    it('yields null for a cookie past its expiry', async () => {
+      expect(await automation.normalize('get:cookie', { name: 'expired', domain: 'localhost' }, () => Promise.resolve(cookie('expired', now - 1)))).toBeNull()
+      expect(await automation.normalize('get:cookie', { name: 'later', domain: 'localhost' }, () => Promise.resolve(cookie('later', now + 60)))).toHaveProperty('name', 'later')
+    })
+  })
 })
