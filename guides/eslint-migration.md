@@ -248,7 +248,7 @@ export default [
 ]
 ```
 
-All three, and `packages/data-context`, also spread `graphqlConfig` last, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
+All three, and `packages/data-context`, also spread `graphqlConfig()` last, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
 
 `frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
 
@@ -296,11 +296,11 @@ import { baseConfig, graphqlConfig, jsonConfig } from '@packages/eslint-config'
 export default [
   ...baseConfig,
   ...jsonConfig,
-  ...graphqlConfig,
+  ...graphqlConfig(),
 ]
 ```
 
-Only those four packages should spread it. It validates every `gql` template literal against `packages/data-context/schemas/schema.graphql`, and a file without a `gql` template costs one regex test.
+Only those four packages should spread it. It validates every `gql` template literal against `packages/data-context/schemas/schema.graphql`, and a file without a `gql` template costs one regex test. Unlike `jsonConfig` it is a function: the plugin, graphql 16 and the Vue SFC compiler load only when it is called, so every other package importing `@packages/eslint-config` starts ESLint without them.
 
 #### What graphql-codegen and `check-ts` already catch
 

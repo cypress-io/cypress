@@ -99,11 +99,11 @@ import { baseConfig, graphqlConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
-  ...graphqlConfig,
+  ...graphqlConfig(),
 ]
 ```
 
-`graphqlConfig` validates `gql` template literals in `.js`, `.ts`, `.jsx`, `.tsx` and `.vue` files against `packages/data-context/schemas/schema.graphql`. Only `app`, `launchpad`, `frontend-shared` and `data-context` use it. See the [ESLint migration guide](../../guides/eslint-migration.md#13-lint-gql-templates-with-graphqlconfig).
+`graphqlConfig()` validates `gql` template literals in `.js`, `.ts`, `.jsx`, `.tsx` and `.vue` files against `packages/data-context/schemas/schema.graphql`. Only `app`, `launchpad`, `frontend-shared` and `data-context` use it. See the [ESLint migration guide](../../guides/eslint-migration.md#13-lint-gql-templates-with-graphqlconfig).
 
 ## Environment-Specific Configurations
 
