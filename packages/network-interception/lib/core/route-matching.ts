@@ -45,7 +45,14 @@ export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMat
     }
 
     if (matcher.test) {
-      if (!matcher.test(value) && (!shouldTryMatchingPath || !matcher.test(matchable.path))) {
+      // RegExp matchers with the `g` or `y` flag are stateful via `lastIndex`: the same matcher
+      // object is reused for every request, so reset it before each test or identical requests
+      // alternate between matching and not matching (#34973).
+      matcher.lastIndex = 0
+      const valueMatches = matcher.test(value)
+
+      matcher.lastIndex = 0
+      if (!valueMatches && (!shouldTryMatchingPath || !matcher.test(matchable.path))) {
         return false
       }
 
