@@ -123,6 +123,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
       cy.get('#text').type('abc')
       cy.get('#text').clear().should('have.value', '')
     },
+    'type after clear': () => cy.get('#text').type('abc').clear().type('xyz').should('have.value', 'xyz'),
     check: () => {
       cy.get('#check').check()
       expectStatus('checked:true')
