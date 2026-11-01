@@ -186,8 +186,6 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: ScreenshotA
     return
   }
 
-  const resetScrollOverrides = scrollOverrides(win, doc)
-
   const docHeight = $(doc).height() as number
   const viewportHeight = getViewportHeight(state)
   const numScreenshots = Math.ceil(docHeight / viewportHeight)
@@ -215,7 +213,6 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: ScreenshotA
   })
 
   return takeScrollingScreenshots(scrolls, win, state, automationOptions)
-  .finally(resetScrollOverrides)
 }
 
 const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning, automationOptions: ScreenshotAutomationOptions) => {
@@ -247,8 +244,6 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
   if (!doc) {
     return
   }
-
-  const resetScrollOverrides = scrollOverrides(win, doc)
 
   let elPosition = applyPaddingToElementPositioning(
     $dom.getElementPositioning($el),
@@ -306,7 +301,6 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
   })
 
   return takeScrollingScreenshots(scrolls, win, state, automationOptions)
-  .finally(resetScrollOverrides)
 }
 
 // "app only" means we're hiding the runner UI
@@ -374,6 +368,10 @@ const takeScreenshot = (
     }
   }
 
+  const isScrollingCapture = $dom.isElement(subject) || capture === 'fullPage'
+
+  let resetScrollOverrides: (() => void) | undefined
+
   const before = ($body: JQuery<HTMLBodyElement>, $container: JQuery<HTMLElement>) => {
     return Promise.try(() => {
       if (disableTimersAndAnimations) {
@@ -383,6 +381,14 @@ const takeScreenshot = (
       return null
     })
     .then(() => {
+      const doc = state('document')
+
+      // Hiding the scrollbar widens the layout and can reflow the page, so it
+      // has to happen before the blackouts measure where their elements are.
+      if (isScrollingCapture && doc) {
+        resetScrollOverrides = scrollOverrides(state('window'), doc)
+      }
+
       // could fail if iframe is cross-origin, so fail gracefully
       try {
         if (disableTimersAndAnimations) {
@@ -417,6 +423,8 @@ const takeScreenshot = (
       console.error(err)
       /* eslint-enable no-console */
     }
+
+    resetScrollOverrides?.()
 
     send('after:screenshot', getOptions(false))
 

@@ -625,6 +625,87 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
+    // Hiding the page scrollbar for fullPage and element captures widens the
+    // layout, which reflows centered content. Blackout boxes must be measured
+    // against the layout that is actually captured.
+    describe('blackout positioning on a scrolling page with centered content', () => {
+      type Rect = { top: number, left: number, width: number, height: number }
+      type Capture = { targets: Rect[], boxes: Rect[] }
+
+      let captures: Capture[]
+
+      const toRect = (el: Element): Rect => {
+        const { top, left, width, height } = el.getBoundingClientRect()
+
+        return { top, left, width, height }
+      }
+
+      const expectBoxesToCoverTargets = () => {
+        expect(captures).not.to.be.empty
+
+        captures.forEach(({ targets, boxes }) => {
+          expect(targets).to.have.length(2)
+          expect(boxes).to.have.length(targets.length)
+
+          boxes.forEach((box, i) => {
+            const target = targets[i]
+
+            expect(box.left, 'left').to.be.closeTo(target.left, 0.5)
+            expect(box.top, 'top').to.be.closeTo(target.top, 0.5)
+            expect(box.width, 'width').to.be.closeTo(target.width, 0.5)
+            expect(box.height, 'height').to.be.closeTo(target.height, 0.5)
+          })
+        })
+      }
+
+      beforeEach(function () {
+        captures = []
+
+        automation.withArgs('take:screenshot').callsFake(() => {
+          const doc: Document = cy.state('document')
+
+          captures.push({
+            targets: Array.from(doc.querySelectorAll('.avatar')).map(toRect),
+            boxes: Array.from(doc.querySelectorAll('.__cypress-blackout')).map(toRect),
+          })
+
+          return Promise.resolve(this.serverResult)
+        })
+
+        cy.viewport(600, 200)
+        cy.visit('/fixtures/screenshot-blackout-centered.html')
+      })
+
+      it('covers each blackout target for capture: viewport', () => {
+        cy.screenshot({ capture: 'viewport', blackout: ['.avatar'] })
+        .then(expectBoxesToCoverTargets)
+      })
+
+      it('covers each blackout target for capture: fullPage', () => {
+        cy.screenshot({ capture: 'fullPage', blackout: ['.avatar'] })
+        .then(expectBoxesToCoverTargets)
+      })
+
+      it('covers each blackout target for an element screenshot', () => {
+        cy.get('main').screenshot({ blackout: ['.avatar'] })
+        .then(expectBoxesToCoverTargets)
+      })
+
+      it('removes the blackouts and scroll overrides when the capture fails', () => {
+        automation.withArgs('take:screenshot').rejects(new Error('capture failed'))
+
+        cy.on('fail', (err) => {
+          const doc: Document = cy.state('document')
+
+          expect(err.message).to.include('capture failed')
+          expect(doc.querySelectorAll('.__cypress-blackout')).to.have.length(0)
+          expect(doc.documentElement.style.overflow).to.eq('')
+        })
+
+        cy.screenshot({ capture: 'fullPage', blackout: ['.avatar'] })
+      })
+    })
+
     describe('element capture', () => {
       let action: sinon.SinonSpy
 
