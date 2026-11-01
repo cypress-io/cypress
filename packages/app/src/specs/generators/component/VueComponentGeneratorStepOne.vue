@@ -40,7 +40,7 @@
           v-if="result"
           class="flex gap-[16px] items-center"
         >
-          <Button
+          <LegacyButton
             size="lg"
             :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: 'true' } }"
             :prefix-icon="TestResultsIcon"
@@ -48,14 +48,13 @@
             @click="emits('close')"
           >
             {{ t('createSpec.successPage.runSpecButton') }}
-          </Button>
+          </LegacyButton>
           <Button
-            size="lg"
-            :prefix-icon="PlusButtonIcon"
-            prefix-icon-class="w-[16px] h-[16px] icon-dark-gray-500"
-            variant="outline"
+            size="40"
+            variant="outline-light"
             @click="emits('restart')"
           >
+            <PlusButtonIcon class="w-[16px] h-[16px] icon-dark-gray-500 mr-[8px]" />
             {{ t('createSpec.successPage.createAnotherSpecButton') }}
           </Button>
         </StandardModalFooter>
@@ -77,7 +76,8 @@ import { gql, useQuery, useMutation } from '@urql/vue'
 import type { ComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
 import { VueComponentGeneratorStepOneDocument, VueComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import LegacyButton from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'

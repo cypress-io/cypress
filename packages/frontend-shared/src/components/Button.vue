@@ -22,15 +22,10 @@
         <slot />
       </template>
       <template
-        v-if="suffixIcon || $slots.suffix"
+        v-if="$slots.suffix"
         #suffix
       >
-        <slot name="suffix">
-          <component
-            :is="suffixIcon"
-            :class="suffixIconClass"
-          />
-        </slot>
+        <slot name="suffix" />
       </template>
     </ButtonInternals>
   </button>
@@ -61,21 +56,21 @@
         <slot />
       </template>
       <template
-        v-if="suffixIcon || $slots.suffix"
+        v-if="$slots.suffix"
         #suffix
       >
-        <slot name="suffix">
-          <component
-            :is="suffixIcon"
-            :class="suffixIconClass"
-          />
-        </slot>
+        <slot name="suffix" />
       </template>
     </ButtonInternals>
   </component>
 </template>
 
 <script lang="ts">
+/**
+ * @deprecated Use `Button` from `@cypress-design/vue-button` instead.
+ * Remaining usages need router `to` links, `href` links that open through
+ * `useExternalLink`, or the `text` variant, none of which map onto it directly.
+ */
 import ButtonInternals from './ButtonInternals.vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
 import BaseLink from '../components/BaseLink.vue'
@@ -83,25 +78,18 @@ import BaseLink from '../components/BaseLink.vue'
 const VariantClassesTable = {
   primary: 'border-indigo-500 bg-indigo-500 focus:bg-indigo-600 text-white hocus-default',
   outline: 'border-gray-100 text-indigo-600 hocus-default',
-  tertiary: 'text-indigo-500 bg-indigo-50 border-transparent hocus-default',
-  pending: 'bg-gray-500 text-white',
-  link: 'border-transparent text-indigo-600 hocus-default',
-  linkBold: 'border-transparent text-indigo-500 font-medium',
   text: 'border-0',
-  secondary: 'bg-jade-500 text-white hocus-secondary',
   white: 'bg-white text-indigo-500 font-medium hocus-default',
 } as const
 
 const SizeClassesTable = {
-  sm: 'px-[6px] py-[2px] text-[14px] h-[24px]',
   md: 'px-[12px] py-[8px] text-[14px] h-[32px]',
   lg: 'px-[16px] py-[11px] max-h-[40px]',
-  'lg-wide': 'px-[32px] py-[8px]',
 } as const
 
-export type ButtonVariants = keyof(typeof VariantClassesTable)
+type ButtonVariants = keyof(typeof VariantClassesTable)
 
-export type ButtonSizes = keyof(typeof SizeClassesTable)
+type ButtonSizes = keyof(typeof SizeClassesTable)
 
 export const inheritAttrs = true
 
@@ -114,14 +102,11 @@ import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'v
 
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
-  suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: ButtonSizes
   variant?: ButtonVariants
   prefixIconClass?: string | Record<string, string | boolean>
-  suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles
   to?: object | string // will render as a router-link with button styles
-  internalLink?: boolean
   disabled?: boolean
 }>()
 
@@ -145,14 +130,14 @@ const classes = computed(() => {
     variantClasses.value,
     sizeClasses.value,
     attrs.class,
-    (props.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
+    props.disabled ? 'opacity-50' : '',
     props.disabled ? 'cursor-default' : '',
   ]
 })
 
 const linkVersion = computed(() => {
   if (!props.to) {
-    return props.internalLink ? BaseLink : ExternalLink
+    return ExternalLink
   }
 
   if (props.disabled) {
