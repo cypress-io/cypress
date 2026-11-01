@@ -1268,6 +1268,39 @@ describe('Server', () => {
       })
     })
 
+    describe('http with experimentalRemoteDriver enabled', () => {
+      const baseUrl = 'http://www.cypress.io'
+      const otherOrigin = 'http://www.google.com'
+
+      beforeEach(async function () {
+        nock(baseUrl).persist().get('/').reply(200, '<html>content</html>', { 'Content-Type': 'text/html' })
+        nock(otherOrigin).get('/').reply(200, '<html>content</html>', { 'Content-Type': 'text/html' })
+
+        await this.setup({
+          projectRoot: '/foo/bar/',
+          config: {
+            port: 2000,
+            supportFile: false,
+            baseUrl,
+            experimentalRemoteDriver: true,
+          },
+        })
+      })
+
+      it('keeps baseUrl as the primary origin when visiting another origin first', async function () {
+        const details = await this.server._onResolveUrl(`${otherOrigin}/`, {}, this.automationRequest)
+
+        expect(details.isPrimarySuperDomainOrigin).to.be.false
+        expect(this.server.remoteStates.isPrimarySuperDomainOrigin(`${baseUrl}/`)).to.be.true
+      })
+
+      it('makes a visit to baseUrl the primary origin', async function () {
+        const details = await this.server._onResolveUrl(`${baseUrl}/`, {}, this.automationRequest)
+
+        expect(details.isPrimarySuperDomainOrigin).to.be.true
+      })
+    })
+
     describe('http with injectDocumentDomain enabled', () => {
       const superDomain = 'cypress.io'
       const secondSuperDomain = 'google.com'

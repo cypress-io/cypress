@@ -265,6 +265,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
   private _documentDomainInjection: DocumentDomainInjection
+  private _remoteDriver: boolean
 
   constructor (config: Cfg) {
     this.isListening = false
@@ -276,6 +277,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._fileServer = null
 
     this._documentDomainInjection = DocumentDomainInjection.InjectionBehavior(config)
+    this._remoteDriver = 'experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true
 
     const remoteStatePorts = () => {
       return {
@@ -1409,7 +1411,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                   })
 
                   if (!handlingLocalFile) {
-                    this._remoteStates.set(newUrl as string, options, !urlDoesNotMatchPolicyBasedOnDomain)
+                    // the remote driver's runner never leaves baseUrl's site, so only that origin is top to the AUT
+                    const isPrimary = this._remoteDriver && this._baseUrl
+                      ? this._documentDomainInjection.urlsMatch(this._baseUrl, newUrl || '')
+                      : !urlDoesNotMatchPolicyBasedOnDomain
+
+                    this._remoteStates.set(newUrl as string, options, isPrimary)
                   }
 
                   const responseBufferStream = new stream.PassThrough({
