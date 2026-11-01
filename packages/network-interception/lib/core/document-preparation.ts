@@ -57,6 +57,12 @@ function resolveInjectionLevelInner (facts: InjectionLevelFacts): InjectionLevel
     return 'full'
   }
 
+  // Returning from a secondary origin creates a new primary AUT window too.
+  // It needs the full bootstrap before application scripts execute.
+  if (facts.isAUTFrame && facts.isRenderedHTML) {
+    return 'full'
+  }
+
   if (!facts.isRenderedHTML) {
     return false
   }
