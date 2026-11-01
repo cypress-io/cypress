@@ -99,7 +99,7 @@ describe('transformRequires', () => {
 
     if (debug.enabled) {
       debug('returned file system')
-      /* eslint-disable-next-line no-console */
+
       console.error(files)
     }
 

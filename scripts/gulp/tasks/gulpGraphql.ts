@@ -43,7 +43,7 @@ export async function graphqlCodegenWatch () {
     cwd: monorepoPaths.pkgDataContext,
   })
   const dfd = Promise.withResolvers()
-  let hasResolved = false
+  const hasResolved = false
 
   spawned.stdout.on('data', (chunk) => {
     const strs = `${chunk}`.split('\n').filter((f) => f)

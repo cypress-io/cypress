@@ -135,7 +135,7 @@ function validateFile ({ filePath, crypto, fs, expectedHash, errorMessage }) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- binary-sources.js embeds this file as text and calls integrityCheck from there
 function integrityCheck (options) {
   const require = options.require
   const electron = require('electron')

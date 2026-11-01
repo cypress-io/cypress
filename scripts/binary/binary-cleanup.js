@@ -67,7 +67,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/better-sqlite3/lib/index.js',
   ]
 
-  let entryPoints = new Set([
+  const entryPoints = new Set([
     ...startingEntryPoints.map((entryPoint) => path.join(unixBuildAppDir, entryPoint)),
   ])
   let esbuildResult
