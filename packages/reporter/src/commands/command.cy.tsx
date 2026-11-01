@@ -1,5 +1,5 @@
 import React from 'react'
-import Command from './command'
+import Command, { formattedMessage } from './command'
 import CommandModel from './command-model'
 import type { ErrProps } from '../errors/err-model'
 import type { SessionStatus } from '../sessions/utils'
@@ -402,6 +402,26 @@ describe('commands', () => {
           expect(events.emit).to.be.calledWith('external:open', fallbackUrl)
         })
       })
+    })
+  })
+
+  describe('formattedMessage', () => {
+    it('renders markdown in command messages', () => {
+      expect(formattedMessage('some **important** message', 'log')).to.contain('<strong>important</strong>')
+    })
+
+    it('does not treat markdown escapes in download file paths as formatting', () => {
+      // on windows, a backslash before a punctuation character in the
+      // filename is a markdown escape and would drop the path separator
+      const filePaths = [
+        'C:\\Users\\user\\app\\cypress\\downloads\\(results).csv',
+        'C:\\Users\\user\\app\\cypress\\downloads\\$rates.txt',
+        'C:\\Users\\user\\app\\cypress\\downloads\\+items.bin',
+      ]
+
+      for (const filePath of filePaths) {
+        expect(formattedMessage(filePath, 'download')).to.equal(filePath)
+      }
     })
   })
 })
