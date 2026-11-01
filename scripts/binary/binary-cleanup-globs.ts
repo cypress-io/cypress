@@ -20,8 +20,9 @@ export const UNNEEDED_FILE_GLOBS: string[][] = [
   ['**', 'graphql', '**', '*.mjs'],
   ['**', '@opentelemetry', '**', 'esm'],
   ['**', '@opentelemetry', '**', 'esnext'],
-  // We currently do not use any map files
-  ['**', '*.map'],
+  // Source maps are not used within the binary. Packages such as `object.map`
+  // also end in `.map`, so match source map suffixes only.
+  ['**', '*.{js,mjs,cjs,ts,mts,cts,css,min}.map'],
   // License files need to be kept
   ['**', '!(LICENSE|license|License).md'],
   // These are type related files that are not used within the binary
@@ -43,7 +44,7 @@ export const UNNEEDED_FILE_GLOBS: string[][] = [
   ['**', '.{editorconfig,jshintrc,jscsrc,jscs.json,flowconfig,DS_Store,whitesource,auto-changelog}'],
   ['**', '.{travis,coveralls,airtap}.yml'],
   ['**', 'yarn.lock'],
-  // Executable links of nested dependencies; nothing in the binary runs them
+  // Executable links of dependencies; nothing in the binary runs them
   ['**', 'node_modules', '.bin'],
   // Files used as part of prebuilding are not necessary
   ['**', 'node_gyp_bins'],

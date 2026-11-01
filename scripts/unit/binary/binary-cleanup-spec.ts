@@ -23,6 +23,7 @@ const REMOVED_FIXTURES = [
   'node_modules/@opentelemetry/api/build/esnext/index.js',
   'node_modules/zod/index.js.map',
   'node_modules/zod/index.d.ts.map',
+  'node_modules/sprintf-js/dist/sprintf.min.map',
   'node_modules/zod/README.md',
   'node_modules/zod/index.d.ts',
   'node_modules/zod/index.d.cts',
@@ -80,6 +81,8 @@ const KEPT_FIXTURES = [
   'node_modules/better-sqlite3/build/Release/better_sqlite3.node',
   'node_modules/semver/bin/semver.js',
   'node_modules/some-module/.gitkeep',
+  'node_modules/object.map/index.js',
+  'node_modules/es-iterator-helpers/Iterator.prototype.map/index.js',
 ]
 
 // `del` resolves literal glob segments on disk and returns them as written in
