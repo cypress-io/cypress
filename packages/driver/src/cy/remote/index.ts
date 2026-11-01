@@ -74,8 +74,12 @@ const splitAtFrames = (allSteps: QueryStep[]) => {
 }
 
 export const callAgent = <M extends keyof AgentMethods>(Cypress: AgentCypress, method: M, args: Parameters<AgentMethods[M]>[0], timeout?: number): Promise<ReturnType<AgentMethods[M]>> => {
+  let isInAutDocument = false
+
   return Promise.try(() => {
     const { tab, frames, steps } = splitAtFrames(args.steps)
+
+    isInAutDocument = !tab && !frames.length
 
     return Cypress.automation('remote:agent', { method, context: getContext(Cypress), args: { ...args, steps }, frames, tab })
   })
@@ -83,7 +87,8 @@ export const callAgent = <M extends keyof AgentMethods>(Cypress: AgentCypress, m
     // Safe because `remote:agent` returns whatever the agent's `call` resolved with
     const response = reply as AgentResponse<ReturnType<AgentMethods[M]>>
 
-    if (response.navigating) {
+    // a tab or an iframe unloading, or a popup closing, doesn't take the AUT's page with it
+    if (response.navigating && isInAutDocument) {
       Cypress.action('app:remote:navigation', { event: 'started' })
     }
 
