@@ -63,8 +63,8 @@ outer contents
   return app.get('/timeout', (req, res) => {
     return setTimeout(() => {
       return res.send('<html>timeout</html>')
-    }
-    , 2000)
+    },
+     2000)
   })
 }
 

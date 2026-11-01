@@ -2,15 +2,19 @@ import debug from 'debug'
 import { strict as assert } from 'assert'
 import { readFileSync } from 'fs'
 import path from 'path'
-import { execSync, ExecSyncOptions, StdioOptions } from 'child_process'
-import { BlueprintConfig, scriptFromBlueprint } from './blueprint'
+import type { ExecSyncOptions, StdioOptions } from 'child_process'
+import { execSync } from 'child_process'
+import type { BlueprintConfig } from './blueprint'
+import { scriptFromBlueprint } from './blueprint'
 import type { CreateBundleOpts, CreateSnapshotScriptOpts, Metadata } from '../types'
-import {
+import type {
   CreateBundle,
-  packherd,
   CreateBundleOpts as PackherdCreateBundleOpts,
   CreateBundleResult,
   CreateBundleSourcemap,
+} from '@tooling/packherd'
+import {
+  packherd,
 } from '@tooling/packherd'
 import { dependencyMapArrayFromInputs } from '../meta/dependency-map'
 import { writeConfigJSON } from './write-config-json'

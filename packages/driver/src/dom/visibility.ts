@@ -426,7 +426,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   }
 
   if (elHasDisplayContents($el)) {
-    let $parent = getParent($el)
+    const $parent = getParent($el)
 
     return elIsHiddenByAncestors($parent, checkOpacity, $parent)
   }
@@ -531,8 +531,8 @@ export const getReasonIsHidden = function (elOrJquery, options = { checkOpacity:
 
   const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
   const node = stringifyElement($el, 'short')
-  let width = elClientWidth($el)
-  let height = elClientHeight($el)
+  const width = elClientWidth($el)
+  const height = elClientHeight($el)
   let $parent
   let parentNode
   let $select
@@ -642,8 +642,8 @@ export const getReasonIsHidden = function (elOrJquery, options = { checkOpacity:
 
   if ($parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))) {
     parentNode = stringifyElement($parent, 'short')
-    let width = elClientWidth($parent)
-    let height = elClientHeight($parent)
+    const width = elClientWidth($parent)
+    const height = elClientHeight($parent)
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }

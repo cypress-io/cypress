@@ -11,7 +11,7 @@ import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
-import { runnerGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
+import { tapGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { RemoteStates } from '@packages/network-tools'
 import bodyParser from 'body-parser'
 import path from 'path'
@@ -234,7 +234,7 @@ export const createCommonRoutes = ({
   })
 
   router.post(`/${config.namespace}/add-verified-command`, bodyParser.json(), (req, res) => {
-    privilegedCommandsManager.addVerifiedCommand(req.body)
+    privilegedCommandsManager.addVerifiedCommand(req.body, req.headers.origin, config.chromeWebSecurity === false)
 
     res.sendStatus(204)
   })
@@ -263,8 +263,15 @@ export const createCommonRoutes = ({
       })
     })
 
-    // The tap CLI's mount; the app reaches GraphQL under `namespace` below.
-    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, runnerGraphQLHTTP)
+    // The tap CLI's mount; the app sends GraphQL over the socket instead. The
+    // session id is only in the session record on disk, never in the page.
+    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, (req, res, next) => {
+      if (!cypressSessions.hasCurrentSessionIdHeader(req.headers)) {
+        return res.sendStatus(404)
+      }
+
+      return next()
+    }, tapGraphQLHTTP)
   }
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -280,8 +287,6 @@ export const createCommonRoutes = ({
       return send(req, encodeURI(req.params[0] ?? ''), { root: getPathToDist('app') }).pipe(res)
     })
   }
-
-  router.use(`/${namespace}/graphql/*`, runnerGraphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
     runner.handle(req, res)

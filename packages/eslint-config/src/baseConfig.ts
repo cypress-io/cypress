@@ -137,7 +137,10 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'no-console': 'error',
       'prefer-spread': 'error',
-      'prefer-const': 'error',
+      // A `let` that a closure reads before its later assignment has to stay
+      // declared up front: as a `const` at the assignment, an early call throws
+      // a TDZ ReferenceError where it used to see `undefined`
+      'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
       'no-async-promise-executor': 'error',
       // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
       'eqeqeq': ['error', 'always', { null: 'ignore' }],

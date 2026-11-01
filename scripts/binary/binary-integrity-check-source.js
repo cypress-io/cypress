@@ -1,3 +1,4 @@
+/* global PATH_SEP -- defined by the V8 snapshot that this file is embedded in */
 const OrigError = Error
 const originalCaptureStackTrace = Error.captureStackTrace
 const originalToString = Function.prototype.toString
@@ -135,7 +136,7 @@ function validateFile ({ filePath, crypto, fs, expectedHash, errorMessage }) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- binary-sources.js embeds this file as text and calls integrityCheck from there
 function integrityCheck (options) {
   const require = options.require
   const electron = require('electron')
@@ -164,37 +165,30 @@ function integrityCheck (options) {
       },
       {
         functionName: 'snapshotRequire',
-        // eslint-disable-next-line no-undef
         fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'runWithSnapshot',
-        // eslint-disable-next-line no-undef
         fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'hookRequire',
-        // eslint-disable-next-line no-undef
         fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'startCypress',
-        // eslint-disable-next-line no-undef
         fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
-        // eslint-disable-next-line no-undef
         fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'v',
-        // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
         column: 2573,
       },
       {
-        // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
         column: 2764,
@@ -204,7 +198,6 @@ function integrityCheck (options) {
 
   // 3. Validate the three pieces of the entry point: the main index file, the bundled jsc file, and the bytenode node module
   validateFile({
-    // eslint-disable-next-line no-undef
     filePath: [appPath, 'index.js'].join(PATH_SEP),
     crypto,
     fs,
@@ -213,7 +206,6 @@ function integrityCheck (options) {
   })
 
   validateFile({
-    // eslint-disable-next-line no-undef
     filePath: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
     crypto,
     fs,

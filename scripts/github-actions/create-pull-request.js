@@ -53,7 +53,7 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
       issueNumber: number,
     }
 
-    let projectBoardNodeId = await github.graphql(
+    const projectBoardNodeId = await github.graphql(
       getProjectV2NodeIdQuery,
       getProjectV2NodeIdQueryVars,
     )

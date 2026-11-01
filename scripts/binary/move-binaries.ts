@@ -7,18 +7,9 @@ import is from 'check-more-types'
 
 import minimist from 'minimist'
 import pluralize from 'pluralize'
-
-// inquirer-confirm is missing type definition
-// @ts-ignore
 import confirm from 'inquirer-confirm'
-
-// ignore TS errors - legacy JS util without types
-// @ts-ignore
 import uploadUtils from './util/upload'
-
-// @ts-ignore
 import { getUploadDirForPlatform } from './upload-build-artifact'
-// @ts-ignore
 import { zipName, getFullUploadPath } from './upload'
 
 /**

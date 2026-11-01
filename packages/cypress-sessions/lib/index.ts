@@ -36,6 +36,13 @@ export interface CypressSession {
   serverPort: number
   sessionId: string
   testingType: SessionTestingType
+  /**
+   * `starting` marks a record written before the project server is up, so it names no
+   * server to reach (`serverPort` is 0); the full record replaces it once the server starts.
+   */
+  status?: 'starting'
+  /** Why the project could not load, on a `starting` record whose load failed. */
+  loadError?: { message: string }
 }
 
 export interface LiveSessionState extends CypressSession {
@@ -60,6 +67,10 @@ export const TAP_SUPPORTED_BROWSER_FAMILY = 'chromium'
 // null family means no browser is open yet — nothing to call unsupported.
 export const isTapSupportedBrowser = (browserFamily: string | null): boolean => {
   return browserFamily === null || browserFamily === TAP_SUPPORTED_BROWSER_FAMILY
+}
+
+export const isStartingRecord = (record: CypressSession): boolean => {
+  return record.status === 'starting'
 }
 
 export const recordFileName = (pid: number): string => {
@@ -106,4 +117,8 @@ export const isCompatibleRecord = (record: any): record is CypressSession => {
     && typeof record.sessionId === 'string'
     && record.sessionId.length > 0
     && isValidTestingType(record.testingType)
+    && (record.status === undefined || record.status === 'starting')
+    && (record.serverPort !== 0 || record.status === 'starting')
+    && (record.loadError === undefined || typeof record.loadError?.message === 'string')
+    && (record.status !== 'starting' || record.loadError !== undefined)
 }

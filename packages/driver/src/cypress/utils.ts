@@ -291,8 +291,7 @@ export default {
     return _
     .chain(values)
     .map(_.bind(this.stringifyActual, this))
-    // @ts-expect-error
-    .without(undefined)
+    .filter((value) => value !== undefined)
     .join(', ')
     .value()
   },
@@ -393,7 +392,6 @@ export default {
       return 0
     }
 
-    // @ts-ignore - _currentRetry is an internal mocha property
     return this.getTestFromRunnable(r)._currentRetry || 0
   },
 
@@ -458,9 +456,19 @@ export default {
     ```
   */
   decodeBase64Unicode (str) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
+    // Inline source maps can be very large, so decode into a single byte array:
+    // a string per byte can exhaust the renderer's heap. `fatal` makes invalid
+    // UTF-8 throw so callers can fall back instead of getting replacement
+    // characters, and `ignoreBOM` keeps a leading byte order mark so the result
+    // is exactly the encoded text.
+    const binary = atob(str)
+    const bytes = new Uint8Array(binary.length)
+
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i)
+    }
+
+    return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)
   },
 
   /**
@@ -478,7 +486,6 @@ export default {
   },
 
   isPromiseLike (ret) {
-    // @ts-ignore
     return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
   },
 

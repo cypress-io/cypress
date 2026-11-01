@@ -8,12 +8,15 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
       size: 0,
     }
   }
+
   beforeSpec ({ archivePath, db }): void {
     throw new Error('Error in beforeSpec')
   }
+
   responseStreamReceived (options: ResponseStreamOptions): Readable {
     return options.responseStream
   }
+
   addRunnables (runnables: any): void {}
   commandLogAdded (log: any): void {}
   commandLogChanged (log: any): void {}
@@ -22,18 +25,23 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   beforeTest (test: Record<string, any>): Promise<void> {
     return Promise.resolve()
   }
+
   preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
     return Promise.resolve()
   }
+
   afterTest (test: Record<string, any>): Promise<void> {
     return Promise.resolve()
   }
+
   afterSpec (): Promise<void> {
     return Promise.resolve()
   }
+
   connectToBrowser (cdpClient: CDPClient): Promise<void> {
     return Promise.resolve()
   }
+
   pageLoading (input: any): void {}
   resetTest (testId: string): void {}
   responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}

@@ -46,7 +46,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
-    // @ts-ignore
+    // @ts-expect-error - deliberately passes an invalid origin
     cy.origin(false, () => {})
   })
 

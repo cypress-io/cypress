@@ -581,7 +581,7 @@ describe('network stubbing', { retries: 15 }, function () {
               })
             }).as('first')
             .intercept(`${url}*`, (req) => {
-              // @ts-ignore
+              // @ts-expect-error - `eventName` is a string, not one of the request event names
               req.on(eventName, (res) => {
                 res.headers['content-type'] = 'application/json'
                 res.send({
@@ -612,7 +612,7 @@ describe('network stubbing', { retries: 15 }, function () {
           })
 
           cy.intercept(url, function (req) {
-            // @ts-ignore
+            // @ts-expect-error - deliberately passes an unknown event name
             req.on('totally-bad', _.noop)
           }).visit(url)
         })
@@ -626,7 +626,7 @@ describe('network stubbing', { retries: 15 }, function () {
           })
 
           cy.intercept(url, function (req) {
-            // @ts-ignore
+            // @ts-expect-error - deliberately passes a non-function handler
             req.on('before:response', false)
           }).visit(url)
         })

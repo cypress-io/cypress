@@ -22,7 +22,7 @@ const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsSto
   if (spec.relative === '__all') {
     if (spec.specFilter) {
       return renderRunnableHeader(
-        <span><span>Specs matching "{spec.specFilter}"</span></span>,
+        <span><span>Specs matching &quot;{spec.specFilter}&quot;</span></span>,
       )
     }
 
