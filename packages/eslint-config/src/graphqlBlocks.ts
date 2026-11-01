@@ -4,6 +4,7 @@ import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 import graphqlPlugin from '@graphql-eslint/eslint-plugin'
 import { parse as parseSfc } from '@vue/compiler-sfc'
 import vue from 'eslint-plugin-vue'
+import { specifiedRules } from 'graphql'
 import { baseConfig } from './baseConfig'
 
 const packagesDir = path.resolve(__dirname, '../..')
@@ -77,6 +78,23 @@ const ruleIds = (config: InfiniteDepthConfigWithExtends): string[] => {
 // the virtual `.graphql` blocks, where JS and layout rules mean nothing
 const baseRulesOff = Object.fromEntries(ruleIds(baseConfig).map((ruleId) => [ruleId, 'off'] as const))
 
+// These three need the whole document set to judge, since a fragment may be
+// defined or used in another file
+const crossDocumentRules = ['KnownFragmentNamesRule', 'NoUnusedFragmentsRule', 'NoUnusedVariablesRule']
+
+// graphql-eslint wraps each graphql-js validator as its own rule and records the
+// validator's name. graphql-js's `UniqueOperationNamesRule` and
+// `UniqueFragmentNamesRule` have no wrapper, so they drop out here
+const graphqlJsRules = Object.fromEntries(
+  Object.entries(graphqlPlugin.rules)
+  .filter(([, rule]) => {
+    const name = rule.meta.docs?.graphQLJSRuleName
+
+    return specifiedRules.some((validator) => validator.name === name) && !crossDocumentRules.includes(name ?? '')
+  })
+  .map(([ruleId]) => [`@graphql-eslint/${ruleId}`, 'error'] as const),
+)
+
 const vueProcessor = vue.processors.vue
 
 /**
@@ -142,31 +160,7 @@ export const graphqlBlocks = [
     },
     rules: {
       ...baseRulesOff,
-
-      // graphql-js's `specifiedRules`, less the three that need the whole
-      // document set to judge: a fragment may be defined or used in another file
-      '@graphql-eslint/executable-definitions': 'error',
-      '@graphql-eslint/fields-on-correct-type': 'error',
-      '@graphql-eslint/fragments-on-composite-type': 'error',
-      '@graphql-eslint/known-argument-names': 'error',
-      '@graphql-eslint/known-directives': 'error',
-      '@graphql-eslint/known-type-names': 'error',
-      '@graphql-eslint/lone-anonymous-operation': 'error',
-      '@graphql-eslint/no-fragment-cycles': 'error',
-      '@graphql-eslint/no-undefined-variables': 'error',
-      '@graphql-eslint/one-field-subscriptions': 'error',
-      '@graphql-eslint/overlapping-fields-can-be-merged': 'error',
-      '@graphql-eslint/possible-fragment-spread': 'error',
-      '@graphql-eslint/provided-required-arguments': 'error',
-      '@graphql-eslint/scalar-leafs': 'error',
-      '@graphql-eslint/unique-argument-names': 'error',
-      '@graphql-eslint/unique-directive-names-per-location': 'error',
-      '@graphql-eslint/unique-input-field-names': 'error',
-      '@graphql-eslint/unique-variable-names': 'error',
-      '@graphql-eslint/value-literals-of-correct-type': 'error',
-      '@graphql-eslint/variables-are-input-types': 'error',
-      '@graphql-eslint/variables-in-allowed-position': 'error',
-
+      ...graphqlJsRules,
       '@graphql-eslint/no-deprecated': 'error',
       '@graphql-eslint/require-selections': ['error', { fieldName: 'id' }],
     },
