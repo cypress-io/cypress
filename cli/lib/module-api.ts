@@ -26,7 +26,15 @@ export function open (options: any = {}): Promise<any> {
  * @see https://on.cypress.io/module-api#cypress-run
  */
 export function run (options: any = {}): Promise<any> {
-  const normalized = normalizeModuleOptions(options)
+  let normalized
+
+  // `run` reports every failure as a rejection, including options that cannot
+  // be serialized, such as a circular `config` object
+  try {
+    normalized = normalizeModuleOptions(options)
+  } catch (err) {
+    return Promise.reject(err)
+  }
 
   return loadCypress().then((cypress) => cypress.run(normalized))
 }

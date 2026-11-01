@@ -75,6 +75,18 @@ describe('module-api', function () {
     expect(cypressModule.parseRunArguments).toHaveBeenCalledWith(['cypress', 'run', '--browser', 'chrome'])
   })
 
+  it('.run rejects when the options cannot be serialized', async () => {
+    const moduleApi = await import('../../lib/module-api')
+    const config: any = {}
+
+    config.self = config
+
+    const result = moduleApi.run({ config })
+
+    await expect(result).rejects.toThrow(TypeError)
+    expect(cypressModule.loaded).toBe(false)
+  })
+
   it('.run rejects when cypress.run throws', async () => {
     cypressModule.run.mockRejectedValue(new Error('Invalid project path parameter: '))
     const moduleApi = await import('../../lib/module-api')
