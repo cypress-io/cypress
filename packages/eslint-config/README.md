@@ -12,7 +12,7 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **JavaScript/TypeScript**: `.js`, `.ts`, `.jsx`, `.tsx`
 - **Vue**: `.vue` files
 - **Cypress Tests**: `.cy.js`, `.cy.ts`
-- **GraphQL**: `.graphql` files
+- **GraphQL**: `gql` template literals, opt-in via `graphqlConfig`
 - **Configuration Files**: `vite.config.mjs`, `webpack.config.*`
 - **JSON**: `.json` files, opt-in via `jsonConfig`
 
@@ -25,7 +25,7 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **React**: `eslint-plugin-react` recommended rules (React 18+)
 - **Stylistic**: `@stylistic/eslint-plugin` with custom formatting rules
 - **Import**: `eslint-plugin-import-x` for import/export validation
-- **GraphQL**: `@graphql-eslint/eslint-plugin` for GraphQL files
+- **GraphQL**: `@graphql-eslint/eslint-plugin` for `gql` template literals, opt-in via `graphqlConfig`
 
 ## Key Rules and Customizations
 
@@ -91,6 +91,20 @@ export default [
 ```
 
 `jsonConfig` enforces two-space JSON layout, `package.json` key order and sorted `scripts` and dependency maps, using `eslint-plugin-jsonc` and `eslint-plugin-package-json`. See the [ESLint migration guide](../../guides/eslint-migration.md#7-lint-json-with-jsonconfig).
+
+### With GraphQL Linting
+
+```typescript
+// eslint.config.ts
+import { baseConfig, graphqlConfig } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...graphqlConfig(),
+]
+```
+
+`graphqlConfig()` validates `gql` template literals in `.js`, `.ts`, `.jsx`, `.tsx` and `.vue` files against `packages/data-context/schemas/schema.graphql`. Only `app`, `launchpad`, `frontend-shared` and `data-context` use it. See the [ESLint migration guide](../../guides/eslint-migration.md#13-lint-gql-templates-with-graphqlconfig).
 
 ## Environment-Specific Configurations
 

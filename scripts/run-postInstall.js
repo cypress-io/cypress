@@ -3,7 +3,7 @@ const { execSync } = require('child_process')
 const executionEnv = process.env.CI ? 'ci' : 'local'
 
 const postInstallCommands = {
-  local: 'patch-package && install-electron && yarn workspace @packages/server sync-cloud-validations && yarn-deduplicate --strategy=highest && lerna run rebuild-better-sqlite3 --scope @packages/server && yarn build && yarn build-v8-snapshot-dev',
+  local: 'patch-package && install-electron && yarn workspace @packages/server sync-cloud-validations && yarn dedupe-lockfile && lerna run rebuild-better-sqlite3 --scope @packages/server && yarn build && yarn build-v8-snapshot-dev',
   ci: 'patch-package && install-electron && yarn workspace @packages/server sync-cloud-validations && lerna run rebuild-better-sqlite3 --scope @packages/server',
 }
 

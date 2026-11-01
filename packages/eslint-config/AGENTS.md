@@ -16,6 +16,8 @@ src/
   baseConfig.ts         Core flat-config with TypeScript, import, and stylistic rules
   cliOverrides.ts       Overrides applied for CLI/Node.js contexts
   frontendOverrides.ts  Rules shared by app, launchpad and frontend-shared, such as type-only imports from data-context in .vue files
+  graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
+  graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
   vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
   reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
@@ -31,4 +33,5 @@ src/
 - There is no `test` script — the config is validated implicitly by running `lint` across consumer packages.
 - Targets ESLint v9.31+ as a peer dependency; earlier ESLint versions are incompatible with the flat-config API used here.
 - `baseConfig` matches no `.json` files. A package lints JSON only when it spreads `jsonConfig` after `baseConfig`. `jsonConfig` needs the `@stylistic` plugin and the `@stylistic/eol-last` rule that `baseConfig` brings. See [Lint JSON with `jsonConfig`](../../guides/eslint-migration.md#7-lint-json-with-jsonconfig) for what it enforces and how it differs from the eslintrc preset.
+- `graphqlConfig` runs on its own `graphql@16` and `@vue/compiler-sfc@3.5`, while the rest of the repo is on `graphql@15` and `@vue/compiler-sfc@3.2`. The `workspaces.nohoist` entry in `package.json` keeps `@graphql-eslint/eslint-plugin` and its tree in this package's `node_modules`, where they resolve the newer copies. Don't remove it, and don't move those two dependencies to the root. See [Lint `gql` templates with `graphqlConfig`](../../guides/eslint-migration.md#13-lint-gql-templates-with-graphqlconfig).
 - The `ignores` block in `baseConfig.ts` holds build output (`cjs/`, `esm/`, `dist/`) for every consumer. Its globs are package-relative — lint runs per package, not from the repo root. The eslintrc half of the monorepo gets the same coverage from `ignorePatterns` in the root `.eslintrc.js`, so a new output directory has to be added in both places until the migration finishes. Never add a per-package `.eslintignore` for build output: see [the ESLint migration guide](../../guides/eslint-migration.md#6-ignore-build-output-centrally) for why those entries silently do nothing.

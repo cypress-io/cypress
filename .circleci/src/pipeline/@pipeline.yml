@@ -1857,7 +1857,7 @@ jobs:
               echo ""
               echo "yarn.lock has duplicates that the local postinstall would collapse on its own,"
               echo "so the committed lockfile does not match the tree contributors actually install."
-              echo "Run 'yarn-deduplicate --strategy=highest' and commit the resulting yarn.lock."
+              echo "Run 'yarn dedupe-lockfile' and commit the resulting yarn.lock."
               exit 1
             fi
       - run:
