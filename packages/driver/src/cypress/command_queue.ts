@@ -11,6 +11,7 @@ import type $Command from './command'
 import type { StateFunc } from './state'
 import type { $Cy } from './cy'
 import type { IStability } from '../cy/stability'
+import { flushRemoteErrors } from '../cy/remote'
 
 const debugErrors = Debug('cypress:driver:errors')
 const debug = Debug('cypress:driver:command_queue')
@@ -470,21 +471,28 @@ export class CommandQueue extends Queue<$Command> {
         // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
-        // we need to wait after all commands have
-        // finished running if the application under
-        // test is no longer stable because we cannot
-        // move onto the next test until its finished
-        return this.stability.whenStable(() => {
-          Cypress.action('cy:command:queue:end')
-          this.stop()
-
-          const onQueueEnd = cy.state('onQueueEnd')
-
-          if (onQueueEnd) {
-            onQueueEnd()
+        return flushRemoteErrors(Cypress).then(() => {
+          // an AUT error that arrived during the flush failed the test
+          if (this.stopped) {
+            return null
           }
 
-          return null
+          // we need to wait after all commands have
+          // finished running if the application under
+          // test is no longer stable because we cannot
+          // move onto the next test until its finished
+          return this.stability.whenStable(() => {
+            Cypress.action('cy:command:queue:end')
+            this.stop()
+
+            const onQueueEnd = cy.state('onQueueEnd')
+
+            if (onQueueEnd) {
+              onQueueEnd()
+            }
+
+            return null
+          })
         })
       }
 

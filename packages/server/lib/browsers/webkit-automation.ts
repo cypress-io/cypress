@@ -3,7 +3,7 @@ import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp-protocol/normalize-resource-type'
 import os from 'os'
-import type { RunModeVideoApi } from '@packages/types'
+import type { RemoteNavigation, RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
 import { cookieMatches } from '../automation/cookie/util'
@@ -20,7 +20,7 @@ import type { AutScripts } from '../automation/commands/remote_visit'
 import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog, isRemoteDialogType } from '../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
-import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
+import { RemoteErrorReports, parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { webkitReloadFrame } from '../automation/commands/reload_frame'
 import { webkitNavigateHistory } from '../automation/commands/navigate_history'
 
@@ -116,6 +116,8 @@ export class WebKitAutomation {
 
   private remoteClock = new RemoteClock(this.autScripts)
 
+  private remoteErrors = new RemoteErrorReports(this.autScripts.evaluateInAut)
+
   private remoteStubs = new RemoteStubs({
     addPreloadScript: async (source) => {
       const script = await this.page.addInitScript({ content: `(${source})(window.${REMOTE_STUB_BINDING})` })
@@ -192,6 +194,8 @@ export class WebKitAutomation {
           debug('failed to report a stub call: %s', err?.message)
         }
       })
+
+      this.listenForAutNavigation()
 
       // Playwright dismisses a dialog itself only while nothing listens for them
       this.page.on('dialog', (dialog) => {
@@ -468,6 +472,71 @@ export class WebKitAutomation {
    * `Your project: '<projectName>'` (see AUT_FRAME_NAME_IDENTIFIER).
    */
   // Playwright drops an error WebKit reports only as a repeat of the previous console message
+  private isAutFrame (frame: playwright.Frame) {
+    try {
+      return frame === this.getAutFrame()
+    } catch {
+      return false
+    }
+  }
+
+  // Playwright has no event for a URL change within a document, so an AUT frame navigation
+  // with no navigation request in flight is taken to be one
+  private listenForAutNavigation () {
+    let pendingRequest: playwright.Request | undefined
+    let autUrl: string | undefined
+
+    const push = (navigation: RemoteNavigation) => {
+      this.automation.push('remote:navigation', navigation).catch((err) => debug('failed to report AUT navigation: %s', err?.message))
+    }
+
+    const end = (request: playwright.Request | undefined) => {
+      if (request && request === pendingRequest) {
+        pendingRequest = undefined
+        push({ event: 'stopped' })
+      }
+    }
+
+    this.page.on('request', (request) => {
+      if (request.isNavigationRequest() && this.isAutFrame(request.frame())) {
+        pendingRequest = request
+        push({ event: 'started' })
+      }
+    })
+
+    this.page.on('requestfailed', end)
+    this.page.on('download', () => end(pendingRequest))
+
+    // a 204 or 205 response leaves the current document in place
+    this.page.on('requestfinished', async (request) => {
+      if (request === pendingRequest && [204, 205].includes((await request.response())?.status() ?? 0)) {
+        end(request)
+      }
+    })
+
+    this.page.on('framenavigated', (frame) => {
+      if (!this.isAutFrame(frame)) {
+        return
+      }
+
+      const previousUrl = autUrl
+
+      autUrl = frame.url()
+
+      if (pendingRequest) {
+        const request = pendingRequest
+
+        frame.waitForLoadState('load').finally(() => end(request))
+
+        return
+      }
+
+      const isHashChange = !!previousUrl && previousUrl.split('#')[0] === autUrl.split('#')[0]
+
+      push({ event: 'withinDocument', source: isHashChange ? 'hashchange' : 'history' })
+    })
+  }
+
   private listenForAutErrors () {
     let lastError: WebKitConsoleMessage | undefined
 
@@ -475,11 +544,11 @@ export class WebKitAutomation {
       lastError = message.level === 'error' && message.source === 'javascript' ? message : undefined
 
       if (lastError) {
-        this.onAutError(lastError)
+        this.remoteErrors.report(this.onAutError(lastError))
       }
     }, () => {
       if (lastError) {
-        this.onAutError(lastError)
+        this.remoteErrors.report(this.onAutError(lastError))
       }
     })
 
@@ -596,6 +665,8 @@ export class WebKitAutomation {
         return await this.remoteClock.setSystemTime(data)
       case 'remote:clock:restore':
         return await this.remoteClock.restore()
+      case 'remote:errors:flush':
+        return await this.remoteErrors.flush()
       case 'remote:visit:before:load':
         return await this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

@@ -29,6 +29,13 @@ async function connectToNewSpecBiDi (options, automation: Automation, browserBiD
 async function setupBiDi (webdriverClient: WebDriverClient, automation: Automation) {
   // webdriver needs to subscribe to the correct BiDi events or else the events we are expecting to stream in will not be sent
   await webdriverClient.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
+  await Promise.all(BidiAutomation.BIDI_NAVIGATION_EVENTS.map(async (event) => {
+    try {
+      await webdriverClient.sessionSubscribe({ events: [event] })
+    } catch (err) {
+      debug('firefox: could not subscribe to %s: %s', event, err?.message)
+    }
+  }))
 
   const biDiClient = BidiAutomation.create(webdriverClient, automation)
 

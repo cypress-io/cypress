@@ -30,6 +30,34 @@ export const parseUncaughtErrorText = (text: string, stack: string | undefined, 
   return { handlerType, error: { message: text, stack } }
 }
 
+// bounds the round trip, which waits on the AUT when it's busy or mid-navigation
+const FLUSH_ROUND_TRIP_LIMIT_MS = 1000
+
+// AUT errors reach the driver asynchronously, so one thrown before a test's last command
+// finished could otherwise arrive after the test ended
+export class RemoteErrorReports {
+  private inFlight = new Set<Promise<void>>()
+
+  constructor (private evaluateInAut: (expression: string) => Promise<unknown>) {}
+
+  report = (reporting: Promise<void>) => {
+    this.inFlight.add(reporting)
+    reporting.finally(() => this.inFlight.delete(reporting)).catch(() => {})
+
+    return reporting
+  }
+
+  // the browser sends an error's event before its reply to a later evaluate in the same document
+  async flush () {
+    await Promise.race([
+      this.evaluateInAut(`''`).catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, FLUSH_ROUND_TRIP_LIMIT_MS)),
+    ])
+
+    await Promise.allSettled([...this.inFlight])
+  }
+}
+
 export const cdpUncaughtException = async (send: SendDebuggerCommand, details: Protocol.Runtime.ExceptionDetails): Promise<RemoteUncaughtException> => {
   const handlerType = details.text.includes('(in promise)') ? 'unhandledrejection' : 'error'
   const { exception } = details

@@ -797,6 +797,9 @@ class $Cypress {
       case 'app:remote:dialog':
         return this.cy.onRemoteDialog(args[0])
 
+      case 'app:remote:navigation':
+        return this.cy.onRemoteNavigation(args[0])
+
       case 'app:window:alert':
         return this.emit('window:alert', args[0])
 

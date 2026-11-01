@@ -239,6 +239,7 @@ export class Automation {
         case 'remote:uncaught:exception':
         case 'remote:stub:call':
         case 'remote:dialog':
+        case 'remote:navigation':
           return data
         default:
           return automate(data)

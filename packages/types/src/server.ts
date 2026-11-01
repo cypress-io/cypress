@@ -249,6 +249,12 @@ export interface RemoteDialog {
   accepted: boolean
 }
 
+// a navigation of the AUT frame: a document load starting or ending, or a URL change within the document
+export type RemoteNavigation =
+  | { event: 'started' }
+  | { event: 'stopped' }
+  | { event: 'withinDocument', source: 'hashchange' | 'history' }
+
 export interface RemoteClockDetails {
   now: number
   methods: string[]
@@ -290,6 +296,8 @@ export interface AutomationCommands {
   'remote:stubs:reset': CommandSignature<void, void>
   'remote:stub:call': CommandSignature<RemoteStubCall, void>
   'remote:dialog': CommandSignature<RemoteDialog, void>
+  'remote:navigation': CommandSignature<RemoteNavigation, void>
+  'remote:errors:flush': CommandSignature<Record<string, never>, void>
   'remote:clock:install': CommandSignature<{ now?: number, methods?: string[] }, RemoteClockDetails>
   'remote:clock:tick': CommandSignature<{ ms: number }, RemoteClockDetails>
   'remote:clock:set:system:time': CommandSignature<{ now: number }, RemoteClockDetails>

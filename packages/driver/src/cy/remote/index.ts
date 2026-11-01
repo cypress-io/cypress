@@ -11,6 +11,15 @@ export { isRemoteElement, isRemoteSubject } from './remote_element'
 
 export const isRemoteDriverEnabled = (Cypress: Pick<ICypress, 'config'>) => Cypress.config('experimentalRemoteDriver' as keyof Cypress.Config) === true
 
+// AUT errors reach the driver asynchronously, so this waits for any thrown before it was called
+export const flushRemoteErrors = (Cypress: AgentCypress) => {
+  if (!isRemoteDriverEnabled(Cypress)) {
+    return Promise.resolve()
+  }
+
+  return Promise.resolve(Cypress.automation('remote:errors:flush', {})).catch(() => {})
+}
+
 // what callAgent uses of Cypress
 type AgentCypress = Pick<ICypress, 'config' | 'browser'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
 

@@ -9,7 +9,7 @@ import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
 import type { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands, RemoteAgentRequest } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands, RemoteAgentRequest, RemoteNavigation } from '@packages/types'
 import type { Automation } from '../../automation'
 import type { CyCookie, CyCookieFilter } from '../../automation/cookie/util'
 import { cookieMatches } from '../../automation/cookie/util'
@@ -33,7 +33,7 @@ import type { AutScripts } from '../../automation/commands/remote_visit'
 import { RemoteClock } from '../../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../../automation/commands/remote_stubs'
-import { cdpUncaughtException } from '../../automation/commands/remote_errors'
+import { RemoteErrorReports, cdpUncaughtException } from '../../automation/commands/remote_errors'
 import { evaluateInFrameContext } from '../../automation/helpers/evaluate_in_frame_context'
 import type { CdpTab } from '../../automation/commands/remote_agent'
 
@@ -93,6 +93,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private remoteVisit: RemoteVisit
   private remoteClock: RemoteClock
   private remoteStubs: RemoteStubs
+  private remoteErrors: RemoteErrorReports
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -107,6 +108,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     onFn('Runtime.exceptionThrown', this.onExceptionThrown)
     onFn('Page.javascriptDialogOpening', this.onJavascriptDialogOpening)
     onFn('Runtime.bindingCalled', this.onBindingCalled)
+    onFn('Page.frameStoppedLoading', this.onFrameStoppedLoading)
+    onFn('Page.navigatedWithinDocument', this.onNavigatedWithinDocument)
 
     this.on = onFn
     this.off = offFn
@@ -154,6 +157,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     this.remoteVisit = new RemoteVisit(autScripts)
     this.remoteClock = new RemoteClock(autScripts)
+    this.remoteErrors = new RemoteErrorReports(autScripts.evaluateInAut)
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -237,6 +241,11 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
   private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
+
+    // a document request that starts its own loader is a cross-document navigation
+    if (params.type === 'Document' && params.frameId && params.requestId === params.loaderId) {
+      void this.pushAutNavigation(params.frameId, { event: 'started' })
+    }
 
     const url = params.request.url
 
@@ -326,7 +335,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   }
 
   // the remote driver can't listen for errors in a cross-origin AUT, so it learns of them here
-  private onExceptionThrown = async ({ exceptionDetails }: Protocol.Runtime.ExceptionThrownEvent) => {
+  private onExceptionThrown = (event: Protocol.Runtime.ExceptionThrownEvent) => this.remoteErrors.report(this.reportException(event))
+
+  private reportException = async ({ exceptionDetails }: Protocol.Runtime.ExceptionThrownEvent) => {
     try {
       if (!exceptionDetails.executionContextId || !(await this.isAutMainWorld(exceptionDetails.executionContextId))) {
         return
@@ -358,6 +369,22 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     } catch (err) {
       debugVerbose('failed to report dialog: %s', err?.message)
     }
+  }
+
+  private pushAutNavigation = async (frameId: string, navigation: RemoteNavigation) => {
+    try {
+      if (await this._isAUTFrame(frameId)) {
+        await this.automation.push('remote:navigation', navigation)
+      }
+    } catch (err) {
+      debugVerbose('failed to report AUT navigation: %s', err?.message)
+    }
+  }
+
+  private onFrameStoppedLoading = ({ frameId }: Protocol.Page.FrameStoppedLoadingEvent) => this.pushAutNavigation(frameId, { event: 'stopped' })
+
+  private onNavigatedWithinDocument = ({ frameId, navigationType }: Protocol.Page.NavigatedWithinDocumentEvent) => {
+    return this.pushAutNavigation(frameId, { event: 'withinDocument', source: navigationType === 'fragment' ? 'hashchange' : 'history' })
   }
 
   private onExecutionContextDestroyed = (event: Protocol.Runtime.ExecutionContextDestroyedEvent) => {
@@ -760,6 +787,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return this.remoteClock.setSystemTime(data)
       case 'remote:clock:restore':
         return this.remoteClock.restore()
+      case 'remote:errors:flush':
+        return this.remoteErrors.flush()
       case 'remote:visit:before:load':
         return this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

@@ -153,6 +153,9 @@ export class EventManager {
         case 'remote:dialog':
           Cypress.action('app:remote:dialog', data)
           break
+        case 'remote:navigation':
+          Cypress.action('app:remote:navigation', data)
+          break
         default:
           break
       }

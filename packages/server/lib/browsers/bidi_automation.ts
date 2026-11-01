@@ -8,7 +8,7 @@ import { AutomationNotImplemented } from '../automation/automation_not_implement
 import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
+import type { AutomationMiddleware, AutomationCommands, RemoteNavigation } from '@packages/types'
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
@@ -20,6 +20,8 @@ import type {
   LogEntry,
   BrowsingContextUserPromptOpenedParameters,
   ScriptMessageParameters,
+  BrowsingContextNavigationInfo,
+  BrowsingContextHistoryUpdatedParameters,
 } from 'webdriver/build/bidi/localTypes'
 import type { CyCookie as CyBaseCookie } from '../automation/cookie/util'
 import type { BidiCyCookie as CyCookie, StoragePartialCookie } from '../automation/cookie/converters/bidi'
@@ -34,7 +36,7 @@ import type { AutScripts } from '../automation/commands/remote_visit'
 import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../automation/commands/remote_dialogs'
 import { RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
-import { parseUncaughtErrorText } from '../automation/commands/remote_errors'
+import { RemoteErrorReports, parseUncaughtErrorText } from '../automation/commands/remote_errors'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -138,6 +140,17 @@ export class BidiAutomation {
     'script.message',
   ]
 
+  // subscribed one at a time, since older Firefox releases reject the newer ones
+  static BIDI_NAVIGATION_EVENTS = [
+    'browsingContext.navigationStarted',
+    'browsingContext.load',
+    'browsingContext.navigationFailed',
+    'browsingContext.navigationAborted',
+    'browsingContext.downloadWillBegin',
+    'browsingContext.fragmentNavigated',
+    'browsingContext.historyUpdated',
+  ]
+
   private webDriverClient: WebDriverClient
   private automation: Automation
   private remoteAgent: BidiRemoteAgent
@@ -145,7 +158,9 @@ export class BidiAutomation {
   private remoteVisit: RemoteVisit
   private remoteClock: RemoteClock
   private remoteStubs: RemoteStubs
+  private remoteErrors: RemoteErrorReports
   private autContextId: string | undefined = undefined
+  private autNavigationId: string | null | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
@@ -225,6 +240,7 @@ export class BidiAutomation {
 
     this.remoteVisit = new RemoteVisit(autScripts)
     this.remoteClock = new RemoteClock(autScripts)
+    this.remoteErrors = new RemoteErrorReports(autScripts.evaluateInAut)
 
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
@@ -235,9 +251,60 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
-    this.webDriverClient.on('log.entryAdded', this.onLogEntryAdded)
+    this.webDriverClient.on('log.entryAdded', (entry) => this.remoteErrors.report(this.onLogEntryAdded(entry)))
     this.webDriverClient.on('browsingContext.userPromptOpened', this.onUserPromptOpened)
     this.webDriverClient.on('script.message', this.onScriptMessage)
+    this.webDriverClient.on('browsingContext.navigationStarted', this.onNavigationStarted)
+    this.webDriverClient.on('browsingContext.load', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.navigationFailed', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.navigationAborted', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.downloadWillBegin', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.fragmentNavigated', this.onFragmentNavigated)
+    this.webDriverClient.on('browsingContext.historyUpdated', this.onHistoryUpdated)
+  }
+
+  private pushAutNavigation = async (navigation: RemoteNavigation) => {
+    try {
+      await this.automation.push('remote:navigation', navigation)
+    } catch (err) {
+      debug('failed to report AUT navigation: %s', err?.message)
+    }
+  }
+
+  private onNavigationStarted = async ({ context, navigation }: BrowsingContextNavigationInfo) => {
+    if (context !== this.autContextId) {
+      return
+    }
+
+    this.autNavigationId = navigation
+    await this.pushAutNavigation({ event: 'started' })
+  }
+
+  // only the navigation in progress ends the AUT's load, not an earlier one it aborted
+  private onNavigationEnded = async ({ context, navigation }: BrowsingContextNavigationInfo) => {
+    if (context !== this.autContextId || this.autNavigationId === undefined || navigation !== this.autNavigationId) {
+      return
+    }
+
+    this.autNavigationId = undefined
+    await this.pushAutNavigation({ event: 'stopped' })
+  }
+
+  private onFragmentNavigated = async (info: BrowsingContextNavigationInfo) => {
+    if (info.context !== this.autContextId) {
+      return
+    }
+
+    await this.onNavigationEnded(info)
+    await this.pushAutNavigation({ event: 'withinDocument', source: 'hashchange' })
+  }
+
+  private onHistoryUpdated = async ({ context }: BrowsingContextHistoryUpdatedParameters) => {
+    if (context !== this.autContextId) {
+      return
+    }
+
+    await this.pushAutNavigation({ event: 'withinDocument', source: 'history' })
   }
 
   private onScriptMessage = async ({ channel, data, source }: ScriptMessageParameters) => {
@@ -1010,6 +1077,8 @@ export class BidiAutomation {
           return this.remoteClock.setSystemTime(data)
         case 'remote:clock:restore':
           return this.remoteClock.restore()
+        case 'remote:errors:flush':
+          return this.remoteErrors.flush()
         case 'remote:visit:before:load':
           return this.remoteVisit.beforeLoad(data)
         case 'remote:visit:on:load':

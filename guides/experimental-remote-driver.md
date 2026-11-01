@@ -45,8 +45,12 @@ Where the commands that work behave differently from the legacy driver:
 - **The `match` assertion** (`.should('match', selector)`) isn't supported on a remote element.
 - **`.frame()`** enters the first element that matches, and each iframe level adds a round trip to every retry.
 - **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it.
-- **A URL change without a page load** (the app's `history.pushState`, `replaceState` or a hash change) doesn't add a "new url" log or update the runner's URL bar. `cy.url()` and `cy.location()` are still correct.
-- **Page loads after the first** don't add a "page load" log.
+- **Navigations are reported by the browser's protocol**, not by listeners in the AUT. A page load the app starts adds a "page load" log and makes the next command wait for it, and a URL change without a page load adds a "new url" log, as in legacy. The differences:
+  - `window:before:unload` and `window:unload` don't fire.
+  - The "new url" log's "Url Updated By" is `hashchange` or `history` rather than `pushState` / `replaceState`.
+  - The report arrives asynchronously, so a command queued right after the click that started a page load may run before the page starts unloading.
+  - WebKit has no event for a URL change within a document, so it counts any AUT frame navigation without a navigation request in flight as one.
+  - Firefox reports `history.pushState` and `replaceState` only in releases with `browsingContext.historyUpdated`.
 
 ## Tabs
 
@@ -63,7 +67,7 @@ Where the commands that work behave differently from the legacy driver:
 
 ## Uncaught errors
 
-- **Errors reach `uncaught:exception` asynchronously**, reported by the browser's protocol rather than a listener in the AUT, so an error after the test's last command may not fail it. The handler's third argument (the promise) is always `undefined`.
+- **Errors reach `uncaught:exception` asynchronously**, reported by the browser's protocol rather than a listener in the AUT. Before each test or hook ends, the driver waits for one round trip to the AUT (up to 1s) and for the errors the browser had already reported, so an error thrown by the last command still fails it. The handler's third argument (the promise) is always `undefined`.
 - **Firefox** reports an unhandled rejection as a plain error, without the "unhandled promise rejection" note.
 - **WebKit** doesn't report unhandled rejections (they carry no location to tell the AUT's from the spec's), and attributes an error to the AUT when its script isn't on the runner's origin, so errors from the AUT's own iframes count too.
 - **Firefox's preload-script error** "Permission denied to access property "length"" is filtered when it has no stack, so an AUT error with exactly that text and no stack would be missed.
@@ -100,7 +104,7 @@ Findings from recording the same spec under both drivers in Chrome and Electron 
 - **The AUT's DOM, network, console and uncaught errors are recorded**, including for a cross-site AUT and its iframes.
 - **Commands have no snapshots or highlights**, so selecting a command doesn't jump to its moment in the recording. The protocol takes its snapshot from the runner's view of the AUT's document, which a cross-origin AUT doesn't have.
 - **Actions show as pending**, and each reports a capture error, because the agent sends only `{ x, y }` coordinates where the protocol expects the full set.
-- **URL changes without a page load, and page loads after the first, are missing**, as in the command log.
+- **URL changes without a page load, and page loads after the first, were missing.** The command log reports them now; the recording hasn't been checked since.
 - **Tabs driven with `cy.tab()` aren't recorded**, since the protocol is connected only to the runner's tab.
 
 ## Changes that affect every run

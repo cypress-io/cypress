@@ -27,7 +27,7 @@ import { create as createAssertions } from '../cy/assertions'
 import { bindToListeners } from '../cy/listeners'
 import { isRemoteDriverEnabled } from '../cy/remote'
 import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
-import type { RemoteDialog, RemoteUncaughtException } from '@packages/types'
+import type { RemoteDialog, RemoteNavigation, RemoteUncaughtException } from '@packages/types'
 import { $Chainer } from './chainer'
 import type { ITimer } from '../cy/timers'
 import { create as createTimer } from '../cy/timers'
@@ -268,6 +268,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.onRemoteUncaughtException = this.onRemoteUncaughtException.bind(this)
     this.onRemoteDialog = this.onRemoteDialog.bind(this)
+    this.onRemoteNavigation = this.onRemoteNavigation.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.getSubjectFromChain = this.getSubjectFromChain.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
@@ -995,6 +996,30 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       this.Cypress.action('app:window:confirmed', message, accepted)
     }
+  }
+
+  // stands in for the beforeunload and history listeners the runner can't add to a cross-origin AUT;
+  // page loads still arrive through the AUT iframe's load event
+  onRemoteNavigation (navigation: RemoteNavigation) {
+    if (!isRemoteDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
+      return
+    }
+
+    if (navigation.event === 'started') {
+      this.isStable(false, 'beforeunload')
+      this.resetTimer()
+
+      return
+    }
+
+    // ends a navigation with no load event (a download or a 204), or one reported after its load
+    if (navigation.event === 'stopped') {
+      this.isStable(true, 'load')
+
+      return
+    }
+
+    return this.Cypress.action('app:navigation:changed', navigation.source)
   }
 
   // the server reports errors from an AUT the runner can't listen to itself

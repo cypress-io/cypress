@@ -342,6 +342,58 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
+  describe('remote driver navigation', () => {
+    const listenersFor = (event: string) => mock.getLastPage().on.mock.calls.filter(([name]) => name === event).map(([, listener]) => listener)
+    // the navigation listeners are added after the network ones
+    const emit = (event: string, arg: unknown) => listenersFor(event).at(-1)(arg)
+    const navigationRequest = (frame: unknown, status = 200) => ({ isNavigationRequest: () => true, frame: () => frame, response: async () => ({ status: () => status }) })
+    const navigations = () => vi.mocked(automation.push).mock.calls.filter(([message]) => message === 'remote:navigation').map(([, data]) => data)
+
+    let autFrame: any
+
+    beforeEach(async () => {
+      automation.push = vi.fn(async () => {})
+      await createAutomation({ remoteDriver: true })
+      autFrame = mock.getLastPage().mainFrame().childFrames()[0]
+      autFrame.waitForLoadState = vi.fn(async () => {})
+    })
+
+    it('pushes a document load of the AUT frame, ending it once the frame loads', async () => {
+      await emit('request', navigationRequest(mock.getLastPage().mainFrame()))
+      await emit('request', navigationRequest(autFrame))
+      await emit('framenavigated', autFrame)
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(autFrame.waitForLoadState).toHaveBeenCalledWith('load')
+      expect(navigations()).toEqual([{ event: 'started' }, { event: 'stopped' }])
+    })
+
+    it('ends a navigation that leaves the document in place', async () => {
+      const noContent = navigationRequest(autFrame, 204)
+
+      await emit('request', noContent)
+      await emit('requestfinished', noContent)
+
+      expect(navigations()).toEqual([{ event: 'started' }, { event: 'stopped' }])
+    })
+
+    it('takes a frame navigation with no request in flight as a URL change within the document', async () => {
+      const urls = ['http://localhost:3000/index.html', 'http://localhost:3000/index.html#a', 'http://localhost:3000/b']
+
+      autFrame.url = () => urls.shift()
+
+      await emit('framenavigated', autFrame)
+      await emit('framenavigated', autFrame)
+      await emit('framenavigated', autFrame)
+
+      expect(navigations()).toEqual([
+        { event: 'withinDocument', source: 'history' },
+        { event: 'withinDocument', source: 'hashchange' },
+        { event: 'withinDocument', source: 'history' },
+      ])
+    })
+  })
+
   describe('tabs the app opened', () => {
     const makePage = (url: string) => {
       return {

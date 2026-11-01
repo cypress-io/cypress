@@ -70,6 +70,7 @@ describe('@packages/driver/src/cypress/command_queue', () => {
       once: vi.fn(),
       removeListener: vi.fn(),
       log: vi.fn(),
+      config: vi.fn(),
     }
 
     ;(globalThis as any).Cypress = Cypress

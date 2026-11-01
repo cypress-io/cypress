@@ -1099,6 +1099,25 @@ describe('lib/browsers/cdp_automation', () => {
         expect(automation.push).toHaveBeenCalledWith('remote:dialog', { type: 'prompt', message: 'name?', accepted: false })
       })
 
+      it('pushes the AUT frame\'s navigations only', async () => {
+        const request = (params) => ({ request: { url: 'http://www.foobar.com/', method: 'GET', headers: {} }, wallTime: 0, ...params })
+
+        await emit('Network.requestWillBeSent', request({ requestId: 'nav', loaderId: 'nav', frameId: '1', type: 'Document' }))
+        await emit('Network.requestWillBeSent', request({ requestId: 'img', loaderId: 'nav', frameId: '1', type: 'Image' }))
+        await emit('Network.requestWillBeSent', request({ requestId: 'child', loaderId: 'child', frameId: 'root', type: 'Document' }))
+        await emit('Page.navigatedWithinDocument', { frameId: '1', url: 'http://www.foobar.com/#a', navigationType: 'fragment' })
+        await emit('Page.navigatedWithinDocument', { frameId: '1', url: 'http://www.foobar.com/b', navigationType: 'historyApi' })
+        await emit('Page.frameStoppedLoading', { frameId: '1' })
+        await emit('Page.navigatedWithinDocument', { frameId: 'root', url: 'http://localhost/#a', navigationType: 'fragment' })
+
+        expect(automation.push.mock.calls).toEqual([
+          ['remote:navigation', { event: 'started' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'hashchange' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'history' }],
+          ['remote:navigation', { event: 'stopped' }],
+        ])
+      })
+
       it('ignores errors from an isolated world or another frame', async () => {
         await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 8, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
         await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 9, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })

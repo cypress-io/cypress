@@ -167,6 +167,64 @@ describe('lib/browsers/bidi_automation', () => {
       })
     })
 
+    describe('remote driver navigation', () => {
+      const info = (overrides: object) => ({ context: 'aut', navigation: 'nav-1', timestamp: 0, url: 'http://www.foobar.com/', ...overrides })
+
+      beforeEach(() => {
+        mockAutomationClient.push = vi.fn().mockResolvedValue(undefined)
+        const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+        // @ts-expect-error - autContextId is private
+        bidiAutomationInstance.autContextId = 'aut'
+      })
+
+      it('pushes the start and end of the AUT\'s navigation, ignoring other contexts', async () => {
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({ context: 'runner' }))
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({}))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.load', info({ context: 'runner' }))
+        mockWebdriverClient.emit('browsingContext.load', info({}))
+        await flushPromises()
+
+        expect(mockAutomationClient.push.mock.calls).toEqual([
+          ['remote:navigation', { event: 'started' }],
+          ['remote:navigation', { event: 'stopped' }],
+        ])
+      })
+
+      it('doesn\'t end a navigation for an earlier one it aborted', async () => {
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({ navigation: 'nav-1' }))
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({ navigation: 'nav-2' }))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.navigationAborted', info({ navigation: 'nav-1' }))
+        await flushPromises()
+
+        expect(mockAutomationClient.push).not.toHaveBeenCalledWith('remote:navigation', { event: 'stopped' })
+
+        mockWebdriverClient.emit('browsingContext.downloadWillBegin', info({ navigation: 'nav-2' }))
+        await flushPromises()
+
+        expect(mockAutomationClient.push).toHaveBeenLastCalledWith('remote:navigation', { event: 'stopped' })
+      })
+
+      it('pushes URL changes within the AUT\'s document, ending a navigation that turned out to be one', async () => {
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({}))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.fragmentNavigated', info({ url: 'http://www.foobar.com/#a' }))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.historyUpdated', { context: 'aut', timestamp: 0, url: 'http://www.foobar.com/b' })
+        mockWebdriverClient.emit('browsingContext.historyUpdated', { context: 'runner', timestamp: 0, url: 'http://localhost/b' })
+        await flushPromises()
+
+        expect(mockAutomationClient.push.mock.calls).toEqual([
+          ['remote:navigation', { event: 'started' }],
+          ['remote:navigation', { event: 'stopped' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'hashchange' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'history' }],
+        ])
+      })
+    })
+
     describe('BrowsingContext', () => {
       describe('contextCreated / contextDestroyed', () => {
         beforeEach(() => {

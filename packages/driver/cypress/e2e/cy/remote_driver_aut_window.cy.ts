@@ -40,7 +40,7 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
       })
     })
 
-    it('fails the test when the error is not handled', (done) => {
+    it('fails the test when the error is not handled, even after its last command', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('app boom')
         expect(err.message).to.include('originated from your application code')
@@ -49,7 +49,43 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
       })
 
       cy.get('#throw').click()
-      cy.wait(2000)
+    })
+  })
+
+  describe('navigation', () => {
+    const logNames: string[] = []
+    const urls: string[] = []
+
+    beforeEach(() => {
+      logNames.length = 0
+      urls.length = 0
+
+      cy.visit(AUT_PAGE)
+      cy.on('log:added', (attrs) => logNames.push(attrs.name))
+      cy.on('url:changed', (url) => urls.push(url))
+    })
+
+    it('waits for a page load a command started', () => {
+      cy.get('#nav').click()
+      cy.get('#page').should('have.text', '2')
+      cy.wrap(null).then(() => {
+        expect(logNames).to.include('page load')
+        expect(logNames).to.include('new url')
+        expect(urls).to.include(`${AUT_PAGE}?page=2`)
+      })
+    })
+
+    it('reports a hash change', () => {
+      cy.get('#hash').click()
+      cy.wrap(urls).should('include', `${AUT_PAGE}#section`)
+      cy.wrap(logNames).should('include', 'new url')
+      cy.url().should('eq', `${AUT_PAGE}#section`)
+    })
+
+    it('reports a URL the app pushes to history', () => {
+      cy.get('#push-state').click()
+      cy.wrap(urls).should('include', `${AUT_PAGE}?page=pushed`)
+      cy.wrap(logNames).should('not.include', 'page load')
     })
   })
 

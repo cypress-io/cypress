@@ -11,6 +11,8 @@
   <button id="show-time">Show time</button>
   <p id="timer-result"></p>
   <a id="nav" href="remote-driver-isolation.html?page=2">Next page</a>
+  <a id="hash" href="#section">Section</a>
+  <button id="push-state">Push state</button>
 
   <button id="throw">Throw</button>
   <button id="reject">Reject</button>
@@ -66,6 +68,7 @@
     const result = (id, text) => { document.getElementById(id).textContent = text }
 
     document.getElementById('throw').addEventListener('click', () => { throw new Error('app boom') })
+    document.getElementById('push-state').addEventListener('click', () => { history.pushState({}, '', '?page=pushed') })
     document.getElementById('reject').addEventListener('click', () => { Promise.reject(new Error('app rejection')) })
     document.getElementById('alert').addEventListener('click', () => { alert('app alert'); result('dialog-result', 'alerted') })
     document.getElementById('confirm').addEventListener('click', () => { result('dialog-result', `confirmed:${confirm('app confirm')}`) })

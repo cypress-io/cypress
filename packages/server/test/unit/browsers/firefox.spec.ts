@@ -435,6 +435,9 @@ describe('lib/browsers/firefox', () => {
           'script.message',
         ] })
 
+        expectCalledWith(wdInstance.sessionSubscribe, { events: ['browsingContext.navigationStarted'] })
+        expectCalledWith(wdInstance.sessionSubscribe, { events: ['browsingContext.historyUpdated'] })
+
         expectCalledWith(wdInstance.browsingContextGetTree, {})
 
         expectCalledWith(wdInstance.browsingContextNavigate, {
