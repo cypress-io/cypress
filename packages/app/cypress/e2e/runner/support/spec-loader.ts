@@ -80,7 +80,7 @@ export function loadSpec (options: LoadSpecOptions) {
           },
         ]
 
-        coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
+        coreData.localSettings.preferences.preferredEditorBinary = '/usr/bin/test-editor'
       }
 
       coreData.localSettings.preferences.isSpecsListOpen = false

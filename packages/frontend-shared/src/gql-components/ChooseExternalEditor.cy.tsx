@@ -23,6 +23,9 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
       },
     })
 
+    cy.findByTestId('launch-editor-hint').should('have.text', defaultMessages.settingsPage.editor.launchEditorHint.replace('{0}', 'LAUNCH_EDITOR'))
+    .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
+
     cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
     .should('be.visible')
     .as('chooseEditor')
@@ -31,19 +34,25 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     cy.contains('On Computer').should('be.visible')
     cy.contains('Atom').should('be.visible')
     cy.contains('Vim').should('be.visible')
+    cy.contains('Custom').should('not.exist')
 
     cy.contains('Vim').click()
     cy.contains('Vim').should('be.visible')
     cy.contains('Atom').should('not.exist')
+  })
 
-    cy.get('[data-cy="custom-editor"]').should('not.exist')
+  it('shows an icon for a selected editor without its own', () => {
+    cy.mountFragment(ChooseExternalEditorFragmentDoc, {
+      onResult (result) {
+        result.localSettings.availableEditors = [
+          { id: 'nano', name: 'Nano', binary: 'nano', __typename: 'Editor' },
+        ]
 
-    cy.get('@chooseEditor').click()
-    cy.contains('Custom').click()
-    cy.get('[data-cy="custom-editor"]').should('exist')
+        result.localSettings.preferences.preferredEditorBinary = 'nano'
+      },
+      render: (gql) => <ChooseExternalEditor gql={gql} labelId="example-label" />,
+    })
 
-    cy.findByLabelText(defaultMessages.settingsPage.editor.customPathPlaceholder)
-    .type('test/path')
-    .should('have.value', 'test/path')
+    cy.contains('button', 'Nano').find('svg').not('[data-testid=icon-caret]').should('be.visible')
   })
 })
