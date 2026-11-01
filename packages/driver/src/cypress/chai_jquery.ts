@@ -223,7 +223,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     return (function (...args) {
       const selector: string = args[0]
 
-      if ($dom.isDom(this._obj)) {
+      if ($dom.isDom(this._obj) || (isRemoteElement(this._obj) && typeof selector === 'string')) {
         return assert(
           this,
           chaiUtils,

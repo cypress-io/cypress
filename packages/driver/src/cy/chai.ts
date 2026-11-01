@@ -283,7 +283,7 @@ chai.use((chai, u) => {
 
     chai.Assertion.overwriteMethod('match', (_super) => {
       return (function (regExp) {
-        if (_.isRegExp(regExp) || $dom.isDom(this._obj)) {
+        if (_.isRegExp(regExp) || $dom.isDom(this._obj) || isRemoteElement(this._obj)) {
           return _super.apply(this, arguments)
         }
 

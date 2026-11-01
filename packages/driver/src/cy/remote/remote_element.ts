@@ -14,6 +14,21 @@ const SUPPORTED_PSEUDOS = {
   ':empty': (el: RemoteElementProps) => el.empty,
 }
 
+// a compound of a tag, ids and classes, which the snapshot can answer without the AUT
+const SIMPLE_SELECTOR = /^([a-z][\w-]*|\*)?((?:[#.][\w-]+)*)$/i
+
+const matchesSimpleSelector = (el: RemoteElementProps, selector: string) => {
+  const [, tag, rest] = SIMPLE_SELECTOR.exec(selector) ?? []
+
+  if (tag && tag !== '*' && tag.toLowerCase() !== el.tagName.toLowerCase()) {
+    return false
+  }
+
+  return (rest.match(/[#.][\w-]+/g) ?? []).every((part) => {
+    return part[0] === '#' ? el.id === part.slice(1) : el.classes.includes(part.slice(1))
+  })
+}
+
 const PROPS = {
   id: (el: RemoteElementProps) => el.id,
   checked: (el: RemoteElementProps) => el.checked,
@@ -114,13 +129,21 @@ export class RemoteElement extends RemoteLocator {
   }
 
   is (selector: string) {
-    const matches = SUPPORTED_PSEUDOS[selector]
+    const matchers = selector.split(',').map((part) => {
+      const trimmed = part.trim()
 
-    if (!matches) {
+      if (SUPPORTED_PSEUDOS[trimmed]) {
+        return SUPPORTED_PSEUDOS[trimmed]
+      }
+
+      if (trimmed && SIMPLE_SELECTOR.test(trimmed)) {
+        return (el: RemoteElementProps) => matchesSimpleSelector(el, trimmed)
+      }
+
       throw unsupported(`.is('${selector}')`)
-    }
+    })
 
-    return this.elements.some(matches)
+    return this.elements.some((el) => matchers.some((matches) => matches(el)))
   }
 
   css (name: string): never {

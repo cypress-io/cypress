@@ -223,6 +223,18 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
       cy.getAllSessionStorage().should('deep.equal', {})
     },
   },
+  assertions: {
+    'match a simple selector': () => cy.get('#two').should('match', 'li.item.two').and('match', 'p, #two').and('not.match', 'ul'),
+    'match an unsupported selector': () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('is not supported on a subject from `experimentalRemoteDriver`')
+      })
+
+      cy.get('#two').should('match', 'ul > li').then(() => {
+        throw new Error('expected the assertion to fail')
+      })
+    },
+  },
   other: {
     'screenshot of the page': () => cy.screenshot('remote-driver-audit-page'),
     'screenshot of an element': () => cy.get('#two').screenshot('remote-driver-audit-element'),
