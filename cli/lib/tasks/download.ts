@@ -265,6 +265,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
     let started: Date | null = null
     let bodyComplete = false
     let redirected = false
+    let writeFailed = false
     let fileStream: fs.WriteStream | undefined
 
     // A failed attempt closes the file it was writing, so a retry does not leave it open behind it
@@ -331,6 +332,25 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         fail(err)
         // status codes here are all 2xx
       } else {
+        const writeStream = fs.createWriteStream(downloadDestination)
+
+        fileStream = writeStream
+
+        // a failed write, such as a full disk, leaves a truncated file, and an
+        // unhandled 'error' event would crash the CLI, so stop downloading, delete
+        // the partial file once the stream has closed so it doesn't keep holding
+        // the disk space, and fail
+        writeStream.on('error', (err) => {
+          debug('failed writing %s: %s', downloadDestination, err.message)
+          writeFailed = true
+          response.destroy()
+          writeStream.once('close', () => {
+            fs.remove(downloadDestination)
+            .catch((removeErr) => debug('failed removing %s: %s', downloadDestination, removeErr.message))
+            .finally(() => reject(err))
+          })
+        })
+
         // We only enable this pipe connection when we know we've got a successful return
         // and handle the completion with verify and resolve
         // there was a possible race condition between end of request and close of writeStream
@@ -340,11 +360,15 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         })
 
         Bluebird.all([new Bluebird((r: any) => {
-          fileStream = fs.createWriteStream(downloadDestination)
-
-          return response.pipe(fileStream.on('close', r))
+          return response.pipe(writeStream.on('close', r))
         }), new Bluebird((r: any) => response.on('end', r))])
         .then(() => {
+          // the error handler is deleting the partial file and rejects with the
+          // write error, so verifying the file here would race that deletion
+          if (writeFailed) {
+            return
+          }
+
           debug('downloading finished')
           verifyDownloadedFile(downloadDestination, expectedSize,
             expectedChecksum)
@@ -357,7 +381,9 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
     .on('error', (e: any) => {
       // The connection can reset after the whole file arrived. The file is complete, and
       // verifying it decides the outcome, so downloading it all again would be wasted.
-      if (bodyComplete || redirected) {
+      // A failed write stops the response itself and fails with the write error, which a
+      // connection error from that stop must not replace with a retry.
+      if (bodyComplete || redirected || writeFailed) {
         debug('ignoring error after the download completed or moved on: %s', e.message)
 
         return
