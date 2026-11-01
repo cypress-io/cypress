@@ -336,10 +336,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
 
         fileStream = writeStream
 
-        // a failed write, such as a full disk, leaves a truncated file, and an
-        // unhandled 'error' event would crash the CLI, so stop downloading, delete
-        // the partial file once the stream has closed so it doesn't keep holding
-        // the disk space, and fail
+        // An unhandled 'error' event would crash the CLI. A failed write, such as on a
+        // full disk, leaves a truncated file that would keep holding that disk space.
         writeStream.on('error', (err) => {
           debug('failed writing %s: %s', downloadDestination, err.message)
           writeFailed = true
@@ -363,8 +361,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
           return response.pipe(writeStream.on('close', r))
         }), new Bluebird((r: any) => response.on('end', r))])
         .then(() => {
-          // the error handler is deleting the partial file and rejects with the
-          // write error, so verifying the file here would race that deletion
+          // The error handler is deleting the partial file and rejects with the
+          // write error, so verifying the file here would race that deletion.
           if (writeFailed) {
             return
           }
@@ -381,8 +379,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
     .on('error', (e: any) => {
       // The connection can reset after the whole file arrived. The file is complete, and
       // verifying it decides the outcome, so downloading it all again would be wasted.
-      // A failed write stops the response itself and fails with the write error, which a
-      // connection error from that stop must not replace with a retry.
+      // A failed write stops the response itself, and the connection error that causes
+      // must not turn the write error into a retry.
       if (bodyComplete || redirected || writeFailed) {
         debug('ignoring error after the download completed or moved on: %s', e.message)
 
