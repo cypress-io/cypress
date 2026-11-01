@@ -421,8 +421,8 @@ const _setAutomation = async (client: CriClient, automation: Automation, resetBr
     })
   })
 
-  if (options.experimentalRemoteDriver) {
-    await cdpAutomation.patchSyncXhr()
+  if (options.remoteAutScript) {
+    await cdpAutomation.addRemoteAutScript(options.remoteAutScript)
   }
 
   automation.use(cdpAutomation)

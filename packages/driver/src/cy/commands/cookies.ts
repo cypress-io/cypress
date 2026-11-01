@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { isRemoteDriverEnabled } from '../remote'
+import type { RemoteAutCall } from '@packages/types'
 
 const COOKIE_PROPS = 'name value path secure hostOnly httpOnly expiry domain sameSite'.split(' ')
 
@@ -102,6 +103,17 @@ interface GetAndClearOptions {
 }
 
 export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, config) {
+  // the remote driver's script in a cross-origin AUT keeps its own document.cookie jar
+  const updateRemoteAutCookies = (args: Extract<RemoteAutCall, { method: 'cookies' }>['args']) => {
+    if (isRemoteDriverEnabled(Cypress)) {
+      Promise.resolve(Cypress.automation('remote:aut:call', { method: 'cookies', args })).catch(() => {})
+    }
+  }
+
+  Cypress.on('set:cookie', (cookie) => updateRemoteAutCookies(['set:cookie', cookie]))
+  Cypress.on('clear:cookie', (name) => updateRemoteAutCookies(['clear:cookie', name]))
+  Cypress.on('clear:cookies', () => updateRemoteAutCookies(['clear:cookies']))
+
   function getDefaultDomain () {
     // the remote driver can't read a cross-origin AUT's location, so it uses the one from automation
     const hostname = isRemoteDriverEnabled(Cypress) ? state('autLocation')?.hostname : (state('window') as Window | undefined)?.location.hostname

@@ -8,7 +8,7 @@ import { AutomationNotImplemented } from '../automation/automation_not_implement
 import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import type { AutomationMiddleware, AutomationCommands, RemoteNavigation } from '@packages/types'
+import type { AutomationMiddleware, AutomationCommands, RemoteAutScriptConfig, RemoteNavigation } from '@packages/types'
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
@@ -17,7 +17,6 @@ import type {
   NetworkResponseCompletedParameters,
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
-  LogEntry,
   BrowsingContextUserPromptOpenedParameters,
   ScriptMessageParameters,
   BrowsingContextNavigationInfo,
@@ -36,8 +35,8 @@ import type { AutScripts } from '../automation/commands/remote_visit'
 import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../automation/commands/remote_dialogs'
 import { RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
-import { SYNC_XHR_PATCH } from '../automation/commands/remote_sync_xhr'
-import { RemoteErrorReports, parseUncaughtErrorText } from '../automation/commands/remote_errors'
+import { getRemoteAutScript, callRemoteAut } from '../automation/commands/remote_aut_script'
+import { RemoteErrorReports } from '../automation/commands/remote_errors'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -125,8 +124,6 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartia
 // passed to the stub recorder in place of a global binding, so the AUT can't see it
 const REMOTE_STUB_CHANNEL = { type: 'channel', value: { channel: 'cypress-remote-stubs' } } as const
 
-const FIREFOX_PRELOAD_SCRIPT_ERROR = 'Error: Permission denied to access property "length"'
-
 export class BidiAutomation {
   // events needed to subscribe to in order for our BiDi automation to work properly
   static BIDI_EVENTS = [
@@ -136,7 +133,6 @@ export class BidiAutomation {
     'network.fetchError',
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
-    'log.entryAdded',
     'browsingContext.userPromptOpened',
     'script.message',
   ]
@@ -160,6 +156,7 @@ export class BidiAutomation {
   private remoteClock: RemoteClock
   private remoteStubs: RemoteStubs
   private remoteErrors: RemoteErrorReports
+  private evaluateInAut: (expression: string) => Promise<unknown>
   private autContextId: string | undefined = undefined
   private autNavigationId: string | null | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
@@ -242,6 +239,7 @@ export class BidiAutomation {
     this.remoteVisit = new RemoteVisit(autScripts)
     this.remoteClock = new RemoteClock(autScripts)
     this.remoteErrors = new RemoteErrorReports(autScripts.evaluateInAut)
+    this.evaluateInAut = autScripts.evaluateInAut
 
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
@@ -252,7 +250,6 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
-    this.webDriverClient.on('log.entryAdded', (entry) => this.remoteErrors.report(this.onLogEntryAdded(entry)))
     this.webDriverClient.on('browsingContext.userPromptOpened', this.onUserPromptOpened)
     this.webDriverClient.on('script.message', this.onScriptMessage)
     this.webDriverClient.on('browsingContext.navigationStarted', this.onNavigationStarted)
@@ -330,29 +327,6 @@ export class BidiAutomation {
       await answerRemoteDialog(this.automation, type, message, (accept) => this.webDriverClient.browsingContextHandleUserPrompt({ context, accept }))
     } catch (err) {
       debug('failed to report dialog: %s', err?.message)
-    }
-  }
-
-  // the remote driver can't listen for errors in a cross-origin AUT, so it learns of them here
-  private onLogEntryAdded = async (entry: LogEntry) => {
-    if (entry.type !== 'javascript' || !this.autContextId || entry.source.context !== this.autContextId) {
-      return
-    }
-
-    const text = entry.text ?? ''
-
-    // Firefox logs this, with no stack, from its own preload-script handling in a cross-origin frame
-    if (!entry.stackTrace && text === FIREFOX_PRELOAD_SCRIPT_ERROR) {
-      return
-    }
-
-    const frames = entry.stackTrace?.callFrames.map((frame) => `    at ${frame.functionName || '<anonymous>'} (${frame.url}:${frame.lineNumber + 1}:${frame.columnNumber + 1})`)
-
-    try {
-      // BiDi reports an unhandled rejection the same way as a thrown error
-      await this.automation.push('remote:uncaught:exception', parseUncaughtErrorText(text, frames?.length ? [text, ...frames].join('\n') : undefined, false))
-    } catch (err) {
-      debug('failed to report AUT exception: %s', err?.message)
     }
   }
 
@@ -867,8 +841,8 @@ export class BidiAutomation {
   }
 
   // not tied to a context, so it covers every tab of the session
-  async patchSyncXhr () {
-    await this.webDriverClient.scriptAddPreloadScript({ functionDeclaration: `() => ${SYNC_XHR_PATCH}` })
+  async addRemoteAutScript (config: RemoteAutScriptConfig) {
+    await this.webDriverClient.scriptAddPreloadScript({ functionDeclaration: `() => ${await getRemoteAutScript(config, { reportErrors: true })}` })
   }
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {
@@ -1085,6 +1059,8 @@ export class BidiAutomation {
           return this.remoteClock.restore()
         case 'remote:errors:flush':
           return this.remoteErrors.flush()
+        case 'remote:aut:call':
+          return callRemoteAut(this.evaluateInAut, data)
         case 'remote:visit:before:load':
           return this.remoteVisit.beforeLoad(data)
         case 'remote:visit:on:load':

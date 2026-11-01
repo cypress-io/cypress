@@ -143,6 +143,10 @@ export class OpenProject extends EventEmitter {
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       experimentalRemoteDriver: 'experimentalRemoteDriver' in cfg && cfg.experimentalRemoteDriver === true,
+      // the remote driver requires baseUrl, which the proxy keeps as the primary origin
+      remoteAutScript: 'experimentalRemoteDriver' in cfg && cfg.experimentalRemoteDriver === true && cfg.baseUrl
+        ? { primaryOrigin: new URL(cfg.baseUrl).origin, namespace: cfg.namespace }
+        : undefined,
       ...prevOptions || {},
       useBrowserNetworkInterception,
       // proxy launch opts must win over prevOptions: args may carry a normalized

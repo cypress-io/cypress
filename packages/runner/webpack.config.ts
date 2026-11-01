@@ -80,6 +80,19 @@ const crossOriginInjectionConfig: webpack.Configuration = {
 }
 
 // @ts-ignore
+const remoteAutInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection_remote_aut: [path.resolve(__dirname, 'injection/remote-aut.ts')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+// @ts-ignore
 const remoteAgentConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
@@ -127,6 +140,7 @@ export default async function () {
     mainInjectionConfig,
     crossOriginConfig,
     crossOriginInjectionConfig,
+    remoteAutInjectionConfig,
     remoteAgentConfig,
     remoteClockConfig,
   ]

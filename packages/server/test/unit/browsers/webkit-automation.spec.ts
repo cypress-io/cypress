@@ -2,9 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
-import { SYNC_XHR_PATCH } from '../../../lib/automation/commands/remote_sync_xhr'
 import type { RunModeVideoApi } from '@packages/types'
 import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
+
+vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
+  return { ...await importOriginal<typeof import('../../../lib/automation/commands/remote_aut_script')>(), getRemoteAutScript: vi.fn(async () => 'remote AUT script') }
+})
 
 // sinon's calledBefore: the first call of `first` precedes the last call of `second`
 const expectCalledBefore = (first: Mock, second: Mock) => {
@@ -95,7 +98,7 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any, remoteDriver: boolean }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any, remoteDriver: boolean, remoteAutScript: any }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
@@ -106,6 +109,7 @@ describe('lib/browsers/webkit-automation', () => {
       isHeadless: opts.isHeadless ?? true,
       cdpSocketServer: opts.cdpSocketServer,
       remoteDriver: opts.remoteDriver,
+      remoteAutScript: opts.remoteAutScript,
     })
   }
 
@@ -253,57 +257,6 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
-  describe('AUT errors', () => {
-    const onConsoleMessage = vi.fn()
-    const onConsoleRepeatCountUpdated = vi.fn()
-    let delegate: any
-
-    const error = (overrides: object = {}) => {
-      return { message: { source: 'javascript', level: 'error', text: 'Error: app boom', url: 'http://www.foobar.com/', ...overrides } }
-    }
-
-    beforeEach(async () => {
-      delegate = { _onConsoleMessage: onConsoleMessage, _onConsoleRepeatCountUpdated: onConsoleRepeatCountUpdated }
-      automation.push = vi.fn(async () => {})
-
-      const newContext = mock.browser.newContext.getMockImplementation()
-
-      mock.browser.newContext.mockImplementationOnce(async () => {
-        const context = await newContext()
-        const page = mock.getLastPage()
-
-        page.url = () => 'http://cypress-runner.foobar.com/__/'
-        // the in-process Playwright client reaches its server page through the connection
-        page._connection = { toImpl: () => ({ delegate }) }
-
-        return context
-      })
-
-      await createAutomation()
-    })
-
-    it('pushes an error from the AUT and each repeat of it, and keeps Playwright\'s handling', async () => {
-      delegate._onConsoleMessage(error())
-      delegate._onConsoleRepeatCountUpdated({ count: 2 })
-      await new Promise((resolve) => setImmediate(resolve))
-
-      expect(automation.push).toHaveBeenCalledTimes(2)
-      expect(automation.push).toHaveBeenCalledWith('remote:uncaught:exception', { handlerType: 'error', error: { name: 'Error', message: 'app boom', stack: undefined } })
-      expect(onConsoleMessage).toHaveBeenCalledWith(error())
-      expect(onConsoleRepeatCountUpdated).toHaveBeenCalledWith({ count: 2 })
-    })
-
-    it('ignores the runner\'s errors, rejections with no location, and repeats of other messages', async () => {
-      delegate._onConsoleMessage(error({ url: 'http://cypress-runner.foobar.com/__cypress/runner.js' }))
-      delegate._onConsoleMessage(error({ text: 'Unhandled Promise Rejection: Error: nope', url: '' }))
-      delegate._onConsoleMessage(error({ level: 'log' }))
-      delegate._onConsoleRepeatCountUpdated({ count: 2 })
-      await new Promise((resolve) => setImmediate(resolve))
-
-      expect(automation.push).not.toHaveBeenCalled()
-    })
-  })
-
   describe('remote driver dialogs and stubs', () => {
     const listenersFor = (event: string) => mock.getLastPage().on.mock.calls.filter(([name]) => name === event).map(([, listener]) => listener)
     const bindingFor = (name: string) => mock.getLastContext().exposeBinding.mock.calls.find(([bindingName]) => bindingName === name)?.[1]
@@ -343,12 +296,12 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
-  it('marks synchronous XHRs in the AUT with the remote driver only', async () => {
+  it('adds the remote AUT script to every frame with the remote driver only', async () => {
     await createAutomation()
-    expect(mock.getLastPage().addInitScript).not.toHaveBeenCalledWith({ content: SYNC_XHR_PATCH })
+    expect(mock.getLastPage().addInitScript).not.toHaveBeenCalledWith({ content: 'remote AUT script' })
 
-    await createAutomation({ remoteDriver: true })
-    expect(mock.getLastPage().addInitScript).toHaveBeenCalledWith({ content: SYNC_XHR_PATCH })
+    await createAutomation({ remoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } })
+    expect(mock.getLastPage().addInitScript).toHaveBeenCalledWith({ content: 'remote AUT script' })
   })
 
   describe('remote driver navigation', () => {

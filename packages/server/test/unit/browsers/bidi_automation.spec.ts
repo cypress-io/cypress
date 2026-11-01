@@ -75,7 +75,6 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.on, 'network.fetchError')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextCreated')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextDestroyed')
-      expectCalledWith(mockWebdriverClient.on, 'log.entryAdded')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.userPromptOpened')
       expectCalledWith(mockWebdriverClient.on, 'script.message')
     })
@@ -93,44 +92,6 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.off, 'network.fetchError')
       expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextCreated')
       expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextDestroyed')
-    })
-
-    describe('log.entryAdded', () => {
-      const entry = (overrides: object) => {
-        return { type: 'javascript', level: 'error', source: { realm: 'r', context: 'aut' }, text: 'Error: app boom', timestamp: 0, ...overrides }
-      }
-
-      let bidiAutomationInstance: BidiAutomation
-
-      beforeEach(() => {
-        mockAutomationClient.push = vi.fn().mockResolvedValue(undefined)
-        bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
-        // @ts-expect-error - autContextId is private
-        bidiAutomationInstance.autContextId = 'aut'
-      })
-
-      it('pushes an error from the AUT', async () => {
-        mockWebdriverClient.emit('log.entryAdded', entry({
-          stackTrace: { callFrames: [{ functionName: 'onClick', url: 'http://www.foobar.com/', lineNumber: 1, columnNumber: 4 }] },
-        }))
-
-        await flushPromises()
-
-        expect(mockAutomationClient.push).toHaveBeenCalledWith('remote:uncaught:exception', {
-          handlerType: 'error',
-          error: { name: 'Error', message: 'app boom', stack: 'Error: app boom\n    at onClick (http://www.foobar.com/:2:5)' },
-        })
-      })
-
-      it('ignores console messages, other contexts and Firefox\'s preload-script error', async () => {
-        mockWebdriverClient.emit('log.entryAdded', entry({ type: 'console' }))
-        mockWebdriverClient.emit('log.entryAdded', entry({ source: { realm: 'r', context: 'runner' } }))
-        mockWebdriverClient.emit('log.entryAdded', entry({ text: 'Error: Permission denied to access property "length"' }))
-
-        await flushPromises()
-
-        expect(mockAutomationClient.push).not.toHaveBeenCalled()
-      })
     })
 
     describe('remote driver dialogs and stubs', () => {

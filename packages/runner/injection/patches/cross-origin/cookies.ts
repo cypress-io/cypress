@@ -34,7 +34,9 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   })
 }
 
-const sendCookieToServer = (cookie: SerializableAutomationCookie) => {
+export type SendCookie = (cookie: SerializableAutomationCookie) => void
+
+const sendCookieToServer: SendCookie = (cookie) => {
   window.top!.postMessage({
     event: 'cross:origin:aut:set:cookie',
     data: {
@@ -53,7 +55,7 @@ const sendCookieToServer = (cookie: SerializableAutomationCookie) => {
 // document.cookie runs into cross-origin restrictions when the AUT is on
 // a different origin than top. The goal is to make it act like it would
 // if the user's app was run in top.
-export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[]) => {
+export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[], sendCookie: SendCookie = sendCookieToServer) => {
   const url = location.href
   const domain = location.hostname
   const cookieJar = new CookieJar()
@@ -118,7 +120,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
         // send the cookie to the server so it can be removed from the browser
         // via automation. If the cookie expiry is set inside the server-side cookie jar,
         // the cookie will be automatically removed.
-        sendCookieToServer(toughCookieToAutomationCookie(parsedCookie, domain))
+        sendCookie(toughCookieToAutomationCookie(parsedCookie, domain))
 
         return getDocumentCookieValue()
       }
@@ -139,7 +141,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
         // send the cookie to the server so it can be set in the browser via
         // automation and in our server-side cookie jar so it's available
         // to subsequent injections
-        sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
+        sendCookie(toughCookieToAutomationCookie(cookie, domain))
       }
 
       return getDocumentCookieValue()
@@ -150,23 +152,27 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     cookieJar.removeAllCookies()
   }
 
+  // called for Cypress cookie commands, so that the document.cookie value is updated optimistically
+  const onCookieCommand = {
+    'set:cookie': (cookie: SerializableAutomationCookie) => {
+      setCookie(automationCookieToToughCookie(cookie, domain))
+    },
+    'clear:cookie': (name: string) => {
+      cookieJar.removeCookie({ name, domain })
+    },
+    'clear:cookies': reset,
+  }
+
   const bindCypressListeners = (Cypress: Cypress.Cypress) => {
     Cypress.on('test:before:run', reset)
 
-    // the following listeners are called from Cypress cookie commands, so that
-    // the document.cookie value is updated optimistically
-    Cypress.on('set:cookie', (cookie: SerializableAutomationCookie) => {
-      setCookie(automationCookieToToughCookie(cookie, domain))
-    })
-
-    Cypress.on('clear:cookie', (name: string) => {
-      cookieJar.removeCookie({ name, domain })
-    })
-
-    Cypress.on('clear:cookies', reset)
+    Cypress.on('set:cookie', onCookieCommand['set:cookie'])
+    Cypress.on('clear:cookie', onCookieCommand['clear:cookie'])
+    Cypress.on('clear:cookies', onCookieCommand['clear:cookies'])
   }
 
   return {
     onCypress: bindCypressListeners,
+    onCookieCommand,
   }
 }

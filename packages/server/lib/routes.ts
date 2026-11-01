@@ -9,7 +9,7 @@ import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
-import type { FoundSpec } from '@packages/types'
+import type { FoundSpec, RemoteUncaughtException } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { runnerGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { RemoteStates } from '@packages/network-tools'
@@ -24,6 +24,8 @@ import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { cypressSessions } from './cypress-sessions'
 import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
+import { addRemoteAutRoutes } from './remote_aut_routes'
+import type { SerializableAutomationCookie } from './automation/cookie/jar'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
@@ -43,6 +45,8 @@ export interface InitializeRoutes {
   isBrowserNetworkMode: () => boolean
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
+  setBrowserCookie: (cookie: SerializableAutomationCookie) => Promise<unknown>
+  reportAutError: (uncaught: RemoteUncaughtException) => Promise<unknown>
 }
 
 export const createCommonRoutes = ({
@@ -54,6 +58,8 @@ export const createCommonRoutes = ({
   remoteStates,
   nodeProxy,
   onError,
+  setBrowserCookie,
+  reportAutError,
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
@@ -194,6 +200,10 @@ export const createCommonRoutes = ({
   router.get(`/${config.namespace}/socket.io.js`, (req, res) => {
     client.handle(req, res)
   })
+
+  if ('experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true) {
+    addRemoteAutRoutes(router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError })
+  }
 
   router.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {
     res.sendFile(path.join(__dirname, './html/get-local-storage.html'))

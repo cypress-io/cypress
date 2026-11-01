@@ -5,6 +5,7 @@ import type { RunModeVideoApi } from './video'
 import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
 import type { SupportedKey } from './automation'
+import type { RemoteAutScriptConfig } from './injection'
 
 export type CdpClientShape = {
   send: (...args: any[]) => Promise<any>
@@ -141,6 +142,8 @@ export type BrowserLaunchOpts = {
   shouldClearPersistedServiceWorkers?: boolean
   // From the project config, since a per-test override can't change how the browser was launched
   experimentalRemoteDriver?: boolean
+  // set with experimentalRemoteDriver: configures the script added to the main world of every frame
+  remoteAutScript?: RemoteAutScriptConfig
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 
@@ -255,6 +258,11 @@ export type RemoteNavigation =
   | { event: 'stopped' }
   | { event: 'withinDocument', source: 'hashchange' | 'history' }
 
+// a call into the remote driver's AUT script: a cookie command for its document.cookie jar, or pausing its timers
+export type RemoteAutCall =
+  | { method: 'cookies', args: ['set:cookie', unknown] | ['clear:cookie', string] | ['clear:cookies'] }
+  | { method: 'timers', args: ['pause', boolean] | ['reset'] }
+
 export interface RemoteClockDetails {
   now: number
   methods: string[]
@@ -298,6 +306,7 @@ export interface AutomationCommands {
   'remote:dialog': CommandSignature<RemoteDialog, void>
   'remote:navigation': CommandSignature<RemoteNavigation, void>
   'remote:errors:flush': CommandSignature<Record<string, never>, void>
+  'remote:aut:call': CommandSignature<RemoteAutCall, void>
   'remote:clock:install': CommandSignature<{ now?: number, methods?: string[] }, RemoteClockDetails>
   'remote:clock:tick': CommandSignature<{ ms: number }, RemoteClockDetails>
   'remote:clock:set:system:time': CommandSignature<{ now: number }, RemoteClockDetails>

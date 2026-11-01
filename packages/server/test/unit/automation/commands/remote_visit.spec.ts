@@ -3,7 +3,7 @@ import vm from 'vm'
 import type { Protocol } from 'devtools-protocol'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
 import { RemoteVisit, beforeLoadScript, onLoadExpression } from '../../../../lib/automation/commands/remote_visit'
-import { cdpUncaughtException, parseUncaughtErrorText } from '../../../../lib/automation/commands/remote_errors'
+import { cdpUncaughtException } from '../../../../lib/automation/commands/remote_errors'
 
 const createWindow = (name: string) => {
   const win = vm.createContext({ name })
@@ -104,29 +104,6 @@ describe('remote visit callbacks', () => {
 })
 
 describe('remote uncaught exceptions', () => {
-  describe('parseUncaughtErrorText', () => {
-    it('splits the error name from its message', () => {
-      expect(parseUncaughtErrorText('TypeError: x is not a function', 'stack', false)).toEqual({
-        handlerType: 'error',
-        error: { name: 'TypeError', message: 'x is not a function', stack: 'stack' },
-      })
-    })
-
-    it('recognizes WebKit\'s unhandled rejection prefix', () => {
-      expect(parseUncaughtErrorText('Unhandled Promise Rejection: Error: app rejection', undefined, false)).toEqual({
-        handlerType: 'unhandledrejection',
-        error: { name: 'Error', message: 'app rejection', stack: undefined },
-      })
-    })
-
-    it('keeps text that has no error name as the message', () => {
-      expect(parseUncaughtErrorText('Script error.', undefined, false)).toEqual({
-        handlerType: 'error',
-        error: { message: 'Script error.', stack: undefined },
-      })
-    })
-  })
-
   describe('cdpUncaughtException', () => {
     const details = (overrides: Partial<Protocol.Runtime.ExceptionDetails>): Protocol.Runtime.ExceptionDetails => {
       return { exceptionId: 1, text: 'Uncaught', lineNumber: 0, columnNumber: 0, ...overrides }

@@ -9,13 +9,20 @@ This guide records where the remote driver behaves differently from the legacy d
 - **`baseUrl` is required.** Config validation fails without it. Set it to the URL of the app under test.
 - **The runner never moves.** It's served from `cypress-runner.<baseUrl's site>` (or Cypress's own `localhost:<port>` when `baseUrl` is localhost or an IP), cross-origin to the AUT, and every `cy.visit` only changes the AUT iframe's `src`. Legacy moves the runner to the first origin a test visits and restarts the test; the remote driver never restarts a test.
 - **The AUT iframe is sandboxed**, so the app can't navigate the top frame.
-- **Nothing is injected into the AUT** when the project config enables the remote driver. The proxy skips the driver bootstrap for the AUT and every frame inside it, so the app's `document.cookie`, `fetch`, `frameElement` and timers are its own. Two exceptions: the automation protocol wraps `XMLHttpRequest.prototype.open` in the AUT and its frames, as the bootstrap does, to mark synchronous requests, since `cy.intercept` can't run a route handler for one while it blocks the runner's thread; and a run that records to Test Replay injects its recorder (see Test Replay).
+- **The proxy injects nothing into the AUT** when the project config enables the remote driver. It skips the driver bootstrap for the AUT and every frame inside it, so the app's `frameElement` is its own. Instead, the automation protocol adds one script (`packages/runner/injection/remote-aut.ts`) to the main world of every frame. In every frame, it wraps `XMLHttpRequest.prototype.open` to mark synchronous requests, as the bootstrap does, since `cy.intercept` can't run a route handler for one while it blocks the runner's thread. In an AUT on an origin other than `baseUrl`'s, it also patches `document.cookie`, `fetch` and `XMLHttpRequest` so the page gets the cookies it would have as top (see Cookies and storage). In the AUT, it wraps `setTimeout`, `setInterval` and `requestAnimationFrame` so `cy.screenshot` can pause them, as the bootstrap does, and in Firefox and WebKit it reports the AUT's uncaught errors (see Uncaught errors). A run that records to Test Replay injects its recorder too (see Test Replay).
 - **The option is read from the project config** for anything decided at launch or by the proxy: the runner's location, AUT injection and WebKit's launch mode. A per-test `experimentalRemoteDriver` override switches the driver code path only, so a test that turns the legacy driver back on in a remote-driver project can't reach the AUT (and a remote-driver test in a legacy project runs against an AUT that still has the injected bootstrap).
-- **WebKit** must enable it in the config file. It then launches Playwright in-process, which needs playwright-webkit 1.59.0 or later, and depends on Playwright internals (its utility world, its page's console handling).
+- **Driver specs that need it for the whole project** are listed in `REMOTE_DRIVER_SPECS` in `packages/driver/cypress.config.ts`: the `cy/remote_driver_*` specs that only exercise the remote driver, and `e2e/remote_cross_origin/`, which ports the `cy.origin` specs without `cy.origin`. They run with `yarn workspace @packages/driver cypress:run:remote-driver` (in CI, the `driver-integration-tests-*-remote-driver` jobs), and the default driver config excludes them.
+- **WebKit** must enable it in the config file. It then launches Playwright in-process, which needs playwright-webkit 1.59.0 or later, and depends on Playwright internals (its utility world).
 
 ## Cookies and storage
 
-- **The app is first-party only on `baseUrl`'s site.** Any other site the test visits is cross-site to the runner, so its cookies are third-party and Chrome partitions its storage, the same as a site visited inside `cy.origin` with the legacy driver. Legacy instead moves the runner to the first site a test visits.
+- **The app is first-party only on `baseUrl`'s site.** Any other site the test visits is cross-site to the runner, so Chrome partitions its storage, the same as a site visited inside `cy.origin` with the legacy driver. `baseUrl`'s origin stays the one the proxy treats as top even when a test visits another site first; legacy instead moves the runner to the first site a test visits.
+- **An AUT on another origin gets the cookies it would have as top**, as inside `cy.origin` with the legacy driver. The proxy keeps its cookies in its own jar and attaches them to the AUT's requests. The AUT script backs `document.cookie` with a copy of that jar, sends `document.cookie` writes to it, and reports each `fetch` / XHR's credentials mode before the request goes out. Legacy does this from the cross-origin bootstrap over `postMessage` to the runner; the remote driver's script uses internal routes on the page's own origin (`/__cypress/remote/*`), since nothing in the page can reach the runner. The differences:
+  - `document.cookie` doesn't include HttpOnly cookies. The legacy cross-origin bootstrap includes them.
+  - Only the AUT's own document is covered. An iframe inside a cross-site AUT gets the browser's third-party cookie rules.
+  - `cy.document().its('cookie')` reads the browser's `document.cookie`, not the page's (see `.its()` and `.invoke()` under Commands).
+  - Each `fetch` / XHR waits for one round trip to Cypress before it is sent, as legacy's does. A synchronous XHR doesn't, so it gets the default credentials, as in legacy.
+  - With `experimentalCspAllowList`, a `connect-src` that excludes the page's own origin blocks the internal routes, so the page's cookies fall back to the browser's third-party rules.
 
 ## Commands
 
@@ -34,7 +41,7 @@ Where the commands that work behave differently from the legacy driver:
 - **`.then($el => …)`, `.each(($el) => …)` and `.within(($el) => …)` hand the callback a read-only snapshot** of the elements, taken when the command runs, which is what a `.should(callback)` gets too. It answers `length`, `text()`, `html()`, `val()`, `attr()`, `prop()` (`id`, `checked`, `selected`, `disabled`, `value`, `tagName`), `is()` with the common pseudo-selectors, `hasClass()`, and `eq()` / `first()` / `last()`. Every other jQuery method, and indexing (`$el[0]`), throws an error pointing to `.invoke()` / `.its()`. `cy.wrap($el)` acts on the element again. Queries inside `.within()` are scoped to its subject.
 - **`cy.document()`** yields a remote subject for the AUT's document. `.its()` and `.invoke()` read the document itself (`cy.document().its('title')`) and `.find()` searches it, but a callback or assertion gets a snapshot, so `.should('have.property', 'title')` or `.then((doc) => doc.title)` doesn't read the document.
 - **`cy.getByRole()`** matches in the AUT. Its `name` can't be a function, and a failure doesn't list the roles on the page.
-- **`.its()` and `.invoke()` run in the AUT.** Their results come back as JSON: an `.invoke()` that returns the subject (`.invoke('show')`) yields the subject, `.its(1)` yields that element, and any other element becomes a description such as `<li#two>`. `.invoke()` can't take a function argument.
+- **`.its()` and `.invoke()` run in the AUT**, in the agent's isolated world. They see the DOM but not the page's own JavaScript properties or the AUT script's patches, so `cy.window().its('appStore')` is undefined and `cy.document().its('cookie')` reads the browser's cookies. Their results come back as JSON: an `.invoke()` that returns the subject (`.invoke('show')`) yields the subject, `.its(1)` yields that element, and any other element becomes a description such as `<li#two>`. `.invoke()` can't take a function argument.
 
 - **Traversals** run in the AUT, so their arguments must be selectors or numbers. Passing an element, jQuery object or function fails with an error.
 - **`.check()` / `.uncheck()` with values** yield the whole subject, not only the matching elements.
@@ -42,15 +49,14 @@ Where the commands that work behave differently from the legacy driver:
 - **`.selectFile()`** sends the files' contents to the AUT as base64.
 - **`cy.clearLocalStorage()`** yields `null` rather than the AUT's `Storage` object.
 - **A `cy.visit()` that only changes the hash** waits until automation reports the new URL, instead of listening for `hashchange` in the AUT's window.
-- **`cy.screenshot()`** has the agent scroll the AUT, add blackouts and pause animations. Its `onBeforeScreenshot` / `onAfterScreenshot` callbacks get an empty jQuery object instead of the element or the AUT's document element, and `.screenshot()` on a remote subject that matches several elements captures the first rather than failing.
+- **`cy.screenshot()`** has the agent scroll the AUT, add blackouts and pause animations, and the AUT script pause the AUT's timers. Its `onBeforeScreenshot` / `onAfterScreenshot` callbacks get an empty jQuery object instead of the element or the AUT's document element, and `.screenshot()` on a remote subject that matches several elements captures the first rather than failing.
 - **`cy.$$(selector)` and `Cypress.$(selector)` fail with an error.** Without a context, jQuery searches the runner's document, not the cross-origin AUT's. Building elements from HTML (`Cypress.$('<div>')`) and wrapping elements still work.
-- **The `match` assertion** (`.should('match', selector)`) isn't supported on a remote element.
+- **The `match` assertion** (`.should('match', selector)`) on a remote element takes a tag, `#id` and `.class` compound (`li.item#two`), a list of them, or the pseudo-classes `is()` supports, which it answers from the snapshot. Any other selector fails with an error.
 - **`.frame()`** enters the first element that matches, and each iframe level adds a round trip to every retry.
 - **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it.
 - **Navigations are reported by the browser's protocol**, not by listeners in the AUT. A page load the app starts adds a "page load" log and makes the next command wait for it, and a URL change without a page load adds a "new url" log, as in legacy. The differences:
   - `window:before:unload` and `window:unload` don't fire.
   - The "new url" log's "Url Updated By" is `hashchange` or `history` rather than `pushState` / `replaceState`.
-  - The report arrives asynchronously, so a command queued right after the click that started a page load may run before the page starts unloading.
   - WebKit has no event for a URL change within a document, so it counts any AUT frame navigation without a navigation request in flight as one.
   - Firefox reports `history.pushState` and `replaceState` only in releases with `browsingContext.historyUpdated`.
 
@@ -69,10 +75,8 @@ Where the commands that work behave differently from the legacy driver:
 
 ## Uncaught errors
 
-- **Errors reach `uncaught:exception` asynchronously**, reported by the browser's protocol rather than a listener in the AUT. Before each test or hook ends, the driver waits for one round trip to the AUT (up to 1s) and for the errors the browser had already reported, so an error thrown by the last command still fails it. The handler's third argument (the promise) is always `undefined`.
-- **Firefox** reports an unhandled rejection as a plain error, without the "unhandled promise rejection" note.
-- **WebKit** doesn't report unhandled rejections (they carry no location to tell the AUT's from the spec's), and attributes an error to the AUT when its script isn't on the runner's origin, so errors from the AUT's own iframes count too.
-- **Firefox's preload-script error** "Permission denied to access property "length"" is filtered when it has no stack, so an AUT error with exactly that text and no stack would be missed.
+- **Errors reach `uncaught:exception` asynchronously.** Chrome and Electron report them through CDP (`Runtime.exceptionThrown`). In Firefox and WebKit, whose protocols can't report them faithfully (Firefox mixes in its own diagnostics, such as rejected cookies, and drops a rejection's stack; WebKit doesn't report rejections), the AUT script listens for `error` and `unhandledrejection` as the legacy bootstrap does and reports each over a synchronous internal request. Before each test or hook ends, the driver waits for one round trip to the AUT (up to 1s) and for the errors already reported, so an error thrown by the last command still fails it. The handler's third argument (the promise) is always `undefined`.
+- **An error from a cross-origin script** in the AUT reads "Script error." in Firefox and WebKit, as it does with the legacy driver. Chrome reports its details.
 
 ## Dialogs
 
@@ -116,4 +120,5 @@ These ship with the remote driver work but change behavior without it:
 - **Firefox** opens `target=_blank` links as tabs (`browser.link.open_newwindow` = 3) and clamps background tab timers to 4ms instead of 1s.
 - **Firefox and WebKit** close leftover tabs before each test, as Chrome does.
 - **WebKit** no longer leaves a new tab's first request hanging, so `target=_blank` tabs open.
+- **`document.cookie` under `cy.origin`** treats a cookie written with a `Domain` attribute as a domain cookie rather than a host-only one, so deleting it through `document.cookie` also removes it from the browser.
 - **Chrome and Electron** answer a dialog from a frame Cypress didn't patch, such as an iframe inside the AUT, instead of leaving it to block the page: it's accepted, and a prompt gets `null`. Without the remote driver no Cypress events fire for it.

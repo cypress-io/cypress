@@ -237,6 +237,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _socket?: TSocket
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
+  private _automation?: Automation
   protected _netStubbingState?: NetStubbingState
   protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
   protected _proxyRuntime?: ProxyNetworkRuntime
@@ -466,6 +467,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       onError,
       getSpec,
       testingType,
+      reportAutError: async (uncaught) => this._automation?.push('remote:uncaught:exception', uncaught),
+      setBrowserCookie: async (cookie) => {
+        // the browsers the remote driver supports set cookies in automation middleware, so nothing goes to an automation client
+        return this._automation?.request('set:cookie', cookie, () => {
+          throw new Error('set:cookie is not handled by automation middleware')
+        })
+      },
     }
 
     this.getCurrentBrowser = getCurrentBrowser
@@ -816,6 +824,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
+    this._automation = automation
+
     // e2e only?
     options.onResolveUrl = this._onResolveUrl.bind(this)
 

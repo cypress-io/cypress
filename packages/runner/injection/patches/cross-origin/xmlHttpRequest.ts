@@ -1,6 +1,7 @@
 import { captureFullRequestUrl, requestSentWithCredentials } from './utils'
+import type { ReportCredentials } from './utils'
 
-export const patchXmlHttpRequest = (window: Window) => {
+export const patchXmlHttpRequest = (window: Window, reportCredentials: ReportCredentials = requestSentWithCredentials) => {
   // intercept method calls and add cypress headers to determine cookie applications in the proxy
   // for simulated top
 
@@ -37,7 +38,7 @@ export const patchXmlHttpRequest = (window: Window) => {
       try {
         // if the option is specified, communicate it to the the server to the proxy can make the request aware if it needs to potentially apply cross origin cookies
         // if the option isn't set, we can imply the default as we know the "resourceType" in the proxy
-        await requestSentWithCredentials({
+        await reportCredentials({
           url: this._url,
           resourceType: 'xhr',
           credentialStatus: this.withCredentials,

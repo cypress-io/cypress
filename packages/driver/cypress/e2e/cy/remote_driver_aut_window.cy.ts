@@ -19,8 +19,7 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
       cy.wrap(errors).should((e) => expect(e.join()).to.include('app boom'))
     })
 
-    // WebKit gives an unhandled rejection no location to tell the AUT's from the spec's
-    it('reports an unhandled rejection', { browser: '!webkit' }, () => {
+    it('reports an unhandled rejection', () => {
       const errors: string[] = []
 
       cy.on('uncaught:exception', (err) => {
@@ -32,11 +31,7 @@ describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, ()
       cy.get('#reject').click()
       cy.wrap(errors).should((e) => {
         expect(e.join()).to.include('app rejection')
-
-        // BiDi reports an unhandled rejection the same way as a thrown error
-        if (!Cypress.isBrowser('firefox')) {
-          expect(e.join()).to.include('It was caused by an unhandled promise rejection.')
-        }
+        expect(e.join()).to.include('It was caused by an unhandled promise rejection.')
       })
     })
 

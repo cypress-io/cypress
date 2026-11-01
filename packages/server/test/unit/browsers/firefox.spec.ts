@@ -430,7 +430,6 @@ describe('lib/browsers/firefox', () => {
           'network.fetchError',
           'browsingContext.contextCreated',
           'browsingContext.contextDestroyed',
-          'log.entryAdded',
           'browsingContext.userPromptOpened',
           'script.message',
         ] })
@@ -449,15 +448,15 @@ describe('lib/browsers/firefox', () => {
         expectCalledWith(vi.mocked(BidiAutomation.create), wdInstance, automation)
         expectCalledWith(automation.use, bidiAutomationClient.automationMiddleware)
         expectCalledWith(bidiAutomationClient.setTopLevelContextId as Mock, mockContextId)
-        expect(bidiAutomationClient.patchSyncXhr).not.toHaveBeenCalled()
+        expect(bidiAutomationClient.addRemoteAutScript).not.toHaveBeenCalled()
       })
 
-      it('marks synchronous XHRs in the AUT with experimentalRemoteDriver', async () => {
+      it('adds the remote AUT script to every frame with experimentalRemoteDriver', async () => {
         browser.family = 'firefox'
         browser.majorVersion = '135'
-        await firefox.open(browser as any, 'http://', { ...options, experimentalRemoteDriver: true } as any, automation as any)
+        await firefox.open(browser as any, 'http://', { ...options, experimentalRemoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation as any)
 
-        expect(bidiAutomationClient.patchSyncXhr).toHaveBeenCalledOnce()
+        expect(bidiAutomationClient.addRemoteAutScript).toHaveBeenCalledExactlyOnceWith({ primaryOrigin: 'http://localhost:3500', namespace: '__cypress' })
       })
 
       afterEach(() => {

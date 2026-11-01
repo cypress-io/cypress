@@ -83,8 +83,8 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
 
-  if (options.experimentalRemoteDriver) {
-    await automation.patchSyncXhr()
+  if (options.remoteAutScript) {
+    await automation.addRemoteAutScript(options.remoteAutScript)
   }
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {

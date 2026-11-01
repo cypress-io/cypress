@@ -2,6 +2,7 @@ import Debug from 'debug'
 import { BidiAutomation } from './bidi_automation'
 import type { Client as WebDriverClient } from 'webdriver'
 import type { Automation } from '../automation'
+import type { RemoteAutScriptConfig } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox-util')
 
@@ -47,12 +48,12 @@ export default {
     automation,
     url,
     webdriverClient: wdInstance,
-    remoteDriver,
+    remoteAutScript,
   }: {
     automation: Automation
     url: string
     webdriverClient: WebDriverClient
-    remoteDriver?: boolean
+    remoteAutScript?: RemoteAutScriptConfig
   }): Promise<BidiAutomation> {
     // set the WebDriver classic instance instantiated from geckodriver
     webdriverClient = wdInstance
@@ -65,8 +66,8 @@ export default {
     // we need to set this to bind our AUT intercepts correctly. Hopefully we can move this in the future on a more sure implementation
     client.setTopLevelContextId(contexts[0].context)
 
-    if (remoteDriver) {
-      await client.patchSyncXhr()
+    if (remoteAutScript) {
+      await client.addRemoteAutScript(remoteAutScript)
     }
 
     automation.use(client.automationMiddleware)

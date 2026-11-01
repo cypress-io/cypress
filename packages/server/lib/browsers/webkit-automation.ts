@@ -3,7 +3,7 @@ import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp-protocol/normalize-resource-type'
 import os from 'os'
-import type { RemoteNavigation, RunModeVideoApi } from '@packages/types'
+import type { RemoteAutScriptConfig, RemoteNavigation, RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
 import { cookieMatches } from '../automation/cookie/util'
@@ -14,14 +14,14 @@ import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
-import { RemoteTabs, WebKitRemoteAgent, toPlaywrightServerObject } from '../automation/commands/remote_agent'
+import { RemoteTabs, WebKitRemoteAgent } from '../automation/commands/remote_agent'
 import { RemoteVisit } from '../automation/commands/remote_visit'
 import type { AutScripts } from '../automation/commands/remote_visit'
 import { RemoteClock } from '../automation/commands/remote_clock'
 import { answerRemoteDialog, isRemoteDialogType } from '../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
-import { SYNC_XHR_PATCH } from '../automation/commands/remote_sync_xhr'
-import { RemoteErrorReports, parseUncaughtErrorText } from '../automation/commands/remote_errors'
+import { getRemoteAutScript, callRemoteAut } from '../automation/commands/remote_aut_script'
+import { RemoteErrorReports } from '../automation/commands/remote_errors'
 import { webkitReloadFrame } from '../automation/commands/reload_frame'
 import { webkitNavigateHistory } from '../automation/commands/navigate_history'
 
@@ -42,47 +42,7 @@ type WebKitAutomationOpts = {
   cdpSocketServer?: CDPSocketServer
   // launched for experimentalRemoteDriver, which drives the AUT from outside the page
   remoteDriver?: boolean
-}
-
-interface WebKitConsoleMessage {
-  source: string
-  level: string
-  text: string
-  url?: string
-  stackTrace?: { callFrames?: { functionName: string, url: string, lineNumber: number, columnNumber: number }[] }
-}
-
-// Wraps the console handlers of the WKPage behind a Playwright page. Its session listeners
-// call them by name, so they keep firing after WebKit swaps the page's inspector session.
-// Only reachable when Playwright runs in-process.
-const tapConsole = (page: playwright.Page, onMessage: (message: WebKitConsoleMessage) => void, onRepeat: () => void) => {
-  const serverPage = toPlaywrightServerObject(page)
-  const delegate = typeof serverPage === 'object' && serverPage !== null ? Reflect.get(serverPage, 'delegate') : undefined
-
-  if (typeof delegate !== 'object' || delegate === null) {
-    return false
-  }
-
-  const onConsoleMessage: unknown = Reflect.get(delegate, '_onConsoleMessage')
-  const onRepeatCountUpdated: unknown = Reflect.get(delegate, '_onConsoleRepeatCountUpdated')
-
-  if (typeof onConsoleMessage !== 'function' || typeof onRepeatCountUpdated !== 'function') {
-    return false
-  }
-
-  Reflect.set(delegate, '_onConsoleMessage', function (this: unknown, event: { message: WebKitConsoleMessage }) {
-    onMessage(event.message)
-
-    return onConsoleMessage.call(this, event)
-  })
-
-  Reflect.set(delegate, '_onConsoleRepeatCountUpdated', function (this: unknown, event: unknown) {
-    onRepeat()
-
-    return onRepeatCountUpdated.call(this, event)
-  })
-
-  return true
+  remoteAutScript?: RemoteAutScriptConfig
 }
 
 export class WebKitAutomation {
@@ -93,6 +53,7 @@ export class WebKitAutomation {
   private userAgent: string | null
   private isHeadless: boolean
   private remoteDriver: boolean
+  private remoteAutScript?: RemoteAutScriptConfig
   private remoteAgent = new WebKitRemoteAgent()
   private remoteTabs = new RemoteTabs(() => {
     return this.getExtraPages().map((page) => {
@@ -136,6 +97,7 @@ export class WebKitAutomation {
     this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
     this.remoteDriver = !!opts.remoteDriver
+    this.remoteAutScript = opts.remoteAutScript
     this.cdpSocketServer = opts.cdpSocketServer
   }
 
@@ -183,10 +145,11 @@ export class WebKitAutomation {
     await this.cdpSocketServer?.attachCDPClient(new WebKitCDPBridge(this.page))
 
     this.handleRequestEvents()
-    this.listenForAutErrors()
-
     if (this.remoteDriver) {
-      await this.page.addInitScript({ content: SYNC_XHR_PATCH })
+      if (this.remoteAutScript) {
+        await this.page.addInitScript({ content: await getRemoteAutScript(this.remoteAutScript, { reportErrors: true }) })
+      }
+
       await this.context.exposeBinding(REMOTE_STUB_BINDING, async (source, payload: string) => {
         try {
           if (source.frame === this.getAutFrame()) {
@@ -473,7 +436,6 @@ export class WebKitAutomation {
    * back to its `id` attribute, both of which the runner sets to
    * `Your project: '<projectName>'` (see AUT_FRAME_NAME_IDENTIFIER).
    */
-  // Playwright drops an error WebKit reports only as a repeat of the previous console message
   private isAutFrame (frame: playwright.Frame) {
     try {
       return frame === this.getAutFrame()
@@ -537,43 +499,6 @@ export class WebKitAutomation {
 
       push({ event: 'withinDocument', source: isHashChange ? 'hashchange' : 'history' })
     })
-  }
-
-  private listenForAutErrors () {
-    let lastError: WebKitConsoleMessage | undefined
-
-    const tapped = tapConsole(this.page, (message) => {
-      lastError = message.level === 'error' && message.source === 'javascript' ? message : undefined
-
-      if (lastError) {
-        this.remoteErrors.report(this.onAutError(lastError))
-      }
-    }, () => {
-      if (lastError) {
-        this.remoteErrors.report(this.onAutError(lastError))
-      }
-    })
-
-    if (!tapped) {
-      debug('could not reach Playwright\'s WebKit page; AUT errors will not be reported')
-    }
-  }
-
-  // WebKit doesn't say which frame an error came from, so an error thrown by a script
-  // outside the runner's origin is taken to be the AUT's. An unhandled rejection has no
-  // script location at all, so it can't be told apart from the spec's and isn't reported.
-  private onAutError = async ({ text, url, stackTrace }: WebKitConsoleMessage) => {
-    try {
-      if (!url || new URL(url).origin === new URL(this.page.url()).origin) {
-        return
-      }
-
-      const frames = stackTrace?.callFrames?.map((frame) => `    at ${frame.functionName || '<anonymous>'} (${frame.url}:${frame.lineNumber}:${frame.columnNumber})`)
-
-      await this.automation.push('remote:uncaught:exception', parseUncaughtErrorText(text, frames?.length ? [text, ...frames].join('\n') : undefined, false))
-    } catch (err) {
-      debug('failed to report AUT exception: %s', err?.message)
-    }
   }
 
   private getAutFrame (): playwright.Frame {
@@ -669,6 +594,8 @@ export class WebKitAutomation {
         return await this.remoteClock.restore()
       case 'remote:errors:flush':
         return await this.remoteErrors.flush()
+      case 'remote:aut:call':
+        return await callRemoteAut(this.autScripts.evaluateInAut, data)
       case 'remote:visit:before:load':
         return await this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

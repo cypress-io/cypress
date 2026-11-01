@@ -25,3 +25,17 @@ const RUNNER_FRAME_NAME_IDENTIFIERS = [
 export const isRunnerFrameName = (name?: string) => {
   return !!name && RUNNER_FRAME_NAME_IDENTIFIERS.some((identifier) => name.startsWith(identifier))
 }
+
+// the remote driver's main-world AUT script exposes its controls here, for the driver to call over the automation protocol
+export const REMOTE_AUT_API = '__cypressRemoteAut'
+
+export interface RemoteAutScriptConfig {
+  // the origin the proxy treats as top: an AUT on any other origin gets simulated top-level cookies
+  primaryOrigin: string
+  namespace: string
+}
+
+export interface RemoteAutScriptSettings extends RemoteAutScriptConfig {
+  // set for a browser whose protocol can't report the AUT's uncaught errors faithfully
+  reportErrors: boolean
+}

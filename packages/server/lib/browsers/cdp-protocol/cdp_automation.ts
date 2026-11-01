@@ -9,7 +9,7 @@ import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
 import type { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands, RemoteAgentRequest, RemoteNavigation } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands, RemoteAgentRequest, RemoteAutScriptConfig, RemoteNavigation } from '@packages/types'
 import type { Automation } from '../../automation'
 import type { CyCookie, CyCookieFilter } from '../../automation/cookie/util'
 import { cookieMatches } from '../../automation/cookie/util'
@@ -34,7 +34,7 @@ import { RemoteClock } from '../../automation/commands/remote_clock'
 import { answerRemoteDialog } from '../../automation/commands/remote_dialogs'
 import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../../automation/commands/remote_stubs'
 import { RemoteErrorReports, cdpUncaughtException } from '../../automation/commands/remote_errors'
-import { SYNC_XHR_PATCH } from '../../automation/commands/remote_sync_xhr'
+import { getRemoteAutScript, callRemoteAut } from '../../automation/commands/remote_aut_script'
 import { evaluateInFrameContext } from '../../automation/helpers/evaluate_in_frame_context'
 import type { CdpTab } from '../../automation/commands/remote_agent'
 
@@ -95,6 +95,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private remoteClock: RemoteClock
   private remoteStubs: RemoteStubs
   private remoteErrors: RemoteErrorReports
+  private evaluateInAut: (expression: string) => Promise<unknown>
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -159,6 +160,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     this.remoteVisit = new RemoteVisit(autScripts)
     this.remoteClock = new RemoteClock(autScripts)
     this.remoteErrors = new RemoteErrorReports(autScripts.evaluateInAut)
+    this.evaluateInAut = autScripts.evaluateInAut
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -178,8 +180,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  async patchSyncXhr () {
-    await this.send('Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
+  async addRemoteAutScript (config: RemoteAutScriptConfig) {
+    await this.send('Page.addScriptToEvaluateOnNewDocument', { source: await getRemoteAutScript(config, { reportErrors: false }) })
   }
 
   useRemoteTabs (getTabs: () => CdpTab[]) {
@@ -794,6 +796,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return this.remoteClock.restore()
       case 'remote:errors:flush':
         return this.remoteErrors.flush()
+      case 'remote:aut:call':
+        return callRemoteAut(this.evaluateInAut, data)
       case 'remote:visit:before:load':
         return this.remoteVisit.beforeLoad(data)
       case 'remote:visit:on:load':

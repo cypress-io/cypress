@@ -767,7 +767,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }))
 
     debug('setting up firefox utils')
-    browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient, remoteDriver: !!options.experimentalRemoteDriver })
+    browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient, remoteAutScript: options.remoteAutScript })
   } catch (err: unknown) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
   }

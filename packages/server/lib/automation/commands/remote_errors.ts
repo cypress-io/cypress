@@ -3,33 +3,6 @@ import type { RemoteUncaughtException } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import { SERIALIZE_ERROR } from './remote_visit'
 
-const UNHANDLED_REJECTION_PREFIXES = [
-  // WebKit
-  'Unhandled Promise Rejection: ',
-  // Firefox
-  'uncaught exception: ',
-]
-
-// Splits the "Name: message" text that WebKit and BiDi report for an uncaught error
-export const parseUncaughtErrorText = (text: string, stack: string | undefined, rejection: boolean): RemoteUncaughtException => {
-  let handlerType: RemoteUncaughtException['handlerType'] = rejection ? 'unhandledrejection' : 'error'
-
-  for (const prefix of UNHANDLED_REJECTION_PREFIXES) {
-    if (text.startsWith(prefix)) {
-      text = text.slice(prefix.length)
-      handlerType = 'unhandledrejection'
-    }
-  }
-
-  const match = /^([\w$]*(?:Error|Exception)): ([\s\S]*)$/.exec(text)
-
-  if (match) {
-    return { handlerType, error: { name: match[1], message: match[2], stack } }
-  }
-
-  return { handlerType, error: { message: text, stack } }
-}
-
 // bounds the round trip, which waits on the AUT when it's busy or mid-navigation
 const FLUSH_ROUND_TRIP_LIMIT_MS = 1000
 

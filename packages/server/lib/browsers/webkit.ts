@@ -166,6 +166,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     isHeadless: !!browser.isHeadless,
     cdpSocketServer,
     remoteDriver: !!options.experimentalRemoteDriver,
+    remoteAutScript: options.remoteAutScript,
   })
 
   automation.use(wkAutomation)

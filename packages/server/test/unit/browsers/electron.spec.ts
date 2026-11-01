@@ -8,13 +8,16 @@ import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as electronApp from '../../../lib/util/electron-app'
 import utils from '../../../lib/browsers/utils'
 import { screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
-import { SYNC_XHR_PATCH } from '../../../lib/automation/commands/remote_sync_xhr'
 import menu from '../../../lib/gui/menu'
 import * as plugins from '../../../lib/plugins'
 import * as Windows from '../../../lib/gui/windows'
 import electron from '../../../lib/browsers/electron'
 import * as savedState from '../../../lib/saved_state'
 import type { BrowserLaunchOpts } from '@packages/types'
+
+vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
+  return { ...await importOriginal<typeof import('../../../lib/automation/commands/remote_aut_script')>(), getRemoteAutScript: vi.fn(async () => 'remote AUT script') }
+})
 
 vi.mock('electron', async () => {
   const { default: electronStub } = await import('../../support/helpers/electron_stub')
@@ -334,18 +337,18 @@ describe('lib/browsers/electron', () => {
   })
 
   describe('._getAutomation', () => {
-    it('marks synchronous XHRs in the AUT with experimentalRemoteDriver', async () => {
+    it('adds the remote AUT script to every frame with experimentalRemoteDriver', async () => {
       // @ts-expect-error - partial launch options
-      await electron._getAutomation({}, { onError: () => {}, experimentalRemoteDriver: true }, {})
+      await electron._getAutomation({}, { onError: () => {}, experimentalRemoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } }, {})
 
-      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
+      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
     })
 
-    it('leaves XHRs alone without it', async () => {
+    it('adds no script without it', async () => {
       // @ts-expect-error - partial launch options
       await electron._getAutomation({}, { onError: () => {} }, {})
 
-      expectNotCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
+      expectNotCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
     })
   })
 

@@ -11,8 +11,11 @@ import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as protocol from '../../../lib/browsers/protocol'
-import { SYNC_XHR_PATCH } from '../../../lib/automation/commands/remote_sync_xhr'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
+
+vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
+  return { ...await importOriginal<typeof import('../../../lib/automation/commands/remote_aut_script')>(), getRemoteAutScript: vi.fn(async () => 'remote AUT script') }
+})
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. The plugin lifecycle these specs drive never queries either schema.
@@ -225,10 +228,10 @@ describe('lib/browsers/chrome', () => {
       expectCalledOnceWith(utils.initializeCDP as any, pageCriClient, automation, false)
     })
 
-    it('marks synchronous XHRs in the AUT with experimentalRemoteDriver', async () => {
-      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, experimentalRemoteDriver: true } as any, automation)
+    it('adds the remote AUT script to every frame with experimentalRemoteDriver', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, experimentalRemoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation)
 
-      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: SYNC_XHR_PATCH })
+      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
     })
 
     it('leaves Fetch to the network runtime on the browser (CDP) network path', async () => {
