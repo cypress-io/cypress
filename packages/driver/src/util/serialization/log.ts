@@ -45,7 +45,7 @@ export const preprocessDomElement = (props: HTMLElement) => {
         const options = el.type === 'select-one' ? el.options : el.selectedOptions
 
         if (el.selectedIndex !== -1) {
-          for (let option of options) {
+          for (const option of options) {
             if (option.selected) {
               option.setAttribute('selected', 'true')
             } else {
@@ -117,7 +117,7 @@ const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions
 
   if (_.isPlainObject(props)) {
     // only attempt to try and serialize dom elements and functions (if attemptToSerializeFunctions is set to true)
-    let objWithPossiblySerializableProps = _.pickBy(props, (value) => {
+    const objWithPossiblySerializableProps = _.pickBy(props, (value) => {
       const isSerializable = isSerializableInCurrentBrowser(value)
 
       if (!isSerializable && $dom.isDom(value) || _.isFunction(value) || _.isObject(value)) {
@@ -127,10 +127,10 @@ const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions
       return false
     })
 
-    let objWithOnlySerializableProps = _.pickBy(props, (value) => isSerializableInCurrentBrowser(value))
+    const objWithOnlySerializableProps = _.pickBy(props, (value) => isSerializableInCurrentBrowser(value))
 
     // assign the properties we know we can serialize here
-    let preprocessed: any = preprocessForSerialization(objWithOnlySerializableProps)
+    const preprocessed: any = preprocessForSerialization(objWithOnlySerializableProps)
 
     // and attempt to serialize possibly unserializable props here and fail gracefully if unsuccessful
     _.forIn(objWithPossiblySerializableProps, (value, key) => {
@@ -381,7 +381,7 @@ export const reifySnapshotFromSerialization = (snapshot) => {
  * @returns a serializable form of the log, including attempted serialization of DOM elements and Functions (if explicitly stated)
  */
 export const preprocessLogForSerialization = (logAttrs) => {
-  let { snapshots, ...logAttrsRest } = logAttrs
+  const { snapshots, ...logAttrsRest } = logAttrs
 
   const preprocessed = preprocessLogLikeForSerialization(logAttrsRest)
 
@@ -419,7 +419,8 @@ export const preprocessLogForSerialization = (logAttrs) => {
  * @returns a reified version of what a log is supposed to look like in Cypress
  */
 export const reifyLogFromSerialization = (logAttrs) => {
-  let { snapshots, ... logAttrsRest } = logAttrs
+  const { snapshots: serializedSnapshots, ...logAttrsRest } = logAttrs
+  let snapshots = serializedSnapshots
 
   // if the protocol is enabled, we don't need to reify the snapshot since the snapshot was serializable coming into the primary instance of Cypress.
   // also make sure numTestsKeptInMemory is 0, otherwise we will want to preprocess the snapshot

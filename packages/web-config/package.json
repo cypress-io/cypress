@@ -1,6 +1,13 @@
 {
   "name": "@packages/web-config",
   "version": "0.0.0-development",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "devDependencies": {
     "@babel/core": "7.28.0",
     "@babel/plugin-proposal-decorators": "7.28.0",
@@ -10,6 +17,7 @@
     "@babel/preset-env": "7.28.0",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
+    "@packages/eslint-config": "0.0.0-development",
     "@svgr/webpack": "8.0.1",
     "arraybuffer-loader": "1.0.8",
     "assert": "2.0.0",
@@ -21,7 +29,9 @@
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.8.1",
     "css-modules-typescript-loader": "4.0.1",
+    "eslint": "^9.31.0",
     "html-webpack-plugin": "5.5.3",
+    "jiti": "^2.4.2",
     "mini-css-extract-plugin": "2.9.1",
     "node-sass-glob-importer": "5.3.3",
     "os-browserify": "0.3.0",
@@ -37,6 +47,5 @@
     "webpack": "^5.88.2",
     "webpack-livereload-plugin": "3.0.2"
   },
-  "license": "MIT",
   "nx": {}
 }

@@ -2,7 +2,8 @@ import { attemptDownload } from './mksnapshot-download'
 import { Metadata } from './metadata'
 
 import debug from 'debug'
-import { runMksnapshot, type RunMksnapshotOptions } from './mksnapshot-run'
+import { runMksnapshot } from './mksnapshot-run'
+import type { RunMksnapshotOptions } from './mksnapshot-run'
 import type { VersionMeta } from './config'
 
 const logInfo = debug('cypress:mksnapshot:info')

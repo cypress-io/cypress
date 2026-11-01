@@ -48,6 +48,8 @@ export const UNNEEDED_FILE_GLOBS: string[][] = [
   // Files used as part of prebuilding are not necessary
   ['**', 'node_gyp_bins'],
   ['**', 'better-sqlite3', 'bin'],
+  // better-sqlite3 loads these ahead of build/Release; the Linux ones need a newer glibc than Cypress supports
+  ['**', 'better-sqlite3', 'prebuilds'],
   ['**', 'registry-js', 'prebuilds'],
   ['**', '*.cc'],
   ['**', '*.o'],

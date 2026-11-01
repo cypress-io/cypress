@@ -112,7 +112,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
       const sessionsManager = new SessionsManager(CypressInstance, cy)
 
-      let activeSession = sessionsManager.getActiveSession('session_1')
+      const activeSession = sessionsManager.getActiveSession('session_1')
 
       expect(cySpy).to.be.calledOnce
       expect(activeSession).to.deep.eq(activeSessions['session_1'])

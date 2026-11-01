@@ -43,8 +43,8 @@ const onSSEServer = (app) => {
       return this.sseStream.write({
         data: `${i}`,
       })
-    }
-    , 100)
+    },
+     100)
   })
 }
 

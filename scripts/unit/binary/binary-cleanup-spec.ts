@@ -45,6 +45,7 @@ const REMOVED_FIXTURES = [
   'node_modules/@babel/core/node_modules/.bin/semver',
   'node_modules/registry-js/build/node_gyp_bins/python3',
   'node_modules/better-sqlite3/bin/darwin-arm64/better_sqlite3.node',
+  'node_modules/better-sqlite3/prebuilds/linux-x64/better_sqlite3.node',
   'node_modules/registry-js/prebuilds/win32-x64/registry.node',
   'node_modules/bare-fs/prebuilds/linux-x64/bare-fs.bare',
   'node_modules/registry-js/src/main.cc',

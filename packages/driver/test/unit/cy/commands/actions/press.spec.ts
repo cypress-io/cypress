@@ -83,7 +83,7 @@ describe('cy/commands/actions/press', () => {
     expect(Commands.addAll).toHaveBeenCalledOnce()
 
     // @ts-expect-error - mock.calls is typed with the real addAll() parameters
-    const [[obj]]: [[{press: PressCommand}]] = Commands.addAll.mock.calls
+    const [[obj]]: [[{ press: PressCommand }]] = Commands.addAll.mock.calls
 
     expect(typeof obj.press).toBe('function')
 
