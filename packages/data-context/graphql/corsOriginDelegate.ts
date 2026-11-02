@@ -49,6 +49,7 @@ export const corsOriginDelegate: CorsOptionsDelegate<Request> = (req, callback) 
 
   if (isCloudNotification) {
     const apiEnvironment = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
+    // The API can direct notifications to a local dashboard even when GraphQL uses staging.
     const usesDevelopmentService = resolveCloudEnv() === 'development' || apiEnvironment === 'development'
     const developmentOrigin = usesDevelopmentService ? resolveCloudUrl('development') : CLOUD_URLS.development
     const isCypressCloudOrigin = origin === developmentOrigin || origin === CLOUD_URLS.staging || origin === CLOUD_URLS.production

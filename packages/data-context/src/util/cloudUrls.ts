@@ -8,6 +8,7 @@ export const CLOUD_URLS = {
 
 export type CloudEnv = keyof typeof CLOUD_URLS
 
+/** Resolves the Cloud URL for the selected environment, applying the development workspace offset. */
 export function resolveCloudUrl (environment: CloudEnv, env: NodeJS.ProcessEnv = process.env): string {
   return resolveDevelopmentWorkspaceUrl(CLOUD_URLS[environment], environment, env)
 }

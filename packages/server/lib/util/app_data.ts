@@ -159,6 +159,7 @@ export const path = (...paths: string[]): string => {
   const hasWorkspace = workspaceNum !== undefined
 
   if (hasWorkspace) {
+    // Isolate cached credentials and preferences for each local Cloud database.
     folder = `${folder}-workspace-${workspaceNum}`
   }
 
