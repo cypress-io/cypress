@@ -25,6 +25,12 @@ class RunSpecError extends Error {
 
 export interface ProjectApiShape {
   /**
+   * Records, for `cypress tap`, that the project could not load and why. Replaced by
+   * the session record once the project server starts.
+   */
+  setSessionLoadError(args: { projectRoot: string, testingType: Cypress.TestingType | null, loadError: string }): Promise<void>
+  clearSessionLoadError(): Promise<void>
+  /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
@@ -123,6 +129,9 @@ export class ProjectActions {
       d.currentRecordingInfo = {}
     })
 
+    // The project a load error was recorded for is gone
+    this.ctx.clearLoadErrorForTap()
+
     // Also clear any data associated with the linked cloud project
     this.ctx.actions.cloudProject.clearCloudProject()
 
@@ -148,18 +157,24 @@ export class ProjectActions {
     this.globalLaunchCount = count
   }
 
-  openDirectoryInIDE (projectPath: string) {
-    this.ctx.debug(`opening ${projectPath} in ${this.ctx.coreData.localSettings.preferences.preferredEditorBinary}`)
+  async openDirectoryInIDE (projectPath: string) {
+    const binary = await this.ctx.actions.localSettings.getLaunchableEditor()
 
-    if (!this.ctx.coreData.localSettings.preferences.preferredEditorBinary) {
+    this.ctx.debug(`opening ${projectPath} in ${binary}`)
+
+    if (!binary) {
       return
     }
 
-    if (this.ctx.coreData.localSettings.preferences.preferredEditorBinary === 'computer') {
+    if (binary === 'computer') {
       this.ctx.actions.electron.showItemInFolder(projectPath)
+
+      return
     }
 
-    execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
+    execa(binary, [projectPath]).catch((err) => {
+      this.ctx.debug('error opening %s in %s: %o', projectPath, binary, err)
+    })
   }
 
   setAndLoadCurrentTestingType (type: TestingType) {

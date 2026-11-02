@@ -46,6 +46,10 @@ const pathToTheme = extension.getPathToTheme()
 
 let browserCriClient: BrowserCriClient | undefined
 
+// Outlives each spec's CdpAutomation, so the reset that runs when the next
+// spec's tab opens can clear the origins the previous spec's tab requested.
+const storageOrigins = new Set<string>()
+
 // Generates default Chrome preferences that Cypress applies to all Chrome instances
 const _getDefaultChromePreferences = (): ChromePreferences => {
   return {
@@ -409,7 +413,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal, storageOrigins)
 
   automation.use(cdpAutomation)
 

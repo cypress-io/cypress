@@ -292,7 +292,7 @@ const deploy = {
     await askMissingOptions(['version'])(options)
 
     // runSmokeTests
-    let usingXvfb = xvfb.isNeeded()
+    const usingXvfb = xvfb.isNeeded()
 
     try {
       if (usingXvfb) {

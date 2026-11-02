@@ -777,7 +777,8 @@
     "rm",
     "tar",
     "tslint",
-    "wc"
+    "wc",
+    "Xvfb"
   ],
   "rules": {
     "binaries": "error",
