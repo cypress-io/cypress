@@ -15,6 +15,8 @@ base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.22.
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
+# Oldest glibc the Linux binary supports
+base-internal-glibc-2-31: &base-internal-glibc-2-31 cypress/base-internal:24.22.1-glibc-2.31
 
 parameters:
   force-persist-artifacts:
@@ -734,13 +736,18 @@ commands:
     description: Build better-sqlite3 for glibc 2.31
     steps:
       - setup_remote_docker
+      - restore_cache:
+          key: v{{ checksum ".circleci/cache-version.txt" }}-better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
+            checksum "node_modules/electron/package.json" }}
       - run:
           name: Build better-sqlite3 for glibc 2.31
+          environment:
+            GLIBC_IMAGE: *base-internal-glibc-2-31
           command: |
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:24.22.1-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder $GLIBC_IMAGE /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
               docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install node-gyp rebuild --force_build=1"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
@@ -750,7 +757,7 @@ commands:
               cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
             fi
       - save_cache:
-          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
+          key: v{{ checksum ".circleci/cache-version.txt" }}-better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
             checksum "node_modules/electron/package.json" }}
           paths:
             - better_sqlite3.node
@@ -758,6 +765,35 @@ commands:
           name: Clean up top level better-sqlite3 file
           command: |
             rm ~/cypress/better_sqlite3.node
+
+  test-binary-on-glibc-2-31:
+    description: Install the packaged binary on glibc 2.31 and load its native modules
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Verify the binary on glibc 2.31
+          environment:
+            GLIBC_IMAGE: *base-internal-glibc-2-31
+          command: |
+            set -ex
+            apt update && apt install -y docker.io
+            docker run -d --name glibc-tester --env CI=true $GLIBC_IMAGE /bin/bash -c "sleep 1000000000"
+            docker cp ~/cypress/cypress.zip glibc-tester:/root/cypress.zip
+            docker cp ~/cypress/cypress.tgz glibc-tester:/root/cypress.tgz
+            docker exec glibc-tester /bin/bash -c '
+              set -ex
+              source /root/.bashrc
+              CYPRESS_INSTALL_BINARY=/root/cypress.zip npm i -g /root/cypress.tgz
+              cypress verify
+              # better-sqlite3 loads lazily (Test Replay, Studio), so verify never touches it
+              EXE=$(find "$(cypress cache path)" -maxdepth 3 -type f -name Cypress)
+              SQLITE_FILES=$(find "$(cypress cache path)" -name better_sqlite3.node)
+              test -n "$SQLITE_FILES"
+              for f in $SQLITE_FILES; do
+                ELECTRON_RUN_AS_NODE=1 "$EXE" -e "require(process.argv[1])" "$f"
+              done
+            '
+            docker rm -f glibc-tester
 
   run-driver-integration-tests:
     parameters:
@@ -3004,6 +3040,9 @@ jobs:
       resource_class:
         type: string
         default: xlarge.gen2
+      test-glibc-2-31:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -3019,6 +3058,10 @@ jobs:
       - build-and-package-binary
       - build-cypress-npm-package:
           executor: << parameters.executor >>
+      - when:
+          condition: << parameters.test-glibc-2-31 >>
+          steps:
+            - test-binary-on-glibc-2-31
       - setup_should_persist_artifacts
       - verify_should_persist_artifacts
       - upload-build-artifacts
@@ -3042,7 +3085,7 @@ jobs:
             ITEMS="[]"
             PAGE=""
             while :; do
-              RESP=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
+              RESP=$(curl -sfS \
                 "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?page-token=$PAGE")
               ITEMS=$(jq -n --argjson a "$ITEMS" --argjson b "$(echo "$RESP" | jq '.items')" '$a + $b')
               PAGE=$(echo "$RESP" | jq -r '.next_page_token // empty')

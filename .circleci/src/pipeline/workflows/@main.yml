@@ -342,6 +342,7 @@ linux-x64:
           - ready-to-release
 
     - create-build-artifacts:
+        test-glibc-2-31: true
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
@@ -439,7 +440,7 @@ linux-x64:
     # settle however it settles; the job itself decides whether anything actually
     # failed.
     - notify-binary-failure:
-        context: [ publish-binary, test-runner:npm-release ]
+        context: test-runner:npm-release
         filters: pipeline.git.branch == "develop"
         requires:
           # the packaging job is listed too: when it breaks, the

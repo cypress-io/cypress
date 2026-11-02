@@ -78,8 +78,9 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
   settings are. A commit whose author GitHub cannot resolve still gets a comment,
   just without the tag.
 
-  It needs `CIRCLE_TOKEN` (from the `publish-binary` context) and `GH_TOKEN` (from
-  `test-runner:npm-release`, the same pairing `verify-release-readiness` uses).
+  It reads job statuses from the CircleCI API without a token, which works only
+  because the project is public, and needs `GH_TOKEN` from `test-runner:npm-release`
+  to post the comment.
 
 ## GitHub Actions
 
