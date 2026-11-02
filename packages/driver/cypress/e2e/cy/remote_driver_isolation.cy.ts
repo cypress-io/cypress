@@ -21,16 +21,27 @@ const probes = (go: Go) => {
   })
 
   describe('1 injection', () => {
-    it('window:before:load doesn\'t fire for the AUT', () => {
-      const urls: string[] = []
+    it('window:before:load fires with the cross-origin window before each window:load', () => {
+      const events: string[] = []
 
       cy.on('window:before:load', (win) => {
-        urls.push(win.location.href)
+        try {
+          events.push(`before:load ${win.location.href}`)
+        } catch (err) {
+          events.push(`before:load unreadable: ${(err as Error).name}`)
+        }
+      })
+
+      cy.on('window:load', () => {
+        events.push('load')
       })
 
       go()
       cy.get('#page').should('have.text', '1')
-      cy.wrap(urls).should('be.empty')
+      cy.wrap(events).should((e) => {
+        expect(e).to.have.length.greaterThan(0)
+        expect(e).to.deep.equal(Cypress._.flatten(Cypress._.times(e.length / 2, () => ['before:load unreadable: SecurityError', 'load'])))
+      })
     })
 
     it('window:load fires with the cross-origin window', () => {

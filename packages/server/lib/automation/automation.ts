@@ -237,6 +237,7 @@ export class Automation {
         case 'canceled:download':
         case 'complete:download':
         case 'remote:uncaught:exception':
+        case 'remote:window:before:load':
         case 'remote:stub:call':
         case 'remote:dialog':
         case 'remote:navigation':

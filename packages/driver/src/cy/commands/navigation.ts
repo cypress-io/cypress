@@ -927,7 +927,11 @@ export default (Commands, Cypress, cy, state, config) => {
             // listen for window:before:load and reject if it errors
             // otherwise, resolve once this event fires
             cy.once(event, onEvent)
-            cy.once('window:before:load', onBeforeLoad)
+
+            // the remote driver runs onBeforeLoad in the AUT, whose window is cross-origin to this listener
+            if (!isRemoteDriverEnabled(Cypress)) {
+              cy.once('window:before:load', onBeforeLoad)
+            }
           }
 
           cleanup = () => {

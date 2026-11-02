@@ -791,6 +791,10 @@ class $Cypress {
       case 'app:remote:uncaught:exception':
         return this.cy.onRemoteUncaughtException(args[0])
 
+      // the AUT's window is cross-origin to the runner, so the handler gets it as cy.state('window') holds it
+      case 'app:remote:window:before:load':
+        return this.emit('window:before:load', this.state('window'))
+
       case 'app:remote:stub:call':
         return this.emit('internal:remote:stub:call', args[0])
 

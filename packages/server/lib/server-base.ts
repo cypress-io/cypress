@@ -468,6 +468,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getSpec,
       testingType,
       reportAutError: async (uncaught) => this._automation?.push('remote:uncaught:exception', uncaught),
+      reportBeforeLoad: async (url) => this._automation?.push('remote:window:before:load', { url }),
       setBrowserCookie: async (cookie) => {
         // the browsers the remote driver supports set cookies in automation middleware, so nothing goes to an automation client
         return this._automation?.request('set:cookie', cookie, () => {

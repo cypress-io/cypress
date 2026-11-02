@@ -13,6 +13,7 @@ describe('lib/remote_aut_routes', () => {
   const setCredentials = vi.fn()
   const setBrowserCookie = vi.fn(async () => {})
   const reportAutError = vi.fn(async () => {})
+  const reportBeforeLoad = vi.fn(async () => {})
 
   beforeEach(async () => {
     const app = express()
@@ -24,7 +25,7 @@ describe('lib/remote_aut_routes', () => {
       next()
     })
 
-    addRemoteAutRoutes(router, { namespace: '__cypress', getNetworkProxy: () => ({ setCredentials }) as any, setBrowserCookie, reportAutError })
+    addRemoteAutRoutes(router, { namespace: '__cypress', getNetworkProxy: () => ({ setCredentials }) as any, setBrowserCookie, reportAutError, reportBeforeLoad })
     app.use(router)
 
     server = app.listen(0)
@@ -73,6 +74,28 @@ describe('lib/remote_aut_routes', () => {
       expect((await post('credentials', { url: 'javascript:void 0', resourceType: 'fetch', credentialStatus: 'omit' })).status).toBe(400)
       expect((await post('credentials', { url: 'http://www.idp.com:3500/', resourceType: 'image', credentialStatus: 'omit' })).status).toBe(400)
       expect(setCredentials).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('POST remote/before-load', () => {
+    it('reports the page\'s window:before:load before replying', async () => {
+      let replied = false
+
+      reportBeforeLoad.mockImplementationOnce(async () => {
+        expect(replied).toBe(false)
+      })
+
+      const res = await post('before-load', { url: `${PAGE_ORIGIN}/page` })
+
+      replied = true
+
+      expect(res.status).toBe(204)
+      expect(reportBeforeLoad).toHaveBeenCalledExactlyOnceWith(`${PAGE_ORIGIN}/page`)
+    })
+
+    it('refuses a report for another origin\'s page', async () => {
+      expect((await post('before-load', { url: 'http://www.idp.com:3500/' })).status).toBe(400)
+      expect(reportBeforeLoad).not.toHaveBeenCalled()
     })
   })
 

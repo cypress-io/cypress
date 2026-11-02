@@ -299,6 +299,7 @@ export interface AutomationCommands {
   'remote:visit:before:load': CommandSignature<RemoteVisitBeforeLoad, void>
   'remote:visit:on:load': CommandSignature<RemoteVisitCallbacks, RemoteVisitResult>
   'remote:uncaught:exception': CommandSignature<RemoteUncaughtException, void>
+  'remote:window:before:load': CommandSignature<{ url: string }, void>
   'remote:stub:add': CommandSignature<RemoteStubSpec, void>
   'remote:stub:update': CommandSignature<Pick<RemoteStubSpec, 'id' | 'behaviors'>, void>
   'remote:stubs:reset': CommandSignature<void, void>

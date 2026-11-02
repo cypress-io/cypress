@@ -21,11 +21,12 @@ interface RemoteAutRouteOptions {
   getNetworkProxy: () => NetworkProxy | undefined
   setBrowserCookie: (cookie: SerializableAutomationCookie) => Promise<unknown>
   reportAutError: (uncaught: RemoteUncaughtException) => Promise<unknown>
+  reportBeforeLoad: (url: string) => Promise<unknown>
 }
 
 // The routes the remote driver's main-world AUT script calls to make a cross-origin page behave as if
 // it were top-level, in place of the postMessage the legacy cross-origin injection sends to the runner.
-export const addRemoteAutRoutes = (router: Router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError }: RemoteAutRouteOptions) => {
+export const addRemoteAutRoutes = (router: Router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError, reportBeforeLoad }: RemoteAutRouteOptions) => {
   // a page only reaches the cookies of its own origin, as it could as top
   const getPageUrl = (req: Request & { proxiedUrl?: string }, url: unknown) => {
     try {
@@ -61,6 +62,20 @@ export const addRemoteAutRoutes = (router: Router, { namespace, getNetworkProxy,
     }
 
     getNetworkProxy()?.setCredentials({ url, resourceType, credentialStatus })
+
+    return res.sendStatus(204)
+  })
+
+  router.post(`/${namespace}/remote/before-load`, bodyParser.json(), async (req, res) => {
+    const pageUrl = getPageUrl(req, req.body?.url)
+
+    if (!pageUrl) {
+      return res.sendStatus(400)
+    }
+
+    await reportBeforeLoad(pageUrl.href).catch((err) => {
+      debug('failed to report the AUT\'s window:before:load: %o', err)
+    })
 
     return res.sendStatus(204)
   })

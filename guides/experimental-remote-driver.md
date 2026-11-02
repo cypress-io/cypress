@@ -72,7 +72,7 @@ Where the commands that work behave differently from the legacy driver:
 
 - **`onBeforeLoad` and `onLoad` run inside the AUT's own window**, sent as source. They can't use the test's variables, closures or commands such as `cy.stub`; values come in through the new `args` option (JSON) as their second argument.
 - **`onBeforeLoad`** runs before the AUT's scripts in the document the visit loads. On playwright-webkit too old to remove an init script, it also runs on later AUT loads.
-- **`window:before:load` doesn't fire**, since nothing is injected to fire it. `window:load` fires with the cross-origin window.
+- **`window:before:load` and `window:load` fire with the cross-origin window**, so a handler can't read or change the page. The AUT script reports `window:before:load` over a synchronous internal request at document start, so it reaches the driver before the page's scripts run, but the handler runs in the runner while the page goes on loading. Use `cy.visit()`'s `onBeforeLoad`, which runs in the AUT, to change the page before its scripts run.
 
 ## Uncaught errors
 

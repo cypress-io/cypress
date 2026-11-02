@@ -3,8 +3,8 @@
  * protocol, in the page's main world. The server wraps it to provide `cypressRemoteAutConfig`.
  *
  * In the AUT, it does what the legacy bootstrap does from inside the page: it makes a cross-origin
- * page behave as if it were top-level, wraps the page's timers so cy.screenshot can pause them, and
- * reports the page's uncaught errors where the browser's protocol can't. It talks to the server over internal routes on the page's own origin, since
+ * page behave as if it were top-level, wraps the page's timers so cy.screenshot can pause them, reports
+ * window:before:load, and reports the page's uncaught errors where the browser's protocol can't. It talks to the server over internal routes on the page's own origin, since
  * nothing in the page can reach the runner.
  */
 import { isRunnerFrameName, REMOTE_AUT_API } from '@packages/types'
@@ -84,6 +84,11 @@ if (isAut) {
       window.reportError(err)
     }
   }
+}
+
+if (isAut && isHttp) {
+  // synchronous, so window:before:load reaches the driver before the page's scripts run
+  requestSync('POST', route('before-load'), { url: location.href })
 }
 
 if (isAut && isHttp && cypressRemoteAutConfig.reportErrors) {

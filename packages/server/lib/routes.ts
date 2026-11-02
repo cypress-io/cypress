@@ -47,6 +47,7 @@ export interface InitializeRoutes {
   testingType: Cypress.TestingType
   setBrowserCookie: (cookie: SerializableAutomationCookie) => Promise<unknown>
   reportAutError: (uncaught: RemoteUncaughtException) => Promise<unknown>
+  reportBeforeLoad: (url: string) => Promise<unknown>
 }
 
 export const createCommonRoutes = ({
@@ -60,6 +61,7 @@ export const createCommonRoutes = ({
   onError,
   setBrowserCookie,
   reportAutError,
+  reportBeforeLoad,
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
@@ -202,7 +204,7 @@ export const createCommonRoutes = ({
   })
 
   if ('experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true) {
-    addRemoteAutRoutes(router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError })
+    addRemoteAutRoutes(router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError, reportBeforeLoad })
   }
 
   router.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {
