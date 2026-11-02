@@ -25,7 +25,7 @@ describe('e2e combined plugin event handlers', () => {
       expectInOrder(stdout, [
         'before:run handler 1',
         'before:run handler 2',
-        'before:browser:launch handler 2 received env from handler 1: first',
+        'before:browser:launch handler 2 received preferences from handler 1: #1b1e2e',
         'before:spec handler 1',
         'before:spec handler 2',
         'after:screenshot handler 2 received path from handler 1: screenshot-replacement.png',

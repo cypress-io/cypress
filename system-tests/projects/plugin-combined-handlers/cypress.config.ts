@@ -14,13 +14,13 @@ export default {
       }
 
       on('before:browser:launch', (browser, launchOptions) => {
-        launchOptions.env.COMBINED_HANDLER_FIRST = 'first'
+        launchOptions.preferences.backgroundColor = '#1b1e2e'
 
         return launchOptions
       })
 
       on('before:browser:launch', (browser, launchOptions) => {
-        console.log(`before:browser:launch handler 2 received env from handler 1: ${launchOptions.env.COMBINED_HANDLER_FIRST}`)
+        console.log(`before:browser:launch handler 2 received preferences from handler 1: ${launchOptions.preferences.backgroundColor}`)
 
         return launchOptions
       })
