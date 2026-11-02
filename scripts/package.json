@@ -10,8 +10,7 @@
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
-    "@packages/electron": "0.0.0-development",
-    "chalk": "2.4.2"
+    "@packages/electron": "0.0.0-development"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
