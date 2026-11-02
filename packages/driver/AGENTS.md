@@ -52,6 +52,8 @@ A regression test for a GitHub issue goes in the spec under `cypress/e2e/` for t
 it('can click a button inside a large div with tabindex=0 without scrolling', () => {
 ```
 
+The exception is a bug that exhausts the browser's memory. Reproducing it in a Cypress spec crashes the browser tab, which ends the whole spec instead of failing one test, so put that test in the vitest suite under `test/unit/` and run the code in a child Node process with a capped heap (`--max-old-space-size`), where running out of memory shows up as a non-zero exit. `decodes a large payload within a capped heap` in `test/unit/cypress/utils.spec.ts` is an example. A worker thread's `resourceLimits` is not enough: a large allocation can still abort the whole test process.
+
 ## Integration Points
 
 - Runtime dependency of **@packages/runner** (bundled) and implicitly **@packages/app** (loaded via Module Federation).
