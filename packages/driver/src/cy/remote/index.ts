@@ -3,7 +3,7 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import type { ICypress } from '../../cypress'
 import type { Log } from '../../cypress/log'
-import type { AgentContext, AgentError, AgentMethods, AgentResponse, EvaluateArgs, EvaluateResult, FrameOwner, QueryStep, TabUrl } from '../../remote/protocol'
+import type { AgentContext, AgentError, AgentMethods, AgentResponse, EvaluateArgs, EvaluateResult, FrameOwner, QueryStep, RemoteReads, TabUrl } from '../../remote/protocol'
 import { fromPageValue, toPageValue } from './stub_values'
 import { RemoteElement, RemoteLocator, isRemoteSubject } from './remote_element'
 
@@ -100,10 +100,10 @@ export const callAgent = <M extends keyof AgentMethods>(Cypress: AgentCypress, m
   })
 }
 
-export const resolveRemoteSubject = (Cypress: ICypress, locator: RemoteLocator, log?: Log) => {
-  return callAgent(Cypress, 'resolve', { steps: locator.steps })
+export const resolveRemoteSubject = (Cypress: ICypress, locator: RemoteLocator, log?: Log, reads?: RemoteReads) => {
+  return callAgent(Cypress, 'resolve', { steps: locator.steps, reads })
   .then(({ elements }) => {
-    const resolved = new RemoteElement(locator, elements)
+    const resolved = new RemoteElement(locator, elements, reads)
 
     log?.set({
       $el: resolved,

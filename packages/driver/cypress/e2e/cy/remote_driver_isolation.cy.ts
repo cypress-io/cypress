@@ -184,12 +184,7 @@ const probes = (go: Go) => {
       cy.get('#dbl').invoke('text').should('eq', 'Double')
     })
 
-    it('should have.css fails on a remote element', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`.css(\'overflow\')` is not supported on a subject from `experimentalRemoteDriver`')
-        done()
-      })
-
+    it('should have.css', () => {
       go()
       cy.get('#scroller').should('have.css', 'overflow', 'auto')
     })

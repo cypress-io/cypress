@@ -49,6 +49,7 @@ import type {
   TriggerArgs,
   QueryStep,
   RemoteElementProps,
+  RemoteReads,
   ResolveArgs,
   ResolveResult,
   TypeArgs,
@@ -146,7 +147,7 @@ const getAttributes = (el: HTMLElement) => {
   return attributes
 }
 
-const describe = (el: HTMLElement): RemoteElementProps => {
+const describe = (el: HTMLElement, reads?: RemoteReads): RemoteElementProps => {
   const $el = $(el)
 
   // a shadow root from .shadow() is a node but not an element
@@ -170,11 +171,15 @@ const describe = (el: HTMLElement): RemoteElementProps => {
     focused: $dom.isFocused(el),
     focusable: $dom.isFocusable($el),
     empty: $el.is(':empty'),
+    ...(reads && {
+      styles: _.fromPairs(reads.styles.map((name) => [name, $el.css(name)])),
+      descendants: _.fromPairs(reads.descendants.map((selector) => [selector, $el.has(selector).length > 0])),
+    }),
   }
 }
 
-const resolve = ({ steps }: ResolveArgs): ResolveResult => {
-  return { elements: runSteps(steps).toArray().map(describe) }
+const resolve = ({ steps, reads }: ResolveArgs): ResolveResult => {
+  return { elements: runSteps(steps).toArray().map((el) => describe(el, reads)) }
 }
 
 // The server reads the element by reference to ask CDP which frame it owns, or

@@ -52,6 +52,9 @@ export interface RemoteElementProps {
   focused: boolean
   focusable: boolean
   empty: boolean
+  // only what a retrying assertion asked for in RemoteReads
+  styles?: Record<string, string>
+  descendants?: Record<string, boolean>
 }
 
 export interface AgentError {
@@ -62,8 +65,15 @@ export interface AgentError {
   timedOut?: boolean
 }
 
+// computed styles and descendant selectors a snapshot can't answer without reading the AUT
+export interface RemoteReads {
+  styles: string[]
+  descendants: string[]
+}
+
 export interface ResolveArgs {
   steps: QueryStep[]
+  reads?: RemoteReads
 }
 
 export interface ResolveResult {

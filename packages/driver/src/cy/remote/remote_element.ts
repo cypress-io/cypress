@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import type { QueryStep, RemoteElementProps } from '../../remote/protocol'
+import type { QueryStep, RemoteElementProps, RemoteReads } from '../../remote/protocol'
 
 const SUPPORTED_PSEUDOS = {
   ':visible': (el: RemoteElementProps) => el.visible,
@@ -63,7 +63,8 @@ export class RemoteLocator {
 export class RemoteElement extends RemoteLocator {
   readonly length: number
 
-  constructor (locator: RemoteLocator, readonly elements: RemoteElementProps[]) {
+  // reads, when given, collects what the snapshot lacked, for a retrying assertion's next attempt to read
+  constructor (locator: RemoteLocator, readonly elements: RemoteElementProps[], readonly reads?: RemoteReads) {
     super(locator.steps, locator.selector)
     this.length = elements.length
 
@@ -81,7 +82,7 @@ export class RemoteElement extends RemoteLocator {
     const resolvedIndex = index < 0 ? this.length + index : index
     const element = this.elements[resolvedIndex]
 
-    return new RemoteElement(this.extend({ type: 'traversal', method: 'eq', args: [index] }, this.selector), element ? [element] : [])
+    return new RemoteElement(this.extend({ type: 'traversal', method: 'eq', args: [index] }, this.selector), element ? [element] : [], this.reads)
   }
 
   first () {
@@ -146,16 +147,65 @@ export class RemoteElement extends RemoteLocator {
     return this.elements.some((el) => matchers.some((matches) => matches(el)))
   }
 
-  css (name: string): never {
-    throw unsupported(`.css('${name}')`)
+  css (name: string) {
+    if (typeof name !== 'string') {
+      throw unsupported('.css()')
+    }
+
+    const el = this.elements[0]
+
+    if (!el) {
+      return undefined
+    }
+
+    if (!el.styles || !(name in el.styles)) {
+      throw this.unread('styles', name, `.css('${name}')`)
+    }
+
+    return el.styles[name]
   }
 
-  data (): never {
-    throw unsupported('.data()')
+  // jQuery reads data from data-* attributes, which the snapshot has, so a detached element answers it
+  data (key?: string) {
+    const el = this.elements[0]
+
+    if (!el) {
+      return undefined
+    }
+
+    const detached = document.createElement('div')
+
+    _.each(el.attributes, (value, name) => {
+      if (name.startsWith('data-')) {
+        detached.setAttribute(name, value)
+      }
+    })
+
+    return key === undefined ? $(detached).data() : $(detached).data(key)
   }
 
-  has (selector: string): never {
-    throw unsupported(`.has('${selector}')`)
+  has (selector: string) {
+    if (typeof selector !== 'string') {
+      throw unsupported('.has()')
+    }
+
+    if (this.elements.some((el) => !el.descendants || !(selector in el.descendants))) {
+      throw this.unread('descendants', selector, `.has('${selector}')`)
+    }
+
+    return new RemoteElement(this.extend({ type: 'traversal', method: 'has', args: [selector] }, this.selector), this.elements.filter((el) => el.descendants![selector]), this.reads)
+  }
+
+  private unread (kind: keyof RemoteReads, value: string, what: string) {
+    if (!this.reads) {
+      return unsupported(what)
+    }
+
+    if (!this.reads[kind].includes(value)) {
+      this.reads[kind].push(value)
+    }
+
+    return new Error(`\`${what}\` hasn't been read from the AUT yet.`)
   }
 }
 

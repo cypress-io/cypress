@@ -235,6 +235,27 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
         throw new Error('expected the assertion to fail')
       })
     },
+    'have.css': () => cy.get('#scroller').should('have.css', 'overflow', 'auto').and('not.have.css', 'display', 'none'),
+    'have.css retries until the style changes': () => {
+      cy.get('#scroller').invoke('attr', 'style', 'height: 50px; overflow: hidden')
+      cy.get('#scroller').should('have.css', 'overflow', 'hidden')
+    },
+    '.css() in a should callback': () => cy.get('#two').should(($el) => expect($el.css('display')).to.eq('list-item')),
+    '.css() in a then callback': () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`.css(\'display\')` is not supported on a subject from `experimentalRemoteDriver`')
+      })
+
+      cy.get('#two').then(($el) => $el.css('display')).then(() => {
+        throw new Error('expected .css() to fail')
+      })
+    },
+    'have.data': () => {
+      cy.get('#two').should('have.data', 'count', 2)
+      cy.get('#two').should('have.data', 'label', 'two')
+      cy.get('#two').should('not.have.data', 'missing')
+    },
+    'have.descendants': () => cy.get('#list').should('have.descendants', '#two').and('not.have.descendants', '#far'),
   },
   other: {
     'screenshot of the page': () => cy.screenshot('remote-driver-audit-page'),
