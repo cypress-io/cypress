@@ -122,6 +122,9 @@ commands:
                 - matches:
                     pattern: /^release\/.*/
                     value: <<pipeline.git.branch>>
+                - matches:
+                    pattern: /^v\d+$/
+                    value: <<pipeline.git.branch>>
           steps:
             - run:
                 name: Cancel CI
