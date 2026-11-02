@@ -24,6 +24,8 @@ export {
   MissingCompanionOptionTapError,
   MissingArgumentsTapError,
   MissingOptionTapError,
+  PIN_TARGET_REMEDY,
+  unmetDependency,
 } from '@packages/cypress-sessions/lib/tap-contract'
 
 export type {

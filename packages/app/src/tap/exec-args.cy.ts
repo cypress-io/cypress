@@ -119,6 +119,52 @@ describe('tap/exec-args', () => {
       expect(failure(outcome).detail).to.contain('missing the required --config option')
     })
 
+    it('rejects an option passed without the companion its schema requires, with the pair’s remedy', () => {
+      const withCompanion: TapCommandOptionSchema[] = [
+        ...OPTIONS,
+        { name: 'retry', type: 'number', required: false, requires: { option: 'port', remedy: 'Pass `--port` too.' }, description: 'a retry' },
+      ]
+
+      expect(failure(coerceCommandOptions('run', withCompanion, { config: 'a.json', retry: '1' }))).to.deep.eq({
+        code: 'MISSING_COMPANION_OPTION',
+        detail: 'You passed the `--retry` flag without also passing the `--port` flag.\n\nPass `--port` too.',
+      })
+
+      expect(coerceCommandOptions('run', withCompanion, { config: 'a.json', retry: '1', port: '80' })).to.deep.eq({
+        ok: true,
+        options: { headed: false, config: 'a.json', retry: 1, port: 80 },
+      })
+
+      // The companion alone is fine: the dependency runs one way.
+      expect(coerceCommandOptions('run', withCompanion, { config: 'a.json', port: '80' })).to.deep.eq({
+        ok: true,
+        options: { headed: false, config: 'a.json', port: 80 },
+      })
+    })
+
+    it('excuses a dependency when its `unless` option is passed, but not a defaulted false', () => {
+      const excusable: TapCommandOptionSchema[] = [
+        ...OPTIONS,
+        { name: 'retry', type: 'number', required: false, requires: { option: 'port', unless: 'headed', remedy: 'Pass `--port` too.' }, description: 'a retry' },
+      ]
+
+      expect(coerceCommandOptions('run', excusable, { config: 'a.json', retry: '1', headed: 'true' })).to.deep.eq({
+        ok: true,
+        options: { headed: true, config: 'a.json', retry: 1 },
+      })
+
+      expect(failure(coerceCommandOptions('run', excusable, { config: 'a.json', retry: '1', headed: 'false' })).code).to.eq('MISSING_COMPANION_OPTION')
+    })
+
+    it('reports a malformed value before a missing companion', () => {
+      const withCompanion: TapCommandOptionSchema[] = [
+        ...OPTIONS,
+        { name: 'retry', type: 'number', required: false, requires: { option: 'port', remedy: 'Pass `--port` too.' }, description: 'a retry' },
+      ]
+
+      expect(failure(coerceCommandOptions('run', withCompanion, { config: 'a.json', retry: 'abc' })).code).to.eq('INVALID_VALUE')
+    })
+
     // A flag the command has no such thing as reads as its own condition, not as
     // one of the ways a flag it does have can be wrong.
     it('rejects an option not in the schema, naming it', () => {

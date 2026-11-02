@@ -1403,17 +1403,18 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['command', '--help'], {})).toBe(0)
       expect(logger.print()).toMatchInlineSnapshot(`
-        "Usage: cypress tap command [options]
+        "Usage: cypress tap command [options] --test-id <test-id> --command-id <command-id>
 
         Retrieves a single command from a test's command log: its reporter row, the DOM
         snapshots pinnable on it, and any associated console properties.
 
         Options:
           -t, --test-id <test-id>        test id, as listed by the reporter command
+                                         (required)
           -c, --command-id <command-id>  command id, as listed by the reporter command
                                          — a row number (test body first when
                                          duplicated), an e-prefixed event id, or
-                                         hook-qualified like "h1:3"
+                                         hook-qualified like "h1:3" (required)
           -a, --attempt <attempt>        1-based attempt (attempt 1 = first run);
                                          defaults to the latest
           -d, --depth <depth>            how many levels of nested console properties
