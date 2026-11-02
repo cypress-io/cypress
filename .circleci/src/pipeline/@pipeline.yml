@@ -1894,14 +1894,35 @@ jobs:
                   byRule: ($files | map(.counts | to_entries[]) | group_by(.key) | map({key: .[0].key, value: (map(.value) | add)}) | from_entries)
                 }' > lint-findings-report/report.json
             jq -r '"Lint findings: \(.total) across \(.byPackage | length) package(s)"' lint-findings-report/report.json
-      # Fails only when this branch has more findings than develop. A missing
+      - when:
+          condition:
+            equal: [ develop, << pipeline.git.branch >> ]
+          steps:
+            - run:
+                name: Stage develop lint findings baseline
+                command: |
+                  mkdir -p lint-findings-baseline
+                  cp lint-findings-report/report.json lint-findings-baseline/report.json
+            - save_cache:
+                name: Save develop lint findings baseline
+                key: v{{ checksum ".circleci/cache-version.txt" }}-lint-findings-baseline-{{ .Revision }}
+                paths:
+                  - lint-findings-baseline
+      - store_artifacts:
+          path: lint-findings-report
+      - run:
+          name: cypress info (dev)
+          command: node cli/bin/cypress info --dev
+      - run:
+          name: Audit conditional job filters
+          command: yarn audit-ci-filters
+      # Runs last so a failing comparison does not skip the artifact upload or the
+      # filter audit. Fails only when this branch has more findings than develop. A missing
       # baseline (expired or empty cache) passes so it never blocks a merge.
       - run:
           name: Compare lint findings to develop 📉
           command: |
             if [ "$CIRCLE_BRANCH" = "develop" ]; then
-              mkdir -p lint-findings-baseline
-              cp lint-findings-report/report.json lint-findings-baseline/report.json
               exit 0
             fi
 
@@ -1925,23 +1946,6 @@ jobs:
               echo "This branch adds $delta lint finding(s) over develop. Fix them, or reduce findings elsewhere to offset." >&2
               exit 1
             fi
-      - when:
-          condition:
-            equal: [ develop, << pipeline.git.branch >> ]
-          steps:
-            - save_cache:
-                name: Save develop lint findings baseline
-                key: v{{ checksum ".circleci/cache-version.txt" }}-lint-findings-baseline-{{ .Revision }}
-                paths:
-                  - lint-findings-baseline
-      - store_artifacts:
-          path: lint-findings-report
-      - run:
-          name: cypress info (dev)
-          command: node cli/bin/cypress info --dev
-      - run:
-          name: Audit conditional job filters
-          command: yarn audit-ci-filters
 
   check-ts:
     <<: *defaults
