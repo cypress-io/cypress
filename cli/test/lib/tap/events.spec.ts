@@ -207,14 +207,14 @@ describe('lib/tap/events', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:3000/anon-collect')
   })
 
-  it.each([0, 1, 2, 3, 4, 5, 6])('reports to development workspace %s', async (workspaceNum) => {
+  it.each([1, 2, 3, 4, 5, 6])('reports to development workspace %s', async (workspaceNum) => {
     process.env.CYPRESS_INTERNAL_ENV = 'development'
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = String(workspaceNum)
 
     await reportTapTrace(0)
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(fetchMock.mock.calls[0][0]).toBe(`http://localhost:${3000 + workspaceNum * 10000}/anon-collect`)
+    expect(fetchMock.mock.calls[0][0]).toBe(`http://localhost:${3000 + (workspaceNum === 1 ? 0 : workspaceNum * 10000)}/anon-collect`)
   })
 
   it('uses the workspace for the machine collector', async () => {
@@ -227,13 +227,13 @@ describe('lib/tap/events', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:43000/machine-collect')
   })
 
-  it('uses default development ports for an empty workspace selector', async () => {
+  it('rejects an empty workspace selector', async () => {
     process.env.CYPRESS_INTERNAL_ENV = 'development'
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = ''
 
     await reportTapTrace(0)
 
-    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:3000/anon-collect')
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('uses the workspace when the collector explicitly selects development', async () => {
@@ -258,7 +258,7 @@ describe('lib/tap/events', () => {
       : 'https://cloud.cypress.io/anon-collect')
   })
 
-  it.each(['7', '-1', '1.5', '4abc', '04', ' 4', '4 ', 'NaN'])('sends nothing for invalid development workspace %j', async (workspaceNum) => {
+  it.each(['', '0', '7', '-1', '1.5', '4abc', '04', ' 4', '4 ', 'NaN'])('sends nothing for invalid development workspace %j', async (workspaceNum) => {
     process.env.CYPRESS_INTERNAL_ENV = 'development'
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = workspaceNum
 

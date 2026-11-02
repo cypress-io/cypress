@@ -24,7 +24,7 @@ describe('util', () => {
       expect(path.basename(util.getApplicationDataFolder())).toBe('development')
     })
 
-    it.each([1, 2, 3, 4, 5, 6])('uses an isolated development folder for workspace %s', (workspaceNum) => {
+    it.each([2, 3, 4, 5, 6])('uses an isolated development folder for workspace %s', (workspaceNum) => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
       vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', String(workspaceNum))
 
@@ -39,7 +39,7 @@ describe('util', () => {
       expect(folder.endsWith(path.join('cy', 'development-workspace-4', 'browsers', 'chrome'))).toBe(true)
     })
 
-    it.each(['', '0'])('uses default development storage for workspace selector %j', (workspace) => {
+    it.each(['1'])('uses default development storage for workspace selector %j', (workspace) => {
       vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', workspace)
 
       expect(path.basename(util.getApplicationDataFolder())).toBe('development')
@@ -78,7 +78,7 @@ describe('util', () => {
     it('rejects an invalid development workspace selector', () => {
       vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', '7')
 
-      expect(() => util.getApplicationDataFolder()).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 6')
+      expect(() => util.getApplicationDataFolder()).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 1 to 6')
     })
   })
 

@@ -46,7 +46,7 @@ describe('CloudDataSource development workspace', () => {
       operationType: 'query',
     })
 
-    expect(fetch).toHaveBeenCalledWith(`http://localhost:${workspace * 10000 + 3000}/test-runner-graphql`, expect.anything())
+    expect(fetch).toHaveBeenCalledWith(`http://localhost:${(workspace === 1 ? 0 : workspace * 10000) + 3000}/test-runner-graphql`, expect.anything())
   })
 
   it('resolves workspace URLs per call for Cloud URL consumers', () => {
@@ -55,7 +55,7 @@ describe('CloudDataSource development workspace', () => {
     const { source } = createSource()
 
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '1'
-    expect(source.getCloudUrl('development')).toBe('http://localhost:13000')
+    expect(source.getCloudUrl('development')).toBe('http://localhost:3000')
 
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '4'
     expect(source.getCloudUrl('development')).toBe('http://localhost:43000')

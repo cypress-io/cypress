@@ -1,18 +1,18 @@
 export function resolveDevelopmentWorkspaceNumber (environment: string | undefined, env: NodeJS.ProcessEnv = process.env): number | undefined {
   const workspaceNum = env.CYPRESS_INTERNAL_WORKSPACE_NUM
-  const usesWorkspace = environment === 'development' && workspaceNum !== undefined && workspaceNum !== ''
+  const usesWorkspace = environment === 'development' && workspaceNum !== undefined
 
   if (!usesWorkspace) {
     return undefined
   }
 
-  const isValidWorkspace = /^[0-6]$/.test(workspaceNum)
+  const isValidWorkspace = /^[1-6]$/.test(workspaceNum)
 
   if (!isValidWorkspace) {
-    throw new Error(`CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 6; received ${JSON.stringify(workspaceNum)}`)
+    throw new Error(`CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 1 to 6; received ${JSON.stringify(workspaceNum)}`)
   }
 
-  const isDefaultWorkspace = workspaceNum === '0'
+  const isDefaultWorkspace = workspaceNum === '1'
 
   return isDefaultWorkspace ? undefined : Number(workspaceNum)
 }

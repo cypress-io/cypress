@@ -102,11 +102,11 @@ describe('corsOriginDelegate', () => {
     process.env.CYPRESS_INTERNAL_CLOUD_ENV = 'development'
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '1'
 
-    expect(evaluate(makeReq({ origin: 'http://localhost:13000', path: '/cloud-notification' })).origin).toBe(true)
+    expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(true)
 
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '4'
 
-    expect(evaluate(makeReq({ origin: 'http://localhost:13000', path: '/cloud-notification' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(false)
     expect(evaluate(makeReq({ origin: 'http://localhost:43000', path: '/cloud-notification' })).origin).toBe(true)
   })
 

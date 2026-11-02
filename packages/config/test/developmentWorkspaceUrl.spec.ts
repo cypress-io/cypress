@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { resolveDevelopmentWorkspaceNumber, resolveDevelopmentWorkspaceUrl } from '../src/developmentWorkspaceUrl'
 
 describe('resolveDevelopmentWorkspaceNumber', () => {
-  it.each([1, 2, 3, 4, 5, 6])('resolves development workspace %s', (workspace) => {
+  it.each([2, 3, 4, 5, 6])('resolves development workspace %s', (workspace) => {
     expect(resolveDevelopmentWorkspaceNumber('development', { CYPRESS_INTERNAL_WORKSPACE_NUM: String(workspace) })).toBe(workspace)
   })
 
-  it.each([undefined, '', '0'])('returns no workspace when the selector is %s', (workspace) => {
+  it.each([undefined, '1'])('returns no workspace when the selector is %s', (workspace) => {
     expect(resolveDevelopmentWorkspaceNumber('development', { CYPRESS_INTERNAL_WORKSPACE_NUM: workspace })).toBeUndefined()
   })
 
@@ -16,7 +16,7 @@ describe('resolveDevelopmentWorkspaceNumber', () => {
   })
 
   it('rejects an invalid development workspace', () => {
-    expect(() => resolveDevelopmentWorkspaceNumber('development', { CYPRESS_INTERNAL_WORKSPACE_NUM: '7' })).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 6')
+    expect(() => resolveDevelopmentWorkspaceNumber('development', { CYPRESS_INTERNAL_WORKSPACE_NUM: '7' })).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 1 to 6')
   })
 })
 
@@ -25,20 +25,20 @@ describe('resolveDevelopmentWorkspaceUrl', () => {
     vi.unstubAllEnvs()
   })
 
-  it.each([1, 2, 3, 4, 5, 6])('offsets localhost service ports for workspace %s', (workspace) => {
+  it.each([[1, 3000, 1234], [2, 23000, 21234], [3, 33000, 31234], [4, 43000, 41234], [5, 53000, 51234], [6, 63000, 61234]])('routes workspace %s to the expected localhost ports', (workspace, dashboardPort, apiPort) => {
     const env = { CYPRESS_INTERNAL_WORKSPACE_NUM: String(workspace) }
 
-    expect(resolveDevelopmentWorkspaceUrl('http://localhost:3000', 'development', env)).toBe(`http://localhost:${workspace * 10000 + 3000}`)
-    expect(resolveDevelopmentWorkspaceUrl('http://localhost:1234/', 'development', env)).toBe(`http://localhost:${workspace * 10000 + 1234}/`)
+    expect(resolveDevelopmentWorkspaceUrl('http://localhost:3000', 'development', env)).toBe(`http://localhost:${dashboardPort}`)
+    expect(resolveDevelopmentWorkspaceUrl('http://localhost:1234/', 'development', env)).toBe(`http://localhost:${apiPort}/`)
   })
 
-  it.each([undefined, '', '0'])('keeps default ports when the workspace is %s', (workspace) => {
+  it.each([undefined, '1'])('keeps default ports when the workspace is %s', (workspace) => {
     expect(resolveDevelopmentWorkspaceUrl('http://localhost:3000', 'development', { CYPRESS_INTERNAL_WORKSPACE_NUM: workspace })).toBe('http://localhost:3000')
   })
 
-  it.each(['7', '-1', '4.5', '04', '4e0', '4abc', ' 4 ', 'NaN', 'Infinity'])('rejects malformed workspace %s in development', (workspace) => {
+  it.each(['', '0', '7', '-1', '4.5', '04', '4e0', '4abc', ' 4 ', 'NaN', 'Infinity'])('rejects malformed workspace %s in development', (workspace) => {
     expect(() => resolveDevelopmentWorkspaceUrl('http://localhost:3000', 'development', { CYPRESS_INTERNAL_WORKSPACE_NUM: workspace })).toThrow(
-      `CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 6; received ${JSON.stringify(workspace)}`,
+      `CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 1 to 6; received ${JSON.stringify(workspace)}`,
     )
   })
 
