@@ -4,8 +4,8 @@ import type { PluginEventHandler, RegisteredPluginHandler, TaskEventHandler } fr
 
 type CombineHandlers = (first: RegisteredPluginHandler, second: RegisteredPluginHandler) => RegisteredPluginHandler
 
-// Applies a handler's result to the value it was given, or returns undefined
-// when the server would ignore that result
+// The rule for applying one handler's result to the value it was given. It
+// returns undefined when the server would ignore that result.
 type MergeResult = (value: any, result: any) => Record<string, any> | undefined
 
 function assertFunctionHandler (handler: RegisteredPluginHandler): asserts handler is PluginEventHandler {
