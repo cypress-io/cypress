@@ -1,15 +1,12 @@
-// Isolation spike: each probe expects same-origin behavior. Run under the legacy
-// driver same-origin (validates the probe), the remote driver same-origin, and
-// the remote driver against a cross-origin AUT with no parent.Cypress access.
+// The remote driver against an AUT on baseUrl and on another site; the runner is cross-origin to
+// both. Where the remote driver deviates from the legacy driver, the test asserts the deviation.
 type Go = () => void
 
-const SAME_ORIGIN_URL = '/fixtures/remote-driver-isolation.html'
-
-const goSameOrigin: Go = () => {
-  cy.visit(SAME_ORIGIN_URL)
+const goBaseUrl: Go = () => {
+  cy.visit('/fixtures/remote-driver-isolation.html')
 }
 
-const goCrossOrigin: Go = () => {
+const goOtherSite: Go = () => {
   cy.visit('/fixtures/remote-driver.html')
   cy.get('#isolation-link').click()
   cy.get('#page').should('have.text', '1')
@@ -24,22 +21,19 @@ const probes = (go: Go) => {
   })
 
   describe('1 injection', () => {
-    it('window:before:load fires for the AUT', () => {
+    it('window:before:load doesn\'t fire for the AUT', () => {
       const urls: string[] = []
 
       cy.on('window:before:load', (win) => {
-        try {
-          urls.push(win.location.href)
-        } catch (err) {
-          urls.push(`unreadable: ${(err as Error).name}`)
-        }
+        urls.push(win.location.href)
       })
 
       go()
-      cy.wrap(urls).should((u) => expect(u.join()).to.include('remote-driver-isolation.html'))
+      cy.get('#page').should('have.text', '1')
+      cy.wrap(urls).should('be.empty')
     })
 
-    it('window:load fires for the AUT', () => {
+    it('window:load fires with the cross-origin window', () => {
       const urls: string[] = []
 
       cy.on('window:load', (win) => {
@@ -51,7 +45,7 @@ const probes = (go: Go) => {
       })
 
       go()
-      cy.wrap(urls).should((u) => expect(u.join()).to.include('remote-driver-isolation.html'))
+      cy.wrap(urls).should((u) => expect(u.join()).to.include('unreadable: SecurityError'))
     })
 
     it('cy.clock/tick controls app timers', () => {
@@ -122,9 +116,12 @@ const probes = (go: Go) => {
       cy.hash().should('eq', '')
     })
 
-    it('cy.window / cy.document', () => {
+    it('cy.window().its() yields a stand-in; cy.document().its() reads the document', () => {
       go()
-      cy.window().should('have.property', 'appState')
+      cy.window().its('appState').then((appState) => {
+        expect(String(appState)).to.eq('[AUT window].appState')
+      })
+
       cy.document().its('title').should('eq', 'Isolation spike')
     })
 
@@ -187,7 +184,12 @@ const probes = (go: Go) => {
       cy.get('#dbl').invoke('text').should('eq', 'Double')
     })
 
-    it('should have.css', () => {
+    it('should have.css fails on a remote element', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`.css(\'overflow\')` is not supported on a subject from `experimentalRemoteDriver`')
+        done()
+      })
+
       go()
       cy.get('#scroller').should('have.css', 'overflow', 'auto')
     })
@@ -214,7 +216,7 @@ const probes = (go: Go) => {
   })
 
   describe('4 runner UI', () => {
-    it('query logs carry a DOM snapshot and element count', () => {
+    it('query logs carry no DOM snapshot or element count', () => {
       const logs: any[] = []
 
       cy.on('log:added', (attrs, log) => {
@@ -226,18 +228,18 @@ const probes = (go: Go) => {
         const getLog = logs.filter((log) => log.get('name') === 'get' && log.get('message') === '#dbl').pop()
 
         expect(getLog, 'get log').to.exist
-        expect(getLog.get('numElements'), 'numElements').to.eq(1)
-        expect(getLog.get('snapshots')?.length ?? 0, 'snapshots').to.be.greaterThan(0)
+        expect(getLog.get('numElements'), 'numElements').to.be.undefined
+        expect(getLog.get('snapshots')?.length ?? 0, 'snapshots').to.eq(0)
       })
     })
   })
 
   describe('5 live objects in spec code', () => {
-    it('cy.window().then reads app state', () => {
+    it('cy.window().then yields a stand-in that can\'t read app state', () => {
       go()
       cy.get('#dbl').click()
       cy.window().then((win: any) => {
-        expect(win.appState.clicks).to.eq(1)
+        expect(String(win.appState.clicks)).to.eq('[AUT window].appState.clicks')
       })
     })
 
@@ -248,11 +250,12 @@ const probes = (go: Go) => {
       })
     })
 
-    it('.then($el) yields a DOM element', () => {
+    it('.then($el) yields a snapshot, not a DOM element', () => {
       go()
       cy.get('#dbl').then(($el) => {
-        expect(Cypress.dom.isElement($el)).to.be.true
-        expect($el[0].tagName).to.eq('BUTTON')
+        expect(Cypress.dom.isElement($el)).to.be.false
+        expect($el.prop('tagName')).to.eq('BUTTON')
+        expect(() => $el[0]).to.throw()
       })
     })
 
@@ -278,12 +281,10 @@ const probes = (go: Go) => {
   })
 }
 
-describe('isolation spike', { browser: { family: 'chromium' }, defaultCommandTimeout: 2000 }, () => {
-  describe('legacy driver, same-origin', { experimentalRemoteDriver: false }, () => probes(goSameOrigin))
+describe('remote driver isolation', () => {
+  describe('AUT on baseUrl', () => probes(goBaseUrl))
 
-  describe('remote driver, same-origin', { experimentalRemoteDriver: true }, () => probes(goSameOrigin))
-
-  describe('remote driver, cross-origin', { experimentalRemoteDriver: true }, () => probes(goCrossOrigin))
+  describe('AUT on another site', () => probes(goOtherSite))
 })
 
 export {}

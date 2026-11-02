@@ -1,12 +1,11 @@
-// Isolation spike, dialog probes. Kept apart because a real (unstubbed) dialog
-// can block the AUT and hang the rest of the run.
+// Kept apart because a real (unanswered) dialog can block the AUT and hang the rest of the run.
 type Go = () => void
 
-const goSameOrigin: Go = () => {
+const goBaseUrl: Go = () => {
   cy.visit('/fixtures/remote-driver-isolation.html')
 }
 
-const goCrossOrigin: Go = () => {
+const goOtherSite: Go = () => {
   cy.visit('/fixtures/remote-driver.html')
   cy.get('#isolation-link').click()
   cy.get('#page').should('have.text', '1')
@@ -26,21 +25,36 @@ const probes = (go: Go) => {
     cy.wrap(alerts).should('deep.equal', ['app alert'])
   })
 
-  it('window:confirm can answer the confirm', () => {
-    cy.on('window:confirm', () => false)
+  it('a window:confirm handler can\'t refuse the confirm', () => {
+    const confirms: string[] = []
+
+    cy.on('window:confirm', (text) => {
+      confirms.push(text)
+
+      return false
+    })
 
     go()
+    cy.get('#confirm').click()
+    cy.get('#dialog-result').should('have.text', 'confirmed:true')
+    cy.wrap(confirms).should('deep.equal', ['app confirm'])
+  })
+
+  it('a stubbed confirm answers it', () => {
+    go()
+    cy.window().then((win) => {
+      cy.stub(win, 'confirm').returns(false)
+    })
+
     cy.get('#confirm').click()
     cy.get('#dialog-result').should('have.text', 'confirmed:false')
   })
 }
 
-describe('isolation spike: dialogs', { browser: { family: 'chromium' }, defaultCommandTimeout: 2000 }, () => {
-  describe('legacy driver, same-origin', { experimentalRemoteDriver: false }, () => probes(goSameOrigin))
+describe('remote driver isolation: dialogs', () => {
+  describe('AUT on baseUrl', () => probes(goBaseUrl))
 
-  describe('remote driver, same-origin', { experimentalRemoteDriver: true }, () => probes(goSameOrigin))
-
-  describe('remote driver, cross-origin', { experimentalRemoteDriver: true }, () => probes(goCrossOrigin))
+  describe('AUT on another site', () => probes(goOtherSite))
 })
 
 export {}

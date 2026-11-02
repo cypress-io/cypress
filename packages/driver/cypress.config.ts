@@ -57,7 +57,7 @@ export const baseConfig: Cypress.ConfigOptions = {
 // these need experimentalRemoteDriver set for the project, so cypress.config-remoteDriver.ts runs them
 export const REMOTE_DRIVER_SPECS = [
   'cypress/e2e/e2e/remote_cross_origin/**/*.cy.ts',
-  'cypress/e2e/cy/remote_driver_{agents,aut_window,clock,commands,frames,tabs}.cy.ts',
+  'cypress/e2e/cy/remote_driver_{agents,aut_window,clock,commands,frames,isolation,isolation_dialogs,tabs}.cy.ts',
 ]
 
 export default defineConfig({
