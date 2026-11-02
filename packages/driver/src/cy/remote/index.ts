@@ -106,6 +106,7 @@ export const resolveRemoteSubject = (Cypress: ICypress, locator: RemoteLocator, 
     const resolved = new RemoteElement(locator, elements)
 
     log?.set({
+      $el: resolved,
       consoleProps: () => {
         return {
           Selector: locator.selector,

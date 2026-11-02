@@ -216,20 +216,24 @@ const probes = (go: Go) => {
   })
 
   describe('4 runner UI', () => {
-    it('query logs carry no DOM snapshot or element count', () => {
+    it('query logs carry an element count and visibility but no DOM snapshot', () => {
       const logs: any[] = []
 
       cy.on('log:added', (attrs, log) => {
         logs.push(log)
       })
 
-      go()
-      cy.get('#dbl').should('exist').then(() => {
-        const getLog = logs.filter((log) => log.get('name') === 'get' && log.get('message') === '#dbl').pop()
+      const getLog = (selector: string) => logs.filter((log) => log.get('name') === 'get' && log.get('message') === selector).pop()
 
-        expect(getLog, 'get log').to.exist
-        expect(getLog.get('numElements'), 'numElements').to.be.undefined
-        expect(getLog.get('snapshots')?.length ?? 0, 'snapshots').to.eq(0)
+      go()
+      cy.get('#dbl').should('exist')
+      cy.get('button').should('have.length.greaterThan', 3)
+      cy.get('#hidden').should('exist').then(() => {
+        expect(getLog('#dbl').get('numElements'), '#dbl numElements').to.eq(1)
+        expect(getLog('#dbl').get('visible'), '#dbl visible').to.be.true
+        expect(getLog('#dbl').get('snapshots')?.length ?? 0, 'snapshots').to.eq(0)
+        expect(getLog('button').get('numElements'), 'button numElements').to.be.greaterThan(3)
+        expect(getLog('#hidden').get('visible'), '#hidden visible').to.be.false
       })
     })
   })

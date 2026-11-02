@@ -54,7 +54,7 @@ Where the commands that work behave differently from the legacy driver:
 - **The `match` assertion** (`.should('match', selector)`) on a remote element takes a tag, `#id` and `.class` compound (`li.item#two`), a list of them, or the pseudo-classes `is()` supports, which it answers from the snapshot. Any other selector fails with an error.
 - **`have.css`, `have.data` and `have.descendants`** on a remote element fail with an error, since the snapshot doesn't carry computed styles, data or descendants.
 - **`.frame()`** enters the first element that matches, and each iframe level adds a round trip to every retry.
-- **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it. Query logs also carry no element count or visibility, so the command log shows no count badge.
+- **No DOM snapshots** of a cross-origin AUT, so command log time-travel shows nothing for it.
 - **Navigations are reported by the browser's protocol**, not by listeners in the AUT. A page load the app starts adds a "page load" log and makes the next command wait for it, and a URL change without a page load adds a "new url" log, as in legacy. The differences:
   - `window:before:unload` and `window:unload` don't fire.
   - The "new url" log's "Url Updated By" is `hashchange` or `history` rather than `pushState` / `replaceState`.

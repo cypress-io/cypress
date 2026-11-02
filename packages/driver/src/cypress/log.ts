@@ -4,6 +4,7 @@ import $ from 'jquery'
 import clone from 'clone'
 
 import { HIGHLIGHT_ATTR } from '../cy/snapshots'
+import { isRemoteElement } from '../cy/remote/remote_element'
 import type { ISnapshots } from '../cy/snapshots'
 import $dom from '../dom'
 import $utils from './utils'
@@ -718,6 +719,16 @@ export class Log {
       return
     }
 
+    // a remote element has nothing in the runner to highlight, only a snapshot to count
+    if (isRemoteElement($el)) {
+      this.unset('$el')
+
+      return this.set({
+        numElements: $el.length,
+        visible: this.isVisible($el.length, () => $el.elements.filter((el) => el.visible).length),
+      })
+    }
+
     if (_.isElement($el)) {
       // wrap the element in jquery
       // if its just a plain element
@@ -736,11 +747,11 @@ export class Log {
     return this.set({
       highlightAttr: HIGHLIGHT_ATTR,
       numElements,
-      visible: this.isVisible($el, numElements),
+      visible: this.isVisible(numElements, () => $el.filter(':visible').length),
     })
   }
 
-  private isVisible ($el: JQuery<Element>, numElements: number): boolean | undefined {
+  private isVisible (numElements: number, countVisible: () => number): boolean | undefined {
     if (this.get('hidden')) {
       return undefined
     }
@@ -750,7 +761,7 @@ export class Log {
     }
 
     if (numElements <= MAX_VISIBILITY_CHECK_ELEMENTS) {
-      return numElements === $el.filter(':visible').length
+      return numElements === countVisible()
     }
 
     return undefined
