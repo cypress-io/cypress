@@ -26,7 +26,7 @@ import { openProject } from './open_project'
 import { cache } from './cache'
 import { graphqlSchema } from '@packages/data-context/graphql/schema'
 import { openExternal } from './gui/links'
-import { getUserEditor } from './util/editors'
+import { getUserEditors } from './util/editors'
 import * as savedState from './saved_state'
 import * as appData from './util/app_data'
 import browsers from './browsers'
@@ -248,10 +248,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       async getPreferences () {
         return (await savedState.create()).get()
       },
-      async getAvailableEditors () {
-        const { availableEditors } = await getUserEditor(true)
-
-        return availableEditors
+      getAvailableEditors () {
+        return getUserEditors()
       },
     },
     cohortsApi: {
