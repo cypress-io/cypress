@@ -40,7 +40,6 @@ Thanks for taking the time to contribute! :smile:
       - [Tasks](#tasks)
         - [Common Top Level Tasks](#common-top-level-tasks)
         - [Package-Level Scripts](#package-level-scripts)
-      - [Local Cloud Workspaces](#local-cloud-workspaces)
       - [Internal Vite Options](#internal-vite-options)
         - [`CYPRESS_INTERNAL_VITE_DEV`](#cypress_internal_vite_dev)
         - [`CYPRESS_INTERNAL_VITE_INSPECT`](#cypress_internal_vite_inspect)
@@ -391,31 +390,6 @@ Each package is responsible for building itself and testing itself and can do so
 | `test-unit`        | Run all unit tests within the package; `exit 0` if N/A                                                                                                   |
 | `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
 | `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
-
-#### Local Cloud Workspaces
-
-When connecting to an isolated local `cypress-services` checkout, set
-`CYPRESS_INTERNAL_ENV=development` and `CYPRESS_INTERNAL_WORKSPACE_NUM` to a
-workspace number from `0` through `5`. Workspace `0` is the default when the
-variable is unset. Cypress adds `workspace number × 10000` to
-the default local Cloud service ports. For example, workspace 4 uses API port
-`41234` and dashboard port `43000`:
-
-```shell
-CYPRESS_INTERNAL_ENV=development CYPRESS_INTERNAL_WORKSPACE_NUM=4 yarn cypress:run --project /path/to/project --record --key <record_key>
-```
-
-This applies to recording, Cloud GraphQL, authentication links, event collection,
-and development schema/validation sync. The local services must already be
-configured to listen on the matching ports. Workspace `0` uses ports `1234` and `3000` and the default app data folder. Invalid workspace
-numbers are rejected when selecting development services. Other environments
-keep their existing URLs, including explicit per-service environment selections
-such as `CYPRESS_INTERNAL_CLOUD_ENV=staging`. An explicitly supplied Cloud request
-base URL takes precedence over the workspace setting.
-
-Each selected development workspace also uses a separate app data folder, such
-as `development-workspace-4`, to keep cached logins and project preferences
-independent. Project IDs still come from each project's Cypress configuration.
 
 #### Internal Vite Options
 When executing top or package level scripts, [Vite](https://vitejs.dev/) may be used to build/host parts of the application. This section is to serve as a general reference for these environment variables that may be leverage throughout the repository.
