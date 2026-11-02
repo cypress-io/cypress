@@ -100,7 +100,7 @@ describe('corsOriginDelegate', () => {
 
   it('resolves workspace changes when evaluating each request', () => {
     process.env.CYPRESS_INTERNAL_CLOUD_ENV = 'development'
-    process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '1'
+    process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '0'
 
     expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(true)
 

@@ -60,13 +60,13 @@ describe('lib/util/app_data', () => {
       vi.unstubAllEnvs()
     })
 
-    it.each([2, 3, 4, 5, 6])('isolates cached user data for workspace %s', (workspace) => {
+    it.each([1, 2, 3, 4, 5])('isolates cached user data for workspace %s', (workspace) => {
       vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', String(workspace))
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', `development-workspace-${workspace}`, 'cache'))
     })
 
-    it.each([undefined, '1'])('preserves the default folder with selector %s', (workspace) => {
+    it.each([undefined, '0'])('preserves the default folder with selector %s', (workspace) => {
       vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', workspace)
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', 'development', 'cache'))
@@ -101,10 +101,10 @@ describe('lib/util/app_data', () => {
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', 'development-workspace-4-e2e-test', 'cache'))
     })
 
-    it.each(['', '0', '7'])('rejects invalid development workspace %j', (workspace) => {
+    it.each(['', '6', '7'])('rejects invalid development workspace %j', (workspace) => {
       vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', workspace)
 
-      expect(() => AppData.path('cache')).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 1 to 6')
+      expect(() => AppData.path('cache')).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 5')
     })
   })
 

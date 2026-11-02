@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it } from '@jest/globals'
 import { resolveCloudEnv, resolveCloudUrl } from '../../../src/util/cloudUrls'
 
 describe('resolveCloudUrl', () => {
-  it.each([1, 2, 3, 4, 5, 6])('targets development workspace %s', (workspace) => {
-    expect(resolveCloudUrl('development', { CYPRESS_INTERNAL_WORKSPACE_NUM: String(workspace) })).toBe(`http://localhost:${(workspace === 1 ? 0 : workspace * 10000) + 3000}`)
+  it.each([0, 1, 2, 3, 4, 5])('targets development workspace %s', (workspace) => {
+    expect(resolveCloudUrl('development', { CYPRESS_INTERNAL_WORKSPACE_NUM: String(workspace) })).toBe(`http://localhost:${workspace * 10000 + 3000}`)
   })
 
   it('keeps the default development URL without a workspace', () => {

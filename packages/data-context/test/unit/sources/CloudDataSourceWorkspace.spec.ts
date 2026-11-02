@@ -32,7 +32,7 @@ describe('CloudDataSource development workspace', () => {
     }
   }
 
-  it.each([1, 2, 3, 4, 5, 6])('sends GraphQL requests to workspace %s with the development Cloud override', async (workspace) => {
+  it.each([0, 1, 2, 3, 4, 5])('sends GraphQL requests to workspace %s with the development Cloud override', async (workspace) => {
     process.env.CYPRESS_INTERNAL_ENV = 'production'
     process.env.CYPRESS_INTERNAL_CLOUD_ENV = 'development'
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = String(workspace)
@@ -46,7 +46,7 @@ describe('CloudDataSource development workspace', () => {
       operationType: 'query',
     })
 
-    expect(fetch).toHaveBeenCalledWith(`http://localhost:${(workspace === 1 ? 0 : workspace * 10000) + 3000}/test-runner-graphql`, expect.anything())
+    expect(fetch).toHaveBeenCalledWith(`http://localhost:${workspace * 10000 + 3000}/test-runner-graphql`, expect.anything())
   })
 
   it('resolves workspace URLs per call for Cloud URL consumers', () => {
@@ -54,7 +54,7 @@ describe('CloudDataSource development workspace', () => {
 
     const { source } = createSource()
 
-    process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '1'
+    process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '0'
     expect(source.getCloudUrl('development')).toBe('http://localhost:3000')
 
     process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '4'

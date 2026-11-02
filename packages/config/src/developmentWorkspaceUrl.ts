@@ -1,6 +1,6 @@
 /**
  * Validates the selector for the effective service environment. Returns undefined
- * for non-development services and workspace 1, which uses the default ports and app data.
+ * for non-development services and workspace 0, which uses the default ports and app data.
  */
 export function resolveDevelopmentWorkspaceNumber (environment: string | undefined, env: NodeJS.ProcessEnv = process.env): number | undefined {
   const workspaceNum = env.CYPRESS_INTERNAL_WORKSPACE_NUM
@@ -10,13 +10,13 @@ export function resolveDevelopmentWorkspaceNumber (environment: string | undefin
     return undefined
   }
 
-  const isValidWorkspace = /^[1-6]$/.test(workspaceNum)
+  const isValidWorkspace = /^[0-5]$/.test(workspaceNum)
 
   if (!isValidWorkspace) {
-    throw new Error(`CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 1 to 6; received ${JSON.stringify(workspaceNum)}`)
+    throw new Error(`CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 5; received ${JSON.stringify(workspaceNum)}`)
   }
 
-  const isDefaultWorkspace = workspaceNum === '1'
+  const isDefaultWorkspace = workspaceNum === '0'
 
   return isDefaultWorkspace ? undefined : Number(workspaceNum)
 }

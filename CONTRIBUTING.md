@@ -396,8 +396,8 @@ Each package is responsible for building itself and testing itself and can do so
 
 When connecting to an isolated local `cypress-services` checkout, set
 `CYPRESS_INTERNAL_ENV=development` and `CYPRESS_INTERNAL_WORKSPACE_NUM` to a
-workspace number from `1` through `6`. Workspace `1` is the default when the
-variable is unset. For workspaces `2`–`6`, Cypress adds `workspace number × 10000` to
+workspace number from `0` through `5`. Workspace `0` is the default when the
+variable is unset. Cypress adds `workspace number × 10000` to
 the default local Cloud service ports. For example, workspace 4 uses API port
 `41234` and dashboard port `43000`:
 
@@ -407,7 +407,7 @@ CYPRESS_INTERNAL_ENV=development CYPRESS_INTERNAL_WORKSPACE_NUM=4 yarn cypress:r
 
 This applies to recording, Cloud GraphQL, authentication links, event collection,
 and development schema/validation sync. The local services must already be
-configured to listen on the matching ports. Workspace `1` uses ports `1234` and `3000` and the default app data folder. Invalid workspace
+configured to listen on the matching ports. Workspace `0` uses ports `1234` and `3000` and the default app data folder. Invalid workspace
 numbers are rejected when selecting development services. Other environments
 keep their existing URLs, including explicit per-service environment selections
 such as `CYPRESS_INTERNAL_CLOUD_ENV=staging`. An explicitly supplied Cloud request

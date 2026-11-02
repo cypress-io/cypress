@@ -80,15 +80,15 @@ describe('lib/cloud/routes', () => {
       expect((await routes()).apiRoutes.api()).toBe('http://localhost:1234/')
     })
 
-    it.each([1, 2, 3, 4, 5, 6])('targets the API in development workspace %s', async (workspace) => {
+    it.each([0, 1, 2, 3, 4, 5])('targets the API in development workspace %s', async (workspace) => {
       process.env.CYPRESS_INTERNAL_ENV = 'development'
       delete process.env.CYPRESS_CONFIG_ENV
       process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = String(workspace)
 
       const loaded = await routes()
 
-      expect(loaded.getApiUrl()).toBe(`http://localhost:${(workspace === 1 ? 0 : workspace * 10000) + 1234}/`)
-      expect(loaded.apiRoutes.instances(123)).toBe(`http://localhost:${(workspace === 1 ? 0 : workspace * 10000) + 1234}/runs/123/instances`)
+      expect(loaded.getApiUrl()).toBe(`http://localhost:${workspace * 10000 + 1234}/`)
+      expect(loaded.apiRoutes.instances(123)).toBe(`http://localhost:${workspace * 10000 + 1234}/runs/123/instances`)
     })
 
     it('uses the workspace when development is selected by default', async () => {
@@ -113,20 +113,20 @@ describe('lib/cloud/routes', () => {
       expect((await routes()).getApiUrl()).toBe(expected[environment])
     })
 
-    it.each(['', '0', '7'])('rejects an invalid workspace %j in development', async (workspace) => {
+    it.each(['', '6', '7'])('rejects an invalid workspace %j in development', async (workspace) => {
       process.env.CYPRESS_INTERNAL_ENV = 'development'
       delete process.env.CYPRESS_CONFIG_ENV
       process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = workspace
 
       const loaded = await routes()
 
-      expect(() => loaded.getApiUrl()).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 1 to 6')
+      expect(() => loaded.getApiUrl()).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 5')
     })
 
     it('resolves workspace changes per call', async () => {
       process.env.CYPRESS_INTERNAL_ENV = 'development'
       delete process.env.CYPRESS_CONFIG_ENV
-      process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '1'
+      process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '0'
 
       const loaded = await routes()
 
