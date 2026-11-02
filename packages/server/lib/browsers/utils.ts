@@ -417,6 +417,10 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
 }
 
 const initializeCDP = async (criClient: CriClient, automation: Automation, useBrowserNetworkInterception: boolean) => {
+  // Keep the page focused when the browser window loses focus, for example
+  // when another window is in front of it. Otherwise the focused element is
+  // blurred, its blur handlers run, and `:focus` stops matching mid-test.
+  await criClient.send('Emulation.setFocusEmulationEnabled', { enabled: true })
   await criClient.send('Runtime.enable')
   await criClient.send('Runtime.addBinding', {
     name: 'cypressUtilityBinding',
