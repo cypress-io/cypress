@@ -70,7 +70,7 @@
 
 ### Batch 5: Test and script folders
 - [x] system-tests — `projects/` and `project-fixtures/` are sample user apps, so they get correctness rules only (see [Lint fixture projects for correctness only](#12-lint-fixture-projects-for-correctness-only))
-- [ ] scripts
+- [x] scripts
 
 ---
 
