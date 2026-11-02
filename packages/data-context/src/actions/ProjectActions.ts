@@ -25,6 +25,12 @@ class RunSpecError extends Error {
 
 export interface ProjectApiShape {
   /**
+   * Records, for `cypress tap`, that the project could not load and why. Replaced by
+   * the session record once the project server starts.
+   */
+  setSessionLoadError(args: { projectRoot: string, testingType: Cypress.TestingType | null, loadError: string }): Promise<void>
+  clearSessionLoadError(): Promise<void>
+  /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
@@ -122,6 +128,9 @@ export class ProjectActions {
       d.app.browserUserAgent = null
       d.currentRecordingInfo = {}
     })
+
+    // The project a load error was recorded for is gone
+    this.ctx.clearLoadErrorForTap()
 
     // Also clear any data associated with the linked cloud project
     this.ctx.actions.cloudProject.clearCloudProject()

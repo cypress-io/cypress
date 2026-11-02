@@ -53,7 +53,7 @@ export default class Hook implements HookProps {
     // Consecutive duplicates only appear once in command array, but hasDuplicates is true
     // Non-consecutive duplicates appear multiple times in command array, but hasDuplicates is false
     // This returns aliases that have consecutive or non-consecutive duplicates
-    let consecutiveDuplicateAliases: Array<Alias> = []
+    const consecutiveDuplicateAliases: Array<Alias> = []
     const aliases: Array<Alias> = this.commands.map((command) => {
       if (command.alias) {
         if (command.hasChildren) {
@@ -131,9 +131,9 @@ export default class Hook implements HookProps {
   }
 
   commandMatchingErr (errToMatch: Err): CommandModel | undefined {
-    return _(this.commands) // @ts-ignore
+    return _(this.commands)
     .filter(({ err }) => {
-      return err && err.message === errToMatch.message && err.message !== undefined
+      return !!err && err.message === errToMatch.message && err.message !== undefined
     })
     .last()
   }

@@ -1,4 +1,4 @@
-import { isTapError, resolveLiveSession } from '../../cypress-sessions'
+import { isTapError, resolveLiveSession, findStartingSession } from '../../cypress-sessions'
 import type { ReadySessionState } from '../../cypress-sessions'
 import { withTapConnection, validateExecResult } from '../tap-connection'
 import { renderOutcome, renderTapFailure } from '../output'
@@ -11,7 +11,7 @@ import type { TapCliOptions, TapRunState, TapStatus } from '../types'
 // browser tap cannot drive is not a stage polling can outlast, so it is absent.
 // A named `--session` that has gone is one of them, so a poller watching one pid
 // keeps reading `not connected` after it exits rather than starting to error.
-const NOT_CONNECTED_CODES: ReadonlySet<string> = new Set(['NO_SESSION', 'SESSION_NOT_FOUND', 'STALE_SESSION'])
+const NOT_CONNECTED_CODES: ReadonlySet<string> = new Set(['NO_SESSION', 'PROJECT_NOT_LOADED', 'SESSION_NOT_FOUND', 'STALE_SESSION'])
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   const pinned = runState.pinned ? { pinned: runState.pinned } : {}
@@ -33,6 +33,24 @@ const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   }
 }
 
+// A project that could not load never starts a session, so it would otherwise read
+// as `not connected` for as long as it stays broken.
+const notConnectedStatus = async (options: TapCliOptions): Promise<TapStatus> => {
+  const starting = await findStartingSession({ session: options.session, cwd: process.cwd() })
+
+  if (!starting?.loadError) {
+    return { status: 'not connected' }
+  }
+
+  return {
+    status: 'error',
+    pid: starting.pid,
+    projectRoot: starting.projectRoot,
+    testingType: starting.testingType,
+    error: starting.loadError.message,
+  }
+}
+
 const reportStatus = async (options: TapCliOptions): Promise<number> => {
   let selection
 
@@ -41,7 +59,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   } catch (err) {
     // No live session is a status a poller waits on, not a failure.
     if (isTapError(err) && NOT_CONNECTED_CODES.has(err.code)) {
-      renderOutcome('status', { status: 'not connected' } satisfies TapStatus, options.json)
+      renderOutcome('status', await notConnectedStatus(options), options.json)
 
       return 0
     }

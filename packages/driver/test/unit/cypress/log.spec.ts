@@ -112,7 +112,7 @@ describe('LogUtils.toSerializedConsoleProps', () => {
         sparse: new Array(2),
         throwingArray,
         protoValue,
-        count: 1n,
+        count: BigInt(1),
       },
       table: {
         1: () => {

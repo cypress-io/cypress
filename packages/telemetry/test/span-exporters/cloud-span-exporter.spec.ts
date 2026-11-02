@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
+import { OTLPExporterError } from '@opentelemetry/otlp-exporter-base'
 import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
 import { OTLPTraceExporter } from '../../src/span-exporters/cloud-span-exporter'
 
-const genericRequest = { encryption: { encryptRequest: ({ url, method, body }: {url: string, method: string, body: string}) => Promise.resolve({ jwe: 'req' }) } }
+const genericRequest = { encryption: { encryptRequest: ({ url, method, body }: { url: string, method: string, body: string }) => Promise.resolve({ jwe: 'req' }) } }
 
 describe('cloudSpanExporter', () => {
   describe('new', () => {
@@ -243,7 +244,7 @@ describe('cloudSpanExporter', () => {
   })
 
   describe('send', () => {
-    it('returns if shutdownOnce.isCalled is true', () => {
+    it('returns if shutdownOnce.isCalled is true', async () => {
       const exporter = new OTLPTraceExporter()
 
       exporter.convert = (objects) => {
@@ -262,8 +263,7 @@ describe('cloudSpanExporter', () => {
         throw 'onError should not be called'
       }
 
-      // @ts-expect-error
-      exporter._shutdownOnce = { isCalled: true }
+      await exporter.shutdown()
 
       expect(exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)).toBeUndefined()
     })
@@ -301,7 +301,7 @@ describe('cloudSpanExporter', () => {
       const exporter = new OTLPTraceExporter()
 
       return new Promise((resolvePromise, rejectPromise) => {
-        // @ts-expect-error
+        // @ts-expect-error - stub convert to return a plain string instead of a trace request
         exporter.convert = (objects) => {
           expect(objects[0].name).toEqual('string')
 
@@ -331,9 +331,10 @@ describe('cloudSpanExporter', () => {
 
     it('fails to send the request', () => {
       const exporter = new OTLPTraceExporter()
+      const error = new OTLPExporterError('err')
 
       return new Promise((resolvePromise, rejectPromise) => {
-        // @ts-expect-error
+        // @ts-expect-error - stub convert to return a plain string instead of a trace request
         exporter.convert = (objects) => {
           expect(objects[0].name).toEqual('string')
 
@@ -346,8 +347,7 @@ describe('cloudSpanExporter', () => {
           expect(contentType).toEqual('application/json')
           expect(resolve).toBeDefined()
           expect(reject).toBeDefined()
-          // @ts-expect-error
-          reject('err')
+          reject(error)
         }
 
         const onSuccess = () => {
@@ -355,7 +355,7 @@ describe('cloudSpanExporter', () => {
         }
 
         const onError = (err) => {
-          expect(err).toEqual('err')
+          expect(err).toEqual(error)
           resolvePromise()
         }
 

@@ -1042,7 +1042,7 @@ describe('lib/config', () => {
         })
 
         it('detects invalid config with no url', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].url = null
           setup(cfg)
@@ -1051,7 +1051,7 @@ describe('lib/config', () => {
         })
 
         it('detects invalid config with no certs', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].certs = null
           setup(cfg)
@@ -1060,7 +1060,7 @@ describe('lib/config', () => {
         })
 
         it('detects invalid config with no cert', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].certs[0].cert = null
           setup(cfg)
@@ -1069,7 +1069,7 @@ describe('lib/config', () => {
         })
 
         it('detects invalid config with PEM and PFX certs', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].certs[0].pfx = 'a_file'
           setup(cfg)
@@ -1078,7 +1078,7 @@ describe('lib/config', () => {
         })
 
         it('detects invalid PEM config with no key', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].certs[0].key = null
           setup(cfg)
@@ -1087,7 +1087,7 @@ describe('lib/config', () => {
         })
 
         it('detects PEM cert absolute path', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].certs[0].cert = '/home/files/a_file'
           setup(cfg)
@@ -1096,7 +1096,7 @@ describe('lib/config', () => {
         })
 
         it('detects PEM key absolute path', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].certs[0].key = '/home/files/a_file'
           setup(cfg)
@@ -1105,7 +1105,7 @@ describe('lib/config', () => {
         })
 
         it('detects PFX absolute path', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].certs[0].cert = undefined
           cfg.clientCertificates[0].certs[0].pfx = '/home/files/a_file'
@@ -1115,7 +1115,7 @@ describe('lib/config', () => {
         })
 
         it('detects CA absolute path', () => {
-          let cfg = pemCertificate()
+          const cfg = pemCertificate()
 
           cfg.clientCertificates[0].ca[0] = '/home/files/a_file'
           setup(cfg)

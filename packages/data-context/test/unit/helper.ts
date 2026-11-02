@@ -65,6 +65,8 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       resetAuthState: jest.fn(),
     } as unknown as AuthApiShape,
     projectApi: {
+      setSessionLoadError: jest.fn().mockResolvedValue(undefined),
+      clearSessionLoadError: jest.fn().mockResolvedValue(undefined),
       closeActiveProject: jest.fn(),
       insertProjectToCache: jest.fn().mockResolvedValue(undefined),
       getProjectRootsFromCache: jest.fn().mockResolvedValue([]),

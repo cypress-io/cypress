@@ -7,7 +7,7 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
 
-interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
+interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
   $el: JQuery<HTMLFormElement>
 }

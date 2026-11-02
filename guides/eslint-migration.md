@@ -16,28 +16,30 @@
 
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
-- [ ] npm/webpack-preprocessor
-- [ ] npm/webpack-dev-server
-- [ ] npm/vite-plugin-cypress-esm
+- [x] npm/webpack-preprocessor
+- [x] npm/webpack-dev-server
+- [x] npm/vite-plugin-cypress-esm
 - [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
 - [ ] packages/frontend-shared
-- [ ] packages/icons
-- [ ] packages/launcher
-- [ ] packages/https-proxy
-- [ ] packages/proxy
-- [ ] packages/net-stubbing
-- [ ] packages/driver
-- [ ] packages/reporter
+- [x] packages/icons
+- [x] packages/launcher
+- [x] packages/https-proxy
+- [x] packages/network-interception
+- [x] packages/proxy
+- [x] packages/net-stubbing
+- [x] packages/driver
+- [x] packages/reporter
 - [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
-- [ ] packages/runner
-- [ ] packages/extension
-- [ ] packages/network
-- [ ] packages/socket
-- [ ] packages/telemetry
+- [x] packages/runner
+- [x] packages/extension
+- [x] packages/network
+- [x] packages/network-tools
+- [x] packages/socket
+- [x] packages/telemetry
 - [ ] packages/launchpad
 - [x] packages/errors
 - [ ] packages/data-context
@@ -50,18 +52,25 @@
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
 - [x] packages/stderr-filtering ✅ **COMPLETED**
-- [ ] packages/config
-- [ ] packages/root
-- [ ] packages/resolve-dist
-- [ ] packages/packherd-require
-- [ ] packages/v8-snapshot-require
-- [ ] packages/web-config
-- [ ] packages/types
-- [ ] packages/example
+- [x] packages/config
+- [x] packages/root
+- [x] packages/resolve-dist
+- [x] packages/packherd-require
+- [x] packages/v8-snapshot-require
+- [x] packages/web-config
+- [x] packages/types
+- [x] packages/scaffold-config
+- [x] packages/ts
+- [x] packages/example
+
+### Batch 4d: Tooling
+- [x] tooling/electron-mksnapshot
+- [x] tooling/packherd
+- [x] tooling/v8-snapshot
 
 ### Batch 5: Test and script folders
-- [ ] system-tests
-- [ ] scripts
+- [x] system-tests — `projects/` and `project-fixtures/` are sample user apps, so they get correctness rules only (see [Lint fixture projects for correctness only](#12-lint-fixture-projects-for-correctness-only))
+- [x] scripts
 
 ---
 
@@ -100,30 +109,36 @@ For each package in the batch:
    - Delete `.eslintignore` — flat config does not read it. Anything in it that is still needed becomes an `ignores` entry in `eslint.config.ts`.
    - Remove any references to `@cypress/eslint-plugin-dev` in `package.json` (if present).
    - **Remove TSLint configs:** Delete `tslint.json` and remove `tslint` dependencies from `package.json`.
+   - **Drop the `tslint` script** and its call from `check-ts`. `packages/ts/tslint.json` enforces `no-empty` for JS, which `baseConfig` already has, and `no-floating-promises`, which `baseConfig` does not run because it is type-aware. Port it by enabling `projectService` and `@typescript-eslint/no-floating-promises` for the files `check-ts` linted, as `packages/scaffold-config` does.
 2. **Add a new ESLint config file:**
    - Create `eslint.config.ts` in the package root:
      ```ts
-     import baseConfig from '@packages/eslint-config'
-     export default baseConfig
+     import { baseConfig, jsonConfig } from '@packages/eslint-config'
+
+     export default [
+       ...baseConfig,
+       ...jsonConfig,
+     ]
      ```
-   - To keep linting the package's JSON files, spread `jsonConfig` after `baseConfig`, as described in [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig).
+   - `jsonConfig` keeps the package's JSON files linted, as described in [Lint JSON with `jsonConfig`](#7-lint-json-with-jsonconfig). A package that leaves it out exports `baseConfig` alone.
 3. **Ensure dependencies are up to date:**
    - Remove any package-local ESLint plugins now provided by the shared config.
    - Remove TSLint-related dependencies (the new config includes `@typescript-eslint`).
    - **Add the shared ESLint config as a dev dependency:**
      - In each migrated package, add `@packages/eslint-config` to `devDependencies` (use a relative file path if not published to npm).
    - **Add ESLint as a dev dependency:**
-     - Since `@packages/eslint-config` has ESLint as a peer dependency, add `eslint: "^9.18.0"` to `devDependencies`.
+     - Since `@packages/eslint-config` has ESLint as a peer dependency, add `eslint: "^9.31.0"` to `devDependencies`.
 4. **Add lint-staged configuration:**
    - Add a `lint-staged` section to the package's `package.json`:
      ```json
      {
        "lint-staged": {
-         "**/*.{js,jsx,ts,tsx}": "eslint --fix"
+         "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
        }
      }
      ```
    - This ensures that when files are staged for commit, they are automatically linted and fixed using the package's local ESLint configuration.
+   - Drop `json` from the glob if the package leaves out `jsonConfig`; otherwise staged `.json` files just produce a "File ignored" warning.
 5. **Run lint and autofix:**
    - From the package root, run:
      ```
@@ -209,7 +224,7 @@ When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfi
 ### 8. **Deprecate and Remove Old Plugin**
 - `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
 - Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
-- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
+- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js` and `eslint` 8 from the root `package.json`.
 
 ### 9. **Lint-Staged After the Migration**
 The root `lint-staged` config is already a single catch-all pattern, so it needs no change when the last package migrates. Once the root itself moves to flat config, that same pattern runs ESLint 9.
@@ -217,6 +232,57 @@ The root `lint-staged` config is already a single catch-all pattern, so it needs
 ### 10. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
+
+### 11. **Migrate the Vue Frontend Packages**
+
+`packages/app`, `packages/launchpad` and `packages/frontend-shared` share one set of overrides. Spread `vueTsxOverrides` and then `frontendOverrides` after `baseConfig`:
+
+```ts
+import { baseConfig, frontendOverrides, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...jsonConfig,
+  ...vueTsxOverrides,
+  ...frontendOverrides,
+]
+```
+
+`frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
+
+Drop the `defineProps`, `defineEmits`, `defineExpose` and `withDefaults` globals from the old config: `vue-eslint-parser` 10 defines the compiler macros in `<script setup>`.
+
+The old config turned `vue/no-v-html` off. `baseConfig` makes it an error, and the shared config keeps it that way, so each package fixes its own uses as it migrates. Two render text, not HTML, and switch to `{{ }}` interpolation:
+
+| Package | Call site | Why it is text |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `baseError.errorStack` | The stack has only ANSI codes stripped, so `<` in an error message is parsed as markup |
+| launchpad | `src/setup/ManualInstall.vue`, `dep.description` | Dependency descriptions are plain text |
+
+The rest render HTML that is built to be rendered. Keep them, wrapped in `<!-- eslint-disable vue/no-v-html -->` / `<!-- eslint-enable vue/no-v-html -->` with a note on where the HTML comes from. A `disable-next-line` comment does not reach a `v-html` attribute on a later line of the tag:
+
+| Package | Call site | Source of the HTML |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `markdown` | `useMarkdown` (markdown-it) |
+| frontend-shared | `src/warning/Warning.vue` | `useMarkdown` |
+| frontend-shared | `src/composables/examples/UseMarkdownExample.vue` | `useMarkdown` |
+| frontend-shared | `src/components/ShikiHighlight.vue` | Shiki, which escapes the code it highlights |
+| launchpad | `src/setup/SelectFrameworkOrBundler.vue` (twice) | Framework SVG icons |
+| app | `src/runs/RunsContainer.vue` | `useMarkdown` |
+| app | `src/settings/project/ExperimentRow.vue` | `useMarkdown` |
+| app | `src/specs/banners/CloudMessageBanner.vue` | `useMarkdown` with `html: false` |
+| app | `src/runner/ScriptError.vue` | `ansi-to-html` with `escapeXML: true` |
+
+### 12. **Lint Fixture Projects for Correctness Only**
+
+`system-tests/projects/**` and `system-tests/project-fixtures/**` are sample user apps, and system-test snapshots assert on line and column numbers inside them. Reformatting one can shift a snapshot, so `system-tests/eslint.config.ts` lints them for correctness only:
+
+- Every rule whose `meta.type` is `layout` is off, which covers all `@stylistic` rules and the Vue template layout rules. The list is computed from `baseConfig`, so a layout rule added there later is off for fixtures too.
+- Unused `eslint-disable` directives are not reported, since deleting one moves every line below it.
+- Rules that flag ordinary user-app code (`ban-ts-comment`, `prefer-const`, `react/prop-types` and similar) are off, and so is `@typescript-eslint/consistent-type-imports`: Angular resolves a constructor parameter's type to a DI token at runtime, so a type-only import breaks the app.
+- Files that fail to parse on purpose are listed in `ignores`. Fixture `package.json` files are left out of `jsonConfig`, because they mirror the user projects they stand in for.
+
+Do not run a bulk `eslint --fix` over the fixtures to clear a new rule. The rules that still autofix there only rewrite code that already fails `yarn lint`, so a new violation should be fixed by hand, with the affected system tests rerun.
 
 ---
 
@@ -327,7 +393,7 @@ ESLint 9.x auto-detects file extensions, so `--ext` flag is no longer needed.
 {
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.18.0",
+    "eslint": "^9.31.0",
     "jiti": "^2.4.2"
   }
 }
@@ -340,7 +406,7 @@ ESLint 9.x auto-detects file extensions, so `--ext` flag is no longer needed.
 #### 7. **Custom Package Rules**
 If a package needs custom rules, extend the base config:
 ```ts
-import baseConfig from '@packages/eslint-config'
+import { baseConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,

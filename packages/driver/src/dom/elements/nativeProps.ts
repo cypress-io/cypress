@@ -6,9 +6,7 @@ import _ from 'lodash'
 import $window from '../window'
 import { isInput, isTextarea, isSelect, isButton, isSvg } from './elementHelpers'
 
-// @ts-ignore
 const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype']>(klass: T, prop: K) => {
-  // @ts-ignore
   const desc = Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
   if (desc === undefined) {

@@ -17,7 +17,6 @@ describe('src/cy/commands/task', () => {
 
       cy.task('foo').then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
-          args: ['338657716278786'],
           commandName: 'task',
           options: {
             task: 'foo',
@@ -33,7 +32,6 @@ describe('src/cy/commands/task', () => {
 
       cy.task('foo', { foo: 'foo' }).then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
-          args: ['338657716278786', '4940328425038888'],
           commandName: 'task',
           options: {
             task: 'foo',

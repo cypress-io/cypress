@@ -675,7 +675,7 @@ export const AllCypressErrors = {
       return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string })
     }
 
-    let systemErr = error.errors.find((err) => {
+    const systemErr = error.errors.find((err) => {
       return err.kind === 'SystemError'
     })
     const recommendation = systemErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(systemErr.url)}` : null

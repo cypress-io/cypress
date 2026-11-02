@@ -343,7 +343,7 @@ export default (Commands, Cypress, cy, state) => {
       Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
-        subject = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
+        subject = cy.$$(cy.getSubjectFromChain(withinSubject || [cy.$$('body')]))
       }
 
       let $el = cy.$$()

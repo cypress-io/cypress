@@ -1,6 +1,10 @@
 import { objectType } from 'nexus'
 import { Editor } from './gql-Editor'
+import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { maskProxyPassword } from '../../../src/util/maskProxyPassword'
+
+// One value for the whole run, so the preference does not change between queries
+const WELCOME_BYPASSED_AT = Date.now()
 
 export const LocalSettingsPreferences = objectType({
   name: 'LocalSettingsPreferences',
@@ -27,8 +31,16 @@ export const LocalSettingsPreferences = objectType({
     t.json('majorVersionWelcomeDismissed', {
       resolve: async (source, args, ctx) => {
         const preferences = await ctx._apis.localSettingsApi.getPreferences()
+        const dismissed = preferences.majorVersionWelcomeDismissed || {}
 
-        return preferences.majorVersionWelcomeDismissed || {}
+        if (!ctx.lifecycleManager.isWelcomeBypassedForAgent) {
+          return dismissed
+        }
+
+        // Matches what the server did when it skipped the welcome, so the Launchpad does not show it
+        const major = GET_MAJOR_VERSION_FOR_CONTENT()
+
+        return { ...dismissed, [major]: dismissed[major] ?? WELCOME_BYPASSED_AT }
       },
     })
 
@@ -44,7 +56,8 @@ export const LocalSettingsPreferences = objectType({
         try {
           const cliBrowser = ctx.coreData.cliBrowser
 
-          if (!cliBrowser) {
+          // The server launches the browser itself, so the Launchpad launching it too would open a second one
+          if (!cliBrowser || ctx.lifecycleManager.isWelcomeBypassedForAgent) {
             return false
           }
 

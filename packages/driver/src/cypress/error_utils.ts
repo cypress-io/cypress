@@ -280,7 +280,8 @@ const makeErrFromErr = (err, options: any = {}) => {
     err = cypressErr({ message: err })
   }
 
-  let { onFail, errProps } = options
+  const { errProps } = options
+  let { onFail } = options
 
   // assume onFail is a command if
   // onFail is present and isn't a function
@@ -435,7 +436,7 @@ const findPropByParents = (msgPath, propName) => {
 }
 
 const errByPath = (msgPath, args?) => {
-  let msgValue = _.get(allErrorMessages, msgPath)
+  const msgValue = _.get(allErrorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -472,7 +473,7 @@ const errByPath = (msgPath, args?) => {
 
 const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
-  let uncaughtErr = errByPath(errPath, {
+  const uncaughtErr = errByPath(errPath, {
     errMsg: stripAnsi(err.message),
     promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   }) as CypressError
@@ -504,7 +505,8 @@ const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameInde
 }
 
 const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
-  let { stack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
+  const { stack: codeFrameStack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
+  let stack = codeFrameStack
 
   stack = $stackUtils.stackWithContentAppended(err, stack)
   stack = $stackUtils.stackWithReplacementMarkerLineRemoved(stack)
@@ -557,7 +559,8 @@ const getStackFromErrArgs = ({ filename, lineno, colno }) => {
 }
 
 const convertErrorEventPropertiesToObject = (args) => {
-  let { message, filename, lineno, colno, err } = args
+  const { filename, lineno, colno, err } = args
+  let { message } = args
 
   // if the error was thrown as a string (throw 'some error'), `err` is
   // the message ('some error') and message is some browser-created
@@ -578,7 +581,8 @@ interface ErrorFromErrorEvent {
 }
 
 const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
-  let { message, filename, lineno, colno, error } = event
+  const { filename, lineno, colno, error } = event
+  let { message } = event
   let docsUrl = error?.docsUrl
   let docsUrlTitle = error?.docsUrlTitle
   let triggerAction = error?.triggerAction

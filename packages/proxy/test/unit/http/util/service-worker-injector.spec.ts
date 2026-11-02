@@ -50,7 +50,6 @@ const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceW
 
   const actual = injectIntoServiceWorker(Buffer.from(APP_SERVICE_WORKER_BODY), options)
 
-  // eslint-disable-next-line no-new-func
   new Function('self', actual)(fakeSelf)
 
   const fetchListener = listeners.find((entry) => entry.type === 'fetch')!.listener

@@ -3,16 +3,14 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
-const mochaOverrideLevel = ['restoring', 'suite', 'test'] as const
-
-export type MochaOverrideLevel = typeof mochaOverrideLevel[number]
+export type MochaOverrideLevel = 'restoring' | 'suite' | 'test'
 
 type ResolvedTestConfigOverride = {
   /**
    * The list of test config overrides and the invocation details used to add helpful
    * error messaging to consumers if a test override fails validation.
    */
-  testConfigList: Array<TestConfig|ResolvedTestConfigOverride>
+  testConfigList: Array<TestConfig | ResolvedTestConfigOverride>
   /**
    * The test config overrides that will apply to the test if it passes validation.
    */
@@ -33,11 +31,11 @@ type TestConfig = {
   invocationDetails: {
     stack: Object
   }
-};
+}
 
 type ConfigOverrides = {
   expose?: Record<string, any>
-};
+}
 
 type ExposeKeyBackup =
   | { existed: true, value: any }
@@ -89,7 +87,7 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
 
         config(testConfigOverrideCopy)
       } catch (e: any) {
-        let err = $errUtils.errByPath('config.invalid_test_override', {
+        const err = $errUtils.errByPath('config.invalid_test_override', {
           errMsg: e.message,
           overrideLevel,
         })

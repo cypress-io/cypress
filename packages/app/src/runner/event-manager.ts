@@ -4,6 +4,7 @@ import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '../store/mobx-runner-store'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
+import { SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/browser/client'
@@ -29,14 +30,33 @@ type $Cypress = any
 
 const noop = () => {}
 
-let crossOriginOnMessageRef = ({ data, source }: MessageEvent<{
-  data: any
-  source: Window
-}>) => {
+let crossOriginOnMessageRef = (event: MessageEvent) => {
   return undefined
 }
 let crossOriginLogs: {[key: string]: Cypress.Log} = {}
 let hasMochaRunEnded: boolean = false
+
+// Posted by the cross-origin AUT injection before a spec bridge attaches to it.
+const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error', 'cross:origin:aut:set:cookie']
+
+const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
+  const iframe = document.getElementById(`${SPEC_BRIDGE_FRAME_NAME_IDENTIFIER}: ${data.origin}`)
+
+  return iframe instanceof HTMLIFrameElement
+    && iframe.classList.contains('spec-bridge-iframe')
+    && !!source
+    && iframe.contentWindow === source
+    && new URL(iframe.src).origin === origin
+}
+
+const isFromAut = ({ data, source }: MessageEvent) => {
+  if (!source || document.querySelector<HTMLIFrameElement>('iframe.aut-iframe')?.contentWindow !== source) {
+    return false
+  }
+
+  return AUT_CROSS_ORIGIN_EVENTS.includes(data.event)
+    || (data.event === 'cross:origin:backend:request' && data.data?.args?.[0] === 'request:sent:with:credentials')
+}
 
 interface AddGlobalListenerOptions {
   element: AutomationElementId
@@ -866,7 +886,17 @@ export class EventManager {
      */
     try {
       window.top.removeEventListener('message', crossOriginOnMessageRef, false)
-      crossOriginOnMessageRef = ({ data, source }) => {
+      crossOriginOnMessageRef = (event) => {
+        const { data, source } = event
+
+        if (typeof data?.event !== 'string' || !data.event.startsWith('cross:origin:')) {
+          return undefined
+        }
+
+        if (!isFromSpecBridge(event) && !isFromAut(event)) {
+          return undefined
+        }
+
         Cypress?.primaryOriginCommunicator.onMessage({ data, source })
 
         return undefined

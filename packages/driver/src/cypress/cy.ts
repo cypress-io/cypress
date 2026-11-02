@@ -1,4 +1,3 @@
-/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
@@ -179,6 +178,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     keyboard: Keyboard
     mouse: Mouse
   }
+
   queue: CommandQueue
 
   timeout: ITimeouts['timeout']
@@ -756,13 +756,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cy[name] = function (...args) {
       ensureRunnable(cy, name)
 
-      // for privileged commands, we send a message to the server that verifies
-      // them as coming from the spec. the fulfillment of this promise means
-      // the message was received. the implementation for those commands
-      // checks to make sure this promise is fulfilled before sending its
-      // websocket message for running the command to ensure prevent a race
-      // condition where running the command happens before the command is
-      // verified
+      // for privileged commands invoked from the spec, the privileged channel
+      // returns a function the command calls with its options to verify them
+      // with the server before sending its websocket message to run them
       const privilegeVerification = Cypress.emitMap('command:invocation', { name, args })
 
       // this is the first call on cypress
@@ -863,13 +859,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cy[name] = function (...args) {
       ensureRunnable(cy, name)
 
-      // for privileged commands, we send a message to the server that verifies
-      // them as coming from the spec. the fulfillment of this promise means
-      // the message was received. the implementation for those commands
-      // checks to make sure this promise is fulfilled before sending its
-      // websocket message for running the command to ensure prevent a race
-      // condition where running the command happens before the command is
-      // verified
+      // for privileged commands invoked from the spec, the privileged channel
+      // returns a function the command calls with its options to verify them
+      // with the server before sending its websocket message to run them
       const privilegeVerification = Cypress.emitMap('command:invocation', { name, args })
 
       // this is the first call on cypress
@@ -1248,7 +1240,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // make sure our current subject is valid for
       // what we expect in this command
 
-      // @ts-ignore
+      // @ts-expect-error - ensure.isType expects a Chainable, not the $Cy instance
       Cypress.ensure.isType(subject, prevSubject as any, this.state('current').get('name'), this)
     }
 

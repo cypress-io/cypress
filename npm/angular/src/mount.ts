@@ -317,7 +317,7 @@ function registerSignalEventsIfNeeded<T> (
 function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, component: { [key: string]: any } & Partial<OnChanges>, key: string, injector: Injector): void {
   if (config.componentProperties) {
     const expectedChangeKey = `${key}Change`
-    let changeKeyIfExists = !!Object.keys(config.componentProperties).find(
+    const changeKeyIfExists = !!Object.keys(config.componentProperties).find(
       (componentKey) => componentKey === expectedChangeKey,
     )
 
@@ -488,7 +488,7 @@ export function mount<T> (
 
   let mountResponsePromiseResolver: any
   let mountResponsePromiseRejector: any
-  let mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
+  const mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
     mountResponsePromiseResolver = resolve
     mountResponsePromiseRejector = reject
   })
