@@ -3033,6 +3033,9 @@ jobs:
           command: |
             version="0.0.0-dev.<< pipeline.number >>"
             failed=""
+            echo "npm $(npm --version), node $(node --version)"
+            echo "dry-run: $(npm config get dry-run)"
+            env | grep -i '^npm_config' | sed 's/=.*//' || true
             for dir in $(node -e "
               const fs = require('fs')
               for (const d of fs.readdirSync('npm')) {
@@ -3044,7 +3047,7 @@ jobs:
             "); do
               echo "== $dir"
               export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
-              (cd "$dir" && npm pkg set version="$version" && npm publish --tag dev) || failed="$failed $dir"
+              (cd "$dir" && npm pkg set version="$version" && npm publish --tag dev --loglevel=notice) || failed="$failed $dir"
             done
             if [ -n "$failed" ]; then
               echo "Failed to publish:$failed"
