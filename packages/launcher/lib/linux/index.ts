@@ -126,18 +126,23 @@ function getLinuxBrowser (
   .catch(logAndThrowError)
 }
 
-export function getVersionString (path: string) {
+// A binary that cannot start says why on stderr, which is the only text a person has to
+// go on when a path they gave is not recognized as a browser.
+export function getVersionOutput (path: string) {
   debugVerbose('finding version string using command "%s --version"', path)
 
   return utils.getOutput(path, ['--version'])
   .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
-  .then((val) => val.stdout)
-  .then((val) => val.trim())
-  .then((val) => {
-    debugVerbose('stdout for "%s --version": %s', path, val)
+  .then(({ stdout, stderr }) => {
+    debugVerbose('stdout for "%s --version": %s', path, stdout.trim())
+    debugVerbose('stderr for "%s --version": %s', path, stderr?.trim())
 
-    return val
+    return { stdout: stdout.trim(), stderr: (stderr ?? '').trim() }
   })
+}
+
+export function getVersionString (path: string) {
+  return getVersionOutput(path).then(({ stdout }) => stdout)
 }
 
 export function getVersionNumber (version: string, browser: Browser) {

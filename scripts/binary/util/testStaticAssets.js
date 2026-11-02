@@ -1,5 +1,3 @@
-/* eslint-disable arrow-body-style */
-
 const la = require('lazy-ass')
 const fs = require('fs-extra')
 const _ = require('lodash')
@@ -171,9 +169,8 @@ function includesCount (string, subString) {
 
   let n = 0
   let pos = 0
-  let step = subString.length
+  const step = subString.length
 
-  // eslint-disable-next-line
   while (true) {
     pos = string.indexOf(subString, pos)
     if (pos >= 0) {

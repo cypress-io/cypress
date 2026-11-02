@@ -24,6 +24,8 @@ import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHand
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { isAgentMode } from '@packages/agent-info'
+import { logError } from '@packages/stderr-filtering'
 import { telemetry } from '@packages/telemetry'
 
 const POTENTIAL_CONFIG_FILES = [
@@ -297,7 +299,7 @@ export class ProjectLifecycleManager {
           }
 
           if (pingBaseUrl) {
-            this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
+            this.ctx.actions.project.pingBaseUrl().catch((err) => this.onLoadError(err, { stopsProject: false }))
           }
         }
 
@@ -308,6 +310,37 @@ export class ProjectLifecycleManager {
       },
       refreshLifecycle: async () => this.refreshLifecycle(),
     })
+  }
+
+  /**
+   * An agent that names the project and testing type on the command line, and has a browser
+   * from `--browser` or from `defaultBrowser` in the config, has no one to dismiss the welcome
+   * screen that would otherwise launch the browser. The dismissal is not saved, so a person's
+   * first launch still sees the welcome.
+   */
+  get isWelcomeBypassedForAgent () {
+    const { project, testingType, isBrowserGivenByCli } = this.ctx.modeOptions
+
+    // Neither `cliBrowser` nor `modeOptions.browser` is evidence of this: a config reload copies the
+    // active browser into both. `isBrowserGivenByCli` is set once, from the command line.
+    const hasBrowser = Boolean(isBrowserGivenByCli || this.configDefaultBrowser)
+
+    return this.ctx.isOpenMode && isAgentMode() && Boolean(project && testingType && hasBrowser)
+  }
+
+  /**
+   * The Launchpad asks about the welcome screen as soon as the config file loads, while
+   * `setupNodeEvents` may still be running, so until the full config exists this reads
+   * `defaultBrowser` from the config file, where a testing type's own value wins.
+   */
+  private get configDefaultBrowser () {
+    if (this.loadedFullConfig) {
+      return this.loadedFullConfig.defaultBrowser
+    }
+
+    const testingType = this.ctx.modeOptions.testingType
+
+    return (testingType && this.loadedConfigFile?.[testingType]?.defaultBrowser) || this.loadedConfigFile?.defaultBrowser
   }
 
   /**
@@ -343,7 +376,7 @@ export class ProjectLifecycleManager {
 
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
 
-      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
+      const hasWelcomeBeenDismissed = this.isWelcomeBypassedForAgent || Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
 
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
       // but if the user needs to dismiss a landing page, don't continue: dismissing it renders OpenBrowser
@@ -497,7 +530,7 @@ export class ProjectLifecycleManager {
     this._configManager = this.createConfigManager()
 
     // Preemptively load these so that they are available when we need them later
-    this.ctx.browser.machineBrowsers().catch(this.onLoadError)
+    this.ctx.browser.machineBrowsers().catch((err) => this.onLoadError(err, { stopsProject: false }))
 
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
@@ -527,6 +560,8 @@ export class ProjectLifecycleManager {
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
+
+    this.ctx.clearLoadErrorForTap()
 
     this.verifyProjectRoot(projectRoot)
 
@@ -590,6 +625,10 @@ export class ProjectLifecycleManager {
         }
       }
     })
+
+    if (testingType) {
+      this.ctx.clearLoadErrorForTap()
+    }
 
     this._currentTestingType = testingType
 
@@ -824,10 +863,52 @@ export class ProjectLifecycleManager {
     if (testingType === 'e2e') {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
+      await this.completeE2ESetupForAgent()
     } else if (testingType === 'component') {
       await this.ctx.actions.wizard.detectFrameworks()
       await this.ctx.actions.wizard.initialize()
     }
+  }
+
+  /**
+   * The Launchpad's Continue button is what loads the new config after the e2e scaffold, so
+   * without it the project never starts. An agent has no one to press it, so it continues
+   * on its own, unless a file needs a person to merge changes into it.
+   */
+  private async completeE2ESetupForAgent () {
+    const { project, testingType } = this.ctx.modeOptions
+    const scaffolded = this.ctx.coreData.scaffoldedFiles
+
+    if (!this.ctx.isOpenMode || !isAgentMode() || !project || testingType !== 'e2e' || !scaffolded) {
+      return
+    }
+
+    const relativePaths = (statuses: string[]) => {
+      return scaffolded
+      .filter((scaffoldedFile) => statuses.includes(scaffoldedFile.status))
+      .map((scaffoldedFile) => path.relative(this.projectRoot, scaffoldedFile.file.absolute))
+    }
+
+    const needsAPerson = relativePaths(['changes', 'error'])
+
+    if (needsAPerson.length) {
+      const message = `Cypress could not finish setting up e2e testing for this project on its own, because these files need changes made by hand: ${needsAPerson.join(', ')}. Make the changes, then start Cypress again.`
+
+      logError(message)
+      this.ctx.reportLoadErrorToTap(message)
+
+      return
+    }
+
+    const created = relativePaths(['valid'])
+
+    if (created.length) {
+      logError(`Cypress set up e2e testing for this project by creating or updating: ${created.join(', ')}. Review these files and commit them.`)
+    }
+
+    // A config that fails to load after the scaffold is reported like any other load error. Nothing
+    // above this awaits the result, so a rejection would be unhandled in the main process.
+    await this.ctx.actions.wizard.completeSetup().catch(this.onLoadError)
   }
 
   async initializeRunMode (testingType: TestingType | null) {
@@ -862,7 +943,7 @@ export class ProjectLifecycleManager {
     }
 
     if (this.metaState.allFoundConfigFiles.length > 1) {
-      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles))
+      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles), { stopsProject: false })
     }
   }
 
@@ -870,13 +951,21 @@ export class ProjectLifecycleManager {
    * When there is an error during any part of the lifecycle
    * initiation, we pass it through here. This allows us to intercept
    * centrally in the e2e tests, as well as notify the "pending initialization"
-   * for run mode
+   * for run mode.
+   *
+   * An error that leaves the project running, such as two config files of different languages,
+   * is not reported to `cypress tap status`, which would otherwise tell a poller to give up
+   * on a start that is going to succeed.
    */
-  onLoadError = (err: CypressError) => {
+  onLoadError = (err: CypressError, { stopsProject = true }: { stopsProject?: boolean } = {}) => {
     if (this.ctx.isRunMode && this._pendingInitialize) {
       this._pendingInitialize.reject(err)
     } else {
       this.ctx.onError(err, 'Cypress configuration error')
+
+      if (stopsProject) {
+        this.ctx.reportLoadErrorToTap(err)
+      }
     }
   }
 

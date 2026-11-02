@@ -37,7 +37,11 @@ Cypress Version: 1.2.3"
 exports[`errors > .errors.formErrorText > returns fully formed text message 1`] = `
 "Your system is missing the dependency: Xvfb
 
-Install Xvfb and run Cypress again.
+Install Xvfb and run Cypress again. On Debian and Ubuntu:
+
+apt-get install -y xvfb
+
+Or run Cypress on a display that already exists by setting the DISPLAY environment variable.
 
 Read our documentation on dependencies for more information:
 
@@ -95,5 +99,6 @@ exports[`errors > individual > has the following errors 1`] = `
   "unexpected",
   "unknownError",
   "versionMismatch",
+  "xvfbFailedToStart",
 ]
 `;

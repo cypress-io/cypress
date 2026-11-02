@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import _ from 'lodash'
 import path from 'path'
 import dedent from 'dedent'
@@ -37,7 +36,8 @@ const debug = Debug('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
 
-let { runId, groupId, machineId, runUrl, tags } = postRunResponse
+const { runId, groupId, runUrl } = postRunResponse
+let { machineId, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
 describe('e2e record', () => {
@@ -659,9 +659,7 @@ describe('e2e record', () => {
 
   context('record in non-parallel', () => {
     describe('api reordering specs', () => {
-      let mockServerState
-
-      mockServerState = setupStubbedServer(createRoutes({
+      const mockServerState = setupStubbedServer(createRoutes({
         postRun: {
           res (req, res) {
             console.log(req.body.specs)
@@ -692,7 +690,7 @@ describe('e2e record', () => {
   })
 
   describe('api skips specs', () => {
-    let mockServerState = setupStubbedServer(createRoutes({
+    const mockServerState = setupStubbedServer(createRoutes({
 
       postInstanceTests: {
         res: (req, res) => {
@@ -2116,7 +2114,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F5] 422 status code with valid decryption on createRun', async () => {
+      describe('[F5] 422 status code with valid decryption on createRun', () => {
         const mockServer = setupStubbedServer(createRoutes({
           sendPreflight: {
             res: async (req, res) => {
