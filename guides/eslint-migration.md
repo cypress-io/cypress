@@ -248,6 +248,8 @@ export default [
 ]
 ```
 
+All three, and `packages/data-context`, also spread `graphqlConfig()` last, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
+
 `frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
 
 Drop the `defineProps`, `defineEmits`, `defineExpose` and `withDefaults` globals from the old config: `vue-eslint-parser` 10 defines the compiler macros in `<script setup>`.
@@ -283,6 +285,70 @@ The rest render HTML that is built to be rendered. Keep them, wrapped in `<!-- e
 - Files that fail to parse on purpose are listed in `ignores`. Fixture `package.json` files are left out of `jsonConfig`, because they mirror the user projects they stand in for.
 
 Do not run a bulk `eslint --fix` over the fixtures to clear a new rule. The rules that still autofix there only rewrite code that already fails `yarn lint`, so a new violation should be fixed by hand, with the affected system tests rerun.
+
+### 13. **Lint `gql` Templates with `graphqlConfig`**
+
+The root `.eslintrc.js` runs `eslint-plugin-graphql` over `app`, `frontend-shared`, `launchpad` and `data-context`. That plugin only runs on ESLint 8 and is no longer maintained. Its flat-config replacement is `graphqlConfig`, built on [`@graphql-eslint/eslint-plugin`](https://the-guild.dev/graphql/eslint) v4. Spread it after `baseConfig`, and after `vueTsxOverrides` and `frontendOverrides` in the Vue packages:
+
+```ts
+import { baseConfig, graphqlConfig, jsonConfig } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...jsonConfig,
+  ...graphqlConfig(),
+]
+```
+
+Only those four packages should spread it. It validates every `gql` template literal against `packages/data-context/schemas/schema.graphql`, and a file without a `gql` template costs one regex test. Unlike `jsonConfig` it is a function: the plugin, graphql 16 and the Vue SFC compiler load only when it is called, so every other package importing `@packages/eslint-config` starts ESLint without them.
+
+#### What graphql-codegen and `check-ts` already catch
+
+`yarn build:graphql` in `data-context` (part of `yarn build`) runs graphql-codegen. Before generating, codegen validates its documents with graphql-js's `specifiedRules`, minus `NoUnusedFragments`, `NoUnusedVariables` and `KnownDirectives`, and pools fragments across all documents. That is close to what `graphql/template-strings` checked, but it falls short of the lint rules in three ways:
+
+- **It only sees `app`, `launchpad` and `frontend-shared`.** The `data-context` documents (`AuthActions`, `CloudProjectActions`, `EventCollectorActions`, `RelevantRunsDataSource`) are sent through `executeRemoteGraphQL` and are in no codegen `documents` glob. A typo in one of them passes codegen and `check-ts` and only fails at runtime.
+- **It does not check deprecation or `id` selection.** Codegen succeeds on a query that selects a deprecated field or leaves out `id`, so `no-deprecated-fields` and `required-fields` have no codegen equivalent.
+- **It reports at build time, not in the editor or at commit.** The generated files are gitignored, so `check-ts` sees whatever the last codegen run wrote. `vue-tsc` checks how components use the generated types, never the documents themselves.
+
+So the lint rules are still needed.
+
+#### How the old rules map
+
+| `eslint-plugin-graphql` | `graphqlConfig` |
+| --- | --- |
+| `template-strings`, graphql-js `specifiedRules` less `KnownFragmentNames`, `NoUnusedFragments` and `NoUnusedVariables` | One `@graphql-eslint/*` rule per graphql-js validator, with the same three left out. The old rule reported only the first error in each template; these report every one |
+| `no-deprecated-fields` | `@graphql-eslint/no-deprecated` |
+| `required-fields`, `requiredFields: ['id']` | `@graphql-eslint/require-selections`, `fieldName: 'id'` |
+| `capitalized-type-name` (warn) | Dropped. Every type in the schema is capitalized, so a lowercase type condition already fails `known-type-names` as an error |
+
+`require-selections` is stricter than `required-fields`. It checks every selection set on a type that has `id`, not just fragment definitions and inline fragments, and it follows fragment spreads into other files. To follow them it loads the `gql` documents of all four packages, because `app` and `launchpad` spread fragments defined in `frontend-shared`. Every existing document passes it.
+
+graphql-js's `UniqueOperationNames` and `UniqueFragmentNames` have no per-template equivalent in v4. `@graphql-eslint/unique-operation-name` and `unique-fragment-name` compare names across the whole document set. They also report a `.vue` document as a duplicate of itself, because a `<script>` block's virtual path differs from the path its sibling was loaded under. Codegen already rejects duplicate names within each generated file.
+
+To silence a report, put the directive inside the template, as a GraphQL comment:
+
+```ts
+gql`
+fragment Example on Query {
+  # eslint-disable-next-line @graphql-eslint/require-selections
+  currentProject {
+    projectRoot
+  }
+}`
+```
+
+A `//` comment above the template does not reach the rule. The template is linted as its own virtual file.
+
+#### How `.vue` files are handled
+
+graphql-eslint's processor refuses `.vue` files under flat config. Its documented workaround, `eslint-processor-vue-blocks`, extracts each `<script>` block as a virtual `.ts` file, which `baseConfig` would then lint a second time. `graphqlConfig` uses its own processor instead. It keeps eslint-plugin-vue's processor for the `.vue` file and extracts only `<script>` blocks that contain a `gql` template. It parses them with `pad: 'space'`, so positions line up with the `.vue` file. The extracted script is not linted itself, only the GraphQL plucked from it. The virtual `.graphql` blocks turn off every `baseConfig` rule, since many of them have no `files` glob and would otherwise lint GraphQL as if it were JavaScript.
+
+#### Dependency pins
+
+- **`graphql@16`, nested.** graphql-eslint v4 declares a `graphql@^16` peer and needs it at load time: it reads the `OperationTypeNode` enum, which graphql 15 only has as a type. The app and server stay on `graphql@15`, so `@packages/eslint-config` depends on `graphql@16` itself and nohoists `@graphql-eslint/eslint-plugin` and its whole tree. Hoisted to the root, the plugin would resolve the root `graphql@15`. v3 accepts graphql 15 but predates ESLint 9's removal of `context.parserServices`.
+- **`graphql` is left out of lockfile deduplication.** `@types/graphql-resolve-batch` depends on `graphql@>=14`, so with a 16.x in the lockfile, `yarn-deduplicate --strategy=highest` would move it to graphql 16 types while `data-context` passes it graphql 15 values. `yarn dedupe-lockfile`, which `yarn check-lockfile`, the local postinstall and CI all use, passes `--exclude graphql`. A root resolution cannot fix this instead, because yarn keeps the `graphql@>=14` request in the lockfile either way.
+- **`@vue/compiler-sfc@3.5`, nested.** graphql-tag-pluck v8 needs `registerTS`, which `@vue/compiler-sfc` added in 3.3. Against the repo's 3.2.47 it silently drops every `.vue` document. The app packages keep 3.2.47.
+- **`@graphql-tools/delegate`.** The root `**/@graphql-tools/delegate: 8.2.1` resolution also reaches the plugin's tree, under `@graphql-tools/wrap` 11. Only `graphql-config`'s URL loader reaches that code, and the schema here is a file.
 
 ---
 
