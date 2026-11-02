@@ -38,7 +38,7 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 | Stage | What It Does |
 |-------|--------------|
 | Linux x64 Build | Full build, packaging, and binary verification for Linux x64 |
-| Binary Creation | Triggers the `cypress-publish-binary` pipeline to build the Linux x64 Electron binaries |
+| Binary Creation | Builds, packages, and uploads the Linux x64 Electron binary and npm package |
 | Binary Verification | Tests the built Linux binary against kitchensink, recipes, and real-world apps |
 | Binary Failure Alerts | Comments on the commit, tagging its author, when a binary job fails |
 | Release Preparation | Validates release readiness, prepares npm packages |
@@ -64,7 +64,7 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 - **`build`** - Core build job that all test jobs depend on
 - **`ready-to-release`** - Gate job that ensures all tests pass before release
 - **`npm-release`** - Publishes packages to npm (develop/release branches only)
-- **`create-and-trigger-packaging-artifacts`** - Initiates binary build process
+- **`create-build-artifacts`** - Builds, packages, and uploads the binary and npm package
 - **`notify-binary-failure`** - Comments on the commit when a binary job fails on
   `develop`, tagging its author. It requires every binary job at `terminal`, so it
   runs once they have all settled however they settled, then reads their real

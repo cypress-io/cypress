@@ -171,13 +171,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/system-tests/test-binary/*`](../../system-tests/test-binary) - update binary system tests to use the newly published Ubuntu and Node images mentioned above, if applicable
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)  
 
-- [ ] **Update `cypress-publish-binary`** For **binary publishing**, make sure the `electron` version that we updated in [`/package.json`](../../package.json) matches the `electron` version inside the [publish binary project](https://github.com/cypress-io/cypress-publish-binary/blob/main/package.json). This is to make sure add-on tests inside the publish-binary repository work locally, but are not required to install the correct version of `electron` in CI when publishing the binary. Ensure the `electron` target in this project's `.circleci` configuration is updated as well. Set the Remove this before merging, and ensure that branch is merged as well.
-  - [ ] Create a new branch in `cypress-publish-binary`
-  - [ ] Update `electron` version in `package.json`
-  - [ ] Update the target `electron` version in the circle configuration
-  - [ ] Update the docker image to the new browsers-internal image made in the previous step
-  - [ ] Add your branch name to the `&full-workflow-filters` anchor in [`@pipeline.yml`](../../.circleci/src/pipeline/@pipeline.yml)
-  - [ ] Trigger the pipeline in CircleCI's UI, and set the `publish-binary-branch` parameter to the branch you created in the `cypress-publish-binary` repository.
+- [ ] **Run the binary jobs.** Push to an `electron/X.Y.Z` branch, which `&full-workflow-filters` in [`@main.yml`](../../.circleci/src/pipeline/workflows/@main.yml) already matches, so the main workflows build and test the binary on every platform.
 
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into Cypress Cloud, and launching Electron tests still work.
 - [ ] **Manually smoke test `cypress run` in record mode with Test Replay.** Test Replay opens its database through `better-sqlite3`'s native module in the Electron main process, which no other test exercises in a packaged binary.

@@ -13,9 +13,6 @@ workflows:
                   - pack-workflows
 
 parameters:
-  publish-binary-branch:
-    type: string
-    default: main
   force-persist-artifacts:
     type: boolean
     default: false

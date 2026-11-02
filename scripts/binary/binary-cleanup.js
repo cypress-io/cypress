@@ -99,7 +99,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'uglify-js',
         'esbuild',
         'enhanced-resolve/lib/createInnerCallback',
-        './addon/addon-native',
       ],
     })
 
