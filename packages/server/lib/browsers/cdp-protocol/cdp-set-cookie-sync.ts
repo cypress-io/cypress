@@ -51,12 +51,13 @@ type ChromeCookieIdentity = Omit<ChromeStoreCookie, 'value'>
 
 type ParsedSetCookie = {
   cookie: Cookie
-  // name, Domain attribute, path and partitioned flag. A later header with the
-  // same headerKey replaces an earlier one, and the origin's and handler's
-  // headers are paired up by it. Built from the header's own Domain=, not the
-  // domain Chrome resolves it to (see `identity`), so two keys can name one
-  // stored cookie (Domain=localhost and no Domain on localhost); see the
-  // command ordering in `planSetCookieSync`.
+  // name, Domain attribute, path and partitioned flag. The origin's and the
+  // handler's headers are paired up by this key, and a later header with the
+  // same key replaces an earlier one. It uses the header's own Domain=, not the
+  // domain Chrome stores the cookie under (that's `identity`). So two different
+  // keys can point at one stored cookie, such as Domain=localhost and no
+  // Domain= on localhost. `planSetCookieSync` orders its commands to handle
+  // that.
   headerKey: string
   // every attribute that affects how the cookie is stored, for change detection
   fingerprint: string
@@ -246,9 +247,10 @@ const setParsedCookieCommand = (parsed: ParsedSetCookie, url: URL, partitionKey:
       // Chrome derives a missing domain and path, and the source scheme, from
       // this url
       url: url.href,
-      // tough-cookie strips Domain='s dot; restoring it makes Network.setCookie
-      // treat this as Domain= rather than host-only. Chrome still stores it
-      // host-only where the header would be (see cookieStoreDomain).
+      // tough-cookie strips the leading dot from Domain=. Adding it back makes
+      // Network.setCookie treat this as a Domain= cookie, not a host-only one.
+      // Chrome still stores it host-only wherever it would for the header
+      // (see cookieStoreDomain).
       ...(cookie.domain ? { domain: `.${cookie.domain}` } : {}),
       ...(cookie.path ? { path: cookie.path } : {}),
       secure: cookie.secure,
@@ -322,8 +324,11 @@ const restoreReplacedCookieCommands = (originCookie: ParsedSetCookie, cookiesWhe
 }
 
 // Undoes what one of the origin's headers did:
-// - An expired header is a deletion: Chrome removed the cookie and stored
-//   nothing, so only the cookie it deleted is restored.
+// - An expired header is a deletion, and Chrome never stores an expired
+//   cookie, so the header alone says what Chrome did and the store isn't
+//   read: only the cookie it deleted is restored. If the request had no
+//   credentials, Chrome ignored the deletion and the restore rewrites the
+//   cookie it still holds unchanged.
 // - Otherwise the stored cookie is deleted and the one it overwrote restored.
 // - If Chrome doesn't hold the origin's value, nothing was stored from this
 //   response, so nothing is done.
@@ -412,14 +417,14 @@ const parseUrl = (rawUrl: string): URL | undefined => {
  *
  * - A cookie the origin set that the handler dropped is removed, and its
  *   earlier copy is restored from `cookiesWhenRequestSent` if the browser sent
- *   it with the request. On the proxy path
- *   the browser only sees the handler's headers, so the origin's cookie is
- *   never stored and the earlier copy is left as it was.
+ *   it with the request. On the proxy path the browser only sees the
+ *   handler's headers, so the origin's cookie is never stored and the earlier
+ *   copy is left as it was.
  * - A cookie the handler added or changed is set, or removed if it is already
  *   expired. Skipped when `includeWrites` is false.
  *
- * Removals run before writes, so where two header keys name the same stored
- * cookie the handler's write wins.
+ * Removals run before writes. When two different header keys point at the same
+ * stored cookie, this keeps a removal from deleting the handler's write.
  *
  * Chrome stores nothing from a response to a request sent without credentials,
  * yet still reports its headers as unblocked, so Chrome's store is checked to

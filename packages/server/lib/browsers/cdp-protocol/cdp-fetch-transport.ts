@@ -977,10 +977,12 @@ export class CdpFetchTransport {
    * hop already see the result.
    */
   private syncSetCookies = async (response: CdpFetchTransportResponse): Promise<void> => {
-    // No cookiesBeforeIntercept: no safe baseline (see resolveCookieHeaders).
-    // No responseHeaders: the codec leaves them unset when no response middleware
-    // (a cy.intercept handler or Cypress's own) changed a header, so Chrome's own
-    // storage of the origin's cookies already stands.
+    // Skip the sync in two cases:
+    // - No cookiesBeforeIntercept: there's no safe baseline to compare against
+    //   (see resolveCookieHeaders).
+    // - No responseHeaders: the codec leaves them unset when no response
+    //   middleware (a cy.intercept handler or Cypress's own) changed a header.
+    //   What Chrome stored from the origin's cookies is already correct.
     if (!response.cookiesBeforeIntercept || !response.responseHeaders) {
       return
     }
