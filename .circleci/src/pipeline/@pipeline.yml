@@ -324,9 +324,7 @@ commands:
                   mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
                   mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
-                  if [[ -d ~/cypress/scripts/node_modules ]]; then
-                    mv ~/cypress/scripts/node_modules /tmp/node_modules_cache/scripts_node_modules
-                  fi
+                  mv ~/cypress/scripts/node_modules /tmp/node_modules_cache/scripts_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
   install-webkit-deps:
@@ -410,10 +408,7 @@ commands:
               mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
               mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
               mv /tmp/node_modules_cache/system-tests_node_modules ~/cypress/system-tests/node_modules
-              # caches saved before scripts/node_modules was cached don't have it
-              if [[ -d "/tmp/node_modules_cache/scripts_node_modules" ]]; then
-                mv /tmp/node_modules_cache/scripts_node_modules ~/cypress/scripts/node_modules
-              fi
+              mv /tmp/node_modules_cache/scripts_node_modules ~/cypress/scripts/node_modules
               mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
               rm -rf /tmp/node_modules_cache
             fi
