@@ -11,6 +11,14 @@ describe('lib/browsers/utils', () => {
       }
     }
 
+    it('keeps the page focused when the browser window loses focus', async () => {
+      const criClient = createCriClient()
+
+      await utils.initializeCDP(criClient as any, {} as any, false)
+
+      expect(criClient.send).toHaveBeenCalledWith('Emulation.setFocusEmulationEnabled', { enabled: true })
+    })
+
     it('includes the window navigation-preload expression in the new-document bootstrap script when useBrowserNetworkInterception is true', async () => {
       const criClient = createCriClient()
 
