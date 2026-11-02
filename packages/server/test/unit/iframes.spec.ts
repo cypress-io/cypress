@@ -1,16 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { iframesController } from '../../lib/controllers/iframes'
 import files from '../../lib/controllers/files'
+import { GracefulExit } from '../../lib/util/graceful-exit'
 
-// chai's `to.throw(err)` with an Error instance asserts the very same object is thrown.
-function thrownBy (fn: () => unknown) {
+vi.mock('timers/promises', () => ({ setTimeout: vi.fn().mockResolvedValue(undefined) }))
+
+async function rejectionOf (promise: Promise<unknown>) {
   try {
-    fn()
+    await promise
   } catch (e) {
     return e
   }
 
-  throw new Error('expected function to throw')
+  throw new Error('expected promise to reject')
 }
 
 describe('controllers/iframes', () => {
@@ -50,8 +52,10 @@ describe('controllers/iframes', () => {
   describe('component', () => {
     let nodeProxy
     let proxyCallback
+    let isShuttingDown: ReturnType<typeof vi.spyOn>
 
     beforeEach(() => {
+      isShuttingDown = vi.spyOn(GracefulExit, 'isShuttingDown', 'get').mockReturnValue(false)
       proxyCallback = null
       nodeProxy = {
         web: vi.fn((req, res, _options, cb) => {
@@ -60,7 +64,7 @@ describe('controllers/iframes', () => {
       }
     })
 
-    it('throws when in run mode (isTextTerminal) and dev server connection is refused (ECONNREFUSED)', () => {
+    it('throws when in run mode (isTextTerminal) and dev server connection is refused (ECONNREFUSED)', async () => {
       const config = { isTextTerminal: true, devServerPublicPathRoute: '/__cypress/' }
       const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
       const res = {}
@@ -72,10 +76,10 @@ describe('controllers/iframes', () => {
 
       err.code = 'ECONNREFUSED'
 
-      expect(thrownBy(() => proxyCallback(err))).toBe(err)
+      expect(await rejectionOf(proxyCallback(err))).toBe(err)
     })
 
-    it('throws when in run mode (isTextTerminal) and dev server connection is reset (ECONNRESET)', () => {
+    it('throws when in run mode (isTextTerminal) and dev server connection is reset (ECONNRESET)', async () => {
       const config = { isTextTerminal: true, devServerPublicPathRoute: '/__cypress/' }
       const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
       const res = {}
@@ -87,10 +91,34 @@ describe('controllers/iframes', () => {
 
       err.code = 'ECONNRESET'
 
-      expect(thrownBy(() => proxyCallback(err))).toBe(err)
+      expect(await rejectionOf(proxyCallback(err))).toBe(err)
     })
 
-    it('does not throw when in open mode and dev server connection is refused (ECONNREFUSED)', () => {
+    it('does not throw when the process is already shutting down', async () => {
+      isShuttingDown.mockReturnValue(true)
+      const config = { isTextTerminal: true, devServerPublicPathRoute: '/__cypress/' }
+      const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
+      const res = { destroy: vi.fn() }
+
+      iframesController.component({ config, nodeProxy } as any, req as any, res as any)
+
+      await expect(proxyCallback(new Error('socket hang up'))).resolves.toBeUndefined()
+      expect(res.destroy).toHaveBeenCalled()
+    })
+
+    it('does not throw when shutdown starts shortly after the proxy error', async () => {
+      isShuttingDown.mockReturnValueOnce(false).mockReturnValueOnce(false).mockReturnValue(true)
+      const config = { isTextTerminal: true, devServerPublicPathRoute: '/__cypress/' }
+      const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
+      const res = { destroy: vi.fn() }
+
+      iframesController.component({ config, nodeProxy } as any, req as any, res as any)
+
+      await expect(proxyCallback(new Error('socket hang up'))).resolves.toBeUndefined()
+      expect(res.destroy).toHaveBeenCalled()
+    })
+
+    it('does not throw when in open mode and dev server connection is refused (ECONNREFUSED)', async () => {
       const config = { isTextTerminal: false, devServerPublicPathRoute: '/__cypress/' }
       const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
       const res = {}
@@ -102,7 +130,8 @@ describe('controllers/iframes', () => {
 
       err.code = 'ECONNREFUSED'
 
-      expect(() => proxyCallback(err)).not.toThrow()
+      await expect(proxyCallback(err)).resolves.toBeUndefined()
+      expect(isShuttingDown).not.toHaveBeenCalled()
     })
   })
 })
