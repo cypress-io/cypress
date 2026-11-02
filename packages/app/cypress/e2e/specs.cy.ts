@@ -328,7 +328,7 @@ describe('App: Specs', () => {
             },
           ]
 
-          ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
+          ctx.coreData.localSettings.preferences.preferredEditorBinary = '/usr/bin/test-editor'
         })
 
         cy.startAppServer('e2e')
@@ -680,7 +680,7 @@ describe('App: Specs', () => {
             },
           ]
 
-          ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
+          ctx.coreData.localSettings.preferences.preferredEditorBinary = '/usr/bin/test-editor'
         })
 
         cy.startAppServer('component')

@@ -5,6 +5,10 @@
 
 - Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
 
+**Misc:**
+
+- The editor chooser now lists only the editors Cypress detects, and the **Custom** option has been removed. To use an editor that isn't listed, set the `LAUNCH_EDITOR` environment variable before starting Cypress. Addressed in [#35208](https://github.com/cypress-io/cypress/pull/35208).
+
 ## 15.21.1
 
 **Bugfixes:**

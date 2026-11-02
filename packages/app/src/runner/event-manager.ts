@@ -215,10 +215,6 @@ export class EventManager {
       logCommand(testId, logId)
     })
 
-    this.reporterBus.on('set:user:editor', (editor) => {
-      this.ws.emit('set:user:editor', editor)
-    })
-
     this.reporterBus.on('runner:restart', rerun)
 
     const sendEventIfSnapshotProps = (testId, logId, event) => {
@@ -270,10 +266,6 @@ export class EventManager {
 
     this.reporterBus.on('open:login:connect:modal', (args) => {
       this.localBus.emit('open:login:connect:modal', args)
-    })
-
-    this.reporterBus.on('get:user:editor', (cb) => {
-      this.ws.emit('get:user:editor', cb)
     })
 
     this.reporterBus.on('open:file:unified', (file: FileDetails) => {

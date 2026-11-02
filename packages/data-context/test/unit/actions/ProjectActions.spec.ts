@@ -1,8 +1,11 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import execa from 'execa'
 import type { DataContext } from '../../../src'
 import { ProjectActions } from '../../../src/actions/ProjectActions'
 import { createTestDataContext } from '../helper'
 import { SpecWithRelativeRoot, TestingType } from '@packages/types'
+
+jest.mock('execa')
 
 describe('ProjectActions', () => {
   let ctx: DataContext
@@ -313,6 +316,51 @@ describe('ProjectActions', () => {
 
       expect(ctx.relevantRuns.moveToRun).toHaveBeenCalledWith(123, [])
       expect(ctx._apis.projectApi.routeToDebug).toHaveBeenCalled()
+    })
+  })
+
+  describe('openDirectoryInIDE', () => {
+    beforeEach(() => {
+      jest.mocked(execa).mockReset().mockReturnValue(Promise.resolve() as any)
+      ctx._apis.electronApi.showItemInFolder = jest.fn()
+      ctx.coreData.localSettings.availableEditors = [
+        { id: 'computer', name: 'Finder', binary: 'computer' },
+        { id: 'code', name: 'Visual Studio Code', binary: 'code' },
+      ]
+    })
+
+    it('shows the directory in the file manager without running a binary for "computer"', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'computer'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(ctx._apis.electronApi.showItemInFolder).toHaveBeenCalledWith('/project')
+      expect(execa).not.toHaveBeenCalled()
+    })
+
+    it('runs the preferred editor with the directory', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(execa).toHaveBeenCalledWith('code', ['/project'])
+      expect(ctx._apis.electronApi.showItemInFolder).not.toHaveBeenCalled()
+    })
+
+    it('does not let a failed editor launch reject', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+      jest.mocked(execa).mockReturnValueOnce(Promise.reject(new Error('spawn code ENOENT')) as any)
+
+      await expect(actions.openDirectoryInIDE('/project')).resolves.toBeUndefined()
+    })
+
+    it('does not run an editor Cypress did not detect', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = '/bin/sh'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(execa).not.toHaveBeenCalled()
+      expect(ctx._apis.electronApi.showItemInFolder).not.toHaveBeenCalled()
     })
   })
 })
