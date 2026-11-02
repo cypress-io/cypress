@@ -22,6 +22,7 @@ import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
 import { relativeToRepoRoot } from './relative-to-repo-root'
+import { resolveDevelopmentWorkspaceNumber } from './development-workspace'
 
 const debug = Debug('cypress:cli')
 
@@ -253,6 +254,13 @@ const getApplicationDataFolder = (...paths: string[]): string => {
 
   // allow overriding the app_data folder
   let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  const workspaceNum = resolveDevelopmentWorkspaceNumber(folder, env)
+  const hasWorkspace = workspaceNum !== undefined
+
+  if (hasWorkspace) {
+    folder = `${folder}-workspace-${workspaceNum}`
+  }
+
   // eslint-disable-next-line no-restricted-syntax
   const pkg = JSON.parse(fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8'))
   const PRODUCT_NAME = pkg.productName || pkg.name

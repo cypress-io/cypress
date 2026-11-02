@@ -94,6 +94,7 @@ const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
 // Names the app reads itself, which are not settings for the project's tests
 const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
+  'CYPRESS_INTERNAL_WORKSPACE_NUM',
   'CYPRESS_AGENT_MODE',
 ]
 

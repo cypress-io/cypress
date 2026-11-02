@@ -23,7 +23,7 @@ import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
-import { CLOUD_URLS, resolveCloudEnv } from '../util/cloudUrls'
+import { resolveCloudEnv, resolveCloudUrl } from '../util/cloudUrls'
 import type { CloudEnv } from '../util/cloudUrls'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
@@ -331,7 +331,7 @@ export class CloudDataSource {
   }
 
   getCloudUrl (env: CloudEnv) {
-    return CLOUD_URLS[env]
+    return resolveCloudUrl(env)
   }
 
   /**
