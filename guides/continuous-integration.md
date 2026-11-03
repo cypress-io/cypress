@@ -30,7 +30,7 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 | Stage | What It Does |
 |-------|--------------|
 | Multi-Platform Builds | Linux x64, Linux ARM64, macOS Intel, macOS Apple Silicon, Windows |
-| Binary Creation | Triggers the `cypress-publish-binary` pipeline to build Electron binaries |
+| Binary Creation | Builds, packages, and uploads the Electron binary and npm package |
 | Binary Verification | Tests the built binary against kitchensink, recipes, and real-world apps |
 | Release Preparation | Validates release readiness, prepares npm packages |
 
@@ -48,7 +48,7 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 - **`build`** - Core build job that all test jobs depend on
 - **`ready-to-release`** - Gate job that ensures all tests pass before release
 - **`npm-release`** - Publishes packages to npm (develop/release branches only)
-- **`create-and-trigger-packaging-artifacts`** - Initiates binary build process
+- **`create-build-artifacts`** - Builds, packages, and uploads the binary and npm package
 
 ## GitHub Actions
 

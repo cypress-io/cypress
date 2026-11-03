@@ -308,23 +308,14 @@ linux-x64:
         requires:
           - ready-to-release
 
-    - create-and-trigger-packaging-artifacts:
+    - create-build-artifacts:
+        test-glibc-2-31: true
         context:
           - test-runner:upload
+          - test-runner:commit-status-checks
           - test-runner:build-binary
-          - publish-binary
         requires:
           - build
-    - wait-for-binary-publish:
-        type: approval
-        requires:
-          - create-and-trigger-packaging-artifacts
-    - get-published-artifacts:
-        context:
-          - publish-binary
-          - test-runner:commit-status-checks
-        requires:
-          - wait-for-binary-publish
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -344,80 +335,71 @@ linux-x64:
         requires:
           - build
     - test-npm-module-on-minimum-node-version:
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-types-cypress-and-jest:
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-full-typescript-project:
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-kitchensink:
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-npm-module-and-verify-binary:
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-staging:
         context: test-runner:record-tests
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-kitchensink-chrome:
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-recipes-firefox:
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-recipes-chrome:
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-recipes:
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-kitchensink-firefox:
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
         context: test-runner:cypress-record-key
         filters: *mainBuildFilters
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a root user"
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
     - binary-system-tests:
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
           - system-tests-node-modules-install
     - yarn-pnp-preprocessor-system-test:
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
           - system-tests-node-modules-install
     - svelte-webpack-system-test:
-        context: publish-binary
         requires:
-          - get-published-artifacts
+          - create-build-artifacts
           - system-tests-node-modules-install
 
 linux-arm64:
@@ -437,33 +419,16 @@ linux-arm64:
         requires:
           - linux-arm64-node-modules-install
 
-    - create-and-trigger-packaging-artifacts:
-        name: linux-arm64-create-and-trigger-packaging-artifacts
+    - create-build-artifacts:
+        name: linux-arm64-create-build-artifacts
         context:
-          [
-            test-runner:upload,
-            test-runner:commit-status-checks,
-            test-runner:build-binary,
-            publish-binary
-          ]
+          - test-runner:upload
+          - test-runner:commit-status-checks
+          - test-runner:build-binary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
           - linux-arm64-build
-
-    - wait-for-binary-publish:
-        name: linux-arm64-wait-for-binary-publish
-        type: approval
-        requires:
-          - linux-arm64-create-and-trigger-packaging-artifacts
-
-    - get-published-artifacts:
-        name: linux-arm64-get-published-artifacts
-        context: [ publish-binary, test-runner:commit-status-checks ]
-        executor: linux-arm64
-        resource_class: arm.medium
-        requires:
-          - linux-arm64-wait-for-binary-publish
 
     - v8-integration-tests:
         executor: linux-arm64

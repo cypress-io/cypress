@@ -259,12 +259,6 @@ These require manual updates in external repositories:
 - Create new `base-internal` images with matching Node.js/Chromium versions
 - Publish to Docker Hub
 
-### Binary Publishing
-- Update `cypress-publish-binary` repository
-- Update electron version in package.json
-- Update CircleCI configuration
-- Update Docker image references
-
 ## Validation Commands
 
 ```bash
