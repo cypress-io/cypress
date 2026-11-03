@@ -27,7 +27,7 @@ export interface MountFnOptions {
 export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
-    // @ts-ignore todo: figure out the correct types
+    // @ts-expect-error - TODO: figure out the correct types
     <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
@@ -51,7 +51,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         },
       })
 
-      // @ts-ignore todo: figure out the correct types
+      // @ts-expect-error - TODO: figure out the correct types
       return mount(comp, options)
     },
   )
@@ -89,7 +89,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       queryVariablesSegment = `(${queryVariablesSegment})`
     }
 
-    // @ts-ignore todo: figure out the correct types
     return mount(defineComponent({
       name: `MountFragment`,
       setup () {
@@ -162,7 +161,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     subscriptionHooks.set(name, hook)
   }
 
-  function stubSubscriptionEvent <T extends TypedDocumentNode<any, any>> (
+  function stubSubscriptionEvent<T extends TypedDocumentNode<any, any>> (
     document: T,
     emitEvent: () => ResultOf<T>,
   ) {

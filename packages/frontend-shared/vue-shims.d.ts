@@ -1,4 +1,4 @@
-/* eslint-disable import/no-duplicates */
+/* eslint-disable import-x/no-duplicates */
 declare module 'virtual:*' {
   import { Component } from 'vue'
   const src: Component

@@ -44,7 +44,7 @@ describe('<Alert />', () => {
   describe('title', () => {
     it('can accept slot as title slot', () => {
       cy.mount(() => (<Alert dismissible status="success"
-      // @ts-ignore - doesn't know about vSlots
+      // @ts-expect-error - doesn't know about vSlots
         vSlots={{
           title: alertRichTitle,
         }}></Alert>))

@@ -38,7 +38,7 @@ export function decodeBase64Unicode (str: string) {
 */
 export function encodeBase64Unicode (str: string) {
   return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
-    // @ts-ignore
+    // @ts-expect-error - String.fromCharCode takes a number; the `0x..` string is coerced at runtime
     return String.fromCharCode(`0x${p1}`)
   }))
 }

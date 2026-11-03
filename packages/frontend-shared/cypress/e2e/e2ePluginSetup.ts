@@ -53,7 +53,7 @@ chai.use(chaiSubset)
 chai.use(sinonChai)
 
 export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
-  // @ts-ignore getSnapshotResult is injected by the snapshot script
+  // @ts-expect-error - getSnapshotResult is injected by the snapshot script
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) && typeof global.getSnapshotResult === 'undefined') {
     throw new Error('getSnapshotResult is undefined. v8 snapshots are not being used in Cypress in Cypress. This can happen if CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT is not set')
   }
@@ -125,7 +125,6 @@ async function makeE2ETasks () {
     // interceptCloudExecute: (config: CloudExecuteRemote) => {}
   }
 
-  let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let remoteGraphQLOptions: Record<string, any> | undefined
@@ -136,7 +135,7 @@ async function makeE2ETasks () {
   const cachedCwd = process.cwd()
 
   await clearCtx()
-  ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
+  const ctx: DataContext = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const launchpadPort = await makeGraphQLServer()
 

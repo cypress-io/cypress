@@ -1,9 +1,10 @@
 /// <reference types="cypress" />
+/// <reference path="../../../driver/types/internal-types-lite.d.ts" />
 
 import '@percy/cypress'
 import type { SnapshotOptions } from '@percy/core'
 
-export interface CustomSnapshotOptions extends SnapshotOptions{
+export interface CustomSnapshotOptions extends SnapshotOptions {
   /**
    * width of the snapshot taken from the left edge of the viewport
    * @default - The test's viewportWidth
@@ -28,7 +29,7 @@ export interface CustomSnapshotOptions extends SnapshotOptions{
   elementOverrides?: Record<string, ((el$: JQuery) => void) | true>
 }
 
-interface SnapshotMutationOptions{
+interface SnapshotMutationOptions {
   log?: string
   defaultWidth: number
   defaultHeight: number
@@ -39,7 +40,7 @@ interface SnapshotMutationOptions{
 
 declare global {
   namespace Cypress {
-    interface Chainable{
+    interface Chainable {
       /**
        * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
        * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -98,7 +99,6 @@ class ElementOverrideManager {
     }
 
     Object.entries(overrides).forEach(([k, v]) => {
-      // eslint-disable-next-line cypress/no-assigning-return-values
       const $el = reporterDocument ? cy.$$(k).add(cy.$$(k, reporterDocument)) : cy.$$(k)
 
       if (typeof v === 'function') {
@@ -129,7 +129,7 @@ class ElementOverrideManager {
       removedNodes,
     }) => {
       if (type === 'attributes' && attributeName) {
-        let targetElement = target as HTMLElement
+        const targetElement = target as HTMLElement
 
         if (!oldValue) {
           targetElement.removeAttribute(attributeName)
@@ -188,7 +188,6 @@ const applySnapshotMutations = ({
     if (log) {
       Cypress.log({
         message: log,
-        // @ts-ignore
         snapshot: true,
         end: true,
       })
@@ -203,7 +202,7 @@ const applySnapshotMutations = ({
   })
 }
 
-export const installCustomPercyCommand = ({ before, elementOverrides }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], isComponentTesting?: boolean } = {}) => {
+export const installCustomPercyCommand = ({ before, elementOverrides }: { before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], isComponentTesting?: boolean } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
    * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -221,7 +220,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
       name = undefined
     }
 
-    // @ts-ignore
     const test: Mocha.Test = cy.state('test')
 
     const titlePath = test.titlePath()
@@ -232,7 +230,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
 
     // viewport data is read from test state rather than config to ensure that
     // the snapshot is presented at the test's expected size.
-    // @ts-ignore
     const { viewportWidth, viewportHeight } = cy.state() as Cypress.Config
     const snapshotWidth = options.width ? options.width : viewportWidth
     const snapshotHeight = options.height ? options.height : viewportHeight
@@ -268,7 +265,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
 
     // Percy v3.1.0 will timeout waiting for response from server if screenshot
     // takes longer than defaultCommandTimeout, so we hack around it
-    // eslint-disable-next-line
     const _backupTimeout = Cypress.config('defaultCommandTimeout')
 
     Cypress.config('defaultCommandTimeout', 10000)
@@ -293,7 +289,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
         // deterministic state we want to capture, so skip readiness. Only key off
         // setTimeout: a Date-only clock (cy.clock(date, ['Date'])) leaves timers
         // real, so readiness still resolves and should run.
-        // @ts-ignore - cy.state is not in the public types
         const clock = cy.state('clock')
 
         if (clock?.details().methods.includes('setTimeout')) {

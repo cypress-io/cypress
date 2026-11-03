@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 
 withDefaults(defineProps<{
-  value: boolean
+  value?: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl'
   labelId: string // required for an id so that an external <label> can be associated with the switch
   disabled?: boolean

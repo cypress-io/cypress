@@ -20,7 +20,7 @@ describe('<StatusBadge />', () => {
         />
         <br /><br />
         {
-          // @ts-ignore
+          // @ts-expect-error - Button does not declare a click emit, so JSX rejects onClick
           <Button onClick={onClick}>toggle</Button>
         }
       </div>

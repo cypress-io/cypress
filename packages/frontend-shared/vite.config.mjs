@@ -13,7 +13,7 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 
 import PkgConfig from 'vite-plugin-package-config'
 
-// @ts-expect-error
+// @ts-expect-error - import.meta is an error when the file is checked as CommonJS
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -82,7 +82,7 @@ const makePlugins = (plugins) => {
 
     // package.json is modified and auto-updated when new cjs dependencies
     // are added
-    // @ts-expect-error
+    // @ts-expect-error - the types declare the plugin as the default export, but Node's CJS interop nests it under `default`
     PkgConfig.default(),
     // OptimizationPersist(),
     // For new plugins only! Merge options for shared plugins via PluginOptions.
