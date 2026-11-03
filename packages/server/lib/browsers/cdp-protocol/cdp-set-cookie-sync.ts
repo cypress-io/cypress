@@ -51,23 +51,19 @@ type ChromeCookieIdentity = Omit<ChromeStoreCookie, 'value'>
 
 type ParsedSetCookie = {
   cookie: Cookie
-  // name, Domain attribute, path and partitioned flag. The origin's and the
-  // handler's headers are paired up by this key, and a later header with the
-  // same key replaces an earlier one. It uses the header's own Domain=, not the
-  // domain Chrome stores the cookie under (that's `identity`). So two different
-  // keys can point at one stored cookie, such as Domain=localhost and no
-  // Domain= on localhost. `planSetCookieSync` orders its commands to handle
-  // that.
-  headerKey: string
-  // every attribute that affects how the cookie is stored, for change detection
-  fingerprint: string
+  // Matches a header against the ones Chrome blocked: name, the header's own
+  // Domain=, path, the partitioned flag, and the attributes Chrome stores.
+  // Formatting is ignored: a handler's copy of a blocked header that differs
+  // only in spacing, casing or attribute order is still blocked. A change to
+  // any of those fields makes it a new header, which Chrome didn't block.
+  headerFingerprint: string
   // where Chrome stores the cookie, for matching against what Chrome reports
   identity: ChromeCookieIdentity
   priority?: Protocol.Network.CookiePriority
   partitioned: boolean
 }
 
-type CookiesByHeaderKey = Map<string, ParsedSetCookie>
+type CookiesByIdentity = Map<string, ParsedSetCookie>
 
 type ReadChromeCookieStore = () => Promise<ChromeStoreCookie[]>
 
@@ -128,6 +124,25 @@ const parsePriority = (cookie: Cookie): Protocol.Network.CookiePriority | undefi
   return undefined
 }
 
+// Everything a Set-Cookie header sets on the stored cookie besides its
+// identity, as a string to compare: when the origin's and the handler's headers
+// for one cookie differ here, the handler changed it and it is written. The raw
+// Domain= is left out because it only affects identity, so Domain=localhost and
+// no Domain= on localhost don't count as a change.
+const cookieContentKey = (parsed: Pick<ParsedSetCookie, 'cookie' | 'priority'>): string => {
+  const { cookie, priority } = parsed
+
+  return [
+    cookie.value,
+    cookie.secure,
+    cookie.httpOnly,
+    cookie.sameSite ?? '',
+    cookie.maxAge ?? '',
+    cookie.expires instanceof Date ? cookie.expires.toISOString() : '',
+    priority ?? '',
+  ].join('\0')
+}
+
 const parseSetCookie = (header: string, url: URL, partitionKey: Protocol.Network.CookiePartitionKey | undefined): ParsedSetCookie | undefined => {
   // loose: Chrome stores a header with no `=` as a cookie with an empty name
   const cookie = Cookie.parse(header, { loose: true })
@@ -138,21 +153,12 @@ const parseSetCookie = (header: string, url: URL, partitionKey: Protocol.Network
 
   const partitioned = !!cookie.extensions?.some((ext) => ext.toLowerCase() === 'partitioned')
   const path = cookie.path ?? defaultPath(url.pathname)
-  const headerKey = [cookie.key, cookie.domain ?? '', path, partitioned].join('\0')
   const priority = parsePriority(cookie)
 
   // tough-cookie's own serializer omits SameSite=None, which Chrome treats
-  // differently from no SameSite at all, so it cannot be used here.
-  const fingerprint = [
-    headerKey,
-    cookie.value,
-    cookie.secure,
-    cookie.httpOnly,
-    cookie.sameSite ?? '',
-    cookie.maxAge ?? '',
-    cookie.expires instanceof Date ? cookie.expires.toISOString() : '',
-    priority ?? '',
-  ].join('\0')
+  // differently from no SameSite at all, so it cannot be used here. The raw
+  // Domain= is included so a blocked header matches only that header.
+  const headerFingerprint = [cookie.key, cookie.domain ?? '', path, partitioned, cookieContentKey({ cookie, priority })].join('\0')
 
   const identity: ChromeCookieIdentity = {
     name: cookie.key,
@@ -161,7 +167,7 @@ const parseSetCookie = (header: string, url: URL, partitionKey: Protocol.Network
     ...(partitioned ? { partitionKey } : {}),
   }
 
-  return { cookie, headerKey, fingerprint, identity, priority, partitioned }
+  return { cookie, headerFingerprint, identity, priority, partitioned }
 }
 
 const parseSetCookieHeaders = (headers: string[], url: URL, partitionKey: Protocol.Network.CookiePartitionKey | undefined): ParsedSetCookie[] => {
@@ -172,28 +178,53 @@ const parseSetCookieHeaders = (headers: string[], url: URL, partitionKey: Protoc
 // - One whose header Chrome blocked in the origin's response. The proxy path
 //   would block it again, but Network.setCookie skips the check that blocked
 //   it, so it must not be written. Nor does it count as the handler keeping the
-//   origin's cookie for that header key. Matched by fingerprint, so a copy the
+//   origin's cookie for that header. Matched by headerFingerprint, so a copy the
 //   handler re-serialized still matches.
 // - A partitioned cookie when Chrome gave no usable partitionKey. Each
 //   top-level site has its own partitioned jar, which CDP can only address by
 //   key. Without one, a write would land in the unpartitioned jar and clobber
 //   an unrelated cookie, and a lookup can't tell whether Chrome stored it.
 const isSyncable = (parsed: ParsedSetCookie, blockedFingerprints: Set<string>, partitionKey: Protocol.Network.CookiePartitionKey | undefined): boolean => {
-  return !blockedFingerprints.has(parsed.fingerprint) && (!parsed.partitioned || !!partitionKey)
+  return !blockedFingerprints.has(parsed.headerFingerprint) && (!parsed.partitioned || !!partitionKey)
 }
 
-// A Map keeps the last cookie for a repeated header key, matching how a later
-// Set-Cookie for the same cookie overwrites an earlier one in Chrome.
-const lastCookiePerHeaderKey = (parsed: ParsedSetCookie[]): CookiesByHeaderKey => new Map(parsed.map((cookie) => [cookie.headerKey, cookie]))
+// Which stored cookie a header writes to, as a map key: two headers with the
+// same key overwrite each other in Chrome's store. Uses the resolved domain,
+// not the raw Domain=, so Domain=localhost and no Domain= on localhost share a
+// key.
+const chromeIdentityKey = (identity: ChromeCookieIdentity): string => {
+  const partition = identity.partitionKey
+
+  return [
+    identity.name,
+    identity.domain,
+    identity.path,
+    partition?.topLevelSite ?? '',
+    partition ? String(partition.hasCrossSiteAncestor) : '',
+  ].join('\0')
+}
+
+// Keeps the last header for each stored cookie, since Chrome applies a
+// response's Set-Cookie headers in order and a later one overwrites an earlier
+// one.
+const lastCookiePerIdentity = (parsed: ParsedSetCookie[]): CookiesByIdentity => {
+  const byIdentity = new Map<string, ParsedSetCookie>()
+
+  for (const cookie of parsed) {
+    byIdentity.set(chromeIdentityKey(cookie.identity), cookie)
+  }
+
+  return byIdentity
+}
 
 const parseSyncableCookies = (url: URL, cookiesBeforeIntercept: CookiesBeforeIntercept, setCookieHeadersAfterIntercept: string[]) => {
   const { setCookieHeadersFromOrigin, setCookieHeadersBlockedByChrome, partitionKey } = cookiesBeforeIntercept
-  const blockedFingerprints = new Set(parseSetCookieHeaders(setCookieHeadersBlockedByChrome, url, partitionKey).map(({ fingerprint }) => fingerprint))
+  const blockedFingerprints = new Set(parseSetCookieHeaders(setCookieHeadersBlockedByChrome, url, partitionKey).map(({ headerFingerprint }) => headerFingerprint))
 
   const syncableCookies = (headers: string[]) => {
     const parsed = parseSetCookieHeaders(headers, url, partitionKey).filter((cookie) => isSyncable(cookie, blockedFingerprints, partitionKey))
 
-    return lastCookiePerHeaderKey(parsed)
+    return lastCookiePerIdentity(parsed)
   }
 
   return {
@@ -311,8 +342,9 @@ const findStoredFromHeader = async (originCookie: ParsedSetCookie, readChromeCoo
 }
 
 // Restores the cookie the origin's header overwrote, if Chrome held it for the
-// request's url when it sent the request, whether or not it was sent. Matching errs toward restoring: rewriting a cookie the header
-// didn't touch leaves it unchanged, but missing one leaves it deleted.
+// request's url when it sent the request, whether or not it was sent. Matching
+// errs toward restoring: rewriting a cookie the header didn't touch leaves it
+// unchanged, but missing one leaves it deleted.
 const restoreReplacedCookieCommands = (originCookie: ParsedSetCookie, cookiesWhenRequestSent: Protocol.Network.Cookie[]): SetCookieSyncCommand[] => {
   return cookiesWhenRequestSent
   .filter((cookie) => isSameChromeCookie(cookie, originCookie.identity))
@@ -349,12 +381,14 @@ const planRemovals = async ({
   cookiesWhenRequestSent,
   readChromeCookieStore,
 }: {
-  cookiesFromOrigin: CookiesByHeaderKey
-  cookiesAfterIntercept: CookiesByHeaderKey
+  cookiesFromOrigin: CookiesByIdentity
+  cookiesAfterIntercept: CookiesByIdentity
   cookiesWhenRequestSent: Protocol.Network.Cookie[]
   readChromeCookieStore: ReadChromeCookieStore
 }): Promise<SetCookieSyncCommand[]> => {
-  const cookiesRemovedByIntercept = [...cookiesFromOrigin.values()].filter(({ headerKey }) => !cookiesAfterIntercept.has(headerKey))
+  const cookiesRemovedByIntercept = [...cookiesFromOrigin.values()].filter((originCookie) => {
+    return !cookiesAfterIntercept.has(chromeIdentityKey(originCookie.identity))
+  })
   const commands = await Promise.all(cookiesRemovedByIntercept.map((originCookie) => removeOriginCookieCommands(originCookie, cookiesWhenRequestSent, readChromeCookieStore)))
 
   return commands.flat()
@@ -368,13 +402,18 @@ const planWrites = async ({
   partitionKey,
   readChromeCookieStore,
 }: {
-  cookiesFromOrigin: CookiesByHeaderKey
-  cookiesAfterIntercept: CookiesByHeaderKey
+  cookiesFromOrigin: CookiesByIdentity
+  cookiesAfterIntercept: CookiesByIdentity
   url: URL
   partitionKey: Protocol.Network.CookiePartitionKey | undefined
   readChromeCookieStore: ReadChromeCookieStore
 }): Promise<SetCookieSyncCommand[]> => {
-  const cookiesAddedOrChangedByIntercept = [...cookiesAfterIntercept.values()].filter(({ headerKey, fingerprint }) => cookiesFromOrigin.get(headerKey)?.fingerprint !== fingerprint)
+  const cookiesAddedOrChangedByIntercept = [...cookiesAfterIntercept.values()].filter((handlerCookie) => {
+    const originCookie = cookiesFromOrigin.get(chromeIdentityKey(handlerCookie.identity))
+
+    // an unchanged header is already in Chrome's store, so it needs no write
+    return !originCookie || cookieContentKey(originCookie) !== cookieContentKey(handlerCookie)
+  })
 
   if (!cookiesAddedOrChangedByIntercept.length) {
     return []
@@ -408,20 +447,24 @@ const parseUrl = (rawUrl: string): URL | undefined => {
 /**
  * Returns the CDP cookie commands, in order, that change Chrome's cookie store
  * from what the origin's Set-Cookie headers stored to what the handler's
- * headers describe. For each header key, the origin's last unblocked header is
- * compared with the handler's last header:
+ * headers describe. Headers are compared by the cookie Chrome stores (name,
+ * resolved domain, path and partition), and the later header for that cookie
+ * replaces an earlier one. Two headers can name one stored cookie, such as
+ * `Domain=localhost` and no `Domain=` on localhost. If the handler drops
+ * one, the other still sets that cookie, so it is not removed, only rewritten
+ * if the remaining header differs from the one Chrome applied last.
  *
- * - A cookie the origin set that the handler dropped is removed, and its
+ * - A cookie the origin set that the handler no longer has is removed, and its
  *   earlier copy is restored from `cookiesWhenRequestSent` if Chrome held it
  *   for the request's url, even one it didn't send (e.g. blocked by SameSite).
- *   On the proxy path the browser only sees the
- *   handler's headers, so the origin's cookie is never stored and the earlier
- *   copy is left as it was.
+ *   On the proxy path the browser only sees the handler's headers, so the
+ *   origin's cookie is never stored and the earlier copy is left as it was.
  * - A cookie the handler added or changed is set, or removed if it is already
  *   expired. Skipped when `includeWrites` is false.
  *
- * Removals run before writes. When two different header keys point at the same
- * stored cookie, this keeps a removal from deleting the handler's write.
+ * Removals come before writes, and the two never touch the same stored cookie:
+ * removals only cover cookies the handler dropped, and writes only cookies it
+ * added or changed.
  *
  * Chrome stores nothing from a response to a request sent without credentials,
  * yet still reports its headers as unblocked, so Chrome's store is checked to

@@ -275,18 +275,22 @@ describe('planSetCookieSync', () => {
     })).toEqual([removal({ name: 'a', domain: '[::1]', path: '/' })])
   })
 
-  // on localhost, `Domain=localhost` and no `Domain=` are different header keys,
-  // but Chrome stores both as the same host-only cookie. The removal must run
-  // before the write, or it would delete the cookie just written.
-  it('removes before writing when two header keys name the same stored cookie', async () => {
+  // Chrome stores `Domain=localhost` as the same host-only cookie as no
+  // `Domain=`, so the handler's a=2 overwrites that cookie and the original
+  // isn't removed first
+  it('treats Domain=localhost and no Domain= as the same cookie on localhost', async () => {
     expect(await plan({
       url: 'http://localhost:3000/',
       setCookieHeadersFromOrigin: ['a=1; Domain=localhost; Path=/'],
       setCookieHeadersAfterIntercept: ['a=2; Path=/'],
-    })).toEqual([
-      removal({ name: 'a', domain: 'localhost', path: '/' }),
-      { method: 'Network.setCookie', params: expect.objectContaining({ name: 'a', value: '2' }) },
-    ])
+    })).toEqual([set({
+      name: 'a',
+      value: '2',
+      url: 'http://localhost:3000/',
+      path: '/',
+      secure: false,
+      httpOnly: false,
+    })])
   })
 
   // Chrome stores a line with no `=` as a cookie with an empty name
@@ -597,10 +601,29 @@ describe('planSetCookieSync', () => {
     // the origin sent a=1 then a=2, so Chrome holds a=2 and the handler's
     // remaining a=1 has to be written
     it('writes the origin\'s earlier value when the handler drops the later header', async () => {
-      expect(cookiesSet(await plan({
+      expect(await plan({
         setCookieHeadersFromOrigin: ['a=1; Path=/', 'a=2; Path=/'],
         setCookieHeadersAfterIntercept: ['a=1; Path=/'],
-      }))).toEqual(['a=1'])
+      })).toEqual([set({ name: 'a', value: '1', url: REQUEST_URL, path: '/', secure: false, httpOnly: false })])
+    })
+
+    // on localhost, both headers set the one host-only cookie a=1. The handler
+    // still sets it with the header it kept, so nothing is planned: a removal
+    // for the dropped header would delete the cookie the handler kept.
+    it('keeps the stored cookie when the handler drops one of two headers for it and keeps the other', async () => {
+      expect(await plan({
+        url: 'http://localhost:3000/',
+        setCookieHeadersFromOrigin: ['a=1; Domain=localhost; Path=/', 'a=1; Path=/'],
+        setCookieHeadersAfterIntercept: ['a=1; Path=/'],
+        chromeCookieStore: [{ name: 'a', value: '1', path: '/', domain: 'localhost' }],
+      })).toEqual([])
+
+      expect(await plan({
+        url: 'http://localhost:3000/',
+        setCookieHeadersFromOrigin: ['a=1; Path=/', 'a=1; Domain=localhost; Path=/'],
+        setCookieHeadersAfterIntercept: ['a=1; Domain=localhost; Path=/'],
+        chromeCookieStore: [{ name: 'a', value: '1', path: '/', domain: 'localhost' }],
+      })).toEqual([])
     })
 
     // same as above, but Chrome blocked a=2, so it holds the a=1 from this
