@@ -523,19 +523,19 @@ const util = {
 
     let result: string | undefined
 
-    if (process.env.hasOwnProperty(varName)) {
+    if (Object.prototype.hasOwnProperty.call(process.env, varName)) {
       debug(`Using ${varName} from environment variable`)
 
       result = process.env[varName]
-    } else if (process.env.hasOwnProperty(configVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarName)) {
       debug(`Using ${varName} from npm config`)
 
       result = process.env[configVarName]
-    } else if (process.env.hasOwnProperty(configVarNameLower)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarNameLower)) {
       debug(`Using ${varName.toLowerCase()} from npm config`)
 
       result = process.env[configVarNameLower]
-    } else if (process.env.hasOwnProperty(packageConfigVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 
       result = process.env[packageConfigVarName]

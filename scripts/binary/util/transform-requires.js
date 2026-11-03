@@ -1,7 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const glob = require('glob')
-const chalk = require('chalk').default
+const chalk = require('chalk')
 const Promise = require('bluebird')
 const Debug = require('debug')
 

@@ -1888,12 +1888,14 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
-      wrongArgOptionUnexpected: {
-        message: stripIndent`
-        ${cmd('session')} was passed an invalid option: **{{key}}**
-        Available options are: \`validate\`
-        `,
-        docsUrl: 'https://on.cypress.io/session',
+      wrongArgOptionUnexpected: ({ validOpts }: { validOpts: string[] }) => {
+        return {
+          message: stripIndent`
+          ${cmd('session')} was passed an invalid option: **{{key}}**
+          Available options are: ${[...validOpts].sort().map((opt) => `\`${opt}\``).join(', ')}
+          `,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgOptionInvalid: {
         message: stripIndent`

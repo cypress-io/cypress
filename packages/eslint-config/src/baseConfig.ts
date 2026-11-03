@@ -138,6 +138,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'no-console': 'error',
       'prefer-spread': 'error',
+      'no-prototype-builtins': 'error',
       // A `let` that a closure reads before its later assignment has to stay
       // declared up front: as a `const` at the assignment, an early call throws
       // a TDZ ReferenceError where it used to see `undefined`
@@ -226,7 +227,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'no-useless-escape': 'off',
       'prefer-rest-params': 'off',
-      'no-prototype-builtins': 'off',
       'no-global-assign': 'off',
       'no-async-promise-executor': 'off',
 
