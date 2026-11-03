@@ -46,5 +46,4 @@ export const StubErrorWrapper = {
 } as const
 
 // For type checking
-
 const _typeCheck: MaybeResolver<ErrorWrapper> = StubErrorWrapper

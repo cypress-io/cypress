@@ -36,7 +36,7 @@ export default [
       // Fixture data that specs load as-is
       'cypress/fixtures/**/*',
       // Written by `yarn build`
-      'src/generated/**/*',
+      '**/generated/**/*',
     ],
   },
 ]

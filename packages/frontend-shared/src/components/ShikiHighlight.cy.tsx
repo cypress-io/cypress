@@ -49,7 +49,6 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     const numLines = 15
 
     // Whitespace
-
     const code = `
     
 

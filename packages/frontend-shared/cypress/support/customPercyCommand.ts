@@ -9,6 +9,10 @@ import type { SnapshotOptions } from '@percy/core'
 type CyWithState = typeof cy & { state: (key?: string) => any }
 type InternalLogConfig = Partial<Cypress.LogConfig> & { snapshot?: boolean }
 
+// Safe because the driver defines cy.state on every cy instance. The key is
+// passed only when given: cy.state() with no argument returns the whole state.
+const getCyState = (...key: [] | [string]) => (cy as CyWithState).state(...key)
+
 export interface CustomSnapshotOptions extends SnapshotOptions {
   /**
    * width of the snapshot taken from the left edge of the viewport
@@ -227,8 +231,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: { before
       name = undefined
     }
 
-    // Safe because the driver defines cy.state on every cy instance
-    const test: Mocha.Test = (cy as CyWithState).state('test')
+    const test: Mocha.Test = getCyState('test')
 
     const titlePath = test.titlePath()
 
@@ -238,7 +241,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: { before
 
     // viewport data is read from test state rather than config to ensure that
     // the snapshot is presented at the test's expected size.
-    const { viewportWidth, viewportHeight } = (cy as CyWithState).state() as Cypress.Config
+    const { viewportWidth, viewportHeight } = getCyState() as Cypress.Config
     const snapshotWidth = options.width ? options.width : viewportWidth
     const snapshotHeight = options.height ? options.height : viewportHeight
 
@@ -273,7 +276,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: { before
 
     // Percy v3.1.0 will timeout waiting for response from server if screenshot
     // takes longer than defaultCommandTimeout, so we hack around it
-
     const _backupTimeout = Cypress.config('defaultCommandTimeout')
 
     Cypress.config('defaultCommandTimeout', 10000)
@@ -298,7 +300,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: { before
         // deterministic state we want to capture, so skip readiness. Only key off
         // setTimeout: a Date-only clock (cy.clock(date, ['Date'])) leaves timers
         // real, so readiness still resolves and should run.
-        const clock = (cy as CyWithState).state('clock')
+        const clock = getCyState('clock')
 
         if (clock?.details().methods.includes('setTimeout')) {
           snapshotOptions.readiness = { preset: 'disabled' }

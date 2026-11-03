@@ -26,5 +26,4 @@ export const GQLStubRegistry = {
 } as const
 
 // For Type checking
-
 const _x: Partial<MaybeResolveMap> = GQLStubRegistry

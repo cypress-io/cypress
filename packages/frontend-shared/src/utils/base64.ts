@@ -38,7 +38,6 @@ export function decodeBase64Unicode (str: string) {
 */
 export function encodeBase64Unicode (str: string) {
   return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
-    // @ts-expect-error - fromCharCode coerces the hex string to a number
-    return String.fromCharCode(`0x${p1}`)
+    return String.fromCharCode(parseInt(p1, 16))
   }))
 }

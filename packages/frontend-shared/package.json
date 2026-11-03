@@ -27,7 +27,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+    "**/*.{js,jsx,ts,tsx,mjs,json,vue}": "eslint --fix"
   },
   "dependencies": {
     "@cypress-design/vue-icon": "^1.18.0",
