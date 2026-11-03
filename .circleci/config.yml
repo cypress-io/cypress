@@ -131,7 +131,22 @@ commands:
                   }
 
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-                    DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+                    PR_API_URL="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}"
+
+                    # CircleCI withholds project secrets from forked PRs, so
+                    # GH_TOKEN can be unset; fall back to an anonymous request.
+                    AUTH_ARGS=()
+                    if [ -n "${GH_TOKEN:-}" ]; then
+                      AUTH_ARGS=(-H "Authorization: token ${GH_TOKEN}")
+                    fi
+
+                    # GitHub can answer with a non-JSON throttling or "forbidden"
+                    # page. Don't fail the pipeline over that: run CI instead.
+                    DRAFT=$(curl --silent --fail "${AUTH_ARGS[@]}" "${PR_API_URL}" | jq -r '.draft' 2>/dev/null) || DRAFT=unknown
+
+                    if [[ "${DRAFT}" == unknown ]]; then
+                      echo "Could not read the PR's draft status from GitHub; running CI."
+                    fi
 
                     if [[ "${DRAFT}" == true ]]; then
                       echo "Skipping CI; PR is in draft - to trigger CI , click the 'Trigger Pipeline' button in the CircleCI UI."
