@@ -485,7 +485,7 @@ Error: userInvocationStack
       return undefined
     }
 
-    it('gives a Cypress error the command invocation stack', () => {
+    it('getUserInvocationStack returns the command invocation stack for a Cypress error', () => {
       const err = new Error('failed')
 
       err.name = 'CypressError'
@@ -493,7 +493,7 @@ Error: userInvocationStack
       expect($errUtils.getUserInvocationStack(err, state)).to.equal(commandStack)
     })
 
-    it('gives an error thrown by user code no user invocation stack', () => {
+    it('getUserInvocationStack returns undefined for an error that is not a Cypress, assertion, or chai validation error', () => {
       expect($errUtils.getUserInvocationStack(new TypeError('boom'), state)).to.be.undefined
     })
 
