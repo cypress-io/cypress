@@ -199,5 +199,29 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
 Take a break, you deserve it! 👉😎👉
 
+## Releasing a previous major
+
+A previous major is maintained on a `vN` branch. The [next version](./next-version.md) is worked out from the newest published version of that major, found through the nearest `vN.*` tag on the branch, so a `v15` build produces `15.Y.Z` without setting `NEXT_VERSION`. Follow the steps above, with these differences:
+
+- **Step 6**: pass the branch the build ran on, because the pre-release npm package is stored under it:
+
+    ```shell
+    yarn prepare-release-artifacts --sha <commit sha> --version <new target version> --branch v15
+    ```
+
+- **Step 8**: publish under a `latest-vN` tag rather than `dev`, so `dev` and `latest` keep pointing at the current major:
+
+    ```shell
+    npm publish /tmp/cypress-prod.tgz --tag latest-v15
+    ```
+
+- **Step 12**: skip it. `cypress-docker-images` only builds the current version, and changing `factory/.env` would move the `cypress/included:latest` tag back to the previous major.
+- **Step 13**: skip it. Never run `npm dist-tag add` without a tag name for a previous-major version, since that moves `latest`.
+- **Step 14**: run `binary-release` as usual. It leaves `desktop.json` on the current major when the released version is older, and only checks that the version is downloadable.
+- **Step 16**: skip it.
+- **Step 17**: tag the commit on `v15` instead of `develop` (`git fetch origin v15` and check `origin/v15`).
+
+The `@cypress/`-namespaced npm packages are only released from `develop`. A fix to one of them reaches previous-major users through a `develop` release, as long as that package's `cypress` peer range still includes the previous major.
+
 [release-automations]: https://github.com/cypress-io/release-automations
 [cypress-example-kitchensink]: https://github.com/cypress-io/cypress-example-kitchensink

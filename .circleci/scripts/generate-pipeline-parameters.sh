@@ -84,7 +84,7 @@ emit_all_true() {
 # On develop/release branches all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
 if [[ "$BRANCH" == "develop" ]] || \
-   [[ "$BRANCH" =~ ^release/ ]] || \
+   [[ "$BRANCH" =~ ^release/ ]] || [[ "$BRANCH" =~ ^v[0-9]+$ ]] || \
    [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
   echo "Branch '$BRANCH' — running all tests" >&2
   emit_all_true

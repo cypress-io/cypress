@@ -8,10 +8,12 @@ on:
     branches:
       - develop
       - release/*
+      - 'v[0-9]+'
   pull_request_target:
     branches:
       - develop
       - release/*
+      - 'v[0-9]+'
 permissions:
   contents: read
 jobs:

@@ -8,6 +8,9 @@ linux-x64:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
       - matches:
+          pattern: /^v\d+$/
+          value: << pipeline.git.branch >>
+      - matches:
           pattern: /^electron\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
@@ -328,7 +331,7 @@ linux-x64:
         context: test-runner:record-tests
         # Expression-based filter: branch-based allowlist OR force-persist-artifacts pipeline parameter.
         # 'update-v8-snapshot-cache-on-develop' is included so v8 snapshot cache updates are fully tested.
-        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch matches /^electron\/\d+\.\d+\.\d+$/ or pipeline.git.branch == "update-v8-snapshot-cache-on-develop" or pipeline.parameters.force-persist-artifacts == true
+        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch matches /^v\d+$/ or pipeline.git.branch matches /^electron\/\d+\.\d+\.\d+$/ or pipeline.git.branch == "update-v8-snapshot-cache-on-develop" or pipeline.parameters.force-persist-artifacts == true
         requires:
           - build
     - test-kitchensink:
