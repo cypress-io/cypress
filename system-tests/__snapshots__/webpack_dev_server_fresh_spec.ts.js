@@ -949,9 +949,11 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 `
 
 exports['@cypress/webpack-dev-server / react / throws graceful error when user tries to run wds6 with webpack older than 5.101.0'] = `
-Your configFile threw an error from: cypress-webpack.config.ts
+Cypress could not start the webpack dev server for component testing. Fix the error below, then run Cypress again.
 
-We stopped running your tests because your config file crashed.
+Read about configuring the dev server: https://on.cypress.io/dev-server
+
+The component.devServer set in cypress-webpack.config.ts threw this error:
 
 CypressWebpackDevServerError: Incompatible versions of webpack and webpack-dev-server!
 webpack-dev-server 6.0.0 requires webpack 5.101.0 or newer, but found webpack 5.100.2.
