@@ -6,7 +6,7 @@
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
 - The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
 - `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
-- Installing the Cypress binary from an interactive terminal, such as with `npx cypress install`, now finishes unzipping sooner and uses less CPU, especially on Windows. Installs in CI, and package manager installs that run without a terminal, are unchanged. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- Installing the Cypress binary from an interactive terminal, such as with `npx cypress install`, now finishes unzipping sooner and uses less CPU, especially on Windows. Installs in CI, and package manager installs that run without a terminal, are unchanged. Fixed in [#35243](https://github.com/cypress-io/cypress/pull/35243).
 
 **Features:**
 
