@@ -421,10 +421,10 @@ describe('code-generator', () => {
       expect(checkAfterTemplate).toBe(true)
     })
 
-    it('should error if template dir does not exist', () => {
+    it('should error if template dir does not exist', async () => {
       const singleSpec = ['sample.spec.ts']
 
-      expect(hasNonExampleSpec('', singleSpec)).rejects.toThrow()
+      await expect(hasNonExampleSpec('', singleSpec)).rejects.toThrow('Template directory does not exist')
     })
   })
 
