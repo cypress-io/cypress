@@ -100,16 +100,16 @@ describe('ProjectConfigIpc', () => {
         const err = epipe()
         const loadConfig = projectConfigIpc.loadConfig()
 
-        projectConfigIpc._childProcess.emit('error', err)
+        projectConfigIpc['_childProcess'].emit('error', err)
 
         await expect(loadConfig).rejects.toEqual(configProcessError(err))
       }, 20_000)
 
       it('rejects registerSetupIpcHandlers() with a config process error', async () => {
         const err = epipe()
-        const setupNodeEvents = projectConfigIpc.registerSetupIpcHandlers()
+        const setupNodeEvents = projectConfigIpc['registerSetupIpcHandlers']()
 
-        projectConfigIpc._childProcess.emit('error', err)
+        projectConfigIpc['_childProcess'].emit('error', err)
 
         await expect(setupNodeEvents).rejects.toEqual(configProcessError(err))
       }, 20_000)
