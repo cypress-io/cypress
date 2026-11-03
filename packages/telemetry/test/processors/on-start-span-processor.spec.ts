@@ -14,7 +14,7 @@ describe('on-start-span-processor', () => {
       }
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - a string stands in for the Span, which the processor only forwards
     processor.onStart(span, undefined)
 
     await promise

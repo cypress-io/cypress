@@ -22,6 +22,7 @@ import memory from './memory'
 
 import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
+import type { Protocol } from 'devtools-protocol'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -44,6 +45,10 @@ const pathToExtension = extension.getPathToV3Extension()
 const pathToTheme = extension.getPathToTheme()
 
 let browserCriClient: BrowserCriClient | undefined
+
+// Outlives each spec's CdpAutomation, so the reset that runs when the next
+// spec's tab opens can clear the origins the previous spec's tab requested.
+const storageOrigins = new Set<string>()
 
 // Generates default Chrome preferences that Cypress applies to all Chrome instances
 const _getDefaultChromePreferences = (): ChromePreferences => {
@@ -119,7 +124,7 @@ const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: Chr
       return original
     }
 
-    let deletions: any[] = []
+    const deletions: any[] = []
 
     _.mergeWith(original, newPrefs[prefPath], (_objValue, newValue, key, obj) => {
       if (newValue == null) {
@@ -275,6 +280,42 @@ const _normalizeHostResolverRules = function (args: string[]): string[] {
   return rest.concat(`${HOST_RESOLVER_RULES}${values.reverse().join(',')}`)
 }
 
+const PERSISTED_SERVICE_WORKERS_SNAPSHOT_TIMEOUT_MS = 5000
+
+/**
+ * Resolves with the http(s) origins of the service worker registrations the
+ * profile holds. Chromium answers the first `ServiceWorker.enable` on a page
+ * session with one `workerRegistrationUpdated` event listing every stored
+ * registration, so this must subscribe before that enable is sent.
+ */
+const _collectPersistedServiceWorkerOrigins = (pageCriClient: CriClient): Promise<string[]> => {
+  return new Promise((resolve) => {
+    const finish = (origins: string[]) => {
+      clearTimeout(timeout)
+      pageCriClient.off('ServiceWorker.workerRegistrationUpdated', onSnapshot)
+      resolve(origins)
+    }
+
+    // deleted registrations count too: their caches outlive them
+    const onSnapshot = ({ registrations }: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+      const origins = registrations
+      .map((registration) => new URL(registration.scopeURL))
+      .filter(({ protocol }) => protocol === 'http:' || protocol === 'https:')
+      .map(({ origin }) => origin)
+
+      finish(origins)
+    }
+
+    // the snapshot arrives once per session, so never let a missing one hold up the launch
+    const timeout = setTimeout(() => {
+      debug('no service worker registration snapshot after %dms, clearing only the runner origin', PERSISTED_SERVICE_WORKERS_SNAPSHOT_TIMEOUT_MS)
+      finish([])
+    }, PERSISTED_SERVICE_WORKERS_SNAPSHOT_TIMEOUT_MS)
+
+    pageCriClient.on('ServiceWorker.workerRegistrationUpdated', onSnapshot)
+  })
+}
+
 // we now store the extension in each browser profile
 const _removeRootExtension = () => {
   return fs
@@ -372,7 +413,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal, storageOrigins)
 
   automation.use(cdpAutomation)
 
@@ -721,6 +762,10 @@ export = {
 
     await options['onInitializeNewBrowserTab']?.()
 
+    const persistedServiceWorkerOrigins = options.useBrowserNetworkInterception && options.shouldClearPersistedServiceWorkers
+      ? _collectPersistedServiceWorkerOrigins(pageCriClient)
+      : undefined
+
     await Promise.all([
       pageCriClient.send('ServiceWorker.enable'),
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi),
@@ -757,11 +802,26 @@ export = {
       // serve last session's responses from. Cookies and local storage stay
       // untouched: clearing those would log the profile out of every site it
       // has visited.
-      if (options.shouldClearPersistedServiceWorkers) {
-        await pageCriClient.send('Storage.clearDataForOrigin', {
-          origin: '*',
-          storageTypes: 'service_workers,cache_storage',
-        })
+      //
+      // Every origin holding a registration is cleared, not just the runner's
+      // current one: without a baseUrl, the first cross-origin cy.visit moves
+      // the runner onto the AUT's origin. Each origin is cleared by name
+      // because clearing every origin at once also reaches the Cypress
+      // extension's storage: on the fresh profile `cypress run` launches with,
+      // it deletes the extension's service worker registration whenever
+      // Chromium has already written it, and the extension stops responding
+      // for the rest of the session.
+      if (persistedServiceWorkerOrigins) {
+        const origins = _.uniq([new URL(url).origin, ...await persistedServiceWorkerOrigins])
+
+        debug('clearing persisted service workers for %o', origins)
+
+        await Promise.all(origins.map((origin) => {
+          return pageCriClient.send('Storage.clearDataForOrigin', {
+            origin,
+            storageTypes: 'service_workers,cache_storage',
+          })
+        }))
       }
 
       await this._navigateUsingCRI(pageCriClient, url)

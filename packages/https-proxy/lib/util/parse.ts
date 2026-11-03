@@ -1,9 +1,7 @@
 import { parse } from 'url'
 
 function parseHost (hostString: string, defaultPort: number) {
-  let m
-
-  m = hostString.match(/^http:\/\/(.*)/)
+  const m = hostString.match(/^http:\/\/(.*)/)
 
   if (m) {
     const parsedUrl = parse(hostString)
@@ -25,7 +23,6 @@ function parseHost (hostString: string, defaultPort: number) {
 }
 
 export function hostAndPort (reqUrl: string, headers: any, defaultPort: number) {
-  let m
   const {
     host,
   } = headers
@@ -33,7 +30,7 @@ export function hostAndPort (reqUrl: string, headers: any, defaultPort: number) 
   const hostPort = parseHost(host, defaultPort)
 
   // this handles paths which include the full url. This could happen if it's a proxy
-  m = reqUrl.match(/^http:\/\/([^\/]*)\/?(.*)$/)
+  const m = reqUrl.match(/^http:\/\/([^\/]*)\/?(.*)$/)
 
   if (m) {
     const parsedUrl = parse(reqUrl)

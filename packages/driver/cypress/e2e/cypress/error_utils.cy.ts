@@ -77,7 +77,7 @@ describe('driver/src/cypress/error_utils', () => {
     it('throws error when it is an error', () => {
       const err = new Error('Something unexpected')
 
-      // @ts-ignore
+      // @ts-expect-error - `extraProp` is a custom property added to test error copying
       err.extraProp = 'extra prop'
       const fn = () => {
         $errUtils.throwErr(err)
@@ -119,7 +119,7 @@ describe('driver/src/cypress/error_utils', () => {
 
   context('.errByPath', () => {
     beforeEach(() => {
-      // @ts-ignore
+      // @ts-expect-error - `__test_errors` is a test-only key not in the error messages type
       $errorMessages.__test_errors = {
         obj: {
           message: 'This is a simple error message',
@@ -362,7 +362,7 @@ describe('driver/src/cypress/error_utils', () => {
     let fn
 
     beforeEach(() => {
-      // @ts-ignore
+      // @ts-expect-error - `__test_errors` is a test-only key not in the error messages type
       $errorMessages.__test_errors = {
         test: 'Simple error {{message}}',
       }

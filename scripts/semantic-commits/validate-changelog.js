@@ -64,7 +64,7 @@ function _validateEntry (changelog, { commitMessage, prNumber, semanticType, ass
   }
 
   const expectedSection = userFacingChanges[semanticType].section
-  let missingExpectedSection = !changelog[expectedSection]
+  const missingExpectedSection = !changelog[expectedSection]
   let sectionEntryFoundIn = ''
 
   const resolveData = _getResolvedMessage(semanticType, prNumber, associatedIssues)
@@ -166,7 +166,7 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
     return /^(cli|packages)/.test(filename) && filename !== 'cli/CHANGELOG.md'
   })
 
-  let errors = []
+  const errors = []
 
   if (binaryFiles.length === 0) {
     console.log('Does not contain changes that impact the next Cypress release.')

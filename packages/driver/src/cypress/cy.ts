@@ -1,4 +1,3 @@
-/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
@@ -163,6 +162,10 @@ interface ICySnapshots extends Omit<
   'onCssModified' | 'onBeforeWindowLoad'
 > { }
 
+// How many times each runnable has started. Hooks are reused across tests and retries,
+// so this tells a completion from an earlier run apart from one for the current run.
+const runnableRuns = new WeakMap<object, number>()
+
 export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IAliases, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
@@ -175,6 +178,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     keyboard: Keyboard
     mouse: Mouse
   }
+
   queue: CommandQueue
 
   timeout: ITimeouts['timeout']
@@ -650,6 +654,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return this.doneEarly()
   }
 
+  cancelPendingCommands () {
+    this.queue.endEarly({ canceled: false })
+  }
+
   // reset is called before each test
   reset (test) {
     try {
@@ -748,13 +756,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cy[name] = function (...args) {
       ensureRunnable(cy, name)
 
-      // for privileged commands, we send a message to the server that verifies
-      // them as coming from the spec. the fulfillment of this promise means
-      // the message was received. the implementation for those commands
-      // checks to make sure this promise is fulfilled before sending its
-      // websocket message for running the command to ensure prevent a race
-      // condition where running the command happens before the command is
-      // verified
+      // for privileged commands invoked from the spec, the privileged channel
+      // returns a function the command calls with its options to verify them
+      // with the server before sending its websocket message to run them
       const privilegeVerification = Cypress.emitMap('command:invocation', { name, args })
 
       // this is the first call on cypress
@@ -855,13 +859,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cy[name] = function (...args) {
       ensureRunnable(cy, name)
 
-      // for privileged commands, we send a message to the server that verifies
-      // them as coming from the spec. the fulfillment of this promise means
-      // the message was received. the implementation for those commands
-      // checks to make sure this promise is fulfilled before sending its
-      // websocket message for running the command to ensure prevent a race
-      // condition where running the command happens before the command is
-      // verified
+      // for privileged commands invoked from the spec, the privileged channel
+      // returns a function the command calls with its options to verify them
+      // with the server before sending its websocket message to run them
       const privilegeVerification = Cypress.emitMap('command:invocation', { name, args })
 
       // this is the first call on cypress
@@ -981,6 +981,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return runnable.fn = fn
     }
 
+    const run = (runnableRuns.get(runnable) ?? 0) + 1
+
+    runnableRuns.set(runnable, run)
+
+    // Once a newer run of this runnable has started (a retry clears mocha's timedOut on the
+    // reused hook), mocha would count a late done() or promise from this run as a second
+    // completion of the new run and fail it, so those are dropped.
+    const isStaleRun = () => runnableRuns.get(runnable) !== run
+
     const cy = this
 
     runnable.fn = function () {
@@ -1008,6 +1017,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           const originalDone = arguments[0]
 
           arguments[0] = (done = function (err) {
+            if (isStaleRun()) {
+              return null
+            }
+
             // TODO: handle no longer error when ended early
             cy.doneEarly()
 
@@ -1070,7 +1083,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
             cy.warnMixingPromisesAndCommands()
           }
 
-          return ret
+          const customPromise = ret
+
+          return new Promise((resolve, reject) => {
+            customPromise.then((value) => {
+              if (!isStaleRun()) {
+                resolve(value)
+              }
+            }, (err) => {
+              if (!isStaleRun()) {
+                reject(err)
+              }
+            })
+          })
         }
 
         // if we're cy or we've enqueued commands
@@ -1215,7 +1240,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // make sure our current subject is valid for
       // what we expect in this command
 
-      // @ts-ignore
+      // @ts-expect-error - ensure.isType expects a Chainable, not the $Cy instance
       Cypress.ensure.isType(subject, prevSubject as any, this.state('current').get('name'), this)
     }
 
@@ -1389,20 +1414,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private doneEarly () {
-    this.queue.cleanup()
-
-    // we only need to worry about doneEarly when
-    // it comes from a manual event such as stopping
-    // Cypress or when we yield a (done) callback
-    // and could arbitrarily call it whenever we want
-    const p = this.state('promise')
-
-    // if our outer promise is pending
-    // then cancel outer and inner
-    // and set canceled to be true
-    if (p && p.isPending()) {
-      this.state('canceled', true)
-      this.state('cancel')()
-    }
+    this.queue.endEarly({ canceled: true })
   }
 }

@@ -38,6 +38,16 @@ lib/
 - This package is **Node.js only** — it uses `tls`, `dns`, `net`, `http`/`https` and `fs-extra` directly. For isomorphic networking utilities (browser + Node.js), use **@packages/network-tools** instead.
 - Only `cjs/` is emitted. `tsconfig.esm.json` sets `noEmit`, so `build:esm` is an ESM-compatibility type-check — the `module` field points at an `esm/` build that is never produced, since every consumer is CommonJS.
 - Tests use `vitest run`; the `test-debug` script enables `--inspect-brk` for breakpoint debugging.
+- In a worktree without a full root `yarn`, the test suite cannot resolve its first-party dependencies until they are built, in this order — each run only reports the next one:
+
+  ```bash
+  yarn workspace @packages/network-tools build   # lib/blocked.ts imports it
+  yarn workspace @packages/socket build          # agent.spec.ts imports @packages/socket/browser/client
+  yarn workspace @packages/https-proxy build     # agent.spec.ts -> test/support/servers
+  yarn workspace @packages/network build         # https-proxy resolves @packages/network by its own `main`
+  ```
+
+  That last step builds `cjs/` from whatever is currently in `lib/`, so a green run afterwards is not evidence about unmodified code. See [Notes](../AGENTS.md#notes) for why `main` decides this.
 - `test/unit/agent.spec.ts` serves on port 443 and resolves `localhost` over both IPv4 and IPv6, so it needs root and an IPv6 loopback. CI's `unit-tests` job enables IPv6 in Docker and runs the suite under `sudo`; without both, much of the agent suite fails on `EACCES` / `EAFNOSUPPORT`.
 
 ## Integration Points

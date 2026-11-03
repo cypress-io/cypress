@@ -46,7 +46,7 @@ import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 
 const props = withDefaults(defineProps<{
   title: string
-  code: string
+  code?: string
   listItems: string[]
   codeFragment: string
 }>(), {

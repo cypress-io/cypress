@@ -7,6 +7,7 @@ import Jimp from 'jimp'
 import sizeOf from 'image-size'
 import colorString from 'color-string'
 import * as plugins from './plugins'
+import { mergeScreenshotDetails } from './plugins/merge_plugin_results'
 import { fs, getPath } from './util/fs'
 import type { Data, ScreenshotsFolder } from './util/fs'
 
@@ -38,11 +39,6 @@ interface SavedDetails {
   testFailure?: boolean
   path?: string
 }
-
-// TODO: when we parallelize these builds we'll need
-// a semaphore to access the file system when we write
-// screenshots since its possible two screenshots with
-// the same name will be written to the file system
 
 // when debugging logs automatically prefix the
 // screenshot id to the debug logs for easier association
@@ -463,11 +459,7 @@ const screenshots = {
 
     return plugins.execute('after:screenshot', details)
     .then((updates) => {
-      if (!_.isPlainObject(updates)) {
-        return details
-      }
-
-      return _.extend(details, _.pick(updates, 'size', 'dimensions', 'path'))
+      return mergeScreenshotDetails(details, updates) ?? details
     })
   },
 

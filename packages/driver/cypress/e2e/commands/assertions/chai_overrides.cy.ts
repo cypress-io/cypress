@@ -173,9 +173,7 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/205
       describe('does not pass not.visible for non-dom', { defaultCommandTimeout: 50 }, function () {
         it('undefined', function (done) {
-          let spy
-
-          spy = cy.spy(function (err) {
+          const spy = cy.spy(function (err) {
             expect(err.message).to.contain('attempted to make')
 
             return done()
@@ -188,9 +186,7 @@ describe('src/cy/commands/assertions', () => {
         })
 
         it('null', function (done) {
-          let spy
-
-          spy = cy.spy(function (err) {
+          const spy = cy.spy(function (err) {
             expect(err.message).to.contain('attempted to make')
 
             return done()
@@ -202,9 +198,7 @@ describe('src/cy/commands/assertions', () => {
         })
 
         it('[]', function (done) {
-          let spy
-
-          spy = cy.spy(function (err) {
+          const spy = cy.spy(function (err) {
             expect(err.message).to.contain('attempted to make')
 
             return done()
@@ -216,9 +210,7 @@ describe('src/cy/commands/assertions', () => {
         })
 
         it('{}', function (done) {
-          let spy
-
-          spy = cy.spy(function (err) {
+          const spy = cy.spy(function (err) {
             expect(err.message).to.contain('attempted to make')
 
             return done()

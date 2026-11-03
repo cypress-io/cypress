@@ -95,8 +95,7 @@ describe('src/cy/commands/querying', () => {
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 100)
+        }, 100)
       })
 
       cy.on('command:retry', () => {
@@ -1353,8 +1352,7 @@ describe('src/cy/commands/querying', () => {
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 50)
+        }, 50)
       })
 
       cy.on('command:retry', () => {
@@ -1932,6 +1930,36 @@ space
         })
 
         return null
+      })
+
+      describe('in a document without a <body>', () => {
+        beforeEach(() => {
+          cy.document().then((doc) => {
+            doc.body.remove()
+          })
+        })
+
+        it('throws when there is no filter', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.name).to.eq('AssertionError')
+            expect(err.message).to.include('Expected to find content: \'brand new content\' but never did.')
+
+            done()
+          })
+
+          cy.contains('brand new content')
+        })
+
+        it('throws when there is a filter', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.name).to.eq('AssertionError')
+            expect(err.message).to.include('Expected to find content: \'brand new content\' within the selector: \'span\' but never did.')
+
+            done()
+          })
+
+          cy.contains('span', 'brand new content')
+        })
       })
 
       _.each([undefined, null], (val) => {

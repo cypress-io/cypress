@@ -997,6 +997,12 @@ describe('visual error templates', () => {
         default: [{}],
       }
     },
+    DEV_SERVER_START_FAILED: () => {
+      return {
+        default: ['cypress.config.ts', 'webpack', makeErr()],
+        customDevServer: ['cypress.config.ts', undefined, makeErr()],
+      }
+    },
     PLUGINS_RUN_EVENT_ERROR: () => {
       return {
         default: ['before:spec', makeErr()],

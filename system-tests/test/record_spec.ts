@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import _ from 'lodash'
 import path from 'path'
 import dedent from 'dedent'
@@ -37,7 +36,8 @@ const debug = Debug('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
 
-let { runId, groupId, machineId, runUrl, tags } = postRunResponse
+const { runId, groupId, runUrl } = postRunResponse
+let { machineId, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
 describe('e2e record', () => {
@@ -659,9 +659,7 @@ describe('e2e record', () => {
 
   context('record in non-parallel', () => {
     describe('api reordering specs', () => {
-      let mockServerState
-
-      mockServerState = setupStubbedServer(createRoutes({
+      const mockServerState = setupStubbedServer(createRoutes({
         postRun: {
           res (req, res) {
             console.log(req.body.specs)
@@ -692,7 +690,7 @@ describe('e2e record', () => {
   })
 
   describe('api skips specs', () => {
-    let mockServerState = setupStubbedServer(createRoutes({
+    const mockServerState = setupStubbedServer(createRoutes({
 
       postInstanceTests: {
         res: (req, res) => {
@@ -2116,7 +2114,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F5] 422 status code with valid decryption on createRun', async () => {
+      describe('[F5] 422 status code with valid decryption on createRun', () => {
         const mockServer = setupStubbedServer(createRoutes({
           sendPreflight: {
             res: async (req, res) => {
@@ -2680,6 +2678,25 @@ describe('e2e record', () => {
             })
 
             expect(artifactReport?.protocol?.afterSpecDurations?.afterSpecTotal).to.be.a('number')
+          })
+        })
+
+        it('reports the hooks that run around each test', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'simple_hooks*',
+            record: true,
+          }).then(() => {
+            const postInstanceTests = getRequests().find(({ url }) => url === `POST /instances/${instanceId}/tests`)?.body
+            const hookIds = postInstanceTests?.hooks.map((hook) => hook.clientId)
+
+            expect(hookIds).to.have.length(4)
+            expect(postInstanceTests?.tests).to.have.length(3)
+
+            postInstanceTests?.tests.forEach((test) => {
+              expect(test.hookIds).to.have.members(hookIds)
+            })
           })
         })
       })

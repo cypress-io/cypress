@@ -70,8 +70,6 @@ describe('lib/agent', function () {
     vi.unstubAllEnvs()
 
     try {
-      // Disabling the eslint for geteuid since we are explicitly catching if there's a problem with it
-      // eslint-disable-next-line
       if (os.platform() === 'linux' && process.geteuid && process.geteuid() !== 0) {
         // eslint-disable-next-line no-console
         console.error('You must be a root user to run these tests since we specifically test hosting a server at 443 which requires root access')
@@ -147,14 +145,14 @@ describe('lib/agent', function () {
 
           fetchWithAgent = function (input: RequestInfo, init?: RequestInit) {
             return fetch(input, {
-              // @ts-expect-error
+              // @ts-expect-error - `agent` is not in fetch's RequestInit type, but cross-fetch passes it to Node's http module
               agent,
               ...init,
             })
           }
 
           if (testCase.proxyUrl) {
-            let options: any = {
+            const options: any = {
               keepRequests: true,
               https: false,
               auth: false,
@@ -307,7 +305,7 @@ describe('lib/agent', function () {
 
         it('HTTP websocket connections can be established and used', async () => {
           const socket = socketIo.client(`http://localhost:${HTTP_PORT}`, {
-            // @ts-expect-error
+            // @ts-expect-error - socket.io-client types `agent` as string | boolean, but passes an http.Agent through to the transport
             agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -323,13 +321,13 @@ describe('lib/agent', function () {
             expect(debugProxy.requests[0].url).toEqual(expect.stringContaining('http://localhost:31080'))
           }
 
-          // @ts-expect-error
+          // @ts-expect-error - `close` is not on the SocketShape type
           socket.close()
         })
 
         it('HTTPS websocket connections can be established and used', async () => {
           const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
-            // @ts-expect-error
+            // @ts-expect-error - socket.io-client types `agent` as string | boolean, but passes an http.Agent through to the transport
             agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -346,7 +344,7 @@ describe('lib/agent', function () {
             }))
           }
 
-          // @ts-expect-error
+          // @ts-expect-error - `close` is not on the SocketShape type
           socket.close()
         })
 
@@ -421,7 +419,7 @@ describe('lib/agent', function () {
         })
 
         const options = spy.mock.calls[0][0]
-        // @ts-expect-error
+        // @ts-expect-error - `_agentKey` is typed Optional<symbol>, and its void member can't index the session cache
         const session = agent.httpsAgent._sessionCache.map[options._agentKey]
 
         expect(spy).toHaveBeenCalledOnce()
@@ -510,14 +508,13 @@ describe('lib/agent', function () {
         vi.stubEnv('NO_PROXY', '')
         vi.stubEnv('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS', `http://localhost:${HTTP_PORT}`)
 
-        const response = await new Promise((resolve) => {
+        const response = await new Promise<http.IncomingMessage & { req: http.ClientRequest }>((resolve) => {
           request({
             url: `http://localhost:${HTTP_PORT}/get`,
           })
           .on('response', resolve)
         })
 
-        // @ts-expect-error
         expect(response.req.path).toEqual('http://localhost:31080/get')
       })
     })
@@ -599,7 +596,7 @@ describe('lib/agent', function () {
             caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
           }
 
-          let options: any = {
+          const options: any = {
             keepRequests: true,
             https: {
               ...servers.https,
@@ -737,7 +734,7 @@ describe('lib/agent', function () {
             agent,
           })
 
-          let options: any = {
+          const options: any = {
             keepRequests: true,
             https: servers.https,
             auth: false,
@@ -826,7 +823,7 @@ describe('lib/agent', function () {
 
         it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https websocket`, async function () {
           const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
-            // @ts-expect-error
+            // @ts-expect-error - socket.io-client types `agent` as string | boolean, but passes an http.Agent through to the transport
             agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -843,7 +840,7 @@ describe('lib/agent', function () {
             }))
           }
 
-          // @ts-expect-error
+          // @ts-expect-error - `close` is not on the SocketShape type
           socket.close()
         })
       })
@@ -895,7 +892,7 @@ describe('lib/agent', function () {
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
-          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234 }, expect.any(Function))
+          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234, ALPNProtocols: ['http/1.1'] }, expect.any(Function))
           resolve()
         })
       })
@@ -910,6 +907,56 @@ describe('lib/agent', function () {
           resolve()
         })
       })
+    })
+  })
+
+  describe('HttpsAgent#createConnection', function () {
+    afterEach(function () {
+      vi.restoreAllMocks()
+    })
+
+    it('advertises http/1.1 over ALPN', function () {
+      const createConnection = vi.spyOn(https.Agent.prototype, 'createConnection').mockReturnValue(new net.Socket() as any)
+      const options = { href: 'https://foo.bar/', host: 'foo.bar', port: 443 } as any
+
+      new CombinedAgent().httpsAgent.createConnection(options, () => {})
+
+      expect(createConnection).toHaveBeenCalledWith(expect.objectContaining({ ALPNProtocols: ['http/1.1'] }))
+    })
+
+    // the origin leg of a tunnel is established in a later call frame than the one that
+    // sets ALPNProtocols, so drive the real tunnel rather than stubbing it out
+    it('advertises http/1.1 over ALPN on the origin leg of an upstream proxy tunnel', async function () {
+      const upstream = allowDestroy(net.createServer((socket) => {
+        socket.once('data', () => socket.write('HTTP/1.1 200 OK\r\n\r\n'))
+      }))
+
+      await new Promise<void>((resolve) => upstream.listen(0, '127.0.0.1', resolve))
+
+      try {
+        const { port } = upstream.address() as net.AddressInfo
+
+        vi.stubEnv('HTTPS_PROXY', `http://127.0.0.1:${port}`)
+        vi.stubEnv('NO_PROXY', '')
+
+        const createConnection = vi.spyOn(https.Agent.prototype, 'createConnection').mockReturnValue(new net.Socket() as any)
+        const { httpsAgent } = new CombinedAgent()
+        const options = {
+          href: 'https://foo.bar/',
+          uri: url.parse('https://foo.bar/'),
+          _agentKey: 'foo.bar:443:',
+        } as any
+
+        await new Promise<void>((resolve) => httpsAgent.createConnection(options, () => resolve()))
+
+        expect(createConnection).toHaveBeenCalledWith(expect.objectContaining({
+          ALPNProtocols: ['http/1.1'],
+          socket: expect.anything(),
+        }))
+      } finally {
+        // the tunnel socket stays open, and close() alone waits on it
+        await new Promise((resolve) => (upstream as any).destroy(resolve))
+      }
     })
   })
 
@@ -956,7 +1003,7 @@ describe('lib/agent', function () {
 
         await new Promise((resolve, reject) => {
           socket.on('message', reject)
-          // @ts-expect-error
+          // @ts-expect-error - `io` is not on the SocketShape type
           socket.io.on('error', resolve)
         })
 
@@ -966,7 +1013,7 @@ describe('lib/agent', function () {
 
         expect(isHttpsRequest).toEqual(testCase.expect)
 
-        // @ts-expect-error
+        // @ts-expect-error - `close` is not on the SocketShape type
         socket.close()
       })
     })
@@ -1011,7 +1058,6 @@ describe('lib/agent', function () {
 
         // now change some stuff, regen, and expect it to work
         delete req._header
-        // @ts-ignore
         req.path = 'http://quuz.quux.invalid/abc?def=123'
         req.setHeader('Host', 'foo.fleem.invalid')
         req.setHeader('bing', 'bang')

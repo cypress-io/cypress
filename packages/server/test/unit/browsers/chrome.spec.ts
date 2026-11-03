@@ -1013,12 +1013,29 @@ describe('lib/browsers/chrome', () => {
   })
 
   describe('#attachListeners', () => {
-    const clearParams = { origin: '*', storageTypes: 'service_workers,cache_storage' }
+    const clearParams = { origin: 'https://example.com', storageTypes: 'service_workers,cache_storage' }
 
-    function setup (options: object) {
+    const registration = (registrationId: string, scopeURL: string, isDeleted = false) => ({ registrationId, scopeURL, isDeleted })
+
+    function setup (options: object, url = 'https://example.com/__/#/specs/runner', snapshot: ReturnType<typeof registration>[] | null = []) {
+      const registrationListeners: Function[] = []
+
       const pageCriClient = {
-        send: vi.fn(() => Promise.resolve()),
-        on: vi.fn(),
+        send: vi.fn(async (command: string, _params?: unknown) => {
+          // Chromium answers a session's first ServiceWorker.enable with one
+          // snapshot of every stored registration
+          if (command === 'ServiceWorker.enable' && snapshot) {
+            registrationListeners.slice().forEach((listener) => listener({ registrations: snapshot }))
+          }
+        }),
+        on: vi.fn((eventName: string, listener: Function) => {
+          if (eventName === 'ServiceWorker.workerRegistrationUpdated') registrationListeners.push(listener)
+        }),
+        off: vi.fn((eventName: string, listener: Function) => {
+          const index = registrationListeners.indexOf(listener)
+
+          if (eventName === 'ServiceWorker.workerRegistrationUpdated' && index > -1) registrationListeners.splice(index, 1)
+        }),
         targetId: '1234',
         whenChildTargetHandled: vi.fn(() => Promise.resolve()),
         reenableChildTargetInterception: vi.fn(() => Promise.resolve()),
@@ -1045,7 +1062,7 @@ describe('lib/browsers/chrome', () => {
 
       const attach = () => {
         return chrome.attachListeners(
-          'https://example.com/__/#/specs/runner',
+          url,
           pageCriClient as any,
           { use: vi.fn() } as any,
           { ...options } as any,
@@ -1053,7 +1070,13 @@ describe('lib/browsers/chrome', () => {
         )
       }
 
-      return { pageCriClient, navigateUsingCRI, attach }
+      const clearedOrigins = () => {
+        return pageCriClient.send.mock.calls
+        .filter(([command]) => command === 'Storage.clearDataForOrigin')
+        .map(([, params]) => (params as { origin: string }).origin)
+      }
+
+      return { pageCriClient, navigateUsingCRI, attach, clearedOrigins, registrationListeners }
     }
 
     it('clears persisted service worker state before the runner navigation', async () => {
@@ -1069,6 +1092,81 @@ describe('lib/browsers/chrome', () => {
 
       expect(navigateOrders).not.toHaveLength(0)
       expect(clearOrders[0]).toBeLessThan(navigateOrders[navigateOrders.length - 1])
+    })
+
+    it('clears every http(s) origin holding a registration, leaving the Cypress extension alone', async () => {
+      const { attach, clearedOrigins } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, [
+        registration('0', 'chrome-extension://caljajdfkjjjdehjdoimjkkakekklcck/'),
+        registration('1', 'http://127.0.0.1:7777/'),
+        registration('2', 'http://127.0.0.1:7777/app/'),
+        registration('3', 'https://www.example.org/scoped/'),
+      ])
+
+      await attach()
+
+      expect(clearedOrigins().sort()).toStrictEqual(['http://127.0.0.1:7777', 'https://example.com', 'https://www.example.org'])
+    })
+
+    it('clears the origin of a registration that is being deleted, since its caches remain', async () => {
+      const { attach, clearedOrigins } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, [
+        registration('1', 'https://deleted.example.org/', true),
+      ])
+
+      await attach()
+
+      expect(clearedOrigins().sort()).toStrictEqual(['https://deleted.example.org', 'https://example.com'])
+    })
+
+    it('clears the origin the runner later moves to when the launch url is on another origin', async () => {
+      const { attach, clearedOrigins } = setup(
+        { ...openOpts, shouldClearPersistedServiceWorkers: true },
+        'http://localhost:3000/__/#/specs/runner?file=cypress/e2e/spec.cy.ts',
+        [registration('1', 'http://127.0.0.1:7777/')],
+      )
+
+      await attach()
+
+      expect(clearedOrigins().sort()).toStrictEqual(['http://127.0.0.1:7777', 'http://localhost:3000'])
+    })
+
+    it('stops listening for registration updates once the snapshot is read', async () => {
+      const { attach, registrationListeners } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, [registration('1', 'http://127.0.0.1:7777/')])
+
+      await attach()
+
+      expect(registrationListeners).toHaveLength(0)
+    })
+
+    it('clears the runner origin and continues the launch when no registration snapshot arrives', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+      try {
+        const { navigateUsingCRI, attach, clearedOrigins } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true }, undefined, null)
+
+        const attached = attach()
+
+        await vi.advanceTimersByTimeAsync(5000)
+        await attached
+
+        expect(clearedOrigins()).toStrictEqual(['https://example.com'])
+        expect(navigateUsingCRI).toHaveBeenCalled()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('clears an http runner origin including its port', async () => {
+      const { pageCriClient, attach } = setup(
+        { ...openOpts, shouldClearPersistedServiceWorkers: true },
+        'http://localhost:3000/__/#/specs/runner?file=cypress/e2e/spec.cy.ts',
+      )
+
+      await attach()
+
+      expectCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin', {
+        origin: 'http://localhost:3000',
+        storageTypes: 'service_workers,cache_storage',
+      })
     })
 
     it('does not clear persisted service worker state on the MITM path', async () => {

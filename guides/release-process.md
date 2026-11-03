@@ -2,7 +2,7 @@
 
 These procedures concern the release process for the Cypress binary and `cypress` npm module.
 
-The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into `develop`. You can read more about this in [CONTRIBUTING.md](../CONTRIBUTING.md#releases).
+The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.org/intro/)) upon being merged into `develop`. You can read more about this in [CONTRIBUTING.md](../CONTRIBUTING.md#releases).
 
 [Anyone can build the binary and npm package locally](./building-release-artifacts.md), but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
 
@@ -115,10 +115,10 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
     You can pass `--dry-run` to see the commands this would run under the hood.
 
-7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
+7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in interactively with `npm login`, as the npm service account. The login prompts for a 2FA one-time password, so the service account must have 2FA enabled.
    If you are not already a Cypress package maintainer, contact a team member who is to get you added.
 
-8. Publish the generated npm package under the `dev` tag, using the npm service account.
+8. Publish the generated npm package under the `dev` tag, using the npm service account. Trusted publishing only works from CI, so the `cypress` package is published by hand. This step needs only the interactive 2FA login from the previous step. It does not use the `NPM_TOKEN` in the `org-npm-credentials` CircleCI context, and rotating or revoking that token does not affect it.
 
     ```shell
     npm publish /tmp/cypress-prod.tgz --tag dev
@@ -203,9 +203,33 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
 
-24. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. If an npm token was created when logging in, please delete this token now.
+24. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. This token is separate from the interactive login used to publish `cypress`. If an npm token was created when logging in, please delete this token now.
 
 Take a break, you deserve it! 👉😎👉
+
+## Releasing a previous major
+
+A previous major is maintained on a `vN` branch. The [next version](./next-version.md) is worked out from the newest published version of that major, found through the nearest `vN.*` tag on the branch, so a `v15` build produces `15.Y.Z` without setting `NEXT_VERSION`. Follow the steps above, with these differences:
+
+- **Step 6**: pass the branch the build ran on, because the pre-release npm package is stored under it:
+
+    ```shell
+    yarn prepare-release-artifacts --sha <commit sha> --version <new target version> --branch v15
+    ```
+
+- **Step 8**: publish under a `latest-vN` tag rather than `dev`, so `dev` and `latest` keep pointing at the current major:
+
+    ```shell
+    npm publish /tmp/cypress-prod.tgz --tag latest-v15
+    ```
+
+- **Step 12**: skip it. `cypress-docker-images` only builds the current version, and changing `factory/.env` would move the `cypress/included:latest` tag back to the previous major.
+- **Step 13**: skip it. Never run `npm dist-tag add` without a tag name for a previous-major version, since that moves `latest`.
+- **Step 14**: run `binary-release` as usual. It leaves `desktop.json` on the current major when the released version is older, and only checks that the version is downloadable.
+- **Step 16**: skip it.
+- **Step 17**: tag the commit on `v15` instead of `develop` (`git fetch origin v15` and check `origin/v15`).
+
+The `@cypress/`-namespaced npm packages are only released from `develop`. A fix to one of them reaches previous-major users through a `develop` release, as long as that package's `cypress` peer range still includes the previous major.
 
 [release-automations]: https://github.com/cypress-io/release-automations
 [cypress-example-kitchensink]: https://github.com/cypress-io/cypress-example-kitchensink

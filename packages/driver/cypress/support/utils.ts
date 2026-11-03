@@ -22,8 +22,8 @@ export const getCommandLogWithText = (command, type?) => {
 // This work around is super hacky to get the appState from the Test Mobx Observable Model
 // this is needed to pause the runner to assert on the test
 export const findAppStateFromTest = function (dom) {
-  let key = _.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
-  let internalInstance = dom[key]
+  const key = _.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
+  const internalInstance = dom[key]
 
   if (internalInstance == null) return null
 
@@ -180,7 +180,7 @@ export const makeRequestForCookieBehaviorTests = (
   }
 
   return new Promise<void>((resolve, reject) => {
-    let xhr = new XMLHttpRequest()
+    const xhr = new XMLHttpRequest()
 
     xhr.open('GET', url)
     xhr.withCredentials = Cypress._.isBoolean(credentials) ? credentials : false

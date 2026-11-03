@@ -211,9 +211,9 @@ type ExecOptions = {
    */
   env?: string
   /**
-   * Set OS-level env vars.
+   * Set OS-level env vars. `undefined` unsets one inherited from the test process.
    */
-  processEnv?: { [key: string]: string | number }
+  processEnv?: { [key: string]: string | number | undefined }
   /**
    * Set an output path.
    */
@@ -589,7 +589,6 @@ process.on('exit', () => {
     return
   }
 
-  // eslint-disable-next-line no-console
   console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
 })
 
@@ -885,10 +884,9 @@ const systemTests = {
     args = _.compact(args)
 
     // avoid snapshot cwd issue - see /patches/snap-shot* for more information
-    // @ts-ignore
     global.CACHED_CWD_FOR_SNAP_SHOT_IT = path.join(__dirname, '..')
 
-    return snapshot.apply(null, args)
+    return snapshot(...args)
   },
 
   setup (options: SetupOptions = {}) {
@@ -1131,7 +1129,6 @@ const systemTests = {
         const matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
-          // eslint-disable-next-line no-unused-vars
           const [, , customBrowserPath, browserName, version, headless] = matches
 
           const { browser } = options

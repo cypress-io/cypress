@@ -349,7 +349,8 @@ angularVersions.forEach((angularVersion) => {
     numTestsKeptInMemory: 1,
   }, () => {
     beforeEach(() => {
-      cy.scaffoldProject(`angular-${angularVersion}`)
+      // A cold Angular install on Windows CI can exceed the default 60s
+      cy.scaffoldProject(`angular-${angularVersion}`, { timeout: 120000 })
     })
 
     it('error conditions', () => {

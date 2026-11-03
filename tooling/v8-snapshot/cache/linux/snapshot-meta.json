@@ -365,7 +365,6 @@
     "./node_modules/fast-glob/node_modules/glob-parent/index.js",
     "./node_modules/fast-glob/out/settings.js",
     "./node_modules/fast-glob/out/utils/path.js",
-    "./node_modules/file-uri-to-path/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/fs/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/json/index.js",
@@ -1766,10 +1765,12 @@
     "./node_modules/baseline-browser-mapping/dist/index.cjs",
     "./node_modules/basic-auth/index.js",
     "./node_modules/bcrypt-pbkdf/index.js",
+    "./node_modules/better-sqlite3/lib/binding.js",
     "./node_modules/better-sqlite3/lib/database.js",
     "./node_modules/better-sqlite3/lib/index.js",
     "./node_modules/better-sqlite3/lib/methods/aggregate.js",
     "./node_modules/better-sqlite3/lib/methods/backup.js",
+    "./node_modules/better-sqlite3/lib/methods/explain.js",
     "./node_modules/better-sqlite3/lib/methods/function.js",
     "./node_modules/better-sqlite3/lib/methods/inspect.js",
     "./node_modules/better-sqlite3/lib/methods/pragma.js",
@@ -1782,7 +1783,6 @@
     "./node_modules/binary-extensions/binary-extensions.json",
     "./node_modules/binary-extensions/index.js",
     "./node_modules/binaryextensions/edition-es5/index.js",
-    "./node_modules/bindings/bindings.js",
     "./node_modules/brace-expansion/index.js",
     "./node_modules/braces/index.js",
     "./node_modules/braces/lib/compile.js",
@@ -3458,6 +3458,7 @@
     "./packages/data-context/src/util/files.ts",
     "./packages/data-context/src/util/hasTypescript.ts",
     "./packages/data-context/src/util/index.ts",
+    "./packages/data-context/src/util/isInsideDir.ts",
     "./packages/data-context/src/util/maskProxyPassword.ts",
     "./packages/data-context/src/util/pluginHandlers.ts",
     "./packages/data-context/src/util/shouldLoadConfigAsEsm.ts",
@@ -3653,7 +3654,6 @@
     "./packages/server/lib/cloud/bundles/bundle_error.ts",
     "./packages/server/lib/cloud/bundles/cache_root.ts",
     "./packages/server/lib/cloud/bundles/ensure_signed_bundle.ts",
-    "./packages/server/lib/cloud/bundles/is_inside_dir.ts",
     "./packages/server/lib/cloud/bundles/parse_hash_from_bundle_url.ts",
     "./packages/server/lib/cloud/bundles/publish_staging_to_final.ts",
     "./packages/server/lib/cloud/bundles/sweep_orphan_staging.ts",
@@ -3945,5 +3945,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e426ab78bbe2ae2eaabf6869d939272375c2913a57129caf2bce4fad80a6aadf"
+  "deferredHash": "13ef43763eb5c98b4bb5bfb80e620f6813dacbbdfd1e7212a402c1e740506c8f"
 }

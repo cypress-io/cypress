@@ -132,7 +132,7 @@ function customRequire (
     }
 
     // 6.3. populate its exports if its definition is cached
-    if (customRequire.definitions.hasOwnProperty(key)) {
+    if (Object.hasOwn(customRequire.definitions, key)) {
       customRequire.exports[key] = mod
       customRequire.definitions[key].apply(mod.exports, [
         mod.exports,
@@ -286,22 +286,18 @@ function createResolveOpts (relFilename, relDirname) {
  * @returns result of invoking `require.resolve` with enhanced info
  */
 customRequire.resolve = function (mod, ...args) {
-  try {
-    // Handle the case where args is { paths: string[] }. The module is expected to be outside of the cypress snapshot.
-    if (args.length === 0 || (args[0] != null && typeof args[0] !== 'string')) {
-      return require.resolve(mod, ...args)
-    }
-
-    const [relFilename = null, relDirname = null] = args
-    const opts =
-      relFilename != null && relDirname != null
-        ? createResolveOpts(relFilename, relDirname)
-        : undefined
-
-    return require.resolve(mod, opts)
-  } catch (err) {
-    throw err
+  // Handle the case where args is { paths: string[] }. The module is expected to be outside of the cypress snapshot.
+  if (args.length === 0 || (args[0] != null && typeof args[0] !== 'string')) {
+    return require.resolve(mod, ...args)
   }
+
+  const [relFilename = null, relDirname = null] = args
+  const opts =
+    relFilename != null && relDirname != null
+      ? createResolveOpts(relFilename, relDirname)
+      : undefined
+
+  return require.resolve(mod, opts)
 }
 
 //

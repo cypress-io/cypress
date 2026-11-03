@@ -186,7 +186,7 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
 it('verifies number of cy commands', () => {
   // remove custom commands we added for our own testing
   const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils', 'runSupportFileCustomPrivilegedCommands']
-  // @ts-ignore
+  // @ts-expect-error - `commandFns` and `queryFns` are internal to cy
   const actualCommands = Cypress._.pullAll([...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)], customCommands)
   const expectedCommands = [
     'check', 'uncheck', 'click', 'env', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',

@@ -278,6 +278,8 @@ Install [Visual Studio 2022 Build Tools](https://aka.ms/vs/17/release/vs_buildto
 
 Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 
+During `yarn` installation you may see `warning Error running install script for optional dependency` for `cpu-features`, followed by a `node-gyp` build error such as `error MSB8020: The build tools for ClangCL (Platform Toolset = 'ClangCL') cannot be found`. You can ignore it. `cpu-features` is an optional dependency of `ssh2`, which reaches the repo only through `dockerode` in [system-tests](./system-tests/package.json). `ssh2` works without it, and the installation completes successfully.
+
 #### Corepack
 
 The Cypress repo is compatible with Corepack and contains a `packageManager` field in the root [package.json](./package.json) file to automatically install Yarn. Cypress does not however require you to enable Corepack. It is classed as experimental and not suitable for production by the Node.js organization. Refer to the repo [corepack](https://github.com/nodejs/corepack#readme) for instructions, known issues and workarounds.
@@ -562,7 +564,7 @@ The repository has one protected branch:
 
 - `develop` contains the current latest "pre-release" code for the Cypress app and contains the already published code of all [standalone npm packages](./npm) Cypress maintains. This branch is set as the default branch, and all pull requests should be made against this branch.
 
-We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We used [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automate the release of these packages to npm.
+We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We use [`semantic-release`](https://semantic-release.org/intro/) to automate the release of these packages to npm.
 
 We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, the pull request should clearly state that it should not be merged until the next scheduled Cypress app release date.
 

@@ -58,7 +58,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
   }
 
   const _controls = () => {
-    let controls: Array<JSX.Element> = []
+    const controls: Array<JSX.Element> = []
 
     // Check if we're running all specs by looking at the spec relative path
     const isRunningAllSpecs = spec?.relative === '__all'

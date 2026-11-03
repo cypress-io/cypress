@@ -44,6 +44,27 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/24178
+    it('finds content within a document subject', () => {
+      cy.document().within(() => {
+        cy.contains('#nested-div span', 'foo').should('exist')
+        cy.contains('foo').should('exist')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24178
+    it('reports missing content within a document as an assertion error', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('AssertionError')
+        expect(err.message).to.eq('Timed out retrying after 100ms: Expected to find content: \'document-scope-missing-content\' within the element: <document> but never did.')
+        done()
+      })
+
+      cy.document().within(() => {
+        cy.contains('document-scope-missing-content', { timeout: 100 })
+      })
+    })
+
     it('does not change the subject', () => {
       const form = cy.$$('#by-name')
 
@@ -184,6 +205,29 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34994
+    describe('contains() retries while the withinSubject is missing from the dom', () => {
+      beforeEach(() => {
+        cy.on('command:retry', _.once(() => {
+          cy.$$('body').append('<div id="wrapper"><div id="upper">Newer York</div></div>')
+        }))
+      })
+
+      it('with a selector', () => {
+        cy.get('#wrapper').within(() => {
+          cy.then(() => cy.$$('#wrapper').remove())
+          cy.contains('#upper', 'Newer York')
+        })
+      })
+
+      it('without a selector', () => {
+        cy.get('#wrapper').within(() => {
+          cy.then(() => cy.$$('#wrapper').remove())
+          cy.contains('Newer York')
+        })
+      })
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         this.logs = []
@@ -297,6 +341,21 @@ describe('src/cy/commands/querying/within', () => {
         })
 
         cy.noop().within(() => {})
+      })
+
+      // https://github.com/cypress-io/cypress/issues/34994
+      it('contains() times out with a content error when the withinSubject never returns to the dom', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.name).to.eq('AssertionError')
+          expect(err.message).to.include('Expected to find content: \'New York\' within the selector: \'#upper\' but never did.')
+
+          done()
+        })
+
+        cy.get('#wrapper').within(() => {
+          cy.then(() => cy.$$('#wrapper').remove())
+          cy.contains('#upper', 'New York')
+        })
       })
 
       it('throws when not a DOM subject', (done) => {

@@ -14,8 +14,7 @@ const simulateBlurEvent = (el, win) => {
   })
 
   const blurEvt = new FocusEvent('blur', {
-    // @ts-ignore // Bubble isn't available on FocusEvent?
-    bubble: false,
+    bubbles: false,
     cancelable: false,
     view: win,
     relatedTarget: null,

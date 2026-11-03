@@ -12,18 +12,20 @@ export const patchXmlHttpRequest = (window: Window) => {
       // since the send method does NOT have access to the arguments passed into open or have the request information,
       // we need to store a reference here to what we need in the send method
       this._url = captureFullRequestUrl(args[1], window)
-    } finally {
-      const result = originalXmlHttpRequestOpen.apply(this, args as any)
-
-      if (args.length > 2 && !args[2]) {
-        this.setRequestHeader('x-cypress-is-sync-request', 'true')
-        this._isSyncRequest = true
-      } else {
-        this._isSyncRequest = false
-      }
-
-      return result
+    } catch {
+      // if our internal logic errors for whatever reason, do NOT block the end user and continue the request
     }
+
+    const result = originalXmlHttpRequestOpen.apply(this, args as any)
+
+    if (args.length > 2 && !args[2]) {
+      this.setRequestHeader('x-cypress-is-sync-request', 'true')
+      this._isSyncRequest = true
+    } else {
+      this._isSyncRequest = false
+    }
+
+    return result
   }
 
   window.XMLHttpRequest.prototype.send = function (...args) {
@@ -42,10 +44,11 @@ export const patchXmlHttpRequest = (window: Window) => {
           resourceType: 'xhr',
           credentialStatus: this.withCredentials,
         })
-      } finally {
+      } catch {
         // if our internal logic errors for whatever reason, do NOT block the end user and continue the request
-        return originalXmlHttpRequestSend.apply(this, args)
       }
+
+      return originalXmlHttpRequestSend.apply(this, args)
     })()
   }
 }

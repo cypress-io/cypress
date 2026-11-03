@@ -22,7 +22,7 @@ const format = (data) => {
 }
 
 function removeLeadingSlash (str: string) {
-  let li = Math.max(str.indexOf('/'), str.indexOf('\\'))
+  const li = Math.max(str.indexOf('/'), str.indexOf('\\'))
 
   return str.substring(li + 1)
 }
@@ -84,6 +84,24 @@ const getScreenshotDocsPath = (cmd) => {
   }
 
   return 'screenshot'
+}
+
+const statusCodeFlagsInvalid = (command, { failOnStatusCode, retryOnStatusCodeFailure }) => {
+  return {
+    message: stripIndent`\
+      ${cmd(command)} was called with options that cannot be used together:
+
+        { failOnStatusCode: ${$utils.stringifyActual(failOnStatusCode)}, retryOnStatusCodeFailure: ${$utils.stringifyActual(retryOnStatusCodeFailure)} }
+
+      \`retryOnStatusCodeFailure\` retries when the response has a status code other than \`2xx\` or \`3xx\`, and fails if the last retry gets one too. It requires \`failOnStatusCode: true\`.
+
+      Pass one of these combinations instead:
+
+        1. To retry on these status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
+        2. To fail on these status codes without retrying, which is the default, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\`.
+        3. To not fail on these status codes, pass \`{ failOnStatusCode: false, retryOnStatusCodeFailure: false }\`.`,
+    docsUrl: `https://on.cypress.io/${command}`,
+  }
 }
 
 const getRedirects = (obj, phrase, listIndentSize) => {
@@ -1425,12 +1443,8 @@ export default {
         docsUrl: 'https://on.cypress.io/request',
       }
     },
-    status_code_flags_invalid: {
-      message: stripIndent`\
-        ${cmd('request')} was invoked with \`{ failOnStatusCode: false, retryOnStatusCodeFailure: true }\`.
-
-        \`failOnStatusCode\` must be \`true\` if \`retryOnStatusCodeFailure\` is \`true\`.`,
-      docsUrl: 'https://on.cypress.io/request',
+    status_code_flags_invalid (obj) {
+      return statusCodeFlagsInvalid('request', obj)
     },
     auth_invalid: {
       message: `${cmd('request')} must be passed an object literal for the \`auth\` option.`,
@@ -1459,7 +1473,6 @@ export default {
         If you're trying to send a \`x-www-form-urlencoded\` request then pass either a string or object literal to the \`body\` property.`,
       docsUrl: 'https://on.cypress.io/request',
     },
-    /* eslint-disable indent */
     loading_failed (obj) {
       return {
         message: cyStripIndent(`\
@@ -1548,7 +1561,6 @@ export default {
         docsUrl: 'https://on.cypress.io/request',
       }
     },
-    /* eslint-enable indent */
     url_missing: {
       message: `${cmd('request')} requires a \`url\`. You did not provide a \`url\`.`,
       docsUrl: 'https://on.cypress.io/request',
@@ -1876,12 +1888,14 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
-      wrongArgOptionUnexpected: {
-        message: stripIndent`
-        ${cmd('session')} was passed an invalid option: **{{key}}**
-        Available options are: \`validate\`
-        `,
-        docsUrl: 'https://on.cypress.io/session',
+      wrongArgOptionUnexpected: ({ validOpts }: { validOpts: string[] }) => {
+        return {
+          message: stripIndent`
+          ${cmd('session')} was passed an invalid option: **{{key}}**
+          Available options are: ${[...validOpts].sort().map((opt) => `\`${opt}\``).join(', ')}
+          `,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgOptionInvalid: {
         message: stripIndent`
@@ -2288,12 +2302,9 @@ export default {
         docsUrl: 'https://on.cypress.io/visit',
       }
     },
-    status_code_flags_invalid: stripIndent`\
-      These options are incompatible with each other.
-
-       - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-       - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-       - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }`,
+    status_code_flags_invalid (obj) {
+      return statusCodeFlagsInvalid('visit', obj)
+    },
     invalid_1st_arg: {
       message: `${cmd('visit')} must be called with a \`url\` or an \`options\` object containing a \`url\` as its 1st argument`,
       docsUrl: 'https://on.cypress.io/visit',

@@ -1,7 +1,8 @@
-import { baseConfig, cliOverrides } from '@packages/eslint-config'
+import { baseConfig, cliOverrides, jsonConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...jsonConfig,
   ...cliOverrides,
   {
     files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],

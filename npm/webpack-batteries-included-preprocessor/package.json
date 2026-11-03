@@ -1,15 +1,38 @@
 {
   "name": "@cypress/webpack-batteries-included-preprocessor",
   "version": "0.0.0-development",
-  "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features and TypeScript",
   "private": false,
+  "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features and TypeScript",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "cypress-preprocessor",
+    "webpack",
+    "typescript",
+    "babel",
+    "preprocessor"
+  ],
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-batteries-included-preprocessor#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20webpack-batteries-included-preprocessor&template=1-bug-report.md&title=",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
+  },
+  "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "lint": "eslint . --no-warn-ignored",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix --no-warn-ignored"
   },
   "dependencies": {
     "@babel/core": "^7.28.0",
@@ -55,26 +78,6 @@
   },
   "peerDependencies": {
     "@cypress/webpack-preprocessor": "^6.0.4"
-  },
-  "files": [
-    "dist/*"
-  ],
-  "types": "dist/index.d.ts",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-batteries-included-preprocessor#readme",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20webpack-batteries-included-preprocessor&template=1-bug-report.md&title=",
-  "keywords": [
-    "cypress",
-    "cypress-plugin",
-    "cypress-preprocessor",
-    "webpack"
-  ],
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix --no-warn-ignored"
   },
   "publishConfig": {
     "access": "public"

@@ -1,29 +1,37 @@
 {
   "name": "@tooling/packherd",
   "version": "0.0.0-development",
-  "description": "Herds all dependencies reachable from an entry and packs them.",
   "private": true,
+  "description": "Herds all dependencies reachable from an entry and packs them.",
   "main": "dist/packherd.js",
+  "types": "src/packherd.ts",
+  "files": [
+    "dist",
+    "src/packherd.ts"
+  ],
   "scripts": {
     "build": "tsc",
     "check-ts": "tsc --noEmit",
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
+    "lint": "eslint",
     "test": "yarn test-integration",
     "test-integration": "mocha --config ./test/.mocharc.js",
     "watch": "tsc --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "esbuild": "^0.28.1"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "globals": "^15.12.0",
+    "jiti": "^2.4.2",
     "mocha": "7.0.1"
   },
-  "files": [
-    "dist",
-    "src/packherd.ts"
-  ],
-  "types": "src/packherd.ts",
   "nx": {}
 }

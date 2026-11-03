@@ -115,7 +115,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       const urlSearchParams = new URLSearchParams(url.search)
       const result = {}
 
-      for (let pair of urlSearchParams.entries()) {
+      for (const pair of urlSearchParams.entries()) {
         result[pair[0]] = pair[1]
       }
 

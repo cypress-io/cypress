@@ -61,5 +61,7 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
   },
-  "include": ["./*.ts", "./lib/*.ts"]
+  "include": ["./*.ts", "./lib/*.ts"],
+  // ESLint loads this through jiti; it is not part of the published build
+  "exclude": ["eslint.config.ts"]
 }

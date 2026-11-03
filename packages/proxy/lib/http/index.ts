@@ -72,7 +72,7 @@ const createBrowserConnectionClosedError = () => {
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
-  Error
+  Error,
 }
 
 export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
@@ -351,7 +351,7 @@ export class Http {
   request: ServerRequest
   socket: SocketBroadcaster
   serverBus: EventEmitter
-  renderedHTMLOrigins: {[key: string]: boolean} = {}
+  renderedHTMLOrigins: { [key: string]: boolean } = {}
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape

@@ -5,7 +5,7 @@ import _ from 'lodash'
 import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
-import { createRetryingSocket, getAddress } from './connect'
+import { ALPNProtocols, createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
 import { clientCertificateStoreSingleton } from './client-certificates'
 import type { CaOptions } from './ca'
@@ -69,6 +69,7 @@ type RequestOptionsWithProxy = WithProxyOpts<http.RequestOptions>
 
 type HttpsRequestOptions = https.RequestOptions & {
   minVersion?: 'TLSv1'
+  ALPNProtocols?: string[]
 }
 
 type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
@@ -108,7 +109,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
   const isHttps = opts.proxy.protocol === 'https:'
   const port = opts.proxy.port || (isHttps ? 443 : 80)
 
-  let connectOpts: any = {
+  const connectOpts: any = {
     port: Number(port),
     host: opts.proxy.hostname,
     useTls: isHttps,
@@ -297,7 +298,6 @@ class HttpAgent extends http.Agent {
     const proxy = url.parse(options.proxy)
 
     // set req.path to the full path so the proxy can resolve it
-    // @ts-ignore: Cannot assign to 'path' because it is a constant or a read-only property.
     req.path = options.href
 
     delete req._header // so we can set headers again
@@ -359,6 +359,12 @@ class HttpsAgent extends https.Agent {
   }
 
   createConnection (options: HttpsRequestOptions, cb?: any): any {
+    // Safe to set after the socket pool has keyed this request: `https.Agent.getName()`
+    // ignores ALPNProtocols, and every connection advertises the same list. Making the
+    // list conditional would need it folded into the key, or sockets would be reused
+    // across differing negotiations.
+    options.ALPNProtocols = [...ALPNProtocols]
+
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
@@ -375,7 +381,6 @@ class HttpsAgent extends https.Agent {
       }
     }
 
-    // @ts-ignore
     cb?.(null, super.createConnection(options) as any)
   }
 

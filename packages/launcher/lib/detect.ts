@@ -16,6 +16,7 @@ import type {
 import type {
   NotDetectedAtPathError,
   NotInstalledError, PathData,
+  VersionStringCache,
 } from './types'
 import * as windowsHelper from './windows'
 
@@ -50,7 +51,7 @@ const validateCypressSupport = (validator: BrowserValidator | undefined, browser
 }
 
 type PlatformHelper = {
-  detect: (browser: Browser) => Promise<DetectedBrowser>
+  detect: (browser: Browser, versionStringCache?: VersionStringCache) => Promise<DetectedBrowser>
   getVersionString: (path: string) => Promise<string>
   getVersionNumber: (path: string, browser: Browser) => string
   getPathData: (path: string) => PathData
@@ -79,6 +80,7 @@ function getHelper (platform?: NodeJS.Platform): PlatformHelper {
 function lookup (
   platform: NodeJS.Platform,
   browser: Browser,
+  versionStringCache: VersionStringCache,
 ): Promise<DetectedBrowser> {
   const helper = getHelper(platform)
 
@@ -86,7 +88,7 @@ function lookup (
     throw new Error(`Cannot lookup browser ${browser.name} on ${platform}`)
   }
 
-  return helper.detect(browser)
+  return helper.detect(browser, versionStringCache)
 }
 
 /**
@@ -94,17 +96,17 @@ function lookup (
  * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
  * we don't use the `binary` field on Windows.
  */
-function checkBrowser (browser: Browser): Bluebird<(boolean | HasVersion)[]> {
+function checkBrowser (browser: Browser, versionStringCache: VersionStringCache): Bluebird<(boolean | HasVersion)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.map(browser.binary, (binary: string) => {
-      return checkOneBrowser(extend({}, browser, { binary }))
+      return checkOneBrowser(extend({}, browser, { binary }), versionStringCache)
     })
   }
 
-  return Bluebird.map([browser], checkOneBrowser)
+  return Bluebird.map([browser], (browser) => checkOneBrowser(browser, versionStringCache))
 }
 
-function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
+function checkOneBrowser (browser: Browser, versionStringCache: VersionStringCache): Promise<boolean | HasVersion> {
   const platform = os.platform()
   const pickBrowserProps = [
     'name',
@@ -131,7 +133,7 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
     throw err
   }
 
-  return lookup(platform, browser)
+  return lookup(platform, browser, versionStringCache)
   .then((val) => ({ ...browser, ...val }))
   .then((val) => _.pick(val, pickBrowserProps) as FoundBrowser)
   .then((foundBrowser) => {
@@ -158,11 +160,19 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 
   debug('detecting if the following browsers are present %o', goalBrowsers)
 
-  return Bluebird.mapSeries(goalBrowsers, checkBrowser)
+  // Several definitions probe the same binary (e.g. `chrome`), so share its `--version` output
+  const versionStringCache: VersionStringCache = new Map()
+
+  // Checked one at a time on purpose: the `which` lookup filters out missing
+  // binaries before anything is spawned, so checking definitions concurrently
+  // leaves little to overlap and does not make startup faster.
+  return Bluebird.mapSeries(goalBrowsers, (browser) => checkBrowser(browser, versionStringCache))
   .then((val) => _.flatten(val))
   .then(compactFalse)
   .then(removeDuplicateBrowsers)
 }
+
+const MAX_REPORTED_OUTPUT = 1000
 
 export const detectByPath = (
   path: string,
@@ -210,8 +220,32 @@ export const detectByPath = (
 
   const pathData = helper.getPathData(path)
 
-  return helper.getVersionString(pathData.path)
-  .then((version) => {
+  // Windows reads the version from the file, so there is no output to report
+  const readVersion = async (binary: string): Promise<{ version: string, stderr: string }> => {
+    if (os.platform() === 'win32') {
+      return { version: await helper.getVersionString(binary), stderr: '' }
+    }
+
+    const { stdout, stderr } = await linuxHelper.getVersionOutput(binary)
+
+    return { version: stdout, stderr }
+  }
+
+  const describeNotFound = (version: string, stderr: string): string => {
+    const base = `Unable to find browser with path ${path}`
+
+    if (os.platform() === 'win32') {
+      return base
+    }
+
+    // A crashing binary can print a lot
+    const clip = (text: string) => (text.length > MAX_REPORTED_OUTPUT ? `${text.slice(0, MAX_REPORTED_OUTPUT)}...` : text)
+
+    return `${base}. Running "${pathData.path} --version" printed: ${clip(version) || '(nothing)'}${stderr ? `\nand wrote to stderr: ${clip(stderr)}` : ''}`
+  }
+
+  return readVersion(pathData.path)
+  .then(({ version, stderr }) => {
     let browser
 
     if (pathData.browserKey) {
@@ -223,7 +257,7 @@ export const detectByPath = (
     }
 
     if (!browser) {
-      throw notDetectedAtPathErr(`Unable to find browser with path ${path}`)
+      throw notDetectedAtPathErr(describeNotFound(version, stderr))
     }
 
     return setCustomBrowserData(browser, pathData.path, version)

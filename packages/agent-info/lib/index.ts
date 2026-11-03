@@ -75,3 +75,22 @@ export const detectAgent = (env: NodeJS.ProcessEnv = process.env): AgentName | u
 export const isAgent = (env: NodeJS.ProcessEnv = process.env): boolean => {
   return !!detectAgent(env)
 }
+
+const AGENT_MODE_VARIABLE = 'CYPRESS_AGENT_MODE'
+
+// Detection cannot know every host, so a person can force the agent behavior on
+// for one the table misses, or off for a human whose shell carries a marker.
+// Any other value defers to detection.
+export const isAgentMode = (env: NodeJS.ProcessEnv = process.env): boolean => {
+  const override = env[AGENT_MODE_VARIABLE]?.trim().toLowerCase()
+
+  if (override === '1' || override === 'true') {
+    return true
+  }
+
+  if (override === '0' || override === 'false') {
+    return false
+  }
+
+  return isAgent(env)
+}

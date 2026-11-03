@@ -2,17 +2,30 @@
   "name": "@packages/proxy",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "index.js",
+  "types": "./lib/index.ts",
+  "files": [
+    "lib"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "devtools-protocol"
+    ]
+  },
   "scripts": {
     "build-prod": "tsc --project .",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-watch": "vitest watch",
     "tslint": "tslint --config ../ts/tslint.json --project ."
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "@packages/socket": "0.0.0-development",
@@ -32,6 +45,7 @@
     "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
     "@packages/errors": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/network-interception": "0.0.0-development",
@@ -43,20 +57,13 @@
     "@types/express": "4.17.2",
     "@types/supertest": "2.0.16",
     "devtools-protocol": "0.0.1687809",
+    "eslint": "^9.31.0",
     "express": "4.21.0",
+    "globals": "^15.12.0",
+    "jiti": "^2.4.2",
     "supertest": "6.0.1",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "lib"
-  ],
-  "types": "./lib/index.ts",
-  "license": "MIT",
-  "workspaces": {
-    "nohoist": [
-      "devtools-protocol"
-    ]
   },
   "nx": {}
 }

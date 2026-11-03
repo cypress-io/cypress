@@ -14,6 +14,7 @@ import process, { stdin, stdout, stderr } from 'process'
 
 import state from '../../../lib/tasks/state'
 import xvfb from '../../../lib/exec/xvfb'
+import { openDetachedOutput, closeDetachedOutput, removeDetachedOutput, discardDetachedOutput, nameForApp, waitForReadyMessage } from '../../../lib/exec/detached'
 import { start } from '../../../lib/exec/spawn'
 import { needsSandbox } from '../../../lib/tasks/verify'
 import util from '../../../lib/util'
@@ -104,6 +105,10 @@ vi.mock('process', async (importActual) => {
         write: vi.fn(),
       },
       once: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
+      kill: vi.fn(),
+      listenerCount: vi.fn(() => 0),
     },
   }
 })
@@ -154,8 +159,23 @@ vi.mock('../../../lib/exec/xvfb', async (importActual) => {
       ...actual.default,
       start: vi.fn(),
       stop: vi.fn(),
+      release: vi.fn(),
       isNeeded: vi.fn(),
     },
+  }
+})
+
+vi.mock('../../../lib/exec/detached', async (importActual) => {
+  const actual: any = await importActual()
+
+  return {
+    openDetachedOutput: vi.fn(),
+    closeDetachedOutput: vi.fn(),
+    removeDetachedOutput: vi.fn(),
+    discardDetachedOutput: vi.fn(),
+    nameForApp: vi.fn(),
+    signalExitCode: actual.signalExitCode,
+    waitForReadyMessage: vi.fn(),
   }
 })
 
@@ -396,6 +416,31 @@ describe('lib/exec/spawn', function () {
       }))
     })
 
+    it('decides on xvfb from the env the child is spawned with', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      const env = { PATH: '/bin' }
+      const startPromise = start('--foo', { env })
+
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
+
+      expect(xvfb.isNeeded).toHaveBeenCalledWith(env)
+    })
+
+    it('falls back to process.env for the xvfb decision', async () => {
+      const startPromise = start('--foo')
+
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
+
+      expect(xvfb.isNeeded).toHaveBeenCalledWith(process.env)
+    })
+
     it('starts xvfb when needed', async () => {
       vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
@@ -542,6 +587,36 @@ describe('lib/exec/spawn', function () {
         // second code should be 0 after successfully running with Xvfb
         expect(code).toEqual(0)
       })
+
+      it('retries with xvfb if electron reports a missing X server', async () => {
+        // mock display missing
+        spawnedProcess.stderr.on.mockImplementation((event, callback) => {
+          if (event === 'data') {
+            callback('[some noise here] Missing X server or $DISPLAY')
+          }
+        })
+
+        vi.mocked(os.platform).mockReturnValue('linux')
+
+        const startPromise = start('--foo')
+
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+        // mock display error due to missing display
+        spawnedProcess.emit('close', 1)
+
+        // mock the process actually starting up after xfvb is started
+        await flushPromises()
+
+        spawnedProcess.emit('close', 0)
+
+        const code = await startPromise
+
+        expect(xvfb.start).toHaveBeenCalledOnce()
+        expect(xvfb.stop).toHaveBeenCalledOnce()
+        expect(cp.spawn).toHaveBeenCalledTimes(2)
+        // second code should be 0 after successfully running with Xvfb
+        expect(code).toEqual(0)
+      })
     })
 
     it('rejects with error from spawn', async () => {
@@ -563,79 +638,697 @@ describe('lib/exec/spawn', function () {
     })
 
     describe('detached mode', () => {
-      let stdoutDataHandler: ((data: Buffer) => void) | undefined
+      const output = { outPath: '/tmp/cypress-open.out', errPath: '/tmp/cypress-open.err', outFd: 11, errFd: 12 }
+
+      const resolveWith = (result: { ready: boolean, code: number }) => {
+        vi.mocked(waitForReadyMessage).mockResolvedValue(result)
+      }
 
       beforeEach(() => {
-        stdoutDataHandler = undefined
-
-        spawnedProcess.stdout = {
-          on: vi.fn().mockImplementation((event: string, handler: any) => {
-            if (event === 'data') stdoutDataHandler = handler
-          }),
-          destroy: vi.fn(),
-          pipe: vi.fn(),
-        }
-
-        spawnedProcess.stderr = {
-          on: vi.fn(),
-          pipe: vi.fn(),
-          destroy: vi.fn(),
-        }
+        vi.mocked(openDetachedOutput).mockResolvedValue(output)
+        vi.mocked(closeDetachedOutput).mockResolvedValue(undefined)
+        vi.mocked(removeDetachedOutput).mockResolvedValue(undefined)
+        vi.mocked(discardDetachedOutput).mockResolvedValue(undefined)
+        vi.mocked(nameForApp).mockImplementation(async (named) => named)
+        stdout.write = vi.fn()
       })
 
-      it('waits for ready sentinel before unreffing and resolving', async () => {
+      it('reports the output files under the names that carry the app pid', async () => {
+        spawnedProcess.pid = 4321
+        resolveWith({ ready: true, code: 0 })
+        vi.mocked(nameForApp).mockResolvedValue({ ...output, outPath: '/tmp/cypress-open-app4321.out', errPath: '/tmp/cypress-open-app4321.err' })
+
+        await start([], { detached: true })
+
+        expect(nameForApp).toHaveBeenCalledWith(output, 4321)
+        expect(stdout.write).toHaveBeenCalledWith(expect.stringContaining('/tmp/cypress-open-app4321.out'))
+        expect(stdout.write).toHaveBeenCalledWith(expect.stringContaining('/tmp/cypress-open-app4321.err'))
+      })
+
+      it('signals the process group of the app, so the processes it started stop with it', async () => {
+        spawnedProcess.pid = 4321
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 137 }
+        })
+
+        await start([], { detached: true })
+
+        expect(process.kill).toHaveBeenNthCalledWith(1, -4321, 'SIGINT')
+        expect(process.kill).toHaveBeenNthCalledWith(2, -4321, 'SIGKILL')
+        expect(spawnedProcess.kill).not.toHaveBeenCalled()
+      })
+
+      it('kills the process tree of the app on Windows', async () => {
+        spawnedProcess.pid = 4321
+        vi.mocked(os.platform).mockReturnValue('win32')
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        await start([], { detached: true })
+        await flushPromises()
+
+        expect(treeKill).toHaveBeenCalledWith(4321, 'SIGINT', expect.any(Function))
+        expect(spawnedProcess.kill).not.toHaveBeenCalled()
+      })
+
+      it('signals only the app on Windows when taskkill fails', async () => {
+        spawnedProcess.pid = 4321
+        vi.mocked(os.platform).mockReturnValue('win32')
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+        vi.mocked(treeKill).mockImplementation(((_pid: number, _signal: string, callback: (err?: Error) => void) => {
+          callback(new Error('Access is denied.'))
+        }) as any)
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        await start([], { detached: true })
+        await vi.waitFor(() => expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT'))
+      })
+
+      it('re-raises the signal on a host with no handler of its own even when the launch then fails', async () => {
+        vi.mocked(process.listenerCount).mockReturnValue(0)
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          throw new Error('read failed')
+        })
+
+        await expect(start([], { detached: true })).rejects.toThrow('read failed')
+        expect(process.kill).toHaveBeenCalledWith(process.pid, 'SIGINT')
+      })
+
+      it('signals only the app on Windows when its process tree cannot be killed', async () => {
+        spawnedProcess.pid = 4321
+        vi.mocked(os.platform).mockReturnValue('win32')
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+        vi.mocked(treeKill).mockImplementation(() => {
+          throw new Error('taskkill failed')
+        })
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        await start([], { detached: true })
+        await vi.waitFor(() => expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT'))
+      })
+
+      it('stops the app, and removes its renamed output, when interrupted while the output is renamed', async () => {
+        const named = { ...output, outPath: '/tmp/cypress-open-app4321.out', errPath: '/tmp/cypress-open-app4321.err' }
+
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+        resolveWith({ ready: true, code: 0 })
+
+        vi.mocked(nameForApp).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return named
+        })
+
         const startPromise = start([], { detached: true })
 
-        await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
+        await vi.waitFor(() => expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT'))
+        spawnedProcess.emit('exit', null, 'SIGINT')
 
+        expect(await startPromise).toBe(130)
         expect(spawnedProcess.unref).not.toHaveBeenCalled()
-
-        stdoutDataHandler!(Buffer.from('Cypress is ready\n'))
-
-        await startPromise
-
-        expect(spawnedProcess.unref).toHaveBeenCalledOnce()
-        expect(spawnedProcess.stdout.destroy).toHaveBeenCalledOnce()
-        expect(spawnedProcess.stderr.destroy).toHaveBeenCalledOnce()
+        expect(removeDetachedOutput).toHaveBeenCalledWith(named)
       })
 
-      it('resolves with exit code if process exits before ready message', async () => {
-        const startPromise = start([], { detached: true })
+      it('signals only the app when its process group cannot be signalled', async () => {
+        spawnedProcess.pid = 4321
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+        vi.mocked(process.kill).mockImplementation(() => {
+          throw Object.assign(new Error('ESRCH'), { code: 'ESRCH' })
+        })
 
-        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
-        spawnedProcess.emit('close', 1)
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
 
-        const code = await startPromise
+          ;(handler as () => void)()
 
-        expect(code).toBe(1)
-        expect(spawnedProcess.unref).not.toHaveBeenCalled()
+          return { ready: false, code: 130 }
+        })
+
+        await start([], { detached: true })
+
+        expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT')
       })
 
-      it('uses piped stdio when detached so startup errors are visible', async () => {
-        const startPromise = start([], { detached: true })
+      it('spawns with file descriptors instead of pipes', async () => {
+        resolveWith({ ready: true, code: 0 })
 
-        await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
-        stdoutDataHandler!(Buffer.from('Cypress is ready\n'))
-        await startPromise
+        await start([], { detached: true })
 
         // @ts-expect-error - mock argument
         const thirdArg = cp.spawn.mock.calls[0][2]
 
-        expect(thirdArg.stdio).toEqual(['ignore', 'pipe', 'pipe'])
+        expect(thirdArg.stdio).toEqual(['ignore', output.outFd, output.errFd])
+        expect(waitForReadyMessage).toHaveBeenCalledWith(output.outPath, output.errPath, spawnedProcess, expect.any(Function))
+      })
+
+      it('retries inside Xvfb with the same arguments, asking for the ready message once', async () => {
+        vi.stubEnv('DISPLAY', 'test-display')
+        vi.mocked(os.platform).mockReturnValue('linux')
+
+        vi.mocked(waitForReadyMessage)
+        .mockImplementationOnce(async (_out, _err, _child, onStderr) => {
+          onStderr?.(Buffer.from('[some noise here] Gtk: cannot open display: 987'))
+
+          return { ready: false, code: 1 }
+        })
+        .mockResolvedValueOnce({ ready: true, code: 0 })
+
+        const code = await start([], { detached: true })
+
+        expect(code).toBe(0)
+        expect(cp.spawn).toHaveBeenCalledTimes(2)
+        expect(xvfb.start).toHaveBeenCalledOnce()
+
+        // @ts-expect-error - mock argument
+        const [[, firstArgs], [, secondArgs]] = cp.spawn.mock.calls
+
+        expect(secondArgs).toEqual(firstArgs)
+        expect(secondArgs.filter((arg: string) => arg === '--emit-when-ready')).toHaveLength(1)
+      })
+
+      it('settles from the wait on its output, not from the child exiting first', async () => {
+        resolveWith({ ready: false, code: 1 })
+
+        await start([], { detached: true })
+
+        expect(spawnedProcess.listenerCount('exit')).toBe(0)
+        expect(spawnedProcess.listenerCount('close')).toBe(0)
+      })
+
+      it('sends what the app printed to stderr through the same filter as piped stderr', async () => {
+        vi.mocked(waitForReadyMessage).mockImplementation(async (_outPath, _errPath, _child, onStderr) => {
+          onStderr?.(Buffer.from('from the app'))
+
+          return { ready: true, code: 0 }
+        })
+
+        const write = vi.spyOn(stderr, 'write').mockImplementation(() => true)
+
+        await start([], { detached: true })
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(stderrFilter).toHaveBeenCalled()
+        expect(write.mock.calls.map(([chunk]) => chunk.toString()).join('')).toContain('from the app')
+      })
+
+      it('rejects, without spawning, when the output files cannot be opened', async () => {
+        vi.mocked(openDetachedOutput).mockRejectedValue(new Error('EACCES: tmp is not writable'))
+
+        await expect(start([], { detached: true })).rejects.toThrow('EACCES')
+        expect(cp.spawn).not.toHaveBeenCalled()
+      })
+
+      it('closes and removes the output files when spawning throws', async () => {
+        vi.mocked(cp.spawn).mockImplementation(() => {
+          throw new Error('spawn failed')
+        })
+
+        await expect(start([], { detached: true })).rejects.toThrow('spawn failed')
+        expect(discardDetachedOutput).toHaveBeenCalledWith(output)
       })
 
       it('passes --emit-when-ready to the Cypress process', async () => {
-        const startPromise = start([], { detached: true })
+        resolveWith({ ready: true, code: 0 })
 
-        await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
+        await start([], { detached: true })
 
         // @ts-expect-error - vitest mock
         const spawnArgs = cp.spawn.mock.calls[0][1]
 
         expect(spawnArgs).toContain('--emit-when-ready')
+      })
 
-        stdoutDataHandler!(Buffer.from('Cypress is ready\n'))
-        await startPromise
+      it('closes the descriptors, unrefs and reports the output location once ready', async () => {
+        resolveWith({ ready: true, code: 0 })
+
+        const code = await start([], { detached: true })
+
+        expect(code).toBe(0)
+        expect(closeDetachedOutput).toHaveBeenCalledWith(output)
+        expect(spawnedProcess.unref).toHaveBeenCalledOnce()
+        expect(vi.mocked(closeDetachedOutput).mock.invocationCallOrder[0])
+        .toBeLessThan(spawnedProcess.unref.mock.invocationCallOrder[0])
+
+        expect(stdout.write).toHaveBeenCalledWith(expect.stringContaining(output.outPath))
+        expect(stdout.write).toHaveBeenCalledWith(expect.stringContaining(output.errPath))
+        expect(removeDetachedOutput).not.toHaveBeenCalled()
+      })
+
+      it('does not wait for the child to close or read the terminal', async () => {
+        resolveWith({ ready: true, code: 0 })
+
+        await start([], { detached: true })
+
+        expect(readline.createInterface).not.toHaveBeenCalled()
+      })
+
+      it('listens for an interrupt only until the app is handed off', async () => {
+        resolveWith({ ready: true, code: 0 })
+
+        await start([], { detached: true })
+
+        const signals = vi.mocked(process.on).mock.calls.map(([signal]) => signal)
+
+        expect(signals).toEqual(['SIGINT', 'SIGTERM'])
+
+        for (const [signal, handler] of vi.mocked(process.on).mock.calls) {
+          expect(process.off).toHaveBeenCalledWith(signal, handler)
+        }
+      })
+
+      it('does not start the app when interrupted while its output files are opened', async () => {
+        vi.mocked(openDetachedOutput).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return output
+        })
+
+        const code = await start([], { detached: true })
+
+        expect(cp.spawn).not.toHaveBeenCalled()
+        expect(discardDetachedOutput).toHaveBeenCalledWith(output)
+        expect(code).toBe(130)
+      })
+
+      it('stops the app, rather than leaving it running unseen, when interrupted before it is ready', async () => {
+        spawnedProcess.kill = vi.fn()
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        const code = await start([], { detached: true })
+
+        expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT')
+        expect(code).toBe(130)
+        expect(spawnedProcess.unref).not.toHaveBeenCalled()
+      })
+
+      it('re-raises the signal on a host that has no handler of its own, so Ctrl-C still ends it', async () => {
+        spawnedProcess.kill = vi.fn()
+        vi.mocked(process.listenerCount).mockReturnValue(0)
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        await start([], { detached: true })
+
+        expect(process.kill).toHaveBeenCalledWith(process.pid, 'SIGINT')
+      })
+
+      it('reports an interrupted run as interrupted even when the app quit cleanly', async () => {
+        spawnedProcess.kill = vi.fn()
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 0 }
+        })
+
+        expect(await start([], { detached: true })).toBe(130)
+      })
+
+      it('removes the output files after an interrupt', async () => {
+        spawnedProcess.kill = vi.fn()
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        await start([], { detached: true })
+
+        expect(removeDetachedOutput).toHaveBeenCalledWith(output)
+      })
+
+      it('stops the app, rather than handing it off, when interrupted while its output files are closed', async () => {
+        spawnedProcess.kill = vi.fn()
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+        resolveWith({ ready: true, code: 0 })
+
+        vi.mocked(closeDetachedOutput).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+        })
+
+        const startPromise = start([], { detached: true })
+
+        await vi.waitFor(() => expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT'))
+        spawnedProcess.emit('exit', null, 'SIGINT')
+
+        expect(await startPromise).toBe(130)
+        expect(spawnedProcess.unref).not.toHaveBeenCalled()
+        expect(removeDetachedOutput).toHaveBeenCalledWith(output)
+      })
+
+      describe('an interrupt that arrives together with the ready message', () => {
+        beforeEach(() => {
+          spawnedProcess.kill = vi.fn()
+          vi.mocked(process.listenerCount).mockReturnValue(1)
+
+          vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+            const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+            ;(handler as () => void)()
+
+            return { ready: true, code: 0 }
+          })
+        })
+
+        it('does not hand the app off, and waits for it to exit before cleaning up', async () => {
+          const startPromise = start([], { detached: true })
+
+          await vi.waitFor(() => expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT'))
+          await flushPromises()
+
+          expect(removeDetachedOutput).not.toHaveBeenCalled()
+
+          spawnedProcess.emit('exit', null, 'SIGINT')
+
+          expect(await startPromise).toBe(130)
+          expect(removeDetachedOutput).toHaveBeenCalledWith(output)
+          expect(nameForApp).not.toHaveBeenCalled()
+          expect(spawnedProcess.unref).not.toHaveBeenCalled()
+          expect(stdout.write).not.toHaveBeenCalled()
+        })
+
+        it('kills the app at once when interrupted again while it is shutting down', async () => {
+          const startPromise = start([], { detached: true })
+
+          await vi.waitFor(() => expect(spawnedProcess.kill).toHaveBeenCalledWith('SIGINT'))
+          await flushPromises()
+
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          expect(spawnedProcess.kill).toHaveBeenLastCalledWith('SIGKILL')
+          expect(process.off).not.toHaveBeenCalled()
+
+          spawnedProcess.emit('exit', null, 'SIGKILL')
+          await startPromise
+        })
+
+        it('kills an app that ignores the signal rather than waiting for it for ever', async () => {
+          vi.useFakeTimers()
+
+          try {
+            const startPromise = start([], { detached: true })
+
+            await vi.advanceTimersByTimeAsync(100)
+            await vi.advanceTimersByTimeAsync(6000)
+
+            expect(spawnedProcess.kill).toHaveBeenLastCalledWith('SIGKILL')
+            expect(await startPromise).toBe(130)
+          } finally {
+            vi.useRealTimers()
+          }
+        })
+      })
+
+      it('does not retry in Xvfb an app that was interrupted while it died of a missing display', async () => {
+        vi.stubEnv('DISPLAY', 'test-display')
+        vi.mocked(os.platform).mockReturnValue('linux')
+        spawnedProcess.kill = vi.fn()
+
+        vi.mocked(waitForReadyMessage).mockImplementationOnce(async (_out, _err, _child, onStderr) => {
+          onStderr?.(Buffer.from('[some noise here] Gtk: cannot open display: 987'))
+
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+
+        expect(await start([], { detached: true })).toBe(130)
+        expect(cp.spawn).toHaveBeenCalledTimes(1)
+        expect(xvfb.start).not.toHaveBeenCalled()
+      })
+
+      it('leaves the signal to a host that handles it itself', async () => {
+        spawnedProcess.kill = vi.fn()
+        vi.mocked(process.listenerCount).mockReturnValue(1)
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 130 }
+        })
+
+        await start([], { detached: true })
+
+        expect(process.kill).not.toHaveBeenCalled()
+      })
+
+      it('does not raise a signal when nothing interrupted the wait', async () => {
+        resolveWith({ ready: true, code: 0 })
+
+        await start([], { detached: true })
+
+        expect(process.kill).not.toHaveBeenCalled()
+      })
+
+      it('kills an app that ignored the first interrupt when interrupted again', async () => {
+        spawnedProcess.kill = vi.fn()
+
+        vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+          const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+          ;(handler as () => void)()
+
+          ;(handler as () => void)()
+
+          return { ready: false, code: 137 }
+        })
+
+        await start([], { detached: true })
+
+        expect(spawnedProcess.kill).toHaveBeenNthCalledWith(1, 'SIGINT')
+        expect(spawnedProcess.kill).toHaveBeenNthCalledWith(2, 'SIGKILL')
+      })
+
+      it('stops listening, cleans up and rejects when waiting for the app fails', async () => {
+        spawnedProcess.kill = vi.fn()
+        vi.mocked(waitForReadyMessage).mockRejectedValue(new Error('read failed'))
+
+        await expect(start([], { detached: true })).rejects.toThrow('read failed')
+
+        expect(spawnedProcess.kill).toHaveBeenCalled()
+        expect(removeDetachedOutput).toHaveBeenCalled()
+        expect(closeDetachedOutput).toHaveBeenCalled()
+
+        for (const [signal, handler] of vi.mocked(process.on).mock.calls) {
+          expect(process.off).toHaveBeenCalledWith(signal, handler)
+        }
+      })
+
+      it('resolves with the exit code and does not unref if the child exits before ready', async () => {
+        resolveWith({ ready: false, code: 1 })
+
+        const code = await start([], { detached: true })
+
+        expect(code).toBe(1)
+        expect(spawnedProcess.unref).not.toHaveBeenCalled()
+        expect(closeDetachedOutput).toHaveBeenCalledWith(output)
+        expect(removeDetachedOutput).toHaveBeenCalledWith(output)
+      })
+
+      describe('with xvfb', () => {
+        beforeEach(() => {
+          vi.mocked(xvfb.isNeeded).mockReturnValue(true)
+        })
+
+        it('leaves xvfb running after the app is ready', async () => {
+          resolveWith({ ready: true, code: 0 })
+
+          await start([], { detached: true })
+
+          expect(xvfb.start).toHaveBeenCalledOnce()
+          expect(xvfb.start).toHaveBeenCalledWith({ detached: true })
+          expect(xvfb.stop).not.toHaveBeenCalled()
+        })
+
+        it('stops xvfb before re-raising an interrupt, so the display is not left behind', async () => {
+          vi.mocked(process.listenerCount).mockReturnValue(0)
+
+          const order: string[] = []
+
+          vi.mocked(xvfb.stop).mockImplementation(async () => {
+            order.push('xvfb.stop')
+
+            return null
+          })
+
+          vi.mocked(process.kill).mockImplementation((() => {
+            order.push('process.kill')
+
+            return true
+          }) as any)
+
+          vi.mocked(waitForReadyMessage).mockImplementation(async () => {
+            const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGTERM')!
+
+            ;(handler as () => void)()
+
+            return { ready: false, code: 143 }
+          })
+
+          spawnedProcess.kill = vi.fn()
+
+          await start([], { detached: true })
+
+          expect(order).toEqual(['xvfb.stop', 'process.kill'])
+        })
+
+        const interruptWhileXvfbStarts = (finish: () => Promise<null>) => {
+          vi.mocked(xvfb.start).mockImplementation(async () => {
+            const [, handler] = vi.mocked(process.on).mock.calls.find(([signal]) => signal === 'SIGINT')!
+
+            ;(handler as () => void)()
+
+            // The interrupt does not wait for Xvfb to finish starting
+            expect(xvfb.stop).toHaveBeenCalledOnce()
+
+            return finish()
+          })
+        }
+
+        it('stops a starting xvfb at once when interrupted, and reports the interrupt rather than the xvfb failure', async () => {
+          vi.mocked(process.listenerCount).mockReturnValue(0)
+          interruptWhileXvfbStarts(() => Promise.reject(new Error('Xvfb exited with a non zero exit code.')))
+
+          const code = await start([], { detached: true })
+
+          expect(cp.spawn).not.toHaveBeenCalled()
+          expect(code).toBe(130)
+          expect(process.kill).toHaveBeenCalledWith(process.pid, 'SIGINT')
+        })
+
+        it('does not start the app when xvfb finished starting before the interrupt stopped it', async () => {
+          interruptWhileXvfbStarts(async () => null)
+
+          const code = await start([], { detached: true })
+
+          expect(cp.spawn).not.toHaveBeenCalled()
+          expect(openDetachedOutput).not.toHaveBeenCalled()
+          expect(code).toBe(130)
+        })
+
+        it('still reports an xvfb that fails to start when nothing interrupted it', async () => {
+          vi.mocked(xvfb.start).mockRejectedValue(new Error('Xvfb exited with a non zero exit code.'))
+
+          await expect(start([], { detached: true })).rejects.toThrow('non zero exit code')
+        })
+
+        it('releases xvfb, rather than stopping it, once the app is handed off', async () => {
+          resolveWith({ ready: true, code: 0 })
+
+          await start([], { detached: true })
+
+          expect(xvfb.release).toHaveBeenCalledOnce()
+          expect(xvfb.stop).not.toHaveBeenCalled()
+        })
+
+        it('keeps listening for an interrupt until xvfb is stopped', async () => {
+          resolveWith({ ready: false, code: 1 })
+
+          const order: string[] = []
+
+          vi.mocked(xvfb.start).mockImplementation(async () => {
+            order.push('xvfb.start')
+
+            return null
+          })
+
+          vi.mocked(xvfb.stop).mockImplementation(async () => {
+            order.push('xvfb.stop')
+
+            return null
+          })
+
+          vi.mocked(process.on).mockImplementation(((signal: string) => {
+            order.push(`on ${signal}`)
+
+            return process
+          }) as any)
+
+          vi.mocked(process.off).mockImplementation(((signal: string) => {
+            order.push(`off ${signal}`)
+
+            return process
+          }) as any)
+
+          await start([], { detached: true })
+
+          expect(order).toEqual(['on SIGINT', 'on SIGTERM', 'xvfb.start', 'xvfb.stop', 'off SIGINT', 'off SIGTERM'])
+        })
+
+        it('stops xvfb if the app fails before ready', async () => {
+          resolveWith({ ready: false, code: 1 })
+
+          await start([], { detached: true })
+
+          expect(xvfb.stop).toHaveBeenCalledOnce()
+        })
       })
     })
 

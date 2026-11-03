@@ -156,25 +156,43 @@ describe('cy.session', { retries: 0 }, () => {
 
     describe('test:before:run:async', () => {
       it('clears session data before each run', async () => {
-        const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
+        const backendSpy = cy.spy(Cypress, 'backend').log(false)
+        const automationSpy = cy.spy(Cypress, 'automation').log(false)
 
         await Cypress.action('runner:test:before:run:async', {
           id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
-        expect(clearCurrentSessionData).to.be.called
+        expect(backendSpy).to.be.calledWith('get:rendered:html:origins')
+        expect(automationSpy).to.be.calledWith('get:cookies')
       })
 
-      it('resets rendered html origins before each run', async () => {
-        const backendSpy = cy.spy(Cypress, 'backend').log(false)
+      it('resets rendered html origins before each run when origins were rendered', async () => {
+        const backendStub = cy.stub(Cypress, 'backend').log(false).callThrough()
+
+        backendStub.withArgs('get:rendered:html:origins').resolves({ [window.location.origin]: true })
 
         await Cypress.action('runner:test:before:run:async', {
           id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
-        expect(backendSpy).to.be.calledWith('reset:rendered:html:origins')
+        expect(backendStub).to.be.calledWith('reset:rendered:html:origins')
+      })
+
+      it('does not reset rendered html origins before each run when no origins were rendered', async () => {
+        const backendStub = cy.stub(Cypress, 'backend').log(false).callThrough()
+
+        backendStub.withArgs('get:rendered:html:origins').resolves({})
+
+        await Cypress.action('runner:test:before:run:async', {
+          id: 'r1',
+          currentRetry: 0,
+        }, Cypress.state('runnable'))
+
+        expect(backendStub).to.be.calledWith('get:rendered:html:origins')
+        expect(backendStub).not.to.be.calledWith('reset:rendered:html:origins')
       })
 
       it('clears the browser context before each run', () => {
@@ -602,6 +620,33 @@ describe('cy.session', { retries: 0 }, () => {
           expect(setup).to.not.be.called
           expect(validate).to.be.calledOnce
           expect(yielded).to.eq('restored')
+        })
+      })
+
+      describe('recreates existing session when validate throws synchronously', () => {
+        let sessionId
+        let yielded
+
+        before(() => {
+          setupTestContext()
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup, { validate })
+          .then(() => {
+            resetMocks()
+            validate.onFirstCall().throws(new Error('validate error'))
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup, { validate }).then((status) => {
+            yielded = status
+          })
+        })
+
+        it('recreates the session', () => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledTwice
+          expect(yielded).to.eq('recreated')
         })
       })
 
@@ -1728,7 +1773,7 @@ describe('cy.session', { retries: 0 }, () => {
         expect(lastSessionLog).to.eq(lastLog)
         expect(lastLog?.get('error')).to.eq(err)
         expect(lastLog?.get('state')).to.eq('failed')
-        expect(err.message).to.eq('`cy.session()` was passed an invalid option: **invalid_key**\nAvailable options are: `validate`')
+        expect(err.message).to.eq('`cy.session()` was passed an invalid option: **invalid_key**\nAvailable options are: `cacheAcrossSpecs`, `validate`')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()

@@ -19,7 +19,7 @@
     "build-v8-snapshot-dev": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js --env=dev",
     "build-v8-snapshot-prod": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js",
     "check-binary-on-cdn": "node ./scripts/binary.js checkIfBinaryExistsOnCdn",
-    "check-lockfile": "yarn-deduplicate --strategy=highest --list --fail",
+    "check-lockfile": "yarn dedupe-lockfile --list --fail",
     "check-lockfile-drift": "./scripts/check-lockfile-drift.sh",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
@@ -37,6 +37,7 @@
     "precypress:run:debug": "yarn ensure-deps",
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "cypress:verify": "cypress verify --dev",
+    "dedupe-lockfile": "yarn-deduplicate --strategy=highest --exclude graphql",
     "dev": "gulp dev",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
@@ -48,7 +49,7 @@
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer,react,vue,svelte,angular} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=cypress --scope=internal-scripts --scope=@packages/{agent-info,config,cypress-sessions,driver,electron,errors,eslint-config,example,extension,frontend-shared,https-proxy,icons,launcher,launchpad,net-stubbing,network,network-interception,network-tools,packherd-require,proxy,reporter,resolve-dist,root,runner,scaffold-config,server,socket,stderr-filtering,telemetry,ts,types,v8-snapshot-require,web-config} --scope=@tooling/{electron-mksnapshot,packherd,system-tests,v8-snapshot} --scope=@cypress/{angular,grep,mount-utils,puppeteer,react,schematic,svelte,vite-dev-server,vite-plugin-cypress-esm,vue,webpack-batteries-included-preprocessor,webpack-dev-server,webpack-preprocessor} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
@@ -127,7 +128,6 @@
     "bytenode": "1.3.7",
     "chai": "4.5.0",
     "chai-as-promised": "7.1.2",
-    "chalk": "2.4.2",
     "check-more-types": "2.24.0",
     "commander": "6.2.1",
     "common-tags": "1.8.0",
@@ -136,7 +136,7 @@
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "del": "3.0.0",
-    "electron": "41.7.0",
+    "electron": "43.8.4",
     "electron-builder": "^25.1.8",
     "eslint": "^8.56.0",
     "eslint-plugin-cypress": "3.6.0",
@@ -175,6 +175,7 @@
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "5.4.0",
+    "node-gyp": "12.4.0",
     "npm-packlist": "9.0.0",
     "patch-package": "8.0.1",
     "playwright-webkit": "1.61.0",
@@ -202,14 +203,14 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=24.15.0",
+    "node": ">=24.22.1",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
+    "url": "git+https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://cypress.io",
   "bugs": {
@@ -252,16 +253,6 @@
     ]
   },
   "lint-staged": {
-    "npm/vue/**/*.{js,jsx,ts,tsx,vue}": "yarn workspace @cypress/vue eslint --fix",
-    "npm/svelte/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/svelte eslint --fix",
-    "npm/react/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/react eslint --fix",
-    "npm/angular/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/angular eslint --fix",
-    "npm/!(vue|svelte|react|angular)/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "cli/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "packages/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "scripts/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
-    "system-tests/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
-    "tooling/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
     "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
     ".circleci/*.yml": "circleci config validate"
   },
@@ -291,7 +282,7 @@
     "browserify-sign": "4.2.5",
     "devtools-protocol": "0.0.1687809",
     "eslint-plugin-import": "2.29.1",
-    "node-abi": "4.28.0",
+    "node-abi": "4.39.0",
     "vue-template-compiler": "2.6.12",
     "yargs-unparser": "1.6.4"
   },
