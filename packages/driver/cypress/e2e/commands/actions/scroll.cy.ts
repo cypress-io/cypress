@@ -351,11 +351,12 @@ describe('src/cy/commands/actions/scroll', () => {
         })
       })
 
-      it('accepts duration string option', () => {
-        const scrollTo = cy.spy($.fn, 'scrollTo')
+      it('animates for a duration given as a numeric string', () => {
+        const animate = cy.spy($.fn, 'animate')
 
         cy.get('#scroll-to-both').scrollTo('25px', { duration: '500' }).then(() => {
-          expect(scrollTo.args[0][1].duration).to.eq('500')
+          expect(animate).to.be.calledOnce
+          expect(animate.firstCall.args[1].duration).to.eq(500)
         })
       })
 
@@ -887,11 +888,12 @@ describe('src/cy/commands/actions/scroll', () => {
       })
     })
 
-    it('accepts duration string option', () => {
-      const scrollTo = cy.spy($.fn, 'scrollTo')
+    it('animates for a duration given as a numeric string', () => {
+      const animate = cy.spy($.fn, 'animate')
 
       cy.get('#scroll-into-view-both h5').scrollIntoView({ duration: '500' }).then(() => {
-        expect(scrollTo.args[0][1].duration).to.eq('500')
+        expect(animate).to.be.calledOnce
+        expect(animate.firstCall.args[1].duration).to.eq(500)
       })
     })
 
