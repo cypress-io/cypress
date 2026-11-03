@@ -82,5 +82,37 @@ describe('ProjectConfigIpc', () => {
       expect(globalThis.debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
       expect(globalThis.debugMessages.at(-1)).toEqual('EPIPE error in registerSetupIpcHandlers() of child process %s')
     }, 20_000)
+
+    describe('EPIPE before the child replies', () => {
+      const epipe = (): NodeJS.ErrnoException => {
+        return Object.assign(new Error('write EPIPE'), { code: 'EPIPE' })
+      }
+
+      const configProcessError = (err: NodeJS.ErrnoException) => {
+        return expect.objectContaining({
+          type: 'CONFIG_FILE_UNEXPECTED_ERROR',
+          title: 'Config process error',
+          originalError: err,
+        })
+      }
+
+      it('rejects loadConfig() with a config process error', async () => {
+        const err = epipe()
+        const loadConfig = projectConfigIpc.loadConfig()
+
+        projectConfigIpc._childProcess.emit('error', err)
+
+        await expect(loadConfig).rejects.toEqual(configProcessError(err))
+      }, 20_000)
+
+      it('rejects registerSetupIpcHandlers() with a config process error', async () => {
+        const err = epipe()
+        const setupNodeEvents = projectConfigIpc.registerSetupIpcHandlers()
+
+        projectConfigIpc._childProcess.emit('error', err)
+
+        await expect(setupNodeEvents).rejects.toEqual(configProcessError(err))
+      }, 20_000)
+    })
   })
 })

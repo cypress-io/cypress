@@ -177,11 +177,10 @@ export class ProjectConfigIpc extends EventEmitter {
       let resolved = false
 
       this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EPIPE') {
+        // Once the reply is in, an EPIPE only means the child went away first, as it can on Ctrl+C.
+        // Before the reply, it means the config never loaded, so it is reported like any other child error.
+        if (err.code === 'EPIPE' && resolved) {
           debug('EPIPE error in loadConfig() of child process %s', err)
-
-          // @ts-ignore
-          resolve()
 
           return
         }
@@ -264,11 +263,8 @@ export class ProjectConfigIpc extends EventEmitter {
       let resolved = false
 
       this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EPIPE') {
+        if (err.code === 'EPIPE' && resolved) {
           debug('EPIPE error in registerSetupIpcHandlers() of child process %s', err)
-
-          // @ts-ignore
-          resolve()
 
           return
         }
