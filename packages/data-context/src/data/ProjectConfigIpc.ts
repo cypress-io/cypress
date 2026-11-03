@@ -314,6 +314,9 @@ export class ProjectConfigIpc extends EventEmitter {
       })
 
       this.once('setupTestingType:error', (err) => {
+        // The child may exit right after reporting this, e.g. when the dev server finds no config file.
+        // That exit must not replace the error it just reported.
+        this.expectExit()
         this.onError(err)
         reject(err)
       })

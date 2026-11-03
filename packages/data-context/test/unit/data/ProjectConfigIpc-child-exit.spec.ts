@@ -129,6 +129,19 @@ describe('config process exit', () => {
       expect(onError).not.toHaveBeenCalled()
       expect(ipc.unexpectedExit).toBeUndefined()
     })
+
+    it('keeps the reported error when the child exits after reporting a setup error', async () => {
+      await finishSetup()
+
+      const devServerErr = { type: 'DEV_SERVER_CONFIG_FILE_NOT_FOUND' }
+
+      ipc.emit('setupTestingType:error', devServerErr)
+      child.emit('exit', 0, null)
+
+      expect(onError).toHaveBeenCalledTimes(1)
+      expect(onError).toHaveBeenCalledWith(devServerErr)
+      expect(ipc.unexpectedExit).toBeUndefined()
+    })
   })
 
   describe('node event invocations', () => {
