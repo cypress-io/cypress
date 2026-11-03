@@ -32,7 +32,7 @@ export class HtmlDataSource {
         let html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
         const title = _.escape(this.ctx.project.projectTitle(this.ctx.currentProject || ''))
 
-        // A replacer function, so `$&` and friends in a project folder name are not expanded
+        // Pass a function, not a string, so `$&` and friends in the title are inserted literally
         return html.replace('<title>Cypress</title>', () => `<title>${title}</title>`)
       } catch (e) {
         if (e.code !== 'ENOENT') {
