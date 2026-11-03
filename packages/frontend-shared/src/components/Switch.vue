@@ -25,7 +25,6 @@ withDefaults(defineProps<{
   labelId: string // required for an id so that an external <label> can be associated with the switch
   disabled?: boolean
 }>(), {
-  value: false,
   size: 'lg',
   disabled: false,
 })

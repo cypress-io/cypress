@@ -1773,7 +1773,7 @@ describe('cy.session', { retries: 0 }, () => {
         expect(lastSessionLog).to.eq(lastLog)
         expect(lastLog?.get('error')).to.eq(err)
         expect(lastLog?.get('state')).to.eq('failed')
-        expect(err.message).to.eq('`cy.session()` was passed an invalid option: **invalid_key**\nAvailable options are: `validate`')
+        expect(err.message).to.eq('`cy.session()` was passed an invalid option: **invalid_key**\nAvailable options are: `cacheAcrossSpecs`, `validate`')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()

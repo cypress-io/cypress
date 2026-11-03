@@ -346,6 +346,34 @@ describe('lib/socket', () => {
       })
     })
 
+    describe('on(open:file)', () => {
+      const fileDetails = { file: '/project/cypress/e2e/spec.cy.js', line: 3, column: 5 }
+
+      beforeEach(() => {
+        ctx.coreData.localSettings.availableEditors = [{ id: 'code', name: 'Visual Studio Code', binary: 'code' }]
+        vi.spyOn(ctx.actions.file, 'openFile').mockResolvedValue(undefined)
+        vi.spyOn(ctx.actions.electron, 'showItemInFolder').mockReturnValue(undefined)
+      })
+
+      it('opens the file in a detected preferred editor', async () => {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+
+        client.emit('open:file', fileDetails)
+
+        await vi.waitFor(() => expect(ctx.actions.file.openFile).toHaveBeenCalledWith(fileDetails.file, 3, 5))
+        expect(ctx.actions.electron.showItemInFolder).not.toHaveBeenCalled()
+      })
+
+      it('shows the file in the file manager without a launchable preferred editor', async () => {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = '/bin/sh'
+
+        client.emit('open:file', fileDetails)
+
+        await vi.waitFor(() => expect(ctx.actions.electron.showItemInFolder).toHaveBeenCalledWith(fileDetails.file))
+        expect(ctx.actions.file.openFile).not.toHaveBeenCalled()
+      })
+    })
+
     describe('on(app:connect)', () => {
       it('calls options.onConnect with socketId and socket', () => {
         return new Promise<void>((done) => {
