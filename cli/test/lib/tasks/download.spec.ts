@@ -1,6 +1,7 @@
 import type { Mock } from 'vitest'
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import { stripVTControlCharacters as stripAnsi } from 'util'
+import { Writable } from 'stream'
 import os from 'os'
 import type { Systeminformation } from 'systeminformation'
 import si from 'systeminformation'
@@ -381,6 +382,54 @@ describe('lib/tasks/download', function () {
         version: options.version,
         progress: { onProgress },
       })).rejects.toThrow()
+    })
+
+    it('rejects and deletes the partial file when the file cannot be written', async function () {
+      await fs.remove(downloadDestination)
+
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-checksum': expectedChecksum,
+        'x-amz-meta-size': String(expectedFileSize),
+      })
+
+      let wrotePartialFile = false
+      let attempts = 0
+
+      const createWriteStream = vi.spyOn(fs, 'createWriteStream').mockImplementation(() => {
+        // Safe because download only pipes into the stream and listens for
+        // 'error' and 'close', which every Writable supports
+        return new Writable({
+          // write the bytes, as a disk that fills up partway through would,
+          // then fail the write
+          write (chunk, encoding, callback) {
+            fs.appendFile(downloadDestination, chunk).then(() => {
+              wrotePartialFile = true
+              callback(Object.assign(new Error('ENOSPC: no space left on device, write'), { code: 'ENOSPC' }))
+            }, callback)
+          },
+        }) as fs.WriteStream
+      })
+
+      try {
+        await expect(download.start({
+          downloadDestination: options.downloadDestination,
+          version: options.version,
+          progress: { onProgress },
+        })).rejects.toThrow('ENOSPC: no space left on device, write')
+      } finally {
+        attempts = createWriteStream.mock.calls.length
+        createWriteStream.mockRestore()
+      }
+
+      // a full disk won't clear up on its own, so the download is not retried
+      expect(attempts).toEqual(1)
+      expect(wrotePartialFile).toBe(true)
+      expect(await fs.pathExists(downloadDestination)).toBe(false)
     })
 
     it('passes when checksum and file size match', async function () {
