@@ -25,7 +25,7 @@ Runs on PRs targeting `develop` or `release/*` branches (excluding draft PRs).
 
 **Binary jobs do not run on pull requests.** Building and verifying the Electron
 binary is the most expensive part of the pipeline, so it runs post-merge on
-`develop` instead. There is no opt-in and no path-based override: a PR that
+`develop` (or the `vN` maintenance branch a PR targets) instead. There is no opt-in and no path-based override: a PR that
 changes binary or packaging code is not covered until it merges, and breakage is
 caught by the develop build. See `notify-binary-failure` below.
 
@@ -33,7 +33,7 @@ caught by the develop build. See `notify-binary-failure` below.
 
 Runs on pushes to `develop` and `release/*` branches. Includes everything from the PR workflow plus:
 
-**Note:** a webhook push to `develop` is path-filtered the same way PRs are — only the job groups touched by the merge's changed files run. Everything else runs unfiltered: `release/*` pushes, and, on `develop`, the scheduled nightly cron and any manually triggered run. Filtering never skips the binary/packaging chain, `npm-release`, or `verify-release-readiness`.
+**Note:** a webhook push to `develop` or a `vN` maintenance branch is path-filtered the same way PRs are — only the job groups touched by the merge's changed files run. Everything else runs unfiltered: `release/*` pushes, and, on `develop` and `vN`, scheduled pipelines and any manually triggered run. A PR into a `vN` branch is diffed against that branch rather than `develop`. Filtering never skips the binary/packaging chain, `npm-release`, or `verify-release-readiness`.
 
 | Stage | What It Does |
 |-------|--------------|
@@ -56,7 +56,8 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 | PR opened/updated | Pull Request | Skipped for draft PRs |
 | Push to `develop` | Full | Linux x64 is path-filtered by changed files; binary builds and release gating always run. Other platforms run from the develop schedule, not this push |
 | Push to `release/*` | Full | Linux x64 runs the complete test suite and binary builds, unfiltered. Other platforms run from the release schedule |
-| Scheduled pipeline | Full | Nightly cron; always unfiltered on `develop`, even though it runs on that branch |
+| Push to `vN` | Full | Path-filtered like a `develop` push; all five platforms run |
+| Scheduled pipeline | Full | Nightly cron on `develop`, weekly build on `vN`; always unfiltered, even though they run on that branch |
 | Manual (CircleCI UI) | Configurable | Can run the full Linux x64 workflow, or all four scheduled platforms, on any branch; `run-all-jobs=true` forces everything on Linux x64 |
 
 ### Key Jobs
@@ -66,7 +67,7 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 - **`npm-release`** - Publishes packages to npm (develop/release branches only)
 - **`create-build-artifacts`** - Builds, packages, and uploads the binary and npm package
 - **`notify-binary-failure`** - Comments on the commit when a binary job fails on
-  `develop`, tagging its author. It requires every binary job at `terminal`, so it
+  `develop` or a `vN` maintenance branch, tagging its author. It requires every binary job at `terminal`, so it
   runs once they have all settled however they settled, then reads their real
   statuses from the CircleCI API and exits quietly unless one of them is `failed` -
   a cancelled or skipped job is not a breakage. Scope comes from the job's own
