@@ -133,9 +133,9 @@ commands:
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
                     PR_API_URL="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}"
 
-                    # This request is unauthenticated, so from CircleCI's shared IPs
-                    # GitHub can answer with a throttling or "forbidden" page instead
-                    # of JSON. Don't fail the pipeline over that: run CI instead.
+                    # Unauthenticated requests from CircleCI's shared IPs can get a
+                    # throttling or "forbidden" page instead of JSON, so treat an
+                    # unreadable response as not a draft rather than failing the pipeline.
                     DRAFT=$(curl --silent --fail --max-time 15 "${PR_API_URL}" | jq -r '.draft' 2>/dev/null) || DRAFT=unknown
 
                     if [[ "${DRAFT}" != true && "${DRAFT}" != false ]]; then
