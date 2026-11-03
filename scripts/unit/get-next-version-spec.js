@@ -3,6 +3,7 @@ const proxyquire = require('proxyquire').noCallThru()
 const sinon = require('sinon')
 
 use(require('sinon-chai'))
+use(require('chai-as-promised'))
 
 describe('get-next-version', () => {
   const releasedVersion = '12.2.0'
