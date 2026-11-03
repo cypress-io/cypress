@@ -1,11 +1,15 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.2.2
+## 16.3.0
 
 **Performance:**
 
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
 - The Cypress binary no longer includes a copy of TypeScript that it never used, since Cypress loads TypeScript from your project. This makes the download smaller and takes less disk space once installed. On Linux arm64, Cypress also starts faster, because it no longer tries to load TypeScript as it launches. Fixed in [#35184](https://github.com/cypress-io/cypress/pull/35184).
 - `cypress run` now spends less time finding the browsers installed on your machine before it starts the first spec, so runs start sooner. Fixed in [#35181](https://github.com/cypress-io/cypress/pull/35181).
+
+**Features:**
+
+- Registering the same event more than once in [`setupNodeEvents`](https://on.cypress.io/plugins-guide) now runs every handler in registration order, instead of only the last one, for [`before:run`](https://on.cypress.io/before-run-api), [`after:run`](https://on.cypress.io/after-run-api), [`before:spec`](https://on.cypress.io/before-spec-api), [`after:spec`](https://on.cypress.io/after-spec-api), [`before:browser:launch`](https://on.cypress.io/browser-launch-api), and [`after:screenshot`](https://on.cypress.io/after-screenshot-api). `before:browser:launch` and `after:screenshot` handlers each receive the result of the handler before them. If a handler throws, later handlers do not run. If you re-registered one of these events to replace a plugin's handler, both now run; to keep only yours, pass the plugin an `on` that skips that event. Addresses [#5240](https://github.com/cypress-io/cypress/issues/5240), [#19809](https://github.com/cypress-io/cypress/issues/19809) and [#27524](https://github.com/cypress-io/cypress/issues/27524).
 
 **Bugfixes:**
 
@@ -25,6 +29,12 @@
 - Fixed an issue where the Cypress app started with `cypress open --detached` could stop working or exit shortly after the command returned, particularly on Linux where Cypress starts its own virtual display. The app's output is now written to files in the system temp directory, and the command prints where those files are. Because the virtual display now keeps running with the app, `cypress open --detached` no longer uses the display set by `XVFB_DISPLAY_NUM`, and prints a warning when it is set. Fixed in [#35112](https://github.com/cypress-io/cypress/pull/35112).
 - Fixed an issue where installing the Cypress binary could hang or fail outright when the connection was reset or the download server returned a temporary error. The download is now retried up to 3 times with an increasing delay before the install fails. Fixed in [#35115](https://github.com/cypress-io/cypress/pull/35115).
 - Fixed an issue where `cypress open` and `cypress run` on Linux failed to start with a "Missing X server or $DISPLAY" error when `DISPLAY` pointed to an X server that was not running. Cypress now starts its own Xvfb and retries. Fixed in [#35114](https://github.com/cypress-io/cypress/pull/35114).
+- Fixed an issue where, in `cypress open` and `cypress run`, the browser launched by Cypress kept loading forever with no error when the Cypress installation was missing some of its files. Cypress now shows an error that names the missing file after a few seconds. Fixed in [#35232](https://github.com/cypress-io/cypress/pull/35232).
+
+**Misc:**
+
+- The error shown when [`cy.session()`](https://on.cypress.io/session) is passed an unknown option now lists every valid option, `cacheAcrossSpecs` and `validate`. Previously it listed only `validate`, suggesting that `cacheAcrossSpecs` was not a valid option. Addressed in [#35233](https://github.com/cypress-io/cypress/pull/35233).
+- The editor chooser now lists only the editors Cypress detects, and the **Custom** option has been removed. To use an editor that isn't listed, set the `LAUNCH_EDITOR` environment variable before starting Cypress. Addressed in [#35208](https://github.com/cypress-io/cypress/pull/35208).
 
 **Dependency Updates:**
 
