@@ -172,6 +172,8 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   .then(removeDuplicateBrowsers)
 }
 
+const MAX_REPORTED_OUTPUT = 1000
+
 export const detectByPath = (
   path: string,
   goalBrowsers?: Browser[],
@@ -218,8 +220,32 @@ export const detectByPath = (
 
   const pathData = helper.getPathData(path)
 
-  return helper.getVersionString(pathData.path)
-  .then((version) => {
+  // Windows reads the version from the file, so there is no output to report
+  const readVersion = async (binary: string): Promise<{ version: string, stderr: string }> => {
+    if (os.platform() === 'win32') {
+      return { version: await helper.getVersionString(binary), stderr: '' }
+    }
+
+    const { stdout, stderr } = await linuxHelper.getVersionOutput(binary)
+
+    return { version: stdout, stderr }
+  }
+
+  const describeNotFound = (version: string, stderr: string): string => {
+    const base = `Unable to find browser with path ${path}`
+
+    if (os.platform() === 'win32') {
+      return base
+    }
+
+    // A crashing binary can print a lot
+    const clip = (text: string) => (text.length > MAX_REPORTED_OUTPUT ? `${text.slice(0, MAX_REPORTED_OUTPUT)}...` : text)
+
+    return `${base}. Running "${pathData.path} --version" printed: ${clip(version) || '(nothing)'}${stderr ? `\nand wrote to stderr: ${clip(stderr)}` : ''}`
+  }
+
+  return readVersion(pathData.path)
+  .then(({ version, stderr }) => {
     let browser
 
     if (pathData.browserKey) {
@@ -231,7 +257,7 @@ export const detectByPath = (
     }
 
     if (!browser) {
-      throw notDetectedAtPathErr(`Unable to find browser with path ${path}`)
+      throw notDetectedAtPathErr(describeNotFound(version, stderr))
     }
 
     return setCustomBrowserData(browser, pathData.path, version)

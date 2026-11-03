@@ -184,6 +184,13 @@ Could not find a Cypress session to tap into.
 Start Cypress with {color:cyan}cypress open{/color}, select a testing type and launch a browser, then try again."
 `;
 
+exports[`lib/tap error rendering catalogue > PROJECT_NOT_LOADED 1`] = `
+"> cypress tap dom --selector "#status"
+Cypress is running, but its project could not load, so there is no Cypress session to tap into.
+
+Run {color:cyan}cypress tap status{/color} to see why. Fix the cause, then stop Cypress and start it again."
+`;
+
 exports[`lib/tap error rendering catalogue > PROTOCOL_MISMATCH 1`] = `
 "> cypress tap status
 An error occurred.

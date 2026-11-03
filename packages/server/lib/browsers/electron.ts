@@ -36,6 +36,10 @@ const ELECTRON_DEBUG_EVENTS = [
 let instance: BrowserInstance | null = null
 let browserCriClient: BrowserCriClient | null = null
 
+// Outlives each spec's window, so the reset when the next spec launches can
+// clear the origins the previous spec's window requested.
+const storageOrigins = new Set<string>()
+
 const tryToCall = function (win, method) {
   try {
     if (!win.isDestroyed()) {
@@ -81,7 +85,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -363,11 +367,11 @@ export = {
         handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
         utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
-        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
-        // Note that we are omitting `file_systems` as it is very non-performant to clear:
-        // https://github.com/cypress-io/cypress/pull/32703
-        pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
-        pageCriClient.send('Network.clearBrowserCache'),
+        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron.
+        // The session clear reaches every origin, including ones left by an earlier `cypress open`,
+        // but has no option for interest groups or shared storage, which the per-origin reset covers.
+        this._clearStorageData(win.webContents),
+        cdpAutomation.onRequest('reset:browser:state', undefined),
       ])
     }
 
@@ -452,6 +456,17 @@ export = {
     debug('clearing cache')
 
     return webContents.session.clearCache()
+  },
+
+  _clearStorageData (webContents) {
+    debug('clearing storage data')
+
+    // Clears every origin in the session, which Chrome's CDP no longer allows
+    // in one call. `filesystem` is left out because it is very slow to clear:
+    // https://github.com/cypress-io/cypress/pull/32703
+    return webContents.session.clearStorageData({
+      storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
+    })
   },
 
   _getUserAgent (webContents) {

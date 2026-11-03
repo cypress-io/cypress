@@ -5,7 +5,7 @@ const plugin: CodegenPlugin<any> = {
   plugin: (schema, documents, config, info) => {
     const typesMap = schema.getTypeMap()
 
-    let typeMap: string[] = []
+    const typeMap: string[] = []
 
     for (const [typeName, type] of Object.entries(typesMap)) {
       if (!typeName.startsWith('__') && isObjectType(type) || isInterfaceType(type)) {
