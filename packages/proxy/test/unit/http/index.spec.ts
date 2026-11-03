@@ -411,6 +411,58 @@ describe('http', function () {
 
       sendOutgoing.mockRestore()
     })
+
+    it('writes a request-stage short-circuit response to the client (#34810)', async function () {
+      // Models serveInternalRoutes answering an unowned reserved path without
+      // calling next(). Before the codec wrote synthesized responses on the
+      // Express transport, the 404 was produced and then silently discarded,
+      // so the client never received a response.
+      const http = new Http(httpOpts)
+      const httpIntercept = new HttpIntercept(proxyHttpCodec)
+      const written: { statusCode?: number, body?: unknown } = {}
+      const shortCircuit = vi.fn().mockImplementation((request) => {
+        return Promise.resolve({
+          id: request.id,
+          url: request.url,
+          statusCode: 404,
+          headers: { 'content-type': 'text/plain' },
+          body: 'Not Found',
+        })
+      })
+
+      httpIntercept.use(shortCircuit)
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
+      http.networkInterception = httpIntercept
+
+      const res = {
+        headersSent: false,
+        writableFinished: false,
+        on,
+        off,
+        status (statusCode: number) {
+          written.statusCode = statusCode
+
+          return this
+        },
+        set () {
+          return this
+        },
+        end (body?: unknown) {
+          written.body = body
+          this.writableFinished = true
+
+          return this
+        },
+      }
+
+      // @ts-expect-error
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'http://localhost:1234/__/does-not-exist', headers: {} }, res)
+
+      expect(shortCircuit).toHaveBeenCalledOnce()
+      expect(written.statusCode).toBe(404)
+      expect(written.body).toBe('Not Found')
+      expect(res.writableFinished).toBe(true)
+    })
   })
 
   describe('Http.reset', function () {
