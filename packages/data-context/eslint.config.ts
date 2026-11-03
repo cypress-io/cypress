@@ -19,6 +19,15 @@ export default [
     },
   },
   {
+    // autobarrel prefixes every barrel it writes with a padding-line disable, which
+    // a barrel with a single export never uses
+    files: ['src/**/index.ts', 'graphql/**/index.ts'],
+    ignores: ['src/index.ts', 'graphql/index.ts'],
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
+  },
+  {
     // The package entry point runs in Node before the TypeScript register hook
     files: ['index.js'],
     languageOptions: {

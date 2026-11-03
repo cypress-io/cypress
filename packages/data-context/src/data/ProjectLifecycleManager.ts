@@ -444,8 +444,7 @@ export class ProjectLifecycleManager {
     // still owns it. If `resetInternalState` (project switch) wipes
     // `_activeLifecycleRefresh` while this iteration is in flight, a fresh
     // chain may have taken its place — we don't want to clobber the new
-    // chain's slot when this old one finally settles. Declared up front so a
-    // finally that settles before the assignment compares against undefined.
+    // chain's slot when this old one finally settles.
     let invokedLifecycleRefresh: Promise<void> | undefined
 
     const runLifecycleRefresh = async () => {

@@ -241,10 +241,7 @@ export class ProjectConfigIpc extends EventEmitter {
     const orderedConfig = {} as Cypress.PluginConfigOptions
 
     Object.keys(mergedConfig).sort().forEach((key) => {
-      const k = key as keyof typeof mergedConfig
-
-      // @ts-expect-error - `orderedConfig` has no index signature for the merged config's keys
-      orderedConfig[k] = mergedConfig[k]
+      Reflect.set(orderedConfig, key, mergedConfig[key as keyof typeof mergedConfig])
     })
 
     this.send('setupTestingType', testingType, {

@@ -23,12 +23,11 @@ export function autoBindDebug<T extends object> (obj: T): T {
     if (v.writable && typeof v.value === 'function') {
       const original = v.value
 
-      // @ts-expect-error - `obj` has no index signature for the prototype's method names
-      obj[k] = function () {
+      Reflect.set(obj, k, function (this: unknown) {
         debug(`calling %s with args %o`, k, arguments)
 
         return original.apply(this, arguments)
-      }
+      })
     }
   }
 

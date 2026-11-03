@@ -23,7 +23,7 @@ export class HtmlDataSource {
 
     // Check if the file exists. If it doesn't, it probably means that Vite is re-building
     // and we should retry a few times until the file exists
-    // eslint-disable-next-line prefer-const -- never incremented, so this loop retries forever; fixed separately
+    // eslint-disable-next-line prefer-const -- never incremented, so this loop retries forever
     let retryCount = 0
     let err
 

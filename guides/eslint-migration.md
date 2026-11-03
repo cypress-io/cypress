@@ -288,7 +288,7 @@ Do not run a bulk `eslint --fix` over the fixtures to clear a new rule. The rule
 
 ### 13. **Lint `gql` Templates with `graphqlConfig`**
 
-The root `.eslintrc.js` runs `eslint-plugin-graphql` over `app`, `frontend-shared`, `launchpad` and `data-context`. That plugin only runs on ESLint 8 and is no longer maintained. Its flat-config replacement is `graphqlConfig`, built on [`@graphql-eslint/eslint-plugin`](https://the-guild.dev/graphql/eslint) v4. Spread it after `baseConfig`, and after `vueTsxOverrides` and `frontendOverrides` in the Vue packages:
+The root `.eslintrc.js` runs `eslint-plugin-graphql` over `app`, `frontend-shared` and `launchpad`, the packages that use `gql` and are still on eslintrc. That plugin only runs on ESLint 8 and is no longer maintained. Its flat-config replacement is `graphqlConfig`, built on [`@graphql-eslint/eslint-plugin`](https://the-guild.dev/graphql/eslint) v4. Spread it after `baseConfig`, and after `vueTsxOverrides` and `frontendOverrides` in the Vue packages:
 
 ```ts
 import { baseConfig, graphqlConfig, jsonConfig } from '@packages/eslint-config'

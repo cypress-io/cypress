@@ -91,7 +91,7 @@ module.exports = {
       // Scope it to the packages that actually use `gql` — add a package here if
       // it starts using it.
       files: [
-        'packages/{app,frontend-shared,launchpad,data-context}/**/*.{js,jsx,ts,tsx,vue}',
+        'packages/{app,frontend-shared,launchpad}/**/*.{js,jsx,ts,tsx,vue}',
       ],
       plugins: [
         'graphql',
