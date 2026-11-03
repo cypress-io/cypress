@@ -13,6 +13,9 @@ import * as fileServer from '../../lib/file_server'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { getCtx } from '@packages/data-context'
 import { GracefulExit } from '../../lib/util/graceful-exit'
+import * as makeGraphQLServer from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerMutationRule } from '@packages/data-context/graphql/rootFieldRules'
+import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptionOnlyRule'
 
 const morganFn = function () {}
 
@@ -160,10 +163,6 @@ describe('lib/server-base', () => {
 
       it('logs a tap graphql request whose session id header does not match', () => {
         expect(skip('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).to.be.false
-      })
-
-      it('logs a graphql request from the app, which sends no session id header', () => {
-        expect(skip('/__cypress/graphql/Specs')).to.be.false
       })
 
       it('logs a proxied request that mimics the probe path', () => {
@@ -451,6 +450,17 @@ describe('lib/server-base', () => {
     beforeEach(function () {
       this.port = 54321
       this.app = this.server.createExpressApp({ morgan: true })
+    })
+
+    it('restricts the graphql-ws endpoint to subscriptions and the mutations the runner sends', function () {
+      sinon.stub(this.server, '_listen').callsFake((port) => Promise.resolve(port))
+      sinon.stub(this.server, '_port').returns(this.port)
+      const graphqlWSStub = sinon.stub(makeGraphQLServer, 'graphqlWS').returns(undefined)
+
+      return this.server.createServer(this.app, { port: this.port, socketIoRoute: '/__socket' })
+      .then(() => {
+        expect(graphqlWSStub).to.have.been.calledWith(sinon.match.any, '/__socket-graphql', { enforceOrigin: false, validationRules: [runnerMutationRule, subscriptionOnlyRule] })
+      })
     })
 
     describe('remote state', () => {
@@ -819,9 +829,12 @@ describe('lib/server-base', () => {
     })
 
     it('is noop if req.url startsWith socketIoRoute', function () {
+      this.server.remoteStates.set('http://localhost:3000')
+
       const remotePort = 12345
       const req = {
         url: '/foobarbaz',
+        headers: { origin: 'http://localhost:3000' },
         socket: { remotePort, remoteAddress: '127.0.0.1' },
       }
 
@@ -833,6 +846,67 @@ describe('lib/server-base', () => {
       const noop = this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(noop).to.be.undefined
+    })
+
+    context('socket upgrade gate', () => {
+      const remotePort = 12345
+
+      beforeEach(function () {
+        this.server.remoteStates.set('http://localhost:3000')
+        this.server.socketAllowed.add({ localPort: remotePort, once: _.noop })
+
+        this.upgrade = (url: string, origin?: string) => {
+          const write = sinon.stub()
+
+          this.server.proxyWebsockets(this.proxy, '/foo', {
+            url,
+            headers: origin ? { origin } : {},
+            socket: { remotePort, remoteAddress: '127.0.0.1' },
+          }, { end: sinon.stub(), write }, this.head)
+
+          return write.called ? 'refused' : 'allowed'
+        }
+      })
+
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+
+      it('refuses a socket upgrade from any origin but the primary, or the Firefox extension on the proxy path', function () {
+        for (const disableProxy of [false, true]) {
+          if (disableProxy) {
+            process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+          }
+
+          const mode = disableProxy ? 'proxy disabled' : 'proxy'
+
+          expect(this.upgrade('/foo-graphql', 'http://localhost:3000'), `${mode}: primary`).to.eq('allowed')
+          expect(this.upgrade('/foo-graphql', 'https://www.localhost:3000'), `${mode}: other protocol`).to.eq('refused')
+          expect(this.upgrade('/foo-graphql', 'https://other.example.com'), `${mode}: other origin`).to.eq('refused')
+          expect(this.upgrade('/foo-graphql', 'http://localhost:4000'), `${mode}: other port`).to.eq('refused')
+          expect(this.upgrade('/foo-graphql', undefined), `${mode}: no origin`).to.eq('refused')
+          expect(this.upgrade('/foo-graphql', 'moz-extension://3f1c2b2e-0000-4000-8000-000000000000'), `${mode}: firefox extension`).to.eq(disableProxy ? 'refused' : 'allowed')
+        }
+      })
+
+      it('refuses socket.io upgrades but lets graphql-ws through from the primary origin when the proxy is disabled', function () {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        expect(this.upgrade('/foo/?EIO=4&transport=websocket', 'http://localhost:3000')).to.eq('refused')
+        expect(this.upgrade('/foo-graphql', 'http://localhost:3000')).to.eq('allowed')
+      })
+
+      it('refuses an upgrade whose port the proxy never saw, even from the primary origin', function () {
+        const write = sinon.stub()
+
+        this.server.proxyWebsockets(this.proxy, '/foo', {
+          url: '/foo-graphql',
+          headers: { origin: 'http://localhost:3000' },
+          socket: { remotePort: 54321, remoteAddress: '127.0.0.1' },
+        }, { end: sinon.stub(), write }, this.head)
+
+        expect(write).to.be.calledWithMatch('400 Bad Request')
+      })
     })
 
     it('calls proxy.ws with hostname + port', function () {

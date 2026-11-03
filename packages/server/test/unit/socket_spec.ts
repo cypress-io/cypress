@@ -19,8 +19,15 @@ import { getCtx } from '../../lib/makeDataContext'
 import { sinon } from '../spec_helper'
 import { SocketCt } from '../../lib/socket-ct'
 import runEvents from '../../lib/plugins/run_events'
+import * as links from '../../lib/gui/links'
 
 let ctx
+
+const waitFor = async (condition: () => boolean) => {
+  for (let i = 0; i < 100 && !condition(); i++) {
+    await new Promise((resolve) => setTimeout(resolve, 10))
+  }
+}
 
 describe('lib/socket', () => {
   beforeEach(async function () {
@@ -152,6 +159,7 @@ describe('lib/socket', () => {
           agent: this.agent,
           path: socketIoRoute,
           transports: ['websocket'],
+          extraHeaders: { origin: new URL(proxyUrl).origin },
         })
       })
     })
@@ -216,6 +224,63 @@ describe('lib/socket', () => {
 
           return done()
         })
+      })
+    })
+
+    describe('on(external:open)', () => {
+      let onUnhandledRejection
+
+      beforeEach(() => {
+        onUnhandledRejection = sinon.stub()
+        process.on('unhandledRejection', onUnhandledRejection)
+      })
+
+      afterEach(() => {
+        process.off('unhandledRejection', onUnhandledRejection)
+      })
+
+      it('handles a url the OS fails to open', function (done) {
+        sinon.stub(links, 'openExternal').callsFake(() => {
+          setImmediate(() => {
+            expect(onUnhandledRejection).not.to.be.called
+
+            done()
+          })
+
+          return Promise.reject(new Error('no handler for https'))
+        })
+
+        this.client.emit('external:open', 'https://on.cypress.io')
+      })
+    })
+
+    describe('on(open:file)', () => {
+      const fileDetails = { file: '/project/cypress/e2e/spec.cy.js', line: 3, column: 5 }
+
+      beforeEach(() => {
+        ctx.coreData.localSettings.availableEditors = [{ id: 'code', name: 'Visual Studio Code', binary: 'code' }]
+        sinon.stub(ctx.actions.file, 'openFile').resolves()
+        sinon.stub(ctx.actions.electron, 'showItemInFolder')
+      })
+
+      it('opens the file in a detected preferred editor', async function () {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+
+        this.client.emit('open:file', fileDetails)
+
+        await waitFor(() => ctx.actions.file.openFile.called)
+        expect(ctx.actions.file.openFile).to.be.calledWith(fileDetails.file, 3, 5)
+        expect(ctx.actions.electron.showItemInFolder).not.to.be.called
+      })
+
+      it('shows the file in the file manager without a launchable preferred editor', async function () {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = '/bin/sh'
+
+        this.client.emit('open:file', fileDetails)
+
+        await waitFor(() => ctx.actions.electron.showItemInFolder.called)
+        expect(ctx.actions.electron.showItemInFolder).to.be.calledWith(fileDetails.file)
+        expect(ctx.actions.file.openFile).not.to.be.called
       })
     })
 
@@ -899,6 +964,7 @@ describe('lib/socket', () => {
           agent,
           path: socketIoRoute,
           transports: ['websocket'],
+          extraHeaders: { origin: new URL(proxyUrl).origin },
         })
       })
     })

@@ -9,6 +9,8 @@ import { Cfg } from '../../lib/project-base'
 import '../spec_helper'
 import { getCtx } from '@packages/data-context'
 import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
+import { tapGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
+import { cypressSessions } from '../../lib/cypress-sessions'
 
 chai.use(require('@cypress/sinon-chai'))
 
@@ -282,6 +284,72 @@ describe('lib/routes', () => {
       const { router } = setupCommonRoutes()
 
       expect(cyPromptManager.initializeRoutes).to.be.calledWith(router)
+    })
+
+    describe('graphql mounts', () => {
+      const graphqlMount = (router, path: string) => {
+        return router.use.args.find((args) => args[0] === path)
+      }
+
+      it('does not mount a graphql handler under the namespace', () => {
+        const { router } = setupCommonRoutes()
+
+        expect(router.use.args.filter((args) => typeof args[0] === 'string' && args[0].startsWith('/namespace/graphql'))).to.deep.eq([])
+      })
+
+      it('mounts the tap graphql handler on the tap mount in open mode', () => {
+        const { router } = setupCommonRoutes()
+        const mount = graphqlMount(router, '/__cypress/tap/graphql/*')
+
+        expect(mount).to.have.length(3)
+        expect(mount[1]).to.be.a('function')
+        expect(mount[2]).to.eq(tapGraphQLHTTP)
+      })
+
+      describe('tap mount session guard', () => {
+        const guard = (headers: Record<string, string | string[]>) => {
+          const { router } = setupCommonRoutes()
+          const middleware = graphqlMount(router, '/__cypress/tap/graphql/*')?.[1]
+          const res = { sendStatus: sinon.stub() }
+          const next = sinon.stub()
+
+          middleware({ headers }, res, next)
+
+          return { res, next }
+        }
+
+        beforeEach(() => {
+          sinon.stub(cypressSessions, 'getCurrent').returns({ sessionId: 'abc' } as any)
+        })
+
+        it('passes a request carrying the current session id', () => {
+          const { res, next } = guard({ 'x-cypress-session-id': 'abc' })
+
+          expect(next).to.be.called
+          expect(res.sendStatus).not.to.be.called
+        })
+
+        it('answers 404 without the session id header', () => {
+          const { res, next } = guard({})
+
+          expect(res.sendStatus).to.be.calledWith(404)
+          expect(next).not.to.be.called
+        })
+
+        it('answers 404 for a repeated session id header', () => {
+          const { res, next } = guard({ 'x-cypress-session-id': ['abc', 'abc'] })
+
+          expect(res.sendStatus).to.be.calledWith(404)
+          expect(next).not.to.be.called
+        })
+
+        it('answers 404 for a session id that is not current', () => {
+          const { res, next } = guard({ 'x-cypress-session-id': 'nope' })
+
+          expect(res.sendStatus).to.be.calledWith(404)
+          expect(next).not.to.be.called
+        })
+      })
     })
   })
 
