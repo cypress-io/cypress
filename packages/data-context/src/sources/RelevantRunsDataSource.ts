@@ -44,7 +44,7 @@ export class RelevantRunsDataSource {
   #pollingInterval: number = 30
   #cached: RelevantRun = RUNS_EMPTY_RETURN
 
-  #runsPoller?: Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum}>
+  #runsPoller?: Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum }>
 
   constructor (private ctx: DataContext) {}
 
@@ -118,7 +118,7 @@ export class RelevantRunsDataSource {
         runId: run.id,
         runNumber: run.runNumber!,
         status: run.status!,
-        sha: run.commitInfo?.sha!,
+        sha: run.commitInfo!.sha!,
         totalFailed: run.totalFailed || 0,
       }
     }) || []

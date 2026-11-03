@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import path from 'path'
-// @ts-ignore - no types available
+// @ts-expect-error - no types available
 import launchEditor from 'launch-editor'
 import type { DataContext } from '../../../src'
 import { FileActions } from '../../../src/actions/FileActions'

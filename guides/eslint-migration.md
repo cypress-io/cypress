@@ -42,7 +42,7 @@
 - [x] packages/telemetry
 - [ ] packages/launchpad
 - [x] packages/errors
-- [ ] packages/data-context
+- [x] packages/data-context
 - [ ] packages/app
 
 ### Batch 4c: Core packages (part 3)

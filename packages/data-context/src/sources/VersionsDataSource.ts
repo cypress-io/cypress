@@ -110,7 +110,7 @@ export class VersionsDataSource {
 
     try {
       response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY_URL)
-      const responseJson = await response.json() as { time: Record<string, string>}
+      const responseJson = await response.json() as { time: Record<string, string> }
 
       debug('NPM release dates received %o', { modified: responseJson.time.modified })
 

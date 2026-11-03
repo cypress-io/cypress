@@ -359,13 +359,13 @@ describe('code-generator', () => {
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      // @ts-expect-error
+      // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
       framework: CT_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
       specPattern: [defaultSpecPattern.component],
     })
 
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 

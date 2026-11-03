@@ -440,14 +440,12 @@ export class ProjectLifecycleManager {
       return this._activeLifecycleRefresh
     }
 
-    // Capture the IIFE locally so the finally only clears the slot if it
+    // Capture the promise locally so the finally only clears the slot if it
     // still owns it. If `resetInternalState` (project switch) wipes
     // `_activeLifecycleRefresh` while this iteration is in flight, a fresh
     // chain may have taken its place — we don't want to clobber the new
     // chain's slot when this old one finally settles.
-    let invokedLifecycleRefresh!: Promise<void>
-
-    invokedLifecycleRefresh = (async () => {
+    const runLifecycleRefresh = async () => {
       try {
         do {
           this._isLifecycleRefreshQueued = false
@@ -458,7 +456,8 @@ export class ProjectLifecycleManager {
           this._activeLifecycleRefresh = null
         }
       }
-    })()
+    }
+    const invokedLifecycleRefresh = runLifecycleRefresh()
 
     this._activeLifecycleRefresh = invokedLifecycleRefresh
 

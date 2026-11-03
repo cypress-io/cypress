@@ -2,8 +2,8 @@ import { plugin } from 'nexus'
 import type { FieldResolver } from 'nexus'
 
 // We know this is a valid node typename
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type $ValidatedByGraphQL = any;
+
+type $ValidatedByGraphQL = any
 
 export const nodePlugin = plugin({
   name: 'NodePlugin',

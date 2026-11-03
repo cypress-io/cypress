@@ -155,7 +155,7 @@ function frontMatter (content: string, args: { [key: string]: any }) {
 
 async function fileExists (absolute: string) {
   try {
-    await fs.access(absolute, fs.constants.F_OK)
+    await fs.access(absolute)
 
     return true
   } catch (e) {

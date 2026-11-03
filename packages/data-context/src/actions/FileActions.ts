@@ -1,6 +1,6 @@
 import path from 'path'
 
-// @ts-ignore - no types available
+// @ts-expect-error - no types available
 import launchEditor from 'launch-editor'
 import type { DataContext } from '..'
 import { quoteEditorBinary } from '../util/quoteEditorBinary'

@@ -23,12 +23,12 @@ export class HtmlDataSource {
 
     // Check if the file exists. If it doesn't, it probably means that Vite is re-building
     // and we should retry a few times until the file exists
-    let retryCount = 0
+    const retryCount = 0
     let err
 
     while (retryCount < 5) {
       try {
-        let html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        const html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
 
         return html.replace(
           '<title>Cypress</title>',

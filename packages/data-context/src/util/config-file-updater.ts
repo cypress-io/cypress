@@ -204,7 +204,7 @@ function setSubKeysSplicers (
 
   const keysToUpdateWithObjects: string[] = []
 
-  const objSubkeys = Object.keys(obj).filter((key) => typeof obj[key] === 'object').reduce((acc: Array<{parent: string, subkey: string}>, key) => {
+  const objSubkeys = Object.keys(obj).filter((key) => typeof obj[key] === 'object').reduce((acc: Array<{ parent: string, subkey: string }>, key) => {
     keysToUpdateWithObjects.push(key)
     Object.entries(obj[key]).forEach(([subkey, value]) => {
       if (['boolean', 'number', 'string'].includes(typeof value)) {
@@ -298,7 +298,7 @@ function isUndefinedOrNull (value: NodePath['node']): value is namedTypes.Identi
   return value.type === 'Identifier' && ['undefined', 'null'].includes(value.name)
 }
 
-interface Splicer{
+interface Splicer {
   start: number
   end: number
   replaceString: string

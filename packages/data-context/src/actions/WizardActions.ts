@@ -222,7 +222,7 @@ export class WizardActions {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
-    // @ts-ignore
+    // @ts-expect-error - the fs-extra 8 types have no `mkdir` overload that takes options
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
 
     let fileContent: string | undefined
