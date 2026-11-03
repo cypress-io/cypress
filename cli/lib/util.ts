@@ -391,6 +391,11 @@ const util = {
     return chalk.blue(...args)
   },
 
+  // Minimum gap between download and unzip progress updates. In an
+  // interactive terminal each update redraws the install task list, so
+  // updating on every chunk or entry slows the install down.
+  progressThrottleMs: 100,
+
   calculateEta (percent: number, elapsed: number): number {
     // returns the number of seconds remaining
 

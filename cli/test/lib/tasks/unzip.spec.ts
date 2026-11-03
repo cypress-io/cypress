@@ -173,7 +173,16 @@ describe('lib/tasks/unzip', function () {
   })
 
   describe('progress', () => {
+    // Only the entry count is read from this zip; the extractor is mocked
     const zipFilePath = path.join('test', 'fixture', '1000-entries.zip')
+
+    const extractTicking = (entries: number) => {
+      return async (_zip: string, _dest: string, onEntry: () => void) => {
+        for (let i = 0; i < entries; i++) {
+          onEntry()
+        }
+      }
+    }
 
     beforeEach(() => {
       vi.mocked(os.platform).mockReturnValue('win32')
@@ -187,6 +196,8 @@ describe('lib/tasks/unzip', function () {
 
     it('reports once per percent while extracting a 1,000-entry zip and ends at 100', async function () {
       const onProgress = vi.fn()
+
+      vi.mocked(extractWithYauzl).mockImplementation(extractTicking(1000))
 
       await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
 
@@ -209,6 +220,36 @@ describe('lib/tasks/unzip', function () {
       await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
 
       expect(onProgress.mock.calls.map(([percent]) => percent)).toEqual([0, 0])
+    })
+
+    it('restarts from 0 instead of passing 100 when the OS tool fails partway and node takes over', async function () {
+      const onProgress = vi.fn()
+
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(extractWithYauzl).mockImplementation(extractTicking(1000))
+
+      const unzipChildProcess = new events.EventEmitter() as any
+
+      unzipChildProcess.stdout = new events.EventEmitter()
+      unzipChildProcess.stderr = new events.EventEmitter()
+
+      vi.mocked(cp.spawn).mockImplementation(() => {
+        setImmediate(() => {
+          for (let i = 0; i < 600; i++) {
+            unzipChildProcess.stdout.emit('data', `  inflating: entries/${i}`)
+          }
+
+          unzipChildProcess.emit('close', 1)
+        })
+
+        return unzipChildProcess
+      })
+
+      await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
+
+      const upTo = (max: number) => Array.from({ length: max + 1 }, (_, i) => i)
+
+      expect(onProgress.mock.calls.map(([percent]) => percent)).toEqual([...upTo(60), ...upTo(100)])
     })
   })
 
