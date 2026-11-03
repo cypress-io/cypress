@@ -114,6 +114,7 @@ export class RelevantRunsDataSource {
     const runs = cloudProject.runsByCommitShas?.filter((run): run is CloudRun => {
       return run != null && !!run.runNumber && !!run.status && !!run.commitInfo?.sha
     }).map((run): RelevantRunInfo => {
+      // Safe because the filter above only keeps runs with these fields set
       return {
         runId: run.id,
         runNumber: run.runNumber!,

@@ -248,7 +248,7 @@ export default [
 ]
 ```
 
-All three, and `packages/data-context`, also spread `graphqlConfig()` last, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
+All three, and `packages/data-context`, also spread `graphqlConfig()` after the shared configs and before their own blocks, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
 
 Add `vue` to the package's `lint-staged` glob (`**/*.{js,jsx,ts,tsx,json,vue}`, as `npm/vue` has). lint-staged hands each staged file only to its nearest config, so without it a staged `.vue` file matches no task and is committed unlinted.
 

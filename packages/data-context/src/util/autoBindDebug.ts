@@ -23,10 +23,12 @@ export function autoBindDebug<T extends object> (obj: T): T {
     if (v.writable && typeof v.value === 'function') {
       const original = v.value
 
-      Reflect.set(obj, k, function (this: unknown) {
-        debug(`calling %s with args %o`, k, arguments)
+      Object.assign(obj, {
+        [k]: function (this: unknown) {
+          debug(`calling %s with args %o`, k, arguments)
 
-        return original.apply(this, arguments)
+          return original.apply(this, arguments)
+        },
       })
     }
   }

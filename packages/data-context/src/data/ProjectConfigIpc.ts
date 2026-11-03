@@ -241,6 +241,7 @@ export class ProjectConfigIpc extends EventEmitter {
     const orderedConfig = {} as Cypress.PluginConfigOptions
 
     Object.keys(mergedConfig).sort().forEach((key) => {
+      // Safe because `key` comes from `Object.keys(mergedConfig)`
       Reflect.set(orderedConfig, key, mergedConfig[key as keyof typeof mergedConfig])
     })
 

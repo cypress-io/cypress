@@ -57,7 +57,7 @@ module.exports = {
         '**/scripts/**',
         '**/test/**',
         'tooling/**',
-        'packages/{app,driver,frontend-shared,launchpad}/cypress/**',
+        'packages/app/cypress/**',
         '*.test.ts',
       ],
       rules: {
