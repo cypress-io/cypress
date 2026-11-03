@@ -241,21 +241,23 @@ describe('planSetCookieSync', () => {
     })])
   })
 
-  // URL.hostname wraps an IPv6 address in brackets (`[::1]`), but Chrome stores
-  // the cookie domain without them (`::1`). An address can't hold a domain
-  // cookie, so a cookie with Domain=::1 is also stored host-only as `::1`.
-  it('matches an IPv6 host as the unbracketed host-only cookie Chrome stored', async () => {
+  // Chrome stores an IPv6 host's cookies under the bracketed host (`[::1]`), the
+  // form URL.hostname gives. An address can't hold a domain cookie, so
+  // Domain=[::1] is stored host-only under the same form. Chrome blocks the
+  // unbracketed Domain=::1, so that header never reaches the sync.
+  it('matches an IPv6 host as the bracketed host-only cookie Chrome stored', async () => {
     const loopback = new URL('http://[::1]/')
 
-    expect(cookieStoreDomain({ domain: null }, loopback)).toBe('::1')
-    expect(cookieStoreDomain({ domain: '::1' }, loopback)).toBe('::1')
-    expect(cookieStoreDomain({ domain: null }, new URL('http://[::ffff:127.0.0.1]/'))).toBe('::ffff:7f00:1')
+    expect(cookieStoreDomain({ domain: null }, loopback)).toBe('[::1]')
+    expect(cookieStoreDomain({ domain: '[::1]' }, loopback)).toBe('[::1]')
+    // Chrome and URL.hostname both normalize an IPv4-mapped address
+    expect(cookieStoreDomain({ domain: null }, new URL('http://[::ffff:127.0.0.1]/'))).toBe('[::ffff:7f00:1]')
 
     expect(await plan({
       url: 'http://[::1]/',
       setCookieHeadersFromOrigin: ['a=1; Path=/'],
       setCookieHeadersAfterIntercept: ['a=2; Path=/'],
-      chromeCookieStore: [{ name: 'a', value: '1', path: '/', domain: '::1' }],
+      chromeCookieStore: [{ name: 'a', value: '1', path: '/', domain: '[::1]' }],
     })).toEqual([set({
       name: 'a',
       value: '2',
@@ -267,10 +269,10 @@ describe('planSetCookieSync', () => {
 
     expect(await plan({
       url: 'http://[::1]/',
-      setCookieHeadersFromOrigin: ['a=1; Domain=::1; Path=/'],
+      setCookieHeadersFromOrigin: ['a=1; Domain=[::1]; Path=/'],
       setCookieHeadersAfterIntercept: [],
-      chromeCookieStore: [{ name: 'a', value: '1', path: '/', domain: '::1' }],
-    })).toEqual([removal({ name: 'a', domain: '::1', path: '/' })])
+      chromeCookieStore: [{ name: 'a', value: '1', path: '/', domain: '[::1]' }],
+    })).toEqual([removal({ name: 'a', domain: '[::1]', path: '/' })])
   })
 
   // on localhost, `Domain=localhost` and no `Domain=` are different header keys,

@@ -79,11 +79,6 @@ const CDP_PRIORITY: Record<string, Protocol.Network.CookiePriority | undefined> 
 // are not part of the page's traffic, so they are left out of the sync.
 const isInternalCookie = (name: string) => name.startsWith('__cypress.')
 
-// `URL.hostname` keeps the brackets around an IPv6 literal (`[::1]`). Chrome's
-// cookie domain is the host without them (`::1`), so an address has to be
-// compared and stored in that form.
-const cookieHost = (url: URL): string => url.hostname.replace(/^\[(.*)\]$/, '$1')
-
 // Whether Chrome stores Domain=<host> as a domain cookie. A host with no
 // registrable domain (an IP, a single label such as localhost, or a public
 // suffix such as github.io or co.uk) can't hold one, so Chrome stores the
@@ -96,7 +91,8 @@ const hostAcceptsDomainCookie = (host: string): boolean => !!isHostOnlyCookie({ 
  * The domain Chrome stores a cookie under, resolved the same way Chrome
  * resolves a Set-Cookie header's Domain= attribute:
  * - no Domain=, or Domain= naming the host itself where that is stored
- *   host-only — under `cookieHost` (bare hostname, IPv6 without brackets).
+ *   host-only — under `URL.hostname`. Chrome keeps the brackets on an IPv6
+ *   host (`[::1]`), and normalizes an address the same way `URL` does.
  * - any other Domain= — dotted (tough-cookie strips the dot from the header, so
  *   it is added back).
  *
@@ -106,7 +102,7 @@ const hostAcceptsDomainCookie = (host: string): boolean => !!isHostOnlyCookie({ 
  * form from Chrome.
  */
 export const cookieStoreDomain = (cookie: Pick<Cookie, 'domain'>, url: URL): string => {
-  const host = cookieHost(url)
+  const host = url.hostname
 
   if (!cookie.domain) {
     return host
@@ -314,8 +310,8 @@ const findStoredFromHeader = async (originCookie: ParsedSetCookie, readChromeCoo
   return storedCookies.find((stored) => isSameChromeCookie(stored, originCookie.identity) && stored.value === originCookie.cookie.value)
 }
 
-// Restores the cookie the origin's header overwrote, if the browser sent it with
-// the request. Matching errs toward restoring: rewriting a cookie the header
+// Restores the cookie the origin's header overwrote, if Chrome held it for the
+// request's url when it sent the request, whether or not it was sent. Matching errs toward restoring: rewriting a cookie the header
 // didn't touch leaves it unchanged, but missing one leaves it deleted.
 const restoreReplacedCookieCommands = (originCookie: ParsedSetCookie, cookiesWhenRequestSent: Protocol.Network.Cookie[]): SetCookieSyncCommand[] => {
   return cookiesWhenRequestSent
@@ -416,8 +412,9 @@ const parseUrl = (rawUrl: string): URL | undefined => {
  * compared with the handler's last header:
  *
  * - A cookie the origin set that the handler dropped is removed, and its
- *   earlier copy is restored from `cookiesWhenRequestSent` if the browser sent
- *   it with the request. On the proxy path the browser only sees the
+ *   earlier copy is restored from `cookiesWhenRequestSent` if Chrome held it
+ *   for the request's url, even one it didn't send (e.g. blocked by SameSite).
+ *   On the proxy path the browser only sees the
  *   handler's headers, so the origin's cookie is never stored and the earlier
  *   copy is left as it was.
  * - A cookie the handler added or changed is set, or removed if it is already
