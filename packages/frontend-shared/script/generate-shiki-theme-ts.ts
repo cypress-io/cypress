@@ -11,10 +11,10 @@ fs.readFile(`${filePath}.template.json`,
       throw err
     }
 
-    for (let colorName in colors) {
+    for (const colorName in colors) {
       const colorScale = colors[colorName]
 
-      for (let colorGrade in colorScale) {
+      for (const colorGrade in colorScale) {
         const variableNameRegExp = new RegExp(`-${colorName}-${colorGrade}"`, 'g')
 
         contents = contents.replace(variableNameRegExp, `${colorScale[colorGrade]}"`)

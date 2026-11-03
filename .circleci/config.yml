@@ -13,9 +13,6 @@ workflows:
                   - pack-workflows
 
 parameters:
-  publish-binary-branch:
-    type: string
-    default: main
   force-persist-artifacts:
     type: boolean
     default: false
@@ -121,6 +118,9 @@ commands:
                 - equal: [<<pipeline.git.branch>>, 'develop']
                 - matches:
                     pattern: /^release\/.*/
+                    value: <<pipeline.git.branch>>
+                - matches:
+                    pattern: /^v\d+$/
                     value: <<pipeline.git.branch>>
           steps:
             - run:

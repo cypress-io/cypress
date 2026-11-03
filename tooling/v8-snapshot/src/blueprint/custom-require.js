@@ -132,7 +132,7 @@ function customRequire (
     }
 
     // 6.3. populate its exports if its definition is cached
-    if (customRequire.definitions.hasOwnProperty(key)) {
+    if (Object.hasOwn(customRequire.definitions, key)) {
       customRequire.exports[key] = mod
       customRequire.definitions[key].apply(mod.exports, [
         mod.exports,
