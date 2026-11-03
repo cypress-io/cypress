@@ -1,9 +1,16 @@
-// @ts-expect-error
+// @ts-expect-error - stub window, which does not exist in the Node test environment
 global.window = {}
 
 import { describe, it, expect, beforeAll } from 'vitest'
+import { trace } from '@opentelemetry/api'
 import { telemetry } from '../src/client'
 import { Telemetry as TelemetryClass } from '../src/telemetry/index'
+
+const rootSpanId = () => {
+  const singleton = window.cypressTelemetrySingleton
+
+  return singleton instanceof TelemetryClass && singleton.rootContext ? trace.getSpanContext(singleton.rootContext)?.spanId : undefined
+}
 
 describe('telemetry is disabled', () => {
   describe('init', () => {
@@ -78,7 +85,6 @@ describe('telemetry is disabled', () => {
 
 describe('telemetry is enabled', () => {
   beforeAll(() => {
-    // @ts-expect-error
     global.window.__CYPRESS_TELEMETRY__ = {
       context: {
         context: {
@@ -176,13 +182,11 @@ describe('telemetry is enabled', () => {
 
   describe('setRootContext', () => {
     it('it sets the context', () => {
-      // @ts-expect-error
-      expect(window.cypressTelemetrySingleton?.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
+      expect(rootSpanId()).toEqual('4ad8bd26672a01b0')
 
       telemetry.setRootContext({ context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' } })
 
-      // @ts-expect-error
-      expect(window.cypressTelemetrySingleton?.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b1')
+      expect(rootSpanId()).toEqual('4ad8bd26672a01b1')
     })
   })
 })

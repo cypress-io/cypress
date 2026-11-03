@@ -20,7 +20,9 @@ import { remoteSchemaWrapped as schemaCloud } from '@packages/data-context/graph
 import type { BrowserApiShape } from '@packages/data-context/src/sources/BrowserDataSource'
 import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape, CohortsApiShape } from '@packages/data-context/src/actions'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
-import type { BrowserInstance } from '../../../lib/browsers/types'
+import type { Browser, BrowserInstance } from '../../../lib/browsers/types'
+import type { Automation } from '../../../lib/automation'
+import type { BrowserLaunchOpts } from '@packages/types'
 import type { FoundBrowser } from '@packages/types/src/browser'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
@@ -675,6 +677,57 @@ describe('lib/browsers/index', () => {
           expect(setBrowserStatus.mock.calls[i][0]).toBe(status)
         })
       })
+    })
+  })
+
+  describe('launch padding', () => {
+    const openElectron = (isTextTerminal: boolean) => {
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      vi.spyOn(electron, 'open').mockResolvedValue(browserInstance)
+
+      const onBrowserOpen = vi.fn()
+      const setBrowserStatus = vi.spyOn(ctx.actions.app, 'setBrowserStatus')
+      const delay = vi.spyOn(Promise, 'delay').mockResolvedValue(undefined)
+
+      const browser: TestElectronBrowser = { name: 'electron', family: 'chromium' }
+      const url: TestUrl = 'http://localhost:3000'
+      const options: Pick<BrowserLaunchOpts, 'url' | 'isTextTerminal' | 'onBrowserOpen'> = { url, isTextTerminal, onBrowserOpen }
+
+      // Safe because `open` reads only `name` and `family` to pick the Electron
+      // launcher, whose `open` is stubbed, and reads no other launch option on
+      // this path. Automation is only passed through to that stub.
+      return browsers.open(browser as Browser, options as BrowserLaunchOpts, null as unknown as Automation, ctx)
+      .then((instance) => {
+        return { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay }
+      })
+    }
+
+    afterEach(() => {
+      return browsers.close()
+    })
+
+    // run mode waits for the socket to connect instead
+    it('does not pad the launch in run mode', async () => {
+      const { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay } = await openElectron(true)
+
+      expect(delay).not.toHaveBeenCalledWith(1000)
+      expect(instance).toBe(browserInstance)
+      expect(onBrowserOpen).toHaveBeenCalledOnce()
+      expect(setBrowserStatus).toHaveBeenLastCalledWith('open')
+    })
+
+    it('pads the launch before reporting the browser open in open mode', async () => {
+      const { instance, browserInstance, onBrowserOpen, setBrowserStatus, delay } = await openElectron(false)
+
+      expect(delay).toHaveBeenCalledWith(1000)
+      expect(delay.mock.invocationCallOrder[0]).toBeLessThan(onBrowserOpen.mock.invocationCallOrder[0])
+      expect(instance).toBe(browserInstance)
+      expect(setBrowserStatus).toHaveBeenLastCalledWith('open')
     })
   })
 

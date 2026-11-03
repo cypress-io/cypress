@@ -250,8 +250,8 @@ describe('lib/cloud/api', () => {
 
   describe('.sendPreflight', () => {
     let prodApi
-    let originalCypressConfigEnv = process.env.CYPRESS_CONFIG_ENV
-    let originalCypressAPIUrl = process.env.CYPRESS_API_URL
+    const originalCypressConfigEnv = process.env.CYPRESS_CONFIG_ENV
+    const originalCypressAPIUrl = process.env.CYPRESS_API_URL
 
     beforeEach(async () => {
       nock.cleanAll()

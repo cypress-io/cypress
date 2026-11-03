@@ -1,19 +1,28 @@
 {
   "name": "@tooling/v8-snapshot",
   "version": "0.0.0-development",
-  "description": "Various utils related to create v8 snapshots for electron apps.",
   "private": true,
+  "description": "Various utils related to create v8 snapshots for electron apps.",
   "main": "dist/v8-snapshot.js",
+  "types": "src/v8-snapshot.ts",
+  "files": [
+    "dist",
+    "src/v8-snapshot.ts"
+  ],
   "scripts": {
     "build": "yarn ensure-typedefs && tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
     "check-ts": "tsc --noEmit",
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
     "ensure-typedefs": "yarn workspace @packages/server ensure-cloud-validations",
+    "lint": "eslint",
     "test": "yarn test-unit",
     "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
     "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
     "watch": "tsc --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "@tooling/electron-mksnapshot": "0.0.0-development",
@@ -28,19 +37,18 @@
     "worker-nodes": "^2.3.0"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
     "@tooling/system-tests": "0.0.0-development",
     "chai-as-promised": "7.1.2",
     "cpr": "^3.0.1",
+    "eslint": "^9.31.0",
+    "globals": "^15.12.0",
+    "jiti": "^2.4.2",
     "mocha": "7.0.1",
     "snap-shot-it": "7.9.10",
     "stealthy-require": "^1.1.1",
     "typescript": "~5.4.5"
   },
-  "files": [
-    "dist",
-    "src/v8-snapshot.ts"
-  ],
-  "types": "src/v8-snapshot.ts",
   "optionalDependencies": {
     "@cypress/snapbuild-android-arm64": "1.0.4",
     "@cypress/snapbuild-darwin-64": "1.0.4",

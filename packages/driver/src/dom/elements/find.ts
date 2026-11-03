@@ -162,7 +162,7 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
  */
 export const elementFromPoint = (doc, x, y): HTMLElement => {
   // first try the native elementFromPoint method
-  let elFromPoint = doc.elementFromPoint(x, y)
+  const elFromPoint = doc.elementFromPoint(x, y)
 
   return getShadowElementFromPoint(elFromPoint, x, y)
 }
@@ -176,7 +176,7 @@ export const isAncestor = ($el: JQuery<HTMLElement>, $maybeAncestor: JQuery<HTML
 }
 
 export const isChild = ($el: JQuery<HTMLElement>, $maybeChild: JQuery<HTMLElement>) => {
-  let children = $el.children()
+  const children = $el.children()
 
   if (children.length && children[0].nodeName === 'SHADOW-ROOT') {
     return isDescendent($el, $maybeChild)
@@ -185,23 +185,26 @@ export const isChild = ($el: JQuery<HTMLElement>, $maybeChild: JQuery<HTMLElemen
   return children.index($maybeChild) >= 0
 }
 
-export const isDescendent = ($el1: JQuery<HTMLElement>, $el2?: JQuery<HTMLElement>) => {
-  if (!$el2) {
+export const isDescendent = (elOrJquery1: HTMLElement | JQuery<HTMLElement>, elOrJquery2?: HTMLElement | JQuery<HTMLElement>) => {
+  if (!elOrJquery2) {
     return false
   }
 
+  const el1 = $jquery.isJquery(elOrJquery1) ? elOrJquery1.get(0) : elOrJquery1
+  const el2 = $jquery.isJquery(elOrJquery2) ? elOrJquery2.get(0) : elOrJquery2
+
   // if they are equal, consider them a descendent
-  if ($el1.get(0) === $el2.get(0)) {
+  if (el1 === el2) {
     return true
   }
 
   // walk up the tree until we find a parent which
   // equals the descendent, if ever
-  return findParent($el2.get(0), (node) => {
-    if (node === $el1.get(0)) {
+  return findParent(el2, (node) => {
+    if (node === el1) {
       return node
     }
-  }) === $el1.get(0)
+  }) === el1
 }
 
 // mostly useful when traversing up parent nodes and wanting to
@@ -247,7 +250,7 @@ $.expr.pseudos['cy-contains'] = $.expr.createPseudo((text) => {
   text = JSON.parse(`"${ text }"`)
 
   return function (elem) {
-    let testText = normalizeWhitespaces(elem)
+    const testText = normalizeWhitespaces(elem)
 
     return testText.includes(text)
   }
@@ -294,7 +297,7 @@ export const getContainsSelector = (text, filter = '', options: {
   matchCase?: boolean
 } = {}) => {
   if (_.isRegExp(text) && options.matchCase === false && !text.flags.includes('i')) {
-    text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+    text = new RegExp(text.source, text.flags + 'i')
   }
 
   const escapedText = _.isString(text) ? JSON.stringify(text).slice(1, -1) : text.toString()
@@ -304,7 +307,7 @@ export const getContainsSelector = (text, filter = '', options: {
   // https://github.com/cypress-io/cypress/issues/2407
   const filters = filter.trim().split(',')
 
-  let expr = _.isRegExp(text) ? 'cy-contains-regex' : (options.matchCase ? 'cy-contains' : 'cy-contains-insensitive')
+  const expr = _.isRegExp(text) ? 'cy-contains-regex' : (options.matchCase ? 'cy-contains' : 'cy-contains-insensitive')
 
   const selectors = _.map(filters, (filter) => {
     // https://github.com/cypress-io/cypress/issues/8626

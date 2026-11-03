@@ -63,13 +63,13 @@ process.stdin.resume() //so the program will not close instantly
 const _task = gulp.task
 
 // So that we auto-exit on single tasks
-// @ts-expect-error
+// @ts-expect-error - a variadic wrapper does not match the overloads of gulp.task
 gulp.task = function () {
   if (arguments.length === 1 && typeof arguments[0] === 'function') {
     process.stdin.pause()
   }
 
-  // @ts-ignore
+  // @ts-expect-error - IArguments is not assignable to the parameter tuple of gulp.task
   return _task.apply(this, arguments)
 }
 

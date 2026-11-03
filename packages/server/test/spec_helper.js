@@ -72,9 +72,7 @@ sinon.useFakeTimers = function (...args) {
 }
 
 sinon.restore = function (...args) {
-  let c
-
-  c = sinon._clock
+  const c = sinon._clock
 
   if (c) {
     c.restore()

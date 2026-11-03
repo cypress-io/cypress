@@ -88,7 +88,7 @@ describe('promises', () => {
       return done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       return Cypress.Promise
       .delay(10)
@@ -97,7 +97,7 @@ describe('promises', () => {
       })
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     return cy.foo()
   })
 
@@ -124,25 +124,25 @@ describe('promises', () => {
       return done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       return new Cypress.Promise((resolve) => {
         return cy.wrap({}).then(resolve)
       })
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     return cy.foo()
   })
 
   it('is okay to return promises from custom commands with no cy commands', () => {
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       return Cypress.Promise
       .delay(10)
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     return cy.foo()
   })
 

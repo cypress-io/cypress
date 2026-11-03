@@ -25,6 +25,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     multipleNetworkRequestEventsForSameRequestId: false,
     exceptionThrown: false,
   }
+
   private idToUrlAndFrameMap = new Map<string, URLAndFrame>()
   private currentRequestWillBeSent: (event) => void
   private cdpClient: any

@@ -2,7 +2,6 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-// @ts-ignore
 import Tooltip from '../lib/tooltip'
 
 import Collapsible from '../collapsible/collapsible'

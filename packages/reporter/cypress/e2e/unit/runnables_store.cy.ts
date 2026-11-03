@@ -68,10 +68,10 @@ describe('runnables store', () => {
   let scroller: Scroller
 
   beforeEach(() => {
-    // @ts-ignore
     global.requestAnimationFrame = (cb: FrameRequestCallback) => {
-      // @ts-ignore
-      return cb()
+      cb(0)
+
+      return 0
     }
 
     appState = appStateStub()

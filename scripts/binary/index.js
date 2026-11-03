@@ -12,6 +12,7 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
 const rp = require('@cypress/request-promise')
+const semver = require('semver')
 
 const zip = require('./zip')
 const ask = require('./ask')
@@ -27,6 +28,8 @@ const xvfb = require('../../cli/lib/exec/xvfb').default
 const smoke = require('./smoke')
 const { needsSandbox } = require('../../cli/lib/tasks/verify')
 const execa = require('execa')
+
+const MANIFEST_URL = 'https://download.cypress.io/desktop.json'
 
 const log = function (msg) {
   const time = new Date()
@@ -124,19 +127,30 @@ const deploy = {
     const options = this.parseOptions(process.argv)
 
     const release = ({ version, commit }) => {
-      return upload.s3Manifest(version)
-      .then(() => {
-        if (commit) {
-          return commitVersion(version)
+      return this.getManifest()
+      .then((manifest) => {
+        const updatesManifest = !semver.lt(version, manifest.version)
+
+        if (!updatesManifest) {
+          console.log(`Leaving the manifest at ${chalk.yellow(manifest.version)}, since ${chalk.yellow(version)} is older.`)
         }
-      }).then(() => {
-        return success('Release Complete')
-      }).catch((err) => {
-        fail('Release Failed')
-        throw err
-      })
-      .then(() => {
-        return this.checkManifest({ version })
+
+        return Promise.resolve(updatesManifest && upload.s3Manifest(version))
+        .then(() => {
+          if (commit) {
+            return commitVersion(version)
+          }
+        }).then(() => {
+          return success('Release Complete')
+        }).catch((err) => {
+          fail('Release Failed')
+          throw err
+        })
+        .then(() => {
+          if (updatesManifest) {
+            return this.checkManifest({ version })
+          }
+        })
       })
       .then(() => {
         return this.checkDownloads({ version })
@@ -147,21 +161,14 @@ const deploy = {
     .then(release)
   },
 
+  getManifest () {
+    return rp.get(MANIFEST_URL).then(JSON.parse)
+  },
+
   checkManifest ({ version }) {
-    const checkManifest = () => {
-      const url = `https://download.cypress.io/desktop.json`
+    process.stdout.write(`Checking for ${chalk.yellow(version)} in the manifest at ${chalk.cyan(MANIFEST_URL)} ... `)
 
-      process.stdout.write(`Checking for ${chalk.yellow(version)} in the manifest at ${chalk.cyan(url)} ... `)
-
-      return rp.get(url)
-      .then((res) => {
-        const manifest = JSON.parse(res)
-
-        return manifest
-      })
-    }
-
-    return checkManifest().then((manifest) => {
+    return this.getManifest().then((manifest) => {
       const versionMatches = manifest.version === version
 
       process.stdout.write(`${versionMatches ? '✅' : '❌'}\n`)
@@ -292,7 +299,7 @@ const deploy = {
     await askMissingOptions(['version'])(options)
 
     // runSmokeTests
-    let usingXvfb = xvfb.isNeeded()
+    const usingXvfb = xvfb.isNeeded()
 
     try {
       if (usingXvfb) {

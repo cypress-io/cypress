@@ -94,7 +94,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
         symbol: Symbol(''),
       }
     }).then((obj) => {
-      // @ts-ignore
+      // @ts-expect-error - the yielded subject is typed as unknown
       return obj.symbol // This will fail accessing the symbol
     })
   })
@@ -177,7 +177,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
       })
     })
     .then((obj) => {
-      // @ts-ignore
+      // @ts-expect-error - the yielded subject is typed as unknown
       obj()
     })
   })

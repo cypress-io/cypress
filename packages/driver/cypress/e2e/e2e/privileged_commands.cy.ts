@@ -81,22 +81,22 @@ describe('privileged commands', () => {
 
     it('handles null argument(s)', () => {
       cy.task('return:arg', null).should('be.null')
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes null as the options argument
       cy.task('return:arg', null, null).should('be.null')
       cy.task('return:arg', null, { timeout: 9999 }).should('be.null')
     })
 
     it('handles extra, unexpected arguments', () => {
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.readFile('cypress/fixtures/app.json', 'utf-8', { log: true }, { should: 'be ignored' })
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.writeFile('cypress/_test-output/written.json', 'contents', 'utf-8', { log: true }, { should: 'be ignored' })
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.task('return:arg', 'arg2', { log: true }, { should: 'be ignored' })
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.get('#basic').selectFile('cypress/fixtures/valid.json', { log: true }, { should: 'be ignored' })
       if (!isWebkit) {
-        // @ts-expect-error
+        // @ts-expect-error - deliberately passes an extra argument
         cy.origin('http://foobar.com:3500', {}, () => {}, { should: 'be ignored' })
       }
     })
@@ -112,6 +112,14 @@ describe('privileged commands', () => {
 
     it('handles TypedArray arguments', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
+    })
+
+    it('passes when a command retries until its assertion passes', () => {
+      let attempts = 0
+
+      cy.readFile('cypress/fixtures/app.json').should(() => {
+        expect(++attempts).to.be.greaterThan(2)
+      })
     })
 
     it('handles args being mutated', () => {

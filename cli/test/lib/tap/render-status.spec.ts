@@ -109,6 +109,20 @@ describe('lib/tap/render/status', () => {
     ].join('\n'))
   })
 
+  it('renders a project that failed to load with its error beneath the session', () => {
+    const output = render({
+      status: 'error',
+      pid: 111,
+      projectRoot: '/projects/app',
+      testingType: 'e2e',
+      error: 'Your configFile is invalid',
+    })
+
+    expect(output).toContain('● error')
+    expect(output).toContain('/projects/app')
+    expect(output).toContain('Your configFile is invalid')
+  })
+
   it('renders the minimal not-connected phase as a single line', () => {
     expect(render({ status: 'not connected' })).toBe('● not connected')
   })

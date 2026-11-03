@@ -57,6 +57,7 @@ class QueueMap<T> {
 
     this.queues[queueKey].push(value)
   }
+
   shift (queueKey: string): T | undefined {
     const queue = this.queues[queueKey]
 
@@ -68,12 +69,14 @@ class QueueMap<T> {
 
     return item
   }
+
   removeMatching (filterFn: (value: T) => boolean) {
     Object.entries(this.queues).forEach(([queueKey, queue]) => {
       this.queues[queueKey] = queue.filter(filterFn)
       if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
     })
   }
+
   removeExact (queueKey: string, value: T) {
     const i = this.queues[queueKey]?.findIndex((v) => v === value)
 

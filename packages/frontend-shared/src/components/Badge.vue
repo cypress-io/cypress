@@ -1,5 +1,5 @@
 <script lang="ts">
-export type BadgeRowStatus = 'success' | 'warning' | 'error' | 'skipped' | 'disabled';
+export type BadgeRowStatus = 'success' | 'warning' | 'error' | 'skipped' | 'disabled'
 
 export const statusClassesObject: Record<BadgeRowStatus, string> = {
   disabled: 'bg-gray-50 text-gray-500',

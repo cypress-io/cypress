@@ -142,7 +142,7 @@ describe('Proxy', () => {
       resetProxy()
 
       // should not generate missing certificates
-      let genSpy = vi.spyOn(proxy, '_generateMissingCertificates')
+      const genSpy = vi.spyOn(proxy, '_generateMissingCertificates')
 
       await request({
         strictSSL: false,
@@ -158,7 +158,7 @@ describe('Proxy', () => {
       await proxy._ca.removeAll()
 
       resetProxy()
-      let genSpy = vi.spyOn(proxy, '_generateMissingCertificates')
+      const genSpy = vi.spyOn(proxy, '_generateMissingCertificates')
 
       await request({
         strictSSL: false,
@@ -195,8 +195,8 @@ describe('Proxy', () => {
 
     // https://github.com/cypress-io/cypress/issues/771
     it('generates certs and can proxy requests for HTTPS requests to IPs', async function () {
-      let generateMissingCertificatesSpy = vi.spyOn(proxy, '_generateMissingCertificates')
-      let getServerPortSpy = vi.spyOn(proxy, '_getServerPortForIp')
+      const generateMissingCertificatesSpy = vi.spyOn(proxy, '_generateMissingCertificates')
+      const getServerPortSpy = vi.spyOn(proxy, '_getServerPortForIp')
 
       await Promise.all([
         startHttpsServer(8445),
@@ -224,7 +224,7 @@ describe('Proxy', () => {
 
     // https://github.com/cypress-io/cypress/issues/9220
     it('handles errors with addContext', async function () {
-      let connectSpy = vi.spyOn(proxy, 'connect')
+      const connectSpy = vi.spyOn(proxy, 'connect')
 
       vi.spyOn(proxy._sniServer, 'addContext').mockImplementation(() => {
         throw new Error('error adding context')
@@ -263,7 +263,7 @@ describe('Proxy', () => {
       await startProxy(3333)
 
       // make sure missing certificates are not generated and are reused
-      let generateMissingCertificatesSpy = vi.spyOn(proxy, '_generateMissingCertificates')
+      const generateMissingCertificatesSpy = vi.spyOn(proxy, '_generateMissingCertificates')
 
       await request({
         strictSSL: false,

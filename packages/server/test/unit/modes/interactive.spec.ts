@@ -236,11 +236,11 @@ describe('gui/interactive', () => {
       let beforeQuitHandler
       let quitTeardownImmediateCallback
 
-      let mockEvent = {
+      const mockEvent = {
         preventDefault: vi.fn(),
       }
 
-      let performAssertions = () => {
+      const performAssertions = () => {
         const opts = {}
 
         return interactiveMode.run(opts).then(() => {
