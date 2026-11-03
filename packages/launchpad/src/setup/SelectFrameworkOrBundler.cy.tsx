@@ -97,8 +97,7 @@ describe('<SelectFrameworkOrBundler />', () => {
         selectorType="framework"
         options={manyOptions}
         value={val.value}
-        // @ts-expect-error - onSelectFramework is an emitted event, not a declared prop
-        onSelectFramework={(newVal: FrontendFramework) => {
+        onSelectFramework={(newVal: string) => {
           val.value = newVal
         }}
       />

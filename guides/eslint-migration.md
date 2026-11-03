@@ -250,6 +250,8 @@ export default [
 
 All three, and `packages/data-context`, also spread `graphqlConfig()` last, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
 
+Add `vue` to the package's `lint-staged` glob (`**/*.{js,jsx,ts,tsx,json,vue}`, as `npm/vue` has). lint-staged hands each staged file only to its nearest config, so without it a staged `.vue` file matches no task and is committed unlinted.
+
 `frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
 
 Drop the `defineProps`, `defineEmits`, `defineExpose` and `withDefaults` globals from the old config: `vue-eslint-parser` 10 defines the compiler macros in `<script setup>`.

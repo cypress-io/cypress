@@ -24,7 +24,7 @@
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+    "**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix"
   },
   "dependencies": {},
   "devDependencies": {
