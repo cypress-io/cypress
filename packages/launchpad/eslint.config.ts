@@ -22,11 +22,4 @@ export default [
       },
     },
   },
-  {
-    ignores: [
-      // vite build output for the e2e bundle
-      'dist-*/**',
-      'cypress/fixtures/**',
-    ],
-  },
 ]
