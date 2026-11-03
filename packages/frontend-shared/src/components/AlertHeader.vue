@@ -51,7 +51,6 @@ const emit = defineEmits<{
   (eventName: 'suffixIconClicked'): void
 }>()
 
-/* eslint-disable vue/require-default-prop */
 defineProps<{
   title: string
   prefixIcon?: FunctionalComponent<SVGAttributes, {}> | null

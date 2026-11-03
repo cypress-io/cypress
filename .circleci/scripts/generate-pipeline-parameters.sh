@@ -8,7 +8,7 @@
 # Every path a job could care about must map to a run-* param below: a path
 # that matches nothing is an error rather than a silent skip.
 #
-# release/* branches, the update-v8-snapshot-cache-on-develop branch, the
+# release/* and vN branches, the update-v8-snapshot-cache-on-develop branch, the
 # run-all-jobs manual trigger, and any develop run that isn't a webhook push
 # (scheduled pipelines, API triggers, or an unset/unknown trigger source) skip
 # path inspection entirely and run everything.
@@ -85,7 +85,7 @@ emit_all_true() {
 # ----- branch override --------------------------------------------------------
 # On release branches and the v8 snapshot cache branch all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
-if [[ "$BRANCH" =~ ^release/ ]] || \
+if [[ "$BRANCH" =~ ^release/ ]] || [[ "$BRANCH" =~ ^v[0-9]+$ ]] || \
    [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
   echo "Branch '$BRANCH' — running all tests" >&2
   emit_all_true

@@ -755,7 +755,7 @@ describe('startSpecWatcher', () => {
         { name: 'test-3.cy.js' },
       ] as FoundSpec[]
 
-      // @ts-expect-error
+      // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       jest.spyOn(ctx.project, 'findSpecs').mockResolvedValue(mockFoundSpecs)
       jest.spyOn(ctx.actions.project, 'setSpecs')
 
@@ -788,7 +788,7 @@ describe('startSpecWatcher', () => {
       await ctx.project.startSpecWatcher(watchOptions)
 
       // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
-      // @ts-expect-error
+      // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       ctx.project.setSpecs(mockFoundSpecs)
 
       await handleFsChange()
@@ -799,13 +799,13 @@ describe('startSpecWatcher', () => {
       // Update internal specs state so that a change will be detected on next FS event
       const updatedSpecs = [...mockFoundSpecs, { name: 'test-4.cy.js' }] as FoundSpec[]
 
-      // @ts-expect-error
+      // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       ctx.project.setSpecs(updatedSpecs)
 
       await handleFsChange()
 
       expect(ctx.project.findSpecs).toHaveBeenCalledWith(watchOptions)
-      // @ts-expect-error
+      // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       expect(ctx.actions.project.setSpecs).toHaveBeenCalledWith(mockFoundSpecs)
     })
   })
@@ -838,7 +838,7 @@ describe('ProjectDataSource', () => {
 
     it('yields common prefix if there are existing specs', async () => {
       jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/e2e/**/*'] })
-      // @ts-expect-error
+      // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       ctx.project.setSpecs([
         { relative: 'cypress/e2e/foo/spec.js' },
         { relative: 'cypress/e2e/foo/bar/spec.js' },
@@ -862,7 +862,7 @@ describe('ProjectDataSource', () => {
 
       ctx.coreData.currentTestingType = 'component'
       jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/component-tests/*.spec.js'] })
-      // @ts-expect-error
+      // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       ctx.project.setSpecs([
         { relative: 'cypress/component-tests/foo/spec.spec.js' },
         { relative: 'cypress/component-tests/foo/spec2.spec.js' },
