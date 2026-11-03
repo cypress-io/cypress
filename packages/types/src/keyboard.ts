@@ -1,3 +1,18 @@
+/**
+ * A key as a US keyboard produces it, using the `KeyboardEvent` fields of the
+ * same names. `location` follows `KeyboardEvent.location`: 0 standard, 1 left,
+ * 2 right, 3 numpad.
+ */
+export interface KeyDefinition {
+  key: string
+  keyCode?: number
+  shiftKeyCode?: number
+  code?: string
+  shiftKey?: string
+  text?: string
+  location?: number
+}
+
 export const USKeyboard = {
   '0': { keyCode: 48, key: '0', code: 'Digit0' },
   '1': { keyCode: 49, key: '1', code: 'Digit1' },
@@ -393,4 +408,20 @@ export const USKeyboard = {
   '|': { keyCode: 220, key: '|', code: 'Backslash' },
   '}': { keyCode: 221, key: '}', code: 'BracketRight' },
   '"': { keyCode: 222, key: '"', code: 'Quote' },
+} satisfies Record<string, KeyDefinition>
+
+/**
+ * Looks up a key in the US layout by its table name (`'Enter'`, `'KeyA'`) or by
+ * the character it types (`'a'`, `'\r'`).
+ */
+export function getUsKeyDefinition (key: string): KeyDefinition | undefined {
+  const keysByName: Readonly<Record<string, KeyDefinition>> = USKeyboard
+
+  // An own-property check keeps names such as `constructor` from resolving to
+  // Object.prototype members.
+  if (!Object.prototype.hasOwnProperty.call(keysByName, key)) {
+    return undefined
+  }
+
+  return keysByName[key]
 }

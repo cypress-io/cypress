@@ -1,6 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import type { SupportedKey, SupportedNamedKey } from '@packages/types'
-import { NamedKeys, toSupportedKey, isSupportedKey, SpaceKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { NamedKeys, toSupportedKey, isSupportedKey, getUsKeyDefinition, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
@@ -16,31 +16,46 @@ type InputKeySourceAction = Parameters<Client['inputPerformActions']>[0]['action
     : never
   : never
 
-function getKeyParams (key: SupportedKey): { text?: string, key: string, code?: string } {
+type KeyParams = Pick<Protocol.Input.DispatchKeyEventRequest, 'key' | 'code' | 'text' | 'windowsVirtualKeyCode' | 'location'>
+
+// CDP has no `keyCode` param: the browser derives `keyCode` and `which` from
+// `windowsVirtualKeyCode`.
+function getKeyParams (key: SupportedKey): KeyParams {
   if (!isSupportedKey(key)) {
     throw new Error(`Invalid key: ${key}`)
   }
 
-  if (key === SpaceKey) {
-    return {
-      text: ' ',
-      key: ' ',
-    }
+  const definition = getUsKeyDefinition(key)
+
+  // Characters outside the US layout, such as `é` or `€`, have no physical key
+  // to report, so they are sent as text alone.
+  if (!definition) {
+    return { key, text: key }
   }
 
-  const isNamedKey = NamedKeys.includes(key)
-
-  if (isNamedKey) {
-    return {
-      key,
-      code: key,
-    }
+  const params: KeyParams = {
+    key: definition.key,
+    location: definition.location ?? 0,
   }
 
-  return {
-    key,
-    text: key,
+  if (definition.code) {
+    params.code = definition.code
   }
+
+  if (definition.keyCode !== undefined) {
+    params.windowsVirtualKeyCode = definition.keyCode
+  }
+
+  // Keys that type a character need `text`, or the browser fires no keypress
+  // and inserts nothing. Enter's text is `\r`, which is what makes it submit a
+  // form or add a newline.
+  const text = definition.text ?? ([...definition.key].length === 1 ? definition.key : undefined)
+
+  if (text !== undefined) {
+    params.text = text
+  }
+
+  return params
 }
 
 export async function cdpKeyPress (

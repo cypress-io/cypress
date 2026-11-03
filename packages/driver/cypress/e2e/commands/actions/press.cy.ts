@@ -32,6 +32,64 @@ describe('src/cy/commands/actions/press', () => {
     })
   }
 
+  describe('key event fidelity', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/press_fidelity.html')
+    })
+
+    it('submits a form implicitly when Enter is pressed in a text field', () => {
+      cy.get('#form-input').focus()
+      cy.press(Cypress.Keyboard.Keys.ENTER)
+      cy.window().its('submits').should('eq', 1)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/32452
+    it('adds a newline to a textarea when Enter is pressed', () => {
+      cy.get('#textarea').focus()
+      cy.press(Cypress.Keyboard.Keys.ENTER)
+      cy.get('#textarea').should('have.value', '\n')
+    })
+
+    it('starts a new line in a contenteditable element when Enter is pressed', () => {
+      cy.get('#contenteditable').focus()
+      cy.press('a')
+      cy.press(Cypress.Keyboard.Keys.ENTER)
+      cy.press('b')
+      cy.get('#contenteditable').should(($el) => {
+        expect($el[0].innerText).to.eq('a\nb')
+      })
+    })
+
+    it('fires keypress for Enter', () => {
+      cy.get('#textarea').focus()
+      cy.press(Cypress.Keyboard.Keys.ENTER)
+      cy.window().its('keypresses').should('deep.equal', [{ key: 'Enter', keyCode: 13 }])
+    })
+
+    const expectedKeydowns = [
+      { press: 'a', key: 'a', code: 'KeyA', keyCode: 65 },
+      { press: '1', key: '1', code: 'Digit1', keyCode: 49 },
+      { press: Cypress.Keyboard.Keys.ENTER, key: 'Enter', code: 'Enter', keyCode: 13 },
+      { press: Cypress.Keyboard.Keys.TAB, key: 'Tab', code: 'Tab', keyCode: 9 },
+      { press: Cypress.Keyboard.Keys.ESC, key: 'Escape', code: 'Escape', keyCode: 27 },
+    ]
+
+    expectedKeydowns.forEach(({ press, key, code, keyCode }) => {
+      it(`sends key, code, keyCode and which for ${press}`, () => {
+        cy.get('#textarea').focus()
+        cy.press(press)
+        cy.window().its('keydowns').should('deep.equal', [{
+          key,
+          code,
+          keyCode,
+          which: keyCode,
+          location: 0,
+          isTrusted: true,
+        }])
+      })
+    })
+  })
+
   Object.values(Cypress.Keyboard.Keys).forEach(testKeyDownUp)
 
   // sets truncated for speed

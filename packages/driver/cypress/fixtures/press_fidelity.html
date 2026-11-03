@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>cy.press() fidelity</title>
+  <script>
+    window.keydowns = []
+    window.keypresses = []
+    window.submits = 0
+
+    document.addEventListener('keydown', (e) => {
+      window.keydowns.push({
+        key: e.key,
+        code: e.code,
+        keyCode: e.keyCode,
+        which: e.which,
+        location: e.location,
+        isTrusted: e.isTrusted,
+      })
+    })
+
+    document.addEventListener('keypress', (e) => {
+      window.keypresses.push({ key: e.key, keyCode: e.keyCode })
+    })
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('form').addEventListener('submit', (e) => {
+        e.preventDefault()
+        window.submits++
+      })
+    })
+  </script>
+</head>
+<body>
+  <!-- A form with a single text field submits implicitly on Enter -->
+  <form id="form">
+    <input type="text" id="form-input" />
+  </form>
+
+  <textarea id="textarea"></textarea>
+
+  <div id="contenteditable" contenteditable="true"></div>
+</body>
+</html>

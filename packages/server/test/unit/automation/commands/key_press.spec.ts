@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Mock } from 'vitest'
-import type { SupportedKey } from '@packages/types'
-import { NamedKeys, toSupportedKey, SpaceKey } from '@packages/types'
+import type { SupportedKey, SupportedNamedKey } from '@packages/types'
+import { NamedKeys, toSupportedKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
 import { cdpKeyPress, bidiKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
 import type { Client as WebdriverClient } from 'webdriver'
@@ -15,6 +15,7 @@ type MockedSendDebuggerCommand = SendDebuggerCommand & Mock
 
 describe('key:press automation command', () => {
   const tab: SupportedKey = toSupportedKey('Tab')
+  const tabParams = { key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9, location: 0 }
 
   describe('cdp', () => {
     const activeElementExpression = `document.activeElement instanceof HTMLIFrameElement ? document.activeElement.name || document.activeElement.id : ''`
@@ -96,14 +97,12 @@ describe('key:press automation command', () => {
 
         expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
           type: 'keyDown',
-          code: 'Tab',
-          key: 'Tab',
+          ...tabParams,
         })
 
         expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
           type: 'keyUp',
-          code: 'Tab',
-          key: 'Tab',
+          ...tabParams,
         })
       })
 
@@ -157,103 +156,104 @@ describe('key:press automation command', () => {
 
         expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
           type: 'keyDown',
-          key: 'Tab',
-          code: 'Tab',
+          ...tabParams,
         })
 
         expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
           type: 'keyUp',
-          key: 'Tab',
-          code: 'Tab',
+          ...tabParams,
         })
       })
 
       describe('when supplied a valid named key', () => {
-        for (const key of NamedKeys.filter((k) => k !== SpaceKey)) {
-          it(`dispatches a keydown followed by a keyup event to the provided send fn with the ${key} keycode`, async () => {
-            await cdpKeyPress(key as SupportedKey, sendFn, executionContexts, frameTree)
-
-            expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-              type: 'keyDown',
-              key,
-              code: key,
-            })
-
-            expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-              type: 'keyUp',
-              key,
-              code: key,
-            })
-          })
+        const expectedNamedKeyParams: Record<SupportedNamedKey, Record<string, unknown>> = {
+          ArrowDown: { key: 'ArrowDown', code: 'ArrowDown', windowsVirtualKeyCode: 40, location: 0 },
+          ArrowLeft: { key: 'ArrowLeft', code: 'ArrowLeft', windowsVirtualKeyCode: 37, location: 0 },
+          ArrowRight: { key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39, location: 0 },
+          ArrowUp: { key: 'ArrowUp', code: 'ArrowUp', windowsVirtualKeyCode: 38, location: 0 },
+          End: { key: 'End', code: 'End', windowsVirtualKeyCode: 35, location: 0 },
+          Home: { key: 'Home', code: 'Home', windowsVirtualKeyCode: 36, location: 0 },
+          PageDown: { key: 'PageDown', code: 'PageDown', windowsVirtualKeyCode: 34, location: 0 },
+          PageUp: { key: 'PageUp', code: 'PageUp', windowsVirtualKeyCode: 33, location: 0 },
+          Enter: { key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, location: 0, text: '\r' },
+          Tab: { key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9, location: 0 },
+          Backspace: { key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8, location: 0 },
+          Space: { key: ' ', code: 'Space', windowsVirtualKeyCode: 32, location: 0, text: ' ' },
+          Delete: { key: 'Delete', code: 'Delete', windowsVirtualKeyCode: 46, location: 0 },
+          Insert: { key: 'Insert', code: 'Insert', windowsVirtualKeyCode: 45, location: 0 },
+          Escape: { key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27, location: 0 },
         }
 
-        it(`dispatches ' ' as text and key, with no code, when the named Space key is pressed`, async () => {
-          await cdpKeyPress(toSupportedKey(SpaceKey), sendFn, executionContexts, frameTree)
-
-          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-            type: 'keyDown',
-            key: ' ',
-            text: ' ',
-          })
-
-          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-            type: 'keyUp',
-            key: ' ',
-            text: ' ',
-          })
+        it('covers every named key', () => {
+          expect(Object.keys(expectedNamedKeyParams).sort()).toEqual([...NamedKeys].sort())
         })
+
+        for (const [key, params] of Object.entries(expectedNamedKeyParams)) {
+          it(`dispatches exactly one keydown and one keyup with the US layout params for ${key}`, async () => {
+            await cdpKeyPress(toSupportedKey(key), sendFn, executionContexts, frameTree)
+
+            const keyEvents = sendFn.mock.calls.filter(([command]) => command === 'Input.dispatchKeyEvent')
+
+            expect(keyEvents).toEqual([
+              ['Input.dispatchKeyEvent', { type: 'keyDown', ...params }],
+              ['Input.dispatchKeyEvent', { type: 'keyUp', ...params }],
+            ])
+          })
+        }
       })
 
-      describe('when supplied a valid character key', () => {
-        const key: SupportedKey = 'a' as SupportedKey
+      describe('when supplied a character key on the US layout', () => {
+        const expectedCharacterParams: Record<string, Record<string, unknown>> = {
+          a: { key: 'a', code: 'KeyA', windowsVirtualKeyCode: 65, location: 0, text: 'a' },
+          Z: { key: 'Z', code: 'KeyZ', windowsVirtualKeyCode: 90, location: 0, text: 'Z' },
+          1: { key: '1', code: 'Digit1', windowsVirtualKeyCode: 49, location: 0, text: '1' },
+          '!': { key: '!', code: 'Digit1', windowsVirtualKeyCode: 49, location: 0, text: '!' },
+          ' ': { key: ' ', code: 'Space', windowsVirtualKeyCode: 32, location: 0, text: ' ' },
+          '\r': { key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, location: 0, text: '\r' },
+          '\n': { key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, location: 0, text: '\r' },
+        }
 
-        it('adds text to the keydown event data', async () => {
-          await cdpKeyPress(key, sendFn, executionContexts, frameTree)
+        for (const [key, params] of Object.entries(expectedCharacterParams)) {
+          it(`dispatches key, code, text, windowsVirtualKeyCode and location for ${JSON.stringify(key)}`, async () => {
+            await cdpKeyPress(toSupportedKey(key), sendFn, executionContexts, frameTree)
 
-          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-            type: 'keyDown',
-            key,
-            text: key,
+            expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', { type: 'keyDown', ...params })
+            expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', { type: 'keyUp', ...params })
           })
+        }
+      })
+
+      describe('when supplied a character that is not on the US layout', () => {
+        it('dispatches only key and text', async () => {
+          await cdpKeyPress(toSupportedKey('€'), sendFn, executionContexts, frameTree)
+
+          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', { type: 'keyDown', key: '€', text: '€' })
+          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', { type: 'keyUp', key: '€', text: '€' })
         })
       })
 
       describe('when supplied a utf8 key', () => {
         const codeOne = 'e'
-        const codeTwo = '́'
-        const value = 'é'
+        const codeTwo = '\u0301'
+        const value = 'e\u0301'
         let key: SupportedKey
 
         beforeEach(() => {
           key = toSupportedKey(value)
         })
 
-        it('dispatches a keydown followed by a keyup event to the provided send fn with the a keycode', async () => {
+        it('dispatches a keydown followed by a keyup event for each codepoint', async () => {
           await cdpKeyPress(key, sendFn, executionContexts, frameTree)
 
-          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-            type: 'keyDown',
-            key: codeOne,
-            text: codeOne,
-          })
+          const keyEvents = sendFn.mock.calls.filter(([command]) => command === 'Input.dispatchKeyEvent')
+          const eParams = { key: codeOne, code: 'KeyE', windowsVirtualKeyCode: 69, location: 0, text: codeOne }
 
-          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-            type: 'keyUp',
-            key: codeOne,
-            text: codeOne,
-          })
-
-          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-            type: 'keyDown',
-            key: codeTwo,
-            text: codeTwo,
-          })
-
-          expect(sendFn).toHaveBeenCalledWith('Input.dispatchKeyEvent', {
-            type: 'keyUp',
-            key: codeTwo,
-            text: codeTwo,
-          })
+          expect(keyEvents).toEqual([
+            ['Input.dispatchKeyEvent', { type: 'keyDown', ...eParams }],
+            ['Input.dispatchKeyEvent', { type: 'keyUp', ...eParams }],
+            ['Input.dispatchKeyEvent', { type: 'keyDown', key: codeTwo, text: codeTwo }],
+            ['Input.dispatchKeyEvent', { type: 'keyUp', key: codeTwo, text: codeTwo }],
+          ])
         })
       })
     })

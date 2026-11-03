@@ -6,6 +6,8 @@ export * from './preferences'
 
 export * from './automation'
 
+export * from './keyboard'
+
 export * from './driver'
 
 export * from './spec'
