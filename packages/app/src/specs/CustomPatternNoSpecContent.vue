@@ -7,31 +7,27 @@
       :gql="props.gql"
     >
       <Button
-        size="lg"
+        size="40"
         @click="onClick"
       >
-        <template #prefix>
-          <i-cy-code-editor_x16 class="icon-dark-white" />
-        </template>
+        <i-cy-code-editor_x16 class="icon-dark-white mr-[8px]" />
         {{ t('createSpec.updateSpecPattern') }}
       </Button>
     </OpenConfigFileInIDE>
 
     <Button
-      size="lg"
-      variant="outline"
+      size="40"
+      variant="outline-light"
       @click="emit('showCreateSpecModal')"
     >
-      <template #prefix>
-        <i-cy-add-large_x16 class="icon-dark-gray-500" />
-      </template>
+      <i-cy-add-large_x16 class="icon-dark-gray-500 mr-[8px]" />
       {{ t('createSpec.newSpec') }}
     </Button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { gql } from '@urql/core'
 import type { CustomPatternNoSpecContentFragment } from '../generated/graphql'
 import SpecPatterns from '../components/SpecPatterns.vue'

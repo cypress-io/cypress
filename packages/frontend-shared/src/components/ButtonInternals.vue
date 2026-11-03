@@ -1,28 +1,18 @@
 <template>
   <span
-    v-if="prefixIcon || $slots.prefix"
+    v-if="$slots.prefix"
     class="flex justify-self-start items-center"
   >
-    <slot name="prefix">
-      <component
-        :is="prefixIcon"
-        :class="prefixIconClass"
-      />
-    </slot>
+    <slot name="prefix" />
   </span>
   <span class="grow">
     <slot />
   </span>
   <span
-    v-if="suffixIcon || $slots.suffix"
+    v-if="$slots.suffix"
     class="flex justify-self-start items-center"
   >
-    <slot name="suffix">
-      <component
-        :is="suffixIcon"
-        :class="suffixIconClass"
-      />
-    </slot>
+    <slot name="suffix" />
   </span>
 </template>
 
@@ -32,18 +22,4 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   inheritAttrs: true,
 })
-</script>
-
-<script lang="ts" setup>
-
-// eslint-disable-next-line no-duplicate-imports
-import type { FunctionalComponent, SVGAttributes } from 'vue'
-
-defineProps<{
-  prefixIcon?: FunctionalComponent<SVGAttributes>
-  suffixIcon?: FunctionalComponent<SVGAttributes>
-  prefixIconClass?: string
-  suffixIconClass?: string
-}>()
-
 </script>

@@ -25,15 +25,15 @@
         </code>
         <CopyButton
           :text="projectIdCode"
-          variant="outline"
-          size="sm"
+          variant="outline-light"
+          size="24"
         />
       </div>
     </div>
     <template #footer>
       <Button
-        size="lg"
-        variant="outline"
+        size="40"
+        variant="outline-light"
         @click="emit('close')"
       >
         {{ t('runs.connect.modal.autoProvision.close') }}
@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import CopyButton from '../CopyButton.vue'
 import OpenFileInIDE from '../OpenFileInIDE.vue'
 import { useI18n } from '@cy/i18n'

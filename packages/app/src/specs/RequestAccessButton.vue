@@ -1,27 +1,26 @@
 <template>
   <Button
     v-if="projectConnectionStatus === 'UNAUTHORIZED'"
-    :prefix-icon="SendIcon"
-    prefix-icon-class="icon-dark-white icon-light-transparent"
+    size="32"
     data-cy="request-access-button"
     @click="requestAccess"
   >
+    <SendIcon class="icon-dark-white icon-light-transparent mr-[8px]" />
     {{ t("specPage.requestAccessButton") }}
   </Button>
   <Button
     v-else-if="projectConnectionStatus === 'ACCESS_REQUESTED'"
-    :prefix-icon="SendIcon"
-    prefix-icon-class="icon-dark-white icon-light-transparent"
+    size="32"
     data-cy="access-requested-button"
-    class="btn-disabled"
     disabled
   >
+    <SendIcon class="icon-dark-white icon-light-transparent mr-[8px]" />
     {{ t("specPage.requestSentButton") }}
   </Button>
 </template>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
 import type { RequestAccessButtonFragment } from '../generated/graphql'
@@ -87,10 +86,3 @@ async function requestAccess () {
 }
 
 </script>
-
-<style scoped>
-/* Override <Button> classes, do not rely on css class order */
-.btn-disabled {
-  @apply bg-gray-800 border-gray-800;
-}
-</style>

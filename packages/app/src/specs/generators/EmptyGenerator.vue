@@ -55,7 +55,7 @@
         class="flex gap-[16px]"
       >
         <Button
-          size="lg"
+          size="40"
           type="submit"
           :disabled="!isValidSpecFile"
           @click="createSpec"
@@ -65,16 +65,16 @@
 
         <Button
           v-if="props.otherGenerators"
-          size="lg"
-          variant="outline"
+          size="40"
+          variant="outline-light"
           @click="emits('restart')"
         >
           {{ t('components.button.back') }}
         </Button>
         <Button
           v-else
-          size="lg"
-          variant="outline"
+          size="40"
+          variant="outline-light"
           @click="emits('close')"
         >
           {{ t('components.button.cancel') }}
@@ -104,21 +104,19 @@
           }"
         >
           <Button
-            size="lg"
-            :prefix-icon="TestResultsIcon"
-            prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
+            size="40"
             @click="emits('close')"
           >
+            <TestResultsIcon class="w-[16px] h-[16px] icon-dark-white mr-[8px]" />
             {{ t('createSpec.successPage.runSpecButton') }}
           </Button>
         </router-link>
         <Button
-          size="lg"
-          :prefix-icon="PlusButtonIcon"
-          prefix-icon-class="w-[16px] h-[16px] icon-dark-gray-500"
-          variant="outline"
+          size="40"
+          variant="outline-light"
           @click="emits('restart')"
         >
+          <PlusButtonIcon class="w-[16px] h-[16px] icon-dark-gray-500 mr-[8px]" />
           {{ t('createSpec.successPage.createAnotherSpecButton') }}
         </Button>
       </StandardModalFooter>
@@ -130,7 +128,7 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 import Input from '@packages/frontend-shared/src/components/Input.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { useVModels, whenever } from '@vueuse/core'
 import { gql, useMutation } from '@urql/vue'
 import SpecPatterns from '../../components/SpecPatterns.vue'

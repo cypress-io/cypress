@@ -45,29 +45,29 @@
         <div>
           <Button
             v-if="cloudStatusMatches('isLoggedOut')"
-            :prefix-icon="UserOutlineIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
+            size="32"
             data-cy="login-button"
             @click="emits('showLoginConnect')"
           >
+            <UserOutlineIcon class="icon-dark-white icon-light-transparent mr-[8px]" />
             {{ t('specPage.cloudLoginButton') }}
           </Button>
           <Button
             v-else-if="cloudStatusMatches('needsProjectConnect')"
-            :prefix-icon="ConnectIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
+            size="32"
             data-cy="connect-button"
             @click="emits('showLoginConnect')"
           >
+            <ConnectIcon class="icon-dark-white icon-light-transparent mr-[8px]" />
             {{ t("specPage.connectProjectButton") }}
           </Button>
           <Button
             v-else-if="project.isNotFound"
-            :prefix-icon="ConnectIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
+            size="32"
             data-cy="reconnect-button"
             @click="emits('showLoginConnect')"
           >
+            <ConnectIcon class="icon-dark-white icon-light-transparent mr-[8px]" />
             {{ t("specPage.reconnectProjectButton") }}
           </Button>
           <RequestAccessButton
@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import RequestAccessButton from './RequestAccessButton.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import UserOutlineIcon from '~icons/cy/user-outline_x16.svg'

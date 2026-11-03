@@ -46,6 +46,7 @@
       </p>
       <Button
         class="!w-full"
+        size="32"
         @click="showUpdateModal = true"
       >
         Update to {{ versions.latest.version }}
@@ -214,7 +215,7 @@ import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
-import Button from '../../components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import Badge from '../../components/Badge.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'

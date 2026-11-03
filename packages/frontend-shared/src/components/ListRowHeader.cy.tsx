@@ -2,7 +2,7 @@ import ListRowHeader from './ListRowHeader.vue'
 import { faker } from '@faker-js/faker'
 import { IconFileChangesAdded, IconActionAdd } from '@cypress-design/vue-icon'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 
 faker.seed(1)
 

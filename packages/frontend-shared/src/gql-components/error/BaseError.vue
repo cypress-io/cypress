@@ -20,16 +20,16 @@
           class="font-medium w-full pt-[12px] gap-4 inline-flex justify-center "
         >
           <Button
-            variant="outline"
+            variant="outline-light"
+            size="32"
             data-testid="error-retry-button"
-            :prefix-icon="RestartIcon"
-            prefix-icon-class="icon-dark-indigo-500"
             @click="emit('retry', baseError.id)"
           >
+            <RestartIcon class="icon-dark-indigo-500 mr-[8px]" />
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
 
-          <Button
+          <LegacyButton
             variant="outline"
             data-testid="error-docs-button"
             :prefix-icon="BookIcon"
@@ -37,7 +37,7 @@
             :href="t(`launchpadErrors.generic.docsButton.${docsType}.link`)"
           >
             {{ t(`launchpadErrors.generic.docsButton.${docsType}.text`) }}
-          </Button>
+          </LegacyButton>
         </div>
       </div>
 
@@ -112,7 +112,8 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import LegacyButton from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../../generated/graphql'
 import Alert from '@cy/components/Alert.vue'

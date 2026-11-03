@@ -166,20 +166,22 @@
     >
       <div class="flex gap-[16px]">
         <Button
-          size="lg"
-          :prefix-icon="newProject ? CreateIcon : ConnectIcon"
-          prefix-icon-class="icon-dark-white"
+          size="40"
           :disabled="disableButton"
           data-cy="connect-project"
           @click="createOrConnectProject"
         >
+          <component
+            :is="newProject ? CreateIcon : ConnectIcon"
+            class="icon-dark-white mr-[8px]"
+          />
           {{ newProject
             ? t('runs.connect.modal.selectProject.createProject')
             : t('runs.connect.modal.selectProject.connectProject') }}
         </Button>
         <Button
-          variant="outline"
-          size="lg"
+          variant="outline-light"
+          size="40"
           @click="emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
@@ -193,7 +195,7 @@
 import { computed, ref, watch } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import ExternalLink from '../ExternalLink.vue'
 import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
