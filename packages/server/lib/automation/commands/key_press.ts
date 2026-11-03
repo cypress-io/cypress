@@ -3,7 +3,7 @@ import type { SupportedKey, SupportedNamedKey } from '@packages/types'
 import { NamedKeys, toSupportedKey, isSupportedKey, SpaceKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client } from 'webdriver'
-import type playwright from 'playwright-webkit'
+import type { Frame, Keyboard } from 'playwright-webkit'
 import Debug from 'debug'
 import { isEqual } from 'lodash'
 import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
@@ -102,11 +102,11 @@ export async function cdpKeyPress (
 
 // Playwright names keys the way `KeyboardEvent.key` does, which is the same
 // as SupportedNamedKey except for Space.
-function toPlaywrightKey (key: SupportedKey): string {
+function toWebKitKeyName (key: SupportedKey): string {
   return key === SpaceKey ? ' ' : key
 }
 
-export async function webkitKeyPress (inKey: SupportedKey, keyboard: playwright.Keyboard, autFrame: playwright.Frame): Promise<void> {
+export async function webkitKeyPress (inKey: SupportedKey, keyboard: Keyboard, autFrame: Frame): Promise<void> {
   const key = toSupportedKey(inKey)
 
   debug('webkit keypress', { key })
@@ -136,11 +136,11 @@ export async function webkitKeyPress (inKey: SupportedKey, keyboard: playwright.
       continue
     }
 
-    const playwrightKey = toPlaywrightKey(toSupportedKey(char))
+    const keyName = toWebKitKeyName(toSupportedKey(char))
 
-    debug('dispatching keydown/keyup', playwrightKey)
-    await keyboard.down(playwrightKey)
-    await keyboard.up(playwrightKey)
+    debug('dispatching keydown/keyup', keyName)
+    await keyboard.down(keyName)
+    await keyboard.up(keyName)
   }
 }
 

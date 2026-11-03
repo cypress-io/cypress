@@ -6,7 +6,7 @@ import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/
 import { cdpKeyPress, bidiKeyPress, webkitKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
 import type { Client as WebdriverClient } from 'webdriver'
 import type { Protocol } from 'devtools-protocol'
-import type playwright from 'playwright-webkit'
+import type { Frame, Keyboard } from 'playwright-webkit'
 
 const stubbedClientMethods = ['inputPerformActions', 'inputReleaseActions', 'getActiveElement', 'findElement', 'scriptEvaluate', 'getWindowHandle', 'switchToWindow', 'browsingContextGetTree'] as const
 
@@ -434,7 +434,7 @@ describe('key:press automation command', () => {
     let calls: string[]
 
     const press = (key: SupportedKey) => {
-      return webkitKeyPress(key, keyboard as unknown as playwright.Keyboard, autFrame as unknown as playwright.Frame)
+      return webkitKeyPress(key, keyboard as unknown as Keyboard, autFrame as unknown as Frame)
     }
 
     beforeEach(() => {

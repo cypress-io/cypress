@@ -52,7 +52,9 @@ describe('src/cy/commands/actions/press', () => {
         cy.get('#input_source').should('have.value', key)
       })
     })
-  } else {
+  }
+
+  if (!Cypress.isBrowser('webkit')) {
     ;['€', 'é'].forEach(testKeyDownUp)
   }
 })
