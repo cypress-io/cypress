@@ -137,7 +137,7 @@ const stackWithReplacedProps = (err, props) => {
   return originalStack.replace(originalName, `${name}: ${message}`)
 }
 
-const getUserInvocationStack = (err, state) => {
+const getCommandInvocationStack = (err, state): string | undefined => {
   const current = state('current')
 
   const currentAssertionCommand = current?.get('currentAssertionCommand')
@@ -187,14 +187,18 @@ const getUserInvocationStack = (err, state) => {
 
   // remove lines that are included _after and including_ the replacement marker -
   // these are also internal to cypress, and unimportant for the user invocation stack
-  userInvocationStack = $stackUtils.stackPriorToReplacementMarker(userInvocationStack)
+  return $stackUtils.stackPriorToReplacementMarker(userInvocationStack)
+}
 
+// The invocation stack that replaces or is spliced into the error's own stack.
+// Other errors keep their own stack; see getCommandInvocationStack.
+const getUserInvocationStack = (err, state) => {
   if (
     isCypressErr(err)
     || isAssertionErr(err)
     || isChaiValidationErr(err)
   ) {
-    return userInvocationStack
+    return getCommandInvocationStack(err, state)
   }
 
   return undefined
@@ -494,8 +498,14 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
 // stacks from command failures and assertion failures have the right message
 // but the stack points to cypress internals. here we replace the internal
 // cypress stack with the invocation stack, which points to the user's code
-const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameIndex => {
-  if (!userInvocationStack) return { stack: err.stack }
+const stackAndCodeFrameIndex = (err, userInvocationStack, commandInvocationStack?: string): StackAndCodeFrameIndex => {
+  if (!userInvocationStack) {
+    if (commandInvocationStack && err.stack) {
+      return { stack: $stackUtils.stackWithCommandInvocationStackAppended(err.stack, commandInvocationStack) }
+    }
+
+    return { stack: err.stack }
+  }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
     return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
@@ -504,8 +514,8 @@ const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameInde
   return { stack: $stackUtils.replacedStack(err, userInvocationStack) || '' }
 }
 
-const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
-  const { stack: codeFrameStack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
+const preferredStackAndCodeFrameIndex = (err, userInvocationStack, commandInvocationStack?: string) => {
+  const { stack: codeFrameStack, index } = stackAndCodeFrameIndex(err, userInvocationStack, commandInvocationStack)
   let stack = codeFrameStack
 
   stack = $stackUtils.stackWithContentAppended(err, stack)
@@ -514,12 +524,14 @@ const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   return { stack, index }
 }
 
-const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
+const enhanceStack = ({ err, userInvocationStack, commandInvocationStack, projectRoot }: {
   err: any
   userInvocationStack?: any
+  // Used only when there is no userInvocationStack, for errors thrown by user or app code
+  commandInvocationStack?: string
   projectRoot?: any
 }) => {
-  const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
+  const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack, commandInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
   err.stack = sourceMapped
@@ -776,6 +788,7 @@ export default {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
+  getCommandInvocationStack,
   getUserInvocationStack,
   isAssertionErr,
   isChaiValidationErr,

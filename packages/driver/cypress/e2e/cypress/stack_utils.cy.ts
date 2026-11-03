@@ -575,6 +575,91 @@ From Your Spec Code:
     })
   })
 
+  context('.stackWithCommandInvocationStackAppended', () => {
+    const commandInvocationStack = `\
+Error: userInvocationStack
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`
+
+    it('keeps the frames above the first Cypress frame and appends the command invocation stack', () => {
+      const stack = `\
+TypeError: Cannot read properties of undefined (reading 'amount')
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:46)
+    at Array.map (<anonymous>)
+    at getRet (http://localhost:3500/__cypress/runner/cypress_runner.js:100:22)
+    at tryCatcher (http://localhost:3500/__cypress/runner/cypress_runner.js:200:23)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, commandInvocationStack)).to.equal(`\
+TypeError: Cannot read properties of undefined (reading 'amount')
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:46)
+    at Array.map (<anonymous>)
+From Your Spec Code:
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`)
+    })
+
+    it('keeps application frames above the first Cypress frame', () => {
+      const stack = `\
+Error: Cannot check out without a shipping address
+    at validateCart (http://localhost:3500/app.html:21:15)
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:14)
+    at getRet (http://localhost:3500/__cypress/runner/cypress_runner.js:100:22)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, commandInvocationStack)).to.equal(`\
+Error: Cannot check out without a shipping address
+    at validateCart (http://localhost:3500/app.html:21:15)
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:14)
+From Your Spec Code:
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`)
+    })
+
+    it('leaves the stack unchanged when it starts inside Cypress', () => {
+      const stack = `\
+TypeError: internal failure
+    at getRet (http://localhost:3500/__cypress/runner/cypress_runner.js:100:22)
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:46)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, commandInvocationStack)).to.equal(stack)
+    })
+
+    it('appends after every frame when the stack has no Cypress frames', () => {
+      const stack = `\
+Error: deep helper failure
+    at helper (http://localhost:3500/__cypress/tests?p=cypress/support/e2e.js:4:11)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, commandInvocationStack)).to.equal(`\
+Error: deep helper failure
+    at helper (http://localhost:3500/__cypress/tests?p=cypress/support/e2e.js:4:11)
+From Your Spec Code:
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`)
+    })
+
+    it('recognizes promise library frames from dev builds', () => {
+      const stack = `\
+Error: User 7 not found in seed data
+    at findUser (http://localhost:3500/__cypress/tests?p=cypress/support/e2e.js:11:10)
+    at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)
+    at Promise._settlePromiseFromHandler (cypress:///../../node_modules/bluebird/js/release/promise.js:513:31)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, commandInvocationStack)).to.equal(`\
+Error: User 7 not found in seed data
+    at findUser (http://localhost:3500/__cypress/tests?p=cypress/support/e2e.js:11:10)
+From Your Spec Code:
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`)
+    })
+
+    it('recognizes driver frames from component testing dev builds', () => {
+      const stack = `\
+Error: thrown in then
+    at eval (webpack:///./src/Button.cy.jsx:8:13)
+    at getRet (cypress:///../driver/src/cy/commands/connectors.ts:90:22)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, commandInvocationStack)).to.equal(`\
+Error: thrown in then
+    at eval (webpack:///./src/Button.cy.jsx:8:13)
+From Your Spec Code:
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`)
+    })
+  })
+
   context('.stackWithoutMessage', () => {
     it('returns stack with the foremost message lines', () => {
       const stack = `\

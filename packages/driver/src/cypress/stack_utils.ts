@@ -25,6 +25,13 @@ const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
+// Cypress's own frames before source mapping: the runner bundle in the binary,
+// or the cypress:/// namespace dev builds give the driver and its dependencies,
+// such as Bluebird
+const isInternalStackLine = (line: string) => {
+  return line.includes('/__cypress/runner') || line.includes('cypress:///')
+}
+
 const hasCrossFrameStacks = (specWindow) => {
   // get rid of the top lines since they naturally have different line:column
   const normalize = (stack) => {
@@ -138,6 +145,23 @@ const stackPriorToReplacementMarker = (stack) => {
 export type StackAndCodeFrameIndex = {
   stack: string
   index?: number
+}
+
+// For an error thrown by user or app code while a command runs, such as in a
+// .then() callback. The frames above the first Cypress frame show where it was
+// thrown; the rest is the command queue and promise library. Replacing those
+// with the command's invocation stack points back to the test code that queued
+// the command. A stack that starts inside Cypress is left alone so internal
+// errors keep their full trace.
+const stackWithCommandInvocationStackAppended = (stack: string, commandInvocationStack: string) => {
+  const [messageLines, stackLines] = splitStack(_.trim(stack, '\n'))
+  const firstInternalIndex = _.findIndex(stackLines, isInternalStackLine)
+
+  if (firstInternalIndex === 0) return stack
+
+  const userLines = firstInternalIndex < 0 ? stackLines : stackLines.slice(0, firstInternalIndex)
+
+  return unsplitStack(messageLines, [...userLines, 'From Your Spec Code:', stackWithoutMessage(commandInvocationStack)])
 }
 
 const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAndCodeFrameIndex => {
@@ -611,6 +635,7 @@ export default {
   stackWithReplacementMarkerLineRemoved,
   stackPriorToReplacementMarker,
   stackWithUserInvocationStackSpliced,
+  stackWithCommandInvocationStackAppended,
   captureUserInvocationStack,
   getInvocationDetails,
   mergeCrossOriginUserInvocationStack,

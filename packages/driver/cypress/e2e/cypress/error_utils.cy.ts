@@ -453,6 +453,57 @@ describe('driver/src/cypress/error_utils', () => {
 
       expect(result.stack).to.equal(err.stack)
     })
+
+    it('appends the command invocation stack when there is no user invocation stack', () => {
+      const originalStack = err.stack
+
+      cy.spy($stackUtils, 'stackWithCommandInvocationStackAppended')
+      $errUtils.enhanceStack({ err, commandInvocationStack: userInvocationStack })
+      expect($stackUtils.stackWithCommandInvocationStackAppended).to.be.calledWith(originalStack, userInvocationStack)
+    })
+
+    it('prefers the user invocation stack over the command invocation stack', () => {
+      err.name = 'CypressError'
+
+      cy.spy($stackUtils, 'stackWithCommandInvocationStackAppended')
+      cy.spy($stackUtils, 'stackWithUserInvocationStackSpliced')
+      $errUtils.enhanceStack({ err, userInvocationStack, commandInvocationStack: userInvocationStack })
+      expect($stackUtils.stackWithUserInvocationStackSpliced).to.be.called
+      expect($stackUtils.stackWithCommandInvocationStackAppended).not.to.be.called
+    })
+  })
+
+  context('.getUserInvocationStack and .getCommandInvocationStack', () => {
+    const commandStack = `\
+Error: userInvocationStack
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`
+    const state = (key) => {
+      if (key === 'current') {
+        return { get: (prop) => (prop === 'userInvocationStack' ? commandStack : undefined) }
+      }
+
+      return undefined
+    }
+
+    it('gives a Cypress error the command invocation stack', () => {
+      const err = new Error('failed')
+
+      err.name = 'CypressError'
+
+      expect($errUtils.getUserInvocationStack(err, state)).to.equal(commandStack)
+    })
+
+    it('gives an error thrown by user code no user invocation stack', () => {
+      expect($errUtils.getUserInvocationStack(new TypeError('boom'), state)).to.be.undefined
+    })
+
+    it('returns the command invocation stack for an error thrown by user code', () => {
+      expect($errUtils.getCommandInvocationStack(new TypeError('boom'), state)).to.equal(commandStack)
+    })
+
+    it('returns undefined when no command is running', () => {
+      expect($errUtils.getCommandInvocationStack(new TypeError('boom'), () => undefined)).to.be.undefined
+    })
   })
 
   context('.appendErrMsg', () => {

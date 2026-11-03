@@ -423,6 +423,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     err = $errUtils.enhanceStack({
       err,
       userInvocationStack,
+      commandInvocationStack: userInvocationStack ? undefined : $errUtils.getCommandInvocationStack(err, this.state),
       projectRoot: $sourceMapUtils.getSourceMapProjectRoot(),
     })
 

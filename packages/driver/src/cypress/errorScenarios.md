@@ -165,5 +165,4 @@ TODO:
 - if visit synchronously fails in app code, point to cy.visit in spec code
   - add 2nd code frame that points to app code
 - don't hide stack trace by default, because now it's actually useful and not overly verbose with internal crud
-- splice out cypress internals when there's a user error (Scenario 2 when error is in a command callback)
 - 
