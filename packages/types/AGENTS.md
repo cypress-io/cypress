@@ -31,7 +31,7 @@ All source lives in `src/` as individual domain-scoped files:
 - `src/protocol.ts` — Protocol types for CDP/BiDi
 - `src/auth.ts` — Authentication types
 - `src/git.ts` — Git info types
-- `src/keyboard-layout.ts` — US keyboard key definitions (`key`, `code`, `keyCode`, …), shared by the driver and server
+- `src/keyboard-layout.ts` — US keyboard key definitions (`key`, `code`, `keyCode`, …), used by the driver keyboard (`packages/driver/src/cy/keyboard.ts`)
 - `src/index.ts` — Barrel re-export of all types
 
 **Gotchas / Notes**
