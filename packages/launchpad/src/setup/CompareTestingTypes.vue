@@ -24,8 +24,6 @@ import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
-// these are code examples so should not trigger linter
-/* eslint-disable no-irregular-whitespace */
 const ctCode = `
 import BaseModal from './BaseModal'
 

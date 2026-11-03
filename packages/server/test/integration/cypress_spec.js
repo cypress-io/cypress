@@ -133,6 +133,7 @@ function mockEE () {
     on: sinon.stub(),
     session: {
       clearCache: sinon.stub().resolves(),
+      clearStorageData: sinon.stub().resolves(),
       setProxy: sinon.stub().resolves(),
       setUserAgent: sinon.stub(),
       on: sinon.stub(),

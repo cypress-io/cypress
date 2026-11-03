@@ -408,6 +408,33 @@ describe('linux browser detection', () => {
     expect(cp.spawn).toHaveBeenCalledTimes(2)
   })
 
+  describe('#getVersionOutput', () => {
+    it('returns trimmed stdout and stderr', async () => {
+      cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
+        if (cmd === 'foo') {
+          setTimeout(() => {
+            cpSpawnMock.stdout.emit('data', '  Chromium 141.0.7390.37  ')
+            cpSpawnMock.stderr.emit('data', '  a warning  ')
+          }, 0)
+        }
+      }
+
+      expect(await linuxHelper.getVersionOutput('foo')).toEqual({ stdout: 'Chromium 141.0.7390.37', stderr: 'a warning' })
+    })
+
+    it('returns an empty stderr when there is none', async () => {
+      cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
+        if (cmd === 'foo') {
+          setTimeout(() => {
+            cpSpawnMock.stdout.emit('data', 'bar')
+          }, 0)
+        }
+      }
+
+      expect(await linuxHelper.getVersionOutput('foo')).toEqual({ stdout: 'bar', stderr: '' })
+    })
+  })
+
   describe('#getVersionString', () => {
     it('runs the command with `--version` and returns trimmed output', async () => {
       cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
@@ -421,6 +448,18 @@ describe('linux browser detection', () => {
       const versionString = await linuxHelper.getVersionString('foo')
 
       expect(versionString).toEqual('bar')
+    })
+
+    it('ignores what the command printed to stderr', async () => {
+      cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
+        if (cmd === 'foo') {
+          setTimeout(() => {
+            cpSpawnMock.stderr.emit('data', 'cannot start: missing library')
+          }, 0)
+        }
+      }
+
+      expect(await linuxHelper.getVersionString('foo')).toEqual('')
     })
 
     it('rejects with errors', async () => {

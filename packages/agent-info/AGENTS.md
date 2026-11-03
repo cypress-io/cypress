@@ -20,7 +20,10 @@ yarn workspace @packages/agent-info test
 **Architecture**
 
 - `lib/index.ts` — the whole package: the `AgentName` union, the `AGENTS`
-  detection table, and the `detectAgent()` / `isAgent()` entry points.
+  detection table, and the `detectAgent()` / `isAgent()` / `isAgentMode()` entry points.
+  `isAgentMode()` is `isAgent()` plus the `CYPRESS_AGENT_MODE` override (`1`/`true` force
+  on, `0`/`false` force off), and is what behavior decisions should read; `detectAgent()`
+  stays the source for what is reported off-machine.
 
 **Adding an agent**
 

@@ -11,9 +11,6 @@ import type { SocketBroadcaster, Socket } from '@packages/socket'
 import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
-import { getUserEditor, setUserEditor } from './util/editors'
-import type { OpenFileDetails } from './util/file-opener'
-import { openFile } from './util/file-opener'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import type { SameSiteContext, SerializableAutomationCookie } from './automation/cookie/jar'
@@ -686,32 +683,20 @@ export class SocketBase implements SocketBroadcaster {
           })
         })
 
-        socket.on('get:user:editor', (cb) => {
-          getUserEditor(false)
-          .then(cb)
-          .catch(() => {})
-        })
-
-        socket.on('set:user:editor', (editor) => {
-          setUserEditor(editor).catch(() => {})
-        })
-
-        socket.on('open:file', async (fileDetails: OpenFileDetails) => {
-          // todo(lachlan): post 10.0 we should not pass the
-          // editor (in the `fileDetails.where` key) from the
-          // front-end, but rather rely on the server context
-          // to grab the preferred editor, like I'm doing here,
-          // so we do not need to
-          // maintain two sources of truth for the preferred editor
-          // adding this conditional to maintain backwards compat with
-          // existing runner and reporter API.
-          fileDetails.where = {
-            binary: getCtx().coreData.localSettings.preferences.preferredEditorBinary || 'computer',
-          }
-
+        socket.on('open:file', async (fileDetails: { file: string, line: number, column: number }) => {
           debug('opening file %o', fileDetails)
 
-          openFile(fileDetails)
+          try {
+            const ctx = getCtx()
+
+            if (await ctx.actions.localSettings.getLaunchableEditor()) {
+              await ctx.actions.file.openFile(fileDetails.file, fileDetails.line, fileDetails.column)
+            } else {
+              ctx.actions.electron.showItemInFolder(fileDetails.file)
+            }
+          } catch (err) {
+            debug('failed to open file %o', err)
+          }
         })
 
         if (this.supportsRunEvents) {

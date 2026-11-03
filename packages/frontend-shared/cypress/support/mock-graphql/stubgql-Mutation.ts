@@ -148,7 +148,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return args.ids.map((id) => {
       const [__typename, hash] = atob(id).split(':')
 
-      const rf: RemoteFetchable & {__typename: string} = {
+      const rf: RemoteFetchable & { __typename: string } = {
         id,
         fetchingStatus: 'FETCHING',
         operation: '',
