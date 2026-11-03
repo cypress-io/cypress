@@ -29,7 +29,7 @@ export class HtmlDataSource {
 
     while (retryCount < MAX_APP_HTML_READ_ATTEMPTS) {
       try {
-        let html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        const html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
         const title = _.escape(this.ctx.project.projectTitle(this.ctx.currentProject || ''))
 
         // Pass a function, not a string, so `$&` and friends in the title are inserted literally

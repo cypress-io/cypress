@@ -24,7 +24,7 @@ if (os.platform() === 'win32') {
 
 const platform = os.platform()
 
-function getBrowserKey<T extends {name: string, version: string | number}> (browser: T) {
+function getBrowserKey<T extends { name: string, version: string | number }> (browser: T) {
   return `${browser.name}-${browser.version}`
 }
 
