@@ -16,6 +16,8 @@ const unzipTools = {
   extractWithYauzl,
 }
 
+const PROGRESS_THROTTLE_MS = 100
+
 interface UnzipOpts {
   zipFilePath: string
   installDir: string
@@ -60,22 +62,36 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
 
       let percent = 0
       let count = 0
+      let lastNotifiedPercent: number | undefined
+      let lastNotifiedAt = 0
 
       const notify = (percent: number): void => {
         const elapsed = +new Date() - +started
+
+        lastNotifiedPercent = percent
+        lastNotifiedAt = Date.now()
 
         const eta = util.calculateEta(percent, elapsed)
 
         progress.onProgress(percent, util.secsRemaining(eta))
       }
 
+      // Extractors tick once per entry, and in an interactive terminal every
+      // progress update redraws the install task list, so skip updates that
+      // would show the same percent with an ETA that is still fresh.
       const tick = (): any => {
         count += 1
 
         percent = ((count / total) * 100)
-        const displayPercent = percent.toFixed(0)
+        const displayPercent = Number(percent.toFixed(0))
 
-        return notify(Number(displayPercent))
+        const isEtaFresh = Date.now() - lastNotifiedAt < PROGRESS_THROTTLE_MS
+
+        if (displayPercent === lastNotifiedPercent && isEtaFresh) {
+          return
+        }
+
+        return notify(displayPercent)
       }
 
       const unzipWithNode = async (): Promise<any> => {

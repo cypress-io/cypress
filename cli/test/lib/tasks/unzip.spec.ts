@@ -172,6 +172,46 @@ describe('lib/tasks/unzip', function () {
     await fs.stat(installDir)
   })
 
+  describe('progress', () => {
+    const zipFilePath = path.join('test', 'fixture', '1000-entries.zip')
+
+    beforeEach(() => {
+      vi.mocked(os.platform).mockReturnValue('win32')
+      // Freeze the clock so only percent changes trigger an update
+      vi.useFakeTimers({ toFake: ['Date'] })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('reports once per percent while extracting a 1,000-entry zip and ends at 100', async function () {
+      const onProgress = vi.fn()
+
+      await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
+
+      expect(onProgress).toHaveBeenCalledTimes(101)
+      expect(onProgress.mock.calls.map(([percent]) => percent)).toEqual(Array.from({ length: 101 }, (_, i) => i))
+      expect(onProgress).toHaveBeenLastCalledWith(100, expect.any(String))
+    })
+
+    it('reports an unchanged percent again once the throttle interval has passed', async function () {
+      const onProgress = vi.fn()
+
+      vi.mocked(extractWithYauzl).mockImplementation(async (_zip, _dest, onEntry) => {
+        onEntry()
+        vi.advanceTimersByTime(99)
+        onEntry()
+        vi.advanceTimersByTime(1)
+        onEntry()
+      })
+
+      await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
+
+      expect(onProgress.mock.calls.map(([percent]) => percent)).toEqual([0, 0])
+    })
+  })
+
   describe('on linux', () => {
     beforeEach(() => {
       vi.mocked(os.platform).mockReturnValue('linux')
