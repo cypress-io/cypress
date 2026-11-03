@@ -142,6 +142,33 @@ describe('get-next-version', () => {
     })
   })
 
+  context('on a previous-major branch', () => {
+    beforeEach(() => {
+      getCurrentReleaseDataStub.resolves({ version: releasedVersion, isPreviousMajor: true })
+    })
+
+    it('allows a patch bump', async () => {
+      bumpStub.callsFake(async (opts, cb) => cb(undefined, { releaseType: 'patch' }))
+
+      const { nextVersion } = await getNextVersionForPath('packages')
+
+      expect(nextVersion).to.eq('12.2.1')
+    })
+
+    it('throws on a major bump', async () => {
+      bumpStub.callsFake(async (opts, cb) => cb(undefined, { releaseType: 'major' }))
+
+      await expect(getNextVersionForPath('packages')).to.be.rejectedWith('The next version 13.0.0 is outside the 12.x line this branch releases.')
+    })
+
+    it('throws when NEXT_VERSION is in a newer major', async () => {
+      process.env.NEXT_VERSION = '13.0.1'
+      bumpStub.callsFake(async (opts, cb) => cb(undefined, { releaseType: 'patch' }))
+
+      await expect(getNextVersionForPath('packages')).to.be.rejectedWith('The next version 13.0.1 is outside the 12.x line this branch releases.')
+    })
+  })
+
   context('#getNextVersionForBinary', () => {
     it('determines next version for all cli & packages changes', async () => {
       let calls = 0
