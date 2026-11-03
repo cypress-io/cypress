@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
+import { getPathToDist } from '@packages/resolve-dist'
 
 describe('HtmlDataSource', () => {
   describe('#fetchAppHtml', () => {
@@ -8,14 +9,19 @@ describe('HtmlDataSource', () => {
     let readFile: jest.SpiedFunction<any>
     let originalViteDev: string | undefined
 
+    const appIndexHtml = getPathToDist('app', 'index.html')
+    const enoent = (message: string) => Object.assign(new Error(message), { code: 'ENOENT' })
+
     beforeEach(() => {
-      jest.useFakeTimers()
       originalViteDev = process.env.CYPRESS_INTERNAL_VITE_DEV
       delete process.env.CYPRESS_INTERNAL_VITE_DEV
 
       ctx = createTestDataContext('open')
       jest.spyOn(ctx.project, 'projectTitle').mockReturnValue('my-project')
       readFile = jest.spyOn(ctx.fs, 'readFile')
+
+      // After creating the context, so only timers started by fetchAppHtml are faked
+      jest.useFakeTimers()
     })
 
     afterEach(() => {
@@ -31,8 +37,8 @@ describe('HtmlDataSource', () => {
 
     it('retries until index.html can be read and fills in the project title', async () => {
       readFile
-      .mockRejectedValueOnce(new Error('ENOENT 1'))
-      .mockRejectedValueOnce(new Error('ENOENT 2'))
+      .mockRejectedValueOnce(enoent('ENOENT 1'))
+      .mockRejectedValueOnce(enoent('ENOENT 2'))
       .mockResolvedValueOnce('<html><head><title>Cypress</title></head></html>')
 
       const html = ctx.html.fetchAppHtml()
@@ -41,11 +47,30 @@ describe('HtmlDataSource', () => {
 
       await expect(html).resolves.toBe('<html><head><title>my-project</title></head></html>')
       expect(readFile).toHaveBeenCalledTimes(3)
+      expect(readFile).toHaveBeenNthCalledWith(1, appIndexHtml, 'utf8')
+      expect(readFile).toHaveBeenNthCalledWith(3, appIndexHtml, 'utf8')
+    })
+
+    it('inserts the project title literally and HTML-escaped', async () => {
+      jest.mocked(ctx.project.projectTitle).mockReturnValue(`a$&b$'<i>&"`)
+      readFile.mockResolvedValueOnce('<title>Cypress</title>')
+
+      await expect(ctx.html.fetchAppHtml()).resolves.toBe('<title>a$&amp;b$&#39;&lt;i&gt;&amp;&quot;</title>')
+    })
+
+    it('rethrows an error other than ENOENT without retrying', async () => {
+      const eacces = Object.assign(new Error('EACCES'), { code: 'EACCES' })
+
+      readFile.mockRejectedValueOnce(eacces)
+
+      await expect(ctx.html.fetchAppHtml()).rejects.toBe(eacces)
+      expect(readFile).toHaveBeenCalledTimes(1)
+      expect(jest.getTimerCount()).toBe(0)
     })
 
     it('rejects with the last error after 5 failed attempts without waiting after the last one', async () => {
       for (let i = 1; i <= 5; i++) {
-        readFile.mockRejectedValueOnce(new Error(`ENOENT ${i}`))
+        readFile.mockRejectedValueOnce(enoent(`ENOENT ${i}`))
       }
 
       const html = ctx.html.fetchAppHtml()
