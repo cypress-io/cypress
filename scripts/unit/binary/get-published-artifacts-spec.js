@@ -1,6 +1,11 @@
 const getPublishedArtifactsModule = require('../../binary/get-published-artifacts')
 const sinon = require('sinon')
-const { expect } = require('chai')
+const chai = require('chai')
+const sinonChai = require('sinon-chai')
+
+chai.use(sinonChai)
+
+const { expect } = chai
 
 const mockArtifacts = [
   { url: '/', path: '~/cypress/binary-url.json' },
@@ -11,7 +16,7 @@ const mockArtifacts = [
 
 describe('get-published-artifacts', () => {
   afterEach(() => {
-    sinon.reset()
+    sinon.restore()
   })
 
   it('downloads artifacts', async () => {
@@ -34,6 +39,22 @@ describe('get-published-artifacts', () => {
     expect(downloadArtifactStub).to.have.been.calledWith('/', '~/cypress/npm-package-url.json')
     expect(downloadArtifactStub).to.have.been.calledWith('/', '~/cypress/cypress.zip')
     expect(downloadArtifactStub).to.have.been.calledWith('/', '~/cypress/cypress.tgz')
+  })
+
+  it('waits until the publish-binary workflow leaves a non-terminal status', async () => {
+    const workflow = { id: 'my-workflow', name: 'linux-x64', status: 'success' }
+    const getWorkflowsStub = sinon.stub(getPublishedArtifactsModule, 'getWorkflows')
+
+    getWorkflowsStub.onFirstCall().resolves([{ id: 'my-workflow', name: 'linux-x64', status: 'running' }])
+    getWorkflowsStub.onSecondCall().resolves([workflow])
+
+    const result = await getPublishedArtifactsModule.waitForWorkflowTerminal('abc123', {
+      pollIntervalMs: 1,
+      maxWaitMs: 1000,
+    })
+
+    expect(result).to.deep.equal(workflow)
+    expect(getWorkflowsStub).to.have.been.calledTwice
   })
 
   it('URLs are not fetched if SHOULD_PERSIST_ARTIFACTS is false', async () => {
