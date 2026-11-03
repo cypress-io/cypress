@@ -15,7 +15,7 @@ const props = defineProps<{
 }>()
 
 const gravatarUrl = computed(() => {
-  let opts: { size: string, default: string, forcedefault?: string } = { size: '48', default: 'mm' }
+  const opts: { size: string, default: string, forcedefault?: string } = { size: '48', default: 'mm' }
 
   if (!props.email) {
     opts.forcedefault = 'y'

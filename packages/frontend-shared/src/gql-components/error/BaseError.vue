@@ -55,12 +55,14 @@
           max-height="none"
         >
           <div class="border-b border-b-red-100 p-[16px] pt-0">
+            <!-- eslint-disable vue/no-v-html -- rendered by useMarkdown (markdown-it) -->
             <div
               ref="markdownTarget"
               class="text-red-500"
               data-testid="error-message"
               v-html="markdown"
             />
+            <!-- eslint-enable vue/no-v-html -->
             <ErrorCodeFrame
               v-if="baseError.codeFrame"
               :gql="baseError.codeFrame"
@@ -96,8 +98,7 @@
                 data-testid="error-header"
                 tabindex="0"
                 class="bg-white rounded font-light border border-red-200 p-[16px] overflow-auto"
-                v-html="baseError.errorStack"
-              />
+              >{{ baseError.errorStack }}</pre>
             </Collapsible>
           </div>
         </Alert>

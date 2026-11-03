@@ -52,14 +52,9 @@ export const CLOUD_STATUSES = [
   'allTasksCompleted',
 ] as const
 
-const PROJECT_STATUSES = [
-  'isComponentTestingCandidate',
-  'allTasksCompleted',
-] as const
-
 export type CloudStatus = typeof CLOUD_STATUSES[number]
 
-export type ProjectStatus = typeof PROJECT_STATUSES[number]
+export type ProjectStatus = 'isComponentTestingCandidate' | 'allTasksCompleted'
 
 export const useUserProjectStatusStore = defineStore({
   id: 'userProjectStatus',

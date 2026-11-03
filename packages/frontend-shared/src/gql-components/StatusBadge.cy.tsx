@@ -20,7 +20,7 @@ describe('<StatusBadge />', () => {
         />
         <br /><br />
         {
-          // @ts-ignore
+          // @ts-expect-error - vue @click isn't represented in JSX
           <Button onClick={onClick}>toggle</Button>
         }
       </div>

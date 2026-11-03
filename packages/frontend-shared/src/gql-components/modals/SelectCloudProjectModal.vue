@@ -313,7 +313,7 @@ const emit = defineEmits<{
 }>()
 
 const isInternalServerError = ref(false)
-const graphqlError = ref<{ extension: string, message: string} | undefined>()
+const graphqlError = ref<{ extension: string, message: string } | undefined>()
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizationOptions = computed(() => {

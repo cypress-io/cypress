@@ -22,7 +22,7 @@
 - [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
-- [ ] packages/frontend-shared
+- [x] packages/frontend-shared
 - [x] packages/icons
 - [x] packages/launcher
 - [x] packages/https-proxy
