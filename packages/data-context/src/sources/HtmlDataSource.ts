@@ -36,7 +36,11 @@ export class HtmlDataSource {
         )
       } catch (e) {
         err = e
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        retryCount++
+
+        if (retryCount < 5) {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        }
       }
     }
 

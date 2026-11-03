@@ -1,8 +1,74 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 
 describe('HtmlDataSource', () => {
+  describe('#fetchAppHtml', () => {
+    let ctx: DataContext
+    let readFile: jest.SpiedFunction<any>
+    let originalViteDev: string | undefined
+
+    beforeEach(() => {
+      jest.useFakeTimers()
+      originalViteDev = process.env.CYPRESS_INTERNAL_VITE_DEV
+      delete process.env.CYPRESS_INTERNAL_VITE_DEV
+
+      ctx = createTestDataContext('open')
+      jest.spyOn(ctx.project, 'projectTitle').mockReturnValue('my-project')
+      readFile = jest.spyOn(ctx.fs, 'readFile')
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+      jest.restoreAllMocks()
+
+      if (originalViteDev === undefined) {
+        delete process.env.CYPRESS_INTERNAL_VITE_DEV
+      } else {
+        process.env.CYPRESS_INTERNAL_VITE_DEV = originalViteDev
+      }
+    })
+
+    it('retries until index.html can be read and fills in the project title', async () => {
+      readFile
+      .mockRejectedValueOnce(new Error('ENOENT 1'))
+      .mockRejectedValueOnce(new Error('ENOENT 2'))
+      .mockResolvedValueOnce('<html><head><title>Cypress</title></head></html>')
+
+      const html = ctx.html.fetchAppHtml()
+
+      await jest.advanceTimersByTimeAsync(2000)
+
+      await expect(html).resolves.toBe('<html><head><title>my-project</title></head></html>')
+      expect(readFile).toHaveBeenCalledTimes(3)
+    })
+
+    it('rejects with the last error after 5 failed attempts without waiting after the last one', async () => {
+      for (let i = 1; i <= 5; i++) {
+        readFile.mockRejectedValueOnce(new Error(`ENOENT ${i}`))
+      }
+
+      const html = ctx.html.fetchAppHtml()
+      const assertion = expect(html).rejects.toThrow('ENOENT 5')
+
+      // 4 waits of 1s between 5 attempts
+      await jest.advanceTimersByTimeAsync(4000)
+      await assertion
+
+      expect(readFile).toHaveBeenCalledTimes(5)
+      expect(jest.getTimerCount()).toBe(0)
+    })
+
+    it('fetches from the Vite dev server when CYPRESS_INTERNAL_VITE_DEV is set', async () => {
+      process.env.CYPRESS_INTERNAL_VITE_DEV = '1'
+      const fetch = jest.spyOn(ctx.util, 'fetch').mockResolvedValue({ text: async () => '<html>dev</html>' } as any)
+
+      await expect(ctx.html.fetchAppHtml()).resolves.toBe('<html>dev</html>')
+      expect(fetch).toHaveBeenCalledTimes(1)
+      expect(readFile).not.toHaveBeenCalled()
+    })
+  })
+
   describe('#makeServeConfig', () => {
     let ctx: DataContext
     let cachedConfig: Record<string, any>
