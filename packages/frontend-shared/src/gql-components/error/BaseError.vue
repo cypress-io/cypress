@@ -55,7 +55,7 @@
           max-height="none"
         >
           <div class="border-b border-b-red-100 p-[16px] pt-0">
-            <!-- eslint-disable vue/no-v-html -- rendered by useMarkdown (markdown-it) -->
+            <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown, which passes raw HTML through (html: true) -->
             <div
               ref="markdownTarget"
               class="text-red-500"

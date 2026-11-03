@@ -56,12 +56,12 @@ shikiWrapperClasses computed property.
       @click="copyOnClick ? () => copyCode() : () => { }"
       v-html="highlightedCode"
     />
-    <!-- eslint-enable vue/no-v-html -->
     <pre
       v-else
       class="border rounded font-normal border-gray-100 py-[8px] text-[14px] leading-[24px] overflow-scroll"
       :class="[props.class, lineNumbers ? 'pl-[56px]' : 'pl-[8px]']"
     >{{ trimmedCode }}</pre>
+    <!-- eslint-enable vue/no-v-html -->
     <CopyButton
       v-if="copyButton"
       variant="outline"
