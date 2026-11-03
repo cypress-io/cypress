@@ -2,8 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { iframesController } from '../../lib/controllers/iframes'
 import files from '../../lib/controllers/files'
 import { GracefulExit } from '../../lib/util/graceful-exit'
-
-vi.mock('timers/promises', () => ({ setTimeout: vi.fn().mockResolvedValue(undefined) }))
+import Bluebird from 'bluebird'
 
 async function rejectionOf (promise: Promise<unknown>) {
   try {
@@ -56,6 +55,8 @@ describe('controllers/iframes', () => {
 
     beforeEach(() => {
       isShuttingDown = vi.spyOn(GracefulExit, 'isShuttingDown', 'get').mockReturnValue(false)
+      // @ts-expect-error - a native promise stands in for Bluebird's
+      vi.spyOn(Bluebird, 'delay').mockResolvedValue(undefined)
       proxyCallback = null
       nodeProxy = {
         web: vi.fn((req, res, _options, cb) => {

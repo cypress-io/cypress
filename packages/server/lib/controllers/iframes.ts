@@ -6,7 +6,7 @@ import type { Cfg } from '../project-base'
 import type { FoundSpec } from '@packages/types'
 import type { RemoteStates } from '@packages/network-tools'
 import { GracefulExit } from '../util/graceful-exit'
-import { setTimeout as sleep } from 'timers/promises'
+import Bluebird from 'bluebird'
 
 const debug = Debug('cypress:server:iframes')
 
@@ -18,7 +18,7 @@ const SHUTDOWN_POLL_MS = 50
 
 const shutdownStartsSoon = async () => {
   for (let waited = 0; waited < SHUTDOWN_WAIT_MS && !GracefulExit.isShuttingDown; waited += SHUTDOWN_POLL_MS) {
-    await sleep(SHUTDOWN_POLL_MS)
+    await Bluebird.delay(SHUTDOWN_POLL_MS)
   }
 
   return GracefulExit.isShuttingDown
