@@ -26,8 +26,6 @@ export default [
     ignores: [
       // vite build output for the e2e bundle
       'dist-*/**',
-      // ambient declarations for vite and .vue imports
-      '**/*.d.ts',
       'cypress/fixtures/**',
     ],
   },
