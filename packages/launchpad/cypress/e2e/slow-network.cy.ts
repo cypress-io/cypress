@@ -14,7 +14,7 @@ describe('slow network: launchpad', () => {
 
         o.testState.pendingFetches.push(dfd)
 
-        let resolveTime = 60000
+        const resolveTime = 60000
 
         const result = await currentStubbedFetch(input, init)
 

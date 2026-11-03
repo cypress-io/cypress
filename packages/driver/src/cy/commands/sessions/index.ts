@@ -89,7 +89,7 @@ export default function (Commands, Cypress, cy) {
           const expectedType = validOpts[key]
 
           if (!expectedType) {
-            $errUtils.throwErrByPath('sessions.session.wrongArgOptionUnexpected', { args: { key } })
+            $errUtils.throwErrByPath('sessions.session.wrongArgOptionUnexpected', { args: { key, validOpts: Object.keys(validOpts) } })
           }
 
           const actualType = typeof value
