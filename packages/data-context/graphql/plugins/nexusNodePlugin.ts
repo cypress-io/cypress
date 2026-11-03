@@ -2,7 +2,6 @@ import { plugin } from 'nexus'
 import type { FieldResolver } from 'nexus'
 
 // We know this is a valid node typename
-
 type $ValidatedByGraphQL = any
 
 export const nodePlugin = plugin({
