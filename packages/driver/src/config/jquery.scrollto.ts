@@ -8,7 +8,7 @@
  * @version 2.1.3
  */
 
-/// <reference types="jquery.scrollto" />
+/// <reference path="../../types/jquery.scrollto.d.ts" />
 
 /** eslint-disable */
 import $ from 'jquery'

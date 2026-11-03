@@ -9351,13 +9351,6 @@
     expect "^30.0.0"
     pretty-format "^30.0.0"
 
-"@types/jquery.scrollto@1.4.32":
-  version "1.4.32"
-  resolved "https://registry.yarnpkg.com/@types/jquery.scrollto/-/jquery.scrollto-1.4.32.tgz#ddc3468338254eb675e49f417c0b81f103d34187"
-  integrity sha512-vvSKYXgllKgvs6DJgow1sT5rhVpkyei2WOakodGxyKA+w1PNVcQuY6PwrbBztbgvWxpT62kDM3RlbL0xmejHCA==
-  dependencies:
-    "@types/jquery" "*"
-
 "@types/jquery@*", "@types/jquery@3.3.31":
   version "3.3.31"
   resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.3.31.tgz#27c706e4bf488474e1cb54a71d8303f37c93451b"
