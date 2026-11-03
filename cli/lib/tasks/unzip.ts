@@ -74,8 +74,8 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
         progress.onProgress(percent, util.secsRemaining(eta))
       }
 
-      // Extractors tick once per entry or output line, so skip updates that
-      // would show the same percent with an ETA that is still fresh.
+      // Extractors tick for every entry or chunk of tool output, far more
+      // often than the shown percent changes.
       const tick = (): any => {
         count += 1
 
