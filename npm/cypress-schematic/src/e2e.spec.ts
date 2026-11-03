@@ -23,6 +23,12 @@ const runCommandInProject = (command: string, projectPath: string) => {
   return execa(ex, args, { cwd: projectPath, stdio: 'inherit' })
 }
 
+// `ng add` installs the latest cypress from npm, which no longer ships `cypress/angular-zoneless`
+const ngAddSchematic = async (flags: string, projectPath: string) => {
+  await runCommandInProject(`yarn ng add @cypress/schematic ${flags}`, projectPath)
+  await runCommandInProject('yarn add -D cypress@^15', projectPath)
+}
+
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
 const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-20', 'angular-21']
@@ -35,9 +41,9 @@ describe('ng add @cypress/schematic / only e2e', { timeout: 1000 * 60 * 5 }, fun
       await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
       if (project === 'angular-21') {
         // for angular 21, we have component testing files inside the source directory, so we need the component flag to set up the support file to declare the mount function
-        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component --add-ct-specs false', projectPath)
+        await ngAddSchematic('--e2e --component --add-ct-specs false', projectPath)
       } else {
-        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component false --add-ct-specs false', projectPath)
+        await ngAddSchematic('--e2e --component false --add-ct-specs false', projectPath)
       }
 
       await runCommandInProject('yarn ng e2e --watch false', projectPath)

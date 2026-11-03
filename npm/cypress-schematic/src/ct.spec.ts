@@ -11,6 +11,12 @@ const runCommandInProject = (command: string, projectPath: string) => {
   return execa(ex, args, { cwd: projectPath, stdio: 'inherit' })
 }
 
+// `ng add` installs the latest cypress from npm, which no longer ships `cypress/angular-zoneless`
+const ngAddSchematic = async (flags: string, projectPath: string) => {
+  await runCommandInProject(`yarn ng add @cypress/schematic ${flags}`, projectPath)
+  await runCommandInProject('yarn add -D cypress@^15', projectPath)
+}
+
 // Since the schematic downloads a new version of cypress, the latest changes of
 // @cypress/angular won't exist in the tmp project. To fix this, we replace the
 // contents of the <project-path>/node_modules/cypress/angular with the latest
@@ -54,13 +60,13 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
       }, timeout)
 
       it('should install ct files with option and no component specs', async () => {
-        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
+        await ngAddSchematic('--e2e --component', projectPath)
         await copyAngularMount(projectPath, { copyZonelessMount: project === 'angular-21' })
         await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
       }, timeout)
 
       it('should generate component alongside component spec', async () => {
-        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
+        await ngAddSchematic('--e2e --component', projectPath)
         // make sure to copy the zoneless mount function for angular 21+
         await copyAngularMount(projectPath, { copyZonelessMount: project === 'angular-21' })
         if (project === 'angular-21') {
