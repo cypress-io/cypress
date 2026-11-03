@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import debugLib from 'debug'
 import { format } from 'util'
 import { autoBindDebug } from '../../../src/util/autoBindDebug'
@@ -19,9 +19,21 @@ class Counter {
 
 describe('autoBindDebug', () => {
   let logged: string[]
+  let ambientNamespaces: string
+
+  // debug's enable/disable write through to process.env.DEBUG, which the rest of
+  // the run shares, so put back whatever namespaces the run started with
+  beforeAll(() => {
+    ambientNamespaces = debugLib.disable()
+  })
+
+  afterAll(() => {
+    debugLib.enable(ambientNamespaces)
+  })
 
   beforeEach(() => {
     logged = []
+    debugLib.disable()
     // debug leaves `%s` for its default log function, which formats with util.format
     jest.spyOn(debugLib, 'log').mockImplementation((...args: unknown[]) => {
       logged.push(format(...args))
@@ -29,7 +41,6 @@ describe('autoBindDebug', () => {
   })
 
   afterEach(() => {
-    debugLib.disable()
     jest.restoreAllMocks()
   })
 
@@ -50,6 +61,7 @@ describe('autoBindDebug', () => {
       const counter = new Counter()
 
       expect(Object.prototype.hasOwnProperty.call(counter, 'add')).toBe(true)
+      expect(counter.add.name).toBe('')
       expect(counter.add(2)).toBe(2)
       expect(counter.add(3)).toBe(5)
       expect(counter.count).toBe(5)
