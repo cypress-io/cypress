@@ -43,5 +43,13 @@ describe('HtmlDataSource', () => {
 
       expect(cachedConfig.resolved.env).toEqual({ apiKey: { value: 'env-secret', from: 'config' } })
     })
+
+    it('serves isLongStackTracesEnabled from the server config', async () => {
+      ctx._apis.projectApi.getConfig = jest.fn().mockReturnValue({ isLongStackTracesEnabled: true }) as any
+
+      const { base64Config } = await ctx.html.makeServeConfig()
+
+      expect(decode(base64Config).isLongStackTracesEnabled).toBe(true)
+    })
   })
 })

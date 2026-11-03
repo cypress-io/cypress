@@ -52,6 +52,7 @@ export interface Cfg extends ReceivedCypressOptions {
   testingType: TestingType
   isDefaultProtocolEnabled?: boolean
   isInteractive?: boolean
+  isLongStackTracesEnabled?: boolean
   hideCommandLog?: boolean
   hideRunnerUi?: boolean
   exit?: boolean
@@ -771,7 +772,8 @@ export class ProjectBase extends EE {
     // getPropertiesFromServerConfig) because cfg.env is not sent to the browser.
     // The driver reads this top-level value at bootstrap; it cannot rely on
     // config.env.INTERNAL_SIMULATE_OPEN_MODE. When CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
-    // is set, run mode should behave like open mode in the driver (retries, stack traces, etc.).
+    // is set, run mode should behave like open mode in the driver (retries, docs links, etc.).
+    // isLongStackTracesEnabled reaches the driver the same way.
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
@@ -780,6 +782,7 @@ export class ProjectBase extends EE {
       specs: [],
       isDefaultProtocolEnabled,
       isInteractive: !this._cfg.isTextTerminal || simulateOpenMode,
+      isLongStackTracesEnabled: process.env.CYPRESS_INTERNAL_LONG_STACK_TRACES === '1',
       hideCommandLog,
       hideRunnerUi,
     }

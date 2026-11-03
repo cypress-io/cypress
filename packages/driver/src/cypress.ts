@@ -260,14 +260,13 @@ class $Cypress {
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
 
-    // enable long stack traces when
-    // we not are running headlessly
-    // for debuggability but disable
-    // them when running headlessly for
-    // performance since users cannot
-    // interact with the stack traces
+    // Long stack traces capture a trace for every promise the command queue,
+    // retries, and assertions create, which slows down every command. Code
+    // frames and the stacks of failed commands come from the command's
+    // invocation stack rather than these traces, so they stay off unless a
+    // maintainer debugging Cypress itself sets CYPRESS_INTERNAL_LONG_STACK_TRACES=1.
     Promise.config({
-      longStackTraces: config.isInteractive,
+      longStackTraces: !!config.isLongStackTracesEnabled,
     })
 
     const { expose } = config

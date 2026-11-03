@@ -165,6 +165,5 @@ TODO:
 - if visit synchronously fails in app code, point to cy.visit in spec code
   - add 2nd code frame that points to app code
 - don't hide stack trace by default, because now it's actually useful and not overly verbose with internal crud
-- profile how much time Bluebird spends when we enable longStackTraces (cypress.js) and maybe turn it always off or always on
 - splice out cypress internals when there's a user error (Scenario 2 when error is in a command callback)
 - 

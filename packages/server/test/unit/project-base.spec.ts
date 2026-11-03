@@ -508,6 +508,46 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(config.isInteractive).toBe(true)
       })
     })
+
+    describe('isLongStackTracesEnabled', () => {
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_LONG_STACK_TRACES
+        delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+      })
+
+      it('returns false in open mode by default', () => {
+        project.cfg.isTextTerminal = false
+
+        expect(project.getConfig().isLongStackTracesEnabled).toBe(false)
+      })
+
+      it('returns false in run mode by default', () => {
+        project.cfg.isTextTerminal = true
+
+        expect(project.getConfig().isLongStackTracesEnabled).toBe(false)
+      })
+
+      it('returns false when CYPRESS_INTERNAL_SIMULATE_OPEN_MODE is set', () => {
+        project.cfg.isTextTerminal = true
+        process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE = '1'
+
+        expect(project.getConfig().isLongStackTracesEnabled).toBe(false)
+      })
+
+      it('returns true when CYPRESS_INTERNAL_LONG_STACK_TRACES is 1', () => {
+        project.cfg.isTextTerminal = true
+        process.env.CYPRESS_INTERNAL_LONG_STACK_TRACES = '1'
+
+        expect(project.getConfig().isLongStackTracesEnabled).toBe(true)
+      })
+
+      it('returns false when CYPRESS_INTERNAL_LONG_STACK_TRACES is set to a value other than 1', () => {
+        project.cfg.isTextTerminal = false
+        process.env.CYPRESS_INTERNAL_LONG_STACK_TRACES = '0'
+
+        expect(project.getConfig().isLongStackTracesEnabled).toBe(false)
+      })
+    })
   })
 
   describe('#open', () => {
