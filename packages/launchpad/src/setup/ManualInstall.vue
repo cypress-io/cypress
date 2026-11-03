@@ -51,10 +51,9 @@
             </span>
           </span>
         </span>
-        <p
-          class="text-gray-500 text-[14px] leading-5"
-          v-html="dep.description"
-        />
+        <p class="text-gray-500 text-[14px] leading-5">
+          {{ dep.description }}
+        </p>
       </li>
     </ul>
   </div>

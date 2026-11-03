@@ -3,6 +3,7 @@ import { baseConfig, graphqlConfig, jsonConfig } from '@packages/eslint-config'
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...graphqlConfig(),
   {
     languageOptions: {
       parserOptions: {
@@ -48,5 +49,4 @@ export default [
       '**/*.gen.ts',
     ],
   },
-  ...graphqlConfig(),
 ]

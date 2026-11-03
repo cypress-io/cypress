@@ -192,7 +192,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   placeholder: '',
   label: '',
-  labelId: undefined,
   itemValue: 'value',
   modelValue: undefined,
   itemKey: 'key',

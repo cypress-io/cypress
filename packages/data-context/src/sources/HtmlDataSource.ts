@@ -9,6 +9,7 @@ import _ from 'lodash'
 import { telemetry } from '@packages/telemetry'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
+const MAX_APP_HTML_READ_ATTEMPTS = 5
 
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
@@ -23,21 +24,27 @@ export class HtmlDataSource {
 
     // Check if the file exists. If it doesn't, it probably means that Vite is re-building
     // and we should retry a few times until the file exists
-    // eslint-disable-next-line prefer-const -- never incremented, so this loop retries forever
     let retryCount = 0
     let err
 
-    while (retryCount < 5) {
+    while (retryCount < MAX_APP_HTML_READ_ATTEMPTS) {
       try {
         const html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        const title = _.escape(this.ctx.project.projectTitle(this.ctx.currentProject || ''))
 
-        return html.replace(
-          '<title>Cypress</title>',
-          `<title>${this.ctx.project.projectTitle(this.ctx.currentProject || '')}</title>`,
-        )
+        // Pass a function, not a string, so `$&` and friends in the title are inserted literally
+        return html.replace('<title>Cypress</title>', () => `<title>${title}</title>`)
       } catch (e) {
+        if (e.code !== 'ENOENT') {
+          throw e
+        }
+
         err = e
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        retryCount++
+
+        if (retryCount < MAX_APP_HTML_READ_ATTEMPTS) {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        }
       }
     }
 

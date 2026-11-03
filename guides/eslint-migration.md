@@ -22,7 +22,7 @@
 - [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
-- [ ] packages/frontend-shared
+- [x] packages/frontend-shared
 - [x] packages/icons
 - [x] packages/launcher
 - [x] packages/https-proxy
@@ -40,7 +40,7 @@
 - [x] packages/network-tools
 - [x] packages/socket
 - [x] packages/telemetry
-- [ ] packages/launchpad
+- [x] packages/launchpad
 - [x] packages/errors
 - [x] packages/data-context
 - [ ] packages/app
@@ -250,6 +250,8 @@ export default [
 
 All three, and `packages/data-context`, also spread `graphqlConfig()` last, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
 
+Add `vue` to the package's `lint-staged` glob (`**/*.{js,jsx,ts,tsx,json,vue}`, as `npm/vue` has). lint-staged hands each staged file only to its nearest config, so without it a staged `.vue` file matches no task and is committed unlinted.
+
 `frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
 
 Drop the `defineProps`, `defineEmits`, `defineExpose` and `withDefaults` globals from the old config: `vue-eslint-parser` 10 defines the compiler macros in `<script setup>`.
@@ -288,7 +290,7 @@ Do not run a bulk `eslint --fix` over the fixtures to clear a new rule. The rule
 
 ### 13. **Lint `gql` Templates with `graphqlConfig`**
 
-The root `.eslintrc.js` runs `eslint-plugin-graphql` over `app`, `frontend-shared` and `launchpad`, the packages that use `gql` and are still on eslintrc. That plugin only runs on ESLint 8 and is no longer maintained. Its flat-config replacement is `graphqlConfig`, built on [`@graphql-eslint/eslint-plugin`](https://the-guild.dev/graphql/eslint) v4. Spread it after `baseConfig`, and after `vueTsxOverrides` and `frontendOverrides` in the Vue packages:
+The root `.eslintrc.js` runs `eslint-plugin-graphql` over `app`, the last package that uses `gql` and is still on eslintrc. That plugin only runs on ESLint 8 and is no longer maintained. Its flat-config replacement is `graphqlConfig`, built on [`@graphql-eslint/eslint-plugin`](https://the-guild.dev/graphql/eslint) v4. Spread it after `baseConfig`, and after `vueTsxOverrides` and `frontendOverrides` in the Vue packages:
 
 ```ts
 import { baseConfig, graphqlConfig, jsonConfig } from '@packages/eslint-config'
