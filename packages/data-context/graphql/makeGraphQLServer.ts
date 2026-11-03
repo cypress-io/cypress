@@ -294,7 +294,7 @@ const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]) => {
 
     // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
     try {
-      // @ts-expect-error
+      // @ts-expect-error - express-graphql types `params` as optional and `query` as nullable; parse() throws on a missing query, which the catch handles
       document = parse(params.query)
     } catch {
       // error will be re-thrown in customParseFn below
