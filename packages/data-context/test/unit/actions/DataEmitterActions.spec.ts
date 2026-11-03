@@ -3,6 +3,10 @@ import type { DataContext } from '../../../src'
 import { DataEmitterActions } from '../../../src/actions/DataEmitterActions'
 import { createTestDataContext } from '../helper'
 
+function assertDefined<T> (value: T | undefined): asserts value is T {
+  expect(value).toBeDefined()
+}
+
 describe('DataEmitterActions', () => {
   describe('.subscribeTo', () => {
     let ctx: DataContext
@@ -106,22 +110,18 @@ describe('DataEmitterActions', () => {
       expect(completed).toBe(true)
     })
 
-    const createTestIterator = (subscription) => {
+    const createTestIterator = (subscription: AsyncGenerator<unknown>) => {
       const returnVal = {
         items: 0,
         completed: false,
-        iterator: undefined,
+        iterator: async (): Promise<void> => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _value of subscription) {
+            returnVal.items += 1
+          }
+          returnVal.completed = true
+        },
       }
-
-      const testIterator = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const _value of subscription) {
-          returnVal.items += 1
-        }
-        returnVal.completed = true
-      }
-
-      returnVal.iterator = testIterator
 
       return returnVal
     }
@@ -142,9 +142,9 @@ describe('DataEmitterActions', () => {
         actions.specsChange()
       })
 
-      let subscription2
-      let iteratorFactory2
-      let iteratorPromise2
+      let subscription2: AsyncGenerator<unknown> | undefined
+      let iteratorFactory2: ReturnType<typeof createTestIterator> | undefined
+      let iteratorPromise2: Promise<void> | undefined
       let unsubscribe2 = jest.fn()
 
       setImmediate(() => {
@@ -161,6 +161,7 @@ describe('DataEmitterActions', () => {
 
       setImmediate(() => {
         subscription1.return(undefined)
+        assertDefined(subscription2)
         subscription2.return(undefined)
       })
 
@@ -172,6 +173,7 @@ describe('DataEmitterActions', () => {
       expect(iteratorFactory1.completed).toBe(true)
 
       // second subscription should be called 2 times
+      assertDefined(iteratorFactory2)
       expect(iteratorFactory2.items).toEqual(2)
       expect(iteratorFactory2.completed).toBe(true)
 

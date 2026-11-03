@@ -6,7 +6,7 @@ import { getPathToDist } from '@packages/resolve-dist'
 describe('HtmlDataSource', () => {
   describe('#fetchAppHtml', () => {
     let ctx: DataContext
-    let readFile: jest.SpiedFunction<any>
+    let readFile: jest.SpiedFunction<(file: string, encoding: string) => Promise<string>>
     let originalViteDev: string | undefined
 
     const appIndexHtml = getPathToDist('app', 'index.html')
@@ -18,7 +18,8 @@ describe('HtmlDataSource', () => {
 
       ctx = createTestDataContext('open')
       jest.spyOn(ctx.project, 'projectTitle').mockReturnValue('my-project')
-      readFile = jest.spyOn(ctx.fs, 'readFile')
+      // Safe because fetchAppHtml only calls the (path, 'utf8') overload, which jest can't pick out of readFile's overloads
+      readFile = jest.spyOn(ctx.fs, 'readFile') as unknown as typeof readFile
 
       // After creating the context, so only timers started by fetchAppHtml are faked
       jest.useFakeTimers()

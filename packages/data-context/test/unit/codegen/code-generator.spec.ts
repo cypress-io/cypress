@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach } from '@jest/globals'
 import { parse } from '@babel/parser'
+import assert from 'assert'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
@@ -23,6 +24,8 @@ import { defaultSpecPattern } from '@packages/config'
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
 const babelParse = (content: string) => parse(content, { sourceType: 'module', plugins: ['jsx', 'typescript'] })
+
+type SingleFileCodeGenResults = CodeGenResults & { files: [CodeGenResult] }
 
 describe('code-generator', () => {
   let ctx: DataContext
@@ -110,7 +113,7 @@ describe('code-generator', () => {
     mTimesAfter = await getMTimes(overwriteCodeGenResults.files)
 
     expect(mTimesBefore).not.toEqual(mTimesAfter)
-    mTimesAfter.forEach((time, i) => expect(time > mTimesBefore[i]))
+    mTimesAfter.forEach((time, i) => expect(time > mTimesBefore[i]!))
   })
 
   it('should generate from integration template', async () => {
@@ -124,7 +127,7 @@ describe('code-generator', () => {
     const codeGenArgs = { fileName }
 
     const codeGenResults = await codeGenerator(action, codeGenArgs)
-    const expected: CodeGenResults = {
+    const expected: SingleFileCodeGenResults = {
       files: [
         {
           type: 'text',
@@ -163,7 +166,7 @@ describe('code-generator', () => {
     }
 
     const codeGenResults = await codeGenerator(action, codeGenArgs)
-    const expected: CodeGenResults = {
+    const expected: SingleFileCodeGenResults = {
       files: [
         {
           type: 'text',
@@ -204,7 +207,7 @@ describe('code-generator', () => {
     }
 
     const codeGenResults = await codeGenerator(action, codeGenArgs)
-    const expected: CodeGenResults = {
+    const expected: SingleFileCodeGenResults = {
       files: [
         {
           type: 'text',
@@ -249,7 +252,7 @@ describe('code-generator', () => {
 
     const codeGenResults = await codeGenerator(action, codeGenArgs)
 
-    const expected: CodeGenResults = {
+    const expected: SingleFileCodeGenResults = {
       files: [
         {
           type: 'text',
@@ -296,7 +299,7 @@ describe('code-generator', () => {
 
     const codeGenResults = await codeGenerator(action, codeGenArgs)
 
-    const expected: CodeGenResults = {
+    const expected: SingleFileCodeGenResults = {
       files: [
         {
           type: 'text',
@@ -368,8 +371,10 @@ describe('code-generator', () => {
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResult = await codeGenerator(action, codeGenOptions)
+    const [specFile] = codeGenResult.files
 
-    expect(() => babelParse(codeGenResult.files[0].content)).not.toThrow()
+    assert(specFile)
+    expect(() => babelParse(specFile.content)).not.toThrow()
   })
 
   describe('nonExampleSpecfile', () => {

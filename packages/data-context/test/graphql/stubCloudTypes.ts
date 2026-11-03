@@ -453,7 +453,7 @@ export const CloudRunStubs = {
 export const CloudUserStubs = {
   me: createCloudUser({ userIsViewer: true }),
   // meAsAdmin: createCloudUser({ userIsViewer: true }), TODO(tim): add when we have roles
-} as Record<string, Required<CloudUser>>
+}
 
 export const CloudOrganizationStubs = {
   cyOrg: createCloudOrganization({}),
@@ -563,7 +563,7 @@ export const CloudQuery: MaybeResolver<Query> = {
 
     return CloudUserStubs.me
   },
-  cloudNodesByIds ({ ids }) {
+  cloudNodesByIds ({ ids }: { ids: string[] }) {
     return ids.map((id) => nodeRegistry[id] ?? null)
   },
   cloudSpecByPath ({ path }) {

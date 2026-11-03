@@ -11,7 +11,7 @@ import { toPosix } from '../../../src/util/file'
 
 describe('GitDataSource', () => {
   let git: ReturnType<typeof simpleGit>
-  let gitInfo: GitDataSource
+  let gitInfo: GitDataSource | undefined
   let projectPath: string
   let e2eFolder: string
 
@@ -138,7 +138,7 @@ describe('GitDataSource', () => {
     await dfd.promise
 
     const results = filepaths.map((filepath) => {
-      return gitInfo.gitInfoFor(filepath)
+      return gitInfo?.gitInfoFor(filepath)
     })
 
     expect(results).toHaveLength(filepaths.length)
@@ -233,7 +233,7 @@ describe('GitDataSource', () => {
   it(`handles error while watching .git on ${os.platform()}`, async () => {
     jest.spyOn(chokidar, 'watch').mockImplementation(() => {
       const mockWatcher = {
-        on: (event, fn) => {
+        on: (event: string, fn: (err: Error) => void) => {
           if (event === 'error') {
             fn(new Error('Unexpected error'))
           }

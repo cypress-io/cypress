@@ -43,7 +43,7 @@ describe('GraphQLDataSource', () => {
 
   afterEach(() => {
     process.chdir(path.join(__dirname, '../../../'))
-    pushFragmentIterator.return()
+    pushFragmentIterator.return?.()
     ctx.destroy()
   })
 
@@ -60,9 +60,9 @@ describe('GraphQLDataSource', () => {
       const result = await executeQuery(`{ cloudViewer { id } }`)
 
       // Initial cloudViewer result returns null
-      expect(result.data.cloudViewer).toEqual(null)
+      expect(result.data?.cloudViewer).toEqual(null)
 
-      const { target, data, fragment } = (await pushFragmentNextVal).data.pushFragment[0]
+      const { target, data, fragment } = (await pushFragmentNextVal).data?.pushFragment[0]
 
       expect(target).toEqual('Query')
       expect(data).toEqual({
@@ -86,9 +86,9 @@ describe('GraphQLDataSource', () => {
       const result = await executeQuery(`{ currentProject { id cloudProject { __typename ... on CloudProject { id name } } } }`)
 
       // Initial cloudProject result returns null
-      expect(result.data.currentProject.cloudProject).toBeNull()
+      expect(result.data?.currentProject.cloudProject).toBeNull()
 
-      const { target, data, fragment } = (await pushFragmentNextVal).data.pushFragment[0]
+      const { target, data, fragment } = (await pushFragmentNextVal).data?.pushFragment[0]
 
       expect(target).toEqual('CurrentProject')
       expect(data).toEqual({
@@ -119,7 +119,7 @@ describe('GraphQLDataSource', () => {
       const result = await executeQuery(`{ cloudViewer { id } }`)
 
       // Initial cloudProject result returns null
-      expect(result.data.cloudViewer).toBeNull()
+      expect(result.data?.cloudViewer).toBeNull()
       await pushFragmentNextVal
 
       pushFragmentNextVal = pushFragmentIterator.next().then(({ value }) => value)
@@ -127,9 +127,9 @@ describe('GraphQLDataSource', () => {
       const result2 = await executeQuery(`{ cloudViewer { id cloudOrganizationsUrl } }`)
 
       // Initial cloudProject result returns null
-      expect(result2.data.cloudViewer).toEqual({ id: 'Q2xvdWRVc2VyOjE=', cloudOrganizationsUrl: null })
+      expect(result2.data?.cloudViewer).toEqual({ id: 'Q2xvdWRVc2VyOjE=', cloudOrganizationsUrl: null })
 
-      const { target, data, fragment } = (await pushFragmentNextVal).data.pushFragment[0]
+      const { target, data, fragment } = (await pushFragmentNextVal).data?.pushFragment[0]
 
       expect(target).toEqual('Query')
       expect(data).toEqual({

@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { stripIndent } from 'common-tags'
 import { parse } from '@babel/parser'
+import assert from 'assert'
 import { insertValueInJSString } from '../../src/util/config-file-updater'
 
 const errors = {
@@ -324,9 +325,15 @@ describe('lib/util/config-file-updater', () => {
         const value = `abc\\\\'+require('child_process').execSync('id'),//\nnext`
 
         const valueOf = (output: string, key: string) => {
-          const [declaration] = parse(output, { sourceType: 'module' }).program.body as any[]
+          const [declaration] = parse(output, { sourceType: 'module' }).program.body
 
-          return declaration.declaration.properties.find((prop) => prop.key.name === key).value
+          assert(declaration?.type === 'ExportDefaultDeclaration' && declaration.declaration.type === 'ObjectExpression')
+
+          const property = declaration.declaration.properties.find((prop) => prop.type === 'ObjectProperty' && prop.key.type === 'Identifier' && prop.key.name === key)
+
+          assert(property?.type === 'ObjectProperty')
+
+          return property.value
         }
 
         it('inserts a string that cannot end its literal early', async () => {
@@ -343,8 +350,13 @@ describe('lib/util/config-file-updater', () => {
 
         it('inserts a nested string that cannot end its literal early', async () => {
           const output = await insertValueInJSString('export default {\n}', { component: { specPattern: value } }, errors)
-          const [specPattern] = valueOf(output, 'component').properties
+          const component = valueOf(output, 'component')
 
+          assert(component.type === 'ObjectExpression')
+
+          const [specPattern] = component.properties
+
+          assert(specPattern?.type === 'ObjectProperty')
           expect(specPattern.value).toMatchObject({ type: 'StringLiteral', value })
         })
       })

@@ -5,8 +5,10 @@ import os from 'os'
 import path from 'path'
 import { createTestDataContext } from '../helper'
 import type { FoundBrowser, FullConfig } from '@packages/types'
+import type { ProjectApiShape } from '../../../src/actions'
+import type { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 
-const browsers = [
+const browsers: [FoundBrowser, FoundBrowser, FoundBrowser, FoundBrowser] = [
   { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron', path: '', version: '' },
   { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Chrome', path: '', version: '' },
   { name: 'chrome', family: 'chromium', channel: 'beta', displayName: 'Chrome Beta', path: '', version: '' },
@@ -48,9 +50,9 @@ describe('ProjectLifecycleManager', () => {
   describe('#onLoadError', () => {
     const loadErrorCtx = () => {
       const context = createDataContext({ project: 'foo' })
-      const setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+      const setSessionLoadError = jest.fn<ProjectApiShape['setSessionLoadError']>().mockResolvedValue(undefined)
 
-      context._apis.projectApi.setSessionLoadError = setSessionLoadError as any
+      context._apis.projectApi.setSessionLoadError = setSessionLoadError
       context.coreData.currentProject = '/projects/foo'
       jest.spyOn(context, 'onError').mockImplementation(() => {})
 
@@ -77,7 +79,7 @@ describe('ProjectLifecycleManager', () => {
 
   describe('#initializeProjectSetup', () => {
     const originalEnv = process.env
-    let consoleError: ReturnType<typeof jest.spyOn>
+    let consoleError: jest.SpiedFunction<typeof console.error>
 
     const scaffolded = (...statuses: Array<'valid' | 'changes' | 'skipped' | 'error'>) => {
       return statuses.map((status, index) => ({ status, description: '', file: { absolute: `/projects/foo/file-${index}.js`, contents: '' } }))
@@ -117,10 +119,10 @@ describe('ProjectLifecycleManager', () => {
       expect(setup.actions.wizard.scaffoldTestingType).toHaveBeenCalledTimes(1)
       expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
 
-      const scaffoldOrder = (setup.actions.wizard.scaffoldTestingType as jest.Mock).mock.invocationCallOrder[0]
-      const completeOrder = (setup.actions.wizard.completeSetup as jest.Mock).mock.invocationCallOrder[0]
+      const scaffoldOrder = jest.mocked(setup.actions.wizard.scaffoldTestingType).mock.invocationCallOrder[0]
+      const completeOrder = jest.mocked(setup.actions.wizard.completeSetup).mock.invocationCallOrder[0]
 
-      expect(scaffoldOrder).toBeLessThan(completeOrder)
+      expect(scaffoldOrder).toBeLessThan(completeOrder!)
     })
 
     it('tells the agent which files it created', async () => {
@@ -203,6 +205,7 @@ describe('ProjectLifecycleManager', () => {
 
       await expect(setup.lifecycleManager.initializeProjectSetup('e2e')).resolves.toBeUndefined()
 
+      // @ts-expect-error - onLoadError is typed for a CypressError, but it also receives whatever completeSetup rejects with
       expect(onLoadError).toHaveBeenCalledWith(failure)
     })
 
@@ -210,9 +213,9 @@ describe('ProjectLifecycleManager', () => {
       process.env.CLAUDECODE = '1'
 
       const setup = setupCtx(scaffolded('valid', 'changes'))
-      const setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+      const setSessionLoadError = jest.fn<ProjectApiShape['setSessionLoadError']>().mockResolvedValue(undefined)
 
-      setup._apis.projectApi.setSessionLoadError = setSessionLoadError as any
+      setup._apis.projectApi.setSessionLoadError = setSessionLoadError
       setup.coreData.currentProject = '/projects/foo'
 
       await setup.lifecycleManager.initializeProjectSetup('e2e')
@@ -588,7 +591,7 @@ describe('ProjectLifecycleManager', () => {
       jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' } as unknown as FullConfig)
 
       // set the active browser to chrome:beta
-      ctx.actions.browser.setActiveBrowser(browsers[2] as FoundBrowser)
+      ctx.actions.browser.setActiveBrowser(browsers[2])
 
       expect(ctx.modeOptions.browser).toEqual(undefined)
       expect(ctx.coreData.cliBrowser).toBeNull()
@@ -698,11 +701,11 @@ describe('ProjectLifecycleManager', () => {
 
   describe('#eventProcessPid', () => {
     it('returns process id from config manager', () => {
-      // @ts-expect-error
-      ctx.lifecycleManager._configManager = {
+      // Safe because eventProcessPid reads nothing else from the config manager
+      ctx.lifecycleManager['_configManager'] = {
         eventProcessPid: 12399,
         destroy: () => {},
-      }
+      } as ProjectConfigManager
 
       expect(ctx.lifecycleManager.eventProcessPid).toEqual(12399)
     })

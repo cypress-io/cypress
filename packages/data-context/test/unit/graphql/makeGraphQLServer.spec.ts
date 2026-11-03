@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from '@jest/globals'
 import { createServer, request } from 'http'
-import type { ClientRequest, IncomingMessage, Server } from 'http'
+import type { ClientRequest, ClientRequestArgs, IncomingMessage, RequestOptions, Server } from 'http'
 import type { AddressInfo } from 'net'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
@@ -192,7 +192,9 @@ describe('makeGraphQLServer (integration)', () => {
   describe('Host enforcement', () => {
     const get = (path: string, host: string): Promise<{ status: number, body: string }> => {
       return new Promise((resolve, reject) => {
-        const req = request({ host: '127.0.0.1', port, path, headers: { Host: host } }, (res) => {
+        const options: ClientRequestArgs = { host: '127.0.0.1', port, path, headers: { Host: host } }
+        // Safe because the fields packages/ts/index.d.ts makes required on RequestOptions are proxy internals that http.request does not read
+        const req = request(options as RequestOptions, (res) => {
           let body = ''
 
           res.setEncoding('utf8')

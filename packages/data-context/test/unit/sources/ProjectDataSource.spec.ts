@@ -2,19 +2,18 @@ import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals
 import os from 'os'
 import fs from 'fs-extra'
 
-import type { SpecWithRelativeRoot } from '../../../src/sources'
 import { matchedSpecs, transformSpec, getLongestCommonPrefixFromPaths, getPathFromSpecPattern, matchesAnySpecPattern } from '../../../src/sources'
 import path from 'path'
 import chokidar from 'chokidar'
 import _ from 'lodash'
-import type { FoundSpec } from '@packages/types'
+import type { FoundSpec, SpecWithRelativeRoot } from '@packages/types'
 import type { DataContext } from '../../../src'
 import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 import { defaultExcludeSpecPattern, defaultSpecPattern } from '@packages/config'
 import FixturesHelper from '@tooling/system-tests'
 
-function delay (ms) {
+function delay (ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms)
   })
@@ -67,10 +66,10 @@ describe('matchedSpecs', () => {
         ],
       })
 
-      expect(result[0].relativeToCommonRoot).toEqual('simple_passing_spec.js')
-      expect(result[1].relativeToCommonRoot).toEqual('simple_hooks_spec.js')
-      expect(result[2].relativeToCommonRoot).toEqual('simple_failing_spec.js')
-      expect(result[3].relativeToCommonRoot).toEqual('simple_failing_hook_spec.js')
+      expect(result[0]?.relativeToCommonRoot).toEqual('simple_passing_spec.js')
+      expect(result[1]?.relativeToCommonRoot).toEqual('simple_hooks_spec.js')
+      expect(result[2]?.relativeToCommonRoot).toEqual('simple_failing_spec.js')
+      expect(result[3]?.relativeToCommonRoot).toEqual('simple_failing_hook_spec.js')
     })
   })
 
@@ -86,8 +85,8 @@ describe('matchedSpecs', () => {
         specPattern: 'cypress/e2e/integration/**/*.spec.ts',
       })
 
-      expect(result[0].relativeToCommonRoot).toEqual('files.spec.ts')
-      expect(result[1].relativeToCommonRoot).toEqual('index.spec.ts')
+      expect(result[0]?.relativeToCommonRoot).toEqual('files.spec.ts')
+      expect(result[1]?.relativeToCommonRoot).toEqual('index.spec.ts')
     })
   })
 
@@ -102,7 +101,7 @@ describe('matchedSpecs', () => {
         specPattern: '/var/folders/y5/T/cy-projects/e2e/cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.js',
       })
 
-      expect(result[0].relativeToCommonRoot).toEqual('screenshot_nested_file_spec.js')
+      expect(result[0]?.relativeToCommonRoot).toEqual('screenshot_nested_file_spec.js')
     })
   })
 })
@@ -422,7 +421,7 @@ describe('getPathFromSpecPattern', () => {
 
       const possiblesFileNames = ['src/ComponentName.test.jsx', 'src/ComponentName.test.js']
 
-      expect(possiblesFileNames.includes(defaultFileName)).toEqual(true)
+      expect(possiblesFileNames).toContain(defaultFileName)
     })
 
     it('creates specName for (src|components)/**/*.test.js', () => {
@@ -430,7 +429,7 @@ describe('getPathFromSpecPattern', () => {
 
       const possiblesFileNames = ['src/ComponentName.test.js', 'components/ComponentName.test.js']
 
-      expect(possiblesFileNames.includes(defaultFileName)).toEqual(true)
+      expect(possiblesFileNames).toContain(defaultFileName)
     })
 
     it('creates specName for e2e/**/*.cy.{js,jsx,ts,tsx}', () => {
@@ -768,7 +767,7 @@ describe('startSpecWatcher', () => {
         return mockWatcher as chokidar.FSWatcher
       })
 
-      let handleFsChange
+      let handleFsChange: (() => unknown) | undefined
 
       jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
@@ -786,6 +785,10 @@ describe('startSpecWatcher', () => {
       }
 
       await ctx.project.startSpecWatcher(watchOptions)
+
+      if (!handleFsChange) {
+        throw new Error('startSpecWatcher did not debounce its change handler')
+      }
 
       // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
       // @ts-expect-error
@@ -885,7 +888,7 @@ describe('ProjectDataSource', () => {
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-        expect(defaultSpecFileName).toEqual('cypress/component/ComponentName.cy.jsx', defaultSpecFileName)
+        expect(defaultSpecFileName).toEqual('cypress/component/ComponentName.cy.jsx')
       })
 
       it('yields non-jsx extension if there are jsx files but specPattern disallows', async () => {
@@ -895,7 +898,7 @@ describe('ProjectDataSource', () => {
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
         // specPattern does not allow for jsx, so generated spec name should not use jsx extension
-        expect(defaultSpecFileName).toEqual('cypress/component/ComponentName.cy.js', defaultSpecFileName)
+        expect(defaultSpecFileName).toEqual('cypress/component/ComponentName.cy.js')
       })
     })
   })

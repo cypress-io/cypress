@@ -1,15 +1,22 @@
 import { describe, expect, it, beforeAll, beforeEach, afterEach, jest } from '@jest/globals'
 import path from 'path'
-import { scaffoldCommonNodeModules } from '@tooling/system-tests/lib/dep-installer'
 import { scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 
+// system-tests type-checks this module under its own compiler options. Loading it with
+// `require` keeps it out of this program, which would check it again under stricter ones.
+const { scaffoldCommonNodeModules }: { scaffoldCommonNodeModules: () => Promise<void> } = require('@tooling/system-tests/lib/dep-installer')
+
+declare global {
+  // eslint-disable-next-line no-var -- only `var` adds a property to the type of `globalThis`
+  var debugMessages: string[]
+}
+
 jest.mock('debug', () => {
   globalThis.debugMessages = []
-  const originalDebugModule = jest.requireActual('debug')
+  const originalDebugModule = jest.requireActual<typeof import('debug')>('debug')
 
-  const debug = (namespace) => {
-    // @ts-expect-error - mock
+  const debug = (namespace: string) => {
     const originalDebug = originalDebugModule(namespace)
 
     // other namespaces get the real debugger, since dependencies such as
@@ -18,7 +25,7 @@ jest.mock('debug', () => {
       return originalDebug
     }
 
-    return ((message) => {
+    return ((message: string) => {
       globalThis.debugMessages.push(message)
 
       originalDebug(message)
@@ -32,7 +39,7 @@ jest.mock('debug', () => {
 
 describe('ProjectConfigIpc', () => {
   describe('real-child-process', () => {
-    let projectConfigIpc
+    let projectConfigIpc: ProjectConfigIpc
 
     beforeAll(async () => {
       await scaffoldCommonNodeModules()
@@ -61,23 +68,14 @@ describe('ProjectConfigIpc', () => {
 
       err.code = 'EPIPE'
 
-      const OG_once = projectConfigIpc.once
-
-      projectConfigIpc.once = function (evt, listener) {
-        if (evt === 'setupTestingType:reply') {
-          return listener()
-        }
-
-        return OG_once.apply(this, [evt, listener])
-      }
-
       await projectConfigIpc.loadConfig()
-      await projectConfigIpc.registerSetupIpcHandlers()
 
-      // Constructor forwards child `error` to `this.emit('error')`; Node throws if nothing listens.
-      projectConfigIpc.on('error', () => {})
+      const setupNodeEvents = projectConfigIpc['registerSetupIpcHandlers']()
 
-      projectConfigIpc._childProcess.emit('error', err)
+      projectConfigIpc.emit('setupTestingType:reply', { setupConfig: null, requires: [], registrations: [] })
+      await setupNodeEvents
+
+      projectConfigIpc['_childProcess'].emit('error', err)
 
       expect(globalThis.debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
       expect(globalThis.debugMessages.at(-1)).toEqual('EPIPE error in registerSetupIpcHandlers() of child process %s')

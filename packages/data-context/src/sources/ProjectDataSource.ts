@@ -585,7 +585,7 @@ export class ProjectDataSource {
     }
   }
 
-  async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
+  async getResolvedConfigFields (): Promise<Array<ResolvedFromConfig & { field: string }>> {
     const config = this.ctx.lifecycleManager.loadedFullConfig?.resolved ?? {}
 
     return Object.entries(config ?? {}).map(([key, value]) => {
@@ -599,7 +599,7 @@ export class ProjectDataSource {
       }
 
       return { ...value, field: key }
-    }) as ResolvedFromConfig[]
+    }) as Array<ResolvedFromConfig & { field: string }>
   }
 
   async getCodeGenCandidates (glob: string): Promise<FilePartsShape[]> {

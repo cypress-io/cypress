@@ -1,4 +1,4 @@
-// Jest globals are available without import in this environment
+import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import fetch from 'cross-fetch'
 import { createTestDataContext } from '../helper'
 import { UtilDataSource } from '../../../src/sources/UtilDataSource'
@@ -30,7 +30,7 @@ describe('UtilDataSource', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ data: 'test' }),
+        json: jest.fn<Response['json']>().mockResolvedValue({ data: 'test' }),
       } as any
 
       mockedFetch.mockResolvedValue(mockResponse)
@@ -41,6 +41,7 @@ describe('UtilDataSource', () => {
       const result = await utilDataSource.fetch(url, init)
 
       expect(mockedFetch).toHaveBeenCalledWith(url, {
+        // @ts-expect-error - agent is a node-fetch option that cross-fetch's RequestInit doesn't declare
         agent: strictAgent,
         method: 'POST',
         body: 'test',
@@ -53,7 +54,7 @@ describe('UtilDataSource', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ data: 'test' }),
+        json: jest.fn<Response['json']>().mockResolvedValue({ data: 'test' }),
       } as any
 
       mockedFetch.mockResolvedValue(mockResponse)
@@ -63,6 +64,7 @@ describe('UtilDataSource', () => {
       const result = await utilDataSource.fetch(url)
 
       expect(mockedFetch).toHaveBeenCalledWith(url, {
+        // @ts-expect-error - agent is a node-fetch option that cross-fetch's RequestInit doesn't declare
         agent: expect.any(Object), // strictAgent
       })
 
@@ -87,6 +89,7 @@ describe('UtilDataSource', () => {
       await utilDataSource.fetch(url, init)
 
       expect(mockedFetch).toHaveBeenCalledWith(url, {
+        // @ts-expect-error - agent is a node-fetch option that cross-fetch's RequestInit doesn't declare
         agent: strictAgent,
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

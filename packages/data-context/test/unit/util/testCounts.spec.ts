@@ -7,7 +7,7 @@ import path from 'path'
 
 describe('getTestCounts', () => {
   it('should return zeros for no input', async () => {
-    const specs = []
+    const specs: SpecWithRelativeRoot[] = []
 
     const counts = await getTestCounts(specs)
 

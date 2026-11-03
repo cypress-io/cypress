@@ -1,13 +1,12 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { NotificationActions } from '../../../src/actions/NotificationActions'
-import type { CloudRunStatus, RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 import { createTestDataContext, createRelevantRun } from '../helper'
 
 describe('NotificationActions', () => {
   let ctx: DataContext
   let actions: NotificationActions
-  let showSystemNotificationStub
+  let showSystemNotificationStub: jest.SpiedFunction<DataContext['actions']['electron']['showSystemNotification']>
 
   beforeEach(() => {
     ctx = createTestDataContext('open')
@@ -149,10 +148,10 @@ describe('NotificationActions', () => {
     })
 
     describe('run completed', () => {
-      ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'].forEach((status) => {
+      (['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] as const).forEach((status) => {
         it(`sends run completed notification if new run has completed - ${status}`, () => {
-          const run1: RelevantRunInfo = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' }
-          const run2: RelevantRunInfo = { ...createRelevantRun(142), status: status as CloudRunStatus, sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' }
+          const run1 = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' } as const
+          const run2 = { ...createRelevantRun(142), status, sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' } as const
           const sendRunCompletedNotificationStub = jest.spyOn(actions, 'sendRunCompletedNotification')
 
           ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true

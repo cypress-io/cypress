@@ -17,7 +17,7 @@ describe('Poller', () => {
   })
 
   it('polls', async () => {
-    const callback = jest.fn()
+    const callback = jest.fn<(subscriptions: { meta: undefined }[]) => Promise<void>>()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
@@ -38,7 +38,7 @@ describe('Poller', () => {
   })
 
   it('can change interval', async () => {
-    const callback = jest.fn()
+    const callback = jest.fn<(subscriptions: { meta: undefined }[]) => Promise<void>>()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
@@ -69,7 +69,7 @@ describe('Poller', () => {
   })
 
   it('handles multiple pollers for the same event', async () => {
-    const callback = jest.fn()
+    const callback = jest.fn<(subscriptions: { meta: undefined }[]) => Promise<void>>()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
@@ -93,7 +93,7 @@ describe('Poller', () => {
   })
 
   it('returns initial value', async () => {
-    const callback = jest.fn()
+    const callback = jest.fn<(subscriptions: { meta: undefined }[]) => Promise<void>>()
     const interval = 5
 
     const initialValue = { foo: true }
@@ -109,7 +109,7 @@ describe('Poller', () => {
   })
 
   it('stores and returns meta values for each subscription', async () => {
-    const callback = jest.fn()
+    const callback = jest.fn<(subscriptions: { meta: { name: string } | undefined }[]) => Promise<void>>()
     const interval = 5
 
     const poller = new Poller<'relevantRunChange', { name: string }, { name: string}>(ctx, 'relevantRunChange', interval, callback)
@@ -119,17 +119,17 @@ describe('Poller', () => {
     const iterator1 = poller.start({ meta: { name: 'one' } })
 
     expect(poller.subscriptions).toHaveLength(1)
-    expect(poller.subscriptions.map((sub) => sub.meta.name)).toEqual(['one'])
+    expect(poller.subscriptions.map((sub) => sub.meta?.name)).toEqual(['one'])
 
     const iterator2 = poller.start({ meta: { name: 'two' } })
 
     expect(poller.subscriptions).toHaveLength(2)
-    expect(poller.subscriptions.map((sub) => sub.meta.name)).toEqual(['one', 'two'])
+    expect(poller.subscriptions.map((sub) => sub.meta?.name)).toEqual(['one', 'two'])
 
     iterator1.return(undefined)
 
     expect(poller.subscriptions).toHaveLength(1)
-    expect(poller.subscriptions.map((sub) => sub.meta.name)).toEqual(['two'])
+    expect(poller.subscriptions.map((sub) => sub.meta?.name)).toEqual(['two'])
 
     iterator2.return(undefined)
 

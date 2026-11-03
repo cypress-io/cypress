@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { execute } from 'graphql'
+import type crossFetch from 'cross-fetch'
 import { Response } from 'cross-fetch'
 
 import type { DataContext } from '../../../src/DataContext'
@@ -21,7 +22,7 @@ import {
 
 describe('CloudDataSource', () => {
   let cloudDataSource: CloudDataSource
-  let fetchStub: jest.Mock<() => Promise<Response>>
+  let fetchStub: jest.Mock<typeof crossFetch>
   let getUserStub: jest.Mock<() => { authToken: string } | null>
   let logoutStub: jest.Mock<() => void>
   let invalidateCacheStub: jest.Mock<() => void>
@@ -142,7 +143,7 @@ describe('CloudDataSource', () => {
 
       const executingResponse = await (immediateResult as CloudDataResponse).executing
 
-      expect(executingResponse.data).toEqual(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data)
+      expect(executingResponse?.data).toEqual(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data)
 
       expect(fetchStub).toHaveBeenCalledTimes(2)
     })
@@ -303,7 +304,7 @@ describe('CloudDataSource', () => {
 
       const delegateCloudField = cloudDataSource.delegateCloudField
 
-      const delegateCloudSpy = jest.spyOn(cloudDataSource, 'delegateCloudField').mockImplementation(async function (...args) {
+      const delegateCloudSpy = jest.spyOn(cloudDataSource, 'delegateCloudField').mockImplementation(async function (this: CloudDataSource, ...args) {
         return delegateCloudField.apply(this, args)
       })
 

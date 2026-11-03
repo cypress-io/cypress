@@ -16,7 +16,7 @@ describe('FileDataSource', () => {
       let projectPath: string
       let scriptsFolder: string
       let ctx: DataContext
-      let fileDataSource
+      let fileDataSource: FileDataSourceModule.FileDataSource
 
       beforeEach(async () => {
         projectPath = await scaffoldProject('globby-test-bed')

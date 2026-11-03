@@ -1,4 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import assert from 'assert'
 import express from 'express'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
@@ -154,7 +155,7 @@ describe('runner GraphQL transports', () => {
   })
 
   beforeEach(() => {
-    openDirectoryInIDE = jest.spyOn(ctx.actions.project, 'openDirectoryInIDE').mockImplementation(() => {})
+    openDirectoryInIDE = jest.spyOn(ctx.actions.project, 'openDirectoryInIDE').mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -162,7 +163,14 @@ describe('runner GraphQL transports', () => {
   })
 
   describe('socket', () => {
-    const errorMessages = (callback: jest.Mock) => (callback.mock.calls[0][0] as { errors: Error[] }).errors.map((error) => error.message)
+    const errorMessages = (callback: jest.Mock) => {
+      const [firstCall] = callback.mock.calls
+
+      assert(firstCall)
+
+      // Safe because the socket handler calls back with a GraphQL ExecutionResult, and every caller here expects it to carry errors
+      return (firstCall[0] as { errors: Error[] }).errors.map((error) => error.message)
+    }
 
     it('rejects a disallowed mutation on the runner without running it', async () => {
       const callback = jest.fn()

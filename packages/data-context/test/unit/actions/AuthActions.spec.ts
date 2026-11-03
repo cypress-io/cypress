@@ -1,5 +1,6 @@
 import { describe, expect, jest, it, beforeEach } from '@jest/globals'
 import { execute, parse } from 'graphql'
+import { CombinedError } from '@urql/core'
 import type { DataContext } from '../../../src'
 import { AuthActions } from '../../../src/actions/AuthActions'
 import type { AuthenticatedUserShape } from '../../../src/data'
@@ -361,9 +362,9 @@ describe('AuthActions', () => {
     })
 
     it('backfills the cloud user id onto the cached user', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockReturnValue(Promise.resolve({
         data: { cloudViewer: { id: 'cloud-user-1', email: 'steve@apple.com', fullName: 'steve' } },
-      } as any)
+      }))
 
       await actions.checkAuth()
 
@@ -371,7 +372,7 @@ describe('AuthActions', () => {
     })
 
     it('logs out instead when the cloud reports no viewer', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({ data: { cloudViewer: null } } as any)
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockReturnValue(Promise.resolve({ data: { cloudViewer: null } }))
 
       await actions.checkAuth()
 
@@ -379,10 +380,10 @@ describe('AuthActions', () => {
     })
 
     it('keeps the user logged in and id-less on a network error', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockReturnValue(Promise.resolve({
         data: null,
-        error: { networkError: new Error('offline') },
-      } as any)
+        error: new CombinedError({ networkError: new Error('offline') }),
+      }))
 
       await actions.checkAuth()
 

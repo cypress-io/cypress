@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
+import assert from 'assert'
 import { graphqlSchema } from '../../../graphql/schema'
 import dedent from 'dedent'
 import type { FieldNode, GraphQLObjectType, OperationDefinitionNode } from 'graphql'
@@ -77,11 +78,13 @@ describe('DocumentNodeBuilder', () => {
   })
 
   it('queryNode: should create a node query + fragment', () => {
-    const selections = ((CLOUD_PROJECT_QUERY.definitions[0] as OperationDefinitionNode).selectionSet.selections as ReadonlyArray<FieldNode>)
+    const [currentProjectField] = ((CLOUD_PROJECT_QUERY.definitions[0] as OperationDefinitionNode).selectionSet.selections as ReadonlyArray<FieldNode>)
+
+    assert(currentProjectField?.selectionSet)
 
     const docNodeBuilder = new DocumentNodeBuilder({
       isNode: true,
-      fieldNodes: (selections[0].selectionSet!.selections) as ReadonlyArray<FieldNode>,
+      fieldNodes: (currentProjectField.selectionSet.selections) as ReadonlyArray<FieldNode>,
       parentType: graphqlSchema.getType('CloudProject') as GraphQLObjectType,
       variableDefinitions: [],
       operationName: 'CLOUD_PROJECT_QUERY',

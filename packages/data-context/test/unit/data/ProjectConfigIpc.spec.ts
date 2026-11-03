@@ -1,28 +1,34 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import assert from 'assert'
 import childProcess from 'child_process'
+import type { ChildProcess } from 'child_process'
 import path from 'path'
 import { scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 
 jest.mock('child_process')
 
+const stubFork = () => {
+  jest.mocked(childProcess.fork).mockImplementation(() => {
+    // Safe because these tests only check how the process is forked and never talk to it
+    return {
+      on: jest.fn(),
+      once: jest.fn(),
+      emit: jest.fn(),
+      kill: jest.fn(),
+      removeAllListeners: jest.fn(),
+    } as unknown as ChildProcess
+  })
+}
+
 describe('ProjectConfigIpc', () => {
   describe('#eventProcessPid', () => {
-    let projectConfigIpc
+    let projectConfigIpc: ProjectConfigIpc
 
     beforeEach(async () => {
       const projectPath = await scaffoldProject('e2e')
 
-      // @ts-expect-error - mock
-      childProcess.fork.mockImplementation(() => {
-        return {
-          on: jest.fn(),
-          once: jest.fn(),
-          emit: jest.fn(),
-          kill: jest.fn(),
-          removeAllListeners: jest.fn(),
-        }
-      })
+      stubFork()
 
       projectConfigIpc = new ProjectConfigIpc(
         undefined,
@@ -41,14 +47,14 @@ describe('ProjectConfigIpc', () => {
     })
 
     it('returns id for child process', () => {
-      const expectedId = projectConfigIpc._childProcess.pid
+      const expectedId = projectConfigIpc['_childProcess'].pid
 
       expect(projectConfigIpc.childProcessPid).toEqual(expectedId)
     })
   })
 
   describe('forkChildProcess', () => {
-    let projectConfigIpc
+    let projectConfigIpc: ProjectConfigIpc
 
     beforeEach(() => {
       process.env.CYPRESS_INTERNAL_MOCK_TYPESCRIPT_INSTALL = 'true'
@@ -63,16 +69,7 @@ describe('ProjectConfigIpc', () => {
       const MOCK_NODE_PATH = '/Users/foo/.nvm/versions/node/v22.15.0/bin/node'
 
       beforeEach(() => {
-        // @ts-expect-error - mock
-        childProcess.fork.mockImplementation(() => {
-          return {
-            on: jest.fn(),
-            once: jest.fn(),
-            emit: jest.fn(),
-            kill: jest.fn(),
-            removeAllListeners: jest.fn(),
-          }
-        })
+        stubFork()
       })
 
       const MODULE_FORMAT_CASES = [
@@ -134,6 +131,7 @@ describe('ProjectConfigIpc', () => {
 
       MODULE_FORMAT_CASES.forEach(({ description, project, configFile, shouldLoadAsEsm }) => {
         it(`passes shouldLoadAsEsm=${shouldLoadAsEsm} for ${description}`, async () => {
+          // @ts-expect-error - scaffoldMigrationProject is typed for top-level fixture dirs only, but nested fixture paths scaffold the same way
           const projectPath = await scaffoldProject(project)
           const configFilePath = path.join(projectPath, configFile)
 
@@ -176,20 +174,12 @@ describe('ProjectConfigIpc', () => {
       ]
 
       beforeEach(() => {
-        // @ts-expect-error - mock
-        childProcess.fork.mockImplementation(() => {
-          return {
-            on: jest.fn(),
-            once: jest.fn(),
-            emit: jest.fn(),
-            kill: jest.fn(),
-            removeAllListeners: jest.fn(),
-          }
-        })
+        stubFork()
       })
 
       PROJECTS.forEach(({ project, configFile }) => {
         it(`${project}: tsx generic loader (esm/commonjs/typescript)`, async () => {
+          // @ts-expect-error - scaffoldMigrationProject is typed for top-level fixture dirs only, but nested fixture paths scaffold the same way
           const projectPath = await scaffoldProject(project)
           const configFilePath = path.join(projectPath, configFile)
 
@@ -238,16 +228,7 @@ describe('ProjectConfigIpc', () => {
       const originalEnv = process.env
 
       beforeEach(() => {
-        // @ts-expect-error - mock
-        childProcess.fork.mockImplementation(() => {
-          return {
-            on: jest.fn(),
-            once: jest.fn(),
-            emit: jest.fn(),
-            kill: jest.fn(),
-            removeAllListeners: jest.fn(),
-          }
-        })
+        stubFork()
       })
 
       afterEach(() => {
@@ -270,8 +251,15 @@ describe('ProjectConfigIpc', () => {
           () => {},
         )
 
-        // @ts-expect-error - mock
-        return childProcess.fork.mock.lastCall[2].env
+        const forkCall = jest.mocked(childProcess.fork).mock.lastCall
+
+        assert(forkCall)
+
+        const [, , options] = forkCall
+
+        assert(options?.env)
+
+        return options.env
       }
 
       it('is not set when the user did not set it', async () => {

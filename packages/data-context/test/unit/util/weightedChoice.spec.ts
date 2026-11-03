@@ -16,7 +16,7 @@ describe('weightedChoice', () => {
     })
 
     it('should error if weights is empty', () => {
-      const weights = []
+      const weights: number[] = []
       const options = ['A', 'B']
 
       const func = () => {
@@ -28,7 +28,7 @@ describe('weightedChoice', () => {
 
     it('should error if options is empty', () => {
       const weights = [25, 75, 45]
-      const options = []
+      const options: string[] = []
 
       const func = () => {
         WEIGHTED(weights).pick(options)

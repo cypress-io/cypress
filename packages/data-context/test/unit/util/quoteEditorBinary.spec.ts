@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals'
-// @ts-ignore - no types available
+// @ts-expect-error - launch-editor ships no type declarations
 import guessEditor from 'launch-editor/guess'
 import { quoteEditorBinary } from '../../../src/util/quoteEditorBinary'
 

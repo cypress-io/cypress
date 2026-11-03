@@ -204,10 +204,10 @@ describe('spec-options', () => {
 
             // This stub simulates that the component we are generating a spec from is using Typescript.
             if (isTypescriptComponent) {
-              // @ts-ignore
+              // @ts-expect-error - spyOn types readFile by its last overload (Buffer), but spec-options reads with 'utf8' and gets a string
               jest.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
             } else {
-              // @ts-ignore
+              // @ts-expect-error - spyOn types readFile by its last overload (Buffer), but spec-options reads with 'utf8' and gets a string
               jest.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
             }
 
@@ -340,7 +340,7 @@ describe('spec-options', () => {
 
             expect(result.codeGenType).toEqual('component')
             expect(result.fileName).toEqual(expectedFileName)
-            expect(result['componentName']).toEqual(expectedComponentName)
+            expect(result).toHaveProperty('componentName', expectedComponentName)
           })
         })
       })

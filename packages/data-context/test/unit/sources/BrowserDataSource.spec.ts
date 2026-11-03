@@ -35,7 +35,7 @@ describe('BrowserDataSource', () => {
       const result = await ctx.browser.allBrowsers()
 
       expect(result.length).toEqual(2)
-      expect(result[1].custom).toEqual(true)
+      expect(result[1]!.custom).toEqual(true)
     })
 
     it('does not add user custom browser if name and version matches a machine browser', async () => {

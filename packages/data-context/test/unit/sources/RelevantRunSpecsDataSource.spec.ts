@@ -54,10 +54,23 @@ describe('RelevantRunSpecsDataSource', () => {
     it('polls and emits changes', async () => {
       const testData = FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC
 
-      //clone the fixture so it is not modified for future tests
-      const FAKE_PROJECT = JSON.parse(JSON.stringify(testData)) as typeof testData
+      type FixtureRun = typeof testData.data.cloudNodesByIds[number]
 
-      const runId = testData.data.cloudNodesByIds[0].id
+      //clone the fixture so it is not modified for future tests
+      // Safe because a JSON round trip keeps the fixture's shape, minus the `undefined` scheduledToCompleteAt that the test sets later
+      const FAKE_PROJECT = JSON.parse(JSON.stringify(testData)) as Omit<typeof testData, 'data'> & {
+        data: Omit<typeof testData.data, 'cloudNodesByIds'> & {
+          cloudNodesByIds: Array<Omit<FixtureRun, 'scheduledToCompleteAt'> & { scheduledToCompleteAt?: string }>
+        }
+      }
+
+      const [run] = FAKE_PROJECT.data.cloudNodesByIds
+
+      if (!run) {
+        throw new Error('FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC must hold a run')
+      }
+
+      const runId = run.id
 
       // @ts-expect-error
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT)
@@ -102,43 +115,43 @@ describe('RelevantRunSpecsDataSource', () => {
         const firstEmit = await subscriptionIterator.next()
 
         // should emit because of first value
-        expect(firstEmit).toEqual({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+        expect(firstEmit).toEqual({ done: false, value: run })
 
-        FAKE_PROJECT.data.cloudNodesByIds[0].totalInstanceCount++
+        run.totalInstanceCount++
         debug('**** tick after total instance count increase')
         await jest.runOnlyPendingTimers()
 
         const secondEmit = await subscriptionIterator.next()
 
         // should emit because of updated "totalInstanceCount"
-        expect(secondEmit).toEqual({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+        expect(secondEmit).toEqual({ done: false, value: run })
 
-        FAKE_PROJECT.data.cloudNodesByIds[0].scheduledToCompleteAt = (new Date()).toISOString()
+        run.scheduledToCompleteAt = (new Date()).toISOString()
         debug('**** tick after adding scheduledToCompleteAt')
         await jest.runOnlyPendingTimers()
 
         const thirdEmit = await subscriptionIterator.next()
 
         // should emit again because of updated "scheduledToCompleteAt"
-        expect(thirdEmit).toEqual({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+        expect(thirdEmit).toEqual({ done: false, value: run })
 
-        FAKE_PROJECT.data.cloudNodesByIds[0].totalTests++
+        run.totalTests++
         debug('**** tick after testCounts increase')
         await jest.runOnlyPendingTimers()
 
         const forthEmit = await subscriptionIterator.next()
 
         // should emit again because of updated "testCounts"
-        expect(forthEmit).toEqual({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+        expect(forthEmit).toEqual({ done: false, value: run })
 
-        FAKE_PROJECT.data.cloudNodesByIds[0].status = 'FAILED'
+        run.status = 'FAILED'
         debug('**** tick after setting status Failed')
         await jest.runOnlyPendingTimers()
 
         const finalEmit = await subscriptionIterator.next()
 
         // should emit again because of updated "status"
-        expect(finalEmit).toEqual({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+        expect(finalEmit).toEqual({ done: false, value: run })
 
         subscriptionIterator.return(undefined)
 
@@ -199,8 +212,8 @@ describe('RelevantRunSpecsDataSource', () => {
         }
       `
 
-      let iterator1: ReturnType<RelevantRunSpecsDataSource['pollForSpecs']>
-      let iterator2: ReturnType<RelevantRunSpecsDataSource['pollForSpecs']>
+      let iterator1: ReturnType<RelevantRunSpecsDataSource['pollForSpecs']> | undefined
+      let iterator2: ReturnType<RelevantRunSpecsDataSource['pollForSpecs']> | undefined
 
       await createGraphQL(query, fields, async (source, args, context, info) => {
         iterator1 = dataSource.pollForSpecs('runId', info)
@@ -229,7 +242,7 @@ describe('RelevantRunSpecsDataSource', () => {
               }`
 
       expect(gqlStub).toHaveBeenCalled()
-      const gqlStubFirstCallFirstArg = gqlStub.mock.calls[0][0]
+      const gqlStubFirstCallFirstArg = gqlStub.mock.calls[0]![0]
 
       expect(gqlStubFirstCallFirstArg).toHaveProperty('operationDoc')
       // should match initial query with one fragment
@@ -270,14 +283,14 @@ describe('RelevantRunSpecsDataSource', () => {
               }`
 
       expect(gqlStub).toHaveBeenCalledTimes(2)
-      const gqlStubSecondCallFirstArg = gqlStub.mock.calls[1][0]
+      const gqlStubSecondCallFirstArg = gqlStub.mock.calls[1]![0]
 
       expect(gqlStubSecondCallFirstArg).toHaveProperty('operationDoc')
       // should match second query with two fragments
       expect(print(gqlStubSecondCallFirstArg.operationDoc)).toEqual(`${secondExpected }\n`)
 
-      iterator1.return(undefined)
-      iterator2.return(undefined)
+      iterator1?.return(undefined)
+      iterator2?.return(undefined)
     })
   })
 })

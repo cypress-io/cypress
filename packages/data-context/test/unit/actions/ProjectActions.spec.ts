@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import execa from 'execa'
 import type { DataContext } from '../../../src'
 import { ProjectActions } from '../../../src/actions/ProjectActions'
+import type { ProjectApiShape } from '../../../src/actions/ProjectActions'
 import { createTestDataContext } from '../helper'
 import type { SpecWithRelativeRoot, TestingType } from '@packages/types'
 
@@ -221,7 +222,7 @@ describe('ProjectActions', () => {
         jest.spyOn(ctx.lifecycleManager, 'setCurrentTestingType').mockReturnValue(undefined)
         jest.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockReturnValue(undefined)
         jest.spyOn(ctx.actions.project, 'switchTestingTypesAndRelaunch')
-        jest.spyOn(ctx.actions.browser, 'closeBrowser').mockReturnValue(undefined)
+        jest.spyOn(ctx.actions.browser, 'closeBrowser').mockResolvedValue(undefined)
         ctx.coreData.app.browserStatus = 'open'
         jest.spyOn(ctx.emitter, 'subscribeTo').mockReturnValue({
           next: () => {},
@@ -315,7 +316,7 @@ describe('ProjectActions', () => {
 
     it('counts the launch before it settles so a concurrent auto-launch check does not launch again', async () => {
       let resolveLaunch!: () => void
-      const launchProject = jest.fn().mockReturnValue(new Promise<void>((resolve) => {
+      const launchProject = jest.fn<ProjectApiShape['launchProject']>().mockReturnValue(new Promise<void>((resolve) => {
         resolveLaunch = resolve
       }))
 
@@ -335,7 +336,7 @@ describe('ProjectActions', () => {
     })
 
     it('does not count a launch that rejects', async () => {
-      const launchProject = jest.fn().mockRejectedValue(new Error('browser failed to launch'))
+      const launchProject = jest.fn<ProjectApiShape['launchProject']>().mockRejectedValue(new Error('browser failed to launch'))
 
       Object.assign(ctx._apis.projectApi, { launchProject })
 

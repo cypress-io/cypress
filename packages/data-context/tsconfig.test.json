@@ -1,6 +1,23 @@
 {
   "extends": "./tsconfig.json",
+  "include": [
+    "src",
+    "graphql",
+    "test"
+  ],
+  "exclude": [
+    "script",
+    "test/unit/actions/project/**",
+    "test/unit/codegen/files/**",
+    "test/unit/codegen/tmp/**",
+    "test/fixtures/**"
+  ],
   "compilerOptions": {
-    "isolatedModules": true
+    "isolatedModules": true,
+    "types": [
+      "cypress",
+      "jest",
+      "node"
+    ]
   }
 }

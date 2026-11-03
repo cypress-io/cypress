@@ -12,7 +12,7 @@ import pkg from '@packages/root'
 describe('VersionsDataSource', () => {
   describe('.versions', () => {
     let ctx: DataContext
-    let fetchMock: jest.Mock
+    let fetchMock: jest.Mock<(url: string, options: { headers: Record<string, string> }) => Promise<unknown>>
     let isDependencyInstalledByNameStub: jest.Mock
     let mockNow: Date = new Date()
     let currentCypressVersion: string = pkg.version
@@ -236,8 +236,7 @@ describe('VersionsDataSource', () => {
       const versionInfo = await versionsDataSource.versionData()
 
       // Reset the testing type in the class
-      // @ts-ignore
-      versionsDataSource._currentTestingType = null
+      versionsDataSource['_currentTestingType'] = null
 
       versionsDataSource.resetLatestVersionTelemetry()
 

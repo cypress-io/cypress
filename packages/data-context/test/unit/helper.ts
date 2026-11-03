@@ -48,7 +48,7 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     modeOptions,
     appApi: {} as AppApiShape,
     localSettingsApi: {
-      getPreferences: jest.fn().mockResolvedValue({
+      getPreferences: jest.fn<LocalSettingsApiShape['getPreferences']>().mockResolvedValue({
         majorVersionWelcomeDismissed: { [GET_MAJOR_VERSION_FOR_CONTENT()]: 123456 },
         notifyWhenRunCompletes: ['failed'],
       }),
@@ -65,29 +65,28 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       resetAuthState: jest.fn(),
     } as unknown as AuthApiShape,
     projectApi: {
-      setSessionLoadError: jest.fn().mockResolvedValue(undefined),
-      clearSessionLoadError: jest.fn().mockResolvedValue(undefined),
+      setSessionLoadError: jest.fn<ProjectApiShape['setSessionLoadError']>().mockResolvedValue(undefined),
+      clearSessionLoadError: jest.fn<ProjectApiShape['clearSessionLoadError']>().mockResolvedValue(undefined),
       closeActiveProject: jest.fn(),
-      insertProjectToCache: jest.fn().mockResolvedValue(undefined),
-      getProjectRootsFromCache: jest.fn().mockResolvedValue([]),
+      insertProjectToCache: jest.fn<ProjectApiShape['insertProjectToCache']>().mockResolvedValue(undefined),
+      getProjectRootsFromCache: jest.fn<ProjectApiShape['getProjectRootsFromCache']>().mockResolvedValue([]),
       runSpec: jest.fn(),
       routeToDebug: jest.fn(),
     } as unknown as ProjectApiShape,
     electronApi: {
-      isMainWindowFocused: jest.fn().mockReturnValue(false),
+      isMainWindowFocused: jest.fn<ElectronApiShape['isMainWindowFocused']>().mockReturnValue(false),
       focusMainWindow: jest.fn(),
       copyTextToClipboard: (text: string) => {},
     } as unknown as ElectronApiShape,
     browserApi: {
       ensureAndGetByNameOrPath: jest.fn(),
       focusActiveBrowserWindow: jest.fn(),
-      getBrowsers: jest.fn().mockResolvedValue([]),
+      getBrowsers: jest.fn<BrowserApiShape['getBrowsers']>().mockResolvedValue([]),
     } as unknown as BrowserApiShape,
     cohortsApi: {
-      getCohorts: jest.fn().mockResolvedValue(undefined),
-      getCohort: jest.fn().mockResolvedValue(undefined),
+      getCohorts: jest.fn<CohortsApiShape['getCohorts']>().mockResolvedValue(undefined),
+      getCohort: jest.fn<CohortsApiShape['getCohort']>().mockResolvedValue(undefined),
       insertCohort: jest.fn(),
-      determineCohort: jest.fn().mockResolvedValue(undefined),
     } as unknown as CohortsApiShape,
   })
 

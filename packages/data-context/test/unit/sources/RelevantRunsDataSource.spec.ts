@@ -5,20 +5,29 @@ import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunsDataSource } from '../../../src/sources'
 import { FAKE_PROJECT_WITH_ERROR, FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
-import type { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 
 const debug = debugLib('cypress:data-context:test:unit:sources:RelevantRunsDataSource')
+
+const [firstSha, secondSha] = FAKE_SHAS
+
+if (!firstSha || !secondSha) {
+  throw new Error('FAKE_SHAS must hold at least two shas')
+}
 
 const _PROJECTS = [FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING] as const
 
 type TestProject = typeof _PROJECTS[number]
 
 function formatRun (project: TestProject, index: number) {
-  const run = project.data.cloudProjectBySlug.runsByCommitShas?.[index]
+  const run = project.data.cloudProjectBySlug.runsByCommitShas[index]
 
-  return (({ status, runNumber, commitInfo, totalFailed, id }) => {
-    return { status, runNumber, sha: commitInfo.sha, totalFailed, runId: id }
-  })(run)
+  if (!run) {
+    throw new Error(`No run at index ${index}`)
+  }
+
+  const { status, runNumber, commitInfo, totalFailed } = run
+
+  return { status, runNumber, sha: commitInfo.sha, totalFailed }
 }
 
 describe('RelevantRunsDataSource', () => {
@@ -38,14 +47,15 @@ describe('RelevantRunsDataSource', () => {
   })
 
   it('returns empty with no project set', async () => {
-    jest.spyOn(ctx.project, 'projectId').mockResolvedValue(undefined)
+    jest.spyOn(ctx.project, 'projectId').mockResolvedValue(null)
 
-    const result = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
+    const result = await dataSource.getRelevantRuns([firstSha])
 
     expect(result).toEqual([])
   })
 
   it('returns empty if error', async () => {
+    // @ts-expect-error - executeRemoteGraphQL can also return synchronously, so jest types mockResolvedValue's argument as never
     jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT_WITH_ERROR)
     const result = await dataSource.getRelevantRuns([])
 
@@ -58,10 +68,12 @@ describe('RelevantRunsDataSource', () => {
     })
 
     const getShasForTestData = (testData: TestProject) => {
-      return testData.data.cloudProjectBySlug.runsByCommitShas.map((run) => run.commitInfo.sha)
+      return testData.data.cloudProjectBySlug.runsByCommitShas
+      .map((run) => run.commitInfo.sha)
+      .filter((sha): sha is string => sha !== undefined)
     }
 
-    const testScenario = async (testData: TestProject, expectedResult: RelevantRunInfo[]) => {
+    const testScenario = async (testData: TestProject, expectedResult: ReturnType<typeof formatRun>[]) => {
       // @ts-expect-error
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(testData)
 
@@ -111,14 +123,14 @@ describe('RelevantRunsDataSource', () => {
       // @ts-expect-error
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
 
-      const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
+      const firstResult = await dataSource.getRelevantRuns([firstSha])
 
       // running should be current after first check
       expect(firstResult).toEqual(
         [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
       )
 
-      const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
+      const secondResult = await dataSource.getRelevantRuns([firstSha])
 
       // running should be current after second check
       expect(secondResult).toEqual(
@@ -151,12 +163,12 @@ describe('RelevantRunsDataSource', () => {
       //passing true to preserveSelectedRun to simulate being on the Debug page when this is called
 
       debug('first check with only one running run')
-      await dataSource.checkRelevantRuns([FAKE_SHAS[0]], true)
+      await dataSource.checkRelevantRuns([firstSha], true)
 
       expect(maybeSendRunNotificationStub).not.toHaveBeenCalled()
 
       debug('second check with the running run completing, but should stay selected')
-      await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
+      await dataSource.checkRelevantRuns([secondSha, firstSha], true)
 
       expect(maybeSendRunNotificationStub).toHaveBeenCalledWith(
         // @ts-expect-error
@@ -165,7 +177,7 @@ describe('RelevantRunsDataSource', () => {
       )
 
       debug('moving runs will cause another check')
-      await dataSource.moveToRun(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
+      await dataSource.moveToRun(4, [secondSha, firstSha])
 
       expect(maybeSendRunNotificationStub).toHaveBeenCalledTimes(1)
 
@@ -232,10 +244,10 @@ describe('RelevantRunsDataSource', () => {
       //simulating being on page other than Debug so not passing preserveSelectedRun
 
       debug('first check with only one running run')
-      await dataSource.checkRelevantRuns([FAKE_SHAS[0]])
+      await dataSource.checkRelevantRuns([firstSha])
 
       debug('second check with the running run completing, but should stay selected')
-      await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]])
+      await dataSource.checkRelevantRuns([secondSha, firstSha])
 
       setImmediate(() => {
         subscription.return(undefined)

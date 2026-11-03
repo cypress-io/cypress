@@ -9,7 +9,7 @@ const requireError = (message: string) => {
 
 describe('DataContext open mode error output', () => {
   let ctx: DataContext
-  let consoleError: ReturnType<typeof jest.spyOn>
+  let consoleError: jest.SpiedFunction<typeof console.error>
 
   const printed = () => consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
 
@@ -256,7 +256,6 @@ describe('DataContext open mode error output', () => {
       const runCtx = createTestDataContext('run')
       const runModeExitEarly = jest.fn()
 
-      // @ts-expect-error - only the exit hook is needed
       runCtx.lifecycleManager.runModeExitEarly = runModeExitEarly
 
       runCtx.onError(requireError('boom'))
