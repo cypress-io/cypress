@@ -273,3 +273,25 @@ describe('cy.intercept rewrites Set-Cookie headers with a Domain= attribute', ()
     expectOnlyCookieA({ value: 'rewritten', domain: 'localhost' })
   })
 })
+
+// Chrome adds its stored cookies to a request whose Cookie header is missing
+// from Fetch.continueRequest, so a handler's deletion has to reach the server
+// as an empty header
+describe('cy.intercept removes the Cookie header from a request', () => {
+  it('sends the request without the browser\'s cookies', () => {
+    cy.visit('/cookie_sync/no_cookies')
+    cy.setCookie('session', 'plain')
+
+    cy.intercept('/cookie_sync/dashboard', (req) => {
+      expect(req.headers.cookie).to.eq('session=plain')
+
+      delete req.headers.cookie
+    })
+
+    fetchText('/cookie_sync/dashboard').should('contain', 'session: none')
+
+    // deleting req.headers.cookie changes only what this request sends, not
+    // the cookies Chrome stores
+    cy.getCookie('session').its('value').should('eq', 'plain')
+  })
+})

@@ -1350,6 +1350,46 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
+    it('sends an empty Cookie header when middleware removes the one Chrome paused with', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        'X-Foo': 'Bar',
+        'Cookie': 'session=abc',
+      }
+
+      httpIntercept.use((req, next) => {
+        // removes the Cookie header the way `delete req.headers.cookie` in a
+        // cy.intercept handler does
+        const headers = Object.fromEntries(Object.entries(req.headers ?? {}).filter(([name]) => name.toLowerCase() !== 'cookie'))
+
+        return next({ ...req, headers })
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'X-Foo',
+          value: 'Bar',
+        }, {
+          name: 'Cookie',
+          value: '',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
     it('marks extra-target requests for the intercept pipeline without sending the header upstream', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())

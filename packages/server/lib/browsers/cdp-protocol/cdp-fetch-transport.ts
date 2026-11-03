@@ -32,6 +32,10 @@ const setCookieHeaders = (headers: Protocol.Fetch.HeaderEntry[]): string[] => {
   .flatMap(({ value }) => value.split('\n'))
 }
 
+const hasCookieHeader = (headers: Protocol.Network.Headers): boolean => {
+  return Object.keys(headers).some((name) => name.toLowerCase() === 'cookie')
+}
+
 // Shared by every session this transport enables so none of them can drift
 // into pausing a different set of requests than the others.
 const FETCH_PATTERNS: Protocol.Fetch.EnableRequest = {
@@ -1083,7 +1087,18 @@ export class CdpFetchTransport {
       return
     }
 
-    return this.toContinueRequestHeaders(withoutMarkers.kept)
+    const headers = this.toContinueRequestHeaders(withoutMarkers.kept)
+
+    // Chrome adds its stored cookies back when Cookie is missing from the list,
+    // so an empty value is the only way to send the request without them. The
+    // first check is that Chrome was going to send cookies, and the second is
+    // that a request handler deleted them. A request that had no cookies leaves
+    // Chrome none to add back, so it gets no empty header.
+    if (hasCookieHeader(original.kept) && !hasCookieHeader(withoutMarkers.kept)) {
+      headers.push({ name: 'Cookie', value: '' })
+    }
+
+    return headers
   }
 
   // Must NOT clear extraInfo tracking on success — the next response under a
