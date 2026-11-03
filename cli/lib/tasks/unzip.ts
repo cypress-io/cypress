@@ -56,8 +56,7 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
       // Close the count-only handle — the Node fallback re-opens the zip for extraction.
       zipFile.close()
 
-      const started = new Date()
-
+      let started = Date.now()
       let percent = 0
       let count = 0
       let lastNotifiedPercent: number | undefined
@@ -69,7 +68,7 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
         lastNotifiedPercent = percent
         lastNotifiedAt = now
 
-        const eta = util.calculateEta(percent, now - +started)
+        const eta = util.calculateEta(percent, now - started)
 
         progress.onProgress(percent, util.secsRemaining(eta))
       }
@@ -82,9 +81,7 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
         percent = ((count / total) * 100)
         const displayPercent = Math.round(percent)
 
-        const isEtaFresh = Date.now() - lastNotifiedAt < util.progressThrottleMs
-
-        if (displayPercent === lastNotifiedPercent && isEtaFresh) {
+        if (displayPercent === lastNotifiedPercent && Date.now() - lastNotifiedAt < util.progressThrottleMs) {
           return
         }
 
@@ -95,8 +92,10 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
         debug('unzipping with node.js (slow)')
 
         // When this is the fallback, the OS tool may already have ticked part
-        // of the archive, but extraction starts over from the first entry.
+        // of the archive and used up time, but extraction starts over from the
+        // first entry, so the progress and the ETA must too.
         count = 0
+        started = Date.now()
         lastNotifiedPercent = undefined
 
         try {
