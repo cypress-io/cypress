@@ -19,7 +19,7 @@ export default [
       '**/*.d.ts',
       'cypress/fixtures/**',
       // graphql-codegen output
-      'src/generated/**',
+      '**/generated/**',
     ],
   },
   {

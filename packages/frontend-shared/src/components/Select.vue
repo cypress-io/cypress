@@ -179,7 +179,7 @@ const props = withDefaults(defineProps<{
   modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string
-  labelId?: string
+  labelId: string
   /**
    * The value of the modelValue to render. `value` by default
    */
@@ -192,7 +192,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   placeholder: '',
   label: '',
-  labelId: undefined,
   itemValue: 'value',
   modelValue: undefined,
   itemKey: 'key',
