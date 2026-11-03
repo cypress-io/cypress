@@ -150,7 +150,7 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, ex
       }
 
       // explicitly set to undefined if config wasn't previously defined
-      if (!globalConfig.hasOwnProperty(key)) {
+      if (!Object.prototype.hasOwnProperty.call(globalConfig, key)) {
         globalConfig[key] = undefined
       }
     })

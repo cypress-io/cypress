@@ -89,7 +89,7 @@ describe('<SelectFrameworkOrBundler />', () => {
   })
 
   it('should select the clicked item', () => {
-    let val = ref('react')
+    const val = ref('react')
 
     cy.mount(() => (
       <SelectFrameworkOrBundler
@@ -97,8 +97,7 @@ describe('<SelectFrameworkOrBundler />', () => {
         selectorType="framework"
         options={manyOptions}
         value={val.value}
-        // @ts-ignore
-        onSelectFramework={(newVal: FrontendFramework) => {
+        onSelectFramework={(newVal: string) => {
           val.value = newVal
         }}
       />
