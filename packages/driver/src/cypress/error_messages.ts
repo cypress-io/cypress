@@ -1382,12 +1382,6 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/press',
     },
-    unsupported_browser: {
-      message: stripIndent`\
-      ${cmd('press')} is not supported in {{family}} browsers.
-      `,
-      docsUrl: 'https://on.cypress.io/press',
-    },
   },
 
   prompt: {

@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
+import { webkitKeyPress } from '../../../lib/automation/commands/key_press'
 import type { RunModeVideoApi } from '@packages/types'
 import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
+
+vi.mock('../../../lib/automation/commands/key_press', () => ({ webkitKeyPress: vi.fn(async () => {}) }))
 
 // sinon's calledBefore: the first call of `first` precedes the last call of `second`
 const expectCalledBefore = (first: Mock, second: Mock) => {
@@ -40,6 +43,7 @@ function createMockBrowser () {
       goto: vi.fn(async () => {}),
       screenshot: vi.fn(async () => Buffer.from('')),
       bringToFront: vi.fn(async () => {}),
+      keyboard: {},
     }
 
     const context: any = {
@@ -320,6 +324,18 @@ describe('lib/browsers/webkit-automation', () => {
       }
 
       expect(error?.message).toContain('Could not find AUT frame')
+    })
+  })
+
+  describe('key:press', () => {
+    it('presses the key with the page keyboard in the AUT frame', async () => {
+      const wkAutomation = await createAutomation()
+      const page = mock.getLastPage()
+      const autFrame = page.mainFrame().childFrames()[0]
+
+      await wkAutomation.onRequest('key:press', { key: 'Tab' })
+
+      expect(webkitKeyPress).toHaveBeenCalledWith('Tab', page.keyboard, autFrame)
     })
   })
 

@@ -3,9 +3,10 @@ import type { Mock } from 'vitest'
 import type { SupportedKey } from '@packages/types'
 import { NamedKeys, toSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
-import { cdpKeyPress, bidiKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
+import { cdpKeyPress, bidiKeyPress, webkitKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
 import type { Client as WebdriverClient } from 'webdriver'
 import type { Protocol } from 'devtools-protocol'
+import type playwright from 'playwright-webkit'
 
 const stubbedClientMethods = ['inputPerformActions', 'inputReleaseActions', 'getActiveElement', 'findElement', 'scriptEvaluate', 'getWindowHandle', 'switchToWindow', 'browsingContextGetTree'] as const
 
@@ -423,6 +424,113 @@ describe('key:press automation command', () => {
           }],
         })
       })
+    })
+  })
+
+  describe('webkit', () => {
+    let keyboard: { down: Mock, up: Mock, insertText: Mock }
+    let frameElement: { evaluate: Mock, dispose: Mock }
+    let autFrame: { frameElement: Mock, evaluate: Mock }
+    let calls: string[]
+
+    const press = (key: SupportedKey) => {
+      return webkitKeyPress(key, keyboard as unknown as playwright.Keyboard, autFrame as unknown as playwright.Frame)
+    }
+
+    beforeEach(() => {
+      calls = []
+      keyboard = {
+        down: vi.fn(async (key: string) => {
+          calls.push(`down:${key}`)
+        }),
+        up: vi.fn(async (key: string) => {
+          calls.push(`up:${key}`)
+        }),
+        insertText: vi.fn(async (text: string) => {
+          calls.push(`insertText:${text}`)
+        }),
+      }
+
+      frameElement = {
+        evaluate: vi.fn(async () => true),
+        dispose: vi.fn(async () => {}),
+      }
+
+      autFrame = {
+        frameElement: vi.fn(async () => frameElement),
+        evaluate: vi.fn(async () => {
+          calls.push('focus')
+        }),
+      }
+    })
+
+    describe('when the aut frame has focus', () => {
+      it('does not refocus the aut frame', async () => {
+        await press(tab)
+
+        expect(autFrame.evaluate).not.toHaveBeenCalled()
+        expect(frameElement.dispose).toHaveBeenCalled()
+      })
+    })
+
+    describe('when the aut frame does not have focus', () => {
+      beforeEach(() => {
+        frameElement.evaluate.mockResolvedValue(false)
+      })
+
+      it('focuses the aut frame before dispatching the key', async () => {
+        await press(tab)
+
+        expect(autFrame.evaluate).toHaveBeenCalledWith('window.focus()')
+        expect(calls).toEqual(['focus', 'down:Tab', 'up:Tab'])
+      })
+    })
+
+    describe('when supplied a valid named key', () => {
+      for (const key of NamedKeys.filter((k) => k !== SpaceKey)) {
+        it(`dispatches keydown and keyup for ${key}`, async () => {
+          await press(key)
+
+          expect(calls).toEqual([`down:${key}`, `up:${key}`])
+        })
+      }
+
+      it('dispatches Space as the space character Playwright expects', async () => {
+        await press(toSupportedKey(SpaceKey))
+
+        expect(calls).toEqual(['down: ', 'up: '])
+      })
+    })
+
+    describe('when supplied a US keyboard character', () => {
+      for (const value of ['a', 'Z', '0', '!', ' ']) {
+        it(`dispatches keydown and keyup for '${value}'`, async () => {
+          await press(toSupportedKey(value))
+
+          expect(calls).toEqual([`down:${value}`, `up:${value}`])
+        })
+      }
+    })
+
+    describe('when supplied a character outside the US keyboard', () => {
+      it('inserts it as text', async () => {
+        await press(toSupportedKey('\u20ac'))
+
+        expect(calls).toEqual(['insertText:\u20ac'])
+        expect(keyboard.down).not.toHaveBeenCalled()
+      })
+
+      it('dispatches each codepoint of a multi-codepoint key in order', async () => {
+        await press(toSupportedKey('e\u0301'))
+
+        expect(calls).toEqual(['down:e', 'up:e', 'insertText:\u0301'])
+      })
+    })
+
+    it('propagates Playwright errors', async () => {
+      keyboard.down.mockRejectedValue(new Error('Target closed'))
+
+      await expect(press(tab)).rejects.toThrow('Target closed')
     })
   })
 })

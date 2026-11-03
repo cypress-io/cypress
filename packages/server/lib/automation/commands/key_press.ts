@@ -3,6 +3,7 @@ import type { SupportedKey, SupportedNamedKey } from '@packages/types'
 import { NamedKeys, toSupportedKey, isSupportedKey, SpaceKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client } from 'webdriver'
+import type playwright from 'playwright-webkit'
 import Debug from 'debug'
 import { isEqual } from 'lodash'
 import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
@@ -97,6 +98,54 @@ export async function cdpKeyPress (
     debug(e)
     throw e
   }
+}
+
+// Playwright names keys the way `KeyboardEvent.key` does, which is the same
+// as SupportedNamedKey except for Space.
+function toPlaywrightKey (key: SupportedKey): string {
+  return key === SpaceKey ? ' ' : key
+}
+
+export async function webkitKeyPress (inKey: SupportedKey, keyboard: playwright.Keyboard, autFrame: playwright.Frame): Promise<void> {
+  const key = toSupportedKey(inKey)
+
+  debug('webkit keypress', { key })
+
+  const autFrameElement = await autFrame.frameElement()
+  const autFrameIsActive = await autFrameElement.evaluate((el) => el.ownerDocument?.activeElement === el)
+
+  await autFrameElement.dispose()
+
+  if (!autFrameIsActive) {
+    debug('aut iframe is not currently focused; focusing aut iframe')
+    await autFrame.evaluate('window.focus()')
+  }
+
+  const isNamedKey = NamedKeys.includes(key)
+  const chars = isNamedKey ? [key] : [...key]
+
+  for (const char of chars) {
+    // Playwright only dispatches key events for keys on its US keyboard layout
+    // and throws `Unknown key` for anything else, so insert other characters as
+    // text, as Playwright's own `keyboard.type()` does. That fires `input`
+    // events but no `keydown` or `keyup`.
+    if (!isNamedKey && !isPrintableAscii(char)) {
+      debug('inserting text', char)
+      await keyboard.insertText(char)
+
+      continue
+    }
+
+    const playwrightKey = toPlaywrightKey(toSupportedKey(char))
+
+    debug('dispatching keydown/keyup', playwrightKey)
+    await keyboard.down(playwrightKey)
+    await keyboard.up(playwrightKey)
+  }
+}
+
+function isPrintableAscii (char: string): boolean {
+  return /^[\x20-\x7E]$/.test(char)
 }
 
 async function getActiveWindow (client: Client) {

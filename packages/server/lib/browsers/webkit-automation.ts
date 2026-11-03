@@ -12,8 +12,9 @@ import utils from './utils'
 import type { CyCookie, CyCookieFilter } from '../automation/cookie/util'
 import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
-import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
+import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName, toSupportedKey } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
+import { webkitKeyPress } from '../automation/commands/key_press'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -407,6 +408,8 @@ export class WebKitAutomation {
         return this.getAutFrame().url()
       case 'get:aut:title':
         return await this.getAutFrame().title()
+      case 'key:press':
+        return await webkitKeyPress(toSupportedKey(data.key), this.page.keyboard, this.getAutFrame())
       case 'focus:browser:window':
         return await this.context.pages()[0]?.bringToFront()
       case 'reset:browser:state':

@@ -39,17 +39,6 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
       return null
     }
 
-    if (Cypress.browser.family === 'webkit') {
-      $errUtils.throwErrByPath('press.unsupported_browser', {
-        onFail: log,
-        args: {
-          family: Cypress.browser.family,
-        },
-      })
-
-      return null
-    }
-
     try {
       const args: AutomationCommands['key:press']['dataType'] = {
         key,

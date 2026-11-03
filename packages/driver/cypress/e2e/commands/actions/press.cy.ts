@@ -1,9 +1,4 @@
 describe('src/cy/commands/actions/press', () => {
-  // TODO: Webkit is not supported. https://github.com/cypress-io/cypress/issues/31054
-  if (Cypress.isBrowser('webkit')) {
-    return
-  }
-
   beforeEach(() => {
     cy.visit('/fixtures/input_events.html')
   })
@@ -45,5 +40,19 @@ describe('src/cy/commands/actions/press', () => {
   ;['a', 'z'].forEach(testKeyDownUp)
 
   // // Special characters
-  ;['!', ' ', '€', 'é'].forEach(testKeyDownUp)
+  ;['!', ' '].forEach(testKeyDownUp)
+
+  // Playwright only sends key events for keys on a US keyboard, so WebKit
+  // inserts other characters as text, without keydown or keyup events.
+  if (Cypress.isBrowser('webkit')) {
+    ;['€', 'é'].forEach((key) => {
+      it(`inserts ${key} into the focused input`, () => {
+        cy.get('#input_source').focus()
+        cy.press(key)
+        cy.get('#input_source').should('have.value', key)
+      })
+    })
+  } else {
+    ;['€', 'é'].forEach(testKeyDownUp)
+  }
 })
