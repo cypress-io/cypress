@@ -632,6 +632,50 @@ From Your Spec Code:
     at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`)
     })
 
+    it('leaves off the invocation stack when a cy.prompt bundle queued the command', () => {
+      const stack = `\
+Error: Cannot read properties of undefined (reading 'SAVE10')
+    at Object.applyDiscount (http://localhost:3500/app.html:13:30)
+    at sendEvent (http://localhost:3500/__cypress/runner/cypress_runner.js:300:32)`
+      const bundleInvocationStack = `\
+Error: userInvocationStack
+    at CyPromptDriver.runStep (http://localhost:3500/__cypress-cy-prompt/driver/cy-prompt.js:609:20)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, bundleInvocationStack)).to.equal(`\
+Error: Cannot read properties of undefined (reading 'SAVE10')
+    at Object.applyDiscount (http://localhost:3500/app.html:13:30)`)
+    })
+
+    it('leaves off the invocation stack when the stack already shows its line', () => {
+      const stack = `\
+TypeError: step failed
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)
+    at runnable.fn (http://localhost:3500/__cypress/runner/cypress_runner.js:905:19)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(stack, commandInvocationStack)).to.equal(`\
+TypeError: step failed
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`)
+    })
+
+    it('treats cy.prompt and Studio bundle frames as Cypress frames', () => {
+      const promptStack = `\
+TypeError: step failed
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:46)
+    at CyPromptDriver.runStep (http://localhost:3500/__cypress-cy-prompt/driver/cy-prompt.js:609:20)`
+      const studioStack = `\
+TypeError: step failed
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:46)
+    at StudioPanel.record (http://localhost:3500/__cypress-studio/app-studio.js:42:7)`
+      const expected = `\
+TypeError: step failed
+    at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:13:46)
+From Your Spec Code:
+    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/spec.cy.js:12:7)`
+
+      expect($stackUtils.stackWithCommandInvocationStackAppended(promptStack, commandInvocationStack)).to.equal(expected)
+      expect($stackUtils.stackWithCommandInvocationStackAppended(studioStack, commandInvocationStack)).to.equal(expected)
+    })
+
     it('recognizes promise library frames from dev builds', () => {
       const stack = `\
 Error: User 7 not found in seed data

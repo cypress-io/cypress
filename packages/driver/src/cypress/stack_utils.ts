@@ -26,10 +26,17 @@ const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
 // Cypress's own frames before source mapping: the runner bundle in the binary,
-// or the cypress:/// namespace dev builds give the driver and its dependencies,
-// such as Bluebird
+// the cypress:/// namespace dev builds give the driver and its dependencies
+// such as Bluebird, and the cy.prompt and Studio bundles served from Cypress Cloud
+const INTERNAL_STACK_LINE_IDENTIFIERS = [
+  '/__cypress/runner',
+  'cypress:///',
+  '/__cypress-cy-prompt/',
+  '/__cypress-studio/',
+]
+
 const isInternalStackLine = (line: string) => {
-  return line.includes('/__cypress/runner') || line.includes('cypress:///')
+  return INTERNAL_STACK_LINE_IDENTIFIERS.some((identifier) => line.includes(identifier))
 }
 
 const hasCrossFrameStacks = (specWindow) => {
@@ -153,6 +160,11 @@ export type StackAndCodeFrameIndex = {
 // with the command's invocation stack points back to the test code that queued
 // the command. A stack that starts inside Cypress is left alone so internal
 // errors keep their full trace.
+//
+// The invocation stack is left off when it would not point to the user's code:
+// when a Cypress bundle such as cy.prompt queued the command, or when the
+// stack already shows that line, as it does when an error's stack is set to
+// the command's own invocation stack.
 const stackWithCommandInvocationStackAppended = (stack: string, commandInvocationStack: string) => {
   const [messageLines, stackLines] = splitStack(_.trim(stack, '\n'))
   const firstInternalIndex = _.findIndex(stackLines, isInternalStackLine)
@@ -160,6 +172,12 @@ const stackWithCommandInvocationStackAppended = (stack: string, commandInvocatio
   if (firstInternalIndex === 0) return stack
 
   const userLines = firstInternalIndex < 0 ? stackLines : stackLines.slice(0, firstInternalIndex)
+  const [invocationLine] = getStackLines(commandInvocationStack)
+  const pointsToUserCode = !!invocationLine
+    && !isInternalStackLine(invocationLine)
+    && !userLines.some((line) => line.trim() === invocationLine.trim())
+
+  if (!pointsToUserCode) return unsplitStack(messageLines, userLines)
 
   return unsplitStack(messageLines, [...userLines, 'From Your Spec Code:', stackWithoutMessage(commandInvocationStack)])
 }
