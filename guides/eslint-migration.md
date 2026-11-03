@@ -40,7 +40,7 @@
 - [x] packages/network-tools
 - [x] packages/socket
 - [x] packages/telemetry
-- [ ] packages/launchpad
+- [x] packages/launchpad
 - [x] packages/errors
 - [ ] packages/data-context
 - [ ] packages/app
