@@ -15,6 +15,7 @@ import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
+import { endRunOnConfigProcessExit, isConfigProcessExit, wasConfigProcessExitReported } from '../util/config_process_exit'
 import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
@@ -1140,6 +1141,15 @@ async function ready (options: ReadyOptions) {
 
   const onError = options.onError = (err) => {
     debug('onError', new Error().stack)
+
+    if (isConfigProcessExit(err)) {
+      return endRunOnConfigProcessExit(err)
+    }
+
+    if (wasConfigProcessExitReported()) {
+      return
+    }
+
     earlyExitTerminator.exitEarly(err)
   }
 

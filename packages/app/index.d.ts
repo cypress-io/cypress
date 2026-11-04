@@ -1,7 +1,7 @@
 /// <reference path="../driver/types/internal-types-lite.d.ts" />
 
 import type { SocketShape } from '@packages/socket/browser/client'
-import type MobX from 'mobx'
+import type * as MobX from 'mobx'
 import type { TapManager } from './src/tap/tap-manager'
 import type { EventManager } from './src/runner/event-manager'
 
