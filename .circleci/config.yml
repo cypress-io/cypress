@@ -13,9 +13,6 @@ workflows:
                   - pack-workflows
 
 parameters:
-  publish-binary-branch:
-    type: string
-    default: main
   force-persist-artifacts:
     type: boolean
     default: false
@@ -122,6 +119,9 @@ commands:
                 - matches:
                     pattern: /^release\/.*/
                     value: <<pipeline.git.branch>>
+                - matches:
+                    pattern: /^v\d+$/
+                    value: <<pipeline.git.branch>>
           steps:
             - run:
                 name: Cancel CI
@@ -131,7 +131,16 @@ commands:
                   }
 
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-                    DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+                    PR_API_URL="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}"
+
+                    # Unauthenticated requests from CircleCI's shared IPs can get a
+                    # throttling or "forbidden" page instead of JSON, so treat an
+                    # unreadable response as not a draft rather than failing the pipeline.
+                    DRAFT=$(curl --silent --show-error --fail --max-time 15 "${PR_API_URL}" | jq -r '.draft' 2>/dev/null) || DRAFT=unknown
+
+                    if [[ "${DRAFT}" != true && "${DRAFT}" != false ]]; then
+                      echo "Could not read the PR's draft status from GitHub (got: ${DRAFT:-empty}); running CI."
+                    fi
 
                     if [[ "${DRAFT}" == true ]]; then
                       echo "Skipping CI; PR is in draft - to trigger CI , click the 'Trigger Pipeline' button in the CircleCI UI."

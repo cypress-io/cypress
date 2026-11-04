@@ -7,7 +7,7 @@ import { defaultMessages } from '@cy/i18n'
 let specs: Array<any> = []
 
 describe('InlineSpecList', () => {
-  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: {specFilter?: string, experimentalRunAllSpecs?: boolean} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
+  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: { specFilter?: string, experimentalRunAllSpecs?: boolean } = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
     onResult: (ctx) => {
       if (!ctx.currentProject?.specs) {
         return ctx
@@ -197,7 +197,7 @@ describe('InlineSpecList', () => {
 
   describe('Run all Specs', () => {
     const hoverRunAllSpecs = (directory: string, specNumber: number) => {
-      let command = cy.contains('[data-cy=directory-item]', directory)
+      const command = cy.contains('[data-cy=directory-item]', directory)
 
       return command.realHover().then(() => {
         cy.get('[data-cy=play-button]').should('exist')

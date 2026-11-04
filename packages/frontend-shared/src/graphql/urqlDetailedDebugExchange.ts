@@ -44,8 +44,7 @@ export const detailedDebugExchange: Exchange = ({ forward }) => {
     return pipe(
       ops$,
       tap((op) => {
-        // @ts-ignore
-        window.__toPrint__.queries[(op.query.definitions[0] as OperationDefinitionNode).name?.value] = print(op.query)
+        window.__toPrint__.queries[String((op.query.definitions[0] as OperationDefinitionNode).name?.value)] = print(op.query)
         window.__toPrint__.logs.push(JSON.parse(JSON.stringify({
           debugType: 'incoming',
           timestamp: new Date().valueOf(),
