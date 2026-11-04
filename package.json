@@ -25,7 +25,7 @@
     "check-terminal": "node scripts/check-terminal.js",
     "check-ts": "yarn lerna run check-ts",
     "clean": "lerna run clean --no-bail || echo 'ok, errors while cleaning'",
-    "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
+    "clean-deps": "find . -name node_modules -type d -prune -exec rm -rf {} +",
     "clean-untracked-files": "git clean -d -f",
     "codegen": "yarn gulp codegen",
     "cypress:open": "yarn gulp open --dev --global",
