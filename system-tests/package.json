@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "node ./scripts/scaffold.js",
-    "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
+    "clean-deps": "find . -name node_modules -type d -prune -exec rm -rf {} +",
     "lint": "eslint",
     "preprojects:yarn:install": "yarn clean-deps",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
