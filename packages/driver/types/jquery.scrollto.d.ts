@@ -11,7 +11,13 @@ type JQueryScrollToTarget<TElement> =
   | JQuery<TElement>
   | { top?: JQueryScrollToPosition, left?: JQueryScrollToPosition }
 
-interface JQueryScrollToOptions<TElement = HTMLElement> extends Omit<JQuery.EffectsOptions<TElement>, 'duration'> {
+// `Omit` can't drop `duration` here: `EffectsOptions` has a `[key: string]: any` index
+// signature, so `Omit` would keep only that and leave every animation option untyped.
+type JQueryEffectsOptionsWithoutDuration<TElement> = {
+  [K in keyof JQuery.EffectsOptions<TElement> as K extends 'duration' ? never : K]: JQuery.EffectsOptions<TElement>[K]
+}
+
+interface JQueryScrollToOptions<TElement = HTMLElement> extends JQueryEffectsOptionsWithoutDuration<TElement> {
   /** Axes to scroll, in order: `'x'`, `'y'`, `'xy'` or `'yx'`. */
   axis?: string
   /**
