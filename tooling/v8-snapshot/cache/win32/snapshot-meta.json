@@ -3940,6 +3940,7 @@
     "./packages/types/cjs/git.js",
     "./packages/types/cjs/index.js",
     "./packages/types/cjs/injection.js",
+    "./packages/types/cjs/keyboard-layout.js",
     "./packages/types/cjs/modeOptions.js",
     "./packages/types/cjs/preferences.js",
     "./packages/types/cjs/protocol.js",
@@ -3954,5 +3955,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "cf533e738816c161c62f76cba195759d03b8d02d537869d7eb2249db1619061f"
+  "deferredHash": "4e774ecf64b6cf31f8745a8be07364fcb3e3df29594dd429ad8317e363420584"
 }

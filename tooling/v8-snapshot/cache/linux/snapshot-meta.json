@@ -3940,6 +3940,7 @@
     "./packages/types/cjs/git.js",
     "./packages/types/cjs/index.js",
     "./packages/types/cjs/injection.js",
+    "./packages/types/cjs/keyboard-layout.js",
     "./packages/types/cjs/modeOptions.js",
     "./packages/types/cjs/preferences.js",
     "./packages/types/cjs/protocol.js",
@@ -3954,5 +3955,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "38e714976062adc8da9e3cba10a28e002b94b64788868a9342666ea37e033884"
+  "deferredHash": "e1037c52aa74538a5047f8bde7ab054851c91e6f891d25531ceac83c86e24204"
 }
