@@ -16,7 +16,7 @@
     "watch": "tsc --watch"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
