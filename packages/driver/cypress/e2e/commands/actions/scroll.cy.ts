@@ -355,8 +355,15 @@ describe('src/cy/commands/actions/scroll', () => {
         const animate = cy.spy($.fn, 'animate')
 
         cy.get('#scroll-to-both').scrollTo('25px', { duration: '500' }).then(() => {
-          expect(animate).to.be.calledOnce
-          expect(animate.firstCall.args[1].duration).to.eq(500)
+          expect(animate).to.be.calledWithMatch({}, { duration: 500 })
+        })
+      })
+
+      it('scrolls instantly for a duration of \'0\'', () => {
+        const animate = cy.spy($.fn, 'animate')
+
+        cy.get('#scroll-to-both').scrollTo('25px', { duration: '0' }).then(() => {
+          expect(animate).to.be.calledWithMatch({}, { duration: 0 })
         })
       })
 
@@ -892,8 +899,15 @@ describe('src/cy/commands/actions/scroll', () => {
       const animate = cy.spy($.fn, 'animate')
 
       cy.get('#scroll-into-view-both h5').scrollIntoView({ duration: '500' }).then(() => {
-        expect(animate).to.be.calledOnce
-        expect(animate.firstCall.args[1].duration).to.eq(500)
+        expect(animate).to.be.calledWithMatch({}, { duration: 500 })
+      })
+    })
+
+    it('scrolls instantly for a duration of \'0\'', () => {
+      const animate = cy.spy($.fn, 'animate')
+
+      cy.get('#scroll-into-view-both h5').scrollIntoView({ duration: '0' }).then(() => {
+        expect(animate).to.be.calledWithMatch({}, { duration: 0 })
       })
     })
 
