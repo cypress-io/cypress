@@ -650,6 +650,30 @@ describe('lib/browsers/firefox', () => {
         }
       })
 
+      it('makes the next launch wait for the failed session to close', async () => {
+        const sessionClosed = Promise.withResolvers<void>()
+
+        wdInstance.deleteSession = vi.fn().mockReturnValue(sessionClosed.promise)
+
+        const firstLaunch = expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        await vi.waitFor(() => expect(wdInstance.deleteSession).toHaveBeenCalledOnce())
+
+        wdInstance.sessionSubscribe = vi.fn().mockResolvedValue(undefined)
+        const secondLaunch = firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        await vi.waitFor(() => expect(utils.getProfileDir).toHaveBeenCalledTimes(2))
+        await new Promise((resolve) => setTimeout(resolve, 50))
+
+        expect(webdriver.newSession).toHaveBeenCalledOnce()
+
+        sessionClosed.resolve()
+        await firstLaunch
+        await secondLaunch
+
+        expect(webdriver.newSession).toHaveBeenCalledTimes(2)
+      })
+
       it('still throws FIREFOX_COULD_NOT_CONNECT if killing firefox fails', async () => {
         vi.spyOn(process, 'kill').mockImplementation(() => {
           throw new Error('EPERM')
@@ -685,6 +709,22 @@ describe('lib/browsers/firefox', () => {
         await firefox.open(browser as any, 'http://', options as any, automation as any)
 
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).toBeUndefined()
+      })
+
+      it('removes session profiles left in the profile directory by a previous launch', async () => {
+        mockfs({
+          '/path/to/appData/firefox-stable/interactive/': {
+            'rust_mozprofileAbC123': { 'prefs.js': '' },
+            'chrome': { 'userChrome.css': '[foo userChrome.css]' },
+          },
+        })
+
+        options.isTextTerminal = true
+
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileAbC123')).toBeUndefined()
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/chrome')).toBeDefined()
       })
 
       it('creates chrome/userChrome.css if not exist', async () => {
@@ -771,6 +811,21 @@ describe('lib/browsers/firefox', () => {
         expectCalledWith(kill, 5678)
         // makes sure the exit event is called to signal to the rest of cypress server that the processes are killed
         expectCalledWith(emit, 'exit')
+      })
+
+      it('kills geckodriver even if killing firefox throws', async () => {
+        const kill = vi.spyOn(process, 'kill').mockImplementation((pid) => {
+          if (pid === 1234) {
+            throw new Error('EPERM')
+          }
+
+          return true
+        })
+
+        const instance = await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        expect(() => instance.kill()).toThrow('EPERM')
+        expectCalledWith(kill, 5678)
       })
 
       it('swallows ESRCH in kill method if thrown', async () => {

@@ -381,6 +381,32 @@ let browserBidiClient: BidiAutomation | undefined
 
 const DELETE_FAILED_SESSION_TIMEOUT = 10000
 
+// the next launch reuses the profile directory, so it waits for a failed launch's session to finish closing
+let failedLaunchCleanup: Promise<void> = Promise.resolve()
+
+function deleteFailedSession (session: WebDriverClient, killBrowserAndDriver: () => unknown): Promise<void> {
+  return Bluebird.resolve(session.deleteSession())
+  .timeout(DELETE_FAILED_SESSION_TIMEOUT)
+  .then(() => undefined, (deleteSessionErr) => {
+    debug('error deleting webdriver session after failed launch, killing firefox and geckodriver: %o', deleteSessionErr)
+
+    try {
+      killBrowserAndDriver()
+    } catch (killErr) {
+      debug('error killing firefox and geckodriver after failed launch: %o', killErr)
+    }
+  })
+}
+
+// a killed geckodriver leaves its rust_mozprofile copy in the profile directory, which would be encoded into the next session's profile
+async function removeLeftoverSessionProfiles (profileDir: string) {
+  const entries = await fs.readdir(profileDir).catch(() => [] as string[])
+
+  await Promise.all(entries
+  .filter((entry) => entry.startsWith('rust_mozprofile'))
+  .map((entry) => fs.remove(path.join(profileDir, entry))))
+}
+
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
@@ -537,6 +563,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   debug('available ports: %o', { marionettePort, webDriverBiDiPort })
 
   const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
+
+  await failedLaunchCleanup
+  await removeLeftoverSessionProfiles(profileDir)
 
   // Delete the legacy profile directory if in open mode.
   // Cypress does this because profiles are sourced and created differently with geckodriver/webdriver.
@@ -719,6 +748,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       debug('closing firefox')
 
       let browserReturnStatus = true
+      let browserKillError: unknown
 
       try {
         browserReturnStatus = process.kill(browserPID)
@@ -726,7 +756,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         if ((error as CypressError)?.code === 'ESRCH') {
           debugVerbose('browser process no longer exists. continuing...')
         } else {
-          throw error
+          browserKillError = error
         }
       }
 
@@ -742,6 +772,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         } else {
           throw error
         }
+      }
+
+      if (browserKillError) {
+        throw browserKillError
       }
 
       // needed for closing the browser when switching browsers in open mode to signal
@@ -774,17 +808,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   } catch (err: unknown) {
     // delete the session so it doesn't leak into the next launch
     if (launchedSession) {
-      await Bluebird.resolve(launchedSession.deleteSession())
-      .timeout(DELETE_FAILED_SESSION_TIMEOUT)
-      .catch((deleteSessionErr) => {
-        debug('error deleting webdriver session after failed launch, killing firefox and geckodriver: %o', deleteSessionErr)
-
-        try {
-          browserInstanceWrapper.kill()
-        } catch (killErr) {
-          debug('error killing firefox and geckodriver after failed launch: %o', killErr)
-        }
-      })
+      failedLaunchCleanup = deleteFailedSession(launchedSession, browserInstanceWrapper.kill)
+      await failedLaunchCleanup
     }
 
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
