@@ -43,12 +43,13 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **Padding**: Enforces blank lines between statements
 
 ### Temporarily Disabled Rules
-Many rules are currently disabled during ESLint development but should eventually be enabled:
+Some recommended rules are turned off because the codebase still has many violations. They live in the "gold standard, but have many violations" block of [`src/baseConfig.ts`](./src/baseConfig.ts):
 - TypeScript-specific rules (`@typescript-eslint/*`)
 - Mocha testing rules
 - Vue component rules
 - Cypress-specific rules
-- React rules (set to warn)
+
+Re-enabling them, one rule or a small group at a time, is tracked in [cypress-io/cypress#35250](https://github.com/cypress-io/cypress/issues/35250). React rules are set to warn.
 
 ## Usage
 
@@ -56,17 +57,21 @@ Many rules are currently disabled during ESLint development but should eventuall
 This package is private and intended for internal use within the Cypress monorepo.
 
 ### Basic Setup
+The configs are named exports; the package has no default export.
+
 ```typescript
 // eslint.config.ts
-import baseConfig from '@packages/eslint-config'
+import { baseConfig } from '@packages/eslint-config'
 
-export default baseConfig
+export default [
+  ...baseConfig,
+]
 ```
 
 ### With Custom Overrides
 ```typescript
 // eslint.config.ts
-import baseConfig from '@packages/eslint-config'
+import { baseConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -118,9 +123,11 @@ Configuration files like `vite.config.mjs` and `webpack.config.*` get Node.js gl
 The base configuration includes shared Node.js and browser globals, plus ES2020 features.
 
 ## Ignored Files
-The configuration automatically ignores:
+The configuration automatically ignores these paths, relative to each workspace's root:
 - `.releaserc.js`
+- `cjs/**/*`
 - `dist/**/*`
+- `esm/**/*`
 - `**/__snapshots__/**/*`
 - `test/.mocharc.js`
 
