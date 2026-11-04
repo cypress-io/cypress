@@ -3,8 +3,8 @@
  * workspace and other environments; rejects invalid development selectors. The CLI
  * cannot import @packages/config, so keep this aligned with its resolver.
  */
-export function resolveDevelopmentWorkspaceNumber (environment: string | undefined, env: NodeJS.ProcessEnv = process.env): number | undefined {
-  const workspaceNum = env.CYPRESS_INTERNAL_WORKSPACE_NUM
+export function resolveDevelopmentCloudWorkspaceNumber (environment: string | undefined, env: NodeJS.ProcessEnv = process.env): number | undefined {
+  const workspaceNum = env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM
   const useDevelopmentWorkspace = environment === 'development' && workspaceNum !== undefined
 
   if (!useDevelopmentWorkspace) {
