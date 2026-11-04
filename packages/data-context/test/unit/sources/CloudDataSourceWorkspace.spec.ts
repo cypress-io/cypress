@@ -9,7 +9,7 @@ describe('CloudDataSource development workspace', () => {
   beforeEach(() => {
     process.env = { ...processEnv }
     delete process.env.CYPRESS_INTERNAL_CLOUD_ENV
-    delete process.env.CYPRESS_INTERNAL_WORKSPACE_NUM
+    delete process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM
   })
 
   afterEach(() => {
@@ -35,7 +35,7 @@ describe('CloudDataSource development workspace', () => {
   it.each([0, 1, 2, 3, 4, 5])('sends GraphQL requests to workspace %s with the development Cloud override', async (workspace) => {
     process.env.CYPRESS_INTERNAL_ENV = 'production'
     process.env.CYPRESS_INTERNAL_CLOUD_ENV = 'development'
-    process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = String(workspace)
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = String(workspace)
 
     const { source, fetch } = createSource()
 
@@ -54,10 +54,10 @@ describe('CloudDataSource development workspace', () => {
 
     const { source } = createSource()
 
-    process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '0'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '0'
     expect(source.getCloudUrl('development')).toBe('http://localhost:3000')
 
-    process.env.CYPRESS_INTERNAL_WORKSPACE_NUM = '4'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
     expect(source.getCloudUrl('development')).toBe('http://localhost:43000')
     expect(source.getCloudUrl('production')).toBe('https://cloud.cypress.io')
     expect(source.getCloudUrl('staging')).toBe('https://cloud-staging.cypress.io')

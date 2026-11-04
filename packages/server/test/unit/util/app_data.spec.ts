@@ -52,7 +52,7 @@ describe('lib/util/app_data', () => {
       vi.spyOn(osPath, 'data').mockReturnValue('/app-data')
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
       vi.stubEnv('CYPRESS_CONFIG_ENV', undefined)
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', undefined)
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', undefined)
       vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', undefined)
     })
 
@@ -61,20 +61,20 @@ describe('lib/util/app_data', () => {
     })
 
     it.each([1, 2, 3, 4, 5])('isolates cached user data for workspace %s', (workspace) => {
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', String(workspace))
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', String(workspace))
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', `development-workspace-${workspace}`, 'cache'))
     })
 
     it.each([undefined, '0'])('preserves the default folder with selector %s', (workspace) => {
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', workspace)
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', workspace)
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', 'development', 'cache'))
     })
 
     it.each(['production', 'staging', 'test'])('does not alter the %s folder', (environment) => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', environment)
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', 'invalid')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', 'invalid')
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', environment, 'cache'))
     })
@@ -82,29 +82,29 @@ describe('lib/util/app_data', () => {
     it('honors CYPRESS_CONFIG_ENV when it selects development', () => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
       vi.stubEnv('CYPRESS_CONFIG_ENV', 'development')
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', '4')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', 'development-workspace-4', 'cache'))
     })
 
     it('ignores the workspace when CYPRESS_CONFIG_ENV overrides development', () => {
       vi.stubEnv('CYPRESS_CONFIG_ENV', 'staging')
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', 'invalid')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', 'invalid')
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', 'staging', 'cache'))
     })
 
     it('keeps the self-testing suffix after the workspace suffix', () => {
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', '4')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
       vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', '1')
 
       expect(AppData.path('cache')).toBe(path.join('/app-data', 'Cypress', 'cy', 'development-workspace-4-e2e-test', 'cache'))
     })
 
     it.each(['', '6', '7'])('rejects invalid development workspace %j', (workspace) => {
-      vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', workspace)
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', workspace)
 
-      expect(() => AppData.path('cache')).toThrow('CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 5')
+      expect(() => AppData.path('cache')).toThrow('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM must be an integer from 0 to 5')
     })
   })
 

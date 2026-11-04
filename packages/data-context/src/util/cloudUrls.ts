@@ -1,4 +1,4 @@
-import { resolveDevelopmentWorkspaceUrl } from '@packages/config'
+import { resolveDevelopmentCloudWorkspaceUrl } from '@packages/config'
 
 export const CLOUD_URLS = {
   development: 'http://localhost:3000',
@@ -10,7 +10,7 @@ export type CloudEnv = keyof typeof CLOUD_URLS
 
 /** Resolves the Cloud URL for the selected environment, applying the development workspace offset. */
 export function resolveCloudUrl (environment: CloudEnv, env: NodeJS.ProcessEnv = process.env): string {
-  return resolveDevelopmentWorkspaceUrl(CLOUD_URLS[environment], environment, env)
+  return resolveDevelopmentCloudWorkspaceUrl(CLOUD_URLS[environment], environment, env)
 }
 
 export function resolveCloudEnv (env: NodeJS.ProcessEnv = process.env): CloudEnv {

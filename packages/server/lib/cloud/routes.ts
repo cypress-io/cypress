@@ -1,13 +1,13 @@
 import _ from 'lodash'
 import UrlParse from 'url-parse'
-import { resolveDevelopmentWorkspaceUrl } from '@packages/config'
+import { resolveDevelopmentCloudWorkspaceUrl } from '@packages/config'
 
 const app_config = require('../../config/app.json')
 
 export const getApiUrl = (): string => {
   const environment = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
 
-  return resolveDevelopmentWorkspaceUrl(app_config[environment].api_url, environment)
+  return resolveDevelopmentCloudWorkspaceUrl(app_config[environment].api_url, environment)
 }
 
 const CLOUD_ENDPOINTS = {

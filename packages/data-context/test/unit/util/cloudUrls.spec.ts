@@ -3,7 +3,7 @@ import { resolveCloudEnv, resolveCloudUrl } from '../../../src/util/cloudUrls'
 
 describe('resolveCloudUrl', () => {
   it.each([0, 1, 2, 3, 4, 5])('targets development workspace %s', (workspace) => {
-    expect(resolveCloudUrl('development', { CYPRESS_INTERNAL_WORKSPACE_NUM: String(workspace) })).toBe(`http://localhost:${workspace * 10000 + 3000}`)
+    expect(resolveCloudUrl('development', { CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM: String(workspace) })).toBe(`http://localhost:${workspace * 10000 + 3000}`)
   })
 
   it('keeps the default development URL without a workspace', () => {
@@ -14,7 +14,7 @@ describe('resolveCloudUrl', () => {
     const env = {
       CYPRESS_INTERNAL_ENV: 'production',
       CYPRESS_INTERNAL_CLOUD_ENV: 'development',
-      CYPRESS_INTERNAL_WORKSPACE_NUM: '4',
+      CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM: '4',
     }
 
     expect(resolveCloudUrl(resolveCloudEnv(env), env)).toBe('http://localhost:43000')
@@ -24,14 +24,14 @@ describe('resolveCloudUrl', () => {
     const env = {
       CYPRESS_INTERNAL_ENV: 'development',
       CYPRESS_INTERNAL_CLOUD_ENV: 'staging',
-      CYPRESS_INTERNAL_WORKSPACE_NUM: 'invalid',
+      CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM: 'invalid',
     }
 
     expect(resolveCloudUrl(resolveCloudEnv(env), env)).toBe('https://cloud-staging.cypress.io')
   })
 
   it('does not apply the workspace to production', () => {
-    expect(resolveCloudUrl('production', { CYPRESS_INTERNAL_WORKSPACE_NUM: '4' })).toBe('https://cloud.cypress.io')
+    expect(resolveCloudUrl('production', { CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM: '4' })).toBe('https://cloud.cypress.io')
   })
 })
 

@@ -11,7 +11,7 @@ import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
 import { monorepoPaths } from '../monorepoPaths'
 import { spawned, universalSpawn } from '../utils/childProcessUtils'
 import { DEFAULT_INTERNAL_CLOUD_ENV } from '../gulpConstants'
-import { resolveDevelopmentWorkspaceUrl } from '../../../packages/config/src/developmentWorkspaceUrl'
+import { resolveDevelopmentCloudWorkspaceUrl } from '../../../packages/config/src/developmentWorkspaceUrl'
 
 export async function nexusCodegen () {
   return nexusTypegen({
@@ -90,7 +90,7 @@ export async function syncRemoteGraphQL () {
   }
 
   try {
-    const cloudUrl = resolveDevelopmentWorkspaceUrl(ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV], DEFAULT_INTERNAL_CLOUD_ENV)
+    const cloudUrl = resolveDevelopmentCloudWorkspaceUrl(ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV], DEFAULT_INTERNAL_CLOUD_ENV)
     const body = await rp.get(`${cloudUrl}/test-runner-graphql-schema`)
 
     // TODO(tim): fix

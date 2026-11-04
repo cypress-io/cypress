@@ -4,20 +4,20 @@
  * cannot import @packages/config, so keep this aligned with its resolver.
  */
 export function resolveDevelopmentCloudWorkspaceNumber (environment: string | undefined, env: NodeJS.ProcessEnv = process.env): number | undefined {
-  const workspaceNum = env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM
-  const useDevelopmentWorkspace = environment === 'development' && workspaceNum !== undefined
+  const cloudWorkspaceNum = env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM
+  const useDevelopmentCloudWorkspace = environment === 'development' && cloudWorkspaceNum !== undefined
 
-  if (!useDevelopmentWorkspace) {
+  if (!useDevelopmentCloudWorkspace) {
     return undefined
   }
 
-  const isValidWorkspace = /^[0-5]$/.test(workspaceNum ?? '')
+  const isValidCloudWorkspace = /^[0-5]$/.test(cloudWorkspaceNum ?? '')
 
-  if (!isValidWorkspace) {
-    throw new Error(`CYPRESS_INTERNAL_WORKSPACE_NUM must be an integer from 0 to 5; received ${JSON.stringify(workspaceNum)}`)
+  if (!isValidCloudWorkspace) {
+    throw new Error(`CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM must be an integer from 0 to 5; received ${JSON.stringify(cloudWorkspaceNum)}`)
   }
 
-  const isDefaultWorkspace = workspaceNum === '0'
+  const isDefaultCloudWorkspace = cloudWorkspaceNum === '0'
 
-  return isDefaultWorkspace ? undefined : Number(workspaceNum)
+  return isDefaultCloudWorkspace ? undefined : Number(cloudWorkspaceNum)
 }

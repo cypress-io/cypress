@@ -5,7 +5,7 @@ import util, { DEVELOPMENT_VERSION } from '../util'
 import { resolvedSessionIdentity } from '../cypress-sessions'
 import { detectAgent } from '@packages/agent-info'
 import type { ReportedInvocation } from './reported-invocation'
-import { resolveDevelopmentWorkspaceNumber } from '../development-workspace'
+import { resolveDevelopmentCloudWorkspaceNumber } from '../development-workspace'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -38,8 +38,8 @@ const namedCollectorEnv = (): keyof typeof CLOUD_URLS | undefined => {
 
 const eventCollectorUrl = (includeMachineId = false): string => {
   const environment = namedCollectorEnv() ?? 'production'
-  const workspaceNum = resolveDevelopmentWorkspaceNumber(environment)
-  const cloudUrl = workspaceNum === undefined ? CLOUD_URLS[environment] : `http://localhost:${3000 + workspaceNum * 10000}`
+  const cloudWorkspaceNum = resolveDevelopmentCloudWorkspaceNumber(environment)
+  const cloudUrl = cloudWorkspaceNum === undefined ? CLOUD_URLS[environment] : `http://localhost:${3000 + cloudWorkspaceNum * 10000}`
 
   return `${cloudUrl}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
 }

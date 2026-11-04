@@ -5,7 +5,7 @@ describe('CloudRequest development workspace', () => {
   beforeEach(() => {
     vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
     vi.stubEnv('CYPRESS_CONFIG_ENV', undefined)
-    vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', '4')
+    vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
   })
 
   afterEach(() => {
@@ -21,7 +21,7 @@ describe('CloudRequest development workspace', () => {
   })
 
   it('does not validate the workspace when a base URL is explicitly provided', () => {
-    vi.stubEnv('CYPRESS_INTERNAL_WORKSPACE_NUM', 'invalid')
+    vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', 'invalid')
 
     expect(createCloudRequest({ baseURL: 'http://localhost:9999' }).defaults.baseURL).toBe('http://localhost:9999')
   })

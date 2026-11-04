@@ -9,7 +9,7 @@ import { getCwd } from '../cwd'
 import md5 from 'md5'
 import sanitize from 'sanitize-filename'
 import replace from 'lodash/replace'
-import { resolveDevelopmentWorkspaceNumber } from '@packages/config'
+import { resolveDevelopmentCloudWorkspaceNumber } from '@packages/config'
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -155,12 +155,12 @@ export const path = (...paths: string[]): string => {
   // allow overriding the app_data folder
   const internalEnv = env.CYPRESS_INTERNAL_ENV as string
   let folder: string = env.CYPRESS_CONFIG_ENV || internalEnv
-  const workspaceNum = resolveDevelopmentWorkspaceNumber(folder, env)
-  const hasWorkspace = workspaceNum !== undefined
+  const cloudWorkspaceNum = resolveDevelopmentCloudWorkspaceNumber(folder, env)
+  const hasCloudWorkspace = cloudWorkspaceNum !== undefined
 
-  if (hasWorkspace) {
+  if (hasCloudWorkspace) {
     // Isolate cached credentials and preferences for each local Cloud database.
-    folder = `${folder}-workspace-${workspaceNum}`
+    folder = `${folder}-workspace-${cloudWorkspaceNum}`
   }
 
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
