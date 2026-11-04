@@ -38,15 +38,19 @@ describe('ProjectConfigIpc', () => {
       await scaffoldCommonNodeModules()
     })
 
+    let onError: jest.Mock<ProjectConfigIpc['onError']>
+
     beforeEach(async () => {
       const projectPath = await scaffoldProject('e2e')
+
+      onError = jest.fn<ProjectConfigIpc['onError']>()
 
       projectConfigIpc = new ProjectConfigIpc(
         undefined,
         projectPath,
         path.join(projectPath, 'cypress.config.js'),
         'cypress.config.js',
-        (error) => {},
+        onError,
         () => {},
         () => {},
       )
@@ -113,6 +117,54 @@ describe('ProjectConfigIpc', () => {
 
         await expect(setupNodeEvents).rejects.toEqual(configProcessError(err))
       }, 20_000)
+    })
+
+    describe('the child exits before it replies', () => {
+      const exitedError = expect.objectContaining({
+        type: 'CONFIG_FILE_UNEXPECTED_ERROR',
+        title: 'Config process error',
+        originalError: expect.objectContaining({ message: expect.stringContaining('SIGKILL') }),
+      })
+
+      it('rejects loadConfig() with a config process error', async () => {
+        const loadConfig = projectConfigIpc.loadConfig()
+
+        projectConfigIpc['_childProcess'].kill('SIGKILL')
+
+        await expect(loadConfig).rejects.toEqual(exitedError)
+      }, 20_000)
+
+      it('rejects registerSetupIpcHandlers() with a config process error', async () => {
+        const setupNodeEvents = projectConfigIpc['registerSetupIpcHandlers']()
+
+        projectConfigIpc['_childProcess'].kill('SIGKILL')
+
+        await expect(setupNodeEvents).rejects.toEqual(exitedError)
+      }, 20_000)
+
+      it('reports nothing when the child exits after both replies', async () => {
+        await projectConfigIpc.loadConfig()
+
+        const setupNodeEvents = projectConfigIpc['registerSetupIpcHandlers']()
+
+        projectConfigIpc.emit('setupTestingType:reply', { setupConfig: null, requires: [], registrations: [] })
+        await setupNodeEvents
+
+        const exited = new Promise((resolve) => projectConfigIpc.on('exit', resolve))
+
+        projectConfigIpc['_childProcess'].kill('SIGKILL')
+        await exited
+
+        expect(onError).not.toHaveBeenCalled()
+      }, 20_000)
+    })
+
+    it('does not throw when the child reports an error after cleanup', () => {
+      projectConfigIpc.cleanupIpc()
+
+      expect(() => {
+        projectConfigIpc['_childProcess'].emit('error', Object.assign(new Error('write EPIPE'), { code: 'EPIPE' }))
+      }).not.toThrow()
     })
   })
 })

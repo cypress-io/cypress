@@ -42,6 +42,10 @@ const tsx = os.platform() === 'win32' ? `file://${toPosix(require.resolve('tsx')
 
 export type PluginIpcHandler = (ipc: ProjectConfigIpc) => void
 
+const exitedBeforeReply = (code: number | null, signal: NodeJS.Signals | null) => {
+  return new Error(`The config process exited before it replied (exit code: ${code}, signal: ${signal})`)
+}
+
 /**
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
  */
@@ -193,6 +197,11 @@ export class ProjectConfigIpc extends EventEmitter {
       this._childProcess.on('exit', (code, signal) => {
         debug('child process %s exited with code %s and signal %s', this._childProcess.pid, code, signal)
         this.emit('exit', code, signal)
+
+        if (!resolved) {
+          this.handleChildProcessError(exitedBeforeReply(code, signal), this, resolved, reject)
+        }
+
         this.cleanupIpc()
       })
 
@@ -271,6 +280,12 @@ export class ProjectConfigIpc extends EventEmitter {
 
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
+      })
+
+      this._childProcess.once('exit', (code, signal) => {
+        if (!resolved) {
+          this.handleChildProcessError(exitedBeforeReply(code, signal), this, resolved, reject)
+        }
       })
 
       // For every registration event, we want to turn into an RPC with the child process
@@ -441,6 +456,11 @@ export class ProjectConfigIpc extends EventEmitter {
     this._childProcess.stdout?.removeAllListeners()
     this._childProcess.stderr?.removeAllListeners()
     this._childProcess.removeAllListeners()
+    // A send that was already under way can still fail with EPIPE after this, and an
+    // 'error' event with no listener would be thrown in this process.
+    this._childProcess.on('error', (err) => {
+      debug('child process %s error after cleanup: %s', this._childProcess.pid, err)
+    })
 
     if (this._childProcess.killed || !this._childProcess.connected) {
       debug('child process %s already killed', this._childProcess.pid)
