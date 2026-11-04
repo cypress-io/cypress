@@ -90,7 +90,7 @@ export default [
 ]
 ```
 
-`jsonConfig` enforces two-space JSON layout, `package.json` key order and sorted `scripts` and dependency maps, using `eslint-plugin-jsonc` and `eslint-plugin-package-json`. See the [ESLint migration guide](../../guides/eslint-migration.md#7-lint-json-with-jsonconfig).
+`jsonConfig` enforces two-space JSON layout, `package.json` key order and sorted `scripts` and dependency maps, using `eslint-plugin-jsonc` and `eslint-plugin-package-json`. See [`jsonConfig`](./AGENTS.md#jsonconfig).
 
 ### With GraphQL Linting
 
@@ -104,7 +104,7 @@ export default [
 ]
 ```
 
-`graphqlConfig()` validates `gql` template literals in `.js`, `.ts`, `.jsx`, `.tsx` and `.vue` files against `packages/data-context/schemas/schema.graphql`. Only `app`, `launchpad`, `frontend-shared` and `data-context` use it. See the [ESLint migration guide](../../guides/eslint-migration.md#13-lint-gql-templates-with-graphqlconfig).
+`graphqlConfig()` validates `gql` template literals in `.js`, `.ts`, `.jsx`, `.tsx` and `.vue` files against `packages/data-context/schemas/schema.graphql`. Only `app`, `launchpad`, `frontend-shared` and `data-context` use it. See [`graphqlConfig`](./AGENTS.md#graphqlconfig).
 
 ## Environment-Specific Configurations
 
