@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "156.0.8078.79"
+chrome-stable-version: &chrome-stable-version "157.0.8103.38"
 chrome-beta-version: &chrome-beta-version "158.0.8127.2"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "156.0.8078.80"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "157.0.8103.38"
 firefox-stable-version: &firefox-stable-version "154.0"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:24.22.1-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.22.1-yarn-berry
@@ -569,7 +569,8 @@ commands:
           condition: <<parameters.only-cache-for-root-user>> # we don't move to /tmp since we don't need to worry about different users
           steps:
             - save_cache:
-                name: Saving node modules for root, cli, system-tests, scripts, and all globbed workspace packages
+                name: Saving node modules for root, cli, system-tests, scripts, and all globbed
+                  workspace packages
                 key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
                   }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
@@ -582,7 +583,8 @@ commands:
           condition: <<parameters.only-cache-for-root-user>>
           steps:
             - save_cache:
-                name: Saving node modules for root, cli, system-tests, scripts, and all globbed workspace packages
+                name: Saving node modules for root, cli, system-tests, scripts, and all globbed
+                  workspace packages
                 key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
                   }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
