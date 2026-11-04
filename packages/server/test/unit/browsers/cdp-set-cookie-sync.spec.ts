@@ -607,6 +607,14 @@ describe('planSetCookieSync', () => {
       })).toEqual([set({ name: 'a', value: '1', url: REQUEST_URL, path: '/', secure: false, httpOnly: false })])
     })
 
+    // Chrome holds the origin's last value, a=2, but the handler's last is a=1
+    it('writes the handler\'s last value when it only swaps the headers', async () => {
+      expect(await plan({
+        setCookieHeadersFromOrigin: ['a=1; Path=/', 'a=2; Path=/'],
+        setCookieHeadersAfterIntercept: ['a=2; Path=/', 'a=1; Path=/'],
+      })).toEqual([set({ name: 'a', value: '1', url: REQUEST_URL, path: '/', secure: false, httpOnly: false })])
+    })
+
     // on localhost, both headers set the one host-only cookie a=1. The handler
     // still sets it with the header it kept, so nothing is planned: a removal
     // for the dropped header would delete the cookie the handler kept.
@@ -819,6 +827,21 @@ describe('planSetCookieSync', () => {
         url: REQUEST_URL,
         cookiesBeforeIntercept: beforeIntercept(['a=1; Path=/; Secure; SameSite=None', 'b=2']),
         setCookieHeadersAfterIntercept: ['a=1; Path=/; Secure; SameSite=None', 'b=2'],
+        includeWrites: true,
+        getChromeCookieStore,
+      })
+
+      expect(commands).toEqual([])
+      expect(getChromeCookieStore).not.toHaveBeenCalled()
+    })
+
+    it('plans nothing and never reads the store when the handler only reordered different cookies', async () => {
+      const getChromeCookieStore = vi.fn(async (): Promise<ChromeStoreCookie[]> => [])
+
+      const commands = await planSetCookieSync({
+        url: REQUEST_URL,
+        cookiesBeforeIntercept: beforeIntercept(['a=1', 'b=2']),
+        setCookieHeadersAfterIntercept: ['b=2', 'a=1'],
         includeWrites: true,
         getChromeCookieStore,
       })

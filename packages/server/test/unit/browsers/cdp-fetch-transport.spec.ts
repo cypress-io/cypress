@@ -758,6 +758,71 @@ describe('CdpFetchTransport', () => {
       expect(encoded.responseHeaders).toBeUndefined()
     })
 
+    describe('continuing a response whose headers only changed order', () => {
+      const decodePausedResponse = (codec: ReturnType<typeof createCdpFetchCodec>, responseHeaders: Protocol.Fetch.HeaderEntry[]) => {
+        const request: CdpFetchTransportRequest = {
+          id: 'network-1',
+          url: 'https://example.test/',
+          method: 'GET',
+          headers: {},
+          initialPriority: 'High',
+          referrerPolicy: 'strict-origin-when-cross-origin',
+        }
+
+        codec.decodeRequest(request)
+
+        return codec.decodeResponse({
+          ...request,
+          requestId: 'fetch-request',
+          responseCode: 200,
+          responseStatusText: 'OK',
+          responseHeaders,
+          originalBodyDigest: digestBody(Buffer.from('origin')),
+        })
+      }
+
+      it('omits the headers when only their order and casing changed', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, [
+          { name: 'Content-Type', value: 'text/plain' },
+          { name: 'X-Foo', value: 'bar' },
+        ])
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: 'origin',
+          headers: { 'x-foo': 'bar', 'content-type': 'text/plain' },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toBeUndefined()
+      })
+
+      // the later of two lines for the same cookie is the one stored, so the
+      // reorder has to reach the set-cookie sync
+      it('sends the headers when Set-Cookie lines were reordered', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, [
+          { name: 'content-type', value: 'text/plain' },
+          { name: 'set-cookie', value: 'a=1' },
+          { name: 'set-cookie', value: 'a=2' },
+        ])
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: 'origin',
+          headers: { 'content-type': 'text/plain', 'set-cookie': ['a=2', 'a=1'] },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toStrictEqual([
+          { name: 'content-type', value: 'text/plain' },
+          { name: 'set-cookie', value: 'a=2' },
+          { name: 'set-cookie', value: 'a=1' },
+        ])
+      })
+    })
+
     it('fulfills a skipped response when middleware sets a body', () => {
       const codec = createCdpFetchCodec()
 
