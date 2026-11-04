@@ -3115,7 +3115,6 @@ jobs:
               exit 0
             fi
 
-            # Not the commit author: develop commits can be outside contributors', and vN cherry-picks keep the original author
             REPO="$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
             COMMIT_URL="https://github.com/$REPO/commit/$CIRCLE_SHA1"
             # CIRCLE_BUILD_URL points at this notifier, which is green and tells
