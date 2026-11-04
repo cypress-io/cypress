@@ -443,7 +443,7 @@ linux-x64:
     # settle however it settles; the job itself decides whether anything actually
     # failed.
     - notify-binary-failure:
-        context: app-foundations-oncall-slack
+        context: test-runner:slack
         filters: pipeline.git.branch == "develop" or pipeline.git.branch matches /^v\d+$/
         requires:
           # the packaging job is listed too: when it breaks, the

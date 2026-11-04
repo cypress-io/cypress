@@ -80,7 +80,7 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 
   It reads job statuses from the CircleCI API without a token, which works only
   because the project is public. It posts with `SLACK_ONCALL_WEBHOOK_URL` and
-  `APP_FOUNDATIONS_ONCALL_SUBTEAM_ID` from the `app-foundations-oncall-slack`
+  `APP_FOUNDATIONS_ONCALL_SUBTEAM_ID` from the `test-runner:slack`
   context, which is restricted to `develop` and `vN` branches.
 
 ## GitHub Actions
