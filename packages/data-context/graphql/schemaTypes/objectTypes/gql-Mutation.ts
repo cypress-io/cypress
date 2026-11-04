@@ -339,7 +339,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
-        let path = args.path
+        const path = args.path
 
         if (!path) {
           await ctx.actions.project.addProjectFromElectronNativeFolderSelect()
@@ -733,7 +733,7 @@ export const mutation = mutationType({
         })))),
       },
       resolve: (source, args, ctx) => {
-        ctx.coreData.cloudProject.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+        ctx.coreData.cloudProject.testsForRunResults = args.testsBySpec.reduce<{ [index: string]: string[] }>((acc, spec) => {
           acc[spec.specPath] = spec.tests
 
           return acc

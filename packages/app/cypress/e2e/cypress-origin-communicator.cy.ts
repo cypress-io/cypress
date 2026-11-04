@@ -65,15 +65,14 @@ describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 1000
       trackRemoveAllListenersOnAllCypressInstances()
 
       cy.window().then((win) => {
-        // @ts-ignore
         const comm = win.Cypress.primaryOriginCommunicator as any
 
-        // @ts-ignore — hold stub across navigation for the assertion below
+        // @ts-expect-error - test-only window property that carries the stub across navigation
         window.__cyCommunicatorMapTest = { postMessage: cy.stub() }
 
         comm.onMessage({
           data: { event: 'cross:origin:bridge:ready', origin: 'https://cypress-map-teardown-test.invalid' },
-          // @ts-ignore
+          // @ts-expect-error - test-only window property that carries the stub across navigation
           source: window.__cyCommunicatorMapTest,
         })
       })
@@ -84,15 +83,14 @@ describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 1000
       assertZeroArgCleanupFired()
 
       cy.window().then((win) => {
-        // @ts-ignore
         const comm = win.Cypress.primaryOriginCommunicator as any
-        // @ts-ignore
+        // @ts-expect-error - test-only window property that carries the stub across navigation
         const stub = window.__cyCommunicatorMapTest
 
         stub.postMessage.resetHistory()
         comm.toAllSpecBridges('test:map:should:not:reach:stub', {})
         expect(stub.postMessage).not.to.have.been.called
-        // @ts-ignore
+        // @ts-expect-error - test-only window property that carries the stub across navigation
         delete window.__cyCommunicatorMapTest
       })
     })
