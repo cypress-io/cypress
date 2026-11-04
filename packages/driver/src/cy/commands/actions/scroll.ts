@@ -30,6 +30,12 @@ const isNaNOrInfinity = (item) => {
   return _.isNaN(num) || !_.isFinite(num)
 }
 
+// jQuery's animate() reads only a number as milliseconds, and animates any
+// other value that isn't 'fast' or 'slow' for its 400ms default
+const toMilliseconds = (duration: unknown) => {
+  return Number.parseFloat(String(duration))
+}
+
 interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions> {
   _log?: Log
   $el: JQuery
@@ -97,6 +103,8 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollIntoView.invalid_duration', { args: { duration: options.duration } })
       }
 
+      const duration = toMilliseconds(options.duration)
+
       if (!((options.easing === 'swing') || (options.easing === 'linear'))) {
         $errUtils.throwErrByPath('scrollIntoView.invalid_easing', { args: { easing: options.easing } })
       }
@@ -131,7 +139,7 @@ export default (Commands, Cypress, cy, state) => {
           return $(options.$parent).scrollTo(options.$el, {
             axis: options.axis,
             easing: options.easing,
-            duration: options.duration,
+            duration,
             offset: options.offset,
             done () {
               return resolve(options.$el)
@@ -265,6 +273,8 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollTo.invalid_duration', { args: { duration: options.duration } })
       }
 
+      const duration = toMilliseconds(options.duration)
+
       if (!((options.easing === 'swing') || (options.easing === 'linear'))) {
         $errUtils.throwErrByPath('scrollTo.invalid_easing', { args: { easing: options.easing } })
       }
@@ -382,7 +392,7 @@ export default (Commands, Cypress, cy, state) => {
           $(options.$el).scrollTo({ left: x, top: y }, {
             axis: options.axis,
             easing: options.easing,
-            duration: options.duration,
+            duration,
             done () {
               return resolve(options.$el)
             },
