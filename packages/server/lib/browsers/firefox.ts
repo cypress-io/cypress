@@ -20,7 +20,7 @@ import { getCtx } from '@packages/data-context'
 import type { CypressError } from '@packages/errors'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
-import type { RemoteConfig } from 'webdriver'
+import type { Client as WebDriverClient, RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
 import { WebDriver } from './webdriver'
 
@@ -644,6 +644,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   browserInstanceWrapper.kill = () => undefined
 
+  let launchedSession: WebDriverClient | undefined
+
   try {
   /**
    * To set the profile, we use the profile capabilities in firefoxOptions which
@@ -692,6 +694,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // to debug webdriver, set the DEBUG=cypress-verbose:server:browsers:webdriver (debugs a third-party patched package webdriver to enable console output)
     // @see ./firefox_automation.md
     const webdriverClient = await WD.newSession(newSessionCapabilities)
+
+    launchedSession = webdriverClient
 
     debugVerbose(`received capabilities %o`, webdriverClient.capabilities)
 
@@ -765,6 +769,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     debug('setting up firefox utils')
     browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient })
   } catch (err: unknown) {
+    // delete the session so it doesn't leak into the next launch
+    await launchedSession?.deleteSession().catch((deleteSessionErr) => {
+      debug('error deleting webdriver session after failed launch: %o', deleteSessionErr)
+    })
+
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
   }
 

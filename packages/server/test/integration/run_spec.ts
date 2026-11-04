@@ -12,6 +12,7 @@ import { ProjectBase } from '../../lib/project-base'
 import { ServerBase } from '../../lib/server-base'
 import devServer from '../../lib/plugins/dev-server'
 import * as errors from '../../lib/errors'
+import { stripAnsi } from '@packages/errors'
 
 describe('lib/modes/run', () => {
   let browserConnectTimeoutPlaceholder
@@ -239,6 +240,36 @@ describe('lib/modes/run', () => {
     // Initial launch + retry for the first spec, then a successful launch per
     // remaining spec — assert we retried at least once past the initial failure.
     expect(launchAttempt).to.be.greaterThan(1)
+  })
+
+  it('launches a fresh browser for the next spec when the browser never connected', async () => {
+    const launches: { spec: string, shouldLaunchNewTab: boolean }[] = []
+
+    // each spec's results are read before that spec launches, so only the first spec sees the error
+    Object.defineProperty(globalThis.CY_TEST_MOCK, 'listenForProjectEnd', {
+      get: () => {
+        return launches.length === 0
+          ? { error: stripAnsi(errors.get('TESTS_DID_NOT_START_FAILED').message), stats: { failures: 1 } }
+          : { stats: { failures: 0 } }
+      },
+    })
+
+    // @ts-expect-error - fake resolves without a BrowserInstance
+    sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {
+      launches.push({ spec: spec as unknown as string, shouldLaunchNewTab: browserOpts.shouldLaunchNewTab })
+
+      if (spec as unknown as string === 'foo.cy.ts') {
+        return Promise.reject(errors.get('FIREFOX_COULD_NOT_CONNECT', new Error('No connection to WebDriver Bidi was established')))
+      }
+
+      return Promise.resolve()
+    })
+
+    await run(options, Promise.resolve())
+
+    expect(launches.filter(({ spec }) => spec === 'foo.cy.ts')).to.have.length(3)
+    expect(launches.find(({ spec }) => spec === 'bar.cy.ts')?.shouldLaunchNewTab).to.equal(false)
+    expect(launches.find(({ spec }) => spec === 'baz.cy.ts')?.shouldLaunchNewTab).to.equal(true)
   })
 
   describe('experimentalSingleTabRunMode', () => {

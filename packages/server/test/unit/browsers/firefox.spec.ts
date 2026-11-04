@@ -606,6 +606,34 @@ describe('lib/browsers/firefox', () => {
       expect(result.kill).toBeInstanceOf(Function)
     })
 
+    describe('when the launch fails after the WebDriver session is created', () => {
+      beforeEach(() => {
+        wdInstance.sessionSubscribe = vi.fn().mockRejectedValue(new Error('No connection to WebDriver Bidi was established'))
+        wdInstance.deleteSession = vi.fn().mockResolvedValue(undefined)
+      })
+
+      it('deletes the session and throws FIREFOX_COULD_NOT_CONNECT', async () => {
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        expect(wdInstance.deleteSession).toHaveBeenCalledOnce()
+      })
+
+      it('still throws FIREFOX_COULD_NOT_CONNECT if deleting the session fails', async () => {
+        wdInstance.deleteSession = vi.fn().mockRejectedValue(new Error('session already gone'))
+
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+      })
+    })
+
+    it('does not delete a session when the WebDriver session could not be created', async () => {
+      wdInstance.deleteSession = vi.fn()
+      vi.mocked(webdriver.newSession).mockRejectedValue(new Error('session not created'))
+
+      await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+      expect(wdInstance.deleteSession).not.toHaveBeenCalled()
+    })
+
     describe('profile/extension', () => {
       afterEach(() => {
         return mockfs.restore()
