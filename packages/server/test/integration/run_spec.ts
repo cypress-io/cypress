@@ -12,7 +12,6 @@ import { ProjectBase } from '../../lib/project-base'
 import { ServerBase } from '../../lib/server-base'
 import devServer from '../../lib/plugins/dev-server'
 import * as errors from '../../lib/errors'
-import { stripAnsi } from '@packages/errors'
 
 describe('lib/modes/run', () => {
   let browserConnectTimeoutPlaceholder
@@ -244,15 +243,6 @@ describe('lib/modes/run', () => {
 
   it('launches a fresh browser for the next spec when the browser never connected', async () => {
     const launches: { spec: string, shouldLaunchNewTab: boolean }[] = []
-
-    // each spec's results are read before that spec launches, so only the first spec sees the error
-    Object.defineProperty(globalThis.CY_TEST_MOCK, 'listenForProjectEnd', {
-      get: () => {
-        return launches.length === 0
-          ? { error: stripAnsi(errors.get('TESTS_DID_NOT_START_FAILED').message), stats: { failures: 1 } }
-          : { stats: { failures: 0 } }
-      },
-    })
 
     // @ts-expect-error - fake resolves without a BrowserInstance
     sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {

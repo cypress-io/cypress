@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
 import EventEmitter from 'events'
 import fs from 'fs-extra'
 import Debug from 'debug'
@@ -377,6 +378,8 @@ toolbox {
 `
 
 let browserBidiClient: BidiAutomation | undefined
+
+const DELETE_FAILED_SESSION_TIMEOUT = 10000
 
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
@@ -770,9 +773,19 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient })
   } catch (err: unknown) {
     // delete the session so it doesn't leak into the next launch
-    await launchedSession?.deleteSession().catch((deleteSessionErr) => {
-      debug('error deleting webdriver session after failed launch: %o', deleteSessionErr)
-    })
+    if (launchedSession) {
+      await Bluebird.resolve(launchedSession.deleteSession())
+      .timeout(DELETE_FAILED_SESSION_TIMEOUT)
+      .catch((deleteSessionErr) => {
+        debug('error deleting webdriver session after failed launch, killing firefox and geckodriver: %o', deleteSessionErr)
+
+        try {
+          browserInstanceWrapper.kill()
+        } catch (killErr) {
+          debug('error killing firefox and geckodriver after failed launch: %o', killErr)
+        }
+      })
+    }
 
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
   }

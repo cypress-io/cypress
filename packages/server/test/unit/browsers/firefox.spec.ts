@@ -618,7 +618,43 @@ describe('lib/browsers/firefox', () => {
         expect(wdInstance.deleteSession).toHaveBeenCalledOnce()
       })
 
-      it('still throws FIREFOX_COULD_NOT_CONNECT if deleting the session fails', async () => {
+      it('kills firefox and geckodriver and still throws FIREFOX_COULD_NOT_CONNECT if deleting the session fails', async () => {
+        const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
+
+        wdInstance.deleteSession = vi.fn().mockRejectedValue(new Error('session already gone'))
+
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        expectCalledWith(kill, 1234)
+        expectCalledWith(kill, 5678)
+      })
+
+      it('kills firefox and geckodriver if deleting the session does not finish', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+        try {
+          const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
+
+          wdInstance.deleteSession = vi.fn().mockReturnValue(new Promise(() => {}))
+
+          const opened = expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+          await vi.waitFor(() => expect(wdInstance.deleteSession).toHaveBeenCalledOnce())
+          await vi.advanceTimersByTimeAsync(10000)
+          await opened
+
+          expectCalledWith(kill, 1234)
+          expectCalledWith(kill, 5678)
+        } finally {
+          vi.useRealTimers()
+        }
+      })
+
+      it('still throws FIREFOX_COULD_NOT_CONNECT if killing firefox fails', async () => {
+        vi.spyOn(process, 'kill').mockImplementation(() => {
+          throw new Error('EPERM')
+        })
+
         wdInstance.deleteSession = vi.fn().mockRejectedValue(new Error('session already gone'))
 
         await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })

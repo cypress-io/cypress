@@ -32,7 +32,6 @@ import { createPublicBrowser, createPublicConfig, createPublicRunResults, create
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
-import { stripAnsi } from '@packages/errors'
 import type { CypressError } from '@packages/errors'
 import { isRunningAsElectronProcess } from '../util/electron-app'
 
@@ -869,7 +868,6 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   }
 
   let isFirstSpecInBrowser = true
-  const browserNeverConnectedMessage = stripAnsi(errors.get('TESTS_DID_NOT_START_FAILED').message)
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number, instanceId: string) {
     const span = telemetry.startSpan({
@@ -911,9 +909,9 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       }
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
+    const { results, browserNeverConnected } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    if (results?.error?.includes('We detected that the Chrome process just crashed with code') || results?.error === browserNeverConnectedMessage) {
+    if (results?.error?.includes('We detected that the Chrome process just crashed with code') || browserNeverConnected) {
       // If the browser has crashed or never launched, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
       isFirstSpecInBrowser = true
     } else {
@@ -1042,6 +1040,8 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
   const videoRecording = await getVideoRecording()
 
+  let browserNeverConnected = false
+
   // we know we're done running headlessly
   // when the renderer has connected and
   // finishes running all of the tests.
@@ -1068,9 +1068,14 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       project,
       browser,
       screenshots,
-      onError: (...args) => {
+      onError: (err) => {
         debug('onError from runSpec')
-        onError(...args)
+
+        if ('type' in err && err.type === 'TESTS_DID_NOT_START_FAILED') {
+          browserNeverConnected = true
+        }
+
+        onError(err)
       },
       videoRecording,
       socketId: options.socketId,
@@ -1084,7 +1089,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
     }),
   ])
 
-  return { results }
+  return { results, browserNeverConnected }
 }
 
 export interface ReadyOptions {
