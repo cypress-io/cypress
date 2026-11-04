@@ -33,7 +33,7 @@ src/
 - Prefer adding an override here over repeating it in several packages. A rule only one package needs goes in that package's `eslint.config.ts`, after the shared configs.
 - Flat config replaces a rule's options rather than merging them. A package that redefines a rule already set here drops the shared options, so extend the shared block instead. `frontendOverrides`'s `no-restricted-imports` is the usual case.
 - `baseConfig`, `jsonConfig` and the other blocks are named exports; `src/index.ts` has no default export.
-- The repo root has its own `eslint.config.ts`, which lints only repo-root files and ignores every subdirectory. Each workspace lints itself.
+- The repo root has its own `eslint.config.ts`, which lints only repo-root files and ignores every subdirectory. Each workspace lints itself. `lerna run lint` only reaches workspaces, so the root `lint` and `lint:fix` scripts run `lint:root` first, which is how CI's `linux-lint` job covers the root files.
 
 ## Adding a workspace
 
