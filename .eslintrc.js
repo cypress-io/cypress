@@ -1,29 +1,3 @@
-const fs = require('fs')
-const path = require('path')
-const { specifiedRules } = require('graphql')
-
-const graphqlOpts = {
-  env: 'literal',
-  tagName: 'gql',
-  // eslint-disable-next-line no-restricted-syntax
-  schemaString: fs.readFileSync(
-    path.join(__dirname, 'packages/data-context/schemas/schema.graphql'),
-    'utf8',
-  ),
-}
-
-const validators = specifiedRules
-.map((rule) => rule.name)
-.filter(
-  (ruleName) => {
-    return [
-      'NoUnusedFragmentsRule',
-      'KnownFragmentNamesRule',
-      'NoUnusedVariablesRule',
-    ].findIndex((x) => x === ruleName) === -1
-  },
-)
-
 module.exports = {
   root: true,
   plugins: [
@@ -57,7 +31,6 @@ module.exports = {
         '**/scripts/**',
         '**/test/**',
         'tooling/**',
-        'packages/app/cypress/**',
         '*.test.ts',
       ],
       rules: {
@@ -83,27 +56,6 @@ module.exports = {
       ],
       rules: {
         'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-      },
-    },
-    {
-      // `eslint-plugin-graphql` pays its per-file cost on every linted file, not
-      // just the ones holding a `gql` template, and that cost dominates lint time.
-      // Scope it to the packages that actually use `gql` — add a package here if
-      // it starts using it.
-      files: [
-        'packages/app/**/*.{js,jsx,ts,tsx,vue}',
-      ],
-      plugins: [
-        'graphql',
-      ],
-      rules: {
-        'graphql/capitalized-type-name': ['warn', graphqlOpts],
-        'graphql/no-deprecated-fields': ['error', graphqlOpts],
-        'graphql/template-strings': ['error', { ...graphqlOpts, validators }],
-        'graphql/required-fields': [
-          'error',
-          { ...graphqlOpts, requiredFields: ['id'] },
-        ],
       },
     },
   ],

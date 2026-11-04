@@ -36,11 +36,13 @@
         :has-banner-been-shown="false"
         :event-data="undefined"
       >
+        <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown from the i18n no-runs message -->
         <div
           ref="markdownTarget"
           class="warning-markdown"
           v-html="markdown"
         />
+        <!-- eslint-enable vue/no-v-html -->
       </TrackedBanner>
       <Warning
         v-if="!online"

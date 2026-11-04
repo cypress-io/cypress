@@ -5,7 +5,7 @@ import Experiments from './Experiments.vue'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<Experiments />', { viewportWidth: 800, viewportHeight: 600 }, () => {
-  let experimentEntries = config.filter((a) => a.field.startsWith('experimental'))
+  const experimentEntries = config.filter((a) => a.field.startsWith('experimental'))
 
   it('renders experiments that are passed in', () => {
     cy.mountFragment(ExperimentsFragmentDoc, {

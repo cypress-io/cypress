@@ -256,8 +256,8 @@ const { t } = useI18n()
 
 const props = defineProps<{
   spec: Spec
-  testResults: {[thumbprint: string]: TestResults[]}
-  groups: {[groupId: string]: StatsMetadata_GroupsFragment }
+  testResults: { [thumbprint: string]: TestResults[] }
+  groups: { [groupId: string]: StatsMetadata_GroupsFragment }
   testingType: TestingTypeEnum
   foundLocally: boolean
   matchesCurrentTestingType: boolean

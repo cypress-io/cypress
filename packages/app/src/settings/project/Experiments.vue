@@ -59,19 +59,23 @@ const localExperiments = computed(() => {
 
   // get experimental retry properties on the 'retries' config object. Mutate the experimentalConfigurations array as to not have side effects with props.gql.config
   // TODO: remove this once experimentalRetries becomes GA. This is to be treated as a one off as supported nested experiments inside config is rare.
-  const { value: { experimentalStrategy, experimentalOptions, from } } = props.gql?.config.find((item) => item.field === 'retries')
+  const retries = props.gql?.config.find((item) => item.field === 'retries')
 
-  experimentalConfigurations.push({
-    field: 'retries.experimentalStrategy',
-    from,
-    value: experimentalStrategy,
-  })
+  if (retries) {
+    const { value: { experimentalStrategy, experimentalOptions, from } } = retries
 
-  experimentalConfigurations.push({
-    field: 'retries.experimentalOptions',
-    from,
-    value: experimentalOptions,
-  })
+    experimentalConfigurations.push({
+      field: 'retries.experimentalStrategy',
+      from,
+      value: experimentalStrategy,
+    })
+
+    experimentalConfigurations.push({
+      field: 'retries.experimentalOptions',
+      from,
+      value: experimentalOptions,
+    })
+  }
   // end TODO removal
 
   return experimentalConfigurations.map((configItem) => {
