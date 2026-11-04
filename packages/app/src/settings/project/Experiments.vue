@@ -55,25 +55,26 @@ const props = defineProps<{
 
 const localExperiments = computed(() => {
   // get experiments out of the config
-  const experimentalConfigurations = props.gql?.config ? (props.gql.config as CypressResolvedConfig).filter((item) => item.field.startsWith('experimental')) : []
+  const config: CypressResolvedConfig = props.gql?.config ?? []
+  const experimentalConfigurations: { field: string, value: unknown }[] = config.filter((item) => item.field.startsWith('experimental'))
 
   // get experimental retry properties on the 'retries' config object. Mutate the experimentalConfigurations array as to not have side effects with props.gql.config
   // TODO: remove this once experimentalRetries becomes GA. This is to be treated as a one off as supported nested experiments inside config is rare.
-  const retries = props.gql?.config.find((item) => item.field === 'retries')
+  const retries = config.find((item) => item.field === 'retries')
 
   if (retries) {
-    const { value: { experimentalStrategy, experimentalOptions, from } } = retries
+    const { value } = retries
+    // `retries` may also be a number, or null to turn retries off; neither sets the experimental options
+    const options = value && typeof value === 'object' && !Array.isArray(value) ? value : undefined
 
     experimentalConfigurations.push({
       field: 'retries.experimentalStrategy',
-      from,
-      value: experimentalStrategy,
+      value: options?.experimentalStrategy,
     })
 
     experimentalConfigurations.push({
       field: 'retries.experimentalOptions',
-      from,
-      value: experimentalOptions,
+      value: options?.experimentalOptions,
     })
   }
   // end TODO removal

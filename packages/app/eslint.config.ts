@@ -42,6 +42,10 @@ export default [
     ignores: [
       // Written by `yarn build`
       'src/generated/**/*',
+      // Data that specs load as written; the mochaEvents snapshots are rewritten by
+      // `cypress:run:e2e:update:snapshots`
+      'cypress/fixtures/**/*',
+      'cypress/e2e/runner/snapshots/**/*',
     ],
   },
 ]

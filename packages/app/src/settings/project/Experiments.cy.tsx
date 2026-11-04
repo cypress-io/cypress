@@ -62,6 +62,34 @@ describe('<Experiments />', { viewportWidth: 800, viewportHeight: 600 }, () => {
     cy.get('[data-cy^="experiment-retries."]').should('not.exist')
   })
 
+  it('renders the experimental retries options as disabled when retries is null', () => {
+    cy.mountFragment(ExperimentsFragmentDoc, {
+      onResult (result) {
+        result.config.find((item) => item.field === 'retries').value = null
+      },
+      render (gql) {
+        return <Experiments gql={gql} />
+      },
+    })
+
+    cy.get('[data-cy="experiment-retries.experimentalStrategy"]').should('contain', 'Disabled')
+    cy.get('[data-cy="experiment-retries.experimentalOptions"]').should('contain', 'Disabled')
+  })
+
+  it('renders no experiments when the project has no config', () => {
+    cy.mountFragment(ExperimentsFragmentDoc, {
+      onResult (result) {
+        result.config = null
+      },
+      render (gql) {
+        return <Experiments gql={gql} />
+      },
+    })
+
+    cy.get('[data-cy="settings-experiments"]').should('be.visible')
+    cy.get('[data-cy^="experiment-"]').should('not.exist')
+  })
+
   it('renders no experiments without project data', () => {
     cy.mount(<Experiments gql={null} />)
 
