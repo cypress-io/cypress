@@ -64,6 +64,11 @@ describe('e2e video compression', () => {
           this.retries(15)
         }
 
+        if (browserName === 'chrome' && !headed) {
+          // ffmpeg occasionally cannot seek to the final frame while the file is still being finalized
+          this.retries(15)
+        }
+
         process.env.VIDEO_COMPRESSION_THROTTLE = '10'
 
         const { stdout } = await exec()
