@@ -31,6 +31,7 @@
 - Fixed an issue where `cypress open` and `cypress run` on Linux failed to start with a "Missing X server or $DISPLAY" error when `DISPLAY` pointed to an X server that was not running. Cypress now starts its own Xvfb and retries. Fixed in [#35114](https://github.com/cypress-io/cypress/pull/35114).
 - When the Cypress binary cannot be saved while it downloads, such as when the disk is full, [`cypress install`](https://on.cypress.io/command-line#cypress-install) and `npm install cypress` now fail with the underlying error, such as `ENOSPC: no space left on device`, and delete the partially downloaded file, instead of crashing with a Node.js stack trace and leaving the file behind in the temporary folder. Fixed in [#35219](https://github.com/cypress-io/cypress/pull/35219).
 - Fixed an issue where, in `cypress open` and `cypress run`, the browser launched by Cypress kept loading forever with no error when the Cypress installation was missing some of its files. Cypress now shows an error that names the missing file after a few seconds. Fixed in [#35232](https://github.com/cypress-io/cypress/pull/35232).
+- Fixed an issue where, in `cypress run` with Firefox, a spec where the browser never connected caused the next spec to crash the whole run. The next spec now launches a new browser. Failed attempts to connect to Firefox also no longer leave Firefox processes running. Fixed in [#35246](https://github.com/cypress-io/cypress/pull/35246).
 
 **Misc:**
 
