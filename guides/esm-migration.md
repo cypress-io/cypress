@@ -25,7 +25,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] cli ✅ **COMPLETED** 
 - [x] npm/angular ✅ **COMPLETED** 
 - [x] npm/cypress-schematic ✅ **COMPLETED**
-- ~~npm/eslint-plugin-dev~~ — **SKIP**: private, no longer published, and deleted once every package is on `@packages/eslint-config`. See [the ESLint migration guide](./eslint-migration.md).
+- ~~npm/eslint-plugin-dev~~ — **SKIP**: deleted; its rules live in `@packages/eslint-config`.
 - [x] npm/grep ✅ **COMPLETED** 
 - [x] npm/mount-utils ✅ **COMPLETED**  
 - [x] npm/puppeteer ✅ **COMPLETED** 
@@ -121,7 +121,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 
 TBD: details will be clearer at the end of Phase 2
 
-Lint ignores build output centrally, so a package that emits `cjs/` and `esm/` needs no ignore entries of its own: the root `.eslintrc.js` `ignorePatterns` covers packages still on eslintrc, `baseConfig.ts` `ignores` covers the ones on flat config, and any emitter under `packages/*`, `npm/*` or `tooling/*` is covered as soon as it is added. Two things to keep in mind if Phase 3 changes the output layout: the `linux-lint` job restores a built workspace, so generated output is on disk when ESLint runs and an uncovered emitter fails CI rather than only local `yarn build && yarn lint`; and output directories outside those workspace roots (or named something other than `cjs`/`esm`/`dist`) need their pattern added centrally. See [the ESLint migration guide](./eslint-migration.md#6-ignore-build-output-centrally) for why this cannot be done with a per-package `.eslintignore`.
+Lint ignores build output centrally, so a package that emits `cjs/` and `esm/` needs no ignore entries of its own: `baseConfig.ts` `ignores` covers every workspace, so any emitter is covered as soon as it is added. Two things to keep in mind if Phase 3 changes the output layout: the `linux-lint` job restores a built workspace, so generated output is on disk when ESLint runs and an uncovered emitter fails CI rather than only local `yarn build && yarn lint`; and output directories nested below a package's root (or named something other than `cjs`/`esm`/`dist`) need their pattern added centrally. See [`@packages/eslint-config`'s ignores](../packages/eslint-config/AGENTS.md#ignores).
 
 ### Phase 4: Run Cypress server as an ESM package
 

@@ -101,8 +101,8 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // Cypress-authored rules, kept under the `@cypress/dev` namespace they had in
-  // @cypress/eslint-plugin-dev so existing eslint-disable comments still resolve.
+  // Cypress-authored rules, under the `@cypress/dev` namespace so existing
+  // `eslint-disable @cypress/dev/...` comments resolve.
   {
     plugins: {
       '@cypress/dev': cypressDevPlugin,

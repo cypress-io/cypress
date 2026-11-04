@@ -39,7 +39,6 @@ npm_puppeteer_tests=false
 npm_vite_plugin_esm_tests=false
 npm_mount_utils_tests=false
 npm_grep_tests=false
-npm_eslint_plugin_tests=false
 npm_schematic_tests=false
 
 # run-force-http1-tests and percy-enabled are NOT forwarded here: each is
@@ -51,7 +50,7 @@ npm_schematic_tests=false
 
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests}
+{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-schematic-tests": $npm_schematic_tests}
 EOF
 }
 
@@ -77,7 +76,6 @@ emit_all_true() {
   npm_vite_plugin_esm_tests=true
   npm_mount_utils_tests=true
   npm_grep_tests=true
-  npm_eslint_plugin_tests=true
   npm_schematic_tests=true
   emit_json
 }
@@ -219,7 +217,7 @@ while IFS= read -r file; do
     *.md|*.mdx|*.txt|*.png|*.jpg|*.gif|*.svg|*.ico|\
     LICENSE|.github/*|.gitignore|.gitattributes|.editorconfig|\
     guides/*|assets/*|\
-    .eslintrc.js|.eslintignore|.prettierignore|.nvmrc|.node-version|.npmrc|.yarnclean|\
+    eslint.config.ts|.prettierignore|.nvmrc|.node-version|.npmrc|.yarnclean|\
     .percy.yml|.releaserc.js|renovate.json|docker-compose.yml|lerna.json|\
     electron-builder.json|knip.json|nx.json|jsconfig.json|autobarrel.json|\
     mocha-reporter-config.json|apollo.config.js|\
@@ -405,10 +403,6 @@ while IFS= read -r file; do
       ;;
     npm/grep/*)
       npm_grep_tests=true
-      system_tests=true
-      ;;
-    npm/eslint-plugin-dev/*)
-      npm_eslint_plugin_tests=true
       system_tests=true
       ;;
     npm/cypress-schematic/*)
