@@ -62,7 +62,7 @@ export default defineConfig({
       return await e2ePluginSetup(on, config)
     },
   },
-  // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
+  // @ts-expect-error - clientRoute and the routes below are internal options the public config type leaves out; they let Cypress test itself in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
   socketIoRoute: '/__app-socket',
