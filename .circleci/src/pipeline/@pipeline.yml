@@ -3124,7 +3124,7 @@ jobs:
             TEXT="<!subteam^${APP_FOUNDATIONS_ONCALL_SUBTEAM_ID}|app-foundations-oncall> :rotating_light: Binary jobs failed on *${CIRCLE_BRANCH}* (<${COMMIT_URL}|${CIRCLE_SHA1:0:10}>): *${FAILED}* - <${WORKFLOW_URL}|view the workflow>"
 
             curl -sfS -X POST -H 'Content-Type: application/json' \
-              "$SLACK_ONCALL_WEBHOOK_URL" \
+              "$SLACK_WEBHOOK_URL" \
               --data "$(jq -n --arg t "$TEXT" '{text:$t}')"
 
   test-kitchensink:
