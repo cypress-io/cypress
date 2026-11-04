@@ -25,6 +25,7 @@ import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
+import { NativeInputNotSupportedError } from '../automation/commands/native_input'
 import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -845,6 +846,9 @@ export class BidiAutomation {
 
           return bidiGetFrameTitle(this.webDriverClient, autContextId)
         }
+        case 'input:actions':
+        case 'input:reset':
+          throw new NativeInputNotSupportedError('Firefox')
         default:
           debug('BiDi automation not implemented for message: %s', message)
           throw new AutomationNotImplemented(message, 'BiDiAutomation')

@@ -4,7 +4,7 @@ import type { PlatformName } from './platform'
 import type { RunModeVideoApi } from './video'
 import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
-import type { SupportedKey } from './automation'
+import type { NativeInputActionsParams, SupportedKey } from './automation'
 
 export type CdpClientShape = {
   send: (...args: any[]) => Promise<any>
@@ -202,6 +202,10 @@ export interface AutomationCommands {
   'remote:debugger:protocol': CommandSignature
   'response:received': CommandSignature
   'key:press': CommandSignature<KeyPressParams, void>
+  /** Sends trusted native input to the AUT. */
+  'input:actions': CommandSignature<NativeInputActionsParams, void>
+  /** Releases every key and button held by earlier `input:actions` and forgets pointer positions. */
+  'input:reset': CommandSignature<Record<string, never>, void>
   'perform:user:gesture': CommandSignature<Record<string, never>, void>
   'get:aut:url': CommandSignature<void, string>
   'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>

@@ -6,6 +6,7 @@ import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAM
 import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import { normalizeResourceType } from '../../../lib/browsers/cdp-protocol/normalize-resource-type'
 import { CDPDisconnectedError } from '../../../lib/browsers/cdp-protocol/cri-errors'
+import { NativeInputNotSupportedError } from '../../../lib/automation/commands/native_input'
 
 type Impl = (...args: any[]) => unknown
 
@@ -1184,6 +1185,12 @@ describe('lib/browsers/cdp_automation', () => {
 
       it('fails if the frame cannot be found', async () => {
         await expect(onRequest('get:aut:title')).rejects.toThrow('Could not find AUT frame')
+      })
+    })
+
+    describe.each(['input:actions', 'input:reset'] as const)('%s', (message) => {
+      it('rejects with a native input not supported error', async () => {
+        await expect(onRequest(message, { sources: [] })).rejects.toThrow(new NativeInputNotSupportedError('Chrome, Edge or Electron'))
       })
     })
 

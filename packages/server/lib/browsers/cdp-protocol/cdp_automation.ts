@@ -27,6 +27,7 @@ import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
+import { NativeInputNotSupportedError } from '../../automation/commands/native_input'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -684,6 +685,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return cdpNavigateHistory(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame(), data.historyNumber)
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+      case 'input:actions':
+      case 'input:reset':
+        throw new NativeInputNotSupportedError('Chrome, Edge or Electron')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

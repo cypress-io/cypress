@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
+import { NativeInputNotSupportedError } from '../../../lib/automation/commands/native_input'
 import type { RunModeVideoApi } from '@packages/types'
 import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
@@ -208,6 +209,14 @@ describe('lib/browsers/webkit-automation', () => {
       mock.getLastContext().pages = () => []
 
       await wk.onRequest('focus:browser:window', {})
+    })
+  })
+
+  describe.each(['input:actions', 'input:reset'] as const)('%s', (message) => {
+    it('rejects with a native input not supported error', async () => {
+      const wk = await createAutomation()
+
+      await expect(wk.onRequest(message, { sources: [] })).rejects.toThrow(new NativeInputNotSupportedError('WebKit'))
     })
   })
 

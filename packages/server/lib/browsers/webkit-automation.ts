@@ -14,6 +14,7 @@ import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
+import { NativeInputNotSupportedError } from '../automation/commands/native_input'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -417,6 +418,9 @@ export class WebKitAutomation {
         if (data.shouldKeepTabOpen) return await this.reset({})
 
         return await this.context.browser()?.close()
+      case 'input:actions':
+      case 'input:reset':
+        throw new NativeInputNotSupportedError('WebKit')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

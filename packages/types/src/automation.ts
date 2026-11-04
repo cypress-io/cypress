@@ -96,3 +96,121 @@ export function toSupportedKey (key: string | number): SupportedKey {
 
   throw new InvalidKeyError(String(key))
 }
+
+/**
+ * Kind of device a native `pointer` input source emulates.
+ */
+export type NativeInputPointerType = 'mouse' | 'pen' | 'touch'
+
+/**
+ * Waits `duration` milliseconds before the source's next action. Every source
+ * accepts it, so a source can stay idle while other sources act in the same tick.
+ */
+export interface NativeInputPauseAction {
+  type: 'pause'
+  duration: number
+}
+
+/**
+ * Moves a pointer to `x`, `y`: CSS pixels relative to the AUT iframe's
+ * viewport, before the runner scales the iframe.
+ */
+export interface NativeInputPointerMoveAction {
+  type: 'pointerMove'
+  x: number
+  y: number
+}
+
+/**
+ * Presses a pointer button at the pointer's current position. `button` follows
+ * `MouseEvent.button` (0 primary, 1 auxiliary, 2 secondary). `pressure` is
+ * between 0 and 1, for pen and touch sources.
+ */
+export interface NativeInputPointerDownAction {
+  type: 'pointerDown'
+  button: number
+  pressure?: number
+}
+
+/**
+ * Releases a pointer button pressed by a `pointerDown` action.
+ */
+export interface NativeInputPointerUpAction {
+  type: 'pointerUp'
+  button: number
+  pressure?: number
+}
+
+/**
+ * Presses a key. `value` is the key's `KeyboardEvent.key`: a single character,
+ * or a named key such as `Enter` or `Shift`.
+ */
+export interface NativeInputKeyDownAction {
+  type: 'keyDown'
+  value: string
+}
+
+/**
+ * Releases a key pressed by a `keyDown` action.
+ */
+export interface NativeInputKeyUpAction {
+  type: 'keyUp'
+  value: string
+}
+
+/**
+ * Scrolls the wheel by `deltaX`, `deltaY` CSS pixels with the cursor at `x`,
+ * `y`, relative to the AUT iframe's viewport before the runner's scaling.
+ */
+export interface NativeInputScrollAction {
+  type: 'scroll'
+  x: number
+  y: number
+  deltaX: number
+  deltaY: number
+}
+
+/**
+ * A mouse, pen or touch input source and the actions it performs, in order.
+ */
+export interface NativeInputPointerSource {
+  type: 'pointer'
+  id: string
+  parameters: {
+    pointerType: NativeInputPointerType
+  }
+  actions: Array<NativeInputPointerMoveAction | NativeInputPointerDownAction | NativeInputPointerUpAction | NativeInputPauseAction>
+}
+
+/**
+ * A keyboard input source and the actions it performs, in order.
+ */
+export interface NativeInputKeySource {
+  type: 'key'
+  id: string
+  actions: Array<NativeInputKeyDownAction | NativeInputKeyUpAction | NativeInputPauseAction>
+}
+
+/**
+ * A scroll wheel input source and the actions it performs, in order.
+ */
+export interface NativeInputWheelSource {
+  type: 'wheel'
+  id: string
+  actions: Array<NativeInputScrollAction | NativeInputPauseAction>
+}
+
+/**
+ * Any native input source.
+ */
+export type NativeInputSource = NativeInputPointerSource | NativeInputKeySource | NativeInputWheelSource
+
+/**
+ * Payload of the `input:actions` automation message, modeled on WebDriver BiDi
+ * `input.performActions`. The backend runs the sources' actions tick by tick:
+ * tick N performs the Nth action of every source before tick N + 1 starts.
+ * Input state, such as held keys and buttons, persists until `input:reset`.
+ */
+export interface NativeInputActionsParams {
+  sources: NativeInputSource[]
+}

@@ -5,6 +5,7 @@ import { isEqual, isMatch, toInteger } from 'lodash'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
+import { NativeInputNotSupportedError } from '../../../lib/automation/commands/native_input'
 import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/browsers/bidi_automation'
 import type { Automation } from '../../../lib/automation'
 import type { NetworkFetchErrorParameters, NetworkResponseCompletedParameters, NetworkResponseStartedParameters } from 'webdriver/build/bidi/localTypes'
@@ -2493,6 +2494,15 @@ describe('lib/browsers/bidi_automation', () => {
           bidiAutomationInstance.autContextId = undefined
 
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)).rejects.toThrow('Cannot get AUT title no AUT context initialized')
+        })
+      })
+
+      describe.each(['input:actions', 'input:reset'] as const)('%s', (message) => {
+        it('rejects with a native input not supported error instead of falling back to the extension', async () => {
+          const request = bidiAutomationInstance.automationMiddleware.onRequest(message, { sources: [] })
+
+          await expect(request).rejects.toThrow(new NativeInputNotSupportedError('Firefox'))
+          await expect(request).rejects.toBeInstanceOf(NativeInputNotSupportedError)
         })
       })
 
