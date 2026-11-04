@@ -254,10 +254,13 @@ const statusMeta = {
   description: 'report where a Cypress session is in its lifecycle',
   details: `Reports where a Cypress session is in its lifecycle, as JSON — for polling and
 "where am I?" checks. Always exits 0 for a determinable stage (including "not
-connected"); a poller branches on the \`status\` field.
+connected" and "error"); a poller branches on the \`status\` field.
 
 Stages:
 - not connected: Cypress cannot be reached.
+- error: Cypress is running but could not load the project, for example because
+  its configuration file is invalid. \`error\` carries the reason; fix the
+  project, then stop Cypress and start it again.
 - browser not selected: Cypress does not have a supported browser open.
 - spec not selected: Cypress has a browser open but no spec is selected.
 - loading: Cypress is loading the spec.

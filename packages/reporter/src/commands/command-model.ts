@@ -60,7 +60,7 @@ export default class Command extends Instrument {
   groupLevel?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
-  _isOpen: boolean|null = null
+  _isOpen: boolean | null = null
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined

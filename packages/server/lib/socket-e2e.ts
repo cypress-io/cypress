@@ -2,6 +2,7 @@ import Debug from 'debug'
 import preprocessor from './plugins/preprocessor'
 import { isSpecFrameScript } from './util/spec_frame_scripts'
 import { SocketBase } from './socket-base'
+import type { StartListeningOptions } from './socket-base'
 import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import type { FoundSpec } from '@packages/types'
@@ -111,7 +112,7 @@ export class SocketE2E extends SocketBase {
     .catch(() => {})
   }
 
-  startListening (server: DestroyableHttpServer, automation, config, options) {
+  startListening (server: DestroyableHttpServer, automation, config, options: StartListeningOptions) {
     return super.startListening(server, automation, config, options, {
       onSocketConnection: (socket) => {
         socket.on('watch:test:file', (specInfo: FoundSpec, cb = function () { }) => {

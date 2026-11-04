@@ -9,7 +9,7 @@ import type { Log } from '../../../cypress/log'
 import { isRemoteSubject } from '../../remote'
 import { remoteSubmit } from '../../remote/actions'
 
-interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
+interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
   $el: JQuery<HTMLFormElement>
 }

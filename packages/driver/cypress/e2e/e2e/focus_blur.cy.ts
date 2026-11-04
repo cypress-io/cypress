@@ -61,7 +61,7 @@ const windowHasFocus = function () {
 }
 
 const requireWindowInFocus = () => {
-  let hasFocus = windowHasFocus()
+  const hasFocus = windowHasFocus()
 
   if (!hasFocus) {
     expect(hasFocus, 'this test requires the window to be in focus').ok

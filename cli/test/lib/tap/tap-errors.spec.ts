@@ -37,6 +37,7 @@ describe('lib/tap error registry', () => {
         "NO_BROWSER_ATTACHED",
         "NO_PROJECT",
         "NO_SESSION",
+        "PROJECT_NOT_LOADED",
         "PROTOCOL_MISMATCH",
         "RENDERER_UNRESPONSIVE",
         "SESSION_NOT_FOUND",
@@ -540,6 +541,11 @@ describe('lib/tap error rendering catalogue', () => {
     STALE_SESSION: {
       invocation: 'cypress tap --session 4321 dom --selector "#status"',
       failure: new TapError('STALE_SESSION'),
+    },
+    // cli/lib/cypress-sessions/index.ts (liveMatches), with a project that failed to load
+    PROJECT_NOT_LOADED: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('PROJECT_NOT_LOADED'),
     },
     // cli/lib/cypress-sessions/index.ts (resolveSession)
     NO_BROWSER_ATTACHED: {

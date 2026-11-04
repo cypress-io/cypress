@@ -74,6 +74,7 @@ This changelog describes the **binary**. Validation only considers changed files
     - _Example (`docs.cypress.io`):_ `` [`before:spec`](https://docs.cypress.io/api/plugins/before-spec-api) ``, `` [`numTestsKeptInMemory`](https://docs.cypress.io/app/references/configuration#Global) ``.
 11. If a change is only observable under a specific run context (e.g. `cypress run` vs. `cypress open`, or behind an experimental flag), state which context is affected so users can tell whether the change applies to them.
 12. A release often ships between the commit that adds an entry and the review that merges it. Re-check placement every time you pull `develop`, and again before marking a pull request ready: if a new `## X.Y.Z` heading has appeared above your entry, move the entry up into the new topmost release, keeping it under the same named section there. This is silent in both directions — the entry still reads correctly in the diff, and validation parses only the topmost release, so an entry stranded under an already-shipped version is simply never seen.
+13. Describe a `perf` entry by its effect, such as "starts running specs sooner", without exact timings or percentages. A benchmark measures one machine and one project, so a number from it reads as a promise to every user. Keep the measurements in the pull request.
 
 ## Dependency Updates and Security Advisories
 

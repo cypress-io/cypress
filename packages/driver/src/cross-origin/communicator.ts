@@ -39,8 +39,6 @@ const sharedPromiseSetup = ({
   communicator: EventEmitter
   timeout: number
 }) => {
-  let timeoutId
-
   const responseEvent = `${event}:${Date.now()}`
   const sentAt = Date.now()
 
@@ -50,7 +48,7 @@ const sharedPromiseSetup = ({
     resolve(result)
   }
 
-  timeoutId = setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     communicator.off(responseEvent, handler)
     reject(new Error(`${event} failed to receive a response from ${specBridgeName} spec bridge within ${timeout / 1000} second.`))
   }, timeout)
@@ -72,7 +70,7 @@ const sharedPromiseSetup = ({
  * @extends EventEmitter
  */
 export class PrimaryOriginCommunicator extends EventEmitter {
-  private crossOriginDriverWindows: {[key: string]: Window} = {}
+  private crossOriginDriverWindows: { [key: string]: Window } = {}
   userInvocationStack?: string
 
   /**
@@ -255,7 +253,8 @@ export class PrimaryOriginCommunicator extends EventEmitter {
  */
 export class SpecBridgeCommunicator extends EventEmitter {
   private handleSubjectAndErr = (data: Cypress.ObjectLike = {}, send: (data: Cypress.ObjectLike) => void) => {
-    let { subject, err, ...rest } = data
+    const { subject, err: dataErr, ...rest } = data
+    let err = dataErr
 
     // check to see if the 'err' key is defined, and if it is, we have an error of any type
     const hasError = !!Object.getOwnPropertyDescriptor(data, 'err')
@@ -344,6 +343,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
       }, '*')
     })
   }
+
   /**
    * Promisified event sent to the primary communicator that expects the same event reflected back with the response.
    * @param {string} event - the name of the event to be sent.
@@ -360,7 +360,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
   }: {
     event: string
     data?: Cypress.ObjectLike
-    options?: {syncGlobals: boolean}
+    options?: { syncGlobals: boolean }
     timeout: number
   }) {
     return new Promise<T>((resolve, reject) => {

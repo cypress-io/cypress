@@ -22,28 +22,28 @@
 - [x] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
-- [ ] packages/frontend-shared
+- [x] packages/frontend-shared
 - [x] packages/icons
 - [x] packages/launcher
 - [x] packages/https-proxy
 - [x] packages/network-interception
 - [x] packages/proxy
 - [x] packages/net-stubbing
-- [ ] packages/driver
-- [ ] packages/reporter
+- [x] packages/driver
+- [x] packages/reporter
 - [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
-- [ ] packages/runner
+- [x] packages/runner
 - [x] packages/extension
 - [x] packages/network
 - [x] packages/network-tools
 - [x] packages/socket
-- [ ] packages/telemetry
-- [ ] packages/launchpad
+- [x] packages/telemetry
+- [x] packages/launchpad
 - [x] packages/errors
-- [ ] packages/data-context
-- [ ] packages/app
+- [x] packages/data-context
+- [x] packages/app
 
 ### Batch 4c: Core packages (part 3)
 - [x] cli
@@ -53,18 +53,24 @@
 - [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [x] packages/config
-- [ ] packages/root
-- [ ] packages/resolve-dist
-- [ ] packages/packherd-require
-- [ ] packages/v8-snapshot-require
-- [ ] packages/web-config
+- [x] packages/root
+- [x] packages/resolve-dist
+- [x] packages/packherd-require
+- [x] packages/v8-snapshot-require
+- [x] packages/web-config
 - [x] packages/types
 - [x] packages/scaffold-config
+- [x] packages/ts
 - [x] packages/example
 
+### Batch 4d: Tooling
+- [x] tooling/electron-mksnapshot
+- [x] tooling/packherd
+- [x] tooling/v8-snapshot
+
 ### Batch 5: Test and script folders
-- [ ] system-tests
-- [ ] scripts
+- [x] system-tests — `projects/` and `project-fixtures/` are sample user apps, so they get correctness rules only (see [Lint fixture projects for correctness only](#12-lint-fixture-projects-for-correctness-only))
+- [x] scripts
 
 ---
 
@@ -218,7 +224,7 @@ When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfi
 ### 8. **Deprecate and Remove Old Plugin**
 - `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
 - Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
-- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
+- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js` and `eslint` 8 from the root `package.json`.
 
 ### 9. **Lint-Staged After the Migration**
 The root `lint-staged` config is already a single catch-all pattern, so it needs no change when the last package migrates. Once the root itself moves to flat config, that same pattern runs ESLint 9.
@@ -226,6 +232,125 @@ The root `lint-staged` config is already a single catch-all pattern, so it needs
 ### 10. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
+
+### 11. **Migrate the Vue Frontend Packages**
+
+`packages/app`, `packages/launchpad` and `packages/frontend-shared` share one set of overrides. Spread `vueTsxOverrides` and then `frontendOverrides` after `baseConfig`:
+
+```ts
+import { baseConfig, frontendOverrides, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...jsonConfig,
+  ...vueTsxOverrides,
+  ...frontendOverrides,
+]
+```
+
+All three, and `packages/data-context`, also spread `graphqlConfig()` after the shared configs and before their own blocks, to keep their `gql` templates linted. See [Lint `gql` templates with `graphqlConfig`](#13-lint-gql-templates-with-graphqlconfig).
+
+Add `vue` to the package's `lint-staged` glob (`**/*.{js,jsx,ts,tsx,json,vue}`, as `npm/vue` has). lint-staged hands each staged file only to its nearest config, so without it a staged `.vue` file matches no task and is committed unlinted.
+
+`frontendOverrides` only allows type imports from `@packages/data-context` in `.vue` files. Flat config replaces a rule's options rather than merging them, so a package that needs another restricted import adds its pattern to `frontendOverrides` instead of redefining the rule locally.
+
+Drop the `defineProps`, `defineEmits`, `defineExpose` and `withDefaults` globals from the old config: `vue-eslint-parser` 10 defines the compiler macros in `<script setup>`.
+
+The old config turned `vue/no-v-html` off. `baseConfig` makes it an error, and the shared config keeps it that way, so each package fixes its own uses as it migrates. Two render text, not HTML, and switch to `{{ }}` interpolation:
+
+| Package | Call site | Why it is text |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `baseError.errorStack` | The stack has only ANSI codes stripped, so `<` in an error message is parsed as markup |
+| launchpad | `src/setup/ManualInstall.vue`, `dep.description` | Dependency descriptions are plain text |
+
+The rest render HTML that is built to be rendered. Keep them, wrapped in `<!-- eslint-disable vue/no-v-html -->` / `<!-- eslint-enable vue/no-v-html -->` with a note on where the HTML comes from. A `disable-next-line` comment does not reach a `v-html` attribute on a later line of the tag:
+
+| Package | Call site | Source of the HTML |
+| --- | --- | --- |
+| frontend-shared | `src/gql-components/error/BaseError.vue`, `markdown` | `useMarkdown` (markdown-it) |
+| frontend-shared | `src/warning/Warning.vue` | `useMarkdown` |
+| frontend-shared | `src/composables/examples/UseMarkdownExample.vue` | `useMarkdown` |
+| frontend-shared | `src/components/ShikiHighlight.vue` | Shiki, which escapes the code it highlights |
+| launchpad | `src/setup/SelectFrameworkOrBundler.vue` (twice) | Framework SVG icons |
+| app | `src/runs/RunsContainer.vue` | `useMarkdown` |
+| app | `src/settings/project/ExperimentRow.vue` | `useMarkdown` |
+| app | `src/specs/banners/CloudMessageBanner.vue` | `useMarkdown` with `html: false` |
+| app | `src/runner/ScriptError.vue` | `ansi-to-html` with `escapeXML: true` |
+
+### 12. **Lint Fixture Projects for Correctness Only**
+
+`system-tests/projects/**` and `system-tests/project-fixtures/**` are sample user apps, and system-test snapshots assert on line and column numbers inside them. Reformatting one can shift a snapshot, so `system-tests/eslint.config.ts` lints them for correctness only:
+
+- Every rule whose `meta.type` is `layout` is off, which covers all `@stylistic` rules and the Vue template layout rules. The list is computed from `baseConfig`, so a layout rule added there later is off for fixtures too.
+- Unused `eslint-disable` directives are not reported, since deleting one moves every line below it.
+- Rules that flag ordinary user-app code (`ban-ts-comment`, `prefer-const`, `react/prop-types` and similar) are off, and so is `@typescript-eslint/consistent-type-imports`: Angular resolves a constructor parameter's type to a DI token at runtime, so a type-only import breaks the app.
+- Files that fail to parse on purpose are listed in `ignores`. Fixture `package.json` files are left out of `jsonConfig`, because they mirror the user projects they stand in for.
+
+Do not run a bulk `eslint --fix` over the fixtures to clear a new rule. The rules that still autofix there only rewrite code that already fails `yarn lint`, so a new violation should be fixed by hand, with the affected system tests rerun.
+
+### 13. **Lint `gql` Templates with `graphqlConfig`**
+
+Under eslintrc, the root `.eslintrc.js` linted `gql` templates with `eslint-plugin-graphql`. That plugin only runs on ESLint 8 and is no longer maintained, and `app`, the last package that uses `gql`, no longer runs it. Its flat-config replacement is `graphqlConfig`, built on [`@graphql-eslint/eslint-plugin`](https://the-guild.dev/graphql/eslint) v4. Spread it after `baseConfig`, and after `vueTsxOverrides` and `frontendOverrides` in the Vue packages:
+
+```ts
+import { baseConfig, graphqlConfig, jsonConfig } from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  ...jsonConfig,
+  ...graphqlConfig(),
+]
+```
+
+Only those four packages should spread it. It validates every `gql` template literal against `packages/data-context/schemas/schema.graphql`, and a file without a `gql` template costs one regex test. Unlike `jsonConfig` it is a function: the plugin, graphql 16 and the Vue SFC compiler load only when it is called, so every other package importing `@packages/eslint-config` starts ESLint without them.
+
+#### What graphql-codegen and `check-ts` already catch
+
+`yarn build:graphql` in `data-context` (part of `yarn build`) runs graphql-codegen. Before generating, codegen validates its documents with graphql-js's `specifiedRules`, minus `NoUnusedFragments`, `NoUnusedVariables` and `KnownDirectives`, and pools fragments across all documents. That is close to what `graphql/template-strings` checked, but it falls short of the lint rules in three ways:
+
+- **It only sees `app`, `launchpad` and `frontend-shared`.** The `data-context` documents (`AuthActions`, `CloudProjectActions`, `EventCollectorActions`, `RelevantRunsDataSource`) are sent through `executeRemoteGraphQL` and are in no codegen `documents` glob. A typo in one of them passes codegen and `check-ts` and only fails at runtime.
+- **It does not check deprecation or `id` selection.** Codegen succeeds on a query that selects a deprecated field or leaves out `id`, so `no-deprecated-fields` and `required-fields` have no codegen equivalent.
+- **It reports at build time, not in the editor or at commit.** The generated files are gitignored, so `check-ts` sees whatever the last codegen run wrote. `vue-tsc` checks how components use the generated types, never the documents themselves.
+
+So the lint rules are still needed.
+
+#### How the old rules map
+
+| `eslint-plugin-graphql` | `graphqlConfig` |
+| --- | --- |
+| `template-strings`, graphql-js `specifiedRules` less `KnownFragmentNames`, `NoUnusedFragments` and `NoUnusedVariables` | One `@graphql-eslint/*` rule per graphql-js validator, with the same three left out. The old rule reported only the first error in each template; these report every one |
+| `no-deprecated-fields` | `@graphql-eslint/no-deprecated` |
+| `required-fields`, `requiredFields: ['id']` | `@graphql-eslint/require-selections`, `fieldName: 'id'` |
+| `capitalized-type-name` (warn) | Dropped. Every type in the schema is capitalized, so a lowercase type condition already fails `known-type-names` as an error |
+
+`require-selections` is stricter than `required-fields`. It checks every selection set on a type that has `id`, not just fragment definitions and inline fragments, and it follows fragment spreads into other files. To follow them it loads the `gql` documents of all four packages, because `app` and `launchpad` spread fragments defined in `frontend-shared`. Every existing document passes it.
+
+graphql-js's `UniqueOperationNames` and `UniqueFragmentNames` have no per-template equivalent in v4. `@graphql-eslint/unique-operation-name` and `unique-fragment-name` compare names across the whole document set. They also report a `.vue` document as a duplicate of itself, because a `<script>` block's virtual path differs from the path its sibling was loaded under. Codegen already rejects duplicate names within each generated file.
+
+To silence a report, put the directive inside the template, as a GraphQL comment:
+
+```ts
+gql`
+fragment Example on Query {
+  # eslint-disable-next-line @graphql-eslint/require-selections
+  currentProject {
+    projectRoot
+  }
+}`
+```
+
+A `//` comment above the template does not reach the rule. The template is linted as its own virtual file.
+
+#### How `.vue` files are handled
+
+graphql-eslint's processor refuses `.vue` files under flat config. Its documented workaround, `eslint-processor-vue-blocks`, extracts each `<script>` block as a virtual `.ts` file, which `baseConfig` would then lint a second time. `graphqlConfig` uses its own processor instead. It keeps eslint-plugin-vue's processor for the `.vue` file and extracts only `<script>` blocks that contain a `gql` template. It parses them with `pad: 'space'`, so positions line up with the `.vue` file. The extracted script is not linted itself, only the GraphQL plucked from it. The virtual `.graphql` blocks turn off every `baseConfig` rule, since many of them have no `files` glob and would otherwise lint GraphQL as if it were JavaScript.
+
+#### Dependency pins
+
+- **`graphql@16`, nested.** graphql-eslint v4 declares a `graphql@^16` peer and needs it at load time: it reads the `OperationTypeNode` enum, which graphql 15 only has as a type. The app and server stay on `graphql@15`, so `@packages/eslint-config` depends on `graphql@16` itself and nohoists `@graphql-eslint/eslint-plugin` and its whole tree. Hoisted to the root, the plugin would resolve the root `graphql@15`. v3 accepts graphql 15 but predates ESLint 9's removal of `context.parserServices`.
+- **`graphql` is left out of lockfile deduplication.** `@types/graphql-resolve-batch` depends on `graphql@>=14`, so with a 16.x in the lockfile, `yarn-deduplicate --strategy=highest` would move it to graphql 16 types while `data-context` passes it graphql 15 values. `yarn dedupe-lockfile`, which `yarn check-lockfile`, the local postinstall and CI all use, passes `--exclude graphql`. A root resolution cannot fix this instead, because yarn keeps the `graphql@>=14` request in the lockfile either way.
+- **`@vue/compiler-sfc@3.5`, nested.** graphql-tag-pluck v8 needs `registerTS`, which `@vue/compiler-sfc` added in 3.3. Against the repo's 3.2.47 it silently drops every `.vue` document. The app packages keep 3.2.47.
+- **`@graphql-tools/delegate`.** The root `**/@graphql-tools/delegate: 8.2.1` resolution also reaches the plugin's tree, under `@graphql-tools/wrap` 11. Only `graphql-config`'s URL loader reaches that code, and the schema here is a file.
 
 ---
 

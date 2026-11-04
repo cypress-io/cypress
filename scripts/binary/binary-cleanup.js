@@ -67,7 +67,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/better-sqlite3/lib/index.js',
   ]
 
-  let entryPoints = new Set([
+  const entryPoints = new Set([
     ...startingEntryPoints.map((entryPoint) => path.join(unixBuildAppDir, entryPoint)),
   ])
   let esbuildResult
@@ -99,7 +99,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'uglify-js',
         'esbuild',
         'enhanced-resolve/lib/createInnerCallback',
-        './addon/addon-native',
       ],
     })
 
@@ -224,6 +223,8 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     // Files used as part of prebuilding are not necessary
     path.join(buildAppDir, '**', 'node_gyp_bins'),
     path.join(buildAppDir, '**', 'better-sqlite3', 'bin'),
+    // better-sqlite3 loads these ahead of build/Release; the Linux ones need a newer glibc than Cypress supports
+    path.join(buildAppDir, '**', 'better-sqlite3', 'prebuilds'),
     path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
     path.join(buildAppDir, '**', '*.cc'),
     path.join(buildAppDir, '**', '*.o'),

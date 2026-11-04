@@ -4,6 +4,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 
 import type { DataContext } from '..'
+import { isLaunchableEditor } from '../util/isLaunchableEditor'
 
 const debug = Debug('cypress:data-context:actions:LocalSettingsActions')
 
@@ -27,6 +28,14 @@ export class LocalSettingsActions {
   async setPreferences (stringifiedJson: string, type: 'global' | 'project') {
     const toJson = JSON.parse(stringifiedJson) as AllowedState
 
+    if (toJson.preferredEditorBinary) {
+      await this.ctx.coreData.localSettings.refreshing
+
+      if (!isLaunchableEditor(this.ctx.coreData.localSettings.availableEditors, toJson.preferredEditorBinary)) {
+        throw new Error(`Cannot set the preferred editor to one Cypress did not detect: ${toJson.preferredEditorBinary}`)
+      }
+    }
+
     if (type === 'global') {
       // update local data on server
       _.mergeWith(this.ctx.coreData.localSettings.preferences, toJson, customizer)
@@ -45,6 +54,14 @@ export class LocalSettingsActions {
     return this.ctx._apis.projectApi.setProjectPreferences(combinedResult)
   }
 
+  async getLaunchableEditor (): Promise<string | undefined> {
+    await this.ctx.coreData.localSettings.refreshing
+
+    const binary = this.ctx.coreData.localSettings.preferences.preferredEditorBinary
+
+    return isLaunchableEditor(this.ctx.coreData.localSettings.availableEditors, binary) ? binary : undefined
+  }
+
   async refreshLocalSettings () {
     if (this.ctx.coreData.localSettings?.refreshing) {
       return
@@ -56,28 +73,35 @@ export class LocalSettingsActions {
 
     this.ctx.coreData.localSettings.refreshing = dfd.promise
 
-    // TODO(tim): global unhandled error concept
-    const availableEditors = await this.ctx._apis.localSettingsApi.getAvailableEditors()
+    try {
+      // TODO(tim): global unhandled error concept
+      const availableEditors = await this.ctx._apis.localSettingsApi.getAvailableEditors()
 
-    this.ctx.coreData.localSettings.availableEditors = availableEditors
-    this.ctx.coreData.localSettings.preferences = {
-      ...defaultPreferences,
-      ...(await this.ctx._apis.localSettingsApi.getPreferences()),
-    }
-
-    const preferences = this.ctx.coreData.localSettings.preferences
-
-    // Fix bad value for notifyWhenRunCompletes.  See https://github.com/cypress-io/cypress/issues/27228
-    if (typeof preferences.notifyWhenRunCompletes === 'boolean') {
-      if (preferences.notifyWhenRunCompletes === true) {
-        preferences.notifyWhenRunCompletes = [...NotifyCompletionStatuses]
-      } else {
-        preferences.notifyWhenRunCompletes = []
+      this.ctx.coreData.localSettings.availableEditors = availableEditors
+      this.ctx.coreData.localSettings.preferences = {
+        ...defaultPreferences,
+        ...(await this.ctx._apis.localSettingsApi.getPreferences()),
       }
 
-      await this.ctx._apis.localSettingsApi.setPreferences(preferences)
-    }
+      const preferences = this.ctx.coreData.localSettings.preferences
 
-    dfd.resolve(availableEditors)
+      // Fix bad value for notifyWhenRunCompletes.  See https://github.com/cypress-io/cypress/issues/27228
+      if (typeof preferences.notifyWhenRunCompletes === 'boolean') {
+        if (preferences.notifyWhenRunCompletes === true) {
+          preferences.notifyWhenRunCompletes = [...NotifyCompletionStatuses]
+        } else {
+          preferences.notifyWhenRunCompletes = []
+        }
+
+        await this.ctx._apis.localSettingsApi.setPreferences(preferences)
+      }
+    } catch (e) {
+      // Clear it so a later refresh can retry instead of every caller seeing the failed one
+      this.ctx.coreData.localSettings.refreshing = null
+
+      throw e
+    } finally {
+      dfd.resolve(this.ctx.coreData.localSettings.availableEditors)
+    }
   }
 }

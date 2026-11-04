@@ -31,6 +31,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     responseEndedWithEmptyBody: [],
     responseStreamTimedOut: [],
   }
+
   private cdpClient: any
   private scriptToEvaluateId: any
   private archivePath: string | undefined

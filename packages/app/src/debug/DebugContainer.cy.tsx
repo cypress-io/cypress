@@ -8,6 +8,10 @@ import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs, createCloudRun } from '@packages/data-context/test/graphql/stubCloudTypes'
 import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/data-context/src/gen/test-cloud-graphql-types.gen'
 
+type DebugCloudProject = Extract<NonNullable<DebugSpecsFragment['currentProject']>['cloudProject'], { __typename: 'CloudProject' }>
+type DebugRun = NonNullable<DebugCloudProject['runByNumber']>
+type DebugRunListItem = NonNullable<NonNullable<DebugCloudProject['allRuns']>[number]>
+
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
   commitShas: '[String!]!',
@@ -139,8 +143,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber!
-            const other = CloudRunStubs[runName] as typeof test
+            const other = CloudRunStubs[runName] as DebugRun
 
             result.currentProject.cloudProject.runByNumber = other
           }
@@ -258,14 +261,12 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber!
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.running,
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) =>
@@ -291,15 +292,13 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.failingWithTests,
               status: 'RUNNING',
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -319,8 +318,6 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             //creating copy to prevent mutation later on in this test
             const cloudRunCopy = JSON.parse(JSON.stringify(CloudRunStubs.failingWithTests))
 
@@ -330,7 +327,7 @@ describe('<DebugContainer />', () => {
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => {
@@ -442,11 +439,9 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.failingWithTests,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -463,12 +458,10 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.failingWithTests,
               totalFailed: 120,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -484,19 +477,15 @@ describe('<DebugContainer />', () => {
           variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-              const test = result.currentProject.cloudProject.runByNumber
-
               const failingWithTests = CloudRunStubs.failingWithTests
 
               result.currentProject.cloudProject.runByNumber = {
                 ...failingWithTests,
-              } as typeof test
+              } as DebugRun
 
-              const allRuns = result.currentProject.cloudProject.allRuns!
+              const currentRun = failingWithTests! as DebugRunListItem
 
-              const currentRun = failingWithTests! as NonNullable<typeof allRuns[number]>
-
-              const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
+              const nextRunning = CloudRunStubs.running as DebugRunListItem
 
               nextRunning.runNumber!++
               nextRunning.completedInstanceCount = 5
@@ -520,23 +509,19 @@ describe('<DebugContainer />', () => {
           variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-              const test = result.currentProject.cloudProject.runByNumber
-
               const failingWithTests = CloudRunStubs.failingWithTests
 
               result.currentProject.cloudProject.runByNumber = {
                 ...failingWithTests,
-              } as typeof test
+              } as DebugRun
 
-              const allRuns = result.currentProject.cloudProject.allRuns!
-
-              const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
+              const nextRunning = CloudRunStubs.running as DebugRunListItem
 
               nextRunning.runNumber!++
               nextRunning.completedInstanceCount = 5
 
               const lotsOfRuns = Array.from(Array(10)).map((_, i) => {
-                const run = createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 }) as NonNullable<typeof allRuns[number]>
+                const run = createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 }) as DebugRunListItem
 
                 run.runNumber = run.runNumber! - i
 

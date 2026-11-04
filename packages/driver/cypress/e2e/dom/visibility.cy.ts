@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error - spec is a script, so destructuring `$` redeclares the global jQuery `$`
 const { $, dom } = Cypress
 
 describe('src/cypress/dom/visibility', {
@@ -85,7 +85,7 @@ describe('src/cypress/dom/visibility', {
 
         it('throws when not passed a DOM element', () => {
           const fn = () => {
-            // @ts-ignore
+            // @ts-expect-error - deliberately passes a selector string instead of a DOM element
             dom.isVisible('form')
           }
 

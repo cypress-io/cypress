@@ -1108,7 +1108,8 @@ export default (Commands, Cypress, cy, state, config) => {
 
         return requestUrl(url, options)
         .then((resp: any = {}) => {
-          let { url, originalUrl, cookies, redirects, filePath } = resp
+          const { cookies, redirects, filePath } = resp
+          let { url, originalUrl } = resp
 
           // reapply the existing hash
           url += existingHash

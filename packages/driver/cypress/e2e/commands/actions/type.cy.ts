@@ -198,7 +198,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   it('should trigger KeyboardEvent, not Event, for event listeners', (done) => {
     cy.$$('input:first').on('keydown', (e) => {
       // @ts-expect-error - TODO: Need to get this to not throw error
-      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView?.KeyboardEvent) {
+      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView.KeyboardEvent) {
         done()
 
         return
@@ -356,7 +356,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
-      let old = Cypress.config('animationDistanceThreshold')
+      const old = Cypress.config('animationDistanceThreshold')
 
       Cypress.config('animationDistanceThreshold', 1000)
 
@@ -682,8 +682,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           expect(text).to.have.value('foo')
 
           done()
-        }
-        , 50)
+        }, 50)
       })
 
       cy.get(':text:first').type('foo{enter}bar{leftarrow}', { delay: 10 })
@@ -1470,7 +1469,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     // https://github.com/cypress-io/cypress/issues/3661
     describe('various focusable elements', () => {
       it('<select> element', () => {
-        let keydown = cy.stub()
+        const keydown = cy.stub()
 
         cy.get('select:first')
         .then(($el) => $el.on('keydown', keydown))
@@ -1481,7 +1480,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('<a> element', () => {
-        let keydown = cy.stub()
+        const keydown = cy.stub()
 
         cy.get('a:first')
         .then(($el) => $el.on('keydown', keydown))
@@ -1499,7 +1498,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           <img usemap="#map" src="/fixtures/media/cypress.png" alt="image" />
           `).prependTo(cy.$$('body'))
 
-        let keydown = cy.stub()
+        const keydown = cy.stub()
 
         cy.$$('area:first').on('keydown', keydown)
 
@@ -1515,8 +1514,8 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       // https://github.com/cypress-io/cypress/issues/2166
       it('<button> element', () => {
-        let keydown = cy.stub()
-        let click = cy.stub()
+        const keydown = cy.stub()
+        const click = cy.stub()
 
         cy.get('button:first')
         .then(($el) => {
@@ -2867,8 +2866,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.$$('input:first').keyup(function () {
         _.delay(() => {
           $(this).addClass('typed')
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('input:first').type('f').should('have.class', 'typed').then(function () {

@@ -18,7 +18,7 @@ vi.mock('../../../src/cypress/source_map_utils', () => {
 
 describe('stack_utils', () => {
   beforeEach(() => {
-    // @ts-expect-error
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config: vi.fn(),
       isBrowser: vi.fn(() => true),
@@ -186,6 +186,8 @@ describe('stack_utils', () => {
             'test',
           )
 
+          if (!result) throw new Error('expected invocation details')
+
           expect(result.stack).toEqual(stack)
         })
       })
@@ -240,6 +242,8 @@ describe('stack_utils', () => {
             config,
             'test',
           )
+
+          if (!result) throw new Error('expected invocation details')
 
           expect(result.stack).toEqual(stack)
         })

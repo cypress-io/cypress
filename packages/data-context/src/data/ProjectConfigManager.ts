@@ -407,6 +407,7 @@ export class ProjectConfigManager {
         (cypressError: CypressError, title?: string | undefined) => {
           this._state = 'errored'
           this.options.ctx.onError(cypressError, title)
+          this.options.ctx.reportLoadErrorToTap(cypressError)
         },
         this.options.ctx.onWarning,
         (debugData: DebugData) => {
@@ -530,7 +531,7 @@ export class ProjectConfigManager {
     configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
 
     // TODO: Convert this to be synchronous, it's just FS checks
-    let fullConfig = await setupFullConfigWithDefaults({
+    const fullConfig = await setupFullConfigWithDefaults({
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
@@ -549,7 +550,7 @@ export class ProjectConfigManager {
       const browsers = await this.options.ctx.browser.machineBrowsers()
 
       if (!fullConfig.browsers || fullConfig.browsers.length === 0) {
-        // @ts-ignore - we don't know if the browser is headed or headless at this point.
+        // @ts-expect-error - we don't know if the browser is headed or headless at this point.
         // this is handled in open_project#launch.
         fullConfig.browsers = browsers
         fullConfig.resolved.browsers = { 'value': fullConfig.browsers, 'from': 'runtime' }

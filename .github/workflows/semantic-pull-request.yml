@@ -25,6 +25,7 @@ on:
     branches:
       - develop
       - release/*
+      - 'v[0-9]+'
 
 jobs:
   main:

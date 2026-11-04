@@ -10,6 +10,7 @@ import pkg from '@packages/root'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { toHashName } from '@packages/server/lib/util/app_data'
 import Fixtures from './fixtures'
+import * as DepInstaller from './dep-installer'
 import type { ProjectFixtureDir } from './fixtureDirs'
 
 const debug = Debug('cypress:system-tests:tap-open')
@@ -56,8 +57,8 @@ export interface TapStatus {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const spawnEnv = (): NodeJS.ProcessEnv => {
-  return {
+const spawnEnv = (overrides: Record<string, string | undefined> = {}): NodeJS.ProcessEnv => {
+  const env: NodeJS.ProcessEnv = {
     // The cy-in-cy markers would redirect app data and change how the browser is
     // launched; a real `cypress open` session must not look like a nested one.
     // CYPRESS_INTERNAL_ENV is reserved — the CLI sets it for its own child and warns
@@ -66,6 +67,16 @@ const spawnEnv = (): NodeJS.ProcessEnv => {
     CYPRESS_CONFIG_ENV: CONFIG_ENV,
     CYPRESS_CACHE_FOLDER: CACHE_FOLDER,
   }
+
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === undefined) {
+      delete env[key]
+    } else {
+      env[key] = value
+    }
+  }
+
+  return env
 }
 
 /**
@@ -87,6 +98,14 @@ const seedWelcomeDismissed = async (projectRoot: string): Promise<void> => {
 
     await fs.outputJson(file, state)
     debug('seeded welcome dismissal at %s', file)
+  }
+}
+
+// Undoes seedWelcomeDismissed, which writes outside the cache folder and so outlives the
+// session that wrote it, for the sessions that must start with the welcome screen undismissed.
+const clearWelcomeDismissed = async (projectRoot: string): Promise<void> => {
+  for (const dir of ['__global__', toHashName(projectRoot)]) {
+    await fs.remove(path.join(APP_DATA_PROJECTS, dir, 'state.json'))
   }
 }
 
@@ -167,6 +186,13 @@ export interface TapSession {
 
 export interface OpenTapSessionOptions {
   /**
+   * Whether to record the welcome screen as dismissed, as a person clicking Continue would.
+   * Defaults to true. Without it, only an AI agent's `cypress open` launches the browser by itself.
+   */
+  seedWelcome?: boolean
+  /** Environment for the `cypress open` process on top of this process's; `undefined` removes a variable. */
+  env?: Record<string, string | undefined>
+  /**
    * Boot alongside the sessions already running rather than from an empty
    * sessions dir, and leave that shared dir in place when killed — so the
    * sessions it was booted beside stay discoverable.
@@ -231,6 +257,11 @@ const buildSession = async (booted: BootedSession, options: OpenTapSessionOption
         // falls back to that one until this one's own record lands.
         const isThisSession = typeof current.projectRoot === 'string'
           && path.resolve(current.projectRoot) === path.resolve(projectRoot)
+
+        // The project could not load, so no browser is coming: say why now, not after the timeout
+        if (isThisSession && current.status === 'error') {
+          return failWithContext(`the project failed to load: ${String(current.error)}`)
+        }
 
         if (isThisSession && current.status !== 'not connected' && current.status !== 'browser not selected') {
           debug('session ready at stage %s', current.status)
@@ -308,11 +339,19 @@ const buildSession = async (booted: BootedSession, options: OpenTapSessionOption
 const prepareProject = async (project: ProjectFixtureDir, options: OpenTapSessionOptions): Promise<string> => {
   const projectRoot = await Fixtures.scaffoldProject(project)
 
+  // A project Cypress sets up for itself gets a config that requires `cypress`, which a
+  // fixture has no node_modules to resolve; systemTests.exec links it for the same reason
+  await DepInstaller.scaffoldCommonNodeModules()
+
   if (!options.additional) {
     await fs.remove(CACHE_FOLDER)
   }
 
-  await seedWelcomeDismissed(projectRoot)
+  if (options.seedWelcome === false) {
+    await clearWelcomeDismissed(projectRoot)
+  } else {
+    await seedWelcomeDismissed(projectRoot)
+  }
 
   return projectRoot
 }
@@ -331,7 +370,7 @@ export const openTapSession = async (project: ProjectFixtureDir, options: OpenTa
     '--e2e',
     '--browser', 'chrome',
     '--dev',
-  ], { cwd: projectRoot, env: spawnEnv(), detached: true })
+  ], { cwd: projectRoot, env: spawnEnv(options.env), detached: true })
 
   let output = ''
 
@@ -469,7 +508,6 @@ export const openTapSessionViaModuleApi = async (project: ProjectFixtureDir): Pr
 
   applyEnv(overrides)
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const cypress = require('cypress')
 
   let settled: string | null = null
@@ -501,4 +539,94 @@ export const openTapSessionViaModuleApi = async (project: ProjectFixtureDir): Pr
 
     throw err
   }
+}
+
+export interface DetachedLaunch {
+  stdout: string
+  stderr: string
+  exitCode: number
+}
+
+export interface DetachedTapSession extends TapSession {
+  /** What `cypress open --detached` itself printed, and how it exited. */
+  launch: DetachedLaunch
+  /** The lock file of the Xvfb the CLI started, when it was made to start one. */
+  xvfbLockFile?: string
+}
+
+export interface OpenDetachedTapSessionOptions {
+  /**
+   * Launch with no DISPLAY, so the CLI starts a Xvfb of its own rather than using the one
+   * this run has. Linux only.
+   */
+  ownDisplay?: boolean
+}
+
+// The CLI picks the display of a detached app's Xvfb itself, ignoring XVFB_DISPLAY_NUM, so the
+// display is read back from the environment the app was started with
+const displayOf = async (pid: number): Promise<string | undefined> => {
+  const environ = await fs.readFile(`/proc/${pid}/environ`, 'utf8').catch(() => '')
+
+  return environ.split('\0').find((entry) => entry.startsWith('DISPLAY='))?.slice('DISPLAY='.length)
+}
+
+/**
+ * Boots through `cypress open --detached`, which returns once the app is ready and leaves it
+ * running on its own. The harness has no handle on the app, so it ends it through the pid in
+ * the session record, as it does for the Module API.
+ */
+export const openDetachedTapSession = async (project: ProjectFixtureDir, options: OpenDetachedTapSessionOptions = {}): Promise<DetachedTapSession> => {
+  const projectRoot = await prepareProject(project, {})
+  // XVFB_DISPLAY_NUM is dropped too, since the CLI would only warn that it ignored it
+  const env = options.ownDisplay ? _.omit(spawnEnv(), 'DISPLAY', 'XVFB_DISPLAY_NUM') : spawnEnv()
+
+  const launch = await new Promise<DetachedLaunch>((resolve, reject) => {
+    const child = cp.spawn(process.execPath, [
+      CLI_BIN, 'open',
+      '--detached',
+      '--project', projectRoot,
+      '--e2e',
+      '--browser', 'chrome',
+      '--dev',
+    ], { cwd: projectRoot, env })
+
+    let stdout = ''
+    let stderr = ''
+
+    child.stdout.on('data', (buf) => {
+      stdout += buf.toString()
+    })
+
+    child.stderr.on('data', (buf) => {
+      stderr += buf.toString()
+    })
+
+    child.on('error', reject)
+    child.on('close', (code) => resolve({ stdout, stderr, exitCode: code ?? -1 }))
+  })
+
+  const session = await buildSession({
+    projectRoot,
+    terminate: () => signalRecorded(projectRoot, 'SIGKILL'),
+    suspend: () => signalRecorded(projectRoot, 'SIGSTOP'),
+    resume: () => signalRecorded(projectRoot, 'SIGCONT'),
+    context: () => `${launch.stdout}${launch.stderr}` || '(no output captured)',
+    exitReason: () => null,
+  })
+
+  if (!options.ownDisplay) {
+    return { ...session, launch }
+  }
+
+  const pid = await recordedPid(projectRoot)
+  const display = pid ? await displayOf(pid) : undefined
+
+  if (!display) {
+    await session.kill()
+
+    throw new Error(`Could not read the display of the app started by cypress open --detached (pid ${pid})\n${launch.stdout}${launch.stderr}`)
+  }
+
+  // DISPLAY is `:<number>` or `:<number>.<screen>`
+  return { ...session, launch, xvfbLockFile: `/tmp/.X${display.slice(1).split('.')[0]}-lock` }
 }

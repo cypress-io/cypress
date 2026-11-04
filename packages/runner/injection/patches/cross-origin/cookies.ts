@@ -17,7 +17,7 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   return documentCookieString.split(';').map((cookieString) => {
     const [name, value] = cookieString.split('=')
 
-    let cookieDomain = location.hostname
+    const cookieDomain = location.hostname
 
     return {
       name: name.trim(),

@@ -13,7 +13,7 @@ describe('toPosix', () => {
   beforeEach(() => {
     config = vi.fn()
 
-    // @ts-expect-error
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config,
     }

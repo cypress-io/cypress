@@ -105,7 +105,7 @@ export default function (Commands, Cypress, cy, state) {
     cy.once('command:enqueued', enqueuedCommand)
 
     const getRet = () => {
-      let ret = fn.apply(ctx, args)
+      const ret = fn.apply(ctx, args)
 
       if (ret && invokedCyCommand && !ret.then) {
         $errUtils.throwErrByPath('then.callback_mixes_sync_and_async', {
@@ -326,7 +326,7 @@ export default function (Commands, Cypress, cy, state) {
         } })
       }
 
-      let value = parent[last](...args)
+      const value = parent[last](...args)
 
       log && cy.state('current') === this && log.set({
         $el: $dom.isElement(subject) ? subject : null,
@@ -434,7 +434,6 @@ export default function (Commands, Cypress, cy, state) {
 
   Commands.addAll({ prevSubject: 'optional' }, {
     then (subject, userOptions, fn) {
-      // eslint-disable-next-line prefer-rest-params
       return thenFn.apply(this, [subject, userOptions, fn])
     },
   })

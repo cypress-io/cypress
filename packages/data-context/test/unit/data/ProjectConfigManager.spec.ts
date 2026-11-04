@@ -108,7 +108,7 @@ describe('ProjectConfigManager', () => {
 
   describe('#eventProcessPid', () => {
     it('returns process id from events ipc', () => {
-      // @ts-expect-error
+      // @ts-expect-error - a partial `ProjectConfigIpc` stub on the private `_eventsIpc`
       configManager._eventsIpc = {
         childProcessPid: 45699,
       }
@@ -117,7 +117,7 @@ describe('ProjectConfigManager', () => {
     })
 
     it('does not throw if config manager is not initialized', () => {
-      // @ts-expect-error
+      // @ts-expect-error - `_eventsIpc` is private
       configManager._eventsIpc = undefined
       expect(configManager.eventProcessPid).toEqual(undefined)
     })

@@ -39,7 +39,7 @@
     "@types/mocha": "8.0.3",
     "@types/node": "24.10.1",
     "axios": "^1.20.0",
-    "better-sqlite3": "12.8.0",
+    "better-sqlite3": "13.0.3",
     "devtools-protocol": "0.0.1687809",
     "eslint": "^9.31.0",
     "express": "4.21.0",

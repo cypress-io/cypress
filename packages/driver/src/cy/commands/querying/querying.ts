@@ -145,7 +145,7 @@ function getAlias (selector, log, cy) {
 }
 
 function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | Cypress.LogTimeoutOptions = {}, queryCommand: QueryCommandOptions = '') {
-  if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+  if (!isEmpty(queryCommand) && _.isPlainObject(options) && Object.prototype.hasOwnProperty.call(options, 'timeout') && !_.isFinite(options.timeout)) {
     $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
       args: { timeout: options.timeout },
     })

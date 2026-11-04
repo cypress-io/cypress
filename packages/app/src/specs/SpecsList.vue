@@ -230,7 +230,7 @@ import TestingTypePromo from './TestingTypePromo.vue'
 
 const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
-  mostRecentUpdate: string | null
+  mostRecentUpdate?: string | null
 }>(), {
   mostRecentUpdate: null,
 })
