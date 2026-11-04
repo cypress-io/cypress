@@ -33,6 +33,7 @@
 - When the Cypress binary cannot be saved while it downloads, such as when the disk is full, [`cypress install`](https://on.cypress.io/command-line#cypress-install) and `npm install cypress` now fail with the underlying error, such as `ENOSPC: no space left on device`, and delete the partially downloaded file, instead of crashing with a Node.js stack trace and leaving the file behind in the temporary folder. Fixed in [#35219](https://github.com/cypress-io/cypress/pull/35219).
 - Fixed an issue where, in `cypress open` and `cypress run`, the browser launched by Cypress kept loading forever with no error when the Cypress installation was missing some of its files. Cypress now shows an error that names the missing file after a few seconds. Fixed in [#35232](https://github.com/cypress-io/cypress/pull/35232).
 - Fixed an issue where [`cy.scrollTo()`](https://on.cypress.io/scrollto) and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) ignored a `duration` given as a string, such as `'2000'`, and always animated the scroll for 400ms. A string `duration` is now read as milliseconds, the same as a number. Fixed in [#35248](https://github.com/cypress-io/cypress/pull/35248).
+- Fixed an issue where [`.select()`](https://on.cypress.io/select) did not fire `input` and `change` events on a `<select multiple>` when the selection changed but its first selected option stayed the same, such as selecting `['apple', 'banana']` when `apple` was already selected. Fixed in [#35254](https://github.com/cypress-io/cypress/pull/35254).
 
 **Misc:**
 
