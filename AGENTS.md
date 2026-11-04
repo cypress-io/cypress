@@ -105,8 +105,6 @@ yarn lint:fix
 
 > **Note**: This project does **not** use Prettier. All formatting is enforced via ESLint.
 
-The repo is mid-migration between two ESLint configs, so ignore rules live in two places: `ignorePatterns` in the root `.eslintrc.js` for the packages still on eslintrc, and the `ignores` block in `packages/eslint-config/src/baseConfig.ts` for the packages on flat config. Build output (`cjs/`, `esm/`, `dist/`) is already ignored in both; do not add a per-package `.eslintignore` for it, since patterns in those files that contain a `/` silently match nothing. [The ESLint migration guide](./guides/eslint-migration.md#6-ignore-build-output-centrally) explains the mechanism.
-
 ### Build
 
 ```bash
@@ -211,7 +209,6 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **`@cypress/grep`** — Plugin to filter test runs by substring/tag.
 - **`@cypress/puppeteer`** — Plugin to enhance Cypress tests with Puppeteer.
 - **`@cypress/schematic`** — Official Angular CLI schematic for adding Cypress.
-- **`@cypress/eslint-plugin-dev`** — ESLint rules shared across Cypress development packages.
 
 ## Code Conventions
 

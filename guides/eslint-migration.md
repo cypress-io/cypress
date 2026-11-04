@@ -92,7 +92,7 @@ This guide describes how to migrate all packages in the Cypress monorepo to the 
 lint-staged hands each staged file to the nearest `package.json` that has a `lint-staged` key, and runs that config's tasks from its directory. Routing is therefore per package, not in the root:
 
 - **Migrated packages** carry their own `lint-staged` key (step 4 below), so their files run `eslint --fix` from the package directory, resolving the package's local ESLint 9 and its `eslint.config.ts`.
-- **Everything else** falls through to the root `package.json`, whose single `*.{js,jsx,ts,tsx,json,eslintrc,vue}` pattern runs ESLint 8 with the root `.eslintrc.js`. A pattern without a `/` matches at any depth, so it covers every directory on its own; adding directory-specific patterns beside it would lint those files twice.
+- **Everything else** falls through to the root `package.json`, whose single `*.{js,jsx,ts,tsx,json,vue}` pattern runs ESLint 9 with the root `eslint.config.ts`. That config lints only files at the repo root and ignores every subdirectory, so a workspace file that reaches it is reported as ignored rather than linted. A pattern without a `/` matches at any depth, so it covers every directory on its own; adding directory-specific patterns beside it would lint those files twice.
 
 Migrating a package needs no change to the root config. `scripts/unit/lint-staged-spec.ts` fails if a workspace with an `eslint.config.*` has no `lint-staged` key. Add the package to the `--scope` list of the root `lint:fix` script too.
 
@@ -171,23 +171,11 @@ For each package in the batch:
 
 ### 6. **Ignore Build Output Centrally**
 
-Compiled output (`cjs/`, `esm/`, `dist/`) is ignored centrally, in both config homes, and neither list should be duplicated per package:
+Compiled output (`cjs/`, `esm/`, `dist/`) is ignored in one place, the `ignores` block in `packages/eslint-config/src/baseConfig.ts`, and should not be duplicated per package. Its globs are package-relative, because each workspace lints from its own directory, so a new emitter is covered as soon as it uses one of those directory names at its root.
 
-- root `.eslintrc.js` `ignorePatterns` — for the packages still on eslintrc
-- `packages/eslint-config/src/baseConfig.ts` `ignores` — for the migrated ones
+Flat config does not read `.eslintignore`. An ignore that only one package needs is an `ignores` entry in that package's `eslint.config.ts`.
 
-A package-level `.eslintignore` cannot do this job, which is worth knowing before reaching for one. ESLint 8 merges every ignore source into a single predicate based at the *common ancestor* of their base paths, and the root `.eslintrc.js` `ignorePatterns` pulls that ancestor up to the repo root. Entries from an `.eslintignore` are flagged `loose`, so they are re-based without being re-prefixed: a package-relative entry keeps its spelling and is then matched against the repo root. Anything containing a `/` is anchored there and silently matches nothing — `packages/resolve-dist/.eslintignore` listed `cjs/index.js` and ESLint linted the file anyway, failing `linux-lint` on develop. Only unanchored spellings survive the re-base:
-
-| Pattern | Result |
-| --- | --- |
-| `**/tsconfig.json` | matches at any depth |
-| `cjs/` | matches at any depth (a trailing slash is not an anchor) |
-| `cjs/index.js` | anchored at the repo root, matches nothing |
-| `/src/thing.ts` | re-prefixed with the package path, matches |
-
-`ESLINT_USE_FLAT_CONFIG` packages are not affected: flat config does not read `.eslintignore` at all, so a migrated package must express ignores as an `ignores` entry. Delete any `.eslintignore` left behind when migrating a package — it is dead weight once the package is on flat config.
-
-Note also that `cjs`/`esm` are anchored to the workspace roots (`packages/*`, `npm/*`, `tooling/*`) rather than written as `**/esm/**`. System-tests fixtures ship handwritten sources under an `esm/` directory, and an unanchored pattern would stop linting them without any signal.
+The patterns are written as `cjs/**/*` and `esm/**/*` rather than `**/esm/**`. System-tests fixtures ship handwritten sources under an `esm/` directory, and an unanchored pattern would stop linting them without any signal.
 
 ### 7. **Lint JSON with `jsonConfig`**
 
@@ -222,12 +210,12 @@ Two differences from the old preset remain:
 When a package opts in, add `json` to its `lint-staged` glob. Without `jsonConfig`, staging a `.json` file only produces a "File ignored because no matching configuration was supplied" warning. Running `eslint --fix` once on opt-in sorts any `package.json` that drifted while the package was not linting JSON. `@packages/errors` is the reference opt-in.
 
 ### 8. **Deprecate and Remove Old Plugin**
-- `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
-- Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
-- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js` and `eslint` 8 from the root `package.json`.
+- `@cypress/eslint-plugin-dev` has been removed from the repo and CI. `7.0.0` stays on npm for anything pinned to it.
+- Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) live in `@packages/eslint-config` under the same `@cypress/dev` namespace, so existing `eslint-disable @cypress/dev/...` comments keep resolving.
+- The root `.eslintrc.js` and ESLint 8 are gone as well. Repo-root files lint with the root `eslint.config.ts`, described in [Lint-Staged Configuration](#1-lint-staged-configuration).
 
 ### 9. **Lint-Staged After the Migration**
-The root `lint-staged` config is already a single catch-all pattern, so it needs no change when the last package migrates. Once the root itself moves to flat config, that same pattern runs ESLint 9.
+The root `lint-staged` config is a single catch-all pattern that runs ESLint 9 with the root `eslint.config.ts`. It needs no change when a workspace is added, because each workspace carries its own `lint-staged` key.
 
 ### 10. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
@@ -436,10 +424,10 @@ graphql-eslint's processor refuses `.vue` files under flat config. Its documente
   it.skip('first test', () => {})
   ```
 
-#### 4. **Rule Mismatches in Pre-commit Hook**
-**Error:** ESLint rule violations that don't match the package's ESLint configuration (e.g., `Unexpected console statement` when `no-console` is off in package config)
+#### 4. **Staged Files Not Linted in Pre-commit Hook**
+**Error:** The pre-commit hook reports `File ignored because of a matching ignore pattern` for a package's files, and they are not linted.
 
-**Root Cause:** The package has no `lint-staged` key in its `package.json`, so its files fall through to the root config and are linted by ESLint 8 against `.eslintrc.js`.
+**Root Cause:** The package has no `lint-staged` key in its `package.json`, so its files fall through to the root `eslint.config.ts`, which ignores everything below the repo root.
 
 **Solution:** Add the `lint-staged` key from step 4. See [Lint-Staged Configuration](#1-lint-staged-configuration).
 
