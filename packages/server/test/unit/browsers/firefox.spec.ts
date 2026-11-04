@@ -711,11 +711,10 @@ describe('lib/browsers/firefox', () => {
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).toBeUndefined()
       })
 
-      it('removes session profiles left in the profile directory by a previous launch', async () => {
+      it('does not remove session profiles it did not create before launching', async () => {
         mockfs({
           '/path/to/appData/firefox-stable/interactive/': {
             'rust_mozprofileAbC123': { 'prefs.js': '' },
-            'chrome': { 'userChrome.css': '[foo userChrome.css]' },
           },
         })
 
@@ -723,8 +722,27 @@ describe('lib/browsers/firefox', () => {
 
         await firefox.open(browser as any, 'http://', options as any, automation as any)
 
-        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileAbC123')).toBeUndefined()
-        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/chrome')).toBeDefined()
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileAbC123')).toBeDefined()
+      })
+
+      it('removes the failed session\'s profile when it has to kill firefox', async () => {
+        mockfs({
+          '/path/to/appData/firefox-stable/interactive/': {
+            'rust_mozprofileFailed': { 'prefs.js': '' },
+            'rust_mozprofileOther': { 'prefs.js': '' },
+          },
+        })
+
+        options.isTextTerminal = true
+        vi.spyOn(process, 'kill').mockReturnValue(true)
+        wdInstance.capabilities['moz:profile'] = '/path/to/appData/firefox-stable/interactive/rust_mozprofileFailed'
+        wdInstance.sessionSubscribe = vi.fn().mockRejectedValue(new Error('No connection to WebDriver Bidi was established'))
+        wdInstance.deleteSession = vi.fn().mockRejectedValue(new Error('session already gone'))
+
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileFailed')).toBeUndefined()
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileOther')).toBeDefined()
       })
 
       it('creates chrome/userChrome.css if not exist', async () => {

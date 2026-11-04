@@ -387,7 +387,7 @@ let failedLaunchCleanup: Promise<void> = Promise.resolve()
 function deleteFailedSession (session: WebDriverClient, killBrowserAndDriver: () => unknown): Promise<void> {
   return Bluebird.resolve(session.deleteSession())
   .timeout(DELETE_FAILED_SESSION_TIMEOUT)
-  .then(() => undefined, (deleteSessionErr) => {
+  .then(() => undefined, async (deleteSessionErr) => {
     debug('error deleting webdriver session after failed launch, killing firefox and geckodriver: %o', deleteSessionErr)
 
     try {
@@ -395,16 +395,16 @@ function deleteFailedSession (session: WebDriverClient, killBrowserAndDriver: ()
     } catch (killErr) {
       debug('error killing firefox and geckodriver after failed launch: %o', killErr)
     }
+
+    // a killed geckodriver can't remove its copy of the profile, which the next launch would encode into its own
+    const sessionProfile = session.capabilities['moz:profile']
+
+    if (typeof sessionProfile === 'string') {
+      await fs.remove(sessionProfile).catch((removeErr) => {
+        debug('error removing profile of failed webdriver session: %o', removeErr)
+      })
+    }
   })
-}
-
-// a killed geckodriver leaves its rust_mozprofile copy in the profile directory, which would be encoded into the next session's profile
-async function removeLeftoverSessionProfiles (profileDir: string) {
-  const entries = await fs.readdir(profileDir).catch(() => [] as string[])
-
-  await Promise.all(entries
-  .filter((entry) => entry.startsWith('rust_mozprofile'))
-  .map((entry) => fs.remove(path.join(profileDir, entry))))
 }
 
 /**
@@ -565,7 +565,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
 
   await failedLaunchCleanup
-  await removeLeftoverSessionProfiles(profileDir)
 
   // Delete the legacy profile directory if in open mode.
   // Cypress does this because profiles are sourced and created differently with geckodriver/webdriver.
