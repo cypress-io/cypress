@@ -133,7 +133,7 @@ describe('SelectorPlayground', () => {
     const fakeJQueryElements = Array(2)
 
     // It is necessary to mimic JQuery behavior.
-    // @ts-ignore
+    // @ts-expect-error - adds jQuery's get() to a plain array so it can stand in for a jQuery collection
     fakeJQueryElements.get = () => fakeJQueryElements
 
     cy.spy(logger, 'logFormatted')
