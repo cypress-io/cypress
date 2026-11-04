@@ -12,6 +12,7 @@ import { ProjectBase } from '../../lib/project-base'
 import { ServerBase } from '../../lib/server-base'
 import devServer from '../../lib/plugins/dev-server'
 import * as errors from '../../lib/errors'
+import { EarlyExitTerminator } from '../../lib/util/graceful_crash_handling'
 
 describe('lib/modes/run', () => {
   let browserConnectTimeoutPlaceholder
@@ -241,8 +242,26 @@ describe('lib/modes/run', () => {
     expect(launchAttempt).to.be.greaterThan(1)
   })
 
+  // like the real listenForProjectEnd, the first spec doesn't end until it exits early
+  function endFirstSpecOnEarlyExit (launches: unknown[]) {
+    const firstSpecEnded = Promise.withResolvers<unknown>()
+    const exitEarly = EarlyExitTerminator.prototype.exitEarly
+
+    sinon.stub(EarlyExitTerminator.prototype, 'exitEarly').callsFake(function (this: EarlyExitTerminator, err) {
+      exitEarly.call(this, err)
+      firstSpecEnded.resolve({ stats: { failures: 1 } })
+    })
+
+    // each spec's results are read before that spec launches
+    Object.defineProperty(globalThis.CY_TEST_MOCK, 'listenForProjectEnd', {
+      get: () => launches.length === 0 ? firstSpecEnded.promise : { stats: { failures: 0 } },
+    })
+  }
+
   it('launches a fresh browser for the next spec when the browser never connected', async () => {
     const launches: { spec: string, shouldLaunchNewTab: boolean }[] = []
+
+    endFirstSpecOnEarlyExit(launches)
 
     // @ts-expect-error - fake resolves without a BrowserInstance
     sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {
@@ -258,6 +277,28 @@ describe('lib/modes/run', () => {
     await run(options, Promise.resolve())
 
     expect(launches.filter(({ spec }) => spec === 'foo.cy.ts')).to.have.length(3)
+    expect(launches.find(({ spec }) => spec === 'bar.cy.ts')?.shouldLaunchNewTab).to.equal(false)
+    expect(launches.find(({ spec }) => spec === 'baz.cy.ts')?.shouldLaunchNewTab).to.equal(true)
+  })
+
+  it('launches a fresh browser for the next spec when the browser crashed', async () => {
+    const launches: { spec: string, shouldLaunchNewTab: boolean }[] = []
+
+    endFirstSpecOnEarlyExit(launches)
+
+    // @ts-expect-error - fake resolves without a BrowserInstance
+    sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {
+      launches.push({ spec: spec as unknown as string, shouldLaunchNewTab: browserOpts.shouldLaunchNewTab })
+
+      if (spec as unknown as string === 'foo.cy.ts') {
+        browserOpts.onError(errors.get('BROWSER_CRASHED', 'Edge', null, 'SIGTRAP'))
+      }
+
+      return Promise.resolve()
+    })
+
+    await run(options, Promise.resolve())
+
     expect(launches.find(({ spec }) => spec === 'bar.cy.ts')?.shouldLaunchNewTab).to.equal(false)
     expect(launches.find(({ spec }) => spec === 'baz.cy.ts')?.shouldLaunchNewTab).to.equal(true)
   })

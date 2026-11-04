@@ -909,14 +909,9 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       }
     }
 
-    const { results, browserNeverConnected } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
+    const { results, browserNeedsRelaunch } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    if (results?.error?.includes('We detected that the Chrome process just crashed with code') || browserNeverConnected) {
-      // If the browser has crashed or never launched, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
-      isFirstSpecInBrowser = true
-    } else {
-      isFirstSpecInBrowser = false
-    }
+    isFirstSpecInBrowser = browserNeedsRelaunch
 
     span?.end()
 
@@ -1004,6 +999,8 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
 async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManagerShape } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression'>, estimated, isFirstSpecInBrowser, isLastSpec) {
   const { project, browser, onError } = options
+  // waitForTestsToFinishRunning replaces the terminator once this spec finishes
+  const specEarlyExitTerminator = earlyExitTerminator
 
   const { isHeadless } = browser
 
@@ -1040,8 +1037,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
   const videoRecording = await getVideoRecording()
 
-  let browserNeverConnected = false
-
   // we know we're done running headlessly
   // when the renderer has connected and
   // finishes running all of the tests.
@@ -1068,14 +1063,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       project,
       browser,
       screenshots,
-      onError: (err) => {
+      onError: (...args) => {
         debug('onError from runSpec')
-
-        if ('type' in err && err.type === 'TESTS_DID_NOT_START_FAILED') {
-          browserNeverConnected = true
-        }
-
-        onError(err)
+        onError(...args)
       },
       videoRecording,
       socketId: options.socketId,
@@ -1089,7 +1079,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
     }),
   ])
 
-  return { results, browserNeverConnected }
+  const { exitErrorType } = specEarlyExitTerminator
+
+  return { results, browserNeedsRelaunch: exitErrorType === 'BROWSER_CRASHED' || exitErrorType === 'TESTS_DID_NOT_START_FAILED' }
 }
 
 export interface ReadyOptions {
