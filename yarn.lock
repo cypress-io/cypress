@@ -9496,6 +9496,11 @@
   resolved "https://registry.yarnpkg.com/@types/semaphore/-/semaphore-1.1.4.tgz#fe9a0deb4c680ec23e8ce6283b3bb94ab7744c64"
   integrity sha512-W+KOVSGHKo5yoPXG69RFIKOdmvAcrAo2qnRrcDv80kIcxDnEUQ+c3IVKq0Jkp+BhhYfrbthPY9cXWFL0L9uzuw==
 
+"@types/semver@^7.5.0":
+  version "7.8.0"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.8.0.tgz#0bfe3ec51f5e9615bc317174cd5b88ea08b7fc2f"
+  integrity sha512-1mAINjtQCXXeLkJ9ehXkwOcBpqtLxiVtKhpUf83DdRNdQKV0iXZpaHYqRr7nj+wvxuJzoAmAwXI+sCNMv1CzLQ==
+
 "@types/send@*", "@types/send@^0.17.1":
   version "0.17.4"
   resolved "https://registry.yarnpkg.com/@types/send/-/send-0.17.4.tgz#6619cd24e7270793702e4e6a4b958a9010cfc57a"
