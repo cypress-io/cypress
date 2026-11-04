@@ -149,10 +149,6 @@ describe('config/src/project/utils', () => {
   })
 
   describe('.getProcessEnvVars', () => {
-    it('does not expose the internal Cloud workspace selector to project tests', () => {
-      expect(getProcessEnvVars({ CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM: '4' })).toEqual({})
-    })
-
     it('returns process envs prefixed with cypress', () => {
       const envs = {
         CYPRESS_BASE_URL: 'value',

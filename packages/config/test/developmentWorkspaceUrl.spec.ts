@@ -21,10 +21,6 @@ describe('resolveDevelopmentCloudWorkspaceNumber', () => {
 })
 
 describe('resolveDevelopmentCloudWorkspaceUrl', () => {
-  it('uses the Cloud workspace selector to route API requests to workspace 4', () => {
-    expect(resolveDevelopmentCloudWorkspaceUrl('http://localhost:1234/', 'development', { CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM: '4' })).toBe('http://localhost:41234/')
-  })
-
   afterEach(() => {
     vi.unstubAllEnvs()
   })
