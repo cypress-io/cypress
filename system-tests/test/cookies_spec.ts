@@ -590,6 +590,13 @@ describe('cy.intercept rewrites Set-Cookie headers', () => {
       return res.redirect('/cookie_sync/dashboard')
     })
 
+    // overwrites a cookie on a path this request doesn't match
+    app.get('/cookie_sync/other_path', (req, res) => {
+      res.setHeader('Set-Cookie', 'scoped=origin; Path=/cookie_sync/elsewhere')
+
+      return res.type('html').end()
+    })
+
     app.get('/cookie_sync/domain', (req, res) => {
       res.setHeader('Set-Cookie', `a=origin; Domain=${req.query.domain}; Path=/`)
 

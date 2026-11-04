@@ -64,6 +64,26 @@ describe('cy.intercept rewrites Set-Cookie headers', () => {
     cy.getCookie('session').its('value').should('eq', 'plain')
   })
 
+  // Chrome reports the earlier cookie with the request even though its path
+  // doesn't match, so the sync can put it back
+  it('keeps the earlier cookie on another path when the handler drops the header that overwrote it', () => {
+    cy.setCookie('scoped', 'plain', { path: '/cookie_sync/elsewhere' })
+
+    cy.intercept('/cookie_sync/other_path', (req) => {
+      req.on('response', (res) => {
+        expect(setCookieLines(res)).to.deep.eq(['scoped=origin; Path=/cookie_sync/elsewhere'])
+
+        delete res.headers['set-cookie']
+      })
+    }).as('otherPath')
+
+    fetchText('/cookie_sync/other_path')
+    cy.wait('@otherPath')
+
+    cy.getCookies().then((cookies) => cookies.find(({ name }) => name === 'scoped'))
+    .should('include', { value: 'plain', path: '/cookie_sync/elsewhere' })
+  })
+
   it('stores no cookie when the handler deletes the header', () => {
     cy.intercept('/cookie_sync/plain', (req) => {
       req.on('response', (res) => {

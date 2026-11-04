@@ -22,7 +22,8 @@ async function plan (options: {
   // every origin cookie Chrome didn't block, which is what Chrome stores when
   // the request was sent with credentials.
   chromeCookieStore?: ChromeStoreCookie[]
-  // the cookies Chrome had for the url when it sent the request
+  // the cookies Chrome had for the url's domain, on any path, when it sent the
+  // request
   cookiesWhenRequestSent?: Protocol.Network.Cookie[]
 }) {
   const url = options.url ?? REQUEST_URL
@@ -423,6 +424,19 @@ describe('planSetCookieSync', () => {
           sourcePort: 443,
           expires: sentCookie.expires,
         }),
+      ])
+    })
+
+    // Chrome lists a cookie on a path the request doesn't match, blocked with
+    // NotOnPath, so it can be put back too
+    it('puts back a cookie on a path the request does not match', async () => {
+      expect(await plan({
+        setCookieHeadersFromOrigin: ['a=new; Path=/other'],
+        setCookieHeadersAfterIntercept: [],
+        cookiesWhenRequestSent: [cookieWhenRequestSent({ value: 'before', path: '/other' })],
+      })).toEqual([
+        removal({ name: 'a', domain: 'api.example.test', path: '/other' }),
+        { method: 'Network.setCookie', params: expect.objectContaining({ name: 'a', value: 'before', path: '/other' }) },
       ])
     })
 

@@ -19,8 +19,9 @@ type ExtraInfoDeferred = {
   // responseReceived arrived — the sweep signal, which for a paused request
   // can only follow the consume
   responseReceived: boolean
-  // the cookies Chrome held for the url when it sent the request, from the
-  // request twin: what the cookie store looked like before this response
+  // the cookies Chrome held for the url's domain, on any path, when it sent
+  // the request, from the request twin: what the cookie store looked like
+  // before this response
   associatedCookies?: Protocol.Network.AssociatedCookie[]
 }
 
@@ -213,8 +214,8 @@ export class CDPNetworkExtraInfo {
   }
 
   /**
-   * The cookies Chrome held for the request's url when it sent the request,
-   * sent or not. Read it before `responseExtraInfo`, which lets the entry be
+   * The cookies Chrome held for the request's domain, on any path, when it
+   * sent the request, sent or not. Read it before `responseExtraInfo`, which lets the entry be
    * swept.
    */
   cookiesWhenRequestSent (requestId: string, sessionId?: string): Protocol.Network.Cookie[] {

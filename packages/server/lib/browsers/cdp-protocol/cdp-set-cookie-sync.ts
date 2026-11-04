@@ -23,8 +23,8 @@ import { isHostOnlyCookie } from '../../automation/cookie/util'
  * per header.
  */
 export type CookiesBeforeIntercept = {
-  // the cookies Chrome had for the request's url when it sent the request,
-  // from Network.requestWillBeSentExtraInfo
+  // the cookies Chrome had for the request's domain, on any path, when it sent
+  // the request, from Network.requestWillBeSentExtraInfo
   cookiesWhenRequestSent: Protocol.Network.Cookie[]
   // every Set-Cookie header the origin sent, from
   // Network.responseReceivedExtraInfo
@@ -341,8 +341,8 @@ const findStoredFromHeader = async (originCookie: ParsedSetCookie, readChromeCoo
   return storedCookies.find((stored) => isSameChromeCookie(stored, originCookie.identity) && stored.value === originCookie.cookie.value)
 }
 
-// Restores the cookie the origin's header overwrote, if Chrome held it for the
-// request's url when it sent the request, whether or not it was sent. Matching
+// Restores the cookie the origin's header overwrote, if Chrome held it when it
+// sent the request, whether or not it was sent. Matching
 // errs toward restoring: rewriting a cookie the header didn't touch leaves it
 // unchanged, but missing one leaves it deleted.
 const restoreReplacedCookieCommands = (originCookie: ParsedSetCookie, cookiesWhenRequestSent: Protocol.Network.Cookie[]): SetCookieSyncCommand[] => {
@@ -455,8 +455,11 @@ const parseUrl = (rawUrl: string): URL | undefined => {
  * if the remaining header differs from the one Chrome applied last.
  *
  * - A cookie the origin set that the handler no longer has is removed, and its
- *   earlier copy is restored from `cookiesWhenRequestSent` if Chrome held it
- *   for the request's url, even one it didn't send (e.g. blocked by SameSite).
+ *   earlier copy is restored from `cookiesWhenRequestSent` if Chrome held it,
+ *   even one it didn't send (e.g. blocked by SameSite, or on another path).
+ *   Chrome lists every cookie for the request's domain there, and a response
+ *   can only set a cookie whose domain matches its url, so any cookie the
+ *   origin's header overwrote is in the list.
  *   On the proxy path the browser only sees the handler's headers, so the
  *   origin's cookie is never stored and the earlier copy is left as it was.
  * - A cookie the handler added or changed is set, or removed if it is already
@@ -478,14 +481,10 @@ const parseUrl = (rawUrl: string): URL | undefined => {
  * Chrome's store is read at most once, and only when one of these checks is
  * needed.
  *
- * The result differs from the proxy path in three ways:
+ * The result differs from the proxy path in two ways:
  * - Network.setCookie skips Chrome's cookie-blocking checks, third-party cookie
  *   rules included, so a cookie the handler adds or edits is stored even where
  *   Chrome would have refused the same header in a response.
- * - `cookiesWhenRequestSent` only has the cookies that match the request's
- *   url. When the handler removes a header whose Path= or Domain= points
- *   elsewhere, an earlier cookie it replaced is not known, so the cookie is
- *   removed outright.
  * - If the origin set no cookies, or only expired ones (so Chrome does not
  *   store anything), the handler's cookies are written even when the request
  *   was sent without credentials, where the browser would have ignored them.
