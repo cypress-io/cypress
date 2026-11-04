@@ -2798,6 +2798,7 @@ jobs:
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+.gen2
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
       - halt-if-skipped:
