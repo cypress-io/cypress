@@ -3032,9 +3032,14 @@ jobs:
     resource_class: medium+.gen2
     steps:
       - restore_cached_workspace
+      # npm trusted publishing: npm exchanges this OIDC token for a short-lived publish
+      # token. Packages without a trusted publisher yet fall back to NPM_TOKEN from the
+      # context. https://docs.npmjs.com/trusted-publishers
       - run:
           name: Release packages after all jobs pass
-          command: yarn npm-release
+          command: |
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            yarn npm-release
 
   create-build-artifacts:
     <<: *defaults

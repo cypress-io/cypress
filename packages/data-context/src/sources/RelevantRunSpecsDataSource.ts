@@ -250,7 +250,8 @@ const createFragment = (info: GraphQLResolveInfo, index: number) => {
     },
   })
 
-  const selections = newFieldNode.selectionSet?.selections!
+  // Safe because GraphQL validation requires a selection set on the object fields this resolves
+  const selections = newFieldNode.selectionSet!.selections
 
   return {
     kind: 'FragmentDefinition' as const,
@@ -304,7 +305,9 @@ const createCombinedFragment = (name: string, fragmentNames: string[], type: Gra
  * @param info to extract field names from
  */
 const getFields = (info: GraphQLResolveInfo) => {
-  const selections = info.fieldNodes[0]!.selectionSet?.selections!
+  // Safe because a resolver always has a field node, and GraphQL validation
+  // requires a selection set on the object fields this resolves
+  const selections = info.fieldNodes[0]!.selectionSet!.selections
 
   const fields = selections.map((selection) => selection.kind === 'Field' && selection.name.value).filter((field): field is string => typeof field === 'string')
 
