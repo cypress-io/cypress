@@ -2,13 +2,17 @@ import _ from 'lodash'
 import Debug from 'debug'
 import mime from 'mime'
 import dataUriToBuffer from 'data-uri-to-buffer'
-import { Jimp, intToRGBA as jimpIntToRGBA } from 'jimp'
+import type { Jimp, intToRGBA as jimpIntToRGBA } from 'jimp'
 import sizeOf from 'image-size'
 import colorString from 'color-string'
 import * as plugins from './plugins'
 import { mergeScreenshotDetails } from './plugins/merge_plugin_results'
 import { fs, getPath } from './util/fs'
 import type { Data, ScreenshotsFolder } from './util/fs'
+
+// jimp does not work in the V8 snapshot, so it is required in a way mksnapshot
+// cannot follow, like webdriver in browsers/webdriver.
+const getJimp = (): { Jimp: typeof Jimp, intToRGBA: typeof jimpIntToRGBA } => require(require.resolve('jimp', { paths: [__dirname] }))
 
 let debug = Debug('cypress:server:screenshot')
 
@@ -68,7 +72,7 @@ interface RGBAWithName extends RGBA {
 }
 
 const intToRGBA = function (int: number): RGBAWithName {
-  const obj: RGBAWithName = jimpIntToRGBA(int) as RGBAWithName
+  const obj: RGBAWithName = getJimp().intToRGBA(int) as RGBAWithName
 
   if (debug.enabled) {
     obj.name = colorString.to.keyword([
@@ -152,7 +156,7 @@ const captureAndCheck = function (data: Data, automate, conditionFn) {
     .then((dataUrl) => {
       debug('received screenshot data from automation layer', dataUrl.slice(0, 100))
 
-      return Jimp.read(dataUriToBuffer(dataUrl))
+      return getJimp().Jimp.read(dataUriToBuffer(dataUrl))
     }).then((image) => {
       debug(`read buffer to image ${image.bitmap.width} x ${image.bitmap.height}`)
 
@@ -281,7 +285,7 @@ const stitchScreenshots = function (pixelRatio) {
 
   const takenAts: string[] = []
   let heightMarker = 0
-  const fullImage = new Jimp({ width: fullWidth, height: fullHeight })
+  const fullImage = new (getJimp().Jimp)({ width: fullWidth, height: fullHeight })
 
   _.each(multipartImages, ({ data, image, takenAt }) => {
     const croppedImage = crop(image, data.clip, pixelRatio)

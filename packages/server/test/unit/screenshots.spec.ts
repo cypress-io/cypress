@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import { Jimp } from 'jimp'
+import { createRequire } from 'module'
+import type { Jimp as JimpClass } from 'jimp'
 import { Buffer } from 'buffer'
 import dataUriToBuffer from 'data-uri-to-buffer'
 import sizeOf from 'image-size'
@@ -13,6 +14,9 @@ import { fs } from '../../lib/util/fs'
 import * as plugins from '../../lib/plugins'
 import { Screenshot } from '../../lib/automation/screenshot'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataContext'
+
+// screenshots.ts requires jimp's CommonJS build, so stub that copy.
+const { Jimp } = createRequire(path.join(__dirname, '../../lib/screenshots.ts'))('jimp') as { Jimp: typeof JimpClass }
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. Resolving the project config never queries either schema.
