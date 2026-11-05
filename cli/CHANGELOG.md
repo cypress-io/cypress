@@ -46,6 +46,7 @@
 - Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
+- Upgraded `socket.io-parser` from `4.2.6` to `4.2.7` to address a [Zero-attachment Memory Exhaustion](https://github.com/advisories/GHSA-2m8v-j782-fhvr) (CVE-2026-69185) vulnerability reported in security scans. Addresses [#35263](https://github.com/cypress-io/cypress/issues/35263).
 
 ## 16.2.1
 
