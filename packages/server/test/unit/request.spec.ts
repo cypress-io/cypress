@@ -999,6 +999,23 @@ describe('lib/request', () => {
         expect(resp.status).toBe(200)
       })
 
+      it('keeps a passed cookie header on a same-host redirect without jar cookies', async () => {
+        mockJarCookies({})
+
+        nock('http://www.foobar.com', { reqheaders: { cookie: 'user=1' } })
+        .get('/')
+        .reply(302, '', { location: '/second' })
+        .get('/second')
+        .reply(200)
+
+        const resp = await request.sendPromise({}, automationFn, {
+          url: 'http://www.foobar.com/',
+          headers: { Cookie: 'user=1' },
+        })
+
+        expect(resp.status).toBe(200)
+      })
+
       it('sends a passed cookie header only to its own host on redirect', async () => {
         mockJarCookies({ 'www.foobar.com': 'a=1', 'other.example.com': 'b=2' })
 
