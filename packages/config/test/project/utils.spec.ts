@@ -572,6 +572,13 @@ describe('config/src/project/utils', () => {
 
         expect(relativeToProjectRoot(projectRoot, supportFile)).toEqual('cypress/support/e2e.js')
       })
+
+      it('keeps a leading pipe in the relative path', () => {
+        const projectRoot = '/root/projects'
+        const supportFile = '/root/projects/|cypress/support/e2e.js'
+
+        expect(relativeToProjectRoot(projectRoot, supportFile)).toEqual('|cypress/support/e2e.js')
+      })
     })
 
     describe('windows', () => {
