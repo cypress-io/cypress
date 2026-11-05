@@ -408,7 +408,7 @@ linux-x64:
     # failed.
     - notify-binary-failure:
         context: test-runner:npm-release
-        filters: pipeline.git.branch == "develop"
+        filters: pipeline.git.branch == "develop" or pipeline.git.branch matches /^v\d+$/
         requires:
           # the packaging job is listed too: when it breaks, the
           # leaves below it are not_run rather than failed, so watching only the
