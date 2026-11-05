@@ -118,6 +118,10 @@ describe('lib/request', () => {
         return Promise.resolve(header ? [{ name: header.split('=')[0], value: header.split('=')[1] }] : [])
       }
 
+      if (msg === 'clear:cookie') {
+        delete cookiesByHost[data.domain]
+      }
+
       return Promise.resolve({})
     })
   }
@@ -972,6 +976,25 @@ describe('lib/request', () => {
         .reply(200)
 
         const resp = await request.sendPromise({}, automationFn, { url: 'http://www.foobar.com/' })
+
+        expect(resp.status).toBe(200)
+      })
+
+      it('does not send a cookie the redirect response deleted', async () => {
+        mockJarCookies({ 'www.foobar.com': 'session=abc' })
+
+        nock('http://www.foobar.com', { reqheaders: { cookie: 'session=abc' } })
+        .get('/logout')
+        .reply(302, '', {
+          'set-cookie': 'session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+          location: '/login',
+        })
+
+        nock('http://www.foobar.com', { badheaders: ['cookie'] })
+        .get('/login')
+        .reply(200)
+
+        const resp = await request.sendPromise({}, automationFn, { url: 'http://www.foobar.com/logout' })
 
         expect(resp.status).toBe(200)
       })
