@@ -39,6 +39,7 @@
 
 - The error shown when [`cy.session()`](https://on.cypress.io/session) is passed an unknown option now lists every valid option, `cacheAcrossSpecs` and `validate`. Previously it listed only `validate`, suggesting that `cacheAcrossSpecs` was not a valid option. Addressed in [#35233](https://github.com/cypress-io/cypress/pull/35233).
 - The editor chooser now lists only the editors Cypress detects, and the **Custom** option has been removed. To use an editor that isn't listed, set the `LAUNCH_EDITOR` environment variable before starting Cypress. Addressed in [#35208](https://github.com/cypress-io/cypress/pull/35208).
+- Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Dependency Updates:**
 
