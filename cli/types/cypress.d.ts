@@ -226,7 +226,7 @@ declare namespace Cypress {
     [key: string]: Storable
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- public type, an interface so users can augment it
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- public type; kept an interface because a type alias would stop declaration merging in user code
   interface StorableArray extends Array<Storable> { }
 
   type StorableRecord = Record<string, Storable>

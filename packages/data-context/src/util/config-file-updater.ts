@@ -17,7 +17,7 @@ function toLiteral (value: boolean | number | string) {
   return typeof value === 'string' ? `'${value.replace(/[\\']/g, '\\$&').replace(/\n/g, '\\n').replace(/\r/g, '\\r')}'` : stringify(value)
 }
 
-export async function insertValuesInConfigFile (file: string, obj: Record<string, unknown>, errors: ErrorObj) {
+export async function insertValuesInConfigFile (file: string, obj: Record<string, any>, errors: ErrorObj) {
   const fileContents = await fs.readFile(file, { encoding: 'utf8' })
 
   const transformedFileContents = await insertValueInJSString(fileContents, obj, errors)

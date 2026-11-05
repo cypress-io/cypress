@@ -69,7 +69,7 @@ type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, '
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- mirrors the `Data = {}` default of @vue/test-utils' MountingOptions
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- see MountingOptions
 export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
 const cleanup = () => {
