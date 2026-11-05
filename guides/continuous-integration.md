@@ -27,7 +27,7 @@ Runs on PRs targeting `develop` or `release/*` branches (excluding draft PRs).
 binary is the most expensive part of the pipeline, so it runs post-merge on
 `develop` (or the `vN` maintenance branch a PR targets) instead. There is no opt-in and no path-based override: a PR that
 changes binary or packaging code is not covered until it merges, and breakage is
-caught by the develop build. See `notify-binary-failure` below.
+caught by the post-merge build. See `notify-binary-failure` below.
 
 #### Full Workflow
 
@@ -40,7 +40,7 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 | Multi-Platform Builds | Linux x64, Linux ARM64, macOS Intel, macOS Apple Silicon, Windows |
 | Binary Creation | Builds, packages, and uploads the Electron binary and npm package |
 | Binary Verification | Tests the built binary against kitchensink, recipes, and real-world apps |
-| Binary Failure Alerts | Comments on the commit, tagging its author, when a binary job fails |
+| Binary Failure Alerts | Pages `@app-foundations-oncall` in Slack when a binary job fails |
 | Release Preparation | Validates release readiness, prepares npm packages |
 
 ### Triggers
@@ -60,22 +60,13 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 - **`ready-to-release`** - Gate job that ensures all tests pass before release
 - **`npm-release`** - Publishes packages to npm (develop/release branches only)
 - **`create-build-artifacts`** - Builds, packages, and uploads the binary and npm package
-- **`notify-binary-failure`** - Comments on the commit when a binary job fails on
-  `develop` or a `vN` maintenance branch, tagging its author. It requires every binary job at `terminal`, so it
-  runs once they have all settled however they settled, then reads their real
-  statuses from the CircleCI API and exits quietly unless one of them is `failed` -
-  a cancelled or skipped job is not a breakage. Scope comes from the job's own
-  dependency list, so adding a binary job to its `requires:` block is all that is
-  needed to cover it.
-
-  `develop` is squash-merged, so the commit author is the author of the PR that
-  produced it, and the `@` tag notifies them whatever their GitHub notification
-  settings are. A commit whose author GitHub cannot resolve still gets a comment,
-  just without the tag.
-
-  It reads job statuses from the CircleCI API without a token, which works only
-  because the project is public, and needs `GH_TOKEN` from `test-runner:npm-release`
-  to post the comment.
+- **`notify-binary-failure`** - Pages `@app-foundations-oncall` in Slack when a
+  binary job fails on `develop` or a `vN` maintenance branch. It requires every
+  binary job at `terminal`, so it runs once they have all settled however they
+  settled, then reads their real statuses from the CircleCI API and exits quietly
+  unless one of them is `failed` - a cancelled or skipped job is not a breakage.
+  Scope comes from the job's own dependency list, so adding a binary job to its
+  `requires:` block is all that is needed to cover it.
 
 ## GitHub Actions
 
