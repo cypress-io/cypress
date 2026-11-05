@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import mime from 'mime'
-import { promisify } from 'util'
 import dataUriToBuffer from 'data-uri-to-buffer'
-import Jimp from 'jimp'
+import { Jimp, intToRGBA as jimpIntToRGBA } from 'jimp'
 import sizeOf from 'image-size'
 import colorString from 'color-string'
 import * as plugins from './plugins'
@@ -69,7 +68,7 @@ interface RGBAWithName extends RGBA {
 }
 
 const intToRGBA = function (int: number): RGBAWithName {
-  const obj: RGBAWithName = Jimp.intToRGBA(int) as RGBAWithName
+  const obj: RGBAWithName = jimpIntToRGBA(int) as RGBAWithName
 
   if (debug.enabled) {
     obj.name = colorString.to.keyword([
@@ -197,7 +196,7 @@ const crop = function (image, dimensions, pixelRatio = 1) {
   debug(`crop: from ${x}, ${y}`)
   debug(`        to ${width} x ${height}`)
 
-  return image.clone().crop(x, y, width, height)
+  return image.clone().crop({ x, y, w: width, h: height })
 }
 
 const pixelConditionFn = function (data: Data, image) {
@@ -282,7 +281,7 @@ const stitchScreenshots = function (pixelRatio) {
 
   const takenAts: string[] = []
   let heightMarker = 0
-  const fullImage = new Jimp(fullWidth, fullHeight)
+  const fullImage = new Jimp({ width: fullWidth, height: fullHeight })
 
   _.each(multipartImages, ({ data, image, takenAt }) => {
     const croppedImage = crop(image, data.clip, pixelRatio)
@@ -302,7 +301,7 @@ const getType = function (details) {
     return details.buffer.type
   }
 
-  return details.image.getMIME()
+  return details.image.mime || 'image/png'
 }
 
 const getBuffer = function (details) {
@@ -310,7 +309,7 @@ const getBuffer = function (details) {
     return Promise.resolve(details.buffer)
   }
 
-  return promisify(details.image.getBuffer.bind(details.image))(Jimp.AUTO)
+  return details.image.getBuffer(details.image.mime || 'image/png')
 }
 
 const getDimensions = function (details) {
