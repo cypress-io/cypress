@@ -30,7 +30,7 @@
           :suffix-icon-class="classes.suffixIconClass"
           data-cy="alert"
           class="rounded min-w-[200px] p-[16px]"
-          @suffixIconClicked="$emit('update:modelValue', !modelValue)"
+          @suffix-icon-clicked="$emit('update:modelValue', !modelValue)"
         >
           <template
             v-if="$slots.title"

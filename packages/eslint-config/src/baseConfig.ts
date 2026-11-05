@@ -238,7 +238,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-this-alias': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-wrapper-object-types': 'off',
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
@@ -255,8 +254,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
       'vue/multi-word-component-names': 'off',
       'vue/no-dupe-keys': 'off',
-      'vue/v-on-event-hyphenation': 'off',
-      'vue/attribute-hyphenation': 'off',
 
       'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',
@@ -277,6 +274,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // the Vue recommended config ships these as warnings, and
     // flatConfigs.typescript leaves import-x/namespace unset
     rules: {
+      'vue/attribute-hyphenation': 'error',
       'vue/attributes-order': 'error',
       'vue/block-order': 'error',
       'vue/component-definition-name-casing': 'error',
@@ -306,6 +304,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/singleline-html-element-content-newline': 'error',
       'vue/this-in-template': 'error',
       'vue/v-bind-style': 'error',
+      'vue/v-on-event-hyphenation': 'error',
       'vue/v-on-style': 'error',
       'vue/v-slot-style': 'error',
 

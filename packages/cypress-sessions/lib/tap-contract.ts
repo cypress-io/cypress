@@ -1,3 +1,4 @@
+import { MissingCompanionOptionTapError } from './tap-errors'
 import type { TapErrorPayload } from './tap-errors'
 
 export const TAP_SCHEMA_VERSION = 1
@@ -24,6 +25,18 @@ interface TapCommandOptionBase {
   alias?: string
   required: boolean
   description: string
+  requires?: TapOptionDependency
+}
+
+// Another option of the same command that this one means nothing without, unless
+// a third option makes it moot. Both the CLI and the session reject a call that
+// breaks it (see `unmetDependency`), and the CLI's help names it, so neither the
+// handler nor the description restates it. The remedy is the pair's own: what
+// dropping either flag leaves you with differs from one pair to the next.
+interface TapOptionDependency {
+  option: string
+  unless?: string
+  remedy: string
 }
 
 // `defaultValue` is the value a command sees when the flag is absent, so a
@@ -32,12 +45,32 @@ interface TapCommandOptionBase {
 // description must not spell the default out a second time. Pairing it with
 // `type` keeps the two from disagreeing: a boolean flag is already
 // absent-means-false, so it takes none, and a required option can't need one.
+// For the same reason a boolean flag can't be required: leaving it out is how a
+// caller says false.
 type TapCommandOptionDefault =
   | { type: 'string', defaultValue?: string }
   | { type: 'number', defaultValue?: number }
-  | { type: 'boolean', defaultValue?: never }
+  | { type: 'boolean', required: false, defaultValue?: never }
 
 export type TapCommandOptionSchema = TapCommandOptionBase & TapCommandOptionDefault
+
+/**
+ * The first option `supplied` passes without the companion it requires, raised as
+ * the failure both sides answer it with. `supplied` holds only the options the
+ * caller actually gave, keyed by schema name; a switch given as false was not
+ * really given.
+ */
+export const unmetDependency = (options: readonly TapCommandOptionSchema[], supplied: Readonly<Record<string, unknown>>): MissingCompanionOptionTapError | undefined => {
+  const given = (name: string): boolean => supplied[name] !== undefined && supplied[name] !== false
+
+  for (const { name, requires } of options) {
+    if (requires && given(name) && !given(requires.option) && !(requires.unless && given(requires.unless))) {
+      return new MissingCompanionOptionTapError(`--${name}`, `--${requires.option}`, requires.remedy)
+    }
+  }
+
+  return undefined
+}
 
 export interface TapCommandSchema {
   name: string
@@ -142,19 +175,24 @@ wrong. Add --attempt to view an earlier retry.`,
   params: [],
   options: [
     { ...testIdField, required: false },
-    attemptField,
+    { ...attemptField, requires: { option: 'test-id', remedy: 'Pass `--test-id` to specify the test, or omit `--attempt` to review the latest attempt for every test in the spec.' } },
   ],
 } as const satisfies TapCommandSchema
+
+// What a pin needs, said once for the call that names half a target and the one
+// that names none.
+export const PIN_TARGET_REMEDY = 'Pass `--test-id` and `--command-id`, as listed by `cypress tap reporter`, or `--clear` to release the current pin.'
 
 const pinMeta = {
   name: 'pin',
   description: 'pin a command’s DOM snapshot into the live application-under-test frame',
   details: `Pins a command's DOM snapshot into the live application-under-test frame so the
-dom/aria/inspect commands can read it. Pass --clear to release.`,
+dom/aria/inspect commands can read it. Name the command with --test-id and
+--command-id, or pass --clear to release the current pin.`,
   params: [],
   options: [
-    { ...testIdField, required: false },
-    { ...commandIdField, required: false },
+    { ...testIdField, required: false, requires: { option: 'command-id', unless: 'clear', remedy: PIN_TARGET_REMEDY } },
+    { ...commandIdField, required: false, requires: { option: 'test-id', unless: 'clear', remedy: PIN_TARGET_REMEDY } },
     attemptField,
     { name: 'at', type: 'string', required: false, description: 'which snapshot to pin: a name like "before"/"after" or a 1-based index; defaults to the last (the command’s final state). Re-run on the pinned command to switch snapshots without releasing the pin' },
     { name: 'clear', type: 'boolean', required: false, description: 'release the current pin and restore the app to its pre-pin state' },

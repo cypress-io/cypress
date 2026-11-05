@@ -210,7 +210,7 @@ export class BrowserCriClient {
   closing = false
   closed = false
   resettingBrowserTargets = false
-  gracefulShutdown?: Boolean
+  gracefulShutdown?: boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   serviceWorkerBindings: Map<SessionId, ServiceWorkerBindingListener> = new Map()
   onClose: Function | null = null

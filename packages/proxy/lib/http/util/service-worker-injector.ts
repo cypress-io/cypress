@@ -57,8 +57,8 @@ export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceW
     let listenerCount = 0
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
-    const targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
-    const targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
+    const targetToWrappedHandleEventMap = new WeakMap<object, EventListenerOrEventListenerObject>()
+    const targetToOrigHandleEventMap = new WeakMap<object, EventListenerOrEventListenerObject>()
 
     const sendEvent = (event: ServiceWorkerClientEventWithoutScope) => {
       const payload = Object.assign({}, event, { scope: self.registration.scope })
