@@ -14,6 +14,7 @@
 
 **Bugfixes:**
 
+- Fixed a regression in [16.0.0](#16-0-0) where changes a [`cy.intercept()`](https://on.cypress.io/intercept) response handler made to `Set-Cookie` headers did not reach the browser in Chromium-based browsers. The browser stored the cookies exactly as the server sent them, so a handler that rewrote a cookie's attributes, such as adding `SameSite=None` so a cross-site login cookie is accepted, or that removed a cookie, had no effect. Cookies in the browser now match the `Set-Cookie` headers the handler leaves on the response. Fixes [#34902](https://github.com/cypress-io/cypress/issues/34902).
 - Fixed an issue where a spec whose bundled file includes a large inline source map could crash the browser tab, leaving `cypress run` hanging with no error until it was killed. The crash could happen while the spec first loaded, or when it loaded again after its first [`cy.visit()`](https://on.cypress.io/visit) to another origin. Specs with inline source maps now also load faster and use less memory. Fixes [#35201](https://github.com/cypress-io/cypress/issues/35201).
 - Fixed an issue where `cypress run` could hang until it was killed, or exit with an unrelated `socket hang up` error, when the process that loads your config file and runs your [Node events](https://docs.cypress.io/app/plugins/plugins-guide) exited, for example because the operating system ran out of memory or `setupNodeEvents` called `process.exit()`. In component testing this process also runs the dev server. Cypress now stops the run with an error that says the process exited, with its exit code or signal. Fixes [#25507](https://github.com/cypress-io/cypress/issues/25507) and [#35223](https://github.com/cypress-io/cypress/issues/35223).
 - Fixed an issue where, in Chrome 158 and later, `cypress run` stopped with the error `* is not a valid URL` when it opened a second spec. Fixes [#35195](https://github.com/cypress-io/cypress/issues/35195).
@@ -47,6 +48,7 @@
 - Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
+- Upgraded `node-forge` from `1.4.0` to `1.4.3` to address the [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-22113978) vulnerability reported in security scans. Addressed in [#35279](https://github.com/cypress-io/cypress/pull/35279).
 
 ## 16.2.1
 
