@@ -1314,7 +1314,7 @@ describe('http/response-middleware', function () {
       expect(appendStub).not.toHaveBeenCalled()
     })
 
-    it('leaves HttpOnly cookies out of the simulated cookies', async function () {
+    it('blanks HttpOnly cookie values in the simulated cookies', async function () {
       const cookieJar = new CookieJar()
 
       cookieJar.setCookie('visible=1', 'http://www.foobar.com/', 'strict')
@@ -1329,7 +1329,10 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
-      expect(ctx.simulatedCookies.map((cookie) => cookie.name)).toEqual(['visible'])
+      expect(ctx.simulatedCookies.map(({ name, value, httpOnly }) => ({ name, value, httpOnly }))).toEqual([
+        { name: 'visible', value: '1', httpOnly: false },
+        { name: 'hidden', value: '', httpOnly: true },
+      ])
     })
 
     it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {

@@ -16,8 +16,9 @@ function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
 
   mw.simulatedCookies = mw.getCookieJar()
   .getCookies(mw.req.proxiedUrl)
-  .filter((cookie) => !cookie.httpOnly)
   .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
+  // document.cookie never reads HttpOnly values; it only needs to know they exist so it can't replace them
+  .map((cookie) => (cookie.httpOnly ? { ...cookie, value: '' } : cookie))
 }
 
 /**

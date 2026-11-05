@@ -60,7 +60,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
   const existingCookies = parseDocumentCookieString(document.cookie)
 
   const getDocumentCookieValue = () => {
-    return cookieJar.getCookies(url, undefined).map((cookie: ToughCookie) => {
+    return cookieJar.getCookies(url, undefined, { http: false }).map((cookie: ToughCookie) => {
       return `${cookie.key}=${cookie.value}`
     }).join('; ')
   }
@@ -71,13 +71,14 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     })
   }
 
-  const setCookie = (cookie: ToughCookie | string) => {
+  const setCookie = (cookie: ToughCookie | string, { http = false } = {}) => {
     try {
-      return cookieJar.setCookie(cookie, url, undefined)
+      return cookieJar.setCookie(cookie, url, undefined, { http })
     } catch (err) {
       // it's possible setting the cookie fails because the domain does not
-      // match. this is expected and okay to do nothing, since it wouldn't be
-      // set in the browser anyway
+      // match, or because it is or would replace an HttpOnly cookie. this is
+      // expected and okay to do nothing, since it wouldn't be set in the
+      // browser anyway
       return
     }
   }
@@ -109,6 +110,8 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // and via setting it inside our automation client with the correct expiry.
       // This will have the effect of removing the cookie
       if (parsedCookie.expiryTime() < Date.now()) {
+        if (!setCookie(stringValue)) return getDocumentCookieValue()
+
         cookieJar.removeCookie({
           name: parsedCookie.key,
           path: parsedCookie.path || '/',
@@ -156,7 +159,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     // the following listeners are called from Cypress cookie commands, so that
     // the document.cookie value is updated optimistically
     Cypress.on('set:cookie', (cookie: SerializableAutomationCookie) => {
-      setCookie(automationCookieToToughCookie(cookie, domain))
+      setCookie(automationCookieToToughCookie(cookie, domain), { http: true })
     })
 
     Cypress.on('clear:cookie', (name: string) => {
