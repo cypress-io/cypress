@@ -31,7 +31,7 @@
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "node-forge": "^1.4.0",
+    "node-forge": "^1.4.3",
     "semaphore": "1.1.0"
   },
   "devDependencies": {
