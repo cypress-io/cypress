@@ -12,7 +12,7 @@ import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
 import { CdpBodyCapture } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
-import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
+import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER, getMetadataHeaderValue } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
@@ -558,7 +558,7 @@ export class CdpFetchTransport {
         debug('marking AUT frame document %s', event.request.url)
         // Node's IncomingMessage lowercases headers on the MITM path; the
         // synthetic CDP codec does not. Use the lowercase form ExtractCypressMetadataHeaders reads.
-        request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
+        request.headers[AUT_FRAME_HEADER.toLowerCase()] = getMetadataHeaderValue()
       }
 
       // Extra-target sessions (popups / _blank) share this transport with
@@ -566,7 +566,7 @@ export class CdpFetchTransport {
       // network path (the MITM proxy never sees those requests).
       if (this.options.isFromExtraTarget) {
         debug('marking extra-target request %s', event.request.url)
-        request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = 'true'
+        request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = getMetadataHeaderValue()
       }
 
       const responseDeferred: ResponsePauseDeferred = {

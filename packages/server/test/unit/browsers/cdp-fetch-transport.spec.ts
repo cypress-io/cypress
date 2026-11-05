@@ -11,6 +11,7 @@ import type { CdpFetchTransportRequest } from '../../../lib/browsers/cdp-protoco
 import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
 import { shouldStreamResponseBody } from '../../../lib/browsers/cdp-protocol/should-stream-response-body'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 function createPausedRequest (options: {
   requestId: string
@@ -1206,7 +1207,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       expectCalledOnceWith(isAUTFrame, 'frame-1')
-      expectCalledWith(seenIsAutFrameHeader, 'true')
+      expectCalledWith(seenIsAutFrameHeader, getMetadataHeaderValue())
       // AUT marker must not leave the process toward the origin.
       expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
@@ -1371,7 +1372,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expectCalledWith(seenExtraTargetHeader, 'true')
+      expectCalledWith(seenExtraTargetHeader, getMetadataHeaderValue())
       expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{

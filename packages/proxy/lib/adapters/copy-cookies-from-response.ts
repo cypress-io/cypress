@@ -13,11 +13,11 @@ function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
   if (mw.res.wantsInjection !== 'fullCrossOrigin') return
 
   const defaultDomain = (new URL(mw.req.proxiedUrl)).hostname
-  const allCookiesForRequest = mw.getCookieJar()
-  .getCookies(mw.req.proxiedUrl)
-  .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
 
-  mw.simulatedCookies = allCookiesForRequest
+  mw.simulatedCookies = mw.getCookieJar()
+  .getCookies(mw.req.proxiedUrl)
+  .filter((cookie) => !cookie.httpOnly)
+  .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
 }
 
 /**

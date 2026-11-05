@@ -9,6 +9,7 @@ import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/br
 import type { Automation } from '../../../lib/automation'
 import type { NetworkFetchErrorParameters, NetworkResponseCompletedParameters, NetworkResponseStartedParameters } from 'webdriver/build/bidi/localTypes'
 import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 // make sure testing promises resolve before asserting on async function conditions
 const flushPromises = () => {
@@ -371,7 +372,7 @@ describe('lib/browsers/bidi_automation', () => {
                 name: 'X-Cypress-Is-AUT-Frame',
                 value: {
                   type: 'string',
-                  value: 'true',
+                  value: getMetadataHeaderValue(),
                 },
               },
             ],

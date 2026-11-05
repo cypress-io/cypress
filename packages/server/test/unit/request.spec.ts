@@ -110,6 +110,18 @@ describe('lib/request', () => {
     nock.enableNetConnect()
   })
 
+  const mockJarCookies = (cookiesByHost: Record<string, string>) => {
+    automationFn.mockImplementation((msg: string, data?: any) => {
+      if (msg === 'get:cookies') {
+        const header = cookiesByHost[new URL(data.url).hostname]
+
+        return Promise.resolve(header ? [{ name: header.split('=')[0], value: header.split('=')[1] }] : [])
+      }
+
+      return Promise.resolve({})
+    })
+  }
+
   it('is defined', () => {
     expect(request).toBeTypeOf('object')
   })
@@ -931,6 +943,59 @@ describe('lib/request', () => {
           })
         })
       })
+
+      it('sends the redirect target\'s cookies on redirect', async () => {
+        mockJarCookies({ 'www.foobar.com': 'a=1', 'other.example.com': 'b=2' })
+
+        nock('http://www.foobar.com', { reqheaders: { cookie: 'a=1' } })
+        .get('/')
+        .reply(302, '', { location: 'http://other.example.com/' })
+
+        nock('http://other.example.com', { reqheaders: { cookie: 'b=2' } })
+        .get('/')
+        .reply(200)
+
+        const resp = await request.sendPromise({}, automationFn, { url: 'http://www.foobar.com/' })
+
+        expect(resp.status).toBe(200)
+      })
+
+      it('sends no cookie header on redirect to a host without cookies', async () => {
+        mockJarCookies({ 'www.foobar.com': 'a=1' })
+
+        nock('http://www.foobar.com', { reqheaders: { cookie: 'a=1' } })
+        .get('/')
+        .reply(302, '', { location: 'http://other.example.com/' })
+
+        nock('http://other.example.com', { badheaders: ['cookie'] })
+        .get('/')
+        .reply(200)
+
+        const resp = await request.sendPromise({}, automationFn, { url: 'http://www.foobar.com/' })
+
+        expect(resp.status).toBe(200)
+      })
+
+      it('sends a passed cookie header only to its own host on redirect', async () => {
+        mockJarCookies({ 'www.foobar.com': 'a=1', 'other.example.com': 'b=2' })
+
+        nock('http://www.foobar.com', { reqheaders: { cookie: 'user=1;a=1' } })
+        .get('/')
+        .reply(302, '', { location: '/second' })
+        .get('/second')
+        .reply(302, '', { location: 'http://other.example.com/' })
+
+        nock('http://other.example.com', { reqheaders: { cookie: 'b=2' } })
+        .get('/')
+        .reply(200)
+
+        const resp = await request.sendPromise({}, automationFn, {
+          url: 'http://www.foobar.com/',
+          headers: { Cookie: 'user=1' },
+        })
+
+        expect(resp.status).toBe(200)
+      })
     })
 
     describe('form=true', () => {
@@ -1144,6 +1209,29 @@ describe('lib/request', () => {
           req.on('error', reject)
         })
       })
+    })
+
+    it('sends no cookie header on redirect to a host without cookies', async () => {
+      mockJarCookies({ 'www.foobar.com': 'a=1' })
+
+      nock('http://www.foobar.com', { reqheaders: { cookie: 'a=1' } })
+      .get('/')
+      .reply(302, '', { location: 'http://other.example.com/' })
+
+      nock('http://other.example.com', { badheaders: ['cookie'] })
+      .get('/')
+      .reply(200)
+
+      const fn = await request.sendStream({}, automationFn, {
+        url: 'http://www.foobar.com/',
+        followRedirect: _.stubTrue,
+      })
+
+      const res: any = await new Promise((resolve, reject) => {
+        fn().on('response', resolve).on('error', reject)
+      })
+
+      expect(res.statusCode).toBe(200)
     })
 
     it('gets + attaches the cookies at each redirect', () => {

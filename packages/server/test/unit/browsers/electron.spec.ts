@@ -14,6 +14,7 @@ import * as Windows from '../../../lib/gui/windows'
 import electron from '../../../lib/browsers/electron'
 import * as savedState from '../../../lib/saved_state'
 import type { BrowserLaunchOpts } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 vi.mock('electron', async () => {
   const { default: electronStub } = await import('../../support/helpers/electron_stub')
@@ -882,7 +883,7 @@ describe('lib/browsers/electron', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })
