@@ -34,6 +34,7 @@
 - Fixed an issue where, in `cypress open` and `cypress run`, the browser launched by Cypress kept loading forever with no error when the Cypress installation was missing some of its files. Cypress now shows an error that names the missing file after a few seconds. Fixed in [#35232](https://github.com/cypress-io/cypress/pull/35232).
 - Fixed an issue where [`cy.scrollTo()`](https://on.cypress.io/scrollto) and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) ignored a `duration` given as a string, such as `'2000'`, and always animated the scroll for 400ms. A string `duration` is now read as milliseconds, the same as a number. Fixed in [#35248](https://github.com/cypress-io/cypress/pull/35248).
 - Fixed an issue where [`.select()`](https://on.cypress.io/select) did not fire `input` and `change` events on a `<select multiple>` when the selection changed but its first selected option stayed the same, such as selecting `['apple', 'banana']` when `apple` was already selected. Fixed in [#35254](https://github.com/cypress-io/cypress/pull/35254).
+- Fixed an issue where Cypress failed to verify and run with an `EACCES` error when the directory above the Cypress binary was read-only, such as a binary set with `CYPRESS_RUN_BINARY`. Cypress now continues without saving the verification result. Fixes [#30684](https://github.com/cypress-io/cypress/issues/30684).
 
 **Misc:**
 

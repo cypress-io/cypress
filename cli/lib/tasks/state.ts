@@ -152,8 +152,20 @@ const getBinaryVerifiedAsync = async (binaryDir: string): Promise<boolean> => {
   return contents.verified
 }
 
+// The binary can be installed in a read-only location, for example one set
+// with CYPRESS_RUN_BINARY. The binary is then verified again on the next run.
+const isReadOnlyError = (err: any): boolean => {
+  return ['EACCES', 'EPERM', 'EROFS'].includes(err?.code)
+}
+
 const clearBinaryStateAsync = async (binaryDir: string): Promise<void> => {
-  await fs.remove(getBinaryStatePath(binaryDir))
+  try {
+    await fs.remove(getBinaryStatePath(binaryDir))
+  } catch (err: any) {
+    if (!isReadOnlyError(err)) throw err
+
+    debug('could not remove binary state: %s', err.code)
+  }
 }
 
 /**
@@ -165,11 +177,17 @@ const clearBinaryStateAsync = async (binaryDir: string): Promise<void> => {
 const writeBinaryVerifiedAsync = async (verified: boolean, binaryDir: string): Promise<void> => {
   const contents = await getBinaryStateContentsAsync(binaryDir)
 
-  await fs.outputJson(
-    getBinaryStatePath(binaryDir),
-    _.extend(contents, { verified }),
-    { spaces: 2 },
-  )
+  try {
+    await fs.outputJson(
+      getBinaryStatePath(binaryDir),
+      _.extend(contents, { verified }),
+      { spaces: 2 },
+    )
+  } catch (err: any) {
+    if (!isReadOnlyError(err)) throw err
+
+    debug('could not write binary state: %s', err.code)
+  }
 }
 
 const getPathToExecutable = (binaryDir: string): string => {
