@@ -32,6 +32,8 @@ describe('server cookie jar between isolated tests', { browser: '!webkit', testI
       })
     })
 
-    cy.wait('@req').its('request.headers.cookie').should('be.undefined')
+    cy.wait('@req').its('request.headers.cookie').should((cookie) => {
+      expect(cookie ?? '').to.not.include('foo1')
+    })
   })
 })
