@@ -894,7 +894,6 @@
     "./packages/server/node_modules/chokidar/lib/constants.js",
     "./packages/server/node_modules/chokidar/lib/fsevents-handler.js",
     "./packages/server/node_modules/chokidar/lib/nodefs-handler.js",
-    "./packages/server/node_modules/chokidar/node_modules/glob-parent/index.js",
     "./packages/server/node_modules/express/lib/application.js",
     "./packages/server/node_modules/express/lib/request.js",
     "./packages/server/node_modules/express/lib/response.js",
@@ -906,6 +905,7 @@
     "./packages/server/node_modules/express/node_modules/send/index.js",
     "./packages/server/node_modules/finalhandler/node_modules/debug/src/browser.js",
     "./packages/server/node_modules/finalhandler/node_modules/debug/src/index.js",
+    "./packages/server/node_modules/glob-parent/index.js",
     "./packages/server/node_modules/glob/glob.js",
     "./packages/server/node_modules/glob/sync.js",
     "./packages/server/node_modules/graceful-fs/graceful-fs.js",
@@ -3751,6 +3751,7 @@
     "./packages/server/lib/util/ci_provider.ts",
     "./packages/server/lib/util/class-helpers.ts",
     "./packages/server/lib/util/commit-info.ts",
+    "./packages/server/lib/util/config_process_exit.ts",
     "./packages/server/lib/util/cypress-cache.ts",
     "./packages/server/lib/util/duration.ts",
     "./packages/server/lib/util/editors.ts",
@@ -3955,5 +3956,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "4e774ecf64b6cf31f8745a8be07364fcb3e3df29594dd429ad8317e363420584"
+  "deferredHash": "d0ec0ba1f830f8faa1c577819b84670c955973a235caced8958cd74bd07b5dc1"
 }
