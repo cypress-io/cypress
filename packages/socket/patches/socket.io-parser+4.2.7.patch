@@ -1,5 +1,5 @@
 diff --git a/node_modules/socket.io-parser/build/cjs/binary.js b/node_modules/socket.io-parser/build/cjs/binary.js
-index f7e9957..65bcabe 100644
+index 4ddc2c2..cce16b3 100644
 --- a/node_modules/socket.io-parser/build/cjs/binary.js
 +++ b/node_modules/socket.io-parser/build/cjs/binary.js
 @@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
@@ -21,12 +21,12 @@ index f7e9957..65bcabe 100644
      pack.attachments = buffers.length; // number of binary 'attachments'
      return { packet: pack, buffers: buffers };
  }
--function _deconstructPacket(data, buffers) {
-+function _deconstructPacket(data, buffers, known, retvals) {
+-function _deconstructPacket(data, buffers, toJSON) {
++function _deconstructPacket(data, buffers, known, retvals, toJSON) {
      if (!data)
          return data;
      if ((0, is_binary_js_1.isBinary)(data)) {
-@@ -26,18 +29,27 @@ function _deconstructPacket(data, buffers) {
+@@ -26,21 +29,30 @@ function _deconstructPacket(data, buffers, toJSON) {
          buffers.push(data);
          return placeholder;
      }
@@ -48,6 +48,10 @@ index f7e9957..65bcabe 100644
          return newData;
      }
      else if (typeof data === "object" && !(data instanceof Date)) {
+         if (data.toJSON && typeof data.toJSON === "function" && !toJSON) {
+-            return _deconstructPacket(data.toJSON(), buffers, true);
++            return _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
+         }
          const newData = {};
 +        retvals.set(data, newData);
          for (const key in data) {
@@ -57,7 +61,7 @@ index f7e9957..65bcabe 100644
              }
          }
          return newData;
-@@ -53,11 +65,11 @@ function _deconstructPacket(data, buffers) {
+@@ -56,11 +68,11 @@ function _deconstructPacket(data, buffers, toJSON) {
   * @public
   */
  function reconstructPacket(packet, buffers) {
@@ -71,7 +75,7 @@ index f7e9957..65bcabe 100644
      if (!data)
          return data;
      if (data && data._placeholder === true) {
-@@ -71,15 +83,19 @@ function _reconstructPacket(data, buffers) {
+@@ -74,15 +86,19 @@ function _reconstructPacket(data, buffers) {
              throw new Error("illegal attachments");
          }
      }
@@ -95,18 +99,18 @@ index f7e9957..65bcabe 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/cjs/index.js b/node_modules/socket.io-parser/build/cjs/index.js
-index e9cc933..e9bbbb8 100644
+index 1bdad4a..dd27500 100644
 --- a/node_modules/socket.io-parser/build/cjs/index.js
 +++ b/node_modules/socket.io-parser/build/cjs/index.js
-@@ -7,6 +7,7 @@ const binary_js_1 = require("./binary.js");
+@@ -10,6 +10,7 @@ const binary_js_1 = require("./binary.js");
  const is_binary_js_1 = require("./is-binary.js");
- const debug_1 = require("debug"); // debug()
+ const debug_1 = __importDefault(require("debug")); // debug()
  const debug = (0, debug_1.default)("socket.io-parser"); // debug()
 +const flatted = require("flatted");
  /**
   * These strings must not be used as event names, as they have a special meaning.
   */
-@@ -90,7 +91,7 @@ class Encoder {
+@@ -93,7 +94,7 @@ class Encoder {
          }
          // json data
          if (null != obj.data) {
@@ -115,7 +119,7 @@ index e9cc933..e9bbbb8 100644
          }
          debug("encoded %j as %s", obj, str);
          return str;
-@@ -236,19 +237,14 @@ class Decoder extends component_emitter_1.Emitter {
+@@ -235,19 +236,14 @@ class Decoder extends component_emitter_1.Emitter {
          // look up json data
          if (str.charAt(++i)) {
              const payload = this.tryParse(str.substr(i));
@@ -137,7 +141,7 @@ index e9cc933..e9bbbb8 100644
          }
          catch (e) {
              return false;
-@@ -365,3 +361,4 @@ function isPacketValid(packet) {
+@@ -364,3 +360,4 @@ function isPacketValid(packet) {
          isAckIdValid(packet.id) &&
          isDataValid(packet.type, packet.data));
  }
@@ -212,7 +216,7 @@ index a530652..28341d2 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm-debug/binary.js b/node_modules/socket.io-parser/build/esm-debug/binary.js
-index 5d5c3d8..2855d98 100644
+index 302ee22..a826584 100644
 --- a/node_modules/socket.io-parser/build/esm-debug/binary.js
 +++ b/node_modules/socket.io-parser/build/esm-debug/binary.js
 @@ -1,4 +1,7 @@
@@ -232,12 +236,12 @@ index 5d5c3d8..2855d98 100644
      pack.attachments = buffers.length; // number of binary 'attachments'
      return { packet: pack, buffers: buffers };
  }
--function _deconstructPacket(data, buffers) {
-+function _deconstructPacket(data, buffers, known, retvals) {
+-function _deconstructPacket(data, buffers, toJSON) {
++function _deconstructPacket(data, buffers, known, retvals, toJSON) {
      if (!data)
          return data;
      if (isBinary(data)) {
-@@ -22,18 +25,27 @@ function _deconstructPacket(data, buffers) {
+@@ -22,21 +25,30 @@ function _deconstructPacket(data, buffers, toJSON) {
          buffers.push(data);
          return placeholder;
      }
@@ -259,6 +263,10 @@ index 5d5c3d8..2855d98 100644
          return newData;
      }
      else if (typeof data === "object" && !(data instanceof Date)) {
+         if (data.toJSON && typeof data.toJSON === "function" && !toJSON) {
+-            return _deconstructPacket(data.toJSON(), buffers, true);
++            return _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
+         }
          const newData = {};
 +        retvals.set(data, newData);
          for (const key in data) {
@@ -268,7 +276,7 @@ index 5d5c3d8..2855d98 100644
              }
          }
          return newData;
-@@ -49,11 +61,11 @@ function _deconstructPacket(data, buffers) {
+@@ -52,11 +64,11 @@ function _deconstructPacket(data, buffers, toJSON) {
   * @public
   */
  export function reconstructPacket(packet, buffers) {
@@ -282,7 +290,7 @@ index 5d5c3d8..2855d98 100644
      if (!data)
          return data;
      if (data && data._placeholder === true) {
-@@ -67,15 +79,19 @@ function _reconstructPacket(data, buffers) {
+@@ -70,15 +82,19 @@ function _reconstructPacket(data, buffers) {
              throw new Error("illegal attachments");
          }
      }
@@ -306,7 +314,7 @@ index 5d5c3d8..2855d98 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm-debug/index.js b/node_modules/socket.io-parser/build/esm-debug/index.js
-index 7a50263..5eee435 100644
+index 25a4912..4073244 100644
 --- a/node_modules/socket.io-parser/build/esm-debug/index.js
 +++ b/node_modules/socket.io-parser/build/esm-debug/index.js
 @@ -1,8 +1,10 @@
@@ -329,7 +337,7 @@ index 7a50263..5eee435 100644
          }
          debug("encoded %j as %s", obj, str);
          return str;
-@@ -231,19 +233,14 @@ export class Decoder extends Emitter {
+@@ -227,19 +229,14 @@ export class Decoder extends Emitter {
          // look up json data
          if (str.charAt(++i)) {
              const payload = this.tryParse(str.substr(i));
@@ -418,7 +426,7 @@ index 0c654dd..c7b10ea 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm/binary.js b/node_modules/socket.io-parser/build/esm/binary.js
-index 5d5c3d8..2855d98 100644
+index 302ee22..a826584 100644
 --- a/node_modules/socket.io-parser/build/esm/binary.js
 +++ b/node_modules/socket.io-parser/build/esm/binary.js
 @@ -1,4 +1,7 @@
@@ -438,12 +446,12 @@ index 5d5c3d8..2855d98 100644
      pack.attachments = buffers.length; // number of binary 'attachments'
      return { packet: pack, buffers: buffers };
  }
--function _deconstructPacket(data, buffers) {
-+function _deconstructPacket(data, buffers, known, retvals) {
+-function _deconstructPacket(data, buffers, toJSON) {
++function _deconstructPacket(data, buffers, known, retvals, toJSON) {
      if (!data)
          return data;
      if (isBinary(data)) {
-@@ -22,18 +25,27 @@ function _deconstructPacket(data, buffers) {
+@@ -22,21 +25,30 @@ function _deconstructPacket(data, buffers, toJSON) {
          buffers.push(data);
          return placeholder;
      }
@@ -465,6 +473,10 @@ index 5d5c3d8..2855d98 100644
          return newData;
      }
      else if (typeof data === "object" && !(data instanceof Date)) {
+         if (data.toJSON && typeof data.toJSON === "function" && !toJSON) {
+-            return _deconstructPacket(data.toJSON(), buffers, true);
++            return _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
+         }
          const newData = {};
 +        retvals.set(data, newData);
          for (const key in data) {
@@ -474,7 +486,7 @@ index 5d5c3d8..2855d98 100644
              }
          }
          return newData;
-@@ -49,11 +61,11 @@ function _deconstructPacket(data, buffers) {
+@@ -52,11 +64,11 @@ function _deconstructPacket(data, buffers, toJSON) {
   * @public
   */
  export function reconstructPacket(packet, buffers) {
@@ -488,7 +500,7 @@ index 5d5c3d8..2855d98 100644
      if (!data)
          return data;
      if (data && data._placeholder === true) {
-@@ -67,15 +79,19 @@ function _reconstructPacket(data, buffers) {
+@@ -70,15 +82,19 @@ function _reconstructPacket(data, buffers) {
              throw new Error("illegal attachments");
          }
      }
@@ -512,7 +524,7 @@ index 5d5c3d8..2855d98 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm/index.js b/node_modules/socket.io-parser/build/esm/index.js
-index f06c183..3df4243 100644
+index 9a715e5..5c35ddd 100644
 --- a/node_modules/socket.io-parser/build/esm/index.js
 +++ b/node_modules/socket.io-parser/build/esm/index.js
 @@ -1,6 +1,8 @@
@@ -533,7 +545,7 @@ index f06c183..3df4243 100644
          }
          return str;
      }
-@@ -227,18 +229,13 @@ export class Decoder extends Emitter {
+@@ -223,18 +225,13 @@ export class Decoder extends Emitter {
          // look up json data
          if (str.charAt(++i)) {
              const payload = this.tryParse(str.substr(i));
