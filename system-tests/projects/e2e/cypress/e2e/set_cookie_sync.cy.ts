@@ -5,7 +5,7 @@
 // The browser's cookie store has to match the headers the handler leaves,
 // including on a redirect hop.
 //
-// Each test requests its endpoint with fetch. cy.visit requests the page from
+// Most tests request their endpoint with fetch. cy.visit requests the page from
 // Node, copies its cookies into Chrome over automation and answers Chrome's
 // navigation from that buffered response, so Chrome never pauses a response or
 // reports what it stored from one, and the cookie sync never runs.
@@ -23,6 +23,28 @@ const originOn = (hostname: string) => {
 
 const setCookieLines = (res: { headers: Record<string, string | string[]> }) => {
   return ([] as string[]).concat(res.headers['set-cookie'] || [])
+}
+
+// /cookie_sync/page sets kept=origin and dropped=origin. The handler rewrites
+// one, drops the other and adds a third.
+const rewritePageCookies = ({ body }: { body?: string } = {}) => {
+  cy.intercept('/cookie_sync/page', (req) => {
+    req.on('response', (res) => {
+      expect(setCookieLines(res)).to.deep.eq(['kept=origin; Path=/', 'dropped=origin; Path=/'])
+
+      if (body !== undefined) {
+        res.body = body
+      }
+
+      res.headers['set-cookie'] = ['kept=rewritten; Path=/', 'added=1; Path=/']
+    })
+  })
+}
+
+const expectPageCookies = () => {
+  cy.getCookie('kept').its('value').should('eq', 'rewritten')
+  cy.getCookie('added').its('value').should('eq', '1')
+  cy.getCookie('dropped').should('be.null')
 }
 
 describe('cy.intercept rewrites Set-Cookie headers', () => {
@@ -162,20 +184,35 @@ describe('cy.intercept rewrites Set-Cookie headers', () => {
   // handler's Set-Cookie headers from that fulfilled response; the sync only
   // removes cookies the origin set that the handler dropped.
   it('stores the handler\'s cookies when it also replaces the response body', () => {
-    cy.intercept('/cookie_sync/page', (req) => {
-      req.on('response', (res) => {
-        expect(setCookieLines(res)).to.deep.eq(['kept=origin; Path=/', 'dropped=origin; Path=/'])
-
-        res.body = 'stubbed'
-        res.headers['set-cookie'] = ['kept=rewritten; Path=/', 'added=1; Path=/']
-      })
-    })
+    rewritePageCookies({ body: 'stubbed' })
 
     fetchText('/cookie_sync/page').should('eq', 'stubbed')
 
-    cy.getCookie('kept').its('value').should('eq', 'rewritten')
-    cy.getCookie('added').its('value').should('eq', '1')
-    cy.getCookie('dropped').should('be.null')
+    expectPageCookies()
+  })
+
+  // Cypress injects into an AUT document, which fulfills the response the same
+  // way replacing the body does
+  it('stores the handler\'s cookies for a page the AUT navigates to', () => {
+    rewritePageCookies()
+
+    cy.window().then((win) => {
+      win.location.href = '/cookie_sync/page'
+    })
+
+    cy.contains('#page', 'origin')
+    expectPageCookies()
+  })
+
+  // the sync doesn't run on this path, so this covers the automation that
+  // copies the visited page's cookies into Chrome
+  it('stores the handler\'s cookies for a page cy.visit loads', () => {
+    rewritePageCookies()
+
+    cy.visit('/cookie_sync/page')
+
+    cy.contains('#page', 'origin')
+    expectPageCookies()
   })
 
   it('keeps a cookie Chrome blocked out of the store while syncing another', () => {
@@ -332,5 +369,59 @@ describe('cy.intercept removes the Cookie header from a request', () => {
     // deleting req.headers.cookie changes only what this request sends, not
     // the cookies Chrome stores
     cy.getCookie('session').its('value').should('eq', 'plain')
+  })
+})
+
+// When the AUT isn't on the primary origin, the proxy also adds the handler's
+// cookies to Chrome over automation, so the sync isn't the only writer. The
+// AUT is a cross-site iframe there, so Chrome only stores the origin's
+// SameSite=None; Secure cookies, which 127.0.0.1 allows over http.
+describe('cy.intercept rewrites Set-Cookie headers in cy.origin', () => {
+  // /cookie_sync/rewritten sets foo=origin and bar=origin
+  beforeEach(() => {
+    cy.intercept({ pathname: '/cookie_sync/rewritten' }, (req) => {
+      req.on('response', (res) => {
+        expect(setCookieLines(res)).to.deep.eq([
+          'foo=origin; Path=/; SameSite=None; Secure',
+          'bar=origin; Path=/; SameSite=None; Secure',
+        ])
+
+        res.headers['set-cookie'] = [
+          'bar=rewritten; Path=/; SameSite=None; Secure',
+          'added=1; Path=/; SameSite=None; Secure',
+        ]
+      })
+    }).as('rewritten')
+  })
+
+  const expectRewrittenCookies = () => {
+    cy.origin(originOn('127.0.0.1'), () => {
+      cy.getCookie('bar').its('value').should('eq', 'rewritten')
+      cy.getCookie('added').its('value').should('eq', '1')
+      cy.getCookie('foo').should('be.null')
+    })
+  }
+
+  it('stores the handler\'s cookies for a page the AUT navigates to', () => {
+    cy.origin(originOn('127.0.0.1'), () => {
+      cy.visit('/cookie_sync/no_cookies')
+      cy.window().then((win) => {
+        win.location.href = '/cookie_sync/rewritten'
+      })
+
+      cy.contains('#page', 'rewritten')
+    })
+
+    expectRewrittenCookies()
+  })
+
+  it('stores the handler\'s cookies from a fetch', () => {
+    cy.origin(originOn('127.0.0.1'), () => {
+      cy.visit('/cookie_sync/no_cookies')
+      cy.window().then((win) => win.fetch('/cookie_sync/rewritten').then((res) => res.text()))
+    })
+
+    cy.wait('@rewritten')
+    expectRewrittenCookies()
   })
 })
