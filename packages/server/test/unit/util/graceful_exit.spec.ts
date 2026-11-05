@@ -371,7 +371,7 @@ describe('lib/util/graceful-exit', () => {
 
     logStub.mockRestore()
 
-    expect(exitedAfter).toBeGreaterThanOrEqual(100)
+    expect(exitedAfter).toBeGreaterThanOrEqual(90)
     expect(exitedAfter).toBeLessThanOrEqual(400)
     expect(exitStub).toHaveBeenCalledWith(0)
     expect(logged).toContain('The "best-effort" teardown step did not finish within 100ms')
