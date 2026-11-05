@@ -12,6 +12,7 @@ const {
 } = require('./utils')
 const { Octokit } = require('@octokit/core')
 const { createAppAuth } = require('@octokit/auth-app')
+const { RequestError } = require('@octokit/request-error')
 const { stripIndent } = require('common-tags')
 
 const { npm, binary } = getNameAndBinary(process.argv)
@@ -73,12 +74,43 @@ const appOctokit = new Octokit({
   },
 })
 
-appOctokit.request(
-  'POST /repos/{owner}/{repo}/commits/{commit_sha}/comments',
-  {
-    owner: 'cypress-io',
-    repo: 'cypress',
-    commit_sha: sha,
-    body: getInstallMessage(),
-  },
-).then((response) => console.log(response))
+const postInstallComment = async () => {
+  const maxAttempts = 5
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await appOctokit.request(
+        'POST /repos/{owner}/{repo}/commits/{commit_sha}/comments',
+        {
+          owner: 'cypress-io',
+          repo: 'cypress',
+          commit_sha: sha,
+          body: getInstallMessage(),
+        },
+      )
+
+      console.log(response)
+
+      return
+    } catch (err) {
+      const isRetryableServerError = err instanceof RequestError && err.status >= 500
+
+      if (!isRetryableServerError || attempt === maxAttempts) {
+        throw err
+      }
+
+      const delayMs = Math.min(1000 * 2 ** (attempt - 1), 30_000)
+
+      console.log(
+        `GitHub API returned ${err.status}, retrying in ${delayMs}ms (attempt ${attempt}/${maxAttempts})`,
+      )
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
+}
+
+postInstallComment().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
