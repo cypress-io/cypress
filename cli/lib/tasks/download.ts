@@ -427,7 +427,7 @@ const start = async (opts: any): Promise<any> => {
   const arch = await util.getRealArch()
   const versionUrl = getUrl(arch, version)
 
-  progress.throttle = 100
+  progress.throttle = util.progressThrottleMs
 
   debug('needed Cypress version: %s', version)
   debug('source url %s', versionUrl)

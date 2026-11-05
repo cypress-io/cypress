@@ -56,6 +56,15 @@ declare module 'net' {
 
 declare type Optional<T> = T | void
 
+declare module 'launch-editor' {
+  function launchEditor (
+    file: string,
+    specifiedEditor?: string,
+    onErrorCallback?: (fileName: string, errorMessage: string | null) => void,
+  ): void
+  export = launchEditor
+}
+
 declare module 'plist' {
   interface Plist {
     parse: (s: string) => any

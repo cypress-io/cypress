@@ -30,6 +30,7 @@
     "@rollup/plugin-commonjs": "^29.0.2",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "lodash": "^4.17.21",
     "rollup": "4.60.2",
     "rollup-plugin-dts": "6.4.1",

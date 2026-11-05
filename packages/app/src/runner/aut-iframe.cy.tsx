@@ -173,7 +173,7 @@ describe('AutIframe', () => {
     it('should remove both aut iframe and snapshot iframe', () => {
       const result = autIframe.create()
       let autIframeRemoved = false
-      let snapshotIframesRemoved = [false, false]
+      const snapshotIframesRemoved = [false, false]
 
       // Mock remove methods
       result.autIframe.remove = () => {

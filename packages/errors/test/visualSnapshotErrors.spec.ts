@@ -692,6 +692,14 @@ describe('visual error templates', () => {
         default: ['/path/to/cypress.config.js', err],
       }
     },
+    CONFIG_PROCESS_EXITED_UNEXPECTEDLY: () => {
+      return {
+        default: [1, null],
+        unknown: [null, null],
+        sigkill: [null, 'SIGKILL'],
+        sigkillComponent: [null, 'SIGKILL', 'component'],
+      }
+    },
     TRUSTED_CERTIFICATES_LOAD_ERROR: () => {
       return {
         default: ['certs/server.crt.pem', makeErr()],

@@ -52,6 +52,11 @@ module.exports = (on, config) => {
       options.preferences['network.cookie.sameSite.noneRequiresSecure'] = true
     }
 
+    if (browser.family === 'firefox' && process.env.FIREFOX_DISABLE_HTTP_CACHE) {
+      options.preferences['browser.cache.disk.enable'] = false
+      options.preferences['browser.cache.memory.enable'] = false
+    }
+
     if (browser.family === 'chromium' && browser.name !== 'electron') {
       if (process.env.CHROMIUM_EXTRA_LAUNCH_ARGS) {
         options.args = options.args.concat(process.env.CHROMIUM_EXTRA_LAUNCH_ARGS.split(' '))
