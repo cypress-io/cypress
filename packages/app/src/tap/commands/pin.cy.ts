@@ -497,9 +497,19 @@ describe('tap/commands/pin', () => {
   it('requires a test and command (or --clear) before attempting a pin', async () => {
     const { pinSnapshot } = stubSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2' })
+    const manager = new TapManager(CYPRESS_VERSION)
+    const neither = await manager.exec('pin')
+    const testOnly = await manager.exec('pin', {}, { 'test-id': 'r2' })
+    const commandOnly = await manager.exec('pin', {}, { 'command-id': '1' })
 
-    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
+    expect((neither as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
+    // Half the pair is answered the way any flag missing its companion is.
+    expect((testOnly as { error: { code: string, detail: string } }).error.code).to.eq('MISSING_COMPANION_OPTION')
+    expect((testOnly as { error: { code: string, detail: string } }).error.detail).to.contain('`--test-id` flag without also passing the `--command-id` flag')
+    expect((commandOnly as { error: { code: string, detail: string } }).error.code).to.eq('MISSING_COMPANION_OPTION')
+    expect((commandOnly as { error: { code: string, detail: string } }).error.detail).to.contain('`--command-id` flag without also passing the `--test-id` flag')
+    // `--clear` makes the pair moot, so a stray ID beside it still releases.
+    expect(await manager.exec('pin', {}, { 'test-id': 'r2', clear: 'true' })).to.deep.eq({ result: { cleared: false } })
     // A malformed pin never drives the app pin.
     expect(pinSnapshot).not.to.have.been.called
   })

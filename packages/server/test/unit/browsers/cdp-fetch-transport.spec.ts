@@ -8,6 +8,7 @@ import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
+import type { ChromeStoreCookie } from '../../../lib/browsers/cdp-protocol/cdp-set-cookie-sync'
 import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
 import { shouldStreamResponseBody } from '../../../lib/browsers/cdp-protocol/should-stream-response-body'
@@ -81,6 +82,7 @@ function createClient () {
       resolves: (value: unknown) => define(() => Promise.resolve(value)),
       rejects: (error: Error) => define(() => Promise.reject(error)),
       returns: (value: unknown) => define(() => value),
+      callsFake: (respond: () => unknown) => define(respond),
     }
   }
 
@@ -757,6 +759,71 @@ describe('CdpFetchTransport', () => {
       expect(encoded.responseHeaders).toBeUndefined()
     })
 
+    describe('continuing a response whose headers only changed order', () => {
+      const decodePausedResponse = (codec: ReturnType<typeof createCdpFetchCodec>, responseHeaders: Protocol.Fetch.HeaderEntry[]) => {
+        const request: CdpFetchTransportRequest = {
+          id: 'network-1',
+          url: 'https://example.test/',
+          method: 'GET',
+          headers: {},
+          initialPriority: 'High',
+          referrerPolicy: 'strict-origin-when-cross-origin',
+        }
+
+        codec.decodeRequest(request)
+
+        return codec.decodeResponse({
+          ...request,
+          requestId: 'fetch-request',
+          responseCode: 200,
+          responseStatusText: 'OK',
+          responseHeaders,
+          originalBodyDigest: digestBody(Buffer.from('origin')),
+        })
+      }
+
+      it('omits the headers when only their order and casing changed', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, [
+          { name: 'Content-Type', value: 'text/plain' },
+          { name: 'X-Foo', value: 'bar' },
+        ])
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: 'origin',
+          headers: { 'x-foo': 'bar', 'content-type': 'text/plain' },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toBeUndefined()
+      })
+
+      // the later of two lines for the same cookie is the one stored, so the
+      // reorder has to reach the set-cookie sync
+      it('sends the headers when Set-Cookie lines were reordered', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, [
+          { name: 'content-type', value: 'text/plain' },
+          { name: 'set-cookie', value: 'a=1' },
+          { name: 'set-cookie', value: 'a=2' },
+        ])
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: 'origin',
+          headers: { 'content-type': 'text/plain', 'set-cookie': ['a=2', 'a=1'] },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toStrictEqual([
+          { name: 'content-type', value: 'text/plain' },
+          { name: 'set-cookie', value: 'a=2' },
+          { name: 'set-cookie', value: 'a=1' },
+        ])
+      })
+    })
+
     it('fulfills a skipped response when middleware sets a body', () => {
       const codec = createCdpFetchCodec()
 
@@ -1342,6 +1409,46 @@ describe('CdpFetchTransport', () => {
         }, {
           name: 'X-Mutated',
           value: '1',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('sends an empty Cookie header when middleware removes the one Chrome paused with', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        'X-Foo': 'Bar',
+        'Cookie': 'session=abc',
+      }
+
+      httpIntercept.use((req, next) => {
+        // removes the Cookie header the way `delete req.headers.cookie` in a
+        // cy.intercept handler does
+        const headers = Object.fromEntries(Object.entries(req.headers ?? {}).filter(([name]) => name.toLowerCase() !== 'cookie'))
+
+        return next({ ...req, headers })
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expectCalledWith(client.send, 'Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'X-Foo',
+          value: 'Bar',
+        }, {
+          name: 'Cookie',
+          value: '',
         }],
       })
 
@@ -2030,6 +2137,391 @@ describe('CdpFetchTransport', () => {
           value: 'foo2=bar2',
         }],
         body: Buffer.from('ok').toString('base64'),
+      })
+    })
+
+    describe('syncing set-cookie changes into the cookie store', () => {
+      // Drives one request through a response handler and returns the CDP calls
+      // the transport made to sync the handler's Set-Cookie edits to Chrome
+      async function runWithSetCookie (options: {
+        // the origin's Set-Cookie header; omitted when it sent none
+        setCookie?: string
+        // a response handler's edit to the Set-Cookie lines
+        rewrite?: (setCookie: string[]) => string[]
+        body?: string
+        // the url a request handler rewrites req.url to
+        rewriteUrl?: string
+        // Network.responseReceivedExtraInfo never arrived for the request
+        extraInfoUnavailable?: boolean
+        // the origin's Set-Cookie lines Chrome refused to store
+        blockedCookies?: string[]
+        cookiePartitionKey?: Protocol.Network.CookiePartitionKey
+        cookiePartitionKeyOpaque?: boolean
+        // Chrome's cookie store after the origin's headers; defaults to every
+        // origin cookie, as for a credentialed request
+        chromeCookieStore?: ChromeStoreCookie[]
+        // Network.getAllCookies rejects, as it does once the target has closed
+        storeUnavailable?: boolean
+        // Network.setCookie and Network.deleteCookies both reject
+        cookieWritesFail?: boolean
+        // a cy.intercept route matched the request, so the transport reads
+        // Chrome's store as it continues the request
+        routeMatched?: boolean
+        // what that read returns, or a reply that never settles; it rejects when
+        // set to an Error
+        cookieStoreWhenContinued?: Protocol.Network.Cookie[] | Error | Promise<never>
+        // for stubbing CDP replies and inspecting calls mid-run
+        client?: ReturnType<typeof createClient>
+      }) {
+        const client = options.client ?? createClient()
+        const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+        const { transport, networkExtraInfo } = createTransport(client, { httpIntercept })
+        const url = 'https://example.test/'
+        const responseUrl = options.rewriteUrl ?? url
+        // Fetch reuses one requestId across the request and response stages
+        const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', url })
+        const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', url: responseUrl, responseStatusCode: 200 })
+
+        response.responseHeaders = [{ name: 'Content-Type', value: 'text/plain' }]
+
+        // Chrome stores a cookie without Domain= as host-only on the response
+        // host; a fixture that sets Domain= must pass chromeCookieStore itself
+        const responseHostname = new URL(responseUrl).hostname
+        const originCookies = (options.setCookie?.split('\n') ?? []).map((line) => {
+          const [name, value] = line.split(';')[0].split('=')
+
+          return { name, value, path: '/', domain: responseHostname }
+        })
+
+        // the first read is the one made as the request is continued, when a
+        // route matched; every later read is the sync's own
+        let reads = 0
+
+        client.sendWithArgs('Network.getAllCookies').callsFake(() => {
+          if (options.routeMatched && reads++ === 0) {
+            const { cookieStoreWhenContinued: store = [] } = options
+
+            if (store instanceof Promise) return store
+
+            return store instanceof Error ? Promise.reject(store) : Promise.resolve({ cookies: store })
+          }
+
+          return options.storeUnavailable
+            ? Promise.reject(new Error('No target with given id found'))
+            : Promise.resolve({ cookies: options.chromeCookieStore ?? originCookies })
+        })
+
+        if (options.cookieWritesFail) {
+          client.sendWithArgs('Network.setCookie').rejects(new Error('Sanitizing cookie failed'))
+          client.sendWithArgs('Network.deleteCookies').rejects(new Error('Sanitizing cookie failed'))
+        }
+
+        networkExtraInfo.responseExtraInfo.mockImplementation(async () => {
+          return options.extraInfoUnavailable ? undefined : {
+            requestId: 'network-1',
+            headers: options.setCookie !== undefined ? { 'Set-Cookie': options.setCookie } : {},
+            // the reason is arbitrary; the transport only reads cookieLine
+            blockedCookies: (options.blockedCookies ?? []).map((cookieLine) => ({ cookieLine, blockedReasons: ['SameSiteLax'] })),
+            ...(options.cookiePartitionKey ? { cookiePartitionKey: options.cookiePartitionKey } : {}),
+            ...(options.cookiePartitionKeyOpaque ? { cookiePartitionKeyOpaque: true } : {}),
+          }
+        })
+
+        httpIntercept.use(async (req, next) => {
+          const res = await next({
+            ...req,
+            ...(options.rewriteUrl ? { url: options.rewriteUrl } : {}),
+            ...(options.routeMatched ? { hadMatchingRoutes: true } : {}),
+          })
+          const setCookie = ([] as string[]).concat(res.headers?.['set-cookie'] ?? [])
+
+          return {
+            ...res,
+            ...(options.rewrite ? { headers: { ...res.headers, 'set-cookie': options.rewrite(setCookie) } } : {}),
+            ...(options.body !== undefined ? { body: options.body } : {}),
+          }
+        })
+
+        const onRequestPaused = await startTransport(transport, client)
+        const handled = onRequestPaused(request, 'session-1')
+
+        await tick()
+        await onRequestPaused(response, 'session-1')
+        await handled
+
+        const methods = client.send.mock.calls.map(([method]) => method)
+
+        return { client, methods, networkExtraInfo }
+      }
+
+      // Holds the cookie command's reply open to check the response stays paused
+      // until it settles, or the page could read the origin's cookies. Send order
+      // alone would pass even if the transport didn't await the command.
+      async function expectResponseHeldForCookieCommand (
+        cookieCommand: 'Network.setCookie' | 'Network.deleteCookies',
+        release: 'Fetch.continueResponse' | 'Fetch.fulfillRequest',
+        options: Parameters<typeof runWithSetCookie>[0],
+      ) {
+        const client = createClient()
+        const pending = Promise.withResolvers<any>()
+
+        client.sendWithArgs(cookieCommand).returns(pending.promise)
+
+        const run = runWithSetCookie({ ...options, client })
+
+        // the transport is now blocked on the cookie command's reply
+        await vi.waitFor(() => expectCalledWith(client.send, cookieCommand, anyArg, 'session-1'))
+        expectNotCalledWith(client.send, release)
+
+        pending.resolve({})
+        const result = await run
+
+        expectCalledWith(client.send, release, anyArg, 'session-1')
+
+        return result
+      }
+
+      it('writes a rewritten cookie on the response session before continuing the response', async () => {
+        const { client } = await expectResponseHeldForCookieCommand('Network.setCookie', 'Fetch.continueResponse', {
+          setCookie: 'foo=from-origin; Path=/',
+          rewrite: () => ['foo=from-handler; Path=/'],
+        })
+
+        expectCalledWith(client.send, 'Network.setCookie', {
+          name: 'foo',
+          value: 'from-handler',
+          url: 'https://example.test/',
+          path: '/',
+          secure: false,
+          httpOnly: false,
+        }, 'session-1')
+      })
+
+      it('does not read or write the cookie store when the handler did not change set-cookie', async () => {
+        const { client } = await runWithSetCookie({ setCookie: 'foo=from-origin; Path=/' })
+
+        expectNotCalledWith(client.send, 'Network.getAllCookies')
+        expectNotCalledWith(client.send, 'Network.setCookie')
+        expectNotCalledWith(client.send, 'Network.deleteCookies')
+      })
+
+      it('removes a dropped cookie before fulfilling, leaving the rest to the fulfilled headers', async () => {
+        const { client } = await expectResponseHeldForCookieCommand('Network.deleteCookies', 'Fetch.fulfillRequest', {
+          setCookie: 'dropped=from-origin; Path=/\nkept=from-origin; Path=/',
+          rewrite: () => ['kept=from-handler; Path=/'],
+          body: 'stubbed',
+        })
+
+        expectNotCalledWith(client.send, 'Network.setCookie')
+        expect(callsMatching(client.send, ['Network.deleteCookies'])).toHaveLength(1)
+        expectCalledWith(client.send, 'Network.deleteCookies', {
+          name: 'dropped',
+          domain: 'example.test',
+          path: '/',
+        }, 'session-1')
+      })
+
+      describe('reading the store as a request a route matched is continued', () => {
+        const heldBefore: Protocol.Network.Cookie = {
+          name: 'foo',
+          value: 'from-before',
+          domain: 'example.test',
+          path: '/',
+          expires: Date.parse('2030-01-01T00:00:00Z') / 1000,
+          size: 14,
+          httpOnly: false,
+          secure: false,
+          session: false,
+          priority: 'Medium',
+          sourceScheme: 'Secure',
+          sourcePort: 443,
+        }
+
+        // Chrome answers the read before it stores the response's cookies only
+        // while the read is sent first, with nothing awaited before the continue
+        it('sends the read just before continuing the request, without waiting for its reply', async () => {
+          const { methods, client } = await runWithSetCookie({
+            setCookie: 'foo=from-origin; Path=/',
+            routeMatched: true,
+            cookieStoreWhenContinued: new Promise<never>(() => {}),
+          })
+
+          const continueIndex = methods.indexOf('Fetch.continueRequest')
+
+          expect(methods[continueIndex - 1]).toBe('Network.getAllCookies')
+          expect(client.send.mock.calls[continueIndex - 1]).toEqual(['Network.getAllCookies', undefined, 'session-1'])
+        })
+
+        it('does not read the store for a request no route matched', async () => {
+          const { methods } = await runWithSetCookie({
+            setCookie: 'foo=from-origin; Path=/',
+            rewrite: () => [],
+          })
+
+          expect(methods.slice(0, methods.indexOf('Fetch.continueRequest'))).not.toContain('Network.getAllCookies')
+        })
+
+        it('puts back the cookie the origin\'s header overwrote when the handler drops it', async () => {
+          const { client } = await expectResponseHeldForCookieCommand('Network.setCookie', 'Fetch.continueResponse', {
+            setCookie: 'foo=from-origin; Path=/',
+            rewrite: () => [],
+            routeMatched: true,
+            cookieStoreWhenContinued: [heldBefore],
+          })
+
+          const cookieCommands = client.send.mock.calls.filter(([method]) => method === 'Network.deleteCookies' || method === 'Network.setCookie')
+
+          expect(cookieCommands).toEqual([
+            ['Network.deleteCookies', expect.objectContaining({ name: 'foo' }), 'session-1'],
+            ['Network.setCookie', expect.objectContaining({ name: 'foo', value: 'from-before', expires: heldBefore.expires }), 'session-1'],
+          ])
+        })
+
+        // a request sent without credentials: Chrome ignored the origin's
+        // foo=from-before, so the stored foo=from-before is the earlier cookie
+        it('keeps a cookie the origin re-sent unchanged when the handler drops it', async () => {
+          const { client } = await runWithSetCookie({
+            setCookie: 'foo=from-before; Path=/',
+            rewrite: () => [],
+            routeMatched: true,
+            cookieStoreWhenContinued: [heldBefore],
+          })
+
+          expect(callsMatching(client.send, ['Network.setCookie'])).toEqual([
+            ['Network.setCookie', expect.objectContaining({ name: 'foo', value: 'from-before', expires: heldBefore.expires }), 'session-1'],
+          ])
+        })
+
+        // deleting the origin's cookie without the earlier one to put back
+        // would leave the page without a cookie it had
+        it('leaves the cookie store alone when the read fails', async () => {
+          const { client, methods } = await runWithSetCookie({
+            setCookie: 'foo=from-origin; Path=/',
+            rewrite: () => [],
+            routeMatched: true,
+            cookieStoreWhenContinued: new Error('No target with given id found'),
+          })
+
+          expectNotCalledWith(client.send, 'Network.deleteCookies')
+          expectNotCalledWith(client.send, 'Network.setCookie')
+          expect(methods).toContain('Fetch.continueResponse')
+        })
+      })
+
+      it('passes the lines Chrome blocked to the planner, which then leaves the stored cookie alone', async () => {
+        const { client } = await runWithSetCookie({
+          setCookie: 'foo=from-origin; Path=/',
+          blockedCookies: ['foo=from-origin; Path=/'],
+          rewrite: () => [],
+        })
+
+        expectNotCalledWith(client.send, 'Network.deleteCookies')
+      })
+
+      describe('partitioned cookies', () => {
+        const cookiePartitionKey = { topLevelSite: 'https://app.test', hasCrossSiteAncestor: true }
+        const partitioned = {
+          setCookie: 'foo=from-origin; Path=/; Secure; SameSite=None; Partitioned',
+          rewrite: () => ['foo=from-handler; Path=/; Secure; SameSite=None; Partitioned'],
+          chromeCookieStore: [{ name: 'foo', value: 'from-origin', path: '/', domain: 'example.test', partitionKey: cookiePartitionKey }],
+          cookiePartitionKey,
+        }
+
+        it('writes a rewritten cookie into the partition the extraInfo reported', async () => {
+          const { client } = await runWithSetCookie(partitioned)
+
+          expect(callsMatching(client.send, ['Network.setCookie'])).toEqual([
+            ['Network.setCookie', expect.objectContaining({ name: 'foo', value: 'from-handler', partitionKey: cookiePartitionKey }), 'session-1'],
+          ])
+        })
+
+        // an opaque key can't address the partition, and writing the cookie
+        // unpartitioned would put it in a different cookie jar
+        it('leaves the cookie alone when the partition key is opaque', async () => {
+          const { client } = await runWithSetCookie({ ...partitioned, cookiePartitionKeyOpaque: true })
+
+          expectNotCalledWith(client.send, 'Network.setCookie')
+        })
+      })
+
+      it('still releases the response when a cookie write fails', async () => {
+        const { client, methods } = await runWithSetCookie({
+          setCookie: 'foo=from-origin; Path=/',
+          rewrite: () => ['bar=from-handler; Path=/'],
+          cookieWritesFail: true,
+        })
+
+        expectCalledWith(client.send, 'Network.deleteCookies', anyArg, 'session-1')
+        expectCalledWith(client.send, 'Network.setCookie', anyArg, 'session-1')
+        expect(methods).toContain('Fetch.continueResponse')
+      })
+
+      it('writes a cookie the handler added to a response the origin sent no set-cookie on', async () => {
+        const { client } = await expectResponseHeldForCookieCommand('Network.setCookie', 'Fetch.continueResponse', {
+          rewrite: () => ['added=from-handler; Path=/'],
+        })
+
+        expectCalledWith(client.send, 'Network.setCookie', {
+          name: 'added',
+          value: 'from-handler',
+          url: 'https://example.test/',
+          path: '/',
+          secure: false,
+          httpOnly: false,
+        }, 'session-1')
+      })
+
+      // with no record of what Chrome stored or blocked, writing the handler's
+      // cookies could store one Chrome refused
+      it('leaves the cookie store alone when the extraInfo never arrived', async () => {
+        const { client } = await runWithSetCookie({
+          extraInfoUnavailable: true,
+          rewrite: () => ['added=from-handler; Path=/'],
+        })
+
+        expectNotCalledWith(client.send, 'Network.setCookie')
+      })
+
+      it('leaves the cookie store alone when it cannot be read', async () => {
+        const { client, methods } = await runWithSetCookie({
+          setCookie: 'foo=from-origin; Path=/',
+          rewrite: () => ['foo=from-handler; Path=/'],
+          storeUnavailable: true,
+        })
+
+        expectNotCalledWith(client.send, 'Network.setCookie')
+        expect(methods).toContain('Fetch.continueResponse')
+      })
+
+      it('syncs against the url a request handler rewrote req.url to', async () => {
+        const { client } = await runWithSetCookie({
+          setCookie: 'foo=from-origin; Path=/\nbar=from-origin; Path=/',
+          rewrite: () => ['bar=from-handler; Path=/'],
+          rewriteUrl: 'https://other.test/v2/',
+        })
+
+        // Chrome stored the origin's cookies against the rewritten url
+        expectCalledWith(client.send, 'Fetch.continueRequest', {
+          requestId: 'fetch-request',
+          url: 'https://other.test/v2/',
+        }, 'session-1')
+
+        // the handler dropped foo, so it's removed from other.test, not example.test
+        expectCalledWith(client.send, 'Network.deleteCookies', {
+          name: 'foo',
+          domain: 'other.test',
+          path: '/',
+        }, 'session-1')
+
+        // the handler's value for bar is written against the rewritten url
+        expectCalledWith(client.send, 'Network.setCookie', {
+          name: 'bar',
+          value: 'from-handler',
+          url: 'https://other.test/v2/',
+          path: '/',
+          secure: false,
+          httpOnly: false,
+        }, 'session-1')
       })
     })
 

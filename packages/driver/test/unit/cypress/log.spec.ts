@@ -67,6 +67,142 @@ describe('LogUtils.reduceMemory', () => {
   })
 })
 
+describe('LogUtils.toSerializedJSON', () => {
+  // A walk that re-reads objects hangs synchronously, where vitest's timeout
+  // can't interrupt it. Counting reads, and throwing once they pass a budget,
+  // turns that into a fast failure: the serializer nulls the throws and stops.
+  // The count lives in an accessor on a shared prototype, with a setter so
+  // `clone` copies it, so a walk over copies of the nodes is counted too.
+  const countReads = (budget: number) => {
+    const counter = { reads: 0 }
+    const ids = new WeakMap<object, number>()
+    const proto = Object.defineProperty({}, 'id', {
+      enumerable: true,
+      get () {
+        if (++counter.reads > budget) {
+          throw new Error('read budget exceeded')
+        }
+
+        return ids.get(this)
+      },
+      set (id: number) {
+        ids.set(this, id)
+      },
+    })
+    const node = (id: number): Record<string, unknown> => {
+      return Object.assign(Object.create(proto), { id })
+    }
+
+    return { counter, node }
+  }
+
+  // https://github.com/cypress-io/cypress/issues/35231
+  it('cuts cycles short, including a cycle reachable by more than one path', () => {
+    const { counter, node } = countReads(10)
+    const twice = node(0)
+
+    twice.a = twice
+    twice.b = twice
+
+    expect(LogUtils.toSerializedJSON({ twice })).toEqual({ twice: { a: null, b: null } })
+    expect(counter.reads).toBe(1)
+  })
+
+  it('walks each object once in a densely linked graph', () => {
+    const { counter, node } = countReads(100)
+    const nodes = Array.from({ length: 12 }, (_, i) => node(i))
+
+    nodes.forEach((n) => {
+      n.links = nodes.filter((other) => other !== n)
+    })
+
+    const serialized = LogUtils.toSerializedJSON({ graph: nodes[0] })
+
+    expect(counter.reads).toBe(12)
+    expect(serialized.graph.links).toHaveLength(11)
+  })
+
+  it('walks a store whose documents point back at it once per document', () => {
+    const { counter, node } = countReads(2000)
+    const store: { docs: Record<string, unknown> } = { docs: {} }
+
+    for (let i = 0; i < 1000; i++) {
+      store.docs[`d${i}`] = Object.assign(node(i), { store })
+    }
+
+    const serialized = LogUtils.toSerializedJSON({ store })
+
+    expect(counter.reads).toBe(1000)
+    expect(serialized.store.docs.d0).toEqual({ store: null })
+  })
+
+  it('serializes an object once per call, so a later reference is null', () => {
+    const shared = { n: 1 }
+
+    expect(LogUtils.toSerializedJSON({ pair: { a: shared, b: shared } })).toEqual({
+      pair: { a: { n: 1 }, b: null },
+    })
+  })
+
+  it('serializes what a groups or table function returns, cycles included', () => {
+    const cycle: Record<string, unknown> = { n: 1 }
+
+    cycle.self = cycle
+
+    const serialized = LogUtils.toSerializedJSON({
+      consoleProps: {
+        table: () => ({ data: cycle }),
+        groups: () => {
+          throw new Error('unreadable')
+        },
+        Yielded: 'kept',
+      },
+    })
+
+    expect(serialized.consoleProps).toEqual({
+      table: { data: { n: 1, self: null } },
+      groups: null,
+      Yielded: 'kept',
+    })
+  })
+
+  it('does not subscribe to a promise, so a rejected one is not rejected again unhandled', async () => {
+    const rejected = Promise.reject(new Error('handled by the test'))
+
+    rejected.catch(() => {})
+
+    expect(LogUtils.toSerializedJSON({ rejected })).toEqual({ rejected: {} })
+
+    // vitest fails the run on an unhandled rejection, which a copy would raise here
+    await new Promise((resolve) => setTimeout(resolve))
+  })
+
+  it('cuts short an array that contains itself', () => {
+    const list: unknown[] = [1]
+
+    list.push(list)
+
+    expect(LogUtils.toSerializedJSON({ list })).toEqual({ list: [1, null] })
+  })
+
+  it('skips getter-only properties on the prototype and nulls values that throw', () => {
+    const withProtoGetter = Object.create({ get computed () {
+      return 1
+    } })
+
+    withProtoGetter.own = 2
+
+    const throwing = { get bad () {
+      throw new Error('unreadable')
+    } }
+
+    expect(LogUtils.toSerializedJSON({ withProtoGetter, throwing })).toEqual({
+      withProtoGetter: { own: 2 },
+      throwing: null,
+    })
+  })
+})
+
 describe('LogUtils.toSerializedConsoleProps', () => {
   it('projects DOM, tables, functions, cycles, and throwing values into JSON-safe data', () => {
     const button = document.createElement('button')

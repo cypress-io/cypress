@@ -14,6 +14,8 @@ import { CdpBodyCapture } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER, getMetadataHeaderValue } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
+import type { CookiesBeforeIntercept } from './cdp-set-cookie-sync'
+import { planSetCookieSync } from './cdp-set-cookie-sync'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -22,6 +24,17 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
+
+const setCookieHeaders = (headers: Protocol.Fetch.HeaderEntry[]): string[] => {
+  return headers
+  .filter(({ name }) => name.toLowerCase() === 'set-cookie')
+  // devtools folds multiple Set-Cookie values into one newline-separated string
+  .flatMap(({ value }) => value.split('\n'))
+}
+
+const hasCookieHeader = (headers: Protocol.Network.Headers): boolean => {
+  return Object.keys(headers).some((name) => name.toLowerCase() === 'cookie')
+}
 
 // Shared by every session this transport enables so none of them can drift
 // into pausing a different set of requests than the others.
@@ -157,6 +170,9 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   captureStream?: Readable
   fulfilled?: boolean
   originalBodyDigest?: BodyDigest
+  // Chrome's cookie handling before cy.intercept ran: the baseline the
+  // response's final Set-Cookie headers are synced against
+  cookiesBeforeIntercept?: CookiesBeforeIntercept
   requestId: string
   responseCode: number
   responseStatusText?: string
@@ -177,6 +193,10 @@ type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   // back from the middleware onion — read by resolveResponse's shouldStreamBody
   // call so classification agrees with the interception that actually ran.
   hadMatchingRoutes?: boolean
+  // Chrome's cookie store as it was when the request was continued, read for
+  // requests a cy.intercept route matched. Resolves to undefined when the read
+  // failed.
+  cookieStoreWhenContinued?: Promise<Protocol.Network.Cookie[] | undefined>
 }
 
 export class CdpFetchTransport {
@@ -281,8 +301,8 @@ export class CdpFetchTransport {
     // The Fetch domain reports nothing when a paused request is canceled, so
     // the Network domain is the only signal that a flow is never coming back.
     this.client.on('Network.loadingFailed', this.onLoadingFailed)
-    // Set-Cookie never appears on Fetch response pauses — the raw cookie
-    // headers only arrive on the Network extraInfo events tracked here.
+    // Fetch response pauses carry no Set-Cookie, sent request cookies or blocked
+    // Set-Cookie lines. Only the Network extraInfo events tracked here do.
     this.networkExtraInfo.start()
     this.bodyCapture.start()
     // Set ahead of the own-session enable below settling, not after - the
@@ -612,6 +632,15 @@ export class CdpFetchTransport {
             headersChanged: !!headers,
           })
 
+        // The cookie sync restores what the origin's Set-Cookie overwrote from
+        // this read. Only a cy.intercept handler can drop those lines, so it is
+        // skipped when no route matched. Nothing may be awaited between the
+        // read and continueRequest, or Chrome stores the response's cookies
+        // before answering it.
+        if (outbound.hadMatchingRoutes) {
+          responseDeferred.cookieStoreWhenContinued = this.readCookieStore(outbound.sessionId)
+        }
+
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
@@ -653,6 +682,8 @@ export class CdpFetchTransport {
           }
         }
       })
+
+      await this.syncSetCookies(response, responseDeferred.cookieStoreWhenContinued)
 
       if (response.fulfilled) {
         // base64 of the gzip magic bytes starts with 'H4sI' — an encoded body
@@ -815,7 +846,7 @@ export class CdpFetchTransport {
 
     debug('response pause for %s: status %s, header names %o', event.request.url, event.responseStatusCode, event.responseHeaders?.map(({ name }) => name))
 
-    const responseHeaders = await this.withSetCookieHeaders(event, sessionId)
+    const { responseHeaders, cookiesBeforeIntercept } = await this.resolveCookieHeaders(event, sessionId)
 
     deferred.headersReady.resolve()
 
@@ -875,7 +906,7 @@ export class CdpFetchTransport {
       }
     }
 
-    // reset() may have rejected this flow while the merge/fetch awaited CDP.
+    // reset() may have rejected this flow while the awaits above were pending.
     // The resolve below would be a no-op and nothing else owns this pause —
     // release it, or the browser stays paused (reset keeps Fetch enabled).
     if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
@@ -901,31 +932,126 @@ export class CdpFetchTransport {
       responseHeaders,
       bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
       originalBodyDigest: digestBody(originalBody),
+      ...(cookiesBeforeIntercept ? { cookiesBeforeIntercept } : {}),
       sessionId,
       ...(bodySkipped ? { bodySkipped: true } : {}),
       ...(captureStream ? { captureStream } : {}),
     })
   }
 
-  private withSetCookieHeaders = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
+  private resolveCookieHeaders = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<{
+    responseHeaders?: Protocol.Fetch.HeaderEntry[]
+    cookiesBeforeIntercept?: CookiesBeforeIntercept
+  }> => {
     const extraInfo = event.networkId
       ? await this.networkExtraInfo.responseExtraInfo(event.networkId, sessionId)
       : undefined
-    const setCookieValues = Object.entries(extraInfo?.headers ?? {})
-    .filter(([name]) => name.toLowerCase() === 'set-cookie')
-    // devtools folds multiple Set-Cookie values into one newline-separated string
-    .flatMap(([, value]) => value.split('\n'))
 
-    if (!setCookieValues.length) {
-      return event.responseHeaders
+    // Without extraInfo there's no record of what Chrome stored from the origin.
+    // An empty baseline would write every handler cookie past Chrome's checks,
+    // blocked ones included. HTTP-cache and service-worker responses never get
+    // extraInfo, so a Set-Cookie a handler adds to one is stored only if the
+    // handler fulfills the response, not if it continues it.
+    if (!extraInfo) {
+      return { responseHeaders: event.responseHeaders }
     }
 
-    debug('merged %d set-cookie header(s) from Network extraInfo for %s', setCookieValues.length, event.request.url)
+    const setCookieHeadersFromOrigin = setCookieHeaders(Object.entries(extraInfo.headers).map(([name, value]) => ({ name, value })))
 
-    return [
-      ...(event.responseHeaders ?? []).filter(({ name }) => name.toLowerCase() !== 'set-cookie'),
-      ...setCookieValues.map((value) => ({ name: 'set-cookie', value })),
-    ]
+    const cookiesBeforeIntercept: CookiesBeforeIntercept = {
+      setCookieHeadersFromOrigin,
+      setCookieHeadersBlockedByChrome: extraInfo.blockedCookies?.map(({ cookieLine }) => cookieLine) ?? [],
+      ...(extraInfo.cookiePartitionKey && !extraInfo.cookiePartitionKeyOpaque
+        ? { partitionKey: extraInfo.cookiePartitionKey }
+        : {}),
+    }
+
+    if (!setCookieHeadersFromOrigin.length) {
+      return { responseHeaders: event.responseHeaders, cookiesBeforeIntercept }
+    }
+
+    debug('merged %d set-cookie header(s) from Network extraInfo for %s', setCookieHeadersFromOrigin.length, event.request.url)
+
+    return {
+      responseHeaders: [
+        ...(event.responseHeaders ?? []).filter(({ name }) => name.toLowerCase() !== 'set-cookie'),
+        ...setCookieHeadersFromOrigin.map((value) => ({ name: 'set-cookie', value })),
+      ],
+      cookiesBeforeIntercept,
+    }
+  }
+
+  /**
+   * Syncs Chrome's cookie store to the response's final Set-Cookie headers
+   * before the response is released, so the page and any following redirect
+   * hop already see the result.
+   */
+  private syncSetCookies = async (
+    response: CdpFetchTransportResponse,
+    cookieStoreWhenContinued?: Promise<Protocol.Network.Cookie[] | undefined>,
+  ): Promise<void> => {
+    // Skip the sync in two cases:
+    // - No cookiesBeforeIntercept: there's no safe baseline to compare against
+    //   (see resolveCookieHeaders).
+    // - No responseHeaders: the codec leaves them unset when no response
+    //   middleware (a cy.intercept handler or Cypress's own) changed a header.
+    //   What Chrome stored from the origin's cookies is already correct.
+    if (!response.cookiesBeforeIntercept || !response.responseHeaders) {
+      return
+    }
+
+    // The URL Chrome actually fetched (after any request-handler rewrite), taken
+    // from the response pause and passed through the middleware unchanged. Chrome
+    // stored the cookies against it.
+    const { url } = response
+    // Awaited here, so a read that never answers only holds up responses that
+    // sync. No read means no route matched, so there is nothing to restore. A
+    // failed read skips the sync, since removing the origin's cookie without
+    // the one it overwrote would delete a cookie the page still has.
+    const cookiesWhenRequestSent = cookieStoreWhenContinued ? await cookieStoreWhenContinued : []
+
+    if (!cookiesWhenRequestSent) {
+      debug('set-cookie sync for %s skipped, could not read Chrome\'s cookie store when the request was continued', url)
+
+      return
+    }
+
+    const commands = await planSetCookieSync({
+      url,
+      cookiesWhenRequestSent,
+      cookiesBeforeIntercept: response.cookiesBeforeIntercept,
+      setCookieHeadersAfterIntercept: setCookieHeaders(response.responseHeaders),
+      includeWrites: !response.fulfilled,
+      getChromeCookieStore: async () => {
+        try {
+          const { cookies } = await this.client.send('Network.getAllCookies', undefined, response.sessionId)
+
+          return cookies
+        } catch (err) {
+          // an empty store makes the planner skip every write and removal it would
+          // need the store to verify
+          debug('set-cookie sync for %s skipped, could not read Chrome\'s cookie store (only cookies the origin expired are restored): %s', url, (err as Error).message)
+
+          return []
+        }
+      },
+    })
+
+    for (const { method, params } of commands) {
+      debug('syncing set-cookie for %s with %s: %o', url, method, { name: params.name, domain: params.domain, path: params.path, partitioned: !!params.partitionKey })
+
+      await this.safeSend(method, params, response.sessionId)
+    }
+  }
+
+  // Not async: the read must be sent before this returns, so it reaches Chrome
+  // ahead of the caller's continueRequest.
+  private readCookieStore (sessionId?: string): Promise<Protocol.Network.Cookie[] | undefined> {
+    return this.client.send('Network.getAllCookies', undefined, sessionId).then(({ cookies }) => cookies, (err) => {
+      debug('could not read Chrome\'s cookie store when continuing the request: %s', (err as Error).message)
+
+      return undefined
+    })
   }
 
   private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Buffer> => {
@@ -995,7 +1121,18 @@ export class CdpFetchTransport {
       return
     }
 
-    return this.toContinueRequestHeaders(withoutMarkers.kept)
+    const headers = this.toContinueRequestHeaders(withoutMarkers.kept)
+
+    // Chrome adds its stored cookies back when Cookie is missing from the list,
+    // so an empty value is the only way to send the request without them. The
+    // first check is that Chrome was going to send cookies, and the second is
+    // that a request handler deleted them. A request that had no cookies leaves
+    // Chrome none to add back, so it gets no empty header.
+    if (hasCookieHeader(original.kept) && !hasCookieHeader(withoutMarkers.kept)) {
+      headers.push({ name: 'Cookie', value: '' })
+    }
+
+    return headers
   }
 
   // Must NOT clear extraInfo tracking on success — the next response under a
