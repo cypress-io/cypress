@@ -8,6 +8,13 @@
     "json"
   ],
   "eslint.enable": true,
+  // each workspace has its own eslint.config.ts, and ESLint 9 resolves the
+  // config from the working directory, so run it from the nearest package.json
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
   // this project does not use Prettier
   // thus set all settings to disable accidentally running Prettier
   "prettier.requireConfig": true,

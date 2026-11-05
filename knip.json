@@ -462,14 +462,6 @@
         "*.{ts,tsx,js,jsx}"
       ]
     },
-    "npm/eslint-plugin-dev": {
-      "entry": [
-        "lib/custom-rules/**/*.js"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
     "npm/webpack-dev-server": {
       "entry": [
         "src/browser.ts",
@@ -564,9 +556,6 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "jiti"
       ]
     },
     "npm/react": {
