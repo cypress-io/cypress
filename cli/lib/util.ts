@@ -391,6 +391,11 @@ const util = {
     return chalk.blue(...args)
   },
 
+  // Download and unzip progress use this to limit how often they update.
+  // In an interactive terminal each update redraws the install task list,
+  // so updating for every chunk or entry slows the install down.
+  progressThrottleMs: 100,
+
   calculateEta (percent: number, elapsed: number): number {
     // returns the number of seconds remaining
 

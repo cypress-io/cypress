@@ -153,7 +153,7 @@ describe('<ConfigCode />', () => {
 
       cy.get(selector).within(($selector) => {
         cy.get('span').each(($el: any) => {
-          let configText = $el[0].innerText.split(':')[0]
+          const configText = $el[0].innerText.split(':')[0]
 
           if (configText === '{') {
             nesting++

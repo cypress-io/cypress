@@ -108,9 +108,6 @@ parameters:
   run-npm-grep-tests:
     type: boolean
     default: true
-  run-npm-eslint-plugin-tests:
-    type: boolean
-    default: true
   run-npm-schematic-tests:
     type: boolean
     default: true
@@ -1283,9 +1280,10 @@ commands:
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
-            # Prefer a `release/<version>` branch (current convention) and
-            # fall back to a bare `<version>` branch for older versions.
-            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || true
+            # Prefer a `release/<version>` branch (current convention), then a
+            # bare `<version>` branch for older versions, then a `v<major>`
+            # branch for previous-major maintenance releases.
+            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || git checkout "v${NEXT_VERSION%%.*}" || true
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
@@ -2797,6 +2795,7 @@ jobs:
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+.gen2
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
       - halt-if-skipped:
@@ -3000,16 +2999,6 @@ jobs:
           command: yarn workspace @cypress/grep test
       - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/grep/test_results
-
-  npm-eslint-plugin-dev:
-    <<: *defaults
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-npm-eslint-plugin-tests >>
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/eslint-plugin-dev test
 
   npm-cypress-schematic:
     <<: *defaults
