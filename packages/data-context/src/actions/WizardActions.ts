@@ -222,8 +222,7 @@ export class WizardActions {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
-    // @ts-ignore
-    await this.ctx.fs.mkdir(supportDir, { recursive: true })
+    await this.ctx.fs.mkdirp(supportDir)
 
     let fileContent: string | undefined
     let description: string = ''

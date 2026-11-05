@@ -1,11 +1,15 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
-# Internal PR for any branch that is not develop, release/x.x.x, or electron/x.x.x related
+# Internal PR for any branch that is not develop, release/x.x.x, vN, or electron/x.x.x related
 when:
   and:
     - not:
         matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
+            value: << pipeline.git.branch >>
+    - not:
+        matches:
+            pattern: /^v\d+$/
             value: << pipeline.git.branch >>
     - not:
         matches:
@@ -306,10 +310,6 @@ jobs:
       filters: &runNpmGrepTests pipeline.parameters.run-npm-grep-tests == true
       requires:
         - ready-to-test
-  - npm-eslint-plugin-dev:
-      filters: &runNpmEslintPluginTests pipeline.parameters.run-npm-eslint-plugin-tests == true
-      requires:
-        - ready-to-test
   - npm-cypress-schematic:
       filters: &runNpmSchematicTests pipeline.parameters.run-npm-schematic-tests == true
       requires:
@@ -478,6 +478,5 @@ jobs:
         - npm-angular
         - npm-mount-utils
         - npm-grep
-        - npm-eslint-plugin-dev
         - npm-cypress-schematic
         - v8-integration-tests

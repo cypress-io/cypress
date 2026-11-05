@@ -13,7 +13,7 @@ export const autSnapshot: AutSnapshot = {
     y: 0,
   },
   highlightAttr: '',
-  // @ts-ignore
+  // @ts-expect-error - the fixture snapshots carry only the names the reporter shows, not full AutSnapshots
   snapshots: [{ name: 'Before' }, { name: 'After' }],
   htmlAttrs: {},
   viewportHeight: 500,

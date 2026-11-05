@@ -101,8 +101,8 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // Cypress-authored rules, kept under the `@cypress/dev` namespace they had in
-  // @cypress/eslint-plugin-dev so existing eslint-disable comments still resolve.
+  // Cypress-authored rules, under the `@cypress/dev` namespace so existing
+  // `eslint-disable @cypress/dev/...` comments resolve.
   {
     plugins: {
       '@cypress/dev': cypressDevPlugin,
@@ -137,11 +137,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'no-console': 'error',
       'prefer-spread': 'error',
+      'no-prototype-builtins': 'error',
       // A `let` that a closure reads before its later assignment has to stay
       // declared up front: as a `const` at the assignment, an early call throws
       // a TDZ ReferenceError where it used to see `undefined`
       'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
-      // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
+      // `== null` is the idiomatic check for both null and undefined
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
       // Unused args and caught errors stay allowed: callbacks and interface
       // implementations often have to accept parameters they ignore. A leading
@@ -220,12 +221,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   },
 
   {
-    // rules that are gold standard, but have many violations
-    // these are off while developing eslint, but should eventually be enabled
+    // rules that are gold standard, but have many violations. The ones set to
+    // `off` here should be re-enabled once their violations are fixed; that
+    // work is tracked in https://github.com/cypress-io/cypress/issues/35250
     rules: {
       'no-useless-escape': 'off',
       'prefer-rest-params': 'off',
-      'no-prototype-builtins': 'off',
       'no-global-assign': 'off',
       'no-async-promise-executor': 'off',
 

@@ -37,7 +37,7 @@ const props = withDefaults(defineProps<{
   fileName: string
   extension: string
   selected?: boolean
-  indexes: number[]
+  indexes?: number[]
 }>(), { indexes: () => [], selected: false })
 
 const split = computed(() => {

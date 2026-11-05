@@ -140,7 +140,7 @@ const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
 const query = useQuery({
   query: VueComponentGeneratorStepOneDocument,
-  // @ts-ignore
+  // @ts-expect-error - urql re-runs the query when this ref changes, but its types only accept a plain string
   variables: { glob: extensionPattern },
   requestPolicy: 'network-only',
 })
