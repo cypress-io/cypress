@@ -11,9 +11,11 @@
       }
     })
 
+    const data = params.has('data') ? JSON.parse(params.get('data')) : { args: JSON.parse(params.get('args')) }
+
     top.postMessage({
       event: `cross:origin:${params.get('event')}`,
-      data: { args: JSON.parse(params.get('args')) },
+      data,
       origin: location.origin,
       responseEvent,
     }, '*')

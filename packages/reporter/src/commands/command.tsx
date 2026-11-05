@@ -51,7 +51,7 @@ export const formattedMessage = (message: string, name?: string) => {
 
   // if the command has url args, don't format those chars like __ and ~~
   if (name === 'visit' || name === 'request' || name === 'origin') {
-    return message
+    return _.escape(message)
   }
 
   // the command message is formatted as '(Optional Custom Msg:) expected <actual> to {assertion} <expected>'

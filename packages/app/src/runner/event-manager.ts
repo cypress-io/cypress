@@ -36,7 +36,34 @@ let crossOriginLogs: { [key: string]: Cypress.Log } = {}
 let hasMochaRunEnded: boolean = false
 
 // Posted by the cross-origin AUT injection before a spec bridge attaches to it.
-const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error', 'cross:origin:aut:set:cookie']
+const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error']
+
+const hostnameOf = (url: unknown) => {
+  try {
+    return new URL(String(url)).hostname
+  } catch {
+    return undefined
+  }
+}
+
+// The AUT injection only sets cookies for its own host or a parent domain of it.
+const isCookieForOrigin = (data: { url?: unknown, cookie?: { domain?: unknown } } | undefined, origin: string) => {
+  const hostname = hostnameOf(origin)
+
+  if (!hostname || hostnameOf(data?.url) !== hostname) {
+    return false
+  }
+
+  const domain = data?.cookie?.domain
+
+  if (typeof domain !== 'string' || !domain) {
+    return true
+  }
+
+  const cookieDomain = domain.replace(/^\./, '')
+
+  return cookieDomain === hostname || hostname.endsWith(`.${cookieDomain}`)
+}
 
 const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
   const iframe = document.getElementById(`${SPEC_BRIDGE_FRAME_NAME_IDENTIFIER}: ${data.origin}`)
@@ -48,9 +75,13 @@ const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
     && new URL(iframe.src).origin === origin
 }
 
-const isFromAut = ({ data, source }: MessageEvent) => {
+const isFromAut = ({ data, source, origin }: MessageEvent) => {
   if (!source || document.querySelector<HTMLIFrameElement>('iframe.aut-iframe')?.contentWindow !== source) {
     return false
+  }
+
+  if (data.event === 'cross:origin:aut:set:cookie') {
+    return isCookieForOrigin(data.data, origin)
   }
 
   return AUT_CROSS_ORIGIN_EVENTS.includes(data.event)

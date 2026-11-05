@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { vi, describe, it, expect } from 'vitest'
-import { PrimaryOriginCommunicator } from '../../../src/cross-origin/communicator'
+import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from '../../../src/cross-origin/communicator'
 
 describe('PrimaryOriginCommunicator', () => {
   const fakeBridgeWindow = () => {
@@ -91,5 +91,48 @@ describe('PrimaryOriginCommunicator', () => {
 
     comm.toAllSpecBridges('test:before:run', {})
     expect(postMessage).toHaveBeenCalledOnce()
+  })
+})
+
+describe('SpecBridgeCommunicator', () => {
+  const message = (overrides: Partial<MessageEvent> = {}) => {
+    return {
+      data: { event: 'sync:state', data: { duringUserTestExecution: true } },
+      source: window.parent,
+      origin: 'http://localhost:3500',
+      ...overrides,
+    } as MessageEvent
+  }
+
+  it('emits messages from the parent window', () => {
+    const comm = new SpecBridgeCommunicator()
+    const handler = vi.fn()
+
+    comm.on('sync:state', handler)
+    comm.onMessage(message())
+
+    expect(handler).toHaveBeenCalledWith({ duringUserTestExecution: true }, { responseEvent: undefined })
+  })
+
+  it('ignores messages from other windows', () => {
+    const comm = new SpecBridgeCommunicator()
+    const handler = vi.fn()
+
+    comm.on('sync:state', handler)
+    comm.onMessage(message({ source: { postMessage: vi.fn() } as unknown as Window }))
+    comm.onMessage(message({ source: null }))
+
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('ignores messages from an origin other than the first one', () => {
+    const comm = new SpecBridgeCommunicator()
+    const handler = vi.fn()
+
+    comm.on('sync:state', handler)
+    comm.onMessage(message())
+    comm.onMessage(message({ origin: 'http://other.example.com:3500' }))
+
+    expect(handler).toHaveBeenCalledOnce()
   })
 })
