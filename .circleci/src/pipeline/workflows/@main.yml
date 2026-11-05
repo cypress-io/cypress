@@ -269,9 +269,6 @@ linux-x64:
     - npm-grep:
         requires:
           - build
-    - npm-eslint-plugin-dev:
-        requires:
-          - build
     - npm-cypress-schematic:
         requires:
           - build
@@ -284,7 +281,6 @@ linux-x64:
           - check-ts
           - health-check
           - npm-angular
-          - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
           - npm-react

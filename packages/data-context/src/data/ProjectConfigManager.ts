@@ -315,6 +315,12 @@ export class ProjectConfigManager {
 
       this.options.eventRegistrar.registerEvent(event, function (...args: any[]) {
         return new Promise((resolve, reject) => {
+          if (ipc.unexpectedExit) {
+            reject(ipc.unexpectedExit)
+
+            return
+          }
+
           const invocationId = _.uniqueId('inv')
           const sentAt = Date.now()
           let replyLogTimeout: NodeJS.Timeout | undefined
@@ -331,6 +337,7 @@ export class ProjectConfigManager {
             replyLogTimeout.unref?.()
           }
 
+          // when the child exits the ipc answers every pending reply with the exit error
           ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
             if (replyLogTimeout) {
               clearTimeout(replyLogTimeout)
@@ -338,7 +345,7 @@ export class ProjectConfigManager {
 
             if (err) {
               debug('promise rejected for id %s after %dms %o', invocationId, Date.now() - sentAt, ':', err.stack)
-              reject(_.extend(new Error(err.message), err))
+              reject(err instanceof Error ? err : _.extend(new Error(err.message), err))
 
               return
             }
@@ -652,6 +659,9 @@ export class ProjectConfigManager {
 
         return
       }
+
+      // the child may exit on its own after the ack, which is not an error
+      this._eventsIpc.expectExit()
 
       debug('sending main:process:will:disconnect message')
       // send reports false for a child that is gone or whose ipc backlog is full; a gone child has
