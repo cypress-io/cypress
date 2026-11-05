@@ -5,6 +5,8 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }: Ex
   passCount = passCount || '--'
   failCount = failCount || '--'
 
+  cy.reporter({ timeout: 30000 }).contains('Your tests are loading...', { timeout: 30000 }).should('not.exist')
+
   cy.reporter({ timeout: 30000 }).find('button.restart', { timeout: 30000 }).should('be.visible') // ensure tests are finished running
 
   cy.reporter().find('.stats', { timeout: 10000 }).within(() => {
@@ -95,8 +97,8 @@ export function loadSpec (options: LoadSpecOptions) {
     setup()
   }
 
-  // Wait for specs to complete
-  shouldHaveTestResults({ passCount, failCount, pendingCount })
+  // Wait for specs to complete (includes loading + restart + stats assertions)
+  cy.waitForSpecToFinish({ passCount, failCount, pendingCount })
 }
 
 export function runSpec ({ fileName, projectName }: { fileName: string, projectName?: ProjectFixtureDir }) {
