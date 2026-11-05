@@ -34,7 +34,7 @@ const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
 const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
-const { getMetadataHeaderValue } = require('@packages/proxy/lib/http/util/metadata-header-value')
+const { getMetadataHeaderValue } = require('@packages/proxy')
 
 zlib = Promise.promisifyAll(zlib)
 

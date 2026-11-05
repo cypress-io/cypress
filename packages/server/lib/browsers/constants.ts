@@ -1,4 +1,4 @@
-export { getMetadataHeaderValue } from '@packages/proxy/lib/http/util/metadata-header-value'
+export { getMetadataHeaderValue } from '@packages/proxy'
 
 // Marks a document request as originating from the AUT frame so downstream
 // consumers (e.g. proxy request-middleware) can identify it for injection.
