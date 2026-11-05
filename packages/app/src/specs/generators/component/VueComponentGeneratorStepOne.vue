@@ -25,7 +25,7 @@
         </div>
         <FileChooser
           v-else-if="!result"
-          v-model:extensionPattern="extensionPattern"
+          v-model:extension-pattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
           @select-file="makeSpec"

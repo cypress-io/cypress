@@ -258,7 +258,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/multi-word-component-names': 'off',
       'vue/html-closing-bracket-spacing': 'off',
       'vue/no-dupe-keys': 'off',
-      'vue/attribute-hyphenation': 'off',
       'vue/no-useless-template-attributes': 'off',
 
       'cypress/no-unnecessary-waiting': 'off',
@@ -280,6 +279,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // the Vue recommended config ships these as warnings, and
     // flatConfigs.typescript leaves import-x/namespace unset
     rules: {
+      'vue/attribute-hyphenation': 'error',
       'vue/attributes-order': 'error',
       'vue/block-order': 'error',
       'vue/component-definition-name-casing': 'error',
