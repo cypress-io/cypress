@@ -8,7 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         @restart="cancelSpecNameCreation"
-        @updateTitle="(value) => emits('update:title', value)"
+        @update-title="(value) => emits('update:title', value)"
       />
     </template>
 
@@ -32,7 +32,7 @@
           <template #item="{ file }">
             <ReactComponentList
               :file="file"
-              @selectItem="makeSpec"
+              @select-item="makeSpec"
             />
           </template>
         </ExpandableFileChooser>

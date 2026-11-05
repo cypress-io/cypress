@@ -10,7 +10,7 @@
       v-model:specFilterModel="specFilterModel"
       :result-count="specs.length"
       :is-run-all-specs-allowed="runAllSpecsStore.isRunAllSpecsAllowed"
-      @newSpec="showModal = true"
+      @new-spec="showModal = true"
       @run-all-specs="runAllSpecsStore.runAllSpecs"
     />
     <InlineSpecListTree

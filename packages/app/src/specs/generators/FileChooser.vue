@@ -49,7 +49,7 @@
       class="right-[24px] left-[24px] absolute"
       :files="filteredFiles"
       :search="filePathSearch"
-      @selectFile="selectFile"
+      @select-file="selectFile"
     >
       <template #no-results>
         <NoResults

@@ -38,7 +38,7 @@
     data-cy="dropzone"
     class="mb-[24px]"
     close-button
-    @addProject="emit('addProject', $event)"
+    @add-project="emit('addProject', $event)"
     @close="toggleDropzone"
   />
 

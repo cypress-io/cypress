@@ -8,7 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         @restart="cancelSpecNameCreation"
-        @updateTitle="(value) => emits('update:title', value)"
+        @update-title="(value) => emits('update:title', value)"
       />
     </template>
 
@@ -28,7 +28,7 @@
           v-model:extensionPattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
-          @selectFile="makeSpec"
+          @select-file="makeSpec"
         />
         <GeneratorSuccess
           v-else

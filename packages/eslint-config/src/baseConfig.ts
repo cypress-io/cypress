@@ -258,7 +258,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/multi-word-component-names': 'off',
       'vue/html-closing-bracket-spacing': 'off',
       'vue/no-dupe-keys': 'off',
-      'vue/v-on-event-hyphenation': 'off',
       'vue/attribute-hyphenation': 'off',
       'vue/no-useless-template-attributes': 'off',
 
@@ -309,6 +308,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/singleline-html-element-content-newline': 'error',
       'vue/this-in-template': 'error',
       'vue/v-bind-style': 'error',
+      'vue/v-on-event-hyphenation': 'error',
       'vue/v-on-style': 'error',
       'vue/v-slot-style': 'error',
 
