@@ -30,7 +30,7 @@ import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import { allowDestroy } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
-import { isUnsafePort } from './util/unsafe_ports'
+import { isUnsafePort } from '@packages/config'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import type { InitializeRoutes } from './routes'
@@ -373,9 +373,21 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // remote state's `<root>` strategy reads `_fileServer.port()`
     // synchronously, so the fileServer must exist before the primary
     // is computed.
-    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+    const fileServerInstance = await fileServer.create(fileServerFolder as string) as FileServer
 
-    const listenedPort = await this._listen(port)
+    this._fileServer = fileServerInstance
+
+    let listenedPort: number
+
+    try {
+      listenedPort = await this._listen(port)
+    } catch (err) {
+      // the file server is already listening when the runner server fails to
+      // start, and nothing else tears it down, so free its port here
+      await fileServerInstance.close()
+
+      throw err
+    }
 
     this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
@@ -919,10 +931,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
+  portBlockedErr (port: number) {
+    const e = errors.get('PORT_BLOCKED_BY_BROWSER', port) as any
+
+    e.port = port
+
+    return e
+  }
+
   _listen (port: number | null | undefined): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       if (port && isUnsafePort(port)) {
-        return reject(errors.get('PORT_BLOCKED_BY_BROWSER', port))
+        return reject(this.portBlockedErr(port))
       }
 
       let attempts = 0
@@ -956,15 +976,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           if (isUnsafePort(address.port)) {
             debug('discarding browser-blocked port %d', address.port)
 
-            if (attempts < MAX_PORT_ATTEMPTS) {
-              this.server.close(() => tryListen())
+            this.server.close((closeErr?: Error) => {
+              if (closeErr) {
+                // the server is still bound, so a retry would fail with
+                // ERR_SERVER_ALREADY_LISTEN
+                debug('error closing server after discarding port %d: %o', address.port, closeErr)
 
-              return
-            }
+                return reject(closeErr)
+              }
 
-            // free the port before surfacing the error so a failed run does
-            // not leave the server holding it
-            this.server.close(() => reject(errors.get('PORT_BLOCKED_BY_BROWSER', address.port)))
+              if (attempts < MAX_PORT_ATTEMPTS) {
+                return tryListen()
+              }
+
+              // the port is already free, so surface the error instead of
+              // leaving the run waiting for a browser that can never connect
+              reject(errors.get('PORT_BLOCKED_BY_BROWSER', null))
+            })
 
             return
           }

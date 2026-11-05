@@ -733,7 +733,16 @@ export const AllCypressErrors = {
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
   },
-  PORT_BLOCKED_BY_BROWSER: (port: number) => {
+  PORT_BLOCKED_BY_BROWSER: (port: number | null) => {
+    if (port == null) {
+      return errTemplate`\
+        Cypress could not find a port that browsers allow
+
+        Chrome, Electron, Firefox and WebKit refuse to load any URL on the ports Cypress was randomly assigned, so the runner could never connect to Cypress
+
+        Set the ${fmt.highlightSecondary('port')} option in your Cypress configuration to a port browsers allow`
+    }
+
     return errTemplate`\
         Cypress cannot use port ${fmt.highlight(port)} because browsers block it
 

@@ -152,7 +152,7 @@ afterAll(() => {
 describe('lib/server-base', () => {
   let config: any
   let server: TestServer
-  let fileServerMock: { close: () => void, port: () => number }
+  let fileServerMock: { close: Mock, port: () => number }
   let oldFileServer: any
   let createFileServer: Mock
 
@@ -172,7 +172,7 @@ describe('lib/server-base', () => {
     await cache.remove()
 
     fileServerMock = {
-      close () {},
+      close: vi.fn(),
       port () {
         return 1111
       },
@@ -1113,6 +1113,10 @@ describe('lib/server-base', () => {
           type: 'PORT_IN_USE_SHORT',
           message: expect.stringContaining(String(port)),
         })
+
+        // the file server created for the failed attempt is still listening,
+        // so it has to be closed rather than left holding its port
+        expect(fileServerMock.close).toHaveBeenCalled()
       })
     })
   })
@@ -1192,11 +1196,28 @@ describe('lib/server-base', () => {
       await expect(server._listen(null)).rejects.toMatchObject({ code: 'EACCES' })
     })
 
+    it('rejects with the close error instead of retrying when the blocked port cannot be released', async () => {
+      const srv = fakeListeningServer([10080, 54321])
+      const closeErr = Object.assign(new Error('close failed'), { code: 'EBADF' })
+
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb(closeErr))
+      })
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toBe(closeErr)
+
+      // a server that is still bound cannot listen again
+      expect(srv.listen).toHaveBeenCalledTimes(1)
+    })
+
     it('gives up after repeated blocked ephemeral ports instead of listening forever', async () => {
       server._server = fakeListeningServer(Array(10).fill(10080))
 
       await expect(server._listen(null)).rejects.toMatchObject({
         type: 'PORT_BLOCKED_BY_BROWSER',
+        message: expect.stringContaining('could not find a port that browsers allow'),
       })
 
       expect(server._server.listen).toHaveBeenCalledTimes(10)

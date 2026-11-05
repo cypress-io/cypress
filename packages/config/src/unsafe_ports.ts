@@ -64,7 +64,7 @@ const UNSAFE_PORTS = new Set([
   636, // ldap+ssl
   989, // ftps-data
   990, // ftps
-  993, // ldap+ssl
+  993, // imap+ssl
   995, // pop3+ssl
   1719, // h323gatestat
   1720, // h323hostcall
@@ -72,6 +72,7 @@ const UNSAFE_PORTS = new Set([
   2049, // nfs
   3659, // apple-sasl / PasswordServer
   4045, // lockd
+  4190, // sieve
   5060, // sip
   5061, // sips
   6000, // X11
@@ -81,6 +82,7 @@ const UNSAFE_PORTS = new Set([
   6667, // Standard IRC [Apple addition]
   6668, // Alternate IRC [Apple addition]
   6669, // Alternate IRC [Apple addition]
+  6679, // osaut
   6697, // IRC + TLS
   10080, // Amanda
 ])
