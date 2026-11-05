@@ -321,30 +321,21 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       })
     })
 
-    it('does not replace HttpOnly cookies', () => {
-      cy.origin(`https://app.foobar.com:3503`, () => {
-        cy.window().then((win) => {
-          win.document.cookie = 'foo=changed; Path=/'
-          // the second write landing means the first has been handled
-          win.document.cookie = 'sync=1; Path=/'
+    const writes = ['foo=changed; Path=/', 'foo=changed', 'foo=; Path=/; Max-Age=0', 'foo=; Max-Age=0']
+
+    writes.forEach((cookie) => {
+      it(`does not replace or expire HttpOnly cookies with "${cookie}"`, () => {
+        cy.origin(`https://app.foobar.com:3503`, { args: { cookie } }, ({ cookie }) => {
+          cy.window().then((win) => {
+            win.document.cookie = cookie
+            // the second write landing means the first has been handled
+            win.document.cookie = 'sync=1; Path=/'
+          })
+
+          cy.getCookie('sync').should('exist')
+
+          cy.getCookie('foo').should('include', { value: 'bar', httpOnly: true })
         })
-
-        cy.getCookie('sync').should('exist')
-
-        cy.getCookie('foo').should('include', { value: 'bar', httpOnly: true })
-      })
-    })
-
-    it('does not expire HttpOnly cookies', () => {
-      cy.origin(`https://app.foobar.com:3503`, () => {
-        cy.window().then((win) => {
-          win.document.cookie = 'foo=; Path=/; Max-Age=0'
-          win.document.cookie = 'sync=1; Path=/'
-        })
-
-        cy.getCookie('sync').should('exist')
-
-        cy.getCookie('foo').should('include', { value: 'bar', httpOnly: true })
       })
     })
 

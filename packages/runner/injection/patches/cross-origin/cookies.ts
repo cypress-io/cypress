@@ -106,11 +106,14 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // if result is undefined, it was invalid and couldn't be parsed
       if (!parsedCookie) return getDocumentCookieValue()
 
+      // cookies written without a Path are stored at '/', so check them there
+      const cookieString = parsedCookie.path ? stringValue : `${stringValue}; Path=/`
+
       // if the cookie is expired, remove it in our cookie jar
       // and via setting it inside our automation client with the correct expiry.
       // This will have the effect of removing the cookie
       if (parsedCookie.expiryTime() < Date.now()) {
-        if (!setCookie(stringValue)) return getDocumentCookieValue()
+        if (!setCookie(cookieString)) return getDocumentCookieValue()
 
         cookieJar.removeCookie({
           name: parsedCookie.key,
@@ -130,14 +133,10 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // value, but tough-cookie doesn't recognize it using an instanceof
       // check and throws an error. because we can't, we have to massage
       // some of the properties below to be correct
-      const cookie = setCookie(stringValue)
+      const cookie = setCookie(cookieString)
 
       if (cookie) {
         cookie.sameSite = parsedCookie.sameSite
-
-        if (!parsedCookie.path) {
-          cookie.path = '/'
-        }
 
         // send the cookie to the server so it can be set in the browser via
         // automation and in our server-side cookie jar so it's available

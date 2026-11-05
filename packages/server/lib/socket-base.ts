@@ -407,7 +407,7 @@ export class SocketBase implements SocketBroadcaster {
         const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
           const { hostname } = new URL(url)
 
-          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext)
+          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext, { http: false })
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
