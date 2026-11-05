@@ -57,6 +57,7 @@ declare global {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- mirrors the `Data = {}` default of @vue/test-utils' MountingOptions
 type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, 'attachTo'> & {
   log?: boolean
   /**
@@ -68,6 +69,7 @@ type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, '
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- mirrors the `Data = {}` default of @vue/test-utils' MountingOptions
 export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
 const cleanup = () => {
@@ -90,6 +92,11 @@ const cleanup = () => {
  * `MountOptions` are modifying, including some Cypress specific options like `styles`.
  * The return type is different. Instead of VueWrapper, it's Cypress.Chainable<VueWrapper<...>>.
  */
+
+/* eslint-disable @typescript-eslint/no-empty-object-type -- the `{}` defaults and
+   constraints match Vue's and VTU's generics, where `{}` is the identity for the
+   `&` intersections built from them. `object` or `Record<string, never>` would
+   change what these public overloads infer. */
 
 type PublicProps = VNodeProps & AllowedComponentProps & ComponentCustomProps
 
@@ -373,6 +380,7 @@ export function mount<
   >
 >['vm']
 }>
+/* eslint-enable @typescript-eslint/no-empty-object-type */
 
 /**
  * Mounts a component and returns an object containing the component and VueWrapper

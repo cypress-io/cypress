@@ -53,8 +53,8 @@ const emit = defineEmits<{
 
 defineProps<{
   title: string
-  prefixIcon?: FunctionalComponent<SVGAttributes, {}> | null
-  suffixIcon?: FunctionalComponent<SVGAttributes, {}> | null
+  prefixIcon?: FunctionalComponent<SVGAttributes> | null
+  suffixIcon?: FunctionalComponent<SVGAttributes> | null
   suffixIconAriaLabel?: string
   alertClass?: string
   prefixIconClass?: string

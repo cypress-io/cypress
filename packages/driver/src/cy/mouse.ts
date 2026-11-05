@@ -82,7 +82,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
     return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
   }
-  const sendPointerdown = (el, evtOptions): {} | SentEvent => {
+  const sendPointerdown = (el, evtOptions): Record<string, never> | SentEvent => {
     if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
@@ -112,7 +112,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
     return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
   }
-  const sendMousedown = (el, evtOptions): {} | SentEvent => {
+  const sendMousedown = (el, evtOptions): Record<string, never> | SentEvent => {
     if ((isFirefox || isWebKit || isChromium116OrLater) && el.disabled) {
       return {}
     }
@@ -812,4 +812,4 @@ const toCoordsEventOptions = (x, y, win) => {
   }
 }
 
-export interface Mouse extends ReturnType<typeof create> {}
+export type Mouse = ReturnType<typeof create>

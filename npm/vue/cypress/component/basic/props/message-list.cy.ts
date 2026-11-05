@@ -83,7 +83,7 @@ describe('Props', () => {
 
     it('starts with two items', () => {
       // Safe because the component mounted in beforeEach gets its data from data()
-      const vm = Cypress.vue as ComponentPublicInstance<{}, {}, ReturnType<typeof data>>
+      const vm = Cypress.vue as ComponentPublicInstance<object, object, ReturnType<typeof data>>
 
       expect(vm.messages).to.deep.equal(['uno', 'dos'])
     })

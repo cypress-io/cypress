@@ -67,7 +67,7 @@ import { IconTechnologyCodeEditor } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
 
-const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
+const icons: Record<string, FunctionalComponent<SVGAttributes>> = {
   'code': VSCode,
   'cursor': Cursor,
   'webstorm': Webstorm,

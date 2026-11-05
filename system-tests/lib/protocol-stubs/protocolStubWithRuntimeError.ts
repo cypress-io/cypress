@@ -49,6 +49,6 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     return Promise.resolve()
   }
 
-  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}
-  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => {}
+  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => void
+  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => void
 }

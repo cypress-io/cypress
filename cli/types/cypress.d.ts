@@ -226,6 +226,7 @@ declare namespace Cypress {
     [key: string]: Storable
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- public type, an interface so users can augment it
   interface StorableArray extends Array<Storable> { }
 
   type StorableRecord = Record<string, Storable>
@@ -326,6 +327,7 @@ declare namespace Cypress {
   /**
    * The interface for user-defined properties in Window object under test.
    */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- users declare their AUT window properties by merging into it
   interface ApplicationWindow { } // tslint:disable-line
 
   /**
@@ -7066,6 +7068,7 @@ declare namespace Cypress {
   }
   ```
    */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- users add custom properties by merging into it, as documented above
   interface cy extends Chainable<undefined> { }
 }
 

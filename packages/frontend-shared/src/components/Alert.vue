@@ -103,7 +103,7 @@ defineEmits<{
 const props = withDefaults(defineProps<{
   title?: string
   status?: AlertStatus
-  icon?: FunctionalComponent<SVGAttributes, {}>
+  icon?: FunctionalComponent<SVGAttributes>
   headerClass?: string
   bodyClass?: string
   dismissible?: boolean

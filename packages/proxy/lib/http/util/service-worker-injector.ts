@@ -5,7 +5,7 @@ import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from './disable-navigation-prel
 
 // structural stand-in for the webworker lib's WorkerGlobalScope — the real lib can't be
 // referenced because lib="webworker" conflicts with the dom lib program-wide
-interface WorkerGlobalScope extends EventTarget {}
+type WorkerGlobalScope = EventTarget
 
 // this should be of type ServiceWorkerGlobalScope from the webworker lib,
 // but we can't reference it directly because it causes errors in other packages,

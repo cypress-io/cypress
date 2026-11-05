@@ -152,15 +152,15 @@ const ensureRunnable = (cy, cmd) => {
   }
 }
 
-interface ICyFocused extends Omit<
+type ICyFocused = Omit<
   IFocused,
   'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
-> { }
+>
 
-interface ICySnapshots extends Omit<
+type ICySnapshots = Omit<
   ISnapshots,
   'onCssModified' | 'onBeforeWindowLoad'
-> { }
+>
 
 // How many times each runnable has started. Hooks are reused across tests and retries,
 // so this tells a completion from an earlier run apart from one for the current run.

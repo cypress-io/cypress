@@ -48,7 +48,7 @@ type CountType = 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
 interface Status {
   value: number | string | null
   class: string
-  icon: FunctionalComponent<SVGAttributes, {}>
+  icon: FunctionalComponent<SVGAttributes>
   name: string
 }
 
