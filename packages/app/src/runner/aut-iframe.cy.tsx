@@ -152,8 +152,8 @@ describe('AutIframe', () => {
       const result = autIframe.create()
 
       result.autSnapshotIframes.forEach((iframe) => {
-        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
-        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
+        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: 'Test Project'`)
+        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: 'Test Project'`)
         expect(iframe[0].className).to.equal('aut-snapshot-iframe')
       })
     })

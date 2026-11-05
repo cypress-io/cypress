@@ -1367,7 +1367,7 @@ describe('src/cy/commands/querying', () => {
     // https://github.com/cypress-io/cypress/issues/8626
     it(`works correctly with ' character inside Regexp.`, () => {
       $(`<button>'</button>`).appendTo($('body'))
-      cy.contains(/\'/)
+      cy.contains(/'/)
     })
 
     // https://github.com/cypress-io/cypress/issues/19116
@@ -2072,7 +2072,7 @@ space
           const containsLog = this.logs[0]
           const assertionLog = this.logs[1]
 
-          expect(err.message).to.contain(`Expected not to find content: \'button\' but continuously found it.`)
+          expect(err.message).to.contain(`Expected not to find content: 'button' but continuously found it.`)
 
           expect(containsLog.get('state')).to.eq('passed')
           expect(containsLog.get('error')).to.be.undefined

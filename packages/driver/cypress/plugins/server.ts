@@ -450,7 +450,7 @@ const createApp = (port) => {
       const text = `encoding-${encodingType}-${assetType}`
 
       if (assetType === 'html') {
-        return `<html><head><link rel="stylesheet" href="/encoding/${encodingType}/css"></head><body><p id="encoding-test">${text}</p><p id="encoding-js"></p></body><script src="/encoding/${encodingType}/js"><\/script></html>`
+        return `<html><head><link rel="stylesheet" href="/encoding/${encodingType}/css"></head><body><p id="encoding-test">${text}</p><p id="encoding-js"></p></body><script src="/encoding/${encodingType}/js"></script></html>`
       }
 
       if (assetType === 'js') {
