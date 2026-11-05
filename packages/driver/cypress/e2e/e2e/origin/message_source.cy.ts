@@ -35,8 +35,9 @@ describe('cross-origin messages from other frames', () => {
 
   describe('aut:set:cookie', () => {
     const cookie = { name: 'foo', value: 'bar', path: '/', expiry: null, maxAge: null, httpOnly: false, hostOnly: true, sameSite: 'lax', secure: false }
+    let automation: sinon.SinonStub
 
-    const postFromAut = (data: unknown) => {
+    const postFromAut = (data: unknown, origin = 'http://www.foobar.com:3500') => {
       const top = window.top!
       const sent = new Cypress.Promise<void>((resolve) => {
         const onMessage = ({ data }) => {
@@ -50,22 +51,22 @@ describe('cross-origin messages from other frames', () => {
       })
       const query = new URLSearchParams({ event: 'aut:set:cookie', data: JSON.stringify(data) })
 
-      cy.stub(Cypress, 'automation').log(false).callThrough()
-      cy.visit(`http://www.foobar.com:3500/fixtures/other/message.html?${query}`)
+      automation = cy.stub(Cypress, 'automation').log(false).callThrough()
+      cy.visit(`${origin}/fixtures/other/message.html?${query}`)
 
       return cy.wrap(sent, { log: false })
     }
 
     it('sets a cookie for the frame host', () => {
       postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com' }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
-      .then(() => {
-        expect(Cypress.automation).to.be.calledWith('set:cookie', Cypress.sinon.match({ name: 'foo', domain: 'www.foobar.com' }))
-      })
+
+      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('have.property', 'value', 'bar')
     })
 
     it('ignores a cookie whose url is another host', () => {
       postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com' }, url: 'http://other.example.com:3500/', sameSiteContext: 'strict' })
       .then(() => {
+        expect(Cypress.automation).not.to.be.calledWith('get:cookies')
         expect(Cypress.automation).not.to.be.calledWith('set:cookie')
       })
     })
@@ -73,7 +74,27 @@ describe('cross-origin messages from other frames', () => {
     it('ignores a cookie whose domain is another host', () => {
       postFromAut({ cookie: { ...cookie, domain: 'other.example.com' }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
       .then(() => {
+        expect(Cypress.automation).not.to.be.calledWith('get:cookies')
         expect(Cypress.automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
+    it('ignores an HttpOnly cookie', () => {
+      postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com', httpOnly: true }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
+      .then(() => {
+        expect(Cypress.automation).not.to.be.calledWith('get:cookies')
+        expect(Cypress.automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
+    it('leaves an existing HttpOnly cookie unchanged', () => {
+      cy.request('https://app.foobar.com:3503/set-cookie?cookie=foo=bar; Path=/; HttpOnly')
+
+      postFromAut({ cookie: { ...cookie, value: 'baz', domain: 'app.foobar.com', secure: true }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
+      .then(() => automation.getCalls().find((call) => call.args[0] === 'get:cookies')?.returnValue)
+
+      cy.getCookie('foo', { domain: 'app.foobar.com' }).then((existing) => {
+        expect(existing).to.include({ value: 'bar', httpOnly: true })
       })
     })
   })

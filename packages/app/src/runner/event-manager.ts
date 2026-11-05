@@ -872,10 +872,23 @@ export class EventManager {
     // AUT prior to attaching a spec bridge.
     Cypress.primaryOriginCommunicator.on(
       'aut:set:cookie',
-      (options: { cookie, url: string, sameSiteContext: string }) => {
+      async (options: { cookie, url: string, sameSiteContext: string }) => {
+        const { cookie } = options
+
+        // document.cookie can neither set an HttpOnly cookie nor replace one
+        if (cookie.httpOnly) return
+
+        const stripDot = (domain?: string) => domain?.replace(/^\./, '')
+        const existing: Cypress.Cookie[] = await Cypress.automation('get:cookies', { domain: cookie.domain }).catch(() => [])
+        const isHttpOnlyMatch = (c: Cypress.Cookie) => {
+          return c.httpOnly && c.name === cookie.name && stripDot(c.domain) === stripDot(cookie.domain) && c.path === (cookie.path || '/')
+        }
+
+        if (existing.some(isHttpOnlyMatch)) return
+
         // unlikely there will be errors, but ignore them in any case, since
         // they're not user-actionable
-        Cypress.automation('set:cookie', options.cookie).catch(() => {})
+        Cypress.automation('set:cookie', cookie).catch(() => {})
         Cypress.backend('cross:origin:set:cookie', options).catch(() => {})
       },
     )
