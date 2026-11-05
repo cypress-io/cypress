@@ -46,6 +46,7 @@
 - Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
+- Upgraded `node-forge` from `1.4.0` to `1.4.3` to address the [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-22113978) vulnerability reported in security scans. Addressed in [#35279](https://github.com/cypress-io/cypress/pull/35279).
 
 ## 16.2.1
 
