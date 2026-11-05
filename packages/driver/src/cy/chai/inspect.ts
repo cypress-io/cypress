@@ -29,7 +29,7 @@ export function create (chai) {
    * @namespace Utils
    * @name inspect
    */
-  function inspect (obj, showHidden, depth, colors) {
+  function inspect (obj, showHidden?, depth?, colors?) {
     const ctx = {
       showHidden,
       seen: [],

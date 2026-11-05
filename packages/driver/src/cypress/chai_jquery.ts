@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { inspect as cypressInspect } from '../cy/chai/display'
 import $dom from '../dom'
 import $elements from '../dom/elements'
 import type { Callbacks as AssertCallbacks, Methods, PartialAssertionArgs } from './assertions/assert'
@@ -271,7 +272,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
       // mutate the subject instead of asserting on it. Other non-names read back
       // a value that always satisfies the assertion.
       if (!_.isString(name) && !_.isFinite(name)) {
-        callbacks.onInvalidArg(acc, description, chaiUtils.inspect(name))
+        callbacks.onInvalidArg(acc, description, cypressInspect(name))
       }
 
       const actual = wrap(this)[acc](name)

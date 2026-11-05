@@ -4,6 +4,13 @@
 /// <reference path="./spec-types.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 
+declare namespace Chai {
+  interface ChaiUtils {
+    // Part of chai's util API since 4.3, newer than the @types/chai that Cypress ships
+    getOperator(obj: object, args: AssertionArgs): string | undefined
+  }
+}
+
 interface InternalWindowLoadDetails {
   type: 'same:origin' | 'cross:origin' | 'cross:origin:failure'
   error?: Error

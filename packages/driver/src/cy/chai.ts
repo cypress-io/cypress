@@ -11,7 +11,7 @@ import { escapeBackslashes, escapeQuotes } from '../util/escape'
 import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
-import * as chaiInspect from './chai/inspect'
+import { objDisplay } from './chai/display'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
 
@@ -96,31 +96,6 @@ chai.use((chai, u) => {
   const containProto = (chai.Assertion.prototype as any).__methods.contain.method
   const existProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exist')!.get
   const existsProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exists')!.get
-  const { objDisplay } = chai.util
-
-  const getMessage = chai.util.getMessage
-  const _inspect = chai.util.inspect
-
-  const { inspect, setFormatValueHook } = chaiInspect.create(chai)
-
-  // prevent tunneling into Window objects (can throw cross-origin errors)
-  setFormatValueHook((ctx, val) => {
-    // https://github.com/cypress-io/cypress/issues/5270
-    // When name attribute exists in <iframe>,
-    // Firefox returns [object Window] but Chrome returns [object Object]
-    // So, we try throwing an error and check the error message.
-    try {
-      val && val.document
-      val && val.inspect
-    } catch (e: any) {
-      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
-      e.message.indexOf('cross-origin') !== -1) { // firefox
-        return `[window]`
-      }
-    }
-
-    return
-  })
 
   const escapeDoubleSlash = (str: string) => str.replace(doubleslashRe, '__double_slash__')
   const restoreDoubleSlash = (str: string) => str.replace(escapedDoubleslashRe, '\\\\')
@@ -179,9 +154,6 @@ chai.use((chai, u) => {
   }
 
   const restoreAsserts = function () {
-    chai.util.inspect = _inspect
-    chai.util.getMessage = getMessage
-    chai.util.objDisplay = objDisplay
     chai.Assertion.prototype.assert = assertProto;
     (chai.Assertion.prototype as any).match = matchProto;
     (chai.Assertion.prototype as any).__methods.length.method = lengthProto;
@@ -191,91 +163,56 @@ chai.use((chai, u) => {
     return Object.defineProperty(chai.Assertion.prototype, 'exists', { get: existsProto })
   }
 
-  const overrideChaiInspect = () => {
-    return chai.util.inspect = inspect
+  // Mirrors chai's util.getMessage, but displays values with Cypress's
+  // inspector and DOM subjects in their short stringified form.
+  const getMessage = (assertion, args) => {
+    const object = chaiUtils.flag(assertion, 'object')
+    const subject = $dom.isDom(object) ? $dom.stringify(object, 'short') : object
+    const actual = args.length > 4 ? args[4] : subject
+    const expected = args[3]
+    const flagMsg = chaiUtils.flag(assertion, 'message')
+    let msg = chaiUtils.flag(assertion, 'negate') ? args[2] : args[1]
+
+    if (typeof msg === 'function') {
+      msg = msg()
+    }
+
+    msg = (msg || '')
+    .replace(/#\{this\}/g, () => objDisplay(subject))
+    .replace(/#\{act\}/g, () => objDisplay(actual))
+    .replace(/#\{exp\}/g, () => objDisplay(expected))
+
+    return flagMsg ? `${flagMsg}: ${msg}` : msg
   }
 
-  const overrideChaiObjDisplay = () => {
-    return chai.util.objDisplay = function (obj) {
-      const str = chai.util.inspect(obj)
-      const type = Object.prototype.toString.call(obj)
-
-      if (chai.config.truncateThreshold && (str.length >= chai.config.truncateThreshold)) {
-        if (type === '[object Function]') {
-          if (!obj.name || (obj.name === '')) {
-            return '[Function]'
-          }
-
-          return `[Function: ${obj.name}]`
-        }
-
-        if (type === '[object Array]') {
-          return `[ Array(${obj.length}) ]`
-        }
-
-        if (type === '[object Object]') {
-          const keys = Object.keys(obj)
-          const kstr = keys.length > 2 ? `${keys.splice(0, 2).join(', ')}, ...` : keys.join(', ')
-
-          return `{ Object (${kstr}) }`
-        }
-
-        return str
-      }
-
-      return str
+  // chai formats the message of the error it throws with its own internal
+  // utilities, which can't be overridden from outside (chai 5+ exposes
+  // `chai.util` as a read-only module namespace). Build the error the same way
+  // chai's Assertion#assert does, with a message Cypress has formatted.
+  const createAssertionError = (assertion, args) => {
+    const [, , , expected, _actual, showDiff] = args
+    const props: Record<string, unknown> = {
+      actual: chaiUtils.getActual(assertion, args),
+      expected,
+      showDiff: showDiff !== false
+        && !(expected === undefined && _actual === undefined)
+        && chai.config.showDiff === true,
     }
+    const operator = chaiUtils.getOperator(assertion, args)
+
+    if (operator) {
+      props.operator = operator
+    }
+
+    return new chai.AssertionError(
+      getMessage(assertion, args),
+      props,
+      chai.config.includeStack ? assertion.assert : chaiUtils.flag(assertion, 'ssfi'),
+    )
   }
 
   const overrideChaiAsserts = function (specWindow, state: StateFunc, assertFn) {
     chai.Assertion.prototype.assert = createPatchedAssert(specWindow, state, assertFn)
-
-    const _origGetmessage = function (obj, args) {
-      const negate = chaiUtils.flag(obj, 'negate')
-      const val = chaiUtils.flag(obj, 'object')
-      const expected = args[3]
-      const actual = chaiUtils.getActual(obj, args)
-      let msg = (negate ? args[2] : args[1])
-      const flagMsg = chaiUtils.flag(obj, 'message')
-
-      if (typeof msg === 'function') {
-        msg = msg()
-      }
-
-      msg = msg || ''
-      msg = msg
-      .replace(/#\{this\}/g, () => {
-        return chaiUtils.objDisplay(val)
-      })
-      .replace(/#\{act\}/g, () => {
-        return chaiUtils.objDisplay(actual)
-      })
-      .replace(/#\{exp\}/g, () => {
-        return chaiUtils.objDisplay(expected)
-      })
-
-      return (flagMsg ? `${flagMsg}: ${msg}` : msg)
-    }
-
-    // @ts-expect-error - chai's getMessage has two overloads; we only override the (obj, args) one.
-    chaiUtils.getMessage = function (assert, args) {
-      const obj = assert._obj
-
-      // if we are formatting a DOM object
-      if ($dom.isDom(obj)) {
-        // replace object with our formatted one
-        assert._obj = $dom.stringify(obj, 'short')
-      }
-
-      const msg = _origGetmessage.call(this, assert, args)
-
-      // restore the real obj if we changed it
-      if (obj !== assert._obj) {
-        assert._obj = obj
-      }
-
-      return msg
-    }
 
     chai.Assertion.overwriteMethod('match', (_super) => {
       return (function (regExp) {
@@ -478,14 +415,13 @@ chai.use((chai, u) => {
 
   const createPatchedAssert = (specWindow, state: StateFunc, assertFn) => {
     return (function (...args) {
-      let err
       const passed = chaiUtils.test(this, args as Chai.AssertionArgs)
       const value = chaiUtils.flag(this, 'object')
       const expected = args[3]
 
       const customArgs = replaceArgMessages(args, this._obj)
 
-      let message = chaiUtils.getMessage(this, customArgs as Chai.AssertionArgs)
+      let message = getMessage(this, customArgs)
       const actual = chaiUtils.getActual(this, customArgs as Chai.AssertionArgs)
 
       message = escapeDoubleSlash(message)
@@ -493,11 +429,7 @@ chai.use((chai, u) => {
       message = restoreDoubleSlash(message)
       message = escapeMarkdown(message)
 
-      try {
-        assertProto.apply(this, args as Chai.AssertionArgs)
-      } catch (e) {
-        err = e
-      }
+      const err = passed ? undefined : createAssertionError(this, args)
 
       assertFn(passed, message, value, actual, expected, err)
 
@@ -566,8 +498,6 @@ chai.use((chai, u) => {
   create = function (specWindow: SpecWindow, state: StateFunc, assertFn: $Cy['assert']) {
     restoreAsserts()
 
-    overrideChaiInspect()
-    overrideChaiObjDisplay()
     overrideChaiAsserts(specWindow, state, assertFn)
 
     return setSpecWindowGlobals(specWindow, state)

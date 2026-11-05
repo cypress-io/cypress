@@ -8,8 +8,8 @@
 // Various stack patterns are saved as scenario fixtures in ./driver/test
 // to prevent regressions.
 
-import chai from 'chai'
 import _ from 'lodash'
+import { inspect } from '../cy/chai/display'
 import $dom from '../dom'
 import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
@@ -48,11 +48,11 @@ const prepareErrorForSerialization = (err) => {
 
   if (err.showDiff === true) {
     if (err.actual) {
-      err.actual = chai.util.inspect(err.actual)
+      err.actual = inspect(err.actual)
     }
 
     if (err.expected) {
-      err.expected = chai.util.inspect(err.expected)
+      err.expected = inspect(err.expected)
     }
   } else {
     delete err.actual
