@@ -154,7 +154,7 @@
     >
       <DocsMenuContent
         :current-project-exists="!!props.gql?.currentProject"
-        @setDocsContent="docsMenuVariant = $event"
+        @set-docs-content="docsMenuVariant = $event"
       />
     </div>
     <div

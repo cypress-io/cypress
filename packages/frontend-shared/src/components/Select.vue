@@ -2,7 +2,7 @@
   <Listbox
     :value="props.modelValue"
     as="div"
-    @update:modelValue="handleUpdate"
+    @update:model-value="handleUpdate"
   >
     <template #default="{ open }">
       <ListboxLabel
