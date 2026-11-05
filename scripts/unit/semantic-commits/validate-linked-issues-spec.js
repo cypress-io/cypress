@@ -55,6 +55,22 @@ describe('semantic-commits/get-linked-issues', () => {
     expect(issues).to.deep.eq(['123'])
   })
 
+  it('does not treat a pipe after resolve as a linking keyword', () => {
+    const issues = getLinkedIssues(`
+        - resolve| #12
+      `)
+
+    expect(issues).to.deep.eq([])
+  })
+
+  it('only matches issue URLs on github.com', () => {
+    const issues = getLinkedIssues(`
+        - closes https://githubXcom/cypress-io/cypress/issues/13
+      `)
+
+    expect(issues).to.deep.eq([])
+  })
+
   it('returns empty list when no issues found', () => {
     const issues = getLinkedIssues(`
         <!-- comment ->

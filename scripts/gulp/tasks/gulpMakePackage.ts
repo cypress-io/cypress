@@ -16,7 +16,7 @@ export async function makePackage () {
       name: 'packageName',
       type: 'input',
       message: 'What is the package name?',
-      validate: (val) => /[A-z-]+/.test(val),
+      validate: (val) => /^[a-z][a-z0-9-]*$/.test(val),
     },
     {
       name: 'target',

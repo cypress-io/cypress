@@ -78,7 +78,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors\.html\?error-on-visit:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -91,7 +91,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors\.html\?error-on-visit:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -105,7 +105,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors\.html:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -131,7 +131,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors\.html:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -142,7 +142,7 @@ describe('errors ui', {
         'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors\.html:\d+:\d+/,
       hasCodeFrame: false,
     })
 
