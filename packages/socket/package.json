@@ -46,7 +46,7 @@
   "dependencies": {
     "@socket.io/component-emitter": "3.1.2",
     "debug": "^4.4.0",
-    "engine.io": "6.6.7",
+    "engine.io": "6.6.11",
     "engine.io-client": "6.6.4",
     "engine.io-parser": "5.2.3",
     "flatted": "3.4.2",

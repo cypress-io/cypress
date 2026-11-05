@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "picomatch": "2.3.0"
+    "picomatch": "2.3.2"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",

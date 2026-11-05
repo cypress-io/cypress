@@ -46,6 +46,7 @@
 - Upgraded bundled Node.js version from `24.15.0` to `24.22.1`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
+- Upgraded `@babel/plugin-transform-modules-systemjs`, `@xmldom/xmldom`, `adm-zip`, `ansi-regex`, `baseline-browser-mapping`, `basic-ftp`, `body-parser`, `brace-expansion`, `browserslist`, `compression`, `debug`, `diff`, `engine.io`, `fast-uri`, `follow-redirects`, `http-proxy-middleware`, `js-yaml`, `launch-editor`, `lodash`, `min-document`, `minimatch`, `morgan`, `node-forge`, `on-headers`, `path-to-regexp`, `picomatch`, `qs`, `serialize-javascript`, `tar-fs`, `webpack`, `webpack-dev-middleware`, `webpack-dev-server` and `ws` to patch and minor releases that address vulnerabilities reported in security scans. Addresses [#35266](https://github.com/cypress-io/cypress/issues/35266).
 
 ## 16.2.1
 

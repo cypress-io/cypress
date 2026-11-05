@@ -40,6 +40,7 @@
     "@cypress/request-promise": "^5.0.0",
     "@packages/eslint-config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
+    "@types/node-forge": "1.3.11",
     "@types/semaphore": "1.1.4",
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
