@@ -1,6 +1,5 @@
 import path from 'path'
 
-// @ts-ignore - no types available
 import launchEditor from 'launch-editor'
 import type { DataContext } from '..'
 import { quoteEditorBinary } from '../util/quoteEditorBinary'
@@ -80,7 +79,7 @@ export class FileActions {
       return
     }
 
-    launchEditor(`${absolute}:${line}:${column}`, quoteEditorBinary(binary), (__: unknown, errMsg: string) => {
+    launchEditor(`${absolute}:${line}:${column}`, quoteEditorBinary(binary), (__: unknown, errMsg: string | null) => {
       this.ctx.debug('error opening file: %s', errMsg)
     })
   }

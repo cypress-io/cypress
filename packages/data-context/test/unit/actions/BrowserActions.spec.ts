@@ -8,7 +8,7 @@ function createDataContext (mode: 'run' | 'open') {
   const ctx = createTestDataContext(mode)
 
   ctx._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
-  // @ts-expect-error
+  // @ts-expect-error - `_projectRoot` is private
   ctx.lifecycleManager._projectRoot = '/path/to/my-project'
 
   return ctx

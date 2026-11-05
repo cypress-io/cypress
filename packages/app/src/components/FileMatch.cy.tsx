@@ -156,7 +156,7 @@ describe('<FileMatch />', { viewportWidth: 600, viewportHeight: 300 }, () => {
     /*----------  Fixtures  ----------*/
     // Matches
     const total = 10
-    const matchesData: Record<string, [{ matches: {found: number, total: number}, pattern?: string, extensionPattern?: string }, string]> = {
+    const matchesData: Record<string, [{ matches: { found: number, total: number }, pattern?: string, extensionPattern?: string }, string]> = {
       all: [
         { matches: { found: 10, total } },
         '10 matches',
