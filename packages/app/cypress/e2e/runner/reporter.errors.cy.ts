@@ -289,12 +289,12 @@ describe('errors ui', {
       // docs_url.cy.js manually sets the 'isInteractive' config property in order
       // to test both run and open mode behavior. We need to skip the config validation
       // here in order for this to be possible.
-      // @ts-ignore
+      // @ts-expect-error - window.top may be null, and it does not declare the test-only __cySkipValidateConfig flag
       window.top.__cySkipValidateConfig = true
     })
 
     after(() => {
-      // @ts-ignore
+      // @ts-expect-error - window.top may be null, and it does not declare the test-only __cySkipValidateConfig flag
       window.top.__cySkipValidateConfig = false
     })
 

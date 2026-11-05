@@ -310,10 +310,6 @@ jobs:
       filters: &runNpmGrepTests pipeline.parameters.run-npm-grep-tests == true
       requires:
         - ready-to-test
-  - npm-eslint-plugin-dev:
-      filters: &runNpmEslintPluginTests pipeline.parameters.run-npm-eslint-plugin-tests == true
-      requires:
-        - ready-to-test
   - npm-cypress-schematic:
       filters: &runNpmSchematicTests pipeline.parameters.run-npm-schematic-tests == true
       requires:
@@ -482,6 +478,5 @@ jobs:
         - npm-angular
         - npm-mount-utils
         - npm-grep
-        - npm-eslint-plugin-dev
         - npm-cypress-schematic
         - v8-integration-tests

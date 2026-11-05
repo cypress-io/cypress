@@ -41,6 +41,7 @@ describe('ProjectConfigManager', () => {
       const configManagerInternals = configManager as any
 
       configManagerInternals._eventsIpc = {
+        expectExit: () => {},
         send: () => false,
         on: () => {
           throw new Error('should not wait on a child that is already gone')
@@ -62,6 +63,7 @@ describe('ProjectConfigManager', () => {
 
       // never acks, so the promise can only settle via its own timeout
       configManagerInternals._eventsIpc = {
+        expectExit: () => {},
         send: () => true,
         on: () => {},
       }
