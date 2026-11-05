@@ -21,7 +21,6 @@ export {
   CommandNotFoundTapError,
   AttemptNotFoundTapError,
   SnapshotNotFoundTapError,
-  MissingCompanionOptionTapError,
   MissingArgumentsTapError,
   MissingOptionTapError,
   PIN_TARGET_REMEDY,
