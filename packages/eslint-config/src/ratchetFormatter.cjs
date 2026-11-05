@@ -4,7 +4,7 @@
 // both reports to the developer and feeds the comparison with develop.
 //
 // This is CommonJS rather than TypeScript because ESLint loads a formatter
-// module itself, and the packages still on ESLint 8 `require` it.
+// module by path, without the `jiti` transpile it applies to config files.
 
 const fs = require('fs/promises')
 const path = require('path')
