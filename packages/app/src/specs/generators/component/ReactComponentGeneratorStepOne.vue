@@ -8,7 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         @restart="cancelSpecNameCreation"
-        @updateTitle="(value) => emits('update:title', value)"
+        @update-title="(value) => emits('update:title', value)"
       />
     </template>
 
@@ -25,14 +25,14 @@
         </div>
         <ExpandableFileChooser
           v-else-if="!result"
-          v-model:extensionPattern="extensionPattern"
+          v-model:extension-pattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
         >
           <template #item="{ file }">
             <ReactComponentList
               :file="file"
-              @selectItem="makeSpec"
+              @select-item="makeSpec"
             />
           </template>
         </ExpandableFileChooser>

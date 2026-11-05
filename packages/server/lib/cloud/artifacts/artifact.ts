@@ -88,7 +88,7 @@ export class Artifact<T extends ArtifactUploadStrategy<UploadResponse>, UploadRe
     }
   }
 
-  protected composeSuccessResult<T extends Object = {}> (response: T, uploadDuration: number): ArtifactUploadResult {
+  protected composeSuccessResult<T extends object = {}> (response: T, uploadDuration: number): ArtifactUploadResult {
     return {
       ...response,
       ...this.commonResultFields(),

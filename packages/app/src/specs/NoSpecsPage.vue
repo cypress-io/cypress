@@ -39,12 +39,12 @@
     <DefaultSpecPatternNoContent
       v-if="props.isDefaultSpecPattern"
       :gql="props.gql"
-      @showCreateSpecModal="showCreateSpecModal"
+      @show-create-spec-modal="showCreateSpecModal"
     />
     <CustomPatternNoSpecContent
       v-else
       :gql="props.gql.currentProject"
-      @showCreateSpecModal="showCreateSpecModal"
+      @show-create-spec-modal="showCreateSpecModal"
     />
   </div>
 </template>
