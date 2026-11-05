@@ -43,13 +43,14 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **Padding**: Enforces blank lines between statements
 
 ### Temporarily Disabled Rules
-Some recommended rules are turned off because the codebase still has many violations. They live in the "gold standard, but have many violations" block of [`src/baseConfig.ts`](./src/baseConfig.ts):
+Some recommended rules are turned off because the codebase still has many violations. They are the rules set to `off` in the "gold standard, but have many violations" block of [`src/baseConfig.ts`](./src/baseConfig.ts):
+- Core rules: `no-useless-escape`, `prefer-rest-params`, `no-global-assign`, `no-async-promise-executor`
 - TypeScript-specific rules (`@typescript-eslint/*`)
-- Mocha testing rules
+- Mocha testing rules (`mocha/no-exclusive-tests` stays an error)
 - Vue component rules
 - Cypress-specific rules
 
-Re-enabling them, one rule or a small group at a time, is tracked in [cypress-io/cypress#35250](https://github.com/cypress-io/cypress/issues/35250). React rules are set to warn.
+Re-enabling them, one rule or a small group at a time, is tracked in [cypress-io/cypress#35250](https://github.com/cypress-io/cypress/issues/35250). `react/react-in-jsx-scope` and `react/jsx-uses-react` are also off in that block, but for good: they don't apply to React 18's JSX transform.
 
 ## Usage
 
@@ -142,6 +143,6 @@ This package includes all necessary ESLint plugins and parsers as devDependencie
 ## Notes
 
 - This configuration is designed for the Cypress monorepo and may need adjustments for other projects
-- Many rules are temporarily disabled to avoid large diffs during development
+- Some recommended rules stay off until their existing violations are fixed; see [Temporarily Disabled Rules](#temporarily-disabled-rules)
 - The configuration uses the new flat config format (ESLint 9+)
 - TypeScript project service is enabled for better type-aware linting 
