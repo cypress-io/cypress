@@ -4,9 +4,10 @@ import type { ErrorRequestHandler, Request, Response } from 'express'
 import { Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import { domainPropsToHostname, toFileServerUrl } from '@packages/network-tools'
+import { domainPropsToHostname, serializeForInlineScript, toFileServerUrl } from '@packages/network-tools'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
+import type { SocketAllowed } from './util/socket_allowed'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
@@ -21,10 +22,10 @@ import specController from './controllers/spec'
 import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
-import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { getOrigin, privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { cypressSessions } from './cypress-sessions'
 import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
-import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
+import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, fullyQualifiedRe, isLoopbackHost, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
 
@@ -40,6 +41,7 @@ export interface InitializeRoutes {
    */
   getNetworkProxy: () => NetworkProxy | undefined
   remoteStates: RemoteStates
+  socketAllowed: SocketAllowed
   isBrowserNetworkMode: () => boolean
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
@@ -52,6 +54,7 @@ export const createCommonRoutes = ({
   testingType,
   getSpec,
   remoteStates,
+  socketAllowed,
   nodeProxy,
   onError,
 }: InitializeRoutes) => {
@@ -73,6 +76,56 @@ export const createCommonRoutes = ({
     }
 
     await networkProxy.handleHttpRequest(req, res)
+  }
+
+  // Documents this server issued run at a trusted origin (the runner) or at
+  // a spec bridge origin the spec opened.
+  const isRunnerOrigin = (origin: string) => {
+    return socketAllowed.isTrustedOrigin(origin) || privilegedCommandsManager.specBridgeOrigins.has(origin)
+  }
+
+  // Loopback re-entry carries the token instead of an Origin header.
+  const isRunnerRequest = (req: Request) => {
+    if (isTrustedInternalLoopback(req.headers) || socketAllowed.isRequestFromTrustedOrigin(req)) {
+      return true
+    }
+
+    const { origin } = req.headers
+
+    // chrome launched with --disable-web-security sends no Origin header
+    if (typeof origin !== 'string') {
+      return config.chromeWebSecurity === false
+    }
+
+    return isRunnerOrigin(origin)
+  }
+
+  // The origin of the document embedding a storage page, when it is the
+  // runner's or a spec bridge's: the page posts storage to it and to nothing else.
+  const getTrustedParentOrigin = (req: Request) => {
+    const { referer } = req.headers
+    const origin = typeof referer === 'string' ? getOrigin(referer) : undefined
+
+    return origin && isRunnerOrigin(origin) ? origin : undefined
+  }
+
+  // The runner document is served to the origin the browser addressed: this
+  // server by a loopback name on its port, or the primary origin the runner
+  // navigated to. A path-only request only addresses us directly on the
+  // browser (CDP) network path; under the proxy it means the browser was not
+  // launched through Cypress.
+  const isRunnerDocumentRequest = (req: Request & { proxiedUrl?: string }) => {
+    const proxiedUrl = req.proxiedUrl ?? ''
+
+    if (fullyQualifiedRe.test(proxiedUrl)) {
+      try {
+        return isLoopbackHost(new URL(proxiedUrl).host, req.socket.localPort) || remoteStates.isPrimarySuperDomainOrigin(proxiedUrl)
+      } catch {
+        return false
+      }
+    }
+
+    return isBrowserNetworkMode() && isLoopbackHost(req.headers.host, req.socket.localPort)
   }
 
   // When a test visits an http:// site and we load our main app page,
@@ -172,12 +225,18 @@ export const createCommonRoutes = ({
   })
 
   router.post(`/${config.namespace}/process-origin-callback`, bodyParser.json(), async (req, res) => {
+    if (!isRunnerRequest(req)) {
+      res.sendStatus(403)
+
+      return
+    }
+
     try {
-      const { file, fn, projectRoot } = req.body
+      const { file, fn } = req.body
 
       debug('process origin callback: %s', fn)
 
-      const contents = await plugins.execute('_process:cross:origin:callback', { file, fn, projectRoot })
+      const contents = await plugins.execute('_process:cross:origin:callback', { file, fn, projectRoot: config.projectRoot })
 
       res.json({ contents })
     } catch (err) {
@@ -196,19 +255,24 @@ export const createCommonRoutes = ({
   })
 
   router.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {
-    res.sendFile(path.join(__dirname, './html/get-local-storage.html'))
+    res.render(path.join(__dirname, './html/get-local-storage.html'), {
+      parentOrigin: serializeForInlineScript(getTrustedParentOrigin(req)),
+    })
   })
 
   router.get(`/${config.namespace}/automation/setLocalStorage`, (req, res) => {
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
+    const parentOrigin = getTrustedParentOrigin(req)
 
     const renderedHTMLOrigins = getNetworkProxy()?.http.getRenderedHTMLOrigins()
 
-    if (renderedHTMLOrigins) {
+    if (parentOrigin && renderedHTMLOrigins) {
       renderedHTMLOrigins[origin] = true
     }
 
-    res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
+    res.render(path.join(__dirname, './html/set-local-storage.html'), {
+      parentOrigin: serializeForInlineScript(parentOrigin),
+    })
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
@@ -234,6 +298,12 @@ export const createCommonRoutes = ({
   })
 
   router.post(`/${config.namespace}/add-verified-command`, bodyParser.json(), (req, res) => {
+    if (!isRunnerRequest(req)) {
+      res.sendStatus(403)
+
+      return
+    }
+
     privilegedCommandsManager.addVerifiedCommand(req.body, req.headers.origin, config.chromeWebSecurity === false)
 
     res.sendStatus(204)
@@ -307,10 +377,7 @@ export const createCommonRoutes = ({
   }
 
   router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
-    // Path-only clientRoute hits are expected when CDP Fetch replaces the
-    // MITM proxy; only treat them as "not launched through Cypress" when the
-    // HTTP proxy is supposed to be in use.
-    const nonProxied = !isBrowserNetworkMode() && (req.proxiedUrl?.startsWith('/') ?? false)
+    const nonProxied = !isRunnerDocumentRequest(req)
 
     getCtx().actions.app.setBrowserUserAgent(req.headers['user-agent'])
 
@@ -322,7 +389,10 @@ export const createCommonRoutes = ({
 
     getCtx().html.appHtml(nonProxied, isBrowserNetworkMode())
     .then((html) => res.send(html))
-    .catch((e) => res.status(500).send({ stack: e.stack }))
+    .catch((e) => {
+      debug('serving the runner page errored: %s', e.stack)
+      res.status(500).send({ message: e.message })
+    })
   })
 
   // serve static assets from the dist'd Vite app
@@ -390,7 +460,7 @@ export const createCommonRoutes = ({
     // for, so hand it to the pipeline as-is. The fallback below rebuilds the
     // URL from the Host header, which here would replace the real target and
     // hide it from net-stubbing and the file-server rewrite.
-    if (isTrustedInternalLoopback(req.headers) && req.proxiedUrl && /^https?:\/\//.test(req.proxiedUrl)) {
+    if (isTrustedInternalLoopback(req.headers) && req.proxiedUrl && fullyQualifiedRe.test(req.proxiedUrl)) {
       debug('serving loopback-token request through the pipeline: %s %s', req.method, req.proxiedUrl)
 
       await handleHttpRequest(req, res)
@@ -429,9 +499,6 @@ export const createCommonRoutes = ({
   // this from running as a regular handler on every unmatched request.
   const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
     console.log(err.stack) // eslint-disable-line no-console
-
-    res.set('x-cypress-error', err.message)
-    res.set('x-cypress-stack', JSON.stringify(err.stack))
 
     res.sendStatus(500)
   }

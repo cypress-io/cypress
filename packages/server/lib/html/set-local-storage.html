@@ -1,36 +1,43 @@
 <html>
   <body>
     <script>
-      window.onmessage = function (event) {
-        const msg = event.data
+      // the origin of the embedding document, when it is the runner's; only its messages are applied
+      const parentOrigin = {{parentOrigin | safe}}
 
-        if (msg.type === 'set:storage:data') {
-          const { data } = msg
+      if (parentOrigin) {
+        window.onmessage = function (event) {
+          if (event.source !== window.parent || event.origin !== parentOrigin) return
 
-          const setData = (storageData, type) => {
-            if (!storageData) return
+          const msg = event.data
 
-            const { clear, value } = storageData
+          if (msg.type === 'set:storage:data') {
+            const { data } = msg
 
-            if (clear) {
-              window[type].clear()
+            const setData = (storageData, type) => {
+              if (!storageData) return
+
+              const { clear, value } = storageData
+
+              if (clear) {
+                window[type].clear()
+              }
+
+              if (value) {
+                Object.keys(value).forEach((key) => {
+                  window[type].setItem(key, value[key])
+                })
+              }
             }
 
-            if (value) {
-              Object.keys(value).forEach((key) => {
-                window[type].setItem(key, value[key])
-              })
-            }
+            setData(data.localStorage, 'localStorage')
+            setData(data.sessionStorage, 'sessionStorage')
+
+            window.parent.postMessage({ type: 'set:storage:complete' }, parentOrigin)
           }
-
-          setData(data.localStorage, 'localStorage')
-          setData(data.sessionStorage, 'sessionStorage')
-
-          window.parent.postMessage({ type: 'set:storage:complete' }, '*')
         }
-      }
 
-      window.parent.postMessage({ type: 'set:storage:load' }, '*')
+        window.parent.postMessage({ type: 'set:storage:load' }, parentOrigin)
+      }
     </script>
   </body>
 </html>

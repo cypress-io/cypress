@@ -4,7 +4,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import * as ensureUrl from './util/ensure-url'
-import type { Express } from 'express'
+import type { ErrorRequestHandler, Express } from 'express'
 import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
@@ -61,11 +61,10 @@ import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, fullyQualifiedRe, getCypressReservedPathPrefixes, getTrustedLoopbackUrl, isLoopbackHost, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
-const fullyQualifiedRe = /^https?:\/\//
 const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
@@ -129,13 +128,6 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
       return next()
     }
 
-    // CDP Fetch owns browser traffic on the browser (CDP) network path, so
-    // path-only requests to the Cypress server are expected — not a sign the
-    // browser was launched outside Cypress.
-    if (isNativeBrowserNetwork()) {
-      return next()
-    }
-
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
     // Trusted loopback from serve-internal-routes: path-only HTTP to Express
@@ -145,6 +137,18 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
       return next()
     }
 
+    // On the browser (CDP) network path nothing transits the proxy: browser
+    // traffic for Cypress routes is looped back with the token above, so a
+    // request without it must address this server by a loopback name on its
+    // own port.
+    if (isNativeBrowserNetwork()) {
+      if (isLoopbackHost(req.headers.host, req.socket.localPort) || isAllowedProxyBypass(trimmedUrl, req) || (trimmedUrl === trimmedClientRoute)) {
+        return next()
+      }
+
+      return res.redirect(clientRoute)
+    }
+
     if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl, req) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
@@ -152,6 +156,19 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
 
     return next()
   }
+}
+
+// Express's own final handler writes the stack into the response body.
+export const _errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
+  console.log(err?.stack || err) // eslint-disable-line no-console
+
+  if (res.headersSent) {
+    req.socket.destroy()
+
+    return
+  }
+
+  res.sendStatus(500)
 }
 
 const setProxiedUrl = function (req) {
@@ -455,6 +472,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const routeOptions: InitializeRoutes = {
       config,
       remoteStates: this._remoteStates,
+      socketAllowed: this.socketAllowed,
       nodeProxy: this.nodeProxy,
       // Lazy: the CDP Fetch runtime swaps NetworkProxy at each launch, so the
       // routes must read whichever instance is current rather than capture one.
@@ -605,8 +623,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       app.use(this.useMorgan())
     }
 
-    // errorhandler
-    app.use(require('errorhandler')())
+    app.use(_errorHandler)
 
     // remove the express powered-by header
     app.disable('x-powered-by')

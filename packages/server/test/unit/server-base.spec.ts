@@ -11,11 +11,12 @@ import { clearCtx, setCtx } from '@packages/data-context'
 import { connect } from '@packages/network'
 import type { NetworkProxy } from '@packages/proxy'
 
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
 import { cache } from '../../lib/cache'
 import { cypressSessions } from '../../lib/cypress-sessions'
 import * as serverErrors from '../../lib/errors'
 import * as fileServer from '../../lib/file_server'
-import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
+import { ServerBase, _errorHandler, _forceProxyMiddleware } from '../../lib/server-base'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import { runnerMutationRule } from '@packages/data-context/graphql/rootFieldRules'
 import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptionOnlyRule'
@@ -1619,6 +1620,92 @@ describe('lib/server-base', () => {
 
       expect(next).toHaveBeenCalledTimes(1)
       expect(res.redirect).not.toHaveBeenCalled()
+    })
+
+    describe('on the browser (CDP) network path', () => {
+      const listenPort = 2020
+
+      const runNative = (req) => {
+        const res = { redirect: vi.fn() }
+        const next = vi.fn()
+
+        _forceProxyMiddleware(clientRoute, undefined, () => true)(req, res, next)
+
+        return { res, next }
+      }
+
+      const direct = (proxiedUrl: string, host: string | undefined, headers = {}) => {
+        return { proxiedUrl, headers: { ...(host ? { host } : {}), ...headers }, socket: { localPort: listenPort } }
+      }
+
+      it('lets a loopback-token request through under any host', () => {
+        const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', 'other.example.com', {
+          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+        }))
+
+        expect(next).toHaveBeenCalledTimes(1)
+        expect(res.redirect).not.toHaveBeenCalled()
+      })
+
+      it('lets a request addressed to this server by a loopback name on its port through', () => {
+        for (const host of ['localhost:2020', '127.0.0.1:2020', '[::1]:2020', 'app.localhost:2020']) {
+          const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', host))
+
+          expect(next, host).toHaveBeenCalledTimes(1)
+          expect(res.redirect, host).not.toHaveBeenCalled()
+        }
+      })
+
+      it('redirects a request under another host, or another port, to clientRoute', () => {
+        for (const host of ['other.example.com:2020', 'localhost:4000', 'localhost', undefined]) {
+          const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', host))
+
+          expect(res.redirect, String(host)).toHaveBeenCalledWith(clientRoute)
+          expect(next, String(host)).not.toHaveBeenCalled()
+        }
+      })
+
+      it('still lets clientRoute and the runner bundles through under another host, so the runner page answers', () => {
+        for (const url of ['/__/', '/__cypress/runner/cypress_runner.js']) {
+          const { res, next } = runNative(direct(url, 'other.example.com:2020'))
+
+          expect(next, url).toHaveBeenCalledTimes(1)
+          expect(res.redirect, url).not.toHaveBeenCalled()
+        }
+      })
+    })
+  })
+
+  describe('#_errorHandler', () => {
+    const err = new Error('boom')
+
+    err.stack = 'Error: boom\n    at handler (/packages/server/lib/server-base.ts:1:1)'
+
+    let log: Mock
+
+    beforeEach(() => {
+      log = vi.spyOn(console, 'log').mockImplementation(() => {}) as unknown as Mock
+    })
+
+    it('logs the stack and answers 500 without a body', () => {
+      const res = { headersSent: false, sendStatus: vi.fn() }
+      const req = { socket: { destroy: vi.fn() } }
+
+      _errorHandler(err, req as any, res as any, vi.fn())
+
+      expect(log).toHaveBeenCalledWith(err.stack)
+      expect(res.sendStatus).toHaveBeenCalledWith(500)
+      expect(req.socket.destroy).not.toHaveBeenCalled()
+    })
+
+    it('destroys the socket when the response has already started', () => {
+      const res = { headersSent: true, sendStatus: vi.fn() }
+      const req = { socket: { destroy: vi.fn() } }
+
+      _errorHandler(err, req as any, res as any, vi.fn())
+
+      expect(req.socket.destroy).toHaveBeenCalledTimes(1)
+      expect(res.sendStatus).not.toHaveBeenCalled()
     })
   })
 
