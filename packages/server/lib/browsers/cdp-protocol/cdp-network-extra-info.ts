@@ -252,9 +252,7 @@ export class CDPNetworkExtraInfo {
       this.extraInfo.delete(key)
     }
 
-    const entry = this.ensureExtraInfoDeferred(key)
-
-    entry.expectsExtraInfo = true
+    this.ensureExtraInfoDeferred(key).expectsExtraInfo = true
   }
 
   /**
