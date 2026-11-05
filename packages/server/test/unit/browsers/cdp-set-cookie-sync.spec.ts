@@ -22,8 +22,7 @@ async function plan (options: {
   // every origin cookie Chrome didn't block, which is what Chrome stores when
   // the request was sent with credentials.
   chromeCookieStore?: ChromeStoreCookie[]
-  // the cookies Chrome had for the url's domain, on any path, when it sent the
-  // request
+  // Chrome's whole cookie store before the response
   cookiesWhenRequestSent?: Protocol.Network.Cookie[]
 }) {
   const url = options.url ?? REQUEST_URL
@@ -44,7 +43,6 @@ async function plan (options: {
   })
 
   const cookiesBeforeIntercept: CookiesBeforeIntercept = {
-    cookiesWhenRequestSent: options.cookiesWhenRequestSent ?? [],
     setCookieHeadersFromOrigin: options.setCookieHeadersFromOrigin,
     setCookieHeadersBlockedByChrome: options.setCookieHeadersBlockedByChrome ?? [],
     ...(options.partitionKey ? { partitionKey: options.partitionKey } : {}),
@@ -52,6 +50,7 @@ async function plan (options: {
 
   return planSetCookieSync({
     url,
+    cookiesWhenRequestSent: options.cookiesWhenRequestSent ?? [],
     cookiesBeforeIntercept,
     setCookieHeadersAfterIntercept: options.setCookieHeadersAfterIntercept,
     includeWrites: options.includeWrites ?? true,
@@ -831,7 +830,7 @@ describe('planSetCookieSync', () => {
 
   describe('reading the store', () => {
     const beforeIntercept = (setCookieHeadersFromOrigin: string[]): CookiesBeforeIntercept => {
-      return { cookiesWhenRequestSent: [], setCookieHeadersFromOrigin, setCookieHeadersBlockedByChrome: [] }
+      return { setCookieHeadersFromOrigin, setCookieHeadersBlockedByChrome: [] }
     }
 
     it('plans nothing and never reads the store when the handler left set-cookie untouched', async () => {
@@ -839,6 +838,7 @@ describe('planSetCookieSync', () => {
 
       const commands = await planSetCookieSync({
         url: REQUEST_URL,
+        cookiesWhenRequestSent: [],
         cookiesBeforeIntercept: beforeIntercept(['a=1; Path=/; Secure; SameSite=None', 'b=2']),
         setCookieHeadersAfterIntercept: ['a=1; Path=/; Secure; SameSite=None', 'b=2'],
         includeWrites: true,
@@ -854,6 +854,7 @@ describe('planSetCookieSync', () => {
 
       const commands = await planSetCookieSync({
         url: REQUEST_URL,
+        cookiesWhenRequestSent: [],
         cookiesBeforeIntercept: beforeIntercept(['a=1', 'b=2']),
         setCookieHeadersAfterIntercept: ['b=2', 'a=1'],
         includeWrites: true,
@@ -872,7 +873,8 @@ describe('planSetCookieSync', () => {
 
       const commands = await planSetCookieSync({
         url: REQUEST_URL,
-        cookiesBeforeIntercept: { ...beforeIntercept(['a=; Path=/; Max-Age=0']), cookiesWhenRequestSent: [sentCookie] },
+        cookiesWhenRequestSent: [sentCookie],
+        cookiesBeforeIntercept: beforeIntercept(['a=; Path=/; Max-Age=0']),
         setCookieHeadersAfterIntercept: [],
         includeWrites: true,
         getChromeCookieStore,
@@ -902,6 +904,7 @@ describe('planSetCookieSync', () => {
 
       const commands = await planSetCookieSync({
         url: REQUEST_URL,
+        cookiesWhenRequestSent: [],
         cookiesBeforeIntercept: beforeIntercept(['a=1; Secure; Partitioned', 'b=1']),
         setCookieHeadersAfterIntercept: ['b=1'],
         includeWrites: true,
@@ -922,6 +925,7 @@ describe('planSetCookieSync', () => {
 
       const commands = await planSetCookieSync({
         url: REQUEST_URL,
+        cookiesWhenRequestSent: [],
         cookiesBeforeIntercept: beforeIntercept(['a=1; Path=/', 'b=1; Path=/']),
         setCookieHeadersAfterIntercept: [],
         includeWrites: true,

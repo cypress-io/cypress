@@ -23,9 +23,6 @@ import { isHostOnlyCookie } from '../../automation/cookie/util'
  * per header.
  */
 export type CookiesBeforeIntercept = {
-  // the cookies Chrome had for the request's domain, on any path, when it sent
-  // the request, from Network.requestWillBeSentExtraInfo
-  cookiesWhenRequestSent: Protocol.Network.Cookie[]
   // every Set-Cookie header the origin sent, from
   // Network.responseReceivedExtraInfo
   setCookieHeadersFromOrigin: string[]
@@ -457,9 +454,6 @@ const parseUrl = (rawUrl: string): URL | undefined => {
  * - A cookie the origin set that the handler no longer has is removed, and its
  *   earlier copy is restored from `cookiesWhenRequestSent` if Chrome held it,
  *   even one it didn't send (e.g. blocked by SameSite, or on another path).
- *   Chrome lists every cookie for the request's domain there, and a response
- *   can only set a cookie whose domain matches its url, so any cookie the
- *   origin's header overwrote is in the list.
  *   On the proxy path the browser only sees the handler's headers, so the
  *   origin's cookie is never stored and the earlier copy is left as it was.
  * - A cookie the handler added or changed is set, or removed if it is already
@@ -493,12 +487,15 @@ const parseUrl = (rawUrl: string): URL | undefined => {
  */
 export async function planSetCookieSync ({
   url: rawUrl,
+  cookiesWhenRequestSent,
   cookiesBeforeIntercept,
   setCookieHeadersAfterIntercept,
   includeWrites,
   getChromeCookieStore,
 }: {
   url: string
+  // Chrome's whole cookie store before this response stored anything
+  cookiesWhenRequestSent: Protocol.Network.Cookie[]
   cookiesBeforeIntercept: CookiesBeforeIntercept
   // the Set-Cookie headers the response is released with, after cy.intercept ran
   setCookieHeadersAfterIntercept: string[]
@@ -509,7 +506,7 @@ export async function planSetCookieSync ({
   // Chrome's cookie store after it processed the origin's headers
   getChromeCookieStore: () => Promise<ChromeStoreCookie[]>
 }): Promise<SetCookieSyncCommand[]> {
-  const { cookiesWhenRequestSent, setCookieHeadersFromOrigin, partitionKey } = cookiesBeforeIntercept
+  const { setCookieHeadersFromOrigin, partitionKey } = cookiesBeforeIntercept
 
   // the handler left the origin's Set-Cookie headers untouched, so Chrome's
   // store already matches them

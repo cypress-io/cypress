@@ -81,6 +81,7 @@ function createClient () {
       resolves: (value: unknown) => define(() => Promise.resolve(value)),
       rejects: (error: Error) => define(() => Promise.reject(error)),
       returns: (value: unknown) => define(() => value),
+      callsFake: (respond: () => unknown) => define(respond),
     }
   }
 
@@ -112,7 +113,6 @@ function createNetworkExtraInfo () {
     stop: vi.fn(),
     flush: vi.fn(),
     clear: vi.fn(),
-    cookiesWhenRequestSent: vi.fn((): Protocol.Network.Cookie[] => []),
     responseExtraInfo: vi.fn(async () => undefined),
   }
 }
@@ -2163,8 +2163,12 @@ describe('CdpFetchTransport', () => {
         storeUnavailable?: boolean
         // Network.setCookie and Network.deleteCookies both reject
         cookieWritesFail?: boolean
-        // the cookies the request found in the store
-        cookiesWhenRequestSent?: Protocol.Network.Cookie[]
+        // a cy.intercept route matched the request, so the transport reads
+        // Chrome's store as it continues the request
+        routeMatched?: boolean
+        // what that read returns, or a reply that never settles; it rejects when
+        // set to an Error
+        cookieStoreWhenContinued?: Protocol.Network.Cookie[] | Error | Promise<never>
         // for stubbing CDP replies and inspecting calls mid-run
         client?: ReturnType<typeof createClient>
       }) {
@@ -2188,24 +2192,30 @@ describe('CdpFetchTransport', () => {
           return { name, value, path: '/', domain: responseHostname }
         })
 
-        if (options.storeUnavailable) {
-          client.sendWithArgs('Network.getAllCookies').rejects(new Error('No target with given id found'))
-        } else {
-          client.sendWithArgs('Network.getAllCookies').resolves({ cookies: options.chromeCookieStore ?? originCookies })
-        }
+        // the first read is the one made as the request is continued, when a
+        // route matched; every later read is the sync's own
+        let reads = 0
+
+        client.sendWithArgs('Network.getAllCookies').callsFake(() => {
+          if (options.routeMatched && reads++ === 0) {
+            const { cookieStoreWhenContinued: store = [] } = options
+
+            if (store instanceof Promise) return store
+
+            return store instanceof Error ? Promise.reject(store) : Promise.resolve({ cookies: store })
+          }
+
+          return options.storeUnavailable
+            ? Promise.reject(new Error('No target with given id found'))
+            : Promise.resolve({ cookies: options.chromeCookieStore ?? originCookies })
+        })
 
         if (options.cookieWritesFail) {
           client.sendWithArgs('Network.setCookie').rejects(new Error('Sanitizing cookie failed'))
           client.sendWithArgs('Network.deleteCookies').rejects(new Error('Sanitizing cookie failed'))
         }
 
-        // the real store drops the entry once responseExtraInfo consumes it
-        let entrySwept = false
-
-        networkExtraInfo.cookiesWhenRequestSent.mockImplementation(() => entrySwept ? [] : options.cookiesWhenRequestSent ?? [])
         networkExtraInfo.responseExtraInfo.mockImplementation(async () => {
-          entrySwept = true
-
           return options.extraInfoUnavailable ? undefined : {
             requestId: 'network-1',
             headers: options.setCookie !== undefined ? { 'Set-Cookie': options.setCookie } : {},
@@ -2217,7 +2227,11 @@ describe('CdpFetchTransport', () => {
         })
 
         httpIntercept.use(async (req, next) => {
-          const res = await next(options.rewriteUrl ? { ...req, url: options.rewriteUrl } : req)
+          const res = await next({
+            ...req,
+            ...(options.rewriteUrl ? { url: options.rewriteUrl } : {}),
+            ...(options.routeMatched ? { hadMatchingRoutes: true } : {}),
+          })
           const setCookie = ([] as string[]).concat(res.headers?.['set-cookie'] ?? [])
 
           return {
@@ -2306,32 +2320,91 @@ describe('CdpFetchTransport', () => {
         }, 'session-1')
       })
 
-      // also covers read order: reading the request's cookies after
-      // responseExtraInfo would find them swept
-      it('puts back the cookie the request carried when the handler drops the origin\'s header', async () => {
-        const { client, networkExtraInfo } = await expectResponseHeldForCookieCommand('Network.setCookie', 'Fetch.continueResponse', {
-          setCookie: 'foo=from-origin; Path=/',
-          rewrite: () => [],
-          cookiesWhenRequestSent: [{
-            name: 'foo',
-            value: 'from-request',
-            domain: 'example.test',
-            path: '/',
-            expires: -1,
-            size: 15,
-            httpOnly: false,
-            secure: false,
-            session: true,
-            priority: 'Medium',
-            sourceScheme: 'Secure',
-            sourcePort: 443,
-          }],
+      describe('reading the store as a request a route matched is continued', () => {
+        const heldBefore: Protocol.Network.Cookie = {
+          name: 'foo',
+          value: 'from-before',
+          domain: 'example.test',
+          path: '/',
+          expires: Date.parse('2030-01-01T00:00:00Z') / 1000,
+          size: 14,
+          httpOnly: false,
+          secure: false,
+          session: false,
+          priority: 'Medium',
+          sourceScheme: 'Secure',
+          sourcePort: 443,
+        }
+
+        // Chrome answers the read before it stores the response's cookies only
+        // while the read is sent first, with nothing awaited before the continue
+        it('sends the read just before continuing the request, without waiting for its reply', async () => {
+          const { methods, client } = await runWithSetCookie({
+            setCookie: 'foo=from-origin; Path=/',
+            routeMatched: true,
+            cookieStoreWhenContinued: new Promise<never>(() => {}),
+          })
+
+          const continueIndex = methods.indexOf('Fetch.continueRequest')
+
+          expect(methods[continueIndex - 1]).toBe('Network.getAllCookies')
+          expect(client.send.mock.calls[continueIndex - 1]).toEqual(['Network.getAllCookies', undefined, 'session-1'])
         })
 
-        expectCalledWith(networkExtraInfo.cookiesWhenRequestSent, 'network-1', 'session-1')
-        expect(callsMatching(client.send, ['Network.setCookie'])).toEqual([
-          ['Network.setCookie', expect.objectContaining({ name: 'foo', value: 'from-request' }), 'session-1'],
-        ])
+        it('does not read the store for a request no route matched', async () => {
+          const { methods } = await runWithSetCookie({
+            setCookie: 'foo=from-origin; Path=/',
+            rewrite: () => [],
+          })
+
+          expect(methods.slice(0, methods.indexOf('Fetch.continueRequest'))).not.toContain('Network.getAllCookies')
+        })
+
+        it('puts back the cookie the origin\'s header overwrote when the handler drops it', async () => {
+          const { client } = await expectResponseHeldForCookieCommand('Network.setCookie', 'Fetch.continueResponse', {
+            setCookie: 'foo=from-origin; Path=/',
+            rewrite: () => [],
+            routeMatched: true,
+            cookieStoreWhenContinued: [heldBefore],
+          })
+
+          const cookieCommands = client.send.mock.calls.filter(([method]) => method === 'Network.deleteCookies' || method === 'Network.setCookie')
+
+          expect(cookieCommands).toEqual([
+            ['Network.deleteCookies', expect.objectContaining({ name: 'foo' }), 'session-1'],
+            ['Network.setCookie', expect.objectContaining({ name: 'foo', value: 'from-before', expires: heldBefore.expires }), 'session-1'],
+          ])
+        })
+
+        // a request sent without credentials: Chrome ignored the origin's
+        // foo=from-before, so the stored foo=from-before is the earlier cookie
+        it('keeps a cookie the origin re-sent unchanged when the handler drops it', async () => {
+          const { client } = await runWithSetCookie({
+            setCookie: 'foo=from-before; Path=/',
+            rewrite: () => [],
+            routeMatched: true,
+            cookieStoreWhenContinued: [heldBefore],
+          })
+
+          expect(callsMatching(client.send, ['Network.setCookie'])).toEqual([
+            ['Network.setCookie', expect.objectContaining({ name: 'foo', value: 'from-before', expires: heldBefore.expires }), 'session-1'],
+          ])
+        })
+
+        // deleting the origin's cookie without the earlier one to put back
+        // would leave the page without a cookie it had
+        it('leaves the cookie store alone when the read fails', async () => {
+          const { client, methods } = await runWithSetCookie({
+            setCookie: 'foo=from-origin; Path=/',
+            rewrite: () => [],
+            routeMatched: true,
+            cookieStoreWhenContinued: new Error('No target with given id found'),
+          })
+
+          expectNotCalledWith(client.send, 'Network.deleteCookies')
+          expectNotCalledWith(client.send, 'Network.setCookie')
+          expect(methods).toContain('Fetch.continueResponse')
+        })
       })
 
       it('passes the lines Chrome blocked to the planner, which then leaves the stored cookie alone', async () => {

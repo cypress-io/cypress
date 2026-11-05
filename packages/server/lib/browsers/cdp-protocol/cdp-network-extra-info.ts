@@ -19,10 +19,6 @@ type ExtraInfoDeferred = {
   // responseReceived arrived — the sweep signal, which for a paused request
   // can only follow the consume
   responseReceived: boolean
-  // the cookies Chrome held for the url's domain, on any path, when it sent
-  // the request, from the request twin: what the cookie store looked like
-  // before this response
-  associatedCookies?: Protocol.Network.AssociatedCookie[]
 }
 
 // A failure backstop (e.g. a connection dying mid-response), not a
@@ -213,15 +209,6 @@ export class CDPNetworkExtraInfo {
     }
   }
 
-  /**
-   * The cookies Chrome held for the request's domain, on any path, when it
-   * sent the request, sent or not. Read it before `responseExtraInfo`, which lets the entry be
-   * swept.
-   */
-  cookiesWhenRequestSent (requestId: string, sessionId?: string): Protocol.Network.Cookie[] {
-    return this.extraInfo.get(this.getExtraInfoDeferredKey(requestId, sessionId))?.associatedCookies?.map(({ cookie }) => cookie) ?? []
-  }
-
   // Network events arrive for every session the CriClient forwards (service
   // workers, other targets), and CDP request ids are only unique per session —
   // scope all entries to the session the event arrived on.
@@ -268,7 +255,6 @@ export class CDPNetworkExtraInfo {
     const entry = this.ensureExtraInfoDeferred(key)
 
     entry.expectsExtraInfo = true
-    entry.associatedCookies = event.associatedCookies
   }
 
   /**

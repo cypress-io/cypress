@@ -193,6 +193,10 @@ type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   // back from the middleware onion — read by resolveResponse's shouldStreamBody
   // call so classification agrees with the interception that actually ran.
   hadMatchingRoutes?: boolean
+  // Chrome's cookie store as it was when the request was continued, read for
+  // requests a cy.intercept route matched. Resolves to undefined when the read
+  // failed.
+  cookieStoreWhenContinued?: Promise<Protocol.Network.Cookie[] | undefined>
 }
 
 export class CdpFetchTransport {
@@ -628,6 +632,15 @@ export class CdpFetchTransport {
             headersChanged: !!headers,
           })
 
+        // The cookie sync restores what the origin's Set-Cookie overwrote from
+        // this read. Only a cy.intercept handler can drop those lines, so it is
+        // skipped when no route matched. Nothing may be awaited between the
+        // read and continueRequest, or Chrome stores the response's cookies
+        // before answering it.
+        if (outbound.hadMatchingRoutes) {
+          responseDeferred.cookieStoreWhenContinued = this.readCookieStore(outbound.sessionId)
+        }
+
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
@@ -670,7 +683,7 @@ export class CdpFetchTransport {
         }
       })
 
-      await this.syncSetCookies(response)
+      await this.syncSetCookies(response, responseDeferred.cookieStoreWhenContinued)
 
       if (response.fulfilled) {
         // base64 of the gzip magic bytes starts with 'H4sI' — an encoded body
@@ -930,9 +943,6 @@ export class CdpFetchTransport {
     responseHeaders?: Protocol.Fetch.HeaderEntry[]
     cookiesBeforeIntercept?: CookiesBeforeIntercept
   }> => {
-    // responseExtraInfo can delete the entry cookiesWhenRequestSent reads, so read
-    // the cookies first.
-    const cookiesWhenRequestSent = event.networkId ? this.networkExtraInfo.cookiesWhenRequestSent(event.networkId, sessionId) : []
     const extraInfo = event.networkId
       ? await this.networkExtraInfo.responseExtraInfo(event.networkId, sessionId)
       : undefined
@@ -949,7 +959,6 @@ export class CdpFetchTransport {
     const setCookieHeadersFromOrigin = setCookieHeaders(Object.entries(extraInfo.headers).map(([name, value]) => ({ name, value })))
 
     const cookiesBeforeIntercept: CookiesBeforeIntercept = {
-      cookiesWhenRequestSent,
       setCookieHeadersFromOrigin,
       setCookieHeadersBlockedByChrome: extraInfo.blockedCookies?.map(({ cookieLine }) => cookieLine) ?? [],
       ...(extraInfo.cookiePartitionKey && !extraInfo.cookiePartitionKeyOpaque
@@ -977,7 +986,10 @@ export class CdpFetchTransport {
    * before the response is released, so the page and any following redirect
    * hop already see the result.
    */
-  private syncSetCookies = async (response: CdpFetchTransportResponse): Promise<void> => {
+  private syncSetCookies = async (
+    response: CdpFetchTransportResponse,
+    cookieStoreWhenContinued?: Promise<Protocol.Network.Cookie[] | undefined>,
+  ): Promise<void> => {
     // Skip the sync in two cases:
     // - No cookiesBeforeIntercept: there's no safe baseline to compare against
     //   (see resolveCookieHeaders).
@@ -992,9 +1004,21 @@ export class CdpFetchTransport {
     // from the response pause and passed through the middleware unchanged. Chrome
     // stored the cookies against it.
     const { url } = response
+    // Awaited here, so a read that never answers only holds up responses that
+    // sync. No read means no route matched, so there is nothing to restore. A
+    // failed read skips the sync, since removing the origin's cookie without
+    // the one it overwrote would delete a cookie the page still has.
+    const cookiesWhenRequestSent = cookieStoreWhenContinued ? await cookieStoreWhenContinued : []
+
+    if (!cookiesWhenRequestSent) {
+      debug('set-cookie sync for %s skipped, could not read Chrome\'s cookie store when the request was continued', url)
+
+      return
+    }
 
     const commands = await planSetCookieSync({
       url,
+      cookiesWhenRequestSent,
       cookiesBeforeIntercept: response.cookiesBeforeIntercept,
       setCookieHeadersAfterIntercept: setCookieHeaders(response.responseHeaders),
       includeWrites: !response.fulfilled,
@@ -1018,6 +1042,16 @@ export class CdpFetchTransport {
 
       await this.safeSend(method, params, response.sessionId)
     }
+  }
+
+  // Not async: the read must be sent before this returns, so it reaches Chrome
+  // ahead of the caller's continueRequest.
+  private readCookieStore (sessionId?: string): Promise<Protocol.Network.Cookie[] | undefined> {
+    return this.client.send('Network.getAllCookies', undefined, sessionId).then(({ cookies }) => cookies, (err) => {
+      debug('could not read Chrome\'s cookie store when continuing the request: %s', (err as Error).message)
+
+      return undefined
+    })
   }
 
   private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Buffer> => {

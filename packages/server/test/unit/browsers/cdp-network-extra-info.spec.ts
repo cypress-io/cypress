@@ -105,50 +105,6 @@ describe('CDPNetworkExtraInfo', () => {
     })
   })
 
-  describe('cookiesWhenRequestSent', () => {
-    const cookie = { name: 'foo', value: 'bar', domain: 'example.test', path: '/' } as Protocol.Network.Cookie
-
-    it('returns the cookies the request twin found in the store, sent or not', () => {
-      const { layer, requestExtraInfo } = createLayer()
-
-      requestExtraInfo({
-        requestId: 'request-1',
-        associatedCookies: [
-          { cookie, blockedReasons: [] },
-          { cookie: { ...cookie, name: 'lax' }, blockedReasons: ['SameSiteLax'] },
-        ],
-      }, 'session-1')
-
-      expect(layer.cookiesWhenRequestSent('request-1', 'session-1').map(({ name }) => name)).toEqual(['foo', 'lax'])
-      // no session id means the root session, and request ids are only unique per session
-      expect(layer.cookiesWhenRequestSent('request-1')).toEqual([])
-    })
-
-    it('returns the cookies of the latest redirect hop', async () => {
-      const { layer, requestExtraInfo, responseExtraInfo } = createLayer()
-
-      // hop 1: the redirect response is consumed, leaving its entry in the
-      // map since a redirect never gets its own responseReceived
-      requestExtraInfo({ requestId: 'request-1', associatedCookies: [{ cookie, blockedReasons: [] }] })
-      responseExtraInfo({ requestId: 'request-1', headers: {} })
-      await layer.responseExtraInfo('request-1')
-
-      expect(layer.cookiesWhenRequestSent('request-1').map(({ value }) => value)).toEqual(['bar'])
-
-      // hop 2 reuses the request id with a different cookie store — it must
-      // replace the consumed entry rather than read hop 1's stale snapshot
-      requestExtraInfo({ requestId: 'request-1', associatedCookies: [{ cookie: { ...cookie, value: 'hop-2' }, blockedReasons: [] }] })
-
-      expect(layer.cookiesWhenRequestSent('request-1').map(({ value }) => value)).toEqual(['hop-2'])
-    })
-
-    it('returns nothing for a request with no twin', () => {
-      const { layer } = createLayer()
-
-      expect(layer.cookiesWhenRequestSent('request-1')).toEqual([])
-    })
-  })
-
   describe('responseExtraInfo', () => {
     it('skips the hold entirely when no extraInfo was promised', async () => {
       vi.useFakeTimers()

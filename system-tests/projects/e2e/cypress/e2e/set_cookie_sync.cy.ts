@@ -117,6 +117,25 @@ describe('cy.intercept rewrites Set-Cookie headers', () => {
     cy.getCookie('added').should('be.null')
   })
 
+  // Chrome ignored the origin's tracking=1, so the tracking=1 in its store is
+  // the one set before the request, and dropping the header must not delete it
+  it('keeps a cookie the origin re-sent unchanged when the handler drops it from a request sent without credentials', () => {
+    cy.setCookie('tracking', '1')
+
+    cy.intercept('/cookie_sync/plain', (req) => {
+      req.on('response', (res) => {
+        expect(setCookieLines(res)).to.deep.eq(['tracking=1; Path=/'])
+
+        delete res.headers['set-cookie']
+      })
+    }).as('plain')
+
+    fetchText('/cookie_sync/plain', { credentials: 'omit' })
+    cy.wait('@plain')
+
+    cy.getCookie('tracking').its('value').should('eq', '1')
+  })
+
   // Chrome blocks the origin's SameSite=Lax cookie on a cross-site response,
   // and the handler's SameSite=None rewrite must still be stored.
   it('stores a cookie Chrome blocked once the handler rewrites it to SameSite=None', () => {
