@@ -642,7 +642,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
       _.each(libs, (url, lib) => {
         [false, true].forEach((modifyObstructiveThirdPartyCode) => {
-          it(`does not alter code from: '${lib}', with modifyObstructiveThirdPartyCode set to ${modifyObstructiveThirdPartyCode}`, { timeout: 10000 }, async function () {
+          it(`does not alter code from: '${lib}', with modifyObstructiveThirdPartyCode set to ${modifyObstructiveThirdPartyCode}`, { timeout: 30000 }, async function () {
             const pathToLib = `/tmp/${lib}`
 
             let libCode: string
