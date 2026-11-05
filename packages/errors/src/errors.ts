@@ -733,6 +733,14 @@ export const AllCypressErrors = {
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
   },
+  PORT_BLOCKED_BY_BROWSER: (port: number) => {
+    return errTemplate`\
+        Cypress cannot use port ${fmt.highlight(port)} because browsers block it
+
+        Chrome, Electron, Firefox and WebKit refuse to load any URL on this port, so the runner would never connect to Cypress
+
+        Choose a port browsers allow with the ${fmt.highlightSecondary('port')} option in your Cypress configuration`
+  },
   FILE_SERVER_COULD_NOT_LISTEN: (attempts: number, err: Error) => {
     return errTemplate`\
         Cypress could not start its internal file server.

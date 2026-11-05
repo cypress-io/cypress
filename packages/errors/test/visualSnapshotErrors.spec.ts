@@ -610,6 +610,11 @@ describe('visual error templates', () => {
         default: [2020],
       }
     },
+    PORT_BLOCKED_BY_BROWSER: () => {
+      return {
+        default: [10080],
+      }
+    },
     FILE_SERVER_COULD_NOT_LISTEN: () => {
       return {
         default: [3, makeErr()],

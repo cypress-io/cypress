@@ -1,4 +1,5 @@
 import { createRequire } from 'module'
+import { EventEmitter } from 'events'
 import express from 'express'
 import _ from 'lodash'
 import nock from 'nock'
@@ -1113,6 +1114,92 @@ describe('lib/server-base', () => {
           message: expect.stringContaining(String(port)),
         })
       })
+    })
+  })
+
+  describe('#_listen', () => {
+    // Stands in for an http.Server whose listen() always succeeds and whose
+    // address reports the next port. Keeps the port sequence deterministic so
+    // the browser-blocked-port retry can be exercised without a real bind.
+    function fakeListeningServer (ports: number[]) {
+      const srv: any = new EventEmitter()
+      let nextPort = 0
+
+      srv.listen = vi.fn((_port: number, _host: string, cb: () => void) => {
+        process.nextTick(cb)
+
+        return srv
+      })
+
+      // the server keeps reporting its last port after the sequence runs out,
+      // since teardown reads address() again
+      srv.address = vi.fn(() => ({ address: '127.0.0.1', family: 'IPv4', port: ports[Math.min(nextPort++, ports.length - 1)] }))
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb())
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      return srv
+    }
+
+    it('listens on the configured port when browsers allow it', async () => {
+      server._server = fakeListeningServer([54321])
+
+      await expect(server._listen(54321)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledWith(54321, '127.0.0.1', expect.any(Function))
+    })
+
+    it('redraws an ephemeral port that browsers block instead of failing to load it', async () => {
+      server._server = fakeListeningServer([10080, 54321])
+
+      await expect(server._listen(null)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledTimes(2)
+      expect(server._server.listen).toHaveBeenLastCalledWith(0, '127.0.0.1', expect.any(Function))
+      expect(server._server.close).toHaveBeenCalledTimes(1)
+    })
+
+    it('rejects with PORT_BLOCKED_BY_BROWSER when the configured port is blocked', async () => {
+      server._server = fakeListeningServer([10080])
+
+      await expect(server._listen(10080)).rejects.toMatchObject({
+        type: 'PORT_BLOCKED_BY_BROWSER',
+        message: expect.stringContaining('10080'),
+      })
+
+      // a port browsers block is refused before binding, so the run does not
+      // hang waiting for a browser that can never connect
+      expect(server._server.listen).not.toHaveBeenCalled()
+    })
+
+    it('rejects a bind failure other than EADDRINUSE instead of leaving the run hanging', async () => {
+      const srv: any = new EventEmitter()
+
+      srv.listen = vi.fn(() => {
+        const err = Object.assign(new Error('listen EACCES: permission denied'), { code: 'EACCES' })
+
+        process.nextTick(() => srv.emit('error', err))
+
+        return srv
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toMatchObject({ code: 'EACCES' })
+    })
+
+    it('gives up after repeated blocked ephemeral ports instead of listening forever', async () => {
+      server._server = fakeListeningServer(Array(10).fill(10080))
+
+      await expect(server._listen(null)).rejects.toMatchObject({
+        type: 'PORT_BLOCKED_BY_BROWSER',
+      })
+
+      expect(server._server.listen).toHaveBeenCalledTimes(10)
     })
   })
 

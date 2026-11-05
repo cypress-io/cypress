@@ -1,0 +1,5 @@
+[31mCypress cannot use port [33m10080[39m[31m because browsers block it[39m
+[31m[39m
+[31mChrome, Electron, Firefox and WebKit refuse to load any URL on this port, so the runner would never connect to Cypress[39m
+[31m[39m
+[31mChoose a port browsers allow with the [95mport[39m[31m option in your Cypress configuration[39m

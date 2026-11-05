@@ -30,6 +30,7 @@ import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import { allowDestroy } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+import { isUnsafePort } from './util/unsafe_ports'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import type { InitializeRoutes } from './routes'
@@ -67,6 +68,10 @@ const debug = Debug('cypress:server:server-base')
 
 const fullyQualifiedRe = /^https?:\/\//
 const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
+// listen(0) draws a fresh ephemeral port each attempt, so only a handful of
+// retries are needed to move off a port browsers block. The cap keeps a
+// misbehaving port range from looping forever.
+const MAX_PORT_ATTEMPTS = 10
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
@@ -916,30 +921,65 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   _listen (port: number | null | undefined): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          reject(this.portInUseErr(port))
+      if (port && isUnsafePort(port)) {
+        return reject(errors.get('PORT_BLOCKED_BY_BROWSER', port))
+      }
+
+      let attempts = 0
+
+      const tryListen = () => {
+        attempts++
+
+        const onError = (err) => {
+          // if the server bombs before starting
+          // and the err no is EADDRINUSE
+          // then we know to display the custom err message
+          if (err.code === 'EADDRINUSE') {
+            return reject(this.portInUseErr(port))
+          }
+
+          // any other bind failure cannot be fixed by retrying, and leaving
+          // the promise pending would hang the run
+          reject(err)
         }
+
+        this.server.once('error', onError)
+
+        const listener = () => {
+          const address = this.server.address() as AddressInfo
+
+          this.server.removeListener('error', onError)
+
+          // Browsers refuse to load any URL on their restricted ports, so a
+          // randomly assigned one has to be redrawn. Only an ephemeral port
+          // reaches here, since a configured one was rejected above.
+          if (isUnsafePort(address.port)) {
+            debug('discarding browser-blocked port %d', address.port)
+
+            if (attempts < MAX_PORT_ATTEMPTS) {
+              this.server.close(() => tryListen())
+
+              return
+            }
+
+            // free the port before surfacing the error so a failed run does
+            // not leave the server holding it
+            this.server.close(() => reject(errors.get('PORT_BLOCKED_BY_BROWSER', address.port)))
+
+            return
+          }
+
+          this.isListening = true
+
+          debug('Server listening on ', address)
+
+          resolve(address.port)
+        }
+
+        this.server.listen(port || 0, '127.0.0.1', listener)
       }
 
-      this.server.once('error', onError)
-
-      const listener = () => {
-        const address = this.server.address() as AddressInfo
-
-        this.isListening = true
-
-        debug('Server listening on ', address)
-
-        this.server.removeListener('error', onError)
-
-        resolve(address.port)
-      }
-
-      this.server.listen(port || 0, '127.0.0.1', listener)
+      tryListen()
     })
   }
 
