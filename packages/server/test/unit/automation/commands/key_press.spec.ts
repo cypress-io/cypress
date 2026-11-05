@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Mock } from 'vitest'
 import type { SupportedKey } from '@packages/types'
-import { NamedKeys, toSupportedKey, SpaceKey } from '@packages/types'
+import { NamedKeys, ModifierKeys, FunctionKeys, toSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
 import { cdpKeyPress, bidiKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
 import type { Client as WebdriverClient } from 'webdriver'
@@ -12,6 +12,8 @@ const stubbedClientMethods = ['inputPerformActions', 'inputReleaseActions', 'get
 type StubbedClient = WebdriverClient & Record<typeof stubbedClientMethods[number], Mock>
 
 type MockedSendDebuggerCommand = SendDebuggerCommand & Mock
+
+const physicalKeys: string[] = [...ModifierKeys, ...FunctionKeys]
 
 describe('key:press automation command', () => {
   const tab: SupportedKey = toSupportedKey('Tab')
@@ -169,7 +171,7 @@ describe('key:press automation command', () => {
       })
 
       describe('when supplied a valid named key', () => {
-        for (const key of NamedKeys.filter((k) => k !== SpaceKey)) {
+        for (const key of NamedKeys.filter((k) => k !== SpaceKey && !physicalKeys.includes(k))) {
           it(`dispatches a keydown followed by a keyup event to the provided send fn with the ${key} keycode`, async () => {
             await cdpKeyPress(key as SupportedKey, sendFn, executionContexts, frameTree)
 
@@ -184,6 +186,33 @@ describe('key:press automation command', () => {
               key,
               code: key,
             })
+          })
+        }
+
+        const physicalKeyParams: [string, { code: string, windowsVirtualKeyCode: number, location: number }][] = [
+          ['Shift', { code: 'ShiftLeft', windowsVirtualKeyCode: 16, location: 1 }],
+          ['Control', { code: 'ControlLeft', windowsVirtualKeyCode: 17, location: 1 }],
+          ['Alt', { code: 'AltLeft', windowsVirtualKeyCode: 18, location: 1 }],
+          ['Meta', { code: 'MetaLeft', windowsVirtualKeyCode: 91, location: 1 }],
+          ...Array.from({ length: 12 }, (_, i): [string, { code: string, windowsVirtualKeyCode: number, location: number }] => {
+            return [`F${i + 1}`, { code: `F${i + 1}`, windowsVirtualKeyCode: 112 + i, location: 0 }]
+          }),
+        ]
+
+        it('covers every modifier and function key', () => {
+          expect(physicalKeyParams.map(([key]) => key)).toEqual(physicalKeys)
+        })
+
+        for (const [key, params] of physicalKeyParams) {
+          it(`dispatches the US keyboard code, keyCode and location for ${key}`, async () => {
+            await cdpKeyPress(toSupportedKey(key), sendFn, executionContexts, frameTree)
+
+            const dispatched = sendFn.mock.calls.filter(([command]) => command === 'Input.dispatchKeyEvent')
+
+            expect(dispatched).toEqual([
+              ['Input.dispatchKeyEvent', { type: 'keyDown', key, ...params }],
+              ['Input.dispatchKeyEvent', { type: 'keyUp', key, ...params }],
+            ])
           })
         }
 
@@ -394,6 +423,27 @@ describe('key:press automation command', () => {
           })
         })
       }
+    })
+
+    it('sends the WebDriver codepoints for the modifier and function keys', () => {
+      expect(BidiOverrideCodepoints).toMatchObject({
+        Shift: '\uE008',
+        Control: '\uE009',
+        Alt: '\uE00A',
+        Meta: '\uE03D',
+        F1: '\uE031',
+        F2: '\uE032',
+        F3: '\uE033',
+        F4: '\uE034',
+        F5: '\uE035',
+        F6: '\uE036',
+        F7: '\uE037',
+        F8: '\uE038',
+        F9: '\uE039',
+        F10: '\uE03A',
+        F11: '\uE03B',
+        F12: '\uE03C',
+      })
     })
 
     describe('when supplied a multi-codepointutf8 key', () => {

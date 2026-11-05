@@ -34,6 +34,39 @@ describe('src/cy/commands/actions/press', () => {
 
   Object.values(Cypress.Keyboard.Keys).forEach(testKeyDownUp)
 
+  describe('modifier and function keys', () => {
+    const keys = [
+      { key: 'Shift', code: 'ShiftLeft', keyCode: 16 },
+      { key: 'Control', code: 'ControlLeft', keyCode: 17 },
+      { key: 'Alt', code: 'AltLeft', keyCode: 18 },
+      { key: 'Meta', code: 'MetaLeft', keyCode: 91 },
+      ...Array.from({ length: 12 }, (_, i) => ({ key: `F${i + 1}`, code: `F${i + 1}`, keyCode: 112 + i })),
+    ] as const
+
+    keys.forEach(({ key, code, keyCode }) => {
+      it(`dispatches a trusted ${key} keydown`, () => {
+        const keydowns: Pick<KeyboardEvent, 'isTrusted' | 'key' | 'code' | 'keyCode'>[] = []
+
+        cy.document().then((doc) => {
+          doc.addEventListener('keydown', ({ isTrusted, key, code, keyCode }) => {
+            keydowns.push({ isTrusted, key, code, keyCode })
+          })
+        })
+
+        cy.press(key)
+
+        cy.wrap(keydowns).should('have.length', 1)
+        cy.wrap(keydowns).its(0).should('include', { isTrusted: true, key })
+
+        // Firefox derives code and keyCode from the WebDriver codepoint itself;
+        // CDP is sent them explicitly.
+        if (Cypress.isBrowser({ family: 'chromium' })) {
+          cy.wrap(keydowns).its(0).should('include', { code, keyCode })
+        }
+      })
+    })
+  })
+
   // sets truncated for speed
 
   // // Numbers

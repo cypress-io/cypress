@@ -1,6 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import type { SupportedKey, SupportedNamedKey } from '@packages/types'
-import { NamedKeys, toSupportedKey, isSupportedKey, SpaceKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { NamedKeys, ModifierKeys, FunctionKeys, USKeyboard, toSupportedKey, isSupportedKey, SpaceKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
@@ -16,7 +16,15 @@ type InputKeySourceAction = Parameters<Client['inputPerformActions']>[0]['action
     : never
   : never
 
-function getKeyParams (key: SupportedKey): { text?: string, key: string, code?: string } {
+type KeyParams = Pick<Protocol.Input.DispatchKeyEventRequest, 'key' | 'code' | 'text' | 'windowsVirtualKeyCode' | 'location'>
+
+const physicalKeys: readonly string[] = [...ModifierKeys, ...FunctionKeys]
+
+function isPhysicalKey (key: string): key is typeof ModifierKeys[number] | typeof FunctionKeys[number] {
+  return physicalKeys.includes(key)
+}
+
+function getKeyParams (key: SupportedKey): KeyParams {
   if (!isSupportedKey(key)) {
     throw new Error(`Invalid key: ${key}`)
   }
@@ -26,6 +34,15 @@ function getKeyParams (key: SupportedKey): { text?: string, key: string, code?: 
       text: ' ',
       key: ' ',
     }
+  }
+
+  // A modifier's `code` names the physical key (`ShiftLeft`), not the key
+  // value. CDP has no `keyCode` param: the browser derives `keyCode` and
+  // `which` from `windowsVirtualKeyCode`.
+  if (isPhysicalKey(key)) {
+    const { code, keyCode, location = 0 }: { code: string, keyCode: number, location?: number } = USKeyboard[key]
+
+    return { key, code, windowsVirtualKeyCode: keyCode, location }
   }
 
   const isNamedKey = NamedKeys.includes(key)
@@ -125,6 +142,22 @@ export const BidiOverrideCodepoints: Record<SupportedNamedKey, string> = {
   'Insert': '\uE016',
   'Space': '\uE00D',
   'Escape': '\uE00C',
+  'Shift': '\uE008',
+  'Control': '\uE009',
+  'Alt': '\uE00A',
+  'Meta': '\uE03D',
+  'F1': '\uE031',
+  'F2': '\uE032',
+  'F3': '\uE033',
+  'F4': '\uE034',
+  'F5': '\uE035',
+  'F6': '\uE036',
+  'F7': '\uE037',
+  'F8': '\uE038',
+  'F9': '\uE039',
+  'F10': '\uE03A',
+  'F11': '\uE03B',
+  'F12': '\uE03C',
 }
 
 // any is fine to be used here because the key must be typeguarded before it can be used as a supported key

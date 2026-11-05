@@ -13,7 +13,23 @@ declare namespace Cypress {
   'Backspace' |
   'Delete' |
   'Insert' |
-  'Escape'
+  'Escape' |
+  'Shift' |
+  'Control' |
+  'Alt' |
+  'Meta' |
+  'F1' |
+  'F2' |
+  'F3' |
+  'F4' |
+  'F5' |
+  'F6' |
+  'F7' |
+  'F8' |
+  'F9' |
+  'F10' |
+  'F11' |
+  'F12'
 
   type SupportedKey = SupportedNamedKey | string | number
 }

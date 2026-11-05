@@ -10,6 +10,7 @@
 
 **Features:**
 
+- [`cy.press()`](https://on.cypress.io/press) now supports the `Shift`, `Control`, `Alt` and `Meta` modifier keys and the function keys `F1` through `F12`, also available as `Cypress.Keyboard.Keys.SHIFT`, `CONTROL`, `ALT`, `META` and `F1` through `F12`. Each press sends a single keydown and keyup, and does not hold the key for the next command. Addressed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Registering the same event more than once in [`setupNodeEvents`](https://on.cypress.io/plugins-guide) now runs every handler in registration order, instead of only the last one, for [`before:run`](https://on.cypress.io/before-run-api), [`after:run`](https://on.cypress.io/after-run-api), [`before:spec`](https://on.cypress.io/before-spec-api), [`after:spec`](https://on.cypress.io/after-spec-api), [`before:browser:launch`](https://on.cypress.io/browser-launch-api), and [`after:screenshot`](https://on.cypress.io/after-screenshot-api). `before:browser:launch` and `after:screenshot` handlers each receive the result of the handler before them. If a handler throws, later handlers do not run. If you re-registered one of these events to replace a plugin's handler, both now run; to keep only yours, pass the plugin an `on` that skips that event. Addresses [#5240](https://github.com/cypress-io/cypress/issues/5240), [#19809](https://github.com/cypress-io/cypress/issues/19809) and [#27524](https://github.com/cypress-io/cypress/issues/27524).
 
 **Bugfixes:**

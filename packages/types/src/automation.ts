@@ -6,6 +6,10 @@ export type SupportedNamedKey = Cypress.SupportedNamedKey
 
 export const SpaceKey = 'Space'
 
+export const ModifierKeys = ['Shift', 'Control', 'Alt', 'Meta'] as const satisfies readonly SupportedNamedKey[]
+
+export const FunctionKeys = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'] as const satisfies readonly SupportedNamedKey[]
+
 /**
  * Array of all supported named keys that can be used with cy.press().
  * These are special keys that have specific meanings beyond single characters.
@@ -26,6 +30,8 @@ export const NamedKeys: SupportedNamedKey[] = [
   'Delete',
   'Insert',
   'Escape',
+  ...ModifierKeys,
+  ...FunctionKeys,
 ]
 
 // utility type to enable the SupportedKey union type

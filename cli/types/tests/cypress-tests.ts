@@ -1483,3 +1483,21 @@ namespace CypressGlobalsTests {
   globalThis.expect // $ExpectType ExpectStatic
   globalThis.assert // $ExpectType AssertStatic
 }
+
+namespace CypressPressNamedKeysTests {
+  Cypress.Keyboard.Keys.SHIFT // $ExpectType "Shift"
+  Cypress.Keyboard.Keys.CONTROL // $ExpectType "Control"
+  Cypress.Keyboard.Keys.ALT // $ExpectType "Alt"
+  Cypress.Keyboard.Keys.META // $ExpectType "Meta"
+  Cypress.Keyboard.Keys.F1 // $ExpectType "F1"
+  Cypress.Keyboard.Keys.F12 // $ExpectType "F12"
+
+  const modifierKeys: Cypress.SupportedNamedKey[] = ['Shift', 'Control', 'Alt', 'Meta']
+  const functionKeys: Cypress.SupportedNamedKey[] = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12']
+  // @ts-expect-error F13 is not a supported named key
+  const unsupportedNamedKey: Cypress.SupportedNamedKey = 'F13'
+
+  cy.press(Cypress.Keyboard.Keys.SHIFT) // $ExpectType Chainable<null>
+  cy.press(Cypress.Keyboard.Keys.F5) // $ExpectType Chainable<null>
+  cy.press('Meta') // $ExpectType Chainable<null>
+}
