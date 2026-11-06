@@ -50,6 +50,7 @@
 - Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
 - Upgraded `node-forge` from `1.4.0` to `1.4.3` to address the [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-22113978) vulnerability reported in security scans. Addressed in [#35279](https://github.com/cypress-io/cypress/pull/35279).
+- Upgraded `firefox-profile` from `4.7.0` to `4.7.1`, which moves its `adm-zip` dependency from `0.5.10` to `0.6.1`, to address [Denial of Service](https://github.com/advisories/GHSA-7q85-xj36-vmfc) and other `adm-zip` vulnerabilities reported in security scans. Addresses [#35266](https://github.com/cypress-io/cypress/issues/35266).
 
 ## 16.2.1
 
