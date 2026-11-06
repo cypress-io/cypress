@@ -121,6 +121,16 @@ const caseInsensitiveSet = function (obj, property, val) {
   obj[lowercaseProperty] = val
 }
 
+const caseInsensitiveDelete = function (obj, property) {
+  const lowercaseProperty = property.toLowerCase()
+
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === lowercaseProperty) {
+      delete obj[key]
+    }
+  }
+}
+
 type AutomationFn = (event: string, data?: any) => Promise<any>
 
 interface RequestOpts {
@@ -561,6 +571,19 @@ export class Request {
     })
   }
 
+  private setRedirectCookieHeader (req: Record<string, any>, newUrl: string, originalUrl: string, automationFn: AutomationFn, userCookieHeader?: string) {
+    // a Cookie header passed by the user is meant for the host it was sent to
+    const existingHeader = url.parse(newUrl).hostname === url.parse(originalUrl).hostname ? userCookieHeader : undefined
+
+    caseInsensitiveDelete(req.headers, 'Cookie')
+
+    if (existingHeader) {
+      req.headers.cookie = existingHeader
+    }
+
+    return this.setRequestCookieHeader(req, newUrl, automationFn, existingHeader)
+  }
+
   private setCookiesOnBrowser (res: any, resUrl: string, automationFn: AutomationFn): Promise<any> {
     let cookies = res.headers['set-cookie']
 
@@ -671,6 +694,7 @@ export class Request {
     } = options
 
     let currentUrl = options.url
+    const userCookieHeader = caseInsensitiveGet(options.headers!, 'cookie')
 
     options.followRedirect = function (incomingRes) {
       if (typeof followRedirect === 'function' && !followRedirect(incomingRes)) {
@@ -685,7 +709,7 @@ export class Request {
       // and then grab the cookies for the new url
       return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn)
       .then(() => {
-        return self.setRequestCookieHeader(this, newUrl, automationFn)
+        return self.setRedirectCookieHeader(this, newUrl, options.url!, automationFn, userCookieHeader)
       }).then(() => {
         currentUrl = newUrl
 
@@ -693,7 +717,7 @@ export class Request {
       })
     }
 
-    return this.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
+    return this.setRequestCookieHeader(options, options.url!, automationFn, userCookieHeader)
     .then(() => {
       return () => {
         debug('sending request as stream %o', merge(options))
@@ -769,6 +793,7 @@ export class Request {
     }
 
     const self = this
+    const userCookieHeader = caseInsensitiveGet(options.headers!, 'cookie')
 
     const send = () => {
       const ms = Date.now()
@@ -797,7 +822,7 @@ export class Request {
           // and then grab the cookies for the new url
           return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn)
           .then(() => {
-            return self.setRequestCookieHeader(this, newUrl, automationFn)
+            return self.setRedirectCookieHeader(this, newUrl, options.url!, automationFn, userCookieHeader)
           }).then(() => {
             currentUrl = newUrl
 
@@ -828,7 +853,7 @@ export class Request {
     }
 
     if (options.cookies) {
-      return self.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
+      return self.setRequestCookieHeader(options, options.url!, automationFn, userCookieHeader)
       .then(send)
     }
 

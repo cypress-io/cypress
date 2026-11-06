@@ -10,6 +10,7 @@ import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
 import * as protocol from '../../../lib/browsers/protocol'
 import { cypressSessions } from '../../../lib/cypress-sessions'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -578,7 +579,7 @@ describe('lib/browsers/browser-cri-client', function () {
         requestId: 'request-id',
         headers: [
           { name: 'X-Another-Custom-Header', value: 'value' },
-          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: getMetadataHeaderValue() },
         ],
       })
     })
@@ -658,7 +659,7 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(criClient.send, 'Fetch.continueRequest', {
         requestId: 'request-id',
         headers: [
-          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: getMetadataHeaderValue() },
         ],
       })
     })

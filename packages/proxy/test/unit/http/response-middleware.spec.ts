@@ -14,6 +14,7 @@ import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
 import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../lib/http/util/disable-navigation-preload'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))
@@ -803,6 +804,9 @@ describe('http/response-middleware', function () {
 
     it('sets Origin-Agent-Cluster header to false when injection is expected', async function () {
       prepareContext({
+        req: {
+          isFileServerRequest: true,
+        },
         incomingRes: {
           headers: {
             // simplest way to make injection expected
@@ -813,6 +817,43 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([SetInjectionLevel], ctx)
       expect(ctx.res.setHeader).toHaveBeenCalledWith('Origin-Agent-Cluster', '?0')
+    })
+
+    it('injects partially for a file server error', async function () {
+      prepareContext({
+        req: {
+          isFileServerRequest: true,
+          cookies: {},
+        },
+        incomingRes: {
+          headers: {
+            'x-cypress-file-server-error': 'true',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+
+      expect(ctx.res.wantsInjection).toEqual('partial')
+      expect(ctx.incomingRes.headers['x-cypress-file-server-error']).toEqual('true')
+    })
+
+    it('ignores and removes the file server error header on other responses', async function () {
+      prepareContext({
+        req: {
+          cookies: {},
+        },
+        incomingRes: {
+          headers: {
+            'x-cypress-file-server-error': 'true',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+
+      expect(ctx.res.wantsInjection).toBe(false)
+      expect(ctx.incomingRes.headers['x-cypress-file-server-error']).toBeUndefined()
     })
 
     describe('CSP header nonce injection', () => {
@@ -1271,6 +1312,27 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(appendStub).not.toHaveBeenCalled()
+    })
+
+    it('blanks HttpOnly cookie values in the simulated cookies', async function () {
+      const cookieJar = new CookieJar()
+
+      cookieJar.setCookie('visible=1', 'http://www.foobar.com/', 'strict')
+      cookieJar.setCookie('hidden=1; HttpOnly', 'http://www.foobar.com/', 'strict')
+
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          wantsInjection: 'fullCrossOrigin',
+        },
+      })
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.simulatedCookies.map(({ name, value, httpOnly }) => ({ name, value, httpOnly }))).toEqual([
+        { name: 'visible', value: '1', httpOnly: false },
+        { name: 'hidden', value: '', httpOnly: true },
+      ])
     })
 
     it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {

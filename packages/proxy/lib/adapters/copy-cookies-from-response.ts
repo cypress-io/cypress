@@ -13,11 +13,12 @@ function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
   if (mw.res.wantsInjection !== 'fullCrossOrigin') return
 
   const defaultDomain = (new URL(mw.req.proxiedUrl)).hostname
-  const allCookiesForRequest = mw.getCookieJar()
+
+  mw.simulatedCookies = mw.getCookieJar()
   .getCookies(mw.req.proxiedUrl)
   .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
-
-  mw.simulatedCookies = allCookiesForRequest
+  // document.cookie never reads HttpOnly values; it only needs to know they exist so it can't replace them
+  .map((cookie) => (cookie.httpOnly ? { ...cookie, value: '' } : cookie))
 }
 
 /**
