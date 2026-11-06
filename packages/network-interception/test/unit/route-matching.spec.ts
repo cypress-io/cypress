@@ -118,6 +118,34 @@ describe('core/route-matching', function () {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34973
+    it('matches identical requests identically when a regexp matcher has the g flag', function () {
+      const urlMatcher = {
+        url: /^\/api\/users\/\d+$/g,
+      } as RouteMatcher
+
+      for (const id of [1, 2, 3, 4]) {
+        tryMatch({
+          proxiedUrl: `https://example.com/api/users/${id}`,
+        }, urlMatcher)
+      }
+
+      const headerMatcher = {
+        headers: {
+          authorization: /^Bearer /g,
+        },
+      } as RouteMatcher
+
+      for (const id of [1, 2, 3, 4]) {
+        tryMatch({
+          headers: {
+            authorization: `Bearer token-${id}`,
+          },
+          proxiedUrl: `https://example.com/api/users/${id}`,
+        }, headerMatcher)
+      }
+    })
+
     it('matches on a null matcher', function () {
       tryMatch({
         proxiedUrl: 'https://google.com/asdf?1234=a',
