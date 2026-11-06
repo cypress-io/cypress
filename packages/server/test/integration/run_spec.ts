@@ -168,6 +168,14 @@ describe('lib/modes/run', () => {
     await run(options, Promise.resolve())
   })
 
+  it('reuses the browsers the data context detected instead of detecting them again', async () => {
+    sinon.stub(OpenProject.prototype, 'launch').resolves()
+
+    await run(options, Promise.resolve())
+
+    expect(browserUtils.get).not.to.have.been.called
+  })
+
   it('falls back to cwd when projectRoot is unset', async () => {
     const fallbackRoot = '/path/to/cwd/fallback'
     const mockedRelativeSupportFilePath = 'cypress/support/e2e.js'

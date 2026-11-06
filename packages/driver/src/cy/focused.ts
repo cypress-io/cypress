@@ -290,4 +290,4 @@ export const create = (state: StateFunc) => ({
   },
 })
 
-export interface IFocused extends ReturnType<typeof create> {}
+export type IFocused = ReturnType<typeof create>

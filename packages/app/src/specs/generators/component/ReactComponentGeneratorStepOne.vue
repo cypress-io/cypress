@@ -8,7 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         @restart="cancelSpecNameCreation"
-        @updateTitle="(value) => emits('update:title', value)"
+        @update-title="(value) => emits('update:title', value)"
       />
     </template>
 
@@ -25,14 +25,14 @@
         </div>
         <ExpandableFileChooser
           v-else-if="!result"
-          v-model:extensionPattern="extensionPattern"
+          v-model:extension-pattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
         >
           <template #item="{ file }">
             <ReactComponentList
               :file="file"
-              @selectItem="makeSpec"
+              @select-item="makeSpec"
             />
           </template>
         </ExpandableFileChooser>
@@ -147,7 +147,7 @@ const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
 const query = useQuery({
   query: ReactComponentGeneratorStepOneDocument,
-  // @ts-ignore
+  // @ts-expect-error - urql re-runs the query when this ref changes, but its types only accept a plain string
   variables: { glob: extensionPattern },
   requestPolicy: 'network-only',
 })

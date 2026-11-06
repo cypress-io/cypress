@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   isCompatibleRecord,
+  isStartingRecord,
   isTapSupportedBrowser,
   recordFileName,
   parseRecordPid,
@@ -12,7 +13,10 @@ import {
   SESSIONS_DIRNAME,
   SCHEMA_VERSION,
   TAP_COMMANDS,
+  PIN_TARGET_REMEDY,
+  unmetDependency,
 } from '../index'
+import type { TapCommandOptionSchema } from '../index'
 
 const validRecord = {
   schemaVersion: SCHEMA_VERSION,
@@ -40,6 +44,32 @@ describe('cypress-sessions contract', () => {
       expect(isCompatibleRecord({ ...validRecord, serverPort: 1.5 })).toBe(false)
       expect(isCompatibleRecord({ ...validRecord, sessionId: '' })).toBe(false)
       expect(isCompatibleRecord({ ...validRecord, testingType: 'nope' })).toBe(false)
+    })
+  })
+
+  describe('a starting record', () => {
+    const starting = { ...validRecord, serverPort: 0, status: 'starting' as const, loadError: { message: 'boom' } }
+
+    it('is accepted with no server port and a load error', () => {
+      expect(isCompatibleRecord(starting)).toBe(true)
+    })
+
+    it('must say why the project did not load', () => {
+      expect(isCompatibleRecord({ ...starting, loadError: undefined })).toBe(false)
+    })
+
+    it('is told apart from a session that has a server', () => {
+      expect(isStartingRecord(starting)).toBe(true)
+      expect(isStartingRecord(validRecord)).toBe(false)
+    })
+
+    it('is the only record that may name port 0', () => {
+      expect(isCompatibleRecord({ ...validRecord, serverPort: 0 })).toBe(false)
+    })
+
+    it('rejects an unknown status or a load error without a message', () => {
+      expect(isCompatibleRecord({ ...starting, status: 'ready' })).toBe(false)
+      expect(isCompatibleRecord({ ...starting, loadError: {} })).toBe(false)
     })
   })
 
@@ -102,6 +132,51 @@ describe('cypress-sessions contract', () => {
 
       expect(advertised).toBeDefined()
       expect(advertised!.details).toBe(reporter.details)
+    })
+
+    // A `requires` naming no declared option would never be satisfiable, one naming
+    // itself would never fire, and an `unless` naming no option would never excuse.
+    it('points every option dependency at other options of the same command', () => {
+      const dependencies = TAP_COMMANDS.flatMap(({ options }) => {
+        const declared: readonly TapCommandOptionSchema[] = options
+        const names = declared.map(({ name }) => name)
+
+        return declared.flatMap((option) => option.requires ? [{ option: option.name, requires: option.requires, names }] : [])
+      })
+
+      expect(dependencies).not.toHaveLength(0)
+
+      for (const { option, requires, names } of dependencies) {
+        expect(requires.option).not.toBe(option)
+        expect(names).toContain(requires.option)
+
+        if (requires.unless !== undefined) {
+          expect(names).toContain(requires.unless)
+        }
+      }
+    })
+
+    describe('unmetDependency', () => {
+      const options = TAP_COMMANDS.find(({ name }) => name === 'pin')!.options as readonly TapCommandOptionSchema[]
+
+      it('names the companion an option was passed without', () => {
+        const unmet = unmetDependency(options, { 'test-id': 'r1' })
+
+        expect(unmet?.code).toBe('MISSING_COMPANION_OPTION')
+        expect(unmet?.detail).toContain('You passed the `--test-id` flag without also passing the `--command-id` flag.')
+        expect(unmet?.detail).toContain(PIN_TARGET_REMEDY)
+      })
+
+      it('is satisfied by the companion, or excused by the option that makes it moot', () => {
+        expect(unmetDependency(options, { 'test-id': 'r1', 'command-id': '1' })).toBeUndefined()
+        expect(unmetDependency(options, { 'test-id': 'r1', clear: true })).toBeUndefined()
+        expect(unmetDependency(options, { 'test-id': 'r1', clear: 'true' })).toBeUndefined()
+        expect(unmetDependency(options, {})).toBeUndefined()
+      })
+
+      it('treats a switch given as false as not given', () => {
+        expect(unmetDependency(options, { 'test-id': 'r1', clear: false })?.code).toBe('MISSING_COMPANION_OPTION')
+      })
     })
 
     it('advertises every option a command declares', () => {

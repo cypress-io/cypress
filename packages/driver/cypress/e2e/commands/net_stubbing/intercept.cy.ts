@@ -653,7 +653,7 @@ describe('network stubbing', { retries: 15 }, function () {
             }).as('testRequest')
 
             cy.window().then(() => {
-              let xhr = new XMLHttpRequest()
+              const xhr = new XMLHttpRequest()
 
               xhr.open('POST', 'https://example.com/test')
               xhr.setRequestHeader('Content-Type', 'application/json')
@@ -708,9 +708,7 @@ describe('network stubbing', { retries: 15 }, function () {
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.intercept(/foo/, {}).then(() => {
-            let lastLog
-
-            lastLog = this.lastLog
+            const lastLog = this.lastLog
 
             expect(lastLog.get('numResponses')).to.eq(0)
           })
@@ -788,7 +786,7 @@ describe('network stubbing', { retries: 15 }, function () {
         const url = uniqueRoute('/bar')
 
         testFail((err) => {
-          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter')
+          expect(err.message).to.include('When invoking `cy.intercept()` with a `RouteMatcher` as the second parameter, `url` can only be specified as the first parameter')
 
           done()
         })
@@ -801,7 +799,7 @@ describe('network stubbing', { retries: 15 }, function () {
         const url = uniqueRoute('/foo')
 
         testFail((err) => {
-          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter.')
+          expect(err.message).to.include('When invoking `cy.intercept()` with a `RouteMatcher` as the second parameter, a handler (function or `StaticResponse`) must be specified as the third parameter.')
 
           done()
         })
@@ -864,6 +862,28 @@ describe('network stubbing', { retries: 15 }, function () {
           })
         })
 
+        // https://github.com/cypress-io/cypress/issues/34975
+        ;[
+          ['FOO', 'foo'],
+          ['Content-Type', 'content-type'],
+          ['Foo', 'FOO'],
+        ].forEach(([first, second]) => {
+          it(`requires unique header names regardless of casing order (${first} and ${second})`, function (done) {
+            testFail((err) => {
+              expect(err.message).to.include(`\`${second}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`)
+
+              done()
+            })
+
+            cy.intercept({
+              headers: {
+                [first]: 'bar',
+                [second]: 'bar',
+              },
+            })
+          })
+        })
+
         it('requires StringMatcher header values', function (done) {
           testFail((err) => {
             expect(err.message).to.include('`headers.wrong` must be a string or a regular expression.')
@@ -883,7 +903,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         it('errors on unknown prop', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('An unknown \`RouteMatcher\` property was passed: `wrong`')
+            expect(err.message).to.include('An unknown `RouteMatcher` property was passed: `wrong`')
 
             done()
           })

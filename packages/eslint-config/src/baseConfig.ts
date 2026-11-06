@@ -101,8 +101,8 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // Cypress-authored rules, kept under the `@cypress/dev` namespace they had in
-  // @cypress/eslint-plugin-dev so existing eslint-disable comments still resolve.
+  // Cypress-authored rules, under the `@cypress/dev` namespace so existing
+  // `eslint-disable @cypress/dev/...` comments resolve.
   {
     plugins: {
       '@cypress/dev': cypressDevPlugin,
@@ -137,8 +137,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'no-console': 'error',
       'prefer-spread': 'error',
-      'prefer-const': 'error',
-      // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
+      'no-prototype-builtins': 'error',
+      // A `let` that a closure reads before its later assignment has to stay
+      // declared up front: as a `const` at the assignment, an early call throws
+      // a TDZ ReferenceError where it used to see `undefined`
+      'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
+      // `== null` is the idiomatic check for both null and undefined
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
       // Unused args and caught errors stay allowed: callbacks and interface
       // implementations often have to accept parameters they ignore. A leading
@@ -217,12 +221,11 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   },
 
   {
-    // rules that are gold standard, but have many violations
-    // these are off while developing eslint, but should eventually be enabled
+    // rules that are gold standard, but have many violations. The ones set to
+    // `off` here should be re-enabled once their violations are fixed; that
+    // work is tracked in https://github.com/cypress-io/cypress/issues/35250
     rules: {
-      'no-useless-escape': 'off',
       'prefer-rest-params': 'off',
-      'no-prototype-builtins': 'off',
       'no-global-assign': 'off',
       'no-async-promise-executor': 'off',
 
@@ -233,8 +236,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-this-alias': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
-      '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-wrapper-object-types': 'off',
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
@@ -245,19 +246,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'mocha/consistent-spacing-between-blocks': 'off',
       'mocha/no-global-tests': 'off',
       'mocha/no-sibling-hooks': 'off',
-      'mocha/no-skipped-tests': 'off',
       'mocha/no-exports': 'off',
-      'mocha/no-async-describe': 'off',
       'mocha/no-return-and-callback': 'off',
       'mocha/no-pending-tests': 'off',
-      'mocha/no-nested-tests': 'off',
 
       'vue/multi-word-component-names': 'off',
-      'vue/html-closing-bracket-spacing': 'off',
       'vue/no-dupe-keys': 'off',
-      'vue/v-on-event-hyphenation': 'off',
-      'vue/attribute-hyphenation': 'off',
-      'vue/no-useless-template-attributes': 'off',
 
       'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',
@@ -278,11 +272,13 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // the Vue recommended config ships these as warnings, and
     // flatConfigs.typescript leaves import-x/namespace unset
     rules: {
+      'vue/attribute-hyphenation': 'error',
       'vue/attributes-order': 'error',
       'vue/block-order': 'error',
       'vue/component-definition-name-casing': 'error',
       'vue/first-attribute-linebreak': 'error',
       'vue/html-closing-bracket-newline': 'error',
+      'vue/html-closing-bracket-spacing': 'error',
       'vue/html-end-tags': 'error',
       'vue/html-indent': 'error',
       'vue/html-quotes': 'error',
@@ -306,6 +302,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/singleline-html-element-content-newline': 'error',
       'vue/this-in-template': 'error',
       'vue/v-bind-style': 'error',
+      'vue/v-on-event-hyphenation': 'error',
       'vue/v-on-style': 'error',
       'vue/v-slot-style': 'error',
 

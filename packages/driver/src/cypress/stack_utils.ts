@@ -329,7 +329,7 @@ const getSourceDetails = (generatedDetails) => {
   if (!sourceDetails) return generatedDetails
 
   const { line, column, file } = sourceDetails
-  let fn = generatedDetails.function
+  const fn = generatedDetails.function
 
   return {
     line,

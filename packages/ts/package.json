@@ -2,24 +2,32 @@
   "name": "@packages/ts",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
+  "files": [
+    "register.js",
+    "registerDir.js"
+  ],
   "scripts": {
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "test": "yarn test-unit",
     "test-unit": "node test",
     "test-watch": "echo 'no watching of tests'"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "debug": "^4.3.4",
     "ts-node": "^10.9.2",
     "tslib": "2.3.1"
   },
-  "devDependencies": {},
-  "files": [
-    "register.js",
-    "registerDir.js"
-  ],
-  "license": "MIT",
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "globals": "^15.12.0",
+    "jiti": "^2.4.2"
+  },
   "nx": {}
 }

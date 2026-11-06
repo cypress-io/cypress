@@ -2,7 +2,7 @@ import $elements from '../dom/elements'
 
 const invalidTargets = new Set(['_parent', '_top'])
 
-export type GuardedEvent = Event & {target: HTMLFormElement | HTMLAnchorElement}
+export type GuardedEvent = Event & { target: HTMLFormElement | HTMLAnchorElement }
 
 /**
  * A `<base target>` is inherited by every untargeted <a> / <form>, so a value of
@@ -33,7 +33,7 @@ export function handleInvalidEventTarget (e: GuardedEvent) {
   handleInvalidTarget(e.target)
 }
 
-export type GuardedAnchorEvent = Event & {target: HTMLAnchorElement}
+export type GuardedAnchorEvent = Event & { target: HTMLAnchorElement }
 
 /**
  * We need to listen to all click events on the window, but only handle anchor elements,

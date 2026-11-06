@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 
 const setPlatformConfig = (platform: string) => {
   return cy.window().then((win) => {
-    // @ts-ignore
+    // @ts-expect-error - the stub sets only base64Config, not the rest of the runner config
     win.__CYPRESS_CONFIG__ = {
       base64Config: Cypress.Buffer.from(JSON.stringify({ platform })).toString('base64'),
     }
@@ -101,7 +101,7 @@ describe('KeyboardBindingsModal', () => {
 
     it('falls back to darwin if platform is not available', () => {
       cy.window().then((win) => {
-        // @ts-ignore
+        // @ts-expect-error - clears the stub config, which the window type does not allow to be undefined
         win.__CYPRESS_CONFIG__ = undefined
       }).then(() => {
         cy.mount(() => {

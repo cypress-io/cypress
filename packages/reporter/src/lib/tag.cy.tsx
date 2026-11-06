@@ -20,7 +20,7 @@ describe('Tag', () => {
     'count',
   ]
 
-  const MockCommandContainer = ({ children }) => (
+  const MockCommandContainer = ({ children }: { children: React.ReactNode }) => (
     <div style={{ backgroundColor: '#171926', minHeight: '20px' }}>
       {children}
     </div>

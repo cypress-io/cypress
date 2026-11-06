@@ -50,7 +50,7 @@
             v-if="runAllSpecsStore.isRunAllSpecsAllowed && !testingType.showTestingTypePromo.value"
             :spec-number="runAllSpecsStore.allSpecsRef.length"
             directory="all"
-            @runAllSpecs="runAllSpecsStore.runAllSpecs"
+            @run-all-specs="runAllSpecsStore.runAllSpecs"
           />
         </div>
         <div class="flex items-center justify-between truncate">
@@ -63,7 +63,7 @@
             :gql="props.gql"
             mode="LATEST_RUNS"
             data-cy="latest-runs-header"
-            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
+            @show-login-connect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
           />
         </div>
         <div class="hidden items-center justify-end truncate md:flex">
@@ -71,7 +71,7 @@
             :gql="props.gql"
             mode="AVG_DURATION"
             data-cy="average-duration-header"
-            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
+            @show-login-connect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
           />
         </div>
       </div>
@@ -110,7 +110,7 @@
           :is-leaf="row.data.isLeaf"
           :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
           :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
-          @toggleRow="row.data.toggle"
+          @toggle-row="row.data.toggle"
         >
           <template #file>
             <SpecItem
@@ -144,7 +144,7 @@
                 :directory="row.data.name"
                 class="opacity-0 run-all"
                 :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
-                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
+                @run-all-specs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
               />
             </RowDirectory>
           </template>
@@ -230,7 +230,7 @@ import TestingTypePromo from './TestingTypePromo.vue'
 
 const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
-  mostRecentUpdate: string | null
+  mostRecentUpdate?: string | null
 }>(), {
   mostRecentUpdate: null,
 })

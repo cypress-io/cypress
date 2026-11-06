@@ -105,8 +105,6 @@ yarn lint:fix
 
 > **Note**: This project does **not** use Prettier. All formatting is enforced via ESLint.
 
-The repo is mid-migration between two ESLint configs, so ignore rules live in two places: `ignorePatterns` in the root `.eslintrc.js` for the packages still on eslintrc, and the `ignores` block in `packages/eslint-config/src/baseConfig.ts` for the packages on flat config. Build output (`cjs/`, `esm/`, `dist/`) is already ignored in both; do not add a per-package `.eslintignore` for it, since patterns in those files that contain a `/` silently match nothing. [The ESLint migration guide](./guides/eslint-migration.md#6-ignore-build-output-centrally) explains the mechanism.
-
 ### Build
 
 ```bash
@@ -211,7 +209,6 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **`@cypress/grep`** — Plugin to filter test runs by substring/tag.
 - **`@cypress/puppeteer`** — Plugin to enhance Cypress tests with Puppeteer.
 - **`@cypress/schematic`** — Official Angular CLI schematic for adding Cypress.
-- **`@cypress/eslint-plugin-dev`** — ESLint rules shared across Cypress development packages.
 
 ## Code Conventions
 
@@ -241,6 +238,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
 - **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
 - **Name the reason, not the predecessor** — "Matches what the old plugin did" is not a *why*, and it rots once that plugin is deleted. State the reason the old code had, and put parity with replaced tooling in the commit message or guide.
+- **No measurements** — Don't cite benchmark numbers in a comment. They depend on the machine they came from and go stale with the code around them. State the reason instead, and keep the numbers in the commit message or pull request.
 
 Bad examples:
 
@@ -297,7 +295,7 @@ Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, an
 
 ### Environment
 
-- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which runs the postinstall. What it covers depends on `CI` ([`scripts/run-postInstall.js`](./scripts/run-postInstall.js)): with `CI` set, as on Claude Code on the web, it skips `yarn-deduplicate`, `yarn build` and the V8 snapshot, so nothing is built. Check `echo $CI`, and run `yarn build` before anything that loads built packages, such as system tests. After adding or changing a dependency, run `yarn check-lockfile`. If it lists duplicates, run `yarn-deduplicate --strategy=highest` and commit the result, or CI's "Check yarn.lock is deduplicated" job fails.
+- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which runs the postinstall. What it covers depends on `CI` ([`scripts/run-postInstall.js`](./scripts/run-postInstall.js)): with `CI` set, as on Claude Code on the web, it skips `yarn-deduplicate`, `yarn build` and the V8 snapshot, so nothing is built. Check `echo $CI`, and run `yarn build` before anything that loads built packages, such as system tests. After adding or changing a dependency, run `yarn check-lockfile`. If it lists duplicates, run `yarn dedupe-lockfile` and commit the result, or CI's "Check yarn.lock is deduplicated" job fails. Then run `yarn check-lockfile-drift`. It runs a full `yarn install`, which drops request keys that nothing asks for any more, such as those left by a reverted `resolutions` entry. `--frozen-lockfile` keeps those keys, so a stale lockfile still passes a frozen install and only fails CI's "Check yarn.lock matches resolved dependencies" job. Don't call `yarn-deduplicate` directly: `dedupe-lockfile` leaves out `graphql`, which the repo holds at two majors on purpose (see [`@packages/eslint-config`'s dependency pins](./packages/eslint-config/AGENTS.md#dependency-pins)).
 - The root `package.json` sets `engines.node` to the version in [`.node-version`](./.node-version), so yarn refuses to run any script on an older Node: `The engine "node" is incompatible with this module`. Containers that pre-install a lower version need the required one installed before anything else works — see [Matching the required Node version](#matching-the-required-node-version).
 - Browsers and a display differ by host. Cursor Cloud runs Xvfb on `DISPLAY=:1` and ships Chrome at `/usr/bin/google-chrome-stable`. Claude Code on the web has Xvfb installed but leaves `DISPLAY` unset, and has no Chrome — only the Chromium that Playwright bundles under `$PLAYWRIGHT_BROWSERS_PATH`. There, `cypress run` starts its own Xvfb when `DISPLAY` is unset, so the Cypress-based suites do run; pass `--browser "$PLAYWRIGHT_BROWSERS_PATH/chromium"` instead of `--browser chrome`, and wrap anything else that needs a display (such as `yarn dev`) in `xvfb-run -a`. On any host, prefix Electron commands with `env -u ELECTRON_RUN_AS_NODE`: some agent hosts set it, and it makes Electron start as plain Node.
 

@@ -120,7 +120,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     const assertions: any[] = []
 
     // grab the rest of the queue'd commands
-    for (let cmd of cy.queue.slice(index)) {
+    for (const cmd of cy.queue.slice(index)) {
       // don't break on utilities, just skip over them
       if (cmd.is('utility')) {
         continue
@@ -173,7 +173,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       message = message.replace(stackTracesRe, '\n')
     }
 
-    let parsed = parseValueActualAndExpected(value, actual, expected)
+    const parsed = parseValueActualAndExpected(value, actual, expected)
     // TODO: make it more specific after defining the type for Cypress.log().
     let obj: Record<string, any> = {
       ...parsed,

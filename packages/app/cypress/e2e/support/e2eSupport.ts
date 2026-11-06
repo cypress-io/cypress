@@ -6,7 +6,7 @@ import './reporter'
 beforeEach(() => {
   // this is always 0, since we only destroy the AUT when using
   // `experimentalSingleTabRunMode, which is not a valid experiment for for e2e testing.
-  // @ts-ignore - dynamically defined during tests using
+  // @ts-expect-error - autDestroyedCount is not declared on the EventManager type
   expect(window.top?.getEventManager().autDestroyedCount).to.be.undefined
 })
 

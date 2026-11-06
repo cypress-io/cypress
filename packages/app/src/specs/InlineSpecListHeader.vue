@@ -78,7 +78,7 @@
       directory="all"
       grayscale
       class="rounded-md flex outline-none border border-gray-900 h-[24px] w-[24px] duration-300 hocus-default items-center justify-center hocus:ring-0 hocus:border-indigo-300"
-      @runAllSpecs="emit('runAllSpecs')"
+      @run-all-specs="emit('runAllSpecs')"
     />
     <div
       class="sr-only"

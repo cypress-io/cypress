@@ -1,5 +1,6 @@
 import fs from 'fs-extra'
-import { StdioOptions, spawnSync } from 'child_process'
+import type { StdioOptions } from 'child_process'
+import { spawnSync } from 'child_process'
 import { config } from './config'
 import path from 'path'
 import tempDir from 'temp-dir'
@@ -254,12 +255,8 @@ function createV8ContextSnapshot (
 export function runMksnapshot (args: string[], options: RunMksnapshotOptions = {}) {
   logDebug('Provided args: %o', args)
   checkArgs(args)
-  let { outputDir, mksnapshotArgs } = extractOutdir(args)
-
-  const res = prepareCommands(binDir, workingDir, mksnapshotArgs)
-  const { mksnapshotBinaryDir, mksnapshotCommand } = res
-
-  mksnapshotArgs = res.mksnapshotArgs
+  const { outputDir, mksnapshotArgs: providedArgs } = extractOutdir(args)
+  const { mksnapshotBinaryDir, mksnapshotCommand, mksnapshotArgs } = prepareCommands(binDir, workingDir, providedArgs)
 
   logDebug('Processed args: %o', mksnapshotArgs)
 

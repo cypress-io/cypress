@@ -123,4 +123,4 @@ export const create = (cy: $Cy) => ({
   },
 })
 
-export interface IAliases extends ReturnType<typeof create> {}
+export type IAliases = ReturnType<typeof create>

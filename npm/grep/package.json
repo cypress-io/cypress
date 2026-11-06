@@ -72,9 +72,6 @@
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
-  "resolutions": {
-    "jiti": "^2.4.2"
-  },
   "dependencies": {
     "debug": "^4.3.4",
     "find-test-names": "^1.28.18",
@@ -83,6 +80,7 @@
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
     "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
   },

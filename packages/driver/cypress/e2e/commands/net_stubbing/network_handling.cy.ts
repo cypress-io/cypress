@@ -233,7 +233,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         cy.wait('@corsRequest').then((res) => {
-          let headers = res.response?.headers
+          const headers = res.response?.headers
 
           expect(headers).to.not.have.property('access-control-expose-headers')
         })
@@ -258,7 +258,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         cy.wait('@corsRequest').then((res) => {
-          let headers = res.response?.headers
+          const headers = res.response?.headers
 
           expect(headers).to.not.have.property('access-control-expose-headers')
         })
@@ -280,7 +280,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         cy.wait('@corsRequest').then((res) => {
-          let headers = res.response?.headers
+          const headers = res.response?.headers
 
           expect(headers!['access-control-expose-headers']).to.eq('*')
           expect(headers!['x-token']).to.eq('token')
@@ -302,7 +302,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         cy.wait('@corsRequest').then((res) => {
-          let headers = res.response?.headers
+          const headers = res.response?.headers
 
           expect(headers!['access-control-expose-headers']).to.eq('x-token')
           expect(headers!['x-token']).to.eq('token')

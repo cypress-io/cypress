@@ -1,4 +1,3 @@
-// @ts-ignore
 import $dom from '@packages/driver/src/dom'
 import events from './events'
 import appState from './app-state'
@@ -28,8 +27,9 @@ class Shortcuts {
 
   _handleKeyDownEvent (event: KeyboardEvent) {
     // if typing into an input, textarea, etc, don't trigger any shortcuts
-    // @ts-ignore
-    const isTextLike = $dom.isTextLike(event.target)
+    // isElement checks nodeType rather than instanceof, so it also holds for
+    // targets from the reporter's iframe document
+    const isTextLike = $dom.isElement(event.target) && $dom.isTextLike(event.target)
     const isAnyModifierKeyPressed = event.altKey || event.ctrlKey || event.shiftKey || event.metaKey
 
     if (isAnyModifierKeyPressed || isTextLike) return

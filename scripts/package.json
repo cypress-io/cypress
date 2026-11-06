@@ -4,10 +4,20 @@
   "private": true,
   "scripts": {
     "build": "echo 'internal-scripts build: no build necessary'",
-    "lint": "eslint --ext .js,.mjs,.ts,.json, ."
+    "lint": "eslint"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
-    "@packages/electron": "0.0.0-development"
+    "@packages/electron": "0.0.0-development",
+    "chalk": "4.1.2"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "globals": "^15.12.0",
+    "jiti": "^2.4.2"
   },
   "nx": {}
 }

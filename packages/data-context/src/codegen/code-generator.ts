@@ -78,7 +78,7 @@ export async function codeGenerator (
         ? await processBinaryFile()
         : await processTextFile()
 
-      const exists = await fileExists(computedPath)
+      const exists = await fs.pathExists(computedPath)
       const status = !exists
         ? 'add'
         : exists && action.overwrite
@@ -153,19 +153,9 @@ function frontMatter (content: string, args: { [key: string]: any }) {
   return { body, renderedAttributes }
 }
 
-async function fileExists (absolute: string) {
-  try {
-    await fs.access(absolute, fs.constants.F_OK)
-
-    return true
-  } catch (e) {
-    return false
-  }
-}
-
 export async function hasNonExampleSpec (testTemplateDir: string, specs: string[]): Promise<boolean> {
   debug(`hasNonExampleSpec - calling with template directory "${testTemplateDir}" and ${specs.length}`)
-  const dirExists = await fileExists(testTemplateDir)
+  const dirExists = await fs.pathExists(testTemplateDir)
 
   if (!dirExists) {
     throw new Error(`Template directory does not exist: ${testTemplateDir}`)
@@ -173,7 +163,7 @@ export async function hasNonExampleSpec (testTemplateDir: string, specs: string[
 
   const templateFiles = await allFilesInDir(testTemplateDir)
 
-  const specInTemplates = (spec: String): boolean => {
+  const specInTemplates = (spec: string): boolean => {
     debug(`hasNonExampleSpec - checking for spec ${spec}`)
 
     return templateFiles.some((templateFile) => templateFile.substring(testTemplateDir.length + 1) === spec)
@@ -184,7 +174,7 @@ export async function hasNonExampleSpec (testTemplateDir: string, specs: string[
 
 export async function getExampleSpecPaths (testTemplateDir: string): Promise<string[]> {
   debug(`getExampleSpecPaths - calling with template directory "${testTemplateDir}"`)
-  const dirExists = await fileExists(testTemplateDir)
+  const dirExists = await fs.pathExists(testTemplateDir)
 
   if (!dirExists) {
     throw new Error(`Template directory does not exist: ${testTemplateDir}`)
