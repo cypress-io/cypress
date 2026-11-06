@@ -190,10 +190,10 @@ chai.use((chai, u) => {
     return flagMsg ? `${flagMsg}: ${msg}` : msg
   }
 
-  // chai formats the message of the error it throws with its own internal
-  // utilities, which can't be overridden from outside (chai 5+ exposes
-  // `chai.util` as a read-only module namespace). Build the error the same way
-  // chai's Assertion#assert does, with a message Cypress has formatted.
+  // Build the error the same way chai's Assertion#assert does, but with a
+  // message Cypress has formatted. Overriding chai's formatters on `chai.util`
+  // instead doesn't work in chai 5+, which makes `chai.util` read-only and
+  // calls its formatters internally.
   const createAssertionError = (assertion, args) => {
     const [, , , expected, _actual, showDiff] = args
     const props: Record<string, unknown> = {
