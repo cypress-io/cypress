@@ -341,4 +341,4 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
   }
 }
 
-export interface ISnapshots extends ReturnType<typeof create> {}
+export type ISnapshots = ReturnType<typeof create>

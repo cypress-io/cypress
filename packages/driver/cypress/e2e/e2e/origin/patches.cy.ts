@@ -383,7 +383,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
 
     it('patches prior to attaching to a spec bridge', () => {
       // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
-      window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
+      window.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
 
       cy.stub(Cypress, 'backendRequestHandler').log(false).callThrough()
 
@@ -618,7 +618,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
 
     it('patches prior to attaching to a spec bridge', () => {
       // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
-      window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
+      window.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
 
       cy.stub(Cypress, 'backendRequestHandler').log(false).callThrough()
 

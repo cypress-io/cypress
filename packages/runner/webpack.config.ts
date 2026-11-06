@@ -74,7 +74,6 @@ const crossOriginInjectionConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
 const remoteAutInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
@@ -87,7 +86,6 @@ const remoteAutInjectionConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
 const remoteAgentConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
@@ -99,11 +97,9 @@ const remoteAgentConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
 const remoteClockConfig: webpack.Configuration = {
   ...commonConfig,
   // runs in the AUT's main world, where a Content-Security-Policy may forbid the eval the dev build wraps modules in
-  // @ts-ignore
   plugins: commonConfig.plugins.filter((plugin) => !plugin.evalDevToolPlugin),
   entry: {
     cypress_remote_clock: [path.resolve(__dirname, '../driver/src/remote/clock/index.ts')],

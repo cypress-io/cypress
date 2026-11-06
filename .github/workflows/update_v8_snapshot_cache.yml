@@ -11,7 +11,7 @@ on:
     paths-ignore:
       - .husky/**
       - .vscode/**
-      - .eslintrc.js
+      - eslint.config.ts
       - .gitattributes
       - .gitignore
       - .percy.yml

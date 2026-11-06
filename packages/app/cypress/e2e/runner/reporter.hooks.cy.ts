@@ -57,7 +57,7 @@ describe('hooks', {
       cy.reporter().contains('before all').closest('.hook-header').find('.hook-open-in-ide').invoke('show').click()
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), 2, 2)
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/hooks\/basic\.cy\.js$/), 2, 2)
       })
     })
 
@@ -79,7 +79,7 @@ describe('hooks', {
       cy.reporter().contains('test body').closest('.hook-header').find('.hook-open-in-ide').invoke('show').click()
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), 10, 2)
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/hooks\/basic\.cy\.js$/), 10, 2)
       })
     })
 
@@ -99,7 +99,7 @@ describe('hooks', {
       cy.reporter().contains('test body').closest('.hook-header').find('.hook-open-in-ide').invoke('show').click()
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/wrapped-it\.cy\.js$`)), 5, 1)
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/hooks\/wrapped-it\.cy\.js$/), 5, 1)
       })
     })
   })

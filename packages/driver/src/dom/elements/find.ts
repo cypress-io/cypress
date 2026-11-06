@@ -319,7 +319,7 @@ export const getContainsSelector = (text, filter = '', options: {
     // https://github.com/cypress-io/cypress/issues/8626
     // Sizzle cannot parse when \' is used inside [attribute~='value'] selector.
     // We need to use other type of quote characters.
-    const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
+    const textToFind = escapedText.includes(`'`) ? `"${escapedText}"` : `'${escapedText}'`
 
     // use custom cy-contains selector that is registered above
     return `${filter}:${expr}(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`

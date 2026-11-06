@@ -199,7 +199,7 @@ describe('remote driver: waiting in a cross-origin AUT', { experimentalRemoteDri
           done()
         })
 
-        // @ts-ignore
+        // @ts-expect-error - passes invalid arguments on purpose to assert the error
         cy.wait('@foo', '@bar')
       })
     })

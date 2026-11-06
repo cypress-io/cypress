@@ -27,8 +27,8 @@ const normalizeOrigin = (urlOrDomain) => {
   return $Location.normalize(origin)
 }
 
-type OptionsOrFn<T> = { args: T } | (() => {})
-type Fn<T> = (args?: T) => {}
+type OptionsOrFn<T> = { args: T } | (() => unknown)
+type Fn<T> = (args?: T) => unknown
 
 export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
   const communicator = Cypress.primaryOriginCommunicator

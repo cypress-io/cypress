@@ -31,6 +31,9 @@ const normalizeValues = (valueOrTextOrIndex) => {
   })
 }
 
+// every option's selected state, since a multiple select can change without its selectedIndex changing
+const getSelection = (select: HTMLSelectElement) => _.map(select.options, 'selected')
+
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     select (subject, valueOrTextOrIndex, userOptions: Partial<Cypress.SelectOptions> = {}) {
@@ -271,7 +274,7 @@ export default (Commands, Cypress, cy) => {
               interval: options.interval,
             })
           }).then(() => {
-            const oldValue = options.$el[0].selectedIndex
+            const oldSelection = getSelection(options.$el.get(0))
 
             // reset the selects value after we've
             // fired all the proper click events
@@ -302,7 +305,7 @@ export default (Commands, Cypress, cy) => {
 
             // https://github.com/cypress-io/cypress/issues/19494
             // When user selects the same option again, `input`, `change` events should not be fired.
-            if (options.$el[0].selectedIndex === oldValue) {
+            if (_.isEqual(getSelection(options.$el.get(0)), oldSelection)) {
               return
             }
 

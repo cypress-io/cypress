@@ -44,6 +44,7 @@
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
     "@types/node": "24.10.1",
+    "@types/semver": "^7.5.0",
     "@types/webpack-bundle-analyzer": "4.7.0",
     "cross-env": "7.0.3",
     "dedent": "^0.7.0",

@@ -35,13 +35,13 @@ describe('remote driver: spies, stubs, and clock in a cross-origin AUT', { exper
 
       expect(Cypress.expose('foo')).to.equal('bar')
       expect(stubExpose).to.be.calledOnce
-      // @ts-ignore
+      // @ts-expect-error - isSinonProxy is set by sinon on the stubbed function, not part of its type
       expect(Cypress.expose.isSinonProxy).to.be.true
     })
 
     it('verifies the stub got restored', () => {
       expect(Cypress.expose('foo')).to.be.undefined
-      // @ts-ignore
+      // @ts-expect-error - isSinonProxy is set by sinon on the stubbed function, not part of its type
       expect(Cypress.expose.isSinonProxy).to.be.undefined
     })
   })
@@ -52,12 +52,12 @@ describe('remote driver: spies, stubs, and clock in a cross-origin AUT', { exper
 
       Cypress.expose()
       expect(spyExpose).to.be.calledOnce
-      // @ts-ignore
+      // @ts-expect-error - isSinonProxy is set by sinon on the stubbed function, not part of its type
       expect(Cypress.expose.isSinonProxy).to.be.true
     })
 
     it('verifies the spy got restored', () => {
-      // @ts-ignore
+      // @ts-expect-error - isSinonProxy is set by sinon on the stubbed function, not part of its type
       expect(Cypress.expose.isSinonProxy).to.be.undefined
     })
   })

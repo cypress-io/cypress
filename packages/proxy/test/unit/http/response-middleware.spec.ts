@@ -880,7 +880,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -903,7 +903,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} \'fake-src-0\',${validNonceDirectiveName} \'fake-src-1\'`,
+                      [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} 'fake-src-0',${validNonceDirectiveName} 'fake-src-1'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -930,7 +930,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: false,
@@ -949,7 +949,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${nonCspHeader}`]: `${validNonceDirectiveName} \'fake-src\'`,
+                      [`${nonCspHeader}`]: `${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -967,7 +967,7 @@ describe('http/response-middleware', function () {
                   res: {
                     getHeaders () {
                       return {
-                        [`${headerName}`]: `${validNonceDirectiveName} \'self\'; fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                        [`${headerName}`]: `${validNonceDirectiveName} 'self'; fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src'`,
                       }
                     },
                     wantsInjection: 'full',
@@ -990,7 +990,7 @@ describe('http/response-middleware', function () {
                   res: {
                     getHeaders () {
                       return {
-                        [`${headerName}`]: `${validNonceDirectiveName} \'self\',fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                        [`${headerName}`]: `${validNonceDirectiveName} 'self',fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src'`,
                       }
                     },
                     wantsInjection: 'full',
