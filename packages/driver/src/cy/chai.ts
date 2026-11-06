@@ -357,8 +357,8 @@ chai.use((chai, u) => {
           try {
             return this.assert(
               obj.length === length,
-              `expected '${node}' to have a length of \#{exp} but got \#{act}`,
-              `expected '${node}' to not have a length of \#{exp}`,
+              `expected '${node}' to have a length of #{exp} but got #{act}`,
+              `expected '${node}' to not have a length of #{exp}`,
               length,
               obj.length,
             )
@@ -427,8 +427,8 @@ chai.use((chai, u) => {
           try {
             return this.assert(
               (isAttached = $dom.isAttached($obj)),
-              'expected \#{act} to exist in the DOM',
-              'expected \#{act} not to exist in the DOM',
+              'expected #{act} to exist in the DOM',
+              'expected #{act} not to exist in the DOM',
               node,
               node,
             )

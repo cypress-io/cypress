@@ -225,7 +225,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // `off` here should be re-enabled once their violations are fixed; that
     // work is tracked in https://github.com/cypress-io/cypress/issues/35250
     rules: {
-      'no-useless-escape': 'off',
       'prefer-rest-params': 'off',
       'no-global-assign': 'off',
       'no-async-promise-executor': 'off',

@@ -1226,7 +1226,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
         args: {
           cmd: name,
-          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+          args: _.isString(args[0]) ? `"${stringifiedArg}"` : stringifiedArg,
         },
       })
     }
