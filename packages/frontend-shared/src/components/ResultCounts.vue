@@ -43,12 +43,12 @@ const { t } = useI18n()
 
 const props = defineProps<ResultCountsProps>()
 
-type CountType= 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
+type CountType = 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
 
 interface Status {
   value: number | string | null
   class: string
-  icon: FunctionalComponent<SVGAttributes, {}>
+  icon: FunctionalComponent<SVGAttributes>
   name: string
 }
 

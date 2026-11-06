@@ -44,7 +44,7 @@ const emit = defineEmits<{
 }>()
 
 withDefaults(defineProps<{
-  isOpen: boolean
+  isOpen?: boolean
 }>(), {
   isOpen: false,
 })

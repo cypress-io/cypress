@@ -334,8 +334,8 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
         expect(err.message).to.include('this is the message')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
         expect(err.message).to.include('this is the message')
-        expect(err.message).to.include('\`cy.origin(\'http://www.foobar.com:3500\', () => {\`')
-        expect(err.message).to.include('\`cy.visit(\'http://www.foobar.com:3500/fixtures/auth/error-on-load.html\')\`')
+        expect(err.message).to.include('`cy.origin(\'http://www.foobar.com:3500\', () => {`')
+        expect(err.message).to.include('`cy.visit(\'http://www.foobar.com:3500/fixtures/auth/error-on-load.html\')`')
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application', 'https://on.cypress.io/origin'])
 
         done()
@@ -379,6 +379,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
           get name () {
             return this._name
           }
+
           set name (name: string) {
             this._name = name
           }
@@ -415,6 +416,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
           get metasyntaticList (): string[] {
             return this._metasyntaticList
           }
+
           set metasyntaticList (itemsToAdd: string[]) {
             this._metasyntaticList = this._metasyntaticList.concat(itemsToAdd)
           }

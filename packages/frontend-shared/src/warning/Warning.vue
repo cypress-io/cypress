@@ -8,11 +8,13 @@
     :title="title"
     :icon="ErrorOutlineIcon"
   >
+    <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown, which passes raw HTML through (html: true) -->
     <div
       ref="markdownTarget"
       class="warning-markdown"
       v-html="markdown"
     />
+    <!-- eslint-enable vue/no-v-html -->
     <Button
       v-if="retryable"
       size="md"
@@ -59,7 +61,7 @@ const props = withDefaults(defineProps<{
 const { modelValue: show } = useVModels(props, emits)
 const markdownTarget = ref()
 
-let message = computed(() => {
+const message = computed(() => {
   if (props.details) {
     return [props.message, `        ${ props.details }`].join('\n\n')
   }

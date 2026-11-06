@@ -8,7 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         @restart="cancelSpecNameCreation"
-        @updateTitle="(value) => emits('update:title', value)"
+        @update-title="(value) => emits('update:title', value)"
       />
     </template>
 
@@ -25,10 +25,10 @@
         </div>
         <FileChooser
           v-else-if="!result"
-          v-model:extensionPattern="extensionPattern"
+          v-model:extension-pattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
-          @selectFile="makeSpec"
+          @select-file="makeSpec"
         />
         <GeneratorSuccess
           v-else
@@ -140,7 +140,7 @@ const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
 const query = useQuery({
   query: VueComponentGeneratorStepOneDocument,
-  // @ts-ignore
+  // @ts-expect-error - urql re-runs the query when this ref changes, but its types only accept a plain string
   variables: { glob: extensionPattern },
   requestPolicy: 'network-only',
 })

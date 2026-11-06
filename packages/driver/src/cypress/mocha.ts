@@ -1,4 +1,3 @@
-/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import type { CypressError } from './error_utils'
 import $errUtils from './error_utils'
@@ -80,7 +79,7 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
     const passingAttempts = passedTests.length
 
     // Below variables are used for when strategy is "detect-flake-and-pass-on-threshold" or no strategy is defined
-    let passesRequired = config?.strategy !== 'detect-flake-but-always-fail' ?
+    const passesRequired = config?.strategy !== 'detect-flake-but-always-fail' ?
       (config?.passesRequired || 1) :
       null
 
@@ -89,7 +88,7 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
       null
 
     // Below variables are used for when strategy is only "detect-flake-but-always-fail"
-    let stopIfAnyPassed = config?.strategy === 'detect-flake-but-always-fail' ?
+    const stopIfAnyPassed = config?.strategy === 'detect-flake-but-always-fail' ?
       (config.stopIfAnyPassed || false) :
       null
 
@@ -461,7 +460,7 @@ function getNormalizedRetriesConfig (Cypress: Cypress.Cypress): NormalizedRetrie
     }
   }
 
-  const enablementKey: 'openMode'|'runMode' = isInOpenMode ? 'openMode' : 'runMode'
+  const enablementKey: 'openMode' | 'runMode' = isInOpenMode ? 'openMode' : 'runMode'
   const enablementValue = retriesConfig[enablementKey]
 
   // if retries are explicitly disabled, return an empty object

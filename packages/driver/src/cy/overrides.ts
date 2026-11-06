@@ -62,4 +62,4 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
   }
 }
 
-export interface IOverrides extends ReturnType<typeof create> {}
+export type IOverrides = ReturnType<typeof create>

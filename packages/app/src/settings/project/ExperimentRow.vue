@@ -20,12 +20,14 @@
       class="text-gray-600"
     >
 
+      <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown from the experiment's i18n description -->
       <span
         ref="descriptionRef"
         class="description children:text-sm children:leading-[24px]"
         data-cy="experimentDescription"
         v-html="markdown"
       />
+      <!-- eslint-enable vue/no-v-html -->
     </span>
     <div
       class="ml-[20px] col-end-auto col-start-2 row-start-1 row-end-3 inline-grid items-center justify-self-end"

@@ -37,6 +37,7 @@ describe('lib/tap error registry', () => {
         "NO_BROWSER_ATTACHED",
         "NO_PROJECT",
         "NO_SESSION",
+        "PROJECT_NOT_LOADED",
         "PROTOCOL_MISMATCH",
         "RENDERER_UNRESPONSIVE",
         "SESSION_NOT_FOUND",
@@ -103,7 +104,7 @@ describe('lib/tap error registry', () => {
     .filter(([, copy]) => copy.attachHelp)
     .map(([code]) => code)
 
-    expect(attaching.sort()).to.deep.eq(['INVALID_ARGUMENTS', 'INVALID_OPTIONS', 'UNKNOWN_COMMAND', 'UNKNOWN_OPTION'])
+    expect(attaching.sort()).to.deep.eq(['INVALID_ARGUMENTS', 'INVALID_OPTIONS', 'MISSING_COMPANION_OPTION', 'UNKNOWN_COMMAND', 'UNKNOWN_OPTION'])
   })
 
   it('leaves the specifics to the throw site, never interpolating them', () => {
@@ -541,6 +542,11 @@ describe('lib/tap error rendering catalogue', () => {
       invocation: 'cypress tap --session 4321 dom --selector "#status"',
       failure: new TapError('STALE_SESSION'),
     },
+    // cli/lib/cypress-sessions/index.ts (liveMatches), with a project that failed to load
+    PROJECT_NOT_LOADED: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('PROJECT_NOT_LOADED'),
+    },
     // cli/lib/cypress-sessions/index.ts (resolveSession)
     NO_BROWSER_ATTACHED: {
       invocation: 'cypress tap dom --selector "#status"',
@@ -698,10 +704,11 @@ describe('lib/tap error rendering catalogue', () => {
       failure: new MissingOptionTapError('reporter', 'test-id'),
       helpOf: 'reporter',
     },
-    // packages/app/src/tap/commands/reporter.ts
+    // packages/app/src/tap/exec-args.ts, from an option's `requires`
     MISSING_COMPANION_OPTION: {
       invocation: 'cypress tap reporter --attempt 2',
       failure: new MissingCompanionOptionTapError('--attempt', '--test-id', 'Pass `--test-id` to specify the test, or omit `--attempt` to review the latest attempt for every test in the spec.'),
+      helpOf: 'reporter',
     },
     // cli/lib/tap/output.ts, standing in for anything that reached the renderer
     // without being raised as a tap failure

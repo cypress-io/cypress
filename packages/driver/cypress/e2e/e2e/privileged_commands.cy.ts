@@ -114,6 +114,14 @@ describe('privileged commands', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
     })
 
+    it('passes when a command retries until its assertion passes', () => {
+      let attempts = 0
+
+      cy.readFile('cypress/fixtures/app.json').should(() => {
+        expect(++attempts).to.be.greaterThan(2)
+      })
+    })
+
     it('handles args being mutated', () => {
       const obj = { foo: 'bar' }
 

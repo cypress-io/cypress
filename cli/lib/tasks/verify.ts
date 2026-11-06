@@ -54,7 +54,15 @@ const checkExecutable = async (binaryDir: string): Promise<void> => {
 const runSmokeTest = (binaryDir: string, options: any): any => {
   let executable = state.getPathToExecutable(binaryDir)
 
-  const needsXvfb = xvfb.isNeeded()
+  const env: NodeJS.ProcessEnv = options.env ?? process.env
+
+  // The smoke test is run with the environment as it is when it runs, because starting
+  // Xvfb sets DISPLAY after this point, and execa adds that to what it is given. So a
+  // variable the caller took out has to be named with no value to stay out.
+  const removedFromEnv = _.mapValues(_.pickBy(process.env, (_value, key) => !(key in env)), () => undefined)
+  const changedInEnv = _.pickBy(env, (value, key) => process.env[key] !== value)
+
+  const needsXvfb = xvfb.isNeeded(env)
 
   debug('needs Xvfb?', needsXvfb)
 
@@ -92,7 +100,8 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
     const stdioOptions = _.extend({}, {
       env: {
-        ...process.env,
+        ...removedFromEnv,
+        ...changedInEnv,
         FORCE_COLOR: '0',
       },
       timeout: options.smokeTestTimeout,
@@ -240,7 +249,7 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
 }
 
 export const start = async (options: any = {}): Promise<void> => {
-  debug('verifying Cypress app with options %j', options)
+  debug('verifying Cypress app with options %j', _.omit(options, 'env'))
 
   _.defaults(options, {
     dev: false,

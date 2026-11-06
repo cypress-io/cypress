@@ -15,7 +15,7 @@ const CA_VERSION = 1
 
 const generateKeyPairAsync = promisify(pki.rsa.generateKeyPair)
 
-const ipAddressRe = /^[\d\.]+$/
+const ipAddressRe = /^[\d.]+$/
 
 const CAattrs = [{
   name: 'commonName',

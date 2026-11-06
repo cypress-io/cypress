@@ -28,7 +28,7 @@ const errMsg = (key: string, value: any, type: string): ErrResult => {
 }
 
 const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
-  return _.isString(value) && /^https?\:\/\//.test(value)
+  return _.isString(value) && /^https?:\/\//.test(value)
 }
 
 const isStringArray = (value: any): ErrResult | boolean => {

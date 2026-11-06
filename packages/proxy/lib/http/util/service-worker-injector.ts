@@ -5,7 +5,7 @@ import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from './disable-navigation-prel
 
 // structural stand-in for the webworker lib's WorkerGlobalScope — the real lib can't be
 // referenced because lib="webworker" conflicts with the dom lib program-wide
-interface WorkerGlobalScope extends EventTarget {}
+type WorkerGlobalScope = EventTarget
 
 // this should be of type ServiceWorkerGlobalScope from the webworker lib,
 // but we can't reference it directly because it causes errors in other packages,
@@ -57,8 +57,8 @@ export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceW
     let listenerCount = 0
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
-    const targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
-    const targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
+    const targetToWrappedHandleEventMap = new WeakMap<object, EventListenerOrEventListenerObject>()
+    const targetToOrigHandleEventMap = new WeakMap<object, EventListenerOrEventListenerObject>()
 
     const sendEvent = (event: ServiceWorkerClientEventWithoutScope) => {
       const payload = Object.assign({}, event, { scope: self.registration.scope })

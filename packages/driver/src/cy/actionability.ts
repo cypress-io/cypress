@@ -20,9 +20,7 @@ const getStickyEl = $dom.getFirstStickyPositionParent
 
 const dispatchPrimedChangeEvents = function (state) {
   // if we have a changeEvent, dispatch it
-  let changeEvent
-
-  changeEvent = state('changeEvent')
+  const changeEvent = state('changeEvent')
 
   if (changeEvent) {
     return changeEvent()
@@ -203,9 +201,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
   const getElementAtPointFromViewport = function (fromElViewport) {
     // get the element at point from the viewport based
     // on the desired x/y normalized coordinations
-    let elAtCoords
-
-    elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromElViewport.x, fromElViewport.y)
+    const elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromElViewport.x, fromElViewport.y)
 
     if (elAtCoords) {
       $elAtCoords = $dom.wrap(elAtCoords)

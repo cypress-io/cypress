@@ -249,6 +249,7 @@ describe('Web Sockets', () => {
             path: this.cfg.socketIoRoute,
             transports: ['websocket'],
             rejectUnauthorized: false,
+            extraHeaders: { origin: new URL(wsUrl || this.cfg.proxyUrl).origin },
           })
 
           return this.wsClient.on('connect', () => {
@@ -382,22 +383,28 @@ describe('Web Sockets', () => {
       })
     }
 
-    it('accepts upgrade when Origin port differs from cypress server port', async () => {
+    it('accepts upgrade when Origin is the primary origin on a port other than the cypress server port', async function () {
+      this.server.remoteStates.set(`http://localhost:${otherPort}`)
+
       const result = await openGraphqlWs(`http://localhost:${otherPort}`)
 
       expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
     })
 
-    it('accepts upgrade when Origin hostname is not localhost', async () => {
+    it('refuses upgrade when Origin is not the primary origin', async function () {
+      this.server.remoteStates.set(`http://localhost:${otherPort}`)
+
       const result = await openGraphqlWs('http://foobar.com:4455')
 
-      expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
+      expect(result.opened).to.be.false
+      expect(result.statusCode).to.eq(400)
     })
 
-    it('accepts upgrade with no Origin header', async () => {
+    it('refuses upgrade with no Origin header', async () => {
       const result = await openGraphqlWs(undefined)
 
-      expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
+      expect(result.opened).to.be.false
+      expect(result.statusCode).to.eq(400)
     })
   })
 })

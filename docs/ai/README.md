@@ -40,7 +40,6 @@ cli/svelte/CLAUDE.md
 cli/vue/CLAUDE.md
 npm/CLAUDE.md                                ← npm workspace
 npm/angular/CLAUDE.md
-npm/eslint-plugin-dev/CLAUDE.md
 npm/grep/CLAUDE.md
 npm/mount-utils/CLAUDE.md
 npm/puppeteer/CLAUDE.md
