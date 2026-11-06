@@ -7,7 +7,7 @@
       v-if="shouldShowWelcome"
       class="pt-[64px]"
       role="main"
-      @clearLandingPage="handleClearLandingPage"
+      @clear-landing-page="handleClearLandingPage"
     />
     <main
       v-else

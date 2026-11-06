@@ -70,17 +70,18 @@ Options:
 `;
 
 exports[`lib/exec/tap help > cypress tap command --help 1`] = `
-"Usage: cypress tap command [options]
+"Usage: cypress tap command [options] --test-id <test-id> --command-id <command-id>
 
 Retrieves a single command from a test's command log: its reporter row, the DOM
 snapshots pinnable on it, and any associated console properties.
 
 Options:
   -t, --test-id <test-id>        test id, as listed by the reporter command
+                                 (required)
   -c, --command-id <command-id>  command id, as listed by the reporter command
                                  — a row number (test body first when
                                  duplicated), an e-prefixed event id, or
-                                 hook-qualified like "h1:3"
+                                 hook-qualified like "h1:3" (required)
   -a, --attempt <attempt>        1-based attempt (attempt 1 = first run);
                                  defaults to the latest
   -d, --depth <depth>            how many levels of nested console properties
@@ -132,7 +133,7 @@ Options:
 `;
 
 exports[`lib/exec/tap help > cypress tap inspect --help 1`] = `
-"Usage: cypress tap inspect [options]
+"Usage: cypress tap inspect [options] --selector <selector>
 
 Inspects a single element matching a CSS Selector: outputs the tag, attributes,
 curated computed styles, box model, and that element's own accessibility node
@@ -145,7 +146,7 @@ or with whichever selector you meant.
 
 Options:
   -e, --selector <selector>  a CSS selector matching exactly one element,
-                             identifying the element to inspect
+                             identifying the element to inspect (required)
   --at <at>                  When a selector matches multiple elements, the
                              0-based index of the match to read
   -s, --session <pid>        target a local Cypress session by its process id
@@ -162,14 +163,17 @@ exports[`lib/exec/tap help > cypress tap pin --help 1`] = `
 "Usage: cypress tap pin [options]
 
 Pins a command's DOM snapshot into the live application-under-test frame so the
-dom/aria/inspect commands can read it. Pass --clear to release.
+dom/aria/inspect commands can read it. Name the command with --test-id and
+--command-id, or pass --clear to release the current pin.
 
 Options:
   -t, --test-id <test-id>        test id, as listed by the reporter command
+                                 (requires --command-id unless --clear)
   -c, --command-id <command-id>  command id, as listed by the reporter command
                                  — a row number (test body first when
                                  duplicated), an e-prefixed event id, or
-                                 hook-qualified like "h1:3"
+                                 hook-qualified like "h1:3" (requires --test-id
+                                 unless --clear)
   -a, --attempt <attempt>        1-based attempt (attempt 1 = first run);
                                  defaults to the latest
   --at <at>                      which snapshot to pin: a name like
@@ -205,7 +209,7 @@ wrong. Add --attempt to view an earlier retry.
 Options:
   -t, --test-id <test-id>  test id, as listed by the reporter command
   -a, --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to
-                           the latest
+                           the latest (requires --test-id)
   -s, --session <pid>      target a local Cypress session by its process id
                            (PID)
   --json                   print the raw JSON result instead of the

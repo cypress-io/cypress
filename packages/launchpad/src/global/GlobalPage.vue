@@ -20,9 +20,9 @@
         :key="project.id"
         :gql="project"
         class="mb-[24px] md:mb-0"
-        @removeProject="handleRemoveProject"
-        @openInFinder="handleOpenInFinder"
-        @openInIDE="handleOpenInIDE"
+        @remove-project="handleRemoveProject"
+        @open-in-finder="handleOpenInFinder"
+        @open-in-i-d-e="handleOpenInIDE"
       />
     </div>
   </template>

@@ -363,7 +363,7 @@ describe('App: Specs', () => {
         cy.getByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
@@ -375,7 +375,7 @@ describe('App: Specs', () => {
         cy.get('[data-cy="no-specs-specPattern"]').click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
@@ -387,7 +387,7 @@ describe('App: Specs', () => {
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
@@ -717,7 +717,7 @@ describe('App: Specs', () => {
         cy.getByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
@@ -729,7 +729,7 @@ describe('App: Specs', () => {
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
