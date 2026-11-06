@@ -38,31 +38,68 @@ let hasMochaRunEnded: boolean = false
 // Posted by the cross-origin AUT injection before a spec bridge attaches to it.
 const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error']
 
-const hostnameOf = (url: unknown) => {
+interface AutCookie {
+  name?: unknown
+  domain?: unknown
+  path?: unknown
+  hostOnly?: unknown
+  httpOnly?: unknown
+  secure?: unknown
+}
+
+const parseUrl = (url: unknown) => {
   try {
-    return new URL(String(url)).hostname
+    return new URL(String(url))
   } catch {
     return undefined
   }
 }
 
-// The AUT injection only sets cookies for its own host or a parent domain of it.
-const isCookieForOrigin = (data: { url?: unknown, cookie?: { domain?: unknown } } | undefined, origin: string) => {
-  const hostname = hostnameOf(origin)
+const stripDot = (domain: string) => domain.replace(/^\./, '').toLowerCase()
 
-  if (!hostname || hostnameOf(data?.url) !== hostname) {
+const isDomainMatch = (host: string, domain: string) => host === domain || host.endsWith(`.${domain}`)
+
+const isPathMatch = (path: string, cookiePath: string) => {
+  return path === cookiePath || (path.startsWith(cookiePath) && (cookiePath.endsWith('/') || path[cookiePath.length] === '/'))
+}
+
+// browsers treat localhost as a secure context, so it may set Secure cookies over http
+const isSecureUrl = ({ protocol, hostname }: URL) => {
+  return protocol === 'https:' || hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === '[::1]' || /^127(\.\d{1,3}){3}$/.test(hostname)
+}
+
+// Allows only cookies that document.cookie on the posting page could set.
+const isCookieForOrigin = (data: { url?: unknown, cookie?: AutCookie } | undefined, origin: string) => {
+  const url = parseUrl(data?.url)
+  const cookie = data?.cookie
+
+  if (!url || url.origin !== origin || typeof cookie?.name !== 'string' || typeof cookie.domain !== 'string' || !cookie.domain) {
     return false
   }
 
-  const domain = data?.cookie?.domain
-
-  if (typeof domain !== 'string' || !domain) {
-    return true
+  if (cookie.httpOnly || (cookie.secure && !isSecureUrl(url))) {
+    return false
   }
 
-  const cookieDomain = domain.replace(/^\./, '')
+  const domain = stripDot(cookie.domain)
 
-  return cookieDomain === hostname || hostname.endsWith(`.${cookieDomain}`)
+  return domain === url.hostname || (!cookie.hostOnly && isDomainMatch(url.hostname, domain))
+}
+
+// Whether `existing` keeps `cookie` from being written: document.cookie can't
+// replace an HttpOnly cookie, and an insecure page can't shadow a Secure one.
+const isBlockedBy = (existing: Cypress.Cookie, cookie: { name: string, domain: string, path?: string }, isSecure: boolean) => {
+  if (existing.name !== cookie.name) return false
+
+  const existingDomain = stripDot(existing.domain)
+  const domain = stripDot(cookie.domain)
+  const path = cookie.path || '/'
+
+  if (existing.httpOnly && existingDomain === domain && existing.path === path) return true
+
+  return !isSecure && existing.secure
+    && (isDomainMatch(existingDomain, domain) || isDomainMatch(domain, existingDomain))
+    && isPathMatch(path, existing.path)
 }
 
 const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
@@ -874,17 +911,10 @@ export class EventManager {
       'aut:set:cookie',
       async (options: { cookie, url: string, sameSiteContext: string }) => {
         const { cookie } = options
+        const isSecure = isSecureUrl(new URL(options.url))
+        const existing: Cypress.Cookie[] = await Cypress.automation('get:cookies', {}).catch(() => [])
 
-        // document.cookie can neither set an HttpOnly cookie nor replace one
-        if (cookie.httpOnly) return
-
-        const stripDot = (domain?: string) => domain?.replace(/^\./, '')
-        const existing: Cypress.Cookie[] = await Cypress.automation('get:cookies', { domain: cookie.domain }).catch(() => [])
-        const isHttpOnlyMatch = (c: Cypress.Cookie) => {
-          return c.httpOnly && c.name === cookie.name && stripDot(c.domain) === stripDot(cookie.domain) && c.path === (cookie.path || '/')
-        }
-
-        if (existing.some(isHttpOnlyMatch)) return
+        if (existing.some((c) => isBlockedBy(c, cookie, isSecure))) return
 
         // unlikely there will be errors, but ignore them in any case, since
         // they're not user-actionable
