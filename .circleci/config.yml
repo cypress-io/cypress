@@ -1,202 +1,27 @@
-orbs:
-    continuation: circleci/continuation@1.1.0
-    circleci-cli: circleci/circleci-cli@0.1.9
-setup: true
 version: 2.1
 
-workflows:
-    setup-workflow:
-        jobs:
-            - pack-workflows
-            - launch-primary-workflow:
-                requires:
-                  - pack-workflows
-
-parameters:
-  force-persist-artifacts:
-    type: boolean
-    default: false
-  # Set to true when triggering the pipeline manually to bypass path filtering
-  # and run all CI jobs regardless of which files changed.
-  run-all-jobs:
-    type: boolean
-    default: false
-  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`,
-  # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
-  # (can also be set manually to run those workflows)
-  run-platform-workflows:
-    type: boolean
-    default: false
-  # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
-  # Trigger Pipeline when a visual review is needed. Requires PERCY_TOKEN.
-  percy-enabled:
-    type: boolean
-    default: false
-  # Opt-in full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy)
-  # path on Chrome. Enable via Trigger Pipeline when investigating that path.
-  run-force-http1-tests:
-    type: boolean
-    default: false
-
-commands:
-  persist:
-    steps:
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .circleci/packed
-  persist-to-workspace-and-exit-early:
-    steps:
-      - run:
-          name: Check cache status and exit early if needed
-          command: |
-            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
-              echo "📦 Cache hit - packed configurations exist"
-              echo "✅ Persisting packed configurations to workspace and halting job"
-              echo "CACHE_HIT=true" >> $BASH_ENV
-            else
-              echo "📦 Cache miss - continuing with packaging"
-              echo "CACHE_HIT=false" >> $BASH_ENV
-              mkdir -p .circleci/packed # persist empty dir to workspace
-            fi
-      - persist
-      - run:
-          name: End job if cache hit
-          command: |
-            if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
-              echo "✅ Cache hit - packed configurations exist"
-              circleci-agent step halt
-            else
-              echo "📦 Cache miss - continuing with packaging"
-            fi
-  pack-workflows:
-    steps:
-      - circleci-cli/install
-      - run:
-          name: Pack workflows
-          command: |
-            ./scripts/pack-ci.sh --all
-
-  # Retrieving and saving packed workflows based on the checksum of the hash
-  # of the yml files in ./.circleci/src
-  calc-src-checksum:
-    steps:
-      - run:
-          name: Generate config checksum for cache lookup
-          # this is saved to a file, so that we can use {{ checksum }} - which
-          # can only operate on the contents of a single file, not a list of
-          # files or a directory.
-          command: |
-            find .circleci/src -name "*.yml" -type f | \
-              sort | \
-              xargs cat | \
-              md5sum | \
-              cut -d' ' -f1 > /tmp/config_checksum.txt
-  restore-src-checksum-cache:
-    steps:
-      - calc-src-checksum
-      - restore_cache:
-            keys:
-              - circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }}
-            paths:
-                - .circleci/packed
-  save-src-checksum-cache:
-    steps:
-      - calc-src-checksum
-      - save_cache:
-          key: circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }}
-          paths:
-            - .circleci/packed
-
-  cancel-draft-prs:
-    steps:
-      - when:
-          condition:
-            not:
-              or:
-                - equal: [<<pipeline.trigger_source>>, 'api']
-                - equal: [<<pipeline.git.branch>>, 'develop']
-                - matches:
-                    pattern: /^release\/.*/
-                    value: <<pipeline.git.branch>>
-                - matches:
-                    pattern: /^v\d+$/
-                    value: <<pipeline.git.branch>>
-          steps:
-            - run:
-                name: Cancel CI
-                command: |
-                  cancel_build() {
-                    circleci-agent step halt
-                  }
-
-                  if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-                    PR_API_URL="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}"
-
-                    # Unauthenticated requests from CircleCI's shared IPs can get a
-                    # throttling or "forbidden" page instead of JSON, so treat an
-                    # unreadable response as not a draft rather than failing the pipeline.
-                    DRAFT=$(curl --silent --show-error --fail --max-time 15 "${PR_API_URL}" | jq -r '.draft' 2>/dev/null) || DRAFT=unknown
-
-                    if [[ "${DRAFT}" != true && "${DRAFT}" != false ]]; then
-                      echo "Could not read the PR's draft status from GitHub (got: ${DRAFT:-empty}); running CI."
-                    fi
-
-                    if [[ "${DRAFT}" == true ]]; then
-                      echo "Skipping CI; PR is in draft - to trigger CI , click the 'Trigger Pipeline' button in the CircleCI UI."
-                      cancel_build
-                    fi
-
-                    echo "Always run CI for PR that is ready for review."
-                    exit 0
-                  fi
-
-                  # otherwise, the build is not a PR so we cancel it 
-                  cancel_build
+# TEMPORARY (kellen/windows-self-hosted-test only, never merge): replaces the
+# setup/continuation pipeline with one job on the self-hosted Windows runner
+# test pool, to verify "Rerun job with SSH".
 
 jobs:
-  pack-workflows:
-    docker:
-        - image: cimg/base:stable
-    resource_class: small.gen2
+  windows-runner-ssh-test:
+    machine: true
+    resource_class: cypress-io/windows-runner-test
     steps:
-        - cancel-draft-prs
-        - checkout:
-            method: blobless
-        - restore-src-checksum-cache
-        - persist-to-workspace-and-exit-early
-        - pack-workflows
-        - save-src-checksum-cache
-        - persist
+      - run:
+          name: Show which runner picked this up
+          shell: powershell.exe
+          command: |
+            $t = Invoke-RestMethod -Method PUT -Uri http://169.254.169.254/latest/api/token -Headers @{ "X-aws-ec2-metadata-token-ttl-seconds" = "60" }
+            "Instance: " + (Invoke-RestMethod -Uri http://169.254.169.254/latest/meta-data/instance-id -Headers @{ "X-aws-ec2-metadata-token" = $t })
+            "Host: $env:COMPUTERNAME  User: $env:USERNAME"
+      - run:
+          name: Fail on purpose
+          shell: powershell.exe
+          command: exit 1
 
-  launch-primary-workflow:
-      docker:
-          - image: cimg/base:stable
-      resource_class: small.gen2
-      steps:
-          - cancel-draft-prs
-          - checkout:
-              method: blobless
-          - attach_workspace:
-              at: .
-          - run:
-              name: Check for primary workflow definition
-              command: |
-                if [ ! -f .circleci/packed/pipeline.yml ]; then
-                    echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
-                    exit 1
-                fi
-          - run:
-              name: Generate path-filtered pipeline parameters
-              environment:
-                RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
-                TRIGGER_SOURCE: "<< pipeline.trigger_source >>"
-                BASE_REVISION: "<< pipeline.git.base_revision >>"
-              command: |
-                bash .circleci/scripts/generate-pipeline-parameters.sh \
-                  > /tmp/pipeline-parameters.json
-                echo "Generated parameters:"
-                cat /tmp/pipeline-parameters.json
-          - continuation/continue:
-              configuration_path: .circleci/packed/pipeline.yml
-              parameters: /tmp/pipeline-parameters.json
+workflows:
+  windows-runner-ssh-test:
+    jobs:
+      - windows-runner-ssh-test
