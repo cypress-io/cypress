@@ -35,7 +35,7 @@ describe('component testing: justInTimeCompile', function () {
       })
 
       const serverPortRegex = /Successfully launched the vite server on port 5173/g
-      const componentsCompiledSeparatelyRegex = /dev\-server\:secs\:changed\: src\/Component\-[1-3]\.cy\.jsx/g
+      const componentsCompiledSeparatelyRegex = /dev-server:secs:changed: src\/Component-[1-3]\.cy\.jsx/g
 
       const totalServersSamePort = getAllMatches(stderr, serverPortRegex).length
       const totalComponentsCompiledSeparately = getAllMatches(stderr, componentsCompiledSeparatelyRegex).length
@@ -60,7 +60,7 @@ describe('component testing: justInTimeCompile', function () {
         },
       })
       const serverPortRegex = /Component testing webpack server 5 started on port 8080/g
-      const componentsCompiledSeparatelyRegex = /justInTimeCompile\/webpack\/src\/Component\-[1-3].cy.jsx/g
+      const componentsCompiledSeparatelyRegex = /justInTimeCompile\/webpack\/src\/Component-[1-3].cy.jsx/g
 
       const totalServersSamePort = getAllMatches(stderr, serverPortRegex).length
       const totalComponentsCompiledSeparately = getAllMatches(stderr, componentsCompiledSeparatelyRegex).length
