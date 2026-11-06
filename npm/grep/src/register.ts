@@ -83,20 +83,7 @@ export function register (): void {
       return _it(name, options)
     }
 
-    let configTags = options && options.tags
-
-    if (typeof configTags === 'string') {
-      configTags = [configTags]
-    }
-
-    const nameToGrep = suiteStack
-      .map((item) => item.name)
-      .concat(name)
-      .join(' ')
-    const tagsToGrep = suiteStack
-      .flatMap((item) => item.tags)
-      .concat(configTags)
-      .filter(Boolean)
+    const { nameToGrep, tagsToGrep } = resolveNameAndTags(name, options)
 
     const shouldRun = shouldTestRun(
       parsedGrep,
@@ -136,6 +123,27 @@ export function register (): void {
   }
 
   const suiteStack: SuiteStackItem[] = []
+
+  // The title and tags a test is filtered on, including everything it
+  // inherits from the suites it sits in.
+  const resolveNameAndTags = (name: string, options: any) => {
+    let configTags = options && options.tags
+
+    if (typeof configTags === 'string') {
+      configTags = [configTags]
+    }
+
+    return {
+      nameToGrep: suiteStack
+        .map((item) => item.name)
+        .concat(name)
+        .join(' '),
+      tagsToGrep: suiteStack
+        .flatMap((item) => item.tags)
+        .concat(configTags)
+        .filter(Boolean),
+    }
+  }
 
     // @ts-expect-error - it is missing only and skip which are overridden below
   describe = function describeGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Suite {
@@ -177,7 +185,41 @@ export function register (): void {
   context = describe
   specify = it
 
-  it.skip = _it.skip
+  // A skipped test has to pass the filter too.  Mocha registers one as
+  // pending, and a registered test is enough for its suite's before() hooks
+  // to run, so handing a non-matching test straight to the real it.skip
+  // defeats grepOmitFiltered and can fail a run over hooks belonging to
+  // tests that were filtered out.
+  // @ts-expect-error - itGrepSkip is narrower than Mocha's PendingTestFunction
+  it.skip = function itGrepSkip (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Test | void {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
+
+    if (!callback) {
+      return _it.skip(name, options)
+    }
+
+    if (omitFiltered) {
+      const { nameToGrep, tagsToGrep } = resolveNameAndTags(name, options)
+
+      if (!shouldTestRun(parsedGrep, nameToGrep, tagsToGrep, !!grepUntagged)) {
+        debugInstance('omitting skipped test "%s"', nameToGrep)
+
+        return
+      }
+    }
+
+    return _it.skip(name, options, callback)
+  }
+
+  // mocha binds xit and xspecify to its own it.skip while setting up the BDD
+  // interface, which happens before register() runs, so they still hold the
+  // unfiltered skip and have to be pointed at the wrapper by hand.
+  xit = it.skip
+  xspecify = it.skip
+
   it.only = _it.only
   it.retries = _it.retries
   // @ts-expect-error - is missing each on Mocha.TestFunction type
