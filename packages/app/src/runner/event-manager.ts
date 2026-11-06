@@ -4,7 +4,6 @@ import type { MobxRunnerStore } from '../store/mobx-runner-store'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 import { SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
-import { isLocalhost } from '@packages/network-tools/lib/uri'
 
 import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/browser/client'
@@ -39,80 +38,13 @@ let hasMochaRunEnded: boolean = false
 // Posted by the cross-origin AUT injection before a spec bridge attaches to it.
 const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error']
 
-interface AutCookie {
-  name?: unknown
-  domain?: unknown
-  path?: unknown
-  hostOnly?: unknown
-  httpOnly?: unknown
-  secure?: unknown
-  sameSite?: unknown
-}
-
-const parseUrl = (url: unknown) => {
+// The posted url must be the sender's own page.
+const isCookieForOrigin = (data: { url?: unknown } | undefined, origin: string) => {
   try {
-    return new URL(String(url))
+    return new URL(String(data?.url)).origin === origin
   } catch {
-    return undefined
-  }
-}
-
-const stripDot = (domain: string) => domain.replace(/^\./, '').toLowerCase()
-
-const isDomainMatch = (host: string, domain: string) => host === domain || host.endsWith(`.${domain}`)
-
-const isPathMatch = (path: string, cookiePath: string) => {
-  return path === cookiePath || (path.startsWith(cookiePath) && (cookiePath.endsWith('/') || path[cookiePath.length] === '/'))
-}
-
-// Secure cookies may be set from https and from localhost or loopback URLs
-const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
-
-// Allows only cookies that document.cookie on the posting page could set.
-const isCookieForOrigin = (data: { url?: unknown, cookie?: AutCookie } | undefined, origin: string) => {
-  const url = parseUrl(data?.url)
-  const cookie = data?.cookie
-
-  if (!url || url.origin !== origin || typeof cookie?.name !== 'string' || typeof cookie.domain !== 'string' || !cookie.domain) {
     return false
   }
-
-  if (cookie.httpOnly || (cookie.secure && !isSecureUrl(url))) {
-    return false
-  }
-
-  if ((cookie.sameSite === 'no_restriction' || /^__secure-/i.test(cookie.name)) && !cookie.secure) {
-    return false
-  }
-
-  if (/^__host-/i.test(cookie.name) && (!cookie.secure || !cookie.hostOnly || cookie.path !== '/')) {
-    return false
-  }
-
-  const domain = stripDot(cookie.domain)
-
-  if (domain === url.hostname) return true
-
-  // a parent domain must not be a public suffix or part of an IP address
-  const superDomain: string | undefined = Cypress?.Location.create(url.href).superDomain
-
-  return !cookie.hostOnly && !!superDomain && isDomainMatch(url.hostname, domain) && isDomainMatch(domain, superDomain)
-}
-
-// Whether `existing` keeps `cookie` from being written: document.cookie can't
-// replace an HttpOnly cookie, and an insecure page can't shadow a Secure one.
-const isBlockedBy = (existing: Cypress.Cookie, cookie: { name: string, domain: string, path?: string }, isSecure: boolean) => {
-  if (existing.name !== cookie.name) return false
-
-  const existingDomain = stripDot(existing.domain)
-  const domain = stripDot(cookie.domain)
-  const path = cookie.path || '/'
-
-  if (existing.httpOnly && existingDomain === domain && existing.path === path) return true
-
-  return !isSecure && existing.secure
-    && (isDomainMatch(existingDomain, domain) || isDomainMatch(domain, existingDomain))
-    && isPathMatch(path, existing.path)
 }
 
 const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
@@ -922,16 +854,10 @@ export class EventManager {
     // AUT prior to attaching a spec bridge.
     Cypress.primaryOriginCommunicator.on(
       'aut:set:cookie',
-      async (options: { cookie, url: string, sameSiteContext: string }) => {
-        const { cookie } = options
-        const isSecure = isSecureUrl(new URL(options.url))
-        const existing: Cypress.Cookie[] = await Cypress.automation('get:cookies', { name: cookie.name }).catch(() => [])
-
-        if (existing.some((c) => isBlockedBy(c, cookie, isSecure))) return
-
+      (options: { cookie, url: string, sameSiteContext: string }) => {
         // unlikely there will be errors, but ignore them in any case, since
         // they're not user-actionable
-        Cypress.automation('set:cookie', cookie).catch(() => {})
+        Cypress.automation('set:cookie', options.cookie).catch(() => {})
         Cypress.backend('cross:origin:set:cookie', options).catch(() => {})
       },
     )
