@@ -332,6 +332,15 @@ namespace CypressCommandsTests {
     this // $ExpectType Command
     arg // $ExpectType string
 
+    // https://github.com/cypress-io/cypress/issues/30198
+    this.set('timeout', 1000)
+    this.set('timeout', 0)
+    this.set('timeout', undefined)
+    this.set({ timeout: 1000 })
+    this.get('timeout') // $ExpectType number | undefined
+    // $ExpectError
+    this.set('timeout', '1000')
+
     return () => 3
   })
 }
