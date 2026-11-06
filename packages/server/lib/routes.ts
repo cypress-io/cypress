@@ -84,9 +84,10 @@ export const createCommonRoutes = ({
     return socketAllowed.isTrustedOrigin(origin) || privilegedCommandsManager.specBridgeOrigins.has(origin)
   }
 
-  // Loopback re-entry carries the token instead of an Origin header.
+  // The loopback forwards the browser's Origin header, so a looped-back
+  // request is judged by it like any other.
   const isRunnerRequest = (req: Request) => {
-    if (isTrustedInternalLoopback(req.headers) || socketAllowed.isRequestFromTrustedOrigin(req)) {
+    if (socketAllowed.isRequestFromTrustedOrigin(req)) {
       return true
     }
 

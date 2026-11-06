@@ -855,13 +855,24 @@ describe('lib/routes', () => {
         expect(res.json).toHaveBeenCalledWith({ contents: 'bundled' })
       })
 
-      it('processes the callback looped back with the token', async () => {
+      // the loopback forwards the browser's Origin header alongside the token
+      it('processes the callback looped back from a trusted origin', async () => {
         const { handler } = setupRoutes()
         const res = makeRes()
 
-        await handler('post', '/__cypress/process-origin-callback')(makeRequest({ body, headers: { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } }), res)
+        await handler('post', '/__cypress/process-origin-callback')(makeRequest({ body, headers: { origin: 'http://localhost:2020', [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } }), res)
 
         expect(res.json).toHaveBeenCalledWith({ contents: 'bundled' })
+      })
+
+      it('answers 403 for a request looped back from another origin', async () => {
+        const { handler } = setupRoutes()
+        const res = makeRes()
+
+        await handler('post', '/__cypress/process-origin-callback')(makeRequest({ body, headers: { origin: 'https://other.example.com', [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } }), res)
+
+        expect(res.sendStatus).toHaveBeenCalledWith(403)
+        expect(plugins.execute).not.toHaveBeenCalled()
       })
 
       it('processes the callback from a spec bridge origin the spec opened', async () => {

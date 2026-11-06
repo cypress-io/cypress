@@ -1,12 +1,13 @@
 <html>
   <body>
     <script>
-      // the origin of the embedding document, when it is the runner's; only its messages are applied
+      // the origin of the embedding document, when it is the runner's; the driver
+      // replies from the runner's top window, so only messages from that origin apply
       const parentOrigin = {{parentOrigin | safe}}
 
       if (parentOrigin) {
         window.onmessage = function (event) {
-          if (event.source !== window.parent || event.origin !== parentOrigin) return
+          if (event.origin !== parentOrigin) return
 
           const msg = event.data
 
