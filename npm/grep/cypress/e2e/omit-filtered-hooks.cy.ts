@@ -9,8 +9,7 @@ describe('Suite whose only test is filtered out', { tags: ['@excluded'] }, () =>
     filteredHookRan = true
   })
 
-  // NOTE: the skip is the point of this fixture. The suite's only test is both skipped and
-  // filtered out, which is the combination that used to run the before() regardless.
+  // NOTE: skipped and tagged out of the filter on purpose; this suite's before() must not run
   it.skip('is skipped and does not match the filter', () => {})
 })
 
