@@ -95,13 +95,12 @@ describe('PrimaryOriginCommunicator', () => {
 })
 
 describe('SpecBridgeCommunicator', () => {
-  const message = (overrides: Partial<MessageEvent> = {}) => {
-    return {
+  const message = (overrides: MessageEventInit = {}) => {
+    return new MessageEvent('message', {
       data: { event: 'sync:state', data: { duringUserTestExecution: true } },
       source: window.parent,
-      origin: 'http://localhost:3500',
       ...overrides,
-    } as MessageEvent
+    })
   }
 
   it('emits messages from the parent window', () => {
@@ -118,21 +117,14 @@ describe('SpecBridgeCommunicator', () => {
     const comm = new SpecBridgeCommunicator()
     const handler = vi.fn()
 
+    const iframe = document.createElement('iframe')
+
+    document.body.appendChild(iframe)
+
     comm.on('sync:state', handler)
-    comm.onMessage(message({ source: { postMessage: vi.fn() } as unknown as Window }))
+    comm.onMessage(message({ source: iframe.contentWindow }))
     comm.onMessage(message({ source: null }))
 
     expect(handler).not.toHaveBeenCalled()
-  })
-
-  it('ignores messages from an origin other than the first one', () => {
-    const comm = new SpecBridgeCommunicator()
-    const handler = vi.fn()
-
-    comm.on('sync:state', handler)
-    comm.onMessage(message())
-    comm.onMessage(message({ origin: 'http://other.example.com:3500' }))
-
-    expect(handler).toHaveBeenCalledOnce()
   })
 })

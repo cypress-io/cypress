@@ -4,6 +4,7 @@ import type { MobxRunnerStore } from '../store/mobx-runner-store'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 import { SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { isLocalhost } from '@packages/network-tools/lib/uri'
 
 import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/browser/client'
@@ -65,9 +66,7 @@ const isPathMatch = (path: string, cookiePath: string) => {
 }
 
 // Secure cookies may be set from https and from localhost or loopback URLs
-const isSecureUrl = ({ protocol, hostname }: URL) => {
-  return protocol === 'https:' || hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === '[::1]' || /^127(\.\d{1,3}){3}$/.test(hostname)
-}
+const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
 
 // Allows only cookies that document.cookie on the posting page could set.
 const isCookieForOrigin = (data: { url?: unknown, cookie?: AutCookie } | undefined, origin: string) => {
@@ -95,7 +94,9 @@ const isCookieForOrigin = (data: { url?: unknown, cookie?: AutCookie } | undefin
   if (domain === url.hostname) return true
 
   // a parent domain must not be a public suffix or part of an IP address
-  return !cookie.hostOnly && isDomainMatch(url.hostname, domain) && isDomainMatch(domain, Cypress.Location.create(url.href).superDomain)
+  const superDomain: string | undefined = Cypress?.Location.create(url.href).superDomain
+
+  return !cookie.hostOnly && !!superDomain && isDomainMatch(url.hostname, domain) && isDomainMatch(domain, superDomain)
 }
 
 // Whether `existing` keeps `cookie` from being written: document.cookie can't
@@ -924,7 +925,7 @@ export class EventManager {
       async (options: { cookie, url: string, sameSiteContext: string }) => {
         const { cookie } = options
         const isSecure = isSecureUrl(new URL(options.url))
-        const existing: Cypress.Cookie[] = await Cypress.automation('get:cookies', {}).catch(() => [])
+        const existing: Cypress.Cookie[] = await Cypress.automation('get:cookies', { name: cookie.name }).catch(() => [])
 
         if (existing.some((c) => isBlockedBy(c, cookie, isSecure))) return
 

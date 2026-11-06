@@ -252,8 +252,6 @@ export class PrimaryOriginCommunicator extends EventEmitter {
  * @extends EventEmitter
  */
 export class SpecBridgeCommunicator extends EventEmitter {
-  private primaryOrigin?: string
-
   private handleSubjectAndErr = (data: Cypress.ObjectLike = {}, send: (data: Cypress.ObjectLike) => void) => {
     const { subject, err: dataErr, ...rest } = data
     let err = dataErr
@@ -303,18 +301,12 @@ export class SpecBridgeCommunicator extends EventEmitter {
 
   /**
    * The callback handler that receives messages from the primary origin.
-   * Only the parent window sends to the spec bridge, and always from the origin it first used.
+   * Only the parent window sends to the spec bridge.
    * @param {MessageEvent} event - the MessageEvent received through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
    * @returns {Void}
    */
-  onMessage ({ data, source, origin }: MessageEvent) {
+  onMessage ({ data, source }: MessageEvent) {
     if (!data || source !== window.parent) return
-
-    if (this.primaryOrigin === undefined) {
-      this.primaryOrigin = origin
-    } else if (origin !== this.primaryOrigin) {
-      return
-    }
 
     this.emit(data.event, data.data, { responseEvent: data.responseEvent })
   }
