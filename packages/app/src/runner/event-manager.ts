@@ -83,7 +83,10 @@ const isCookieForOrigin = (data: { url?: unknown, cookie?: AutCookie } | undefin
 
   const domain = stripDot(cookie.domain)
 
-  return domain === url.hostname || (!cookie.hostOnly && isDomainMatch(url.hostname, domain))
+  if (domain === url.hostname) return true
+
+  // a parent domain must not be a public suffix or part of an IP address
+  return !cookie.hostOnly && isDomainMatch(url.hostname, domain) && isDomainMatch(domain, Cypress.Location.create(url.href).superDomain)
 }
 
 // Whether `existing` keeps `cookie` from being written: document.cookie can't

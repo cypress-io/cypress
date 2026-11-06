@@ -111,6 +111,22 @@ describe('cross-origin messages from other frames', () => {
       })
     })
 
+    it('ignores a cookie for a public suffix', () => {
+      postFromAut({ cookie: { ...cookie, domain: 'com', hostOnly: false }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
+      .then(() => {
+        expect(automation).not.to.be.calledWith('get:cookies')
+        expect(automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
+    it('ignores a cookie for part of an IP address', () => {
+      postFromAut({ cookie: { ...cookie, domain: '0.0.1', hostOnly: false }, url: 'http://127.0.0.1:3500/', sameSiteContext: 'strict' }, 'http://127.0.0.1:3500')
+      .then(() => {
+        expect(automation).not.to.be.calledWith('get:cookies')
+        expect(automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
     it('ignores a Secure cookie from an http page', () => {
       postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com', secure: true }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
       .then(() => {
@@ -138,7 +154,7 @@ describe('cross-origin messages from other frames', () => {
     })
   })
 
-  it('ignores messages to the spec bridge from other windows', () => {
+  it('ignores messages to the spec bridge from other windows', { browser: '!webkit' }, () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('[data-cy="cross-origin-secondary-link"]').click()
     cy.origin('http://www.foobar.com:3500', () => {})
