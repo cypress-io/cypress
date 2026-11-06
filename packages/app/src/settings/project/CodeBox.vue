@@ -37,7 +37,7 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 const props = defineProps<{
   code: string
-  prefixIcon: FunctionalComponent<SVGAttributes, {}>
+  prefixIcon: FunctionalComponent<SVGAttributes>
   confidential?: boolean
 }>()
 

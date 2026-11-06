@@ -30,7 +30,7 @@ import { computed } from 'vue'
 const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
-  isCompletionScheduled: boolean
+  isCompletionScheduled?: boolean
 }>(), {
   isCompletionScheduled: false,
 })

@@ -400,7 +400,7 @@ const replaceErrMsgTokens = (errMessage, args) => {
   const replace = (str, argValue, argKey) => {
     // Use a replacer function so `$` sequences in the (user-controlled) arg are
     // inserted literally rather than treated as special replacement patterns.
-    return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), () => argValue)
+    return str.replace(new RegExp(`\\{\\{${argKey}\\}\\}`, 'g'), () => argValue)
   }
 
   const getMsg = function (args = {}) {
@@ -428,7 +428,7 @@ const findPropByParents = (msgPath, propName) => {
 
   const obj = _.get(allErrorMessages, msgPath)
 
-  if (obj.hasOwnProperty(propName)) {
+  if (Object.prototype.hasOwnProperty.call(obj, propName)) {
     return obj[propName]
   }
 
@@ -454,9 +454,9 @@ const errByPath = (msgPath, args?) => {
     }
   }
 
-  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || findPropByParents(msgPath, 'docsUrl')
-  const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || findPropByParents(msgPath, 'docsUrlTitle')
-  const triggerAction = (msgObj.hasOwnProperty('triggerAction') && msgObj.triggerAction) || findPropByParents(msgPath, 'triggerAction')
+  const docsUrl = (Object.prototype.hasOwnProperty.call(msgObj, 'docsUrl') && msgObj.docsUrl) || findPropByParents(msgPath, 'docsUrl')
+  const docsUrlTitle = (Object.prototype.hasOwnProperty.call(msgObj, 'docsUrlTitle') && msgObj.docsUrlTitle) || findPropByParents(msgPath, 'docsUrlTitle')
+  const triggerAction = (Object.prototype.hasOwnProperty.call(msgObj, 'triggerAction') && msgObj.triggerAction) || findPropByParents(msgPath, 'triggerAction')
 
   const resolvedTriggerAction =
     triggerAction === 'loginModal' || triggerAction === 'projectConnectModal'

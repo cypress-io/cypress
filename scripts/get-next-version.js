@@ -14,7 +14,7 @@ const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
 const getNextVersionForPath = async (path) => {
-  const { version: releasedVersion } = await getCurrentReleaseData(false)
+  const { version: releasedVersion, isPreviousMajor } = await getCurrentReleaseData(false)
 
   let commits
   const whatBump = (foundCommits) => {
@@ -60,6 +60,10 @@ const getNextVersionForPath = async (path) => {
   } else if (!isSentinelVersion && checkedInBinaryVersion !== releasedVersion) {
     // honor a manually-set real version in package.json
     nextVersion = checkedInBinaryVersion
+  }
+
+  if (isPreviousMajor && semver.major(nextVersion) > semver.major(releasedVersion)) {
+    throw new Error(`The next version ${nextVersion} is outside the ${semver.major(releasedVersion)}.x line this branch releases.`)
   }
 
   return {

@@ -687,7 +687,7 @@ describe('driver/src/cypress/error_utils', () => {
 
     it('calls Cypress.log with error name and message when error a string', () => {
       $errUtils.logError(cypressMock, 'error', 'Some string error')
-      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: \"Some string error\"`))
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: "Some string error"`))
     })
 
     it('calls Cypress.log with default error name and provided message message when error is an object with a message', () => {

@@ -6,7 +6,7 @@
     <p class="mb-6 text-lg font-light text-body-gray">
       {{ t('globalPage.empty.helper') }}
     </p>
-    <FileDropzone @addProject="emit('addProject', $event)" />
+    <FileDropzone @add-project="emit('addProject', $event)" />
   </div>
 </template>
 

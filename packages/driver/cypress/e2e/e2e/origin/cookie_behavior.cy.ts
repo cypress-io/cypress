@@ -800,6 +800,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                   return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=www.foobar.com`, 'fetch'))
                 })
 
+                // eslint-disable-next-line cypress/no-unnecessary-waiting -- lets the first Set-Cookie response reach the cookie jar before the second request
                 cy.wait(200)
 
                 cy.window().then((win) => {
@@ -1390,6 +1391,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com`, 'fetch'))
               })
 
+              // eslint-disable-next-line cypress/no-unnecessary-waiting -- lets the first Set-Cookie response reach the cookie jar before the second request
               cy.wait(200)
 
               cy.window().then((win) => {

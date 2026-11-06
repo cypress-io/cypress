@@ -5,7 +5,7 @@ function specRowSelector (specFileName: string) {
   return `[data-cy-row="${specFileName}"]`
 }
 
-function dotSelector (specFileName: string, dotNumber: 0 | 1 | 2 |'latest') {
+function dotSelector (specFileName: string, dotNumber: 0 | 1 | 2 | 'latest') {
   return `${specRowSelector(specFileName)} [data-cy="run-status-dot-${dotNumber}"]`
 }
 
@@ -44,10 +44,10 @@ function validateTooltip (status: string) {
   })
 }
 
-function specShouldShow (specFileName: string, runDotsClasses: string[], latestRunStatus: CloudRunStatus|'PLACEHOLDER') {
+function specShouldShow (specFileName: string, runDotsClasses: string[], latestRunStatus: CloudRunStatus | 'PLACEHOLDER') {
   const latestStatusSpinning = latestRunStatus === 'RUNNING'
 
-  type dotIndex = Parameters<typeof dotSelector>[1];
+  type dotIndex = Parameters<typeof dotSelector>[1]
   const indexes: Exclude<dotIndex, 'latest'>[] = [0, 1, 2]
 
   indexes.forEach((i) => {
@@ -386,6 +386,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
         .should('have.attr', 'aria-expanded', 'false')
 
         // Trigger cloud specs list change by scrolling
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- pausing at the bottom is the scroll gesture under test; the assertion that follows checks nothing changed
         cy.findByTestId('spec-list-container')
         .scrollTo('bottom', { duration: 500 })
         .wait(100)
@@ -577,9 +578,10 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseleave')
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
 
-      cy.wait(1200)
+      // new results should be shown once polling returns them
+      cy.get(dotSelector('accounts_list.spec.js', 'latest'), { timeout: 10000 })
+      .should('have.attr', 'data-cy-run-status', 'FAILED')
 
-      // new results should be shown
       specShouldShow('accounts_list.spec.js', ['gray-300', 'red-400', 'jade-400'], 'FAILED')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseenter')
       cy.get('.v-popper__popper--shown').should('exist')
@@ -617,7 +619,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.goOffline()
-      cy.wait(300)
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
 

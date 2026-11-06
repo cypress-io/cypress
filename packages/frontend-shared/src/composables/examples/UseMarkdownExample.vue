@@ -1,8 +1,10 @@
 <template>
+  <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown, which passes raw HTML through (html: true) -->
   <div
     ref="target"
     v-html="markdown"
   />
+  <!-- eslint-enable vue/no-v-html -->
 </template>
 
 <script lang="ts" setup>

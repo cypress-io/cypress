@@ -99,7 +99,7 @@ const measure = (func: (...args) => any, opts: { name?: string, save?: boolean }
  * @returns the JS heap size limit in bytes for the browser. If not available, returns a default of four gibibytes.
  */
 export const getJsHeapSizeLimit: (automation: Automation) => Promise<number> = measure(async (automation: Automation) => {
-  let heapLimit: Number
+  let heapLimit: number
 
   try {
     heapLimit = (await automation.request('get:heap:size:limit', null, null)).result.value

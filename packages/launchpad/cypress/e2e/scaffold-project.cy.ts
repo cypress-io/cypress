@@ -93,7 +93,7 @@ function scaffoldAndOpenCTProject (opts: {
   cy.contains('Continue').click()
 }
 
-function assertScaffoldedFilesAreCorrect (opts: { language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string, customDirectory?: string}) {
+function assertScaffoldedFilesAreCorrect (opts: { language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string, customDirectory?: string }) {
   cy.withCtx((ctx) => ctx.currentProject).then((currentProject) => {
     cy.task<SnapshotScaffoldTestResult>('snapshotCypressDirectory', {
       currentProject,
@@ -187,7 +187,7 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     cy.get('h1').contains(cy.i18n.setupPage.testingCard.chooseABrowser).should('be.visible')
 
     cy.withCtx(async (ctx) => {
-      let config = await ctx.actions.file.readFileInProject('cypress.config.js')
+      const config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       expect(config).not.to.contain('defineConfig')
     })

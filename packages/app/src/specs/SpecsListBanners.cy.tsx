@@ -161,14 +161,14 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
         .should('be.visible')
 
         // The ct title has dynamic content and seems complicated to set here, so ignoring
-        let ctBannerTitle = defaultMessages.specPage.banners.componentTesting.title
+        const ctBannerTitle = defaultMessages.specPage.banners.componentTesting.title
 
         if (ctBannerTitle) {
           defaultMessages.specPage.banners.componentTesting.title = ctBannerTitle.replace('{0}', 'React')
         }
 
         cy.wrap(Object.entries(defaultMessages.specPage.banners[camelCase(bannerTestId)])).each((entry) => {
-          // @ts-expect-error
+          // @ts-expect-error - the banner messages are typed as unknown, which no cy.contains overload accepts
           cy.contains(entry[1]).should('be.visible')
         })
       })

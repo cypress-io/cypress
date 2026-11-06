@@ -197,8 +197,9 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
       cy.getByRole('button', { name: 'Close' }).should('be.visible')
 
-      // There appears to be a race condition here where sometimes we try to run the spec
-      // before the file has been written to. Waiting here for 1 second resolves the issue.
+      // The dialog can appear before the new spec is written and picked up by
+      // the component dev server, and running it before then fails
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the dev server exposes no signal that it has picked up the spec
       cy.wait(2000)
 
       cy.getByRole('link', { name: 'Okay, run the spec' })
