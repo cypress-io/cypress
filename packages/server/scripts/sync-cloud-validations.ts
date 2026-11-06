@@ -3,6 +3,7 @@
 
 import fs from 'fs'
 import path from 'path'
+import { resolveDevelopmentCloudWorkspaceUrl } from '../../config/src/developmentWorkspaceUrl'
 
 const log = (message: string) => {
   // eslint-disable-next-line no-console
@@ -18,7 +19,10 @@ const CY_CLOUD_VALIDATION_BASE: Record<string, string> = {
   development: 'http://localhost:1234',
 }
 
-const VALIDATION_BASE = CY_CLOUD_VALIDATION_BASE[INTERNAL_CLOUD_ENV] || 'https://api.cypress.io'
+const VALIDATION_BASE = resolveDevelopmentCloudWorkspaceUrl(
+  CY_CLOUD_VALIDATION_BASE[INTERNAL_CLOUD_ENV] || 'https://api.cypress.io',
+  INTERNAL_CLOUD_ENV,
+)
 
 const TYPES_URL = `${VALIDATION_BASE}/cypress-app/validations/types`
 

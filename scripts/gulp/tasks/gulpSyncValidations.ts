@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 import crossFetch from 'cross-fetch'
+import { resolveDevelopmentCloudWorkspaceUrl } from '../../../packages/config/src/developmentWorkspaceUrl'
 
 const INTERNAL_CLOUD_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
 
@@ -11,7 +12,7 @@ const CY_CLOUD_VALIDATION_BASE = {
   development: 'http://localhost:1234',
 }
 
-const VALIDATION_BASE = CY_CLOUD_VALIDATION_BASE[INTERNAL_CLOUD_ENV]
+const VALIDATION_BASE = resolveDevelopmentCloudWorkspaceUrl(CY_CLOUD_VALIDATION_BASE[INTERNAL_CLOUD_ENV], INTERNAL_CLOUD_ENV)
 
 const OUTPUT_FOLDER = path.join(__dirname, '../../../system-tests/lib/validations')
 

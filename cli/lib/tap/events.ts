@@ -5,6 +5,7 @@ import util, { DEVELOPMENT_VERSION } from '../util'
 import { resolvedSessionIdentity } from '../cypress-sessions'
 import { detectAgent } from '@packages/agent-info'
 import type { ReportedInvocation } from './reported-invocation'
+import { resolveDevelopmentCloudWorkspaceNumber } from '../development-workspace'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -36,7 +37,11 @@ const namedCollectorEnv = (): keyof typeof CLOUD_URLS | undefined => {
 }
 
 const eventCollectorUrl = (includeMachineId = false): string => {
-  return `${CLOUD_URLS[namedCollectorEnv() ?? 'production']}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
+  const environment = namedCollectorEnv() ?? 'production'
+  const cloudWorkspaceNum = resolveDevelopmentCloudWorkspaceNumber(environment)
+  const cloudUrl = cloudWorkspaceNum === undefined ? CLOUD_URLS[environment] : `http://localhost:${3000 + cloudWorkspaceNum * 10000}`
+
+  return `${cloudUrl}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
 }
 
 interface TapTrace {
