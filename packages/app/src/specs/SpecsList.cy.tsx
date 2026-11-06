@@ -237,7 +237,10 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.wrap(setSpecFilterStub).should('have.been.calledWith', 'te')
         cy.get('@searchField').type('{backspace}{backspace}')
         cy.wrap(setSpecFilterStub).should('have.been.calledWith', '')
-        cy.wait(100) // there's an intentional 50ms delay in the code, lets just wait it out
+        // the list is filtered after a debounce, so wait for it to show every spec again
+        cy.contains('button', defaultMessages.createSpec.viewSpecPatternButton)
+        .should('contain.text', '50 matches')
+        .and('not.contain.text', 'of 50 matches')
 
         // Specs List has a min width of ~650px in the app, so there's no need to snapshot below that
         cy.viewport(650, 850)

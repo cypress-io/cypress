@@ -197,9 +197,14 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
       cy.getByRole('button', { name: 'Close' }).should('be.visible')
 
-      // There appears to be a race condition here where sometimes we try to run the spec
-      // before the file has been written to. Waiting here for 1 second resolves the issue.
-      cy.wait(2000)
+      // The dialog can appear before the spec is written and picked up by the
+      // specs watcher, and running it before then fails
+      cy.withRetryableCtx(async (ctx, o) => {
+        const contents = await ctx.fs.readFile(ctx.path.join(ctx.currentProject!, o.specPath), 'utf8')
+
+        expect(contents).not.to.be.empty
+        expect(ctx.project.specs.some((spec) => ctx.path.normalize(spec.relative) === ctx.path.normalize(o.specPath))).to.be.true
+      }, { specPath: expectedSpecPath })
 
       cy.getByRole('link', { name: 'Okay, run the spec' })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()

@@ -50,8 +50,8 @@ describe('slow network: launchpad', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('Log in')
-    cy.wait(500)
-    cy.withCtx(async (ctx, o) => {
+    cy.withRetryableCtx(async (ctx, o) => {
+      expect(o.testState.pendingFetches).not.to.be.empty
       o.testState.pendingFetches.map((f) => f.resolve())
     })
 
