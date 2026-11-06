@@ -599,5 +599,65 @@ describe('src/cy/commands/assertions', () => {
         done)
       })
     })
+
+    describe('assertion errors', () => {
+      it('throws a chai AssertionError with the operator and a diff', () => {
+        const err = getAssertionError(() => expect({ a: 1 }).to.deep.equal({ a: 2 }))
+
+        expect(err).to.be.an.instanceof(chai.AssertionError)
+        expect(err.message).to.eq('expected { a: 1 } to deeply equal { a: 2 }')
+        expect(err.operator).to.eq('deepStrictEqual')
+        expect(err.showDiff).to.be.true
+        expect(err.actual).to.eq('{ a: 1 }')
+        expect(err.expected).to.eq('{ a: 2 }')
+      })
+
+      it('serializes diffed values with Cypress value inspection', () => {
+        const foo = function foo () {}
+        const bar = function bar () {}
+
+        const err = getAssertionError(() => expect(foo).to.equal(bar))
+
+        expect(err.actual).to.eq('[Function: foo]')
+        expect(err.expected).to.eq('[Function: bar]')
+      })
+
+      it('omits the diff when the assertion has no expected value', () => {
+        const err = getAssertionError(() => expect(0).to.be.ok)
+
+        expect(err.message).to.eq('expected 0 to be truthy')
+        expect(err).not.to.have.property('showDiff')
+        expect(err).not.to.have.property('actual')
+        expect(err).not.to.have.property('expected')
+      })
+
+      it('omits the diff and shortens DOM subjects', () => {
+        const err = getAssertionError(() => expect(document.body).to.equal(document.createElement('span')))
+
+        expect(err.message).to.eq(`expected '<body>' to equal <span></span>`)
+        expect(err).not.to.have.property('showDiff')
+      })
+
+      it('prefixes the custom message', () => {
+        const err = getAssertionError(() => expect(1, 'my message').to.equal(2))
+
+        expect(err.message).to.eq('my message: expected 1 to equal 2')
+      })
+
+      it('throws a chai AssertionError from the assert interface', () => {
+        const err = getAssertionError(() => assert.equal(1, 2))
+
+        expect(err).to.be.an.instanceof(chai.AssertionError)
+        expect(err.message).to.eq('expected 1 to equal 2')
+        expect(err.operator).to.eq('strictEqual')
+      })
+    })
+
+    // chai 5+ exposes `chai.util` as a read-only module namespace, so Cypress
+    // formats messages without overwriting it. Plugins calling `chai.util`
+    // directly get chai's own formatting, not Cypress's.
+    it('leaves chai.util formatting to chai', () => {
+      expect(chai.util.objDisplay(function foo () {})).to.eq('[Function foo]')
+    })
   })
 })

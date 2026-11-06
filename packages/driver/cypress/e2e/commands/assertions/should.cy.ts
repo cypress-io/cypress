@@ -987,6 +987,24 @@ describe('src/cy/commands/assertions', () => {
       cy.visit('fixtures/cross_origin_name.html')
       cy.get('.foo').should('not.exist')
     })
+
+    // https://github.com/cypress-io/cypress/issues/5270
+    it('displays a cross-origin window as [window] in assertion messages', () => {
+      cy.visit('fixtures/cross_origin_name.html')
+      cy.get('iframe').then(($iframe) => {
+        const crossOriginWindow = $iframe[0].contentWindow
+
+        try {
+          expect({ frame: crossOriginWindow }).to.deep.equal({})
+        } catch (err) {
+          expect(err.message).to.eq('expected { frame: [window] } to deeply equal {}')
+
+          return
+        }
+
+        throw new Error('expected the assertion to fail')
+      })
+    })
   })
 
   context('implicit assertions', () => {
