@@ -26,6 +26,13 @@
     <button id="submit-button" type="submit">Submit</button>
   </form>
 
+  <input id="outside" autocomplete="off" />
+  <!-- sized to its options, so the click point lands on an <option> -->
+  <select id="fruits" multiple size="2">
+    <option value="apple">Apple</option>
+    <option value="banana">Banana</option>
+  </select>
+
   <div role="button" id="role-button">Role button</div>
   <div id="host"></div>
 
@@ -51,6 +58,8 @@
     byId('text').addEventListener('blur', () => status('blur:text'))
     byId('check').addEventListener('change', (e) => status(`checked:${e.target.checked}`))
     byId('fruit').addEventListener('change', (e) => status(`selected:${e.target.value}`))
+    byId('outside').addEventListener('change', (e) => status(`changed:${e.target.value}`))
+    byId('fruits').addEventListener('change', (e) => status(`selected:${[...e.target.selectedOptions].map((option) => option.value).join(',')}`))
     byId('file').addEventListener('change', (e) => status(`file:${e.target.files[0] ? e.target.files[0].name : 'none'}`))
     byId('role-button').addEventListener('click', () => status('clicked'))
     byId('role-button').addEventListener('dblclick', () => status('dblclicked'))

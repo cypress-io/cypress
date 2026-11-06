@@ -74,7 +74,6 @@ const crossOriginInjectionConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
 const remoteAutInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
@@ -87,7 +86,9 @@ const remoteAutInjectionConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
+// The server sends this bundle to the AUT every time a page loads in Firefox and
+// WebKit, and evaluating it there takes longer the more code it has, so it leaves
+// out what the agent never runs and is minified in production.
 const remoteAgentConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
@@ -97,13 +98,26 @@ const remoteAgentConfig: webpack.Configuration = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
   },
+  resolve: {
+    ...commonConfig.resolve,
+    alias: {
+      // error_utils only inspects a chai assertion's values, and the agent makes no assertions
+      chai: false,
+      // stack_utils maps stacks to the spec's source, which the driver does with the agent's errors
+      'source-map': false,
+      // ensure only compares origins in a check the driver runs, not the agent
+      '@packages/network-tools': false,
+    },
+  },
+  optimization: {
+    ...commonConfig.optimization,
+    minimize: process.env.NODE_ENV === 'production',
+  },
 }
 
-// @ts-ignore
 const remoteClockConfig: webpack.Configuration = {
   ...commonConfig,
   // runs in the AUT's main world, where a Content-Security-Policy may forbid the eval the dev build wraps modules in
-  // @ts-ignore
   plugins: commonConfig.plugins.filter((plugin) => !plugin.evalDevToolPlugin),
   entry: {
     cypress_remote_clock: [path.resolve(__dirname, '../driver/src/remote/clock/index.ts')],

@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import type { Protocol } from 'devtools-protocol'
+import { RUNNER_FRAME_NAME_IDENTIFIERS } from '@packages/types'
 import type { RemoteAgentFrameOwner, RemoteAgentRequest } from '@packages/types'
 import { getRunnerRemoteAgentContents } from '@packages/resolve-dist'
 import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
@@ -20,6 +21,58 @@ const frameNotFound = (owner: RemoteAgentFrameOwner, reason: string) => {
   }
 }
 
+// Installs the agent as each AUT document is created, so the first command after a
+// navigation doesn't wait for it. The guard matches the remote AUT script's, so the
+// runner's own frames and the blank page between tests don't pay for an agent they
+// never use; any other frame gets the agent on first use.
+//
+// WebKit doesn't preload: Playwright can't preload into its utility world, and
+// installing as the AUT frame navigates makes a run slower than installing on first use.
+const getAgentPreloadSource = async (getSource: () => Promise<Buffer | string>, wrap = (source: string) => source) => {
+  return toAscii(`(() => {
+  const isAut = window.parent === window.top && window !== window.top && !${JSON.stringify(RUNNER_FRAME_NAME_IDENTIFIERS)}.some((id) => window.name.startsWith(id))
+
+  if (isAut && /^https?:$/.test(location.protocol)) {
+    ${whenDocumentHasRoot(wrap(String(await getSource())))}
+  }
+})()`)
+}
+
+// The protocols handle the agent's few thousand non-ASCII characters slowly: Chrome
+// takes about 0.2ms each to register a script, over a second per spec, and Firefox
+// and WebKit install it faster without them. A `\u` escape means the same character
+// in a string, regex, identifier or comment.
+const toAscii = (source: string) => {
+  return source.replace(/[\u0080-\uffff]/g, (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`)
+}
+
+// jQuery's selector engine can't initialize until the document has its root
+// element, which a document being created doesn't have yet
+const whenDocumentHasRoot = (source: string) => {
+  return `(() => {
+  const install = () => {
+    if (window.${AGENT_GLOBAL} !== undefined) {
+      return
+    }
+
+${source}
+  }
+
+  if (document.documentElement) {
+    return install()
+  }
+
+  const observer = new MutationObserver(() => {
+    if (document.documentElement) {
+      observer.disconnect()
+      install()
+    }
+  })
+
+  observer.observe(document, { childList: true })
+})()`
+}
+
 const isMissingContextError = (err: unknown) => {
   return err instanceof Error && err.message.includes('Cannot find context with specified id')
 }
@@ -36,6 +89,10 @@ export class CdpRemoteAgent {
     private contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
     private getSource: () => Promise<Buffer | string> = getRunnerRemoteAgentContents,
   ) {}
+
+  async preload () {
+    await this.send('Page.addScriptToEvaluateOnNewDocument', { source: await getAgentPreloadSource(this.getSource), worldName: WORLD_NAME })
+  }
 
   async call (frame: Protocol.Page.Frame, request: RemoteAgentRequest): Promise<unknown> {
     let frameId = frame.id
@@ -114,26 +171,40 @@ export class CdpRemoteAgent {
       return existing
     }
 
-    const { executionContextId } = await this.send('Page.createIsolatedWorld', {
+    // the preload creates the world when the document does, but skips frames other than the AUT
+    const preloaded = [...this.contexts.values()].find((context) => context.name === WORLD_NAME && context.auxData?.frameId === frameId)
+    const executionContextId = preloaded?.id ?? (await this.send('Page.createIsolatedWorld', {
       frameId,
       worldName: WORLD_NAME,
+    })).executionContextId
+
+    const { result } = await this.send('Runtime.evaluate', {
+      contextId: executionContextId,
+      expression: `window.${AGENT_GLOBAL} !== undefined`,
+      returnByValue: true,
     })
 
-    this.source ??= Promise.resolve(this.getSource()).then(String)
+    if (!result.value) {
+      await this.install(executionContextId)
+    }
+
+    debug('using agent world %d for frame %s (preloaded: %s)', executionContextId, frameId, !!result.value)
+    this.worlds.set(frameId, executionContextId)
+
+    return executionContextId
+  }
+
+  private async install (contextId: Protocol.Runtime.ExecutionContextId) {
+    this.source ??= Promise.resolve(this.getSource()).then((source) => toAscii(String(source)))
 
     const { exceptionDetails } = await this.send('Runtime.evaluate', {
-      contextId: executionContextId,
+      contextId,
       expression: await this.source,
     })
 
     if (exceptionDetails) {
       throw new Error(`The remote agent failed to load: ${exceptionDetails.exception?.description ?? exceptionDetails.text}`)
     }
-
-    debug('created agent world %d for frame %s', executionContextId, frameId)
-    this.worlds.set(frameId, executionContextId)
-
-    return executionContextId
   }
 }
 
@@ -277,6 +348,14 @@ export class BidiRemoteAgent {
     private getSource: () => Promise<Buffer | string> = getRunnerRemoteAgentContents,
   ) {}
 
+  // Firefox runs a preload script in every document of every frame, so the agent stays
+  // a string there and only the AUT frame, which passes the guard, parses it
+  async preload () {
+    const source = await getAgentPreloadSource(this.getSource, (agent) => `(0, eval)(${JSON.stringify(agent)})`)
+
+    await this.client.scriptAddPreloadScript({ functionDeclaration: `() => ${source}`, sandbox: WORLD_NAME })
+  }
+
   async call (autContextId: string, request: RemoteAgentRequest): Promise<unknown> {
     let contextId = autContextId
 
@@ -325,7 +404,7 @@ export class BidiRemoteAgent {
   }
 
   private async install (contextId: string) {
-    this.source ??= Promise.resolve(this.getSource()).then(String)
+    this.source ??= Promise.resolve(this.getSource()).then((source) => toAscii(String(source)))
 
     const result = await this.client.scriptEvaluate({
       expression: await this.source,
@@ -449,13 +528,18 @@ export class WebKitRemoteAgent {
     let result = await this.evaluate(frame, action, guarded)
 
     if (result === AGENT_MISSING) {
-      this.source ??= Promise.resolve(this.getSource()).then(String)
-      await this.evaluate(frame, 'loading', await this.source)
-      debug('installed agent in the utility world of a WebKit frame')
+      await this.install(frame)
       result = await this.evaluate(frame, action, expression)
     }
 
     return result
+  }
+
+  private async install (frame: PlaywrightServerFrame) {
+    this.source ??= Promise.resolve(this.getSource()).then((source) => toAscii(String(source)))
+
+    await this.evaluate(frame, 'loading', await this.source)
+    debug('installed agent in the utility world of a WebKit frame')
   }
 
   private async evaluate (frame: PlaywrightServerFrame, action: string, expression: string) {

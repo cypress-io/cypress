@@ -30,7 +30,6 @@ describe('remote driver: files in a cross-origin AUT', { experimentalRemoteDrive
       expect(Cypress.backend).to.be.calledWith(
         'run:privileged',
         {
-          args: ['6998637248317671', '4581875909943693'],
           commandName: 'writeFile',
           options: {
             fileName: 'foo.json',

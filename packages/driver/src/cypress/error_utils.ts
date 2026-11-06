@@ -11,7 +11,7 @@
 import chai from 'chai'
 import _ from 'lodash'
 import $dom from '../dom'
-import { stripAnsi } from '@packages/errors'
+import stripAnsi from 'strip-ansi'
 import $errorMessages from './error_messages'
 import type { StackAndCodeFrameIndex } from './stack_utils'
 import $stackUtils from './stack_utils'

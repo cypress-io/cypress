@@ -188,6 +188,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
   async addRemoteAutScript (config: RemoteAutScriptConfig) {
     await this.send('Page.addScriptToEvaluateOnNewDocument', { source: await getRemoteAutScript(config, { reportErrors: false }) })
+
+    await this.remoteAgent.preload()
   }
 
   useRemoteTabs (getTabs: () => CdpTab[]) {

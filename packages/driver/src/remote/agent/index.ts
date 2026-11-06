@@ -25,6 +25,7 @@ import $actionability from '../../cy/actionability'
 import { create as createFocused } from '../../cy/focused'
 import { create as createMouse } from '../../cy/mouse'
 import { Keyboard } from '../../cy/keyboard'
+import { createTypeEventHandlers } from '../../cy/commands/actions/type_events'
 import type { StateFunc } from '../../cypress/state'
 import type {
   ActionOptions,
@@ -291,6 +292,12 @@ const type = (context: AgentContext, args: TypeArgs): Bluebird<ActionResult> => 
     }
 
     const $el = resolveSubject(args.steps, args.index)
+    const handlers = createTypeEventHandlers({
+      $el,
+      state,
+      isBrowser: (name) => shim.isBrowser(name),
+      submit: (form) => submitForm(form.get(0)),
+    })
 
     return keyboard.type({
       $el,
@@ -300,9 +307,7 @@ const type = (context: AgentContext, args: TypeArgs): Bluebird<ActionResult> => 
       parseSpecialCharSequences: args.options.parseSpecialCharSequences,
       window,
       force: args.options.force,
-      updateValue (el, key) {
-        return $selection.replaceSelectionContents(el, key)
-      },
+      ...handlers,
     } as any)
     .then(() => ({ coords: _.pick(coords.fromAutWindow, 'x', 'y') }))
   })
@@ -328,12 +333,14 @@ const blur = (context: AgentContext, { steps, index }: ElementArgs) => {
   return null
 }
 
-const submit = (context: AgentContext, { steps, index }: ElementArgs) => {
-  const form = resolveSubject(steps, index).get(0)
-
+const submitForm = (form: HTMLFormElement) => {
   if (form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))) {
     form.submit()
   }
+}
+
+const submit = (context: AgentContext, { steps, index }: ElementArgs) => {
+  submitForm(resolveSubject(steps, index).get(0))
 
   return null
 }
@@ -366,7 +373,9 @@ const findOptions = ($select: JQuery<any>, values: (string | number)[]) => {
 const select = (context: AgentContext, args: SelectArgs) => {
   const mouse = getMouse()
 
-  return verify('select', context, args, undefined, ($select, coords) => {
+  return verify('select', context, args, undefined, (_$elToClick, coords) => {
+    // the element at the click point is an <option> when a multiple select renders as a list box
+    const $select = resolveSubject(args.steps, args.index)
     const select = $select.get(0)
     const { matches, notAllUniqueValues } = findOptions($select, args.values)
     const value = args.values.join(', ')
@@ -392,7 +401,8 @@ const select = (context: AgentContext, args: SelectArgs) => {
     mouse.move(coords.fromElViewport, args.options.force && select)
     mouse.click(coords.fromElViewport, args.options.force && select)
 
-    const oldIndex = select.selectedIndex
+    // every option's selected state, since a multiple select can change without its selectedIndex changing
+    const oldSelection = _.map(select.options, 'selected')
 
     $select.val(matches.map(({ value }) => value))
 
@@ -400,7 +410,7 @@ const select = (context: AgentContext, args: SelectArgs) => {
       matches.forEach(({ el }) => $(el).prop('selected', true))
     }
 
-    if (select.selectedIndex !== oldIndex) {
+    if (!_.isEqual(_.map(select.options, 'selected'), oldSelection)) {
       select.dispatchEvent(new Event('input', { bubbles: true, cancelable: false }))
       select.dispatchEvent(new Event('change', { bubbles: true, cancelable: false }))
     }

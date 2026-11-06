@@ -4,7 +4,7 @@ import { getCwd } from '../cwd'
 import Debug from 'debug'
 import { escapeFilenameInUrl } from '../util/escape_filename'
 import { getCtx } from '@packages/data-context'
-import { DocumentDomainInjection, serializeForInlineScript } from '@packages/network-tools'
+import { DocumentDomainInjection, getRemoteRunnerOrigin, serializeForInlineScript } from '@packages/network-tools'
 import { privilegedCommandsManager } from '../privileged-commands/privileged-commands-manager'
 import type { Cfg } from '../project-base'
 import type { RemoteStates } from '@packages/network-tools'
@@ -39,8 +39,11 @@ const files = {
 
     let privilegedChannel: string | undefined
 
-    // the runner only loads the spec frame on the primary origin
-    if (remoteStates.isPrimarySuperDomainOrigin(req.proxiedUrl)) {
+    // the runner loads the spec frame on the primary origin, or on its own origin under the remote driver, which never moves it
+    const isRemoteRunnerOrigin = 'experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true && !!config.baseUrl && config.port != null &&
+      new URL(req.proxiedUrl).origin === getRemoteRunnerOrigin(config.baseUrl, config.port)
+
+    if (remoteStates.isPrimarySuperDomainOrigin(req.proxiedUrl) || isRemoteRunnerOrigin) {
       privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
         browserFamily: req.query.browserFamily,
         isSpecBridge: false,

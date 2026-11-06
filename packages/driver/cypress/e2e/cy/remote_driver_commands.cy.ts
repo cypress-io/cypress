@@ -124,6 +124,18 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
       cy.get('#text').clear().should('have.value', '')
     },
     'type after clear': () => cy.get('#text').type('abc').clear().type('xyz').should('have.value', 'xyz'),
+    'type {enter} fires change': () => {
+      cy.get('#outside').type('abc{enter}')
+      expectStatus('changed:abc')
+    },
+    'type fires change when the input blurs': () => {
+      cy.get('#outside').type('abc').blur()
+      expectStatus('changed:abc')
+    },
+    'type {enter} submits the form': () => {
+      cy.get('#text').type('abc{enter}')
+      expectStatus('submitted:abc')
+    },
     check: () => {
       cy.get('#check').check()
       expectStatus('checked:true')
@@ -136,6 +148,15 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     select: () => {
       cy.get('#fruit').select('banana')
       expectStatus('selected:banana')
+    },
+    'select several options': () => {
+      cy.get('#fruits').select(['Apple', 'Banana'])
+      expectStatus('selected:apple,banana')
+    },
+    'select adds to a multiple selection': () => {
+      cy.get('#fruits').select(['Apple'])
+      cy.get('#fruits').select(['Apple', 'Banana'])
+      expectStatus('selected:apple,banana')
     },
     selectFile: () => {
       cy.get('#file').selectFile({ contents: Cypress.Buffer.from('audit'), fileName: 'audit.txt' })

@@ -16,20 +16,22 @@ describe('remote:agent automation command', () => {
   const expression = `__cypressAgent.call("resolve", {"config":{}}, [{"type":"get","selector":"#input"}])`
 
   let send: MockedSendDebuggerCommand
+  let installedWorlds: Set<number>
   let contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>
   let nextWorldId: number
   let ownerResult: Protocol.Runtime.RemoteObject
   let agent: CdpRemoteAgent
 
-  const addContext = (id: number) => {
+  const addContext = (id: number, name?: string) => {
     // @ts-expect-error - partial mock of the execution context
-    contexts.set(id, { id, auxData: { frameId: frame.id, isDefault: false } })
+    contexts.set(id, { id, name, auxData: { frameId: frame.id, isDefault: false } })
   }
 
   const callsTo = (method: string) => send.mock.calls.filter(([name]) => name === method)
 
   beforeEach(() => {
     contexts = new Map()
+    installedWorlds = new Set()
     nextWorldId = 10
     ownerResult = { type: 'object', subtype: 'node', objectId: 'iframe-object' }
 
@@ -43,7 +45,13 @@ describe('remote:agent automation command', () => {
       }
 
       if (params?.expression === 'agent source') {
+        installedWorlds.add(params.contextId)
+
         return { result: { type: 'undefined' } }
+      }
+
+      if (params?.expression === 'window.__cypressAgent !== undefined') {
+        return { result: { type: 'boolean', value: installedWorlds.has(params.contextId) } }
       }
 
       if (params?.expression?.startsWith('__cypressAgent.frameOwner')) {
@@ -70,10 +78,46 @@ describe('remote:agent automation command', () => {
 
     expect(callsTo('Page.createIsolatedWorld')).toEqual([['Page.createIsolatedWorld', { frameId: 'aut', worldName: '__cypress_remote_agent' }]])
     expect(callsTo('Runtime.evaluate').map(([, params]) => params)).toEqual([
+      { contextId: 10, expression: 'window.__cypressAgent !== undefined', returnByValue: true },
       { contextId: 10, expression: 'agent source' },
       { contextId: 10, expression, awaitPromise: true, returnByValue: true },
       { contextId: 10, expression, awaitPromise: true, returnByValue: true },
     ])
+  })
+
+  it('uses the world the preload created without installing the agent again', async () => {
+    addContext(5, '__cypress_remote_agent')
+    installedWorlds.add(5)
+
+    await agent.call(frame, request)
+
+    expect(callsTo('Page.createIsolatedWorld')).toEqual([])
+    expect(callsTo('Runtime.evaluate').map(([, params]) => params?.expression)).toEqual(['window.__cypressAgent !== undefined', expression])
+  })
+
+  it('installs the agent in the preload\'s world when the preload didn\'t', async () => {
+    addContext(5, '__cypress_remote_agent')
+
+    await agent.call(frame, request)
+
+    expect(callsTo('Page.createIsolatedWorld')).toEqual([])
+    expect(callsTo('Runtime.evaluate').map(([, params]) => [params?.contextId, params?.expression])).toEqual([
+      [5, 'window.__cypressAgent !== undefined'],
+      [5, 'agent source'],
+      [5, expression],
+    ])
+  })
+
+  it('preloads the agent into its world in every new document, with non-ASCII characters escaped', async () => {
+    agent = new CdpRemoteAgent(send, contexts, () => Promise.resolve('agent source \u00e9'))
+
+    await agent.preload()
+
+    const [[, params]] = callsTo('Page.addScriptToEvaluateOnNewDocument')
+
+    expect(params).toMatchObject({ worldName: '__cypress_remote_agent' })
+    expect(params.source).toContain('agent source \\u00e9')
+    expect([...params.source].every((char) => char.charCodeAt(0) < 0x80)).toBe(true)
   })
 
   it('creates a new world after a navigation destroys the old one', async () => {
@@ -112,8 +156,10 @@ describe('remote:agent automation command', () => {
 
       expect(callsTo('Page.createIsolatedWorld').map(([, params]) => params?.frameId)).toEqual(['aut', 'child'])
       expect(callsTo('Runtime.evaluate').map(([, params]) => [params?.contextId, params?.expression])).toEqual([
+        [10, 'window.__cypressAgent !== undefined'],
         [10, 'agent source'],
         [10, '__cypressAgent.frameOwner([{"type":"get","selector":"#pay"}])'],
+        [11, 'window.__cypressAgent !== undefined'],
         [11, 'agent source'],
         [11, expression],
       ])
@@ -152,6 +198,7 @@ describe('remote:agent automation command', () => {
     let installed: Set<string>
     let ownerValue: ScriptRemoteValue
     let scriptEvaluate: Mock
+    let scriptAddPreloadScript: Mock
     let bidiAgent: BidiRemoteAgent
 
     const evaluated = () => scriptEvaluate.mock.calls.map(([params]) => params)
@@ -180,8 +227,19 @@ describe('remote:agent automation command', () => {
         return success({ type: 'string', value: JSON.stringify({ ok: true, value: { elements: [] } }) })
       })
 
+      scriptAddPreloadScript = vi.fn(async () => ({ script: 'preload' }))
+
       // @ts-expect-error - partial mock of the webdriver client
-      bidiAgent = new BidiRemoteAgent({ scriptEvaluate }, () => Promise.resolve('agent source'))
+      bidiAgent = new BidiRemoteAgent({ scriptEvaluate, scriptAddPreloadScript }, () => Promise.resolve('agent source'))
+    })
+
+    it('preloads the agent into its sandbox as a string that only a frame passing the guard evaluates', async () => {
+      await bidiAgent.preload()
+
+      const [[params]] = scriptAddPreloadScript.mock.calls
+
+      expect(params.sandbox).toEqual('__cypress_remote_agent')
+      expect(params.functionDeclaration).toContain('(0, eval)("agent source")')
     })
 
     it('installs the agent in the frame\'s sandbox when it is missing and calls it there', async () => {

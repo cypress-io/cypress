@@ -843,6 +843,8 @@ export class BidiAutomation {
   // not tied to a context, so it covers every tab of the session
   async addRemoteAutScript (config: RemoteAutScriptConfig) {
     await this.webDriverClient.scriptAddPreloadScript({ functionDeclaration: `() => ${await getRemoteAutScript(config, { reportErrors: true })}` })
+
+    await this.remoteAgent.preload()
   }
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {
