@@ -26,7 +26,7 @@ export interface CypressInternalBase extends Cypress.Cypress {
   areSourceMapsAvailable?: boolean
 }
 
-type SpecBridgeCommunicatorBase = Cypress.Cypress extends { specBridgeCommunicator: infer T } ? T : {}
+type SpecBridgeCommunicatorBase = Cypress.Cypress extends { specBridgeCommunicator: infer T } ? T : unknown
 
 export interface CrossOriginCypressInternal extends CypressInternalBase {
   isCrossOriginSpecBridge: true
