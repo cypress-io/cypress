@@ -153,7 +153,6 @@ describe('lib/browsers/firefox', () => {
       vi.spyOn(utils, 'writeExtension').mockResolvedValue('/path/to/ext')
       vi.spyOn(utils, 'getPort').mockResolvedValue(1234)
       vi.spyOn(FirefoxProfile.prototype, 'setPreference')
-      vi.spyOn(FirefoxProfile.prototype, 'shouldDeleteOnExit')
       vi.spyOn(FirefoxProfile.prototype, 'path')
       vi.spyOn(FirefoxProfile.prototype, 'encoded').mockImplementation((cb: Function) => {
         cb(undefined, 'abcdef')
@@ -546,10 +545,60 @@ describe('lib/browsers/firefox', () => {
       expectNotCalledWith(setPreference, 'network.proxy.no_proxies_on')
     })
 
-    it('tears down the temporary profile when the browser is destroyed', async () => {
-      await firefox.open(browser as any, 'http://', options as any, automation as any)
+    describe('profile removal on exit', () => {
+      let rmSyncSpy: MockInstance
 
-      expectCalledWith(vi.mocked(FirefoxProfile.prototype.shouldDeleteOnExit), true)
+      beforeEach(() => {
+        rmSyncSpy = vi.spyOn(fsExtra, 'rmSync').mockReturnValue(undefined)
+      })
+
+      it('removes the temporary profile with retries when the process exits', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        firefox._removeProfileDirsOnExit()
+
+        expect(rmSyncSpy).toHaveBeenCalledWith(
+          '/path/to/appData/firefox-stable/interactive',
+          expect.objectContaining({ recursive: true, force: true, maxRetries: expect.any(Number) }),
+        )
+      })
+
+      it('removes the profile of every Firefox launched in the process', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        vi.mocked(utils.getProfileDir).mockReturnValue('/path/to/appData/firefox-dev/interactive')
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        firefox._removeProfileDirsOnExit()
+
+        expect(rmSyncSpy).toHaveBeenCalledWith('/path/to/appData/firefox-stable/interactive', expect.anything())
+        expect(rmSyncSpy).toHaveBeenCalledWith('/path/to/appData/firefox-dev/interactive', expect.anything())
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/35293
+      it('does not print an error when the profile cannot be removed', async () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        rmSyncSpy.mockImplementation(() => {
+          throw Object.assign(new Error('EPERM: operation not permitted'), { code: 'EPERM', syscall: 'rm' })
+        })
+
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        expect(() => firefox._removeProfileDirsOnExit()).not.toThrow()
+        expect(warnSpy).not.toHaveBeenCalled()
+        expect(errorSpy).not.toHaveBeenCalled()
+      })
+
+      // firefox-profile's own delete-on-exit makes one attempt and prints the error with console.warn
+      it('leaves firefox-profile\'s own delete-on-exit turned off', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        const [profile] = vi.mocked(FirefoxProfile.prototype.path).mock.instances
+
+        expect(profile.willDeleteOnExit()).toBe(false)
+      })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/17896

@@ -378,6 +378,30 @@ toolbox {
 
 let browserBidiClient: BidiAutomation | undefined
 
+const profileDirsToRemoveOnExit = new Set<string>()
+
+export function _removeProfileDirsOnExit () {
+  for (const dir of profileDirsToRemoveOnExit) {
+    try {
+      // On Windows, Firefox's processes can still hold handles in the profile for a moment after
+      // they are killed, which fails the first attempt with EPERM or EBUSY, so retry before giving up.
+      // eslint-disable-next-line no-restricted-syntax -- 'exit' listeners cannot await
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+    } catch (err) {
+      // A leftover profile is removed by the profile cleaner at the start of the next run
+      debug('could not remove firefox profile %s on exit: %o', dir, err)
+    }
+  }
+}
+
+function removeProfileDirOnExit (dir: string) {
+  if (!profileDirsToRemoveOnExit.size) {
+    process.once('exit', _removeProfileDirsOnExit)
+  }
+
+  profileDirsToRemoveOnExit.add(dir)
+}
+
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
@@ -569,8 +593,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     destinationDirectory: profileDir,
   })
 
-  // make sure the profile that is ported into the session is destroyed when the browser is closed
-  profile.shouldDeleteOnExit(true)
+  removeProfileDirOnExit(profileDir)
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
