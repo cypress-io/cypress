@@ -29,7 +29,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
     super()
   }
 
-  pull () {
+  pullOnce () {
     return new Promise<void>((resolve, reject) => {
       log('Pulling image', this.dockerImage)
       getDocker().pull(this.dockerImage, null, (err, stream) => {
@@ -49,6 +49,28 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
         docker.modem.followProgress(stream, onFinished, onProgress)
       }, null)
     })
+  }
+
+  async pull (maxAttempts = 3) {
+    let lastError: unknown
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await this.pullOnce()
+
+        return
+      } catch (err) {
+        lastError = err
+        if (attempt < maxAttempts) {
+          const delayMs = 2000 * attempt
+
+          log('Pull failed, retrying', { attempt, delayMs, err })
+          await new Promise((resolve) => setTimeout(resolve, delayMs))
+        }
+      }
+    }
+
+    throw lastError
   }
 
   run (opts: {
