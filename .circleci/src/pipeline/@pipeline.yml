@@ -108,9 +108,6 @@ parameters:
   run-npm-grep-tests:
     type: boolean
     default: true
-  run-npm-eslint-plugin-tests:
-    type: boolean
-    default: true
   run-npm-schematic-tests:
     type: boolean
     default: true
@@ -2836,6 +2833,7 @@ jobs:
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+.gen2
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
       - halt-if-skipped:
@@ -3040,16 +3038,6 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/grep/test_results
 
-  npm-eslint-plugin-dev:
-    <<: *defaults
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-npm-eslint-plugin-tests >>
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/eslint-plugin-dev test
-
   npm-cypress-schematic:
     <<: *defaults
     steps:
@@ -3125,7 +3113,7 @@ jobs:
     resource_class: small.gen2
     steps:
       - run:
-          name: Comment on the commit if a binary job failed
+          name: Page on-call in Slack if a binary job failed
           command: |
             # This endpoint paginates and linux-x64 is already ~80 jobs, so a
             # dropped page would silently report no failures at all.
@@ -3154,20 +3142,15 @@ jobs:
             fi
 
             REPO="$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
-            AUTH="Authorization: token $GH_TOKEN"
-            # develop is squash-merged, so the commit author is the PR author.
-            # An unresolvable author still gets a comment, just without the tag.
-            LOGIN=$(curl -sS -H "$AUTH" \
-              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1" \
-              | jq -r '.author.login // empty') || true
+            COMMIT_URL="https://github.com/$REPO/commit/$CIRCLE_SHA1"
             # CIRCLE_BUILD_URL points at this notifier, which is green and tells
-            # the author nothing. Link the workflow holding the failed jobs.
+            # on-call nothing. Link the workflow holding the failed jobs.
             WORKFLOW_URL="https://app.circleci.com/workflow/$CIRCLE_WORKFLOW_ID"
-            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($WORKFLOW_URL)"
+            TEXT="<!subteam^${APP_FOUNDATIONS_ONCALL_SUBTEAM_ID}|app-foundations-oncall> :rotating_light: Binary jobs failed on *${CIRCLE_BRANCH}* (<${COMMIT_URL}|${CIRCLE_SHA1:0:10}>): *${FAILED}* - <${WORKFLOW_URL}|view the workflow>"
 
-            curl -sfS -X POST -H "$AUTH" \
-              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1/comments" \
-              --data "$(jq -n --arg b "$BODY" '{body:$b}')"
+            curl -sfS -X POST -H 'Content-Type: application/json' \
+              "$SLACK_WEBHOOK_URL" \
+              --data "$(jq -n --arg t "$TEXT" '{text:$t}')"
 
   test-kitchensink:
     <<: *defaults

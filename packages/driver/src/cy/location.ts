@@ -77,4 +77,4 @@ export const create = (state: StateFunc) => ({
   },
 })
 
-export interface ILocation extends ReturnType<typeof create> {}
+export type ILocation = ReturnType<typeof create>

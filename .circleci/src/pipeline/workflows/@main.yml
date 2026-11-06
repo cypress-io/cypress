@@ -281,9 +281,6 @@ linux-x64:
     - npm-grep:
         requires:
           - build
-    - npm-eslint-plugin-dev:
-        requires:
-          - build
     - npm-cypress-schematic:
         requires:
           - build
@@ -296,7 +293,6 @@ linux-x64:
           - check-ts
           - health-check
           - npm-angular
-          - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
           - npm-react
@@ -455,8 +451,8 @@ linux-x64:
     # settle however it settles; the job itself decides whether anything actually
     # failed.
     - notify-binary-failure:
-        context: test-runner:npm-release
-        filters: pipeline.git.branch == "develop"
+        context: test-runner:slack
+        filters: pipeline.git.branch == "develop" or pipeline.git.branch matches /^v\d+$/
         requires:
           # the packaging job is listed too: when it breaks, the
           # leaves below it are not_run rather than failed, so watching only the

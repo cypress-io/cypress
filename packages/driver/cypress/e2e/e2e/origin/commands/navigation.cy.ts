@@ -262,7 +262,7 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
 
     it('succeeds when the AUT window in the secondary is undefined', () => {
       // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
-      window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
+      window.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
 
       cy.visit('/fixtures/primary-origin.html')
 

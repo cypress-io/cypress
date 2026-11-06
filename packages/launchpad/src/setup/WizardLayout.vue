@@ -8,7 +8,7 @@
     </div>
     <div class="w-full border border-gray-100 rounded flex flex-col">
       <div class="grow">
-        <slot :backFn="backFn" />
+        <slot :back-fn="backFn" />
       </div>
       <ButtonBar
         :next-fn="props.nextFn"

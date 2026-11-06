@@ -100,8 +100,13 @@ function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protoc
   // Compare case-insensitively on name and order-insensitively overall — CDP
   // pause events and the middleware view can fold the same headers back in a
   // different order and casing without that being a meaningful change.
+  // Set-Cookie keeps its order: when two lines set the same cookie, the later
+  // one wins, so a handler that only reorders them changes the cookie stored.
   const normalize = (entries: Protocol.Fetch.HeaderEntry[]) => {
-    return entries.map(({ name, value }) => `${name.toLowerCase()}: ${value}`).sort()
+    const lines = entries.map(({ name, value }) => `${name.toLowerCase()}: ${value}`)
+    const isSetCookie = (line: string) => line.startsWith('set-cookie: ')
+
+    return [...lines.filter((line) => !isSetCookie(line)).sort(), ...lines.filter(isSetCookie)]
   }
 
   const leftNorm = normalize(left)

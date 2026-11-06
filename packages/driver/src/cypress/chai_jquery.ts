@@ -301,13 +301,13 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
         let negatedMessage: string
 
         if (_.isUndefined(actual)) {
-          message = `expected \#{this} to have ${description} ${inspect(name)}`
+          message = `expected #{this} to have ${description} ${inspect(name)}`
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)}`
+          negatedMessage = `expected #{this} not to have ${description} ${inspect(name)}`
         } else {
-          message = `expected \#{this} to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          message = `expected #{this} to have ${description} ${inspect(name)} with the value #{exp}, but the value was #{act}`
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          negatedMessage = `expected #{this} not to have ${description} ${inspect(name)} with the value #{exp}, but the value was #{act}`
         }
 
         // only cast .attr() as a string

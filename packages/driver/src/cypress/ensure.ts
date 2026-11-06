@@ -115,7 +115,7 @@ const isChildCommand = (command, args, cy: $Cy) => {
     $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
       args: {
         cmd: command.get('name'),
-        args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+        args: _.isString(args[0]) ? `"${stringifiedArg}"` : stringifiedArg,
       },
       // a chain only gains a subject from its own commands, so retrying can't help
       errProps: { retry: false },
