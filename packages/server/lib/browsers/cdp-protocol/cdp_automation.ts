@@ -19,7 +19,7 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { CDPDisconnectedError } from './cri-errors'
 import { normalizeResourceType } from './normalize-resource-type'
 import { cdpKeyPress } from '../../automation/commands/key_press'
-import { AUT_FRAME_HEADER } from '../constants'
+import { AUT_FRAME_HEADER, getMetadataHeaderValue } from '../constants'
 
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 
@@ -536,7 +536,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
         return this._continueRequest(client, params, {
           name: AUT_FRAME_HEADER,
-          value: 'true',
+          value: getMetadataHeaderValue(),
         })
       }
 

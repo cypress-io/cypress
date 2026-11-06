@@ -11,7 +11,7 @@ import { cypressSessions } from '../cypress-sessions'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape, CdpClientShape, OnExtraTargetCriClientReady, ExtraTargetDetach } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { EXTRA_TARGET_HEADER } from './constants'
+import { EXTRA_TARGET_HEADER, getMetadataHeaderValue } from './constants'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -633,7 +633,7 @@ export class BrowserCriClient {
           requestId: params.requestId,
           headers: [
             ...headers,
-            { name: EXTRA_TARGET_HEADER, value: 'true' },
+            { name: EXTRA_TARGET_HEADER, value: getMetadataHeaderValue() },
           ],
         }
 

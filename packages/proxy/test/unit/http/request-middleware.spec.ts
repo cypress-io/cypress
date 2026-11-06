@@ -10,6 +10,7 @@ import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { HttpMiddlewareThis } from '../../../lib/http'
 import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
+import { getMetadataHeaderValue } from '../../../lib/http/util/metadata-header-value'
 
 vi.mock('../../../lib/resourceTypeAndCredentialManager', () => {
   return {
@@ -83,13 +84,24 @@ describe('http/request-middleware', () => {
     describe('x-cypress-is-aut-frame', () => {
       it('when it exists, removes header and sets in on the req', async () => {
         const ctx = prepareContext({
-          'x-cypress-is-aut-frame': 'true',
+          'x-cypress-is-aut-frame': getMetadataHeaderValue(),
         })
 
         await testMiddleware([ExtractCypressMetadataHeaders], ctx)
 
         expect(ctx.req.headers!['x-cypress-is-aut-frame']).toBeUndefined()
         expect(ctx.req.isAUTFrame).toBe(true)
+      })
+
+      it('when it has another value, removes header and does not set it on the req', async () => {
+        const ctx = prepareContext({
+          'x-cypress-is-aut-frame': 'true',
+        })
+
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+
+        expect(ctx.req.headers!['x-cypress-is-aut-frame']).toBeUndefined()
+        expect(ctx.req.isAUTFrame).toBe(false)
       })
 
       it('when it does not exist, sets in on the req', async () => {
@@ -105,7 +117,7 @@ describe('http/request-middleware', () => {
     describe('x-cypress-is-from-extra-target', () => {
       it('when it exists, sets in on the req and only runs necessary middleware', async () => {
         const ctx = prepareContext({
-          'x-cypress-is-from-extra-target': 'true',
+          'x-cypress-is-from-extra-target': getMetadataHeaderValue(),
         })
         let maybeSetBasicAuthHeadersRan = false
         let skippedMiddlewareRan = false
@@ -135,6 +147,25 @@ describe('http/request-middleware', () => {
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(false)
+      })
+
+      it('when it has another value, removes header and runs all middleware', async () => {
+        const ctx = prepareContext({
+          'x-cypress-is-from-extra-target': 'true',
+        })
+        let otherMiddlewareRan = false
+
+        await testMiddleware({
+          ExtractCypressMetadataHeaders,
+          MaybeSimulateSecHeaders () {
+            otherMiddlewareRan = true
+            this.next()
+          },
+        }, ctx)
+
+        expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
+        expect(ctx.req.isFromExtraTarget).toBe(false)
+        expect(otherMiddlewareRan).toBe(true)
       })
     })
 
