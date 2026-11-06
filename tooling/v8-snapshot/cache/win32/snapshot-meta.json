@@ -3623,6 +3623,7 @@
     "./packages/server/lib/browsers/cdp-protocol/cdp-fetch-transport.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-network-error.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-network-extra-info.ts",
+    "./packages/server/lib/browsers/cdp-protocol/cdp-set-cookie-sync.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp_automation.ts",
     "./packages/server/lib/browsers/cdp-protocol/cri-client.ts",
     "./packages/server/lib/browsers/cdp-protocol/cri-errors.ts",
@@ -3956,5 +3957,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d0ec0ba1f830f8faa1c577819b84670c955973a235caced8958cd74bd07b5dc1"
+  "deferredHash": "509c473e7d21be788971a510c12585f52fd53dd5d764a4617f5649aef45e01e7"
 }
