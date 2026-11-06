@@ -308,6 +308,9 @@ describe('@packages/driver/src/cypress/runner', () => {
 
       const api = $Runner.create(makeSpecWindow(), wrapper, makeCypressStub(), makeCyStub(), makeStateStub())
       const normalized = api.normalizeAll({}, true)
+
+      if (!normalized) throw new Error('expected the suite to have tests')
+
       const [normalizedNested] = normalized.suites
       const [normalizedDeepest] = normalizedNested.suites
 

@@ -25,7 +25,7 @@ describe('<BaseError />', () => {
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.contains('h2', 'OriginalError')
     .get(messageSelector)
-    .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.replace(/\`/g, '').slice(0, 10))
+    .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.replace(/`/g, '').slice(0, 10))
     .get(retryButtonSelector)
     .should('not.exist')
 

@@ -37,14 +37,19 @@ const files = {
 
     const superDomain = injection.shouldInjectDocumentDomain(origin) ? injection.getHostname(origin) : ''
 
-    const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
-      browserFamily: req.query.browserFamily,
-      isSpecBridge: false,
-      namespace: config.namespace,
-      scripts: allFilesToSend,
-      url: req.proxiedUrl,
-      documentDomainContext: injection.shouldInjectDocumentDomain(origin),
-    })
+    let privilegedChannel: string | undefined
+
+    // the runner only loads the spec frame on the primary origin
+    if (remoteStates.isPrimarySuperDomainOrigin(req.proxiedUrl)) {
+      privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
+        browserFamily: req.query.browserFamily,
+        isSpecBridge: false,
+        namespace: config.namespace,
+        scripts: allFilesToSend,
+        url: req.proxiedUrl,
+        documentDomainContext: injection.shouldInjectDocumentDomain(origin),
+      })
+    }
 
     const iframeOptions = {
       superDomain,

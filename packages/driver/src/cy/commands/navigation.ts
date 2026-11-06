@@ -12,6 +12,7 @@ import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunica
 import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
 import type { StateFunc } from '../../cypress/state'
+import type { $Cy } from '../../cypress/cy'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -444,7 +445,7 @@ interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
   hasAlreadyVisitedUrl: boolean
 }
 
-export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, args: any[]) => {
+export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: Cypress.Cypress['config'], args: any[]) => {
   let forceReload
   let userOptions
   const throwArgsErr = () => {
@@ -476,13 +477,11 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
   }
 
   // clear the current timeout
-  // @ts-expect-error
-  cy.clearTimeout('reload')
+  cy.clearTimeout()
 
   let cleanup: (() => any) | null = null
   const options = _.defaults({}, userOptions, {
     log: true,
-    // @ts-expect-error
     timeout: config('pageLoadTimeout'),
   })
 
@@ -533,7 +532,6 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
     if (Cypress.isBrowser('webkit')) {
       // Make sure the reload command can communicate with the AUT.
       // if we failed for any other reason, we need to display the correct error to the user.
-      // @ts-expect-error
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
     }
 
@@ -541,10 +539,9 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
   })
 }
 
-export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, numberOrString: number | string, userOptions = {}) => {
+export const go = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: Cypress.Cypress['config'], numberOrString: number | string, userOptions = {}) => {
   const options: Record<string, any> = _.defaults({}, userOptions, {
     log: true,
-    // @ts-expect-error
     timeout: config('pageLoadTimeout'),
   })
 
@@ -570,7 +567,6 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         }
 
         // clear the current timeout
-        // @ts-expect-error
         cy.clearTimeout()
 
         cy.once('window:before:unload', beforeUnload)
@@ -629,7 +625,6 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
       if (Cypress.isBrowser('webkit')) {
         // Make sure the reload command can communicate with the AUT.
         // if we failed for any other reason, we need to display the correct error to the user.
-        // @ts-expect-error
         Cypress.ensure.commandCanCommunicateWithAUT(cy)
       }
 
@@ -1051,7 +1046,8 @@ export default (Commands, Cypress, cy, state, config) => {
 
         return requestUrl(url, options)
         .then((resp: any = {}) => {
-          let { url, originalUrl, cookies, redirects, filePath } = resp
+          const { cookies, redirects, filePath } = resp
+          let { url, originalUrl } = resp
 
           // reapply the existing hash
           url += existingHash

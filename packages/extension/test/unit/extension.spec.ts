@@ -5,10 +5,9 @@ import path from 'path'
 import * as extension from '../../lib/index'
 
 vi.mock('../../lib/index', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('../../lib/index')>()
 
   return {
-    // @ts-expect-error
     ...actual,
     getPathToExtension: vi.fn(),
   }
@@ -87,7 +86,7 @@ describe('Extension', () => {
   describe('manifest', () => {
     it('has a key that resolves to the static extension ID', async () => {
       const manifest = await fs.readJson(path.join(cwd, 'app/v3/manifest.json'))
-      const cmd = `echo \"${manifest.key}\" | openssl base64 -d -A | shasum -a 256 | head -c32 | tr 0-9a-f a-p`
+      const cmd = `echo "${manifest.key}" | openssl base64 -d -A | shasum -a 256 | head -c32 | tr 0-9a-f a-p`
 
       const stdout = await new Promise((resolve, reject) => {
         exec(cmd, (error, stdout) => {

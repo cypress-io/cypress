@@ -48,9 +48,7 @@ export default {
     // set the WebDriver classic instance instantiated from geckodriver
     webdriverClient = wdInstance
 
-    let client: BidiAutomation
-
-    client = await setupBiDi(webdriverClient, automation)
+    const client: BidiAutomation = await setupBiDi(webdriverClient, automation)
     // use the BiDi commands to visit the url as opposed to classic webdriver
     const { contexts } = await webdriverClient.browsingContextGetTree({})
 

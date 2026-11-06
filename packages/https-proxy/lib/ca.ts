@@ -15,7 +15,7 @@ const CA_VERSION = 1
 
 const generateKeyPairAsync = promisify(pki.rsa.generateKeyPair)
 
-const ipAddressRe = /^[\d\.]+$/
+const ipAddressRe = /^[\d.]+$/
 
 const CAattrs = [{
   name: 'commonName',
@@ -230,7 +230,7 @@ export class CA {
     certServer.setIssuer(this.CAcert.issuer.attributes)
     certServer.setExtensions(ServerExtensions.concat([{
       name: 'subjectAltName',
-      // @ts-expect-error
+      // @ts-expect-error - concat() is held to ServerExtensions' inferred element type, which has no altNames
       altNames: hosts.map((host: string) => {
         if (host.match(ipAddressRe)) {
           return { type: 7, ip: host }

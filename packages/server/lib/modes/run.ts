@@ -15,6 +15,7 @@ import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
+import { endRunOnConfigProcessExit, isConfigProcessExit, wasConfigProcessExitReported } from '../util/config_process_exit'
 import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
@@ -1138,15 +1139,25 @@ async function ready (options: ReadyOptions) {
 
   const onError = options.onError = (err) => {
     debug('onError', new Error().stack)
+
+    if (isConfigProcessExit(err)) {
+      return endRunOnConfigProcessExit(err)
+    }
+
+    if (wasConfigProcessExitReported()) {
+      return
+    }
+
     earlyExitTerminator.exitEarly(err)
   }
 
   // alias and coerce to null
-  let specPatternFromCli = options.spec || null
+  const specPatternFromCli = options.spec || null
 
   // ensure the project exists
   // and open up the project
-  const browsers = await browserUtils.get()
+  // Use the data context's cached detection so browsers are detected once per run
+  const browsers: FoundBrowser[] = await require('@packages/data-context').getCtx().browser.machineBrowsers()
 
   debug('found all system browsers %o', browsers.map(createPublicBrowser))
   // TODO: refactor this so we don't need to extend options

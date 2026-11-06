@@ -623,6 +623,33 @@ describe('cy.session', { retries: 0 }, () => {
         })
       })
 
+      describe('recreates existing session when validate throws synchronously', () => {
+        let sessionId
+        let yielded
+
+        before(() => {
+          setupTestContext()
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup, { validate })
+          .then(() => {
+            resetMocks()
+            validate.onFirstCall().throws(new Error('validate error'))
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup, { validate }).then((status) => {
+            yielded = status
+          })
+        })
+
+        it('recreates the session', () => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledTwice
+          expect(yielded).to.eq('recreated')
+        })
+      })
+
       describe('restores saved session with validation flow', () => {
         let sessionId
 
@@ -1746,7 +1773,7 @@ describe('cy.session', { retries: 0 }, () => {
         expect(lastSessionLog).to.eq(lastLog)
         expect(lastLog?.get('error')).to.eq(err)
         expect(lastLog?.get('state')).to.eq('failed')
-        expect(err.message).to.eq('`cy.session()` was passed an invalid option: **invalid_key**\nAvailable options are: `validate`')
+        expect(err.message).to.eq('`cy.session()` was passed an invalid option: **invalid_key**\nAvailable options are: `cacheAcrossSpecs`, `validate`')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()

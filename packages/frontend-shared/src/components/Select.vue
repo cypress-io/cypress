@@ -2,7 +2,7 @@
   <Listbox
     :value="props.modelValue"
     as="div"
-    @update:modelValue="handleUpdate"
+    @update:model-value="handleUpdate"
   >
     <template #default="{ open }">
       <ListboxLabel
@@ -192,7 +192,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   placeholder: '',
   label: '',
-  labelId: undefined,
   itemValue: 'value',
   modelValue: undefined,
   itemKey: 'key',

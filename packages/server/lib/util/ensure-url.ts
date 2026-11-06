@@ -50,7 +50,9 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
 
 export const isListening = (urlStr: string) => {
   // takes a urlStr and verifies the hostname + port is listening
-  let { hostname, protocol, port } = url.parse(urlStr)
+  const parsedUrl = url.parse(urlStr)
+  const { hostname, protocol } = parsedUrl
+  let { port } = parsedUrl
 
   if (port == null) {
     port = protocol === 'https:' ? '443' : '80'

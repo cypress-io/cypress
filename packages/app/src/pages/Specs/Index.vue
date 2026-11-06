@@ -15,14 +15,14 @@
       v-if="query.data.value.currentProject?.specs.length"
       :gql="query.data.value"
       :most-recent-update="mostRecentUpdate"
-      @showCreateSpecModal="showCreateSpecModal"
+      @show-create-spec-modal="showCreateSpecModal"
     />
     <NoSpecsPage
       v-else
       :gql="query.data.value"
       :title="title"
       :is-default-spec-pattern="isDefaultSpecPattern"
-      @showCreateSpecModal="showCreateSpecModal"
+      @show-create-spec-modal="showCreateSpecModal"
     />
     <SpecsListRunWatcher
       v-for="run in latestRuns"

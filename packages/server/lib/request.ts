@@ -100,7 +100,7 @@ const pipeEvent = (source, destination, event) => {
 const caseInsensitiveGet = function (obj, property) {
   const lowercaseProperty = property.toLowerCase()
 
-  for (let key of Object.keys(obj)) {
+  for (const key of Object.keys(obj)) {
     if (key.toLowerCase() === lowercaseProperty) {
       return obj[key]
     }
@@ -112,7 +112,7 @@ const caseInsensitiveGet = function (obj, property) {
 const caseInsensitiveSet = function (obj, property, val) {
   const lowercaseProperty = property.toLowerCase()
 
-  for (let key of Object.keys(obj)) {
+  for (const key of Object.keys(obj)) {
     if (key.toLowerCase() === lowercaseProperty) {
       obj[key] = val
     }
@@ -717,7 +717,7 @@ export class Request {
 
     // normalize case sensitivity
     // to be lowercase
-    let accept = options.headers!.Accept
+    const accept = options.headers!.Accept
 
     if (accept) {
       delete options.headers!.Accept

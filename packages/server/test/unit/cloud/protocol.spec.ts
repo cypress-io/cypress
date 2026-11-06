@@ -231,7 +231,7 @@ describe('lib/cloud/protocol', () => {
     })
 
     expect(mockDatabase).toHaveBeenCalledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {
-      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+      nativeBinding: path.join(path.dirname(require.resolve('better-sqlite3/package.json')), 'build', 'Release', 'better_sqlite3.node'),
       verbose: expect.any(Function),
     })
 

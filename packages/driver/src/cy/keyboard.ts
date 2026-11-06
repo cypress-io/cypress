@@ -3,11 +3,10 @@ import Debug from 'debug'
 import _ from 'lodash'
 import dayjs from 'dayjs'
 import $errUtils from '../cypress/error_utils'
-import { USKeyboard } from '../cypress/UsKeyboardLayout'
+import { USKeyboard } from '@packages/types'
 import $dom from '../dom'
 import $document from '../dom/document'
 import $elements from '../dom/elements'
-// eslint-disable-next-line no-duplicate-imports
 import type { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
 import $selection from '../dom/selection'
 import $utils from '../cypress/utils'
@@ -68,7 +67,7 @@ const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]{1,3})?/
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
-const isValidNumberInputChar = /[-+eE\d\.]/
+const isValidNumberInputChar = /[-+eE\d.]/
 const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}$/
 
 const INITIAL_MODIFIERS = {
@@ -302,7 +301,7 @@ const parseCharsBetweenCurlyBraces = (chars: string) => {
 
 const shouldIgnoreEvent = <
   T extends KeyEventType,
-  K extends { [key in T]?: boolean }
+  K extends { [key in T]?: boolean },
 >(
   eventName: T,
   options: K,
@@ -1012,7 +1011,7 @@ export class Keyboard {
     debug('event options:', eventType, eventOptions)
     if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
       event = document.createEvent('TextEvent')
-      // @ts-ignore
+      // @ts-expect-error - initTextEvent is deprecated and not in the DOM lib types
       event.initTextEvent(
         eventType,
         eventOptions.bubbles,

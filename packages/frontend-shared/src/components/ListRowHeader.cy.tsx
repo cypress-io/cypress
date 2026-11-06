@@ -19,7 +19,7 @@ describe('<ListRowHeader />', () => {
     cy.mount(() => (
       <div class="text-center p-4">
         <ListRowHeader
-          // @ts-ignore - doesn't know about vSlots
+          // @ts-expect-error - vSlots is a Vue JSX prop the component props do not declare
           vSlots={{
             icon: () => <IconFileChangesAdded data-testid="file-added-icon" />,
             description: () => <p data-testid="list-row-description">{ description }</p>,
@@ -45,7 +45,7 @@ describe('<ListRowHeader />', () => {
         <ListRowHeader
           icon={() => <IconFileChangesAdded data-testid="file-added-icon"/>}
           description={description}
-          // @ts-ignore - doesn't know about vSlots
+          // @ts-expect-error - vSlots is a Vue JSX prop the component props do not declare
           vSlots={{
             header: () => <>{ header }</>,
           }}

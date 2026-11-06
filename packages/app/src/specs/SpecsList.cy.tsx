@@ -62,9 +62,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         .should('have.length.below', specs.length)
 
         cy.percySnapshot('full list')
-        const longestSpec = specs.reduce((acc, spec) =>
-          acc.relative.length < spec.relative.length ? spec : acc
-        , specs[0])
+        const longestSpec = specs.reduce((acc, spec) => {
+          return acc.relative.length < spec.relative.length ? spec : acc
+        }, specs[0])
 
         cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
         .as('specsListInput')
@@ -236,8 +236,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.get('@searchField').type('{backspace}{backspace}')
         cy.wrap(setSpecFilterStub).should('have.been.calledWith', 'te')
         cy.get('@searchField').type('{backspace}{backspace}')
-        cy.wrap(setSpecFilterStub).should('have.been.calledWith', '')
-        cy.wait(100) // there's an intentional 50ms delay in the code, lets just wait it out
+        // the filter is saved, and the list refiltered, after a debounce; wait for
+        // the latest save so the snapshots show the unfiltered list
+        cy.wrap(setSpecFilterStub).its('lastCall.args.0').should('equal', '')
 
         // Specs List has a min width of ~650px in the app, so there's no need to snapshot below that
         cy.viewport(650, 850)

@@ -1,36 +1,41 @@
 {
   "name": "@packages/icons",
   "version": "0.0.0-development",
-  "description": "Cypress Icons",
   "private": true,
+  "description": "Cypress Icons",
+  "license": "MIT",
   "main": "index.js",
-  "scripts": {
-    "build": "yarn build-assets && yarn build:cjs && yarn build:esm",
-    "build-assets": "tsx ./scripts/build.ts && tsx ./scripts/ico.ts",
-    "build-prod": "yarn build",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "test": "yarn test-unit",
-    "test-unit": "vitest run",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
-  },
-  "devDependencies": {
-    "@types/mocha": "^8.0.3",
-    "@types/to-ico": "^1.1.3",
-    "fs-extra": "9.1.0",
-    "to-ico": "^1.1.5",
-    "tsx": "^4.23.12",
-    "vitest": "^3.2.4"
-  },
+  "module": "index.mjs",
+  "types": "index.d.ts",
   "files": [
     "dist",
     "index.js",
     "index.d.ts"
   ],
-  "types": "index.d.ts",
-  "license": "MIT",
-  "module": "index.mjs",
+  "scripts": {
+    "build": "yarn build-assets && yarn build:cjs && yarn build:esm",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build-assets": "tsx ./scripts/build.ts && tsx ./scripts/ico.ts",
+    "build-prod": "yarn build",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
+    "lint": "eslint",
+    "test": "yarn test-unit",
+    "test-unit": "vitest run"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,mts,tsx,json}": "eslint --fix"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "@types/mocha": "^8.0.3",
+    "@types/to-ico": "^1.1.3",
+    "eslint": "^9.31.0",
+    "fs-extra": "9.1.0",
+    "jiti": "^2.4.2",
+    "to-ico": "^1.1.5",
+    "tsx": "^4.23.12",
+    "vitest": "^3.2.4"
+  },
   "nx": {}
 }

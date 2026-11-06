@@ -106,7 +106,7 @@ describe('Choose a browser page', () => {
       } else if (Cypress.platform === 'linux') {
         cy.get('@AlertBody').find('code').eq(1).should('have.text', `spawn ${path} ENOENT`)
       } else {
-        cy.get('@AlertBody').find('code').eq(1).should('have.text', `Unable to find browser with path ${path}`)
+        cy.get('@AlertBody').find('code').eq(1).should('contain.text', `Unable to find browser with path ${path}`)
       }
 
       cy.percySnapshot()

@@ -41,7 +41,7 @@ const asterisksRegex = /^\*\*(.+?)\*\*$/gs
 // `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
 // `expected **foo** to have length above **1** but got **0**`
 // `Custom message expected **<span>** to exist in the DOM`
-const assertionRegex = /^.*?expected | to[^\*]+| not[^\*]+| with[^\*]+|,? but[^\*]+/g
+const assertionRegex = /^.*?expected | to[^*]+| not[^*]+| with[^*]+|,? but[^*]+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
@@ -344,8 +344,7 @@ const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId
     {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon data-cy='failed-icon-indicator' aria-hidden state={model.state} iconSize='12' />}
     {model.referencesAlias ?
       <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-      : <Message model={model} />
-    }
+      : <Message model={model} />}
   </span>
 ))
 
@@ -463,7 +462,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
   const getFeedbackUrl = useCallback(
     async () => {
       try {
-        // @ts-ignore
+        // @ts-expect-error - the declared backendRequestHandler type has an emitter parameter that the driver's implementation does not take
         const result = await Cypress.backendRequestHandler(
           'prompt:backend:request',
           'prompt:get-feedback-url',

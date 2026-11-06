@@ -182,7 +182,7 @@ export async function detectThirdPartyCTFrameworks (
 
           debug('Module is %o', mod)
 
-          let defaultEntry = mod?.default ?? mod
+          const defaultEntry = mod?.default ?? mod
 
           debug('Import successful: %o', defaultEntry)
 

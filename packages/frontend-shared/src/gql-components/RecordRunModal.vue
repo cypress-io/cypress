@@ -18,7 +18,7 @@
   </StandardModal>
 </template>
 
-<script setup lang="ts" >
+<script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 import StandardModal from '../components/StandardModal.vue'
 import RecordPromptAdapter from './RecordPromptAdapter.vue'

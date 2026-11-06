@@ -42,6 +42,7 @@ describe('source_map_utils', () => {
 
   // Helper function to run tests with Windows path behavior
   const withWindowsPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config: vi.fn().mockReturnValue('win32'),
     }
@@ -69,6 +70,7 @@ describe('source_map_utils', () => {
   }
 
   const withLinuxPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config: vi.fn().mockReturnValue('linux'),
     }
@@ -94,6 +96,35 @@ describe('source_map_utils', () => {
       vi.doUnmock('path')
     }
   }
+
+  describe('extractSourceMap', () => {
+    const withInlineMap = (mapBase64: string) => {
+      return `it('test', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${mapBase64}\n`
+    }
+
+    it('decodes an inline map whose sources contain multi-byte UTF-8 characters', async () => {
+      await withLinuxPaths((sourceMapUtils) => {
+        const sourceMap = {
+          version: 3,
+          sources: ['cypress/e2e/spec.cy.js'],
+          names: [],
+          mappings: 'AAAA',
+          sourcesContent: ['// “quotes” ü サイプリスは一番 🙂'],
+        }
+        const mapBase64 = Buffer.from(JSON.stringify(sourceMap)).toString('base64')
+
+        expect(sourceMapUtils.extractSourceMap(withInlineMap(mapBase64))).toEqual(sourceMap)
+      })
+    })
+
+    it('returns null when the inline map is not valid UTF-8', async () => {
+      await withLinuxPaths((sourceMapUtils) => {
+        const mapBase64 = Buffer.concat([Buffer.from('{"version":3,"sources":["'), Buffer.from([0xff]), Buffer.from('"]}')]).toString('base64')
+
+        expect(sourceMapUtils.extractSourceMap(withInlineMap(mapBase64))).toBeNull()
+      })
+    })
+  })
 
   describe('areSourceMapsAvailable', () => {
     it('should return false when no source map consumers exist', async () => {

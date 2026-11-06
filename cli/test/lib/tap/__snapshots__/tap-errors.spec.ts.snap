@@ -130,7 +130,7 @@ retrieve the test runner reporter for the spec or a specific test
 Options:
   -t, --test-id <test-id>  test id, as listed by the reporter command
   -a, --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to
-                           the latest
+                           the latest (requires --test-id)
   -s, --session <pid>      target a local Cypress session by its process id
                            (PID)
   --json                   print the raw JSON result instead of the
@@ -153,7 +153,23 @@ exports[`lib/tap error rendering catalogue > MISSING_COMPANION_OPTION 1`] = `
 "> cypress tap reporter --attempt 2
 You passed the {color:cyan}--attempt{/color} flag without also passing the {color:cyan}--test-id{/color} flag.
 
-Pass {color:cyan}--test-id{/color} to specify the test, or omit {color:cyan}--attempt{/color} to review the latest attempt for every test in the spec."
+Pass {color:cyan}--test-id{/color} to specify the test, or omit {color:cyan}--attempt{/color} to review the latest attempt for every test in the spec.
+
+Usage: cypress tap reporter [options]
+
+retrieve the test runner reporter for the spec or a specific test
+
+Options:
+  -t, --test-id <test-id>  test id, as listed by the reporter command
+  -a, --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to
+                           the latest (requires --test-id)
+  -s, --session <pid>      target a local Cypress session by its process id
+                           (PID)
+  --json                   print the raw JSON result instead of the
+                           human-readable rendering
+  --timeout <ms>           how long to wait on any single call into the Cypress
+                           session, in milliseconds (default: 30000)
+  -h, --help               display help for command"
 `;
 
 exports[`lib/tap error rendering catalogue > NO_AUT 1`] = `
@@ -182,6 +198,13 @@ exports[`lib/tap error rendering catalogue > NO_SESSION 1`] = `
 Could not find a Cypress session to tap into.
 
 Start Cypress with {color:cyan}cypress open{/color}, select a testing type and launch a browser, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > PROJECT_NOT_LOADED 1`] = `
+"> cypress tap dom --selector "#status"
+Cypress is running, but its project could not load, so there is no Cypress session to tap into.
+
+Run {color:cyan}cypress tap status{/color} to see why. Fix the cause, then stop Cypress and start it again."
 `;
 
 exports[`lib/tap error rendering catalogue > PROTOCOL_MISMATCH 1`] = `

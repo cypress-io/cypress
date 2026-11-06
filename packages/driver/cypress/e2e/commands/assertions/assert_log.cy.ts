@@ -234,7 +234,7 @@ describe('src/cy/commands/assertions', () => {
     })
 
     describe('#patchAssert', () => {
-      it('wraps \#{this} and \#{exp} in \#{b}', (done) => {
+      it('wraps #{this} and #{exp} in #{b}', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'assert') {
             cy.removeAllListeners('log:added')
@@ -452,7 +452,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('preserves quotation marks if escaped', (done) => {
         expectMarkdown(
-          () => expect(`\'cypress\'`).to.eq(`\'cypress\'`),
+          () => expect(`'cypress'`).to.eq(`'cypress'`),
           // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
           `expected **'cypress'** to equal ****'cypress'****`,
           done,

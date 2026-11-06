@@ -46,9 +46,8 @@ const caseInsensitiveGetAllHeaders = (headers: OutgoingHttpHeaders, lowercasePro
       // Therefore, we need to return each header as it's own value so we can apply
       // injection nonce values to each one, because we don't know which will be
       // the most restrictive.
-      acc.push.apply(
-        acc,
-        `${value}`.split(',')
+      acc.push(
+        ...`${value}`.split(',')
         .filter(Boolean)
         .map((policyString) => `${policyString}`.trim()),
       )

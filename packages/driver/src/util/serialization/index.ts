@@ -122,7 +122,7 @@ export const reifySerializedError = (serializedError: any, userInvocationStack: 
     reifiedError = new Error(serializedError.toString())
   } else if (_.isObject(serializedError as any)) {
     // otherwise, try to determine if there are any error details in the object and merge the error objects together
-    let errorToMerge = serializedError?.message ? new Error(serializedError?.message || '') : reifiedError
+    const errorToMerge = serializedError?.message ? new Error(serializedError?.message || '') : reifiedError
 
     reifiedError = _.assignWith(errorToMerge, serializedError)
   } else if (serializedError !== UNSERIALIZABLE) {

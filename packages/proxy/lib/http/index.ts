@@ -72,7 +72,7 @@ const createBrowserConnectionClosedError = () => {
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
-  Error
+  Error,
 }
 
 export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
@@ -138,7 +138,7 @@ export type ServerCtx = Readonly<{
   reservedPathPrefixes?: string[]
 }>
 
-const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
+const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<unknown>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
@@ -351,7 +351,7 @@ export class Http {
   request: ServerRequest
   socket: SocketBroadcaster
   serverBus: EventEmitter
-  renderedHTMLOrigins: {[key: string]: boolean} = {}
+  renderedHTMLOrigins: { [key: string]: boolean } = {}
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape

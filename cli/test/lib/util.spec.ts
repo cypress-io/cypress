@@ -21,6 +21,14 @@ describe('util', () => {
     })
   })
 
+  describe('.isBrokenGtkDisplay with a missing X server', () => {
+    it('detects the Electron missing X server message', () => {
+      const text = '[1234:0101/000000.000000:ERROR:ozone_platform_x11.cc(245)] Missing X server or $DISPLAY'
+
+      expect(util.isBrokenGtkDisplay(text)).toEqual(true)
+    })
+  })
+
   describe('.getGitHubIssueUrl', () => {
     it('returns url for issue number', () => {
       const url = util.getGitHubIssueUrl(4034)

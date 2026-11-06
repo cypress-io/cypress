@@ -104,6 +104,11 @@ describe('App - Debug Page', () => {
     }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataFailing })
 
     cy.withCtx((ctx, { sinon }) => {
+      ctx.coreData.localSettings.availableEditors = [
+        ...ctx.coreData.localSettings.availableEditors,
+        { id: 'code', binary: 'code', name: 'Visual Studio Code' },
+      ]
+
       ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
       sinon.stub(ctx.actions.file, 'openFile')
     })
