@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
 import EventEmitter from 'events'
 import fs from 'fs-extra'
 import Debug from 'debug'
@@ -20,7 +21,7 @@ import { getCtx } from '@packages/data-context'
 import type { CypressError } from '@packages/errors'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
-import type { RemoteConfig } from 'webdriver'
+import type { Client as WebDriverClient, RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
 import { WebDriver } from './webdriver'
 
@@ -378,6 +379,34 @@ toolbox {
 
 let browserBidiClient: BidiAutomation | undefined
 
+const DELETE_FAILED_SESSION_TIMEOUT = 10000
+
+// the next launch reuses the profile directory, so it waits for a failed launch's session to finish closing
+let failedLaunchCleanup: Promise<void> = Promise.resolve()
+
+function deleteFailedSession (session: WebDriverClient, killBrowserAndDriver: () => unknown): Promise<void> {
+  return Bluebird.resolve(session.deleteSession())
+  .timeout(DELETE_FAILED_SESSION_TIMEOUT)
+  .then(() => undefined, async (deleteSessionErr) => {
+    debug('error deleting webdriver session after failed launch, killing firefox and geckodriver: %o', deleteSessionErr)
+
+    try {
+      killBrowserAndDriver()
+    } catch (killErr) {
+      debug('error killing firefox and geckodriver after failed launch: %o', killErr)
+    }
+
+    // a killed geckodriver can't remove its copy of the profile, which the next launch would encode into its own
+    const sessionProfile = session.capabilities['moz:profile']
+
+    if (typeof sessionProfile === 'string') {
+      await fs.remove(sessionProfile).catch((removeErr) => {
+        debug('error removing profile of failed webdriver session: %o', removeErr)
+      })
+    }
+  })
+}
+
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
@@ -535,6 +564,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
 
+  await failedLaunchCleanup
+
   // Delete the legacy profile directory if in open mode.
   // Cypress does this because profiles are sourced and created differently with geckodriver/webdriver.
   // the profile creation method before 13.15.0 will no longer work with geckodriver/webdriver
@@ -644,6 +675,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   browserInstanceWrapper.kill = () => undefined
 
+  let launchedSession: WebDriverClient | undefined
+
   try {
   /**
    * To set the profile, we use the profile capabilities in firefoxOptions which
@@ -693,6 +726,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // @see ./firefox_automation.md
     const webdriverClient = await WD.newSession(newSessionCapabilities)
 
+    launchedSession = webdriverClient
+
     debugVerbose(`received capabilities %o`, webdriverClient.capabilities)
 
     const browserPID: number = webdriverClient.capabilities['moz:processID']
@@ -712,6 +747,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       debug('closing firefox')
 
       let browserReturnStatus = true
+      let browserKillError: unknown
 
       try {
         browserReturnStatus = process.kill(browserPID)
@@ -719,7 +755,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         if ((error as CypressError)?.code === 'ESRCH') {
           debugVerbose('browser process no longer exists. continuing...')
         } else {
-          throw error
+          browserKillError = error
         }
       }
 
@@ -735,6 +771,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         } else {
           throw error
         }
+      }
+
+      if (browserKillError) {
+        throw browserKillError
       }
 
       // needed for closing the browser when switching browsers in open mode to signal
@@ -765,6 +805,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     debug('setting up firefox utils')
     browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient })
   } catch (err: unknown) {
+    // delete the session so it doesn't leak into the next launch
+    if (launchedSession) {
+      failedLaunchCleanup = deleteFailedSession(launchedSession, browserInstanceWrapper.kill)
+      await failedLaunchCleanup
+    }
+
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
   }
 
