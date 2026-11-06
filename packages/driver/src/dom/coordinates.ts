@@ -189,7 +189,6 @@ const getCoordsByPosition = (
   yPosition: 'top' | 'center' | 'bottom' = 'center',
 ) => {
   const getLeft = () => {
-    /* eslint-disable default-case */
     switch (xPosition) {
       case 'left': return Math.ceil(left)
       case 'center': return Math.floor(left)
@@ -204,8 +203,6 @@ const getCoordsByPosition = (
       case 'bottom': return Math.floor(top) - 1
     }
   }
-
-  /* eslint-disable default-case */
 
   // returning x/y here because this is
   // about the target position we want

@@ -31,7 +31,7 @@ const defaultOptions = [
 
 const mountSelect = (props: any = {}) => {
   // v-model setup
-  let value = defaultOptions[0]
+  const value = defaultOptions[0]
 
   // The width and padding need to be here so that
   // a click on the body dismisses the options

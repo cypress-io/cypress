@@ -589,13 +589,12 @@ process.on('exit', () => {
     return
   }
 
-  // eslint-disable-next-line no-console
   console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
 })
 
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
-const videoRe = /\-\s\sVideo\soutput:\s.*.mp4/gm
+const videoRe = /-\s\sVideo\soutput:\s.*.mp4/gm
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed capturing this video.',
   'This error will not affect or change the exit code.',
@@ -885,10 +884,9 @@ const systemTests = {
     args = _.compact(args)
 
     // avoid snapshot cwd issue - see /patches/snap-shot* for more information
-    // @ts-ignore
     global.CACHED_CWD_FOR_SNAP_SHOT_IT = path.join(__dirname, '..')
 
-    return snapshot.apply(null, args)
+    return snapshot(...args)
   },
 
   setup (options: SetupOptions = {}) {
@@ -1131,7 +1129,6 @@ const systemTests = {
         const matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
-          // eslint-disable-next-line no-unused-vars
           const [, , customBrowserPath, browserName, version, headless] = matches
 
           const { browser } = options

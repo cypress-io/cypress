@@ -581,7 +581,7 @@ describe('network stubbing', { retries: 15 }, function () {
               })
             }).as('first')
             .intercept(`${url}*`, (req) => {
-              // @ts-ignore
+              // @ts-expect-error - `eventName` is a string, not one of the request event names
               req.on(eventName, (res) => {
                 res.headers['content-type'] = 'application/json'
                 res.send({
@@ -607,12 +607,12 @@ describe('network stubbing', { retries: 15 }, function () {
           const url = uniqueRoute('/foo')
 
           testFail((err) => {
-            expect(err.message).to.contain('An invalid event name was passed as the first parameter to \`req.on()\`.')
+            expect(err.message).to.contain('An invalid event name was passed as the first parameter to `req.on()`.')
             done()
           })
 
           cy.intercept(url, function (req) {
-            // @ts-ignore
+            // @ts-expect-error - deliberately passes an unknown event name
             req.on('totally-bad', _.noop)
           }).visit(url)
         })
@@ -621,12 +621,12 @@ describe('network stubbing', { retries: 15 }, function () {
           const url = uniqueRoute('/foo')
 
           testFail((err) => {
-            expect(err.message).to.contain('\`req.on()\` requires the second parameter to be a function.')
+            expect(err.message).to.contain('`req.on()` requires the second parameter to be a function.')
             done()
           })
 
           cy.intercept(url, function (req) {
-            // @ts-ignore
+            // @ts-expect-error - deliberately passes a non-function handler
             req.on('before:response', false)
           }).visit(url)
         })

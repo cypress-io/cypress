@@ -44,7 +44,7 @@ describe('<Alert />', () => {
   describe('title', () => {
     it('can accept slot as title slot', () => {
       cy.mount(() => (<Alert dismissible status="success"
-      // @ts-ignore - doesn't know about vSlots
+      // @ts-expect-error - vSlots is a Vue JSX prop the component props do not declare
         vSlots={{
           title: alertRichTitle,
         }}></Alert>))

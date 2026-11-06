@@ -62,7 +62,7 @@ describe('return values', () => {
   })
 
   it('can return undefined when invoking cy commands in custom command', (done) => {
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       cy.wrap(null).then(function () {
         assertLogLength(this.logs, 1)
@@ -72,7 +72,7 @@ describe('return values', () => {
       return undefined
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     return cy.foo()
   })
 
@@ -91,14 +91,14 @@ describe('return values', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
       return 'bar'
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     return cy.foo()
   })
 
@@ -117,7 +117,7 @@ describe('return values', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
@@ -126,7 +126,7 @@ describe('return values', () => {
       }
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     return cy.foo()
   })
 

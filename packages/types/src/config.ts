@@ -74,6 +74,6 @@ export type BreakingErrResult = {
 // Array format used for displaying resolved configuration in the UI
 export type CypressResolvedConfig = Array<{
   field: string
-  from: 'default'| 'config' | 'plugin' | 'env'
+  from: 'default' | 'config' | 'plugin' | 'env'
   value: string | number | boolean | Record<string, string> | Array<string>
 }>

@@ -24,6 +24,8 @@
       v-if="value"
       #input-prefix="{ value: itemValue }"
     >
+      <!-- Raw SVG from a third-party component framework definition's `icon` option -->
+      <!-- eslint-disable vue/no-v-html -->
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
         v-if="!itemValue?.icon"
@@ -34,6 +36,7 @@
         class="h-[16px] w-[16px]"
         v-html="itemValue.icon"
       />
+      <!-- eslint-enable vue/no-v-html -->
     </template>
 
     <template #selected>
@@ -64,6 +67,8 @@
       </span>
     </template>
     <template #item-prefix="{ value: itemValue }">
+      <!-- Raw SVG from a third-party component framework definition's `icon` option -->
+      <!-- eslint-disable vue/no-v-html -->
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
         v-if="!itemValue?.icon"
@@ -74,6 +79,7 @@
         class="h-[16px] w-[16px]"
         v-html="itemValue.icon"
       />
+      <!-- eslint-enable vue/no-v-html -->
     </template>
     <template
       v-if="selectorType === 'framework'"

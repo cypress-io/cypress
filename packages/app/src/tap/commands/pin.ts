@@ -2,7 +2,7 @@ import { defineCommand } from './definition'
 import { attemptOfLog, attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, TapTestsRunner } from '../types'
-import { CommandNotFoundTapError, SnapshotNotFoundTapError, SpecInProgressTapError, TapError } from '../contract'
+import { CommandNotFoundTapError, PIN_TARGET_REMEDY, SnapshotNotFoundTapError, SpecInProgressTapError, TapError } from '../contract'
 import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contract'
 
 // A pin as the commands read it, whoever made it: tap's own, or one made by hand
@@ -116,9 +116,10 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   }
 
   // Either the pair that names a command or `--clear`, which no one option can be
-  // marked required to express.
+  // marked required to express. The schema already rejects one ID without the
+  // other, so this is the call that passed neither.
   if (test === undefined || command === undefined) {
-    throw new TapError('INVALID_OPTIONS', { detail: 'Pass `--test-id` and `--command-id`, as listed by `cypress tap reporter`, or `--clear` to release the current pin.' })
+    throw new TapError('INVALID_OPTIONS', { detail: PIN_TARGET_REMEDY })
   }
 
   if (!runner) {

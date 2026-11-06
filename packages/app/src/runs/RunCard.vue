@@ -163,9 +163,9 @@ const { t } = useI18n()
 
 gql`
 fragment RunCard on CloudRun {
-	id
-	createdAt
-	status
+  id
+  createdAt
+  status
   totalDuration
   url
   runNumber
@@ -173,14 +173,14 @@ fragment RunCard on CloudRun {
     id
     name
   }
-	...RunResults
-	commitInfo {
-		authorName
-		authorEmail
-		summary
-		branch
-		sha
-	}
+  ...RunResults
+  commitInfo {
+    authorName
+    authorEmail
+    summary
+    branch
+    sha
+  }
 }
 `
 

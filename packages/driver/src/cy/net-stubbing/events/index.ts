@@ -64,7 +64,6 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   }
 
   function failCurrentTest (err: Error) {
-    // @ts-ignore
     cy.fail(err, { async: true })
   }
 

@@ -18,6 +18,7 @@ describe('aborting XHRs started in a previous test', () => {
     })
 
     it('test 2 aborts the completed XHR', () => {
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps this test running while the XHR from the previous test completes
       cy.wait(2000)
     })
   })

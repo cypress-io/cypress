@@ -15,7 +15,7 @@ const debug = debugFn('cypress:driver:mouse')
 
 export type ForceEl = false | HTMLElement
 
-export type MouseCoords = { x?: number, y?: number}
+export type MouseCoords = { x?: number, y?: number }
 
 /**
  * @typedef Coords
@@ -82,7 +82,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
     return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
   }
-  const sendPointerdown = (el, evtOptions): {} | SentEvent => {
+  const sendPointerdown = (el, evtOptions): Partial<SentEvent> => {
     if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
@@ -112,7 +112,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
     return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
   }
-  const sendMousedown = (el, evtOptions): {} | SentEvent => {
+  const sendMousedown = (el, evtOptions): Partial<SentEvent> => {
     if ((isFirefox || isWebKit || isChromium116OrLater) && el.disabled) {
       return {}
     }
@@ -435,10 +435,10 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       }, mouseEvtOptionsExtend)
 
       // TODO: pointer events should have fractional coordinates, not rounded
-      let pointerdown = sendPointerdown(
+      const pointerdown = sendPointerdown(
         el,
         pointerEvtOptions,
-      ) as Partial<SentEvent>
+      )
 
       const pointerdownPrevented = pointerdown.preventedDefault
       const elIsDetached = $elements.isDetachedEl(el)
@@ -461,7 +461,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         }
       }
 
-      let mousedown = sendMousedown(el, mouseEvtOptions)
+      const mousedown = sendMousedown(el, mouseEvtOptions)
 
       return {
         targetEl: el,
@@ -480,7 +480,9 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       // el we just send pointerdown
       const el = mouseDownPhase.targetEl
 
-      if (mouseDownPhase.events.pointerdown.preventedDefault || (mouseDownPhase.events.mousedown as Partial<SentEvent>).preventedDefault || !$elements.isAttachedEl(el)) {
+      const { mousedown } = mouseDownPhase.events
+
+      if (mouseDownPhase.events.pointerdown.preventedDefault || ('preventedDefault' in mousedown && mousedown.preventedDefault) || !$elements.isAttachedEl(el)) {
         return mouseDownPhase
       }
 
@@ -507,8 +509,6 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
       if (shouldMoveCursorToEndAfterMousedown(el)) {
         debug('moveSelectionToEnd due to click', el)
-        // It's a curried function, so the 2 arguments are valid.
-        // @ts-ignore
         $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
       }
 
@@ -606,21 +606,21 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
     _upEvents (fromElViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       const win = state('window')
 
-      let defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
+      const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
       const pointerEvtOptions = _.extend({}, defaultOptions, {
         ...defaultPointerDownUpOptions,
         buttons: 0,
       }, pointerEvtOptionsExtend)
 
-      let mouseEvtOptions = _.extend({}, defaultOptions, {
+      const mouseEvtOptions = _.extend({}, defaultOptions, {
         buttons: 0,
         detail: 1,
       }, mouseEvtOptionsExtend)
 
       const el = forceEl || mouse.moveToCoords(fromElViewport)
 
-      let pointerup = sendPointerup(el, pointerEvtOptions)
+      const pointerup = sendPointerup(el, pointerEvtOptions)
 
       if (skipMouseEvent || $elements.isDetachedEl($(el))) {
         return {
@@ -634,7 +634,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         }
       }
 
-      let mouseup = sendMouseup(el, mouseEvtOptions)
+      const mouseup = sendMouseup(el, mouseEvtOptions)
 
       return {
         targetEl: el,
@@ -669,7 +669,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         detail: 1,
       }, mouseEvtOptionsExtend)
 
-      let click = sendClick(el, clickEventOptions, { force: !!forceEl })
+      const click = sendClick(el, clickEventOptions, { force: !!forceEl })
 
       return { click }
     },
@@ -687,7 +687,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         which: 3,
       }, mouseEvtOptionsExtend)
 
-      let contextmenu = sendContextmenu(el, mouseEvtOptions)
+      const contextmenu = sendContextmenu(el, mouseEvtOptions)
 
       return { contextmenu }
     },
@@ -710,7 +710,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         detail: 2,
       }, mouseEvtOptionsExtend)
 
-      let dblclick = sendDblclick(el, dblclickEvtProps)
+      const dblclick = sendDblclick(el, dblclickEvtProps)
 
       return { clickEvents1, clickEvents2, dblclick }
     },
@@ -759,13 +759,10 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
   const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable, composed }))
 
   if (bubbles) {
-    evt.stopPropagation = function (...args) {
+    evt.stopPropagation = function () {
       evt._hasStoppedPropagation = true
 
-      // stopPropagation doesn't have any arguments. So, we cannot type-safely pass the second argument.
-      // But we're passing it just in case.
-      // @ts-ignore
-      return stopPropagation.apply(this, ...args)
+      return stopPropagation.call(this)
     }
   }
 
@@ -817,4 +814,4 @@ const toCoordsEventOptions = (x, y, win) => {
   }
 }
 
-export interface Mouse extends ReturnType<typeof create> {}
+export type Mouse = ReturnType<typeof create>

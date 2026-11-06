@@ -148,7 +148,7 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: Dete
 
     debug('Checking for default Cypress config file')
 
-    for (let extension of ['ts', 'mts']) {
+    for (const extension of ['ts', 'mts']) {
       if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
         debug(`Detected cypress.config.${extension} - using TS`)
 
@@ -156,7 +156,7 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: Dete
       }
     }
 
-    for (let extension of ['js', 'cjs', 'mjs']) {
+    for (const extension of ['js', 'cjs', 'mjs']) {
       if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
         debug(`Detected cypress.config.${extension} - using JS`)
 

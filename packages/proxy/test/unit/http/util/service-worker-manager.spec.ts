@@ -517,7 +517,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         it('supports a request with a hash parameter', async () => {
-          let result = manager.processBrowserPreRequest(createBrowserPreRequest({
+          const result = manager.processBrowserPreRequest(createBrowserPreRequest({
             url: 'http://localhost:8080/foo.js',
           }))
 
@@ -642,7 +642,7 @@ describe('lib/http/util/service-worker-manager', () => {
           expect(registration?.isHandlingRequests).toBe(false)
           expect(serviceWorker?.controlledURLs).toEqual(new Set())
 
-          let result = manager.processBrowserPreRequest(createBrowserPreRequest({
+          const result = manager.processBrowserPreRequest(createBrowserPreRequest({
             url: 'http://localhost:8080/index.html',
             originalResourceType: 'Document',
           }))
@@ -677,7 +677,7 @@ describe('lib/http/util/service-worker-manager', () => {
             scope: 'http://localhost:8080',
           })
 
-          let result = manager.processBrowserPreRequest(createBrowserPreRequest({
+          const result = manager.processBrowserPreRequest(createBrowserPreRequest({
             url: 'http://example.com/bar.css',
             callFrameUrl: 'http://localhost:8080/foo.js',
           }))
@@ -712,7 +712,7 @@ describe('lib/http/util/service-worker-manager', () => {
             scope: 'http://localhost:8080',
           })
 
-          let result = manager.processBrowserPreRequest(createBrowserPreRequest({
+          const result = manager.processBrowserPreRequest(createBrowserPreRequest({
             url: 'http://example.com/bar.css',
             callFrameUrl: 'http://localhost:8080/foo.js',
           }))
@@ -736,7 +736,7 @@ describe('lib/http/util/service-worker-manager', () => {
           const registration = manager['serviceWorkerRegistrations'].get('1')
           const serviceWorker = registration?.activatedServiceWorker
 
-          let result = manager.processBrowserPreRequest(createBrowserPreRequest({
+          const result = manager.processBrowserPreRequest(createBrowserPreRequest({
             url: 'http://localhost:9999/index.html',
             originalResourceType: 'Document',
           }))
@@ -750,7 +750,7 @@ describe('lib/http/util/service-worker-manager', () => {
           const registration = manager['serviceWorkerRegistrations'].get('1')
           const serviceWorker = registration?.activatedServiceWorker
 
-          let result = manager.processBrowserPreRequest(createBrowserPreRequest({
+          const result = manager.processBrowserPreRequest(createBrowserPreRequest({
             url: 'http://localhost:8080/index.html',
             originalResourceType: 'Fetch',
           }))

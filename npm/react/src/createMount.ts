@@ -67,6 +67,7 @@ export const makeMountFn = (
     internalMountOptions.render(reactComponent, el, reactDomToUse)
 
     return (
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the chained zero-length wait is the event-loop tick described below
       cy.wrap<React.ReactNode>(userComponent, { log: false })
       .then(() => {
         return cy.wrap<MountReturn>({

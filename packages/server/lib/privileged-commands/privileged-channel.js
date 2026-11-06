@@ -14,18 +14,19 @@
   const captureStackTrace = win.Error.captureStackTrace
   const filter = win.Array.prototype.filter
   const arrayIncludes = win.Array.prototype.includes
-  const map = win.Array.prototype.map
-  const slice = win.Array.prototype.slice
-  const isArray = win.Array.isArray
   const stringIncludes = win.String.prototype.includes
   const replace = win.String.prototype.replace
   const split = win.String.prototype.split
-  const functionToString = win.Function.prototype.toString
+  const decodeUri = win.decodeURIComponent
   const fetch = win.fetch
   const parse = win.JSON.parse
   const stringify = win.JSON.stringify
-  const charCodeAt = win.String.prototype.charCodeAt
-  const imul = Math.imul
+  const Uint8ArrayCtor = win.Uint8Array
+  const Uint32ArrayCtor = win.Uint32Array
+  const textEncoder = new win.TextEncoder()
+  const encodeText = win.TextEncoder.prototype.encode
+  const subtle = win.isSecureContext && win.crypto ? win.crypto.subtle : undefined
+  const digest = subtle ? subtle.digest : undefined
 
   const queryStringRegex = /\?.*$/
 
@@ -94,9 +95,9 @@
       // stack URLs come in encoded by default (similar to URI but not entirely accurate).
       // we need to make sure our script and stack are both decoded entirely to make sure the comparisons are accurate.
       try {
-        const decodedScript = decodeURIComponent(script)
+        const decodedScript = decodeUri(script)
 
-        const decodedStack = decodeURIComponent(err.stack)
+        const decodedStack = decodeUri(err.stack)
 
         return stringIncludes.call(decodedStack, decodedScript)
       } catch (e) {
@@ -139,36 +140,112 @@
     return hasCallbackInsideEval(err) || hasStackLinesFromSpecOrSupportFile(err)
   }
 
-  // source: https://github.com/bryc/code/blob/d0dac1c607a005679799024ff66166e13601d397/jshash/experimental/cyrb53.js
-  function hash (str) {
-    const seed = 0
-    let h1 = 0xdeadbeef ^ seed
-    let h2 = 0x41c6ce57 ^ seed
+  const SHA256_K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+  ]
 
-    for (let i = 0, ch; i < str.length; i++) {
-      ch = charCodeAt.call(str, i)
-      h1 = imul(h1 ^ ch, 2654435761)
-      h2 = imul(h2 ^ ch, 1597334677)
-    }
-    h1 = imul(h1 ^ (h1 >>> 16), 2246822507)
-    h1 ^= imul(h2 ^ (h2 >>> 13), 3266489909)
-    h2 = imul(h2 ^ (h2 >>> 16), 2246822507)
-    h2 ^= imul(h1 ^ (h1 >>> 13), 3266489909)
+  const HEX_DIGITS = '0123456789abcdef'
 
-    return `${4294967296 * (2097151 & h2) + (h1 >>> 0)}`
+  const rotateRight = (value, bits) => {
+    return (value >>> bits) | (value << (32 - bits))
   }
 
-  // removes trailing undefined args
-  function dropRightUndefined (array) {
-    if (!isArray(array)) return []
+  const toHex = (words, wordSize) => {
+    let hex = ''
 
-    let index = array.length
+    for (let i = 0; i < words.length; i++) {
+      for (let shift = wordSize - 4; shift >= 0; shift -= 4) {
+        hex += HEX_DIGITS[(words[i] >>> shift) & 0xf]
+      }
+    }
 
-    // find index of last non-undefined arg
-    // eslint-disable-next-line no-empty
-    while (index-- && array[index] === undefined) {}
+    return hex
+  }
 
-    return slice.call(array, 0, index + 1)
+  function sha256Js (bytes) {
+    const byteLength = bytes.length
+    const words = new Uint32ArrayCtor((((byteLength + 8) >>> 6) + 1) * 16)
+
+    for (let i = 0; i < byteLength; i++) {
+      words[i >>> 2] |= bytes[i] << (24 - (i % 4) * 8)
+    }
+
+    words[byteLength >>> 2] |= 0x80 << (24 - (byteLength % 4) * 8)
+    words[words.length - 2] = (byteLength / 0x20000000) >>> 0
+    words[words.length - 1] = byteLength << 3
+
+    const state = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]
+    const schedule = new Uint32ArrayCtor(64)
+
+    for (let offset = 0; offset < words.length; offset += 16) {
+      for (let t = 0; t < 64; t++) {
+        if (t < 16) {
+          schedule[t] = words[offset + t]
+        } else {
+          const w15 = schedule[t - 15]
+          const w2 = schedule[t - 2]
+          const s0 = rotateRight(w15, 7) ^ rotateRight(w15, 18) ^ (w15 >>> 3)
+          const s1 = rotateRight(w2, 17) ^ rotateRight(w2, 19) ^ (w2 >>> 10)
+
+          schedule[t] = schedule[t - 16] + s0 + schedule[t - 7] + s1
+        }
+      }
+
+      let a = state[0]
+      let b = state[1]
+      let c = state[2]
+      let d = state[3]
+      let e = state[4]
+      let f = state[5]
+      let g = state[6]
+      let h = state[7]
+
+      for (let t = 0; t < 64; t++) {
+        const s1 = rotateRight(e, 6) ^ rotateRight(e, 11) ^ rotateRight(e, 25)
+        const choice = (e & f) ^ (~e & g)
+        const temp1 = (h + s1 + choice + SHA256_K[t] + schedule[t]) | 0
+        const s0 = rotateRight(a, 2) ^ rotateRight(a, 13) ^ rotateRight(a, 22)
+        const majority = (a & b) ^ (a & c) ^ (b & c)
+        const temp2 = (s0 + majority) | 0
+
+        h = g
+        g = f
+        f = e
+        e = (d + temp1) | 0
+        d = c
+        c = b
+        b = a
+        a = (temp1 + temp2) | 0
+      }
+
+      state[0] = (state[0] + a) | 0
+      state[1] = (state[1] + b) | 0
+      state[2] = (state[2] + c) | 0
+      state[3] = (state[3] + d) | 0
+      state[4] = (state[4] + e) | 0
+      state[5] = (state[5] + f) | 0
+      state[6] = (state[6] + g) | 0
+      state[7] = (state[7] + h) | 0
+    }
+
+    return toHex(state, 32)
+  }
+
+  // crypto.subtle is only available in secure contexts, and the spec frame is
+  // served on the origin of the app under test, which may be plain http
+  async function sha256 (bytes) {
+    if (digest) {
+      return toHex(new Uint8ArrayCtor(await digest.call(subtle, 'SHA-256', bytes)), 8)
+    }
+
+    return sha256Js(bytes)
   }
 
   function onCommandInvocation (command) {
@@ -191,49 +268,52 @@
     // it as a verified command
     if (!stackIsFromSpecFrame(err)) return
 
-    // hash the args to avoid `413 Request Entity Too Large` error from express.
-    // see https://github.com/cypress-io/cypress/issues/27099 and
-    // https://github.com/cypress-io/cypress/issues/27097
-    const args = map.call(dropRightUndefined([...(command.args || [])]), (arg) => {
-      if (arg === undefined) {
-        arg = null
+    // the server runs a command once per verification of its options hash.
+    // the options are hashed to avoid `413 Request Entity Too Large` error
+    // from express. see https://github.com/cypress-io/cypress/issues/27099
+    // and https://github.com/cypress-io/cypress/issues/27097
+    let verifiedHash
+
+    const verify = async (packet, binaries) => {
+      const binaryHashes = []
+
+      for (let i = 0; i < binaries.length; i++) {
+        binaryHashes[i] = await sha256(binaries[i])
       }
 
-      if (typeof arg === 'function') {
-        arg = functionToString.call(arg)
+      const hash = await sha256(encodeText.call(textEncoder, stringify([packet, binaryHashes])))
+
+      // a retried command (e.g. cy.readFile() until its assertion passes)
+      // verifies again, but only with the options it was first verified with
+      if (verifiedHash === undefined) {
+        verifiedHash = hash
+      } else if (hash !== verifiedHash) {
+        return
       }
 
-      return hash(stringify(arg))
-    })
-
-    // if we verify a privileged command was invoked from the spec frame, we
-    // send it to the server, where it's stored in state. when the command is
-    // run and it sends its message to the server via websocket, we check
-    // that verified status before allowing the command to continue running
-    //
-    // needs to use the fully-qualified url or else when the baseUrl includes
-    // basic auth, the fetch fails with a security error
-    // see https://github.com/cypress-io/cypress/issues/28336
-    const promise = fetch(`${win.location.origin}/${namespace}/add-verified-command`, {
-      body: stringify({
-        args,
-        name: command.name,
-        key,
-        url,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    }).catch(() => {
-      // this erroring is unlikely, but it's fine to ignore. if adding the
-      // verified command failed, the default behavior is NOT to allow
-      // the privileged command to run
-    })
+      // needs to use the fully-qualified url or else when the baseUrl includes
+      // basic auth, the fetch fails with a security error
+      // see https://github.com/cypress-io/cypress/issues/28336
+      return fetch(`${win.location.origin}/${namespace}/add-verified-command`, {
+        body: stringify({
+          hash,
+          name: command.name,
+          key,
+          url,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      }).catch(() => {
+        // this erroring is unlikely, but it's fine to ignore. if adding the
+        // verified command failed, the default behavior is NOT to allow
+        // the privileged command to run
+      })
+    }
 
     return {
-      args,
-      promise,
+      verify,
     }
   }
 
@@ -241,7 +321,7 @@
 
   // returned for testing purposes only
   return {
-    dropRightUndefined,
     onCommandInvocation,
+    sha256,
   }
 })

@@ -61,7 +61,7 @@ const windowHasFocus = function () {
 }
 
 const requireWindowInFocus = () => {
-  let hasFocus = windowHasFocus()
+  const hasFocus = windowHasFocus()
 
   if (!hasFocus) {
     expect(hasFocus, 'this test requires the window to be in focus').ok
@@ -625,11 +625,12 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     .should('have.focus')
 
     if (isFirefoxBelow152) {
-      cy.wait(0).get('@selectionchange').should('be.called')
+      cy.get('@selectionchange').should('be.called')
 
       return
     }
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts selectionchange is not fired, so let pending events dispatch first
     cy.wait(10).get('@selectionchange').should('not.be.called')
   })
 
@@ -642,11 +643,12 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     .should('have.focus')
 
     if (isFirefoxBelow152) {
-      cy.wait(0).get('@selectionchange').should('be.called')
+      cy.get('@selectionchange').should('be.called')
 
       return
     }
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts selectionchange is not fired, so let pending events dispatch first
     cy.wait(10).get('@selectionchange').should('not.be.called')
   })
 
@@ -659,11 +661,12 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     .should('have.focus')
 
     if (isFirefoxBelow152) {
-      cy.wait(0).get('@selectionchange').should('be.called')
+      cy.get('@selectionchange').should('be.called')
 
       return
     }
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts selectionchange is not fired, so let pending events dispatch first
     cy.wait(10).get('@selectionchange').should('not.be.called')
   })
 
@@ -675,6 +678,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts selectionchange is not fired, so let pending events dispatch first
     cy.wait(0).get('@selectionchange').should('not.be.called')
   })
 
@@ -685,11 +689,12 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     $el[0].focus()
 
     if (isFirefoxBelow152) {
-      cy.wait(0).get('@selectionchange').should('be.called')
+      cy.get('@selectionchange').should('be.called')
 
       return
     }
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts selectionchange is not fired, so let pending events dispatch first
     cy.wait(0).get('@selectionchange').should('not.be.called')
   })
 
@@ -719,10 +724,12 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
 
     cy.$$('<div>second inner contenteditable</div>').appendTo(outer)
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- lets the focus events dispatch before the next step
     cy.get('input:first').focus()
     .wait(0)
     .get('@selectionchange').then((stub) => stub.resetHistory())
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- lets the focus events dispatch before the next step
     cy.wrap(inner).should(($el) => $el.focus)
     .wait(0)
 

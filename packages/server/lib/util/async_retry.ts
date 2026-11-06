@@ -11,7 +11,7 @@ export function asyncRetry<
 > (fn: (...args: TArgs) => Promise<TResult>, options: RetryOptions) {
   return async (...args: TArgs): Promise<TResult> => {
     let attempt = 0
-    let errors: Error[] = []
+    const errors: Error[] = []
 
     const shouldRetry = options.shouldRetry ?? (() => true)
 

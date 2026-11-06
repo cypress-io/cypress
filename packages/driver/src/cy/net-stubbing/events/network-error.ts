@@ -31,7 +31,7 @@ export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (Cyp
     })
   }
 
-  // @ts-ignore
+  // @ts-expect-error - the handler expects a NetworkError, but err is a plain Error
   userHandler && await userHandler(err)
 
   request.state = 'Errored'

@@ -101,7 +101,8 @@ describe('@packages/driver/src/cypress/command_queue', () => {
       setup({ isStable: true })
       queue.add(createCommand(() => new Promise<void>((resolve) => settleLate = resolve)))
       queue.add(createCommand(() => null))
-      queue.run()
+      // the chain is left pending on purpose, so run() is not awaited
+      void queue.run()
       await flush()
     }
 

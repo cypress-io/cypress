@@ -8,7 +8,7 @@ const debug = Debug('cypress:cli')
 
 const getBinaryDirectory = async (): Promise<string> => {
   if (util.getEnv('CYPRESS_RUN_BINARY')) {
-    let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY') as string)
+    const envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY') as string)
 
     try {
       const envBinaryDir = await state.parseRealPlatformBinaryFolderAsync(envBinaryPath)

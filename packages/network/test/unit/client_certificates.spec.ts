@@ -19,15 +19,15 @@ function opensslNewkeyArgs (algo: CertAlgo): string[] {
 const testSubject = '/CN=example.org/C=US/ST=California/L=San Fran/O=Test/OU=Test'
 
 function urlShouldMatch (url: string, matcher: string) {
-  let rule = UrlMatcher.buildMatcherRule(matcher)
-  let parsedUrl = new ParsedUrl(url)
+  const rule = UrlMatcher.buildMatcherRule(matcher)
+  const parsedUrl = new ParsedUrl(url)
 
   expect(UrlMatcher.matchUrl(parsedUrl.host, parsedUrl.path, parsedUrl.port, rule), `'${url}' should match '${matcher}' (rule: ${JSON.stringify(rule)})`).toBe(true)
 }
 
 function urlShouldNotMatch (url: string, matcher: string) {
-  let rule = UrlMatcher.buildMatcherRule(matcher)
-  let parsedUrl = new ParsedUrl(url)
+  const rule = UrlMatcher.buildMatcherRule(matcher)
+  const parsedUrl = new ParsedUrl(url)
 
   expect(UrlMatcher.matchUrl(parsedUrl.host, parsedUrl.path, parsedUrl.port, rule), `'${url}' should not match '${matcher}' (rule: ${JSON.stringify(rule)})`).toBe(false)
 }
@@ -78,7 +78,7 @@ describe('lib/client-certificates', () => {
 
   describe('ClientCertificateUrlMatcher', () => {
     it('matches basic hostnames', () => {
-      let matcher = 'https://a.host.com'
+      const matcher = 'https://a.host.com'
 
       urlShouldMatch('https://a.host.com', matcher)
       urlShouldMatch('https://a.host.com/a/path', matcher)
@@ -106,7 +106,7 @@ describe('lib/client-certificates', () => {
     })
 
     it('matches basic paths', () => {
-      let matcher = 'https://a.path.com/a'
+      const matcher = 'https://a.path.com/a'
 
       urlShouldMatch('https://a.path.com/a', matcher)
       urlShouldNotMatch('https://a.path.com', matcher)
@@ -114,7 +114,7 @@ describe('lib/client-certificates', () => {
     })
 
     it('matches wildcard paths', () => {
-      let matcher = 'https://a.path2.com/**'
+      const matcher = 'https://a.path2.com/**'
 
       urlShouldMatch('https://a.path2.com/a', matcher)
       urlShouldMatch('https://a.path2.com/a/b', matcher)
@@ -123,8 +123,8 @@ describe('lib/client-certificates', () => {
 
   describe('UrlClientCertificates', () => {
     it('constructs, populates default properties', () => {
-      let url = 'http://a.host.com/home'
-      let certs = new UrlClientCertificates(url)
+      const url = 'http://a.host.com/home'
+      const certs = new UrlClientCertificates(url)
 
       expect(certs.url).toEqual(url)
       expect(certs.pathnameLength).toEqual(5)
@@ -140,7 +140,7 @@ describe('lib/client-certificates', () => {
 
       expect(store.getCertCount()).toEqual(0)
 
-      let options = store.getClientCertificateAgentOptionsForUrl(url1)
+      const options = store.getClientCertificateAgentOptionsForUrl(url1)
 
       expect(options).toEqual(null)
 

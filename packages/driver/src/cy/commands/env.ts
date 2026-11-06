@@ -41,7 +41,7 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
         }
       }
 
-      let message = envVars.join(', ')
+      const message = envVars.join(', ')
 
       options._log = Cypress.log({
         hidden: !options.log,

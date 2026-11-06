@@ -55,7 +55,7 @@ export async function correlateBrowserPreRequest (mw: RequestInterceptionMiddlew
       requestId,
       method: mw.req.method,
       url: mw.req.proxiedUrl,
-      // @ts-ignore
+      // @ts-expect-error - IncomingHttpHeaders allows undefined values, which BrowserPreRequest headers do not
       headers: mw.req.headers,
       resourceType: 'document',
       originalResourceType: 'document',

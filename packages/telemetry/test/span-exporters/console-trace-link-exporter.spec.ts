@@ -10,7 +10,7 @@ describe('consoleTraceLinkExporter', () => {
         environment: 'environment',
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - _traceUrl is private
       expect(exporter._traceUrl).toEqual('https://ui.honeycomb.io/team/environments/environment/datasets/serviceName/trace?trace_id')
     })
   })
@@ -23,7 +23,7 @@ describe('consoleTraceLinkExporter', () => {
         environment: 'environment',
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - _log is private; replace it to capture output
       exporter._log = (...args) => {
         expect(args[0]).toEqual('Trace start: [spanName] - https://ui.honeycomb.io/team/environments/environment/datasets/serviceName/trace?trace_id=traceId')
       }
@@ -31,7 +31,7 @@ describe('consoleTraceLinkExporter', () => {
       return new Promise((resolve) => {
         exporter.export([{
           name: 'spanName',
-          // @ts-expect-error
+          // @ts-expect-error - partial SpanContext stub with only the ids the exporter reads
           spanContext: () => {
             return {
               traceId: 'traceId',
@@ -39,7 +39,7 @@ describe('consoleTraceLinkExporter', () => {
             }
           },
         }], (result) => {
-          // @ts-expect-error
+          // @ts-expect-error - _uniqueTraces is private
           expect(exporter._uniqueTraces['traceId']).toEqual('spanId')
           expect(result.code).toEqual(0)
           resolve()
@@ -56,7 +56,7 @@ describe('consoleTraceLinkExporter', () => {
 
       exporter.export([{
         name: 'spanName',
-        // @ts-expect-error
+        // @ts-expect-error - partial SpanContext stub with only the ids the exporter reads
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -65,7 +65,7 @@ describe('consoleTraceLinkExporter', () => {
         },
       }], () => {})
 
-      // @ts-expect-error
+      // @ts-expect-error - _log is private; replace it to capture output
       exporter._log = (...args) => {
         throw 'do not call'
       }
@@ -73,7 +73,7 @@ describe('consoleTraceLinkExporter', () => {
       return new Promise((resolve) => {
         exporter.export([{
           name: 'spanName',
-          // @ts-expect-error
+          // @ts-expect-error - partial SpanContext stub with only the ids the exporter reads
           spanContext: () => {
             return {
               traceId: 'traceId',
@@ -81,7 +81,7 @@ describe('consoleTraceLinkExporter', () => {
             }
           },
         }], (result) => {
-          // @ts-expect-error
+          // @ts-expect-error - _uniqueTraces is private
           expect(exporter._uniqueTraces['traceId']).not.toEqual('spanId2')
           expect(result.code).toEqual(0)
           resolve()
@@ -98,7 +98,7 @@ describe('consoleTraceLinkExporter', () => {
 
       exporter.export([{
         name: 'spanName',
-        // @ts-expect-error
+        // @ts-expect-error - partial SpanContext stub with only the ids the exporter reads
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -107,7 +107,7 @@ describe('consoleTraceLinkExporter', () => {
         },
       }], () => {})
 
-      // @ts-expect-error
+      // @ts-expect-error - _log is private; replace it to capture output
       exporter._log = (...args) => {
         throw 'do not call'
       }
@@ -116,7 +116,7 @@ describe('consoleTraceLinkExporter', () => {
         exporter.export([{
           name: 'spanName',
           ended: true,
-          // @ts-expect-error
+          // @ts-expect-error - partial SpanContext stub with only the ids the exporter reads
           spanContext: () => {
             return {
               traceId: 'traceId',
@@ -139,7 +139,7 @@ describe('consoleTraceLinkExporter', () => {
 
       exporter.export([{
         name: 'spanName',
-        // @ts-expect-error
+        // @ts-expect-error - partial SpanContext stub with only the ids the exporter reads
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -148,7 +148,7 @@ describe('consoleTraceLinkExporter', () => {
         },
       }], () => {})
 
-      // @ts-expect-error
+      // @ts-expect-error - _log is private; replace it to capture output
       exporter._log = (...args) => {
         // eslint-disable-next-line no-console
         console.log(args)
@@ -159,7 +159,7 @@ describe('consoleTraceLinkExporter', () => {
         exporter.export([{
           name: 'spanName',
           ended: true,
-          // @ts-expect-error
+          // @ts-expect-error - partial SpanContext stub with only the ids the exporter reads
           spanContext: () => {
             return {
               traceId: 'traceId',

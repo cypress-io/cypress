@@ -465,8 +465,8 @@ describe('lib/adapters/serve-internal-routes', () => {
       expect(serverRequest.create).not.toHaveBeenCalled()
     })
 
-    it('releases own-origin namespace subresources with concrete types', async () => {
-      // the app's graphql calls — the parent's cy.intercept must see these
+    it('releases own-origin subresources with concrete types', async () => {
+      // the Studio bundle — the parent's cy.intercept must see it
       vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware()
@@ -474,9 +474,9 @@ describe('lib/adapters/serve-internal-routes', () => {
 
       await middleware({
         id: 'req-1',
-        url: 'http://localhost:1234/__cypress/graphql/mutation-foo',
-        method: 'POST',
-        resourceType: 'xhr',
+        url: 'http://localhost:1234/__cypress-studio/app-studio.js',
+        method: 'GET',
+        resourceType: 'script',
       }, next)
 
       expect(next).toHaveBeenCalledOnce()
@@ -711,8 +711,8 @@ describe('lib/adapters/internal-routes isAnsweredByCypress', () => {
       expect(answered({ url: 'http://localhost:1234/__/', resourceType: 'other' })).toBe(false)
     })
 
-    it('is false for own-origin namespace subresources with concrete types', () => {
-      expect(answered({ url: 'http://localhost:1234/__cypress/graphql/mutation-foo', resourceType: 'xhr' })).toBe(false)
+    it('is false for own-origin subresources with concrete types', () => {
+      expect(answered({ url: 'http://localhost:1234/__cypress-studio/app-studio.js', resourceType: 'script' })).toBe(false)
     })
 
     it('is true for own-origin non-clientRoute documents', () => {

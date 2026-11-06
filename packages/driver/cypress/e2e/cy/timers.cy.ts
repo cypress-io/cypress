@@ -1,3 +1,4 @@
+/* eslint-disable cypress/no-unnecessary-waiting -- these specs check that cleared and paused timers do not fire, so real time has to pass */
 // NOTE: basically the same as a cy.wait(...) but uses setTimeout instead of Promise.delay
 // since firefox will sometimes have `Promise.delay(10)` fire faster than a `setTimeout(..., 1)`
 const cyWaitTimeout = (n) => cy.wrap(new Promise((resolve) => window.setTimeout(resolve, n)))
@@ -360,8 +361,6 @@ describe('driver/src/cy/timers', () => {
     .log('cancels the interval after 3 calls')
     .window()
     .then((win) => {
-      let timerId
-
       const cancelAfter3Calls = cy
       .stub()
       .onThirdCall()
@@ -369,7 +368,7 @@ describe('driver/src/cy/timers', () => {
         win.clearInterval(timerId)
       })
 
-      timerId = win.setInterval(cancelAfter3Calls, 10)
+      const timerId = win.setInterval(cancelAfter3Calls, 10)
 
       cy
       .wait(100)
@@ -380,8 +379,6 @@ describe('driver/src/cy/timers', () => {
     .log('cancels the interval after 3 calls even when paused')
     .window()
     .then((win) => {
-      let timerId
-
       const cancelAfter3Calls = cy
       .stub()
       .onThirdCall()
@@ -395,7 +392,7 @@ describe('driver/src/cy/timers', () => {
 
       cy.pauseTimers(true)
 
-      timerId = win.setInterval(cancelAfter3Calls, 10)
+      const timerId = win.setInterval(cancelAfter3Calls, 10)
 
       cy
       .wait(200)

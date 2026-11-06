@@ -101,7 +101,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
       subjectFn: () => {
         const subject = cy.subject(command.get('chainerId'))
 
-        // @ts-ignore
+        // @ts-expect-error - ensure.isType expects a Chainable, not the $Cy instance
         Cypress.ensure.isType(subject, command.get('prevSubject'), command.get('name'), cy)
 
         return ret(subject)
@@ -326,8 +326,6 @@ export class CommandQueue extends Queue<$Command> {
           command.set('queryFn', ret)
           ret = retryQuery(command, ret, this.cy)
         }
-      } catch (err) {
-        throw err
       } finally {
         // always remove this listener
         Cypress.removeListener('command:enqueued', commandEnqueued)
@@ -433,7 +431,7 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   // TypeScript doesn't allow overriding functions with different type signatures
-  // @ts-ignore
+  // @ts-expect-error - run() has a different signature than Queue.run()
   run () {
     if (this.stopped) {
       this.cleanup()
@@ -554,9 +552,9 @@ export class CommandQueue extends Queue<$Command> {
 
       // since this failed this means that a specific command failed
       // and we should highlight it in red or insert a new command
-      // @ts-ignore
+      // @ts-expect-error - _.isObject() narrows err to object, which has no name property
       if (_.isObject(err) && !err.name) {
-        // @ts-ignore
+        // @ts-expect-error - _.isObject() narrows err to object, which has no name property
         err.name = 'CypressError'
       }
 

@@ -5,7 +5,7 @@ import uniqueSelector from '@cypress/unique-selector'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
-const VALID_SELECTOR_PRIORITY_REGEX = /^(data\-.+|id|class|tag|attributes|nth\-child|attribute:(.+)|name)$/
+const VALID_SELECTOR_PRIORITY_REGEX = /^(data-.+|id|class|tag|attributes|nth-child|attribute:(.+)|name)$/
 
 export const DEFAULT_SELECTOR_PRIORITIES = [
   'data-cy',

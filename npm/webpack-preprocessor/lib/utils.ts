@@ -9,7 +9,6 @@ function createDeferred<T> () {
   })
 
   return {
-    //@ts-ignore
     resolve,
     reject,
     promise,

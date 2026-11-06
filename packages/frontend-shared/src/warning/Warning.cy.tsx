@@ -51,8 +51,7 @@ describe('<Warning />', () => {
   })
 
   it('renders with a Learn more Link', () => {
-    // eslint-disable-next-line prefer-template
-    const messagePlusLink = message + '[Learn more](https://on.cypress.io/git-info)'
+    const messagePlusLink = `${message}[Learn more](https://on.cypress.io/git-info)`
 
     cy.mount(() => (<div class="p-4"><Warning
       title={title}

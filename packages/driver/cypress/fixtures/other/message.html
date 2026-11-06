@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <script>
+    const params = new URLSearchParams(location.search)
+    const responseEvent = `other:response:${Date.now()}`
+
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.event === responseEvent) {
+        parent.postMessage({ type: 'other:response', data: event.data.data }, '*')
+      }
+    })
+
+    top.postMessage({
+      event: `cross:origin:${params.get('event')}`,
+      data: { args: JSON.parse(params.get('args')) },
+      origin: location.origin,
+      responseEvent,
+    }, '*')
+
+    parent.postMessage({ type: 'other:sent' }, '*')
+  </script>
+</body>
+</html>

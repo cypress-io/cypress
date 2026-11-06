@@ -900,7 +900,6 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.verifyE2ESelected()
-    cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
 
@@ -919,6 +918,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.verifyE2ESelected()
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the prompt never opens, so give it time to open first
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })

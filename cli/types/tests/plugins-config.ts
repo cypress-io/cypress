@@ -15,6 +15,15 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config.testingType // $ExpectType TestingType
   config.browsers // $ExpectType Browser[]
 
+  // https://github.com/cypress-io/cypress/issues/30420
+  on('before:run', (details) => {
+    details.config // $ExpectType PluginConfigOptions
+    details.config.projectRoot // $ExpectType string
+    details.config.configFile // $ExpectType string
+    details.config.testingType // $ExpectType TestingType
+    details.config.browsers // $ExpectType Browser[]
+  })
+
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string
     options.extensions // $ExpectType string[]

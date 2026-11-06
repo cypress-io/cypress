@@ -375,7 +375,7 @@ describe('doctor', () => {
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
 
     await fs.remove(cacheDir)
-    let generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
+    const generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
       nodeModulesOnly: false,
       forceNorewrite: ['force-no-rewrite.js'],

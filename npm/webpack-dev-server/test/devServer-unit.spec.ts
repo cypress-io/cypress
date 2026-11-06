@@ -14,7 +14,7 @@ vi.mock('../src/helpers/sourceRelativeWebpackModules', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual() returns unknown, which cannot be spread
     ...actual,
     sourceDefaultWebpackDependencies: vi.fn(),
   }

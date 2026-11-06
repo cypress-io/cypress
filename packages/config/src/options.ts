@@ -17,7 +17,7 @@ import * as validate from './validation'
  * - add name and description copy to `/packages/frontend-shared/src/locales/en-US.json`
  */
 
-const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
+const _BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'CONFIG_FILE_INVALID_ROOT_CONFIG',
   'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
   'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
@@ -41,7 +41,7 @@ type ValidationOptions = {
   testingType: TestingType | null
 }
 
-export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
+export type BreakingOptionErrorKey = typeof _BREAKING_OPTION_ERROR_KEY[number]
 
 /**
  * Where a configuration option is allowed to be overridden at test time:
@@ -454,7 +454,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: (key: string, value: any, opts: ValidationOptions) => {
       const { testingType } = opts
 
-      let configOpts = [true, false]
+      const configOpts = [true, false]
 
       if (testingType === 'component') {
         configOpts.pop()

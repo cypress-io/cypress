@@ -828,7 +828,7 @@ is being covered by another element:
 
       it('drops files onto any element and triggers events', (done) => {
         const $body = cy.$$('body')
-        let events: any[] = []
+        const events: any[] = []
 
         $body.on('input', (e) => {
           throw new Error('should not trigger input')

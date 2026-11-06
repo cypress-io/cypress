@@ -6,9 +6,9 @@ describe('test retries with testIsolation disabled', { testIsolation: false, ret
 
   beforeEach(() => {
     // ensure we run the tests in run mode
-    // @ts-expect-error
+    // @ts-expect-error - `isInteractive` is not a test config override
     Cypress.config('isInteractive', false)
-    // @ts-expect-error
+    // @ts-expect-error - `exit` is not a test config override
     Cypress.config('exit', true)
   })
 

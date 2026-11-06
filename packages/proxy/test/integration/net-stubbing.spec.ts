@@ -240,7 +240,6 @@ describe('network stubbing', () => {
       if (event === 'before:request') {
         onNetStubbingEvent({
           eventName: 'send:static:response',
-          // @ts-ignore
           frame: {
             requestId: data.requestId,
             staticResponse: {
@@ -310,7 +309,6 @@ describe('network stubbing', () => {
         sendContentLength = data.data.headers['content-length']
         onNetStubbingEvent({
           eventName: 'send:static:response',
-          // @ts-ignore
           frame: {
             requestId: data.requestId,
             staticResponse: {

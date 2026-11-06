@@ -513,6 +513,29 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('#change-result').should('have.text', 'Number of times onChange event fired: 1')
         cy.get('#input-result').should('have.text', 'Number of times input event fired: 1')
       })
+
+      it('fires `change` with the whole selection of a multiple select', () => {
+        let changedTo
+
+        cy.$$('select[name=movies]').on('change', (e) => {
+          changedTo = Cypress.$(e.target).val()
+        })
+
+        cy.get('select[name=movies]').select(['apoc', 'br'])
+        cy.then(() => expect(changedTo).to.deep.eq(['apoc', 'br']))
+      })
+
+      it('fires `change` when adding to a multiple select\'s selection', () => {
+        let changedTo
+
+        cy.$$('select[name=movies]').on('change', (e) => {
+          changedTo = Cypress.$(e.target).val()
+        })
+
+        cy.get('select[name=movies]').select(['apoc'])
+        cy.get('select[name=movies]').select(['apoc', 'br'])
+        cy.then(() => expect(changedTo).to.deep.eq(['apoc', 'br']))
+      })
     })
 
     describe('errors', {

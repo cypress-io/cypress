@@ -420,7 +420,7 @@ export class BidiAutomation {
   private onBeforeRequestSent = async (params: NetworkBeforeRequestSentParametersModified) => {
     debugVerbose('received network.beforeRequestSend %o', params)
 
-    let url = params.request.url
+    const url = params.request.url
 
     const parsedHeaders = {}
 
