@@ -428,6 +428,7 @@ export function mount (componentOptions: any, options: any = {}) {
     Cypress.vueWrapper = wrapper as VueWrapper<ComponentPublicInstance>
     Cypress.vue = wrapper.vm as ComponentPublicInstance
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- yields so the component's lifecycle hooks run before the test continues
     return cy
     .wait(1, { log: false })
     .then(() => {

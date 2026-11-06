@@ -338,7 +338,7 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(200)
+      cy.location('hash').should('include', '/settings')
       cy.get('[data-cy="Device settings"]').click()
     })
 
@@ -363,7 +363,7 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(200)
+      cy.location('hash').should('include', '/settings')
       cy.get('[data-cy="Device settings"]').click()
     })
   })
@@ -460,43 +460,32 @@ describe('App: Settings', () => {
         cy.contains('Notify me when a run completes').should('be.visible')
         cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        // each preference is saved after a debounce
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled', 'errored'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
       })
 
       itSkipIfWindows('sends test notification', () => {

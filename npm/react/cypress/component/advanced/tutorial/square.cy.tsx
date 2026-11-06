@@ -29,10 +29,7 @@ describe('Square', () => {
   it('looks good', () => {
     mount(<Square />)
 
-    // pause to show it
-    cy.wait(1000)
     cy.get('.square').click()
-    cy.wait(1000)
 
     cy.get('.square')
     .should('have.css', 'background-color', 'rgb(255, 255, 255)')

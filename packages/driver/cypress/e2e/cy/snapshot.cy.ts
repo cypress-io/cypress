@@ -101,6 +101,7 @@ describe('driver/src/cy/snapshots', () => {
     it('does not cause images to be requested multiple times', function () {
       let timesRequested = 0
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the image is not requested again, so give a second request time to happen
       cy.intercept('/fixtures/media/cypress.png', () => {
         timesRequested++
       })
