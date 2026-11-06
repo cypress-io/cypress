@@ -15,9 +15,9 @@ describe('Spec List - Last updated with git info', () => {
 
   it('shows correct git icons', () => {
     // foo.spec.js is newly created, not yet committed
-    // this is performed by the task `initGitRepoForTestProject`
-
-    cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
+    // this is performed by the task `initGitRepoForTestProject`, and git status
+    // for the freshly initialized repo can take a while to arrive
+    cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg', { timeout: 10000 })
     .should('have.class', 'icon-light-jade-50')
 
     cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')

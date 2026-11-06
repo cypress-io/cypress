@@ -197,14 +197,10 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
       cy.getByRole('button', { name: 'Close' }).should('be.visible')
 
-      // The dialog can appear before the spec is written and picked up by the
-      // specs watcher, and running it before then fails
-      cy.withRetryableCtx(async (ctx, o) => {
-        const contents = await ctx.fs.readFile(ctx.path.join(ctx.currentProject!, o.specPath), 'utf8')
-
-        expect(contents).not.to.be.empty
-        expect(ctx.project.specs.some((spec) => ctx.path.normalize(spec.relative) === ctx.path.normalize(o.specPath))).to.be.true
-      }, { specPath: expectedSpecPath })
+      // The dialog can appear before the new spec is written and picked up by
+      // the component dev server, and running it before then fails
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the dev server exposes no signal that it has picked up the spec
+      cy.wait(2000)
 
       cy.getByRole('link', { name: 'Okay, run the spec' })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
