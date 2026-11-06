@@ -33,6 +33,7 @@ Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/ser
 **Architecture**
 
 - `lib/browsers/` — Browser launch, automation, and CDP/BiDi communication for Chrome, Firefox, Electron, and WebKit
+  - `lib/browsers/cdp-protocol/` — The browser network path for Chromium browsers (CDP Fetch interception instead of the HTTP proxy); its [README](./lib/browsers/cdp-protocol/README.md) explains how cookies work there
 - `lib/project-base.ts` — Base project class; orchestrates proxy, socket, and server setup
 - `lib/server-base.ts` — HTTP/HTTPS server setup and routing
 - `lib/socket-base.ts`, `lib/socket-e2e.ts`, `lib/socket-ct.ts` — WebSocket communication with the browser/driver

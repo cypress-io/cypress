@@ -192,4 +192,4 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
   },
 })
 
-export interface IRetries extends ReturnType<typeof create> {}
+export type IRetries = ReturnType<typeof create>

@@ -104,7 +104,7 @@ describe('lib/tap error registry', () => {
     .filter(([, copy]) => copy.attachHelp)
     .map(([code]) => code)
 
-    expect(attaching.sort()).to.deep.eq(['INVALID_ARGUMENTS', 'INVALID_OPTIONS', 'UNKNOWN_COMMAND', 'UNKNOWN_OPTION'])
+    expect(attaching.sort()).to.deep.eq(['INVALID_ARGUMENTS', 'INVALID_OPTIONS', 'MISSING_COMPANION_OPTION', 'UNKNOWN_COMMAND', 'UNKNOWN_OPTION'])
   })
 
   it('leaves the specifics to the throw site, never interpolating them', () => {
@@ -704,10 +704,11 @@ describe('lib/tap error rendering catalogue', () => {
       failure: new MissingOptionTapError('reporter', 'test-id'),
       helpOf: 'reporter',
     },
-    // packages/app/src/tap/commands/reporter.ts
+    // packages/app/src/tap/exec-args.ts, from an option's `requires`
     MISSING_COMPANION_OPTION: {
       invocation: 'cypress tap reporter --attempt 2',
       failure: new MissingCompanionOptionTapError('--attempt', '--test-id', 'Pass `--test-id` to specify the test, or omit `--attempt` to review the latest attempt for every test in the spec.'),
+      helpOf: 'reporter',
     },
     // cli/lib/tap/output.ts, standing in for anything that reached the renderer
     // without being raised as a tap failure

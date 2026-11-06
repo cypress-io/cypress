@@ -30,7 +30,7 @@
           :suffix-icon-class="classes.suffixIconClass"
           data-cy="alert"
           class="rounded min-w-[200px] p-[16px]"
-          @suffixIconClicked="$emit('update:modelValue', !modelValue)"
+          @suffix-icon-clicked="$emit('update:modelValue', !modelValue)"
         >
           <template
             v-if="$slots.title"
@@ -103,7 +103,7 @@ defineEmits<{
 const props = withDefaults(defineProps<{
   title?: string
   status?: AlertStatus
-  icon?: FunctionalComponent<SVGAttributes, {}>
+  icon?: FunctionalComponent<SVGAttributes>
   headerClass?: string
   bodyClass?: string
   dismissible?: boolean

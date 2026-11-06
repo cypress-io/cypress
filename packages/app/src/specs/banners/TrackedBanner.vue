@@ -5,7 +5,7 @@
   >
     <slot
       :dismiss="dismiss"
-      :bannerInstanceId="bannerInstanceId"
+      :banner-instance-id="bannerInstanceId"
     />
   </Alert>
 </template>

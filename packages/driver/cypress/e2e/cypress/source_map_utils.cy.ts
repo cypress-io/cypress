@@ -10,7 +10,7 @@ const SourceMapConsumer = BaseSourceMapConsumer as typeof BaseSourceMapConsumer 
 const _ = Cypress._
 const { encodeBase64Unicode } = Cypress.utils
 
-const testContent = `it(\'simple test\', () => {
+const testContent = `it('simple test', () => {
     expect(true).to.be.true
     expect(true).to.be.false
     expect(false).to.be.false
@@ -34,7 +34,7 @@ const sourceMap = {
 }
 
 const fileContents = `${testContent}
-\/\/# sourceMappingURL=data:application/json;charset=utf-8;base64,${encodeBase64Unicode(JSON.stringify(sourceMap))}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,${encodeBase64Unicode(JSON.stringify(sourceMap))}
 `
 
 const createFile = (fileName) => {
@@ -58,7 +58,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('returns null if it is not an inline map', () => {
-      const sourceMap = $sourceMapUtils.extractSourceMap(`${testContent}\n\/\/# sourceMappingURL=foo.map`)
+      const sourceMap = $sourceMapUtils.extractSourceMap(`${testContent}\n//# sourceMappingURL=foo.map`)
 
       expect(sourceMap).to.be.null
     })
@@ -66,7 +66,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     it('returns null if it is not valid base64', () => {
       // create a file contents with a source map that has not been base64 encoded
       const fileContents = `${testContent}
-\/\/# sourceMappingURL=data:application/json;charset=utf-8;base64,${JSON.stringify(sourceMap)}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,${JSON.stringify(sourceMap)}
 `
       const extractedSourceMap = $sourceMapUtils.extractSourceMap(fileContents)
 
@@ -80,7 +80,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('returns source map when the data url does not have a charset', () => {
-      const extractedSourceMap = $sourceMapUtils.extractSourceMap(`${testContent}\n\/\/# sourceMappingURL=data:application/json;base64,${encodeBase64Unicode(JSON.stringify(sourceMap))}`)
+      const extractedSourceMap = $sourceMapUtils.extractSourceMap(`${testContent}\n//# sourceMappingURL=data:application/json;base64,${encodeBase64Unicode(JSON.stringify(sourceMap))}`)
 
       expect(extractedSourceMap).to.be.eql(sourceMap)
     })

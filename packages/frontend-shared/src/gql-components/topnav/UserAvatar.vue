@@ -6,7 +6,7 @@
   />
 </template>
 
-<script setup lang="ts" >
+<script setup lang="ts">
 import gravatar from 'gravatar'
 import { computed } from 'vue'
 

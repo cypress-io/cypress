@@ -66,7 +66,7 @@ const validateOptions = (options) => {
   const supportedUploadTypes = Object.keys(uploadTypes)
 
   la(check.defined(type) && supportedUploadTypes.includes(type),
-    `specify which upload type you\'d like to upload. One of ${supportedUploadTypes.join(',')}`, type)
+    `specify which upload type you'd like to upload. One of ${supportedUploadTypes.join(',')}`, type)
 
   const { uploadFolder, uploadFileName } = uploadTypes[type]
 

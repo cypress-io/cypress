@@ -573,9 +573,19 @@ describe('tap binding pin lifecycle', () => {
 
       expect((noTarget as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
+      const testOnly = await binding.exec('pin', {}, { 'test-id': 'r2' })
+      const commandOnly = await binding.exec('pin', {}, { 'command-id': '1' })
+
+      expect((testOnly as { error: { code: string } }).error.code).to.eq('MISSING_COMPANION_OPTION')
+      expect((commandOnly as { error: { code: string } }).error.code).to.eq('MISSING_COMPANION_OPTION')
+
       const clearNoop = await binding.exec('pin', {}, { clear: 'true' })
 
       expect(clearNoop).to.deep.eq({ result: { cleared: false } })
+
+      const clearWithStrayId = await binding.exec('pin', {}, { clear: 'true', 'test-id': 'r2' })
+
+      expect(clearWithStrayId).to.deep.eq({ result: { cleared: false } })
 
       const beforeRun = await binding.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 

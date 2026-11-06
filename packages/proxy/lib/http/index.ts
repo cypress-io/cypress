@@ -138,7 +138,7 @@ export type ServerCtx = Readonly<{
   reservedPathPrefixes?: string[]
 }>
 
-const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
+const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<unknown>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
