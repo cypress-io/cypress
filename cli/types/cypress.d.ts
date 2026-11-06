@@ -5122,6 +5122,25 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'be.finite'): Chainable<Subject>
+    /**
+     * Asserts that the target is iterable, which means that it has a `Symbol.iterator` method.
+     * @example
+     *    cy.wrap([1, 2]).should('be.iterable')
+     *    cy.wrap(new Set([1, 2])).should('be.iterable')
+     * @see http://chaijs.com/api/bdd/#method_iterable
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.iterable'): Chainable<Subject>
+    /**
+     * Asserts that the target contains the given subset. Objects match when every property of the subset matches the target's, recursively, and arrays match when each element of the subset matches at least one element of the target, in any order.
+     * A function in the subset is called with the target's value and passes when it returns a truthy value, and dates match by timestamp.
+     * @example
+     *    cy.request('/users/1').its('body').should('containSubset', { name: 'Jane', address: { city: 'Atlanta' } })
+     *    cy.wrap([{ id: 1 }, { id: 2 }]).should('containSubset', [{ id: 2 }])
+     * @see http://chaijs.com/api/bdd/#method_containsubset
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'containSubset', subset: any): Chainable<Subject>
 
     // chai.not
     /**
@@ -5725,6 +5744,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.be.finite'): Chainable<Subject>
+    /**
+     * Asserts that the target is iterable, which means that it has a `Symbol.iterator` method.
+     * @example
+     *    cy.wrap(1).should('not.be.iterable')
+     * @see http://chaijs.com/api/bdd/#method_iterable
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.iterable'): Chainable<Subject>
+    /**
+     * Asserts that the target contains the given subset.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('not.containSubset', { a: 3 })
+     * @see http://chaijs.com/api/bdd/#method_containsubset
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.containSubset', subset: any): Chainable<Subject>
 
     // sinon-chai
     /**

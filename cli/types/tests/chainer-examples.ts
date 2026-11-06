@@ -171,6 +171,11 @@ cy.wrap(6).should('not.be.greaterThanOrEqual', 7)
 cy.wrap(4).should('not.be.lessThanOrEqual', 3)
 
 cy.wrap([1, 2, 3]).should('include.members', [1, 2])
+
+cy.wrap([1, 2]).should('be.iterable')
+cy.wrap(1).should('not.be.iterable')
+cy.wrap({ a: 1, b: { c: 2 } }).should('containSubset', { b: { c: 2 } })
+cy.wrap({ a: 1 }).should('not.containSubset', { a: 2 })
 ;
 
 () => {
