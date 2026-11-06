@@ -1,6 +1,5 @@
 import {
   CookieJar,
-  toughCookieToAutomationCookie,
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
 import type { Cookie as ToughCookie,
@@ -34,15 +33,12 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   })
 }
 
-const sendCookieToServer = (cookie: SerializableAutomationCookie) => {
+const sendCookieToServer = (cookieString: string) => {
   window.top!.postMessage({
     event: 'cross:origin:aut:set:cookie',
     data: {
-      cookie,
+      cookieString,
       url: location.href,
-      // url will always match the cookie domain, so strict context tells
-      // tough-cookie to allow it to be set
-      sameSiteContext: 'strict',
     },
   }, '*')
 }
@@ -60,7 +56,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
   const existingCookies = parseDocumentCookieString(document.cookie)
 
   const getDocumentCookieValue = () => {
-    return cookieJar.getCookies(url, undefined).map((cookie: ToughCookie) => {
+    return cookieJar.getCookies(url, undefined, { http: false }).map((cookie: ToughCookie) => {
       return `${cookie.key}=${cookie.value}`
     }).join('; ')
   }
@@ -71,13 +67,14 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     })
   }
 
-  const setCookie = (cookie: ToughCookie | string) => {
+  const setCookie = (cookie: ToughCookie | string, { http = false } = {}) => {
     try {
-      return cookieJar.setCookie(cookie, url, undefined)
+      return cookieJar.setCookie(cookie, url, undefined, { http })
     } catch (err) {
       // it's possible setting the cookie fails because the domain does not
-      // match. this is expected and okay to do nothing, since it wouldn't be
-      // set in the browser anyway
+      // match, or because it is or would replace an HttpOnly cookie. this is
+      // expected and okay to do nothing, since it wouldn't be set in the
+      // browser anyway
       return
     }
   }
@@ -99,16 +96,22 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       if (parsedCookie?.hostOnly === null) {
         // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates.
         // in the case it is not set, we need to calculate it
-        parsedCookie.hostOnly = isHostOnlyCookie(parsedCookie.domain || domain)
+        // tough-cookie strips the Domain attribute's leading dot, so its presence is what makes a domain cookie
+        parsedCookie.hostOnly = !parsedCookie.domain
       }
 
       // if result is undefined, it was invalid and couldn't be parsed
       if (!parsedCookie) return getDocumentCookieValue()
 
+      // cookies written without a Path are stored at '/', so check them there
+      const cookieString = parsedCookie.path ? stringValue : `${stringValue}; Path=/`
+
       // if the cookie is expired, remove it in our cookie jar
       // and via setting it inside our automation client with the correct expiry.
       // This will have the effect of removing the cookie
       if (parsedCookie.expiryTime() < Date.now()) {
+        if (!setCookie(cookieString)) return getDocumentCookieValue()
+
         cookieJar.removeCookie({
           name: parsedCookie.key,
           path: parsedCookie.path || '/',
@@ -118,7 +121,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
         // send the cookie to the server so it can be removed from the browser
         // via automation. If the cookie expiry is set inside the server-side cookie jar,
         // the cookie will be automatically removed.
-        sendCookieToServer(toughCookieToAutomationCookie(parsedCookie, domain))
+        sendCookieToServer(stringValue)
 
         return getDocumentCookieValue()
       }
@@ -127,19 +130,15 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // value, but tough-cookie doesn't recognize it using an instanceof
       // check and throws an error. because we can't, we have to massage
       // some of the properties below to be correct
-      const cookie = setCookie(stringValue)
+      const cookie = setCookie(cookieString)
 
       if (cookie) {
         cookie.sameSite = parsedCookie.sameSite
 
-        if (!parsedCookie.path) {
-          cookie.path = '/'
-        }
-
         // send the cookie to the server so it can be set in the browser via
         // automation and in our server-side cookie jar so it's available
         // to subsequent injections
-        sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
+        sendCookieToServer(stringValue)
       }
 
       return getDocumentCookieValue()
@@ -156,7 +155,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     // the following listeners are called from Cypress cookie commands, so that
     // the document.cookie value is updated optimistically
     Cypress.on('set:cookie', (cookie: SerializableAutomationCookie) => {
-      setCookie(automationCookieToToughCookie(cookie, domain))
+      setCookie(automationCookieToToughCookie(cookie, domain), { http: true })
     })
 
     Cypress.on('clear:cookie', (name: string) => {

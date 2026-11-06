@@ -36,7 +36,18 @@ let crossOriginLogs: { [key: string]: Cypress.Log } = {}
 let hasMochaRunEnded: boolean = false
 
 // Posted by the cross-origin AUT injection before a spec bridge attaches to it.
-const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error', 'cross:origin:aut:set:cookie']
+const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error']
+
+// The posted url must be the sender's own page, since the server checks the cookie against it.
+const isCookieForOrigin = (data: { cookieString?: unknown, url?: unknown } | undefined, origin: string) => {
+  if (typeof data?.cookieString !== 'string') return false
+
+  try {
+    return new URL(String(data.url)).origin === origin
+  } catch {
+    return false
+  }
+}
 
 const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
   const iframe = document.getElementById(`${SPEC_BRIDGE_FRAME_NAME_IDENTIFIER}: ${data.origin}`)
@@ -48,9 +59,13 @@ const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
     && new URL(iframe.src).origin === origin
 }
 
-const isFromAut = ({ data, source }: MessageEvent) => {
+const isFromAut = ({ data, source, origin }: MessageEvent) => {
   if (!source || document.querySelector<HTMLIFrameElement>('iframe.aut-iframe')?.contentWindow !== source) {
     return false
+  }
+
+  if (data.event === 'cross:origin:aut:set:cookie') {
+    return isCookieForOrigin(data.data, origin)
   }
 
   return AUT_CROSS_ORIGIN_EVENTS.includes(data.event)
@@ -839,15 +854,11 @@ export class EventManager {
     // This message comes from the AUT, not the spec bridge. This is called in
     // the event that cookies are set via document.cookie in a cross origin
     // AUT prior to attaching a spec bridge.
-    Cypress.primaryOriginCommunicator.on(
-      'aut:set:cookie',
-      (options: { cookie, url: string, sameSiteContext: string }) => {
-        // unlikely there will be errors, but ignore them in any case, since
-        // they're not user-actionable
-        Cypress.automation('set:cookie', options.cookie).catch(() => {})
-        Cypress.backend('cross:origin:set:cookie', options).catch(() => {})
-      },
-    )
+    Cypress.primaryOriginCommunicator.on('aut:set:cookie', ({ cookieString, url }: { cookieString: string, url: string }) => {
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
+      Cypress.backend('cross:origin:set:cookie', { cookieString, url }).catch(() => {})
+    })
 
     Cypress.handlePrimaryOriginSocketEvent(Cypress, 'backend:request')
 

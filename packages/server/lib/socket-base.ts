@@ -13,8 +13,8 @@ import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import type { SameSiteContext, SerializableAutomationCookie } from './automation/cookie/jar'
-import { cookieJar, automationCookieToToughCookie } from './automation/cookie/jar'
+import { cookieJar } from './automation/cookie/jar'
+import { setDocumentCookie } from './automation/cookie/document-cookie'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
@@ -404,10 +404,11 @@ export class SocketBase implements SocketBroadcaster {
           })
         })
 
-        const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
-          const { hostname } = new URL(url)
-
-          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext)
+        const setCrossOriginCookie = (data: { cookieString?: unknown, url?: unknown }) => {
+          return setDocumentCookie(data, {
+            getCookies: (filter) => automationRequest('get:cookies', filter),
+            setCookie: (cookie) => automationRequest('set:cookie', cookie),
+          })
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {

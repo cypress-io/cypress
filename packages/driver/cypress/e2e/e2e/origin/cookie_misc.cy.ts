@@ -280,6 +280,25 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         })
       })
 
+      it('works with a Domain attribute for a parent domain', () => {
+        cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+
+        cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+        cy.origin(`https://app.foobar.com:3503`, () => {
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=bar; Domain=foobar.com'
+          })
+
+          cy.getCookie('foo').its('value').should('eq', 'bar')
+
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=deleted; Domain=foobar.com; Max-Age=0'
+          })
+
+          cy.getCookie('foo').should('eq', null)
+        })
+      })
+
       it('expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0', () => {
         cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
 
@@ -297,6 +316,59 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
           cy.getCookie('foo').should('eq', null)
         })
+      })
+    })
+  })
+
+  describe('document.cookie with HttpOnly cookies', () => {
+    beforeEach(() => {
+      cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+      cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.window().then((win) => {
+          return cy.wrap(win.fetch(`/set-cookie?cookie=foo=bar; Path=/; HttpOnly`))
+        })
+
+        cy.reload()
+      })
+    })
+
+    it('does not read HttpOnly cookies', () => {
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.document().its('cookie').should('not.include', 'foo=')
+        cy.getCookie('foo').its('value').should('eq', 'bar')
+      })
+    })
+
+    const writes = ['foo=changed; Path=/', 'foo=changed', 'foo=; Path=/; Max-Age=0', 'foo=; Max-Age=0']
+
+    writes.forEach((cookie) => {
+      it(`does not replace or expire HttpOnly cookies with "${cookie}"`, () => {
+        cy.origin(`https://app.foobar.com:3503`, { args: { cookie } }, ({ cookie }) => {
+          cy.window().then((win) => {
+            win.document.cookie = cookie
+            // the second write landing means the first has been handled
+            win.document.cookie = 'sync=1; Path=/'
+          })
+
+          cy.getCookie('sync').should('exist')
+
+          cy.getCookie('foo').should('include', { value: 'bar', httpOnly: true })
+        })
+      })
+    })
+
+    it('does not set cookies marked HttpOnly', () => {
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.window().then((win) => {
+          win.document.cookie = 'baz=qux; Path=/; HttpOnly'
+          win.document.cookie = 'sync=1; Path=/'
+        })
+
+        cy.getCookie('sync').should('exist')
+
+        cy.getCookie('baz').should('be.null')
+        cy.document().its('cookie').should('not.include', 'baz=')
       })
     })
   })

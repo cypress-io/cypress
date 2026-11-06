@@ -6,6 +6,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import { getMetadataHeaderValue } from './util/metadata-header-value'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -27,13 +28,12 @@ const LogRequest: RequestMiddleware = function () {
 const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
+  this.req.isAUTFrame = this.req.headers['x-cypress-is-aut-frame'] === getMetadataHeaderValue()
+  this.req.isFromExtraTarget = this.req.headers['x-cypress-is-from-extra-target'] === getMetadataHeaderValue()
   this.req.isSyncRequest = !!this.req.headers['x-cypress-is-sync-request']
 
-  if (this.req.headers['x-cypress-is-aut-frame']) {
-    delete this.req.headers['x-cypress-is-aut-frame']
-  }
+  delete this.req.headers['x-cypress-is-aut-frame']
+  delete this.req.headers['x-cypress-is-from-extra-target']
 
   if (this.req.headers['x-cypress-is-sync-request']) {
     delete this.req.headers['x-cypress-is-sync-request']
@@ -49,8 +49,6 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   // to send the request/response directly through
   if (this.req.isFromExtraTarget) {
     this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
-
-    delete this.req.headers['x-cypress-is-from-extra-target']
 
     this.onlyRunMiddleware([
       'MaybeSetBasicAuthHeaders',

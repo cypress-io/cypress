@@ -23,6 +23,7 @@ import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataCon
 import { SocketCt } from '../../lib/socket-ct'
 import runEvents from '../../lib/plugins/run_events'
 import { GracefulExit } from '../../lib/util/graceful-exit'
+import { cookieJar } from '../../lib/automation/cookie/jar'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. No test here issues a GraphQL request.
@@ -483,6 +484,39 @@ describe('lib/socket', () => {
             return done()
           })
         })
+      })
+    })
+
+    describe('on(backend:request, cross:origin:set:cookie)', () => {
+      const url = 'https://www.foobar.com/'
+
+      const setCookie = (cookieString: string) => {
+        return new Promise<void>((resolve) => {
+          client.emit('backend:request', 'cross:origin:set:cookie', { cookieString, url }, () => resolve())
+        })
+      }
+
+      const jarCookies = () => cookieJar.getCookies(url).map(({ key, value, httpOnly }) => ({ key, value, httpOnly }))
+
+      let request: MockInstance
+
+      beforeEach(() => {
+        cookieJar.removeAllCookies()
+        request = vi.spyOn(automation, 'request').mockImplementation(async (message) => message === 'get:cookies' ? [] : undefined)
+      })
+
+      it('stores the cookie in the server-side jar and the browser', async () => {
+        await setCookie('foo=bar')
+
+        expect(jarCookies()).toEqual([{ key: 'foo', value: 'bar', httpOnly: false }])
+        expect(request).toHaveBeenCalledWith('set:cookie', expect.objectContaining({ name: 'foo', value: 'bar', domain: 'www.foobar.com' }), expect.any(Function))
+      })
+
+      it('does not store HttpOnly cookies', async () => {
+        await setCookie('foo=bar; HttpOnly')
+
+        expect(jarCookies()).toEqual([])
+        expect(request).not.toHaveBeenCalledWith('set:cookie', expect.anything(), expect.anything())
       })
     })
 
