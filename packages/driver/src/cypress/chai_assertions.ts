@@ -1,10 +1,22 @@
 // chai 5.2+ has `iterable` and `containSubset` built in. Cypress runs chai 4,
 // so it adds them with chai's names, matching rules and messages, letting tests
-// written for them keep passing once Cypress upgrades chai.
+// written for them keep passing once Cypress upgrades chai. The exceptions are
+// noted where they occur.
+import _ from 'lodash'
 
-// Spec code runs in a different realm from the driver, so `instanceof Date` is
-// false for the dates it creates.
-const isDate = (value: unknown): value is Date => Object.prototype.toString.call(value) === '[object Date]'
+const isIterable = (obj) => {
+  try {
+    return obj != null && typeof obj[Symbol.iterator] === 'function'
+  } catch (err) {
+    // A cross-origin window refuses to have its Symbol.iterator read, and is
+    // not iterable.
+    if (err?.name === 'SecurityError') {
+      return false
+    }
+
+    throw err
+  }
+}
 
 const compareSubset = (expected: unknown, actual: unknown): boolean => {
   if (expected === actual) {
@@ -31,8 +43,10 @@ const compareSubset = (expected: unknown, actual: unknown): boolean => {
     return expected.every((exp) => actual.some((act) => compareSubset(exp, act)))
   }
 
-  if (isDate(expected)) {
-    return isDate(actual) && expected.getTime() === actual.getTime()
+  // `_.isDate` rather than chai's `instanceof Date`, which is false for dates
+  // that spec code creates in its own realm.
+  if (_.isDate(expected)) {
+    return _.isDate(actual) && expected.getTime() === actual.getTime()
   }
 
   return Object.keys(expected).every((key) => {
@@ -58,7 +72,7 @@ export const $chaiAssertions = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils
     const obj = chaiUtils.flag(this, 'object')
 
     this.assert(
-      obj != null && typeof obj[Symbol.iterator] === 'function',
+      isIterable(obj),
       'expected #{this} to be an iterable',
       'expected #{this} to not be an iterable',
       obj,
@@ -79,7 +93,8 @@ export const $chaiAssertions = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils
   })
 
   // chai throws from `assert.isIterable` directly. Going through an Assertion
-  // instead shows the result in the Command Log, as other assert methods do.
+  // instead shows the result in the Command Log, as other assert methods do,
+  // and prefixes a custom message with `message: ` rather than `message `.
   assert.isIterable = function (obj, msg) {
     new Assertion(obj, msg, assert.isIterable, true).to.be.iterable
   }

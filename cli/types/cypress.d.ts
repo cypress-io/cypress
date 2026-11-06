@@ -5745,7 +5745,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.finite'): Chainable<Subject>
     /**
-     * Asserts that the target is iterable, which means that it has a `Symbol.iterator` method.
+     * Asserts that the target is not iterable, which means that it has no `Symbol.iterator` method.
      * @example
      *    cy.wrap(1).should('not.be.iterable')
      * @see http://chaijs.com/api/bdd/#method_iterable
@@ -5753,7 +5753,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.iterable'): Chainable<Subject>
     /**
-     * Asserts that the target contains the given subset.
+     * Asserts that the target does not contain the given subset.
      * @example
      *    cy.wrap({ a: 1, b: 2 }).should('not.containSubset', { a: 3 })
      * @see http://chaijs.com/api/bdd/#method_containsubset

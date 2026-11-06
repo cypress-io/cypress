@@ -186,7 +186,7 @@ declare namespace Chai {
      * @example
      *    assert.isIterable([1, 2])
      *    assert.isIterable(new Set([1, 2]), 'expected a set')
-     * @see http://chaijs.com/api/assert/#method_isiterable
+     * @see http://chaijs.com/api/bdd/#method_iterable
      */
     isIterable(value: any, message?: string): void
 

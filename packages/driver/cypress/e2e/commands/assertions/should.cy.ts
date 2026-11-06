@@ -1006,6 +1006,25 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    it('treats a cross-origin window as not iterable', () => {
+      cy.visit('fixtures/cross_origin_name.html')
+      cy.get('iframe').then(($iframe) => {
+        const crossOriginWindow = $iframe[0].contentWindow
+
+        expect(crossOriginWindow).not.to.be.iterable
+
+        try {
+          expect(crossOriginWindow).to.be.iterable
+        } catch (err) {
+          expect(err.message).to.eq(`expected '<window>' to be an iterable`)
+
+          return
+        }
+
+        throw new Error('expected the assertion to fail')
+      })
+    })
+
     it('inspects a cross-origin window that chai writes into its own message', () => {
       cy.visit('fixtures/cross_origin_name.html')
       cy.get('iframe').then(($iframe) => {

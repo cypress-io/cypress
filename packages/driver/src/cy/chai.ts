@@ -13,6 +13,7 @@ import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
 import { $chaiAssertions } from '../cypress/chai_assertions'
 import { inspect, objDisplay } from './chai/display'
+import { overrideChaiUtil } from './chai/override_util'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
 
@@ -91,18 +92,6 @@ chai.use((chai, u) => {
       throw err
     },
   })
-
-  // chai 4's assertions write some values into their messages with
-  // `chai.util.inspect` and `objDisplay` before checking anything, so point
-  // those at Cypress's formatters, which display cross-origin windows without
-  // reading them. chai 5+ makes `chai.util` read-only.
-  if (Object.getOwnPropertyDescriptor(chai.util, 'inspect')?.writable) {
-    chai.util.inspect = inspect
-  }
-
-  if (Object.getOwnPropertyDescriptor(chai.util, 'objDisplay')?.writable) {
-    chai.util.objDisplay = objDisplay
-  }
 
   const assertProto = chai.Assertion.prototype.assert
   const matchProto = (chai.Assertion.prototype as any).match
@@ -205,9 +194,9 @@ chai.use((chai, u) => {
   }
 
   // Build the error the same way chai's Assertion#assert does, but with a
-  // message Cypress has formatted. Overriding chai's formatters on `chai.util`
-  // instead doesn't work in chai 5+, which makes `chai.util` read-only and
-  // calls its formatters internally.
+  // message Cypress has formatted. chai's own Assertion#assert only uses
+  // Cypress's `getMessage` where `chai.util` can be overridden, which chai 5+
+  // doesn't allow.
   const createAssertionError = (assertion, args) => {
     const [, , , expected, _actual, showDiff] = args
     const props: Record<string, unknown> = {
@@ -517,6 +506,12 @@ chai.use((chai, u) => {
   create = function (specWindow: SpecWindow, state: StateFunc, assertFn: $Cy['assert']) {
     restoreAsserts()
 
+    // chai 4's assertions write some values into their messages with
+    // `chai.util` before checking anything, and plugins build messages with
+    // `chai.util.getMessage`, so point those at Cypress's formatters, which
+    // display cross-origin windows without reading them. Setting them for
+    // each spec undoes any replacement a previous spec made.
+    overrideChaiUtil(chai.util, { inspect, objDisplay, getMessage })
     overrideChaiAsserts(specWindow, state, assertFn)
 
     return setSpecWindowGlobals(specWindow, state)

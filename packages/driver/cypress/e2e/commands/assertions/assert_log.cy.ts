@@ -653,6 +653,13 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    it('formats messages that plugins build with chai.util.getMessage', () => {
+      const assertion = expect(document.body)
+      const message = chai.util.getMessage(assertion, [false, 'expected #{this} to be shiny', 'expected #{this} not to be shiny', undefined])
+
+      expect(message).to.eq(`expected '<body>' to be shiny`)
+    })
+
     // Some chai assertions write values into the message themselves, through
     // `chai.util`, rather than through #{this}, #{act} or #{exp}.
     describe('values chai writes into its own messages', () => {
