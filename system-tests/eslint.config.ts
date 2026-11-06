@@ -78,6 +78,10 @@ export default [
       'react/no-deprecated': 'off',
       'react/prop-types': 'off',
       'vue/require-default-prop': 'off',
+      // fixture specs produce the timings, videos, command logs and mid-wait
+      // errors that system tests assert on, so their fixed waits are the
+      // scenario under test
+      'cypress/no-unnecessary-waiting': 'off',
       // import-x cannot parse the `.d.mts` types of @vitejs/plugin-vue
       'import-x/default': 'off',
       'import-x/namespace': 'off',

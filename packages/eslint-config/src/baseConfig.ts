@@ -253,7 +253,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/multi-word-component-names': 'off',
       'vue/no-dupe-keys': 'off',
 
-      'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',
       'cypress/no-async-tests': 'off',
       'cypress/no-assigning-return-values': 'off',

@@ -832,7 +832,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
       cy.specsPageIsVisible()
-      cy.wait(1000)
       moveToRunsPage()
       cy.get('[data-cy="runs"]')
 
@@ -847,7 +846,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
       cy.specsPageIsVisible()
-      cy.wait(1000)
       moveToRunsPage()
       cy.get('[data-cy="runs"]')
 

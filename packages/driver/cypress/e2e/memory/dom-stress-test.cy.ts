@@ -56,6 +56,7 @@ describe(`DOM Stress Tests`, () => {
 
       it('handles stress scrolling without crashing', () => {
         cy.get('button[data-cy="stress-scroll"]').click()
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- lets the stress scroll run before the next interaction
         cy.wait(2000)
         cy.get('#basic-list').scrollTo(0, 10000)
       })
