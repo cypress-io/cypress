@@ -77,14 +77,18 @@ export default (Commands, Cypress, cy) => {
       // or texts and clear the previous selections which matches jQuery's
       // behavior
 
-      if (!options.$el.is('select')) {
-        node = $dom.stringify(options.$el)
-        $errUtils.throwErrByPath('select.invalid_element', { args: { node } })
+      const validateSelectSubject = () => {
+        if (!options.$el.is('select')) {
+          node = $dom.stringify(options.$el)
+          $errUtils.throwErrByPath('select.invalid_element', { args: { node } })
+        }
+
+        if (options.$el.length && options.$el.length > 1) {
+          $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
+        }
       }
 
-      if (options.$el.length && options.$el.length > 1) {
-        $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
-      }
+      validateSelectSubject()
 
       // normalize valueOrTextOrIndex if its not an array
       valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v: any) => {
@@ -110,6 +114,7 @@ export default (Commands, Cypress, cy) => {
 
       const getOptions = () => {
         options.$el = cy.getSubjectFromChain(subjectChain)
+        validateSelectSubject()
         let notAllUniqueValues
 
         // throw if <select> is disabled
@@ -216,13 +221,20 @@ export default (Commands, Cypress, cy) => {
       return Promise
       .try(retryOptions)
       .then((obj = {}) => {
-        const { values, optionEls, optionsObjects, notAllUniqueValues } = obj
+        let { values, optionEls, optionsObjects, notAllUniqueValues } = obj
 
         // preserve the selected values
         consoleProps.Selected = values
 
         return cy.now('click', options.$el, {
           $el: options.$el,
+          subjectFn: () => {
+            // Keep option metadata in sync with the element click re-queries.
+            ({ values, optionEls, optionsObjects, notAllUniqueValues } = getOptions())
+            consoleProps.Selected = values
+
+            return options.$el
+          },
           log: false,
           verify: false,
           errorOnSelect: false, // prevent click errors since we want the select to be clicked
