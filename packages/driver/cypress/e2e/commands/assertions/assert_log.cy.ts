@@ -653,11 +653,36 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    // chai 5+ exposes `chai.util` as a read-only module namespace, so Cypress
-    // formats messages without overwriting it. Plugins calling `chai.util`
-    // directly get chai's own formatting, not Cypress's.
-    it('leaves chai.util formatting to chai', () => {
-      expect(chai.util.objDisplay(function foo () {})).to.eq('[Function foo]')
+    // Some chai assertions write values into the message themselves, through
+    // `chai.util`, rather than through #{this}, #{act} or #{exp}.
+    describe('values chai writes into its own messages', () => {
+      it('does not truncate a long string', () => {
+        const search = 'a much longer search string that exceeds forty characters'
+        const err = getAssertionError(() => expect('hello').to.include(search))
+
+        expect(err.message).to.eq(`expected 'hello' to include '${search}'`)
+      })
+
+      it('renders a DOM element as HTML', () => {
+        const err = getAssertionError(() => expect([]).to.include(document.createElement('div')))
+
+        expect(err.message).to.eq('expected [] to include <div></div>')
+      })
+
+      it('renders functions as [Function: name]', () => {
+        const isTwo = function isTwo (n) {
+          return n === 2
+        }
+        const err = getAssertionError(() => expect(1).to.satisfy(isTwo))
+
+        expect(err.message).to.eq('expected 1 to satisfy [Function: isTwo]')
+      })
+
+      it('renders objects without a type prefix', () => {
+        const err = getAssertionError(() => expect({ a: 1 }).to.have.ownPropertyDescriptor('a', { value: 2 }))
+
+        expect(err.message).to.eq(`expected the own property descriptor for 'a' on { a: 1 } to match { value: 2 }, got { value: 1, writable: true, enumerable: true, configurable: true }`)
+      })
     })
   })
 })

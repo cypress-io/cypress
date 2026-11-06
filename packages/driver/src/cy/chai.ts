@@ -12,7 +12,7 @@ import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
 import { $chaiAssertions } from '../cypress/chai_assertions'
-import { objDisplay } from './chai/display'
+import { inspect, objDisplay } from './chai/display'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
 
@@ -91,6 +91,18 @@ chai.use((chai, u) => {
       throw err
     },
   })
+
+  // chai 4's assertions write some values into their messages with
+  // `chai.util.inspect` and `objDisplay` before checking anything, so point
+  // those at Cypress's formatters, which display cross-origin windows without
+  // reading them. chai 5+ makes `chai.util` read-only.
+  if (Object.getOwnPropertyDescriptor(chai.util, 'inspect')?.writable) {
+    chai.util.inspect = inspect
+  }
+
+  if (Object.getOwnPropertyDescriptor(chai.util, 'objDisplay')?.writable) {
+    chai.util.objDisplay = objDisplay
+  }
 
   const assertProto = chai.Assertion.prototype.assert
   const matchProto = (chai.Assertion.prototype as any).match

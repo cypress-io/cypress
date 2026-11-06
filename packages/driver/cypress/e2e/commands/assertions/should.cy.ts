@@ -1005,6 +1005,26 @@ describe('src/cy/commands/assertions', () => {
         throw new Error('expected the assertion to fail')
       })
     })
+
+    it('inspects a cross-origin window that chai writes into its own message', () => {
+      cy.visit('fixtures/cross_origin_name.html')
+      cy.get('iframe').then(($iframe) => {
+        const crossOriginWindow = $iframe[0].contentWindow
+
+        expect([1]).not.to.include(crossOriginWindow)
+        expect([crossOriginWindow]).to.include(crossOriginWindow)
+
+        try {
+          expect([1]).to.include(crossOriginWindow)
+        } catch (err) {
+          expect(err.message).to.eq('expected [ 1 ] to include [window]')
+
+          return
+        }
+
+        throw new Error('expected the assertion to fail')
+      })
+    })
   })
 
   context('implicit assertions', () => {
