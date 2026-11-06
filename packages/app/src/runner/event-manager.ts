@@ -45,6 +45,7 @@ interface AutCookie {
   hostOnly?: unknown
   httpOnly?: unknown
   secure?: unknown
+  sameSite?: unknown
 }
 
 const parseUrl = (url: unknown) => {
@@ -63,7 +64,7 @@ const isPathMatch = (path: string, cookiePath: string) => {
   return path === cookiePath || (path.startsWith(cookiePath) && (cookiePath.endsWith('/') || path[cookiePath.length] === '/'))
 }
 
-// browsers treat localhost as a secure context, so it may set Secure cookies over http
+// Secure cookies may be set from https and from localhost or loopback URLs
 const isSecureUrl = ({ protocol, hostname }: URL) => {
   return protocol === 'https:' || hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === '[::1]' || /^127(\.\d{1,3}){3}$/.test(hostname)
 }
@@ -78,6 +79,14 @@ const isCookieForOrigin = (data: { url?: unknown, cookie?: AutCookie } | undefin
   }
 
   if (cookie.httpOnly || (cookie.secure && !isSecureUrl(url))) {
+    return false
+  }
+
+  if ((cookie.sameSite === 'no_restriction' || /^__secure-/i.test(cookie.name)) && !cookie.secure) {
+    return false
+  }
+
+  if (/^__host-/i.test(cookie.name) && (!cookie.secure || !cookie.hostOnly || cookie.path !== '/')) {
     return false
   }
 

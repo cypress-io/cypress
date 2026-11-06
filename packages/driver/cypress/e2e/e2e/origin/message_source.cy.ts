@@ -135,6 +135,38 @@ describe('cross-origin messages from other frames', () => {
       })
     })
 
+    it('ignores a __Secure- cookie that is not Secure', () => {
+      postFromAut({ cookie: { ...cookie, name: '__Secure-foo', domain: 'app.foobar.com' }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
+      .then(() => {
+        expect(automation).not.to.be.calledWith('get:cookies')
+        expect(automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
+    it('ignores a __Host- cookie for a parent domain', () => {
+      postFromAut({ cookie: { ...cookie, name: '__Host-foo', domain: 'foobar.com', hostOnly: false, secure: true }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
+      .then(() => {
+        expect(automation).not.to.be.calledWith('get:cookies')
+        expect(automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
+    it('ignores a __Host- cookie with a path other than /', () => {
+      postFromAut({ cookie: { ...cookie, name: '__Host-foo', domain: 'app.foobar.com', path: '/fixtures', secure: true }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
+      .then(() => {
+        expect(automation).not.to.be.calledWith('get:cookies')
+        expect(automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
+    it('ignores a SameSite=None cookie that is not Secure', () => {
+      postFromAut({ cookie: { ...cookie, domain: 'app.foobar.com', sameSite: 'no_restriction' }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
+      .then(() => {
+        expect(automation).not.to.be.calledWith('get:cookies')
+        expect(automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+
     it('leaves an existing Secure cookie unchanged from an http page', () => {
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com', secure: true })
 
