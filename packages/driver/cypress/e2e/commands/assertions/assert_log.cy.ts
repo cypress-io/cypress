@@ -418,6 +418,16 @@ describe('src/cy/commands/assertions', () => {
       })
     }
 
+    const getAssertionError = (test) => {
+      try {
+        test()
+      } catch (err) {
+        return err
+      }
+
+      throw new Error('expected the assertion to throw, but it did not')
+    }
+
     // https://github.com/cypress-io/cypress/issues/19116
     it('text with backslashes', (done) => {
       const text = '"<OE_D]dQ\\'
@@ -538,16 +548,6 @@ describe('src/cy/commands/assertions', () => {
     // truncateThreshold), so these assertions catch a regression that would
     // change failure messages.
     describe('uses Cypress value inspection', () => {
-      const getAssertionError = (test) => {
-        try {
-          test()
-        } catch (err) {
-          return err
-        }
-
-        throw new Error('expected the assertion to throw, but it did not')
-      }
-
       it('renders functions as [Function: name]', () => {
         const foo = function foo () {}
         const bar = function bar () {}
@@ -573,6 +573,30 @@ describe('src/cy/commands/assertions', () => {
         const err = getAssertionError(() => expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).to.equal(null))
 
         expect(err.message).to.eq('expected [ Array(15) ] to equal null')
+      })
+    })
+
+    describe('template tags inside values', () => {
+      it('keeps #{exp} in the subject literal in the error', () => {
+        const err = getAssertionError(() => expect('#{exp}').to.equal('x'))
+
+        expect(err.message).to.eq(`expected '#{exp}' to equal 'x'`)
+      })
+
+      it('keeps #{act} in the subject literal in the error', () => {
+        const err = getAssertionError(() => expect('#{act}').to.equal('x'))
+
+        expect(err.message).to.eq(`expected '#{act}' to equal 'x'`)
+      })
+
+      it('keeps #{exp} in the subject literal in the command log', (done) => {
+        expectMarkdown(() => {
+          try {
+            expect('#{exp}').to.equal('x')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        },
+        `expected **#{exp}** to equal **x**`,
+        done)
       })
     })
   })

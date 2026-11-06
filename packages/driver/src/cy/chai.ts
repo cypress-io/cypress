@@ -177,10 +177,15 @@ chai.use((chai, u) => {
       msg = msg()
     }
 
-    msg = (msg || '')
-    .replace(/#\{this\}/g, () => objDisplay(subject))
-    .replace(/#\{act\}/g, () => objDisplay(actual))
-    .replace(/#\{exp\}/g, () => objDisplay(expected))
+    // Replace every tag in one pass so a displayed value that itself contains
+    // a tag such as `#{exp}` is never substituted again.
+    msg = (msg || '').replace(/#\{(this|act|exp)\}/g, (_match, tag) => {
+      if (tag === 'this') return objDisplay(subject)
+
+      if (tag === 'act') return objDisplay(actual)
+
+      return objDisplay(expected)
+    })
 
     return flagMsg ? `${flagMsg}: ${msg}` : msg
   }
