@@ -136,6 +136,13 @@ describe('formattedMessage', () => {
 
       expect(result).to.equal('http://www.test.com/__Path__99~~path~~')
     })
+
+    it('escapes HTML in url messages', () => {
+      const specialMessage = 'http://www.test.com/?q=<b>&r=1 -> http://www.test.com/<b>'
+      const result = formattedMessage(specialMessage, 'visit')
+
+      expect(result).to.equal('http://www.test.com/?q=&lt;b&gt;&amp;r=1 -&gt; http://www.test.com/&lt;b&gt;')
+    })
   })
 
   describe('when not an assertion', () => {
