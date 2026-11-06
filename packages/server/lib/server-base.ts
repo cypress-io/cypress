@@ -931,20 +931,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
-  portBlockedErr (port: number) {
-    const e = errors.get('PORT_BLOCKED_BY_BROWSER', port) as any
-
-    e.port = port
-
-    return e
-  }
-
   _listen (port: number | null | undefined): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      if (port && isUnsafePort(port)) {
-        return reject(this.portBlockedErr(port))
-      }
-
       let attempts = 0
 
       const tryListen = () => {
@@ -970,9 +958,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
           this.server.removeListener('error', onError)
 
-          // Browsers refuse to load any URL on their restricted ports, so a
-          // randomly assigned one has to be redrawn. Only an ephemeral port
-          // reaches here, since a configured one was rejected above.
+          // Configuration validation rejects configured ports that browsers block.
+          // A randomly assigned port can still be blocked and must be redrawn.
           if (isUnsafePort(address.port)) {
             debug('discarding browser-blocked port %d', address.port)
 
@@ -991,7 +978,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
               // the port is already free, so surface the error instead of
               // leaving the run waiting for a browser that can never connect
-              reject(errors.get('PORT_BLOCKED_BY_BROWSER', null))
+              reject(errors.get('PORT_BLOCKED_BY_BROWSER'))
             })
 
             return

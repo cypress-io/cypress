@@ -1165,19 +1165,6 @@ describe('lib/server-base', () => {
       expect(server._server.close).toHaveBeenCalledTimes(1)
     })
 
-    it('rejects with PORT_BLOCKED_BY_BROWSER when the configured port is blocked', async () => {
-      server._server = fakeListeningServer([10080])
-
-      await expect(server._listen(10080)).rejects.toMatchObject({
-        type: 'PORT_BLOCKED_BY_BROWSER',
-        message: expect.stringContaining('10080'),
-      })
-
-      // a port browsers block is refused before binding, so the run does not
-      // hang waiting for a browser that can never connect
-      expect(server._server.listen).not.toHaveBeenCalled()
-    })
-
     it('rejects a bind failure other than EADDRINUSE instead of leaving the run hanging', async () => {
       const srv: any = new EventEmitter()
 

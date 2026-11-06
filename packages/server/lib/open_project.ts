@@ -433,8 +433,7 @@ export class OpenProject extends EventEmitter {
 
       await this.projectBase.open()
     } catch (err: any) {
-      // port errors carry the port so it can be re-created with a fresh stack
-      if (err.isCypressErr && err.port != null) {
+      if (err.isCypressErr && err.portInUse) {
         errors.throwErr(err.type, err.port)
       } else {
         // rethrow and handle elsewhere

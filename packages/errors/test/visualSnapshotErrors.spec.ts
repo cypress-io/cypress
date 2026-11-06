@@ -612,8 +612,7 @@ describe('visual error templates', () => {
     },
     PORT_BLOCKED_BY_BROWSER: () => {
       return {
-        default: [10080],
-        ephemeral: [null],
+        default: [],
       }
     },
     FILE_SERVER_COULD_NOT_LISTEN: () => {
