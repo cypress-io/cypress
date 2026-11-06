@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "lib": ["ES2020", "DOM"],
+    "types": ["cypress"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  }
+}
