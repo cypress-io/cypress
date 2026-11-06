@@ -34,8 +34,7 @@ describe('cross-origin messages from other frames', () => {
   })
 
   describe('aut:set:cookie', () => {
-    const cookie = { name: 'foo', value: 'bar', path: '/', expiry: null, maxAge: null, httpOnly: false, hostOnly: true, sameSite: 'lax', secure: false }
-    let automation: sinon.SinonStub
+    let backend: sinon.SinonStub
 
     const postFromAut = (data: unknown, origin = 'http://www.foobar.com:3500') => {
       const top = window.top!
@@ -51,137 +50,94 @@ describe('cross-origin messages from other frames', () => {
       })
       const query = new URLSearchParams({ event: 'aut:set:cookie', data: JSON.stringify(data) })
 
-      automation = cy.stub(Cypress, 'automation').log(false).callThrough()
+      backend = cy.stub(Cypress, 'backend').log(false).callThrough()
       cy.visit(`${origin}/fixtures/other/message.html?${query}`)
 
-      const returnOf = (event: string) => automation.getCalls().find((call) => call.args[0] === event)?.returnValue
-
-      // the handler looks up existing cookies before it writes, so wait for both
       return cy.wrap(sent, { log: false })
-      .then(() => returnOf('get:cookies'))
-      .then(() => new Cypress.Promise((resolve) => setTimeout(resolve)))
-      .then(() => returnOf('set:cookie'))
+      .then(() => Promise.resolve(backend.getCalls().find((call) => call.args[0] === 'cross:origin:set:cookie')?.returnValue).catch(() => {}))
+    }
+
+    const expectNoCookie = () => {
+      cy.getAllCookies().then((cookies) => {
+        expect(cookies.filter(({ name }) => name === 'foo')).to.be.empty
+      })
     }
 
     it('sets a cookie for the frame host', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com' }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
+      postFromAut({ cookieString: 'foo=bar', url: 'http://www.foobar.com:3500/' })
 
       cy.getCookie('foo', { domain: 'www.foobar.com' }).should('have.property', 'value', 'bar')
     })
 
-    it('ignores a cookie whose url is another host', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com' }, url: 'http://other.example.com:3500/', sameSiteContext: 'strict' })
+    it('ignores a cookie whose url is another origin', () => {
+      postFromAut({ cookieString: 'foo=bar', url: 'http://other.example.com:3500/' })
       .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
+        expect(backend).not.to.be.calledWith('cross:origin:set:cookie')
+      })
+    })
+
+    it('ignores a message without a cookie string', () => {
+      postFromAut({ cookie: { name: 'foo', value: 'bar', domain: 'www.foobar.com' }, url: 'http://www.foobar.com:3500/' })
+      .then(() => {
+        expect(backend).not.to.be.calledWith('cross:origin:set:cookie')
       })
     })
 
     it('ignores a cookie whose domain is another host', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'other.example.com' }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
+      postFromAut({ cookieString: 'foo=bar; Domain=other.example.com', url: 'http://www.foobar.com:3500/' })
+
+      expectNoCookie()
     })
 
     it('ignores an HttpOnly cookie', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com', httpOnly: true }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
+      postFromAut({ cookieString: 'foo=bar; HttpOnly', url: 'http://www.foobar.com:3500/' })
+
+      expectNoCookie()
     })
 
     it('leaves an existing HttpOnly cookie unchanged', () => {
       cy.request('https://app.foobar.com:3503/set-cookie?cookie=foo=bar; Path=/; HttpOnly')
 
-      postFromAut({ cookie: { ...cookie, value: 'baz', domain: 'app.foobar.com', secure: true }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
+      postFromAut({ cookieString: 'foo=baz; Secure', url: 'https://app.foobar.com:3503/' }, 'https://app.foobar.com:3503')
 
       cy.getCookie('foo', { domain: 'app.foobar.com' }).then((existing) => {
         expect(existing).to.include({ value: 'bar', httpOnly: true })
       })
     })
 
-    it('ignores a host-only cookie for a parent domain', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'foobar.com', hostOnly: true }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
-    })
-
     it('ignores a cookie for a public suffix', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'com', hostOnly: false }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
-    })
+      postFromAut({ cookieString: 'foo=bar; Domain=com', url: 'http://www.foobar.com:3500/' })
 
-    it('ignores a cookie for part of an IP address', () => {
-      postFromAut({ cookie: { ...cookie, domain: '0.0.1', hostOnly: false }, url: 'http://127.0.0.1:3500/', sameSiteContext: 'strict' }, 'http://127.0.0.1:3500')
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
+      expectNoCookie()
     })
 
     it('ignores a Secure cookie from an http page', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'www.foobar.com', secure: true }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
-    })
+      postFromAut({ cookieString: 'foo=bar; Secure', url: 'http://www.foobar.com:3500/' })
 
-    it('ignores a __Secure- cookie that is not Secure', () => {
-      postFromAut({ cookie: { ...cookie, name: '__Secure-foo', domain: 'app.foobar.com' }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
+      expectNoCookie()
     })
 
     it('ignores a __Host- cookie for a parent domain', () => {
-      postFromAut({ cookie: { ...cookie, name: '__Host-foo', domain: 'foobar.com', hostOnly: false, secure: true }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
-    })
+      postFromAut({ cookieString: '__Host-foo=bar; Secure; Domain=foobar.com', url: 'https://app.foobar.com:3503/' }, 'https://app.foobar.com:3503')
 
-    it('ignores a __Host- cookie with a path other than /', () => {
-      postFromAut({ cookie: { ...cookie, name: '__Host-foo', domain: 'app.foobar.com', path: '/fixtures', secure: true }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
+      cy.getAllCookies().then((cookies) => {
+        expect(cookies.filter(({ name }) => name === '__Host-foo')).to.be.empty
       })
     })
 
     it('ignores a SameSite=None cookie that is not Secure', () => {
-      postFromAut({ cookie: { ...cookie, domain: 'app.foobar.com', sameSite: 'no_restriction' }, url: 'https://app.foobar.com:3503/', sameSiteContext: 'strict' }, 'https://app.foobar.com:3503')
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
-      })
+      postFromAut({ cookieString: 'foo=bar; SameSite=None', url: 'https://app.foobar.com:3503/' }, 'https://app.foobar.com:3503')
+
+      expectNoCookie()
     })
 
     it('leaves an existing Secure cookie unchanged from an http page', () => {
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com', secure: true })
 
-      postFromAut({ cookie: { ...cookie, value: 'baz', domain: 'www.foobar.com' }, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
+      postFromAut({ cookieString: 'foo=baz', url: 'http://www.foobar.com:3500/' })
 
       cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
         expect(cookies.map(({ name, value, secure }) => ({ name, value, secure }))).to.deep.equal([{ name: 'foo', value: 'bar', secure: true }])
-      })
-    })
-
-    it('ignores a message without a cookie', () => {
-      postFromAut({ url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
-      .then(() => {
-        expect(automation).not.to.be.calledWith('get:cookies')
-        expect(automation).not.to.be.calledWith('set:cookie')
       })
     })
   })

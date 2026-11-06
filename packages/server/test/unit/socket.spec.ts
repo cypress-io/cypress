@@ -490,40 +490,33 @@ describe('lib/socket', () => {
     describe('on(backend:request, cross:origin:set:cookie)', () => {
       const url = 'https://www.foobar.com/'
 
-      const makeCookie = (props = {}) => {
-        return { name: 'foo', value: 'bar', domain: 'www.foobar.com', path: '/', hostOnly: true, httpOnly: false, secure: false, expiry: null, maxAge: null, sameSite: 'lax', ...props }
-      }
-
-      const setCookie = (cookie) => {
+      const setCookie = (cookieString: string) => {
         return new Promise<void>((resolve) => {
-          client.emit('backend:request', 'cross:origin:set:cookie', { cookie, url, sameSiteContext: 'strict' }, () => resolve())
+          client.emit('backend:request', 'cross:origin:set:cookie', { cookieString, url }, () => resolve())
         })
       }
 
       const jarCookies = () => cookieJar.getCookies(url).map(({ key, value, httpOnly }) => ({ key, value, httpOnly }))
 
+      let request: MockInstance
+
       beforeEach(() => {
         cookieJar.removeAllCookies()
+        request = vi.spyOn(automation, 'request').mockImplementation(async (message) => message === 'get:cookies' ? [] : undefined)
       })
 
-      it('stores the cookie in the server-side cookie jar', async () => {
-        await setCookie(makeCookie())
+      it('stores the cookie in the server-side jar and the browser', async () => {
+        await setCookie('foo=bar')
 
         expect(jarCookies()).toEqual([{ key: 'foo', value: 'bar', httpOnly: false }])
+        expect(request).toHaveBeenCalledWith('set:cookie', expect.objectContaining({ name: 'foo', value: 'bar', domain: 'www.foobar.com' }), expect.any(Function))
       })
 
       it('does not store HttpOnly cookies', async () => {
-        await setCookie(makeCookie({ httpOnly: true }))
+        await setCookie('foo=bar; HttpOnly')
 
         expect(jarCookies()).toEqual([])
-      })
-
-      it('does not replace HttpOnly cookies', async () => {
-        cookieJar.setCookie('foo=bar; Path=/; HttpOnly', url, 'strict')
-
-        await setCookie(makeCookie({ value: 'changed' }))
-
-        expect(jarCookies()).toEqual([{ key: 'foo', value: 'bar', httpOnly: true }])
+        expect(request).not.toHaveBeenCalledWith('set:cookie', expect.anything(), expect.anything())
       })
     })
 

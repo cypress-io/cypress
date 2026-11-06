@@ -1,6 +1,5 @@
 import {
   CookieJar,
-  toughCookieToAutomationCookie,
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
 import type { Cookie as ToughCookie,
@@ -34,15 +33,12 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   })
 }
 
-const sendCookieToServer = (cookie: SerializableAutomationCookie) => {
+const sendCookieToServer = (cookieString: string) => {
   window.top!.postMessage({
     event: 'cross:origin:aut:set:cookie',
     data: {
-      cookie,
+      cookieString,
       url: location.href,
-      // url will always match the cookie domain, so strict context tells
-      // tough-cookie to allow it to be set
-      sameSiteContext: 'strict',
     },
   }, '*')
 }
@@ -125,7 +121,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
         // send the cookie to the server so it can be removed from the browser
         // via automation. If the cookie expiry is set inside the server-side cookie jar,
         // the cookie will be automatically removed.
-        sendCookieToServer(toughCookieToAutomationCookie(parsedCookie, domain))
+        sendCookieToServer(stringValue)
 
         return getDocumentCookieValue()
       }
@@ -142,7 +138,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
         // send the cookie to the server so it can be set in the browser via
         // automation and in our server-side cookie jar so it's available
         // to subsequent injections
-        sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
+        sendCookieToServer(stringValue)
       }
 
       return getDocumentCookieValue()
