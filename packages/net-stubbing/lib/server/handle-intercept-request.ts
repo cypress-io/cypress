@@ -8,6 +8,7 @@ import {
   setDefaultHeaders,
   getBodyEncoding,
 } from './util'
+import { mergeMissingHeadersFromBrowserPreRequest } from './merge-browser-prerequest-headers'
 import { InterceptedRequest } from './intercepted-request'
 import { telemetry } from '@packages/telemetry'
 
@@ -91,6 +92,8 @@ export async function handleInterceptRequest (
   }
 
   await ensureBody()
+
+  mergeMissingHeadersFromBrowserPreRequest(request.req)
 
   request.addDefaultSubscriptions()
 
