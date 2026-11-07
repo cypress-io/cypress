@@ -33,6 +33,7 @@ describe('src/cypress/runner', () => {
 describe('async timeouts', () => {
   it('does not timeout during cypress command', (done) => {
     cy.timeout(100)
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- the wait has to outlast cy.timeout() to show a running command is not timed out
     cy.wait(200)
     cy.then(() => done())
   })

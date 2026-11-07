@@ -176,7 +176,7 @@ describe('src/cypress/runner', () => {
       cy.reporter().find('[data-cy="runnable-popover-open-ide"]').click()
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`simple-cy-assert\.runner\.cy\.js$`)), 1, 1)
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/simple-cy-assert\.runner\.cy\.js$/), 1, 1)
       })
 
       cy.reporter().find('[data-cy="runnable-header"] [data-cy="spec-duration"]').should('exist')

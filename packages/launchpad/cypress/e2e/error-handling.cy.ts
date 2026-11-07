@@ -70,7 +70,8 @@ describe('Error handling', () => {
         cy.contains(idiomaticConfigFile)
       })
 
-      cy.wait(1000) // ensure the error doesn't get cleared (process.exit)
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the error is not cleared when the child process exits, so give it time to exit first
+      cy.wait(1000)
 
       cy.contains('You are using vite for your dev server, but a configuration file was not found.')
       cy.contains('Add your vite config at one of the above paths, or import your configuration file and provide it to the devServer config as a viteConfig option.')
@@ -120,7 +121,8 @@ describe('Error handling', () => {
           cy.contains(idiomaticConfigFile)
         })
 
-        cy.wait(1000) // ensure the error doesn't get cleared (process.exit)
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the error is not cleared when the child process exits, so give it time to exit first
+        cy.wait(1000)
 
         cy.contains('You are using webpack for your dev server, but a configuration file was not found.')
         cy.contains('Add your webpack config at one of the above paths, or import your configuration file and provide it to the devServer config as a webpackConfig option.')

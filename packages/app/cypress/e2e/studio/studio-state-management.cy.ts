@@ -89,8 +89,6 @@ describe('studio functionality', () => {
 })`)
     })
 
-    cy.wait(200)
-
     cy.findByTestId('studio-save-button').click()
 
     // the commands should still be there since the save failed

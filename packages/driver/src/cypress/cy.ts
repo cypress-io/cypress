@@ -152,15 +152,15 @@ const ensureRunnable = (cy, cmd) => {
   }
 }
 
-interface ICyFocused extends Omit<
+type ICyFocused = Omit<
   IFocused,
   'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
-> { }
+>
 
-interface ICySnapshots extends Omit<
+type ICySnapshots = Omit<
   ISnapshots,
   'onCssModified' | 'onBeforeWindowLoad'
-> { }
+>
 
 // How many times each runnable has started. Hooks are reused across tests and retries,
 // so this tells a completion from an earlier run apart from one for the current run.
@@ -1226,7 +1226,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
         args: {
           cmd: name,
-          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+          args: _.isString(args[0]) ? `"${stringifiedArg}"` : stringifiedArg,
         },
       })
     }

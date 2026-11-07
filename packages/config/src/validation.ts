@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
 import { BROWSER_FAMILY } from '@packages/types'
+import { isUnsafePort } from './unsafe_ports'
 
 const debug = Debug('cypress:server:validation')
 
@@ -28,7 +29,7 @@ const errMsg = (key: string, value: any, type: string): ErrResult => {
 }
 
 const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
-  return _.isString(value) && /^https?\:\/\//.test(value)
+  return _.isString(value) && /^https?:\/\//.test(value)
 }
 
 const isStringArray = (value: any): ErrResult | boolean => {
@@ -526,6 +527,22 @@ export function isNumber (key: string, value: any): ErrResult | true {
   }
 
   return errMsg(key, value, 'a number')
+}
+
+export function isValidPort (key: string, value: any): ErrResult | true {
+  if (value == null) {
+    return true
+  }
+
+  if (!_.isNumber(value)) {
+    return errMsg(key, value, 'a number')
+  }
+
+  if (isUnsafePort(value)) {
+    return errMsg(key, value, `a port browsers allow, since Chrome, Electron, Firefox and WebKit refuse to load any URL on port ${value}`)
+  }
+
+  return true
 }
 
 export function isString (key: string, value: any): ErrResult | true {

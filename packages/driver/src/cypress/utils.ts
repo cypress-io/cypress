@@ -9,7 +9,7 @@ import $jquery from '../dom/jquery'
 import { $Location } from './location'
 import $errUtils from './error_utils'
 
-const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+const customProtocolRegex = /^[^:/]+:\/{1,3}/
 // Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
 const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 

@@ -230,6 +230,7 @@ describe('network stubbing', { retries: 15 }, function () {
       .then(() => {
         if (Cypress.isBrowser('firefox')) {
           // strangely, Firefox requires some time to be waited before the first image response will be cached
+          // eslint-disable-next-line cypress/no-unnecessary-waiting -- the Firefox caching delay described above
           cy.wait(1000)
         }
       })

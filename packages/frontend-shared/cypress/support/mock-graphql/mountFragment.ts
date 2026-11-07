@@ -85,7 +85,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     let queryVariablesSegment = ''
 
     if (options.variableTypes) {
-      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `\$${name}: ${type}`).join(',')
+      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `$${name}: ${type}`).join(',')
       queryVariablesSegment = `(${queryVariablesSegment})`
     }
 

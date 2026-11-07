@@ -1,3 +1,4 @@
+/* eslint-disable cypress/no-unnecessary-waiting -- these specs check that cleared and paused timers do not fire, so real time has to pass */
 // NOTE: basically the same as a cy.wait(...) but uses setTimeout instead of Promise.delay
 // since firefox will sometimes have `Promise.delay(10)` fire faster than a `setTimeout(..., 1)`
 const cyWaitTimeout = (n) => cy.wrap(new Promise((resolve) => window.setTimeout(resolve, n)))

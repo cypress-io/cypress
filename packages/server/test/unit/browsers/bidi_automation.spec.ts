@@ -1965,7 +1965,7 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         describe('clear:cookie', () => {
-          it('clears a single cookie and returns it\s value', async () => {
+          it('clears a single cookie and returns its value', async () => {
             const cookieToClear = {
               name: 'testCookie',
               value: 'testValue',
@@ -2064,7 +2064,7 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         describe('clear:cookies', () => {
-          it('clears a single cookie and returns it\s value', async () => {
+          it('clears a single cookie and returns its value', async () => {
             const cookiesToClear = [{
               name: 'testCookie',
               value: 'testValue',

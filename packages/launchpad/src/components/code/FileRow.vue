@@ -69,7 +69,7 @@ type FileRowStatus = 'changes' | 'valid' | 'skipped' | 'error'
 type StatusInfo = {
   badgeLabel?: string
   badgeType?: BadgeRowStatus
-  icon: FunctionalComponent<SVGAttributes, {}>
+  icon: FunctionalComponent<SVGAttributes>
   initiallyOpen?: boolean
 }
 </script>
