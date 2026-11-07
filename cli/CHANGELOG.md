@@ -52,6 +52,7 @@
 - Upgraded bundled Chromium version from `146.0.7680.216` to `150.0.7871.250`. Addresses [#35124](https://github.com/cypress-io/cypress/issues/35124).
 - Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
 - Upgraded `node-forge` from `1.4.0` to `1.4.3` to address the [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-22113978) vulnerability reported in security scans. Addressed in [#35279](https://github.com/cypress-io/cypress/pull/35279).
+- Upgraded `jimp` from `0.22.12` to `1.6.1` to address an [infinite loop](https://github.com/advisories/GHSA-5v7r-6r5c-r473) vulnerability (CVE-2026-31808) in its `file-type` dependency reported in security scans. This also removes `xml2js` `0.4.23`, which has a [prototype pollution](https://github.com/advisories/GHSA-776f-qx25-q3cc) vulnerability (CVE-2023-0842). Addresses [#35271](https://github.com/cypress-io/cypress/issues/35271).
 
 ## 16.2.1
 
