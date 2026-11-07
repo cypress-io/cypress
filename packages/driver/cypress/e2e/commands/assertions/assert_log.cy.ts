@@ -463,8 +463,7 @@ describe('src/cy/commands/assertions', () => {
       it('preserves quotation marks if escaped', (done) => {
         expectMarkdown(
           () => expect(`\'cypress\'`).to.eq(`\'cypress\'`),
-          // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
-          `expected **'cypress'** to equal ****'cypress'****`,
+          `expected **'cypress'** to equal **'cypress'**`,
           done,
         )
       })
@@ -548,6 +547,18 @@ describe('src/cy/commands/assertions', () => {
     // truncateThreshold), so these assertions catch a regression that would
     // change failure messages.
     describe('uses Cypress value inspection', () => {
+      it('renders a value whose getter throws something other than an Error', () => {
+        const value = {
+          get document () {
+            throw 'nope'
+          },
+        }
+
+        const err = getAssertionError(() => expect(value).to.equal(1))
+
+        expect(err.message).to.eq('expected { document: [Getter] } to equal 1')
+      })
+
       it('renders functions as [Function: name]', () => {
         const foo = function foo () {}
         const bar = function bar () {}
@@ -596,6 +607,16 @@ describe('src/cy/commands/assertions', () => {
           } catch (error) {} /* eslint-disable-line no-empty */
         },
         `expected **#{exp}** to equal **x**`,
+        done)
+      })
+
+      it('keeps #{this} in the expected value literal in the command log', (done) => {
+        expectMarkdown(() => {
+          try {
+            expect('x').to.equal('#{this}')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        },
+        `expected **x** to equal **#{this}**`,
         done)
       })
     })

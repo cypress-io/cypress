@@ -13,8 +13,11 @@ setFormatValueHook((ctx, val) => {
     val && val.document
     val && val.inspect
   } catch (e: any) {
-    if (e.stack.indexOf('cross-origin') !== -1 || // chrome
-    e.message.indexOf('cross-origin') !== -1) { // firefox
+    // a getter can throw any value, not only an Error
+    const includesCrossOrigin = (text: unknown) => typeof text === 'string' && text.includes('cross-origin')
+
+    if (includesCrossOrigin(e?.stack) || // chrome
+    includesCrossOrigin(e?.message)) { // firefox
       return `[window]`
     }
   }

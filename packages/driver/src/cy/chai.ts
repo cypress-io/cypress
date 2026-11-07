@@ -136,24 +136,22 @@ chai.use((chai, u) => {
     return message.replace(imageMarkdown, '``$&``')
   }
 
-  const replaceArgMessages = (args, str) => {
-    return _.reduce(args, (memo: string[], value, index) => {
-      if (_.isString(value)) {
-        value = value
-        .replace(allWordsBetweenCurlyBraces, '**$1**')
-        .replace(allEscapedSingleQuotes, '__quote__')
-        .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
-        // when a value has ** in it, **** are sometimes created after the process above.
-        // remove them with this.
-        .replace(allQuadStars, '**')
-
-        memo.push(value)
-      } else {
-        memo.push(value)
+  const replaceArgMessages = (args: unknown[]) => {
+    return args.map((value, index) => {
+      // Only the message templates: the expected and actual values are
+      // displayed as they are.
+      if (!_.isString(value) || (index !== 1 && index !== 2)) {
+        return value
       }
 
-      return memo
-    }, [])
+      return value
+      .replace(allWordsBetweenCurlyBraces, '**$1**')
+      .replace(allEscapedSingleQuotes, '__quote__')
+      .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
+      // when a value has ** in it, **** are sometimes created after the process above.
+      // remove them with this.
+      .replace(allQuadStars, '**')
+    })
   }
 
   const restoreAsserts = function () {
@@ -427,7 +425,7 @@ chai.use((chai, u) => {
       const value = chaiUtils.flag(this, 'object')
       const expected = args[3]
 
-      const customArgs = replaceArgMessages(args, this._obj)
+      const customArgs = replaceArgMessages(args)
 
       let message = getMessage(this, customArgs)
       const actual = chaiUtils.getActual(this, customArgs as Chai.AssertionArgs)
