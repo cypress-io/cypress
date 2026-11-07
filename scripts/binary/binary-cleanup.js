@@ -55,6 +55,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/mocha-7.2.0/index.js',
     'packages/server/node_modules/webdriver/build/index.js',
     'packages/server/node_modules/@wdio/utils/build/node.js',
+    // jimp is deferred in the snapshot, so its dependencies are loaded from disk
+    'node_modules/jimp/dist/commonjs/index.js',
     // dependencies needed for geckodriver when running firefox in the binary
     'node_modules/pump/index.js',
     'node_modules/sprintf-js/src/sprintf.js',
