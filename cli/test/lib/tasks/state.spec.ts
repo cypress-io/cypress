@@ -61,6 +61,7 @@ vi.mock('fs-extra', async (importActual) => {
       pathExists: vi.fn(),
       readJson: vi.fn(),
       outputJson: vi.fn(),
+      remove: vi.fn(),
       realpath: vi.fn(),
     },
   }
@@ -328,6 +329,42 @@ describe('lib/tasks/state', function () {
         { verified: false },
         { spaces: 2 },
       )
+    })
+
+    it('ignores a read-only binary state location', async function () {
+      vi.mocked(fs.outputJson).mockRejectedValue(Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }))
+
+      await expect(state.writeBinaryVerifiedAsync(true, binaryDir)).resolves.toBeUndefined()
+    })
+
+    it('rethrows other errors', async function () {
+      vi.mocked(fs.outputJson).mockRejectedValue(Object.assign(new Error('ENOSPC: no space left on device'), { code: 'ENOSPC' }))
+
+      await expect(state.writeBinaryVerifiedAsync(true, binaryDir)).rejects.toThrow('ENOSPC')
+    })
+  })
+
+  describe('.clearBinaryStateAsync', function () {
+    const binaryStateFilename = path.join(versionDir, 'binary_state.json')
+
+    it('removes the binary state', async function () {
+      vi.mocked(fs.remove).mockResolvedValue()
+
+      await state.clearBinaryStateAsync(binaryDir)
+
+      expect(fs.remove).toHaveBeenCalledWith(binaryStateFilename)
+    })
+
+    it('ignores a read-only binary state location', async function () {
+      vi.mocked(fs.remove).mockRejectedValue(Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }))
+
+      await expect(state.clearBinaryStateAsync(binaryDir)).resolves.toBeUndefined()
+    })
+
+    it('rethrows other errors', async function () {
+      vi.mocked(fs.remove).mockRejectedValue(Object.assign(new Error('EBUSY: resource busy'), { code: 'EBUSY' }))
+
+      await expect(state.clearBinaryStateAsync(binaryDir)).rejects.toThrow('EBUSY')
     })
   })
 

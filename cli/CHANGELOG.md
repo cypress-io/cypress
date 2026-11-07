@@ -38,6 +38,7 @@
 - Fixed an issue where the browser tab running Cypress could stop responding when a test's command log held an object with a circular reference reachable by more than one path, such as an object passed to [`cy.wrap()`](https://on.cypress.io/wrap) or stubbed with [`cy.stub()`](https://on.cypress.io/stub). Fixes [#35231](https://github.com/cypress-io/cypress/issues/35231).
 - Fixed an issue where [`cy.scrollTo()`](https://on.cypress.io/scrollto) and [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) ignored a `duration` given as a string, such as `'2000'`, and always animated the scroll for 400ms. A string `duration` is now read as milliseconds, the same as a number. Fixed in [#35248](https://github.com/cypress-io/cypress/pull/35248).
 - Fixed an issue where [`.select()`](https://on.cypress.io/select) did not fire `input` and `change` events on a `<select multiple>` when the selection changed but its first selected option stayed the same, such as selecting `['apple', 'banana']` when `apple` was already selected. Fixed in [#35254](https://github.com/cypress-io/cypress/pull/35254).
+- Fixed an issue where Cypress failed to verify and run with an `EACCES` error when the directory above the Cypress binary was read-only, such as a binary set with `CYPRESS_RUN_BINARY`. Cypress now continues without saving the verification result. Fixes [#30684](https://github.com/cypress-io/cypress/issues/30684).
 
 **Misc:**
 
