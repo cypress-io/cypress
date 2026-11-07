@@ -148,7 +148,7 @@ chai.use((chai, u) => {
       .replace(allWordsBetweenCurlyBraces, '**$1**')
       .replace(allEscapedSingleQuotes, '__quote__')
       .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
-      // when a value has ** in it, **** are sometimes created after the process above.
+      // when a template has ** in it, **** are sometimes created after the process above.
       // remove them with this.
       .replace(allQuadStars, '**')
     })
