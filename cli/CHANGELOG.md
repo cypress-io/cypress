@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.3.0
 
+**Features:**
+
+- Component testing with webpack now supports `webpack-dev-server` 6 when your project provides it, which Angular 22.2 projects using `@angular-devkit/build-angular` do. `webpack-dev-server` 6 requires webpack `5.101.0` or newer, and Cypress reports an error naming both versions when an older webpack is installed. The `webpack-dev-server` bundled with Cypress is still version 5. Addresses [#34259](https://github.com/cypress-io/cypress/issues/34259).
+
 **Performance:**
 
 - In `cypress run`, specs now start sooner when Cypress launches a new browser for them. In Electron, this is every spec unless component testing's `experimentalSingleTabRunMode` is enabled. In other browsers, it is the first spec and any spec after the browser exits unexpectedly. Fixed in [#35186](https://github.com/cypress-io/cypress/pull/35186).
@@ -98,6 +102,11 @@
 **Dependency Updates:**
 
 - Upgraded `undici` from `6.28.0` to `6.29.1` to address an [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-UNDICI-21181005) vulnerability reported in security scans. Addressed in [#35087](https://github.com/cypress-io/cypress/pull/35087).
+
+**Dependency Updates:**
+
+- Upgraded `ws` from `8.21.1` to `8.22.0`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
+- Upgraded `shell-quote` from `1.11.0` to `1.12.0`. `shell-quote` is a transitive dependency of `launch-editor`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
 
 ## 16.2.0
 

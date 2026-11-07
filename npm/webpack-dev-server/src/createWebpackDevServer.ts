@@ -45,8 +45,8 @@ export async function createWebpackDevServer (
   const finalWebpackConfig = await makeWebpackConfig(config)
   const webpackCompiler = webpack(finalWebpackConfig)
 
-  if (webpackDevServerMajorVersion === 5) {
-    debug('using webpack-dev-server v5')
+  if (webpackDevServerMajorVersion === 5 || webpackDevServerMajorVersion === 6) {
+    debug(`using webpack-dev-server v${webpackDevServerMajorVersion}`)
 
     return webpackDevServer5(config, webpackCompiler, finalWebpackConfig)
   }
