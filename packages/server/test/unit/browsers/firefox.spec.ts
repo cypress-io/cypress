@@ -550,6 +550,10 @@ describe('lib/browsers/firefox', () => {
 
       beforeEach(() => {
         rmSyncSpy = vi.spyOn(fsExtra, 'rmSync').mockReturnValue(undefined)
+
+        // Drop the dirs earlier tests in this file queued, so each test only sees its own launches
+        firefox._removeProfileDirsOnExit()
+        rmSyncSpy.mockClear()
       })
 
       it('removes the temporary profile with retries when the process exits', async () => {
@@ -598,6 +602,19 @@ describe('lib/browsers/firefox', () => {
         const [profile] = vi.mocked(FirefoxProfile.prototype.path).mock.instances
 
         expect(profile.willDeleteOnExit()).toBe(false)
+      })
+
+      it('removes the process listeners firefox-profile adds for each profile', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        const [profile] = vi.mocked(FirefoxProfile.prototype.path).mock.instances
+        const onExit = Reflect.get(profile, 'onExit')
+        const onSigInt = Reflect.get(profile, 'onSigInt')
+
+        expect(onExit).toBeTypeOf('function')
+        expect(onSigInt).toBeTypeOf('function')
+        expect(process.listeners('exit')).not.toContain(onExit)
+        expect(process.listeners('SIGINT')).not.toContain(onSigInt)
       })
     })
 
