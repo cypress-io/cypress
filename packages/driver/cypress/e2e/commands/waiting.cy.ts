@@ -1,3 +1,4 @@
+/* eslint-disable cypress/no-unnecessary-waiting -- these specs test cy.wait itself, including waiting a fixed time */
 import { assertLogLength } from '../../support/utils'
 const { _, Promise } = Cypress
 let reqQueue: XMLHttpRequest[] = []

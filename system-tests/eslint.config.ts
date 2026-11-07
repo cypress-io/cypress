@@ -78,6 +78,10 @@ export default [
       'react/no-deprecated': 'off',
       'react/prop-types': 'off',
       'vue/require-default-prop': 'off',
+      // fixture specs produce the timings, videos, command logs and mid-wait
+      // errors that system tests assert on, so their fixed waits are the
+      // scenario under test
+      'cypress/no-unnecessary-waiting': 'off',
       // import-x cannot parse the `.d.mts` types of @vitejs/plugin-vue
       'import-x/default': 'off',
       'import-x/namespace': 'off',
@@ -114,6 +118,9 @@ export default [
       // typescript-eslint has removed, and ESLint reports a disable directive
       // for an unknown rule as an error
       'projects/vue3-vite-ts-*/src/env.d.ts',
+      // the `*.vue` shim Vue CLI scaffolds, whose `DefineComponent<{}, {}, any>`
+      // trips @typescript-eslint/no-empty-object-type
+      'projects/vue3-webpack-ts-*/shims-vue.d.ts',
       // invalid on purpose: system tests assert on the errors they produce
       'project-fixtures/react/src/AppCompilationError.cy.jsx',
       'projects/config-with-ts-module-error/cypress.config.ts',

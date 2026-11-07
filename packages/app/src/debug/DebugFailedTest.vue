@@ -12,7 +12,6 @@
     <template
       v-for="{text, type}, index in failedTestData.mappedTitleParts"
       :key="`${text}-${index}`"
-      :data-cy="`titleParts-${index}`"
     >
       <IconChevronRightSmall
         v-if="index !== 0 && type !== 'LAST-PART-END'"

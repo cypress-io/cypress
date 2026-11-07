@@ -407,6 +407,48 @@ function deleteFailedSession (session: WebDriverClient, killBrowserAndDriver: ()
   })
 }
 
+const profileDirsToRemoveOnExit = new Set<string>()
+let isExitListenerRegistered = false
+
+export function _removeProfileDirsOnExit () {
+  const dirs = [...profileDirsToRemoveOnExit]
+
+  profileDirsToRemoveOnExit.clear()
+
+  for (const dir of dirs) {
+    try {
+      // On Windows, Firefox's processes can still hold handles in the profile for a moment after
+      // they are killed, which fails the first attempt with EPERM or EBUSY, so retry before giving up.
+      // eslint-disable-next-line no-restricted-syntax -- 'exit' listeners cannot await
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+    } catch (err) {
+      // A leftover run profile can be removed by the profile cleaner when a later run starts
+      debug('could not remove firefox profile %s on exit: %o', dir, err)
+    }
+  }
+}
+
+function removeProfileDirOnExit (dir: string) {
+  if (!isExitListenerRegistered) {
+    process.once('exit', _removeProfileDirsOnExit)
+    isExitListenerRegistered = true
+  }
+
+  profileDirsToRemoveOnExit.add(dir)
+}
+
+// firefox-profile adds an 'exit' and a 'SIGINT' listener for every profile it creates. Cypress removes the
+// profile itself and GracefulExit handles SIGINT, so drop them rather than let them pile up on each relaunch.
+function removeFirefoxProfileProcessListeners (profile: FirefoxProfile) {
+  for (const [event, key] of [['exit', 'onExit'], ['SIGINT', 'onSigInt']] as const) {
+    const listener = Reflect.get(profile, key)
+
+    if (typeof listener === 'function') {
+      process.removeListener(event, listener)
+    }
+  }
+}
+
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
@@ -600,8 +642,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     destinationDirectory: profileDir,
   })
 
-  // make sure the profile that is ported into the session is destroyed when the browser is closed
-  profile.shouldDeleteOnExit(true)
+  removeFirefoxProfileProcessListeners(profile)
+  removeProfileDirOnExit(profileDir)
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
