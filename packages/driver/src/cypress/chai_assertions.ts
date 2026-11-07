@@ -1,7 +1,7 @@
 // chai 5.2+ has `iterable` and `containSubset` built in. Cypress runs chai 4,
-// so it adds them with chai's names, matching rules and messages, letting tests
-// written for them keep passing once Cypress upgrades chai. The exceptions are
-// noted where they occur.
+// so it adds them with chai 6.3's names, matching rules and messages, letting
+// tests written for them keep passing once Cypress upgrades chai. The
+// exceptions are noted where they occur.
 import _ from 'lodash'
 
 const isIterable = (obj) => {
