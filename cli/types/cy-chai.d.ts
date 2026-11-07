@@ -98,31 +98,6 @@ declare namespace Chai {
     lessThanOrEqual: NumberComparer
 
     /**
-     * Asserts that the target is iterable, which means that it has a `Symbol.iterator` method.
-     *
-     * @example
-     *    expect([1, 2]).to.be.iterable
-     *    expect('foobar').to.be.iterable
-     *    expect(1).to.not.be.iterable
-     * @see http://chaijs.com/api/bdd/#method_iterable
-     */
-    iterable: Assertion
-
-    /**
-     * Asserts that the target contains the given subset. Objects match when every property of the subset
-     * matches the target's, recursively, and arrays match when each element of the subset matches at least
-     * one element of the target, in any order. A function in the subset is called with the target's value and
-     * passes when it returns a truthy value, and dates match by timestamp.
-     *
-     * @example
-     *    expect({ a: 1, b: { c: 2, d: 3 } }).to.containSubset({ b: { c: 2 } })
-     *    expect([{ id: 1 }, { id: 2 }]).to.containSubset([{ id: 2 }])
-     *    expect({ age: 25 }).to.containSubset({ age: (age) => age > 18 })
-     * @see http://chaijs.com/api/bdd/#method_containsubset
-     */
-    containSubset(subset: any): Assertion
-
-    /**
      * Assert that the first element of the selection has the given attribute, using `.attr()`.
      * Optionally, assert a particular value as well. A number is compared against the attribute's string value.
      *
@@ -177,47 +152,6 @@ declare namespace Chai {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      */
     value(value: string | number): Assertion
-  }
-
-  interface Assert {
-    /**
-     * Asserts that `value` is iterable, which means that it has a `Symbol.iterator` method.
-     *
-     * @example
-     *    assert.isIterable([1, 2])
-     *    assert.isIterable(new Set([1, 2]), 'expected a set')
-     * @see http://chaijs.com/api/bdd/#method_iterable
-     */
-    isIterable(value: any, message?: string): void
-
-    /**
-     * Asserts that `value` contains the given subset. Objects match when every property of the subset
-     * matches the target's, recursively, and arrays match when each element of the subset matches at least
-     * one element of the target, in any order.
-     *
-     * @example
-     *    assert.containsSubset({ a: 1, b: { c: 2, d: 3 } }, { b: { c: 2 } })
-     * @see http://chaijs.com/api/assert/#method_containssubset
-     */
-    containsSubset(value: any, subset: any, message?: string): void
-
-    /**
-     * Asserts that `value` contains the given subset. Alias of `containsSubset`.
-     *
-     * @example
-     *    assert.containSubset({ a: 1, b: { c: 2, d: 3 } }, { b: { c: 2 } })
-     * @see http://chaijs.com/api/assert/#method_containssubset
-     */
-    containSubset(value: any, subset: any, message?: string): void
-
-    /**
-     * Asserts that `value` does not contain the given subset.
-     *
-     * @example
-     *    assert.doesNotContainSubset({ a: 1, b: 2 }, { a: 3 })
-     * @see http://chaijs.com/api/assert/#method_doesnotcontainsubset
-     */
-    doesNotContainSubset(value: any, subset: any, message?: string): void
   }
 
   interface Match {

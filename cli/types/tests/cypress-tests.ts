@@ -1433,29 +1433,6 @@ namespace ChaiJQueryTests {
   expect($el).to.have.data('flags', { a: true }) // $ExpectError
 }
 
-namespace ChaiSubsetAndIterableTests {
-  expect([1, 2]).to.be.iterable // $ExpectType Assertion
-  expect(1).to.not.be.iterable // $ExpectType Assertion
-  expect([1, 2]).to.be.iterable() // $ExpectError
-
-  expect({ a: 1, b: { c: 2 } }).to.containSubset({ b: { c: 2 } }) // $ExpectType Assertion
-  expect([{ id: 1 }]).to.not.containSubset([{ id: 2 }]) // $ExpectType Assertion
-  expect({ age: 25 }).to.containSubset({ age: (age: number) => age > 18 }) // $ExpectType Assertion
-  expect({ a: 1 }).to.containSubset() // $ExpectError
-
-  assert.isIterable([1, 2]) // $ExpectType void
-  assert.isIterable(new Set([1]), 'expected a set') // $ExpectType void
-  assert.containsSubset({ a: 1, b: 2 }, { a: 1 }) // $ExpectType void
-  assert.containSubset({ a: 1, b: 2 }, { a: 1 }, 'message') // $ExpectType void
-  assert.doesNotContainSubset({ a: 1 }, { a: 2 }) // $ExpectType void
-  assert.containsSubset({ a: 1 }) // $ExpectError
-
-  cy.wrap([1, 2]).should('be.iterable') // $ExpectType Chainable<number[]>
-  cy.wrap(1).should('not.be.iterable') // $ExpectType Chainable<number>
-  cy.wrap({ a: 1, b: 2 }).should('containSubset', { a: 1 }) // $ExpectType Chainable<{ a: number; b: number; }>
-  cy.wrap({ a: 1 }).should('not.containSubset', { a: 2 }) // $ExpectType Chainable<{ a: number; }>
-}
-
 namespace CypressOptionsBeforeCallbackTests {
   cy.getCookies().each({ timeout: 4000 }, (cookie) => {})
   cy.getCookies().spread({ timeout: 4000 }, (cookie1, cookie2) => {})

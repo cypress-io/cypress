@@ -11,7 +11,6 @@ import { escapeBackslashes, escapeQuotes } from '../util/escape'
 import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
-import { $chaiAssertions } from '../cypress/chai_assertions'
 import { inspect, objDisplay } from './chai/display'
 import { overrideChaiUtil } from './chai/override_util'
 import type { StateFunc } from '../cypress/state'
@@ -44,7 +43,6 @@ type CreateFunc = (specWindow: SpecWindow, state: StateFunc, assertFn: $Cy['asse
 export let create: CreateFunc | null = null
 
 chai.use(sinonChai)
-chai.use($chaiAssertions)
 
 chai.use((chai, u) => {
   const chaiUtils = u
