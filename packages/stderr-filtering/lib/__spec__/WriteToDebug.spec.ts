@@ -244,17 +244,11 @@ describe('WriteToDebug', () => {
     it('handles undefined decoders', () => {
       const newWriteToDebug = new WriteToDebug(mockDebug)
 
-      newWriteToDebug.end()
-
-      // Should not throw
-      expect(true).toBe(true)
+      expect(() => newWriteToDebug.end()).not.toThrow()
     })
 
     it('cleans up decoders after processing', () => {
-      writeToDebug.end()
-
-      // Should not throw
-      expect(true).toBe(true)
+      expect(() => writeToDebug.end()).not.toThrow()
     })
   })
 

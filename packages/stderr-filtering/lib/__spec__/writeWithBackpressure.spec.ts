@@ -44,7 +44,12 @@ describe('writeWithBackpressure', () => {
 
       expect(output.write).toHaveBeenCalledWith(Buffer.from('test'))
       expect(output.once).toHaveBeenCalledWith('drain', expect.any(Function))
-      expect(writePromise).resolves
+
+      const drain = output.once.mock.calls.find(([event]) => event === 'drain')?.[1]
+
+      drain?.()
+
+      await expect(writePromise).resolves.toBeUndefined()
     })
   })
 })
