@@ -418,6 +418,16 @@ describe('src/cy/commands/assertions', () => {
       })
     }
 
+    const getAssertionError = (test) => {
+      try {
+        test()
+      } catch (err) {
+        return err
+      }
+
+      throw new Error('expected the assertion to throw, but it did not')
+    }
+
     // https://github.com/cypress-io/cypress/issues/19116
     it('text with backslashes', (done) => {
       const text = '"<OE_D]dQ\\'
@@ -453,8 +463,7 @@ describe('src/cy/commands/assertions', () => {
       it('preserves quotation marks if escaped', (done) => {
         expectMarkdown(
           () => expect(`'cypress'`).to.eq(`'cypress'`),
-          // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
-          `expected **'cypress'** to equal ****'cypress'****`,
+          `expected **'cypress'** to equal **'cypress'**`,
           done,
         )
       })
@@ -517,6 +526,40 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    describe('values containing message template tags', () => {
+      it('keeps #{exp} in the subject literal in the error', () => {
+        const err = getAssertionError(() => expect('#{exp}').to.equal('x'))
+
+        expect(err.message).to.eq(`expected '#{exp}' to equal 'x'`)
+      })
+
+      it('keeps #{act} in the subject literal in the error', () => {
+        const err = getAssertionError(() => expect('#{act}').to.equal('x'))
+
+        expect(err.message).to.eq(`expected '#{act}' to equal 'x'`)
+      })
+
+      it('keeps #{exp} in the subject literal in the Command Log', (done) => {
+        expectMarkdown(() => {
+          try {
+            expect('#{exp}').to.equal('x')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        },
+        `expected **#{exp}** to equal **x**`,
+        done)
+      })
+
+      it('keeps #{this} in the expected value literal in the Command Log', (done) => {
+        expectMarkdown(() => {
+          try {
+            expect('x').to.equal('#{this}')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        },
+        `expected **x** to equal **#{this}**`,
+        done)
+      })
+    })
+
     describe('escape markdown', () => {
       // https://github.com/cypress-io/cypress/issues/17357
       it('images', (done) => {
@@ -538,16 +581,6 @@ describe('src/cy/commands/assertions', () => {
     // truncateThreshold), so these assertions catch a regression that would
     // change failure messages.
     describe('uses Cypress value inspection', () => {
-      const getAssertionError = (test) => {
-        try {
-          test()
-        } catch (err) {
-          return err
-        }
-
-        throw new Error('expected the assertion to throw, but it did not')
-      }
-
       it('renders functions as [Function: name]', () => {
         const foo = function foo () {}
         const bar = function bar () {}
@@ -573,6 +606,18 @@ describe('src/cy/commands/assertions', () => {
         const err = getAssertionError(() => expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).to.equal(null))
 
         expect(err.message).to.eq('expected [ Array(15) ] to equal null')
+      })
+
+      it('renders a getter that throws a non-Error value', () => {
+        const err = getAssertionError(() => {
+          expect({
+            get document () {
+              throw 'nope'
+            },
+          }).to.equal(1)
+        })
+
+        expect(err.message).to.eq('expected { document: [Getter] } to equal 1')
       })
     })
   })
