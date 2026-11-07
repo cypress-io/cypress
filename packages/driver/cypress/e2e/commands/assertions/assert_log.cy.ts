@@ -558,6 +558,36 @@ describe('src/cy/commands/assertions', () => {
         `expected **x** to equal **#{this}**`,
         done)
       })
+
+      it('keeps #{exp} in the actual value literal in the error', () => {
+        const err = getAssertionError(() => expect({ a: '#{exp}' }).to.have.property('a', 'x'))
+
+        expect(err.message).to.eq(`expected { a: '#{exp}' } to have property 'a' of 'x', but got '#{exp}'`)
+      })
+
+      it('keeps #{exp} in the actual value literal in the Command Log', () => {
+        const messages: string[] = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            messages.push(log.get('message'))
+          }
+        })
+
+        cy.then(() => {
+          try {
+            expect({ a: '#{exp}' }).to.have.property('a', 'x')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        })
+
+        // have.property logs that the property exists before it checks the value
+        cy.then(() => {
+          expect(messages).to.deep.eq([
+            'expected **{ a: #{exp} }** to have property **a**',
+            'expected **{ a: #{exp} }** to have property **a** of **x**, but got **#{exp}**',
+          ])
+        })
+      })
     })
 
     describe('escape markdown', () => {
