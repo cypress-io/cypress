@@ -400,7 +400,8 @@ function deleteFailedSession (session: WebDriverClient, killBrowserAndDriver: ()
     const sessionProfile = session.capabilities['moz:profile']
 
     if (typeof sessionProfile === 'string') {
-      await fs.remove(sessionProfile).catch((removeErr) => {
+      // the killed processes can briefly keep handles open on Windows, failing the first attempt with EPERM or EBUSY
+      await fs.promises.rm(sessionProfile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch((removeErr) => {
         debug('error removing profile of failed webdriver session: %o', removeErr)
       })
     }
