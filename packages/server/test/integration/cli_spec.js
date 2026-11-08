@@ -35,10 +35,14 @@ describe('CLI Interface', () => {
   it('writes out ping value and exits', (done) => {
     return cp.exec('npm run dev -- --cwd=/foo/bar --smoke-test --ping=12345', { env }, (err, stdout, stderr) => {
       if (err) {
-        done(err)
+        return done(err)
       }
 
-      expect(clean(stdout)).to.eq('12345')
+      try {
+        expect(clean(stdout)).to.eq('12345')
+      } catch (e) {
+        return done(e)
+      }
 
       return done()
     })
@@ -48,13 +52,17 @@ describe('CLI Interface', () => {
   it('writes out package.json and exits', (done) => {
     return cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
       if (err) {
-        done(err)
+        return done(err)
       }
 
-      const json = JSON.parse(clean(stdout))
+      try {
+        const json = JSON.parse(clean(stdout))
 
-      expect(json.name).to.eq('cypress')
-      expect(json.productName).to.eq('Cypress', stdout)
+        expect(json.name).to.eq('cypress')
+        expect(json.productName).to.eq('Cypress', stdout)
+      } catch (e) {
+        return done(e)
+      }
 
       return done()
     })
