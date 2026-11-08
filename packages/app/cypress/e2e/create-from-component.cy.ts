@@ -1,10 +1,86 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../src/paths'
 
-function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedSpecPath: string) {
+interface FrameworkOptions {
+  name: 'Vue' | 'React'
+  listTitle: string
+  glob: string
+  matchCount: number
+  listed: string[]
+  search: { term: string, hidden: string[] }
+  selectComponent: () => void
+  extraTests?: () => void
+  waitForDevServer?: boolean
+}
+
+const vue: FrameworkOptions = {
+  name: 'Vue',
+  listTitle: 'Lists Vue components in the project',
+  glob: '*.vue',
+  matchCount: 9,
+  listed: ['App', 'HelloWorld'],
+  search: { term: 'HelloWorld', hidden: ['App'] },
+  selectComponent: () => {
+    cy.findByText('HelloWorld').should('be.visible').click()
+  },
+}
+
+const react: FrameworkOptions = {
+  name: 'React',
+  listTitle: 'Lists files in the project',
+  glob: '*.{js,jsx,tsx}',
+  matchCount: 5,
+  listed: ['App', 'index'],
+  search: { term: 'App', hidden: ['index', 'component'] },
+  selectComponent: () => {
+    // Expand the row
+    cy.findByText('App').should('be.visible').click()
+
+    // Click on 'app' component
+    cy.findByTestId('react-component-row').should('contain', 'App').click()
+  },
+  extraTests: () => {
+    it('shows \'No components found\' if there are no exported components', () => {
+      cy.get('@ComponentCard').click()
+
+      cy.findByText('index').should('be.visible').click()
+
+      cy.findByTestId('react-component-row').should('not.exist')
+      cy.contains('No components found').should('be.visible')
+    })
+
+    it('shows \'Unable to parse file\' if there was an error parsing the file', () => {
+      cy.get('@ComponentCard').click()
+
+      // This component has a syntax error so we will fail to parse it
+      cy.findByText('Invalid').should('be.visible').click()
+
+      cy.findByTestId('react-component-row').should('not.exist')
+      cy.contains('Unable to parse file').should('be.visible')
+    })
+  },
+  waitForDevServer: true,
+}
+
+function validateCreateFromComponentCard (framework: FrameworkOptions, beforeEachFn: () => void, expectedSpecPath: string) {
   beforeEach(beforeEachFn)
 
-  it('Shows create from component card for Vue projects', () => {
+  const createSpecFromComponent = () => {
+    cy.get('@ComponentCard').click()
+    framework.selectComponent()
+
+    cy.getByRole('dialog', {
+      name: defaultMessages.createSpec.successPage.header,
+      native: false,
+    }).as('SuccessDialog')
+
+    cy.get('@SuccessDialog').within(() => {
+      cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
+      cy.getByRole('button', { name: 'Close' }).should('be.visible')
+    })
+  }
+
+  it(`Shows create from component card for ${framework.name} projects`, () => {
     cy.get('@ComponentCard')
     .within(() => {
       cy.getByRole('button', {
@@ -26,39 +102,36 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
     }).should('not.exist')
   })
 
-  it('Lists Vue components in the project', () => {
+  it(framework.listTitle, () => {
     cy.get('@ComponentCard').click()
 
-    cy.findByText('9 matches').should('be.visible')
+    cy.findByText(`${framework.matchCount} matches`).should('be.visible')
 
-    cy.findByText('App').should('be.visible')
-    cy.findByText('HelloWorld').should('be.visible')
+    framework.listed.forEach((item) => {
+      cy.findByText(item).should('be.visible')
+    })
   })
 
   it('Allows for the user to search through their components', () => {
     cy.get('@ComponentCard').click()
 
-    cy.findByText('*.vue').should('be.visible')
-    cy.findByText('9 matches').should('be.visible')
-    cy.findByLabelText('Search by filename').type('HelloWorld')
+    cy.findByText(framework.glob).should('be.visible')
+    cy.findByText(`${framework.matchCount} matches`).should('be.visible')
+    cy.findByLabelText('Search by filename').type(framework.search.term)
 
-    cy.findByText('HelloWorld').should('be.visible')
-    cy.findByText('1 of 9 matches').should('be.visible')
-    cy.findByText('App').should('not.exist')
+    cy.findByText(framework.search.term).should('be.visible')
+    cy.findByText(`1 of ${framework.matchCount} matches`).should('be.visible')
+    framework.search.hidden.forEach((item) => {
+      cy.findByText(item).should('not.exist')
+    })
   })
 
+  framework.extraTests?.()
+
   it('shows success modal when component spec is created', () => {
-    cy.get('@ComponentCard').click()
+    createSpecFromComponent()
 
-    cy.findByText('HelloWorld').should('be.visible').click()
-
-    cy.getByRole('dialog', {
-      name: defaultMessages.createSpec.successPage.header,
-      native: false,
-    }).as('SuccessDialog').within(() => {
-      cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.getByRole('button', { name: 'Close' }).should('be.visible')
-
+    cy.get('@SuccessDialog').within(() => {
       cy.getByRole('link', { name: 'Okay, run the spec' })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`)
 
@@ -70,138 +143,15 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
   })
 
   it('runs generated spec', () => {
-    cy.get('@ComponentCard').click()
+    createSpecFromComponent()
 
-    cy.findByText('HelloWorld').should('be.visible').click()
-
-    cy.getByRole('dialog', {
-      name: defaultMessages.createSpec.successPage.header,
-      native: false,
-    }).as('SuccessDialog').within(() => {
-      cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.getByRole('button', { name: 'Close' }).should('be.visible')
-
-      cy.getByRole('link', { name: 'Okay, run the spec' })
-      .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
-    })
-
-    cy.waitForSpecToFinish({ passCount: 1 })
-  })
-}
-
-/* eslint-disable mocha/no-identical-title -- this helper repeats the Vue helper's test titles, but the two run under different contexts, so full titles never collide */
-function validateCreateFromReactComponentCard (beforeEachFn: () => void, expectedSpecPath: string) {
-  beforeEach(beforeEachFn)
-
-  it('Shows create from component card for React projects', () => {
-    cy.get('@ComponentCard')
-    .within(() => {
-      cy.getByRole('button', {
-        name: 'Create from component',
-      }).should('be.visible')
-      .and('not.be.disabled')
-    })
-  })
-
-  it('Can be closed with the x button', () => {
-    cy.get('@ComponentCard').click()
-
-    cy.getByRole('button', { name: 'Close' }).as('DialogCloseButton')
-
-    cy.get('@DialogCloseButton').click()
-    cy.getByRole('dialog', {
-      name: 'Choose a component',
-      native: false,
-    }).should('not.exist')
-  })
-
-  it('Lists files in the project', () => {
-    cy.get('@ComponentCard').click()
-
-    cy.findByText('5 matches').should('be.visible')
-
-    cy.findByText('App').should('be.visible')
-    cy.findByText('index').should('be.visible')
-  })
-
-  it('Allows for the user to search through their components', () => {
-    cy.get('@ComponentCard').click()
-
-    cy.findByText('*.{js,jsx,tsx}').should('be.visible')
-    cy.findByText('5 matches').should('be.visible')
-    cy.findByLabelText('Search by filename').type('App')
-
-    cy.findByText('App').should('be.visible')
-    cy.findByText('1 of 5 matches').should('be.visible')
-    cy.findByText('index').should('not.exist')
-    cy.findByText('component').should('not.exist')
-  })
-
-  it('shows \'No components found\' if there are no exported components', () => {
-    cy.get('@ComponentCard').click()
-
-    cy.findByText('index').should('be.visible').click()
-
-    cy.findByTestId('react-component-row').should('not.exist')
-    cy.contains('No components found').should('be.visible')
-  })
-
-  it('shows \'Unable to parse file\' if there was an error parsing the file', () => {
-    cy.get('@ComponentCard').click()
-
-    // This component has a syntax error so we will fail to parse it
-    cy.findByText('Invalid').should('be.visible').click()
-
-    cy.findByTestId('react-component-row').should('not.exist')
-    cy.contains('Unable to parse file').should('be.visible')
-  })
-
-  it('shows success modal when component spec is created', () => {
-    cy.get('@ComponentCard').click()
-
-    // Expand the row
-    cy.findByText('App').should('be.visible').click()
-
-    // Click on 'app' component
-    cy.findByTestId('react-component-row').should('contain', 'App').click()
-
-    cy.getByRole('dialog', {
-      name: defaultMessages.createSpec.successPage.header,
-      native: false,
-    }).as('SuccessDialog').within(() => {
-      cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.getByRole('button', { name: 'Close' }).should('be.visible')
-
-      cy.getByRole('link', { name: 'Okay, run the spec' })
-      .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`)
-
-      cy.getByRole('button', { name: 'Create another spec' }).click()
-    })
-
-    // 'Create from component' card appears again when the user selects "create another spec"
-    cy.findByText('Create from component').should('be.visible')
-  })
-
-  it('runs generated spec', () => {
-    cy.get('@ComponentCard').click()
-
-    // Expand the row
-    cy.findByText('App').should('be.visible').click()
-
-    // Click on 'app' component
-    cy.findByTestId('react-component-row').should('contain', 'App').click()
-
-    cy.getByRole('dialog', {
-      name: defaultMessages.createSpec.successPage.header,
-      native: false,
-    }).as('SuccessDialog').within(() => {
-      cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
-      cy.getByRole('button', { name: 'Close' }).should('be.visible')
-
-      // The dialog can appear before the new spec is written and picked up by
-      // the component dev server, and running it before then fails
-      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the dev server exposes no signal that it has picked up the spec
-      cy.wait(2000)
+    cy.get('@SuccessDialog').within(() => {
+      if (framework.waitForDevServer) {
+        // The dialog can appear before the new spec is written and picked up by
+        // the component dev server, and running it before then fails
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the dev server exposes no signal that it has picked up the spec
+        cy.wait(2000)
+      }
 
       cy.getByRole('link', { name: 'Okay, run the spec' })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
@@ -210,12 +160,11 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
     cy.waitForSpecToFinish({ passCount: 1 })
   })
 }
-/* eslint-enable mocha/no-identical-title */
 
 describe('Create from component card', () => {
   context('Vue', () => {
     context('project with default spec pattern', () => {
-      validateCreateFromVueComponentCard(() => {
+      validateCreateFromComponentCard(vue, () => {
         cy.scaffoldProject('no-specs-vue')
         cy.openProject('no-specs-vue', ['--component'])
         cy.startAppServer('component')
@@ -227,7 +176,7 @@ describe('Create from component card', () => {
     })
 
     context('project with custom spec pattern', () => {
-      validateCreateFromVueComponentCard(() => {
+      validateCreateFromComponentCard(vue, () => {
         cy.scaffoldProject('no-specs-vue')
         cy.openProject('no-specs-vue', ['--config-file', 'cypress-custom-spec-pattern.config.ts', '--component'])
         cy.startAppServer('component')
@@ -242,7 +191,7 @@ describe('Create from component card', () => {
 
   context('React', () => {
     context('project with default spec pattern', () => {
-      validateCreateFromReactComponentCard(() => {
+      validateCreateFromComponentCard(react, () => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
@@ -254,7 +203,7 @@ describe('Create from component card', () => {
     })
 
     context('project with custom spec pattern', () => {
-      validateCreateFromReactComponentCard(() => {
+      validateCreateFromComponentCard(react, () => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs', ['--config-file', 'cypress-custom-spec-pattern.config.ts', '--component'])
         cy.startAppServer('component')
