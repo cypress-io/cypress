@@ -1165,7 +1165,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       onSubmit: (e) => {
         return this.Cypress.action('app:form:submitted', e)
       },
-      onLoad () { },
+      onLoad: () => { },
       onBeforeUnload: (e) => {
         this.isStable(false, 'beforeunload')
 

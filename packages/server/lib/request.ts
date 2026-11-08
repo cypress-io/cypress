@@ -771,8 +771,6 @@ export class Request {
       options.json = false
     }
 
-    const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
-
     const send = () => {
       const ms = Date.now()
 
@@ -786,6 +784,8 @@ export class Request {
       let currentUrl = options.url
 
       if (options.followRedirect) {
+        const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
+
         options.followRedirect = function (incomingRes) {
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 

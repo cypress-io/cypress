@@ -157,7 +157,8 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
 
 export = {
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
-    // onNewWindow's own `this` is the window that opened the child
+    // onNewWindow's own `this` is the window that opened the child, so it
+    // reaches this module through launchChild
     const launchChild = (url: string, parent: BrowserWindow) => this._launchChild(url, parent, projectRoot, state, options, automation)
 
     const defaults: Windows.WindowOptions = {
