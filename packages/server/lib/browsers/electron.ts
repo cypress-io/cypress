@@ -157,6 +157,7 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
 
 export = {
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- onNewWindow needs its own `this`, the window that opened the child
     const _this = this
 
     const defaults: Windows.WindowOptions = {
@@ -212,6 +213,7 @@ export = {
         }
       },
       async onNewWindow (this: BrowserWindow, { url }) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- nulled once the window closes, which `this` can't be
         let _win: BrowserWindow | null = this
 
         _win.on('closed', () => {

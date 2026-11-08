@@ -433,11 +433,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // store the error on state now
     this.state('error', err)
 
-    const cy = this
-
-    const finish = function (err) {
+    const finish = (err) => {
       // if the test has a (done) callback, we fail the test with that
-      const d = cy.state('done')
+      const d = this.state('done')
 
       if (d) {
         return d(err)
@@ -446,7 +444,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // if this failure was asynchronously called (outside the promise chain)
       // but the promise chain is still active, reject it. if we're inside
       // the promise chain, this isn't necessary and will actually mess it up
-      const r = cy.state('reject')
+      const r = this.state('reject')
 
       if (options.async && r) {
         return r(err)
@@ -691,10 +689,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addCommandSync (name, fn) {
-    const cy = this
-
-    cy[name] = function () {
-      return fn.apply(cy.runnableCtx(name), arguments)
+    this[name] = (...args) => {
+      return fn.apply(this.runnableCtx(name), args)
     }
   }
 
@@ -703,24 +699,22 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addCommand ({ name, fn, type, prevSubject }) {
-    const cy = this
-
     this.commandFns[name] = fn
 
-    const wrap = function (firstCall) {
+    const wrap = (firstCall) => {
       if (type === 'parent') {
-        return (chainerId, ...args) => fn.apply(cy.runnableCtx(name), args)
+        return (chainerId, ...args) => fn.apply(this.runnableCtx(name), args)
       }
 
-      const wrapped = function (chainerId, ...args) {
+      const wrapped = (chainerId, ...args) => {
         // push the subject into the args
         if (firstCall) {
-          cy.validateFirstCall(name, args, prevSubject)
+          this.validateFirstCall(name, args, prevSubject)
         }
 
-        args = cy.pushSubject(name, args, prevSubject, chainerId)
+        args = this.pushSubject(name, args, prevSubject, chainerId)
 
-        return fn.apply(cy.runnableCtx(name), args)
+        return fn.apply(this.runnableCtx(name), args)
       }
 
       wrapped.originalFn = fn
@@ -734,13 +728,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const callback = (chainer, userInvocationStack, args, privilegeVerification, firstCall = false) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
-      const onInjectCommand = cy.state('onInjectCommand')
+      const onInjectCommand = this.state('onInjectCommand')
 
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
+      if (_.isFunction(onInjectCommand) && onInjectCommand.call(this, name, ...args) === false) {
         return
       }
 
-      cy.enqueue($Command.create({
+      this.enqueue($Command.create({
         name,
         args,
         type,
@@ -753,8 +747,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     $Chainer.add(name, callback)
 
-    cy[name] = function (...args) {
-      ensureRunnable(cy, name)
+    this[name] = (...args) => {
+      ensureRunnable(this, name)
 
       // for privileged commands invoked from the spec, the privileged channel
       // returns a function the command calls with its options to verify them
@@ -763,16 +757,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // this is the first call on cypress
       // so create a new chainer instance
-      const chainer = new $Chainer(cy.specWindow)
+      const chainer = new $Chainer(this.specWindow)
 
-      if (cy.state('chainerId')) {
-        cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
+      if (this.state('chainerId')) {
+        this.linkSubject(chainer.chainerId, this.state('chainerId'))
       }
 
-      let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+      let userInvocationStack = $stackUtils.captureUserInvocationStack(this.specWindow.Error)
 
-      if (cy.state('originUserInvocationStack')) {
-        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
+      if (this.state('originUserInvocationStack')) {
+        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, this.state('originUserInvocationStack'))
       }
 
       callback(chainer, userInvocationStack, args, privilegeVerification, true)
@@ -782,10 +776,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // that means we are attempting to invoke
       // a cypress command within another cypress
       // command and we should error
-      const ret = cy.state('commandIntermediateValue')
+      const ret = this.state('commandIntermediateValue')
 
       if (ret) {
-        const current = cy.state('current')
+        const current = this.state('current')
 
         // if this is a custom promise
         if ($utils.isPromiseLike(ret) && $utils.noArgsAreAFunction(current.get('args'))) {
@@ -802,12 +796,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // if we're the first call onto a cy
       // command, then kick off the run
-      if (!cy.state('promise')) {
-        if (cy.state('returnedCustomPromise')) {
-          cy.warnMixingPromisesAndCommands()
+      if (!this.state('promise')) {
+        if (this.state('returnedCustomPromise')) {
+          this.warnMixingPromisesAndCommands()
         }
 
-        cy.runQueue()
+        this.runQueue()
       }
 
       return chainer
@@ -815,16 +809,14 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addQuery ({ name, fn }) {
-    const cy = this
-
     this.queryFns[name] = fn
 
     const callback = (chainer, userInvocationStack, args, privilegeVerification) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
-      const onInjectCommand = cy.state('onInjectCommand')
+      const onInjectCommand = this.state('onInjectCommand')
 
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
+      if (_.isFunction(onInjectCommand) && onInjectCommand.call(this, name, ...args) === false) {
         return
       }
 
@@ -851,13 +843,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       command.set('fn', cyFn)
       command.set('privilegeVerification', privilegeVerification)
 
-      cy.enqueue(command)
+      this.enqueue(command)
     }
 
     $Chainer.add(name, callback)
 
-    cy[name] = function (...args) {
-      ensureRunnable(cy, name)
+    this[name] = (...args) => {
+      ensureRunnable(this, name)
 
       // for privileged commands invoked from the spec, the privileged channel
       // returns a function the command calls with its options to verify them
@@ -866,24 +858,24 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // this is the first call on cypress
       // so create a new chainer instance
-      const chainer = new $Chainer(cy.specWindow)
+      const chainer = new $Chainer(this.specWindow)
 
-      if (cy.state('chainerId')) {
-        cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
+      if (this.state('chainerId')) {
+        this.linkSubject(chainer.chainerId, this.state('chainerId'))
       }
 
-      let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+      let userInvocationStack = $stackUtils.captureUserInvocationStack(this.specWindow.Error)
 
-      if (cy.state('originUserInvocationStack')) {
-        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
+      if (this.state('originUserInvocationStack')) {
+        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, this.state('originUserInvocationStack'))
       }
 
       callback(chainer, userInvocationStack, args, privilegeVerification)
 
       // if we're the first call onto a cy
       // command, then kick off the run
-      if (!cy.state('promise')) {
-        cy.runQueue()
+      if (!this.state('promise')) {
+        this.runQueue()
       }
 
       return chainer
@@ -990,6 +982,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // completion of the new run and fail it, so those are dropped.
     const isStaleRun = () => runnableRuns.get(runnable) !== run
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- runnable.fn forwards its own `this` and `arguments` to the user's test function
     const cy = this
 
     runnable.fn = function () {
@@ -1146,14 +1139,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private contentWindowListeners (contentWindow) {
-    const cy = this
-
     bindToListeners(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
 
-        const handled = cy.onUncaughtException({
+        const handled = this.onUncaughtException({
           err,
           promise,
           handlerType,
@@ -1162,49 +1153,49 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         debugErrors('uncaught AUT error: %o', originalErr)
 
-        $errUtils.logError(cy.Cypress, handlerType, originalErr, handled)
+        $errUtils.logError(this.Cypress, handlerType, originalErr, handled)
 
         // return undefined so the browser does its default
         // uncaught exception behavior (logging to console)
         return undefined
       },
-      onHistoryNav (delta) {
-        cy.state('navHistoryDelta', delta)
+      onHistoryNav: (delta) => {
+        this.state('navHistoryDelta', delta)
       },
-      onSubmit (e) {
-        return cy.Cypress.action('app:form:submitted', e)
+      onSubmit: (e) => {
+        return this.Cypress.action('app:form:submitted', e)
       },
       onLoad () { },
-      onBeforeUnload (e) {
-        cy.isStable(false, 'beforeunload')
+      onBeforeUnload: (e) => {
+        this.isStable(false, 'beforeunload')
 
-        cy.Cookies.setInitial()
+        this.Cookies.setInitial()
 
-        cy.resetTimer()
+        this.resetTimer()
 
-        cy.Cypress.action('app:window:before:unload', e)
+        this.Cypress.action('app:window:before:unload', e)
 
         // return undefined so our beforeunload handler
         // doesn't trigger a confirmation dialog
         return undefined
       },
-      onUnload (e) {
-        return cy.Cypress.action('app:window:unload', e)
+      onUnload: (e) => {
+        return this.Cypress.action('app:window:unload', e)
       },
-      onNavigation (...args) {
-        return cy.Cypress.action('app:navigation:changed', ...args)
+      onNavigation: (...args) => {
+        return this.Cypress.action('app:navigation:changed', ...args)
       },
-      onAlert (str) {
-        return cy.Cypress.action('app:window:alert', str)
+      onAlert: (str) => {
+        return this.Cypress.action('app:window:alert', str)
       },
-      onConfirm (str) {
-        const results = cy.Cypress.action('app:window:confirm', str)
+      onConfirm: (str) => {
+        const results = this.Cypress.action('app:window:confirm', str)
 
         // return false if ANY results are false
         // else true
         const ret = !_.some(results, returnedFalse)
 
-        cy.Cypress.action('app:window:confirmed', str, ret)
+        this.Cypress.action('app:window:confirmed', str, ret)
 
         return ret
       },

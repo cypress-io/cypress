@@ -242,8 +242,6 @@ export class Request {
 
     let req = null
 
-    const self = this
-
     const delayStream = new stream.PassThrough()
     let reqBodyBuffer: ReturnType<typeof streamBuffer> | null = streamBuffer()
     const retryStream = duplexify(reqBodyBuffer, delayStream)
@@ -262,7 +260,7 @@ export class Request {
       cleanup()
     }
 
-    const tryStartStream = function () {
+    const tryStartStream = () => {
       // if our request has been aborted
       // in the time that we were waiting to retry
       // then immediately bail
@@ -270,7 +268,7 @@ export class Request {
         return
       }
 
-      const reqStream = self.r(opts)
+      const reqStream = this.r(opts)
       let didReceiveResponse = false
 
       const retry = function ({ delay, attempt }) {
@@ -324,7 +322,7 @@ export class Request {
         }
 
         // otherwise, see if we can retry another request under the hood...
-        return self.maybeRetryOnNetworkFailure(err, {
+        return this.maybeRetryOnNetworkFailure(err, {
           opts,
           retryIntervals,
           delaysRemaining,
@@ -346,7 +344,7 @@ export class Request {
         didReceiveResponse = true
 
         // ok, no net error, but what about a bad status code?
-        return self.maybeRetryOnStatusCodeFailure(incomingRes, {
+        return this.maybeRetryOnStatusCodeFailure(incomingRes, {
           opts,
           requestId,
           delaysRemaining,
@@ -427,8 +425,6 @@ export class Request {
       retryOnStatusCodeFailure,
     } = opts
 
-    const self = this
-
     const retry = ({ delay }) => {
       return Promise.delay(delay)
       .then(() => {
@@ -451,7 +447,7 @@ export class Request {
       })
     }).then((res) => {
       // ok, no net error, but what about a bad status code?
-      return self.maybeRetryOnStatusCodeFailure(res, {
+      return this.maybeRetryOnStatusCodeFailure(res, {
         opts,
         requestId,
         retryIntervals,
@@ -664,6 +660,7 @@ export class Request {
       strictSSL: false,
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- followRedirect needs its own `this`, the request being redirected
     const self = this
 
     const {
@@ -768,6 +765,7 @@ export class Request {
       options.json = false
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- followRedirect needs its own `this`, the request being redirected
     const self = this
 
     const send = () => {
@@ -828,7 +826,7 @@ export class Request {
     }
 
     if (options.cookies) {
-      return self.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
+      return this.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
       .then(send)
     }
 

@@ -30,10 +30,13 @@ export default [
   },
   {
     // blueprint.ts concatenates these into one snapshot script, and set-globals.js
-    // reassigns top-level bindings that globals.js and custom-require.js declare
+    // reassigns top-level bindings that globals.js and custom-require.js declare.
+    // ESLint lints each file alone, so it reads those bindings as globals, and
+    // globals-strict.js replaces real globals with proxies to catch unsafe use
     files: ['src/blueprint/**'],
     rules: {
       'prefer-const': 'off',
+      'no-global-assign': 'off',
     },
   },
 ]

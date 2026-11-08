@@ -110,11 +110,9 @@ export class WebKitAutomation {
   }
 
   private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
-    const _this = this
-
     videoApi.useVideoController({
-      async endVideoCapture () {
-        const pwVideo = _this.page.video()
+      endVideoCapture: async () => {
+        const pwVideo = this.page.video()
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
@@ -122,7 +120,7 @@ export class WebKitAutomation {
 
         await Promise.all([
           // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
-          _this.page.close(),
+          this.page.close(),
           pwVideo.saveAs(videoApi.videoName),
         ])
       },

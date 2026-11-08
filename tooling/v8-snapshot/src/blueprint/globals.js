@@ -5,8 +5,6 @@
 // These stub common globals during snapshot creation and are switched out when
 // the app initializes the snapshot on startup. See ./set-globals.js
 
-const outerScope = this
-
 function createElement (_type) {
   return {
     innerHTML: '',
@@ -788,7 +786,7 @@ function makeGlobalPlaceholder (globalFunctionName) {
 // will also capture the placeholder function (`var a = setTimeout` and `var a = global.setTimeout`).
 
 for (const globalFunctionName of globalFunctionNames) {
-  if (outerScope[globalFunctionName] !== undefined) {
+  if (this[globalFunctionName] !== undefined) {
     // This happens when the snapshot script is eval'd in tests.
     continue
   }
@@ -802,7 +800,7 @@ for (const globalFunctionName of globalFunctionNames) {
     },
   })
 
-  outerScope[globalFunctionName] = placeholder
+  this[globalFunctionName] = placeholder
 }
 
 let window = {}

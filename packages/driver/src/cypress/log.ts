@@ -815,6 +815,7 @@ export class Log {
   }
 
   wrapConsoleProps () {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- the wrapper passes its own `this` on to the original consoleProps
     const _this = this
 
     const { consoleProps } = this.attributes
