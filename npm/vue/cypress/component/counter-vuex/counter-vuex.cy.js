@@ -61,7 +61,7 @@ describe.skip('Vuex Counter', () => {
   it('count is zero when input is cleared', () => {
     cy.get('input').type(`{selectall}{backspace}`)
     cy.contains('0 times')
-  }),
+  })
 
   it('set count via input field', () => {
     const count = 42

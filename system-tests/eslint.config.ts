@@ -15,10 +15,18 @@ const ruleMeta = (ruleId: string) => {
   return rule?.meta
 }
 
+// Plugins don't always type a whitespace-only rule `layout`, so a whitespace
+// autofix counts too
+const isLayoutRule = (ruleId: string) => {
+  const meta = ruleMeta(ruleId)
+
+  return meta?.type === 'layout' || meta?.fixable === 'whitespace'
+}
+
 const layoutRulesOff = Object.fromEntries(
   baseConfig
   .flatMap((config) => Object.keys(config.rules ?? {}))
-  .filter((ruleId) => ruleMeta(ruleId)?.type === 'layout')
+  .filter(isLayoutRule)
   .map((ruleId) => [ruleId, 'off']),
 )
 
@@ -66,9 +74,6 @@ export default [
     },
     rules: {
       ...layoutRulesOff,
-      // only adds blank lines, but the plugin types it `suggestion`, so
-      // `layoutRulesOff` misses it
-      'mocha/consistent-spacing-between-blocks': 'off',
       // Angular resolves a constructor parameter's type to a DI token at
       // runtime, so a type-only import erases the token and the app fails to
       // compile (NG2003)
