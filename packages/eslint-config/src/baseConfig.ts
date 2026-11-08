@@ -249,8 +249,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/no-dupe-keys': 'off',
 
       'cypress/unsafe-to-chain-command': 'off',
-      'cypress/no-async-tests': 'off',
-      'cypress/no-assigning-return-values': 'off',
 
       // we use react 18+, so these rules do not apply
       'react/react-in-jsx-scope': 'off',
@@ -259,6 +257,17 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       // noisy, and not that helpful at this point. Maybe down the line we can
       // enable it.
       'import-x/default': 'warn',
+    },
+  },
+
+  // These rules guard the `cy` command queue, which only exists in Cypress specs
+  // and support files. Node-side mocha and vitest suites write async tests and
+  // keep return values on purpose.
+  {
+    ignores: ['**/*.cy.{js,jsx,ts,tsx}', '**/cypress/**'],
+    rules: {
+      'cypress/no-async-tests': 'off',
+      'cypress/no-assigning-return-values': 'off',
     },
   },
 
