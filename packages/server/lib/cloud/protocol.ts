@@ -162,7 +162,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         const wrapper = eventListeners?.get(listener)
 
         if (wrapper) {
-          cdpClient.off(event, wrapper as any)
+          cdpClient.off(event, wrapper)
           eventListeners!.delete(listener)
           if (eventListeners!.size === 0) {
             listenerMap.delete(event)

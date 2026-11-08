@@ -5078,9 +5078,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users
     (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example
@@ -5683,9 +5684,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users
     (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example
