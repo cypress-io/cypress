@@ -293,7 +293,7 @@ describe('test errors', () => {
     })
   })
 
-  describe('code frames', () => {
+  describe('code frame fallbacks', () => {
     it('does not show code frame when not included on error', () => {
       commandErr.codeFrame = undefined
       setError(commandErr)

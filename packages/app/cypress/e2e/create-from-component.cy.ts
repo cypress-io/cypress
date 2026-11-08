@@ -102,6 +102,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
     })
   })
 
+  // eslint-disable-next-line mocha/no-identical-title -- the Vue and React helpers run under different contexts, so full titles never collide
   it('Can be closed with the x button', () => {
     cy.get('@ComponentCard').click()
 
@@ -123,6 +124,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
     cy.findByText('index').should('be.visible')
   })
 
+  // eslint-disable-next-line mocha/no-identical-title -- the Vue and React helpers run under different contexts, so full titles never collide
   it('Allows for the user to search through their components', () => {
     cy.get('@ComponentCard').click()
 
@@ -155,6 +157,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
     cy.contains('Unable to parse file').should('be.visible')
   })
 
+  // eslint-disable-next-line mocha/no-identical-title -- the Vue and React helpers run under different contexts, so full titles never collide
   it('shows success modal when component spec is created', () => {
     cy.get('@ComponentCard').click()
 
@@ -181,6 +184,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
     cy.findByText('Create from component').should('be.visible')
   })
 
+  // eslint-disable-next-line mocha/no-identical-title -- the Vue and React helpers run under different contexts, so full titles never collide
   it('runs generated spec', () => {
     cy.get('@ComponentCard').click()
 

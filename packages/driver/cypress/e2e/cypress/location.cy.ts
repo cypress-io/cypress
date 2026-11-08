@@ -209,7 +209,7 @@ describe('src/cypress/location', () => {
     })
   })
 
-  context('#getOrigin', () => {
+  context('#getOrigin with varied hosts', () => {
     it('handles ip addresses', () => {
       const str = setup('local').getOrigin()
 
