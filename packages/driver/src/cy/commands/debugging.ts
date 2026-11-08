@@ -123,7 +123,7 @@ export default (Commands, Cypress, cy, state, config) => {
         $utils.log('Current Subject: ', subject)
 
         ////// HOVER OVER TO INSPECT THE CURRENT SUBJECT //////
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- puts the subject on the paused line for devtools to inspect
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- see the banner above
         subject
         ///////////////////////////////////////////////////////
 

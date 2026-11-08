@@ -115,8 +115,8 @@ export default [
       'no-debugger': 'off',
     },
   },
-  // The harness asserts with chai, and fixture projects keep specs where their
-  // custom spec patterns point, outside the shared test globs
+  // The harness asserts with chai, and fixture projects keep specs wherever
+  // their custom spec patterns point, outside the shared test globs
   chaiFriendlyConfig(['lib/**', ...fixtureDirs]),
   {
     // These configs reference `require` or `import.meta.resolve` as a bare
