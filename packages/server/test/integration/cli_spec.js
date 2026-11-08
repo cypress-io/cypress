@@ -55,13 +55,13 @@ describe('CLI Interface', () => {
   context('exit codes', () => {
     describe('from start script command', () => {
       it('exits with code 22', async () => {
-        const { exitCode } = await execa.command(`${pkg.scripts.dev} --exit-with-code=22`, { reject: false })
+        const { exitCode } = await execa(`${pkg.scripts.dev} --exit-with-code=22`, { shell: true, reject: false })
 
         expect(exitCode).to.eq(22)
       })
 
       it('exits with code 0', async () => {
-        const { exitCode } = await execa.command(`${pkg.scripts.dev} --exit-with-code=0`, { reject: false })
+        const { exitCode } = await execa(`${pkg.scripts.dev} --exit-with-code=0`, { shell: true, reject: false })
 
         expect(exitCode).to.eq(0)
       })
