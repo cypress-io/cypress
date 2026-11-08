@@ -1,5 +1,3 @@
-/// <reference path="../../../cli/types/cypress.d.ts" />
-
 import type { TestingType } from '.'
 
 export const RESOLVED_FROM = ['default', 'config', 'plugin', 'envFile', 'env', 'cli', 'runtime'] as const

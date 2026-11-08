@@ -45,8 +45,10 @@ cy.wrap(undefined).should('be.undefined')
 
 cy.wrap(6).should('be.within', 5, 10)
 
-namespace ChangeSingleParam {
+// ChangeSingleParam
+{
   let dots = ''
+
   function addDot () { dots += '.' }
   function getDots () { return dots }
   cy.wrap(addDot).should('change', getDots)

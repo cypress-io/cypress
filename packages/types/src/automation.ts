@@ -1,5 +1,3 @@
-/// <reference path="../../../cli/types/cypress-automation.d.ts" />
-
 export type AutomationElementId = `${string}-string`
 
 export type SupportedNamedKey = Cypress.SupportedNamedKey

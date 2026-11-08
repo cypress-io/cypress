@@ -1,4 +1,3 @@
-/// <reference path="../../../../dist/index.d.ts" />
 import Message from './Message.vue'
 import { mount } from '@cypress/vue'
 
