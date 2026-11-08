@@ -797,7 +797,6 @@ export class ProjectLifecycleManager {
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!configFilePathSet) {
       this.setConfigFilePath(`cypress.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
-      configFilePathSet = true
     }
 
     this._projectMetaState = metaState

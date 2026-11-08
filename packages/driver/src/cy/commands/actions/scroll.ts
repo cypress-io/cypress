@@ -80,9 +80,6 @@ export default (Commands, Cypress, cy, state) => {
         axis: 'xy',
       })
 
-      // figure out the options which actually change the behavior of clicks
-      let deltaOptions = $utils.filterOutOptions(options)
-
       // here we want to figure out what has to actually
       // be scrolled to get to this element, cause we need
       // to scrollTo passing in that element.
@@ -109,7 +106,8 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollIntoView.invalid_easing', { args: { easing: options.easing } })
       }
 
-      deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
+      // figure out the options which actually change the behavior of the scroll
+      const deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
 
       options._log = Cypress.log({
         $el: options.$el,

@@ -57,7 +57,7 @@ type NormalizedRetriesConfig = {
 export function calculateTestStatus (test: CypressTest, config?: NormalizedRetriesConfig) {
   // @ts-expect-error - currentRetry() is protected in the mocha types
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
-  let shouldAttemptsContinue: boolean = true
+  let shouldAttemptsContinue: boolean
   let outerTestStatus: 'passed' | 'failed' | undefined = undefined
 
   const passedTests = _.filter(test.prevAttempts, (o) => o.state === 'passed')

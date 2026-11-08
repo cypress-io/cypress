@@ -395,7 +395,7 @@ const validateTyping = (
   const allChars = joinKeyArrayToString(keys)
 
   if (skipCheckUntilIndex) {
-    return { skipCheckUntilIndex: skipCheckUntilIndex-- }
+    return { skipCheckUntilIndex }
   }
 
   debug('validateTyping:', chars, el)

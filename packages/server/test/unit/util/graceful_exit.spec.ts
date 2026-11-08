@@ -318,7 +318,7 @@ describe('lib/util/graceful-exit', () => {
     const exitStub = stubExit()
     const logStub = stubLog()
     const unhandled: unknown[] = []
-    let exitCalls: unknown[][] = []
+    let exitCalls: unknown[][]
     const onUnhandled = (reason: unknown) => unhandled.push(reason)
 
     // lib/unhandled_exceptions exits the process with code 1 on an unhandled rejection, which would

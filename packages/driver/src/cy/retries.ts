@@ -44,12 +44,6 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
 
     const current = state('current')
 
-    // use the log if passed in, else fallback to options._log
-    // else fall back to just grabbing the last log per our current command
-    if (!log) {
-      log = options._log ?? current?.getLastLog()
-    }
-
     _.defaults(options, {
       _runnable: state('runnable'),
       _runnableTimeout: runnableTimeout,
@@ -58,8 +52,6 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       _start: new Date,
       _name: current?.get('name'),
     })
-
-    let { error } = options
 
     const interval = options.interval ?? options._interval
 
@@ -75,9 +67,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     // if our total exceeds the timeout OR the total + the interval
     // exceed the runnables timeout, then bail
     if ((total + interval) >= options._runnableTimeout!) {
-      let onFail
-
-      ({ error, onFail } = options)
+      const { error, onFail } = options
 
       const prependMsg = error?.retry === false ? '' : errByPath('miscellaneous.retry_timed_out', {
         ms: options._runnableTimeout,
