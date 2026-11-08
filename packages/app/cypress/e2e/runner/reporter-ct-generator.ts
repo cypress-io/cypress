@@ -38,7 +38,6 @@ function loadErrorSpec (options: specLoader.LoadSpecOptions, configFile: string)
  * @param server 'Vite' | 'Webpack'
  * @param configFile config file
  */
-// eslint-disable-next-line mocha/no-exports -- a test generator: specs call it to register these tests, and importing it registers nothing
 export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: string) => {
   describe(`${server} - errors ui`, {
     viewportHeight: 768,
@@ -515,7 +514,6 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
   })
 }
 
-// eslint-disable-next-line mocha/no-exports -- a test generator, like generateCtErrorTests
 export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configFile: string) => {
   it('uncaught errors', () => {
     const verify = loadErrorSpec({

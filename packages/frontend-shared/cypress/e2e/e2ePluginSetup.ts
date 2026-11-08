@@ -12,7 +12,7 @@ import path from 'path'
 import execa from 'execa'
 import _ from 'lodash'
 
-import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions, MockNodeCloudRequestOptions, MockNodeCloudStreamingRequestOptions } from '../support/e2e-types'
+import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions, MockNodeCloudRequestOptions, MockNodeCloudStreamingRequestOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 import * as inspector from 'inspector'
 // tslint:disable-next-line: no-implicit-dependencies - requires cypress

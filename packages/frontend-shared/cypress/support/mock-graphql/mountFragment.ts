@@ -20,12 +20,10 @@ import { createI18n } from '@cy/i18n'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { getOperationNameFromDocument } from './clientTestUtils'
 
-// eslint-disable-next-line mocha/no-exports -- helper module: its only mocha call is the hook registerMountFn adds
 export interface MountFnOptions {
   plugins?: (() => any)[]
 }
 
-// eslint-disable-next-line mocha/no-exports -- see MountFnOptions
 export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',

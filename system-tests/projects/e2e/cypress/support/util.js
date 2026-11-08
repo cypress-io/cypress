@@ -16,14 +16,12 @@ const getTitle = (title, ctx) => {
   return `${parentTitle} ${title}`.trim()
 }
 
-// eslint-disable-next-line mocha/no-exports -- a test generator: specs call it to register these tests, and importing it registers nothing
 export const fail = (title, ctx, test) => {
   const testTitle = `${count++}) ✗ FAIL - ${getTitle(title, ctx)}`
 
   it(testTitle, test)
 }
 
-// eslint-disable-next-line mocha/no-exports -- a test generator, like fail
 export const verify = (title, ctx, options) => {
   const {
     before,

@@ -33,7 +33,7 @@ class WrapperComponent {}
 @NgModule({
   declarations: [WrapperComponent, ProjectionComponent],
 })
-export class WrapperModule {} // eslint-disable-line mocha/no-exports -- never imported, but it gives WrapperComponent its template scope
+export class WrapperModule {} // eslint-disable-line mocha/no-exports -- the export is its only use: nothing references the module, so unexported it fails no-unused-vars
 
 // Starting with Angular v19, standalone = true is the new default behavior.
 // This means that the ng module configurations, including test module configurations,

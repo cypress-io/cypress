@@ -5,14 +5,16 @@ import { fixtureDirs } from '@tooling/system-tests'
 import type { ProjectFixtureDir } from '@tooling/system-tests'
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
-import { GET_MAJOR_VERSION_FOR_CONTENT, type Browser, type FoundBrowser } from '@packages/types'
+import type { DocumentNode, ExecutionResult } from 'graphql'
+import { GET_MAJOR_VERSION_FOR_CONTENT, type Browser, type FoundBrowser, type OpenModeOptions } from '@packages/types'
 
 import type { SinonStub } from 'sinon'
+import type sinon from 'sinon'
 import 'cypress-plugin-tab'
+import type { Response } from 'cross-fetch'
 import type nock from 'nock'
 
 import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
-import type { CyTaskResult, MockNodeCloudRequestOptions, MockNodeCloudStreamingRequestOptions, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, UnwrapPromise, WithCtxInjected, WithCtxOptions } from './e2e-types'
 import { installCustomPercyCommand } from './customPercyCommand'
 import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
@@ -26,7 +28,46 @@ const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
 const SIXTY_SECONDS = 60 * 1000
 
-interface FindBrowsersOptions {
+export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
+  retry?: boolean
+  retryDelay?: number // default 1000
+  retryCount?: number // default 5
+  projectName?: ProjectFixtureDir
+  [key: string]: any
+}
+
+export interface WithCtxInjected extends WithCtxOptions {
+  require: typeof require
+  process: typeof process
+  sinon: typeof sinon
+  testState: Record<string, any>
+  projectDir(projectName: ProjectFixtureDir): string
+}
+
+export interface RemoteGraphQLInterceptPayload {
+  operationName?: string
+  query: string
+  variables: Record<string, any>
+  document: DocumentNode
+  result: ExecutionResult
+  callCount: number
+  Response: typeof Response
+}
+
+export interface RemoteGraphQLBatchInterceptPayload<T> {
+  key: string
+  index: number
+  field: string
+  variables: Record<string, any>
+  result: T
+}
+
+export type RemoteGraphQLInterceptor<T = { [key: string]: any }> = (
+  obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>, options: Record<string, any>) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
+
+export type RemoteGraphQLBatchInterceptor<T = any> = (obj: RemoteGraphQLBatchInterceptPayload<T>, testState: Record<string, any>) => T | Promise<T>
+
+export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
   browsers?: FoundBrowser[]
   /**
@@ -39,7 +80,20 @@ interface FindBrowsersOptions {
   filter?(browser: Browser): boolean
 }
 
-interface ValidateExternalLinkOptions {
+export interface MockNodeCloudRequestOptions {
+  url: string
+  method: string
+  body: nock.Body
+  persist?: boolean
+}
+
+export interface MockNodeCloudStreamingRequestOptions {
+  url: string
+  method: string
+  body: nock.Body
+}
+
+export interface ValidateExternalLinkOptions {
   /**
    * The user-visible descriptor for the link. If omitted, the href
    * is assumed to be the name.
@@ -197,6 +251,16 @@ function addProject (projectName: ProjectFixtureDir, open = false) {
   return logInternal({ name: 'addProject', message: projectName }, () => {
     return taskInternal('__internal_addProject', { projectName, open })
   })
+}
+
+export interface ResetOptionsResult {
+  modeOptions: OpenModeOptions
+  e2eServerPort?: number | null
+}
+
+export interface OpenGlobalModeOptions {
+  argv?: string[]
+  byFlag?: boolean
 }
 
 function openGlobalMode (options: OpenGlobalModeOptions = {}) {
@@ -412,6 +476,12 @@ function skipWelcome () {
   .click()
   .should('not.exist')
 }
+
+type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
+
+export type CyTaskResult<R> =
+  { value?: never, error: { name: string, message: string, stack?: string } } |
+  { value: UnwrapPromise<R>, error?: never }
 
 function withRetryableCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => R | Promise<R>, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
   return withCtx(fn, { ...opts, retry: true })
