@@ -1,3 +1,4 @@
+// @ts-expect-error - this is being redeclared
 const { _, $ } = Cypress
 
 // Reading and decoding files from an input element would, in the real world,

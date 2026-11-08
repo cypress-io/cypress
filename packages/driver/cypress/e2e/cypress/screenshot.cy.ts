@@ -1,3 +1,6 @@
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes webpack bundle this spec as an ES module
+export {} // make typescript see this as a module
+
 const Screenshot = Cypress.Screenshot as unknown as InternalScreenshot
 
 const DEFAULTS = {

@@ -1,3 +1,4 @@
+// @ts-expect-error - redeclared variable needs to be handled
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/type - #type events', () => {

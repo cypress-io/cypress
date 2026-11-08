@@ -200,3 +200,6 @@ describe('driver/src/cy/snapshots', () => {
     })
   })
 })
+
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes webpack bundle this spec as an ES module
+export {}

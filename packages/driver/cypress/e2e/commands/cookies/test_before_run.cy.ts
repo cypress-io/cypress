@@ -1,5 +1,8 @@
 const { Promise } = Cypress
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes webpack bundle this spec as an ES module
+export {}
+
 describe('src/cy/commands/cookies', () => {
   let automation: sinon.SinonStub
 

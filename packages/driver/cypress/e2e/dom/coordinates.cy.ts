@@ -3,6 +3,9 @@ import $elements from '../../../src/dom/elements'
 
 const { $ } = Cypress
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes webpack bundle this spec as an ES module
+export {}
+
 describe('src/dom/coordinates', () => {
   beforeEach(function () {
     cy.visit('/fixtures/generic.html').then(() => {

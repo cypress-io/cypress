@@ -1,5 +1,8 @@
 const { _ } = Cypress
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes webpack bundle this spec as an ES module
+export {}
+
 describe('src/cy/commands/assertions', () => {
   beforeEach(function () {
     cy.visit('/fixtures/jquery.html')

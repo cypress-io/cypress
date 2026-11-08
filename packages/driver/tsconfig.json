@@ -11,12 +11,7 @@
     "outDir": "dist",
     "noErrorTruncation": true,
     "types": [],
-    "resolveJsonModule": true,
-    // Specs have no imports or exports, so without this their top-level
-    // declarations would share one global scope. It stays out of
-    // cypress/tsconfig.json, which compiles `Cypress.require` dependencies:
-    // there it would emit dependencies.support-commonjs.ts as an ES module
-    "moduleDetection": "force"
+    "resolveJsonModule": true
   },
   "exclude": [
     "dist"
