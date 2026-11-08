@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import type { TestingType } from '.'
 
 export const RESOLVED_FROM = ['default', 'config', 'plugin', 'envFile', 'env', 'cli', 'runtime'] as const

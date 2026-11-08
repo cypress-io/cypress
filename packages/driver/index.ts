@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 declare global {
   interface Window {
     Cypress: Cypress.Cypress

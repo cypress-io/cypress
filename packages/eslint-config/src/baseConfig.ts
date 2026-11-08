@@ -181,10 +181,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-unused-expressions': ['error', unusedExpressionsOptions],
       // `declare namespace Cypress` is how the public types and user support
       // files augment the global `Cypress` namespace
-      '@typescript-eslint/no-namespace': ['error', {
-        allowDeclarations: true,
-        allowDefinitionFiles: true,
-      }],
+      '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
       'no-restricted-properties': [
         'error',
         {
@@ -344,24 +341,14 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // A merged declaration must repeat the original's type parameters, used or not
   {
     files: ['**/*.d.ts'],
     rules: {
+      // A merged declaration must repeat the original's type parameters, used or not
       '@typescript-eslint/no-unused-vars': 'off',
-    },
-  },
-
-  // An import turns a global declaration file into a module, so the public
-  // typings pull in other declarations with references instead
-  {
-    files: ['**/*.d.ts'],
-    rules: {
-      '@typescript-eslint/triple-slash-reference': ['error', {
-        lib: 'always',
-        path: 'always',
-        types: 'always',
-      }],
+      // An import turns a global declaration file into a module, so the public
+      // typings pull in other declarations with references instead
+      '@typescript-eslint/triple-slash-reference': 'off',
     },
   },
 

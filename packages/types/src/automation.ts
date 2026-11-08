@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 export type AutomationElementId = `${string}-string`
 
 export type SupportedNamedKey = Cypress.SupportedNamedKey

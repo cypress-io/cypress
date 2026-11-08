@@ -1090,6 +1090,11 @@ cy
 
 // CypressTestConfigOverridesTests
 {
+  describe('rejects an unknown config option on a suite', {
+    browser: { family: 'firefox' },
+    foo: 'bar', // $ExpectError
+  }, () => { })
+
   // set config on a per-test basis
   it('accepts every per-test config option', {
     animationDistanceThreshold: 10,
@@ -1183,14 +1188,6 @@ cy
   describe.skip('describe.skip', {}, () => { })
   xdescribe('xdescribe', {}, () => { })
 }
-
-// for whatever reason, this is a false negative if placed in
-// the CypressTestConfigOverridesTests block
-
-describe('rejects an unknown config option on a suite', {
-  browser: { family: 'firefox' },
-  foo: 'bar', // $ExpectError
-}, () => { })
 
 // CypressShadowTests
 {

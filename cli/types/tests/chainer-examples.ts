@@ -45,8 +45,9 @@ cy.wrap(undefined).should('be.undefined')
 
 cy.wrap(6).should('be.within', 5, 10)
 
-// ChangeSingleParam
-{
+;
+
+() => {
   let dots = ''
 
   function addDot () { dots += '.' }
