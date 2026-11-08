@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-sibling-hooks -- the first hook must run a command before the second hook times out */
 let attempt = 0
 const ranAfterLateCommand: number[] = []
 

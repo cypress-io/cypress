@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-sibling-hooks -- separate hooks at one level are what this fixture exercises */
 describe('my test', () => {
   before(() => {
     cy.log('beforeHook 1')

@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-sibling-hooks -- the exported helpers each register hooks inside the describe that calls them */
 import crypto from 'crypto'
 import _ from 'lodash'
 import { setTimeout as delay } from 'node:timers/promises'

@@ -25,6 +25,7 @@ describe('return values', () => {
   })
 
   it('can return cy and have done callback', (done) => {
+    // eslint-disable-next-line mocha/no-return-and-callback -- verifies Cypress accepts a returned chain alongside done
     return cy.wrap({}).then(() => {
       done()
     })
@@ -56,6 +57,7 @@ describe('return values', () => {
 
     cy.wrap(null)
 
+    // eslint-disable-next-line mocha/no-return-and-callback -- the returned function is the value whose body the error must stringify
     return () => {
       return 'foo'
     }
@@ -73,7 +75,7 @@ describe('return values', () => {
     })
 
     // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
-    return cy.foo()
+    cy.foo()
   })
 
   it('throws when returning a non promise and invoking cy commands from a custom command', function (done) {
@@ -99,7 +101,7 @@ describe('return values', () => {
     })
 
     // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
-    return cy.foo()
+    cy.foo()
   })
 
   it('stringifies function return values', function (done) {
@@ -127,7 +129,7 @@ describe('return values', () => {
     })
 
     // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
-    return cy.foo()
+    cy.foo()
   })
 
   describe('without invoking cy', () => {

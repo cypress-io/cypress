@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-sibling-hooks -- counts how often each of several sibling hooks reruns */
 const urls = [
   'http://localhost:3434',
   'http://localhost:4545',

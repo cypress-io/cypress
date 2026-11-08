@@ -19,6 +19,7 @@ it('errors when invoking commands in custom command and returning different valu
 })
 
 it('errors when not invoking commands, invoking done callback, and returning a promise', (done) => {
+  // eslint-disable-next-line mocha/no-return-and-callback -- asserts the error for a test that returns a promise and takes done
   return Promise.resolve(null).then(() => {
     return done()
   })

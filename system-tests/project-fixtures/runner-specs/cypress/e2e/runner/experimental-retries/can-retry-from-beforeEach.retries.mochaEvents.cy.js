@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-sibling-hooks -- the mocha events snapshot records each sibling hook separately */
 describe('suite 1', () => {
   before(() => {})
   beforeEach(() => {})

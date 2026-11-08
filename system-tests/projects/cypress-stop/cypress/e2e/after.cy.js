@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-sibling-hooks -- verifies that hooks after the one calling Cypress.stop() do not run */
 describe('Cypress.stop() in after', () => {
   after(() => {
     console.log('after 1')

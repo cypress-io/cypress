@@ -33,7 +33,7 @@ describe('CLI Interface', () => {
   })
 
   it('writes out ping value and exits', (done) => {
-    return cp.exec('npm run dev -- --cwd=/foo/bar --smoke-test --ping=12345', { env }, (err, stdout, stderr) => {
+    cp.exec('npm run dev -- --cwd=/foo/bar --smoke-test --ping=12345', { env }, (err, stdout, stderr) => {
       if (err) {
         done(err)
       }
@@ -46,7 +46,7 @@ describe('CLI Interface', () => {
 
   // This fails on MacOS due to an apparent limit on the buffer size of stdout
   it('writes out package.json and exits', (done) => {
-    return cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
+    cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
       if (err) {
         done(err)
       }
@@ -75,7 +75,7 @@ describe('CLI Interface', () => {
       it('exits with code 22', function (done) {
         const s = cp.exec(`${this.dev} --exit-with-code=22`)
 
-        return s.on('close', (code) => {
+        s.on('close', (code) => {
           expect(code).to.eq(22)
 
           return done()
@@ -85,7 +85,7 @@ describe('CLI Interface', () => {
       it('exits with code 0', function (done) {
         const s = cp.exec(`${this.dev} --exit-with-code=0`)
 
-        return s.on('close', (code) => {
+        s.on('close', (code) => {
           expect(code).to.eq(0)
 
           return done()
@@ -123,7 +123,7 @@ describe('CLI Interface', () => {
         const expectedCode = doesNpmObscureInternalExitCode() ? 1 : 10
         const s = cp.exec('npm run dev -- --exit-with-code=10')
 
-        return s.on('close', (code) => {
+        s.on('close', (code) => {
           expect(code).to.eq(expectedCode)
 
           return done()
@@ -133,7 +133,7 @@ describe('CLI Interface', () => {
       it('npm passes on 0 exit code', (done) => {
         const s = cp.exec('npm run dev -- --exit-with-code=0')
 
-        return s.on('close', (code) => {
+        s.on('close', (code) => {
           expect(code).to.eq(0)
 
           return done()

@@ -90,6 +90,7 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
 }
 
 function validateCreateFromReactComponentCard (beforeEachFn: () => void, expectedSpecPath: string) {
+  // eslint-disable-next-line mocha/no-sibling-hooks -- each helper registers its hook inside a different describe
   beforeEach(beforeEachFn)
 
   it('Shows create from component card for React projects', () => {
