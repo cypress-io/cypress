@@ -93,7 +93,7 @@ describe('CLI Interface', () => {
         })
       })
 
-      it('npm slurps up or not exit value on failure', async () => {
+      it('passes a non-zero exit code through npm', async () => {
         const expectedCode = doesNpmObscureInternalExitCode() ? 1 : 10
         const { exitCode, message } = await execa('npm', ['run', 'dev', '--', '--exit-with-code=10'], { reject: false })
 
