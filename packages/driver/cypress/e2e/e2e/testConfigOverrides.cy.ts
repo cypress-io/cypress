@@ -268,7 +268,7 @@ describe('per-test config', () => {
       })
 
       describe('inner suite 2', { baz: true } as Cypress.SuiteConfigOverrides, () => {
-        it('has config.bar', () => {
+        it('has config.baz', () => {
           expect(userConfig().bar).not.ok
           expect(userConfig().baz).ok
           expect(userConfig().foo).ok
