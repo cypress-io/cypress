@@ -1,5 +1,5 @@
-// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes webpack bundle this spec as an ES module
-export {} // make typescript see this as a module
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
+export {}
 
 const { $ } = Cypress
 
