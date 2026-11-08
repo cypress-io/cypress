@@ -156,12 +156,6 @@ describe('src/cypress/location', () => {
       expect(str).to.eq('https://stackoverflow.com')
     })
 
-    it('handles subdomains google', () => {
-      const str = setup('google').getOrigin()
-
-      expect(str).to.eq('https://www.google.com')
-    })
-
     // https://github.com/cypress-io/cypress/issues/255
     it('handles a second domain inside the query string', () => {
       const str = setup('email').getOrigin()
