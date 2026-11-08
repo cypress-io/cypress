@@ -28,12 +28,12 @@ import { UrlImageComponent } from './components/url-image.component'
   standalone: false,
   template: `<app-projection>Hello World</app-projection>`,
 })
-export class WrapperComponent {}
+class WrapperComponent {}
 
 @NgModule({
   declarations: [WrapperComponent, ProjectionComponent],
 })
-export class WrapperModule {}
+export class WrapperModule {} // eslint-disable-line mocha/no-exports -- the export is its only use: nothing references the module, so unexported it fails no-unused-vars
 
 // Starting with Angular v19, standalone = true is the new default behavior.
 // This means that the ng module configurations, including test module configurations,

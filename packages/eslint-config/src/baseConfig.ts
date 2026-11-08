@@ -245,7 +245,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'mocha/no-identical-title': 'off',
       'mocha/no-global-tests': 'off',
       'mocha/no-sibling-hooks': 'off',
-      'mocha/no-exports': 'off',
       'mocha/no-return-and-callback': 'off',
       'mocha/no-pending-tests': 'off',
 
@@ -313,6 +312,17 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     files: ['**/*.d.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+
+  // eslint-plugin-mocha treats any file with a Mocha call, hooks included, as a
+  // test file, which takes in support files, test generators and plugin source
+  // whose exports are their purpose. The rule is there because importing a spec
+  // registers its tests in the importer, so only spec files are held to it.
+  {
+    ignores: ['**/*.cy.*', '**/*.spec.*', '**/*_spec.*', '**/*-spec.*', '**/*.test.*'],
+    rules: {
+      'mocha/no-exports': 'off',
     },
   },
 
