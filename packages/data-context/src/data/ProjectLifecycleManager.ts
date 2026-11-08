@@ -716,7 +716,7 @@ export class ProjectLifecycleManager {
     await this.resetInternalState()
   }
 
-  registerEvent (event: string, callback: Function) {
+  registerEvent (event: string, callback: (...args: any[]) => any) {
     return this._eventRegistrar.registerEvent(event, callback)
   }
 

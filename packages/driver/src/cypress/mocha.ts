@@ -136,8 +136,8 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
   }
 }
 
-type MochaArgs = [string, Function | undefined]
-function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string = '', _testConfig?: Record<string, any>) {
+type MochaArgs = [string, ((...args: any[]) => unknown) | undefined]
+function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: (...args: any[]) => any, testCallback: ((...args: any[]) => unknown) | string = '', _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
 
   // attached testConfigOverrides will execute before `runner:test:before:run` event

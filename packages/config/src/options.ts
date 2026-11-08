@@ -63,7 +63,7 @@ export type OverrideContext = 'suite' | 'test' | 'runtime' | undefined
 interface ConfigOption {
   name: string
   defaultValue?: any
-  validation: Function
+  validation: (key: string, value: any, opts: ValidationOptions) => validate.ErrResult | string | boolean
   requireRestartOnChange?: 'server' | 'browser'
   /**
    * The list of test-time overrides levels supported by the configuration option. When undefined,

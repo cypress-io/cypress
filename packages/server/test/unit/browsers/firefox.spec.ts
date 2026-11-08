@@ -154,7 +154,7 @@ describe('lib/browsers/firefox', () => {
       vi.spyOn(utils, 'getPort').mockResolvedValue(1234)
       vi.spyOn(FirefoxProfile.prototype, 'setPreference')
       vi.spyOn(FirefoxProfile.prototype, 'path')
-      vi.spyOn(FirefoxProfile.prototype, 'encoded').mockImplementation((cb: Function) => {
+      vi.spyOn(FirefoxProfile.prototype, 'encoded').mockImplementation((cb: (err: any, encodedProfile: string) => void) => {
         cb(undefined, 'abcdef')
       })
 

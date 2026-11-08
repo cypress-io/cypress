@@ -387,7 +387,7 @@ const validateTyping = (
   el: HTMLElement,
   keys: KeyInfo[],
   currentIndex: number,
-  onFail: Function,
+  onFail: Log | ((err: Error) => unknown),
   skipCheckUntilIndex: number | undefined,
   force: boolean,
 ) => {
@@ -695,16 +695,16 @@ interface typeOptions {
   release?: boolean
   _log?: Log
   delay?: number
-  onError?: Function
-  onEvent?: Function
-  onBeforeEvent?: Function
-  onFocusChange?: Function
-  onBeforeType?: Function
-  onAfterType?: Function
-  onValueChange?: Function
-  onEnterPressed?: Function
-  onNoMatchingSpecialChars?: Function
-  onBeforeSpecialCharAction?: Function
+  onError?: (...args: any[]) => unknown
+  onEvent?: (id: string, key: string, event: Event, dispatched: boolean) => unknown
+  onBeforeEvent?: (...args: any[]) => unknown
+  onFocusChange?: (...args: any[]) => unknown
+  onBeforeType?: (totalKeys: number) => unknown
+  onAfterType?: () => unknown
+  onValueChange?: (originalText: string, el: HTMLElement) => unknown
+  onEnterPressed?: (el: HTMLElement) => unknown
+  onNoMatchingSpecialChars?: (chars: string, allChars: string) => unknown
+  onBeforeSpecialCharAction?: (...args: any[]) => unknown
   prevValue?: string
 }
 

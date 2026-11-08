@@ -231,8 +231,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
   private testConfigOverride: TestConfigOverride
-  private commandFns: Record<string, Function> = {}
-  private queryFns: Record<string, Function> = {}
+  private commandFns: Record<string, (...args: any[]) => any> = {}
+  private queryFns: Record<string, (...args: any[]) => any> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()

@@ -14,7 +14,7 @@ runnerStore.setSpec({
 
 describe('test errors', () => {
   let commandErr: Partial<Err>
-  let setError: Function
+  let setError: (err: Partial<Err>) => void
   let runnablesWithErr: RootRunnable
   let runner: EventEmitter
 
@@ -25,8 +25,8 @@ describe('test errors', () => {
     runner = new EventEmitter()
 
     cy.visit('/').then((win) => {
-      setError = (err: Error) => {
-        // @ts-expect-error - RootRunnable types suites as optional, and a plain Error stands in for ErrProps
+      setError = (err) => {
+        // @ts-expect-error - RootRunnable types suites as optional, and the fixture error is a Partial<Err>, not a full ErrProps
         runnablesWithErr.suites[0].tests[0].err = err
 
         cy.get('.reporter.mounted').then(() => {

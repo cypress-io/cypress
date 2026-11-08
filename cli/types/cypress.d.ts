@@ -5079,6 +5079,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     // tslint:disable-next-line ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users
     (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
     /**
      * Asserts that the target is a member of the given array list.
@@ -5683,6 +5684,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     // tslint:disable-next-line ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users
     (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
     /**
      * Asserts that the target is a member of the given array list.
