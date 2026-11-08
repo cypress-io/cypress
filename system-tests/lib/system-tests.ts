@@ -62,7 +62,7 @@ export type ItOptions = ExecOptions & {
   onRun?: (
     this: Mocha.Context,
     execFn: ExecFn,
-    browser: BrowserName
+    browser: BrowserName,
   ) => Promise<any> | any
   /**
    * Same as using `systemTests.it.only`.
