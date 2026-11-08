@@ -627,6 +627,24 @@ describe('config/src/validation', () => {
     })
   })
 
+  describe('.isValidPort', () => {
+    it('returns true for null or a port browsers allow', () => {
+      expect(validation.isValidPort(mockKey, null)).toBe(true)
+      expect(validation.isValidPort(mockKey, 3000)).toBe(true)
+      expect(validation.isValidPort(mockKey, 65535)).toBe(true)
+    })
+
+    it('returns an error for a port browsers block', () => {
+      expect(validation.isValidPort(mockKey, 10080)).toMatchObject({ key: mockKey, value: 10080 })
+      expect(validation.isValidPort(mockKey, 4190)).toMatchObject({ key: mockKey, value: 4190 })
+      expect(validation.isValidPort(mockKey, 6679)).toMatchObject({ key: mockKey, value: 6679 })
+    })
+
+    it('returns an error for a value that is not a number', () => {
+      expect(validation.isValidPort(mockKey, '3000')).toMatchObject({ key: mockKey, value: '3000', type: 'a number' })
+    })
+  })
+
   describe('.isNumberOrFalse', () => {
     it('returns true for value=number', () => {
       const result = validation.isNumberOrFalse(mockKey, 1)
