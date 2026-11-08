@@ -3,6 +3,7 @@ import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 
 import cy from 'eslint-plugin-cypress'
+import chaiFriendly from 'eslint-plugin-chai-friendly'
 
 import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
@@ -15,6 +16,35 @@ import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-imp
 
 import { cypressDevPlugin } from './rules'
 import { reactRulesOff } from './reactRulesOff'
+
+const testFiles = [
+  '**/test/**/*.{js,jsx,ts,tsx}',
+  '**/cypress/**/*.{js,jsx,ts,tsx}',
+  '**/*.spec.{js,jsx,ts,tsx}',
+  '**/*.cy.{js,jsx,ts,tsx}',
+]
+
+const unusedExpressionsOptions = {
+  allowShortCircuit: true,
+  allowTernary: true,
+  allowTaggedTemplates: true,
+}
+
+// Chai property assertions such as `expect(x).to.be.true` are unused
+// expressions to the TypeScript rule. Add it after `baseConfig` for test code
+// that the shared test globs miss.
+export const chaiFriendlyConfig = (files: string[]): InfiniteDepthConfigWithExtends => {
+  return {
+    files,
+    plugins: {
+      'chai-friendly': chaiFriendly,
+    },
+    rules: {
+      '@typescript-eslint/no-unused-expressions': 'off',
+      'chai-friendly/no-unused-expressions': ['error', unusedExpressionsOptions],
+    },
+  }
+}
 
 export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
@@ -118,12 +148,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
   {
-    files: [
-      '**/test/**/*.{js,jsx,ts,tsx}',
-      '**/cypress/**/*.{js,jsx,ts,tsx}',
-      '**/*.spec.{js,jsx,ts,tsx}',
-      '**/*.cy.{js,jsx,ts,tsx}',
-    ],
+    files: testFiles,
     rules: {
       '@cypress/dev/skip-comment': 'error',
     },
@@ -153,6 +178,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
         ignoreRestSiblings: true,
         varsIgnorePattern: '^_',
       }],
+      '@typescript-eslint/no-unused-expressions': ['error', unusedExpressionsOptions],
       'no-restricted-properties': [
         'error',
         {
@@ -228,7 +254,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-rest-params': 'off',
       'no-async-promise-executor': 'off',
 
-      '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-namespace': 'off',
@@ -270,6 +295,8 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'cypress/no-assigning-return-values': 'off',
     },
   },
+
+  chaiFriendlyConfig(testFiles),
 
   {
     // the Vue recommended config ships these as warnings, and

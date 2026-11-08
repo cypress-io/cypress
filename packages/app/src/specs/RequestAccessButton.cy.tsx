@@ -38,7 +38,6 @@ describe('<RequestAccessButton />', () => {
     it('triggers mutation on button click', () => {
       const requestAccessMutationTracker = cy.stub()
 
-      cy.remoteGraphQLIntercept
       cy.stubMutationResolver(RequestAccessButton_RequestAccessDocument, (defineResult) => {
         requestAccessMutationTracker()
 

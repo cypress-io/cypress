@@ -1,5 +1,5 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
@@ -113,6 +113,17 @@ export default [
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       'no-debugger': 'off',
+    },
+  },
+  // The harness asserts with chai, and fixture projects keep specs where their
+  // custom spec patterns point, outside the shared test globs
+  chaiFriendlyConfig(['lib/**', ...fixtureDirs]),
+  {
+    // These configs reference `require` or `import.meta.resolve` as a bare
+    // statement, which throws unless they load in the module system under test
+    files: ['projects/config-cjs-and-esm/**/cypress.config.*'],
+    rules: {
+      'chai-friendly/no-unused-expressions': 'off',
     },
   },
   {

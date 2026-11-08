@@ -536,6 +536,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         try {
           // Test to see if we can communicate with the AUT.
+          // eslint-disable-next-line chai-friendly/no-unused-expressions -- reading href throws when the AUT is cross-origin
           autWindow.location.href
           isRunnerAbleToCommunicateWithAUT = true
         } catch (err: any) {
