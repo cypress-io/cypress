@@ -582,6 +582,8 @@ describe('src/cy/commands/assertions', () => {
 
         // have.property logs that the property exists before it checks the value
         cy.then(() => {
+          cy.removeAllListeners('log:added')
+
           expect(messages).to.deep.eq([
             'expected **{ a: #{exp} }** to have property **a**',
             'expected **{ a: #{exp} }** to have property **a** of **x**, but got **#{exp}**',
