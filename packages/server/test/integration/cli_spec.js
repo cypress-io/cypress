@@ -55,15 +55,15 @@ describe('CLI Interface', () => {
   context('exit codes', () => {
     describe('from start script command', () => {
       it('exits with code 22', async () => {
-        const { exitCode } = await execa(`${pkg.scripts.dev} --exit-with-code=22`, { shell: true, reject: false })
+        const { exitCode, message } = await execa(`${pkg.scripts.dev} --exit-with-code=22`, { shell: true, reject: false })
 
-        expect(exitCode).to.eq(22)
+        expect(exitCode, message).to.eq(22)
       })
 
       it('exits with code 0', async () => {
-        const { exitCode } = await execa(`${pkg.scripts.dev} --exit-with-code=0`, { shell: true, reject: false })
+        const { exitCode, message } = await execa(`${pkg.scripts.dev} --exit-with-code=0`, { shell: true, reject: false })
 
-        expect(exitCode).to.eq(0)
+        expect(exitCode, message).to.eq(0)
       })
     })
 
@@ -95,15 +95,15 @@ describe('CLI Interface', () => {
 
       it('npm slurps up or not exit value on failure', async () => {
         const expectedCode = doesNpmObscureInternalExitCode() ? 1 : 10
-        const { exitCode } = await execa('npm', ['run', 'dev', '--', '--exit-with-code=10'], { reject: false })
+        const { exitCode, message } = await execa('npm', ['run', 'dev', '--', '--exit-with-code=10'], { reject: false })
 
-        expect(exitCode).to.eq(expectedCode)
+        expect(exitCode, message).to.eq(expectedCode)
       })
 
       it('npm passes on 0 exit code', async () => {
-        const { exitCode } = await execa('npm', ['run', 'dev', '--', '--exit-with-code=0'], { reject: false })
+        const { exitCode, message } = await execa('npm', ['run', 'dev', '--', '--exit-with-code=0'], { reject: false })
 
-        expect(exitCode).to.eq(0)
+        expect(exitCode, message).to.eq(0)
       })
     })
   })
