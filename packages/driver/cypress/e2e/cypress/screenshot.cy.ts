@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 const Screenshot = Cypress.Screenshot as unknown as InternalScreenshot
 
 const DEFAULTS = {

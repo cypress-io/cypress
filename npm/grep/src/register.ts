@@ -12,6 +12,7 @@ interface SuiteStackItem {
 }
 
 // function is intended to be called from the support file
+// eslint-disable-next-line mocha/no-exports -- the plugin's public API: it wraps Mocha's it and describe, and registers no tests itself
 export function register (): void {
   // preserve the real "it" function
   const _it = it

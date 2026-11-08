@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 function snakeCase (string) {
   return _.snakeCase(string)
 }

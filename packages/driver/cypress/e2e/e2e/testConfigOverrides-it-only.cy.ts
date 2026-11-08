@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 // Internal to the driver's test override bookkeeping, so not on the public config type.
 type ConfigWithTestOverrideInternals = Cypress.Config & {
   testConfigList?: unknown

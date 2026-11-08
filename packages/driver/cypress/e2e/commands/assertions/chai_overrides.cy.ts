@@ -1,7 +1,5 @@
 const { _ } = Cypress
 
-export {}
-
 describe('src/cy/commands/assertions', () => {
   beforeEach(function () {
     cy.visit('/fixtures/jquery.html')

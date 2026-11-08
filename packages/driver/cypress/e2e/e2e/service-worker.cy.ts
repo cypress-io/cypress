@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 // The scripts below are stringified and run inside the service worker, so `self` is typed
 // as its global scope. The webworker lib conflicts with the dom lib program-wide, so the
 // members the scripts use are declared structurally here.

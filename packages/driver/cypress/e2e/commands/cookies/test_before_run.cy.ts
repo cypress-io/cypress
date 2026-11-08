@@ -1,7 +1,5 @@
 const { Promise } = Cypress
 
-export {}
-
 describe('src/cy/commands/cookies', () => {
   let automation: sinon.SinonStub
 

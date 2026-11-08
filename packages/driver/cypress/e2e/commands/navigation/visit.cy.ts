@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 const { _, Promise } = Cypress
 
 type FooWindow = Cypress.AUTWindow & { foo?: string }

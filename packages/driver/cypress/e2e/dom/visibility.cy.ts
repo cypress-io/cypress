@@ -1,4 +1,3 @@
-// @ts-expect-error - spec is a script, so destructuring `$` redeclares the global jQuery `$`
 const { $, dom } = Cypress
 
 describe('src/cypress/dom/visibility', {

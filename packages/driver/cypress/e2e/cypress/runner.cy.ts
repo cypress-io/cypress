@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 const { _ } = Cypress
 
 const pending: Cypress.ObjectLike[] = []

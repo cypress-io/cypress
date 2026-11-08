@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 // `console` lives on the global scope rather than on `Window`
 const topWindow = () => window.top as Window & typeof globalThis
 

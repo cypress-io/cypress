@@ -2,6 +2,7 @@ import { AutIframe } from '../../../src/runner/aut-iframe'
 import { EventManager } from '../../../src/runner/event-manager'
 import type { Socket } from '@packages/socket/browser/client'
 
+// eslint-disable-next-line mocha/no-exports -- helper module: the beforeEach guard is meant to run in every spec that imports these helpers
 export const StubWebsocket = new Proxy<Socket>(Object.create(null), {
   get: (obj, prop) => {
     throw Error(`Cannot access ${String(prop)} on StubWebsocket!`)
@@ -21,6 +22,7 @@ beforeEach(() => {
 
 // Event manager with Cypress driver dependencies stubbed out
 // Useful for component testing
+// eslint-disable-next-line mocha/no-exports -- see StubWebsocket
 export const createEventManager = () => {
   return new EventManager(
     null, // packages/driver, not needed for CT tests
@@ -35,6 +37,7 @@ const mockDom = {
 }
 
 // Stub AutIframe, useful for component testing
+// eslint-disable-next-line mocha/no-exports -- see StubWebsocket
 export const createTestAutIframe = (eventManager = createEventManager()) => {
   eventManager._testingOnlySetCypress({
     dom: mockDom,

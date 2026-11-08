@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 const { $ } = Cypress
 
 describe('src/cypress/dom/visibility - shadow dom', () => {

@@ -58,6 +58,15 @@ export default [
     },
   },
   {
+    // The harness library that specs under test/ import: its exports register
+    // the hooks and tests those specs ask for, and spec_helper is loaded for
+    // its global hooks
+    files: ['lib/**'],
+    rules: {
+      'mocha/no-exports': 'off',
+    },
+  },
+  {
     files: ['scripts/**/*.js'],
     languageOptions: {
       sourceType: 'commonjs',

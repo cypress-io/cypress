@@ -1,5 +1,3 @@
-export {} // make typescript see this as a module
-
 const { Screenshot } = Cypress
 
 let failedEventFired = false

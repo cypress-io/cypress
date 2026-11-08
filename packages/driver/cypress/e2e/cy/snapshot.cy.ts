@@ -200,5 +200,3 @@ describe('driver/src/cy/snapshots', () => {
     })
   })
 })
-
-export {}

@@ -17,6 +17,7 @@ interface HandlesFileOpeningProps {
   previousClickSelector?: string
 }
 
+// eslint-disable-next-line mocha/no-exports -- a test generator: specs call it to register these tests, and importing it registers nothing
 export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = false, previousClickSelector }: HandlesFileOpeningProps) => {
   describe('it handles file opening', () => {
     it('emits unified file open event', () => {
@@ -37,6 +38,7 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
   })
 }
 
+// eslint-disable-next-line mocha/no-exports -- helper module: its only mocha calls are inside itHandlesFileOpening
 export const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => {
   const defaultLog = {
     event: false,

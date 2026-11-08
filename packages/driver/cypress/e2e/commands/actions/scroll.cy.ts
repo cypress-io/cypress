@@ -1,4 +1,3 @@
-// @ts-expect-error - this is declared multiple times
 const { _, $ } = Cypress
 
 // `client*` leaves out visible scrollbars, which CSS sizes include
