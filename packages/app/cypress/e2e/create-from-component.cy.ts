@@ -9,7 +9,6 @@ interface FrameworkOptions {
   listed: string[]
   search: { term: string, hidden: string[] }
   selectComponent: () => void
-  extraTests?: () => void
   waitForDevServer?: boolean
 }
 
@@ -39,44 +38,45 @@ const react: FrameworkOptions = {
     // Click on 'app' component
     cy.findByTestId('react-component-row').should('contain', 'App').click()
   },
-  extraTests: () => {
-    it('shows \'No components found\' if there are no exported components', () => {
-      cy.get('@ComponentCard').click()
-
-      cy.findByText('index').should('be.visible').click()
-
-      cy.findByTestId('react-component-row').should('not.exist')
-      cy.contains('No components found').should('be.visible')
-    })
-
-    it('shows \'Unable to parse file\' if there was an error parsing the file', () => {
-      cy.get('@ComponentCard').click()
-
-      // This component has a syntax error so we will fail to parse it
-      cy.findByText('Invalid').should('be.visible').click()
-
-      cy.findByTestId('react-component-row').should('not.exist')
-      cy.contains('Unable to parse file').should('be.visible')
-    })
-  },
   waitForDevServer: true,
+}
+
+function reactOnlyTests () {
+  it('shows \'No components found\' if there are no exported components', () => {
+    cy.get('@ComponentCard').click()
+
+    cy.findByText('index').should('be.visible').click()
+
+    cy.findByTestId('react-component-row').should('not.exist')
+    cy.contains('No components found').should('be.visible')
+  })
+
+  it('shows \'Unable to parse file\' if there was an error parsing the file', () => {
+    cy.get('@ComponentCard').click()
+
+    // This component has a syntax error so we will fail to parse it
+    cy.findByText('Invalid').should('be.visible').click()
+
+    cy.findByTestId('react-component-row').should('not.exist')
+    cy.contains('Unable to parse file').should('be.visible')
+  })
 }
 
 function validateCreateFromComponentCard (framework: FrameworkOptions, beforeEachFn: () => void, expectedSpecPath: string) {
   beforeEach(beforeEachFn)
 
-  const createSpecFromComponent = () => {
+  const createSpecFromComponent = (inSuccessDialog: () => void) => {
     cy.get('@ComponentCard').click()
     framework.selectComponent()
 
     cy.getByRole('dialog', {
       name: defaultMessages.createSpec.successPage.header,
       native: false,
-    }).as('SuccessDialog')
-
-    cy.get('@SuccessDialog').within(() => {
+    }).within(() => {
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
       cy.getByRole('button', { name: 'Close' }).should('be.visible')
+
+      inSuccessDialog()
     })
   }
 
@@ -126,12 +126,8 @@ function validateCreateFromComponentCard (framework: FrameworkOptions, beforeEac
     })
   })
 
-  framework.extraTests?.()
-
   it('shows success modal when component spec is created', () => {
-    createSpecFromComponent()
-
-    cy.get('@SuccessDialog').within(() => {
+    createSpecFromComponent(() => {
       cy.getByRole('link', { name: 'Okay, run the spec' })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`)
 
@@ -143,9 +139,7 @@ function validateCreateFromComponentCard (framework: FrameworkOptions, beforeEac
   })
 
   it('runs generated spec', () => {
-    createSpecFromComponent()
-
-    cy.get('@SuccessDialog').within(() => {
+    createSpecFromComponent(() => {
       if (framework.waitForDevServer) {
         // The dialog can appear before the new spec is written and picked up by
         // the component dev server, and running it before then fails
@@ -200,6 +194,8 @@ describe('Create from component card', () => {
 
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
       }, 'src/App.cy.jsx')
+
+      reactOnlyTests()
     })
 
     context('project with custom spec pattern', () => {
@@ -213,6 +209,8 @@ describe('Create from component card', () => {
         cy.findByText('New spec').click()
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
       }, 'src/specs-folder/App.cy.jsx')
+
+      reactOnlyTests()
     })
 
     // This test verifies that the Create from Component functionality works correctly
