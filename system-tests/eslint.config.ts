@@ -66,6 +66,9 @@ export default [
     },
     rules: {
       ...layoutRulesOff,
+      // only adds blank lines, but the plugin types it `suggestion`, so
+      // `layoutRulesOff` misses it
+      'mocha/consistent-spacing-between-blocks': 'off',
       // Angular resolves a constructor parameter's type to a DI token at
       // runtime, so a type-only import erases the token and the app fails to
       // compile (NG2003)
