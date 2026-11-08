@@ -557,6 +557,15 @@ export class Request {
     })
   }
 
+  // followRedirect is called with the request being redirected as `this`, so it
+  // reaches this instance through the returned arrow
+  private redirectCookieSyncer (automationFn: AutomationFn) {
+    return (incomingRes: any, fromUrl: string, req: Record<string, any>, toUrl: string) => {
+      return this.setCookiesOnBrowser(incomingRes, fromUrl, automationFn)
+      .then(() => this.setRequestCookieHeader(req, toUrl, automationFn))
+    }
+  }
+
   private setCookiesOnBrowser (res: any, resUrl: string, automationFn: AutomationFn): Promise<any> {
     let cookies = res.headers['set-cookie']
 
@@ -660,8 +669,7 @@ export class Request {
       strictSSL: false,
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias -- followRedirect needs its own `this`, the request being redirected
-    const self = this
+    const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
 
     const {
       followRedirect,
@@ -680,10 +688,8 @@ export class Request {
       // we need to override the init method and
       // first set the received cookies on the browser
       // and then grab the cookies for the new url
-      return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn)
+      return syncRedirectCookies(incomingRes, currentUrl!, this, newUrl)
       .then(() => {
-        return self.setRequestCookieHeader(this, newUrl, automationFn)
-      }).then(() => {
         currentUrl = newUrl
 
         return true
@@ -765,8 +771,7 @@ export class Request {
       options.json = false
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias -- followRedirect needs its own `this`, the request being redirected
-    const self = this
+    const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
 
     const send = () => {
       const ms = Date.now()
@@ -793,10 +798,8 @@ export class Request {
           // we need to override the init method and
           // first set the new cookies on the browser
           // and then grab the cookies for the new url
-          return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn)
+          return syncRedirectCookies(incomingRes, currentUrl!, this, newUrl)
           .then(() => {
-            return self.setRequestCookieHeader(this, newUrl, automationFn)
-          }).then(() => {
             currentUrl = newUrl
 
             return true

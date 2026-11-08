@@ -140,6 +140,7 @@ const rp = request.defaults((params, callback) => {
       params.transform = async function (body, response) {
         const { statusCode } = response
         const throwStatusCodeErrWithResp = (message, responseBody) => {
+          // `this` is the request-promise options that rp calls transform with
           // @ts-expect-error - StatusCodeError expects request's Options, which require url, but RequestPromiseOptions makes it optional
           throw new RequestErrors.StatusCodeError(response.statusCode, message, this, responseBody)
         }
