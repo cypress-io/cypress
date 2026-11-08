@@ -477,7 +477,7 @@ describe('src/cy/commands/actions/focus', () => {
         // focus on the 2nd.  the 2nd focus causes
         // a blur on the 1st element, which should
         // cause an error because its no longer in the DOM
-        return cy
+        cy
         .get('input:first').focus()
         .get('input:last').focus()
         .then(() => {
