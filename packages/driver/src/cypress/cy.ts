@@ -689,8 +689,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addCommandSync (name, fn) {
-    this[name] = (...args) => {
-      return fn.apply(this.runnableCtx(name), args)
+    // normalizedUserInvocationStack drops this wrapper's frame from user stacks by
+    // the name the browser infers from `cy[name] = function`, so keep that shape
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- see above
+    const cy = this
+
+    cy[name] = function () {
+      return fn.apply(cy.runnableCtx(name), arguments)
     }
   }
 
@@ -699,22 +704,25 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addCommand ({ name, fn, type, prevSubject }) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- the user-stack filter matches `cy[name]`, see addCommandSync
+    const cy = this
+
     this.commandFns[name] = fn
 
-    const wrap = (firstCall) => {
+    const wrap = function (firstCall) {
       if (type === 'parent') {
-        return (chainerId, ...args) => fn.apply(this.runnableCtx(name), args)
+        return (chainerId, ...args) => fn.apply(cy.runnableCtx(name), args)
       }
 
-      const wrapped = (chainerId, ...args) => {
+      const wrapped = function (chainerId, ...args) {
         // push the subject into the args
         if (firstCall) {
-          this.validateFirstCall(name, args, prevSubject)
+          cy.validateFirstCall(name, args, prevSubject)
         }
 
-        args = this.pushSubject(name, args, prevSubject, chainerId)
+        args = cy.pushSubject(name, args, prevSubject, chainerId)
 
-        return fn.apply(this.runnableCtx(name), args)
+        return fn.apply(cy.runnableCtx(name), args)
       }
 
       wrapped.originalFn = fn
@@ -728,13 +736,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const callback = (chainer, userInvocationStack, args, privilegeVerification, firstCall = false) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
-      const onInjectCommand = this.state('onInjectCommand')
+      const onInjectCommand = cy.state('onInjectCommand')
 
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(this, name, ...args) === false) {
+      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
         return
       }
 
-      this.enqueue($Command.create({
+      cy.enqueue($Command.create({
         name,
         args,
         type,
@@ -747,8 +755,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     $Chainer.add(name, callback)
 
-    this[name] = (...args) => {
-      ensureRunnable(this, name)
+    cy[name] = function (...args) {
+      ensureRunnable(cy, name)
 
       // for privileged commands invoked from the spec, the privileged channel
       // returns a function the command calls with its options to verify them
@@ -757,16 +765,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // this is the first call on cypress
       // so create a new chainer instance
-      const chainer = new $Chainer(this.specWindow)
+      const chainer = new $Chainer(cy.specWindow)
 
-      if (this.state('chainerId')) {
-        this.linkSubject(chainer.chainerId, this.state('chainerId'))
+      if (cy.state('chainerId')) {
+        cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
       }
 
-      let userInvocationStack = $stackUtils.captureUserInvocationStack(this.specWindow.Error)
+      let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
-      if (this.state('originUserInvocationStack')) {
-        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, this.state('originUserInvocationStack'))
+      if (cy.state('originUserInvocationStack')) {
+        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
       }
 
       callback(chainer, userInvocationStack, args, privilegeVerification, true)
@@ -776,10 +784,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // that means we are attempting to invoke
       // a cypress command within another cypress
       // command and we should error
-      const ret = this.state('commandIntermediateValue')
+      const ret = cy.state('commandIntermediateValue')
 
       if (ret) {
-        const current = this.state('current')
+        const current = cy.state('current')
 
         // if this is a custom promise
         if ($utils.isPromiseLike(ret) && $utils.noArgsAreAFunction(current.get('args'))) {
@@ -796,12 +804,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // if we're the first call onto a cy
       // command, then kick off the run
-      if (!this.state('promise')) {
-        if (this.state('returnedCustomPromise')) {
-          this.warnMixingPromisesAndCommands()
+      if (!cy.state('promise')) {
+        if (cy.state('returnedCustomPromise')) {
+          cy.warnMixingPromisesAndCommands()
         }
 
-        this.runQueue()
+        cy.runQueue()
       }
 
       return chainer
@@ -809,14 +817,17 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addQuery ({ name, fn }) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- the user-stack filter matches `cy[name]`, see addCommandSync
+    const cy = this
+
     this.queryFns[name] = fn
 
     const callback = (chainer, userInvocationStack, args, privilegeVerification) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
-      const onInjectCommand = this.state('onInjectCommand')
+      const onInjectCommand = cy.state('onInjectCommand')
 
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(this, name, ...args) === false) {
+      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
         return
       }
 
@@ -843,13 +854,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       command.set('fn', cyFn)
       command.set('privilegeVerification', privilegeVerification)
 
-      this.enqueue(command)
+      cy.enqueue(command)
     }
 
     $Chainer.add(name, callback)
 
-    this[name] = (...args) => {
-      ensureRunnable(this, name)
+    cy[name] = function (...args) {
+      ensureRunnable(cy, name)
 
       // for privileged commands invoked from the spec, the privileged channel
       // returns a function the command calls with its options to verify them
@@ -858,24 +869,24 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // this is the first call on cypress
       // so create a new chainer instance
-      const chainer = new $Chainer(this.specWindow)
+      const chainer = new $Chainer(cy.specWindow)
 
-      if (this.state('chainerId')) {
-        this.linkSubject(chainer.chainerId, this.state('chainerId'))
+      if (cy.state('chainerId')) {
+        cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
       }
 
-      let userInvocationStack = $stackUtils.captureUserInvocationStack(this.specWindow.Error)
+      let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
-      if (this.state('originUserInvocationStack')) {
-        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, this.state('originUserInvocationStack'))
+      if (cy.state('originUserInvocationStack')) {
+        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
       }
 
       callback(chainer, userInvocationStack, args, privilegeVerification)
 
       // if we're the first call onto a cy
       // command, then kick off the run
-      if (!this.state('promise')) {
-        this.runQueue()
+      if (!cy.state('promise')) {
+        cy.runQueue()
       }
 
       return chainer
