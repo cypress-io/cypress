@@ -1021,12 +1021,6 @@ describe('src/cy/commands/actions/type - #type', () => {
       .should('have.value', 'b@foo.com')
     })
 
-    it('overwrites text when selectAll in mouseup handler', () => {
-      cy.$$('#input-without-value').val('0').mouseup(function () {
-        $(this).select()
-      })
-    })
-
     it('responsive to keydown handler', () => {
       cy.$$('#input-without-value').val('1234').keydown(function () {
         const input = $(this).get(0) as HTMLInputElement
