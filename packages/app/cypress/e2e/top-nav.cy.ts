@@ -462,6 +462,7 @@ describe('App Top Nav Workflows', () => {
           cy.getByRole('button', { name: expectedNextStepText }).click()
         })
       }
+
       context('with no project id', () => {
         it('shows "connect project" button after login if no project id is set', () => {
           cy.scaffoldProject('component-tests')
