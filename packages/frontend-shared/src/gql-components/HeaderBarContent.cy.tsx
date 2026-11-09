@@ -150,14 +150,14 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     // because outside of global mode, those are buttons that trigger popups
     // so this way we can assert all links at once.
     const expectedDocsLinks = {
-      ['Write your first test']: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+Launchpad',
-      ['Testing your app']: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+Launchpad',
-      ['Organizing tests']: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+Launchpad',
-      ['Best practices']: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+Launchpad',
-      ['Configuration']: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+Launchpad',
-      ['API']: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+Launchpad',
-      ['Set up CI']: 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI&utm_source=Binary%3A+Launchpad',
-      ['Run tests faster']: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization&utm_source=Binary%3A+Launchpad',
+      'Write your first test': 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+Launchpad',
+      'Testing your app': 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+Launchpad',
+      'Organizing tests': 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+Launchpad',
+      'Best practices': 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+Launchpad',
+      'Configuration': 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+Launchpad',
+      'API': 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+Launchpad',
+      'Set up CI': 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI&utm_source=Binary%3A+Launchpad',
+      'Run tests faster': 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization&utm_source=Binary%3A+Launchpad',
     }
 
     cy.contains('button', 'Docs').click()

@@ -21,7 +21,7 @@ describe('ChooseExternalEditorModal', () => {
     cy.contains('You can change this later in the Settings page.')
 
     cy.findByTestId('launch-editor-hint').should('have.text', 'Editor not listed? Set LAUNCH_EDITOR and restart.')
-    .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
+    .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference?utm_medium=Choose+External+Editor&utm_content=Launch+Editor+Hint&utm_source=Binary%3A+Launchpad')
 
     cy.contains('Choose your editor...')
     .should('be.visible')

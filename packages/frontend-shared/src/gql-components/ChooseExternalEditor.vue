@@ -36,7 +36,7 @@
   <p
     class="mt-[8px] max-w-[400px] text-sm text-gray-600"
     data-cy="launch-editor-hint"
-  >Editor not listed? Set <ExternalLink href="https://on.cypress.io/file-opener-preference">
+  >Editor not listed? Set <ExternalLink :href="launchEditorHintLink">
     <code class="font-medium">LAUNCH_EDITOR</code>
   </ExternalLink> and restart.</p>
   <!-- eslint-enable vue/multiline-html-element-content-newline -->
@@ -60,6 +60,15 @@ import Terminal from '~icons/cy/terminal_x16.svg'
 import { IconTechnologyCodeEditor } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
+import { getUrlWithParams } from '../utils/getUrlWithParams'
+
+const launchEditorHintLink = getUrlWithParams({
+  url: 'https://on.cypress.io/file-opener-preference',
+  params: {
+    utm_medium: 'Choose External Editor',
+    utm_content: 'Launch Editor Hint',
+  },
+})
 
 const icons: Record<string, FunctionalComponent<SVGAttributes>> = {
   'code': VSCode,
