@@ -1,13 +1,9 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
 import { RequestAccessButtonFragmentDoc } from '../generated/graphql-test'
 import RequestAccessButton from './RequestAccessButton.vue'
 
 const requestAccessButtonSelector = '[data-cy=request-access-button]'
 const requestSentButton = '[data-cy=access-requested-button]'
-
-const messages = defaultMessages.specPage
 
 describe('<RequestAccessButton />', () => {
   describe('unauthorized', () => {
@@ -32,7 +28,7 @@ describe('<RequestAccessButton />', () => {
     it('renders request access content', () => {
       cy.get(requestAccessButtonSelector)
       .should('be.visible')
-      .and('contain.text', messages.requestAccessButton)
+      .and('contain.text', 'Request access')
     })
 
     it('triggers mutation on button click', () => {
@@ -81,7 +77,7 @@ describe('<RequestAccessButton />', () => {
     it('renders access requested content', () => {
       cy.get(requestSentButton)
       .should('be.visible')
-      .and('contain.text', messages.requestSentButton)
+      .and('contain.text', 'Request sent')
     })
   })
 })
