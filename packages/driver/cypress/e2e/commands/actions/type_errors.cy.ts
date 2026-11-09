@@ -17,8 +17,6 @@ describe('src/cy/commands/actions/type - #type errors', () => {
 
         this.logs.push(log)
       })
-
-      null
     })
 
     it('throws when not a dom subject', (done) => {
@@ -84,8 +82,6 @@ describe('src/cy/commands/actions/type - #type errors', () => {
     it('throws when subject is a collection of elements', function (done) {
       cy.get('textarea,:text').then(function ($inputs) {
         this.num = $inputs.length
-
-        $inputs
       }).type('foo')
 
       cy.on('fail', (err) => {

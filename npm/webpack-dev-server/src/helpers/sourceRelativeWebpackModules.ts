@@ -253,9 +253,9 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     })
   }
 
-  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath),
+  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath)
   htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
 
   debug('HtmlWebpackPlugin: Successfully sourced html-webpack-plugin - %o', htmlWebpackPlugin)

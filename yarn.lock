@@ -16361,6 +16361,11 @@ eslint-json-compat-utils@^0.2.1:
   dependencies:
     esquery "^1.6.0"
 
+eslint-plugin-chai-friendly@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-friendly/-/eslint-plugin-chai-friendly-1.2.1.tgz#141392762aa8626ac3d25780a502e625ce74922b"
+  integrity sha512-mV3EOJLDr8+L+LS8uCkP711fnNHz+4PsmPyz18xwkvjJwfLRlnx0Eu6CFnb5B+dW5ahoav2jVer2KFYsmIuv3A==
+
 eslint-plugin-cypress@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-6.1.0.tgz#5619ceb67d09d74cb5225408bb36c962afb94880"
