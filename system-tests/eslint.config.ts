@@ -15,10 +15,18 @@ const ruleMeta = (ruleId: string) => {
   return rule?.meta
 }
 
+// Plugins don't always type a whitespace-only rule `layout`, so a whitespace
+// autofix counts too
+const isLayoutRule = (ruleId: string) => {
+  const meta = ruleMeta(ruleId)
+
+  return meta?.type === 'layout' || meta?.fixable === 'whitespace'
+}
+
 const layoutRulesOff = Object.fromEntries(
   baseConfig
   .flatMap((config) => Object.keys(config.rules ?? {}))
-  .filter((ruleId) => ruleMeta(ruleId)?.type === 'layout')
+  .filter(isLayoutRule)
   .map((ruleId) => [ruleId, 'off']),
 )
 

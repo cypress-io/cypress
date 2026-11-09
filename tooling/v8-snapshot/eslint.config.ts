@@ -36,4 +36,13 @@ export default [
       'prefer-const': 'off',
     },
   },
+  {
+    // ESLint lints each file alone, so it reads the bindings set-globals.js
+    // reassigns as globals; globals-strict.js replaces real globals with
+    // proxies to catch unsafe use during snapshot creation
+    files: ['src/blueprint/set-globals.js', 'src/blueprint/globals-strict.js'],
+    rules: {
+      'no-global-assign': 'off',
+    },
+  },
 ]

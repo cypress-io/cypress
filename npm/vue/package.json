@@ -55,7 +55,7 @@
     "typescript": "~5.4.5",
     "vite": "^8.0.9",
     "vue": "3.2.47",
-    "vue-eslint-parser": "^10.0.0",
+    "vue-eslint-parser": "^10.4.2",
     "vue-i18n": "9.14.5",
     "vue-router": "^4.0.0",
     "vue-tsc": "^2.0.19",

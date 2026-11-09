@@ -226,7 +226,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // work is tracked in https://github.com/cypress-io/cypress/issues/35250
     rules: {
       'prefer-rest-params': 'off',
-      'no-global-assign': 'off',
       'no-async-promise-executor': 'off',
 
       '@typescript-eslint/no-unused-expressions': 'off',
@@ -234,7 +233,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-this-alias': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
 
       'mocha/no-exclusive-tests': 'error',
@@ -243,10 +241,8 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'mocha/max-top-level-suites': 'off',
       'mocha/no-top-level-hooks': 'off',
       'mocha/no-identical-title': 'off',
-      'mocha/consistent-spacing-between-blocks': 'off',
       'mocha/no-global-tests': 'off',
       'mocha/no-sibling-hooks': 'off',
-      'mocha/no-exports': 'off',
       'mocha/no-return-and-callback': 'off',
       'mocha/no-pending-tests': 'off',
 
@@ -314,6 +310,17 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     files: ['**/*.d.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+
+  // eslint-plugin-mocha treats any file with a Mocha call, hooks included, as a
+  // test file, which takes in support files, test generators and plugin source
+  // whose exports are their purpose. The rule is there because importing a spec
+  // registers its tests in the importer, so only spec files are held to it.
+  {
+    ignores: ['**/*.cy.*', '**/*.spec.*', '**/*_spec.*', '**/*-spec.*', '**/*.test.*'],
+    rules: {
+      'mocha/no-exports': 'off',
     },
   },
 
