@@ -33,9 +33,7 @@
       </div>
       <template #suffix>
         <span class="rounded-md bg-indigo-50">
-          <span class=" p-[5px] text-indigo-500">
-            Latest
-          </span>
+          <span class=" p-[5px] text-indigo-500">Latest</span>
         </span>
       </template>
     </TopNavListItem>
@@ -69,9 +67,7 @@
       </div>
       <template #suffix>
         <span class="rounded-md bg-orange-100">
-          <span class="p-[5px] text-amber-800">
-            Installed
-          </span>
+          <span class="p-[5px] text-amber-800">Installed</span>
         </span>
       </template>
     </TopNavListItem>
