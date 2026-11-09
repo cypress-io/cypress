@@ -3,7 +3,7 @@
     class="transition-all duration-200"
     variant="bare"
     title="Choose a testing type"
-    help-link="https://on.cypress.io/choosing-testing-type"
+    :help-link="helpLink"
     :model-value="show"
     data-cy="switch-modal"
     @update:model-value="emits('close')"
@@ -22,6 +22,7 @@ import type { SwitchTestingTypeModalFragment } from '../generated/graphql'
 import StandardModal from '@cy/components/StandardModal.vue'
 import TestingTypePicker from '@cy/gql-components/TestingTypePicker.vue'
 import type { TestingTypeEnum } from '@packages/frontend-shared/src/generated/graphql'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment SwitchTestingTypeModal on Query {
@@ -43,6 +44,14 @@ const props = defineProps<{
 const emits = defineEmits<{
   (eventName: 'close'): void
 }>()
+
+const helpLink = getUrlWithParams({
+  url: 'https://on.cypress.io/choosing-testing-type',
+  params: {
+    utm_medium: 'Switch Testing Type Modal',
+    utm_campaign: 'Need help',
+  },
+})
 
 const switchAndRelaunch = useMutation(SwitchTestingTypeAndRelaunchDocument)
 
