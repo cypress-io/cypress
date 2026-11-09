@@ -34,14 +34,14 @@
           'sr-only': inputFocused || props.specFilterModel
         }"
       >
-        {{ t('specPage.searchPlaceholder') }}
+        Search specs
       </label>
       <button
         v-if="props.specFilterModel"
         type="button"
         data-cy="clear-search-button"
         class="border-transparent rounded-md flex outline-none h-[24px] my-[4px] inset-y-0 right-0 w-[24px] duration-300 absolute items-center justify-center group hocus-default hocus:ring-0"
-        :aria-label="t('specPage.clearSearch')"
+        aria-label="Clear search field"
         @click.stop="clearInput"
       >
         <i-cy-delete_x16
@@ -56,7 +56,7 @@
     >
       <button
         class="rounded-md flex outline-none border border-gray-900 h-[24px] w-[24px] duration-300 hocus-default items-center justify-center hocus:ring-0 hocus:border-indigo-300"
-        :aria-label="t('specPage.newSpecButton')"
+        aria-label="New spec"
         @click="emit('newSpec')"
       >
         <i-cy-add-small_x16 class="icon-light-gray-50 icon-dark-gray-200" />
@@ -68,7 +68,7 @@
           class="inline-flex text-sm font-normal"
           data-cy="tooltip-content"
         >
-          {{ t('specPage.newSpecButton') }}
+          New spec
         </span>
       </template>
     </Tooltip>
@@ -84,19 +84,17 @@
       class="sr-only"
       aria-live="polite"
     >
-      {{ t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: resultCount, denominator: resultCount}) }}
+      {{ resultCount === 0 ? 'No matches' : resultCount === 1 ? '1 match' : `${resultCount} matches` }}
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useI18n } from '@cy/i18n'
 import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 
-const { t } = useI18n()
 const props = defineProps<{
   specFilterModel: string
   resultCount: number
