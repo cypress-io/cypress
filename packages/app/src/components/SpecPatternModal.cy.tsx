@@ -1,7 +1,6 @@
 import { SpecPatternModalFragmentDoc } from '../generated/graphql-test'
 import SpecPatternModal from './SpecPatternModal.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<SpecPatternModal />', () => {
   it('should not render if closed', () => {
@@ -24,16 +23,16 @@ describe('<SpecPatternModal />', () => {
     })
 
     cy.get('[data-cy="spec-pattern-modal"]').should('be.visible')
-    cy.contains('h2', defaultMessages.components.specPatternModal.title)
+    cy.contains('h2', 'Spec pattern settings')
     cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io/test-type-options')
     cy.get('[data-cy="spec-pattern"]').should('be.visible')
 
     cy.percySnapshot()
 
     cy.get('[data-cy="open-config-file"]').should('be.visible')
-    cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
+    cy.contains('button', 'Update spec pattern')
 
-    cy.contains('button', defaultMessages.components.modal.dismiss).click()
+    cy.contains('button', 'Dismiss').click()
 
     cy.get('@closeSpy').should('have.been.called')
   })
