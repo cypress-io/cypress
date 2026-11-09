@@ -45,7 +45,7 @@
             data-cy="login-button"
             @click="emits('showLoginConnect')"
           >
-            Log in to Cypress Cloud
+            {{ 'Log in to Cypress Cloud' }}
           </Button>
           <Button
             v-else-if="cloudStatusMatches('needsProjectConnect')"
@@ -54,7 +54,7 @@
             data-cy="connect-button"
             @click="emits('showLoginConnect')"
           >
-            Connect your project
+            {{ 'Connect your project' }}
           </Button>
           <Button
             v-else-if="project.isNotFound"
@@ -63,7 +63,7 @@
             data-cy="reconnect-button"
             @click="emits('showLoginConnect')"
           >
-            Reconnect your project
+            {{ 'Reconnect your project' }}
           </Button>
           <RequestAccessButton
             v-else-if="project.isNotAuthorized"
