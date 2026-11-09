@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
+    "@tooling/system-tests": "0.0.0-development",
     "cross-env": "7.0.3",
     "dedent": "^0.7.0",
     "eslint": "^9.31.0",

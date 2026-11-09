@@ -1,8 +1,14 @@
-import { baseConfig, cliOverrides, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, cliOverrides, jsonConfig, nodeConfig, userNodeConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  {
+    ...userNodeConfig,
+    // CI runs the specs on the dev Node; only the shipped CLI runs on the user's
+    ignores: ['test/**'],
+  },
   ...cliOverrides,
   {
     languageOptions: {

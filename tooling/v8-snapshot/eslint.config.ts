@@ -1,9 +1,10 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
   {
     ignores: [
       // inputs the specs bundle and snapshot, some of them vendored code

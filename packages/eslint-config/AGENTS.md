@@ -19,6 +19,7 @@ src/
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
+  nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
   vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
   reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
@@ -39,14 +40,15 @@ src/
 
 A new workspace lints itself with its own config:
 
-1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig` and, to lint JSON, `jsonConfig` after it:
+1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)):
 
    ```ts
-   import { baseConfig, jsonConfig } from '@packages/eslint-config'
+   import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 
    export default [
      ...baseConfig,
      ...jsonConfig,
+     ...nodeConfig,
    ]
    ```
 
@@ -75,6 +77,28 @@ It is built on `eslint-plugin-jsonc` and `eslint-plugin-package-json`, and every
 The first `eslint --fix` after a package opts in reorders its `package.json` top-level keys. That diff is expected.
 
 `eslint-plugin-jsonc` is pinned to v2, because v3 needs ESLint 9.38 or later. `eslint-plugin-package-json` is pinned to 0.x, because 1.x moves to `jsonc-eslint-parser` v3 and declares a peer dependency on `@eslint/json`. `@eslint/json` itself doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
+
+## `nodeConfig`
+
+`nodeConfig` checks the [runtime floors](../../AGENTS.md#runtime-targets) and declared dependencies of Node-side code. Spread it after `baseConfig` and `jsonConfig`. It is built on `eslint-plugin-n` and turns on:
+
+- `n/no-unsupported-features/node-builtins`, `n/no-unsupported-features/es-builtins` and `n/no-unsupported-features/es-syntax`: no Node API, built-in or syntax newer than the floor. They are off for `.d.ts` files, which emit no runtime code and whose DOM globals, such as `Storage`, the rules would read as Node's.
+- `n/no-extraneous-import` and `n/no-extraneous-require`: every package a file imports is declared in the nearest `package.json`. Declare a missing package rather than disabling the rule, and declare a sibling workspace the way the repo already does, as `"0.0.0-development"` in `devDependencies`, even when it creates a cycle, as `proxy` → `server` already does. Use a hoisted package's existing version range so the lockfile doesn't resolve a second copy. A `require.resolve` that deliberately finds a package through another one, such as the user's project or `playwright-webkit`, gets an `eslint-disable-next-line` with the reason.
+
+`nodeConfig` also declares `globals.node`. The plugin only checks a global such as `process` or `Buffer` that resolves in scope, so without them a workspace that never declared Node globals, like `cli`, would skip every global-based check silently.
+
+`n/no-extraneous-*` also skips imports it can't resolve, which includes every workspace whose `main` points at build output that isn't built yet. Run `yarn lint` on a built tree, as CI does, or those hits stay hidden.
+
+The floor is set in `settings.n.version`, not read from each workspace's `engines`, because most workspaces declare none. `nodeConfig.ts` reads both floors from the files that own them:
+
+- **Bundled floor** (the default): `>=` the version in `.node-version`. Dev tooling runs on it, and the Electron main process runs on Electron's embedded Node, which for the pinned Electron is the same version. If an Electron bump ever leaves its Node below `.node-version`, lower this floor to it.
+- **User floor**: `engines.node` from `cli/package.json`. Spread `userNodeConfig` after `nodeConfig`, scoped with `files`, for code that runs on the user's Node. `cli` applies it to everything but `test/**`, whose specs CI runs on the dev Node. `server` applies it to `lib/plugins/child/**`, the config child process. Modules the child imports from outside that directory are still checked against the bundled floor.
+
+Every workspace opts in except the browser bundles, whose floor is the supported browsers rather than a Node version: `app`, `launchpad`, `frontend-shared`, `driver`, `reporter`, `runner`, `extension` and `example`, and the mount adapters `npm/react`, `npm/vue`, `npm/angular`, `npm/svelte` and `npm/mount-utils`. `system-tests` keeps it out of `projects/**` and `project-fixtures/**`: fixtures are user projects with their own dependencies, and `n/no-extraneous-import` crashes resolving their `tsconfig.json` files.
+
+`n/no-process-exit` is left off: almost all of its hits are CLIs and scripts that exit on purpose. The plugin's optional `ts-declaration-location` peer is only needed by `n/no-sync`, which isn't enabled.
+
+`nodeConfig.ts` loads the plugin with `require` rather than `import`. Its types export a string-named `"module.exports"`, which TypeScript only parses from 5.6 and import-x's parser not at all. An `import` fails `check-ts` in every workspace whose `tsconfig` takes in its `eslint.config.ts`.
 
 ## Vue packages
 

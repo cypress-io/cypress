@@ -1,8 +1,9 @@
-import { baseConfig, graphqlConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, graphqlConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
   ...graphqlConfig(),
   {
     languageOptions: {

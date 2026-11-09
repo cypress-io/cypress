@@ -1,9 +1,15 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, userNodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  {
+    // The config child process runs on the user's Node
+    ...userNodeConfig,
+    files: ['lib/plugins/child/**'],
+  },
   {
     languageOptions: {
       parserOptions: {
