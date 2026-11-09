@@ -373,6 +373,33 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  describe('document.cookie from an http page', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+    })
+
+    const writes = ['foo=bar; Secure', 'foo=bar; SameSite=None', '__secure-foo=bar']
+
+    writes.forEach((cookie) => {
+      it(`does not keep "${cookie}"`, () => {
+        cy.origin('http://www.foobar.com:3500', { args: { cookie } }, ({ cookie }) => {
+          cy.window().then((win) => {
+            win.document.cookie = cookie
+            // the second write landing means the first has been handled
+            win.document.cookie = 'sync=1'
+          })
+
+          cy.getCookie('sync').should('exist')
+          cy.document().its('cookie').should('include', 'sync=1').and('not.match', /foo=/)
+          cy.getAllCookies().then((cookies) => {
+            expect(cookies.filter(({ name }) => name.endsWith('foo'))).to.be.empty
+          })
+        })
+      })
+    })
+  })
+
   describe('Same-Site Cross-Origin cookie behavior', () => {
     const cookie = 'foo1=bar2'
     const site = 'foobar.com'

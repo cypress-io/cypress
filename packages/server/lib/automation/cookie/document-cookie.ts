@@ -1,9 +1,10 @@
 import Debug from 'debug'
-import { CookieJar as ToughCookieJar, domainMatch, pathMatch } from 'tough-cookie'
+import { CookieJar as ToughCookieJar } from 'tough-cookie'
 import type { Cookie } from 'tough-cookie'
-import { isLocalhost } from '@packages/network-tools'
 import { CookieJar, cookieJar, toughCookieToAutomationCookie } from './jar'
 import type { SerializableAutomationCookie } from './jar'
+import { isBlockedBy, isSecureUrl, meetsSecureRules } from './document-cookie-rules'
+import type { ExistingCookie } from './document-cookie-rules'
 
 const debug = Debug('cypress:server:automation:cookie:document-cookie')
 
@@ -12,17 +13,9 @@ interface DocumentCookieWrite {
   url?: unknown
 }
 
-type ExistingCookie = Pick<SerializableAutomationCookie, 'name' | 'domain' | 'path' | 'httpOnly' | 'secure'>
-
 export interface DocumentCookieAutomation {
   getCookies: (filter: { name: string }) => Promise<ExistingCookie[]>
   setCookie: (cookie: SerializableAutomationCookie) => Promise<unknown>
-}
-
-interface StoredCookie {
-  name: string
-  domain: string
-  path: string
 }
 
 const parseUrl = (url: unknown) => {
@@ -34,9 +27,6 @@ const parseUrl = (url: unknown) => {
     return undefined
   }
 }
-
-// browsers treat localhost as a secure context, so it may set Secure cookies over http
-const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
 
 const parseDocumentCookie = (cookieString: string, url: URL): Cookie | undefined => {
   const cookie = CookieJar.parse(cookieString)
@@ -55,30 +45,6 @@ const parseDocumentCookie = (cookieString: string, url: URL): Cookie | undefined
 
     return
   }
-}
-
-// tough-cookie does not tie Secure to the page's scheme, does not require Secure
-// for SameSite=None, and matches cookie prefixes case-sensitively
-const meetsSecureRules = (cookie: Cookie, isSecure: boolean) => {
-  if (!cookie.secure) {
-    return cookie.sameSite !== 'none' && !/^__(secure|host)-/i.test(cookie.key)
-  }
-
-  return isSecure && (!/^__host-/i.test(cookie.key) || (cookie.hostOnly === true && cookie.path === '/'))
-}
-
-// document.cookie can't replace an HttpOnly cookie, and an insecure page can't shadow a Secure one
-const isBlockedBy = (existing: ExistingCookie, cookie: StoredCookie, isSecure: boolean) => {
-  if (existing.name !== cookie.name) return false
-
-  const existingDomain = existing.domain.replace(/^\./, '')
-  const existingPath = existing.path || '/'
-
-  if (existing.httpOnly && existingDomain === cookie.domain && existingPath === cookie.path) return true
-
-  return !isSecure && existing.secure
-    && (domainMatch(existingDomain, cookie.domain) || domainMatch(cookie.domain, existingDomain))
-    && pathMatch(cookie.path, existingPath)
 }
 
 /**
