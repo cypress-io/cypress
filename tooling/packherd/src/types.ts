@@ -50,5 +50,5 @@ export type CreateBundleResult = {
  * @category Bundle
  */
 export type CreateBundle = (
-  args: CreateBundleOpts
+  args: CreateBundleOpts,
 ) => Promise<CreateBundleResult>

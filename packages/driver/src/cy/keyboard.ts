@@ -30,7 +30,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 type SimulatedDefault = (
   el: HTMLElement,
   key: KeyDetails,
-  options: typeOptions
+  options: typeOptions,
 ) => void
 
 type KeyInfo = KeyDetails | ShortcutDetails

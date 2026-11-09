@@ -1885,6 +1885,7 @@ describe('src/cy/commands/connectors', () => {
 
     context('#each', () => {
       it('invokes callback function with runnable.ctx', function () {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- compared against the callback's own `this`
         const ctx = this
 
         cy.wrap([1]).each(function () {
