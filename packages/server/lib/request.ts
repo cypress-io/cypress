@@ -121,6 +121,16 @@ const caseInsensitiveSet = function (obj, property, val) {
   obj[lowercaseProperty] = val
 }
 
+const caseInsensitiveDelete = function (obj, property) {
+  const lowercaseProperty = property.toLowerCase()
+
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === lowercaseProperty) {
+      delete obj[key]
+    }
+  }
+}
+
 type AutomationFn = (event: string, data?: any) => Promise<any>
 
 interface RequestOpts {
@@ -557,12 +567,25 @@ export class Request {
     })
   }
 
+  private setRedirectCookieHeader (req: Record<string, any>, newUrl: string, originalUrl: string, automationFn: AutomationFn, userCookieHeader?: string) {
+    // a Cookie header passed by the user is meant for the host it was sent to
+    const existingHeader = url.parse(newUrl).hostname === url.parse(originalUrl).hostname ? userCookieHeader : undefined
+
+    caseInsensitiveDelete(req.headers, 'Cookie')
+
+    if (existingHeader) {
+      req.headers.cookie = existingHeader
+    }
+
+    return this.setRequestCookieHeader(req, newUrl, automationFn, existingHeader)
+  }
+
   // followRedirect is called with the request being redirected as `this`, so it
   // reaches this instance through the returned arrow
-  private redirectCookieSyncer (automationFn: AutomationFn) {
+  private redirectCookieSyncer (automationFn: AutomationFn, originalUrl: string, userCookieHeader?: string) {
     return (incomingRes: any, fromUrl: string, req: Record<string, any>, toUrl: string) => {
       return this.setCookiesOnBrowser(incomingRes, fromUrl, automationFn)
-      .then(() => this.setRequestCookieHeader(req, toUrl, automationFn))
+      .then(() => this.setRedirectCookieHeader(req, toUrl, originalUrl, automationFn, userCookieHeader))
     }
   }
 
@@ -669,7 +692,8 @@ export class Request {
       strictSSL: false,
     })
 
-    const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
+    const userCookieHeader = caseInsensitiveGet(options.headers!, 'cookie')
+    const syncRedirectCookies = this.redirectCookieSyncer(automationFn, options.url!, userCookieHeader)
 
     const {
       followRedirect,
@@ -696,7 +720,7 @@ export class Request {
       })
     }
 
-    return this.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
+    return this.setRequestCookieHeader(options, options.url!, automationFn, userCookieHeader)
     .then(() => {
       return () => {
         debug('sending request as stream %o', merge(options))
@@ -771,6 +795,8 @@ export class Request {
       options.json = false
     }
 
+    const userCookieHeader = caseInsensitiveGet(options.headers!, 'cookie')
+
     const send = () => {
       const ms = Date.now()
 
@@ -784,7 +810,7 @@ export class Request {
       let currentUrl = options.url
 
       if (options.followRedirect) {
-        const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
+        const syncRedirectCookies = this.redirectCookieSyncer(automationFn, options.url!, userCookieHeader)
 
         options.followRedirect = function (incomingRes) {
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
@@ -829,7 +855,7 @@ export class Request {
     }
 
     if (options.cookies) {
-      return this.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
+      return this.setRequestCookieHeader(options, options.url!, automationFn, userCookieHeader)
       .then(send)
     }
 
