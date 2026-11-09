@@ -16,7 +16,7 @@
     }"
   >
     <p class="mb-[24px]">
-      {{ t('specPage.banners.createOrganization.content') }}
+      Join or create an organization in Cypress Cloud to access your projects and recorded test runs.
     </p>
 
     <Button
@@ -26,14 +26,13 @@
       :prefix-icon="OrganizationIcon"
       prefix-icon-class="icon-dark-white icon-light-indigo-500"
     >
-      {{ t('specPage.banners.createOrganization.buttonLabel') }}
+      Set up your organization
     </Button>
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
@@ -57,7 +56,6 @@ const props = defineProps<{
   cohortOption: CohortOption
 }>()
 
-const { t } = useI18n()
 const bannerId = BannerIds.ACI_082022_CREATE_ORG
 
 const query = useQuery({ query: CreateOrganizationBannerDocument })
