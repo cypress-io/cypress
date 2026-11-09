@@ -73,7 +73,7 @@ const experimentText = {
     name: 'Origin Dependencies',
     description: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
   },
-} satisfies Record<string, { name: string, description: string }>
+}
 
 const isKnownExperiment = (field: string): field is keyof typeof experimentText => field in experimentText
 
