@@ -80,7 +80,7 @@ const copy = computed(() => {
   if (isRetentionLimit(overLimitReason.value)) {
     return {
       title: 'Beyond data retention',
-      message: `Your data retention limit is ${overLimitReason.value.dataRetentionDays} days and these tests ran ${props.runAgeDays} days ago. Upgrade your plan to increase your data retention limit.`,
+      message: `Your data retention limit is ${overLimitReason.value.dataRetentionDays ?? ''} days and these tests ran ${props.runAgeDays} days ago. Upgrade your plan to increase your data retention limit.`,
       actionLabel: isPlanAdmin.value ? 'Upgrade plan' : 'Contact admin',
     }
   }
