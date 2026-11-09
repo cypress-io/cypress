@@ -1568,6 +1568,14 @@ cy
   cy.get('form').scrollIntoView({ offset: { top: '20' } }) // $ExpectError
 }
 
+// CypressScrollIntoViewEnsureScrollableTests
+{
+  cy.get('form').scrollIntoView({ duration: 100, easing: 'linear', log: false, timeout: 1000 })
+  cy.get('form').scrollIntoView({ ensureScrollable: false }) // $ExpectError
+  cy.get('form').scrollTo('bottom', { ensureScrollable: false })
+  cy.scrollTo(0, 500, { ensureScrollable: false })
+}
+
 // CypressRequireTests
 {
   Cypress.require('lodash')
