@@ -5,12 +5,13 @@
   >
     <template #header>
       <PromoHeader title="Copy the command below to record your first run">
+        <!-- Interpolated text drops the whitespace that static text would keep inside the link -->
         <template #description>
-          Review the
+          {{ 'Review the' }}
           <ExternalLink :href="guideUrl">
-            guide on recording runs
+            {{ 'guide on recording runs' }}
           </ExternalLink>
-          to Cypress Cloud
+          {{ 'to Cypress Cloud' }}
         </template>
         <template #content>
           <RecordPromptAdapter />

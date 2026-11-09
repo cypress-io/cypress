@@ -25,10 +25,11 @@
             v-if="helpLinkHref"
             class="ml-[4px]"
           >
+            <!-- Interpolated text drops the whitespace that static text would keep inside the link -->
             <ExternalLink
               :href="helpLink"
             >
-              Learn more
+              {{ 'Learn more' }}
               <span class="sr-only">
                 {{ helpLinkSrText }}
               </span>
