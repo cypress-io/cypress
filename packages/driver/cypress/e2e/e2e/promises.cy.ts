@@ -1,4 +1,5 @@
-export {} // make typescript see this as a module
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
+export {}
 
 // `console` lives on the global scope rather than on `Window`
 const topWindow = () => window.top as Window & typeof globalThis

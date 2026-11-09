@@ -168,6 +168,7 @@ describe('src/cy/commands/connectors', () => {
         .wrap({ foo: 'bar' })
         .then((obj) => {
           return new Promise((resolve) => {
+            // eslint-disable-next-line cypress/no-unnecessary-waiting -- any queued command works here; the spec tests how .then() handles it
             cy.wait(10)
 
             resolve(obj.foo)
@@ -179,6 +180,7 @@ describe('src/cy/commands/connectors', () => {
         cy
         .wrap({ foo: 'bar' })
         .then((obj) => {
+          // eslint-disable-next-line cypress/no-unnecessary-waiting -- any queued command works here; the spec tests how .then() handles it
           return cy
           .wait(10)
           .then(() => {
@@ -199,6 +201,7 @@ describe('src/cy/commands/connectors', () => {
         cy
         .wrap({ foo: 'bar' })
         .then((obj) => {
+          // eslint-disable-next-line cypress/no-unnecessary-waiting -- any queued command works here; the spec tests how .then() handles it
           cy
           .wait(10)
           .then(() => {
@@ -288,6 +291,7 @@ describe('src/cy/commands/connectors', () => {
           })
 
           cy.then(() => {
+            // eslint-disable-next-line cypress/no-unnecessary-waiting -- enqueues a command inside cy.then() to trigger the mixed async and sync code error
             cy.wait(5000)
 
             return 'foo'
@@ -1881,6 +1885,7 @@ describe('src/cy/commands/connectors', () => {
 
     context('#each', () => {
       it('invokes callback function with runnable.ctx', function () {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- compared against the callback's own `this`
         const ctx = this
 
         cy.wrap([1]).each(function () {

@@ -265,6 +265,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
         cy.visitLaunchpad()
         cy.contains('launchpad')
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the prompt never opens, so give it time to open first
         cy.wait(1000)
         cy.contains('Configure CI').should('not.exist')
       })

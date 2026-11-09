@@ -4,12 +4,6 @@
     data-cy="deprecated-ribbon"
     tabindex="0"
   >
-    <slot>{{ t('openBrowser.deprecatedRibbon') }}</slot>
+    <slot>Deprecated</slot>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
-</script>

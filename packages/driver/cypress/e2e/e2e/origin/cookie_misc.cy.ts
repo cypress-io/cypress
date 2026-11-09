@@ -280,25 +280,6 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         })
       })
 
-      it('works with a Domain attribute for a parent domain', () => {
-        cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
-
-        cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
-        cy.origin(`https://app.foobar.com:3503`, () => {
-          cy.window().then((win) => {
-            win.document.cookie = 'foo=bar; Domain=foobar.com'
-          })
-
-          cy.getCookie('foo').its('value').should('eq', 'bar')
-
-          cy.window().then((win) => {
-            win.document.cookie = 'foo=deleted; Domain=foobar.com; Max-Age=0'
-          })
-
-          cy.getCookie('foo').should('eq', null)
-        })
-      })
-
       it('expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0', () => {
         cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
 

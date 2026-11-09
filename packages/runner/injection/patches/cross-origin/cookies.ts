@@ -96,8 +96,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       if (parsedCookie?.hostOnly === null) {
         // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates.
         // in the case it is not set, we need to calculate it
-        // tough-cookie strips the Domain attribute's leading dot, so its presence is what makes a domain cookie
-        parsedCookie.hostOnly = !parsedCookie.domain
+        parsedCookie.hostOnly = isHostOnlyCookie(parsedCookie.domain || domain)
       }
 
       // if result is undefined, it was invalid and couldn't be parsed

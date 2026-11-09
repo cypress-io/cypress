@@ -462,6 +462,7 @@ describe('App Top Nav Workflows', () => {
           cy.getByRole('button', { name: expectedNextStepText }).click()
         })
       }
+
       context('with no project id', () => {
         it('shows "connect project" button after login if no project id is set', () => {
           cy.scaffoldProject('component-tests')
@@ -900,7 +901,6 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.verifyE2ESelected()
-    cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
 
@@ -919,6 +919,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.verifyE2ESelected()
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the prompt never opens, so give it time to open first
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })

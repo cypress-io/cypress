@@ -568,8 +568,10 @@ cy.wait(['@foo', '@bar'])
     first // $ExpectType Interception<any, any>
   })
 
+// eslint-disable-next-line cypress/no-unnecessary-waiting -- checks the type of the numeric overload
 cy.wait(1234) // $ExpectType Chainable<undefined>
 
+// eslint-disable-next-line cypress/no-unnecessary-waiting -- checks the type of the numeric overload
 cy.wrap('foo').wait(1234) // $ExpectType Chainable<string>
 
 cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
