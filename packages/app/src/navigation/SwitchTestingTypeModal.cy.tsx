@@ -1,7 +1,6 @@
 import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import { SwitchTestingTypeModalFragmentDoc } from '../generated/graphql-test'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('SwitchTestingTypeModal', () => {
   it('renders the testing type cards in a modal', () => {
@@ -23,7 +22,7 @@ describe('SwitchTestingTypeModal', () => {
     })
 
     cy.get('[data-cy="card"]').should('have.length', 2)
-    cy.contains('h2', defaultMessages.testingType.modalTitle).should('be.visible')
+    cy.contains('h2', 'Choose a testing type').should('be.visible')
     cy.get('[data-cy="switch-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/choosing-testing-type')
     cy.percySnapshot()
 
