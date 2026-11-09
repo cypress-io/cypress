@@ -158,6 +158,7 @@ watch(() => userProjectStatusStore.project.isProjectConnected, (newVal, oldVal) 
     showConnectSuccessAlert.value = false
   }
 })
+
 </script>
 
 <style scoped>

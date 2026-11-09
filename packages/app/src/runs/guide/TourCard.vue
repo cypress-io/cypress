@@ -29,4 +29,5 @@ import RecordGuideImage from '../../assets/record-guide.svg'
 defineProps<{
   action: () => void
 }>()
+
 </script>

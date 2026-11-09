@@ -45,4 +45,5 @@ import GuideCard3 from './GuideCard3.vue'
 defineProps<{
   campaign: string
 }>()
+
 </script>

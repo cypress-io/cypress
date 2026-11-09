@@ -153,4 +153,5 @@ const groupByCommit = computed(() => {
 
   return result
 })
+
 </script>

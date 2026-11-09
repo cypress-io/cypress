@@ -48,4 +48,5 @@ const configFilePath = computed(() => props.gql.configFileAbsolutePath?.replace(
 whenever(projectId, () => {
   showAlert.value = true
 })
+
 </script>

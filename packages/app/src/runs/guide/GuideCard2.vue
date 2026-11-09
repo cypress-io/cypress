@@ -28,4 +28,5 @@ import Illustration from '../../assets/runs-guide-skeleton-2.svg'
 defineProps<{
   action: () => void
 }>()
+
 </script>

@@ -113,4 +113,5 @@ const ariaLabel = computed(() => {
 
   return labelArray.join(' ')
 })
+
 </script>
