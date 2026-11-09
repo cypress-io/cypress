@@ -26,11 +26,11 @@
         >
           <template v-if="!viewer && !error">
             <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-            Logging in gives you access to <ExternalLink href="https://on.cypress.io/dashboard-introduction">Cypress Cloud</ExternalLink>. You can set up projects to be recorded and see test data from your project.
+            Logging in gives you access to <ExternalLink :href="cloudIntroductionUrl">Cypress Cloud</ExternalLink>. You can set up projects to be recorded and see test data from your project.
           </template>
           <template v-else-if="viewer">
             You are now logged in as <ExternalLink
-              href="https://on.cypress.io/dashboard/profile"
+              :href="cloudProfileUrl"
               class="font-medium text-indigo-500"
             >
               {{ viewer.fullName || viewer.email }}
@@ -90,6 +90,7 @@ import NoInternetConnection from '../../components/NoInternetConnection.vue'
 import CopyText from '@cy/components/CopyText.vue'
 import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
 import { hideAllPoppers } from 'floating-vue'
+import { getUrlWithParams } from '../../utils/getUrlWithParams'
 
 import {
   Dialog,
@@ -128,6 +129,27 @@ fragment LoginModal on Query {
 hideAllPoppers()
 
 const viewer = computed(() => props.gql?.cloudViewer)
+
+const utmParams = computed(() => {
+  return {
+    utm_medium: props.utmMedium,
+    ...(props.utmContent ? { utm_content: props.utmContent } : {}),
+  }
+})
+
+const cloudIntroductionUrl = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/dashboard-introduction',
+    params: { ...utmParams.value, utm_campaign: 'Cypress Cloud' },
+  })
+})
+
+const cloudProfileUrl = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/dashboard/profile',
+    params: { ...utmParams.value, utm_campaign: 'Profile' },
+  })
+})
 
 const error = computed(() => {
   const { name } = props.gql.authState

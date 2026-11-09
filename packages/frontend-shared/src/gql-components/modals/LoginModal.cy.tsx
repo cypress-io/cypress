@@ -66,7 +66,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       })
 
       cy.contains('h2', 'Continue in your browser').should('be.visible')
-      cy.contains('a', 'Cypress Cloud').should('be.visible').should('have.attr', 'href', 'https://on.cypress.io/dashboard-introduction')
+      cy.contains('a', 'Cypress Cloud').should('be.visible').should('have.attr', 'href', 'https://on.cypress.io/dashboard-introduction?utm_medium=testing&utm_campaign=Cypress+Cloud&utm_source=Binary%3A+Launchpad')
 
       cy.getByRole('button', { name: 'Opening browser' })
       .should('be.visible')
@@ -163,7 +163,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       mountSuccess()
       cy.contains('h2', 'Login successful').should('be.visible')
       cy.contains(`You are now logged in as ${cloudViewer.fullName}.`).should('be.visible')
-      cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+      cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile?utm_medium=testing&utm_campaign=Profile&utm_source=Binary%3A+Launchpad')
     })
   })
 
@@ -224,7 +224,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     mountSuccess(cloudViewerNoName)
     cy.contains('h2', 'Login successful').should('be.visible')
     cy.contains(`You are now logged in as ${cloudViewerNoName.email}.`).should('be.visible')
-    cy.contains('a', cloudViewerNoName.email).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+    cy.contains('a', cloudViewerNoName.email).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile?utm_medium=testing&utm_campaign=Profile&utm_source=Binary%3A+Launchpad')
   })
 
   it('emits an event to close the modal when "Continue" button is clicked', () => {
