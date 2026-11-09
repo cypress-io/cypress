@@ -1,5 +1,4 @@
 import TerminalPrompt from './TerminalPrompt.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 
 describe('<TerminalPrompt />', () => {
   it('renders without overflow', { viewportWidth: 800, viewportHeight: 120 }, () => {

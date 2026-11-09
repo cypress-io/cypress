@@ -1,4 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import Warning from './Warning.vue'
 import { faker } from '@faker-js/faker'
 import { ref } from 'vue'
@@ -45,7 +44,7 @@ describe('<Warning />', () => {
       {...methods}
     /></div>))
 
-    cy.get('[aria-label=Dismiss').first().click()
+    cy.get('[aria-label=Dismiss]').first().click()
     cy.wrap(onUpdate).should('be.called')
   })
 

@@ -1,6 +1,5 @@
 import StandardModal from './StandardModal.vue'
 import Tooltip from './Tooltip.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { DialogOverlay } from '@headlessui/vue'
 import { ref } from 'vue'
 

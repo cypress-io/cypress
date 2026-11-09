@@ -1,4 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import ResultCounts from './ResultCounts.vue'
 
 const validateResult = (type: string, value: string | number) => {

@@ -1,5 +1,4 @@
 import NoResults from './NoResults.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 
 describe('<NoResults />', () => {
   it('renders if there is a search message', () => {

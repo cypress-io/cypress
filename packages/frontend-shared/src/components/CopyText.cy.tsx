@@ -1,5 +1,4 @@
 import CopyText from './CopyText.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 
 describe('<CopyText />', () => {
   it('renders without overflow', { viewportWidth: 800, viewportHeight: 120 }, () => {
