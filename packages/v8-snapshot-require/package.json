@@ -32,7 +32,6 @@
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
     "@tooling/packherd": "0.0.0-development",
-    "@tooling/v8-snapshot": "0.0.0-development",
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
     "vitest": "^3.2.4"

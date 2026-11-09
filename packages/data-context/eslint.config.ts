@@ -1,9 +1,10 @@
-import { baseConfig, graphqlConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, graphqlConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...nodeConfig,
+  undeclaredWorkspaceImports(['src/data/ProjectConfigIpc.ts'], ['@packages/server']),
   ...graphqlConfig(),
   {
     languageOptions: {

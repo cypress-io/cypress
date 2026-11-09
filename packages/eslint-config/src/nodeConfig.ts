@@ -67,6 +67,21 @@ export const nodeConfig: Linter.Config[] = [
   },
 ]
 
+/**
+ * Lets `files` import sibling workspaces they don't declare, for imports whose
+ * declaration would close a dependency cycle. nx breaks a cycle by dropping one
+ * of its edges, which can build a package before one it compiles against.
+ */
+export const undeclaredWorkspaceImports = (files: string[], workspaces: string[]): Linter.Config => {
+  return {
+    files,
+    rules: {
+      'n/no-extraneous-import': ['error', { allowModules: workspaces }],
+      'n/no-extraneous-require': ['error', { allowModules: workspaces }],
+    },
+  }
+}
+
 /** Lowers `nodeConfig`'s floor to the user's Node. Spread it after `nodeConfig`. */
 export const userNodeConfig: Linter.Config = {
   settings: {

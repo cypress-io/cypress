@@ -42,7 +42,6 @@
     "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
     "@packages/eslint-config": "0.0.0-development",
-    "@packages/https-proxy": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@types/concat-stream": "1.6.1",

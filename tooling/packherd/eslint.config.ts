@@ -1,10 +1,11 @@
-import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...nodeConfig,
+  undeclaredWorkspaceImports(['test/**'], ['@tooling/system-tests']),
   {
     languageOptions: {
       parserOptions: {
