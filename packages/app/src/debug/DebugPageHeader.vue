@@ -26,7 +26,7 @@
             class="font-normal mx-px px-2 text-orange-500 items-center"
             data-cy="debug-commitsAhead"
           >
-            {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
+            {{ commitsAheadText }}
           </span>
         </li>
         <li
@@ -40,7 +40,7 @@
             data-cy="debug-header-dashboard-link"
             :href="runUrl"
           >
-            {{ t('debugPage.header.runUrl') }}
+            View in Cypress Cloud
           </ExternalLink>
         </li>
       </ul>
@@ -112,14 +112,11 @@ import type { DebugPageHeaderFragment } from '../generated/graphql'
 import { IconTimeClock } from '@cypress-design/vue-icon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
-import { useI18n } from 'vue-i18n'
 import RunNumber from '../runs/RunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { DEBUG_TAB_MEDIUM } from './utils/constants'
-
-const { t } = useI18n()
 
 gql`
 fragment DebugPageHeader on CloudRun {
@@ -151,6 +148,10 @@ const debug = computed(() => props.gql)
 
 const runUrl = computed(() => {
   return debug.value.url ? getUrlWithParams({ url: debug.value.url, params: { utm_medium: DEBUG_TAB_MEDIUM, utm_campaign: 'View in Cypress Cloud' } }) : '#'
+})
+
+const commitsAheadText = computed(() => {
+  return props.commitsAhead === 1 ? 'You are 1 commit ahead' : `You are ${props.commitsAhead} commits ahead`
 })
 
 const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(debug)
