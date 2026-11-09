@@ -27,7 +27,7 @@ describe('ChooseExternalEditorModal', () => {
     .should('be.visible')
     .as('chooseEditor')
 
-    cy.contains('Need help').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
+    cy.contains('Need help').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference?utm_medium=Choose+External+Editor&utm_content=Need+Help&utm_source=Binary%3A+Launchpad')
 
     // initial
     cy.percySnapshot()

@@ -2,7 +2,7 @@
   <StandardModal
     :model-value="props.open"
     variant="bare"
-    help-link="https://on.cypress.io/file-opener-preference"
+    :help-link="helpLink"
     help-text="Need help"
     data-cy="choose-editor-modal"
     @update:model-value="close"
@@ -71,6 +71,7 @@ import { useMutation } from '@urql/vue'
 import ChooseExternalEditor from './ChooseExternalEditor.vue'
 import StandardModal from '../components/StandardModal.vue'
 import Button from '../components/Button.vue'
+import { getUrlWithParams } from '../utils/getUrlWithParams'
 import type { ChooseExternalEditorModalFragment } from '../generated/graphql'
 import { ChooseExternalEditorModal_SetPreferredEditorBinaryDocument } from '../generated/graphql'
 
@@ -103,6 +104,14 @@ const emit = defineEmits<{
 }>()
 
 const preferredEditor = ref('')
+
+const helpLink = getUrlWithParams({
+  url: 'https://on.cypress.io/file-opener-preference',
+  params: {
+    utm_medium: 'Choose External Editor',
+    utm_content: 'Need Help',
+  },
+})
 
 function close () {
   preferredEditor.value = ''
