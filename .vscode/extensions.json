@@ -38,10 +38,6 @@
     //    Recommended Extensions
     // -----------------------------
 
-    // Name: i18n-ally
-    // Description: Preview and edit any hardcoded strings directly in your source code.
-    "lokalise.i18n-ally",
-
     // Name: Iconify Intellisense
     // Description: Preview shortcodes as SVG Icons for common libraries like Font Awesome.
     "antfu.iconify",
