@@ -1,5 +1,4 @@
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import ResultCounts from './ResultCounts.vue'
 
 const validateResult = (type: string, value: string | number) => {
@@ -18,10 +17,10 @@ describe('<ResultCounts />', () => {
         totalSkipped={4}
       />))
 
-    validateResult(defaultMessages.runs.results.skipped, 4)
-    validateResult(defaultMessages.runs.results.pending, 3)
-    validateResult(defaultMessages.runs.results.passed, 2)
-    validateResult(defaultMessages.runs.results.failed, 1)
+    validateResult('skipped', 4)
+    validateResult('pending', 3)
+    validateResult('passed', 2)
+    validateResult('failed', 1)
   })
 
   it('renders zero contents', () => {
@@ -33,10 +32,10 @@ describe('<ResultCounts />', () => {
         totalSkipped={0}
       />))
 
-    validateResult(defaultMessages.runs.results.skipped, 0)
-    validateResult(defaultMessages.runs.results.pending, 0)
-    validateResult(defaultMessages.runs.results.passed, 0)
-    validateResult(defaultMessages.runs.results.failed, 0)
+    validateResult('skipped', 0)
+    validateResult('pending', 0)
+    validateResult('passed', 0)
+    validateResult('failed', 0)
   })
 
   it('renders string range values', () => {
@@ -48,10 +47,10 @@ describe('<ResultCounts />', () => {
         totalSkipped="10-1"
       />))
 
-    validateResult(defaultMessages.runs.results.skipped, '10-1')
-    validateResult(defaultMessages.runs.results.pending, '5-5')
-    validateResult(defaultMessages.runs.results.passed, '2-20')
-    validateResult(defaultMessages.runs.results.failed, '1-2')
+    validateResult('skipped', '10-1')
+    validateResult('pending', '5-5')
+    validateResult('passed', '2-20')
+    validateResult('failed', '1-2')
   })
 
   it('changes order of status signs with the order prop', () => {
