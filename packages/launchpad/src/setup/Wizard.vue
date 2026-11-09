@@ -26,15 +26,12 @@ import type { WizardFragment } from '../generated/graphql'
 import WarningList from '../warning/WarningList.vue'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './LaunchpadHeader.vue'
-import { useI18n } from '@cy/i18n'
 
 type CurrentStep = 'selectFramework' | 'installDependencies'
 
 const props = defineProps<{
   gql: WizardFragment
 }>()
-
-const { t } = useI18n()
 
 const currentStep = ref<CurrentStep>('selectFramework')
 
@@ -60,6 +57,17 @@ fragment Wizard on Query {
   ...InstallDependencies
 }`
 
-const title = computed(() => t(`setupWizard.${currentStep.value}.title`))
-const description = computed(() => t(`setupWizard.${currentStep.value}.description`))
+const stepHeaders: Record<CurrentStep, { title: string, description: string }> = {
+  selectFramework: {
+    title: 'Project setup',
+    description: 'Confirm the front-end framework and bundler used in your project.',
+  },
+  installDependencies: {
+    title: 'Install dev dependencies',
+    description: 'Based on your previous selection, the following dependencies are required.',
+  },
+}
+
+const title = computed(() => stepHeaders[currentStep.value].title)
+const description = computed(() => stepHeaders[currentStep.value].description)
 </script>

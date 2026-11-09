@@ -32,10 +32,7 @@
 <script lang="ts" setup>
 import ButtonBar from './ButtonBar.vue'
 import { computed } from 'vue'
-import { useI18n } from '@cy/i18n'
 import type { ButtonVariants } from '@cypress-design/vue-button'
-
-const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -65,8 +62,8 @@ const props = withDefaults(
   },
 )
 
-const nextLabel = computed(() => props.next || t('setupPage.step.next'))
-const backLabel = computed(() => props.back || t('setupPage.step.back'))
-const skipLabel = computed(() => props.skip || t('setupPage.step.skip'))
+const nextLabel = computed(() => props.next || 'Next step')
+const backLabel = computed(() => props.back || 'Back')
+const skipLabel = computed(() => props.skip || 'Skip')
 
 </script>

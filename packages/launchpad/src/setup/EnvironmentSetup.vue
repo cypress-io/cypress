@@ -5,11 +5,11 @@
     :icon="ErrorOutlineIcon"
     class="mx-auto my-[24px] max-w-[640px]"
     status="warning"
-    :title="t('setupPage.projectSetup.communityFrameworkDefinitionProblem')"
+    title="Community framework definition problem"
     dismissible
   >
     <p>
-      {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed', erroredFrameworks.length) }}
+      {{ erroredFrameworks.length === 1 ? 'This project has a community framework definition installed that could not be loaded. It is located at the following path:' : 'This project has some community framework definitions installed that could not be loaded. They are located at the following paths:' }}
     </p>
     <ul class="list-disc my-[12px] ml-[36px]">
       <li
@@ -25,11 +25,8 @@
         </button>
       </li>
     </ul>
-    <i18n-t
-      tag="p"
-      keypath="setupPage.projectSetup.seeFrameworkDefinitionDocumentation"
-    >
-      <ExternalLink
+    <p>
+      See the <ExternalLink
         :href="getUrlWithParams({
           url :'https://on.cypress.io/component-integrations',
           params: {
@@ -37,9 +34,9 @@
           }
         })"
       >
-        {{ t('setupPage.projectSetup.frameworkDefinitionDocumentation') }}
-      </ExternalLink>
-    </i18n-t>
+        framework definition documentation
+      </ExternalLink> for more information about creating, installing, and troubleshooting third party definitions.
+    </p>
   </Alert>
   <WizardLayout
     :back-fn="onBack"
@@ -51,8 +48,8 @@
       <SelectFrameworkOrBundler
         :options="frameworks || []"
         :value="props.gql.framework?.type ?? undefined"
-        :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
-        :label="t('setupPage.projectSetup.frameworkLabel')"
+        placeholder="Pick a framework"
+        label="Front-end framework"
         selector-type="framework"
         data-testid="select-framework"
         @select-framework="val => onWizardSetup('framework', val)"
@@ -62,8 +59,8 @@
         class="pt-[3px]"
         :options="bundlers"
         :value="props.gql.bundler?.type ?? undefined"
-        :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
-        :label="t('setupPage.projectSetup.bundlerLabel')"
+        placeholder="Pick a bundler"
+        label="Bundler"
         selector-type="bundler"
         data-testid="select-bundler"
         @select-bundler="val => onWizardSetup('bundler', val)"
@@ -86,7 +83,6 @@ import {
   EnvironmentSetup_OpenInFinderDocument,
 } from '../generated/graphql'
 
-import { useI18n } from '@cy/i18n'
 import { useMutation, useSubscription } from '@urql/vue'
 import type { FrameworkOption } from './types'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
@@ -149,8 +145,6 @@ const props = defineProps<{
   gql: EnvironmentSetupFragment
   nextFn: () => void
 }>()
-
-const { t } = useI18n()
 
 const bundlers = computed(() => {
   const all = props.gql.framework?.supportedBundlers || []

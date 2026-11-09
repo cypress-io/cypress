@@ -49,7 +49,7 @@
         v-if="isDetected"
         class="ml-[4px] text-gray-400 inline-block"
       >
-        {{ t('setupPage.projectSetup.detected') }}
+        (detected)
       </span>
     </template>
 
@@ -63,7 +63,7 @@
         v-if="itemValue.isDetected"
         class="ml-[4px] text-gray-400 inline-block"
       >
-        {{ t('setupPage.projectSetup.detected') }}
+        (detected)
       </span>
     </template>
     <template #item-prefix="{ value: itemValue }">
@@ -98,12 +98,9 @@ import Select from '@cy/components/Select.vue'
 import type {
   SupportedBundlers,
 } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import AlphaLabel from './AlphaLabel.vue'
 import CommunityLabel from './CommunityLabel.vue'
 import FrameworkOptionsFooter from './FrameworkOptionsFooter.vue'
-
-const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   value?: string
