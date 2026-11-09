@@ -1,7 +1,5 @@
 import { RecordKeyFragmentDoc } from '../../generated/graphql-test'
 import RecordKey from './RecordKey.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<RecordKey />', () => {
   const key = '1234-bbbb-5678-dddd'
@@ -40,11 +38,11 @@ describe('<RecordKey />', () => {
 
   it('has a managed keys button and copy button', () => {
     // the functionality of this button triggers a mutation so is tested in the settings page e2e tests
-    cy.contains('button', defaultMessages.settingsPage.recordKey.manageKeys)
+    cy.contains('button', 'Manage keys')
     .should('be.visible')
     .and('not.be.disabled')
 
-    cy.contains('button', defaultMessages.clipboard.copy)
+    cy.contains('button', 'Copy')
     .should('be.visible')
     .and('not.be.disabled')
   })
