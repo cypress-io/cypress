@@ -11,6 +11,11 @@ const clone = (obj) => {
     return Buffer.from(obj)
   }
 
+  // A `.js` fixture can evaluate to `undefined`, which JSON.parse() rejects.
+  if (obj === undefined) {
+    return obj
+  }
+
   return JSON.parse(JSON.stringify(obj))
 }
 
@@ -60,7 +65,9 @@ const makeKeyPrefixes = (fixturePath: string): string[] => {
 export default (Commands, Cypress, cy, state, config) => {
   // This function runs each time a spec window loads, so the cache lasts for one
   // run of a spec: every test in it shares the cache, and it starts empty when
-  // the spec runs again or the next spec starts.
+  // the spec runs again or the next spec starts. Each cy.origin() spec bridge
+  // runs it too and keeps its own cache, which invalidation in another
+  // context does not reach.
   let cache = {}
 
   const clearCache = () => {
