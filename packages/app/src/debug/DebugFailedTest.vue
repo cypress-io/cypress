@@ -86,9 +86,6 @@ import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { getDebugArtifacts } from './utils/debugArtifacts'
 import type { TestResults } from './DebugSpec.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   failedTestsResult: TestResults[]
@@ -170,7 +167,7 @@ const failedTestData = computed(() => {
   })
   .flat() // flatten the array since one of the internal items may itself be an array.
 
-  const debugArtifacts = getDebugArtifacts(runInstance, t)
+  const debugArtifacts = getDebugArtifacts(runInstance)
 
   return {
     debugArtifacts,
