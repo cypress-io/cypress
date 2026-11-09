@@ -70,13 +70,15 @@ describe('InlineSpecList', () => {
       const newSpecSelector = `[aria-label="New spec"]`
 
       cy.get(newSpecSelector).click()
-      cy.contains('Create new spec').should('be.visible')
+      cy.findByRole('heading', { name: 'Create new spec' }).should('be.visible')
 
-      cy.contains('Scaffold example specs').should('be.visible')
-      cy.contains('We\'ll generate several example specs to help guide you on how to write tests in Cypress.').should('be.visible')
+      cy.contains('[data-cy=card-title]', 'Scaffold example specs').should('be.visible')
+      .closest('[data-cy=card]')
+      .should('contain', 'We\'ll generate several example specs to help guide you on how to write tests in Cypress.')
 
-      cy.contains('Create new spec').should('be.visible')
-      cy.contains('We\'ll generate a template spec file which can be used to start testing your application.').should('be.visible')
+      cy.contains('[data-cy=card-title]', 'Create new spec').should('be.visible')
+      .closest('[data-cy=card]')
+      .should('contain', 'We\'ll generate a template spec file which can be used to start testing your application.')
     })
 
     it('should handle spec refresh', () => {
