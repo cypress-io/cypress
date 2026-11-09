@@ -4,9 +4,9 @@
     :medium="RUNS_TAB_MEDIUM"
   >
     <template #header>
-      <PromoHeader :title="t('runs.connect.title')">
+      <PromoHeader title="Connect to view your recorded runs">
         <template #description>
-          {{ t('runs.connect.description') }}
+          Cypress Cloud is built for teams who need to do testing at scale.
         </template>
         <template #control>
           <CloudConnectButton
@@ -34,7 +34,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import { RUNS_TAB_MEDIUM } from '../utils/constants'
 import CloudConnectButton from '../CloudConnectButton.vue'
 import Promo from '../../components/promo/Promo.vue'
@@ -46,7 +45,4 @@ import GuideCard3 from './GuideCard3.vue'
 defineProps<{
   campaign: string
 }>()
-
-const { t } = useI18n()
-
 </script>

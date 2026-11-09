@@ -1,7 +1,7 @@
 <template>
   <div class="h-full">
     <NoInternetConnection v-if="!online">
-      {{ t('launchpadErrors.noInternet.connectProject') }}
+      Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project.
     </NoInternetConnection>
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
@@ -29,14 +29,14 @@
     >
       <TrackedBanner
         v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
-        :title="t('runs.empty.noRunsFoundForBranch')"
+        title="No runs found for your branch"
         :banner-id="ACI_052023_NO_RUNS_FOUND_FOR_BRANCH"
         dismissible
         status="warning"
         :has-banner-been-shown="false"
         :event-data="undefined"
       >
-        <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown from the i18n no-runs message -->
+        <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown from the no-runs message -->
         <div
           ref="markdownTarget"
           class="warning-markdown"
@@ -46,21 +46,21 @@
       </TrackedBanner>
       <Warning
         v-if="!online"
-        :title="t('launchpadErrors.noInternet.header')"
-        :message="t('launchpadErrors.noInternet.message')"
+        title="You have no internet connection"
+        message="Check your internet connection to pull the latest data from Cypress Cloud."
         :dismissible="false"
         class="mx-auto mb-[24px]"
       />
       <TrackedBanner
         v-if="!userProjectStatusStore.project.isUsingGit"
-        :title="t('runs.empty.gitRepositoryNotDetected')"
+        title="Git repository not detected"
         :banner-id="ACI_052023_GIT_NOT_DETECTED"
         :has-banner-been-shown="false"
         status="warning"
         dismissible
         :event-data="undefined"
       >
-        {{ t('runs.empty.ensureGitSetupCorrectly') }}
+        Cypress uses Git to associate runs with your local state. As a fallback, all runs for your project are shown. Please ensure that version control is set up correctly.
       </TrackedBanner>
       <RunsLayout
         :runs="runs"
@@ -75,7 +75,6 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
@@ -91,8 +90,6 @@ import TrackedBanner from '../specs/banners/TrackedBanner.vue'
 import { BannerIds } from '@packages/types/src'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import type { RunCardFragment, RunsContainerFragment, RunsGitTreeQuery } from '../generated/graphql'
-
-const { t } = useI18n()
 
 const markdownTarget = ref()
 
@@ -140,8 +137,8 @@ const noRunsForBranchMessage = computed(() => {
     },
   })
 
-  const message = t('runs.empty.noRunsForBranchMessage')
-  const link = `[${t('links.learnMoreButton')}](${learnMoreLink})`
+  const message = 'Cypress uses Git to show runs for your branch. As a fallback, all runs for your project are shown. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.'
+  const link = `[Learn more](${learnMoreLink})`
 
   return `${message} ${link}`
 })
@@ -161,7 +158,6 @@ watch(() => userProjectStatusStore.project.isProjectConnected, (newVal, oldVal) 
     showConnectSuccessAlert.value = false
   }
 })
-
 </script>
 
 <style scoped>

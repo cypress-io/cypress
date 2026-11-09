@@ -36,9 +36,7 @@
             v-if="sha === currentCommitInfo?.sha"
             data-cy="tag-checked-out"
             class="inline-flex items-center shrink-0 font-medium text-purple-400 align-middle border border-gray-100 rounded border-1 h-[16px] ml-[8px] px-[4px] text-[12px] leading-[16px]"
-          >
-            {{ t('runs.layout.checkedOut') }}
-          </span>
+          >Checked out</span>
         </div>
         <ul
           v-if="groupByCommit[sha].runs"
@@ -67,7 +65,7 @@
       @click="openLatest"
     >
       <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
-      {{ t('runs.layout.viewCloudRuns') }}
+      View runs in Cypress Cloud
     </Button>
   </div>
   <ul
@@ -91,15 +89,12 @@
 import { compact, groupBy } from 'lodash'
 import { computed, h } from 'vue'
 import type { FunctionalComponent } from 'vue'
-import { useI18n } from '@cy/i18n'
 import RunCard from './RunCard.vue'
 import DebugCommitIcon from '../debug/DebugCommitIcon.vue'
 import Button from '@cypress-design/vue-button'
 import { IconTechnologyCypress } from '@cypress-design/vue-icon'
 import type { RunCardFragment } from '../generated/graphql'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   runs?: RunCardFragment[]
@@ -158,5 +153,4 @@ const groupByCommit = computed(() => {
 
   return result
 })
-
 </script>

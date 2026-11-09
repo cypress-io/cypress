@@ -1,10 +1,6 @@
 import { RunsErrorRendererFragmentDoc } from '../generated/graphql-test'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
-
-const text = defaultMessages.runs.errors
 
 describe('<RunsErrorRenderer />', () => {
   it('should show a "connection failed" error', () => {
@@ -42,9 +38,9 @@ describe('<RunsErrorRenderer />', () => {
 
     cy.spy(userProjectStatusStore, 'openLoginConnectModal').as('loginConnectSpy')
 
-    cy.contains(text.notFound.title).should('be.visible')
-    cy.contains(text.notFound.description.replace('{0}', 'projectId: "test-project-id"')).should('be.visible')
-    cy.contains('button', text.notFound.button).click()
+    cy.contains('Couldn\'t find your project').should('be.visible')
+    cy.contains('We were unable to find an existing project matching the projectId: "test-project-id" set in your Cypress config file. You can reconnect with an existing project or create a new project.').should('be.visible')
+    cy.contains('button', 'Reconnect your project').click()
 
     cy.get('@loginConnectSpy').should('have.been.calledWith', { utmMedium: 'Runs Tab' })
   })
