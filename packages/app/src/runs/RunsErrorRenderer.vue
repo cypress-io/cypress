@@ -8,7 +8,7 @@
     @button-click="emit('reExecuteRunsQuery')"
   >
     <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-    The request times out when trying to retrieve the recorded runs from Cypress Cloud. Please refresh the page to try again and visit out <ExternalLink href="https://www.cypressstatus.com/">Support page</ExternalLink> if this behavior continues.
+    The request times out when trying to retrieve the recorded runs from Cypress Cloud. Please refresh the page to try again and visit our <ExternalLink href="https://www.cypressstatus.com/">Support page</ExternalLink> if this behavior continues.
   </RunsError>
   <RunsError
     v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectNotFound'"

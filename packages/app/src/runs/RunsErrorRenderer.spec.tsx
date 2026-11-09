@@ -14,7 +14,7 @@ describe('<RunsErrorRenderer />', () => {
     })
 
     cy.contains('h2', 'Cannot connect to Cypress Cloud')
-    cy.contains('p', 'The request times out when trying to retrieve the recorded runs from Cypress Cloud. Please refresh the page to try again and visit out Support page if this behavior continues.')
+    cy.contains('p', 'The request times out when trying to retrieve the recorded runs from Cypress Cloud. Please refresh the page to try again and visit our Support page if this behavior continues.')
     cy.findByTestId('external').contains('Support page').should('have.attr', 'href', 'https://www.cypressstatus.com/')
     cy.contains('button', 'Try again')
   })
