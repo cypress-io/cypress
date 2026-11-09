@@ -1377,7 +1377,6 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
           describe('creation time', () => {
             it('places cookies created earlier BEFORE newly created cookies', () => {
               cy.intercept(`${scheme}://www.foobar.com:${sameOriginPort}/test-request`, (req) => {
-                7
                 expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
 
                 req.reply({

@@ -34,7 +34,7 @@
           </button>
           <Badge
             v-if="browser.isDeprecated"
-            :label="t('topNav.deprecated')"
+            label="Deprecated"
             status="warning"
             data-cy="deprecated-browser-badge"
           />
@@ -44,7 +44,7 @@
           group-hover:mix-blend-luminosity
           "
         >
-          {{ t('topNav.version') }} {{ browser.majorVersion }}
+          Version {{ browser.majorVersion }}
           <span v-if="!browser.isVersionSupported">
             (Unsupported)
           </span>
@@ -81,7 +81,6 @@
   </template>
 </template>
 <script setup lang="ts">
-import { useI18n } from '@cy/i18n'
 import { VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
 import type { VerticalBrowserListItemsFragment } from '../../generated/graphql'
 import { computed } from 'vue'
@@ -91,8 +90,6 @@ import Tooltip from '../../components/Tooltip.vue'
 import Badge from '../../components/Badge.vue'
 import { sortBrowsersByDeprecation } from '../../utils/sortBrowsersByDeprecation'
 import _ from 'lodash'
-
-const { t } = useI18n()
 
 gql`
 fragment VerticalBrowserListItems on CurrentProject {

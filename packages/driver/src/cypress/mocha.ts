@@ -136,8 +136,8 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
   }
 }
 
-type MochaArgs = [string, Function | undefined]
-function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string = '', _testConfig?: Record<string, any>) {
+type MochaArgs = [string, ((...args: any[]) => unknown) | undefined]
+function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: (...args: any[]) => any, testCallback: ((...args: any[]) => unknown) | string = '', _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
 
   // attached testConfigOverrides will execute before `runner:test:before:run` event
@@ -420,9 +420,7 @@ function runFreshAttempt (this: Mocha.Runnable & { timedOut?: boolean }, ...args
 
 const patchRunnableRun = (Cypress) => {
   Runnable.prototype.run = function (...args) {
-    const runnable = this
-
-    Cypress.action('mocha:runnable:run', runFreshAttempt, runnable, args)
+    Cypress.action('mocha:runnable:run', runFreshAttempt, this, args)
   }
 }
 
@@ -585,16 +583,15 @@ const patchSuiteAddSuite = (specWindow) => {
 
 const patchRunnableResetTimeout = () => {
   Runnable.prototype.resetTimeout = function () {
-    const runnable = this
     const currentRunner = Cypress.runner
 
     const ms = this.timeout() || 1e9
 
     this.clearTimeout()
 
-    const getErrPath = function () {
+    const getErrPath = () => {
       // we've yield an explicit done callback
-      if (runnable.async) {
+      if (this.async) {
         return 'mocha.async_timed_out'
       }
 
@@ -602,7 +599,7 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      if (runnable.state === 'passed' || Cypress.runner !== currentRunner) {
+      if (this.state === 'passed' || Cypress.runner !== currentRunner) {
         // this timeout can be reached at the same time that a
         // user does an asynchronous `done`, so double-check
         // that the test has not already passed before timing out
@@ -611,8 +608,8 @@ const patchRunnableResetTimeout = () => {
 
       const err = $errUtils.errByPath(getErrPath(), { ms })
 
-      runnable.callback(err)
-      runnable.timedOut = true
+      this.callback(err)
+      this.timedOut = true
     }, ms)
   }
 }

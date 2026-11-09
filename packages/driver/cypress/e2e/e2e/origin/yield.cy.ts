@@ -134,7 +134,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
       done()
     })
 
-    cy.origin<{ key: Function }>('http://www.foobar.com:3500', () => {
+    cy.origin<{ key: () => string }>('http://www.foobar.com:3500', () => {
       cy.wrap({
         key: () => {
           return 'whoops'

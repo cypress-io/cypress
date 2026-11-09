@@ -3,6 +3,7 @@ import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 
 import cy from 'eslint-plugin-cypress'
+import chaiFriendly from 'eslint-plugin-chai-friendly'
 
 import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
@@ -15,6 +16,35 @@ import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-imp
 
 import { cypressDevPlugin } from './rules'
 import { reactRulesOff } from './reactRulesOff'
+
+const testFiles = [
+  '**/test/**/*.{js,jsx,ts,tsx}',
+  '**/cypress/**/*.{js,jsx,ts,tsx}',
+  '**/*.spec.{js,jsx,ts,tsx}',
+  '**/*.cy.{js,jsx,ts,tsx}',
+]
+
+const unusedExpressionsOptions = {
+  allowShortCircuit: true,
+  allowTernary: true,
+  allowTaggedTemplates: true,
+}
+
+// Chai property assertions such as `expect(x).to.be.true` are unused
+// expressions to the TypeScript rule. Add it after `baseConfig` for test code
+// that the shared test globs miss.
+export const chaiFriendlyConfig = (files: string[]): InfiniteDepthConfigWithExtends => {
+  return {
+    files,
+    plugins: {
+      'chai-friendly': chaiFriendly,
+    },
+    rules: {
+      '@typescript-eslint/no-unused-expressions': 'off',
+      'chai-friendly/no-unused-expressions': ['error', unusedExpressionsOptions],
+    },
+  }
+}
 
 export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
@@ -118,12 +148,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
   {
-    files: [
-      '**/test/**/*.{js,jsx,ts,tsx}',
-      '**/cypress/**/*.{js,jsx,ts,tsx}',
-      '**/*.spec.{js,jsx,ts,tsx}',
-      '**/*.cy.{js,jsx,ts,tsx}',
-    ],
+    files: testFiles,
     rules: {
       '@cypress/dev/skip-comment': 'error',
     },
@@ -156,6 +181,10 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
         ignoreRestSiblings: true,
         varsIgnorePattern: '^_',
       }],
+      '@typescript-eslint/no-unused-expressions': ['error', unusedExpressionsOptions],
+      // `declare namespace Cypress` is how the public types and user support
+      // files augment the global `Cypress` namespace
+      '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
       'no-restricted-properties': [
         'error',
         {
@@ -229,34 +258,23 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     // work is tracked in https://github.com/cypress-io/cypress/issues/35250
     rules: {
       'prefer-rest-params': 'off',
-      'no-global-assign': 'off',
       'no-async-promise-executor': 'off',
 
-      '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-this-alias': 'off',
-      '@typescript-eslint/triple-slash-reference': 'off',
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
       'mocha/no-setup-in-describe': 'off',
       'mocha/max-top-level-suites': 'off',
       'mocha/no-top-level-hooks': 'off',
-      'mocha/no-identical-title': 'off',
       'mocha/no-global-tests': 'off',
-      'mocha/no-sibling-hooks': 'off',
-      'mocha/no-return-and-callback': 'off',
       'mocha/no-pending-tests': 'off',
 
       'vue/multi-word-component-names': 'off',
       'vue/no-dupe-keys': 'off',
 
       'cypress/unsafe-to-chain-command': 'off',
-      'cypress/no-async-tests': 'off',
-      'cypress/no-assigning-return-values': 'off',
 
       // we use react 18+, so these rules do not apply
       'react/react-in-jsx-scope': 'off',
@@ -267,6 +285,19 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'import-x/default': 'warn',
     },
   },
+
+  // These rules guard the `cy` command queue, which only exists in Cypress specs
+  // and support files. Node-side mocha and vitest suites write async tests and
+  // keep return values on purpose.
+  {
+    ignores: ['**/*.cy.{js,jsx,ts,tsx}', '**/cypress/**'],
+    rules: {
+      'cypress/no-async-tests': 'off',
+      'cypress/no-assigning-return-values': 'off',
+    },
+  },
+
+  chaiFriendlyConfig(testFiles),
 
   {
     // the Vue recommended config ships these as warnings, and
@@ -310,11 +341,14 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // A merged declaration must repeat the original's type parameters, used or not
   {
     files: ['**/*.d.ts'],
     rules: {
+      // A merged declaration must repeat the original's type parameters, used or not
       '@typescript-eslint/no-unused-vars': 'off',
+      // An import turns a global declaration file into a module, so the public
+      // typings pull in other declarations with references instead
+      '@typescript-eslint/triple-slash-reference': 'off',
     },
   },
 

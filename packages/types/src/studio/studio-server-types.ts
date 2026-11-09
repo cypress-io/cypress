@@ -56,7 +56,7 @@ export interface StudioCloudApi {
 
 type AsyncRetry = <TArgs extends any[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
-  options: RetryOptions
+  options: RetryOptions,
 ) => (...args: TArgs) => Promise<TResult>
 
 export type BrowserWindow = {
@@ -197,7 +197,7 @@ export interface StudioServerShape {
 
 export interface StudioServerDefaultShape {
   createStudioServer: (
-    options: StudioServerOptions
+    options: StudioServerOptions,
   ) => Promise<StudioServerShape>
   MOUNT_VERSION: number
 }

@@ -66,7 +66,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
           throw new Error('"window.ws" is expected to be available')
         }
 
-        const originalEmit: Function = win.ws.emit
+        const originalEmit: (...args: any[]) => unknown = win.ws.emit
         const stub = cy.stub(win.ws as any, 'emit')
 
         stub.callsFake((...args) => {

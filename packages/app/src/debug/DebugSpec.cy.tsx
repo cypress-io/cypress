@@ -1,7 +1,5 @@
 import DebugSpec from './DebugSpec.vue'
 import type { Spec, TestResults } from './DebugSpec.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 const resultCounts = (min: number, max: number) => {
   return {
@@ -201,7 +199,7 @@ describe('<DebugSpec/> with multiple test results', () => {
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/auth.spec.ts')
     cy.contains('auth').should('be.visible')
     cy.findByTestId('run-failures').should('not.be.disabled')
-    .contains(defaultMessages.debugPage.runFailures.btn)
+    .contains('Run Failures')
 
     cy.findByTestId('spec-header-metadata').should('be.visible')
     cy.findByTestId('debugHeader-results').should('be.visible')
@@ -575,8 +573,8 @@ describe('Open in IDE', () => {
   it('shows openInIDE if file is found locally', () => {
     renderDebugSpec()
 
-    cy.findByLabelText(defaultMessages.debugPage.openFile.openInIDE).as('openInIDE').realHover()
-    cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.openInIDE)
+    cy.findByLabelText('Open in IDE').as('openInIDE').realHover()
+    cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', 'Open in IDE')
 
     cy.get('@openInIDE').click()
 
@@ -587,7 +585,7 @@ describe('Open in IDE', () => {
   it('shows disabled openInIDE if file is not found locally', () => {
     renderDebugSpec({ foundLocally: false })
 
-    cy.findByLabelText(defaultMessages.debugPage.openFile.notFoundLocally).as('openInIDE').realHover()
-    cy.findByTestId('open-in-ide-disabled-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.notFoundLocally)
+    cy.findByLabelText('Opening in IDE is disabled because the spec is not found in this project').as('openInIDE').realHover()
+    cy.findByTestId('open-in-ide-disabled-tooltip').should('be.visible').and('contain', 'Opening in IDE is disabled because the spec is not found in this project')
   })
 })

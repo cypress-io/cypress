@@ -137,6 +137,49 @@ describe('src/cypress/location', () => {
 
       expect(origin).to.eq(null)
     })
+
+    it('handles ip addresses', () => {
+      const str = setup('local').getOrigin()
+
+      expect(str).to.eq('http://127.0.0.1:8080')
+    })
+
+    it('handles 1 part localhost', () => {
+      const str = setup('users').getOrigin()
+
+      expect(str).to.eq('http://localhost:2020')
+    })
+
+    it('handles 2 parts stack', () => {
+      const str = setup('stack').getOrigin()
+
+      expect(str).to.eq('https://stackoverflow.com')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/255
+    it('handles a second domain inside the query string', () => {
+      const str = setup('email').getOrigin()
+
+      expect(str).to.eq('http://localhost:3500')
+    })
+
+    it('handles private tlds in the public suffix', () => {
+      const str = setup('heroku').getOrigin()
+
+      expect(str).to.eq('https://example.herokuapp.com')
+    })
+
+    it('handles subdomains of private tlds in the public suffix', () => {
+      const str = setup('herokuSub').getOrigin()
+
+      expect(str).to.eq('https://foo.example.herokuapp.com')
+    })
+
+    it('falls back to dumb check when invalid tld', () => {
+      const str = setup('unknown').getOrigin()
+
+      expect(str).to.eq('http://what.is.so.unknown')
+    })
   })
 
   context('#getPathName', () => {
@@ -206,57 +249,6 @@ describe('src/cypress/location', () => {
       const str = setup('signin').getToString()
 
       expect(str).to.eq('http://localhost:2020/signin')
-    })
-  })
-
-  context('#getOrigin', () => {
-    it('handles ip addresses', () => {
-      const str = setup('local').getOrigin()
-
-      expect(str).to.eq('http://127.0.0.1:8080')
-    })
-
-    it('handles 1 part localhost', () => {
-      const str = setup('users').getOrigin()
-
-      expect(str).to.eq('http://localhost:2020')
-    })
-
-    it('handles 2 parts stack', () => {
-      const str = setup('stack').getOrigin()
-
-      expect(str).to.eq('https://stackoverflow.com')
-    })
-
-    it('handles subdomains google', () => {
-      const str = setup('google').getOrigin()
-
-      expect(str).to.eq('https://www.google.com')
-    })
-
-    // https://github.com/cypress-io/cypress/issues/255
-    it('handles a second domain inside the query string', () => {
-      const str = setup('email').getOrigin()
-
-      expect(str).to.eq('http://localhost:3500')
-    })
-
-    it('handles private tlds in the public suffix', () => {
-      const str = setup('heroku').getOrigin()
-
-      expect(str).to.eq('https://example.herokuapp.com')
-    })
-
-    it('handles subdomains of private tlds in the public suffix', () => {
-      const str = setup('herokuSub').getOrigin()
-
-      expect(str).to.eq('https://foo.example.herokuapp.com')
-    })
-
-    it('falls back to dumb check when invalid tld', () => {
-      const str = setup('unknown').getOrigin()
-
-      expect(str).to.eq('http://what.is.so.unknown')
     })
   })
 

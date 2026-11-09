@@ -2856,8 +2856,6 @@ describe('src/cy/commands/actions/type - #type', () => {
           this.lastLog = log
         }
       })
-
-      null
     })
 
     it('eventually passes the assertion', () => {

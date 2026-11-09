@@ -24,7 +24,7 @@ type retryOptions = {
   error?: CypressError
   interval: number
   log: boolean
-  onFail?: Function
+  onFail?: (err: Error) => Error
   timeout: number
   total?: number
 }

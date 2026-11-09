@@ -331,7 +331,7 @@ interface CommandProps {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
   groupId?: number
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
