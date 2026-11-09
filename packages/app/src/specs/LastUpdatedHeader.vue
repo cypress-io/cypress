@@ -29,6 +29,7 @@
           :href="docsUrl"
           class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
         >git info</ExternalLink> for this project and has defaulted to showing file system data instead</template>
+        <!-- eslint-enable vue/multiline-html-element-content-newline -->
       </div>
     </template>
   </Tooltip>

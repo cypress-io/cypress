@@ -96,7 +96,8 @@ fragment CreateSpecModal on Query {
 
 const currentGeneratorId: Ref<GeneratorId | undefined> = ref(props.initialGenerator)
 
-const title = ref('Create new spec')
+const defaultTitle = 'Create new spec'
+const title = ref(defaultTitle)
 
 const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
 
@@ -121,7 +122,7 @@ const specFileName = computed(() => {
 })
 
 whenever(not(generator), () => {
-  title.value = 'Create new spec'
+  title.value = defaultTitle
 })
 
 function close () {

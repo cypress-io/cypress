@@ -84,13 +84,13 @@
       class="sr-only"
       aria-live="polite"
     >
-      {{ resultCount === 0 ? 'No matches' : resultCount === 1 ? '1 match' : `${resultCount} matches` }}
+      {{ resultCountLabel }}
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
@@ -108,6 +108,14 @@ const emit = defineEmits<{
 }>()
 
 const runAllSpecsStore = useRunAllSpecsStore()
+
+const resultCountLabel = computed(() => {
+  if (props.resultCount === 0) {
+    return 'No matches'
+  }
+
+  return props.resultCount === 1 ? '1 match' : `${props.resultCount} matches`
+})
 
 const inputFocused = ref(false)
 const input = ref<HTMLInputElement>()
