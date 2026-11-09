@@ -1,8 +1,8 @@
 <template>
   <WarningList :gql="props.gql" />
   <LaunchpadHeader
-    :title="title"
-    :description="description"
+    :title="header.title"
+    :description="header.description"
   />
   <div class="mb-5 children:relative">
     <EnvironmentSetup
@@ -68,6 +68,5 @@ const stepHeaders: Record<CurrentStep, { title: string, description: string }> =
   },
 }
 
-const title = computed(() => stepHeaders[currentStep.value].title)
-const description = computed(() => stepHeaders[currentStep.value].description)
+const header = computed(() => stepHeaders[currentStep.value])
 </script>

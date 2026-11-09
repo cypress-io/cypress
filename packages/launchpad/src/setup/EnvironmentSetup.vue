@@ -9,7 +9,7 @@
     dismissible
   >
     <p>
-      {{ erroredFrameworks.length === 1 ? 'This project has a community framework definition installed that could not be loaded. It is located at the following path:' : 'This project has some community framework definitions installed that could not be loaded. They are located at the following paths:' }}
+      {{ erroredFrameworksMessage }}
     </p>
     <ul class="list-disc my-[12px] ml-[36px]">
       <li
@@ -171,6 +171,12 @@ const frameworks = computed(() => {
 
 const erroredFrameworks = computed(() => {
   return props.gql.erroredFrameworks.filter((framework) => framework.path)
+})
+
+const erroredFrameworksMessage = computed(() => {
+  return erroredFrameworks.value.length === 1
+    ? 'This project has a community framework definition installed that could not be loaded. It is located at the following path:'
+    : 'This project has some community framework definitions installed that could not be loaded. They are located at the following paths:'
 })
 
 gql`

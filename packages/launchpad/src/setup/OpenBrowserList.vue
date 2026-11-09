@@ -146,7 +146,7 @@
               @click="emit('focusBrowser')"
             >
               <ExportIcon class="mr-[8px] icon-dark-gray-500" />
-              {{ browserText.focus }}
+              Focus
             </Button>
             <Button
               size="40"
@@ -156,7 +156,7 @@
               @click="emit('closeBrowser')"
             >
               <PowerStandbyIcon class="mr-[8px] icon-dark-gray-500" />
-              {{ browserText.close }}
+              Close
             </Button>
           </template>
         </template>
@@ -171,7 +171,7 @@
         <ArrowRightIcon
           class="mr-[8px] icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
         />
-        {{ browserText.switchTestingType }}
+        Switch testing type
       </Button>
     </div>
   </form>
@@ -289,9 +289,6 @@ const browserText = computed(() => {
       opening: `Opening Component Testing in ${browser}`,
     },
     running: `Running ${browser}`,
-    focus: 'Focus',
-    close: 'Close',
-    switchTestingType: 'Switch testing type',
   }
 })
 
