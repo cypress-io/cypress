@@ -51,6 +51,6 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
   it('renders footer with CTA button', () => {
     cy.contains('p', 'You can reconfigure the E2E testing settings for this project if you\'re experiencing issues with your Cypress configuration.')
     cy.contains('a', 'Configuration guide')
-    .should('have.attr', 'href', 'https://on.cypress.io/configuration')
+    .should('have.attr', 'href', 'https://on.cypress.io/configuration?utm_medium=Settings&utm_campaign=Configuration+Guide&utm_source=Binary%3A+Launchpad')
   })
 })

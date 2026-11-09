@@ -50,7 +50,7 @@
       variant="outline"
       :prefix-icon="SettingsIcon"
       prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
-      href="https://on.cypress.io/configuration"
+      :href="configurationGuideUrl"
     >
       Configuration guide
     </Button>
@@ -75,12 +75,15 @@ import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
 import { isWindows } from '@packages/frontend-shared/src/utils/isWindows'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const footerText = computed(() => {
   const testingType = props.gql.currentProject?.currentTestingType === 'component' ? 'component' : 'E2E'
 
   return `You can reconfigure the ${testingType} testing settings for this project if you're experiencing issues with your Cypress configuration.`
 })
+
+const configurationGuideUrl = getUrlWithParams({ url: 'https://on.cypress.io/configuration', params: { utm_medium: 'Settings', utm_campaign: 'Configuration Guide' } })
 
 gql`
 fragment SettingsContainer on Query {
