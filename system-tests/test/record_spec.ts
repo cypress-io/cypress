@@ -1430,7 +1430,7 @@ describe('e2e record', () => {
         })
       })
 
-      it('errors and exits when auto cancel not available in plan', function () {
+      it('errors and exits when auto cancel not available in plan with 1 when posix exit codes are enabled', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',

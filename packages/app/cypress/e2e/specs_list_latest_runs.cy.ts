@@ -614,7 +614,7 @@ describe('App/Cloud Integration - Latest runs (no branch)', { viewportWidth: 120
   })
 })
 
-describe('App/Cloud Integration - Latest runs and Average duration', { viewportWidth: 1200 }, () => {
+describe('App/Cloud Integration - Latest runs and Average duration (offline)', { viewportWidth: 1200 }, () => {
   context('when offline', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')

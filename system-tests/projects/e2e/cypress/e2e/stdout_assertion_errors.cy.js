@@ -7,7 +7,7 @@ describe('assertion errors', () => {
     cy.wrap([]).should('eql', [1, 2, 3])
   })
 
-  it('fails with dom assertion without diff, with retries', () => {
+  it('fails with dom assertion without diff, no retries', () => {
     cy.get('body').then(($el) => {
       expect($el).to.have.class('foo')
     })

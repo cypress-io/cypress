@@ -1016,7 +1016,7 @@ namespace CypressDomTests {
 
 namespace CypressTestConfigOverridesTests {
   // set config on a per-test basis
-  it('test', {
+  it('accepts every per-test config option', {
     animationDistanceThreshold: 10,
     defaultCommandTimeout: 6000,
     expose: {},
@@ -1029,80 +1029,80 @@ namespace CypressTestConfigOverridesTests {
     viewportWidth: 200,
     waitForAnimations: false,
   }, () => { })
-  it('test', {
+  it('accepts a browser object', {
     browser: { name: 'firefox' },
   }, () => { })
-  it('test', {
+  it('accepts an array of browsers', {
     browser: [{ name: 'firefox' }, { name: 'chrome' }],
   }, () => { })
-  it('test', {
+  it('accepts a browser name with keystrokeDelay', {
     browser: 'firefox',
     keystrokeDelay: 0,
   }, () => { })
-  it('test', {
+  it('rejects an unknown browser property', {
     browser: { foo: 'bar' }, // $ExpectError
   }, () => { })
-  it('test', {
+  it('accepts null retries', {
     retries: null,
     keystrokeDelay: 0,
   }, () => { })
-  it('test', {
+  it('rejects a boolean keystrokeDelay', {
     retries: 3,
     keystrokeDelay: false, // $ExpectError
   }, () => { })
-  it('test', {
+  it('accepts retries with null openMode', {
     retries: {
       runMode: 3,
       openMode: null,
     },
   }, () => { })
-  it('test', {
+  it('accepts retries with only runMode', {
     retries: {
       runMode: 3,
     },
   }, () => { })
-  it('test', {
+  it('rejects an unknown retries property', {
     retries: { run: 3 }, // $ExpectError
   }, () => { })
-  it('test', {
+  it('rejects testIsolation on a test', {
     testIsolation: false, // $ExpectError
   }, () => { })
 
-  it.skip('test', {}, () => { })
-  it.only('test', {}, () => { })
-  xit('test', {}, () => { })
+  it.skip('it.skip', {}, () => { })
+  it.only('it.only', {}, () => { })
+  xit('xit', {}, () => { })
 
-  specify('test', {}, () => { })
-  specify.only('test', {}, () => { })
-  specify.skip('test', {}, () => { })
-  xspecify('test', {}, () => { })
+  specify('specify', {}, () => { })
+  specify.only('specify.only', {}, () => { })
+  specify.skip('specify.skip', {}, () => { })
+  xspecify('xspecify', {}, () => { })
 
   // set config on a per-suite basis
-  describe('suite', {
+  describe('accepts a browser family with keystrokeDelay on a suite', {
     browser: { family: 'firefox' },
     keystrokeDelay: 0,
   }, () => { })
 
-  describe('suite', {
+  describe('accepts testIsolation on a suite', {
     testIsolation: false,
   }, () => { })
 
-  context('suite', {}, () => { })
+  context('context', {}, () => { })
 
-  describe('suite', {
+  describe('rejects a boolean keystrokeDelay on a suite', {
     browser: { family: 'firefox' },
     keystrokeDelay: false, // $ExpectError
   }, () => { })
 
-  describe.only('suite', {}, () => { })
-  describe.skip('suite', {}, () => { })
-  xdescribe('suite', {}, () => { })
+  describe.only('describe.only', {}, () => { })
+  describe.skip('describe.skip', {}, () => { })
+  xdescribe('xdescribe', {}, () => { })
 }
 
 // for whatever reason, this is a false negative if placed in
 // the CypressTestConfigOverridesTests namespace
 
-describe('suite', {
+describe('rejects an unknown config option on a suite', {
   browser: { family: 'firefox' },
   foo: 'bar', // $ExpectError
 }, () => { })

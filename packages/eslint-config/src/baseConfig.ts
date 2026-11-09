@@ -240,7 +240,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'mocha/no-setup-in-describe': 'off',
       'mocha/max-top-level-suites': 'off',
       'mocha/no-top-level-hooks': 'off',
-      'mocha/no-identical-title': 'off',
       'mocha/no-global-tests': 'off',
       'mocha/no-sibling-hooks': 'off',
       'mocha/no-return-and-callback': 'off',
