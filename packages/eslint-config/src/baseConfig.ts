@@ -258,7 +258,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'no-async-promise-executor': 'off',
 
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
 
       'mocha/no-exclusive-tests': 'error',
