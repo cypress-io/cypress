@@ -1,11 +1,8 @@
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 import GlobalPage from './GlobalPage.vue'
 import type { GlobalPageFragment } from '../generated/graphql-test'
 import { GlobalPageFragmentDoc, GlobalPage_AddProjectDocument } from '../generated/graphql-test'
 
-const searchLabel = defaultMessages.globalPage.searchPlaceholder
-const emptyMessages = defaultMessages.globalPage.empty
+const searchLabel = 'Search projects'
 const testProject = 'some-test-title'
 const anotherTestProject = 'another-test-project'
 const testProjectPath = '/usr/local/dev/projects/some-test-title'
@@ -17,8 +14,8 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
         <GlobalPage gql={{ gql: {} } as unknown as GlobalPageFragment}/>
       </div>))
 
-      cy.findByText(emptyMessages.title).should('be.visible')
-      cy.findByText(emptyMessages.helper).should('be.visible')
+      cy.findByText('Add project').should('be.visible')
+      cy.findByText('Get started by adding your first project below.').should('be.visible')
 
       const addProjectStub = cy.stub()
 
@@ -53,7 +50,7 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
           } })
       })
 
-      cy.findByText(emptyMessages.browseManually).click()
+      cy.findByText('browse manually.').click()
 
       cy.wrap(addProjectStub).should('have.been.called')
     })
@@ -84,7 +81,7 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
     it('can add a project when clicking the button', () => {
       cy.findByText('cypress-config-ts').should('not.exist')
 
-      cy.contains('button', defaultMessages.globalPage.addProjectButton).click()
+      cy.contains('button', 'Add project').click()
       cy.get('input[type=file]')
       .attachFileWithPath('absolute/path/to/yet-another-test-project/cypress.config.ts')
       .trigger('change', { force: true })
