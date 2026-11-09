@@ -58,11 +58,9 @@ const makeKeyPrefixes = (fixturePath: string): string[] => {
 }
 
 export default (Commands, Cypress, cy, state, config) => {
-  // This runs each time a spec window loads, so the cache lasts for one run of
-  // a spec: every test in it shares the cache, and it starts empty when the spec
-  // runs again or the next spec starts. Short of that, only invalidateCacheEntry
-  // removes entries; 'clear:fixtures:cache' lets the driver's own tests start
-  // each test with an empty cache.
+  // This function runs each time a spec window loads, so the cache lasts for one
+  // run of a spec: every test in it shares the cache, and it starts empty when
+  // the spec runs again or the next spec starts.
   let cache = {}
 
   const clearCache = () => {
@@ -83,6 +81,7 @@ export default (Commands, Cypress, cy, state, config) => {
     }
   }
 
+  // Only the driver's own tests emit this, to start each test with an empty cache.
   Cypress.on('clear:fixtures:cache', clearCache)
   Cypress.on('fixture:cache:invalidate', invalidateCacheEntry)
 
