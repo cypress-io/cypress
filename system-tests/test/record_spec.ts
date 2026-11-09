@@ -2651,6 +2651,7 @@ describe('e2e record', () => {
 
       describe('passing', () => {
         enableCaptureProtocol()
+
         it('retrieves the capture protocol, uploads the db, and updates the artifact upload report', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -2720,6 +2721,7 @@ describe('e2e record', () => {
 
       describe('when the tab crashes in chrome', () => {
         enableCaptureProtocol()
+
         it('posts accurate test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -2758,6 +2760,7 @@ describe('e2e record', () => {
 
       describe('when there is an async error thrown from config file', () => {
         enableCaptureProtocol()
+
         it('posts accurate test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -2779,6 +2782,7 @@ describe('e2e record', () => {
 
       describe('protocol runtime errors', () => {
         enableCaptureProtocol()
+
         describe('db size too large', () => {
           beforeEach(() => {
             return fsPromise.writeFile(archiveFile, randomBytes(1024))
@@ -2818,6 +2822,7 @@ describe('e2e record', () => {
 
         describe('db is unreadable', () => {
           enableCaptureProtocol(PROTOCOL_STUB_NO_DB_WRITE)
+
           beforeEach(() => {
             if (fs.existsSync(archiveFile)) {
               return fsPromise.rm(archiveFile)
@@ -3035,6 +3040,7 @@ describe('capture-protocol api errors', () => {
 
   describe('upload 500 - tries 3 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
@@ -3075,6 +3081,7 @@ describe('capture-protocol api errors', () => {
     const errorResponseMimeType = 'application/xml'
 
     stubbedServerWithErrorOn('putCaptureProtocolUpload', Number.MAX_SAFE_INTEGER, 503, errorResponseMimeType, errorResponseBody)
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
@@ -3174,6 +3181,7 @@ describe('capture-protocol api errors', () => {
 
   describe('fetch script 500', () => {
     stubbedServerWithErrorOn('getCaptureScript', Infinity, 500, 'text/plain', '500 - Internal Server Error')
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 

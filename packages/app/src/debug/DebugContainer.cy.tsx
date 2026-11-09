@@ -359,6 +359,7 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-header').should('be.visible')
       cy.findByTestId('debug-testing-progress').should('be.visible')
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.get<DebugSpecsFragment>('@gql').then((gql) => {
         const run = getRun(gql)
@@ -374,6 +375,7 @@ describe('<DebugContainer />', () => {
         run.testsForReview.push(newTest)
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.findAllByTestId('debug-spec-item').should('have.length', 1)
       cy.get<CloudRun>('@run').then((run) => {
@@ -393,6 +395,7 @@ describe('<DebugContainer />', () => {
         cy.wrap(newSpecTest).as('newSpecTest')
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.findAllByTestId('debug-spec-item').should('have.length', 2)
       cy.get<CloudRun>('@run').then((run) => {
@@ -425,6 +428,7 @@ describe('<DebugContainer />', () => {
         cy.findAllByTestId('grouped-row').should('have.length', 2)
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.get<CloudRun>('@run').then((run) => {
         run.status = 'FAILED'

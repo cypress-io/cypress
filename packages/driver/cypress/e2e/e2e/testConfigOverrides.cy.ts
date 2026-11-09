@@ -305,7 +305,9 @@ describe('per-test config', () => {
 
   describe('xit, xdescribe', () => {
     xit('should be skipped', {}, () => {})
+
     xspecify('should be skipped', {}, () => {})
+
     xdescribe('suite should be skipped', {}, () => {
       it('skipped')
     })

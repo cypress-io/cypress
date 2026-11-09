@@ -112,6 +112,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
 
         // add the cy.wait here to keep commands streaming in, forcing the
         // cy.origin callback window to be open long enough for the error to occur
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the async error to fire
         cy.wait(250)
       })
     })
@@ -142,6 +143,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
 
         // add the cy.wait here to keep commands streaming in,
         // forcing the cy.origin callback window to be open long enough for an async error to occur
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the async error to fire
         cy.wait(1000)
       })
     })
@@ -179,6 +181,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
         }, 50)
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps the test running long enough for the async error to fire
       cy.wait(250)
     })
   })
@@ -234,6 +237,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
 
         // add the cy.wait here to keep commands streaming in, forcing the
         // cy.origin callback window to be open long enough for the error to occur
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the async error to fire
         cy.wait(250)
       })
     })
@@ -254,6 +258,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
         Promise.reject(new Error('rejected promise'))
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps the test running long enough for the async error to fire
       cy.wait(250)
     })
 

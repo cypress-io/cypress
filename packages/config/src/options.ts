@@ -338,7 +338,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'port',
     defaultValue: null,
-    validation: validate.isNumber,
+    validation: validate.isValidPort,
   }, {
     name: 'projectId',
     defaultValue: null,

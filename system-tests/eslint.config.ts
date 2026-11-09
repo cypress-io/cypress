@@ -15,10 +15,18 @@ const ruleMeta = (ruleId: string) => {
   return rule?.meta
 }
 
+// Plugins don't always type a whitespace-only rule `layout`, so a whitespace
+// autofix counts too
+const isLayoutRule = (ruleId: string) => {
+  const meta = ruleMeta(ruleId)
+
+  return meta?.type === 'layout' || meta?.fixable === 'whitespace'
+}
+
 const layoutRulesOff = Object.fromEntries(
   baseConfig
   .flatMap((config) => Object.keys(config.rules ?? {}))
-  .filter((ruleId) => ruleMeta(ruleId)?.type === 'layout')
+  .filter(isLayoutRule)
   .map((ruleId) => [ruleId, 'off']),
 )
 
@@ -78,6 +86,10 @@ export default [
       'react/no-deprecated': 'off',
       'react/prop-types': 'off',
       'vue/require-default-prop': 'off',
+      // fixture specs produce the timings, videos, command logs and mid-wait
+      // errors that system tests assert on, so their fixed waits are the
+      // scenario under test
+      'cypress/no-unnecessary-waiting': 'off',
       // import-x cannot parse the `.d.mts` types of @vitejs/plugin-vue
       'import-x/default': 'off',
       'import-x/namespace': 'off',
