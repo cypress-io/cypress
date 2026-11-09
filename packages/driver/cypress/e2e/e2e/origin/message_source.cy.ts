@@ -32,4 +32,70 @@ describe('cross-origin messages from other frames', () => {
     postFromFrame('backend:request', ['get:rendered:html:origins'])
     .should('equal', 'no response')
   })
+
+  describe('aut:set:cookie', () => {
+    const cookie = { name: 'foo', value: 'bar', domain: 'www.foobar.com', path: '/', expiry: null, maxAge: null, httpOnly: false, hostOnly: true, sameSite: 'lax', secure: false }
+    let automation: sinon.SinonStub
+
+    const postFromAut = (data: unknown) => {
+      const top = window.top!
+      const sent = new Cypress.Promise<void>((resolve) => {
+        const onMessage = ({ data }) => {
+          if (data?.type === 'other:sent') {
+            top.removeEventListener('message', onMessage)
+            resolve()
+          }
+        }
+
+        top.addEventListener('message', onMessage)
+      })
+      const query = new URLSearchParams({ event: 'aut:set:cookie', data: JSON.stringify(data) })
+
+      automation = cy.stub(Cypress, 'automation').log(false).callThrough()
+      cy.visit(`http://www.foobar.com:3500/fixtures/other/message.html?${query}`)
+
+      return cy.wrap(sent, { log: false })
+    }
+
+    it('sets a cookie for the frame host', () => {
+      postFromAut({ cookie, url: 'http://www.foobar.com:3500/', sameSiteContext: 'strict' })
+
+      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('have.property', 'value', 'bar')
+    })
+
+    it('ignores a cookie whose url is another host', () => {
+      postFromAut({ cookie, url: 'http://other.example.com:3500/', sameSiteContext: 'strict' })
+      .then(() => {
+        expect(automation).not.to.be.calledWith('set:cookie')
+      })
+    })
+  })
+
+  it('ignores messages to the spec bridge from other windows', { browser: '!webkit' }, () => {
+    cy.visit('/fixtures/primary-origin.html')
+    cy.get('[data-cy="cross-origin-secondary-link"]').click()
+    cy.origin('http://www.foobar.com:3500', () => {})
+
+    cy.then(() => {
+      const top = window.top!
+      const bridge = top.document.querySelector<HTMLIFrameElement>('.spec-bridge-iframe')!.contentWindow!
+
+      return new Cypress.Promise((resolve) => {
+        const onMessage = ({ data }) => {
+          if (data?.event === 'cross:origin:snapshot:final:generated') {
+            top.removeEventListener('message', onMessage)
+            resolve('responded')
+          }
+        }
+
+        top.addEventListener('message', onMessage)
+        bridge.postMessage({ event: 'generate:final:snapshot', data: 'http://www.foobar.com:3500/fixtures/secondary-origin.html' }, '*')
+        setTimeout(() => {
+          top.removeEventListener('message', onMessage)
+          resolve('no response')
+        }, 1000)
+      })
+    })
+    .should('equal', 'no response')
+  })
 })

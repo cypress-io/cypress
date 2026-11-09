@@ -248,8 +248,8 @@ const attachToWindow = (autWindow: Window) => {
 }
 
 // only bind the message handler one time when the spec bridge is created
-window.addEventListener('message', ({ data }) => {
-  Cypress?.specBridgeCommunicator.onMessage({ data })
+window.addEventListener('message', (event) => {
+  Cypress?.specBridgeCommunicator.onMessage(event)
 }, false)
 
 createCypress()

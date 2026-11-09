@@ -46,4 +46,11 @@ describe('visitFailure', () => {
 
     cy.percySnapshot()
   })
+
+  it('shows the content type as text', () => {
+    getContainerEl()!.innerHTML = visitFailure({ url: 'http://foo.cypress.io/?a=1&b=2', status: 404, statusText: 'Not Found', contentType: 'text/plain; charset=<utf-8>' })
+
+    cy.get('a').should('have.attr', 'href', 'http://foo.cypress.io/?a=1&b=2')
+    cy.get('p').contains('404 - Not Found (text/plain; charset=<utf-8>)')
+  })
 })
