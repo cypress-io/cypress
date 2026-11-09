@@ -834,14 +834,12 @@ const localItFn = function (title: string, opts: ItOptions) {
 
       const originalTitle = this.test.parent.titlePath().concat(title).join(' / ')
 
-      const ctx = this
-
       const execFn = (overrides = {}) => {
-        return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+        return systemTests.exec(this, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
       // pass Mocha's this context to onRun
-      return options.onRun.call(this, execFn, browser, ctx)
+      return options.onRun.call(this, execFn, browser, this)
     })
   }
 

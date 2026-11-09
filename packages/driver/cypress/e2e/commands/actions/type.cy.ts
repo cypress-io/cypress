@@ -966,6 +966,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.$$('#input-without-value').val('0').mouseup(function () {
         $(this).select()
       })
+
+      cy.get('#input-without-value')
+      .type('50')
+      .should('have.value', '50')
     })
 
     // https://github.com/cypress-io/cypress/issues/5703
@@ -1015,12 +1019,6 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get('#email-without-value')
       .type('b@foo.com')
       .should('have.value', 'b@foo.com')
-    })
-
-    it('overwrites text when selectAll in mouseup handler', () => {
-      cy.$$('#input-without-value').val('0').mouseup(function () {
-        $(this).select()
-      })
     })
 
     it('responsive to keydown handler', () => {
