@@ -1,8 +1,6 @@
 import { WarningListFragmentDoc } from '../generated/graphql-test'
 import WarningList from './WarningList.vue'
 import { faker } from '@faker-js/faker'
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 import { WarningList_RemoveWarningDocument } from '../generated/graphql'
 
 faker.seed(1)
@@ -63,7 +61,7 @@ describe('<WarningList />', () => {
     cy.get(warningSelector).should('have.length', 2)
     cy.contains(firstWarning.errorMessage)
 
-    cy.findAllByLabelText(defaultMessages.components.modal.dismiss).first().click()
+    cy.findAllByLabelText('Dismiss').first().click()
     cy.get(warningSelector).should('have.length', 1)
     cy.contains(firstWarning.errorMessage).should('not.exist')
   })
