@@ -58,7 +58,11 @@ const makeKeyPrefixes = (fixturePath: string): string[] => {
 }
 
 export default (Commands, Cypress, cy, state, config) => {
-  // this is called at the beginning of run, so clear the cache
+  // The cache lives as long as this closure. The driver calls this function
+  // when it creates a Cypress instance for a spec window, which happens once
+  // per spec and again on every re-run in open mode, so fixtures stay cached
+  // across all tests in a spec regardless of `testIsolation`. Each cy.origin()
+  // spec bridge creates its own instance and so keeps a separate cache.
   let cache = {}
 
   const clearCache = () => {
@@ -79,6 +83,8 @@ export default (Commands, Cypress, cy, state, config) => {
     }
   }
 
+  // Nothing in production emits this. The driver's own tests emit it so each
+  // test starts with an empty cache.
   Cypress.on('clear:fixtures:cache', clearCache)
   Cypress.on('fixture:cache:invalidate', invalidateCacheEntry)
 
