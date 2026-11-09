@@ -28,7 +28,7 @@ import { UrlImageComponent } from './components/url-image.component'
   standalone: false,
   template: `<app-projection>Hello World</app-projection>`,
 })
-class WrapperComponent {}
+export class WrapperComponent {} // eslint-disable-line mocha/no-exports -- Angular requires a component declared in an exported NgModule to be exported too (NG3004)
 
 @NgModule({
   declarations: [WrapperComponent, ProjectionComponent],
