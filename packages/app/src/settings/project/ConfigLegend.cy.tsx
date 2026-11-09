@@ -1,10 +1,14 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import ConfigLegend from './ConfigLegend.vue'
 import { each } from 'lodash'
 import { OpenConfigFileInIdeFragmentDoc } from '../../generated/graphql-test'
 
-const legend = defaultMessages.settingsPage.config.legend
+const legend = [
+  { label: 'env', description: 'Set from environment variables' },
+  { label: 'default', description: 'Default values' },
+  { label: 'dynamic', description: 'Set by the {0} function' },
+  { label: 'cli', description: 'Set from CLI arguments' },
+  { label: 'config', description: 'Set from {0}' },
+]
 
 describe('<ConfigLegend/>', () => {
   it('renders', () => {

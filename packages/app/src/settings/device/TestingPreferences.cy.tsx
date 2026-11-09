@@ -1,20 +1,16 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { TestingPreferencesFragmentDoc } from '../../generated/graphql-test'
 import TestingPreferences from './TestingPreferences.vue'
 
 describe('<TestingPreferences />', () => {
   it('renders the title and description', () => {
-    const testingPreferences = defaultMessages.settingsPage.testingPreferences
-
     cy.mountFragment(TestingPreferencesFragmentDoc, {
       render: (gql) => (<div class="p-[24px]">
         <TestingPreferences gql={gql} />
       </div>),
     })
 
-    cy.findByText(testingPreferences.description).should('be.visible')
-    cy.findByText(testingPreferences.title).should('be.visible')
+    cy.findByText('Configure your testing environment with these flags').should('be.visible')
+    cy.findByText('Testing preferences').should('be.visible')
   })
 
   it('displays the results for auto-scroll', () => {
