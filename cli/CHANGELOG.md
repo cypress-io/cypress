@@ -45,6 +45,7 @@
 
 **Misc:**
 
+- The TypeScript types for [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) no longer accept the `ensureScrollable` option, which only [`cy.scrollTo()`](https://on.cypress.io/scrollto) uses. `.scrollIntoView()` always ignored it, so TypeScript code that passes `ensureScrollable` to `.scrollIntoView()` now fails to compile. Remove the option to fix the error; scrolling behaves the same without it. Addressed in [#35331](https://github.com/cypress-io/cypress/pull/35331).
 - The error shown when [`cy.session()`](https://on.cypress.io/session) is passed an unknown option now lists every valid option, `cacheAcrossSpecs` and `validate`. Previously it listed only `validate`, suggesting that `cacheAcrossSpecs` was not a valid option. Addressed in [#35233](https://github.com/cypress-io/cypress/pull/35233).
 - The editor chooser now lists only the editors Cypress detects, and the **Custom** option has been removed. To use an editor that isn't listed, set the `LAUNCH_EDITOR` environment variable before starting Cypress. Addressed in [#35208](https://github.com/cypress-io/cypress/pull/35208).
 
