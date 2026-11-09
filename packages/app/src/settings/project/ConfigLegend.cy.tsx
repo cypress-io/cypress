@@ -3,11 +3,11 @@ import { each } from 'lodash'
 import { OpenConfigFileInIdeFragmentDoc } from '../../generated/graphql-test'
 
 const legend = [
-  { label: 'env', description: 'Set from environment variables' },
-  { label: 'default', description: 'Default values' },
-  { label: 'dynamic', description: 'Set by the {0} function' },
-  { label: 'cli', description: 'Set from CLI arguments' },
-  { label: 'config', description: 'Set from {0}' },
+  { label: 'env', description: ['Set from environment variables'] },
+  { label: 'default', description: ['Default values'] },
+  { label: 'dynamic', description: ['Set by the', 'function'] },
+  { label: 'cli', description: ['Set from CLI arguments'] },
+  { label: 'config', description: ['Set from'] },
 ]
 
 describe('<ConfigLegend/>', () => {
@@ -20,7 +20,7 @@ describe('<ConfigLegend/>', () => {
 
     each(legend, ({ label, description }) => {
       cy.contains(label)
-      each(description.split('{0}'), (desc) => desc && cy.contains(desc))
+      each(description, (desc) => cy.contains(desc))
     })
 
     cy.percySnapshot()
