@@ -7,7 +7,7 @@
       item-value="name"
       item-key="id"
       :label-id="labelId"
-      :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
+      placeholder="Choose your editor..."
       class="w-[400px]"
       data-cy="selectEditor"
       @update:model-value="updateEditor"
@@ -32,26 +32,20 @@
       </template>
     </Select>
   </div>
+  <!-- eslint-disable vue/multiline-html-element-content-newline -->
   <p
     class="mt-[8px] max-w-[400px] text-sm text-gray-600"
     data-cy="launch-editor-hint"
-  >
-    <i18n-t
-      scope="global"
-      keypath="settingsPage.editor.launchEditorHint"
-    >
-      <ExternalLink href="https://on.cypress.io/file-opener-preference">
-        <code class="font-medium">LAUNCH_EDITOR</code>
-      </ExternalLink>
-    </i18n-t>
-  </p>
+  >Editor not listed? Set <ExternalLink href="https://on.cypress.io/file-opener-preference">
+    <code class="font-medium">LAUNCH_EDITOR</code>
+  </ExternalLink> and restart.</p>
+  <!-- eslint-enable vue/multiline-html-element-content-newline -->
 </template>
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { ref, computed } from 'vue'
 import Icon from '@cy/components/Icon.vue'
-import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
 import ExternalLink from './ExternalLink.vue'
 import Cursor from '~icons/logos/cursor'
@@ -107,8 +101,6 @@ const props = defineProps<{
   gql: ChooseExternalEditorFragment
   labelId: string
 }>()
-
-const { t } = useI18n()
 
 type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][number]
 

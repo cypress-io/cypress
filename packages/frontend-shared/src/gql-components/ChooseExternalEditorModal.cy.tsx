@@ -1,7 +1,5 @@
 import ChooseExternalEditorModal from './ChooseExternalEditorModal.vue'
 import { ChooseExternalEditorFragmentDoc } from '../generated/graphql-test'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('ChooseExternalEditorModal', () => {
   it('renders editors and UI elements work', () => {
@@ -18,14 +16,14 @@ describe('ChooseExternalEditorModal', () => {
       },
     })
 
-    cy.contains(defaultMessages.globalPage.externalEditorPreferences)
-    cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription1)
-    cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription2.replace('{0}', 'Settings'))
+    cy.contains('External editor preferences')
+    cy.contains('Select your preference for opening files on your system.')
+    cy.contains('You can change this later in the Settings page.')
 
-    cy.findByTestId('launch-editor-hint').should('have.text', defaultMessages.settingsPage.editor.launchEditorHint.replace('{0}', 'LAUNCH_EDITOR'))
+    cy.findByTestId('launch-editor-hint').should('have.text', 'Editor not listed? Set LAUNCH_EDITOR and restart.')
     .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
 
-    cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
+    cy.contains('Choose your editor...')
     .should('be.visible')
     .as('chooseEditor')
 

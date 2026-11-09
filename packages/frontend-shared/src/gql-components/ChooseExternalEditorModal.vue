@@ -3,29 +3,24 @@
     :model-value="props.open"
     variant="bare"
     help-link="https://on.cypress.io/file-opener-preference"
-    :help-text="t('links.needHelp')"
+    help-text="Need help"
     data-cy="choose-editor-modal"
     @update:model-value="close"
   >
     <template #title>
-      {{ t("globalPage.externalEditorPreferences") }}
+      External editor preferences
     </template>
 
     <div class="m-[24px]">
       <div>
         <p class="font-normal text-sm text-gray-600 select-none">
           <slot name="description">
-            <span id="choose-editor-label">{{ t("globalPage.externalEditorPreferencesDescription1") }}</span>
+            <span id="choose-editor-label">Select your preference for opening files on your system.</span>
           </slot>
         </p>
         <p class="font-normal text-sm text-gray-600 select-none">
           <slot name="description">
-            <i18n-t
-              scope="global"
-              keypath="globalPage.externalEditorPreferencesDescription2"
-            >
-              <strong>{{ t("globalPage.settings") }}</strong>
-            </i18n-t>
+            You can change this later in the <strong>Settings</strong> page.
           </slot>
         </p>
       </div>
@@ -55,14 +50,14 @@
           :disabled="!preferredEditor?.length"
           @click="selectEditor"
         >
-          {{ t("globalPage.saveChanges") }}
+          Save changes
         </Button>
 
         <Button
           variant="outline"
           @click="close"
         >
-          {{ t("globalPage.cancel") }}
+          Cancel
         </Button>
       </div>
     </template>
@@ -70,7 +65,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
 import { ref } from 'vue'
 import { useMutation } from '@urql/vue'
@@ -79,8 +73,6 @@ import StandardModal from '../components/StandardModal.vue'
 import Button from '../components/Button.vue'
 import type { ChooseExternalEditorModalFragment } from '../generated/graphql'
 import { ChooseExternalEditorModal_SetPreferredEditorBinaryDocument } from '../generated/graphql'
-
-const { t } = useI18n()
 
 gql`
 fragment ChooseExternalEditorModal on Query {
