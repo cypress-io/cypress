@@ -3,11 +3,10 @@
     id="selector-playground"
     class="border-t border-b bg-gray-1000 border-gray-800 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[1fr,auto] items-center "
   >
-    <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- listens for hover and focus on the controls inside; it is not a control itself -->
+    <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/mouse-events-have-key-events -- a hover preview that the AUT clears on mouseenter, which focus has no counterpart for -->
     <div
       class="flex h-full flex-1 w-full relative items-center"
       @mouseover="setShowingHighlight"
-      @focusin="setShowingHighlight"
     >
       <Menu #="{ open }">
         <MenuButton

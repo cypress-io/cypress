@@ -1,15 +1,19 @@
 <template>
-  <div data-cy="collapsible">
-    <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -- the rule cannot read a bound tabindex -->
+  <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- the root takes focus so consumers such as Alert and SettingsCard can style its focus ring -->
+  <div
+    :tabindex="disable ? '-1' : '0'"
+    data-cy="collapsible"
+    @keypress.space.enter.self.prevent="!disable && toggle()"
+  >
+    <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -- keyboard focus and activation live on the root above -->
     <div
       data-cy="collapsible-header"
       role="button"
-      :tabindex="disable ? '-1' : '0'"
       :aria-expanded="isOpen"
       class="rounded-t focus:outline-indigo-500"
       :class="{'rounded-b': !isOpen}"
       @click="!disable && toggle()"
-      @keypress.space.enter.self.prevent="!disable && toggle()"
+      @keypress.space.enter.self="!disable && toggle()"
     >
       <slot
         name="target"

@@ -145,9 +145,7 @@
             </ListboxOption>
             <li
               v-if="$slots.footer"
-              role="option"
-              aria-selected="false"
-              aria-disabled="true"
+              role="presentation"
             >
               <slot name="footer" />
             </li>

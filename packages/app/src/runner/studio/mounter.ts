@@ -82,7 +82,7 @@ function setupVueContainerListeners (vueContainer: HTMLElement, closeMenu: () =>
     for (const el of paths) {
       if (classIncludes(el as EventTarget, 'single-assertion') ||
           classIncludes(el as EventTarget, 'assertion-option') ||
-          (el instanceof HTMLElement && el.tagName === 'A' && classIncludes(el, 'close'))) {
+          (el instanceof HTMLElement && el.tagName === 'BUTTON' && classIncludes(el, 'close'))) {
         el.dispatchEvent(new MouseEvent('click', e))
         break
       }
