@@ -2,7 +2,8 @@ import {
   CookieJar,
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
-import { isBlockedBy, isSecureUrl, meetsSecureRules } from '@packages/server/lib/automation/cookie/document-cookie-rules'
+import { meetsSecureRules } from '@packages/server/lib/automation/cookie/document-cookie-rules'
+import { isLocalhost } from '@packages/network-tools/lib/uri'
 import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
 } from '@packages/server/lib/automation/cookie/jar'
@@ -54,7 +55,8 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
   const url = location.href
   const domain = location.hostname
   const cookieJar = new CookieJar()
-  const isSecure = isSecureUrl(new URL(url))
+  // browsers treat localhost as a secure context, so it may set Secure cookies over http
+  const isSecure = location.protocol === 'https:' || isLocalhost(new URL(url))
   const existingCookies = parseDocumentCookieString(document.cookie)
 
   const getDocumentCookieValue = () => {
@@ -107,12 +109,10 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // cookies written without a Path are stored at '/', so check them there
       const cookieString = parsedCookie.path ? stringValue : `${stringValue}; Path=/`
 
-      const stored = { name: parsedCookie.key, domain: parsedCookie.domain || domain, path: parsedCookie.path || '/' }
-      const isAllowed = meetsSecureRules({ ...parsedCookie, hostOnly: !parsedCookie.domain, path: stored.path }, isSecure)
-        && !cookieJar.getAllCookies().some((c) => isBlockedBy({ name: c.key, domain: c.domain || '', path: c.path, httpOnly: c.httpOnly, secure: c.secure }, stored, isSecure))
-
       // the server drops writes that break these rules, so keep them out of document.cookie too
-      if (!isAllowed) return getDocumentCookieValue()
+      if (!meetsSecureRules({ ...parsedCookie, hostOnly: !parsedCookie.domain, path: parsedCookie.path || '/' }, isSecure)) {
+        return getDocumentCookieValue()
+      }
 
       // if the cookie is expired, remove it in our cookie jar
       // and via setting it inside our automation client with the correct expiry.
