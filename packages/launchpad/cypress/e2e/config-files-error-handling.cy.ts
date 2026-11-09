@@ -3,7 +3,7 @@ import { getPathForPlatform } from './support/getPathForPlatform'
 const configErrorTitle = 'Cypress configuration error'
 
 const expectConfigErrorTitle = () => {
-  cy.contains('h1', 'Cypress configuration error', { timeout: 10000 })
+  cy.contains('h1', configErrorTitle, { timeout: 10000 })
 }
 
 const expectStackToBe = (mode: 'open' | 'closed') => {
