@@ -1,4 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../src/paths'
 
 interface FrameworkOptions {
@@ -70,7 +69,7 @@ function validateCreateFromComponentCard (framework: FrameworkOptions, beforeEac
     framework.selectComponent()
 
     cy.getByRole('dialog', {
-      name: defaultMessages.createSpec.successPage.header,
+      name: 'Great! The spec was successfully added',
       native: false,
     }).within(() => {
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
