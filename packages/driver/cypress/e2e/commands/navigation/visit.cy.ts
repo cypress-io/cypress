@@ -79,6 +79,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('invokes onLoad callback', function (done) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias -- compared against the callback's own `this`
       const ctx = this
 
       cy.visit('/fixtures/jquery.html', {
@@ -94,6 +95,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('invokes onBeforeLoad callback with cy context', function (done) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias -- compared against the callback's own `this`
       const ctx = this
 
       cy.visit('/fixtures/jquery.html', {
