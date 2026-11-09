@@ -44,7 +44,7 @@ describe('writeWithBackpressure', () => {
 
       expect(output.write).toHaveBeenCalledWith(Buffer.from('test'))
       expect(output.once).toHaveBeenCalledWith('drain', expect.any(Function))
-      expect(writePromise).resolves
+      await expect(writePromise).resolves.toBeUndefined()
     })
   })
 })

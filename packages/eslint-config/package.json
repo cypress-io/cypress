@@ -25,6 +25,7 @@
     "@stylistic/eslint-plugin": "^5.2",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
+    "@vitest/eslint-plugin": "^1.6.28",
     "@vue/compiler-sfc": "^3.5.43",
     "eslint": "^9.31.0",
     "eslint-import-resolver-typescript": "^4.4.4",

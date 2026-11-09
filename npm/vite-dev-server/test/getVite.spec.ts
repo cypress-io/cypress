@@ -14,84 +14,130 @@ const winPathMocks = vi.hoisted(() => {
   }
 })
 
-describe('getVite', () => {
-  beforeEach(() => {
-    // see details on https://vitest.dev/api/vi.html#vi-mock as vi.mock is hoisted to the top of the file
-    vi.mock('os', () => {
-      return {
-        default: {
-          platform: osMocks.platform,
-        },
+vi.mock('os', () => {
+  return {
+    default: {
+      platform: osMocks.platform,
+    },
+  }
+})
+
+vi.mock('url', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('url')>()
+
+  return {
+    ...actual,
+    pathToFileURL: (pathStr: string) => {
+      if (winPathMocks.simulateWin32) {
+        const slash = pathStr.replace(/\\/g, '/')
+
+        return new URL(`file:///${slash}`)
       }
-    })
 
-    vi.mock('url', async (importOriginal) => {
-      const actual = await importOriginal<typeof import('url')>()
+      return actual.pathToFileURL(pathStr)
+    },
+  }
+})
 
+vi.mock('path', async (importOriginal) => {
+  const pathModule = await importOriginal<typeof import('path')>()
+  const resolveImpl = (...args: string[]) => {
+    if (winPathMocks.simulateWin32) {
+      return pathModule.win32.resolve(...args)
+    }
+
+    return pathModule.resolve(...args)
+  }
+
+  return {
+    ...pathModule,
+    default: {
+      ...pathModule,
+      resolve: resolveImpl,
+    },
+  }
+})
+
+vi.mock('module', async () => {
+  const original = await vi.importActual('module')
+
+  return {
+    ...original,
+    createRequire: vi.fn(() => {
       return {
-        ...actual,
-        pathToFileURL: (pathStr: string) => {
-          if (winPathMocks.simulateWin32) {
-            const slash = pathStr.replace(/\\/g, '/')
+        resolve: vi.fn((id: string, opts: any) => {
+          // a bit hacky, but pass in the version as the project path so we don't muck up the module cache
+          const version = opts.paths[0]
 
-            return new URL(`file:///${slash}`)
+          // Ensure returned paths are absolute, since `getVite()` now uses `pathToFileURL()`.
+          // Use a Windows filesystem path for the windows test case (`require.resolve` returns a path, not a URL).
+          if (String(version).includes('windows')) {
+            return `C:\\vite-${version}\\package.json`
           }
 
-          return actual.pathToFileURL(pathStr)
-        },
-      }
-    })
-
-    vi.mock('path', async (importOriginal) => {
-      const pathModule = await importOriginal<typeof import('path')>()
-      const resolveImpl = (...args: string[]) => {
-        if (winPathMocks.simulateWin32) {
-          return pathModule.win32.resolve(...args)
-        }
-
-        return pathModule.resolve(...args)
-      }
-
-      return {
-        ...pathModule,
-        default: {
-          ...pathModule,
-          resolve: resolveImpl,
-        },
-      }
-    })
-
-    osMocks.platform.mockReturnValue('linux')
-
-    vi.mock('module', async () => {
-      const original = await vi.importActual('module')
-
-      return {
-        ...original,
-        createRequire: vi.fn(() => {
-          return {
-            resolve: vi.fn((id: string, opts: any) => {
-              // a bit hacky, but pass in the version as the project path so we don't muck up the module cache
-              const version = opts.paths[0]
-
-              // Ensure returned paths are absolute, since `getVite()` now uses `pathToFileURL()`.
-              // Use a Windows filesystem path for the windows test case (`require.resolve` returns a path, not a URL).
-              if (String(version).includes('windows')) {
-                return `C:\\vite-${version}\\package.json`
-              }
-
-              return `/vite-${version}/package.json`
-            }),
-          }
+          return `/vite-${version}/package.json`
         }),
       }
-    })
+    }),
+  }
+})
 
-    vi.mock('/mock/vite/dist/node/index.js', async () => {
-      return {
-        moduleFormat: 'esm',
-      }
-    })
+vi.mock('/mock/vite/dist/node/index.js', async () => {
+  return {
+    moduleFormat: 'esm',
+  }
+})
+
+vi.mock('/vite-7/package.json', async () => {
+  return {
+    default: {
+      version: '7.0.0',
+    },
+  }
+})
+
+vi.mock('/vite-8/package.json', async () => {
+  return {
+    default: {
+      version: '8.0.0',
+      exports: {
+        '.': '/mock/vite/dist/node/index.js',
+      },
+    },
+  }
+})
+
+vi.mock('/vite-9/package.json', async () => {
+  return {
+    default: {
+      version: '9.0.0',
+      exports: {
+        '.': '/mock/vite/dist/node/index.js',
+      },
+    },
+  }
+})
+
+vi.mock('file:///C:/vite-8-windows/package.json', async () => {
+  return {
+    default: {
+      version: '8.0.0',
+      exports: {
+        '.': '/mock/vite/dist/node/index.js',
+      },
+    },
+  }
+})
+
+vi.mock('file:///C:/mock/vite/dist/node/index.js', async () => {
+  return {
+    moduleFormat: 'esm',
+  }
+})
+
+describe('getVite', () => {
+  beforeEach(() => {
+    osMocks.platform.mockReturnValue('linux')
   })
 
   afterEach(() => {
@@ -100,14 +146,6 @@ describe('getVite', () => {
 
   describe('ViteVersionNotSupportedError', () => {
     it('should throw an error if the vite version is not supported', async () => {
-      vi.mock('/vite-7/package.json', async () => {
-        return {
-          default: {
-            version: '7.0.0',
-          },
-        }
-      })
-
       try {
         await getVite({
           // @ts-expect-error - mock config
@@ -146,17 +184,6 @@ describe('getVite', () => {
   describe('esm', () => {
     describe('version 8', () => {
       it('should return the correct ESM vite instance', async () => {
-        vi.mock('/vite-8/package.json', async () => {
-          return {
-            default: {
-              version: '8.0.0',
-              exports: {
-                '.': '/mock/vite/dist/node/index.js',
-              },
-            },
-          }
-        })
-
         const vite = await getVite({
           // @ts-expect-error - mock config
           cypressConfig: {
@@ -174,17 +201,6 @@ describe('getVite', () => {
     // but the user is able to attempt usage anyway.
     describe('Future versions', () => {
       it('should return the correct ESM vite instance for Vite 9+', async () => {
-        vi.mock('/vite-9/package.json', async () => {
-          return {
-            default: {
-              version: '9.0.0',
-              exports: {
-                '.': '/mock/vite/dist/node/index.js',
-              },
-            },
-          }
-        })
-
         const vite = await getVite({
           // @ts-expect-error - mock config
           cypressConfig: {
@@ -210,23 +226,6 @@ describe('getVite', () => {
 
     it('adds the "file://" prefix to paths when importing', async () => {
       osMocks.platform.mockReturnValue('win32')
-
-      vi.mock('file:///C:/vite-8-windows/package.json', async () => {
-        return {
-          default: {
-            version: '8.0.0',
-            exports: {
-              '.': '/mock/vite/dist/node/index.js',
-            },
-          },
-        }
-      })
-
-      vi.mock('file:///C:/mock/vite/dist/node/index.js', async () => {
-        return {
-          moduleFormat: 'esm',
-        }
-      })
 
       const vite = await getVite({
         // @ts-expect-error - mock config

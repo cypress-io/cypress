@@ -1,10 +1,11 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, vitestConfig } from '@packages/eslint-config'
 
 const allowDefaultProject = ['cypress.config.ts', 'eslint.config.ts', 'support/index.js', 'vitest.config.ts']
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...vitestConfig,
   {
     languageOptions: {
       parserOptions: {
