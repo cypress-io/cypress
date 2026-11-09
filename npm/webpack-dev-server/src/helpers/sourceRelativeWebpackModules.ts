@@ -51,6 +51,7 @@ const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 // We ship webpack as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
 // serves as our fallback.
 const cypressWebpackPath = (config: WebpackDevServerConfig) => {
+  // eslint-disable-next-line n/no-extraneous-require -- resolved from the Cypress binary, which ships it
   return require.resolve('@cypress/webpack-batteries-included-preprocessor', {
     paths: [config.cypressConfig.cypressBinaryRoot],
   })
@@ -224,6 +225,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
   let htmlWebpackPluginJsonPath: string
 
   try {
+    // eslint-disable-next-line n/no-extraneous-require -- sourced from the user's project, like webpack itself
     htmlWebpackPluginJsonPath = require.resolve('html-webpack-plugin/package.json', {
       paths: [searchRoot],
     })

@@ -142,7 +142,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       // declared up front: as a `const` at the assignment, an early call throws
       // a TDZ ReferenceError where it used to see `undefined`
       'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
-      // `== null` is the idiomatic null-or-undefined check, matching eslintrc's `allow-null`
+      // `== null` is the idiomatic check for both null and undefined
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
       // Unused args and caught errors stay allowed: callbacks and interface
       // implementations often have to accept parameters they ignore. A leading
@@ -221,12 +221,11 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   },
 
   {
-    // rules that are gold standard, but have many violations
-    // these are off while developing eslint, but should eventually be enabled
+    // rules that are gold standard, but have many violations. The ones set to
+    // `off` here should be re-enabled once their violations are fixed; that
+    // work is tracked in https://github.com/cypress-io/cypress/issues/35250
     rules: {
-      'no-useless-escape': 'off',
       'prefer-rest-params': 'off',
-      'no-global-assign': 'off',
       'no-async-promise-executor': 'off',
 
       '@typescript-eslint/no-unused-expressions': 'off',
@@ -234,38 +233,22 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-this-alias': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
-      '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-wrapper-object-types': 'off',
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
       'mocha/no-setup-in-describe': 'off',
       'mocha/max-top-level-suites': 'off',
       'mocha/no-top-level-hooks': 'off',
-      'mocha/no-identical-title': 'off',
-      'mocha/consistent-spacing-between-blocks': 'off',
       'mocha/no-global-tests': 'off',
       'mocha/no-sibling-hooks': 'off',
-      'mocha/no-skipped-tests': 'off',
-      'mocha/no-exports': 'off',
-      'mocha/no-async-describe': 'off',
       'mocha/no-return-and-callback': 'off',
       'mocha/no-pending-tests': 'off',
-      'mocha/no-nested-tests': 'off',
 
       'vue/multi-word-component-names': 'off',
-      'vue/html-closing-bracket-spacing': 'off',
       'vue/no-dupe-keys': 'off',
-      'vue/v-on-event-hyphenation': 'off',
-      'vue/attribute-hyphenation': 'off',
-      'vue/no-useless-template-attributes': 'off',
 
-      'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',
-      'cypress/no-async-tests': 'off',
-      'cypress/no-assigning-return-values': 'off',
 
       // we use react 18+, so these rules do not apply
       'react/react-in-jsx-scope': 'off',
@@ -277,15 +260,28 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
+  // These rules guard the `cy` command queue, which only exists in Cypress specs
+  // and support files. Node-side mocha and vitest suites write async tests and
+  // keep return values on purpose.
+  {
+    ignores: ['**/*.cy.{js,jsx,ts,tsx}', '**/cypress/**'],
+    rules: {
+      'cypress/no-async-tests': 'off',
+      'cypress/no-assigning-return-values': 'off',
+    },
+  },
+
   {
     // the Vue recommended config ships these as warnings, and
     // flatConfigs.typescript leaves import-x/namespace unset
     rules: {
+      'vue/attribute-hyphenation': 'error',
       'vue/attributes-order': 'error',
       'vue/block-order': 'error',
       'vue/component-definition-name-casing': 'error',
       'vue/first-attribute-linebreak': 'error',
       'vue/html-closing-bracket-newline': 'error',
+      'vue/html-closing-bracket-spacing': 'error',
       'vue/html-end-tags': 'error',
       'vue/html-indent': 'error',
       'vue/html-quotes': 'error',
@@ -309,6 +305,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'vue/singleline-html-element-content-newline': 'error',
       'vue/this-in-template': 'error',
       'vue/v-bind-style': 'error',
+      'vue/v-on-event-hyphenation': 'error',
       'vue/v-on-style': 'error',
       'vue/v-slot-style': 'error',
 
@@ -321,6 +318,17 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     files: ['**/*.d.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+
+  // eslint-plugin-mocha treats any file with a Mocha call, hooks included, as a
+  // test file, which takes in support files, test generators and plugin source
+  // whose exports are their purpose. The rule is there because importing a spec
+  // registers its tests in the importer, so only spec files are held to it.
+  {
+    ignores: ['**/*.cy.*', '**/*.spec.*', '**/*_spec.*', '**/*-spec.*', '**/*.test.*'],
+    rules: {
+      'mocha/no-exports': 'off',
     },
   },
 

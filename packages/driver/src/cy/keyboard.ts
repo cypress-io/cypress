@@ -30,7 +30,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 type SimulatedDefault = (
   el: HTMLElement,
   key: KeyDetails,
-  options: typeOptions
+  options: typeOptions,
 ) => void
 
 type KeyInfo = KeyDetails | ShortcutDetails
@@ -67,7 +67,7 @@ const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]{1,3})?/
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
-const isValidNumberInputChar = /[-+eE\d\.]/
+const isValidNumberInputChar = /[-+eE\d.]/
 const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}$/
 
 const INITIAL_MODIFIERS = {

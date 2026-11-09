@@ -100,8 +100,8 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
 
         verify('in file outside project', {
           message: 'An outside error',
-          stackRegex: /\/throws\-error\.js:5:8/,
-          codeFrameRegex: /\/throws\-error\.js:5:9/,
+          stackRegex: /\/throws-error\.js:5:8/,
+          codeFrameRegex: /\/throws-error\.js:5:9/,
           codeFrameText: `thrownewError('An outside error')`,
         })
       })

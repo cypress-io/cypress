@@ -4,12 +4,9 @@ import CoffeeIcon from '~icons/mdi/coffee'
 import LoadingIcon from '~icons/mdi/loading'
 import { faker } from '@faker-js/faker'
 import Alert from './Alert.vue'
-import { defaultMessages } from '../locales/i18n'
 import { ref } from 'vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
-
-const messages = defaultMessages.components.alert
 
 const alertBodySelector = '[data-cy=alert-body]'
 const alertHeaderSelector = '[data-cy=alert-header]'
@@ -17,7 +14,7 @@ const alertHeaderSelector = '[data-cy=alert-header]'
 const suffixIconSelector = '[data-cy=alert-suffix-icon]'
 const prefixIconSelector = '[data-cy=alert-prefix-icon]'
 
-const dismissSelector = `[aria-label=${messages.dismissAriaLabel}]`
+const dismissSelector = '[aria-label=Dismiss]'
 
 faker.seed(1)
 
@@ -130,7 +127,7 @@ describe('<Alert />', () => {
 
       cy.get(suffixIconSelector)
       .should('be.visible')
-      .and('have.attr', 'aria-label', messages.dismissAriaLabel)
+      .and('have.attr', 'aria-label', 'Dismiss')
     })
 
     it('can be dismissed', () => {
@@ -223,9 +220,7 @@ describe('<Alert />', () => {
       cy.get(alertBodySelector).should('not.exist')
     })
   })
-})
 
-describe('<Alert />', () => {
   it('renders various alerts with customizations', () => {
     const { modelValue, methods } = makeDismissibleProps()
 

@@ -39,9 +39,12 @@
     "@electron/fuses": "1.8.0",
     "@electron/get": "^4.0.1",
     "@electron/packager": "18.3.6",
+    "@packages/eslint-config": "0.0.0-development",
+    "@packages/root": "0.0.0-development",
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.31.0",
     "execa": "4.1.0",
+    "jiti": "^2.4.2",
     "systeminformation": "^5.33.16",
     "vitest": "^3.2.4"
   },

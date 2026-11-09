@@ -1,5 +1,6 @@
 const { _ } = Cypress
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}
 
 describe('src/cy/commands/assertions', () => {

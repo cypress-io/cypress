@@ -265,6 +265,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
         cy.visitLaunchpad()
         cy.contains('launchpad')
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the prompt never opens, so give it time to open first
         cy.wait(1000)
         cy.contains('Configure CI').should('not.exist')
       })
@@ -392,7 +393,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
         cy.getByRole('dialog', { name: 'Login successful', native: false }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
-          cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile' })
+          cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile?utm_medium=Nav&utm_campaign=Profile&utm_source=Binary%3A+Launchpad' })
 
           // The dialog can be closed at this point by either the header close button or the Continue button
           // The Continue button is tested here

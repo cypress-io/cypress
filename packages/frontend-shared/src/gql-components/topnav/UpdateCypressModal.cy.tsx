@@ -1,6 +1,4 @@
 import UpdateCypressModal from './UpdateCypressModal.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   const installedVersion = '8.2.0'
@@ -16,12 +14,10 @@ describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 },
       onClose={handleClose}
       installCommand="npm i "/>))
 
-    cy.contains(`${defaultMessages.topNav.updateCypress.title} ${latestVersion}`).should('be.visible')
-    cy.contains(defaultMessages.topNav.updateCypress.currentlyRunning
-    .replace('{0}', installedVersion)).should('be.visible')
+    cy.contains(`Upgrade to Cypress ${latestVersion}`).should('be.visible')
+    cy.contains(`You are currently running Version ${installedVersion} of Cypress. `).should('be.visible')
 
-    cy.contains(defaultMessages.topNav.updateCypress.pasteToUpgradeGlobal
-    .replace('{0}', defaultMessages.topNav.updateCypress.rememberToCloseInsert)).should('be.visible')
+    cy.contains('To upgrade to the latest version, first close this app, then paste the command below into your terminal:').should('be.visible')
 
     cy.findByDisplayValue(`npm i cypress@${latestVersion}`).should('be.visible')
     cy.findByLabelText('Close').click().then(() => {
@@ -37,7 +33,6 @@ describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 },
       show={true}
       installCommand="npm i "/>))
 
-    cy.contains(defaultMessages.topNav.updateCypress.pasteToUpgradeProject
-    .replace('{0}', defaultMessages.topNav.updateCypress.rememberToCloseInsert)).should('be.visible')
+    cy.contains('To upgrade to the latest version for your project, first close this app, then paste the command below into your terminal:').should('be.visible')
   })
 })

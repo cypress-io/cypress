@@ -24,7 +24,7 @@
     <FileMatch
       ref="fileMatchRef"
       v-model:pattern="filePathSearch"
-      v-model:extensionPattern="localExtensionPattern"
+      v-model:extension-pattern="localExtensionPattern"
       class="bg-white pt-[24px] pb-[12px] top-[0px] z-10 sticky"
       :matches="matches"
     >
@@ -49,7 +49,7 @@
       class="right-[24px] left-[24px] absolute"
       :files="filteredFiles"
       :search="filePathSearch"
-      @selectFile="selectFile"
+      @select-file="selectFile"
     >
       <template #no-results>
         <NoResults

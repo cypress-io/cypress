@@ -1,5 +1,5 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
@@ -15,10 +15,18 @@ const ruleMeta = (ruleId: string) => {
   return rule?.meta
 }
 
+// Plugins don't always type a whitespace-only rule `layout`, so a whitespace
+// autofix counts too
+const isLayoutRule = (ruleId: string) => {
+  const meta = ruleMeta(ruleId)
+
+  return meta?.type === 'layout' || meta?.fixable === 'whitespace'
+}
+
 const layoutRulesOff = Object.fromEntries(
   baseConfig
   .flatMap((config) => Object.keys(config.rules ?? {}))
-  .filter((ruleId) => ruleMeta(ruleId)?.type === 'layout')
+  .filter(isLayoutRule)
   .map((ruleId) => [ruleId, 'off']),
 )
 
@@ -27,6 +35,9 @@ export default [
   // Fixture package.json files keep the layout and key order of the user
   // projects they stand in for
   ...jsonConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
+  // Fixtures are user projects with their own dependencies and Node, and
+  // n/no-extraneous-import crashes resolving their tsconfig files
+  ...nodeConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
   {
     languageOptions: {
       parserOptions: {
@@ -78,6 +89,10 @@ export default [
       'react/no-deprecated': 'off',
       'react/prop-types': 'off',
       'vue/require-default-prop': 'off',
+      // fixture specs produce the timings, videos, command logs and mid-wait
+      // errors that system tests assert on, so their fixed waits are the
+      // scenario under test
+      'cypress/no-unnecessary-waiting': 'off',
       // import-x cannot parse the `.d.mts` types of @vitejs/plugin-vue
       'import-x/default': 'off',
       'import-x/namespace': 'off',
@@ -114,6 +129,9 @@ export default [
       // typescript-eslint has removed, and ESLint reports a disable directive
       // for an unknown rule as an error
       'projects/vue3-vite-ts-*/src/env.d.ts',
+      // the `*.vue` shim Vue CLI scaffolds, whose `DefineComponent<{}, {}, any>`
+      // trips @typescript-eslint/no-empty-object-type
+      'projects/vue3-webpack-ts-*/shims-vue.d.ts',
       // invalid on purpose: system tests assert on the errors they produce
       'project-fixtures/react/src/AppCompilationError.cy.jsx',
       'projects/config-with-ts-module-error/cypress.config.ts',

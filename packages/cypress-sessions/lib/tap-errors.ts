@@ -274,7 +274,9 @@ export const TAP_ERROR_COPY = {
    *
    * @deprecated - raise it with new MissingCompanionOptionTapError(), which writes its copy
    */
-  MISSING_COMPANION_OPTION: {},
+  MISSING_COMPANION_OPTION: {
+    attachHelp: true,
+  },
   /**
    * Raised when a known input was given a value of the wrong type or range.
    *
@@ -492,8 +494,9 @@ export class SnapshotNotFoundTapError extends NotFoundTapError {
 
 /**
  * A flag that only means something alongside another one. Both are named here;
- * `remedy` is the throw site's, because what dropping either one leaves you with
- * is particular to the pair — a spec-wide view rather than one test's attempt.
+ * `remedy` comes from the dependency's `requires` in the command schema, because
+ * what dropping either one leaves you with is particular to the pair — a
+ * spec-wide view rather than one test's attempt.
  */
 export class MissingCompanionOptionTapError extends DetailedTapError {
   constructor (given: string, required: string, remedy: string) {

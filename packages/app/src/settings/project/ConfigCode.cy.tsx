@@ -67,9 +67,7 @@ describe('<ConfigCode />', () => {
       </div>))
 
       Cypress._.each(arrayTest, (val) => {
-        const valElement = cy.findByText(`'${val}',`)
-
-        valElement.realHover()
+        cy.findByText(`'${val}',`).realHover()
 
         cy.get('.v-popper__popper--shown')
         .should('be.visible')
@@ -111,9 +109,7 @@ describe('<ConfigCode />', () => {
       </div>))
 
       Cypress._.each(Object.values(objectTest), (value) => {
-        const valElement = cy.findByText(`'${value}',`)
-
-        valElement.realHover()
+        cy.findByText(`'${value}',`).realHover()
 
         cy.get('.v-popper__popper--shown')
         .should('have.length', 1)

@@ -1,9 +1,10 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
   {
     ignores: [
       // a snapshot script the specs expect mksnapshot to reject

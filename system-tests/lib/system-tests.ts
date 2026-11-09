@@ -62,7 +62,7 @@ export type ItOptions = ExecOptions & {
   onRun?: (
     this: Mocha.Context,
     execFn: ExecFn,
-    browser: BrowserName
+    browser: BrowserName,
   ) => Promise<any> | any
   /**
    * Same as using `systemTests.it.only`.
@@ -594,7 +594,7 @@ process.on('exit', () => {
 
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
-const videoRe = /\-\s\sVideo\soutput:\s.*.mp4/gm
+const videoRe = /-\s\sVideo\soutput:\s.*.mp4/gm
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed capturing this video.',
   'This error will not affect or change the exit code.',
@@ -834,14 +834,12 @@ const localItFn = function (title: string, opts: ItOptions) {
 
       const originalTitle = this.test.parent.titlePath().concat(title).join(' / ')
 
-      const ctx = this
-
       const execFn = (overrides = {}) => {
-        return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+        return systemTests.exec(this, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
       // pass Mocha's this context to onRun
-      return options.onRun.call(this, execFn, browser, ctx)
+      return options.onRun.call(this, execFn, browser, this)
     })
   }
 

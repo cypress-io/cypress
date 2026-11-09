@@ -7,7 +7,7 @@ const Debug = require('debug')
 
 const debug = Debug('cypress:scripts:util:transform-requires')
 
-const requireRE = /(require\(["'`])@packages\/(.+?)([\/"'`])/g
+const requireRE = /(require\(["'`])@packages\/(.+?)([/"'`])/g
 const globAsync = Promise.promisify(glob)
 
 const rewritePackageNames = (fileStr, buildRoot, filePath, onFound) => {

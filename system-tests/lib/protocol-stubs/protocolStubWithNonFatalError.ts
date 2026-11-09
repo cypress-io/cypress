@@ -44,6 +44,6 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
   pageLoading (input: any): void {}
   resetTest (testId: string): void {}
-  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}
-  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => {}
+  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => void
+  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => void
 }

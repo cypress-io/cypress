@@ -1175,7 +1175,7 @@ export default {
 
           You passed: ${format(eventName)}`, 10)
       },
-      req_continue_fn_only: '\`req.continue\` requires the parameter to be a function',
+      req_continue_fn_only: '`req.continue` requires the parameter to be a function',
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
       defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
       setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
@@ -1451,7 +1451,7 @@ export default {
       docsUrl: 'https://on.cypress.io/request',
     },
     encoding_invalid: {
-      message: `${cmd('request')} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node\'s Buffer encoding.`,
+      message: `${cmd('request')} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node's Buffer encoding.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     gzip_invalid: {

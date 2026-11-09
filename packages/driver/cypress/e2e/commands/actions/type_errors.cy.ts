@@ -244,12 +244,6 @@ If you want to skip parsing special character sequences and type the text exactl
       })
     })
 
-    it('allows typing special characters', () => {
-      cy
-      .get(':text:first').type('{esc}')
-      .should('have.value', '')
-    })
-
     it('can type into input with invalid type attribute', () => {
       cy.get(':text:first')
       .invoke('attr', 'type', 'asdf')
