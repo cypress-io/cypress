@@ -1,6 +1,7 @@
 <template>
   <div class="rounded flex font-medium bg-gray-900 py-[2px] px-[12px] text-gray-200 text-[14px] leading-[20px] gap-[8px] items-center">
     <Switch
+      id="toggle-highlights-switch"
       label-id="toggle-highlights"
       :value="props.value"
       size="sm"
@@ -8,6 +9,7 @@
     />
     <label
       id="toggle-highlights"
+      for="toggle-highlights-switch"
       class="cursor-pointer"
     >{{ t('runner.snapshot.highlightsLabel') }}
     </label>

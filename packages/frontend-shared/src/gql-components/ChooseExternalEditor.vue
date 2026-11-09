@@ -1,5 +1,6 @@
 <template>
   <div class="flex items-center">
+    <!-- eslint-disable vuejs-accessibility/form-control-has-label -- the Select component, not a native select; it renders its own label -->
     <!-- @vue-expect-error -->
     <Select
       :model-value="selectedEditor"
@@ -31,6 +32,7 @@
         />
       </template>
     </Select>
+    <!-- eslint-enable vuejs-accessibility/form-control-has-label -->
   </div>
   <p
     class="mt-[8px] max-w-[400px] text-sm text-gray-600"

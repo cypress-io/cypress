@@ -37,7 +37,10 @@
           class="py-[16px]"
         >
           <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
-            <label :id="labelId">{{ title }}</label>
+            <label
+              :id="labelId"
+              :for="id"
+            >{{ title }}</label>
             <Switch
               :id="id"
               class="mx-[8px]"

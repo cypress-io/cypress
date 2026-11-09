@@ -11522,7 +11522,7 @@ aria-query@5.3.0:
   dependencies:
     dequal "^2.0.3"
 
-aria-query@^5.3.1:
+aria-query@^5.3.0, aria-query@^5.3.1:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/aria-query/-/aria-query-5.3.2.tgz#93f81a43480e33a338f19163a3d10a50c01dcd59"
   integrity sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw==
@@ -16487,6 +16487,14 @@ eslint-plugin-vue@^10.3.0:
     postcss-selector-parser "^6.0.15"
     semver "^7.6.3"
     xml-name-validator "^4.0.0"
+
+eslint-plugin-vuejs-accessibility@^2.6.3:
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-vuejs-accessibility/-/eslint-plugin-vuejs-accessibility-2.6.3.tgz#5141cf8331252082c8bac39f821f0b47f6c5f9c2"
+  integrity sha512-nNdV+Pw80eR3YYqYPYoiSiVNdLtvXEHXAJQ505NZqVfp9iSJ+Zvd/JsJ/cMFzz+05RBmVkruHiYWcuFTq88tRg==
+  dependencies:
+    aria-query "^5.3.0"
+    vue-eslint-parser "^9.0.0 || ^10.0.0"
 
 eslint-scope@5.1.1, eslint-scope@^5.1.1:
   version "5.1.1"
@@ -32439,10 +32447,10 @@ vue-eslint-parser@7.11.0:
     lodash "^4.17.21"
     semver "^6.3.0"
 
-vue-eslint-parser@^10.0.0:
-  version "10.4.1"
-  resolved "https://registry.yarnpkg.com/vue-eslint-parser/-/vue-eslint-parser-10.4.1.tgz#3d0aabb6604dac3fcd94f893291cb9e754cc392c"
-  integrity sha512-Gk6gRDj0n/fkRa3C3l0bBheoBckUq/Rs0F/TvMWIS6nzzx67amAViMe9CkNgsP2tXyQONvGiHQESHwFtZ3aYDA==
+vue-eslint-parser@^10.0.0, "vue-eslint-parser@^9.0.0 || ^10.0.0":
+  version "10.4.2"
+  resolved "https://registry.yarnpkg.com/vue-eslint-parser/-/vue-eslint-parser-10.4.2.tgz#c93ea8e31a094eda97f727cf5cf5dd2220ac8dfd"
+  integrity sha512-WMpzulb50kb6snghzoGzS++62wcOszAk/piYcnvzdStM8Wni/BmogYltpoOFv2eK9hDbXxvwFQgnwZGpAoUfpA==
   dependencies:
     debug "^4.4.0"
     eslint-scope "^8.2.0 || ^9.0.0"

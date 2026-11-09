@@ -5,6 +5,7 @@
   >
     <img
       class="h-[64px] w-[64px]"
+      alt="Cypress"
       src="../../../../frontend-shared/src/assets/logos/cypress-dark.png"
     >
     <slot />

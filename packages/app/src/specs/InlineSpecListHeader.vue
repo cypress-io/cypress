@@ -2,6 +2,7 @@
   <div
     class="border-b border-gray-900 h-[64px] mx-[16px] auto-cols-max grid grid-flow-col gap-[8px] grid-cols-[minmax(0,1fr)] pointer-cursor items-center"
   >
+    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -- pointer shortcut that focuses the search input, which keyboard users reach directly -->
     <div
       class="relative items-center"
       @click="input?.focus()"

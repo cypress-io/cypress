@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/mouse-events-have-key-events -- the tooltip also opens on focus through its triggers, and the slot calls focus() -->
   <Tooltip
     :triggers="['hover', 'focus']"
     :hide-triggers="['hover', 'focus']"

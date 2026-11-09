@@ -11,7 +11,10 @@
     >
       <div class="py-[16px]">
         <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
-          <label :id="autoScrollingPreference.id">{{ autoScrollingPreference.title }}</label>
+          <label
+            :id="autoScrollingPreference.id"
+            for="autoScrollingToggle"
+          >{{ autoScrollingPreference.title }}</label>
           <Switch
             id="autoScrollingToggle"
             class="mx-[8px]"

@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -- the Select component, not a native select; it renders its own label -->
   <Select
     :model-value="selectedOptionObject"
     :placeholder="props.placeholder"

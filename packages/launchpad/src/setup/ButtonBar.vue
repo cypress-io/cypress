@@ -31,12 +31,13 @@
       >
         <label
           id="altFn"
+          for="altFnSwitch"
           class="px-3 text-gray-500"
-          @click="handleAlt"
         >
           {{ alt }}
         </label>
         <Switch
+          id="altFnSwitch"
           size="lg"
           label-id="altFn"
           :value="altValue"

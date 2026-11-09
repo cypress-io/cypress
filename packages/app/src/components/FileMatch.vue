@@ -46,13 +46,13 @@
           v-if="expanded"
           v-model="localExtensionPattern"
           class="ml-[12px]"
-          :aria-label="t('components.fileSearch.byExtensionInput')"
+          :label="t('components.fileSearch.byExtensionInput')"
           :placeholder="t('components.fileSearch.byExtensionInput')"
         />
         <FileMatchInput
           v-else
           v-model="localPattern"
-          aria-label="Search by filename"
+          label="Search by filename"
           :placeholder="t('components.fileSearch.byFilenameInput')"
         />
       </div>
@@ -74,7 +74,7 @@
         <i-cy-magnifying-glass_x16 class="mr-[8px] ml-[12px] inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400" />
         <FileMatchInput
           v-model="localPattern"
-          :aria-label="t('components.fileSearch.byFilenameInput')"
+          :label="t('components.fileSearch.byFilenameInput')"
           :placeholder="t('components.fileSearch.byFilenameInput')"
         />
       </div>

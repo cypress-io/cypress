@@ -54,11 +54,11 @@ describe('<SelectCloudProjectModal />', () => {
 
   it('prefills new project name with the current one', () => {
     mountDialog()
-    cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
+    cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
     cy.findByLabelText(`${defaultMessages.runs.connect.modal.selectProject.projectName }*${defaultMessages.runs.connect.modal.selectProject.projectNameDisclaimer}`)
     .should('have.value', 'Test Project')
 
-    cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('be.visible')
+    cy.contains('button', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('be.visible')
     cy.contains('label', defaultMessages.runs.connect.modal.selectProject.privateDescription).should('be.visible')
     cy.contains('label', defaultMessages.runs.connect.modal.selectProject.publicDescription).should('be.visible')
   })
@@ -68,7 +68,7 @@ describe('<SelectCloudProjectModal />', () => {
     cy.get('[data-cy="selectOrganization"]').click()
     cy.getByRole('listbox', { native: false }).within(() => cy.findAllByText('Test Org 2').click())
 
-    cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('not.exist')
+    cy.contains('button', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('not.exist')
   })
 
   it('auto selects a project if it is the only project in the organization', () => {
@@ -151,7 +151,7 @@ describe('<SelectCloudProjectModal />', () => {
 
     context('create new project', () => {
       beforeEach(() => {
-        cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
+        cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
         cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
       })
 

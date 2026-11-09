@@ -26,6 +26,7 @@
           </slot>
         </span>
       </div>
+      <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -- the consumer's id or aria-label reaches the input through inputAttrs -->
       <input
         :ref="props.inputRef?.()"
         v-model="localValue"

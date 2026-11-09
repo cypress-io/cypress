@@ -39,6 +39,7 @@
           </ExternalLink>
         </i18n-t>
       </Alert>
+      <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -- the Select component, not a native select; it renders its own label -->
       <Select
         v-model="pickedOrganization"
         :options="organizationOptions"
@@ -72,6 +73,7 @@
           <OrganizationIcon class="h-[16px] w-[16px] icon-dark-gray-500" />
         </template>
       </Select>
+      <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -- the Select component, not a native select; it renders its own label -->
       <Select
         v-if="!newProject"
         v-model="pickedProject"
@@ -94,12 +96,13 @@
               {{ t('runs.connect.modal.selectProject.project') }}
               <span class="text-red-500">*</span>
             </p>
-            <a
+            <button
+              type="button"
               class="cursor-pointer my-[8px] text-right text-indigo-500 hover:underline"
               @click="newProject = true"
             >
               {{ t('runs.connect.modal.selectProject.createNewProject') }}
-            </a>
+            </button>
           </div>
         </template>
         <template #input-prefix>
@@ -125,13 +128,14 @@
               {{ t('runs.connect.modal.selectProject.projectNameDisclaimer') }}
             </span>
           </label>
-          <a
+          <button
             v-if="projectOptions.length > 0"
+            type="button"
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
             {{ t('runs.connect.modal.selectProject.chooseExistingProject') }}
-          </a>
+          </button>
         </div>
         <Input
           id="projectName"

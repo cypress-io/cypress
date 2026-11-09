@@ -1,5 +1,6 @@
 <!-- Be careful with changing styles of the panels, it can impact our screenshot tests -->
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- tracks a drag that started on a resize handle -->
   <div
     id="resizable-panels-root"
     class="flex"
@@ -21,6 +22,7 @@
         :is-dragging="panel1IsDragging"
       />
 
+      <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- pointer-only drag handle; the panels have no keyboard resizing -->
       <div
         data-cy="panel1ResizeHandle"
         class="cursor-ew-resize h-full top-0 right-[-6px] w-[10px] z-30 absolute"
@@ -41,6 +43,7 @@
         :is-dragging="panel1IsDragging || panel2IsDragging || panel4IsDragging"
       />
 
+      <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- pointer-only drag handle; the panels have no keyboard resizing -->
       <div
         data-cy="panel2ResizeHandle"
         class="cursor-ew-resize h-full top-0 right-[-6px] w-[10px] z-30 absolute"
@@ -69,6 +72,7 @@
     >
       <slot name="panel4" />
 
+      <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- pointer-only drag handle; the panels have no keyboard resizing -->
       <div
         data-cy="panel4ResizeHandle"
         class="cursor-ew-resize h-full top-0 left-[-5px] w-[10px] z-30 absolute"

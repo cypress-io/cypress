@@ -8,6 +8,8 @@ export * from './graphqlConfig'
 
 export * from './jsonConfig'
 
+export * from './vueA11yConfig'
+
 export * from './vueTsxOverrides'
 
 import * as globalImport from 'globals'

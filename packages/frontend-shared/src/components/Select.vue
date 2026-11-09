@@ -146,6 +146,8 @@
             <li
               v-if="$slots.footer"
               role="option"
+              aria-selected="false"
+              aria-disabled="true"
             >
               <slot name="footer" />
             </li>

@@ -8,6 +8,7 @@
       v-bind="wrapperProps"
       class="children:h-[30px]"
     >
+      <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -- pointer shortcut for the row's padding; the button or link inside is the keyboard control -->
       <li
         v-for="row in list"
         :key="row.index"

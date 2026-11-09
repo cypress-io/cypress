@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -- pointer shortcut; the project title button is the keyboard control and its click bubbles here -->
   <div
     class="bg-white border rounded cursor-pointer flex space-x-3
   border-gray-100 w-full pt-[13px] pr-[4px] pb-[13px] relative items-center group

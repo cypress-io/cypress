@@ -19,6 +19,7 @@ src/
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
+  vueA11yConfig.ts      Opt-in accessibility linting of .vue templates (eslint-plugin-vuejs-accessibility), for app, launchpad and frontend-shared
   vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
   reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
@@ -79,6 +80,16 @@ The first `eslint --fix` after a package opts in reorders its `package.json` top
 ## Vue packages
 
 `app`, `launchpad` and `frontend-shared` spread `vueTsxOverrides` and then `frontendOverrides` after `baseConfig` (and `jsonConfig`), and add `vue` to their `lint-staged` glob. Without `vue` in the glob, a staged `.vue` file matches no task and is committed unlinted. `vue-eslint-parser` 10 defines the `<script setup>` compiler macros (`defineProps`, `defineEmits`, `defineExpose`, `withDefaults`), so they need no globals.
+
+They also spread `vueA11yConfig` after `frontendOverrides`. It runs `eslint-plugin-vuejs-accessibility`'s recommended rules on `.vue` templates: images need `alt`, form controls need a label, clickable elements need keyboard support, ARIA roles and attributes must be valid. The other `.vue` files in the repo are test fixtures (`npm/vue` component specs, `system-tests/projects`, a `data-context` codegen fixture), not UI users see, so those workspaces leave it out. The block carries the plugin and its rules only; the plugin's `flat/recommended` preset would also replace `baseConfig`'s `.vue` parser setup.
+
+- **Prefer the semantic element.** A `<button type="button">` over a clickable `<div>`, a `<fieldset>`/`<legend>` over a `<label>` for a group, a `<label for>` over a `@click` on the label.
+- **`label-has-for` takes either association.** The rule's default requires a label to both wrap its control and name it with `for`; the block sets `required: { some: ['nesting', 'id'] }`, which is what HTML requires. A `<label>` that names a `Switch` points `for` at the switch's `id`, alongside the `label-id` the switch uses for `aria-labelledby`.
+- **`form-control-has-label` reads the shared `Select` as a native `<select>`**, because the rule matches on the kebab-cased tag name and has no option to exclude a component. `Select` renders its own label, so each use carries an `eslint-disable-next-line` with that reason. The same goes for `Input.vue`'s inner `<input>`, which takes the consumer's `id` or `aria-label` through `v-bind`.
+- **A bound `:tabindex` reads as missing** to `interactive-supports-focus`, so `Collapsible` disables it on its header.
+- **Pointer shortcuts are disabled per element, with the reason.** `Card`, `GlobalProjectCard` and similar rows put `@click` on the container for a larger hit area while a `<button>` inside is the keyboard control, and the resize handles in `ResizablePanels` are pointer-only.
+
+Template directives take a description after `--`: `<!-- eslint-disable-next-line vuejs-accessibility/<rule> -- <reason> -->`. A `@vue-expect-error` comment must stay directly above its element, so use an `eslint-disable` / `eslint-enable` pair there instead.
 
 `vue/no-v-html` is an error. Render text with `{{ }}` interpolation. Where a component renders HTML built to be rendered (markdown-it via `useMarkdown`, Shiki, `ansi-to-html` with `escapeXML: true`, bundled SVG icons), wrap it in `<!-- eslint-disable vue/no-v-html -->` / `<!-- eslint-enable vue/no-v-html -->` with a note on where the HTML comes from. A `disable-next-line` comment does not reach a `v-html` attribute on a later line of the tag.
 

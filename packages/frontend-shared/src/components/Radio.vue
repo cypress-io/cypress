@@ -1,34 +1,35 @@
 <template>
-  <label
-    class="mt-[24px] text-gray-800 block font-bold"
-    :for="props.name"
-  >{{ props.label }}</label>
-  <div
-    v-for="opt in options"
-    :key="opt.value"
-    class="mt-[8px]"
-  >
-    <label
-      class="flex text-[16px] leading-[24px] items-center"
+  <fieldset class="mt-[24px]">
+    <legend class="text-gray-800 block font-bold">
+      {{ props.label }}
+    </legend>
+    <div
+      v-for="opt in options"
+      :key="opt.value"
+      class="mt-[8px]"
     >
-      <input
-        type="radio"
-        :name="props.name"
-        :value="opt.value"
-        class="mr-[8px] radio hocus-default checked:bg-transparent checked:hocus:bg-transparent checked:border-indigo-500 checked:hocus:border-indigo-500"
-        :checked="props.value === opt.value"
-        @click="emits('update:value', opt.value)"
+      <label
+        class="flex text-[16px] leading-[24px] items-center"
       >
-      <slot
-        name="option"
-        :option="opt"
-        :checked="props.value === opt.value"
-      >
-        <span class="text-gray-800">{{ opt.label }}</span>
-        <span class="text-gray-500"> - {{ opt.description }}</span>
-      </slot>
-    </label>
-  </div>
+        <input
+          type="radio"
+          :name="props.name"
+          :value="opt.value"
+          class="mr-[8px] radio hocus-default checked:bg-transparent checked:hocus:bg-transparent checked:border-indigo-500 checked:hocus:border-indigo-500"
+          :checked="props.value === opt.value"
+          @click="emits('update:value', opt.value)"
+        >
+        <slot
+          name="option"
+          :option="opt"
+          :checked="props.value === opt.value"
+        >
+          <span class="text-gray-800">{{ opt.label }}</span>
+          <span class="text-gray-500"> - {{ opt.description }}</span>
+        </slot>
+      </label>
+    </div>
+  </fieldset>
 </template>
 
 <script lang="ts" setup>

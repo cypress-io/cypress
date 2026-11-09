@@ -1,5 +1,6 @@
 <template>
   <template v-if="props.gql">
+    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -- pointer shortcut; the browser name button is the keyboard control and its click bubbles here -->
     <li
       v-for="browser of browsers"
       :key="browser.id"

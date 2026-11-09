@@ -21,17 +21,15 @@
         <span>Assert</span>
       </div>
       <div class="close-wrapper">
-        <a
+        <button
+          type="button"
           data-cy="assertions-menu-close"
-          tabindex="0"
-          role="button"
+          aria-label="Close"
           class="close"
-          @keydown.enter="onClose"
-          @keydown.space="onClose"
           @click.stop="onClose"
         >
           <IconActionDeleteSmall />
-        </a>
+        </button>
       </div>
     </div>
     <div
@@ -176,6 +174,13 @@ onMounted(() => {
       margin-right: 8px;
 
       .close {
+        // A shadow root does not inherit the app's button reset
+        background: none;
+        border: 0;
+        padding: 0;
+        color: inherit;
+        font: inherit;
+
         &:hover, &:focus, &:active {
           cursor: pointer;
           color: #eee;

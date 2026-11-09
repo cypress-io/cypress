@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -- pointer shortcut; the title button is the keyboard control and its click bubbles here -->
   <div
     class="relative block h-auto text-center border border-gray-100 rounded outline-none group children:hyphens-manual"
     :class="{

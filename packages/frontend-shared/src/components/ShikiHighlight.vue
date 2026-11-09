@@ -19,6 +19,7 @@ shikiWrapperClasses computed property.
 <template>
   <div class="text-left cursor-text">
     <!-- eslint-disable vue/no-v-html -- rendered by Shiki, which escapes the code it highlights -->
+    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -- copy on click is a pointer shortcut; copy-button gives keyboard users a control -->
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
