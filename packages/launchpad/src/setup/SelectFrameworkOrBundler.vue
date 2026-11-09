@@ -48,9 +48,7 @@
       <span
         v-if="isDetected"
         class="ml-[4px] text-gray-400 inline-block"
-      >
-        (detected)
-      </span>
+      >(detected)</span>
     </template>
 
     <template #item-body="{ value: itemValue }">
@@ -62,9 +60,7 @@
       <span
         v-if="itemValue.isDetected"
         class="ml-[4px] text-gray-400 inline-block"
-      >
-        (detected)
-      </span>
+      >(detected)</span>
     </template>
     <template #item-prefix="{ value: itemValue }">
       <!-- Raw SVG from a third-party component framework definition's `icon` option -->

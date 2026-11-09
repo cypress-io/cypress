@@ -4,6 +4,5 @@
     <span class="sr-only">
       Support is in
     </span>
-    Alpha
-  </span>
+    Alpha</span>
 </template>
