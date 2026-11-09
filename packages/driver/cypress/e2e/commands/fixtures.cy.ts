@@ -254,6 +254,25 @@ describe('src/cy/commands/fixtures', () => {
         })
       })
 
+      ;[
+        { fixture: 'empty.txt', expected: '' },
+        { fixture: 'false.json', expected: false },
+        { fixture: 'null.json', expected: null },
+      ].forEach(({ fixture, expected }) => {
+        it(`caches fixtures with falsy content: ${fixture}`, () => {
+          cy.fixture(fixture).then((content) => {
+            expect(content).to.eq(expected)
+
+            cy.fixture(fixture).then((content) => {
+              expect(content).to.eq(expected)
+            })
+          })
+          .then(() => {
+            expect(backend.withArgs('get:fixture')).to.be.calledOnce
+          })
+        })
+      })
+
       it('clones fixtures to prevent accidental mutation', () => {
         cy.fixture('foo').then((obj) => {
           // mutate the object
