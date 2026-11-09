@@ -31,7 +31,7 @@ type retryOptions = {
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeout'], clearTimeout: $Cy['clearTimeout'], whenStable: $Cy['whenStable'], finishAssertions: (err?: Error) => void) => ({
-  retry (fn, options: retryOptions, log?) {
+  retry (fn, options: retryOptions) {
     // remove the runnables timeout because we are now in retry
     // mode and should be handling timing out ourselves and dont
     // want to accidentally time out via mocha
