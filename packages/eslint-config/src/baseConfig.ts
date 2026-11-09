@@ -266,8 +266,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'mocha/max-top-level-suites': 'off',
       'mocha/no-top-level-hooks': 'off',
       'mocha/no-global-tests': 'off',
-      'mocha/no-sibling-hooks': 'off',
-      'mocha/no-return-and-callback': 'off',
       'mocha/no-pending-tests': 'off',
 
       'vue/multi-word-component-names': 'off',

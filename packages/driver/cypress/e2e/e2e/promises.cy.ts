@@ -99,7 +99,7 @@ describe('promises', () => {
     })
 
     // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
-    return cy.foo()
+    cy.foo()
   })
 
   it('throws when instantiating a promise from a custom command', function (done) {
@@ -133,7 +133,7 @@ describe('promises', () => {
     })
 
     // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
-    return cy.foo()
+    cy.foo()
   })
 
   it('is okay to return promises from custom commands with no cy commands', () => {
