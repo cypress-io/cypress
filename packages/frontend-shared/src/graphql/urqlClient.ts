@@ -1,11 +1,12 @@
 import {
-  Exchange,
-  Client,
   createClient,
   dedupExchange,
   errorExchange,
   fetchExchange,
   subscriptionExchange,
+} from '@urql/core'
+import type { Exchange,
+  Client,
   CombinedError,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
@@ -94,15 +95,11 @@ export function makeCacheExchange (schema: any = urqlSchema) {
 declare global {
   interface Window {
     ws?: SocketShape
-    /**
-     * We can set this in onBeforeLoad in Cypress tests, allowing us
-     * to use cy.intercept in tests that we need it
-     */
-    __CYPRESS_GQL_NO_SOCKET__?: string
     __CYPRESS_MODE__: 'run' | 'open'
+    __CYPRESS_BROWSER_NETWORK_MODE__?: boolean
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
-    __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
+    __CYPRESS_BROWSER__: Partial<Browser> & { majorVersion: string | number }
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId
@@ -123,6 +120,7 @@ interface AppUrqlClientConfig {
   target: 'app'
   namespace: string
   socketIoRoute: string
+  port?: number | null
 }
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
@@ -166,7 +164,6 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
       forwardSubscription (op) {
         return {
           subscribe: (sink) => {
-            // @ts-ignore
             const dispose = socketClient.subscribe(op, sink)
 
             return {
@@ -192,7 +189,7 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
     // Rather than authoring a custom exchange, let's just polyfill the "fetch"
     // exchange to adapt to a similar interface. This way it'll be simple to
     // swap in-and-out during integration tests.
-    fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
+    fetch: config.target === 'launchpad' ? window.fetch : urqlFetchSocketAdapter(io),
   })
 
   await connectPromise
@@ -232,14 +229,28 @@ function getPubSubSource (config: PubSubConfig) {
   })
 }
 
-function getSocketSource (config: UrqlClientConfig) {
-  // http: -> ws:  &  https: -> wss:
-  const protocol = window.location.protocol.replace('http', 'ws')
-  const wsUrl = config.target === 'launchpad'
-    ? `ws://${window.location.host}/__launchpad/graphql-ws`
-    : `${protocol}//${window.location.host}${config.socketIoRoute}-graphql`
+export function getGraphQLWsUrl (config: UrqlClientConfig, location: Pick<Location, 'protocol' | 'host'>, isBrowserNetworkMode: boolean) {
+  if (config.target === 'launchpad') {
+    return `ws://${location.host}/__launchpad/graphql-ws`
+  }
 
+  // On the browser (CDP) network path the app is served at the AUT's superdomain, and
+  // CDP cannot intercept a WebSocket upgrade — the handshake has to name the Cypress
+  // server or it reaches the user's app server (see #34563). `port` is the port the
+  // server is listening on; `proxyUrl` is derived from the port that was requested and
+  // can still name a port nothing is bound to.
+  if (isBrowserNetworkMode && config.port) {
+    return `ws://localhost:${config.port}${config.socketIoRoute}-graphql`
+  }
+
+  // http: -> ws:  &  https: -> wss:
+  const protocol = location.protocol.replace('http', 'ws')
+
+  return `${protocol}//${location.host}${config.socketIoRoute}-graphql`
+}
+
+function getSocketSource (config: UrqlClientConfig) {
   return createWsClient({
-    url: wsUrl,
+    url: getGraphQLWsUrl(config, window.location, window.__CYPRESS_BROWSER_NETWORK_MODE__ === true),
   })
 }

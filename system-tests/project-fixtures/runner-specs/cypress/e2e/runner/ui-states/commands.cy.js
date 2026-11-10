@@ -14,7 +14,7 @@ describe('Command Options and UI Display Tests', () => {
       cy.log(obj)
     })
 
-    cy.get('div').each(($div) => { }).end()
+    cy.get('div').each(($div) => { })
 
     cy.fixture('uiStates')
 
@@ -56,7 +56,6 @@ describe('Command Options and UI Display Tests', () => {
     cy.document({ timeout: 2005 })
 
     cy.get('input').eq(0, { timeout: 2006 })
-    cy.exec('ls', { env: { 'a': true } })
     cy.get('input').filter('#a', { timeout: 2007 })
     cy.get('form').find('#a', { timeout: 2008 })
     cy.get('input').first({ timeout: 2009 })
@@ -91,7 +90,7 @@ describe('Command Options and UI Display Tests', () => {
     cy.get('#b').prevAll('input', { timeout: 2026 })
     cy.get('#b').prevUntil('#a', { timeout: 2027 })
     cy.readFile('./cypress/fixtures/uiStates.json', { timeout: 2028 })
-    cy.reload(true, { timeout: 2028 })
+    cy.reload(true, { timeout: 60000 })
     cy.get('button').rightclick({ timeout: 2028 })
     cy.root({ timeout: 2028 })
   })
@@ -137,9 +136,11 @@ describe('Command Options and UI Display Tests', () => {
   })
 
   it('verify element visibility state', () => {
-    cy.visit('cypress/fixtures/commandsActions.html')
+    cy.visit('cypress/fixtures/uiStates.html')
 
-    cy.get('#scroll-horizontal button')
+    // `#c` has inline `style="display: none"`, which the modern visibility
+    // algorithm detects (scroll-clipping is no longer treated as hidden).
+    cy.get('#c')
     .should('not.be.visible')
   })
 

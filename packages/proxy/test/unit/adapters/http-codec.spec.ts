@@ -22,6 +22,14 @@ describe('proxyHttpCodec', () => {
     expect(ctx.id).to.equal(request.id)
   })
 
+  it('copies resourceType from the middleware request onto the neutral request', () => {
+    const ctx = createCtx()
+
+    ctx.req.resourceType = 'xhr'
+
+    expect(proxyHttpCodec.decodeRequest(ctx).resourceType).to.equal('xhr')
+  })
+
   it('encodes neutral request mutations back onto the proxied request', () => {
     const ctx = createCtx()
     const request = proxyHttpCodec.decodeRequest(ctx)

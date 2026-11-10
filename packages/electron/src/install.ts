@@ -15,7 +15,7 @@ import { pipeline } from 'stream/promises'
 import crypto from 'crypto'
 import { flipFuses, FuseVersion, FuseV1Options } from '@electron/fuses'
 import { move, remove } from 'fs-extra'
-// @ts-ignore
+import * as cyIcons from '@packages/icons'
 import pkg from '@packages/root'
 
 const debug = Debug('cypress:electron:install')
@@ -34,7 +34,7 @@ export function getElectronVersion () {
 // returns icons package so that the caller code can find
 // paths to the icons without hard-coding them
 export const icons = () => {
-  return require('@packages/icons')
+  return cyIcons
 }
 
 function checkCurrentVersion (pathToVersion: string) {
@@ -61,20 +61,25 @@ async function getFileHash (filePath: string): Promise<string> {
   return hash.digest('hex')
 }
 
-async function checkIconVersion () {
-  // TODO: this seems wrong, it's hard coding the check only for OSX and not windows or linux (!?)
-  const mainIconsPath = icons().getPathToIcon('cypress.icns')
-  const cachedIconsPath = path.join(
-    __dirname,
-    '../Cypress/Cypress.app/Contents/Resources/electron.icns',
-  )
+// `@electron/packager` only leaves a standalone icon file in the packaged app on
+// darwin. On win32 rcedit writes the icon into `Cypress.exe` and on linux none is
+// applied, so there is nothing to compare against there.
+async function checkIconVersion (platform: string) {
+  if (platform !== 'darwin') {
+    return
+  }
+
+  const mainIconsPath = cyIcons.getPathToIcon('cypress.icns')
+  const cachedIconsPath = getPathToResources('electron.icns')
 
   const [mainHash, cachedHash] = await Promise.all(
     [mainIconsPath, cachedIconsPath].map(getFileHash),
   )
 
   if (mainHash !== cachedHash) {
-    throw new Error('Icon mismatch')
+    throw new Error(
+      `cached icon '${cachedIconsPath}' does not match '${mainIconsPath}', binary needs rebuilding`,
+    )
   }
 }
 
@@ -135,6 +140,35 @@ interface PkgElectronAppOptions {
   overwrite: boolean
   electronVersion: string
   icon: string
+  electronZipDir?: string
+}
+
+// @electron/packager would fetch this through @electron/get, which never
+// retries and re-fetches SHASUMS256.txt even on cache hits. Calling it here
+// lets us retry; electronZipDir then points the packager at the result.
+async function downloadElectronZipWithRetries (options: { version: string, platform: string, arch: string }): Promise<string> {
+  // required dynamically for the same mksnapshot reason as @electron/packager below
+  const e = 'electron'
+  const { downloadArtifact } = require(`@${e}/get`)
+  const retryDelaysMs = [2000, 4000, 8000, 16000, 32000]
+
+  // same env var the `electron` package's own installer honors, so CI can point
+  // both at one cacheable directory. Undefined falls back to the platform default.
+  const cacheRoot = process.env.electron_config_cache
+
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await downloadArtifact({ artifactName: 'electron', cacheRoot, ...options })
+    } catch (err) {
+      const delayMs = retryDelaysMs[attempt]
+
+      if (delayMs === undefined) throw err
+
+      debug('electron zip download failed %o', { attempt, err })
+      console.log(`Electron download failed (${(err as Error).message}), retrying in ${delayMs / 1000}s (attempt ${attempt + 1} of ${retryDelaysMs.length})`)
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
 }
 
 async function pkgElectronApp (
@@ -156,9 +190,8 @@ async function pkgElectronApp (
   const e = 'electron'
   const p = 'packager'
   const pkgr = require(`@${e}/${p}`)
-  const icons = require('@packages/icons')
 
-  const iconPath = icons.getPathToIcon('cypress')
+  const iconPath = cyIcons.getPathToIcon('cypress')
 
   debug('package icon', iconPath)
 
@@ -179,6 +212,14 @@ async function pkgElectronApp (
     icon: iconPath,
     ...options,
   }
+
+  const zipPath = await downloadElectronZipWithRetries({
+    version: resolvedOptions.electronVersion,
+    platform: resolvedOptions.platform,
+    arch: resolvedOptions.arch,
+  })
+
+  resolvedOptions.electronZipDir = path.dirname(zipPath)
 
   debug('packager options %j', resolvedOptions)
   const [appPath] = await pkgr(resolvedOptions)
@@ -205,7 +246,7 @@ async function pkgElectronApp (
   }
 }
 
-function ensure () {
+export function ensure () {
   const arch = os.arch()
   const platform = os.platform()
   const pathToExec = getPathToExec()
@@ -216,9 +257,7 @@ function ensure () {
     checkCurrentVersion(pathToVersion),
     // check if the dist folder exist and re-build if not
     fs.stat(pathToExec),
-    // Compare the icon in dist with the one in the icons
-    // package. If different, force the re-build.
-    checkIconVersion(),
+    checkIconVersion(platform),
   ]).then(() => {
     // check that the arch of the built binary matches our CPU
     return checkBinaryArchCpuArch(pathToExec, platform, arch)
@@ -228,7 +267,11 @@ function ensure () {
 }
 
 export function check () {
-  return ensure().catch((err) => {
-    packageAndExit()
+  return ensure().then(() => {
+    debug('existing electron binary is up to date, skipping rebuild')
+  }).catch((err) => {
+    debug('rebuilding electron binary: %s', (err as Error).message)
+
+    return packageAndExit()
   })
 }

@@ -2,6 +2,7 @@ import type { CyPromptCloudApi } from '@packages/types/src/cy-prompt/cy-prompt-s
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
 import { stackWithCause } from '../../error_with_cause'
+import { isReportingDisabled } from '../../reporting_disabled'
 const debug = Debug('cypress:server:cloud:api:cy-prompt:report_cy_prompt_error')
 
 export interface ReportCyPromptErrorOptions {
@@ -41,7 +42,7 @@ export function reportCyPromptError ({
 }: ReportCyPromptErrorOptions): void {
   debug('Error reported:', error)
 
-  if (process.env.CYPRESS_CRASH_REPORTS === '0') {
+  if (isReportingDisabled()) {
     return
   }
 

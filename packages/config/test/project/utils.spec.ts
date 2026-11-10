@@ -1,6 +1,6 @@
 import { vi, describe, it, beforeAll, beforeEach, expect } from 'vitest'
 import _ from 'lodash'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import Debug from 'debug'
 import os from 'node:os'
 
@@ -23,17 +23,16 @@ import {
 } from '../../src/project/utils'
 import { resetIssuedWarnings } from '../../src/browser'
 import path from 'node:path'
-import { Config } from '../../src/project/types'
+import type { Config } from '../../src/project/types'
 import fs from 'fs-extra'
 
 const debug = Debug('test')
 
 vi.mock('@packages/errors', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('@packages/errors')>()
 
   return {
     default: {
-      // @ts-expect-error
       ...actual.default,
       throwErr: vi.fn(),
       warning: vi.fn(),
@@ -42,11 +41,10 @@ vi.mock('@packages/errors', async (importActual) => {
 })
 
 vi.mock('fs-extra', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<{ default: typeof import('fs-extra') }>()
 
   return {
     default: {
-      // @ts-expect-error
       ...actual.default,
       pathExists: vi.fn(),
     },
@@ -54,10 +52,9 @@ vi.mock('fs-extra', async (importActual) => {
 })
 
 vi.mock('../../src/project/utils', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('../../src/project/utils')>()
 
   return {
-    // @ts-expect-error
     ...actual,
     resolveModule: vi.fn(),
   }
@@ -166,6 +163,7 @@ describe('config/src/project/utils', () => {
     it('does not return CYPRESS_RESERVED_ENV_VARS', () => {
       const envs = {
         CYPRESS_INTERNAL_ENV: 'value',
+        CYPRESS_AGENT_MODE: '1',
       } as unknown as NodeJS.ProcessEnv
 
       expect(getProcessEnvVars(envs)).toEqual({})
@@ -205,17 +203,8 @@ describe('config/src/project/utils', () => {
   })
 
   describe('environment name check', () => {
-    it('throws an error for unknown CYPRESS_INTERNAL_ENV', async () => {
+    it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'foo-bar')
-      // @ts-expect-error - invalid arg types
-      vi.mocked(errors.throwErr).mockImplementation((args1: string, arg2: string) => {
-        if (args1 === 'INVALID_CYPRESS_INTERNAL_ENV' && arg2 === 'foo-bar') {
-          return
-        }
-
-        throw new Error('should be unreachable')
-      })
-
       const cfg = {
         projectRoot: '/foo/bar/',
         supportFile: false,
@@ -224,13 +213,9 @@ describe('config/src/project/utils', () => {
 
       const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
 
-      try {
-        await mergeDefaults(cfg, options, {}, getFilesByGlob)
-      } catch {
-        //
-      }
+      expect(() => mergeDefaults(cfg, options, {}, getFilesByGlob)).toThrow(/unknown or unsupported \S*CYPRESS_INTERNAL_ENV\S* value: \S*foo-bar/)
 
-      expect(errors.throwErr).toHaveBeenCalledOnce
+      expect(errors.throwErr).toHaveBeenCalledExactlyOnceWith('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
     })
 
     it('allows production CYPRESS_INTERNAL_ENV', async () => {
@@ -246,7 +231,7 @@ describe('config/src/project/utils', () => {
 
       await mergeDefaults(cfg, options, {}, getFilesByGlob)
 
-      expect(errors.throwErr).not.toHaveBeenCalled
+      expect(errors.throwErr).not.toHaveBeenCalled()
     })
   })
 
@@ -526,13 +511,13 @@ describe('config/src/project/utils', () => {
 
     for (const folder of ['fileServerFolder', 'fixturesFolder']) {
       it(`converts relative ${folder} to absolute path`, () => {
-        const obj = {
+        const obj: Record<string, string> = {
           projectRoot: '/_test-output/path/to/project',
         }
 
         obj[folder] = 'foo/bar'
 
-        const expected = {
+        const expected: Record<string, string> = {
           projectRoot: '/_test-output/path/to/project',
         }
 
@@ -706,6 +691,8 @@ describe('config/src/project/utils', () => {
       try {
         await setSupportFileAndFolder(obj, getFilesByGlob)
       } catch (err) {
+        if (!(err instanceof Error)) throw err
+
         expect(stripAnsi(err.message)).toContain('Your project does not contain a default supportFile')
 
         return
@@ -722,11 +709,12 @@ describe('config/src/project/utils', () => {
       const e: Error & { code?: string } = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      // @ts-expect-error - invalid arg types
-      vi.mocked(resolveModule).mockImplementation((args) => {
-        if (args === supportFilename) {
+      vi.mocked(resolveModule).mockImplementation((name) => {
+        if (name === supportFilename) {
           throw e
         }
+
+        throw new Error(`Unexpected resolveModule call: ${name}`)
       })
 
       const obj = setAbsolutePaths({
@@ -755,11 +743,12 @@ describe('config/src/project/utils', () => {
       const e: Error & { code?: string } = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      // @ts-expect-error - invalid arg types
-      vi.mocked(resolveModule).mockImplementation((args) => {
-        if (args === supportFilename) {
+      vi.mocked(resolveModule).mockImplementation((name) => {
+        if (name === supportFilename) {
           throw e
         }
+
+        throw new Error(`Unexpected resolveModule call: ${name}`)
       })
 
       const obj = setAbsolutePaths({
@@ -997,10 +986,6 @@ describe('config/src/project/utils', () => {
 
     it('responseTimeout=30000', async function () {
       await defaults('responseTimeout', 30000)
-    })
-
-    it('execTimeout=60000', async function () {
-      await defaults('execTimeout', 60000)
     })
 
     it('waitForAnimations=true', async function () {
@@ -1304,30 +1289,28 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
-          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {},
           excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
-          execTimeout: { value: 60000, from: 'default' },
           experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
           experimentalCspAllowList: { value: false, from: 'default' },
-          experimentalFastVisibility: { value: false, from: 'default' },
+          visibilityStrategy: { value: 'modern', from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
-          experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           expose: {},
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+          forceHttp1: { value: false, from: 'default' },
           hosts: { value: null, from: 'default' },
           includeShadowDom: { value: false, from: 'default' },
           injectDocumentDomain: { value: false, from: 'default' },
           justInTimeCompile: { value: true, from: 'default' },
           isInteractive: { value: true, from: 'default' },
-          keystrokeDelay: { value: 0, from: 'default' },
+          keystrokeDelay: { value: null, from: 'default' },
+          manageBrowserMemory: { value: true, from: 'default' },
           modifyObstructiveCode: { value: true, from: 'default' },
           numTestsKeptInMemory: { value: 50, from: 'default' },
           pageLoadTimeout: { value: 60000, from: 'default' },
@@ -1352,6 +1335,7 @@ describe('config/src/project/utils', () => {
           taskTimeout: { value: 60000, from: 'default' },
           testIsolation: { value: true, from: 'default' },
           trashAssetsBeforeRuns: { value: true, from: 'default' },
+          trustedCertificates: { value: [], from: 'default' },
           userAgent: { value: null, from: 'default' },
           video: { value: false, from: 'default' },
           videoCompression: { value: false, from: 'default' },
@@ -1408,7 +1392,6 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
-          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {
             foo: {
@@ -1433,16 +1416,13 @@ describe('config/src/project/utils', () => {
             },
           },
           excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
-          execTimeout: { value: 60000, from: 'default' },
           experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
           experimentalCspAllowList: { value: false, from: 'default' },
-          experimentalFastVisibility: { value: false, from: 'default' },
+          visibilityStrategy: { value: 'modern', from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
-          experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           expose: {
             baz: {
@@ -1456,12 +1436,14 @@ describe('config/src/project/utils', () => {
           },
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+          forceHttp1: { value: false, from: 'default' },
           hosts: { value: null, from: 'default' },
           includeShadowDom: { value: false, from: 'default' },
           injectDocumentDomain: { value: false, from: 'default' },
           justInTimeCompile: { value: true, from: 'default' },
           isInteractive: { value: true, from: 'default' },
-          keystrokeDelay: { value: 0, from: 'default' },
+          keystrokeDelay: { value: null, from: 'default' },
+          manageBrowserMemory: { value: true, from: 'default' },
           modifyObstructiveCode: { value: true, from: 'default' },
           numTestsKeptInMemory: { value: 50, from: 'default' },
           pageLoadTimeout: { value: 60000, from: 'default' },
@@ -1486,6 +1468,7 @@ describe('config/src/project/utils', () => {
           taskTimeout: { value: 60000, from: 'default' },
           testIsolation: { value: true, from: 'default' },
           trashAssetsBeforeRuns: { value: true, from: 'default' },
+          trustedCertificates: { value: [], from: 'default' },
           userAgent: { value: null, from: 'default' },
           video: { value: false, from: 'default' },
           videoCompression: { value: false, from: 'default' },

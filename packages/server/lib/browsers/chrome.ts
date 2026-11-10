@@ -22,6 +22,7 @@ import memory from './memory'
 
 import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
+import type { Protocol } from 'devtools-protocol'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -45,6 +46,10 @@ const pathToTheme = extension.getPathToTheme()
 
 let browserCriClient: BrowserCriClient | undefined
 
+// Outlives each spec's CdpAutomation, so the reset that runs when the next
+// spec's tab opens can clear the origins the previous spec's tab requested.
+const storageOrigins = new Set<string>()
+
 // Generates default Chrome preferences that Cypress applies to all Chrome instances
 const _getDefaultChromePreferences = (): ChromePreferences => {
   return {
@@ -52,6 +57,10 @@ const _getDefaultChromePreferences = (): ChromePreferences => {
       autofill: {
         profile_enabled: false, // Disable Chrome's "Save address" pop up
         credit_card_enabled: false, // Disable Chrome's "Save card" pop up
+      },
+      // Chrome 138+ gates the "Translate this page?" bubble on this pref alone.
+      translate: {
+        enabled: false,
       },
     },
     defaultSecure: {},
@@ -115,7 +124,7 @@ const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: Chr
       return original
     }
 
-    let deletions: any[] = []
+    const deletions: any[] = []
 
     _.mergeWith(original, newPrefs[prefPath], (_objValue, newValue, key, obj) => {
       if (newValue == null) {
@@ -204,6 +213,109 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   return args
 }
 
+const DISABLE_FEATURES = '--disable-features='
+
+/**
+ * Merge multiple `--disable-features` arguments into one.
+ *
+ * Cypress disables features in `_getArgs` that the run depends on, and users
+ * may add their own via `before:browser:launch`. Chromium only honors the last
+ * occurrence of the switch, so the values must be combined: a user-supplied
+ * argument otherwise replaces Cypress's list rather than adding to it.
+ */
+const _normalizeDisableFeatures = function (args: string[]): string[] {
+  const featureArgs = args.filter((arg) => arg.startsWith(DISABLE_FEATURES))
+
+  if (featureArgs.length <= 1) {
+    return args
+  }
+
+  const features = _.uniq(
+    featureArgs
+    .flatMap((arg) => arg.slice(DISABLE_FEATURES.length).split(','))
+    .filter(Boolean),
+  )
+
+  const rest = args.filter((arg) => !arg.startsWith(DISABLE_FEATURES))
+
+  if (!features.length) {
+    return rest
+  }
+
+  return rest.concat(`${DISABLE_FEATURES}${features.join(',')}`)
+}
+
+const HOST_RESOLVER_RULES = '--host-resolver-rules='
+
+/**
+ * Merge multiple `--host-resolver-rules` arguments into one.
+ *
+ * Cypress pushes its own rules in `_getArgs` (translated from `hosts` when the
+ * MITM proxy is disabled) and users may add their own via
+ * `before:browser:launch`. Chromium only honors the last occurrence of the
+ * switch, so the values must be combined. Within the merged value the first
+ * matching rule wins, so later (user-supplied) arguments are placed first to
+ * let them override the rules derived from `hosts`.
+ */
+const _normalizeHostResolverRules = function (args: string[]): string[] {
+  const ruleArgs = args.filter((arg) => arg.startsWith(HOST_RESOLVER_RULES))
+
+  if (ruleArgs.length <= 1) {
+    return args
+  }
+
+  // Empty values are dropped rather than merged — Chromium only honors the
+  // last occurrence of the switch, so a trailing empty value would otherwise
+  // clear the rules derived from `hosts`.
+  const values = ruleArgs
+  .map((arg) => arg.slice(HOST_RESOLVER_RULES.length))
+  .filter(Boolean)
+
+  const rest = args.filter((arg) => !arg.startsWith(HOST_RESOLVER_RULES))
+
+  if (!values.length) {
+    return rest
+  }
+
+  return rest.concat(`${HOST_RESOLVER_RULES}${values.reverse().join(',')}`)
+}
+
+const PERSISTED_SERVICE_WORKERS_SNAPSHOT_TIMEOUT_MS = 5000
+
+/**
+ * Resolves with the http(s) origins of the service worker registrations the
+ * profile holds. Chromium answers the first `ServiceWorker.enable` on a page
+ * session with one `workerRegistrationUpdated` event listing every stored
+ * registration, so this must subscribe before that enable is sent.
+ */
+const _collectPersistedServiceWorkerOrigins = (pageCriClient: CriClient): Promise<string[]> => {
+  return new Promise((resolve) => {
+    const finish = (origins: string[]) => {
+      clearTimeout(timeout)
+      pageCriClient.off('ServiceWorker.workerRegistrationUpdated', onSnapshot)
+      resolve(origins)
+    }
+
+    // deleted registrations count too: their caches outlive them
+    const onSnapshot = ({ registrations }: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+      const origins = registrations
+      .map((registration) => new URL(registration.scopeURL))
+      .filter(({ protocol }) => protocol === 'http:' || protocol === 'https:')
+      .map(({ origin }) => origin)
+
+      finish(origins)
+    }
+
+    // the snapshot arrives once per session, so never let a missing one hold up the launch
+    const timeout = setTimeout(() => {
+      debug('no service worker registration snapshot after %dms, clearing only the runner origin', PERSISTED_SERVICE_WORKERS_SNAPSHOT_TIMEOUT_MS)
+      finish([])
+    }, PERSISTED_SERVICE_WORKERS_SNAPSHOT_TIMEOUT_MS)
+
+    pageCriClient.on('ServiceWorker.workerRegistrationUpdated', onSnapshot)
+  })
+}
+
 // we now store the extension in each browser profile
 const _removeRootExtension = () => {
   return fs
@@ -263,7 +375,7 @@ const _navigateUsingCRI = async function (client, url) {
 
 const _handleDownloads = async function (client, downloadsFolder: string, automation) {
   client.on('Page.downloadWillBegin', (data) => {
-    const downloadItem = {
+    const downloadItem: { id: string, url: string, filePath?: string, mime?: string | null } = {
       id: data.guid,
       url: data.url,
     }
@@ -271,9 +383,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
     const filename = data.suggestedFilename
 
     if (filename) {
-      // @ts-ignore
       downloadItem.filePath = path.join(downloadsFolder, data.suggestedFilename)
-      // @ts-ignore
       downloadItem.mime = mime.getType(data.suggestedFilename)
     }
 
@@ -303,7 +413,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal, storageOrigins)
 
   automation.use(cdpAutomation)
 
@@ -318,6 +428,10 @@ export = {
   //
 
   _normalizeArgExtensions,
+
+  _normalizeHostResolverRules,
+
+  _normalizeDisableFeatures,
 
   _removeRootExtension,
 
@@ -378,6 +492,62 @@ export = {
       args.push(`--proxy-server=${ps}`)
     }
 
+    // With the MITM proxy disabled the browser performs origin fetches itself,
+    // so the Node-side DNS remap (evil-dns) can't honor `hosts` — translate it
+    // into Chromium resolver rules at launch instead.
+    if (!_.isEmpty(options.hosts)) {
+      const rules = _.map(options.hosts, (ip, host) => {
+        // Chromium parses the replacement's last `:` as an optional port, so
+        // IPv6 literals must be bracketed.
+        const replacement = ip.includes(':') && !ip.startsWith('[') ? `[${ip}]` : ip
+
+        return `MAP ${host} ${replacement}`
+      }).join(',')
+
+      args.push(`${HOST_RESOLVER_RULES}${rules}`)
+    }
+
+    // Pushed after the `hosts` rules so that the merge in `_normalizeHostResolverRules`
+    // orders these first and they win for an origin that appears in both. The bridge
+    // resolves the real address itself, so a `hosts` entry for that origin still applies.
+    if (options.mtlsHostResolverRules) {
+      args.push(`${HOST_RESOLVER_RULES}${options.mtlsHostResolverRules}`)
+    }
+
+    // Blink's cache-aware font loading hard-fails uncached @font-face loads
+    // (net::ERR_FAILED) when a CDP Fetch response-stage pause is attached,
+    // which the CDP transport always enables (crbug.com/1196004). Web fonts do
+    // not load at all on the browser (CDP) network path unless this flag stays —
+    // do not remove it.
+    // These features are launch-time-only: connectToExisting attaches to an
+    // already-running browser and inherits the flags of whatever launched it.
+    if (options.useBrowserNetworkInterception) {
+      // On the browser (CDP) network path the browser makes origin fetches itself. The
+      // blanket `--ignore-certificate-errors` stays so an untrusted cert still loads, but
+      // Chrome treats such a connection as a clicked-through warning and never disk-caches
+      // from it. Declaring a cert in `trustedCertificates` adds its SPKI fingerprint here,
+      // which Chrome honors over the blanket flag: the connection is genuinely trusted, so
+      // the origin's assets cache normally.
+      const fingerprints = options.trustedCertificateFingerprints ?? []
+
+      if (fingerprints.length) {
+        args.push(`--ignore-certificate-errors-spki-list=${fingerprints.join(',')}`)
+      }
+
+      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith(DISABLE_FEATURES))
+
+      // ServiceWorkerAutoPreload serves navigations that cold-start a service
+      // worker from a browser-issued request no CDP session can pause
+      // https://github.com/cypress-io/cypress/issues/34709
+      const features = 'WebFontsCacheAwareTimeoutAdaption,ServiceWorkerAutoPreload'
+
+      if (disableFeaturesIndex === -1) {
+        args.push(`${DISABLE_FEATURES}${features}`)
+      } else {
+        args[disableFeaturesIndex] += `,${features}`
+      }
+    }
+
     if (options.chromeWebSecurity === false) {
       args.push('--disable-web-security')
       args.push('--allow-running-insecure-content')
@@ -385,9 +555,9 @@ export = {
 
     const { isHeadless } = browser
 
-    // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
-    // https://github.com/cypress-io/cypress/issues/1872
-    args.push('--proxy-bypass-list=<-loopback>')
+    if (options.proxyBypassList) {
+      args.push(`--proxy-bypass-list=${options.proxyBypassList}`)
+    }
 
     if (isHeadless) {
       args.push('--headless=new')
@@ -496,6 +666,19 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
+    // this runs once per spec, and the client from the previous spec still holds
+    // an open websocket to the same browser. Nothing else closes it. Awaited so
+    // its close, which clears the session's CDP url, can't land after the new
+    // connection sets its own; the reference is left in place until the new
+    // client replaces it so the getter doesn't see undefined mid-connect.
+    if (browserCriClient) {
+      try {
+        await browserCriClient.close(true)
+      } catch (e) {
+        debug('error closing the previous browser cri client: %o', e)
+      }
+    }
+
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
       port,
@@ -512,7 +695,18 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+
+    // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
+    // Fetch must be wired here on the browser (CDP) network path. The page is
+    // already loaded — enable Page, listen for future frame changes, and seed
+    // the frame tree so isAUTFrame works before any new frameAttached events.
+    if (options.useBrowserNetworkInterception) {
+      await pageCriClient.send('Page.enable')
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await cdpAutomation.seedFrameTree(pageCriClient)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
+    }
   },
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
@@ -560,7 +754,7 @@ export = {
       // if the client disconnects (e.g. due to a computer sleeping), update
       // the frame tree on reconnect in cases there were changes while
       // the client was disconnected
-      // @ts-expect-error
+      // @ts-expect-error - _updateFrameTree is private to CdpAutomation
       return cdpAutomation._updateFrameTree(client, 'onReconnect')()
     }
 
@@ -568,17 +762,74 @@ export = {
 
     await options['onInitializeNewBrowserTab']?.()
 
+    const persistedServiceWorkerOrigins = options.useBrowserNetworkInterception && options.shouldClearPersistedServiceWorkers
+      ? _collectPersistedServiceWorkerOrigins(pageCriClient)
+      : undefined
+
     await Promise.all([
       pageCriClient.send('ServiceWorker.enable'),
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
-      utils.initializeCDP(pageCriClient, automation),
+      utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
     ])
 
-    await this._navigateUsingCRI(pageCriClient, url)
+    if (options.useBrowserNetworkInterception) {
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
 
-    await cdpAutomation._handlePausedRequests(pageCriClient)
-    cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      // A service worker auto-attaches on both the browser-level connection
+      // and this page connection; the browser connection defers releasing a
+      // paused one until this promise resolves, so it never starts serving
+      // navigations before Fetch interception is enabled on its session
+      // here (#34674). For a crash-reloaded target, the browser connection
+      // instead asks this page connection to re-enable interception outright
+      // and holds on that call - a stale confirmation can't be told apart
+      // from a fresh one, so this never trusts one that was already on file.
+      // Both reassigned on every attachListeners call so they always point
+      // at the current page client - connectToNewSpec reuses the same
+      // pageCriClient across specs, but resetBrowserTargets can swap in a
+      // new one before this runs again.
+      browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
+      browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
+
+      // The runner document is served on the AUT's origin, so a root-scoped
+      // worker the origin registered in an earlier session is entitled to
+      // answer for it — and in a persistent open-mode profile it survives to
+      // do so before interception can attach. Redundant with
+      // reset:browser:state on the connectToNewSpec path, and harmless there.
+      // cache_storage goes along because clearing service_workers drops the
+      // registration but leaves its caches, which a re-registered worker would
+      // serve last session's responses from. Cookies and local storage stay
+      // untouched: clearing those would log the profile out of every site it
+      // has visited.
+      //
+      // Every origin holding a registration is cleared, not just the runner's
+      // current one: without a baseUrl, the first cross-origin cy.visit moves
+      // the runner onto the AUT's origin. Each origin is cleared by name
+      // because clearing every origin at once also reaches the Cypress
+      // extension's storage: on the fresh profile `cypress run` launches with,
+      // it deletes the extension's service worker registration whenever
+      // Chromium has already written it, and the extension stops responding
+      // for the rest of the session.
+      if (persistedServiceWorkerOrigins) {
+        const origins = _.uniq([new URL(url).origin, ...await persistedServiceWorkerOrigins])
+
+        debug('clearing persisted service workers for %o', origins)
+
+        await Promise.all(origins.map((origin) => {
+          return pageCriClient.send('Storage.clearDataForOrigin', {
+            origin,
+            storageTypes: 'service_workers,cache_storage',
+          })
+        }))
+      }
+
+      await this._navigateUsingCRI(pageCriClient, url)
+    } else {
+      await this._navigateUsingCRI(pageCriClient, url)
+      await cdpAutomation._handlePausedRequests(pageCriClient)
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+    }
 
     return cdpAutomation
   },
@@ -629,9 +880,12 @@ export = {
       // Write the final merged preferences BEFORE launching the browser
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
-    // normalize the --load-extensions argument by
-    // massaging what the user passed into our own
-    const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
+    // Each merges a switch Chromium honors only once, so what a user adds in
+    // before:browser:launch extends Cypress's value instead of replacing it.
+    let args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
+
+    args = _normalizeHostResolverRules(args)
+    args = _normalizeDisableFeatures(args)
 
     // this overrides any previous user-data-dir args
     // by being the last one
@@ -662,6 +916,7 @@ export = {
       protocolManager: options.protocolManager,
       fullyManageTabs: true,
       onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent,
+      onExtraTargetCriClientReady: options.onExtraTargetCriClientReady,
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)

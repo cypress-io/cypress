@@ -1,4 +1,4 @@
-import { baseConfig, cliOverrides } from '@packages/eslint-config'
+import { baseConfig, cliOverrides, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import { globalIgnores } from 'eslint/config'
 
 export default [
@@ -6,6 +6,8 @@ export default [
   // dist folder, so we need to ignore them
   globalIgnores(['src/**/*.{js,js.map,d.ts}']),
   ...baseConfig,
+  ...jsonConfig,
+  ...nodeConfig,
   ...cliOverrides,
   {
     files: ['**/*.spec.ts', '**/*.component.ts'],

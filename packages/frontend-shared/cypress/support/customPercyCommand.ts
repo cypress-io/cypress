@@ -3,7 +3,17 @@
 import '@percy/cypress'
 import type { SnapshotOptions } from '@percy/core'
 
-export interface CustomSnapshotOptions extends SnapshotOptions{
+// `cy.state` and the `snapshot` log option are driver internals. app type-checks
+// this file with the driver's types loaded and frontend-shared without them, so
+// a `@ts-expect-error` would be unused in one of the two; these types fit both.
+type CyWithState = typeof cy & { state: (key?: string) => any }
+type InternalLogConfig = Partial<Cypress.LogConfig> & { snapshot?: boolean }
+
+// Safe because the driver defines cy.state on every cy instance. The key is
+// passed only when given: cy.state() with no argument returns the whole state.
+const getCyState = (...key: [] | [string]) => (cy as CyWithState).state(...key)
+
+export interface CustomSnapshotOptions extends SnapshotOptions {
   /**
    * width of the snapshot taken from the left edge of the viewport
    * @default - The test's viewportWidth
@@ -28,7 +38,7 @@ export interface CustomSnapshotOptions extends SnapshotOptions{
   elementOverrides?: Record<string, ((el$: JQuery) => void) | true>
 }
 
-interface SnapshotMutationOptions{
+interface SnapshotMutationOptions {
   log?: string
   defaultWidth: number
   defaultHeight: number
@@ -39,7 +49,7 @@ interface SnapshotMutationOptions{
 
 declare global {
   namespace Cypress {
-    interface Chainable{
+    interface Chainable {
       /**
        * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
        * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -76,16 +86,29 @@ class ElementOverrideManager {
       this.mutationStack.push(...mutations)
     })
 
-    observer.observe(cy.$$('html')[0], {
+    const observeOptions: MutationObserverInit = {
       childList: true,
       subtree: true,
       attributes: true,
       attributeOldValue: true,
-    })
+    }
+
+    observer.observe(cy.$$('html')[0], observeOptions)
+
+    // The reporter renders inside a same-origin iframe
+    // (#reporter-frame), so selectors targeting reporter content resolve against
+    // that document rather than the top one. Include the iframe document when
+    // applying overrides, and observe it too so the mutations are reverted after
+    // the snapshot. Falls back to top-document-only when the reporter renders
+    // inline (component tests, older layouts).
+    const reporterDocument = (cy.$$('#reporter-frame')[0] as HTMLIFrameElement | undefined)?.contentDocument
+
+    if (reporterDocument?.documentElement) {
+      observer.observe(reporterDocument.documentElement, observeOptions)
+    }
 
     Object.entries(overrides).forEach(([k, v]) => {
-      // eslint-disable-next-line cypress/no-assigning-return-values
-      const $el = cy.$$(k)
+      const $el = reporterDocument ? cy.$$(k).add(cy.$$(k, reporterDocument)) : cy.$$(k)
 
       if (typeof v === 'function') {
         v($el)
@@ -115,7 +138,7 @@ class ElementOverrideManager {
       removedNodes,
     }) => {
       if (type === 'attributes' && attributeName) {
-        let targetElement = target as HTMLElement
+        const targetElement = target as HTMLElement
 
         if (!oldValue) {
           targetElement.removeAttribute(attributeName)
@@ -172,12 +195,13 @@ const applySnapshotMutations = ({
     elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
 
     if (log) {
-      Cypress.log({
+      const logConfig: InternalLogConfig = {
         message: log,
-        // @ts-ignore
         snapshot: true,
         end: true,
-      })
+      }
+
+      Cypress.log(logConfig)
     }
 
     return () => {
@@ -189,7 +213,7 @@ const applySnapshotMutations = ({
   })
 }
 
-export const installCustomPercyCommand = ({ before, elementOverrides }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], isComponentTesting?: boolean } = {}) => {
+export const installCustomPercyCommand = ({ before, elementOverrides }: { before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'], isComponentTesting?: boolean } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
    * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -207,8 +231,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
       name = undefined
     }
 
-    // @ts-ignore
-    const test: Mocha.Test = cy.state('test')
+    const test: Mocha.Test = getCyState('test')
 
     const titlePath = test.titlePath()
 
@@ -218,8 +241,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
 
     // viewport data is read from test state rather than config to ensure that
     // the snapshot is presented at the test's expected size.
-    // @ts-ignore
-    const { viewportWidth, viewportHeight } = cy.state() as Cypress.Config
+    const { viewportWidth, viewportHeight } = getCyState() as Cypress.Config
     const snapshotWidth = options.width ? options.width : viewportWidth
     const snapshotHeight = options.height ? options.height : viewportHeight
 
@@ -254,7 +276,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
 
     // Percy v3.1.0 will timeout waiting for response from server if screenshot
     // takes longer than defaultCommandTimeout, so we hack around it
-    // eslint-disable-next-line
     const _backupTimeout = Cypress.config('defaultCommandTimeout')
 
     Cypress.config('defaultCommandTimeout', 10000)
@@ -267,10 +288,25 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
       // enqueued appropriately.
       cy
       .then(() => {
-        return percySnapshot(screenshotName, {
+        const snapshotOptions: CustomSnapshotOptions & { readiness?: { preset: 'disabled' } } = {
           ...options,
           widths: [snapshotWidth],
-        })
+        }
+
+        // Percy's readiness gate (`@percy/dom`'s waitForReady) drives both its
+        // checks and its own timeout off setTimeout. When cy.clock() has faked
+        // setTimeout the AUT clock is frozen, so waitForReady can never resolve
+        // and the snapshot command times out; the frozen DOM is already the
+        // deterministic state we want to capture, so skip readiness. Only key off
+        // setTimeout: a Date-only clock (cy.clock(date, ['Date'])) leaves timers
+        // real, so readiness still resolves and should run.
+        const clock = getCyState('clock')
+
+        if (clock?.details().methods.includes('setTimeout')) {
+          snapshotOptions.readiness = { preset: 'disabled' }
+        }
+
+        return percySnapshot(screenshotName, snapshotOptions)
       })
       .then(() => {
         return reset()

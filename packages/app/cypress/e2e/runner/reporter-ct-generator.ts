@@ -100,8 +100,8 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
 
         verify('in file outside project', {
           message: 'An outside error',
-          stackRegex: /\/throws\-error\.js:5:8/,
-          codeFrameRegex: /\/throws\-error\.js:5:9/,
+          stackRegex: /\/throws-error\.js:5:8/,
+          codeFrameRegex: /\/throws-error\.js:5:9/,
           codeFrameText: `thrownewError('An outside error')`,
         })
       })
@@ -447,12 +447,12 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
         // docs_url.cy.js manually sets the 'isInteractive' config property in order
         // to test both run and open mode behavior. We need to skip the config validation
         // here in order for this to be possible.
-        // @ts-ignore
+        // @ts-expect-error - window.top may be null, and it does not declare the test-only __cySkipValidateConfig flag
         window.top.__cySkipValidateConfig = true
       })
 
       after(() => {
-        // @ts-ignore
+        // @ts-expect-error - window.top may be null, and it does not declare the test-only __cySkipValidateConfig flag
         window.top.__cySkipValidateConfig = false
       })
 
@@ -466,7 +466,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
 
         verify('displays as link in interactive mode', {
           verifyFn () {
-            cy.contains('.runnable-title', 'displays as link in interactive mode')
+            cy.reporter().contains('.runnable-title', 'displays as link in interactive mode')
             .closest('.runnable').within(() => {
               cy
               .get('.runnable-err-message')
@@ -479,7 +479,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
 
         verify('is text in error message in run mode', {
           verifyFn () {
-            cy.contains('.runnable-title', 'is text in error message in run mode')
+            cy.reporter().contains('.runnable-title', 'is text in error message in run mode')
             .closest('.runnable').within(() => {
               cy
               .get('.runnable-err-message')

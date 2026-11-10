@@ -63,10 +63,6 @@ function stubCloudAppMessages (messages: typeof cloudMessage[] | []) {
   }, { messages })
 }
 
-Cypress.on('window:before:load', (win) => {
-  win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
-})
-
 describe('App - Cloud Message Banner', () => {
   before(() => {
     cy.task('__internal_optInToCloudAppMessages')
@@ -115,34 +111,31 @@ describe('App - Cloud Message Banner', () => {
     cy.loginUser()
     stubCloudAppMessages([cloudMessage])
 
-    // Assert via mutation payload — `beforeEach` stubs
+    // Assert via the setPreferences payload — `beforeEach` stubs
     // `getCurrentProjectSavedState`, which would shadow a savedState re-read.
-    // The fixture is project-scoped so this intercept matches; see
-    // `cloudMessage.dismissal.scope` above.
-    cy.intercept('mutation-TrackedBanner_SetProjectState').as('setPrefs')
+    cy.withCtx((ctx, { sinon }) => {
+      sinon.spy(ctx.actions.localSettings, 'setPreferences')
+    })
 
     cy.visitApp()
     cy.specsPageIsVisible()
 
     cy.findByTestId('cloud-message-banner').should('be.visible')
 
-    cy.wait('@setPrefs').then((interception) => {
-      const body = interception.request.body as { variables: { value: string } }
-
-      expect(body.variables.value).to.contain('lastShown')
+    cy.withRetryableCtx((ctx, { sinon }) => {
+      expect(ctx.actions.localSettings.setPreferences).to.have.been.calledWith(sinon.match('lastShown'), 'project')
     })
 
     cy.findByTestId('alert-suffix-icon').click()
     cy.findByTestId('cloud-message-banner').should('not.exist')
 
-    cy.wait('@setPrefs').then((interception) => {
-      const body = interception.request.body as { variables: { value: string } }
-      const value = body.variables.value
-
-      expect(value).to.contain('"banners"')
-      expect(value).to.contain('"cloud:ai_tools_education"')
-      expect(value).to.contain('"dismissed"')
-      expect(value).to.not.contain('shownCount')
+    cy.withRetryableCtx((ctx, { sinon }) => {
+      expect(ctx.actions.localSettings.setPreferences).to.have.been.calledWith(sinon.match((value: string) => {
+        return value.includes('"banners"')
+          && value.includes('"cloud:ai_tools_education"')
+          && value.includes('"dismissed"')
+          && !value.includes('shownCount')
+      }), 'project')
     })
   })
 

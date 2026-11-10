@@ -30,7 +30,7 @@ yarn gulp downloadStudioTypes
 or to reference a local `cypress_services` repo:
 
 ```sh
-CYPRESS_LOCAL_STUDIO_PATH=<path-to-cypress-services/app/studio/dist/development-directory> yarn gulp downloadStudioTypes
+CYPRESS_LOCAL_STUDIO_PATH=<path-to-cypress-services/app/packages/studio/dist/development-directory> yarn gulp downloadStudioTypes
 ```
 
 ## Testing

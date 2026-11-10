@@ -215,6 +215,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    CLOUD_RERUN_FAILED_TESTS: () => {
+      return {
+        default: [{ message: 'Re-running only the tests that did not pass in the previous run.' }],
+      }
+    },
     CLOUD_API_RESPONSE_FAILED_RETRYING: () => {
       return {
         default: [{
@@ -510,6 +515,7 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+        beforeSpec: [err, 'beforeSpec'],
       }
     },
     CLOUD_PROTOCOL_CAPTURE_FAILURE: () => {
@@ -520,7 +526,7 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `status`, `statusText`, `url` and `responseBody` are assigned below
       const err: Error & { status: number, statusText: string, url: string, message: string, responseBody: string } = makeErr()
 
       err.status = 500
@@ -533,7 +539,7 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `url` is assigned below
       const err: Error & { url: string } = makeErr()
 
       err.url = 'https://some/url'
@@ -543,7 +549,7 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `chunkSizeBytes` and `maxActivityDwellTime` are assigned below
       const err: Error & { chunkSizeBytes: number, maxActivityDwellTime: number } = new Error('stream stall')
 
       err.chunkSizeBytes = 65536
@@ -554,9 +560,9 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: () => {
-      // @ts-expect-error
+      // @ts-expect-error - `errors` is assigned below
       const aggregateError: Error & { errors: any[] } = makeErr()
-      // @ts-expect-error
+      // @ts-expect-error - `errors` is assigned below
       const aggregateErrorWithSystemError: Error & { errors: any[] } = makeErr()
 
       const errOne = makeErr()
@@ -565,7 +571,7 @@ describe('visual error templates', () => {
 
       aggregateError.errors = [errOne, errTwo, errThree]
 
-      // @ts-expect-error
+      // @ts-expect-error - `kind` and `url` are assigned below
       const errSystemErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
 
       errSystemErr.kind = 'SystemError'
@@ -594,11 +600,6 @@ describe('visual error templates', () => {
         default: ['project-id-123', '/path/to/cypress.config.js'],
       }
     },
-    NO_PROJECT_ID: () => {
-      return {
-        default: ['/path/to/project/cypress.config.js'],
-      }
-    },
     NO_PROJECT_FOUND_AT_PROJECT_ROOT: () => {
       return {
         default: ['/path/to/project'],
@@ -607,6 +608,11 @@ describe('visual error templates', () => {
     PORT_IN_USE_SHORT: () => {
       return {
         default: [2020],
+      }
+    },
+    PORT_BLOCKED_BY_BROWSER: () => {
+      return {
+        default: [],
       }
     },
     FILE_SERVER_COULD_NOT_LISTEN: () => {
@@ -689,6 +695,35 @@ describe('visual error templates', () => {
 
       return {
         default: ['/path/to/cypress.config.js', err],
+      }
+    },
+    CONFIG_PROCESS_EXITED_UNEXPECTEDLY: () => {
+      return {
+        default: [1, null],
+        unknown: [null, null],
+        sigkill: [null, 'SIGKILL'],
+        sigkillComponent: [null, 'SIGKILL', 'component'],
+      }
+    },
+    TRUSTED_CERTIFICATES_LOAD_ERROR: () => {
+      return {
+        default: ['certs/server.crt.pem', makeErr()],
+        pem: ['trustedCertificates[0].pem', makeErr()],
+      }
+    },
+    CLIENT_CERTIFICATES_NOT_LOADED: () => {
+      return {
+        default: ['https://example.com/secure'],
+      }
+    },
+    CLIENT_CERTIFICATES_CONFLICT: () => {
+      return {
+        default: ['example.com:443', ['https://example.com/one', 'https://example.com/two']],
+      }
+    },
+    CLIENT_CERTIFICATES_PATH_SCOPED: () => {
+      return {
+        default: ['example.com:443', ['https://example.com/secure/*']],
       }
     },
     SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
@@ -927,6 +962,12 @@ describe('visual error templates', () => {
         default: [1, 'chrome', 62],
       }
     },
+    BROWSER_NETWORK_INTERCEPTION_ESCAPE: () => {
+      return {
+        default: ['https://www.example.com/dashboard', false],
+        runnerDocument: ['https://www.example.com/__/#/specs/runner?file=cypress/e2e/spec.cy.js', true],
+      }
+    },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {
       return {
         default: ['chrome'],
@@ -967,6 +1008,12 @@ describe('visual error templates', () => {
     CONFIG_FILE_DEV_SERVER_INVALID_RETURN: () => {
       return {
         default: [{}],
+      }
+    },
+    DEV_SERVER_START_FAILED: () => {
+      return {
+        default: ['cypress.config.ts', 'webpack', makeErr()],
+        customDevServer: ['cypress.config.ts', undefined, makeErr()],
       }
     },
     PLUGINS_RUN_EVENT_ERROR: () => {
@@ -1096,6 +1143,12 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
@@ -1130,6 +1183,12 @@ describe('visual error templates', () => {
       }
     },
 
+    FORCE_HTTP1_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+
     INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
       return {
         default: [],
@@ -1137,6 +1196,11 @@ describe('visual error templates', () => {
     },
 
     INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+    BROWSER_ELECTRON_DEPRECATED: () => {
       return {
         default: [],
       }
@@ -1156,7 +1220,27 @@ describe('visual error templates', () => {
         default: ['http://localhost:8080'],
       }
     },
-    CYPRESS_ENV_DEPRECATION: () => {
+    ALLOW_CYPRESS_ENV_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+    EXEC_TIMEOUT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
+      return {
+        default: [],
+      }
+    },
+    VISIBILITY_STRATEGY_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
       return {
         default: [],
       }

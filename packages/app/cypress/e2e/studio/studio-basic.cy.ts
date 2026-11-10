@@ -4,7 +4,7 @@ describe('Cypress Studio - Basic Functionality', () => {
   it('does not display the launch studio button when test is pending', () => {
     loadProjectAndRunSpec({ specName: 'skipped.cy.js' })
 
-    cy.contains('skipped test')
+    cy.reporter().contains('skipped test')
     .closest('.runnable-wrapper').as('runnable-wrapper')
     .realHover()
 
@@ -42,17 +42,17 @@ describe('studio functionality', () => {
     cy.waitForSpecToFinish()
 
     // Assert the commands we input via Studio are executed.
-    cy.get('.command-name-visit').within(() => {
+    cy.reporter().find('.command-name-visit').within(() => {
       cy.contains('visit')
       cy.contains('cypress/e2e/index.html')
     })
 
-    cy.get('.command-name-get').first().within(() => {
+    cy.reporter().find('.command-name-get').first().within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
 
-    cy.get('.command-name-click').within(() => {
+    cy.reporter().find('.command-name-click').within(() => {
       cy.contains('click')
     })
   })
@@ -122,7 +122,7 @@ describe('studio functionality', () => {
 
     cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
 
-    cy.get('button.restart').click()
+    cy.reporter().find('button.restart').click()
 
     // dismiss unsaved changes modal
     cy.findByTestId('unsaved-changes-discard-button').click()
@@ -140,11 +140,11 @@ describe('studio functionality', () => {
       o.sinon.stub(ctx.actions.file, 'openFile')
     })
 
-    cy.get('[data-cy="runnable-options-button"]').click()
-    cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+    cy.reporter().find('[data-cy="runnable-options-button"]').click()
+    cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('be.visible')
 
-    cy.get('[data-cy="runnable-popover-open-ide"]').contains('Open in IDE')
-    cy.get('[data-cy="runnable-popover-open-ide"]').click()
+    cy.reporter().find('[data-cy="runnable-popover-open-ide"]').contains('Open in IDE')
+    cy.reporter().find('[data-cy="runnable-popover-open-ide"]').click()
 
     cy.contains('External editor preferences')
 
@@ -178,7 +178,7 @@ describe('studio functionality', () => {
     })
 
     // Verify that no legacy studio commands were added
-    cy.get('.command-is-studio').should('not.exist')
+    cy.reporter().find('.command-is-studio').should('not.exist')
 
     // Verify that the actual DOM interactions still work (button was clicked, counter incremented)
     // but they just weren't recorded by the legacy studio event listeners
@@ -197,7 +197,7 @@ describe('studio functionality', () => {
     incrementCounter(0)
 
     // hover over the visit command to show a snapshot
-    cy.get('.command-name-visit').realHover()
+    cy.reporter().find('.command-name-visit').realHover()
     cy.getAutIframe().within(() => {
       // verify the count in the snapshot is 0
       cy.get('p').should('contain', 'Count is 0')

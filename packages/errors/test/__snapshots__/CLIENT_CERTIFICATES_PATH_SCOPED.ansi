@@ -1,0 +1,9 @@
+[31mCypress could not apply your [33mclientCertificates[39m[31m configuration.[39m
+[31m[39m
+[31mThe certificate for [95mexample.com:443[39m[31m is limited to part of that origin:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mhttps://example.com/secure/*[39m[31m[39m
+[31m[39m
+[31mA browser presents a client certificate when it connects to an origin, before any path is known, so Cypress cannot keep it to the configured path. Configure the certificate for the whole origin by removing the path from the URL.[39m
+[31m[39m
+[31mSetting [95mforceHttp1: true[39m[31m routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.[39m

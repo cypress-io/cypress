@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core'
+import { Component, effect, input } from '@angular/core'
 
 @Component({
   selector: 'errors-component',
@@ -8,7 +8,15 @@ import { Component, Input } from '@angular/core'
   </div>`,
 })
 export class ErrorsComponent {
-  @Input() throwError!: boolean
+  throwError = input<boolean>(false)
+
+  constructor () {
+    effect(() => {
+      if (this.throwError()) {
+        throw new Error('mount error')
+      }
+    })
+  }
 
   syncError () {
     throw new Error('sync error')

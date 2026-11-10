@@ -50,7 +50,7 @@
             v-if="runAllSpecsStore.isRunAllSpecsAllowed && !testingType.showTestingTypePromo.value"
             :spec-number="runAllSpecsStore.allSpecsRef.length"
             directory="all"
-            @runAllSpecs="runAllSpecsStore.runAllSpecs"
+            @run-all-specs="runAllSpecsStore.runAllSpecs"
           />
         </div>
         <div class="flex items-center justify-between truncate">
@@ -63,7 +63,7 @@
             :gql="props.gql"
             mode="LATEST_RUNS"
             data-cy="latest-runs-header"
-            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
+            @show-login-connect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
           />
         </div>
         <div class="hidden items-center justify-end truncate md:flex">
@@ -71,7 +71,7 @@
             :gql="props.gql"
             mode="AVG_DURATION"
             data-cy="average-duration-header"
-            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
+            @show-login-connect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
           />
         </div>
       </div>
@@ -108,10 +108,9 @@
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
-          :is-project-connected="projectConnectionStatus === 'CONNECTED'"
           :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
           :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
-          @toggleRow="row.data.toggle"
+          @toggle-row="row.data.toggle"
         >
           <template #file>
             <SpecItem
@@ -145,7 +144,7 @@
                 :directory="row.data.name"
                 class="opacity-0 run-all"
                 :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
-                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
+                @run-all-specs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
               />
             </RowDirectory>
           </template>
@@ -186,7 +185,7 @@
     <NoResults
       v-show="!specs.length"
       :search-term="specFilterModel"
-      :message="t('specPage.noResultsMessage')"
+      message="No specs matched your search:"
       class="mt-[56px]"
       @clear="handleClear"
     />
@@ -204,9 +203,10 @@ import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
-import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, useCollapsibleTree } from './tree/useCollapsibleTree'
+import { SpecsList_GitInfoUpdatedDocument } from '../generated/graphql'
+import type { Specs_SpecsListFragment, SpecsListFragment } from '../generated/graphql'
+import { buildSpecTree, useCollapsibleTree } from './tree/useCollapsibleTree'
+import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -227,10 +227,20 @@ import TestingTypeSwitcher from './switcher/TestingTypeSwitcher.vue'
 import { useTestingType } from '../composables/useTestingType'
 import TestingTypePromo from './TestingTypePromo.vue'
 
+const props = withDefaults(defineProps<{
+  gql: Specs_SpecsListFragment
+  mostRecentUpdate?: string | null
+}>(), {
+  mostRecentUpdate: null,
+})
+
+const emit = defineEmits<{
+  (e: 'showCreateSpecModal'): void
+}>()
+
 const { openLoginConnectModal } = useUserProjectStatusStore()
 
 const route = useRoute()
-const { t } = useI18n()
 const testingType = useTestingType()
 
 const isOnline = useOnline()
@@ -339,17 +349,6 @@ fragment Specs_SpecsList on Query {
 `
 
 useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
-
-const props = withDefaults(defineProps<{
-  gql: Specs_SpecsListFragment
-  mostRecentUpdate: string | null
-}>(), {
-  mostRecentUpdate: null,
-})
-
-const emit = defineEmits<{
-  (e: 'showCreateSpecModal'): void
-}>()
 
 const showSpecPatternModal = ref(false)
 

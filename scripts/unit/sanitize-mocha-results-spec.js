@@ -5,7 +5,7 @@ const { sanitizeMochaResults } = require('../sanitize-mocha-results')
 
 if (process.platform !== 'win32') {
   describe('sanitize-mocha-results', () => {
-    let cachedEnv = { ...process.env }
+    const cachedEnv = { ...process.env }
     let fsAccessStub
 
     beforeEach(() => {

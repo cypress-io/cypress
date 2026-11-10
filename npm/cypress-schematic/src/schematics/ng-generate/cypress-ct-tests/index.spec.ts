@@ -1,5 +1,6 @@
 import { describe, it, beforeEach, expect } from 'vitest'
-import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
+import type { UnitTestTree } from '@angular-devkit/schematics/testing'
+import { SchematicTestRunner } from '@angular-devkit/schematics/testing'
 import { join } from 'path'
 
 describe('ng-generate @cypress/schematic:specs-ct', () => {

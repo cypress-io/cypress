@@ -23,32 +23,56 @@ Runs on PRs targeting `develop` or `release/*` branches (excluding draft PRs).
 
 **Note:** External contributor PRs require manual approval before running tests that use secrets.
 
+**Binary jobs do not run on pull requests.** Building and verifying the Electron
+binary is the most expensive part of the pipeline, so it runs post-merge on
+`develop` (or the `vN` maintenance branch a PR targets) instead. There is no opt-in and no path-based override: a PR that
+changes binary or packaging code is not covered until it merges, and breakage is
+caught by the post-merge build. See `notify-binary-failure` below.
+
 #### Full Workflow
 
 Runs on pushes to `develop` and `release/*` branches. Includes everything from the PR workflow plus:
 
+**Note:** a webhook push to `develop` or a `vN` maintenance branch is path-filtered the same way PRs are — only the job groups touched by the merge's changed files run. Everything else runs unfiltered: `release/*` pushes, and, on `develop` and `vN`, scheduled pipelines and any manually triggered run. A PR into a `vN` branch is diffed against that branch rather than `develop`. Filtering never skips the binary/packaging chain, `npm-release`, or `verify-release-readiness`.
+
 | Stage | What It Does |
 |-------|--------------|
-| Multi-Platform Builds | Linux x64, Linux ARM64, macOS Intel, macOS Apple Silicon, Windows |
-| Binary Creation | Triggers the `cypress-publish-binary` pipeline to build Electron binaries |
-| Binary Verification | Tests the built binary against kitchensink, recipes, and real-world apps |
+| Linux x64 Build | Full build, packaging, and binary verification for Linux x64 |
+| Binary Creation | Builds, packages, and uploads the Linux x64 Electron binary and npm package |
+| Binary Verification | Tests the built Linux binary against kitchensink, recipes, and real-world apps |
+| Binary Failure Alerts | Pages `@app-foundations-oncall` in Slack when a binary job fails |
 | Release Preparation | Validates release readiness, prepares npm packages |
+
+Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows do not build on every `develop` or `release/*` push — see "Multi-Platform Builds" below.
+
+#### Multi-Platform Builds
+
+Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI Scheduled Pipeline instead of every push — one schedule for `develop`, a second retargeted at whichever `release/*` branch is currently active. See the "Scheduled platform CI" section of [`.circleci/AGENTS.md`](../.circleci/AGENTS.md) for the schedule ids and parameters. A manual Trigger Pipeline run can also produce all four on demand, for any branch, via `run-platform-workflows=true` or `force-persist-artifacts=true`.
 
 ### Triggers
 
 | Trigger | Workflow | Notes |
 |---------|----------|-------|
 | PR opened/updated | Pull Request | Skipped for draft PRs |
-| Push to `develop` | Full | Runs complete test suite + binary builds |
-| Push to `release/*` | Full | Same as develop |
-| Manual (CircleCI UI) | Configurable | Can run full workflow on any branch |
+| Push to `develop` | Full | Linux x64 is path-filtered by changed files; binary builds and release gating always run. Other platforms run from the develop schedule, not this push |
+| Push to `release/*` | Full | Linux x64 runs the complete test suite and binary builds, unfiltered. Other platforms run from the release schedule |
+| Push to `vN` | Full | Path-filtered like a `develop` push; all five platforms run |
+| Scheduled pipeline | Full | Nightly cron on `develop`, weekly build on `vN`; always unfiltered, even though they run on that branch |
+| Manual (CircleCI UI) | Configurable | Can run the full Linux x64 workflow, or all four scheduled platforms, on any branch; `run-all-jobs=true` forces everything on Linux x64 |
 
 ### Key Jobs
 
 - **`build`** - Core build job that all test jobs depend on
 - **`ready-to-release`** - Gate job that ensures all tests pass before release
 - **`npm-release`** - Publishes packages to npm (develop/release branches only)
-- **`create-and-trigger-packaging-artifacts`** - Initiates binary build process
+- **`create-build-artifacts`** - Builds, packages, and uploads the binary and npm package
+- **`notify-binary-failure`** - Pages `@app-foundations-oncall` in Slack when a
+  binary job fails on `develop` or a `vN` maintenance branch. It requires every
+  binary job at `terminal`, so it runs once they have all settled however they
+  settled, then reads their real statuses from the CircleCI API and exits quietly
+  unless one of them is `failed` - a cancelled or skipped job is not a breakage.
+  Scope comes from the job's own dependency list, so adding a binary job to its
+  `requires:` block is all that is needed to cover it.
 
 ## GitHub Actions
 

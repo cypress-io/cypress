@@ -2,7 +2,18 @@
   "name": "@cypress/mount-utils",
   "version": "0.0.0-development",
   "description": "Shared utilities for the various component testing adapters",
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/mount-utils#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
+  },
+  "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
@@ -10,31 +21,21 @@
     "lint": "eslint",
     "watch": "tsc -w"
   },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "dependencies": {},
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "lodash": "^4.17.21",
-    "rollup": "3.29.5",
-    "rollup-plugin-dts": "5.0.0",
-    "rollup-plugin-typescript2": "^0.29.0",
+    "rollup": "4.60.2",
+    "rollup-plugin-dts": "6.4.1",
+    "rollup-plugin-typescript2": "^0.37.0",
     "typescript": "~5.4.5"
-  },
-  "files": [
-    "dist"
-  ],
-  "types": "dist/index.d.ts",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/mount-utils#readme",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "publishConfig": {
     "access": "public"

@@ -1,11 +1,14 @@
-import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
+import type { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment } from '../generated/graphql-test'
+import { DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs, createCloudRun } from '@packages/data-context/test/graphql/stubCloudTypes'
 import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/data-context/src/gen/test-cloud-graphql-types.gen'
+
+type DebugCloudProject = Extract<NonNullable<DebugSpecsFragment['currentProject']>['cloudProject'], { __typename: 'CloudProject' }>
+type DebugRun = NonNullable<DebugCloudProject['runByNumber']>
+type DebugRunListItem = NonNullable<NonNullable<DebugCloudProject['allRuns']>[number]>
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
@@ -49,8 +52,8 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setHasInitiallyLoaded()
       userProjectStatusStore.setProjectFlag('isUsingGit', true)
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
-      cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
+      validateEmptyState(['Connect to Cypress Cloud', 'Connect to debug your tests', 'Cypress Cloud is built for teams who need to do testing at scale.'])
+      cy.getByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
     it('is logged in with no project', () => {
@@ -61,8 +64,8 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setProjectFlag('isUsingGit', true)
       userProjectStatusStore.setHasInitiallyLoaded()
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
-      cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
+      validateEmptyState(['Connect to debug your tests', 'Cypress Cloud is built for teams who need to do testing at scale.'])
+      cy.getByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
     it('has no runs', () => {
@@ -78,7 +81,7 @@ describe('<DebugContainer />', () => {
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.noRuns.title])
+      validateEmptyState(['Copy the command below to record your first run'])
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
@@ -138,8 +141,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber!
-            const other = CloudRunStubs[runName] as typeof test
+            const other = CloudRunStubs[runName] as DebugRun
 
             result.currentProject.cloudProject.runByNumber = other
           }
@@ -210,19 +212,19 @@ describe('<DebugContainer />', () => {
     context('over limit', () => {
       it('handled usage exceeded', () => {
         mountTestRun('overLimit')
-        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
 
       it('handles retention exceeded', () => {
         mountTestRun('overLimitRetention')
-        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
 
       it('does not show passing message if run is hidden', () => {
         mountTestRun('overLimitPassed')
         cy.contains('Well Done!').should('not.exist')
         cy.contains('All your tests passed.').should('not.exist')
-        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.getByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
     })
 
@@ -257,14 +259,12 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber!
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.running,
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) =>
@@ -290,15 +290,13 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.failingWithTests,
               status: 'RUNNING',
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -318,8 +316,6 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             //creating copy to prevent mutation later on in this test
             const cloudRunCopy = JSON.parse(JSON.stringify(CloudRunStubs.failingWithTests))
 
@@ -329,7 +325,7 @@ describe('<DebugContainer />', () => {
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => {
@@ -361,6 +357,7 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-header').should('be.visible')
       cy.findByTestId('debug-testing-progress').should('be.visible')
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.get<DebugSpecsFragment>('@gql').then((gql) => {
         const run = getRun(gql)
@@ -376,6 +373,7 @@ describe('<DebugContainer />', () => {
         run.testsForReview.push(newTest)
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.findAllByTestId('debug-spec-item').should('have.length', 1)
       cy.get<CloudRun>('@run').then((run) => {
@@ -395,6 +393,7 @@ describe('<DebugContainer />', () => {
         cy.wrap(newSpecTest).as('newSpecTest')
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.findAllByTestId('debug-spec-item').should('have.length', 2)
       cy.get<CloudRun>('@run').then((run) => {
@@ -427,6 +426,7 @@ describe('<DebugContainer />', () => {
         cy.findAllByTestId('grouped-row').should('have.length', 2)
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.get<CloudRun>('@run').then((run) => {
         run.status = 'FAILED'
@@ -441,11 +441,9 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.failingWithTests,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -462,12 +460,10 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.failingWithTests,
               totalFailed: 120,
-            } as typeof test
+            } as DebugRun
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -483,19 +479,15 @@ describe('<DebugContainer />', () => {
           variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-              const test = result.currentProject.cloudProject.runByNumber
-
               const failingWithTests = CloudRunStubs.failingWithTests
 
               result.currentProject.cloudProject.runByNumber = {
                 ...failingWithTests,
-              } as typeof test
+              } as DebugRun
 
-              const allRuns = result.currentProject.cloudProject.allRuns!
+              const currentRun = failingWithTests! as DebugRunListItem
 
-              const currentRun = failingWithTests! as NonNullable<typeof allRuns[number]>
-
-              const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
+              const nextRunning = CloudRunStubs.running as DebugRunListItem
 
               nextRunning.runNumber!++
               nextRunning.completedInstanceCount = 5
@@ -519,23 +511,19 @@ describe('<DebugContainer />', () => {
           variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-              const test = result.currentProject.cloudProject.runByNumber
-
               const failingWithTests = CloudRunStubs.failingWithTests
 
               result.currentProject.cloudProject.runByNumber = {
                 ...failingWithTests,
-              } as typeof test
+              } as DebugRun
 
-              const allRuns = result.currentProject.cloudProject.allRuns!
-
-              const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
+              const nextRunning = CloudRunStubs.running as DebugRunListItem
 
               nextRunning.runNumber!++
               nextRunning.completedInstanceCount = 5
 
               const lotsOfRuns = Array.from(Array(10)).map((_, i) => {
-                const run = createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 }) as NonNullable<typeof allRuns[number]>
+                const run = createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 }) as DebugRunListItem
 
                 run.runNumber = run.runNumber! - i
 
@@ -556,7 +544,14 @@ describe('<DebugContainer />', () => {
 
         //test scrolling
 
-        cy.findByTestId('run-423').should('not.be.visible')
+        // The modern visibility algorithm doesn't detect scroll-clipped
+        // elements as hidden, so assert geometrically that run-423 sits
+        // below the scroll container's visible area before scrolling.
+        cy.findByTestId('run-423').then(($el) => {
+          const container = $el[0].closest('#debug-runs-container') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
 
         cy.findByTestId('debug-runs-container').scrollTo('bottom')
 

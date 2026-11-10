@@ -1,9 +1,7 @@
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import { ref } from 'vue'
 
-const searchLabel = defaultMessages.globalPage.searchPlaceholder
+const searchLabel = 'Search projects'
 const dropzoneSelector = '[data-cy="dropzone"] > div'
 const fileInputSelector = 'input[type=file]'
 const addProjectSelector = '[data-cy=addProjectButton]'
@@ -15,10 +13,10 @@ describe('<GlobalPageHeader />', () => {
     cy.wrap(search).as('search')
     const fileUploadSpy = cy.spy().as('fileUpload')
 
-    // @ts-ignore = vModel is v-model in vue
+    // @ts-expect-error - vModel is Vue JSX's v-model, which the TSX types don't know
     cy.mount(() => (<div class="p-12 overflow-auto resize-x max-w-[600px]"><GlobalPageHeader onAddProject={fileUploadSpy} vModel={search.value}/></div>))
 
-    cy.contains('button', defaultMessages.globalPage.addProjectButton)
+    cy.contains('button', 'Add project')
     .click()
     .get(fileInputSelector)
     .then(($input) => {

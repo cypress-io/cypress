@@ -1,6 +1,5 @@
 // @ts-check
 const debug = require('debug')('cypress:ts')
-const path = require('path')
 
 // in development we should have TypeScript hook installed
 // in production or staging we are likely to be running
@@ -8,7 +7,7 @@ const path = require('path')
 // build has been done correctly
 module.exports = function (scopeDir) {
   // Only set up ts-node if we're not using the snapshot
-  // @ts-ignore getSnapshotResult is a global defined in the v8 snapshot
+  // @ts-expect-error - getSnapshotResult is a global defined in the v8 snapshot
   if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof getSnapshotResult === 'undefined') {
     try {
     // Prevent double-compiling if we're testing the app and already have ts-node hook installed
@@ -21,10 +20,7 @@ module.exports = function (scopeDir) {
         // https://github.com/TypeStrong/ts-node#programmatic-usage
         const project = require('path').join(__dirname, 'tsconfig.json')
 
-        process.env.TS_CACHED_TRANSPILE_CACHE = path.join(__dirname, 'node_modules', '.ts-cache')
-
         tsNode.register({
-          compiler: 'typescript-cached-transpile',
           project,
           transpileOnly: true,
           preferTsExts: true, // Helps when the files are compiled locally, resolves the TS file

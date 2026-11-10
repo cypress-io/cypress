@@ -34,12 +34,12 @@ describe('activateMainTab', () => {
     // tests more portable.
     prevWin = global.window
     prevDoc = global.document
-    // @ts-expect-error
+    // @ts-expect-error - `global.top` is typed `Window | null`
     prevTop = global.top
-    // @ts-expect-error
+    // @ts-expect-error - partial window mock
     global.window = window
     global.document = mockDocument as Document
-    // @ts-expect-error
+    // @ts-expect-error - partial window mock
     global.top = mockTop
 
     mockPage = {
@@ -53,7 +53,7 @@ describe('activateMainTab', () => {
 
   afterEach(() => {
     vi.clearAllTimers()
-    // @ts-expect-error
+    // @ts-expect-error - `prevWin` is typed as Window, not `Window & typeof globalThis`
     global.window = prevWin
     global.top = prevTop
     global.document = prevDoc
@@ -63,7 +63,7 @@ describe('activateMainTab', () => {
     vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
     vi.mocked(window.addEventListener).mockImplementation((event, listener) => {
       if (event === 'message') {
-        // @ts-expect-error
+        // @ts-expect-error - the listener may be an EventListenerObject, which is not callable
         listener({ data: { message: 'cypress:extension:main:tab:activated' } })
       }
     })

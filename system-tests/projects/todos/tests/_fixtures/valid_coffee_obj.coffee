@@ -1,4 +1,0 @@
-{
-  name: "cypress"
-  users: []
-}

@@ -1,35 +1,16 @@
 import { readdirSync } from 'fs'
 import { resolve } from 'path'
 import { getSystemPath, normalize, strings } from '@angular-devkit/core'
-import { Tree, apply, url, applyTemplates, move, Rule } from '@angular-devkit/schematics'
+import type { Tree, Rule } from '@angular-devkit/schematics'
+import { apply, url, applyTemplates, move } from '@angular-devkit/schematics'
 import { get } from 'https'
-import { Schema } from '../ng-generate/cypress-test/schema'
-import { minVersion as semverMinVersion } from 'semver'
-import type { SemVer } from 'semver'
+import type { Schema } from '../ng-generate/cypress-test/schema'
 
-import { getPackageJsonDependency } from './dependencies'
 import { JSONFile } from './jsonFile'
 
 export interface NodePackage {
   name: string
   version: string
-}
-
-export function getAngularSemverVersion (tree: Tree): SemVer | null {
-  const packageNode = getPackageJsonDependency(tree, '@angular/core')
-
-  try {
-    if (packageNode !== null) {
-      const version: SemVer | null = packageNode && packageNode.version ?
-        semverMinVersion(packageNode.version) : null
-
-      return version
-    }
-
-    return null
-  } catch (e) {
-    return null
-  }
 }
 
 /**
@@ -86,15 +67,12 @@ function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: st
 }
 
 export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: string, tree: Tree }) {
-  let components = []
-  let directories = []
-
   const projectPath = resolve(getSystemPath(normalize('')))
   const contents = readdirSync(resolve(`${projectPath}/${appPath}`), { withFileTypes: true })
 
   if (contents) {
-    components = contents.filter((file) => file['name'].endsWith(`component.ts`))
-    directories = contents.filter((file) => file.isDirectory())
+    const components = contents.filter((file) => file['name'].endsWith(`component.ts`))
+    const directories = contents.filter((file) => file.isDirectory())
 
     if (components) {
       components.map((component) => {

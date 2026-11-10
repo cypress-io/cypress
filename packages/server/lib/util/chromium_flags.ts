@@ -1,9 +1,23 @@
 const disabledFeatures = [
-  // Uncomment to force the deprecation of unload events
-  // 'DeprecateUnloadByUserAndOrigin',
+  // Keep `unload` events firing (Chrome 158+ stops dispatching them). The
+  // driver listens for the AUT's `unload` to drop its listeners and record
+  // that the page went away; without it, navigations within `cy.origin()`
+  // leave that state stale when `injectDocumentDomain` is enabled.
+  // https://developer.chrome.com/docs/web-platform/deprecating-unload
+  'DeprecateUnload',
+  'DeprecateUnloadByBucket',
 
   // Hide toolbar button that opens dialog for controlling media sessions.
   'GlobalMediaControls',
+
+  // Chrome silently upgrades outermost main-frame http:// GET navigations to
+  // https:// (Chrome 115+). Cypress navigates top to exactly the origin a visit
+  // resolved to, so an upgrade strands the runner on an origin the driver never
+  // asked for and cy.visit re-switches origins forever. Chromium exempts
+  // loopback, non-unique hosts, and explicit non-default ports, so this only
+  // affects real hostnames on 80/443.
+  // https://github.com/cypress-io/cypress/issues/34508
+  'HttpsUpgrades',
 
   // Disables the Interest Feed Content Suggestions,
   // which is a feature that shows content suggestions based on the user's interests.
@@ -12,6 +26,21 @@ const disabledFeatures = [
 
   // Hides the Lens feature in the URL address bar.
   'LensOverlay',
+
+  // Disable Chrome's Local Network Access (LNA) checks, which began rolling out
+  // in Chrome 141. LNA gates requests from a page to local/private/loopback
+  // addresses behind a `local-network-access` permission prompt. In an automated
+  // browser the prompt cannot be answered, so cross-origin requests to local dev
+  // servers (e.g. login/redirect/OAuth flows) are blocked, breaking tests that
+  // worked in Chrome 140. Cypress fully controls the browser under test, so it's
+  // safe to opt out of these checks entirely.
+  // The browser network path also depends on it: internal Cypress routes the
+  // page requests from the AUT origin are redirected to the Cypress server on
+  // localhost, which LNA would block for a public AUT origin.
+  // https://github.com/cypress-io/cypress/issues/32708
+  // https://developer.chrome.com/blog/local-network-access
+  'LocalNetworkAccessChecks',
+  'LocalNetworkAccessChecksWebRTC',
 
   // Avoid the startup dialog for _Do you want the application 'Chromium.app' to accept incoming network connections?_.
   // Also disables the Chrome Media Router https://chromium.googlesource.com/chromium/src/+/HEAD/docs/media/media_router.md
@@ -26,19 +55,8 @@ const disabledFeatures = [
   // https://github.com/cypress-io/cypress/issues/29199
   'PrivacySandboxSettings4',
 
-  // Disable Chrome's Local Network Access (LNA) checks, which began rolling out
-  // in Chrome 141. LNA gates requests from a page to local/private/loopback
-  // addresses behind a `local-network-access` permission prompt. In an automated
-  // browser the prompt cannot be answered, so cross-origin requests to local dev
-  // servers (e.g. login/redirect/OAuth flows) are blocked, breaking tests that
-  // worked in Chrome 140. Cypress fully controls the browser under test, so it's
-  // safe to opt out of these checks entirely.
-  // https://github.com/cypress-io/cypress/issues/32708
-  // https://developer.chrome.com/blog/local-network-access
-  'LocalNetworkAccessChecks',
-  'LocalNetworkAccessChecksWebRTC',
-
-  // Disable manual option and popup prompt of Chrome translation
+  // Disable manual option and popup prompt of Chrome translation. Applies
+  // below Chrome 138 only; 138+ is gated on the `translate.enabled` preference.
   // https://github.com/cypress-io/cypress/issues/28225
   'Translate',
 ]
@@ -152,10 +170,4 @@ export const formatElectronFlags = (flags) => {
 
 export const DEFAULT_CHROME_FLAGS = formatChromeFlags(DEFAULT_FLAGS)
 
-export const DEFAULT_ELECTRON_FLAGS = [
-  ...formatElectronFlags(DEFAULT_CHROME_FLAGS),
-  // NOTE: Can likely be removed with Electron upgrade to 37+.
-  // @see https://github.com/electron/electron/issues/46538
-  // @see https://github.com/cypress-io/cypress/issues/32361
-  ...formatElectronFlags(['--gtk-version=3']),
-]
+export const DEFAULT_ELECTRON_FLAGS = formatElectronFlags(DEFAULT_CHROME_FLAGS)

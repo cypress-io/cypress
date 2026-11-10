@@ -13,7 +13,6 @@ const config = makeConfig({
       '@cypress-design/**',
       '@cypress-design/vue-button',
       'debug',
-      'p-defer',
       'bluebird',
       'events',
       '@popperjs/core',

@@ -1,9 +1,5 @@
 import ExternalEditorSettings from './ExternalEditorSettings.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { ExternalEditorSettingsFragmentDoc } from '../../generated/graphql-test'
-
-const editorText = defaultMessages.settingsPage.editor
 
 describe('<ExternalEditorSettings />', () => {
   it('renders the placeholder by default', () => {
@@ -13,7 +9,7 @@ describe('<ExternalEditorSettings />', () => {
       },
     })
 
-    cy.findByText(editorText.noEditorSelectedPlaceholder).should('be.visible')
+    cy.findByText('Choose your editor...').should('be.visible')
   })
 
   it('renders the title and description', () => {
@@ -23,8 +19,8 @@ describe('<ExternalEditorSettings />', () => {
       },
     })
 
-    cy.findByText(editorText.description).should('be.visible')
-    cy.findByText(editorText.title).should('be.visible')
+    cy.findByText('External editor to use for editing code opened when using Cypress.').should('be.visible')
+    cy.findByText('External editor').should('be.visible')
   })
 
   it('can select an editor', () => {
@@ -43,20 +39,16 @@ describe('<ExternalEditorSettings />', () => {
     cy.get('[aria-expanded="false"]').contains('VS Code')
   })
 
-  it('can input a custom binary', () => {
+  it('does not offer a custom editor', () => {
     cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
       render: (gqlVal) => {
         return <ExternalEditorSettings gql={gqlVal} />
       },
     })
 
-    const inputSelector = '[aria-haspopup=true]'
+    cy.get('[aria-haspopup=true]').click()
 
-    cy.get(inputSelector).click()
-
-    cy.contains('Custom').click()
-    cy.get('[data-cy="custom-editor"]').should('exist')
-
-    cy.findByPlaceholderText(editorText.customPathPlaceholder).type('/usr/bin').should('have.value', '/usr/bin')
+    cy.get('[role=option]').should('have.length.greaterThan', 0)
+    cy.contains('[role=option]', 'Custom').should('not.exist')
   })
 })

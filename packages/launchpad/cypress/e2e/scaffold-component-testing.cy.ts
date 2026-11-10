@@ -32,7 +32,7 @@ describe('scaffolding component testing', {
       cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
       cy.get('button').should('be.visible').contains('Webpack(detected)')
       cy.get('button').contains('Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.getByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -115,7 +115,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
       cy.get('button').contains('Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.getByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -130,7 +130,7 @@ describe('scaffolding component testing', {
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
       cy.contains('button', 'Angular(detected)').should('be.visible')
       cy.contains('button', 'Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.getByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -144,7 +144,7 @@ describe('scaffolding component testing', {
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
       cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
       cy.contains('button', 'Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.getByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -158,7 +158,7 @@ describe('scaffolding component testing', {
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
       cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
       cy.contains('button', 'Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.getByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
       verifyConfigFile(`cypress.config.ts`)
     })

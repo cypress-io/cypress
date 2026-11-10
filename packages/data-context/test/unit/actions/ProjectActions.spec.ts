@@ -1,8 +1,11 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import execa from 'execa'
 import type { DataContext } from '../../../src'
 import { ProjectActions } from '../../../src/actions/ProjectActions'
 import { createTestDataContext } from '../helper'
-import { SpecWithRelativeRoot, TestingType } from '@packages/types'
+import type { SpecWithRelativeRoot, TestingType } from '@packages/types'
+
+jest.mock('execa')
 
 describe('ProjectActions', () => {
   let ctx: DataContext
@@ -303,6 +306,45 @@ describe('ProjectActions', () => {
     })
   })
 
+  describe('launchProject', () => {
+    beforeEach(() => {
+      ctx.coreData.currentProject = '/cy-project'
+      ctx.coreData.currentTestingType = 'e2e'
+      ctx.coreData.activeBrowser = { id: 'abc' } as any
+    })
+
+    it('counts the launch before it settles so a concurrent auto-launch check does not launch again', async () => {
+      let resolveLaunch!: () => void
+      const launchProject = jest.fn().mockReturnValue(new Promise<void>((resolve) => {
+        resolveLaunch = resolve
+      }))
+
+      Object.assign(ctx._apis.projectApi, { launchProject })
+
+      expect(actions.launchCount).toBe(0)
+
+      const launching = actions.launchProject('e2e')
+
+      expect(launchProject).toHaveBeenCalledTimes(1)
+      expect(actions.launchCount).toBe(1)
+
+      resolveLaunch()
+      await launching
+
+      expect(actions.launchCount).toBe(1)
+    })
+
+    it('does not count a launch that rejects', async () => {
+      const launchProject = jest.fn().mockRejectedValue(new Error('browser failed to launch'))
+
+      Object.assign(ctx._apis.projectApi, { launchProject })
+
+      await expect(actions.launchProject('e2e')).rejects.toThrow('browser failed to launch')
+
+      expect(actions.launchCount).toBe(0)
+    })
+  })
+
   describe('debugCloudRun', () => {
     beforeEach(() => {
       jest.spyOn(ctx.relevantRuns, 'moveToRun')
@@ -313,6 +355,79 @@ describe('ProjectActions', () => {
 
       expect(ctx.relevantRuns.moveToRun).toHaveBeenCalledWith(123, [])
       expect(ctx._apis.projectApi.routeToDebug).toHaveBeenCalled()
+    })
+  })
+
+  describe('clearCurrentProject', () => {
+    // `after:run` is dispatched from the project server's close and has to be answered by
+    // the plugins process the config manager owns, so the project must close first
+    it('closes the active project before tearing down the lifecycle', async () => {
+      const calls: string[] = []
+
+      // closeActiveProject yields before resolving, so running the two concurrently would
+      // interleave the markers rather than just reordering them
+      ;(ctx._apis.projectApi.closeActiveProject as jest.Mock).mockImplementation(async () => {
+        calls.push('closeActiveProject:start')
+        await new Promise((resolve) => setImmediate(resolve))
+        calls.push('closeActiveProject:end')
+      })
+
+      jest.spyOn(ctx.lifecycleManager, 'clearCurrentProject').mockImplementation(async () => {
+        calls.push('clearCurrentProject:start')
+      })
+
+      await actions.clearCurrentProject()
+
+      expect(calls).toEqual([
+        'closeActiveProject:start',
+        'closeActiveProject:end',
+        'clearCurrentProject:start',
+      ])
+    })
+  })
+
+  describe('openDirectoryInIDE', () => {
+    beforeEach(() => {
+      jest.mocked(execa).mockReset().mockReturnValue(Promise.resolve() as any)
+      ctx._apis.electronApi.showItemInFolder = jest.fn()
+      ctx.coreData.localSettings.availableEditors = [
+        { id: 'computer', name: 'Finder', binary: 'computer' },
+        { id: 'code', name: 'Visual Studio Code', binary: 'code' },
+      ]
+    })
+
+    it('shows the directory in the file manager without running a binary for "computer"', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'computer'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(ctx._apis.electronApi.showItemInFolder).toHaveBeenCalledWith('/project')
+      expect(execa).not.toHaveBeenCalled()
+    })
+
+    it('runs the preferred editor with the directory', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(execa).toHaveBeenCalledWith('code', ['/project'])
+      expect(ctx._apis.electronApi.showItemInFolder).not.toHaveBeenCalled()
+    })
+
+    it('does not let a failed editor launch reject', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+      jest.mocked(execa).mockReturnValueOnce(Promise.reject(new Error('spawn code ENOENT')) as any)
+
+      await expect(actions.openDirectoryInIDE('/project')).resolves.toBeUndefined()
+    })
+
+    it('does not run an editor Cypress did not detect', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = '/bin/sh'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(execa).not.toHaveBeenCalled()
+      expect(ctx._apis.electronApi.showItemInFolder).not.toHaveBeenCalled()
     })
   })
 })

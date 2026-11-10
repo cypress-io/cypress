@@ -8,7 +8,6 @@ describe('Test Isolation', () => {
     project: 'cypress-in-cypress',
     spec: 'test-isolation.spec.js',
     expectedExitCode: 0,
-    timeout: 20000,
     browser: 'chrome',
   })
 
@@ -16,7 +15,6 @@ describe('Test Isolation', () => {
     project: 'cypress-in-cypress',
     spec: 'test-isolation-describe-config.spec.js',
     expectedExitCode: 0,
-    timeout: 20000,
     browser: 'chrome',
   })
 
@@ -29,7 +27,6 @@ describe('Test Isolation', () => {
     project: 'cypress-in-cypress',
     spec: 'test-isolation.spec.js',
     expectedExitCode: null,
-    timeout: 20000,
     browser: 'chrome',
     snapshot: true,
     headed: true,
@@ -55,7 +52,6 @@ describe('Test Isolation', () => {
     project: 'cypress-in-cypress',
     spec: 'test-isolation.spec.js',
     expectedExitCode: null,
-    timeout: 20000,
     browser: 'chrome',
     snapshot: true,
     headed: false,
@@ -76,7 +72,6 @@ describe('Test Isolation', () => {
     project: 'cypress-in-cypress',
     spec: 'test-isolation.spec.js',
     expectedExitCode: 0,
-    timeout: 20000,
     browser: 'chrome',
     snapshot: true,
     headed: false,
@@ -87,7 +82,6 @@ describe('Test Isolation', () => {
     project: 'cypress-in-cypress',
     spec: 'test-isolation.spec.js',
     expectedExitCode: 0,
-    timeout: 20000,
     browser: 'chrome',
     snapshot: true,
     headed: true,

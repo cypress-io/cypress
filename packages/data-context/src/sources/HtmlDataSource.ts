@@ -9,6 +9,7 @@ import _ from 'lodash'
 import { telemetry } from '@packages/telemetry'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
+const MAX_APP_HTML_READ_ATTEMPTS = 5
 
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
@@ -26,17 +27,24 @@ export class HtmlDataSource {
     let retryCount = 0
     let err
 
-    while (retryCount < 5) {
+    while (retryCount < MAX_APP_HTML_READ_ATTEMPTS) {
       try {
-        let html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        const html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        const title = _.escape(this.ctx.project.projectTitle(this.ctx.currentProject || ''))
 
-        return html.replace(
-          '<title>Cypress</title>',
-          `<title>${this.ctx.project.projectTitle(this.ctx.currentProject || '')}</title>`,
-        )
+        // Pass a function, not a string, so `$&` and friends in the title are inserted literally
+        return html.replace('<title>Cypress</title>', () => `<title>${title}</title>`)
       } catch (e) {
+        if (e.code !== 'ENOENT') {
+          throw e
+        }
+
         err = e
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        retryCount++
+
+        if (retryCount < MAX_APP_HTML_READ_ATTEMPTS) {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        }
       }
     }
 
@@ -52,11 +60,11 @@ export class HtmlDataSource {
       'proxyUrl',
       'remote',
       'testingType',
-      'componentTesting',
       'reporterUrl',
       'namespace',
       'socketIoRoute',
       'isDefaultProtocolEnabled',
+      'isInteractive',
       'hideCommandLog',
       'hideRunnerUi',
     ]
@@ -78,10 +86,11 @@ export class HtmlDataSource {
       // Error getting config, we will show an error screen when we render the page
     }
 
-    // If mitigating secrets via setting allowCypressEnv, we need to delete the env object and avoid serializing it completely to the browser
-    if (!cfg.allowCypressEnv) {
-      delete cfg.env
-    }
+    // Environment variables are only available to the spec via cy.env() on the server.
+    // `rawJson` and `resolved` also carry them, and nothing in the browser reads either.
+    delete cfg.env
+    delete cfg.rawJson
+    delete cfg.resolved
 
     // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
     // whenever the app is served/re-served
@@ -107,7 +116,7 @@ export class HtmlDataSource {
   /**
    * The app html includes the SSR'ed data to bootstrap the page for the app
    */
-  async appHtml (nonProxied: boolean) {
+  async appHtml (nonProxied: boolean, isBrowserNetworkMode: boolean) {
     if (nonProxied) {
       return this.ctx.fs.readFile(PATH_TO_NON_PROXIED_ERROR, 'utf-8')
     }
@@ -117,10 +126,10 @@ export class HtmlDataSource {
       this.makeServeConfig(),
     ])
 
-    return this.replaceBody(appHtml, serveConfig)
+    return this.replaceBody(appHtml, serveConfig, isBrowserNetworkMode)
   }
 
-  private replaceBody (html: string, serveConfig: object) {
+  private replaceBody (html: string, serveConfig: object, isBrowserNetworkMode: boolean) {
     return html.replace('<body>', `
       <body>
         <script>
@@ -132,7 +141,7 @@ export class HtmlDataSource {
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
           window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
           ${telemetry.isEnabled() ? `window.__CYPRESS_TELEMETRY__ = ${JSON.stringify({ context: telemetry.getActiveContextObject(), resources: telemetry.getResources(), isVerbose: telemetry.isVerbose() })}` : ''}
-          ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';` : ''}
+          ${isBrowserNetworkMode ? `window.__CYPRESS_BROWSER_NETWORK_MODE__ = true;` : ''}
         </script>
     `)
   }

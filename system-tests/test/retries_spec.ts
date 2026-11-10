@@ -21,6 +21,15 @@ describe('retries', () => {
     snapshot: true,
   })
 
+  it('logs one attempt when both beforeEach and afterEach fail', {
+    project: 'retries-2',
+    spec: 'fail-in-both-hooks.cy.js',
+    snapshot: true,
+    config: {
+      screenshotOnRunFailure: false,
+    },
+  })
+
   it('completes a run of many retries in a reasonable time', {
     spec: 'hanging_retries.cy.js',
     expectedExitCode: 10,

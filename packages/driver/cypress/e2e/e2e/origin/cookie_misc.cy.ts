@@ -10,7 +10,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     // does a 302 redirect back to www.foobar.com primary-origin page, but sets a sameSite=None cookie
     cy.get('[data-cy="cookie-cross-origin-redirects-host-only"]').click()
 
-    cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+    cy.getCookies({ domain: 'www.foobar.com' }).should((cookies) => {
       expect(cookies).to.have.length(1)
 
       const singleCookie = cookies[0]
@@ -27,7 +27,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     // does a 302 redirect back to www.foobar.com primary-origin page, but sets a sameSite=None cookie
     cy.get('[data-cy="cookie-cross-origin-redirects"]').click()
 
-    cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+    cy.getCookies({ domain: 'www.foobar.com' }).should((cookies) => {
       expect(cookies).to.have.length(1)
 
       const singleCookie = cookies[0]
@@ -75,10 +75,8 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
     // wait for the async XHR response to arrive
     cy.wait('@async')
-    // cy.getAllCookies does not wait for the cookies to be set, so we need to wait manually
-    cy.wait(500)
 
-    cy.getAllCookies().then((cookies) => {
+    cy.getAllCookies().should((cookies) => {
       const isFirefox = Cypress.isBrowser({ family: 'firefox' })
 
       // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
@@ -321,7 +319,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       // 1. visits www.foobar.com:3500: The AUT and top are the same-origin
       cy.visit(`http://${hostnameA}`).then(() => {
         // 2. set a cookie via Set-Cookie Response header. Since top and AUT are the same-origin, this works
-        // @ts-expect-error
+        // @ts-expect-error - window.top is possibly null and is not typed as an AUTWindow
         cy.wrap(makeRequest(window.top, `http://${hostnameA}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
       })
 
@@ -335,13 +333,13 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         // for same super domain origin and not same origin in Cypress <= 13, so the cookies are NOT simulated.
         // In Cypress 14, we are changing this to check for same origin for simulation conditions, which will allow this cookie
         // to be set and correctly simulate the AUT as top.
-        // @ts-expect-error
+        // @ts-expect-error - window.top is possibly null and is not typed as an AUTWindow
         cy.wrap(makeRequest(window.top, `http://${hostnameB}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
       })
 
       // 5. mock a navigation back to the first domain (this isn't necessary but makes the test cleaner) now AUT and top are same-origin
       cy.visit(`http://${hostnameA}`).then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - window.top is possibly null and is not typed as an AUTWindow
         cy.wrap(makeRequest(window.top, `http://${hostnameA}/test-request`, 'fetch'))
 
         cy.wait('@cookiedRequest').then(({ request }) => {

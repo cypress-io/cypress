@@ -21,6 +21,7 @@ class SnapshotEntryGeneratorViaWalk {
     readonly nodeModulesOnly: boolean,
     readonly pathsMapper: PathsMapper,
     readonly integrityCheckSource: string | undefined,
+    readonly forceNorewrite: string[],
   ) {
     this.bundlerPath = getBundlerPath()
   }
@@ -61,6 +62,10 @@ class SnapshotEntryGeneratorViaWalk {
       sourcemap: false,
       supportTypeScript: this.nodeModulesOnly,
       integrityCheckSource: this.integrityCheckSource,
+      // The bundle produced here is discarded — we only want its metadata — but
+      // the bundler still rewrites every module, so modules that cannot survive
+      // rewriting have to be excluded or the bundler fails outright.
+      norewrite: this.forceNorewrite,
     }
     const { meta } = await createBundleAsync(opts)
 
@@ -81,6 +86,7 @@ type GenerateDepsDataOpts = {
   nodeModulesOnly?: boolean
   pathsMapper?: PathsMapper
   integrityCheckSource: string | undefined
+  forceNorewrite?: string[]
 }
 
 export type BundlerMetadata = Metadata & { projectBaseDir: string }
@@ -98,6 +104,7 @@ export async function generateBundlerMetadata (
     fullConf.nodeModulesOnly,
     fullConf.pathsMapper,
     config.integrityCheckSource,
+    config.forceNorewrite ?? [],
   )
   const meta = await generator.getMetadata()
 
@@ -125,6 +132,7 @@ export async function generateSnapshotEntryFromEntryDependencies (
     fullConf.nodeModulesOnly,
     fullConf.pathsMapper,
     config.integrityCheckSource,
+    config.forceNorewrite ?? [],
   )
 
   try {

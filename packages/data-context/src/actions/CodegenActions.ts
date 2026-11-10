@@ -6,6 +6,7 @@ import { SpecOptions, codeGenerator } from '../codegen'
 import templates from '../codegen/templates'
 import type { CodeGenType } from '../gen/graphcache-config.gen'
 import { visit } from 'ast-types'
+import { isInsideDirOnDisk } from '../util/isInsideDir'
 
 interface ReactComponentDescriptor {
   exportName: string
@@ -15,8 +16,18 @@ interface ReactComponentDescriptor {
 export class CodegenActions {
   constructor (private ctx: DataContext) {}
 
-  async getReactComponentsFromFile (filePath: string, reactDocgen?: typeof import('react-docgen')): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
+  async getReactComponentsFromFile (filePath: string, reactDocgen?: typeof import('react-docgen')): Promise<{ components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
+      const project = this.ctx.currentProject
+
+      assert(project, 'Cannot read a component without currentProject.')
+
+      const componentPath = path.resolve(project, filePath)
+
+      if (!(await isInsideDirOnDisk(project, componentPath))) {
+        throw new Error(`Cannot read a component outside of the project: ${filePath}`)
+      }
+
       // this dance to get react-docgen is for now because react-docgen is a module and our typescript settings are set up to transpile to commonjs
       // which will require the module, which will fail because it's an es module. This is a temporary workaround.
       let actualReactDocgen = reactDocgen
@@ -27,10 +38,10 @@ export class CodegenActions {
 
       const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = actualReactDocgen
 
-      const src = await this.ctx.fs.readFile(filePath, 'utf8')
+      const src = await this.ctx.fs.readFile(componentPath, 'utf8')
 
       const exportResolver: ExportResolver = new Map()
-      let result = parseReactComponent(src, {
+      const result = parseReactComponent(src, {
         resolver: findAllWithLink(exportResolver, reactDocgenResolvers),
         babelOptions: {
           configFile: false,
@@ -77,16 +88,20 @@ export class CodegenActions {
 
     assert(project, 'Cannot create spec without currentProject.')
 
-    const getCodeGenPath = () => {
-      return codeGenType === 'e2e'
-        ? this.ctx.path.join(
-          project,
-          codeGenCandidate,
-        )
-        : codeGenCandidate
+    const codeGenPath = path.resolve(project, codeGenCandidate)
+
+    if (!(await isInsideDirOnDisk(project, codeGenPath))) {
+      throw new Error(`Cannot generate a spec outside of the project: ${codeGenCandidate}`)
     }
 
-    const codeGenPath = getCodeGenPath()
+    // Ensure the componentName is a valid identifier
+    if (componentName !== undefined && !/^[\p{ID_Start}$_][\p{ID_Continue}$\u200C\u200D]*$/u.test(componentName)) {
+      throw new Error(`Invalid component name: ${componentName}`)
+    }
+
+    if (codeGenType === 'component' && !(await this.ctx.fs.pathExists(codeGenPath))) {
+      throw new Error(`Cannot generate a spec for a component that does not exist: ${codeGenCandidate}`)
+    }
 
     const { specPattern = [] } = await this.ctx.project.specPatterns()
 
@@ -102,7 +117,7 @@ export class CodegenActions {
       isDefault,
     })
 
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResults = await codeGenerator(
       { templateDir: templates[codeGenOptions.templateKey], target: codeGenOptions.overrideCodeGenDir || path.parse(codeGenPath).dir },
@@ -176,7 +191,7 @@ export class CodegenActions {
       return undefined
     }
 
-    // @ts-ignore - because of the conditional above, we know that devServer isn't a function
+    // @ts-expect-error - because of the conditional above, we know that devServer isn't a function
     return this.ctx.coreData.wizard.frameworks.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }

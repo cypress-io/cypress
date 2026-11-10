@@ -81,8 +81,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
 
     const checkForXhr = async function (
       alias: string,
-      type: 'request'|'response',
-      index: number,
+      type: 'request' | 'response',
       num: string,
       options: waitOptions,
     ) {
@@ -106,19 +105,11 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
         return req
       }
 
-      // append .type to the alias
-      const xhr = cy.getIndexedXhrByAlias(`${alias}.${type}`, index)
-
-      // return our xhr object
-      if (xhr) {
-        return xhr
-      }
-
       return cy.retry(() => {
-        return checkForXhr.apply(window, [alias, type, index, num, options])
+        return checkForXhr.apply(window, [alias, type, num, options])
       },
       // TODO: What should `_log`'s type be?
-      // @ts-expect-error - Incompatible types.
+      // @ts-expect-error - waitOptions is not assignable to retryOptions
       options)
     }
 
@@ -235,7 +226,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
           log.set('timeout', options.timeout)
         }
 
-        return checkForXhr(alias, 'request', index, num, options)
+        return checkForXhr(alias, 'request', num, options)
       }
 
       const waitForResponse = () => {
@@ -248,7 +239,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
           log.set('timeout', options.timeout)
         }
 
-        return checkForXhr(alias, 'response', index, num, options)
+        return checkForXhr(alias, 'response', num, options)
       }
 
       // if we were only waiting for the request

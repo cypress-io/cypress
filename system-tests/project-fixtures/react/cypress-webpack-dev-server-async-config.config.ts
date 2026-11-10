@@ -3,7 +3,6 @@ import * as path from 'path'
 import * as fs from 'fs'
 
 export default defineConfig({
-  allowCypressEnv: false,
   component: {
     devServer: {
       framework: 'react',

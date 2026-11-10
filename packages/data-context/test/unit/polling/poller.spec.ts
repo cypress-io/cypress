@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 
 import { Poller } from '../../../src/polling'
 import { createTestDataContext } from '../helper'
@@ -112,7 +112,7 @@ describe('Poller', () => {
     const callback = jest.fn()
     const interval = 5
 
-    const poller = new Poller<'relevantRunChange', { name: string }, { name: string}>(ctx, 'relevantRunChange', interval, callback)
+    const poller = new Poller<'relevantRunChange', { name: string }, { name: string }>(ctx, 'relevantRunChange', interval, callback)
 
     expect(poller.subscriptions).toHaveLength(0)
 

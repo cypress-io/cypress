@@ -2,6 +2,7 @@ import Module from 'module'
 import path from 'path'
 import type { Frameworks, WebpackDevServerConfig } from '../devServer'
 import debugFn from 'debug'
+import type webpack from 'webpack'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
 
@@ -22,7 +23,7 @@ export interface SourcedDependency {
 }
 
 export interface SourcedWebpack extends SourcedDependency {
-  module: Function
+  module: typeof webpack
   majorVersion: 4 | 5
 }
 
@@ -48,9 +49,10 @@ export interface SourceRelativeWebpackResult {
 const originalModuleLoad = (Module as ModuleClass)._load
 const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 
-// We ship webpack@4 as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
+// We ship webpack as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
 // serves as our fallback.
-export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
+const cypressWebpackPath = (config: WebpackDevServerConfig) => {
+  // eslint-disable-next-line n/no-extraneous-require -- resolved from the Cypress binary, which ships it
   return require.resolve('@cypress/webpack-batteries-included-preprocessor', {
     paths: [config.cypressConfig.cypressBinaryRoot],
   })
@@ -125,7 +127,7 @@ function sourceWebpack (config: WebpackDevServerConfig, framework: SourcedDepend
       paths: [searchRoot],
     })
   } catch (e) {
-    if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
+    if ((e as { code?: string }).code !== 'MODULE_NOT_FOUND') {
       debug('Webpack: Failed to source webpack - %s', e)
       throw e
     }
@@ -189,7 +191,7 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpackM
       paths: [searchRoot],
     })
   } catch (e) {
-    if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
+    if ((e as { code?: string }).code !== 'MODULE_NOT_FOUND') {
       debug('WebpackDevServer: Failed to source webpack-dev-server - %s', e)
       throw e
     }
@@ -224,6 +226,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
   let htmlWebpackPluginJsonPath: string
 
   try {
+    // eslint-disable-next-line n/no-extraneous-require -- sourced from the user's project, like webpack itself
     htmlWebpackPluginJsonPath = require.resolve('html-webpack-plugin/package.json', {
       paths: [searchRoot],
     })
@@ -233,7 +236,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     // we shouldn't be concerned with using our own copy if they've shipped w/ an earlier version
     htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [5])
   } catch (e) {
-    const err = e as Error & {code?: string}
+    const err = e as Error & { code?: string }
 
     if (err.code !== 'MODULE_NOT_FOUND' && !err.message.includes('Unexpected major version')) {
       debug('HtmlWebpackPlugin: Failed to source html-webpack-plugin - %s', e)
@@ -251,9 +254,9 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     })
   }
 
-  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath),
+  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath)
   htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
 
   debug('HtmlWebpackPlugin: Successfully sourced html-webpack-plugin - %o', htmlWebpackPlugin)
@@ -276,7 +279,7 @@ export function sourceDefaultWebpackDependencies (config: WebpackDevServerConfig
   }
 }
 
-export function getMajorVersion <T extends number> (json: PackageJson, acceptedVersions: T[]): T {
+export function getMajorVersion<T extends number> (json: PackageJson, acceptedVersions: T[]): T {
   const major = Number(json.version.split('.')[0])
 
   if (!acceptedVersions.includes(major as T)) {

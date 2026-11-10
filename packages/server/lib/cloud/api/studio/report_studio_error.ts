@@ -2,6 +2,7 @@ import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-ty
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
 import { stackWithCause } from '../../error_with_cause'
+import { isReportingDisabled } from '../../reporting_disabled'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 import { logError } from '@packages/stderr-filtering'
 import exception from '../../exception'
@@ -41,7 +42,7 @@ export function reportStudioError ({
 }: ReportStudioErrorOptions): void {
   debug('Error reported:', error)
 
-  if (process.env.CYPRESS_CRASH_REPORTS === '0') {
+  if (isReportingDisabled()) {
     return
   }
 

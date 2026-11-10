@@ -2,10 +2,11 @@
   "compilerOptions": {
     "baseUrl": "tsconfig",
     "lib": [
-      "es2018",
+      "es2022",
       "dom"
     ],
     "declaration": true,
+    "target": "es2022",
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmit": true,
@@ -20,7 +21,6 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "target": "es6",
     "types": [
       "node"
     ]

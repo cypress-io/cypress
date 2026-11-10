@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 
-import CommandModel from '../../../src/commands/command-model'
-import ErrModel from '../../../src/errors/err-model'
+import type CommandModel from '../../../src/commands/command-model'
+import type ErrModel from '../../../src/errors/err-model'
 import Hook from '../../../src/hooks/hook-model'
 
 describe('Hook model', () => {
@@ -120,7 +120,6 @@ describe('Hook model', () => {
   context('#commandMatchingErr', () => {
     it('returns last command to match the error', () => {
       const matchesButIsntLast: Partial<CommandModel> = {
-        // @ts-ignore
         err: { message: 'matching error message' } as ErrModel,
         isMatchingEvent: () => {
           return false
@@ -130,7 +129,6 @@ describe('Hook model', () => {
       hook.addCommand(matchesButIsntLast as CommandModel)
 
       const doesntMatch: Partial<CommandModel> = {
-        // @ts-ignore
         err: { message: 'other error message' } as ErrModel,
         isMatchingEvent: () => {
           return false
@@ -150,7 +148,6 @@ describe('Hook model', () => {
 
     it('returns undefined when no match', () => {
       const noMatch1: Partial<CommandModel> = {
-        // @ts-ignore
         err: { message: 'some error message' } as ErrModel,
         isMatchingEvent: () => {
           return false
@@ -160,7 +157,6 @@ describe('Hook model', () => {
       hook.addCommand(noMatch1 as CommandModel)
 
       const noMatch2: Partial<CommandModel> = {
-        // @ts-ignore
         err: { message: 'other error message' } as ErrModel,
       }
 

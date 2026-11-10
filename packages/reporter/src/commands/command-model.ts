@@ -1,8 +1,10 @@
 import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
-import Err, { ErrProps } from '../errors/err-model'
-import Instrument, { InstrumentProps } from '../instruments/instrument-model'
+import type { ErrProps } from '../errors/err-model'
+import Err from '../errors/err-model'
+import type { InstrumentProps } from '../instruments/instrument-model'
+import Instrument from '../instruments/instrument-model'
 import type { TimeoutID } from '../lib/types'
 import type { SessionProps } from '../sessions/sessions-model'
 
@@ -58,7 +60,7 @@ export default class Command extends Instrument {
   groupLevel?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
-  _isOpen: boolean|null = null
+  _isOpen: boolean | null = null
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined

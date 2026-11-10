@@ -32,11 +32,12 @@
 </template>
 
 <script lang="ts" setup>
-import { FunctionalComponent, ref, SVGAttributes } from 'vue'
+import { ref } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 const props = defineProps<{
   code: string
-  prefixIcon: FunctionalComponent<SVGAttributes, {}>
+  prefixIcon: FunctionalComponent<SVGAttributes>
   confidential?: boolean
 }>()
 

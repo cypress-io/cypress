@@ -2,19 +2,18 @@ import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
 import { $Location } from '../cypress/location'
-import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin, syncExposeToCurrentOrigin } from '../util/config'
+import { syncConfigToCurrentOrigin, syncExposeToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
 
 interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
-  env: Cypress.ObjectLike
   expose: Cypress.ObjectLike
   file?: string
   fn: string
   skipConfigValidation: boolean
-  state: {}
+  state: Record<string, unknown>
   logCounter: number
 }
 
@@ -23,7 +22,7 @@ interface serializedRunnable {
   type: string
   title: string
   parent: serializedRunnable
-  ctx: {}
+  ctx: Record<string, unknown>
   _currentRetry: number
   _timeout: number
   titlePath: string
@@ -34,7 +33,7 @@ interface GetFileResult {
   error?: string
 }
 
-const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
+const rehydrateRunnable = (data: serializedRunnable): Runnable | Test => {
   let runnable
 
   if (data.type === 'test') {
@@ -74,7 +73,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
 // 4. Eval the callback like normal
 const getCallbackFn = async (fn: string, file?: string) => {
   if (
-    // @ts-expect-error
+    // @ts-expect-error - experimentalOriginDependencies is e2e-only, so it is not a key of Cypress.Config
     !Cypress.config('experimentalOriginDependencies')
     || !fn.includes('Cypress.require')
   ) {
@@ -144,7 +143,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunOriginFnOptions) => {
-    const { config, args, env, expose, file, fn, state, skipConfigValidation, logCounter } = options
+    const { config, args, expose, file, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
 
@@ -153,15 +152,11 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     // Set the counter for log ids
     LogUtils.setCounter(logCounter)
 
-    // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
 
-    // resync the config/env before running the origin:fn
+    // resync the config/expose before running the origin:fn
     syncConfigToCurrentOrigin(config)
     syncExposeToCurrentOrigin(expose)
-    if (Cypress.config('allowCypressEnv')) {
-      syncEnvToCurrentOrigin(env)
-    }
 
     cy.state('onQueueEnd', () => {
       queueFinished = true

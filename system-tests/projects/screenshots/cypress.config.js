@@ -1,10 +1,9 @@
 const path = require('path')
-const Jimp = require('jimp')
+const { Jimp, intToRGBA } = require('jimp')
 const _ = require('lodash')
 const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
 
 module.exports = {
-  'allowCypressEnv': false,
   'e2e': {
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser, options) => {
@@ -25,7 +24,7 @@ module.exports = {
               x = x * devicePixelRatio
               y = y * devicePixelRatio
 
-              const pixels = Jimp.intToRGBA(image.getPixelColor(x, y))
+              const pixels = intToRGBA(image.getPixelColor(x, y))
 
               const { r, g, b } = pixels
 

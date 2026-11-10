@@ -2,9 +2,10 @@ import {
   CookieJar,
   toughCookieToAutomationCookie,
   automationCookieToToughCookie,
+} from '@packages/server/lib/automation/cookie/jar'
+import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
 } from '@packages/server/lib/automation/cookie/jar'
-import type { Cookie as ToughCookie } from '@packages/server/lib/automation/cookie/jar'
 
 function isHostOnlyCookie (domain) {
   return domain[0] !== '.'
@@ -16,7 +17,7 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   return documentCookieString.split(';').map((cookieString) => {
     const [name, value] = cookieString.split('=')
 
-    let cookieDomain = location.hostname
+    const cookieDomain = location.hostname
 
     return {
       name: name.trim(),

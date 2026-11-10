@@ -13,7 +13,7 @@ const debug = debugLib(debugPrefix)
 
 export type BuildOptions = Record<string, any>
 
-export type AngularWebpackDevServerConfig = Extract<WebpackDevServerConfig, {framework: 'angular'}>
+export type AngularWebpackDevServerConfig = Extract<WebpackDevServerConfig, { framework: 'angular' }>
 
 type Configurations = {
   configurations?: {
@@ -200,7 +200,7 @@ export async function getAngularCliModules (projectRoot: string) {
 
       return module
     } catch (e) {
-      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`)
+      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`, { cause: e })
     }
   }))
 

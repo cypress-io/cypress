@@ -1,5 +1,4 @@
 module.exports = {
-  'allowCypressEnv': false,
   'retries': 2,
   'e2e': {
     'supportFile': false,

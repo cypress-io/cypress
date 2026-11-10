@@ -26,7 +26,7 @@ export type Methods = Accessors | Selectors | 'data' | 'class' | 'empty' | 'id' 
 
 export type PartialAssertionArgs = [Chai.Message, Chai.Message, any?, any?, boolean?]
 
-interface Callbacks {
+export interface Callbacks {
   onInvalid: (method, obj) => void
   onError: (err, method, obj, negated) => void
 }

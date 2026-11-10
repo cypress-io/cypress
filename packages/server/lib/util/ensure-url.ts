@@ -50,7 +50,9 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
 
 export const isListening = (urlStr: string) => {
   // takes a urlStr and verifies the hostname + port is listening
-  let { hostname, protocol, port } = url.parse(urlStr)
+  const parsedUrl = url.parse(urlStr)
+  const { hostname, protocol } = parsedUrl
+  let { port } = parsedUrl
 
   if (port == null) {
     port = protocol === 'https:' ? '443' : '80'
@@ -61,12 +63,8 @@ export const isListening = (urlStr: string) => {
     // urls excluded from the proxy via NO_PROXY (e.g. localhost, which is the
     // component testing dev server and is in NO_PROXY by default) fall through
     // to a direct connection below so we don't route them through the proxy.
-    // For some reason, TypeScript gets confused by the "agent" parameter
-    // and required double ts-ignore to allow it on local machines and on CI
-    // @ts-ignore
     return rp({
       url: urlStr,
-      // @ts-ignore
       agent,
       proxy: null,
     })

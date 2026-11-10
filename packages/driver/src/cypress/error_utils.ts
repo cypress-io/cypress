@@ -13,7 +13,8 @@ import _ from 'lodash'
 import $dom from '../dom'
 import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
-import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
+import type { StackAndCodeFrameIndex } from './stack_utils'
+import $stackUtils from './stack_utils'
 import $utils from './utils'
 import type { HandlerType } from './runner'
 
@@ -199,14 +200,35 @@ const getUserInvocationStack = (err, state) => {
   return undefined
 }
 
+const setErrProp = (err, prop: string, value: any): boolean => {
+  try {
+    err[prop] = value
+  } catch {
+    // `DOMException`, which browsers throw for cross-origin access and CSP
+    // violations, inherits `message` as a getter-only accessor, so a plain
+    // assignment throws. An own property shadows the accessor.
+    try {
+      Object.defineProperty(err, prop, { value, writable: true, configurable: true })
+    } catch {
+      return false
+    }
+  }
+
+  return true
+}
+
+// Decorating is best effort: an error that could not be annotated is better
+// than one replaced by the failure to annotate it.
+// https://github.com/cypress-io/cypress/issues/34818
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  err.stack = $stackUtils.normalizedStack(err)
+  setErrProp(err, 'stack', $stackUtils.normalizedStack(err))
 
   const newMessage = cb(err.message, newErrMsg)
   const newStack = stackWithReplacedProps(err, { message: newMessage })
 
-  err.message = newMessage
-  err.stack = newStack
+  if (setErrProp(err, 'message', newMessage)) {
+    setErrProp(err, 'stack', newStack)
+  }
 
   return err
 }
@@ -258,7 +280,8 @@ const makeErrFromErr = (err, options: any = {}) => {
     err = cypressErr({ message: err })
   }
 
-  let { onFail, errProps } = options
+  const { errProps } = options
+  let { onFail } = options
 
   // assume onFail is a command if
   // onFail is present and isn't a function
@@ -313,7 +336,7 @@ const warnByPath = (errPath, options: any = {}) => {
 }
 
 export class InternalCypressError extends Error {
-  onFail?: Function
+  onFail?: (err: Error) => void
   isRecovered?: boolean
 
   constructor (message) {
@@ -333,7 +356,7 @@ export class CypressError extends Error {
   triggerAction?: 'loginModal' | 'projectConnectModal' | null
   retry?: boolean
   userInvocationStack?: any
-  onFail?: Function
+  onFail?: (err: Error) => void
   isRecovered?: boolean
 
   constructor (message) {
@@ -375,7 +398,9 @@ const replaceErrMsgTokens = (errMessage, args) => {
   if (!errMessage) return errMessage
 
   const replace = (str, argValue, argKey) => {
-    return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
+    // Use a replacer function so `$` sequences in the (user-controlled) arg are
+    // inserted literally rather than treated as special replacement patterns.
+    return str.replace(new RegExp(`\\{\\{${argKey}\\}\\}`, 'g'), () => argValue)
   }
 
   const getMsg = function (args = {}) {
@@ -403,7 +428,7 @@ const findPropByParents = (msgPath, propName) => {
 
   const obj = _.get(allErrorMessages, msgPath)
 
-  if (obj.hasOwnProperty(propName)) {
+  if (Object.prototype.hasOwnProperty.call(obj, propName)) {
     return obj[propName]
   }
 
@@ -411,7 +436,7 @@ const findPropByParents = (msgPath, propName) => {
 }
 
 const errByPath = (msgPath, args?) => {
-  let msgValue = _.get(allErrorMessages, msgPath)
+  const msgValue = _.get(allErrorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -429,9 +454,9 @@ const errByPath = (msgPath, args?) => {
     }
   }
 
-  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || findPropByParents(msgPath, 'docsUrl')
-  const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || findPropByParents(msgPath, 'docsUrlTitle')
-  const triggerAction = (msgObj.hasOwnProperty('triggerAction') && msgObj.triggerAction) || findPropByParents(msgPath, 'triggerAction')
+  const docsUrl = (Object.prototype.hasOwnProperty.call(msgObj, 'docsUrl') && msgObj.docsUrl) || findPropByParents(msgPath, 'docsUrl')
+  const docsUrlTitle = (Object.prototype.hasOwnProperty.call(msgObj, 'docsUrlTitle') && msgObj.docsUrlTitle) || findPropByParents(msgPath, 'docsUrlTitle')
+  const triggerAction = (Object.prototype.hasOwnProperty.call(msgObj, 'triggerAction') && msgObj.triggerAction) || findPropByParents(msgPath, 'triggerAction')
 
   const resolvedTriggerAction =
     triggerAction === 'loginModal' || triggerAction === 'projectConnectModal'
@@ -448,7 +473,7 @@ const errByPath = (msgPath, args?) => {
 
 const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
-  let uncaughtErr = errByPath(errPath, {
+  const uncaughtErr = errByPath(errPath, {
     errMsg: stripAnsi(err.message),
     promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   }) as CypressError
@@ -480,7 +505,8 @@ const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameInde
 }
 
 const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
-  let { stack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
+  const { stack: codeFrameStack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
+  let stack = codeFrameStack
 
   stack = $stackUtils.stackWithContentAppended(err, stack)
   stack = $stackUtils.stackWithReplacementMarkerLineRemoved(stack)
@@ -533,7 +559,8 @@ const getStackFromErrArgs = ({ filename, lineno, colno }) => {
 }
 
 const convertErrorEventPropertiesToObject = (args) => {
-  let { message, filename, lineno, colno, err } = args
+  const { filename, lineno, colno, err } = args
+  let { message } = args
 
   // if the error was thrown as a string (throw 'some error'), `err` is
   // the message ('some error') and message is some browser-created
@@ -554,7 +581,8 @@ interface ErrorFromErrorEvent {
 }
 
 const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
-  let { message, filename, lineno, colno, error } = event
+  const { filename, lineno, colno, error } = event
+  let { message } = event
   let docsUrl = error?.docsUrl
   let docsUrlTitle = error?.docsUrlTitle
   let triggerAction = error?.triggerAction
@@ -732,24 +760,6 @@ const toLoggableError = (maybeError: unknown): LoggableError => {
   }
 }
 
-const getUnsupportedPlugin = (runnable) => {
-  if (!(runnable.invocationDetails && runnable.invocationDetails.originalFile && runnable.err && runnable.err.message)) {
-    return null
-  }
-
-  const pluginsErrors = {
-    '@cypress/code-coverage': 'glob pattern string required',
-  }
-
-  const unsupportedPluginFound = Object.keys(pluginsErrors).find((plugin) => runnable.invocationDetails.originalFile.includes(plugin))
-
-  if (unsupportedPluginFound && pluginsErrors[unsupportedPluginFound] && runnable.err.message.includes(pluginsErrors[unsupportedPluginFound])) {
-    return unsupportedPluginFound
-  }
-
-  return null
-}
-
 const extendErrorMessages = (errorMessages: any) => {
   allErrorMessages = {
     ...allErrorMessages,
@@ -766,7 +776,6 @@ export default {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
-  getUnsupportedPlugin,
   getUserInvocationStack,
   isAssertionErr,
   isChaiValidationErr,

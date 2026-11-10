@@ -20,10 +20,14 @@ export async function mapOrigins (Cypress: Cypress.Cypress, origins: string | st
   return _.uniq(_.flatten(await getOrigins))
 }
 
-export async function getAllHtmlOrigins (Cypress: Cypress.Cypress) {
-  const currentOrigin = window.location.origin
-  const storedOrigins = await Cypress.backend('get:rendered:html:origins')
-  const origins = [..._.keys(storedOrigins), currentOrigin]
+export async function getRenderedHtmlOrigins (Cypress: Cypress.Cypress): Promise<string[]> {
+  return _.keys(await Cypress.backend('get:rendered:html:origins'))
+}
 
-  return _.uniq(origins)
+export function withCurrentOrigin (origins: string[]) {
+  return _.uniq([...origins, window.location.origin])
+}
+
+export async function getAllHtmlOrigins (Cypress: Cypress.Cypress) {
+  return withCurrentOrigin(await getRenderedHtmlOrigins(Cypress))
 }

@@ -1,8 +1,6 @@
 import sinon from 'sinon'
 import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 import { Clipboard_CopyToClipboardDocument } from '../generated/graphql'
 import { WIZARD_DEPENDENCY_REACT, WIZARD_DEPENDENCY_TYPESCRIPT } from '@packages/scaffold-config/browser/dependencies'
 
@@ -41,15 +39,15 @@ describe('<ManualInstall />', () => {
 
     const installCommand = `npm install -D react react-dom typescript`
 
-    cy.findByText(defaultMessages.setupWizard.installDependencies.pasteCommand).should('be.visible')
+    cy.findByText('Paste this command into your terminal to install the following packages:').should('be.visible')
     cy.findByDisplayValue(installCommand).should('be.visible')
-    cy.findByRole('button', { name: 'Copy' }).click()
-    cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
+    cy.getByRole('button', { name: 'Copy' }).click()
+    cy.getByRole('button', { name: 'Copied!' }).should('be.visible')
 
     cy.wrap(stubCopy).should('have.been.calledWith', installCommand)
 
     const validatePackage = (packageName: string) => {
-      cy.findByRole('link', { name: packageName })
+      cy.getByRole('link', { name: packageName })
       .should('have.attr', 'href', `https://www.npmjs.com/package/${packageName}`)
 
       cy.contains(framework.description.split('<span')[0])

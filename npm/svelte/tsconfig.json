@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "lib": [
-      "es2015",
+      "es2022",
       "dom"
     ],
     "allowJs": true,

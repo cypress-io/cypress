@@ -11,7 +11,7 @@ import $animation from './animation'
 const { isWindow, getWindowByElement } = $window
 const { isDocument, getDocumentFromElement } = $document
 const { wrap, unwrap, isJquery, query } = $jquery
-const { isVisible, isHidden, isStrictlyHidden, isHiddenByAncestors, getReasonIsHidden, isW3CRendered, isW3CFocusable } = $visibility
+const { isVisible, isHidden, isStrictlyHidden, isHiddenByAncestors, getReasonIsHidden, isW3CFocusable } = $visibility
 const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, getInputFromLabel, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, isWithinShadowRoot, getHostContenteditable } = $elements
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
 const { getSelectionBounds } = $selection
@@ -34,7 +34,6 @@ export default {
   addCssAnimationDisabler,
   wrap,
   isW3CFocusable,
-  isW3CRendered,
   query,
   unwrap,
   elementFromPoint,

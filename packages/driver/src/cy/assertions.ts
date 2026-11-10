@@ -6,15 +6,24 @@ import $errUtils from '../cypress/error_utils'
 import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
 
-// TODO
-// bTagOpen + bTagClosed
-// are duplicated in assertions.coffee
 const butRe = /,? but\b/
 const bTagOpen = /\*\*/g
 const bTagClosed = /\*\*/g
 const stackTracesRe = / at .*\n/gm
 
 const IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
+
+// reads a property of the value under assertion, returning undefined instead
+// of throwing when the read fails, as it does with a SecurityError when the
+// value is a cross-origin window, such as the one `cy.go()` yields after
+// navigating to another origin
+const getProperty = (value, property: string) => {
+  try {
+    return value ? value[property] : undefined
+  } catch {
+    return undefined
+  }
+}
 
 const invokeWith = (value) => {
   return (fn) => {
@@ -60,6 +69,7 @@ const exists = (subject, cy: $Cy) => {
 
   // verify the $el exists and use our default error messages
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- chai property assertion, which throws when the subject is missing
     cy.expect(subject).to.exist
   } finally {
     cy.state('onBeforeLog', null)
@@ -111,7 +121,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     const assertions: any[] = []
 
     // grab the rest of the queue'd commands
-    for (let cmd of cy.queue.slice(index)) {
+    for (const cmd of cy.queue.slice(index)) {
       // don't break on utilities, just skip over them
       if (cmd.is('utility')) {
         continue
@@ -160,11 +170,11 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       message = message.substring(0, message.search(butRe))
     }
 
-    if (value && value.isSinonProxy) {
+    if (getProperty(value, 'isSinonProxy')) {
       message = message.replace(stackTracesRe, '\n')
     }
 
-    let parsed = parseValueActualAndExpected(value, actual, expected)
+    const parsed = parseValueActualAndExpected(value, actual, expected)
     // TODO: make it more specific after defining the type for Cypress.log().
     let obj: Record<string, any> = {
       ...parsed,
@@ -210,7 +220,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       name: 'assert',
       message,
       passed,
-      selector: value ? value.selector : undefined,
+      selector: getProperty(value, 'selector'),
       timeout: 0,
       type (current, subject) {
         // if our current command has arguments assume
@@ -252,7 +262,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           log.snapshot()
         }
 
-        // @ts-ignore
+        // @ts-expect-error - issuesCommunicatingOrFinding is a Cypress-specific error property
         if (err && (!hasLoggedError || (err.issuesCommunicatingOrFinding && index === logs.length - 1))) {
           hasLoggedError = true
 
@@ -368,7 +378,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         if (_.isFunction(onRetry)) {
-          //@ts-expect-error
+          // @ts-expect-error - options is a Record<string, any>, which retryOptions does not accept
           return cy.retry(onRetry, options)
         }
 

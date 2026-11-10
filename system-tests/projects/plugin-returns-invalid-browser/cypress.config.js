@@ -1,5 +1,4 @@
 module.exports = {
-  'allowCypressEnv': false,
   'e2e': {
     setupNodeEvents (on, config) {
       // returns invalid config with a browser that is invalid

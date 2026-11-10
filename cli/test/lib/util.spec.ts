@@ -3,7 +3,7 @@ import assert from 'assert'
 import hasha from 'hasha'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
-import { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
 
 describe('util', () => {
   beforeEach(() => {
@@ -18,6 +18,14 @@ describe('util', () => {
       expect(util.isBrokenGtkDisplay(text)).toEqual(true)
       // and not for the other messages
       expect(util.isBrokenGtkDisplay('display was set incorrectly')).toEqual(false)
+    })
+  })
+
+  describe('.isBrokenGtkDisplay with a missing X server', () => {
+    it('detects the Electron missing X server message', () => {
+      const text = '[1234:0101/000000.000000:ERROR:ozone_platform_x11.cc(245)] Missing X server or $DISPLAY'
+
+      expect(util.isBrokenGtkDisplay(text)).toEqual(true)
     })
   })
 
@@ -152,7 +160,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -171,7 +179,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -190,7 +198,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -211,7 +219,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -233,7 +241,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -257,7 +265,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -302,7 +310,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -472,7 +480,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             platform: vi.fn(),
@@ -485,7 +493,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             osInfo: vi.fn(),

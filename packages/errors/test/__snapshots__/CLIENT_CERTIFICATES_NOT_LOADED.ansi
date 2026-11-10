@@ -1,0 +1,3 @@
+[31mCypress could not load the certificate configured in [33mclientCertificates[39m[31m for [95mhttps://example.com/secure[39m[31m.[39m
+[31m[39m
+[31mThe entry was accepted during validation but no certificate was available for it when the browser launched, so Cypress stopped rather than run without presenting it.[39m

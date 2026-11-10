@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { SpecWithRelativeRoot } from '@packages/types'
+import type { SpecWithRelativeRoot } from '@packages/types'
 import fs from 'fs-extra'
 import { scaffoldMigrationProject } from '../helper'
 import { getTestCounts } from '../../../src/util/testCounts'

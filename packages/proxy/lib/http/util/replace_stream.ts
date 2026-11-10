@@ -24,10 +24,7 @@ export function replaceStream (patterns: RegExp | RegExp[], replacements: string
   let tail = ''
 
   return through(function write (this: InternalStream, chunk) {
-    let emitted = false
-
     const emitTailUpTo = (index) => {
-      emitted = true
       this.queue(tail.slice(0, index))
       tail = tail.slice(index)
     }
@@ -43,7 +40,7 @@ export function replaceStream (patterns: RegExp | RegExp[], replacements: string
 
       tail = tail.replace(pattern, function replacer (match) {
         // ugly, but necessary due to bizarre function signature of String#replace
-        const offset = arguments[arguments.length - 2] // eslint-disable-line prefer-rest-params
+        const offset = arguments[arguments.length - 2]
 
         if (offset + replacement.length > replacementEndIndex) {
           replacementEndIndex = offset + replacement.length
@@ -65,10 +62,6 @@ export function replaceStream (patterns: RegExp | RegExp[], replacements: string
       const breakableAt = splitter.nextBreak(tail, Math.max(0, tail.length - options.maxTailLength - 4))
 
       emitTailUpTo(breakableAt)
-    }
-
-    if (!emitted) {
-      // this.queue('')
     }
   }, function end (this: InternalStream) {
     if (tail.length) {

@@ -1,3 +1,15 @@
+# [@[secure]/vite-plugin-[secure]-esm-v2.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/vite-plugin-[secure]-esm-v1.1.2...@[secure]/vite-plugin-[secure]-esm-v2.0.0) (2026-08-26)
+
+
+### breaking
+
+* release version 2.0.0 of @[secure]/vite-plugin-[secure]-esm ([cdff502](https://github.com/[secure]-io/[secure]/commit/cdff5029e4f580d9b994053cb8117879039d608a))
+
+
+### BREAKING CHANGES
+
+* Make @[secure]/vite-plugin-[secure]-esm an ESM only module
+
 # [@cypress/vite-plugin-cypress-esm-v1.1.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-plugin-cypress-esm-v1.1.1...@cypress/vite-plugin-cypress-esm-v1.1.2) (2024-12-03)
 
 

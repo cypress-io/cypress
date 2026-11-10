@@ -164,18 +164,11 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_failing.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/form_submission_failing.cy.js/form submission f     (1280x720)
-     ails -- fails without an explicit wait when an element is immediately found (fai               
-     led).png                                                                                       
 
 
 ====================================================================================================

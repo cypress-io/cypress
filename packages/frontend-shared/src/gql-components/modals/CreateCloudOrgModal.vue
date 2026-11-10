@@ -1,7 +1,7 @@
 <template>
   <StandardModal
     model-value
-    :title="t('runs.connect.modal.title')"
+    title="Connect project"
     help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
@@ -9,14 +9,14 @@
       v-if="!isOnline"
       class="mt-[24px]"
     >
-      {{ t('launchpadErrors.noInternet.message') }}
+      Check your internet connection to pull the latest data from Cypress Cloud.
     </NoInternetConnection>
     <div
       v-else
       class="border border-dashed rounded border-gray-100 text-center p-[24px] w-[592px]"
     >
       <p class=" mb-[16px] text-gray-700">
-        {{ t('runs.connect.modal.createOrg.description') }}
+        You need to create an organization in Cypress Cloud to continue.
       </p>
       <ExternalLink
         v-if="createOrgUrl"
@@ -26,7 +26,7 @@
         @click="startWaitingOrgToBeCreated()"
       >
         <i-cy-office-building_x16 class="inline-block icon-dark-white" />
-        {{ t('runs.connect.modal.createOrg.button') }}
+        Create organization
       </ExternalLink>
     </div>
     <template
@@ -44,21 +44,21 @@
               class="animate-spin icon-dark-white icon-light-gray-400"
             />
           </template>
-          {{ t('runs.connect.modal.createOrg.waitingButton') }}
+          Waiting for you to create an organization...
         </Button>
         <Button
           v-else
           size="lg"
           @click="refetch()"
         >
-          {{ t('runs.connect.modal.createOrg.refreshButton') }}
+          Refresh organizations list
         </Button>
         <Button
           variant="outline"
           size="lg"
           @click="emit('cancel')"
         >
-          {{ t('runs.connect.modal.cancel') }}
+          Cancel
         </Button>
       </div>
     </template>
@@ -73,11 +73,10 @@ import Button from '@cy/components/Button.vue'
 import ExternalLink from '../ExternalLink.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 
-import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
-import { useI18n } from '@cy/i18n'
+import { CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
+import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
 import { useDebounceFn, useOnline } from '@vueuse/core'
 
-const { t } = useI18n()
 const online = useOnline()
 
 const emit = defineEmits<{

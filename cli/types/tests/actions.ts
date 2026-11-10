@@ -71,34 +71,47 @@ Cypress.on('log:changed', (attributes, log) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('test:before:run', (attributes , test) => {
+Cypress.on('test:before:run', (attributes, test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType Test
 })
 
-Cypress.on('test:before:run:async', (attributes , test) => {
+Cypress.on('test:before:run:async', (attributes, test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType Test
 })
 
-Cypress.on('test:after:run', (attributes , test) => {
+Cypress.on('test:after:run', (attributes, test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType Test
 })
 
-namespace CypressActionCommandOptionTests {
-  cy.get('el').clear({scrollBehavior: 'top'})
-  cy.get('el').check({scrollBehavior: 'bottom'})
-  cy.get('el').type('hello', {scrollBehavior: 'center'})
-  cy.get('el').trigger('mousedown', {scrollBehavior: 'nearest'})
-  cy.get('el').click({scrollBehavior: false})
-  cy.get('el').click({scrollBehavior: true}) // $ExpectError
+// CypressActionCommandOptionTests
+{
+  cy.get('el').clear({ scrollBehavior: 'top' })
+  cy.get('el').check({ scrollBehavior: 'bottom' })
+  cy.get('el').type('hello', { scrollBehavior: 'center' })
+  cy.get('el').trigger('mousedown', { scrollBehavior: 'nearest' })
+  cy.get('el').click({ scrollBehavior: false })
+  cy.get('el').click({ scrollBehavior: 'start' })
+  cy.get('el').click({ scrollBehavior: 'end' })
+  cy.get('el').click({ scrollBehavior: true }) // $ExpectError
+  cy.get('el').click({ scrollBehavior: { block: 'start', inline: 'nearest' } })
+  cy.get('el').click({ scrollBehavior: { inline: 'nearest' } })
+  cy.get('el').click({ scrollBehavior: { block: 'end' } })
+  cy.get('el').click({ scrollBehavior: { block: 'center', inline: 'center' } })
+  // `top`/`bottom` are block-axis alignments, not per-axis positions
+  cy.get('el').click({ scrollBehavior: { block: 'top' } }) // $ExpectError
+  cy.get('el').click({ scrollBehavior: { inline: 'bottom' } }) // $ExpectError
+  cy.get('el').click({ scrollBehavior: { inline: false } }) // $ExpectError
+  cy.get('el').click({ scrollBehavior: { axis: 'start' } }) // $ExpectError
 }
 
 // https://github.com/cypress-io/cypress/pull/21286
 // `waitFor` doesn't exist in Node EventEmitter
 // and it confuses the users with `cy.wait`
-namespace CyEventEmitterTests {
+// CyEventEmitterTests
+{
   cy.waitFor() // $ExpectError
   cy.on('random', () => {})
   cy.removeAllListeners()

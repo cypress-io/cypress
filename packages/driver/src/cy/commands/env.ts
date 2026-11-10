@@ -41,14 +41,15 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
         }
       }
 
-      let message = envVars.join(', ')
+      const message = envVars.join(', ')
 
       options._log = Cypress.log({
         hidden: !options.log,
         message,
         timeout: options.timeout,
         consoleProps () {
-          return envVars
+          // only the names, never the values
+          return { 'Env Vars': envVars }
         },
       })
 

@@ -10,11 +10,15 @@ describe('slow network: launchpad', () => {
       (ctx.util.fetch as Sinon.SinonStub).restore()
       o.testState.pendingFetches = []
       o.sinon.stub(ctx.util, 'fetch').callsFake(async (input, init) => {
-        const dfd = o.pDefer()
+        if (o.testState.fetchesReleased) {
+          return currentStubbedFetch(input, init)
+        }
+
+        const dfd = Promise.withResolvers()
 
         o.testState.pendingFetches.push(dfd)
 
-        let resolveTime = 60000
+        const resolveTime = 60000
 
         const result = await currentStubbedFetch(input, init)
 
@@ -50,8 +54,9 @@ describe('slow network: launchpad', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('Log in')
-    cy.wait(500)
     cy.withCtx(async (ctx, o) => {
+      // also covers fetches that start after this point
+      o.testState.fetchesReleased = true
       o.testState.pendingFetches.map((f) => f.resolve())
     })
 

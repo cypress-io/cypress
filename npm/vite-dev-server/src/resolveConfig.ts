@@ -4,17 +4,13 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import debugFn from 'debug'
-import type { InlineConfig as InlineConfig_7, DepOptimizationOptions as DepOptimizationOptions_7 } from 'vite-7'
-import type { InlineConfig as InlineConfig_8, DepOptimizationOptions as DepOptimizationOptions_8 } from 'vite-8'
-import type { Plugin, PluginBuild, BuildResult } from 'esbuild'
+import type { InlineConfig } from 'vite-8'
 import path from 'path'
 import { createRequire } from 'module'
-import semverGte from 'semver/functions/gte.js'
-
 import { configFiles } from './constants.js'
 import type { ViteDevServerConfig } from './devServer.js'
 import { Cypress, CypressSourcemap } from './plugins/index.js'
-import type { Vite_7, Vite_8 } from './getVite.js'
+import type { Vite } from './getVite.js'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
@@ -24,17 +20,9 @@ const debug = debugFn('cypress:vite-dev-server:resolve-config')
 /** Passed as `oxc.jsxRefreshInclude` so JSX refresh excludes do not match CSS or other assets. */
 export const JSX_REFRESH_SCRIPT_RE = /\.(?:[cm]?js|[cm]?ts|[jt]sx)$/
 
-export const isVite8 = (vite: Vite_7 | Vite_8): boolean => {
-  const isVite8 = vite.version && semverGte(vite.version, '8.0.0') || false
-
-  debug('is vite 8 being used:', isVite8)
-
-  return isVite8
-}
-
-export const createViteDevServerConfig = async <T extends Vite_7 | Vite_8>(config: ViteDevServerConfig, vite: T): Promise<T extends Vite_7 ? InlineConfig_7 : InlineConfig_8> => {
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
   const { viteConfig: inlineViteConfig, cypressConfig: { projectRoot } } = config
-  let resolvedOverrides: InlineConfig_7 | InlineConfig_8 = {}
+  let resolvedOverrides: InlineConfig = {}
 
   if (inlineViteConfig) {
     debug(`Received a custom viteConfig`, inlineViteConfig)
@@ -78,7 +66,7 @@ export const createViteDevServerConfig = async <T extends Vite_7 | Vite_8>(confi
   return finalConfig
 }
 
-function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite_7 | Vite_8): InlineConfig_7 | InlineConfig_8 {
+function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig {
   const {
     cypressConfig: {
       port,
@@ -101,60 +89,24 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite_7 | Vite
     paths: [projectRoot],
   })))
 
-  const cypress_esbuild_plugin: Plugin = {
-    name: 'cypress-esbuild-plugin',
-    setup (build: PluginBuild) {
-      build.onEnd(function (result: BuildResult) {
-        // We don't want to completely fail the build here on errors so we treat the errors as warnings
-        // which will handle things more gracefully. Vite will 500 on files that have errors when they
-        // are requested later and Cypress will display an error message.
-        // See: https://github.com/cypress-io/cypress/pull/21599
-        result.warnings = [...(result.warnings || []), ...(result.errors || [])]
-        result.errors = []
-      })
-    },
-  }
-
-  let options: DepOptimizationOptions_7 | DepOptimizationOptions_8
-
-  if (isVite8(vite)) {
-    // @see https://main.vite.dev/guide/migration
-    options = {
-      rolldownOptions: {
-        plugins: [
-          // @see https://vite.dev/guide/rolldown#withfilter-wrapper
-          (vite as Vite_8).withFilter(
-            cypress_esbuild_plugin,
-            {},
-          ),
-        ],
-      },
-    }
-  } else {
-    options = {
-      esbuildOptions: {
-        // Type assertion needed due to esbuild version mismatch between vite-dev-server and vite
-        plugins: [
-          cypress_esbuild_plugin as any,
-        ],
-      },
-    }
-  }
-
-  const viteConfig: InlineConfig_7 | InlineConfig_8 = {
+  const viteConfig: InlineConfig = {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
     // Vite 8 Rolldown/react-plugin can wrap JSX specs with `import.meta.hot.accept`, re-evaluating
     // the module in headed mode and registering describe/it twice. Excluding CT specs from JSX refresh fixes it.
     // @see https://github.com/cypress-io/cypress/issues/33750
-    ...(isVite8(vite) ? {
-      oxc: {
-        jsxRefreshInclude: JSX_REFRESH_SCRIPT_RE,
-        jsxRefreshExclude: specs.map((s) => s.absolute),
-      },
-    } : {}),
+    oxc: {
+      jsxRefreshInclude: JSX_REFRESH_SCRIPT_RE,
+      jsxRefreshExclude: specs.map((s) => s.absolute),
+    },
+    // No rolldown plugin to downgrade dep-optimizer errors to warnings (see #21599).
+    // The original workaround was an esbuild plugin under `optimizeDeps.esbuildOptions.plugins`;
+    // when Vite 8 switched dep optimization to rolldown (#33580) the callback was moved to
+    // `rolldownOptions.plugins` but kept esbuild's `setup(build).onEnd(...)` shape, which
+    // rolldown never invokes. Rolldown reports per-module parse errors without aborting the
+    // optimizer, so the mitigation is no longer needed; re-add via `onLog`/`onwarn` only if
+    // a real hang regression appears.
     optimizeDeps: {
-      ...options,
       entries: [
         ...specs.map((s) => path.relative(projectRoot, s.relative)),
         ...(supportFile ? [path.resolve(projectRoot, supportFile)] : []),

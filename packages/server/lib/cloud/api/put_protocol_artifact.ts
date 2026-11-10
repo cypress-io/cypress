@@ -31,7 +31,7 @@ export const putProtocolArtifact = asyncRetry(
       },
       // ts thinks this is a web fetch, which only expects ReadableStreams.
       // But, this is a node fetch, which supports ReadStreams.
-      // @ts-expect-error
+      // @ts-expect-error - BodyInit does not include Node's Readable
       body: activityMonitor.monitor(fileStream),
       signal: controller.signal,
     })

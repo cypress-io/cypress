@@ -1,8 +1,8 @@
-import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter'
+import { STRIPPED_INTEGRITY_TAG } from './rewrite-constants.json'
+import { replaceStream } from './replace_stream'
 import type { SecurityOpts } from './rewriter'
 
 const pumpify = require('pumpify')
-const { replaceStream } = require('./replace_stream')
 const utf8Stream = require('utf8-stream')
 
 const topOrParentEqualityBeforeRe = /((?:\bwindow\b|\bself\b)(?:\.|\[['"](?:top|self)['"]\])?\s*[!=]==?\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)(?![\w])/g
@@ -15,7 +15,7 @@ const topOrParentExpandedEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=]==?\s
 // outright frame busting with top.window.location = 'https://www.foobar.com'
 const topWindowLocationRe = /(top)(\.window\.location\s?=)/g
 
-const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(\btop\b|\bparent\b)([.])(\blocation\b|\bframes\b)/g
+const topOrParentLocationOrFramesRe = /([^\da-zA-Z()])?(\btop\b|\bparent\b)([.])(\blocation\b|\bframes\b)/g
 
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*;\s*})/g

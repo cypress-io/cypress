@@ -24,25 +24,27 @@ describe('NetworkPolicyRegistry', () => {
     expect(registry.getPolicies()).toEqual([policy])
   })
 
-  it('runPolicies calls onEnd when a matching policy ends the chain', async () => {
+  it('runPolicies stops the chain at the first policy that ends it', async () => {
     const registry = new NetworkPolicyRegistry()
-    const onContinue = vi.fn()
-    const onEnd = vi.fn()
+    const laterApply = vi.fn()
 
     registry.add(testPolicy({
       when: () => true,
       apply: (ctx) => ctx.end(),
     }))
 
-    await registry.runPolicies({
+    registry.add(testPolicy({
+      when: () => true,
+      apply: laterApply,
+    }))
+
+    const result = await registry.runPolicies({
       phase: 'request',
       exchange: { url: 'http://evil.com/' },
-      onContinue,
-      onEnd,
     })
 
-    expect(onEnd).toHaveBeenCalledTimes(1)
-    expect(onContinue).not.toHaveBeenCalled()
+    expect(result.ended).toBe(true)
+    expect(laterApply).not.toHaveBeenCalled()
   })
 
   it('runPolicies returns blockedHostMatch in state when blocked', async () => {
@@ -62,48 +64,40 @@ describe('NetworkPolicyRegistry', () => {
     expect(result.state.blockedHostMatch).toBe('evil.com')
   })
 
-  it('runPolicies calls onContinue when no policy matches', async () => {
+  it('runPolicies does not end the chain when no policy matches', async () => {
     const registry = new NetworkPolicyRegistry()
-    const onContinue = vi.fn()
-    const onEnd = vi.fn()
+    const apply = vi.fn()
 
     registry.add(testPolicy({
       when: () => false,
-      apply: (ctx) => ctx.end(),
+      apply,
     }))
 
-    await registry.runPolicies({
+    const result = await registry.runPolicies({
       phase: 'request',
       exchange: { url: 'http://example.com/' },
-      onContinue,
-      onEnd,
     })
 
-    expect(onContinue).toHaveBeenCalledTimes(1)
-    expect(onEnd).not.toHaveBeenCalled()
+    expect(result.ended).toBe(false)
+    expect(apply).not.toHaveBeenCalled()
   })
 
-  it('runPolicies calls onEnd only once when a policy calls end() multiple times', async () => {
+  it('runPolicies skips policies registered for another phase', async () => {
     const registry = new NetworkPolicyRegistry()
-    const onContinue = vi.fn()
-    const onEnd = vi.fn()
+    const apply = vi.fn()
 
     registry.add(testPolicy({
+      phases: ['response'],
       when: () => true,
-      apply: async (ctx) => {
-        ctx.end()
-        ctx.end()
-      },
+      apply,
     }))
 
-    await registry.runPolicies({
+    const result = await registry.runPolicies({
       phase: 'request',
       exchange: { url: 'http://example.com/' },
-      onContinue,
-      onEnd,
     })
 
-    expect(onEnd).toHaveBeenCalledTimes(1)
-    expect(onContinue).not.toHaveBeenCalled()
+    expect(result.ended).toBe(false)
+    expect(apply).not.toHaveBeenCalled()
   })
 })

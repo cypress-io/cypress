@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import React, { MouseEvent, useCallback } from 'react'
+import type { MouseEvent } from 'react'
+import React, { useCallback } from 'react'
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
@@ -54,7 +55,7 @@ const TriggerAction = ({ triggerAction }: { triggerAction: 'loginModal' | 'proje
 }
 
 interface TestErrorProps {
-  err: Err
+  err?: Err
   testId?: string
   commandId?: number
   // the command group level to nest the recovered in-test error
@@ -130,8 +131,7 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
               contentClass='runnable-err-stack-trace'
             >
               <ErrorStack err={err} />
-            </Collapsible>
-          }
+            </Collapsible>}
         </div>
       </div>
     </div>

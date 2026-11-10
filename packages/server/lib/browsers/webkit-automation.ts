@@ -1,16 +1,19 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp-protocol/cdp_automation'
+import { normalizeResourceType } from './cdp-protocol/normalize-resource-type'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
-import { cookieMatches, CyCookieFilter } from '../automation/cookie/util'
+import { cookieMatches } from '../automation/cookie/util'
 import { convertPlaywrightCookieToCyCookie, convertCyCookieToPlaywrightCookie } from '../automation/cookie/converters/webkit'
 import utils from './utils'
-import type { CyCookie } from '../automation/cookie/util'
-import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import type { CyCookie, CyCookieFilter } from '../automation/cookie/util'
+import type { CDPSocketServer } from '@packages/socket'
+import { WebKitCDPBridge } from './webkit-cdp-bridge'
+import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
+import { AUT_FRAME_HEADER } from './constants'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -26,6 +29,7 @@ type WebKitAutomationOpts = {
   videoApi?: RunModeVideoApi
   userAgent?: string | null
   isHeadless: boolean
+  cdpSocketServer?: CDPSocketServer
 }
 
 export class WebKitAutomation {
@@ -35,12 +39,14 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
+  cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
     this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
+    this.cdpSocketServer = opts.cdpSocketServer
   }
 
   // static initializer to avoid "not definitively declared"
@@ -83,13 +89,16 @@ export class WebKitAutomation {
       this.automation.onDownloadLinkClicked?.(downloadUrl)
     })
 
+    // the automation socket must attach before the runner navigates so its window bindings exist when the driver connects
+    await this.cdpSocketServer?.attachCDPClient(new WebKitCDPBridge(this.page))
+
     this.handleRequestEvents()
 
     if (options.downloadsFolder) this.handleDownloadEvents(options.downloadsFolder)
 
     if (options.videoApi) this.recordVideo(options.videoApi, contextStarted)
 
-    let promises: Promise<any>[] = []
+    const promises: Promise<any>[] = []
 
     promises.push(this.markAutIframeRequests())
 
@@ -101,11 +110,9 @@ export class WebKitAutomation {
   }
 
   private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
-    const _this = this
-
     videoApi.useVideoController({
-      async endVideoCapture () {
-        const pwVideo = _this.page.video()
+      endVideoCapture: async () => {
+        const pwVideo = this.page.video()
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
@@ -113,7 +120,7 @@ export class WebKitAutomation {
 
         await Promise.all([
           // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
-          _this.page.close(),
+          this.page.close(),
           pwVideo.saveAs(videoApi.videoName),
         ])
       },
@@ -154,7 +161,7 @@ export class WebKitAutomation {
       return route.continue({
         headers: {
           ...request.headers(),
-          'X-Cypress-Is-AUT-Frame': 'true',
+          [AUT_FRAME_HEADER]: 'true',
         },
       })
     })
@@ -347,11 +354,12 @@ export class WebKitAutomation {
       autFrame = autFrame.childFrames().find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER)) ?? autFrame
     }
 
-    // If for whatever reason we cannot identify the AUT frame by name, fall back
-    // to the first child frame, which should always be the AUT frame.
+    // If for whatever reason we cannot identify the AUT frame by name, fall back to the first
+    // child frame that is not one of the runner's own iframes — the AUT is the only child of top
+    // that the runner does not name itself.
     if (!autFrame) {
-      debug('could not identify AUT frame by name, falling back to first child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
-      autFrame = childFrames[0]
+      debug('could not identify AUT frame by name, falling back to the first non-runner child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
+      autFrame = childFrames.find((frame) => !isRunnerFrameName(frame.name()))
     }
 
     if (!autFrame) {

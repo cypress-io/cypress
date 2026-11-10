@@ -30,6 +30,11 @@ export const Browser = objectType({
     t.nonNull.boolean('isVersionSupported', {
       resolve: (source, args, ctx) => ctx.browser.isVersionSupported(source),
     })
+
+    t.nonNull.boolean('isDeprecated', {
+      description: 'Whether the browser is deprecated and will be removed in a future version of Cypress',
+      resolve: (source, args, ctx) => ctx.browser.isDeprecated(source),
+    })
   },
   sourceType: {
     module: '@packages/types',

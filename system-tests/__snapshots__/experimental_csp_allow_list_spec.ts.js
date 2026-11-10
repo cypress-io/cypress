@@ -299,18 +299,11 @@ When this \`load\` event occurs, Cypress will continue running commands.
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_action_with_allow_list_custom.cy.ts                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/form_action_with_allow_list_custom.cy.ts/experi     (1280x720)
-     mentalCspAllowList=['script-src-elem', 'script-src', 'default-src'] -- fails on                
-     inline form action (failed).png                                                                
 
 
 ====================================================================================================

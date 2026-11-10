@@ -30,9 +30,7 @@ describe('subdomains', () => {
         document.cookie = 'foo=bar'
       })
 
-      cy.getCookies().then((cookies) => {
-        expect(cookies.length).to.eq(3)
-      })
+      cy.getCookies().should('have.length', 3)
     })
   })
 

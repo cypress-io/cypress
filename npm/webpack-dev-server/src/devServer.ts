@@ -6,7 +6,8 @@ import type { Compiler, Configuration } from 'webpack'
 import { createWebpackDevServer } from './createWebpackDevServer'
 import debugLib from 'debug'
 import { nextHandler } from './helpers/nextHandler'
-import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
+import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
+import { sourceDefaultWebpackDependencies } from './helpers/sourceRelativeWebpackModules'
 import { angularHandler } from './helpers/angularHandler'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')
@@ -51,29 +52,27 @@ type DevServerCreateResult = {
  *
  * @param config
  */
-export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
-  return new Promise(async (resolve, reject) => {
-    const result = await devServer.create(devServerConfig) as DevServerCreateResult
+export async function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
+  const result = await devServer.create(devServerConfig) as DevServerCreateResult
 
-    result.server.start().then(() => {
-      if (!result.server.options.port) {
-        return reject(new Error(`Expected port ${result.server.options.port} to be a number`))
-      }
+  await result.server.start()
 
-      debug(`Component testing webpack server ${result.version} started on port %s`, result.server.options.port)
+  if (!result.server.options.port) {
+    throw new Error(`Expected port ${result.server.options.port} to be a number`)
+  }
 
-      resolve({
-        port: result.server.options.port as number,
-        // Close is for unit testing only. We kill this child process which will handle the closing of the server
-        close: async (done) => {
-          debug('closing dev server')
-          result.server.stop().then(() => done?.()).catch(done).finally(() => {
-            debug('closed dev server')
-          })
-        },
+  debug(`Component testing webpack server ${result.version} started on port %s`, result.server.options.port)
+
+  return {
+    port: result.server.options.port as number,
+    // Close is for unit testing only. We kill this child process which will handle the closing of the server
+    close: async (done) => {
+      debug('closing dev server')
+      result.server.stop().then(() => done?.()).catch(done).finally(() => {
+        debug('closed dev server')
       })
-    }).catch(reject)
-  })
+    },
+  }
 }
 
 export type PresetHandlerResult = { frameworkConfig: Configuration, sourceWebpackModulesResult: SourceRelativeWebpackResult }

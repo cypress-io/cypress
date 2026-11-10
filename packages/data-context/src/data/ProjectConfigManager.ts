@@ -1,5 +1,7 @@
-import { CypressError, getError } from '@packages/errors'
-import { PluginIpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
+import { getError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
+import { ProjectConfigIpc } from './ProjectConfigIpc'
+import type { PluginIpcHandler, LoadConfigReply, SetupNodeEventsReply } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FullConfig, TestingType, DebugData } from '@packages/types'
 import debugLib from 'debug'
@@ -8,7 +10,6 @@ import _ from 'lodash'
 import chokidar from 'chokidar'
 import {
   validate as validateConfig,
-  validateNoBreakingConfigLaunchpad,
   validateNoBreakingConfigRoot,
   validateNoBreakingTestingTypeConfig,
   setupFullConfigWithDefaults,
@@ -29,6 +30,22 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 // how long to wait for a reply to an execute:plugins ipc message before
 // logging (when debug logging is enabled)
 const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
+
+// keep in sync with getTeardownTimeoutMs in @packages/server lib/util/graceful-exit.ts, which owns
+// this budget; data-context cannot import from the server, so the default is mirrored here
+const DEFAULT_TEARDOWN_TIMEOUT_MS = 5000
+// the disconnect ack has to give up well before the teardown budget expires, or the force-exit cuts
+// off the rest of teardown instead; derived so lowering the budget cannot invert the two. Keep equal
+// to PEER_WAIT_BUDGET_FRACTION in @packages/server lib/util/graceful-exit.ts, which bounds the other
+// wait on a process we do not control
+const TEARDOWN_BUDGET_FRACTION = 0.4
+
+function mainProcessWillDisconnectTimeoutMs (): number {
+  const configured = Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT)
+  const budget = Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_TEARDOWN_TIMEOUT_MS
+
+  return Math.max(1, Math.floor(budget * TEARDOWN_BUDGET_FRACTION))
+}
 
 export type OnFinalConfigLoadedOptions = {
   shouldRestartBrowser: boolean
@@ -159,9 +176,7 @@ export class ProjectConfigManager {
       return loadConfigReply.initialConfig
     } catch (error) {
       debug(`catch %o`, error)
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       this._state = 'errored'
       await this.closeWatchers()
@@ -280,9 +295,7 @@ export class ProjectConfigManager {
     } catch (error) {
       debug(`catch setupNodeEvents %o`, error)
       this._state = 'errored'
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       await this.closeWatchers()
 
@@ -302,6 +315,12 @@ export class ProjectConfigManager {
 
       this.options.eventRegistrar.registerEvent(event, function (...args: any[]) {
         return new Promise((resolve, reject) => {
+          if (ipc.unexpectedExit) {
+            reject(ipc.unexpectedExit)
+
+            return
+          }
+
           const invocationId = _.uniqueId('inv')
           const sentAt = Date.now()
           let replyLogTimeout: NodeJS.Timeout | undefined
@@ -318,6 +337,7 @@ export class ProjectConfigManager {
             replyLogTimeout.unref?.()
           }
 
+          // when the child exits the ipc answers every pending reply with the exit error
           ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
             if (replyLogTimeout) {
               clearTimeout(replyLogTimeout)
@@ -325,7 +345,7 @@ export class ProjectConfigManager {
 
             if (err) {
               debug('promise rejected for id %s after %dms %o', invocationId, Date.now() - sentAt, ':', err.stack)
-              reject(_.extend(new Error(err.message), err))
+              reject(err instanceof Error ? err : _.extend(new Error(err.message), err))
 
               return
             }
@@ -384,19 +404,17 @@ export class ProjectConfigManager {
   private loadConfig () {
     if (!this._loadConfigPromise) {
       // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       this._eventsIpc = new ProjectConfigIpc(
         this.options.ctx.coreData.app.nodePath,
-        this.options.ctx.coreData.app.nodeVersion,
         this.options.projectRoot,
         this.configFilePath,
         this.options.configFile,
         (cypressError: CypressError, title?: string | undefined) => {
           this._state = 'errored'
           this.options.ctx.onError(cypressError, title)
+          this.options.ctx.reportLoadErrorToTap(cypressError)
         },
         this.options.ctx.onWarning,
         (debugData: DebugData) => {
@@ -421,24 +439,6 @@ export class ProjectConfigManager {
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
     }, this._testingType)
-
-    return validateNoBreakingConfigLaunchpad(
-      config,
-      (type, obj) => {
-        const error = getError(type, obj)
-
-        this.options.ctx.onWarning(error)
-
-        return error
-      },
-      (type, obj) => {
-        const error = getError(type, obj)
-
-        this.options.onError(error)
-
-        throw error
-      },
-    )
   }
 
   onLoadError = async (error: any) => {
@@ -538,7 +538,7 @@ export class ProjectConfigManager {
     configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
 
     // TODO: Convert this to be synchronous, it's just FS checks
-    let fullConfig = await setupFullConfigWithDefaults({
+    const fullConfig = await setupFullConfigWithDefaults({
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
@@ -557,7 +557,7 @@ export class ProjectConfigManager {
       const browsers = await this.options.ctx.browser.machineBrowsers()
 
       if (!fullConfig.browsers || fullConfig.browsers.length === 0) {
-        // @ts-ignore - we don't know if the browser is headed or headless at this point.
+        // @ts-expect-error - we don't know if the browser is headed or headless at this point.
         // this is handled in open_project#launch.
         fullConfig.browsers = browsers
         fullConfig.resolved.browsers = { 'value': fullConfig.browsers, 'from': 'runtime' }
@@ -655,19 +655,30 @@ export class ProjectConfigManager {
     return new Promise((resolve, reject) => {
       if (!this._eventsIpc) {
         debug(`mainProcessWillDisconnect message not set, no IPC available`)
-        reject()
+        reject(new Error('mainProcessWillDisconnect has no IPC available'))
 
         return
       }
 
-      debug('sending main:process:will:disconnect message')
-      this._eventsIpc.send('main:process:will:disconnect')
+      // the child may exit on its own after the ack, which is not an error
+      this._eventsIpc.expectExit()
 
-      // If for whatever reason we don't get an ack in 5s, bail.
+      debug('sending main:process:will:disconnect message')
+      // send reports false for a child that is gone or whose ipc backlog is full; a gone child has
+      // already emitted exit/disconnect, so the listeners below would never fire and this would
+      // stall for the full timeout. Either way there is no ack coming.
+      if (!this._eventsIpc.send('main:process:will:disconnect')) {
+        debug('could not send to the child process, nothing to wait for')
+        resolve()
+
+        return
+      }
+
+      // If for whatever reason we don't get an ack, bail.
       const timeoutId = setTimeout(() => {
         debug(`mainProcessWillDisconnect message timed out`)
         reject(new Error('mainProcessWillDisconnect message timed out'))
-      }, 5000)
+      }, mainProcessWillDisconnectTimeoutMs())
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
         debug('Received main:process:will:disconnect:ack')
@@ -700,10 +711,22 @@ export class ProjectConfigManager {
     this._pathToWatcherRecord = {}
   }
 
-  async destroy () {
+  /**
+   * Every registered handler resolves off a reply from the events ipc, and that reply has
+   * no timeout. Handlers must never outlive the ipc they are bound to, or a later
+   * `after:run`/`after:spec` awaits a reply that can never arrive.
+   */
+  private cleanupEventsIpc () {
     if (this._eventsIpc) {
       this._eventsIpc.cleanupIpc()
     }
+
+    this.options.eventRegistrar.reset()
+  }
+
+  async destroy () {
+    this.cleanupEventsIpc()
+    this._eventsIpc = undefined
 
     this._state = 'pending'
     this._cachedLoadConfig = undefined

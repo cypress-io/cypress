@@ -1,4 +1,5 @@
 
+@use "../../../../reporter/src/lib/variables.scss" as *;
 @mixin box-shadow {
   border: 1px solid #9aa2fc;
   box-shadow: 0 0 0 3px rgba(154, 162, 252, 0.35);

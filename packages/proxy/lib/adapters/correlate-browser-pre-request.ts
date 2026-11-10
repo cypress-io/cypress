@@ -32,7 +32,7 @@ export async function correlateBrowserPreRequest (mw: RequestInterceptionMiddlew
   const copyResourceTypeAndNext = () => {
     mw.res.off('close', onClose)
 
-    mw.req.resourceType = mw.req.browserPreRequest?.resourceType
+    mw.req.resourceType = mw.req.browserPreRequest?.resourceType ?? mw.req.resourceType
 
     span?.setAttributes({
       resourceType: mw.req.resourceType,
@@ -46,13 +46,16 @@ export async function correlateBrowserPreRequest (mw: RequestInterceptionMiddlew
   if (mw.req.headers['x-cypress-resolving-url']) {
     mw.debug('skipping prerequest for resolve:url')
     delete mw.req.headers['x-cypress-resolving-url']
+    // The proxy-off forced loopback rides on the internal token — strip it so
+    // it never reaches a real origin on passthrough.
+    delete mw.req.headers['x-cypress-internal-loopback-token']
     const requestId = `cy.visit-${Date.now()}`
 
     mw.req.browserPreRequest = {
       requestId,
       method: mw.req.method,
       url: mw.req.proxiedUrl,
-      // @ts-ignore
+      // @ts-expect-error - IncomingHttpHeaders allows undefined values, which BrowserPreRequest headers do not
       headers: mw.req.headers,
       resourceType: 'document',
       originalResourceType: 'document',

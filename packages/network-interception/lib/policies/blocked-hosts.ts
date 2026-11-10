@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type { NetworkPolicy } from './types'
 
 export type BlockedHostsConfig = {
@@ -41,6 +42,7 @@ export function createBlockedHosts (config: BlockedHostsConfig): NetworkPolicy {
       }
 
       ctx.state.blockedHostMatch = match
+      debug.policies('blocking request %s (matched %s)', ctx.exchange.url, match)
       ctx.end()
     },
   }

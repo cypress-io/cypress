@@ -1,5 +1,4 @@
 import type { SinonStub } from 'sinon'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 describe('Launchpad: Open Mode', () => {
@@ -24,14 +23,14 @@ describe('Launchpad: Open Mode', () => {
     it('shows Add Project when no projects have been added', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
-      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+      cy.get('h1').should('contain', 'Add project')
     })
 
     it('shows the projects page when a project is not specified', () => {
       cy.openGlobalMode()
       cy.addProject('todos')
       cy.visitLaunchpad()
-      cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+      cy.contains('Recent projects')
     })
 
     it('does not show Welcome screen on next Launchpad visit when it has already been dismissed', () => {
@@ -39,7 +38,7 @@ describe('Launchpad: Open Mode', () => {
       cy.skipWelcome()
       cy.visitLaunchpad({ showWelcome: true })
       cy.contains('button', 'Continue').should('not.exist')
-      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+      cy.get('h1').should('contain', 'Add project')
     })
   })
 
@@ -82,7 +81,7 @@ describe('Launchpad: Open Mode', () => {
             'x-framework': 'react',
             'x-dev-server': 'webpack',
             'x-notifications': 'failed',
-            'x-dependencies': 'typescript@5.3.3',
+            'x-dependencies': o.sinon.match(/^typescript@\d+\.\d+\.\d+/),
           },
         })
       })
@@ -122,7 +121,9 @@ describe('Launchpad: Open Mode', () => {
         cy.loginUser()
         cy.visitLaunchpad()
         cy.get('h1').should('contain', 'Choose a browser')
-        cy.withCtx((ctx, o) => {
+        // The manifest request fires asynchronously from the version-data query and can
+        // resolve after the 'Choose a browser' page renders, so retry until it has fired.
+        cy.withRetryableCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
               'x-logged-in': 'true',
@@ -214,22 +215,44 @@ describe('Launchpad: Open Mode', () => {
     cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
   })
 
-  it('auto-launches the browser when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
+  it('auto-launches the browser exactly once when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
     cy.scaffoldProject('launchpad')
     stubAvailableBrowsers()
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      // A real launch takes seconds. Dismissing the welcome mounts OpenBrowser
+      // inside that window, and its own auto-launch check must not launch again.
+      // The test holds the launch open until it has checked that.
+      o.sinon.stub(ctx._apis.projectApi, 'launchProject').callsFake(() => {
+        return new Promise<void>((resolve) => {
+          o.testState.resolveLaunch = resolve
+        })
+      })
     })
 
+    // OpenBrowser decides whether to auto-launch from this query's response
+    cy.intercept('query-OpenBrowser_LocalSettings').as('openBrowserLocalSettings')
+
     // Need to visit after args have been configured, todo: fix in #18776
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
+    cy.skipWelcome()
 
     cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
     cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+    cy.wait('@openBrowserLocalSettings')
+
+    cy.withRetryableCtx((ctx, o) => {
+      expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+      expect(o.testState.resolveLaunch).to.be.a('function')
+    })
+
+    cy.withCtx((ctx, o) => {
+      o.testState.resolveLaunch()
+    })
 
     cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.project.launchCount).to.eq(1)
       expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
     })
   })
@@ -281,7 +304,7 @@ describe('Launchpad: Open Mode', () => {
       cy.visitLaunchpad()
 
       cy.contains('button', 'Docs').click()
-      cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
+      cy.contains('Getting started').should('be.visible')
     })
   })
 
@@ -354,7 +377,7 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('no-support-file')
     cy.openProject('no-support-file', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains(cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.contains('Cypress configuration error')
     cy.contains('Your project does not contain a default supportFile.')
     cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })

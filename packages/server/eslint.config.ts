@@ -1,8 +1,16 @@
-import { baseConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports, userNodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
+  ...jsonConfig,
+  ...nodeConfig,
+  undeclaredWorkspaceImports(['hook-require.js'], ['@packages/v8-snapshot-require']),
+  {
+    // The config child process runs on the user's Node
+    ...userNodeConfig,
+    files: ['lib/plugins/child/**'],
+  },
   {
     languageOptions: {
       parserOptions: {

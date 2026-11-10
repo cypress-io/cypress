@@ -1,6 +1,9 @@
-import { describe, expect, beforeEach, afterEach, it, vi, Mock, MockInstance } from 'vitest'
+import type { Mock, MockInstance } from 'vitest'
+import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import zlib from 'zlib'
+import http from 'http'
+import { Socket } from 'net'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
@@ -10,9 +13,20 @@ import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
+import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../lib/http/util/disable-navigation-preload'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))
+}
+
+async function streamToString (stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: Buffer[] = []
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+
+  return Buffer.concat(chunks).toString('utf8')
 }
 
 describe('http/response-middleware', function () {
@@ -51,6 +65,7 @@ describe('http/response-middleware', function () {
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
       'MaybeInjectServiceWorker',
+      'NotifyResponseStreamReceived',
       'CompressBody',
       'SendResponseBodyToClient',
     ])
@@ -381,7 +396,7 @@ describe('http/response-middleware', function () {
       expect(ctx.incomingResHadEmptyBody).toBe(false)
     })
 
-    let badHeaders = {
+    const badHeaders = {
       'bad-header ': 'value', //(contains trailling space)
       'Content Type': 'value', //(contains a space)
       'User-Agent:': 'value', //(contains a colon)
@@ -560,6 +575,32 @@ describe('http/response-middleware', function () {
         },
       }
     }
+  })
+
+  describe('PatchExpressSetHeader', function () {
+    const { PatchExpressSetHeader } = ResponseMiddleware
+    let ctx
+
+    beforeEach(async function () {
+      ctx = {
+        incomingRes: {
+          headers: {},
+        },
+        res: new http.ServerResponse(new http.IncomingMessage(new Socket())),
+      }
+
+      await testMiddleware([PatchExpressSetHeader], ctx)
+    })
+
+    it('returns the response when the header is valid', function () {
+      expect(ctx.res.setHeader('x-valid', 'value')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-valid')).toBe('value')
+    })
+
+    it('sets the header and returns the response when the value has an invalid character', function () {
+      expect(ctx.res.setHeader('x-invalid', 'a\u0000b')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-invalid')).toBe('a\u0000b')
+    })
   })
 
   describe('MaybeSetOriginAgentClusterHeader', function () {
@@ -789,7 +830,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -812,7 +853,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} \'fake-src-0\',${validNonceDirectiveName} \'fake-src-1\'`,
+                      [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} 'fake-src-0',${validNonceDirectiveName} 'fake-src-1'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -839,7 +880,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: false,
@@ -858,7 +899,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${nonCspHeader}`]: `${validNonceDirectiveName} \'fake-src\'`,
+                      [`${nonCspHeader}`]: `${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -876,7 +917,7 @@ describe('http/response-middleware', function () {
                   res: {
                     getHeaders () {
                       return {
-                        [`${headerName}`]: `${validNonceDirectiveName} \'self\'; fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                        [`${headerName}`]: `${validNonceDirectiveName} 'self'; fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src'`,
                       }
                     },
                     wantsInjection: 'full',
@@ -899,7 +940,7 @@ describe('http/response-middleware', function () {
                   res: {
                     getHeaders () {
                       return {
-                        [`${headerName}`]: `${validNonceDirectiveName} \'self\',fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                        [`${headerName}`]: `${validNonceDirectiveName} 'self',fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src'`,
                       }
                     },
                     wantsInjection: 'full',
@@ -2409,14 +2450,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': undefined,
-            'deferSourceMapRewrite': undefined,
             'domainName': 'foobar.com',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': true,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://www.foobar.com:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2433,14 +2471,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': undefined,
-            'deferSourceMapRewrite': undefined,
             'domainName': '127.0.0.1',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': false,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://127.0.0.1:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2463,14 +2498,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': 'fake-nonce',
-            'deferSourceMapRewrite': undefined,
             'domainName': 'foobar.com',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': true,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://www.foobar.com:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2543,12 +2575,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': true,
         'modifyObstructiveThirdPartyCode': true,
         'url': 'http://www.foobar.com:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2558,12 +2587,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': true,
         'modifyObstructiveThirdPartyCode': false,
         'url': 'http://127.0.0.1:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2581,12 +2607,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': false,
         'modifyObstructiveThirdPartyCode': false,
         'url': 'http://www.foobar.com:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2685,7 +2708,84 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
       expect(injectIntoServiceWorkerStub).toHaveBeenCalledOnce()
-      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo')
+
+      // toHaveBeenCalledWith/toEqual treat an `undefined`-valued property as
+      // equivalent to an absent key, so asserting the option key by name that
+      // way would pass even against a differently-named key. toStrictEqual
+      // does not make that elision, so it actually pins the key name.
+      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined }])
+    })
+
+    it('passes the reserved path prefixes when useBrowserNetworkInterception is set on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
+        useBrowserNetworkInterception: true,
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', {
+        disableServiceWorkerNavigationPreload: true,
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
+      }])
+    })
+
+    it('does not pass the reserved path prefixes when useBrowserNetworkInterception is unset on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      expect(injectIntoServiceWorkerStub.mock.calls[0][1]).toStrictEqual({ disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined })
+    })
+
+    it('prepends the navigation preload expression when useBrowserNetworkInterception is set on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        useBrowserNetworkInterception: true,
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo', expect.objectContaining({ disableServiceWorkerNavigationPreload: true }))
+
+      const rewritten = await streamToString(ctx.incomingResStream)
+
+      expect(rewritten).toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
+    })
+
+    it('does not prepend the navigation preload expression when useBrowserNetworkInterception is unset on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      const rewritten = await streamToString(ctx.incomingResStream)
+
+      expect(rewritten).not.toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
     })
 
     function prepareContext (props) {
@@ -2727,8 +2827,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('CompressBody', function () {
-    const { CompressBody } = ResponseMiddleware
+  describe('NotifyResponseStreamReceived and CompressBody', function () {
+    const { CompressBody, NotifyResponseStreamReceived } = ResponseMiddleware
     let ctx
     let responseStreamReceivedStub: Mock
 
@@ -2766,7 +2866,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2810,7 +2910,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2843,7 +2943,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2868,7 +2968,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2903,7 +3003,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -3008,6 +3108,34 @@ describe('http/response-middleware', function () {
   describe('AttachPlainTextStreamFn', function () {
     const { AttachPlainTextStreamFn } = ResponseMiddleware
 
+    // https://github.com/cypress-io/cypress/issues/34387
+    it.each(['x-gzip', ' X-GZIP '])('decompresses the gzip alias in %s', async function (encoding) {
+      const ctx = {
+        debug: () => {},
+        res: { on: () => {}, off: () => {} },
+        incomingRes: { headers: { 'content-encoding': encoding } },
+        incomingResStream: Readable.from([zlib.gzipSync(Buffer.from('aliased'))]),
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: [],
+        makeResStreamPlainText: () => {},
+        onError: (err) => {
+          throw err
+        },
+      }
+
+      await testMiddleware([AttachPlainTextStreamFn], ctx)
+      ctx.makeResStreamPlainText()
+      expect(ctx.contentEncodingOrder).toEqual(['gzip'])
+      expect(ctx.isGunzipped).toBe(true)
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+      expect(Buffer.concat(chunks).toString()).toBe('aliased')
+    })
+
     it('decompresses Brotli and sets isBrotliDecompressed when content-encoding is br', async function () {
       const compressed = zlib.brotliCompressSync(Buffer.from('hello'))
       const stream = Readable.from([compressed])
@@ -3040,7 +3168,7 @@ describe('http/response-middleware', function () {
       expect(Buffer.concat(chunks).toString()).toBe('hello')
     })
 
-    it('decompresses layered content-encoding in reverse order (br then gzip for "gzip, br")', async function () {
+    it.each(['gzip, br', 'x-gzip, br'])('decompresses layered content-encoding in reverse order for %s', async function (encoding) {
       // content-encoding: gzip, br means gzip applied first, then br. Wire format: br(gzip(data)).
       const inner = zlib.gzipSync(Buffer.from('layered'))
       const outer = zlib.brotliCompressSync(inner)
@@ -3048,7 +3176,7 @@ describe('http/response-middleware', function () {
       const ctx = {
         debug: () => {},
         res: { on: () => {}, off: () => {} },
-        incomingRes: { headers: { 'content-encoding': 'gzip, br' } },
+        incomingRes: { headers: { 'content-encoding': encoding } },
         incomingResStream: stream,
         isGunzipped: false,
         isBrotliDecompressed: false,

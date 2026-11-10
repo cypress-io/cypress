@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "lib": [
-      "es2015",
+      "es2022",
       "dom"
     ],
     "rootDir": "src",

@@ -1,10 +1,19 @@
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
-import { RootRunnable } from './../../src/runnables/runnables-store'
+import type { RootRunnable } from './../../src/runnables/runnables-store'
+
+const runnerStore = new MobxRunnerStore()
+
+runnerStore.setSpec({
+  name: 'foo',
+  absolute: '/foo/bar',
+  relative: 'foo/bar',
+})
 
 describe('agents', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
-  let start: Function
+  let start: () => void
 
   beforeEach(() => {
     cy.fixture('runnables_agents').then((_runnables) => {
@@ -16,13 +25,7 @@ describe('agents', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-        },
+        runnerStore,
       })
     })
 
@@ -37,7 +40,7 @@ describe('agents', () => {
   })
 
   it('does not render agents if there are no agents', () => {
-    // @ts-ignore
+    // @ts-expect-error - RootRunnable types tests as optional
     runnables.tests[0].agents = []
     start()
 

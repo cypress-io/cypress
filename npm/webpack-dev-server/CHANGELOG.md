@@ -1,3 +1,43 @@
+# [@[secure]/webpack-dev-server-v6.1.2](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.1.1...@[secure]/webpack-dev-server-v6.1.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** keep a newer spec list when specs change during beforeCompile ([#34931](https://github.com/[secure]-io/[secure]/issues/34931)) ([4c64499](https://github.com/[secure]-io/[secure]/commit/4c64499fd0c3689872cc3442879f06b9f78e4070))
+
+# [@[secure]/webpack-dev-server-v6.1.1](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.1.0...@[secure]/webpack-dev-server-v6.1.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* show a clear error when the [secure] [secure] dev server fails to start ([#35081](https://github.com/[secure]-io/[secure]/issues/35081)) ([b7fd293](https://github.com/[secure]-io/[secure]/commit/b7fd293f3c71cb5080466a98860f73eee796f724))
+
+# [@[secure]/webpack-dev-server-v6.1.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.0.0...@[secure]/webpack-dev-server-v6.1.0) (2026-10-06)
+
+
+### Features
+
+* add cy.getByRole() query ([#34937](https://github.com/[secure]-io/[secure]/issues/34937)) ([9f0e4a9](https://github.com/[secure]-io/[secure]/commit/9f0e4a962eccde5c34faa09bf04576c769788303))
+
+# [@[secure]/webpack-dev-server-v6.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v5.6.3...@[secure]/webpack-dev-server-v6.0.0) (2026-08-26)
+
+
+### breaking
+
+* release version 6.0.0 of @[secure]/webpack-dev-server ([cef29eb](https://github.com/[secure]-io/[secure]/commit/cef29eb9c1801e08b558d8da87121f867259b382))
+
+
+### Features
+
+* add Angular 22 [secure] [secure] support for Cypress 16 ([#34046](https://github.com/[secure]-io/[secure]/issues/34046)) ([df8980e](https://github.com/[secure]-io/[secure]/commit/df8980e474c4d7376a8ee30cd45e630945a176e5))
+
+
+### BREAKING CHANGES
+
+* update build target of @[secure]/webpack-dev-server from es2017 to es2022
+
+# [@cypress/webpack-dev-server-v5.6.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.2...@cypress/webpack-dev-server-v5.6.3) (2026-08-10)
+
 # [@cypress/webpack-dev-server-v5.6.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.1...@cypress/webpack-dev-server-v5.6.2) (2026-05-31)
 
 # [@cypress/webpack-dev-server-v5.6.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.0...@cypress/webpack-dev-server-v5.6.1) (2026-05-09)

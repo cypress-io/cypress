@@ -9,15 +9,22 @@ import $jquery from '../dom/jquery'
 import { $Location } from './location'
 import $errUtils from './error_utils'
 
-const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+const customProtocolRegex = /^[^:/]+:\/{1,3}/
 // Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
 const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
 
+// `methods` derives its list from Node's `http.METHODS` when it is imported.
+// In the browser bundle there is no `http` module, so it falls back to a static
+// snapshot that predates newer standardized methods such as QUERY. Union those
+// in so validation matches regardless of the runtime doing the check.
+const additionalHttpMethods = ['query']
+const validHttpMethods = new Set([...methods, ...additionalHttpMethods].map((method) => method.toLowerCase()))
+
 const defaultOptions = {
-  delay: 10,
+  delay: 0,
   force: false,
   timeout: null,
   interval: null,
@@ -49,7 +56,7 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
   [_.stubTrue, 'unknown'],
 ], ([fn, type]) => {
   return [fn, _.constant(type)]
-}) as unknown as [(val: any) => boolean, (val: Function) => Function][]
+}) as unknown as [(val: any) => boolean, (val: any) => string][]
 
 export default {
   warning (msg) {
@@ -284,8 +291,7 @@ export default {
     return _
     .chain(values)
     .map(_.bind(this.stringifyActual, this))
-    // @ts-expect-error
-    .without(undefined)
+    .filter((value) => value !== undefined)
     .join(', ')
     .value()
   },
@@ -341,7 +347,7 @@ export default {
   },
 
   isValidHttpMethod (str) {
-    return _.isString(str) && _.includes(methods, str.toLowerCase())
+    return _.isString(str) && validHttpMethods.has(str.toLowerCase())
   },
 
   addTwentyYears () {
@@ -386,7 +392,6 @@ export default {
       return 0
     }
 
-    // @ts-ignore - _currentRetry is an internal mocha property
     return this.getTestFromRunnable(r)._currentRetry || 0
   },
 
@@ -451,9 +456,19 @@ export default {
     ```
   */
   decodeBase64Unicode (str) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
+    // Inline source maps can be very large, so decode into a single byte array:
+    // a string per byte can exhaust the renderer's heap. `fatal` makes invalid
+    // UTF-8 throw so callers can fall back instead of getting replacement
+    // characters, and `ignoreBOM` keeps a leading byte order mark so the result
+    // is exactly the encoded text.
+    const binary = atob(str)
+    const bytes = new Uint8Array(binary.length)
+
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i)
+    }
+
+    return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)
   },
 
   /**
@@ -471,7 +486,6 @@ export default {
   },
 
   isPromiseLike (ret) {
-    // @ts-ignore
     return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
   },
 

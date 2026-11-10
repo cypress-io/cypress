@@ -40,12 +40,9 @@ export type DocsMenuVariant = 'ci1' | 'orchestration1' | 'main'
 </script>
 
 <script setup lang="ts">
-import { useI18n } from '@cy/i18n'
 import type { LinkWithParams } from '../../utils/getUrlWithParams'
 import { getUrlWithParams } from '../../utils/getUrlWithParams'
 import ExternalLink from '../ExternalLink.vue'
-
-const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'setDocsContent', value: DocsMenuVariant): void
@@ -73,9 +70,9 @@ const docsMenu: {
     changeContent?: DocsMenuVariant
   }[]
 }[] = [{
-  title: t('topNav.docsMenu.gettingStartedTitle'),
+  title: 'Getting started',
   children: [{
-    text: t('topNav.docsMenu.firstTest'),
+    text: 'Write your first test',
     link: {
       url: 'https://on.cypress.io/writing-first-test',
       params: {
@@ -84,7 +81,7 @@ const docsMenu: {
       },
     },
   }, {
-    text: t('topNav.docsMenu.testingApp'),
+    text: 'Testing your app',
     link: {
       url: 'https://on.cypress.io/testing-your-app',
       params: {
@@ -94,7 +91,7 @@ const docsMenu: {
     },
   },
   {
-    text: t('topNav.docsMenu.organizingTests'),
+    text: 'Organizing tests',
     link: {
       url: 'https://on.cypress.io/writing-and-organizing-tests',
       params: {
@@ -104,9 +101,9 @@ const docsMenu: {
     },
   }],
 }, {
-  title: t('topNav.docsMenu.referencesTitle'),
+  title: 'References',
   children: [{
-    text: t('topNav.docsMenu.bestPractices'),
+    text: 'Best practices',
     link: {
       url: 'https://on.cypress.io/best-practices',
       params: {
@@ -115,7 +112,7 @@ const docsMenu: {
       },
     },
   }, {
-    text: t('topNav.docsMenu.configuration'),
+    text: 'Configuration',
     link: {
       url: 'https://on.cypress.io/configuration',
       params: {
@@ -124,7 +121,7 @@ const docsMenu: {
       },
     },
   }, {
-    text: t('topNav.docsMenu.api'),
+    text: 'API',
     link: {
       url: 'https://on.cypress.io/api',
       params: {
@@ -134,9 +131,9 @@ const docsMenu: {
     },
   }],
 }, {
-  title: t('topNav.docsMenu.ciTitle'),
+  title: 'Run in CI/CD',
   children: [{
-    text: t('topNav.docsMenu.ciSetup'),
+    text: 'Set up CI',
     changeContent: 'ci1',
     link: {
       url: 'https://on.cypress.io/ci',
@@ -146,7 +143,7 @@ const docsMenu: {
       },
     },
   }, {
-    text: t('topNav.docsMenu.fasterTests'),
+    text: 'Run tests faster',
     changeContent: 'orchestration1',
     link: {
       url: 'https://on.cypress.io/parallelization',

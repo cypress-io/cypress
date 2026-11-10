@@ -7,11 +7,16 @@
  * and global session data is persisted between specs in run mode.
  */
 
+// the reporter renders inside a same-origin iframe (#reporter-frame)
+const reporterDocument = () => {
+  return top.document.querySelector('#reporter-frame').contentDocument
+}
+
 it('restores global session from last spec', () => {
   cy.login('global_1', true)
   cy.env(['SYSTEM_TESTS']).then(({ SYSTEM_TESTS }) => {
     if (SYSTEM_TESTS) {
-      cy.get(top.document).within(() => {
+      cy.get(reporterDocument()).within(() => {
         cy.contains('.test', 'restores global session ').as('restores_global_session').click()
         cy.get('@restores_global_session').within(() => {
           cy.get('.command-name-session').should('contain', 'global_1')
@@ -21,9 +26,7 @@ it('restores global session from last spec', () => {
     }
   })
 
-  cy.getCookie('token').then((cookie) => {
-    expect(cookie.value).to.eq('1')
-  })
+  cy.getCookie('token').its('value').should('eq', '1')
 })
 
 it('creates spec session since it is a new spec', () => {
@@ -31,7 +34,7 @@ it('creates spec session since it is a new spec', () => {
 
   cy.env(['SYSTEM_TESTS']).then(({ SYSTEM_TESTS }) => {
     if (SYSTEM_TESTS) {
-      cy.get(top.document).within(() => {
+      cy.get(reporterDocument()).within(() => {
         cy.contains('.test', 'creates spec session').as('creates_spec_session').click()
         cy.get('@creates_spec_session').within(() => {
           cy.get('.command-name-session').should('contain', 'spec_session')
@@ -41,7 +44,5 @@ it('creates spec session since it is a new spec', () => {
     }
   })
 
-  cy.getCookie('token').then((cookie) => {
-    expect(cookie.value).to.eq('2')
-  })
+  cy.getCookie('token').its('value').should('eq', '2')
 })

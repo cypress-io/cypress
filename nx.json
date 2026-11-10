@@ -2,8 +2,7 @@
   "targetDefaults": {
     "lint": {
       "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.js"
+        "default"
       ],
       "cache": false
     },
@@ -41,7 +40,7 @@
       "!{projectRoot}/**/*.spec.ts",
       "!{projectRoot}/**/*.md",
       "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.ts",
       "!{projectRoot}/.mocharc.{js,json}",
       "!{projectRoot/cypress.config.{ts,js}",
       "!{projectRoot/**/*.cy.ts"

@@ -9,24 +9,25 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
     "dev": "rollup -c rollup.config.mjs -w",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "lint": "eslint"
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^18.0.0",
-    "@angular/core": "^18.0.0",
-    "@angular/platform-browser-dynamic": "^18.0.0",
+    "@angular/common": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
     "@cypress/mount-utils": "0.0.0-development",
-    "rollup": "^4.24.4",
-    "typescript": "~5.4.5",
-    "zone.js": "~0.14.6"
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
+    "rollup": "^4.60.2",
+    "typescript": "~5.9.2"
   },
   "peerDependencies": {
-    "@angular/common": ">=18.0.0",
-    "@angular/core": ">=18.0.0",
-    "@angular/platform-browser-dynamic": ">=18.0.0",
-    "rxjs": ">=7.5.0",
-    "zone.js": ">=0.14.0"
+    "@angular/common": ">=21.0.0",
+    "@angular/core": ">=21.0.0",
+    "@angular/platform-browser": ">=21.0.0",
+    "rxjs": ">=7.8.0"
   },
   "files": [
     "dist"
@@ -35,7 +36,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
+    "url": "git+https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fangular&template=1-bug-report.md&title=",
@@ -44,21 +45,8 @@
     "cypress",
     "cypress-io",
     "test",
-    "testing"
-  ],
-  "contributors": [
-    {
-      "name": "Bill Glesias",
-      "social": "@atofstryker"
-    },
-    {
-      "name": "Jordan Powell",
-      "social": "@jordanpowell88"
-    },
-    {
-      "name": "Zach Williams",
-      "social": "@ZachJW34"
-    }
+    "testing",
+    "zoneless"
   ],
   "module": "dist/index.js",
   "publishConfig": {
@@ -73,11 +61,7 @@
       }
     }
   },
-  "standard": {
-    "globals": [
-      "Cypress",
-      "cy",
-      "expect"
-    ]
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   }
 }

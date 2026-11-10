@@ -2,6 +2,22 @@ import $jquery from '../jquery'
 import _ from 'lodash'
 import type { HTMLSingleValueChangeInputElement, HTMLValueIsNumberTypeElement } from './types'
 
+export const textLikeInputTypes = [
+  'text',
+  'password',
+  'email',
+  'number',
+  'date',
+  'week',
+  'month',
+  'time',
+  'datetime',
+  'datetime-local',
+  'search',
+  'url',
+  'tel',
+] as const
+
 const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 
 const valueIsNumberTypeRe = /progress|meter|li/

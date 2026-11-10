@@ -13,15 +13,28 @@ workflows:
                   - pack-workflows
 
 parameters:
-  publish-binary-branch:
-    type: string
-    default: main
   force-persist-artifacts:
     type: boolean
     default: false
   # Set to true when triggering the pipeline manually to bypass path filtering
   # and run all CI jobs regardless of which files changed.
   run-all-jobs:
+    type: boolean
+    default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`,
+  # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
+  # (can also be set manually to run those workflows)
+  run-platform-workflows:
+    type: boolean
+    default: false
+  # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
+  # Trigger Pipeline when a visual review is needed. Requires PERCY_TOKEN.
+  percy-enabled:
+    type: boolean
+    default: false
+  # Opt-in full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy)
+  # path on Chrome. Enable via Trigger Pipeline when investigating that path.
+  run-force-http1-tests:
     type: boolean
     default: false
 
@@ -106,6 +119,9 @@ commands:
                 - matches:
                     pattern: /^release\/.*/
                     value: <<pipeline.git.branch>>
+                - matches:
+                    pattern: /^v\d+$/
+                    value: <<pipeline.git.branch>>
           steps:
             - run:
                 name: Cancel CI
@@ -115,7 +131,16 @@ commands:
                   }
 
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-                    DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+                    PR_API_URL="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}"
+
+                    # Unauthenticated requests from CircleCI's shared IPs can get a
+                    # throttling or "forbidden" page instead of JSON, so treat an
+                    # unreadable response as not a draft rather than failing the pipeline.
+                    DRAFT=$(curl --silent --show-error --fail --max-time 15 "${PR_API_URL}" | jq -r '.draft' 2>/dev/null) || DRAFT=unknown
+
+                    if [[ "${DRAFT}" != true && "${DRAFT}" != false ]]; then
+                      echo "Could not read the PR's draft status from GitHub (got: ${DRAFT:-empty}); running CI."
+                    fi
 
                     if [[ "${DRAFT}" == true ]]; then
                       echo "Skipping CI; PR is in draft - to trigger CI , click the 'Trigger Pipeline' button in the CircleCI UI."
@@ -165,6 +190,8 @@ jobs:
               name: Generate path-filtered pipeline parameters
               environment:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
+                TRIGGER_SOURCE: "<< pipeline.trigger_source >>"
+                BASE_REVISION: "<< pipeline.git.base_revision >>"
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

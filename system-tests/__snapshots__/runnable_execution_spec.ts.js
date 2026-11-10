@@ -109,17 +109,11 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     runnables_already_run_suite.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/runnables_already_run_suite.cy.js/Top level des     (1280x720)
-     cribe -- suite 2 -- should fail (failed).png                                                   
 
 
 ====================================================================================================

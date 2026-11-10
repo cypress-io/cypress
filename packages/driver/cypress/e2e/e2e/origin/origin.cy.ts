@@ -69,6 +69,30 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     })
   })
 
+  // viewportWidth/viewportHeight test config overrides must stay in sync with the secondary
+  // origin's Cypress.config() even when the spec bridge is reused across tests, since
+  // `initialize:cypress` only runs once per spec bridge.
+  // https://github.com/cypress-io/cypress/pull/34262
+  describe('keeps viewport config overrides in sync inside a reused spec bridge', () => {
+    it('creates the spec bridge with the first override', { viewportWidth: 320, viewportHeight: 480 }, () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://www.foobar.com:3500', () => {
+        expect(Cypress.config('viewportWidth')).to.equal(320)
+        expect(Cypress.config('viewportHeight')).to.equal(480)
+      })
+    })
+
+    it('reuses the spec bridge with a different override without going stale', { viewportWidth: 640, viewportHeight: 400 }, () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://www.foobar.com:3500', () => {
+        expect(Cypress.config('viewportWidth')).to.equal(640)
+        expect(Cypress.config('viewportHeight')).to.equal(400)
+      })
+    })
+  })
+
   describe('ensure that visiting a cross origin page with a cy.origin command with no cy commands may cause subsequent tests to hang.', () => {
     it('executes quickly', () => {
       cy.visit('/fixtures/primary-origin.html')

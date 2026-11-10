@@ -2,10 +2,11 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
 import chalk from 'chalk'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import timers from 'timers/promises'
 import fs from 'fs-extra'
-import si, { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import download from '../../../lib/tasks/download'
@@ -19,7 +20,7 @@ vi.mock('systeminformation', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       osInfo: vi.fn(),
     },
@@ -31,7 +32,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
       arch: vi.fn(),
@@ -39,12 +40,16 @@ vi.mock('os', async (importActual) => {
   }
 })
 
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
+
 vi.mock('timers/promises', async (importActual) => {
   const actual = await importActual()
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       setTimeout: vi.fn(),
     },
@@ -56,7 +61,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       remove: vi.fn(),
       ensureDir: vi.fn(),
@@ -70,7 +75,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pkgVersion: vi.fn(),
       pkgBuildInfo: vi.fn(),
@@ -87,7 +92,7 @@ vi.mock('../../../lib/tasks/download', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -99,7 +104,7 @@ vi.mock('../../../lib/tasks/unzip', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -111,7 +116,7 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getVersionDir: vi.fn(),
       getBinaryDir: vi.fn(),
@@ -162,15 +167,11 @@ const PRE_RELEASE_DOWNLOAD_URL =
   `https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/${PRE_RELEASE_BRANCH}-${PRE_RELEASE_COMMIT_SHA}/cypress.zip`
 
 /**
- * stdout capture: listr2/chalk emit ANSI; assertions use strip-ansi + toContain so tests stay stable across OS/CI.
+ * stdout capture: listr2/chalk emit ANSI; assertions strip ANSI + toContain so tests stay stable across OS/CI.
  *
  * @see https://listr2.kilic.dev/renderer/renderer.html#frontmatter-title
  */
 describe('/lib/tasks/install', function () {
-  const buildInfo = {
-    commitSha: 'abc123',
-    commitBranch: 'aBranchName',
-  }
   const createStdoutCapture = () => {
     const logs: string[] = []
 
@@ -299,7 +300,7 @@ describe('/lib/tasks/install', function () {
 
         await install.start({ buildInfo })
         expect(unzip.start).toHaveBeenCalledWith(expect.objectContaining({
-          installDir: expect.stringMatching(/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/),
+          installDir: expect.stringMatching(/beta-1\.2\.3-aBranchName-3b7f0b5c$/),
         }))
       })
     })

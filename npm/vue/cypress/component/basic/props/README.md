@@ -7,4 +7,4 @@ const messages = ['one 🍎', 'two 🍌']
 mount(MessageList, { props: { messages } })
 ```
 
-See [message-list-spec.js](message-list-spec.js) for all ways to set and change props.
+See [message-list.cy.ts](message-list.cy.ts) for all ways to set and change props.

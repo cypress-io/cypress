@@ -1,8 +1,9 @@
 import path from 'path'
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
 import { BROWSER_FAMILY } from '@packages/types'
+import { isUnsafePort } from './unsafe_ports'
 
 const debug = Debug('cypress:server:validation')
 
@@ -28,7 +29,7 @@ const errMsg = (key: string, value: any, type: string): ErrResult => {
 }
 
 const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
-  return _.isString(value) && /^https?\:\/\//.test(value)
+  return _.isString(value) && /^https?:\/\//.test(value)
 }
 
 const isStringArray = (value: any): ErrResult | boolean => {
@@ -39,7 +40,8 @@ const isFalse = (value: any): boolean => {
   return value === false
 }
 
-type ValidationResult = ErrResult | boolean | string;
+export type ValidationResult = ErrResult | boolean | string
+
 type ValidationFn = (key: string, value: any) => ValidationResult
 
 export const validateAny = (...validations: ValidationFn[]): ValidationFn => {
@@ -106,7 +108,7 @@ export const isValidBrowserList = (_key: string, browsers: any): ErrResult | tru
   }
 
   for (let k = 0; k < browsers.length; k += 1) {
-    const validationResult: boolean | {key: string, value: string, type: string, list?: string} = isValidBrowser(browsers[k])
+    const validationResult: boolean | { key: string, value: string, type: string, list?: string } = isValidBrowser(browsers[k])
 
     if (validationResult !== true) {
       validationResult.list = 'browsers'
@@ -148,7 +150,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
     validKeys.push('passesRequired')
 
     if (_.isNull(value.passesRequired) || value.passesRequired === undefined) {
-      return errMsg(`${key}.passesRequired`, value.stopIfAnyPassed, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
+      return errMsg(`${key}.passesRequired`, value.passesRequired, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
     }
 
     const isValidPassesRequired = Number.isInteger(value.passesRequired) && value.passesRequired >= 1 && value.passesRequired <= value.maxRetries
@@ -167,7 +169,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
   return true
 }
 
-const isValidRetryValue = (key: string, value: any, minimumValue: 0|1): ErrResult | true => {
+const isValidRetryValue = (key: string, value: any, minimumValue: 0 | 1): ErrResult | true => {
   if (_.isNull(value)) return true
 
   if (Number.isInteger(value) && value >= minimumValue) return true
@@ -266,6 +268,49 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
   return true
 }
 
+// the per-axis form takes the same values as the native `scrollIntoView`
+const SCROLL_BEHAVIOR_POSITIONS = ['center', 'start', 'end', 'nearest']
+// a single value also accepts the block-axis-only alignments
+const SCROLL_BEHAVIOR_ALIGNMENTS = [...SCROLL_BEHAVIOR_POSITIONS, 'top', 'bottom']
+const SCROLL_BEHAVIOR_AXES = ['block', 'inline']
+const SCROLL_BEHAVIOR_POSITION_HINTS: Record<string, string> = { top: 'start', bottom: 'end' }
+
+/**
+ * Checks that a value is a valid `scrollBehavior`: `false`, one alignment applied
+ * to both axes, or a per-axis object such as `{ block: 'start', inline: 'nearest' }`.
+ */
+export const isValidScrollBehavior = (key: string, value: any): ErrResult | true => {
+  const alignments = SCROLL_BEHAVIOR_ALIGNMENTS.map((a) => str(a)).join(', ')
+  const positions = SCROLL_BEHAVIOR_POSITIONS.map((p) => str(p)).join(', ')
+  const expected = `one of these values: ${alignments}, false, or an object with keys "block" and/or "inline" set to one of ${positions}`
+
+  if (value === false || SCROLL_BEHAVIOR_ALIGNMENTS.includes(value)) {
+    return true
+  }
+
+  if (!_.isPlainObject(value)) {
+    return errMsg(key, value, expected)
+  }
+
+  const axes = Object.keys(value)
+
+  if (!axes.length || !axes.every((axis) => SCROLL_BEHAVIOR_AXES.includes(axis))) {
+    return errMsg(key, value, expected)
+  }
+
+  for (const axis of axes) {
+    const position = value[axis]
+
+    if (!SCROLL_BEHAVIOR_POSITIONS.includes(position)) {
+      const hint = SCROLL_BEHAVIOR_POSITION_HINTS[position]
+
+      return errMsg(`${key}.${axis}`, position, `one of these values: ${positions}${hint ? ` (use ${str(hint)} instead of ${str(position)})` : ''}`)
+    }
+  }
+
+  return true
+}
+
 /**
  * Checks if given value for a key is equal to one of the provided values.
  * @example
@@ -329,18 +374,18 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     key: string
     cert: string
     pfx: string
-  }>}>): ErrResult | true | string => {
+  }> }>): ErrResult | true | string => {
   debug('clientCerts: %o', certsForUrls)
 
   if (!Array.isArray(certsForUrls)) {
     return errMsg(`clientCertificates.certs`, certsForUrls, 'an array of certs for URLs')
   }
 
-  let urls: string[] = []
+  const urls: string[] = []
 
   for (let i = 0; i < certsForUrls.length; i++) {
     debug(`Processing clientCertificates: ${i}`)
-    let certsForUrl = certsForUrls[i]
+    const certsForUrl = certsForUrls[i]
 
     if (!certsForUrl) {
       continue
@@ -352,7 +397,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
 
     if (certsForUrl.url !== '*') {
       try {
-        let parsed = new URL(certsForUrl.url)
+        const parsed = new URL(certsForUrl.url)
 
         if (parsed.protocol !== 'https:') {
           return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'an https protocol')
@@ -377,7 +422,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     }
 
     for (let j = 0; j < certsForUrl.certs.length; j++) {
-      let certInfo = certsForUrl.certs[j]!
+      const certInfo = certsForUrl.certs[j]!
 
       // Only one of PEM or PFX cert allowed
       if (certInfo.cert && certInfo.pfx) {
@@ -412,9 +457,49 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     if (certsForUrl.ca) {
       for (let k = 0; k < certsForUrl.ca.length; k++) {
         if (path.isAbsolute(certsForUrl.ca[k] || '')) {
-          return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+          return errMsg(`clientCertificates[${i}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
         }
       }
+    }
+  }
+
+  return true
+}
+
+const TRUSTED_CERTIFICATE_KEYS = ['filePath', 'pem', 'spki']
+// Chrome's --ignore-certificate-errors-spki-list format: base64 SHA-256 (32 bytes → 43 chars + '=').
+const SPKI_FINGERPRINT = /^[A-Za-z0-9+/]{43}=$/
+
+/**
+ * Validates the `trustedCertificates` list. Each entry must be an object with
+ * exactly one of `filePath`, `pem`, or `spki` set to a non-empty string.
+ * @returns {string|true} Returns `true` if the list is valid. Returns an error message if it is not.
+ */
+export const isValidTrustedCertificates = (key: string, value: any): ErrResult | true => {
+  if (!Array.isArray(value)) {
+    return errMsg(key, value, 'an array of trusted certificate objects')
+  }
+
+  for (const [i, entry] of value.entries()) {
+    if (!_.isPlainObject(entry)) {
+      return errMsg(`${key}[${i}]`, entry, 'an object with exactly one of "filePath", "pem", or "spki"')
+    }
+
+    const keys = Object.keys(entry)
+
+    if (keys.length !== 1 || !TRUSTED_CERTIFICATE_KEYS.includes(keys[0]!)) {
+      return errMsg(`${key}[${i}]`, entry, 'an object with exactly one of "filePath", "pem", or "spki"')
+    }
+
+    const [entryKey] = keys
+    const entryValue = entry[entryKey!]
+
+    if (!_.isString(entryValue) || _.isEmpty(entryValue)) {
+      return errMsg(`${key}[${i}].${entryKey}`, entryValue, 'a non-empty string')
+    }
+
+    if (entryKey === 'spki' && !SPKI_FINGERPRINT.test(entryValue)) {
+      return errMsg(`${key}[${i}].spki`, entryValue, 'a base64-encoded SHA-256 SPKI fingerprint')
     }
   }
 
@@ -445,6 +530,22 @@ export function isNumber (key: string, value: any): ErrResult | true {
   return errMsg(key, value, 'a number')
 }
 
+export function isValidPort (key: string, value: any): ErrResult | true {
+  if (value == null) {
+    return true
+  }
+
+  if (!_.isNumber(value)) {
+    return errMsg(key, value, 'a number')
+  }
+
+  if (isUnsafePort(value)) {
+    return errMsg(key, value, `a port browsers allow, since Chrome, Electron, Firefox and WebKit refuse to load any URL on port ${value}`)
+  }
+
+  return true
+}
+
 export function isString (key: string, value: any): ErrResult | true {
   if (value == null || _.isString(value)) {
     return true
@@ -462,7 +563,7 @@ export function isArray (key: string, value: any) {
 }
 
 export function isNumberOrFalse (key: string, value: any): ErrResult | true {
-  if (_.isNumber(value) || isFalse(value)) {
+  if (value == null || _.isNumber(value) || isFalse(value)) {
     return true
   }
 

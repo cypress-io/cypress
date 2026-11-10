@@ -1,11 +1,11 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import fs from 'fs-extra'
 import path from 'path'
 import os from 'os'
 
 import { scaffoldProject, removeProject, createTestDataContext } from '../helper'
 import * as FileDataSourceModule from '../../../src/sources/FileDataSource'
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import * as fileUtil from '../../../src/util/file'
 
 const FileDataSource = FileDataSourceModule.FileDataSource
@@ -72,7 +72,7 @@ describe('FileDataSource', () => {
 
           // Verify that the glob pattern is not impacted if it contains directories equivalent
           // to the working directory
-          let files = await fileDataSource.getFilesByGlob(
+          const files = await fileDataSource.getFilesByGlob(
             projectPath,
             `./cypress${projectPath}/nested-script.js`,
           )

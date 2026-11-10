@@ -19,9 +19,9 @@ export function loadProjectAndRunSpec ({ projectName = 'studio' as ProjectFixtur
 }
 
 export function openNewTestFromSpecHeader () {
-  cy.get('[data-cy="runnable-options-button"]').click()
-  cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
-  cy.get('[data-cy="runnable-popover-new-test"]').click()
+  cy.reporter().find('[data-cy="runnable-options-button"]').click()
+  cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('be.visible')
+  cy.reporter().find('[data-cy="runnable-popover-new-test"]').click()
 }
 
 export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''], afterLaunch = () => {}, shouldLogin = false }: { specName?: string, createNewTestFromSuite?: boolean, createNewTestFromSpecHeader?: boolean, cliArgs?: string[], afterLaunch?: () => void, shouldLogin?: boolean } = {}) {
@@ -30,9 +30,9 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
   const testTitle = 'visits a basic html page'
 
   if (createNewTestFromSuite || createNewTestFromSpecHeader) {
-    cy.contains('studio functionality').as('item')
+    cy.reporter().contains('studio functionality').as('item')
   } else {
-    cy.contains(testTitle).as('item')
+    cy.reporter().contains(testTitle).as('item')
   }
 
   cy.get('@item')
@@ -45,7 +45,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
       openNewTestFromSpecHeader()
     } else {
       cy.get('@runnable-wrapper').realHover()
-      cy.findByTestId('create-new-test-from-suite').click()
+      cy.reporter().findByTestId('create-new-test-from-suite').click()
     }
 
     cy.findByTestId('studio-panel').should('be.visible')
@@ -58,7 +58,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
     cy.waitForSpecToFinish()
 
-    cy.get('[data-cy="studio-single-test-title"]').contains(testTitle)
+    cy.reporter().find('[data-cy="studio-single-test-title"]').contains(testTitle)
 
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
@@ -71,7 +71,7 @@ export function inputNewTestName ({ name = 'new-test' }: { name?: string } = {})
 
   cy.findByTestId('record-button-disabled').should('have.text', 'Record')
 
-  cy.get('.studio-single-test-container').should('be.visible')
+  cy.reporter().find('.studio-single-test-container').should('be.visible')
 }
 
 export function incrementCounter (initialCount: number) {
@@ -93,10 +93,10 @@ export function assertClosingPanelWithoutChanges () {
   // Original spec should pass
   cy.waitForSpecToFinish({ passCount: 1 })
 
-  cy.get('.command').should('have.length', 1)
+  cy.reporter().find('.command').should('have.length', 1)
 
   // Assert the spec was executed without any new commands.
-  cy.get('.command-name-visit').within(() => {
+  cy.reporter().find('.command-name-visit').within(() => {
     cy.contains('visit')
     cy.contains('cypress/e2e/index.html')
   })

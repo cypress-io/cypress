@@ -1,0 +1,65 @@
+import { resolveLiveSession } from '../../cypress-sessions'
+import { TapSpecsOperation } from '@packages/cypress-sessions'
+import { querySessionGraphql } from '../session-gql'
+import { renderOutcome, renderTapFailure } from '../output'
+import { defineNativeCommand } from './definition'
+import type { TapSpecsQuery } from '@packages/cypress-sessions'
+import type { TapCliOptions } from '../types'
+
+/** One row of `cypress tap specs`: a runnable spec of the active project. */
+export interface TapSpecEntry {
+  /** POSIX project-relative spec path. */
+  relativePath: string
+  /** Git's human-readable last-modified time (e.g. `2 hours ago`); absent without git info. */
+  lastModified?: string
+  /** Machine-facing last-modified epoch; JSON-only, omitted from the human view. */
+  lastModifiedTimestamp?: string
+}
+
+const modifiedAt = (spec: TapSpecEntry): number => {
+  const parsed = spec.lastModifiedTimestamp === undefined ? NaN : Date.parse(spec.lastModifiedTimestamp)
+
+  return Number.isNaN(parsed) ? -Infinity : parsed
+}
+
+const byMostRecentlyModified = (a: TapSpecEntry, b: TapSpecEntry): number => {
+  const left = modifiedAt(a)
+  const right = modifiedAt(b)
+
+  return left === right ? 0 : right - left
+}
+
+// `TapSpecsQuery` is the schema shape, but the value crosses the wire unvalidated,
+// so entries are guarded against nulls and non-string fields before rendering.
+const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
+  const specs = data.currentProject?.specs ?? []
+
+  return specs
+    .filter((spec) => typeof spec?.relative === 'string')
+    .map((spec) => {
+      const lastModified = spec.gitInfo?.lastModifiedHumanReadable
+      const lastModifiedTimestamp = spec.gitInfo?.lastModifiedTimestamp
+
+      return {
+        relativePath: spec.relative.replace(/\\/g, '/'),
+        ...(typeof lastModified === 'string' ? { lastModified } : {}),
+        ...(typeof lastModifiedTimestamp === 'string' ? { lastModifiedTimestamp } : {}),
+      }
+    })
+    .sort(byMostRecentlyModified)
+}
+
+const listSpecs = async (options: TapCliOptions): Promise<number> => {
+  try {
+    const { session } = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
+    const data = await querySessionGraphql(session, TapSpecsOperation)
+
+    renderOutcome('specs', toSpecList(data), options.json)
+
+    return 0
+  } catch (err: any) {
+    return await renderTapFailure(err)
+  }
+}
+
+export const specsCommand = defineNativeCommand('specs', listSpecs)

@@ -3,12 +3,14 @@ import { parse } from '@babel/parser'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
-import { DataContext } from '../../../src'
-import {
+import type { DataContext } from '../../../src'
+import type {
   Action,
-  codeGenerator,
   CodeGenResult,
   CodeGenResults,
+} from '../../../src/codegen/code-generator'
+import {
+  codeGenerator,
   hasNonExampleSpec,
   getExampleSpecPaths,
 } from '../../../src/codegen/code-generator'
@@ -357,13 +359,13 @@ describe('code-generator', () => {
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      // @ts-expect-error
+      // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
       framework: CT_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
       specPattern: [defaultSpecPattern.component],
     })
 
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 
@@ -419,10 +421,10 @@ describe('code-generator', () => {
       expect(checkAfterTemplate).toBe(true)
     })
 
-    it('should error if template dir does not exist', () => {
+    it('should error if template dir does not exist', async () => {
       const singleSpec = ['sample.spec.ts']
 
-      expect(hasNonExampleSpec('', singleSpec)).rejects.toThrow()
+      await expect(hasNonExampleSpec('', singleSpec)).rejects.toThrow('Template directory does not exist')
     })
   })
 

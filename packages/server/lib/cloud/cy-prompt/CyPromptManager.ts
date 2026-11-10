@@ -2,7 +2,8 @@ import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, 
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
-import crypto, { BinaryLike } from 'crypto'
+import type { BinaryLike } from 'crypto'
+import crypto from 'crypto'
 
 interface CyPromptServer { default: CyPromptServerDefaultShape }
 
@@ -89,7 +90,7 @@ export class CyPromptManager implements CyPromptManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return this._cyPromptServer[method].apply(this._cyPromptServer, args)
+      return this._cyPromptServer[method](...args)
     } catch (error: unknown) {
       let actualError: Error
 
@@ -119,7 +120,7 @@ export class CyPromptManager implements CyPromptManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return await this._cyPromptServer[method].apply(this._cyPromptServer, args)
+      return await this._cyPromptServer[method](...args)
     } catch (error: unknown) {
       let actualError: Error
 

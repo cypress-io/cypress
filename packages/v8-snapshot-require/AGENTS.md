@@ -29,7 +29,7 @@ yarn workspace @packages/v8-snapshot-require check-ts
 - The resolver map key format is `<dir>***<request>` mapping to the fully resolved path relative to the project base dir; keys are embedded in the snapshot itself.
 - Enable debug logging with `DEBUG=cypress:pack*` or `DEBUG=cypress:snap*` to inspect hit/miss rates (`exportHits`, `definitionHits`, `misses`).
 - `exports` (fully initialized) and `definitions` (lazy initializer functions) overlap in the snapshot; a module can appear in both.
-- To disable the snapshot entirely (for debugging), set `DISABLE_SNAPSHOT_REQUIRE=1`.
+- To disable the V8 snapshot entirely (for debugging), set `DISABLE_SNAPSHOT_REQUIRE=1`. This is unrelated to `SNAPSHOT_UPDATE=1`, which updates test snapshots.
 
 **Integration Points**
 

@@ -1,3 +1,4 @@
+types/aria-query
 types/blob-util
 types/bluebird
 types/chai
@@ -19,7 +20,6 @@ vue
 react*
 mount-utils
 angular
-angular-zoneless
 svelte
 index.js
 lib/**/*.js

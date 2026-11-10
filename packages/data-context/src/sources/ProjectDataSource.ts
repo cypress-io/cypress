@@ -21,7 +21,8 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '../../graphql/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
-import { FileExtension, getDefaultSpecFileName } from '../util/files'
+import { getDefaultSpecFileName } from '../util/files'
+import type { FileExtension } from '../util/files'
 
 type SpecPatterns = {
   specPattern?: string[]
@@ -34,6 +35,8 @@ interface MatchedSpecs {
   specAbsolutePaths: string[]
   specPattern: string | string[]
 }
+
+const MASKED_ENV_VALUE = '*****'
 
 const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
@@ -116,7 +119,7 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   if (!paths[0]) return ''
 
   function getPathParts (pathname: string) {
-    return pathname.split(/[\/\\]/g)
+    return pathname.split(/[/\\]/g)
   }
 
   const lcp = getPathParts(paths[0])
@@ -149,7 +152,7 @@ export function getPathFromSpecPattern ({
 { specPattern: string
   testingType: TestingType
   fileExtensionToUse?: FileExtension
-  name?: string}) {
+  name?: string }) {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -207,6 +210,17 @@ export function getPathFromSpecPattern ({
   const randExp = new RandExp(finalGlob.replace(/\./g, '\\.'))
 
   return randExp.gen()
+}
+
+/**
+ * `minimatch` only understands posix separators, but `path.relative` emits `\` on
+ * Windows, so the relative path has to be normalized or a specPattern containing a
+ * directory segment (like the `cypress/e2e/**` default) can never match.
+ */
+export function matchesAnySpecPattern (relativeSpecPath: string, specPattern: string[], sep: string = path.sep): boolean {
+  const posixPath = toPosix(relativeSpecPath, sep)
+
+  return specPattern.some((s) => minimatch(posixPath, s))
 }
 
 export class ProjectDataSource {
@@ -441,14 +455,14 @@ export class ProjectDataSource {
         }
 
         // If none of the spec patterns match, we don't need to watch it
-        return !specPattern.some((s) => minimatch(path.relative(projectRoot, file), s))
+        return !matchesAnySpecPattern(path.relative(projectRoot, file), specPattern)
       }],
     })
   }
 
   async defaultSpecFileName (): Promise<string> {
     const { specPattern = [] } = await this.ctx.project.specPatterns()
-    let fileExtensionToUse: FileExtension = this.ctx.lifecycleManager.fileExtensionToUse
+    const fileExtensionToUse: FileExtension = this.ctx.lifecycleManager.fileExtensionToUse
 
     // If generating a component test then check whether there are JSX/TSX files present in the project.
     // If project uses JSX then user likely wants to use JSX for their tests as well.
@@ -579,7 +593,8 @@ export class ProjectDataSource {
         return {
           field: key,
           from: key,
-          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, value])),
+          // The page under test can reach this field, and env values must only reach the spec through cy.env()
+          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, key === 'env' ? MASKED_ENV_VALUE : value])),
         }
       }
 

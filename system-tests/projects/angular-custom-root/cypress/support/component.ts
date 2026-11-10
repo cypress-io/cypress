@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import { mount } from 'cypress/angular'
 
 declare global {
@@ -10,6 +9,3 @@ declare global {
 }
 
 Cypress.Commands.add('mount', mount)
-
-// Example use:
-// cy.mount(MyComponent)

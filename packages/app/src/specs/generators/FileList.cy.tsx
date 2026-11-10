@@ -1,6 +1,7 @@
 import FileList from './FileList.vue'
 import data from '../../../cypress/fixtures/FileList.json'
-import { ref, Ref } from 'vue'
+import { ref } from 'vue'
+import type { Ref } from 'vue'
 import type { FileListItemFragment } from '../../generated/graphql-test'
 
 const difficultFile = {
@@ -15,6 +16,7 @@ const fileRowSelector = '[data-cy=file-list-row]'
 const allFiles = data as FileListItemFragment[]
 
 allFiles[1] = { ...allFiles[1], ...difficultFile }
+
 describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
   describe('with files', () => {
     const files = allFiles

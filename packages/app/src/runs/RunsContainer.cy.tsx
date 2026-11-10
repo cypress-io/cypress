@@ -1,8 +1,6 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   context('when the user is logged in', () => {
@@ -43,10 +41,8 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      const text = defaultMessages.runs.connect
-
-      cy.contains(text.title).should('be.visible')
-      cy.contains(text.buttonProject).should('be.visible')
+      cy.contains('Connect to view your recorded runs').should('be.visible')
+      cy.contains('Connect a Cypress Cloud project').should('be.visible')
       cy.percySnapshot()
     })
   })
@@ -59,10 +55,8 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      const text = defaultMessages.runs.connect
-
-      cy.contains(text.title).should('be.visible')
-      cy.contains(text.buttonUser).should('be.visible')
+      cy.contains('Connect to view your recorded runs').should('be.visible')
+      cy.contains('Connect to Cypress Cloud').should('be.visible')
       cy.percySnapshot()
     })
   })
@@ -78,9 +72,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      const text = defaultMessages.runs.empty
-
-      cy.contains(text.title).should('be.visible')
+      cy.contains('Copy the command below to record your first run').should('be.visible')
     })
   })
 
@@ -98,12 +90,10 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      const { title, description, link, button } = defaultMessages.runs.errors.connectionFailed
-
-      cy.contains(title).should('be.visible')
-      cy.contains(description.replace('{0}', link)).should('be.visible')
-      cy.contains('a', link).should('have.attr', 'href', 'https://www.cypressstatus.com/')
-      cy.contains('button', button).should('be.visible').click()
+      cy.contains('Cannot connect to Cypress Cloud').should('be.visible')
+      cy.contains('The request times out when trying to retrieve the recorded runs from Cypress Cloud. Please refresh the page to try again and visit our Support page if this behavior continues.').should('be.visible')
+      cy.contains('a', 'Support page').should('have.attr', 'href', 'https://www.cypressstatus.com/')
+      cy.contains('button', 'Try again').should('be.visible').click()
 
       cy.get('@reExecuteRunsQuery').should('have.been.called')
 
@@ -127,8 +117,8 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      cy.get('h2').contains(defaultMessages.runs.empty.gitRepositoryNotDetected)
-      cy.contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
+      cy.get('h2').contains('Git repository not detected')
+      cy.contains('Cypress uses Git to associate runs with your local state. As a fallback, all runs for your project are shown. Please ensure that version control is set up correctly.')
     })
 
     it('dismisses the alert', () => {
@@ -146,8 +136,8 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      cy.get('h2').contains(defaultMessages.runs.empty.gitRepositoryNotDetected)
-      cy.contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
+      cy.get('h2').contains('Git repository not detected')
+      cy.contains('Cypress uses Git to associate runs with your local state. As a fallback, all runs for your project are shown. Please ensure that version control is set up correctly.')
       cy.get('[data-cy=alert-suffix-icon]').click()
       cy.get('[data-cy=alert-header]').should('not.exist')
     })
@@ -175,10 +165,10 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      cy.get('h2').contains(defaultMessages.runs.empty.noRunsFoundForBranch)
-      cy.get('p').contains(defaultMessages.runs.empty.noRunsForBranchMessage)
+      cy.get('h2').contains('No runs found for your branch')
+      cy.get('p').contains('Cypress uses Git to show runs for your branch. As a fallback, all runs for your project are shown. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.')
       // The utm_source will be Binary%3A+App in production`open` mode but we assert using Binary%3A+Launchpad as this is the value in CI
-      cy.contains(defaultMessages.links.learnMoreButton).should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
+      cy.contains('Learn more').should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
     })
 
     it('dismisses the alert', () => {
@@ -202,10 +192,10 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      cy.get('h2').contains(defaultMessages.runs.empty.noRunsFoundForBranch)
-      cy.get('p').contains(defaultMessages.runs.empty.noRunsForBranchMessage)
+      cy.get('h2').contains('No runs found for your branch')
+      cy.get('p').contains('Cypress uses Git to show runs for your branch. As a fallback, all runs for your project are shown. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.')
       // The utm_source will be Binary%3A+App in production`open` mode but we assert using Binary%3A+Launchpad as this is the value in CI
-      cy.contains(defaultMessages.links.learnMoreButton).should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
+      cy.contains('Learn more').should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
       cy.get('[data-cy=alert-suffix-icon]').click()
       cy.get('[data-cy=alert-header]').should('not.exist')
     })

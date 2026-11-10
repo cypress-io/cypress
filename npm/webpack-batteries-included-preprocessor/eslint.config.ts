@@ -1,10 +1,14 @@
-import { baseConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
+  ...jsonConfig,
+  ...nodeConfig,
+  // the shared test globs leave out .mjs
+  chaiFriendlyConfig(['test/**/*.{mjs,mts}']),
   {
-    ignores: ['test/fixtures/**/*', 'test/_test-output/**'],
+    ignores: ['test/_test-output/**'],
   },
   {
     files: ['**/*.js', '**/*.ts'],
@@ -15,6 +19,23 @@ export default [
       globals: {
         ...globals.node,
       },
+    },
+  },
+  {
+    files: ['test/fixtures/**/*.{js,jsx,mjs,mts,ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+      },
+      globals: {
+        ...globals.node,
+        expect: 'readonly',
+      },
+    },
+    rules: {
+      'import-x/default': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-unused-vars': 'off',
     },
   },
 ]

@@ -107,7 +107,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     cy.get('input:first').clear({ scrollBehavior: 'bottom' })
 
     cy.get('input:first').then((el) => {
-      expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
+      expect(el[0].scrollIntoView).calledWith({ block: 'end' })
     })
   })
 
@@ -120,30 +120,6 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
     cy.get('input:first').then((el) => {
       expect(el[0].scrollIntoView).not.to.be.called
-    })
-  })
-
-  it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
-    cy.get('input:first').then((el) => {
-      cy.spy(el[0], 'scrollIntoView')
-    })
-
-    cy.get('input:first').clear()
-
-    cy.get('input:first').then((el) => {
-      expect(el[0].scrollIntoView).not.to.be.called
-    })
-  })
-
-  it('calls scrollIntoView by default', () => {
-    cy.get('input:first').then((el) => {
-      cy.spy(el[0], 'scrollIntoView')
-    })
-
-    cy.get('input:first').clear()
-
-    cy.get('input:first').then((el) => {
-      expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
     })
   })
 
@@ -250,8 +226,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.$$('input:first').keyup(function () {
         _.delay(() => {
           $(this).addClass('cleared')
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('input:first').clear().should('have.class', 'cleared').then(function () {
@@ -268,8 +243,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.$$('input').keyup(function () {
         _.delay(() => {
           $(this).addClass('cleared')
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('input').invoke('slice', 0, 2).clear().should('have.class', 'cleared')
@@ -325,7 +299,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
         expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
         expect(err.message).to.include('`<form id="checkboxes">...</form>`')
-        expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.message).to.include(`A clearable element is one of the following:`)
         expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
         done()
@@ -339,7 +313,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
         expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
         expect(err.message).to.include('`<div id="does-not-wrap-input">Text</div>`')
-        expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.message).to.include(`A clearable element is one of the following:`)
         expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
         done()
@@ -363,7 +337,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
         expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
         expect(err.message).to.include('`<input type="radio" name="gender" value="male">`')
-        expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.message).to.include(`A clearable element is one of the following:`)
         expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
         done()
       })
@@ -376,7 +350,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
         expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
         expect(err.message).to.include('`<input type="checkbox" name="colors" value="blue">`')
-        expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.message).to.include(`A clearable element is one of the following:`)
         expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
         done()

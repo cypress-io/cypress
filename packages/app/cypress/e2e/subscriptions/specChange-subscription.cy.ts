@@ -1,4 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../../src/paths'
 
 describe('specChange subscription', () => {
@@ -93,7 +92,7 @@ describe('specChange subscription', () => {
       })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(o.path, '')
@@ -148,7 +147,7 @@ describe('specChange subscription', () => {
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
 
     it('responds to a cypress.config.js file change', () => {
@@ -164,7 +163,6 @@ describe('specChange subscription', () => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -194,9 +192,9 @@ e2e: {
     it('responds to specChange event for an added file', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -221,9 +219,9 @@ e2e: {
     it('responds to specChange event for a removed file', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -245,10 +243,10 @@ e2e: {
 
     it('handles removing the last file', () => {
       cy.contains('dom-content.spec').click()
-      cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+      cy.reporter().find('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
       cy.get('[data-cy=specs-list-panel]').should('be.visible')
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
       cy.withCtx(async (ctx, o) => {
         await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
       }, {
@@ -292,15 +290,15 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/dom-content.spec.js') })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
 
     it('responds to a cypress.config.js file change', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -313,7 +311,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -422,7 +419,7 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
 
     it('responds to a cypress.config.js file change', () => {
@@ -438,7 +435,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -464,7 +460,6 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
@@ -492,7 +487,7 @@ module.exports = {
       })
 
       cy.get('[data-cy="create-spec-page-title"]', { timeout: 15000 })
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
   })
 })

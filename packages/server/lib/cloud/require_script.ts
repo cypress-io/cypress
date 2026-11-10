@@ -10,10 +10,12 @@ export const requireScript = <T>(script: string): T => {
 
   mod.filename = ''
   // _compile is a private method
-  // @ts-expect-error
+  // @ts-expect-error - _compile is not on Module's public type
   mod._compile(script, mod.filename)
 
-  module.children.splice(module.children.indexOf(mod), 1)
+  if (module.children) {
+    module.children.splice(module.children.indexOf(mod), 1)
+  }
 
   return mod.exports as T
 }

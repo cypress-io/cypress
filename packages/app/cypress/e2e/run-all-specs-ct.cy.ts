@@ -10,9 +10,7 @@ describe('run-all-specs-ct', () => {
       return cy.findByTestId('run-all-specs-for-all').click()
     }
 
-    const command = cy.get('[data-cy=spec-item-directory]').contains(platformDir)
-
-    return command.realHover().then(() => {
+    return cy.get('[data-cy=spec-item-directory]').contains(platformDir).realHover().then(() => {
       cy.get(`[data-cy="run-all-specs-for-${platformDir.replace('\\', '\\\\')}"]`).click({ force: true })
     })
   }
@@ -36,7 +34,7 @@ describe('run-all-specs-ct', () => {
         // in cy-in-cy only, runAllSpecs is always set AFTER initCypressTests is called inside the vite dev server, meaning that __RUN_ALL_SPECS__ on the window is out of date.
         // to hack around this, we reload the page to force the vite dev server to process the runAllSpecs again when the value is set properly.
         if (bundler === 'vite') {
-          cy.contains('Your tests are loading...').should('not.exist')
+          cy.reporter().contains('Your tests are loading...').should('not.exist')
           cy.reload()
         }
 
@@ -54,7 +52,7 @@ describe('run-all-specs-ct', () => {
         // in cy-in-cy only, runAllSpecs is always set AFTER initCypressTests is called inside the vite dev server, meaning that __RUN_ALL_SPECS__ on the window is out of date.
         // to hack around this, we reload the page to force the vite dev server to process the runAllSpecs again when the value is set properly.
         if (bundler === 'vite') {
-          cy.contains('Your tests are loading...').should('not.exist')
+          cy.reporter().contains('Your tests are loading...').should('not.exist')
           cy.reload()
         }
 
@@ -72,7 +70,7 @@ describe('run-all-specs-ct', () => {
         // in cy-in-cy only, runAllSpecs is always set AFTER initCypressTests is called inside the vite dev server, meaning that __RUN_ALL_SPECS__ on the window is out of date.
         // to hack around this, we reload the page to force the vite dev server to process the runAllSpecs again when the value is set properly.
         if (bundler === 'vite') {
-          cy.contains('Your tests are loading...').should('not.exist')
+          cy.reporter().contains('Your tests are loading...').should('not.exist')
           cy.reload()
         }
 

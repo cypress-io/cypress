@@ -1,3 +1,15 @@
+# [@[secure]/svelte-v4.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/svelte-v3.0.0...@[secure]/svelte-v4.0.0) (2026-08-26)
+
+
+### breaking
+
+* release version 4.0.0 of @[secure]/svelte ([62a8397](https://github.com/[secure]-io/[secure]/commit/62a8397400a9ffc3bc87ad489930db6af311fb88))
+
+
+### BREAKING CHANGES
+
+* updates the build target of @[secure]/svelte from es6 to es2022
+
 # [@cypress/svelte-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/svelte-v2.0.1...@cypress/svelte-v3.0.0) (2025-01-08)
 
 

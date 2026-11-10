@@ -23,5 +23,5 @@ yarn test-e2e -- <path-to-spec>             # run a specific vitest e2e spec fil
 ## Gotchas / Notes
 
 - Peer dependencies (`@babel/core`, `@babel/preset-env`, `babel-loader`, `webpack@^5`) must be installed in the consumer's project. This package deliberately ships without bundled loaders.
-- For a batteries-included alternative with TypeScript and CoffeeScript support built-in, use `@cypress/webpack-batteries-included-preprocessor`.
+- For a batteries-included alternative with TypeScript support built-in, use `@cypress/webpack-batteries-included-preprocessor`.
 - The `main` field points to `dist` (a directory), relying on Node's `index.js` resolution within it.

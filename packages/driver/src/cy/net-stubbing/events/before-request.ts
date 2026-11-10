@@ -1,10 +1,12 @@
 import _ from 'lodash'
 
-import {
-  SERIALIZABLE_REQ_PROPS,
+import type {
   Interception,
   CyHttpMessages,
   Subscription,
+} from '../types'
+import {
+  SERIALIZABLE_REQ_PROPS,
 } from '../types'
 
 import { parseJsonBody, stringifyJsonBody } from './utils'
@@ -113,7 +115,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       const urlSearchParams = new URLSearchParams(url.search)
       const result = {}
 
-      for (let pair of urlSearchParams.entries()) {
+      for (const pair of urlSearchParams.entries()) {
         result[pair[0]] = pair[1]
       }
 

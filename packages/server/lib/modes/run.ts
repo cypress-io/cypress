@@ -15,6 +15,7 @@ import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
+import { endRunOnConfigProcessExit, isConfigProcessExit, wasConfigProcessExitReported } from '../util/config_process_exit'
 import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
@@ -26,7 +27,8 @@ import type { Browser } from '../browsers/types'
 import type { Data } from '../util/fs'
 import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
-import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
+import type { CypressRunResult } from './results'
+import { createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
@@ -312,6 +314,9 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
 
             ffmpegController.writeVideoFrame(data)
           },
+          get startedVideoCapture () {
+            return ffmpegController.startedVideoCapture
+          },
           async restart () {
             await videoRecording.api.useFfmpegVideoController(_ffmpegOpts)
           },
@@ -502,7 +507,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
   }
 
   // TODO: remove the need to extend options and avoid the type error
-  // @ts-expect-error
+  // @ts-expect-error - setScreenshotMetadata is not declared on the run options type
   options.setScreenshotMetadata = (data) => {
     return currentSetScreenshotMetadata(data)
   }
@@ -904,14 +909,9 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       }
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
+    const { results, browserNeedsRelaunch } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
-      // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
-      isFirstSpecInBrowser = true
-    } else {
-      isFirstSpecInBrowser = false
-    }
+    isFirstSpecInBrowser = browserNeedsRelaunch
 
     span?.end()
 
@@ -999,6 +999,8 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
 async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManagerShape } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression'>, estimated, isFirstSpecInBrowser, isLastSpec) {
   const { project, browser, onError } = options
+  // waitForTestsToFinishRunning replaces the terminator once this spec finishes
+  const specEarlyExitTerminator = earlyExitTerminator
 
   const { isHeadless } = browser
 
@@ -1077,7 +1079,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
     }),
   ])
 
-  return { results }
+  const { exitErrorType } = specEarlyExitTerminator
+
+  return { results, browserNeedsRelaunch: exitErrorType === 'BROWSER_CRASHED' || exitErrorType === 'TESTS_DID_NOT_START_FAILED' }
 }
 
 export interface ReadyOptions {
@@ -1134,15 +1138,25 @@ async function ready (options: ReadyOptions) {
 
   const onError = options.onError = (err) => {
     debug('onError', new Error().stack)
+
+    if (isConfigProcessExit(err)) {
+      return endRunOnConfigProcessExit(err)
+    }
+
+    if (wasConfigProcessExitReported()) {
+      return
+    }
+
     earlyExitTerminator.exitEarly(err)
   }
 
   // alias and coerce to null
-  let specPatternFromCli = options.spec || null
+  const specPatternFromCli = options.spec || null
 
   // ensure the project exists
   // and open up the project
-  const browsers = await browserUtils.get()
+  // Use the data context's cached detection so browsers are detected once per run
+  const browsers: FoundBrowser[] = await require('@packages/data-context').getCtx().browser.machineBrowsers()
 
   debug('found all system browsers %o', browsers.map(createPublicBrowser))
   // TODO: refactor this so we don't need to extend options

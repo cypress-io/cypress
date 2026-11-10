@@ -2,7 +2,6 @@ import type { ProjectBase } from '../project-base'
 import type { BaseReporterResults, ReporterResults, ReporterTestError } from '../types/reporter'
 import { log, stackUtils, stripAnsi } from '@packages/errors'
 import Debug from 'debug'
-import pDefer, { DeferredPromise } from 'p-defer'
 
 const debug = Debug('cypress:util:crash_handling')
 
@@ -104,13 +103,15 @@ const defaultStats = (error: Error): BaseReporterResults => {
 }
 
 export class EarlyExitTerminator {
-  private terminator: DeferredPromise<BaseReporterResults>
+  private terminator: PromiseWithResolvers<BaseReporterResults>
 
   private pendingRunnable: any
   private intermediateStats: ReporterResults | undefined
 
+  exitErrorType: string | undefined
+
   constructor () {
-    this.terminator = pDefer<BaseReporterResults>()
+    this.terminator = Promise.withResolvers<BaseReporterResults>()
   }
 
   waitForEarlyExit (project: ProjectBase) {
@@ -135,6 +136,8 @@ export class EarlyExitTerminator {
 
       return
     }
+
+    this.exitErrorType = error.type
 
     // eslint-disable-next-line no-console
     console.log('')

@@ -4,7 +4,8 @@ import type { DataContext } from '../../src'
 import type { RequestPolicy } from '@urql/core'
 import assert from 'assert'
 import debugLib from 'debug'
-import { BREAK, OperationDefinitionNode, visit } from 'graphql'
+import { BREAK, visit } from 'graphql'
+import type { OperationDefinitionNode } from 'graphql'
 import { remoteSchema } from './remoteSchema'
 
 const debug = debugLib('cypress:graphql:remoteSchemaWrapped')

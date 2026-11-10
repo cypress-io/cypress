@@ -1,7 +1,8 @@
 /// <reference path="../driver/types/internal-types-lite.d.ts" />
 
 import type { SocketShape } from '@packages/socket/browser/client'
-import type MobX from 'mobx'
+import type * as MobX from 'mobx'
+import type { TapManager } from './src/tap/tap-manager'
 import type { EventManager } from './src/runner/event-manager'
 
 export {}
@@ -23,6 +24,7 @@ declare global {
   interface Window {
     ws?: SocketShape
     getEventManager: () => EventManager
+    __CYPRESS_TAP_BINDING__?: TapManager
     UnifiedRunner: {
       /**
        * This is the config served from the back-end.
@@ -62,6 +64,13 @@ declare global {
       shortcuts: {
         stop: () => void
       }
+
+      /**
+       * Points reporter code that binds document-level listeners or portals
+       * DOM nodes at the document the reporter is rendered into (the reporter
+       * renders inside a same-origin iframe).
+       */
+      setReporterDocument: (doc: Document) => void
     }
   }
 }

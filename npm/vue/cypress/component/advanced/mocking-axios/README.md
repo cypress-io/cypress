@@ -26,4 +26,4 @@ cy.stub(Axios, 'get').resolves({
 
 ![Mocked get](./images/mock-get.png)
 
-See [Users.vue](Users.vue) and [Users.cy.js](Users.cy.js).
+See [Users.vue](Users.vue) and [Users.cy.ts](Users.cy.ts).

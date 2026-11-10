@@ -2,12 +2,12 @@ import $ from 'jquery'
 import _ from 'lodash'
 
 // wrap the object in jquery
-export function wrap (obj) {
+function wrap (obj) {
   return $(obj)
 }
 
 const query = (selector, context) => {
-  // @ts-ignore
+  // @ts-expect-error - $.fn.init is not declared in the jQuery types
   return new $.fn.init(selector, context)
 }
 

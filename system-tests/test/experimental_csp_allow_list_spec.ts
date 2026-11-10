@@ -38,7 +38,6 @@ describe('e2e experimentalCspAllowList', () => {
         '*.foobar.com': '127.0.0.1',
       },
       e2e: {
-        allowCypressEnv: false,
       },
     },
   })
@@ -110,6 +109,7 @@ describe('e2e experimentalCspAllowList', () => {
         videoCompression: false,
         retries: 0,
         experimentalCspAllowList: ['form-action'],
+        screenshotOnRunFailure: false,
       },
     })
   })

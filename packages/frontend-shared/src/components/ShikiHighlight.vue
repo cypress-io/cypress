@@ -18,10 +18,12 @@ shikiWrapperClasses computed property.
 
 <template>
   <div class="text-left cursor-text">
+    <!-- eslint-disable vue/no-v-html -- rendered by Shiki, which escapes the code it highlights -->
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
       tabindex="0"
+      data-cy="code-highlight"
       :class="[
         'shiki-wrapper',
 
@@ -59,6 +61,7 @@ shikiWrapperClasses computed property.
       class="border rounded font-normal border-gray-100 py-[8px] text-[14px] leading-[24px] overflow-scroll"
       :class="[props.class, lineNumbers ? 'pl-[56px]' : 'pl-[8px]']"
     >{{ trimmedCode }}</pre>
+    <!-- eslint-enable vue/no-v-html -->
     <CopyButton
       v-if="copyButton"
       variant="outline"

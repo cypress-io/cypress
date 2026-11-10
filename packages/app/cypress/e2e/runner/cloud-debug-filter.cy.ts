@@ -19,9 +19,9 @@ describe('cloud debug test filtering', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
-    cy.get('.runnable-title').contains('t2')
+    cy.reporter().find('.runnable-title').contains('t2')
 
-    cy.get('.debug-dismiss').contains('1 / 4 tests').click()
+    cy.reporter().find('.debug-dismiss').contains('1 / 4 tests').click()
     cy.waitForSpecToFinish({ passCount: 2, failCount: 2 })
 
     cy.withCtx((ctx) => {
@@ -33,7 +33,7 @@ describe('cloud debug test filtering', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
-    cy.get('.runnable-title').contains('t4')
+    cy.reporter().find('.runnable-title').contains('t4')
   })
 
   it('wraps filter UI with large number of tests', () => {
@@ -74,9 +74,9 @@ describe('cloud debug test filtering', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
-    cy.get('.runnable-title').contains('t1')
+    cy.reporter().find('.runnable-title').contains('t1')
 
-    cy.get('.debug-dismiss').click().waitForSpecToFinish()
+    cy.reporter().find('.debug-dismiss').click().waitForSpecToFinish()
 
     // .only is ignored as it is not in set of filtered tests
     cy.withCtx((ctx) => {
@@ -88,9 +88,9 @@ describe('cloud debug test filtering', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
-    cy.get('.runnable-title').contains('t3')
+    cy.reporter().find('.runnable-title').contains('t3')
 
-    cy.get('.debug-dismiss').click().waitForSpecToFinish()
+    cy.reporter().find('.debug-dismiss').click().waitForSpecToFinish()
 
     // .skip is respected
     cy.withCtx((ctx) => {
@@ -101,10 +101,10 @@ describe('cloud debug test filtering', () => {
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1, pendingCount: 1 })
-    cy.get('.runnable-title').first().contains('t2')
-    cy.get('.runnable-title').last().contains('t3')
+    cy.reporter().find('.runnable-title').first().contains('t2')
+    cy.reporter().find('.runnable-title').last().contains('t3')
 
-    cy.get('.debug-dismiss').contains('2 / 4 tests').click().waitForSpecToFinish()
+    cy.reporter().find('.debug-dismiss').contains('2 / 4 tests').click().waitForSpecToFinish()
 
     // suite only is respected
     cy.withCtx((ctx) => {
@@ -115,7 +115,7 @@ describe('cloud debug test filtering', () => {
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
-    cy.get('.runnable-title').contains('t4')
+    cy.reporter().find('.runnable-title').contains('t4')
   })
 
   it('works with browser filter', () => {
@@ -127,9 +127,9 @@ describe('cloud debug test filtering', () => {
 
     cy.visitApp(`specs/runner?file=cypress/e2e/browsers.cy.js&mode=debug`)
 
-    cy.get('.runnable-title').eq(0).contains('t1 (skipped due to browser)')
-    cy.get('.runnable-title').eq(1).contains('s1 (skipped due to browser)')
-    cy.get('.runnable-title').eq(2).contains('t2')
+    cy.reporter().find('.runnable-title').eq(0).contains('t1 (skipped due to browser)')
+    cy.reporter().find('.runnable-title').eq(1).contains('s1 (skipped due to browser)')
+    cy.reporter().find('.runnable-title').eq(2).contains('t2')
   })
 
   it('filter is maintained across cross-domain reinitialization', () => {

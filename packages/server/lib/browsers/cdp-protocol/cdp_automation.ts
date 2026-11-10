@@ -8,15 +8,20 @@ import debugModule from 'debug'
 import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
-import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../../automation'
-import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie/util'
+import type { CyCookie, CyCookieFilter } from '../../automation/cookie/util'
+import { cookieMatches } from '../../automation/cookie/util'
 import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
-import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
+import type { CriClient } from './cri-client'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
+import { CDPDisconnectedError } from './cri-errors'
+import { normalizeResourceType } from './normalize-resource-type'
 import { cdpKeyPress } from '../../automation/commands/key_press'
+import { AUT_FRAME_HEADER } from '../constants'
 
-import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 
 import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
@@ -27,22 +32,19 @@ export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
 
+const debug = debugModule('cypress:server:browsers:cdp_automation')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
+
+// `cookies` is left out because Network.clearBrowserCookies clears every
+// cookie at once, and `file_systems` because it is very slow to clear:
+// https://github.com/cypress-io/cypress/pull/32703
+const RESET_STORAGE_TYPES = 'indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage'
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {
     format: 'jpeg',
     everyNthFrame,
   }
-}
-
-export const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
-  resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
-  if (validResourceTypes.includes(resourceType as ResourceType)) {
-    return resourceType as ResourceType
-  }
-
-  return 'other'
 }
 
 export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
@@ -54,12 +56,24 @@ export type OffFn = <T extends CdpEvent>(eventName: T, cb: (data: any) => void) 
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
   frame: Protocol.Page.Frame
+  childFrames?: HasFrame[]
 }
 
-// the resource types passed through to request middleware / cy.intercept matching; any
-// other type reported by the protocol (e.g. 'document', 'media', 'preflight') normalizes to 'other'
-// CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
-const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
+const findFrameById = (frameTree: HasFrame | undefined, frameId: string): HasFrame | undefined => {
+  for (const child of frameTree?.childFrames || []) {
+    if (child.frame?.id === frameId) {
+      return child
+    }
+
+    const descendant = findFrameById(child, frameId)
+
+    if (descendant) {
+      return descendant
+    }
+  }
+
+  return undefined
+}
 
 export class CdpAutomation implements CDPClient, AutomationMiddleware {
   on: OnFn
@@ -67,10 +81,12 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   send: SendDebuggerCommand
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
+  private autFrameId: string | undefined
+  private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
 
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false, private storageOrigins: Set<string> = new Set()) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
@@ -92,8 +108,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       try {
         await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
       } catch (e) {
-        // swallow this error if the CRI connection was reset
-        if (!e.message.includes('browser CRI connection was reset')) {
+        // swallow this error if the CRI connection was reset - the ack racing a
+        // disconnect is expected and not actionable
+        if (!CDPDisconnectedError.isCDPDisconnectedError(e)) {
           throw e
         }
       }
@@ -102,8 +119,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
+  /**
+   * @param storageOrigins the origins the browser has sent requests to since
+   * the last `reset:browser:state`. Pass the same set to every instance created
+   * for one browser, so a reset clears origins that an earlier tab's instance
+   * recorded.
+   */
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean, storageOrigins?: Set<string>): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless, storageOrigins)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
@@ -173,6 +196,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       return
     }
 
+    this.recordStorageOrigin(url)
+
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
     // Firefox lacks support for urlFragment and initiator, two nice-to-haves
     const browserPreRequest: BrowserPreRequest = {
@@ -192,6 +217,53 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
 
     await this.automation.onBrowserPreRequest?.(browserPreRequest)
+  }
+
+  private recordStorageOrigin (url: string) {
+    try {
+      const { protocol, origin } = new URL(url)
+
+      if (protocol === 'http:' || protocol === 'https:') {
+        this.storageOrigins.add(origin)
+      }
+    } catch {
+      // not a parseable URL, so it has no origin that could hold storage
+    }
+  }
+
+  // Chrome rejects `origin: '*'` from version 158 on, so each origin the
+  // browser has requested is cleared by name. Every clear runs even when one
+  // fails, and any failure is then thrown: a spec that starts with the last
+  // spec's data fails in ways that are hard to trace back to this. An origin
+  // that failed is kept for the next reset.
+  private async resetBrowserState () {
+    const origins = [...this.storageOrigins]
+
+    this.storageOrigins.clear()
+
+    debug('resetting browser state for origins %o', origins)
+
+    const clears: [string, Promise<unknown>][] = [
+      ['Network.clearBrowserCookies', this.sendDebuggerCommandFn('Network.clearBrowserCookies')],
+      ['Network.clearBrowserCache', this.sendDebuggerCommandFn('Network.clearBrowserCache')],
+      ...origins.map((origin): [string, Promise<unknown>] => {
+        return [`Storage.clearDataForOrigin for ${origin}`, this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin, storageTypes: RESET_STORAGE_TYPES })
+        .catch((err) => {
+          this.storageOrigins.add(origin)
+          throw err
+        })]
+      }),
+    ]
+
+    const results = await Promise.allSettled(clears.map(([, clear]) => clear))
+
+    const failures = results.flatMap((result, i) => {
+      return result.status === 'rejected' ? [`${clears[i][0]}: ${result.reason?.message ?? result.reason}`] : []
+    })
+
+    if (failures.length) {
+      throw new Error(`Cypress could not clear the browser's state before the next spec:\n\n${failures.join('\n')}`)
+    }
   }
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
@@ -288,19 +360,21 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     return _.get(cookies, 0, null)
   }
 
-  private _updateFrameTree = (client: CriClient, eventName) => async () => {
-    debugVerbose(`update frame tree for ${eventName}`)
+  private _updateFrameTree = (client: CriClient, eventName) => {
+    return async () => {
+      debugVerbose(`update frame tree for ${eventName}`)
 
-    this.gettingFrameTree = (async () => {
-      try {
-        this.frameTree = (await client.send('Page.getFrameTree')).frameTree
-        debugVerbose('frame tree updated')
-      } catch (err) {
-        debugVerbose('failed to update frame tree:', err.stack)
-      } finally {
-        this.gettingFrameTree = null
-      }
-    })()
+      this.gettingFrameTree = (async () => {
+        try {
+          this.frameTree = (await client.send('Page.getFrameTree')).frameTree
+          debugVerbose('frame tree updated')
+        } catch (err) {
+          debugVerbose('failed to update frame tree:', err.stack)
+        } finally {
+          this.gettingFrameTree = null
+        }
+      })()
+    }
   }
 
   private _continueRequest = (client, params, header?) => {
@@ -332,6 +406,32 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     })
   }
 
+  /**
+   * Locates the AUT frame within a frame tree. The runner seeds the AUT
+   * iframe's window.name with AUT_FRAME_NAME_IDENTIFIER, but the AUT can
+   * overwrite window.name at any point, so the id of the frame we last matched
+   * by name is remembered and reused for as long as that frame is attached —
+   * ids are stable for the lifetime of the iframe element.
+   */
+  private _findAutFrame = (frameTree: HasFrame | undefined): HasFrame | undefined => {
+    const isAutName = (item: HasFrame) => !!item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
+
+    let frame = _.find(frameTree?.childFrames || [], isAutName) as HasFrame | undefined
+
+    // Cy-in-cy nests the real AUT under the outer AUT frame
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
+      frame = _.find(frame.childFrames || [], isAutName) as HasFrame | undefined
+    }
+
+    if (frame) {
+      this.autFrameId = frame.frame.id
+
+      return frame
+    }
+
+    return this.autFrameId ? findFrameById(frameTree, this.autFrameId) : undefined
+  }
+
   private _isAUTFrame = async (frameId: string) => {
     debugVerbose('need frame tree')
 
@@ -343,15 +443,45 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       await this.gettingFrameTree
     }
 
-    const frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
-      return frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
-    }) as HasFrame | undefined
+    const autFrame = this._findAutFrame(this.frameTree)
 
-    if (frame) {
-      return frame.frame.id === frameId
+    return !!autFrame && autFrame.frame.id === frameId
+  }
+
+  isAUTFrame = (frameId: string) => {
+    return this._isAUTFrame(frameId)
+  }
+
+  /**
+   * Notifies the listener with the committed URL when the AUT frame
+   * navigates. Protocol-neutral surface: the consumer (the CDP Fetch network
+   * runtime's simulated-top tracking) gets the fact of an AUT document
+   * commit without referencing CDP events or frame ids.
+   */
+  onAUTFrameNavigated = (listener: (url: string) => void): (() => void) => {
+    this.autFrameNavigatedListener = listener
+
+    return () => {
+      // only clear our own subscription — a stale unsubscribe (e.g. a
+      // stopped runtime) must not wipe a successor's
+      if (this.autFrameNavigatedListener === listener) {
+        this.autFrameNavigatedListener = undefined
+      }
+    }
+  }
+
+  private _onFrameNavigated = async (params: Protocol.Page.FrameNavigatedEvent) => {
+    if (!this.autFrameNavigatedListener) {
+      return
     }
 
-    return false
+    try {
+      if (await this._isAUTFrame(params.frame.id)) {
+        this.autFrameNavigatedListener?.(params.frame.url)
+      }
+    } catch (err) {
+      debugVerbose('frameNavigated AUT lookup failed: %s', err?.message)
+    }
   }
 
   private _getAutFrame = async () => {
@@ -364,24 +494,19 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
       const frameTree = (await this.send('Page.getFrameTree')).frameTree
 
-      let frame = _.find(frameTree?.childFrames || [], (item: HasFrame) => {
-        return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
-      }) as HasFrame | undefined
-
-      // If we are in E2E Cypress in Cypress testing, we need to get the frame from the child frames of the AUT frame. Else we are reloading what would be the "top" frame under test (with the AUT and reporter_)
-      if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
-        // @ts-expect-error
-        frame = _.find(frame?.childFrames || [], (item: HasFrame) => {
-          return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
-        }) as HasFrame | undefined
-      }
+      let frame = this._findAutFrame(frameTree)
 
       if (!frame) {
-        // if for whatever reason we cannot identify the AUT frame by name, we will fall back to the first child frame that exists.
-        // The first child frame should always be the AUT frame, followed by the spec frame
-        if (frameTree?.childFrames?.[0]) {
-          frame = frameTree.childFrames[0]
-        } else {
+        // if for whatever reason we cannot identify the AUT frame, fall back to the first child
+        // frame that is not one of the runner's own iframes — the AUT is the only child of top
+        // that the runner does not name itself
+        debugVerbose('could not identify AUT frame, falling back to the first non-runner child frame %o', { childFrameNames: frameTree?.childFrames?.map((item) => item.frame?.name) })
+
+        frame = _.find(frameTree?.childFrames || [], (item: HasFrame) => {
+          return !isRunnerFrameName(item.frame?.name)
+        }) as HasFrame | undefined
+
+        if (!frame) {
           throw new Error('Could not find AUT frame')
         }
       }
@@ -390,7 +515,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     } catch (err) {
       debugVerbose('failed to get aut frame:', err.stack)
 
-      throw new Error('Could not find AUT frame')
+      throw new Error('Could not find AUT frame', { cause: err })
     }
   }
 
@@ -410,7 +535,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
         return this._continueRequest(client, params, {
-          name: 'X-Cypress-Is-AUT-Frame',
+          name: AUT_FRAME_HEADER,
           value: 'true',
         })
       }
@@ -427,6 +552,16 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     client.on('Page.frameAttached', this._updateFrameTree(client, 'Page.frameAttached'))
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
+    client.on('Page.frameNavigated', this._onFrameNavigated)
+  }
+
+  /**
+   * Fetch and cache the current frame tree. Needed when attaching to an
+   * already-loaded page (e.g. cy-in-cy connectToExisting) where frameAttached
+   * will not fire for existing frames.
+   */
+  seedFrameTree = async (client: CriClient) => {
+    await this._updateFrameTree(client, 'seedFrameTree')()
   }
 
   onRequest = async <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
@@ -524,18 +659,13 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         try {
           screenshot = await this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         } catch (err) {
-          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
+          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`, { cause: err })
         }
 
         return `data:image/png;base64,${screenshot.data}`
       }
       case 'reset:browser:state':
-        return Promise.all([
-          // Note that we are omitting `file_systems` as it is very non-performant to clear:
-          // https://github.com/cypress-io/cypress/pull/32703
-          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
-          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
-        ])
+        return this.resetBrowserState()
       case 'reset:browser:tabs:for:next:spec':
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':

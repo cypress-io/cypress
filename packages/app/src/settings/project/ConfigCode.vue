@@ -11,7 +11,7 @@
         prefix-icon-class="text-gray-500"
         @click="onClick"
       >
-        {{ t('file.edit') }}
+        Edit
       </Button>
     </OpenConfigFileInIDE>
     <code
@@ -51,7 +51,6 @@
 <script lang="ts" setup>
 import Button from '@cy/components/Button.vue'
 import IconCode from '~icons/mdi/code'
-import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import RenderObject from './renderers/RenderObject.vue'
 import { gql } from '@urql/core'
@@ -79,6 +78,4 @@ const sortAlphabetical = (config) => {
 
 // a bug in vite demands that we do this passthrough
 const colorMap = CONFIG_LEGEND_COLOR_MAP
-
-const { t } = useI18n()
 </script>

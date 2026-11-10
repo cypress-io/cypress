@@ -6,7 +6,7 @@ import path from 'path'
 import fs from 'fs'
 
 import { restoreLoadHook, sourceDefaultWebpackDependencies } from '../src/helpers/sourceRelativeWebpackModules'
-import { WebpackDevServerConfig } from '../src/devServer'
+import type { WebpackDevServerConfig } from '../src/devServer'
 
 type ProjectDirs = typeof fixtureDirs
 

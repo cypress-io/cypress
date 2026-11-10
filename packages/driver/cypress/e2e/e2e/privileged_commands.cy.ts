@@ -3,7 +3,6 @@ import { runImportedPrivilegedCommands } from '../../support/utils'
 const isWebkit = Cypress.isBrowser({ family: 'webkit' })
 
 function runSpecFunctionCommands () {
-  cy.exec('echo "hello"')
   cy.readFile('cypress/fixtures/app.json')
   cy.writeFile('cypress/_test-output/written.json', 'contents')
   cy.task('return:arg', 'arg')
@@ -29,7 +28,6 @@ describe('privileged commands', () => {
       ranInBeforeEach = true
 
       // ensures these run properly in hooks, but only run it once per spec run
-      cy.exec('echo "hello"')
       cy.readFile('cypress/fixtures/app.json')
       cy.writeFile('cypress/_test-output/written.json', 'contents')
       cy.task('return:arg', 'arg')
@@ -40,7 +38,6 @@ describe('privileged commands', () => {
     })
 
     it('passes in test body', () => {
-      cy.exec('echo "hello"')
       cy.readFile('cypress/fixtures/app.json')
       cy.writeFile('cypress/_test-output/written.json', 'contents')
       cy.task('return:arg', 'arg')
@@ -84,24 +81,22 @@ describe('privileged commands', () => {
 
     it('handles null argument(s)', () => {
       cy.task('return:arg', null).should('be.null')
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes null as the options argument
       cy.task('return:arg', null, null).should('be.null')
       cy.task('return:arg', null, { timeout: 9999 }).should('be.null')
     })
 
     it('handles extra, unexpected arguments', () => {
-      // @ts-expect-error
-      cy.exec('echo "hey-o"', { log: true }, { should: 'be ignored' })
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.readFile('cypress/fixtures/app.json', 'utf-8', { log: true }, { should: 'be ignored' })
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.writeFile('cypress/_test-output/written.json', 'contents', 'utf-8', { log: true }, { should: 'be ignored' })
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.task('return:arg', 'arg2', { log: true }, { should: 'be ignored' })
-      // @ts-expect-error
+      // @ts-expect-error - deliberately passes an extra argument
       cy.get('#basic').selectFile('cypress/fixtures/valid.json', { log: true }, { should: 'be ignored' })
       if (!isWebkit) {
-        // @ts-expect-error
+        // @ts-expect-error - deliberately passes an extra argument
         cy.origin('http://foobar.com:3500', {}, () => {}, { should: 'be ignored' })
       }
     })
@@ -119,9 +114,18 @@ describe('privileged commands', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
     })
 
+    it('passes when a command retries until its assertion passes', () => {
+      let attempts = 0
+
+      cy.readFile('cypress/fixtures/app.json').should(() => {
+        expect(++attempts).to.be.greaterThan(2)
+      })
+    })
+
     it('handles args being mutated', () => {
       const obj = { foo: 'bar' }
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- mutates the args while the privileged command is queued
       cy.wait(10).then(() => {
         obj.foo = 'baz'
       })
@@ -164,7 +168,6 @@ describe('privileged commands', () => {
 
     it('passes in test body .then() callback', () => {
       cy.then(() => {
-        cy.exec('echo "hello"')
         cy.readFile('cypress/fixtures/app.json')
         cy.writeFile('cypress/_test-output/written.json', 'contents')
         cy.task('return:arg', 'arg')
@@ -198,7 +201,6 @@ describe('privileged commands', () => {
     // cy.origin() doesn't currently have webkit support
     it('passes in .origin() callback', { browser: '!webkit' }, () => {
       cy.origin('http://foobar.com:3500', () => {
-        cy.exec('echo "hello"')
         cy.readFile('cypress/fixtures/app.json')
         cy.writeFile('cypress/_test-output/written.json', 'contents')
         cy.task('return:arg', 'arg')
@@ -213,7 +215,7 @@ describe('privileged commands', () => {
 
   describe('in AUT', () => {
     const strategies = ['inline', 'then', 'eval', 'function']
-    const commands = ['exec', 'readFile', 'writeFile', 'selectFile', 'task']
+    const commands = ['readFile', 'writeFile', 'selectFile', 'task']
 
     // cy.origin() doesn't currently have webkit support
     if (!Cypress.isBrowser({ family: 'webkit' })) {
@@ -260,6 +262,7 @@ describe('privileged commands', () => {
               // that script from running
               cy.visit(`/aut-commands?appendToSpecFrame=true&strategy=${strategy}&command=${command}`)
               // wait 500ms then ensure the command did not run
+              // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the command never runs, so give it time to run first
               cy.wait(500).then(() => {
                 expect(ranCommand, `expected cy.${command}() not to run, but it did`).to.be.false
               })

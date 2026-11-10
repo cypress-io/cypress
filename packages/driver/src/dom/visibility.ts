@@ -5,7 +5,7 @@ import $elements from './elements'
 import $coordinates from './coordinates'
 import * as $transform from './transform'
 const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
-import { fastIsHidden } from './visibility/fastIsHidden'
+import { modernIsHidden } from './visibility/modernIsHidden'
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
@@ -23,10 +23,10 @@ const isVisible = (el) => {
 // as elements with `opacity: 0` are hidden yet actionable
 
 const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
-  if (Cypress.config('experimentalFastVisibility')) {
+  if (Cypress.config('visibilityStrategy') === 'modern') {
     ensureEl(el, methodName)
 
-    return fastIsHidden(el, options)
+    return modernIsHidden(el, options)
   }
 
   if (isStrictlyHidden(el, methodName, options, isHidden)) {
@@ -161,12 +161,14 @@ const elHasNoEffectiveWidthOrHeight = ($el: JQuery) => {
     transform = 'none'
   }
 
-  const hasTextContent = !!el.textContent?.trim().length
-
   const width = elClientWidth($el)
   const height = elClientHeight($el)
 
-  return (isZeroLengthAndTransformNone(width, height, transform) && !hasTextContent) ||
+  // `el.textContent` serializes the element's entire subtree into a fresh
+  // string, and this runs once per ancestor, so keep it inside the
+  // short-circuit and read it only when the zero-length/transform-none
+  // branch needs it.
+  return (isZeroLengthAndTransformNone(width, height, transform) && !el.textContent?.trim().length) ||
   isZeroLengthAndOverflowHidden(width, height, elHasOverflowHidden($el)) ||
   (el.getClientRects().length <= 0)
 }
@@ -424,7 +426,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   }
 
   if (elHasDisplayContents($el)) {
-    let $parent = getParent($el)
+    const $parent = getParent($el)
 
     return elIsHiddenByAncestors($parent, checkOpacity, $parent)
   }
@@ -522,17 +524,56 @@ const parentHasOpacityZero = function ($el) {
 }
 
 /* eslint-disable no-cond-assign */
-export const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
+export const getReasonIsHidden = function (elOrJquery, options = { checkOpacity: true }) {
   // TODO: need to add in the reason an element
   // is hidden when its fixed position and its
   // either being covered or there is no el
 
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
   const node = stringifyElement($el, 'short')
-  let width = elClientWidth($el)
-  let height = elClientHeight($el)
+  const width = elClientWidth($el)
+  const height = elClientHeight($el)
   let $parent
   let parentNode
   let $select
+
+  if (Cypress.config('visibilityStrategy') === 'modern') {
+    // for a multi-element subject, describe the first element that modernIsHidden actually caught —
+    // checking only $el[0] would misattribute the cause when a later element is the hidden one.
+    const hiddenEl = $el.toArray().find((e) => modernIsHidden(e, options)) ?? $el[0]
+    const $hiddenEl = $jquery.wrap(hiddenEl)
+    const hiddenNode = stringifyElement($hiddenEl, 'short')
+
+    // detached elements fail `Element.checkVisibility()` because they are not rendered, but the
+    // generic checkVisibility message would be unhelpful — surface the structural cause instead.
+    if (isDetached($hiddenEl)) {
+      return `This element \`${hiddenNode}\` is not visible because it is detached from the DOM`
+    }
+
+    // mirror modernIsHidden: checkVisibility() runs first, then a zero-dimension guard.
+    // attribute the failure to whichever check actually rejected the element and report
+    // only the values relevant to that check.
+    const passesCheckVisibility = hiddenEl.checkVisibility({
+      contentVisibilityAuto: true,
+      opacityProperty: options.checkOpacity,
+      visibilityProperty: true,
+    } as CheckVisibilityOptions)
+
+    if (!passesCheckVisibility) {
+      const style = getComputedStyle(hiddenEl)
+      const contentVisibility = style.getPropertyValue('content-visibility') || 'visible'
+
+      return `This element \`${hiddenNode}\` is not visible per \`Element.checkVisibility()\`. Computed: \`display: ${style.display}\`, \`visibility: ${style.visibility}\`, \`opacity: ${style.opacity}\`, \`content-visibility: ${contentVisibility}\`.`
+    }
+
+    const rect = hiddenEl.getBoundingClientRect()
+
+    if (rect.width <= 0 || rect.height <= 0) {
+      return `This element \`${hiddenNode}\` is not visible because it has an effective width and height of: \`${rect.width} x ${rect.height}\` pixels.`
+    }
+
+    return `This element \`${hiddenNode}\` is not visible.`
+  }
 
   // if the element is an option or optgroup then we need to get the
   // select so it can be used when determining the hidden reason
@@ -601,8 +642,8 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 
   if ($parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))) {
     parentNode = stringifyElement($parent, 'short')
-    let width = elClientWidth($parent)
-    let height = elClientHeight($parent)
+    const width = elClientWidth($parent)
+    const height = elClientHeight($parent)
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
@@ -635,5 +676,4 @@ export default {
   isHiddenByAncestors,
   getReasonIsHidden,
   isW3CFocusable,
-  isW3CRendered,
 }

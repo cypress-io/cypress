@@ -2,7 +2,12 @@
   "name": "@packages/stderr-filtering",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "yarn clean && tsc",
     "clean": "rimraf -rf ./{dist,coverage}",
@@ -10,24 +15,20 @@
     "test": "vitest",
     "watch": "tsc --watch"
   },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "dependencies": {
     "debug": "^4.3.4"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@types/node": "^22.18.7",
+    "@types/node": "^24.10.1",
     "@vitest/coverage-v8": "^3.2.4",
-    "eslint": "^9.22.0",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "rimraf": "^6.1.1",
     "typescript": "^5.8.2",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "dist"
-  ],
-  "types": "dist/index.d.ts",
-  "license": "MIT",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   }
 }

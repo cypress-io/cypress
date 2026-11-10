@@ -9,7 +9,7 @@ import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { GracefulExit } from '../util/graceful-exit'
 import { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLServer'
-import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+import { globalPubSub, getCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
 
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
@@ -63,13 +63,10 @@ export = {
       // different color.
       backgroundColor: 'white',
 
-      // Dimensions of the Electron window on initial launch.
-      // Because we are migrating users that may have
-      // a width smaller than the min dimensions, we will
-      // force the dimensions to be within the minimum bounds.
-      //
-      // Doing this before launch (instead of relying on minW + minH)
-      // prevents the window from jumping.
+      // Dimensions of the Electron window on initial launch. A saved size can
+      // be smaller than the minimum, so force the dimensions within bounds
+      // before launch (instead of relying on minW + minH) to stop the window
+      // from jumping.
       width: chooseDimensions({
         preferred: preferredWidth,
         minimum: minWidth,
@@ -130,7 +127,6 @@ export = {
         show: true,
         frame: true,
         transparent: false,
-        // @ts-ignore
         icon: image.createFromPath(cyIcons.getPathToIcon('icon_64x64.png')),
       },
     }

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <div id="status">idle</div>
+  <script>
+    async function load () {
+      try {
+        // A real request back to the file server (this page), so the run has a
+        // request that goes to origin.
+        await fetch(window.location.href)
+        // A request cy.intercept stubs, so it never reaches origin.
+        const res = await fetch('/api/users')
+        const body = await res.json()
+
+        document.getElementById('status').textContent = body.ok ? 'stubbed-ok' : 'stubbed-no'
+      } catch (err) {
+        document.getElementById('status').textContent = 'error'
+      }
+    }
+
+    load()
+  </script>
+</body>
+</html>

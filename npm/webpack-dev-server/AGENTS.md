@@ -32,7 +32,7 @@ yarn test -- "<glob-pattern>"                # run vitest specs matching a glob
 
 ## Gotchas / Notes
 
-- Uses a "cypress-in-cypress" integration test approach (special env vars required; see `cypress:run` script).
+- Integration tests use the cypress-in-cypress pattern via the `cypress:run` script, which sets the env vars for you. See [`packages/app/AGENTS.md`](../../packages/app/AGENTS.md) for what they are and why there are two.
 - Webpack itself is a dev dependency only (`webpack: "npm:webpack@^5"`) — consumers supply their own webpack install via their project.
 
 ## Integration Points

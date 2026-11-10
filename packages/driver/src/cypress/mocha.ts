@@ -1,6 +1,6 @@
-/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
-import $errUtils, { CypressError } from './error_utils'
+import type { CypressError } from './error_utils'
+import $errUtils from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
 import $sourceMapUtils from './source_map_utils'
@@ -55,9 +55,9 @@ type NormalizedRetriesConfig = {
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
 export function calculateTestStatus (test: CypressTest, config?: NormalizedRetriesConfig) {
-  // @ts-expect-error
+  // @ts-expect-error - currentRetry() is protected in the mocha types
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
-  let shouldAttemptsContinue: boolean = true
+  let shouldAttemptsContinue: boolean
   let outerTestStatus: 'passed' | 'failed' | undefined = undefined
 
   const passedTests = _.filter(test.prevAttempts, (o) => o.state === 'passed')
@@ -79,7 +79,7 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
     const passingAttempts = passedTests.length
 
     // Below variables are used for when strategy is "detect-flake-and-pass-on-threshold" or no strategy is defined
-    let passesRequired = config?.strategy !== 'detect-flake-but-always-fail' ?
+    const passesRequired = config?.strategy !== 'detect-flake-but-always-fail' ?
       (config?.passesRequired || 1) :
       null
 
@@ -88,7 +88,7 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
       null
 
     // Below variables are used for when strategy is only "detect-flake-but-always-fail"
-    let stopIfAnyPassed = config?.strategy === 'detect-flake-but-always-fail' ?
+    const stopIfAnyPassed = config?.strategy === 'detect-flake-but-always-fail' ?
       (config.stopIfAnyPassed || false) :
       null
 
@@ -136,8 +136,8 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
   }
 }
 
-type MochaArgs = [string, Function | undefined]
-function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string = '', _testConfig?: Record<string, any>) {
+type MochaArgs = [string, ((...args: any[]) => unknown) | undefined]
+function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: (...args: any[]) => any, testCallback: ((...args: any[]) => unknown) | string = '', _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
 
   // attached testConfigOverrides will execute before `runner:test:before:run` event
@@ -409,11 +409,18 @@ const patchRunnerFail = () => {
   }
 }
 
+// Cypress re-runs the same hook object when it retries a test, and mocha ignores done()
+// while timedOut is still set from the previous attempt's runnable timeout, so the retried
+// hook could never finish. Clear it when mocha actually starts this attempt.
+function runFreshAttempt (this: Mocha.Runnable & { timedOut?: boolean }, ...args) {
+  this.timedOut = false
+
+  return runnableRun.apply(this, args)
+}
+
 const patchRunnableRun = (Cypress) => {
   Runnable.prototype.run = function (...args) {
-    const runnable = this
-
-    Cypress.action('mocha:runnable:run', runnableRun, runnable, args)
+    Cypress.action('mocha:runnable:run', runFreshAttempt, this, args)
   }
 }
 
@@ -451,7 +458,7 @@ function getNormalizedRetriesConfig (Cypress: Cypress.Cypress): NormalizedRetrie
     }
   }
 
-  const enablementKey: 'openMode'|'runMode' = isInOpenMode ? 'openMode' : 'runMode'
+  const enablementKey: 'openMode' | 'runMode' = isInOpenMode ? 'openMode' : 'runMode'
   const enablementValue = retriesConfig[enablementKey]
 
   // if retries are explicitly disabled, return an empty object
@@ -576,17 +583,15 @@ const patchSuiteAddSuite = (specWindow) => {
 
 const patchRunnableResetTimeout = () => {
   Runnable.prototype.resetTimeout = function () {
-    const runnable = this
-    // @ts-ignore Cypress.runner is not defined
     const currentRunner = Cypress.runner
 
     const ms = this.timeout() || 1e9
 
     this.clearTimeout()
 
-    const getErrPath = function () {
+    const getErrPath = () => {
       // we've yield an explicit done callback
-      if (runnable.async) {
+      if (this.async) {
         return 'mocha.async_timed_out'
       }
 
@@ -594,8 +599,7 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      // @ts-ignore Cypress.runner is not defined
-      if (runnable.state === 'passed' || Cypress.runner !== currentRunner) {
+      if (this.state === 'passed' || Cypress.runner !== currentRunner) {
         // this timeout can be reached at the same time that a
         // user does an asynchronous `done`, so double-check
         // that the test has not already passed before timing out
@@ -604,8 +608,8 @@ const patchRunnableResetTimeout = () => {
 
       const err = $errUtils.errByPath(getErrPath(), { ms })
 
-      runnable.callback(err)
-      runnable.timedOut = true
+      this.callback(err)
+      this.timedOut = true
     }, ms)
   }
 }

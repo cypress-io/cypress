@@ -7,7 +7,8 @@ import debugLib from 'debug'
 import { parse, print } from 'recast'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
-import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
+import type { ASTComponentDefinitionConfig } from './astConfigHelpers'
+import { addComponentDefinition, addE2EDefinition } from './astConfigHelpers'
 
 const debug = debugLib('cypress:config:addToCypressConfig')
 
@@ -51,7 +52,7 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
     return print(ast).code
   } catch (e: any) {
     debug(`Error adding properties to %s: %s`, filePath, e.stack)
-    throw new Error(`Unable to automerge with the config file`)
+    throw new Error(`Unable to automerge with the config file`, { cause: e })
   }
 }
 
@@ -62,7 +63,7 @@ interface AddProjectIdToCypressConfigOptions {
 
 export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
-    let result = await fs.readFile(options.filePath, 'utf8')
+    const result = await fs.readFile(options.filePath, 'utf8')
     const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
       t.identifier('projectId'),
       t.identifier(options.projectId),
@@ -155,39 +156,31 @@ type OutputExtension = '.ts' | '.mjs' | '.js'
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string}) {
+function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string }) {
   if (defineConfigAvailable(projectRoot)) {
     if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
       return dedent`
         import { defineConfig } from 'cypress'
 
-        export default defineConfig({
-          allowCypressEnv: false,
-        })
+        export default defineConfig({})
       `
     }
 
     return dedent`
       const { defineConfig } = require('cypress')
 
-      module.exports = defineConfig({
-        allowCypressEnv: false,
-      })
+      module.exports = defineConfig({})
     `
   }
 
   if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
     return dedent`
-      export default {
-        allowCypressEnv: false,
-      }
+      export default {}
     `
   }
 
   return dedent`
-    module.exports = {
-      allowCypressEnv: false,
-    }
+    module.exports = {}
   `
 }
 

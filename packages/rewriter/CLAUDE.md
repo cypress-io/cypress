@@ -1,3 +1,0 @@
-# Rewriter
-
-@AGENTS.md

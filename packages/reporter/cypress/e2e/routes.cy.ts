@@ -1,10 +1,19 @@
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
-import { RootRunnable } from './../../src/runnables/runnables-store'
+import type { RootRunnable } from './../../src/runnables/runnables-store'
+
+const runnerStore = new MobxRunnerStore()
+
+runnerStore.setSpec({
+  name: 'foo',
+  absolute: '/foo/bar',
+  relative: 'foo/bar',
+})
 
 describe('routes', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
-  let start: Function
+  let start: () => void
 
   beforeEach(() => {
     cy.fixture('runnables_routes').then((_runnables) => {
@@ -16,13 +25,7 @@ describe('routes', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-        },
+        runnerStore,
       })
     })
 

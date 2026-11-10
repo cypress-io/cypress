@@ -3,7 +3,7 @@ import systemTests from '../lib/system-tests'
 
 describe('e2e cdp', function () {
   systemTests.setup()
-  let restoreEnv: Function
+  let restoreEnv: () => void
 
   beforeEach(() => {
     restoreEnv = mockedEnv({
@@ -21,5 +21,14 @@ describe('e2e cdp', function () {
     spec: 'spec.cy.ts',
     browser: 'chrome',
     skip: true, // TODO: Investigate and unskip flaky test
+  })
+
+  // Ported from the `fundamentals__chrome-remote-debugging` recipe in
+  // cypress-io/cypress-example-recipes. The remote debugging port is only
+  // reachable from a chromium-family browser, so this does not run in Electron.
+  systemTests.it('drives Chrome from setupNodeEvents over the remote debugging port', {
+    project: 'chrome-remote-debugging',
+    spec: 'spec.cy.ts',
+    browser: 'chrome',
   })
 })

@@ -2,7 +2,6 @@ import { defineConfig } from 'cypress'
 import path from 'path'
 
 export default defineConfig({
-  allowCypressEnv: false,
   fixturesFolder: false,
   component: {
     devServer: {

@@ -33,7 +33,7 @@ export function hashQueryCommand (Cypress: Cypress.Cypress, options: Partial<Cyp
   }
 }
 
-export function locationQueryCommand (Cypress: Cypress.Cypress, key: string, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+export function locationQueryCommand (Cypress: Cypress.Cypress, key?: string | Partial<Cypress.Loggable & Cypress.Timeoutable>, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
   // normalize arguments allowing key + options to be undefined
   // key can represent the options
   if (_.isObject(key)) {
@@ -76,7 +76,7 @@ export default (Commands, Cypress) => {
     return hashQueryCommand.call(this, Cypress, options)
   })
 
-  Commands.addQuery('location', function (key: string, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+  Commands.addQuery('location', function (key?: string | Partial<Cypress.Loggable & Cypress.Timeoutable>, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     return locationQueryCommand.call(this, Cypress, key, options)
   })
 }

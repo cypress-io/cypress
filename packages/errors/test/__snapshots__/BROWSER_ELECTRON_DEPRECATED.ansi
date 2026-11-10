@@ -1,0 +1,6 @@
+[31m[95mWarning:[39m[31m The [33mElectron[39m[31m browser is deprecated as a test browser and will be removed in a future version of Cypress.[39m
+[31m[39m
+[31mSwitch to Chrome or another installed browser to avoid a breaking change when you upgrade.[39m
+[31m[39m
+[31mRead more about supported browsers: https://on.cypress.io/launching-browsers[39m
+[31m[39m

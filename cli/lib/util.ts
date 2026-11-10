@@ -44,7 +44,9 @@ const getFileSize = async (filename: string): Promise<any> => {
   return size
 }
 
-const isBrokenGtkDisplayRe = /Gtk: cannot open display/
+// When DISPLAY is set but nothing is listening on it, Electron prints either the Gtk
+// message or the X server one, depending on its version.
+const isBrokenGtkDisplayRe = /Gtk: cannot open display|Missing X server or \$DISPLAY/
 
 const stringify = (val: any): string => {
   return _.isObject(val) ? JSON.stringify(val) : val
@@ -130,6 +132,14 @@ function isValidCypressInternalEnvValue (value: string | undefined): boolean {
 function isNonProductionCypressInternalEnvValue (value: string | undefined): boolean {
   return !_.isUndefined(value) && value !== 'production'
 }
+
+/**
+ * The version every package carries in a source checkout, which the release
+ * replaces with the computed one (see scripts/get-next-version.js). Comparing
+ * `pkgVersion()` against it is how the CLI knows it is running from the repo
+ * rather than from an install.
+ */
+export const DEVELOPMENT_VERSION = '0.0.0-development'
 
 /**
  * Prints NODE_OPTIONS using debug() module, but only
@@ -259,7 +269,12 @@ const getApplicationDataFolder = (...paths: string[]): string => {
   return p
 }
 
+export function posixify (path: string): string {
+  return path.replace(/\\/g, '/')
+}
+
 const util = {
+  posixify,
   normalizeModuleOptions,
   parseOpts,
   isValidCypressInternalEnvValue,
@@ -376,6 +391,11 @@ const util = {
     return chalk.blue(...args)
   },
 
+  // Download and unzip progress use this to limit how often they update.
+  // In an interactive terminal each update redraws the install task list,
+  // so updating for every chunk or entry slows the install down.
+  progressThrottleMs: 100,
+
   calculateEta (percent: number, elapsed: number): number {
     // returns the number of seconds remaining
 
@@ -390,11 +410,11 @@ const util = {
     return elapsed * (1 / (percent / 100)) - elapsed
   },
 
-  convertPercentToPercentage (num: number): number {
+  convertPercentToPercentage (num: number | null): number {
     // convert a percent with values between 0 and 1
     // with decimals, so that it is between 0 and 100
     // and has no decimal places
-    return Math.round(_.isFinite(num) ? (num * 100) : 0)
+    return num !== null && _.isFinite(num) ? Math.round(num * 100) : 0
   },
 
   secsRemaining (eta: number): string {
@@ -508,19 +528,19 @@ const util = {
 
     let result: string | undefined
 
-    if (process.env.hasOwnProperty(varName)) {
+    if (Object.prototype.hasOwnProperty.call(process.env, varName)) {
       debug(`Using ${varName} from environment variable`)
 
       result = process.env[varName]
-    } else if (process.env.hasOwnProperty(configVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarName)) {
       debug(`Using ${varName} from npm config`)
 
       result = process.env[configVarName]
-    } else if (process.env.hasOwnProperty(configVarNameLower)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarNameLower)) {
       debug(`Using ${varName.toLowerCase()} from npm config`)
 
       result = process.env[configVarNameLower]
-    } else if (process.env.hasOwnProperty(packageConfigVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 
       result = process.env[packageConfigVarName]

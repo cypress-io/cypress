@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import devServer from './plugins/dev-server'
 import { SocketBase } from './socket-base'
-import dfd from 'p-defer'
+import type { StartListeningOptions } from './socket-base'
 import type { Socket } from '@packages/socket'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import assert from 'assert'
@@ -9,7 +9,7 @@ import type { Automation } from './automation'
 const debug = Debug('cypress:server:socket-ct')
 
 export class SocketCt extends SocketBase {
-  #destroyAutPromise?: dfd.DeferredPromise<void>
+  #destroyAutPromise?: PromiseWithResolvers<void>
 
   constructor (config: Record<string, any>) {
     super(config)
@@ -43,7 +43,7 @@ export class SocketCt extends SocketBase {
     devServer.emitter.off('dev-server:compile:success', this.onCloudTestFileChange)
   }
 
-  startListening (server: DestroyableHttpServer, automation: Automation, config, options) {
+  startListening (server: DestroyableHttpServer, automation: Automation, config, options: StartListeningOptions) {
     return super.startListening(server, automation, config, options, {
       onSocketConnection: (socket: Socket) => {
         debug('do onSocketConnection')
@@ -57,7 +57,7 @@ export class SocketCt extends SocketBase {
   }
 
   destroyAut () {
-    this.#destroyAutPromise = dfd()
+    this.#destroyAutPromise = Promise.withResolvers<void>()
 
     this.toRunner('aut:destroy:init')
 

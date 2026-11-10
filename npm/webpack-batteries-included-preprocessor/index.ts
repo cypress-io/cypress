@@ -92,7 +92,7 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
 
   debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
 
-  let typeScriptPath: string | boolean | undefined | null = null
+  let typeScriptPath: string | boolean | undefined | null
 
   try {
     if (options.typescript === true) {
@@ -231,10 +231,6 @@ const getDefaultWebpackOptions = () => {
           loader: require.resolve('babel-loader'),
           options: getBabelLoaderOptions(),
         }],
-      }, {
-        test: /\.coffee$/,
-        exclude: [/node_modules/, /browserslist/],
-        loader: require.resolve('coffee-loader'),
       }],
     },
     plugins: [
@@ -262,7 +258,7 @@ const getDefaultWebpackOptions = () => {
       ...(Debug.enabled(WBADebugNamespace) ? [new BundleAnalyzerPlugin()] : []),
     ],
     resolve: {
-      extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
+      extensions: ['.js', '.json', '.jsx', '.mjs'],
       fallback: {
         assert: false,
         buffer: require.resolve('buffer/'),

@@ -61,6 +61,17 @@ export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary' | 'validator'
 }
 
 /**
+ * Whether the given browser is deprecated as a test browser and slated for
+ * removal in a future major version of Cypress. Centralized here so the
+ * GraphQL resolver (App) and run mode agree on what counts as deprecated —
+ * when the next browser is deprecated (or Electron's removal lands), this is
+ * the single place to update.
+ */
+export const isDeprecatedBrowser = (browser: Pick<FoundBrowser, 'name'>): boolean => {
+  return browser.name === 'electron'
+}
+
+/**
  * Partial browser object, returned by an OS-specific launcher helper.
  */
 export type DetectedBrowser = Pick<FoundBrowser, 'name' | 'path' | 'version'>

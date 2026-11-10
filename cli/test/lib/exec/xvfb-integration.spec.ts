@@ -7,7 +7,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
     },
@@ -32,7 +32,7 @@ describe('lib/exec/xvfb-integration', function () {
     })
 
     it('outputs when enabled', function () {
-      const processStderrWriteSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(undefined)
+      const processStderrWriteSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
 
       Debug.enable(xvfb._debugXvfb.namespace)
 
@@ -43,7 +43,7 @@ describe('lib/exec/xvfb-integration', function () {
     })
 
     it('does not output when disabled', function () {
-      const processStderrWriteSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(undefined)
+      const processStderrWriteSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
 
       Debug.disable()
 

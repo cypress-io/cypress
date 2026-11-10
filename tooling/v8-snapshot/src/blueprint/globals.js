@@ -5,8 +5,6 @@
 // These stub common globals during snapshot creation and are switched out when
 // the app initializes the snapshot on startup. See ./set-globals.js
 
-const outerScope = this
-
 function createElement (_type) {
   return {
     innerHTML: '',
@@ -45,7 +43,7 @@ Object.defineProperties(document, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_document () {
   return document
 }
@@ -71,7 +69,7 @@ Object.defineProperties(global, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_global () {
   return global
 } // Globally visible function and constructor names that are available in an Electron renderer window, but not visible
@@ -787,8 +785,10 @@ function makeGlobalPlaceholder (globalFunctionName) {
 // functions are set as properties on our "global" stand-in and also in this function's scope, so bare references
 // will also capture the placeholder function (`var a = setTimeout` and `var a = global.setTimeout`).
 
+// `this` is the object blueprint.ts calls generateSnapshot with, so this loop
+// must stay directly in that function body rather than in a nested function
 for (const globalFunctionName of globalFunctionNames) {
-  if (outerScope[globalFunctionName] !== undefined) {
+  if (this[globalFunctionName] !== undefined) {
     // This happens when the snapshot script is eval'd in tests.
     continue
   }
@@ -802,7 +802,7 @@ for (const globalFunctionName of globalFunctionNames) {
     },
   })
 
-  outerScope[globalFunctionName] = placeholder
+  this[globalFunctionName] = placeholder
 }
 
 let window = {}
@@ -828,7 +828,7 @@ Object.defineProperties(window, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_window () {
   return window
 }
@@ -872,7 +872,7 @@ Object.defineProperties(console, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- snapbuild rewrites bundled code to call it
 function get_console () {
   return console
 }
@@ -891,7 +891,6 @@ Object.defineProperties(__pathResolver, {
   },
 })
 
-// eslint-disable-next-line no-unused-vars
 function __resolve_path (dir) {
   return __pathResolver.resolve(dir)
 }
