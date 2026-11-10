@@ -43,6 +43,12 @@ describe('lib/automation/cookie/document-cookie', () => {
       expect(browserCookie()).toMatchObject({ path: '/account/settings' })
     })
 
+    it('a cookie with a relative Path at the directory of the page', async () => {
+      await write('foo=bar; Path=fixtures', 'https://www.foobar.com/account/settings/page.html')
+
+      expect(browserCookie()).toMatchObject({ path: '/account/settings' })
+    })
+
     it('a cookie without a name', async () => {
       await write('foo')
       await write('=bar=baz')
