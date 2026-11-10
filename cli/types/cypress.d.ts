@@ -4333,9 +4333,11 @@ declare namespace Cypress {
    */
   interface TypeOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
-     * Delay after each keypress (ms)
+     * Time, in milliseconds, between each keystroke.
+     * When not set, the [`keystrokeDelay`](https://on.cypress.io/configuration) configuration option is used,
+     * then the value set with [Cypress.Keyboard.defaults()](https://on.cypress.io/keyboard-api), falling back to `0`.
      *
-     * @default 10
+     * @default 0
      */
     delay: number
     /**
