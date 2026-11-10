@@ -43,6 +43,7 @@ describe('lib/util/graceful-exit', () => {
 
   afterEach(() => {
     GracefulExit.resetForTesting()
+    vi.useRealTimers()
     delete process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT
     vi.restoreAllMocks()
   })
@@ -253,13 +254,9 @@ describe('lib/util/graceful-exit', () => {
   it('abandons a hung step on its own budget so the remaining steps still complete', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '1000'
 
-    const startedAt = Date.now()
-    let exitedAfter: number | undefined
-    const exitStub = vi.spyOn(process, 'exit').mockImplementation(() => {
-      exitedAfter = exitedAfter ?? Date.now() - startedAt
+    vi.useFakeTimers()
 
-      return undefined as never
-    })
+    const exitStub = stubExit()
     const logStub = stubLog()
 
     let quickStepRan = false
@@ -272,22 +269,21 @@ describe('lib/util/graceful-exit', () => {
 
     void GracefulExit.exitGracefully(0)
 
-    await new Promise((r) => setTimeout(r, 1200))
+    // 0.8 of the 1000ms budget, so teardown settles before the shared force-exit timer can fire
+    await vi.advanceTimersByTimeAsync(800)
+
+    expect(quickStepRan, 'the quick step is not cut off by the hung one').toBe(true)
+    expect(exitStub).toHaveBeenCalledTimes(1)
+    expect(exitStub).toHaveBeenCalledWith(0)
+
+    await vi.advanceTimersByTimeAsync(1000)
 
     const logged = logStub.mock.calls.flat().join('\n')
 
-    logStub.mockRestore()
-
-    expect(quickStepRan, 'the quick step is not cut off by the hung one').toBe(true)
-    // 0.8 of the 1000ms budget, so teardown settles before the shared force-exit timer can fire
-    expect(exitedAfter).toBeGreaterThanOrEqual(800)
-    expect(exitedAfter).toBeLessThanOrEqual(999)
-    expect(exitStub).toHaveBeenCalledWith(0)
+    expect(exitStub).toHaveBeenCalledTimes(1)
     expect(logged).toContain('The "hang" teardown step did not finish within 800ms')
     expect(logged).not.toContain('Failed to gracefully exit')
-
-    exitStub.mockRestore()
-  }, 5000)
+  })
 
   it('a reset cancels the step bounds of an in-flight teardown', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '200'
@@ -352,30 +348,19 @@ describe('lib/util/graceful-exit', () => {
   it('honors a step-specific timeout shorter than the shared budget', async () => {
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '2000'
 
-    const startedAt = Date.now()
-    let exitedAfter: number | undefined
-    const exitStub = vi.spyOn(process, 'exit').mockImplementation(() => {
-      exitedAfter = exitedAfter ?? Date.now() - startedAt
+    vi.useFakeTimers()
 
-      return undefined as never
-    })
+    const exitStub = stubExit()
     const logStub = stubLog()
 
     GracefulExit.addStep(() => new Promise(() => {}), 'best-effort', 100)
 
     void GracefulExit.exitGracefully(0)
 
-    await new Promise((r) => setTimeout(r, 500))
+    await vi.advanceTimersByTimeAsync(100)
 
-    const logged = logStub.mock.calls.flat().join('\n')
-
-    logStub.mockRestore()
-
-    expect(exitedAfter).toBeGreaterThanOrEqual(100)
-    expect(exitedAfter).toBeLessThanOrEqual(400)
+    expect(exitStub).toHaveBeenCalledTimes(1)
     expect(exitStub).toHaveBeenCalledWith(0)
-    expect(logged).toContain('The "best-effort" teardown step did not finish within 100ms')
-
-    exitStub.mockRestore()
-  }, 5000)
+    expect(logStub.mock.calls.flat().join('\n')).toContain('The "best-effort" teardown step did not finish within 100ms')
+  })
 })
