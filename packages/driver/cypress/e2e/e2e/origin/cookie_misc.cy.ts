@@ -353,7 +353,12 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
           cy.getCookie('sync').should('exist')
 
-          cy.getCookie('foo').should('include', { value: 'bar', httpOnly: true })
+          // a write without a Path is for /fixtures, so it can add a cookie there
+          cy.getAllCookies().then((cookies) => {
+            const atRoot = cookies.filter(({ name, path }) => name === 'foo' && path === '/')
+
+            expect(atRoot.map(({ value, httpOnly }) => ({ value, httpOnly }))).to.deep.equal([{ value: 'bar', httpOnly: true }])
+          })
         })
       })
     })

@@ -37,6 +37,25 @@ describe('lib/automation/cookie/document-cookie', () => {
       expect(browserCookie()).toMatchObject({ domain: 'foobar.com', hostOnly: false })
     })
 
+    it('a cookie without a Path at the directory of the page', async () => {
+      await write('foo=bar', 'https://www.foobar.com/account/settings/page.html')
+
+      expect(browserCookie()).toMatchObject({ path: '/account/settings' })
+    })
+
+    it('a cookie without a name', async () => {
+      await write('foo')
+      await write('=bar=baz')
+
+      expect(automation.setCookie.mock.calls.map(([cookie]) => ({ name: cookie.name, value: cookie.value }))).toEqual([{ name: '', value: 'foo' }, { name: '', value: 'bar=baz' }])
+    })
+
+    it('a cookie without an attribute that is over 1024 bytes', async () => {
+      await write(`foo=bar; Path=/${'a'.repeat(1024)}; Max-Age=60`, 'https://www.foobar.com/account/page.html')
+
+      expect(browserCookie()).toMatchObject({ path: '/account', maxAge: 60 })
+    })
+
     it('a Secure cookie from an https page', async () => {
       await write('foo=bar; Secure; SameSite=None')
 
@@ -89,6 +108,22 @@ describe('lib/automation/cookie/document-cookie', () => {
 
     it('a string that does not parse', () => expectIgnored(''))
 
+    it('a cookie with neither a name nor a value', async () => {
+      await expectIgnored('=')
+      await expectIgnored('; Path=/')
+    })
+
+    it('a name and value over 4096 bytes', () => expectIgnored(`foo=${'a'.repeat(4094)}`))
+
+    it('a cookie without a name whose value has a prefix', () => expectIgnored('=__Host-foo=bar; Secure; Path=/'))
+
+    it('a prefix reserved for cookies set by a response, in any case', async () => {
+      await expectIgnored('__Http-foo=bar; Secure')
+      await expectIgnored('__host-http-foo=bar; Secure; Path=/')
+    })
+
+    it('a __Host- cookie without a Path from a page outside /', () => expectIgnored('__Host-foo=bar; Secure', 'https://www.foobar.com/account/page.html'))
+
     it('a cookie for another host', () => expectIgnored('foo=bar; Domain=other.example.com'))
 
     it('a cookie for a child of the page host', () => expectIgnored('foo=bar; Domain=app.www.foobar.com'))
@@ -137,11 +172,12 @@ describe('lib/automation/cookie/document-cookie', () => {
     })
   })
 
-  it('writes when the existing cookie lookup fails', async () => {
+  it('ignores the write when the existing cookie lookup fails', async () => {
     automation.getCookies.mockRejectedValue(new Error('no automation client'))
 
     await write('foo=bar')
 
-    expect(automation.setCookie).toHaveBeenCalledOnce()
+    expect(automation.setCookie).not.toHaveBeenCalled()
+    expect(cookieJar.getAllCookies()).toEqual([])
   })
 })

@@ -2,7 +2,7 @@ import {
   CookieJar,
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
-import { meetsSecureRules } from '@packages/server/lib/automation/cookie/document-cookie-rules'
+import { isBlockedByExisting, meetsDocumentCookieRules, parseDocumentCookie } from '@packages/server/lib/automation/cookie/document-cookie-rules'
 import { isLocalhost } from '@packages/network-tools/lib/uri'
 import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
@@ -60,8 +60,8 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
   const existingCookies = parseDocumentCookieString(document.cookie)
 
   const getDocumentCookieValue = () => {
-    return cookieJar.getCookies(url, undefined, { http: false }).map((cookie: ToughCookie) => {
-      return `${cookie.key}=${cookie.value}`
+    return cookieJar.getCookies(url, undefined, { http: false, secure: isSecure }).map((cookie: ToughCookie) => {
+      return cookie.key ? `${cookie.key}=${cookie.value}` : cookie.value
     }).join('; ')
   }
 
@@ -95,59 +95,27 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
 
     set (newValue: any) {
       const stringValue = `${newValue}`
-      const parsedCookie = CookieJar.parse(stringValue)
-
-      if (parsedCookie?.hostOnly === null) {
-        // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates.
-        // in the case it is not set, we need to calculate it
-        parsedCookie.hostOnly = isHostOnlyCookie(parsedCookie.domain || domain)
-      }
-
-      // if result is undefined, it was invalid and couldn't be parsed
-      if (!parsedCookie) return getDocumentCookieValue()
-
-      // cookies written without a Path are stored at '/', so check them there
-      const cookieString = parsedCookie.path ? stringValue : `${stringValue}; Path=/`
+      const cookie = parseDocumentCookie(stringValue, location.pathname)
 
       // the server drops writes that break these rules, so keep them out of document.cookie too
-      if (!meetsSecureRules({ ...parsedCookie, hostOnly: !parsedCookie.domain, path: parsedCookie.path || '/' }, isSecure)) {
-        return getDocumentCookieValue()
+      if (!cookie || !meetsDocumentCookieRules(cookie, isSecure)) return getDocumentCookieValue()
+
+      const stored = { name: cookie.key, domain: cookie.domain || domain, path: cookie.path || '/' }
+      const isBlocked = cookieJar.getAllCookies().some((existing) => {
+        return isBlockedByExisting({ ...existing, name: existing.key, domain: existing.domain || domain }, stored, isSecure)
+      })
+
+      if (isBlocked || !setCookie(cookie)) return getDocumentCookieValue()
+
+      // an expired cookie removes the one it replaces, here and in the browser
+      if (cookie.expiryTime() < Date.now()) {
+        cookieJar.removeCookie(stored)
       }
 
-      // if the cookie is expired, remove it in our cookie jar
-      // and via setting it inside our automation client with the correct expiry.
-      // This will have the effect of removing the cookie
-      if (parsedCookie.expiryTime() < Date.now()) {
-        if (!setCookie(cookieString)) return getDocumentCookieValue()
-
-        cookieJar.removeCookie({
-          name: parsedCookie.key,
-          path: parsedCookie.path || '/',
-          domain: parsedCookie.domain as string,
-        })
-
-        // send the cookie to the server so it can be removed from the browser
-        // via automation. If the cookie expiry is set inside the server-side cookie jar,
-        // the cookie will be automatically removed.
-        sendCookieToServer(stringValue)
-
-        return getDocumentCookieValue()
-      }
-
-      // we should be able to pass in parsedCookie here instead of the string
-      // value, but tough-cookie doesn't recognize it using an instanceof
-      // check and throws an error. because we can't, we have to massage
-      // some of the properties below to be correct
-      const cookie = setCookie(cookieString)
-
-      if (cookie) {
-        cookie.sameSite = parsedCookie.sameSite
-
-        // send the cookie to the server so it can be set in the browser via
-        // automation and in our server-side cookie jar so it's available
-        // to subsequent injections
-        sendCookieToServer(stringValue)
-      }
+      // send the cookie to the server so it can be set in the browser via
+      // automation and in our server-side cookie jar so it's available
+      // to subsequent injections
+      sendCookieToServer(stringValue)
 
       return getDocumentCookieValue()
     },

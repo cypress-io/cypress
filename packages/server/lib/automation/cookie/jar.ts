@@ -93,9 +93,10 @@ export class CookieJar {
     this._cookieJar = new ToughCookieJar(undefined, { allowSpecialUseDomain: true })
   }
 
-  getCookies (url: string, sameSiteContext: SameSiteContext = undefined, { http = true }: { http?: boolean } = {}) {
+  // `secure` defaults to whether the url is https
+  getCookies (url: string, sameSiteContext: SameSiteContext = undefined, { http = true, secure }: { http?: boolean, secure?: boolean } = {}) {
     // @ts-expect-error - tough-cookie supports sameSiteContext, but GetCookiesOptions does not declare it
-    return this._cookieJar.getCookiesSync(url, { sameSiteContext, http })
+    return this._cookieJar.getCookiesSync(url, { sameSiteContext, http, secure })
   }
 
   getAllCookies () {
