@@ -575,6 +575,22 @@ describe('src/cy/commands/assertions', () => {
         cy.noop(false).should('be.true')
       })
 
+      // https://github.com/cypress-io/cypress/issues/35335
+      it('fails promptly when contain.text fails on a very long text', (done) => {
+        const start = Date.now()
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('Noted.')
+          expect(Date.now() - start).to.be.lessThan(5000)
+
+          done()
+        })
+
+        cy.$$('<div id="long-text" />').text('word '.repeat(90000)).appendTo(cy.$$('body'))
+
+        cy.get('#long-text').should('contain.text', 'Noted.')
+      })
+
       it('throws err when not available chainable', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('The chainer `dee` was not found. Could not build assertion.')

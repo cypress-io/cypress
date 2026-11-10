@@ -1,7 +1,10 @@
 import _ from 'lodash'
 import type { ErrorLike } from './errorTypes'
 
-export const stackLineRegex = /^\s*(at )?.*@?(?:\(?.*(?::\d+:\d+|<unknown>|\[native code\])+\)?)$/
+// Error messages can embed very long lines (e.g. the full text of an element), so
+// this must stay linear: overlapping wildcards like `.*@?\(?.*` backtrack
+// quadratically on a long line that isn't a stack frame.
+export const stackLineRegex = /^\s*(?:\S.*)?(?::\d+:\d+|<unknown>|\[native code\])\)?$/
 
 type MessageLines = [string[], string[]] & { messageEnded?: boolean }
 
