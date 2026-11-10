@@ -13,8 +13,8 @@ import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import type { SameSiteContext, SerializableAutomationCookie } from './automation/cookie/jar'
-import { cookieJar, automationCookieToToughCookie } from './automation/cookie/jar'
+import { cookieJar } from './automation/cookie/jar'
+import { setDocumentCookie } from './automation/cookie/document-cookie'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
@@ -32,6 +32,8 @@ type StartListeningCallbacks = {
 }
 
 const debug = Debug('cypress:server:socket-base')
+
+const DOCUMENT_COOKIE_WRITE_TIMEOUT = 5000
 
 function getInterceptRegistration (options: StartListeningOptions): ForInterceptRegistration {
   return options.interceptRegistration
@@ -207,6 +209,9 @@ export class SocketBase implements SocketBroadcaster {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
+    // document.cookie writes from a cross-origin AUT that have not reached the browser yet
+    const documentCookieWrites = new Set<Promise<void>>()
+
     const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
     this.getIos().forEach((io) => {
@@ -300,7 +305,16 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('automation:request', (message: keyof AutomationCommands, data, cb) => {
           debug('automation:request %s %o', message, data)
 
-          return automationRequest(message, data)
+          const request = async () => {
+            // a cookie command sent after a document.cookie write has to see that write
+            if (message.includes('cookie') && documentCookieWrites.size) {
+              await Promise.all(documentCookieWrites)
+            }
+
+            return automationRequest(message, data)
+          }
+
+          return request()
           .then((resp) => {
             return cb({ response: resp })
           }).catch((err) => {
@@ -404,10 +418,28 @@ export class SocketBase implements SocketBroadcaster {
           })
         })
 
-        const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
-          const { hostname } = new URL(url)
+        const setCrossOriginCookie = (data: { cookieString?: unknown, url?: unknown }) => {
+          const write = setDocumentCookie(data, {
+            getCookies: (filter) => automationRequest('get:cookies', filter),
+            setCookie: (cookie) => automationRequest('set:cookie', cookie),
+          })
 
-          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext, { http: false })
+          // automation requests have no timeout, so a write the browser never answers must not hold cookie commands forever
+          const settled = new Promise<void>((resolve) => {
+            const timer = setTimeout(resolve, DOCUMENT_COOKIE_WRITE_TIMEOUT)
+            const done = () => {
+              clearTimeout(timer)
+              resolve()
+            }
+
+            write.then(done, done)
+          }).then(() => {
+            documentCookieWrites.delete(settled)
+          })
+
+          documentCookieWrites.add(settled)
+
+          return write
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {

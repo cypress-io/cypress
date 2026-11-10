@@ -743,11 +743,23 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       })
     })
 
-    it('does not set cookie when invalid', () => {
+    // Firefox rejects a cookie that starts with '=', but the patch follows the cookie spec
+    it('sets a cookie without a name', { browser: '!firefox' }, () => {
       cy.get('[data-cy="cross-origin-secondary-link"]').click()
       cy.origin('http://www.foobar.com:3500', () => {
         cy.document().then((doc) => {
           doc.cookie = '=value'
+        })
+
+        cy.document().its('cookie').should('equal', 'value')
+      })
+    })
+
+    it('does not set cookie when invalid', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = '='
         })
 
         cy.document().its('cookie').should('equal', '')
@@ -862,7 +874,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
             httpOnly: false,
             hostOnly: true,
             name: 'name',
-            path: '/',
+            path: '/fixtures/auth',
             sameSite: 'lax',
             secure: false,
             value: 'value',
