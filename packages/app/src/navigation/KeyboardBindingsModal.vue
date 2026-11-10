@@ -2,7 +2,7 @@
   <StandardModal
     class="transition transition-all duration-200"
     variant="bare"
-    :title="t('sidebar.keyboardShortcuts.title')"
+    title="Keyboard shortcuts"
     :model-value="show"
     data-cy="keyboard-modal"
     :no-help="true"
@@ -45,10 +45,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-import { useI18n } from '@cy/i18n'
 import { getRunnerConfigFromWindow } from '../runner/get-runner-config-from-window'
-
-const { t } = useI18n()
 
 defineProps<{
   show: boolean
@@ -73,19 +70,19 @@ const keyBindings = computed(() => {
   return [
     {
       key: ['r'],
-      description: t('sidebar.keyboardShortcuts.rerun'),
+      description: 'Re-run tests',
     },
     {
       key: ['s'],
-      description: t('sidebar.keyboardShortcuts.stop'),
+      description: 'Stop tests',
     },
     {
       key: ['f'],
-      description: t('sidebar.keyboardShortcuts.toggle'),
+      description: 'Toggle specs list',
     },
     {
       key: isDarwin.value ? ['⌘', '+', 's'] : ['Ctrl', '+', 's'],
-      description: t('sidebar.keyboardShortcuts.studioSave'),
+      description: 'Save Studio changes',
     },
   ]
 })

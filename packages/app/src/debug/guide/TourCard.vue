@@ -1,7 +1,7 @@
 <template>
   <PromoCard
-    :title="t('debugPage.emptyStates.slideshow.tour.title')"
-    :body="t('debugPage.emptyStates.slideshow.tour.description')"
+    title="Record your first test run to Cypress Cloud"
+    body="You're almost there! Start recording your test runs to Cypress Cloud by running the command below in your local or CI terminal."
   >
     <template #image>
       <div class="h-[310px] xl:h-[305px]">
@@ -12,22 +12,19 @@
       <PromoAction
         :action="action"
         :left-icon="IconObjectTassel"
-        :right-label="t('debugPage.emptyStates.slideshow.controls.view')"
+        right-label="View Tour"
       />
     </template>
   </PromoCard>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import PromoCard from '../../components/promo/PromoCard.vue'
 import PromoAction from '../../components/promo/PromoAction.vue'
 
 import { IconObjectTassel } from '@cypress-design/vue-icon'
 
 import RecordGuideImage from '../../assets/record-guide.svg'
-
-const { t } = useI18n()
 
 defineProps<{
   action: () => void

@@ -33,8 +33,8 @@ async function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
   const packages = {} as {
     loadConfig: (phase: 'development', dir: string) => Promise<any>
-    getNextJsBaseWebpackConfig: Function
-    nextLoadJsConfig: Function
+    getNextJsBaseWebpackConfig: (dir: string, options: Record<string, unknown>) => Promise<Configuration>
+    nextLoadJsConfig: (dir: string, nextConfig: unknown) => Promise<{ jsConfig: unknown, resolvedBaseUrl: unknown }>
     getSupportedBrowsers: (dir: string, isDevelopment: boolean, nextJsConfig: any) => Promise<string[] | undefined>
   }
 

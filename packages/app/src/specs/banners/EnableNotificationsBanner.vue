@@ -5,10 +5,10 @@
   >
     <div>
       <div class="text-gray-900 font-medium text-base">
-        {{ t('specPage.banners.enableNotifications.title') }}
+        Start debugging as soon as your first tests fail
       </div>
       <div class="text-gray-700 text-sm mt-[3px]">
-        {{ t('specPage.banners.enableNotifications.subtitle') }}
+        Cypress can notify you about Cloud test runs for your branch.
       </div>
     </div>
     <div class="flex gap-[8px]">
@@ -16,16 +16,16 @@
         size="40"
         @click="enableNotifications"
       >
-        {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
+        Enable desktop notifications
       </Button>
       <Button
         variant="outline-light"
         @click="remindLater"
       >
-        {{ t('specPage.banners.enableNotifications.remindMeLater') }}
+        Remind me later
       </Button>
       <Button
-        :aria-label="t('specPage.banners.enableNotifications.dismissBanner')"
+        aria-label="Dismiss banner"
         class="flex items-center text-gray-200"
         variant="outline-light"
         @click="dismissBanner"
@@ -37,15 +37,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import { gql, useMutation } from '@urql/vue'
 import Button from '@cypress-design/vue-button'
 import { IconActionDeleteMedium } from '@cypress-design/vue-icon'
 import { dayjs } from '../../runs/utils/day.js'
 import { EnableNotificationsBanner_ShowNotificationDocument, EnableNotificationsBanner_SetPreferencesDocument } from '../../generated/graphql'
 import { useRouter } from 'vue-router'
-
-const { t } = useI18n()
 
 gql`
 mutation EnableNotificationsBanner_ShowNotification($title: String!, $body: String!) {
@@ -70,7 +67,7 @@ const setPreferences = useMutation(EnableNotificationsBanner_SetPreferencesDocum
 const router = useRouter()
 
 const enableNotifications = async () => {
-  await showNotification.executeMutation({ title: t('specPage.banners.enableNotifications.notificationsEnabledTitle'), body: t('specPage.banners.enableNotifications.notificationsEnabledBody') })
+  await showNotification.executeMutation({ title: 'Notifications Enabled', body: 'Nice, notifications are enabled!' })
 
   await setPreferences.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: true }) })
 

@@ -13,9 +13,9 @@ self.addEventListener('fetch', (event) => {
 // Executes the injector's generated source in a fake service worker scope so the
 // wrapped fetch listener can be dispatched against, rather than only string-asserted.
 const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceWorker>[1]) => {
-  const listeners: { type: string, listener: Function }[] = []
+  const listeners: { type: string, listener: (...args: any[]) => unknown }[] = []
   const clientEvents: any[] = []
-  let onfetchSlot: Function | null = null
+  let onfetchSlot: ((...args: any[]) => unknown) | null = null
 
   const fakeSelf: any = {
     registration: { scope: 'https://example.com/' },
@@ -23,10 +23,10 @@ const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceW
       claim: async () => {},
       matchAll: async () => [],
     },
-    addEventListener: (type: string, listener: Function) => {
+    addEventListener: (type: string, listener: (...args: any[]) => unknown) => {
       listeners.push({ type, listener })
     },
-    removeEventListener: (type: string, listener: Function) => {
+    removeEventListener: (type: string, listener: (...args: any[]) => unknown) => {
       const index = listeners.findIndex((entry) => entry.type === type && entry.listener === listener)
 
       if (index > -1) {
@@ -43,7 +43,7 @@ const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceW
     configurable: true,
     enumerable: true,
     get: () => onfetchSlot,
-    set: (value: Function | null) => {
+    set: (value: ((...args: any[]) => unknown) | null) => {
       onfetchSlot = value
     },
   })
@@ -54,7 +54,7 @@ const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceW
 
   const fetchListener = listeners.find((entry) => entry.type === 'fetch')!.listener
 
-  const dispatchTo = async (listener: Function, url: string) => {
+  const dispatchTo = async (listener: (...args: any[]) => unknown, url: string) => {
     const respondWith = vi.fn()
 
     await listener({ request: { url }, respondWith })

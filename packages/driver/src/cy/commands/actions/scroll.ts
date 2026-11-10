@@ -36,12 +36,11 @@ const toMilliseconds = (duration: unknown) => {
   return Number.parseFloat(String(duration))
 }
 
-interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions> {
+interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollIntoViewOptions> {
   _log?: Log
   $el: JQuery
   $parent: any
   axis: string
-  offset?: object
 }
 
 interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
@@ -55,15 +54,9 @@ interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    scrollIntoView (subject, userOptions: Partial<Cypress.ScrollToOptions> = {}) {
+    scrollIntoView (subject, userOptions: Partial<Cypress.ScrollIntoViewOptions> = {}) {
       if (!_.isObject(userOptions)) {
         $errUtils.throwErrByPath('scrollIntoView.invalid_argument', { args: { arg: userOptions } })
-      }
-
-      // ensure the subject is not window itself
-      // cause how are you gonna scroll the window into view...
-      if (subject === state('window')) {
-        $errUtils.throwErrByPath('scrollIntoView.subject_is_window')
       }
 
       // throw if we're trying to scroll to multiple elements

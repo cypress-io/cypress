@@ -1,5 +1,3 @@
-/// <reference path="../../types/cypress/log.d.ts" />
-
 import type Bluebird from 'bluebird'
 
 import type { RouteMap } from '../cy/net-stubbing/types'

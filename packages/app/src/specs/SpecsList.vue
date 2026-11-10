@@ -185,7 +185,7 @@
     <NoResults
       v-show="!specs.length"
       :search-term="specFilterModel"
-      :message="t('specPage.noResultsMessage')"
+      message="No specs matched your search:"
       class="mt-[56px]"
       @clear="handleClear"
     />
@@ -205,7 +205,6 @@ import { gql } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { SpecsList_GitInfoUpdatedDocument } from '../generated/graphql'
 import type { Specs_SpecsListFragment, SpecsListFragment } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import { buildSpecTree, useCollapsibleTree } from './tree/useCollapsibleTree'
 import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
@@ -242,7 +241,6 @@ const emit = defineEmits<{
 const { openLoginConnectModal } = useUserProjectStatusStore()
 
 const route = useRoute()
-const { t } = useI18n()
 const testingType = useTestingType()
 
 const isOnline = useOnline()

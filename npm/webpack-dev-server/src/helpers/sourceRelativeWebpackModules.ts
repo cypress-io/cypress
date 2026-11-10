@@ -2,6 +2,7 @@ import Module from 'module'
 import path from 'path'
 import type { Frameworks, WebpackDevServerConfig } from '../devServer'
 import debugFn from 'debug'
+import type webpack from 'webpack'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
 
@@ -22,7 +23,7 @@ export interface SourcedDependency {
 }
 
 export interface SourcedWebpack extends SourcedDependency {
-  module: Function
+  module: typeof webpack
   majorVersion: 4 | 5
 }
 
@@ -253,9 +254,9 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     })
   }
 
-  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath),
+  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath)
   htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
 
   debug('HtmlWebpackPlugin: Successfully sourced html-webpack-plugin - %o', htmlWebpackPlugin)

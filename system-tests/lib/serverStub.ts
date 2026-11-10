@@ -442,6 +442,7 @@ const onServer = (routes) => {
   })
 }
 
+/* eslint-disable mocha/no-sibling-hooks -- each helper registers its hooks in the suite that calls it, so they are never siblings */
 export const enableCaptureProtocol = (stub = PROTOCOL_STUB_VALID) => {
   beforeEach(() => {
     protocolStub = stub
@@ -486,6 +487,7 @@ export const disableCaptureProtocolUploadUrl = () => {
     CAPTURE_PROTOCOL_ENABLED = true
   })
 }
+/* eslint-enable mocha/no-sibling-hooks */
 
 export const setupStubbedServer = (routes) => {
   systemTests.setup({
