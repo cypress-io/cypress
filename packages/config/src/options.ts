@@ -14,7 +14,7 @@ import * as validate from './validation'
  * - Ensure the config package tests pass with updated snapshots
  *
  * Additionally, for experiments:
- * - add name and description copy to `/packages/frontend-shared/src/locales/en-US.json`
+ * - add name and description copy to `/packages/app/src/settings/project/Experiments.vue`
  */
 
 const _BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
