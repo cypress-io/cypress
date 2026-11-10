@@ -1699,7 +1699,6 @@
     "./node_modules/binary-extensions/binary-extensions.json",
     "./node_modules/binary-extensions/index.js",
     "./node_modules/binaryextensions/edition-es5/index.js",
-    "./node_modules/brace-expansion/index.js",
     "./node_modules/braces/index.js",
     "./node_modules/braces/lib/compile.js",
     "./node_modules/braces/lib/constants.js",
@@ -2456,6 +2455,7 @@
     "./node_modules/mime/types.json",
     "./node_modules/mimic-fn/index.js",
     "./node_modules/min-indent/index.js",
+    "./node_modules/minimatch/node_modules/brace-expansion/index.js",
     "./node_modules/minimist/index.js",
     "./node_modules/mocha-7.2.0/lib/browser/progress.js",
     "./node_modules/mocha-7.2.0/lib/context.js",
@@ -2478,6 +2478,7 @@
     "./node_modules/mocha-7.2.0/lib/reporters/markdown.js",
     "./node_modules/mocha-7.2.0/lib/stats-collector.js",
     "./node_modules/mocha-7.2.0/lib/utils.js",
+    "./node_modules/mocha-7.2.0/node_modules/brace-expansion/index.js",
     "./node_modules/mocha-7.2.0/node_modules/debug/node_modules/ms/index.js",
     "./node_modules/mocha-7.2.0/node_modules/debug/src/common.js",
     "./node_modules/mocha-7.2.0/node_modules/glob/common.js",
@@ -3660,6 +3661,7 @@
     "./packages/server/node_modules/body-parser/node_modules/content-type/index.js",
     "./packages/server/node_modules/body-parser/node_modules/debug/src/debug.js",
     "./packages/server/node_modules/body-parser/node_modules/ms/index.js",
+    "./packages/server/node_modules/brace-expansion/index.js",
     "./packages/server/node_modules/chalk/templates.js",
     "./packages/server/node_modules/color-convert/conversions.js",
     "./packages/server/node_modules/color-convert/index.js",
@@ -3815,5 +3817,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "94ce04b7d1e69c5e561e20e478e538ebaa6f43a563db7a1d7f2518529a25b656"
+  "deferredHash": "ce68649c9d02cb90eaae6eac0ea733797bee82d27d1e0a50837323fed82a38af"
 }
