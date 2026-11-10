@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.3.1
+
+**Bugfixes:**
+
+- Fixed an issue where a failed assertion whose error message was very long, such as [`.should('contain.text')`](https://on.cypress.io/should) on an element with a lot of text, took minutes to report, so the run looked stuck. The browser stopped responding while it processed the error, and `cypress run` paused again after printing the failure. The failure is now reported as soon as the assertion times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
+
 ## 16.3.0
 
 **Performance:**
