@@ -786,7 +786,7 @@ commands:
               CYPRESS_INSTALL_BINARY=/root/cypress.zip npm i -g /root/cypress.tgz
               cypress verify
               # better-sqlite3 loads lazily (Test Replay, Studio), so verify never touches it
-              EXE=$(find "$(cypress cache path)" -maxdepth 3 -type f -name Cypress)
+              EXE=$(find "$(cypress cache path)" -type f -path '*/Cypress/Cypress')
               SQLITE_FILES=$(find "$(cypress cache path)" -name better_sqlite3.node)
               test -n "$SQLITE_FILES"
               for f in $SQLITE_FILES; do
