@@ -26,7 +26,6 @@
     "types": [
       "cypress", 
       "cypress-real-events", 
-      "@intlify/unplugin-vue-i18n/messages",
       "@testing-library/cypress"
     ]
   }

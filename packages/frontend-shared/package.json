@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@cypress-design/vue-icon": "^1.18.0",
-    "@intlify/unplugin-vue-i18n": "4.0.0",
     "@packages/data-context": "0.0.0-development",
     "@urql/devtools": "2.0.3",
     "gravatar": "1.8.2",
@@ -111,7 +110,6 @@
     "vite-plugin-package-config": "0.1.1",
     "vite-svg-loader": "5.1.0",
     "vue": "3.2.47",
-    "vue-i18n": "9.14.5",
     "vue-router": "4",
     "vue-toastification": "2.0.0-rc.1",
     "vue-tsc": "^2.0.19",

@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 import VueSvgLoader from 'vite-svg-loader'
 import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
@@ -28,10 +27,6 @@ const makePlugins = (plugins) => {
   return ([
     vue(),
     vueJsx(), // Used mostly for testing in *.(t|j)sx files.
-    vueI18n({
-      include: path.resolve(__dirname, './src/locales/**/*.json'),
-      ...plugins.vueI18nOptions,
-    }),
     Icons({
       // 1em. Default, without this options is 1.2em.
       // If you notice that your icons are bigger than they should be, this
@@ -90,8 +85,7 @@ const makePlugins = (plugins) => {
 /**
  * @typedef PluginOptions
  * @type {object}
- * @property {import('@antfu/utils').ArgumentsType<typeof vueI18n>[0]=} vueI18nOptions
- * @property {import('@antfu/utils').ArgumentsType<typeof Icons>[0]=} VueI18n
+ * @property {import('@antfu/utils').ArgumentsType<typeof Icons>[0]=} iconsOptions
  * @property {import('@antfu/utils').ArgumentsType<typeof Components>[0]=} componentOptions
 
  *

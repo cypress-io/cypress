@@ -17,7 +17,6 @@
     },
     "types": [
       "chrome",
-      "@intlify/unplugin-vue-i18n/messages",
       "@testing-library/cypress",
       "cypress-real-events", 
       "cypress"
