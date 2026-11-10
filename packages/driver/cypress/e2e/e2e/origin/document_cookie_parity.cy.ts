@@ -11,6 +11,8 @@ interface WriteCase {
   title?: string
   https?: boolean
   existing?: ExistingCookie
+  // a path the page moves to with history.pushState() before the write
+  pushState?: string
   // Firefox handles the write differently from the cookie spec, which the patch follows
   notFirefox?: boolean
 }
@@ -20,10 +22,11 @@ interface RecordArgs {
   url: string
   write: string
   existing?: ExistingCookie
+  pushState?: string
 }
 
 // Runs as-is in the primary origin and as a cy.origin() callback, so it can't close over anything.
-const record = ({ site, url, write, existing }: RecordArgs) => {
+const record = ({ site, url, write, existing, pushState }: RecordArgs) => {
   cy.visit(url)
 
   if (existing) {
@@ -37,6 +40,8 @@ const record = ({ site, url, write, existing }: RecordArgs) => {
   }
 
   cy.window().then((win) => {
+    if (pushState) win.history.pushState({}, '', pushState)
+
     win.document.cookie = write
     win.document.cookie = 'written=1; Path=/'
   })
@@ -90,6 +95,8 @@ const cases: WriteCase[] = [
   { write: 'foo=bar; Path=/fixtures/auth' },
   { write: 'foo=bar; Path=fixtures' },
   { write: 'foo=bar; Path=/a; Path=/' },
+  { write: 'foo=bar', title: 'foo=bar after pushState to another directory', pushState: '/account/settings/profile' },
+  { write: 'foo=bar; Path=/account', title: 'foo=bar; Path=/account after pushState into it', pushState: '/account/settings/profile' },
 
   // domain
   { write: 'foo=bar; Domain={site}; Path=/' },
@@ -162,12 +169,12 @@ const cases: WriteCase[] = [
 // Compares what a document.cookie write does in the primary origin, where the
 // browser handles it, with what the same write does inside cy.origin().
 describe('document.cookie writes in cy.origin() match the browser', () => {
-  cases.forEach(({ write, title, https, existing, notFirefox }) => {
+  cases.forEach(({ write, title, https, existing, pushState, notFirefox }) => {
     it(`${title || write} (${https ? 'https' : 'http'})`, { browser: notFirefox ? '!firefox' : undefined }, () => {
       const args = (site: string): RecordArgs => {
         const origin = https ? `https://www.${site}:3502` : `http://www.${site}:3500`
 
-        return { site, url: `${origin}/fixtures/secondary-origin.html`, write: write.replace('{site}', site), existing }
+        return { site, url: `${origin}/fixtures/secondary-origin.html`, write: write.replace('{site}', site), existing, pushState }
       }
 
       record(args('foobar.com')).then((native) => {

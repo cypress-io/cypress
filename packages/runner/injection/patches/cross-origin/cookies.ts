@@ -35,12 +35,12 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   })
 }
 
-const sendCookieToServer = (cookieString: string) => {
+const sendCookieToServer = (cookieString: string, url: string) => {
   window.top!.postMessage({
     event: 'cross:origin:aut:set:cookie',
     data: {
       cookieString,
-      url: location.href,
+      url,
     },
   }, '*')
 }
@@ -52,7 +52,10 @@ const sendCookieToServer = (cookieString: string) => {
 // a different origin than top. The goal is to make it act like it would
 // if the user's app was run in top.
 export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[]) => {
+  // browsers keep reading and writing cookies against the url the document
+  // loaded with, even after history.pushState() changes location
   const url = location.href
+  const { pathname } = location
   const domain = location.hostname
   const cookieJar = new CookieJar()
   // browsers treat localhost as a secure context, so it may set Secure cookies over http
@@ -95,7 +98,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
 
     set (newValue: any) {
       const stringValue = `${newValue}`
-      const cookie = parseDocumentCookie(stringValue, location.pathname)
+      const cookie = parseDocumentCookie(stringValue, pathname)
 
       // the server drops writes that break these rules, so keep them out of document.cookie too
       if (!cookie || !meetsDocumentCookieRules(cookie, isSecure)) return getDocumentCookieValue()
@@ -115,7 +118,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // send the cookie to the server so it can be set in the browser via
       // automation and in our server-side cookie jar so it's available
       // to subsequent injections
-      sendCookieToServer(stringValue)
+      sendCookieToServer(stringValue, url)
 
       return getDocumentCookieValue()
     },
