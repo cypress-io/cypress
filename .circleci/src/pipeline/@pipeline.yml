@@ -1574,32 +1574,17 @@ commands:
 
   check-if-binary-exists:
     steps:
-      - run-on-dependencies:
-          package: internal-scripts
-          command: build
+      - run:
+          name: Build internal-scripts and its dependencies
+          command: |
+            source ./scripts/ensure-node.sh
+            node ./scripts/lerna-build.js --scope=internal-scripts --include-dependencies
       - run:
           name: Check if binary exists, exit if it does
           command: |
             source ./scripts/ensure-node.sh
             yarn gulp e2eTestScaffold
             yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
-
-  run-on-dependencies:
-    parameters:
-      package:
-        description: Package to build all dependencies for. All dependencies in the
-          dependency chain must have a build script.
-        type: string
-      command:
-        description: Command to run on the dependencies.
-        type: string
-    steps:
-      - run:
-          name: Exec << parameters.command >> recursively on << parameters.package >>
-            dependencies.
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn lerna run <<parameters.command>> --scope=<<parameters.package>> --include-dependencies
 
   build-and-package-binary:
     steps:

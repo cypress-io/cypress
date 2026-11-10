@@ -10,13 +10,17 @@ const minimist = require('minimist')
 
 const lerna = path.resolve(__dirname, '..', 'node_modules', '.bin', 'lerna')
 
-const argv = minimist(process.argv.slice(2), { string: ['scope'] })
+const argv = minimist(process.argv.slice(2), { string: ['scope'], boolean: ['include-dependencies'] })
 const concurrency = Math.min(4, os.availableParallelism())
 
 const args = ['run', 'build', '--stream', `--concurrency=${concurrency}`]
 
 if (argv.scope) {
   args.push('--scope', argv.scope)
+}
+
+if (argv['include-dependencies']) {
+  args.push('--include-dependencies')
 }
 
 const child = spawn(
