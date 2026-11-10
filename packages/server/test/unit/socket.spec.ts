@@ -543,6 +543,32 @@ describe('lib/socket', () => {
 
         expect(request.mock.calls.map(([message]) => message)).toEqual(['get:cookies', 'set:cookie', 'get:cookie'])
       })
+
+      it('does not hold a cookie command behind a write that never finishes', async () => {
+        const timeouts = vi.spyOn(globalThis, 'setTimeout')
+        const lookupStarted = new Promise<void>((resolve) => {
+          request.mockImplementation((message) => {
+            if (message !== 'get:cookies') return Promise.resolve({ name: 'foo' })
+
+            resolve()
+
+            return new Promise(() => {})
+          })
+        })
+
+        client.emit('backend:request', 'cross:origin:set:cookie', { cookieString: 'foo=bar', url }, () => {})
+
+        const read = new Promise<{ response: unknown }>((resolve) => client.emit('automation:request', 'get:cookie', { name: 'foo' }, resolve))
+
+        await lookupStarted
+
+        const giveUpOnWrite = timeouts.mock.calls.find(([, delay]) => delay === 5000)?.[0]
+
+        expect(giveUpOnWrite).toBeTypeOf('function')
+        giveUpOnWrite?.()
+
+        expect(await read).toEqual({ response: { name: 'foo' } })
+      })
     })
 
     describe('on(backend:request, reset:server:state)', () => {

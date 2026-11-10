@@ -33,6 +33,8 @@ type StartListeningCallbacks = {
 
 const debug = Debug('cypress:server:socket-base')
 
+const DOCUMENT_COOKIE_WRITE_TIMEOUT = 5000
+
 function getInterceptRegistration (options: StartListeningOptions): ForInterceptRegistration {
   return options.interceptRegistration
 }
@@ -208,7 +210,7 @@ export class SocketBase implements SocketBroadcaster {
     }
 
     // document.cookie writes from a cross-origin AUT that have not reached the browser yet
-    const documentCookieWrites = new Set<Promise<unknown>>()
+    const documentCookieWrites = new Set<Promise<void>>()
 
     const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
@@ -306,7 +308,7 @@ export class SocketBase implements SocketBroadcaster {
           const request = async () => {
             // a cookie command sent after a document.cookie write has to see that write
             if (message.includes('cookie') && documentCookieWrites.size) {
-              await Promise.allSettled(documentCookieWrites)
+              await Promise.all(documentCookieWrites)
             }
 
             return automationRequest(message, data)
@@ -420,9 +422,22 @@ export class SocketBase implements SocketBroadcaster {
           const write = setDocumentCookie(data, {
             getCookies: (filter) => automationRequest('get:cookies', filter),
             setCookie: (cookie) => automationRequest('set:cookie', cookie),
-          }).finally(() => documentCookieWrites.delete(write))
+          })
 
-          documentCookieWrites.add(write)
+          // automation requests have no timeout, so a write the browser never answers must not hold cookie commands forever
+          const settled = new Promise<void>((resolve) => {
+            const timer = setTimeout(resolve, DOCUMENT_COOKIE_WRITE_TIMEOUT)
+            const done = () => {
+              clearTimeout(timer)
+              resolve()
+            }
+
+            write.then(done, done)
+          }).then(() => {
+            documentCookieWrites.delete(settled)
+          })
+
+          documentCookieWrites.add(settled)
 
           return write
         }
