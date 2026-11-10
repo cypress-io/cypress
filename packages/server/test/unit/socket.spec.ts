@@ -518,6 +518,31 @@ describe('lib/socket', () => {
         expect(jarCookies()).toEqual([])
         expect(request).not.toHaveBeenCalledWith('set:cookie', expect.anything(), expect.anything())
       })
+
+      it('reaches the browser before a cookie command sent after it', async () => {
+        let finishLookup: (cookies: unknown[]) => void = () => {}
+        const lookup = new Promise<unknown[]>((resolve) => finishLookup = resolve)
+        const lookupStarted = new Promise<void>((resolve) => {
+          request.mockImplementation(async (message) => {
+            if (message !== 'get:cookies') return
+
+            resolve()
+
+            return lookup
+          })
+        })
+
+        const written = setCookie('foo=bar')
+        const read = new Promise<void>((resolve) => client.emit('automation:request', 'get:cookie', { name: 'foo' }, () => resolve()))
+
+        await lookupStarted
+        // lets the server receive the get:cookie request while the write is still looking up cookies
+        await new Promise((resolve) => setTimeout(resolve, 50))
+        finishLookup([])
+        await Promise.all([written, read])
+
+        expect(request.mock.calls.map(([message]) => message)).toEqual(['get:cookies', 'set:cookie', 'get:cookie'])
+      })
     })
 
     describe('on(backend:request, reset:server:state)', () => {

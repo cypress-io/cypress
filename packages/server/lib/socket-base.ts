@@ -207,6 +207,9 @@ export class SocketBase implements SocketBroadcaster {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
+    // document.cookie writes from a cross-origin AUT that have not reached the browser yet
+    const documentCookieWrites = new Set<Promise<unknown>>()
+
     const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
     this.getIos().forEach((io) => {
@@ -300,7 +303,16 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('automation:request', (message: keyof AutomationCommands, data, cb) => {
           debug('automation:request %s %o', message, data)
 
-          return automationRequest(message, data)
+          const request = async () => {
+            // a cookie command sent after a document.cookie write has to see that write
+            if (message.includes('cookie') && documentCookieWrites.size) {
+              await Promise.allSettled(documentCookieWrites)
+            }
+
+            return automationRequest(message, data)
+          }
+
+          return request()
           .then((resp) => {
             return cb({ response: resp })
           }).catch((err) => {
@@ -405,10 +417,14 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         const setCrossOriginCookie = (data: { cookieString?: unknown, url?: unknown }) => {
-          return setDocumentCookie(data, {
+          const write = setDocumentCookie(data, {
             getCookies: (filter) => automationRequest('get:cookies', filter),
             setCookie: (cookie) => automationRequest('set:cookie', cookie),
-          })
+          }).finally(() => documentCookieWrites.delete(write))
+
+          documentCookieWrites.add(write)
+
+          return write
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
