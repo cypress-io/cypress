@@ -224,12 +224,10 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
   // Now we rendered the prelude and can calculate the bundle line offset and thus
   // process and include source maps. Since it is expensive we only do this if we
   // have a valid sourcemap.
-  let offsetToBundle: number | undefined = undefined
-
   let processedSourceMap: string | undefined
 
   if (sourceMap != null) {
-    offsetToBundle =
+    const offsetToBundle =
       newLinesInBuffer(wrapperOpen) + newLinesInBuffer(BUNDLE_WRAPPER_OPEN)
 
     processedSourceMap = processSourceMap(sourceMap, basedir, offsetToBundle)
