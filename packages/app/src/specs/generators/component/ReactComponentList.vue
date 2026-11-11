@@ -4,13 +4,13 @@
       v-if="errored"
       class="border-b border-b-gray-50 py-2 pl-[56px] text-gray-700"
     >
-      {{ t('createSpec.unableToParseFile') }}
+      Unable to parse file
     </div>
     <div
       v-else-if="!getReactComponentsMutation.fetching.value && !components.length"
       class="border-b border-b-gray-50 py-2 pl-[56px] text-gray-700"
     >
-      {{ t('createSpec.noComponentsFound') }}
+      No components found
     </div>
     <ul v-else>
       <li
@@ -40,7 +40,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '@cy/i18n'
 import { gql, useMutation } from '@urql/vue'
 import { ref, onMounted } from 'vue'
 import { ComponentList_GetReactComponentsFromFileDocument } from '../../../generated/graphql'
@@ -52,7 +51,6 @@ type ReactComponentDescriptor = {
   isDefault: boolean
 }
 
-const { t } = useI18n()
 const errored = ref<boolean | undefined>(false)
 const components = ref<readonly ReactComponentDescriptor[]>([])
 

@@ -25,7 +25,7 @@ for (const { bundler } of PROJECTS) {
       // @ts-expect-error - the project name is built at runtime, so it does not narrow to the typed list of fixture projects
       cy.scaffoldProject(PROJECT_NAME)
       cy.findBrowsers()
-    }),
+    })
 
     it(`can run multiple CT tests without interruption`, () => {
       // @ts-expect-error - the project name is built at runtime, so it does not narrow to the typed list of fixture projects

@@ -1,8 +1,6 @@
 import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
-import { get, set } from 'lodash'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
+import { set } from 'lodash'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const tooltipContentSelector = '.v-popper'
@@ -11,12 +9,11 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
   function mountWithStatus (
     status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED',
     mode: string,
-    msgKeys: {
+    messages: {
       header: string
       connected: string
       notConnected: string
       noAccess: string
-      docs: string
     },
   ) {
     const userProjectStatusStore = useUserProjectStatusStore()
@@ -82,27 +79,25 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
   [{
     mode: 'AVG_DURATION',
-    msgKeys: {
-      header: 'specPage.averageDuration.header',
-      connected: 'specPage.averageDuration.tooltip.connected',
-      notConnected: 'specPage.averageDuration.tooltip.notConnected',
-      noAccess: 'specPage.averageDuration.tooltip.noAccess',
-      docs: 'specPage.averageDuration.tooltip.linkText',
+    messages: {
+      header: 'Average duration',
+      connected: 'The average spec durations of your latest runs in Cypress Cloud',
+      notConnected: 'Connect to Cypress Cloud to see the average spec durations of your latest runs',
+      noAccess: 'Request access to this project in Cypress Cloud to view the average spec durations of your latest runs',
     },
   }, {
     mode: 'LATEST_RUNS',
-    msgKeys: {
-      header: 'specPage.latestRuns.header',
-      connected: 'specPage.latestRuns.tooltip.connected',
-      notConnected: 'specPage.latestRuns.tooltip.notConnected',
-      noAccess: 'specPage.latestRuns.tooltip.noAccess',
-      docs: 'specPage.latestRuns.tooltip.linkText',
+    messages: {
+      header: 'Latest runs',
+      connected: 'The status of your latest runs in Cypress Cloud',
+      notConnected: 'Connect to Cypress Cloud to see the status of your latest runs',
+      noAccess: 'Request access to this project in Cypress Cloud to view the status of your latest runs',
     },
-  }].forEach(({ mode, msgKeys }) => {
+  }].forEach(({ mode, messages }) => {
     context(mode, () => {
       context('connected', () => {
         beforeEach(() => {
-          mountWithStatus('CONNECTED', mode, msgKeys)
+          mountWithStatus('CONNECTED', mode, messages)
         })
 
         it('should render expected tooltip content', () => {
@@ -110,7 +105,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.connected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', messages.connected)
 
           cy.findByTestId('cloud-data-tooltip-content').find('button').should('not.exist')
         })
@@ -118,7 +113,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
       context('not connected', () => {
         beforeEach(() => {
-          mountWithStatus('NOT_CONNECTED', mode, msgKeys)
+          mountWithStatus('NOT_CONNECTED', mode, messages)
         })
 
         it('should render expected tooltip content', () => {
@@ -126,7 +121,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', messages.notConnected)
 
           cy.findByTestId('connect-button')
           .should('be.visible')
@@ -138,7 +133,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
       context('unauthorized', () => {
         beforeEach(() => {
-          mountWithStatus('UNAUTHORIZED', mode, msgKeys)
+          mountWithStatus('UNAUTHORIZED', mode, messages)
         })
 
         it('should render expected tooltip content', () => {
@@ -146,15 +141,15 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', messages.noAccess)
 
-          cy.contains('button', defaultMessages.specPage.requestAccessButton).should('be.visible')
+          cy.contains('button', 'Request access').should('be.visible')
         })
       })
 
       context('access requested', () => {
         beforeEach(() => {
-          mountWithStatus('ACCESS_REQUESTED', mode, msgKeys)
+          mountWithStatus('ACCESS_REQUESTED', mode, messages)
         })
 
         it('should render expected tooltip content', () => {
@@ -162,15 +157,15 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', messages.noAccess)
 
-          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible').should('be.disabled')
+          cy.contains('button', 'Request sent').should('be.visible').should('be.disabled')
         })
       })
 
       context('logged out', () => {
         beforeEach(() => {
-          mountWithStatus('LOGGED_OUT', mode, msgKeys)
+          mountWithStatus('LOGGED_OUT', mode, messages)
         })
 
         it('should render expected tooltip content', () => {
@@ -178,7 +173,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', messages.notConnected)
 
           cy.findByTestId('login-button')
           .should('be.visible')
@@ -190,7 +185,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
       context('not found', () => {
         beforeEach(() => {
-          mountWithStatus('NOT_FOUND', mode, msgKeys)
+          mountWithStatus('NOT_FOUND', mode, messages)
         })
 
         it('should render expected tooltip content', () => {
@@ -198,7 +193,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', messages.notConnected)
 
           cy.findByTestId('reconnect-button')
           .should('be.visible')
@@ -210,7 +205,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
       it('delays popping tooltip', () => {
         cy.clock()
-        mountWithStatus('CONNECTED', mode, msgKeys)
+        mountWithStatus('CONNECTED', mode, messages)
         cy.get(tooltipContentSelector).trigger('mouseenter')
         cy.findByTestId('cloud-data-tooltip-content')
         .should('not.exist')

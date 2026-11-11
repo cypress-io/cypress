@@ -161,7 +161,7 @@ export type ModuleDefinition = (
   },
   __filename: string,
   __dirname: string,
-  require: NodeRequireFunction
+  require: NodeRequireFunction,
 ) => NodeModule
 
 /**
@@ -186,7 +186,7 @@ export type Snapshot = {
     document: unknown,
     console: Console,
     pathResolver: unknown,
-    require: NodeRequireFunction
+    require: NodeRequireFunction,
   ) => void
 }
 

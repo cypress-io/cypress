@@ -180,7 +180,6 @@ export const getRendererMemoryUsage: () => Promise<number | null> = measure(asyn
   // if we don't have a renderer process yet, find it.
   // this is done once since the renderer process will not change
   if (!rendererProcess) {
-    let process: Process | null = null
     let processes: si.Systeminformation.ProcessesData
 
     try {
@@ -191,7 +190,7 @@ export const getRendererMemoryUsage: () => Promise<number | null> = measure(asyn
       return null
     }
 
-    process = findRendererProcess(processes)
+    const process = findRendererProcess(processes)
 
     if (!process) return null
 

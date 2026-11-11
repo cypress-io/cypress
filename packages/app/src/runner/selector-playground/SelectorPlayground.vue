@@ -9,7 +9,7 @@
     >
       <Menu #="{ open }">
         <MenuButton
-          :aria-label="t('runner.selectorPlayground.selectorMethodsLabel')"
+          aria-label="Selector methods"
           class="border border-r-transparent rounded-l-md flex h-full outline-solid outline-indigo-500 border-gray-800 text-gray-300 w-[40px] items-center justify-center hover:bg-gray-800"
           @click.stop
         >
@@ -72,10 +72,10 @@
           data-cy="playground-num-elements"
         >
           <template v-if="!selectorPlaygroundStore.isValid">
-            <span class="text-error-300">{{ t('runner.selectorPlayground.invalidSelector') }}</span>
+            <span class="text-error-300">Invalid</span>
           </template>
           <template v-else>
-            {{ t('runner.selectorPlayground.matches', selectorPlaygroundStore.numElements) }}
+            {{ matchesText }}
           </template>
         </div>
       </code>
@@ -85,8 +85,8 @@
       <SelectorPlaygroundTooltip
         color="light"
         placement="top"
-        :hover-text="t('runner.selectorPlayground.copyTooltip')"
-        :click-text="t('runner.selectorPlayground.copyTooltipAction')"
+        hover-text="Copy to clipboard"
+        click-text="Copied!"
       >
         <template #default="{focus}">
           <button
@@ -104,8 +104,8 @@
       <SelectorPlaygroundTooltip
         color="light"
         placement="top"
-        :hover-text="t('runner.selectorPlayground.printTooltip')"
-        :click-text="t('runner.selectorPlayground.printTooltipAction')"
+        hover-text="Print to console"
+        click-text="Printed!"
       >
         <template #default="{focus}">
           <button
@@ -132,11 +132,8 @@ import type { EventManager } from '../event-manager'
 import { openPlayground, closePlayground, SELECTOR_METHODS, getMethodPrefixLength } from './utils'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useElementSize } from '@vueuse/core'
-import { useI18n } from 'vue-i18n'
 import { useClipboard } from '@cy/gql-components/useClipboard'
 import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   eventManager: EventManager
@@ -148,6 +145,12 @@ const methods = SELECTOR_METHODS
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const match = ref<HTMLDivElement>()
 const { width: matcherWidth } = useElementSize(match)
+
+const matchesText = computed(() => {
+  const n = selectorPlaygroundStore.numElements
+
+  return n === 0 ? 'No matches' : n === 1 ? `${n} match` : `${n} matches`
+})
 
 // Text that is printed to the LEFT of the input
 const leftOfInputText = computed(() => {

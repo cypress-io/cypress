@@ -33,7 +33,7 @@ defineProps<{
   icon: 'access' | 'error'
   message: string
   buttonText: string
-  buttonIcon: FunctionalComponent<SVGAttributes, {}>
+  buttonIcon: FunctionalComponent<SVGAttributes>
   buttonDisabled?: boolean
 }>()
 

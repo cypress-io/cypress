@@ -716,7 +716,7 @@ export class ProjectLifecycleManager {
     await this.resetInternalState()
   }
 
-  registerEvent (event: string, callback: Function) {
+  registerEvent (event: string, callback: (...args: any[]) => any) {
     return this._eventRegistrar.registerEvent(event, callback)
   }
 
@@ -797,7 +797,6 @@ export class ProjectLifecycleManager {
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!configFilePathSet) {
       this.setConfigFilePath(`cypress.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
-      configFilePathSet = true
     }
 
     this._projectMetaState = metaState

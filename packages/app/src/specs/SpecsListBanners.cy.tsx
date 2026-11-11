@@ -1,6 +1,4 @@
-import { camelCase, assignIn, set } from 'lodash'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
+import { assignIn, set } from 'lodash'
 import SpecsListBanners from './SpecsListBanners.vue'
 import { ref } from 'vue'
 import type { Ref } from 'vue'
@@ -143,6 +141,35 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
           },
         }
 
+        const bannerMessages: Record<string, string[]> = {
+          'login': [
+            'Optimize and record your CI test runs with Cypress Cloud',
+            'When you configure Cypress to record tests to Cypress Cloud, you\'ll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.',
+            'Get started with Cypress Cloud',
+          ],
+          'create-organization': [
+            'Finish setting up Cypress Cloud',
+            'Join or create an organization in Cypress Cloud to access your projects and recorded test runs.',
+            'Set up your organization',
+          ],
+          'connect-project': [
+            'Connect your project to Cypress Cloud',
+            'Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.',
+            'Connect your project',
+          ],
+          'record': [
+            'Record your first run',
+            'Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools.',
+          ],
+          'component-testing': [
+            'React component testing is available for this project',
+            'You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.',
+            'Quick setup',
+            'Read our guide',
+            'Give feedback',
+          ],
+        }
+
         const userProjectStatusStore = useUserProjectStatusStore()
 
         const stateToSet = bannerTrueConditions[bannerTestId]
@@ -160,16 +187,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
         cy.get(`[data-cy="${bannerTestId}-banner"]`)
         .should('be.visible')
 
-        // The ct title has dynamic content and seems complicated to set here, so ignoring
-        const ctBannerTitle = defaultMessages.specPage.banners.componentTesting.title
-
-        if (ctBannerTitle) {
-          defaultMessages.specPage.banners.componentTesting.title = ctBannerTitle.replace('{0}', 'React')
-        }
-
-        cy.wrap(Object.entries(defaultMessages.specPage.banners[camelCase(bannerTestId)])).each((entry) => {
-          // @ts-expect-error - the banner messages are typed as unknown, which no cy.contains overload accepts
-          cy.contains(entry[1]).should('be.visible')
+        cy.wrap(bannerMessages[bannerTestId]).each((message: string) => {
+          cy.contains(message).should('be.visible')
         })
       })
 

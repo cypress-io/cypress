@@ -35,6 +35,7 @@ export const findAppStateFromTest = function (dom) {
 export const clickCommandLog = (sel, type?) => {
   // trigger the LONG_RUNNING_THRESHOLD to display the command line
   // this adds time to test but makes a more accurate test as React 18+ does not rerender when setting internals
+  // eslint-disable-next-line cypress/no-unnecessary-waiting -- LONG_RUNNING_THRESHOLD has to pass before the command shows in the log
   return cy.wait(2000)
   .then(() => {
     const commandLogEl = getCommandLogWithText(sel, type)
@@ -55,8 +56,8 @@ export const clickCommandLog = (sel, type?) => {
 
     inner.get(0).click()
 
-    // wait slightly for a repaint of the reporter
-    cy.wait(10).then(() => {
+    // retry until the reporter repaints
+    cy.wrap(null, { log: false }).should(() => {
       // make sure command was pinned, otherwise throw a better error message
       expect(cy.$$('.runnable-active .command-pin', getReporterDocument()).length, 'command should be pinned').ok
     })

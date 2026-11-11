@@ -15,8 +15,6 @@ import type { SubscriptionHook, MutationResolverCallback as MutationResolver } f
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
-import { createI18n } from '@cy/i18n'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { getOperationNameFromDocument } from './clientTestUtils'
 
@@ -40,8 +38,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       each(plugins, (pluginFn: () => any) => {
         options?.global?.plugins?.push(pluginFn())
       })
-
-      options.global.plugins.push(createI18n())
 
       const context = makeClientTestContext()
 
@@ -68,7 +64,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
           'transition-group': false,
         },
         plugins: [
-          createI18n(),
           {
             install (app) {
               app.use(urql, testUrqlClient(context, options.onResult, mutationResolvers, registerSubscriptionHook))
@@ -85,7 +80,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     let queryVariablesSegment = ''
 
     if (options.variableTypes) {
-      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `\$${name}: ${type}`).join(',')
+      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `$${name}: ${type}`).join(',')
       queryVariablesSegment = `(${queryVariablesSegment})`
     }
 

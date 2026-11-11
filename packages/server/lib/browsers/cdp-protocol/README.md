@@ -76,6 +76,7 @@ Most of these follow from Chrome storing cookies before the response middleware 
 - **HTTP cache and service-worker responses.** Chrome emits no extraInfo for these, so there are no origin headers to compare against and the sync doesn't run. A handler's edits and removals have no effect. A cookie it adds is stored only if the handler also fulfills the response, for example by replacing the body.
 - **Partitioned (CHIPS) cookies** are synced only when Chrome reports a partition key it can address. With an opaque key they are skipped. The server-side jar and the `cy` cookie commands don't model partitions on either path.
 - **The origin's values are briefly visible.** Until the sync runs, other requests and page scripts can see the cookies the origin set, including ones the handler removes or changes.
+- **A request handler that rewrites `req.url` to another host.** Chrome sends the request to the rewritten host, so it stores the response's cookies there, and the server-side jar records them under the same host. On the proxy path, the browser stores them under the host it requested, while the jar records them under the rewritten host.
 - **A removed `Cookie` header arrives empty.** When a `cy.intercept()` request handler deletes `req.headers.cookie`, the transport sends an empty `Cookie` header, because Chrome adds its stored cookies back when the header is missing. The server gets no cookies, as on the proxy path, but sees an empty header where the proxy path sends none.
 
 ## Debugging

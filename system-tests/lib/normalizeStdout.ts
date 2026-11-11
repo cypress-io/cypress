@@ -13,7 +13,7 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 // a single placeholder. They are kept as separate groups (rather than a single
 // repeating group) so the `headless` capture stays `undefined` when absent —
 // the harness asserts on it directly in system-tests.ts.
-export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(headless\))?(\s\(deprecated\))?(\s+)/
+export const browserNameVersionRe = /(Browser:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(headless\))?(\s\(deprecated\))?(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 // The Electron browser deprecation warning is printed for every run-mode run
@@ -169,22 +169,22 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
   .replace(/js-\d{3}/g, 'js-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3 (also matches pre-release suffixes like 0.0.0-development)
-  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+(?:-\S+)?)/g, replaceCypressVersion)
+  .replace(/(Cypress:\s+)(\d+\.\d+\.\d+(?:-\S+)?)/g, replaceCypressVersion)
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
-  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \((?:.|\n)*?\)\s+)/g, replaceNodeVersion)
+  .replace(/(Node Version:\s+v)(\d+\.\d+\.\d+)( \((?:.|\n)*?\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
-  .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
+  .replace(/(Duration:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   // duration='1589' -> duration='XXXX'
-  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
+  .replace(/(duration=')(\d+)(')/g, replaceDurationFromReporter)
   // (in|after) (1m)|(1m, 10s)|(10s)|(10.12ms) 1/1 => '(in|after) XXm, YYs, ZZ.ZZms 1/1
   .replace(/((in)|(after)) ((?:\d+m)|(?:\d+m, \d+s)|(?:\d+s)|(?:\d+\.\d+ms)) (\d+\/\d+)/g, replaceShortDuration)
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
   // normalizes upload indicator to a consistent number of dots
-  .replace(/(Uploading Cloud Artifacts\: )([\. ]*)/g, replaceUploadActivityIndicator)
+  .replace(/(Uploading Cloud Artifacts: )([. ]*)/g, replaceUploadActivityIndicator)
   // fix "Require stacks" for CI
-  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
+  .replace(/^(- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
@@ -207,7 +207,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
     // This message is replaced with Chrome/Firefox's exception text for consistent diffs
-    str = str.replace(/(ReferenceError:|>) Can\'t find variable: (\S+)/g, '$1 $2 is not defined')
+    str = str.replace(/(ReferenceError:|>) Can't find variable: (\S+)/g, '$1 $2 is not defined')
   }
 
   // avoid race condition when webpack prints this at a non-deterministic timing
