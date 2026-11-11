@@ -68,7 +68,9 @@ const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
 const isValidNumberInputChar = /[-+eE\d.]/
-const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}$/
+// Unanchored at the end so that each arrow in a run such as
+// {upArrow}{upArrow} is accepted on its own as typing reaches it
+const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}/
 
 const INITIAL_MODIFIERS = {
   alt: false,

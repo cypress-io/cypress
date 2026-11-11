@@ -4,9 +4,11 @@
 **Bugfixes:**
 
 - Fixed an issue where a failed assertion whose error message was very long, such as [`.should('contain.text')`](https://on.cypress.io/should) on an element with a lot of text, took minutes to report, so the run looked stuck. The browser stopped responding while it processed the error, and `cypress run` paused again after printing the failure. The failure is now reported as soon as the assertion times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
+- [`.type()`](https://on.cypress.io/type) now accepts consecutive `{upArrow}` and `{downArrow}` sequences, such as `{upArrow}{upArrow}`, on `date`, `month`, `week`, `time`, and `datetime-local` inputs, and steps the value once per arrow. Previously, a single arrow worked but more than one in a row failed with an error saying the input required a valid date, month, week, time, or datetime. Fixed in [#35352](https://github.com/cypress-io/cypress/pull/35352).
 
 **Misc:**
 
+- Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
 
 **Dependency Updates:**
