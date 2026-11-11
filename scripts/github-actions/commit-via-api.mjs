@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 
-export const commitViaApi = async ({ context, github, baseBranch, branchName, filePaths, message }) => {
+export const commitViaApi = async ({ context, github, baseBranch, branchName, filePaths, message, resetToBase = false }) => {
   const owner = context.repo.owner
   const repo = context.repo.repo
   const repositoryNameWithOwner = `${owner}/${repo}`
@@ -15,6 +15,16 @@ export const commitViaApi = async ({ context, github, baseBranch, branchName, fi
     }
   })
 
+  const getBaseSha = async () => {
+    const { data } = await github.rest.git.getRef({
+      owner,
+      repo,
+      ref: `heads/${baseBranch}`,
+    })
+
+    return data.object.sha
+  }
+
   let expectedHeadOid
 
   try {
@@ -28,13 +38,7 @@ export const commitViaApi = async ({ context, github, baseBranch, branchName, fi
   } catch (err) {
     if (err.status !== 404) throw err
 
-    const { data: baseRef } = await github.rest.git.getRef({
-      owner,
-      repo,
-      ref: `heads/${baseBranch}`,
-    })
-
-    expectedHeadOid = baseRef.object.sha
+    expectedHeadOid = await getBaseSha()
 
     await github.rest.git.createRef({
       owner,
@@ -42,6 +46,26 @@ export const commitViaApi = async ({ context, github, baseBranch, branchName, fi
       ref: `refs/heads/${branchName}`,
       sha: expectedHeadOid,
     })
+  }
+
+  // Files generated from a fresh checkout of the base branch belong on top of
+  // that base, not on whatever the bot branch held before. Without the reset,
+  // the branch never picks up later base commits, so its PR conflicts and its
+  // tree stops matching the generated files.
+  if (resetToBase && branchName !== baseBranch) {
+    const baseSha = await getBaseSha()
+
+    if (baseSha !== expectedHeadOid) {
+      await github.rest.git.updateRef({
+        owner,
+        repo,
+        ref: `heads/${branchName}`,
+        sha: baseSha,
+        force: true,
+      })
+
+      expectedHeadOid = baseSha
+    }
   }
 
   const mutation = `

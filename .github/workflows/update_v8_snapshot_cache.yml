@@ -228,6 +228,7 @@ jobs:
               branchName: process.env.BRANCH_NAME,
               filePaths,
               message: 'chore: updating v8 snapshot cache',
+              resetToBase: true,
             })
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
