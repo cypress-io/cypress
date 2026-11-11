@@ -274,7 +274,7 @@ export class ProjectActions {
 
       return dir
     } catch (exception) {
-      throw Error(`Cannot add ${projectRoot} to projects as it does not exist in the file system`)
+      throw Error(`Cannot add ${projectRoot} to projects as it does not exist in the file system`, { cause: exception })
     }
   }
 

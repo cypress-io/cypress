@@ -4192,7 +4192,7 @@ declare namespace Cypress {
     ensureScrollable: boolean
   }
 
-  interface ScrollIntoViewOptions extends ScrollToOptions {
+  interface ScrollIntoViewOptions extends Omit<ScrollToOptions, 'ensureScrollable'> {
     /**
      * Amount to scroll after the element has been scrolled into view
      *
