@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - [`.type()`](https://on.cypress.io/type) now accepts consecutive `{upArrow}` and `{downArrow}` sequences, such as `{upArrow}{upArrow}`, on `date`, `month`, `week`, `time`, and `datetime-local` inputs, and steps the value once per arrow. Previously, a single arrow worked but more than one in a row failed with an error saying the input required a valid date, month, week, time, or datetime. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Misc:**
 
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
