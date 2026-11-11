@@ -73,8 +73,8 @@ Certain side effects, like GraphQL mutations, do not fire from component tests, 
 
 ## Testing Style Guide
 
-### String constants
-Strings used in tests for locating elements or asserting content in other ways are imported from the i18n constants. All strings present in the App or Launchpad UI should be found in some form in `en-US.json`. If a plain string is found in the UI code (we have a few of them), it should be moved into the constants file and then imported to both the component and the test code.
+### UI strings
+The App and Launchpad UI only ships in English, so components contain their UI strings directly. Tests that locate elements by their text or assert on content write the same text as string literals, rather than importing it from a shared module.
 
 ### Element Locators
 When relevant, element locators can assert something useful about the nature or context of the element in the DOM. Often for accessibility reasons it is important what elements are rendered. If there is nothing in particular that matters about the DOM, or if needed to disambiguate, then `data-cy` attributes can be used to locate elements.
