@@ -2,6 +2,7 @@ import { fs } from './fs'
 import os from 'os'
 import path from 'path'
 import { shell } from 'electron'
+import { isRunningAsElectronProcess } from './electron-app'
 
 const trashItem = async (itemPath: string): Promise<void> => {
   try {
@@ -16,12 +17,12 @@ const trashItem = async (itemPath: string): Promise<void> => {
   }
 }
 
-// Moves a folder's contents to the trash (or empties it on Linux)
+// Moves a folder's contents to the trash, or empties it on Linux and when running as Node without Electron's shell
 export const folder = async (pathToFolder: string): Promise<void> => {
   try {
     await fs.statAsync(pathToFolder)
 
-    if (os.platform() === 'linux') {
+    if (os.platform() === 'linux' || !isRunningAsElectronProcess()) {
       await fs.emptyDir(pathToFolder)
 
       return

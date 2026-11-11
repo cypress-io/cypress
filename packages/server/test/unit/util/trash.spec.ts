@@ -44,6 +44,8 @@ describe('lib/util/trash', () => {
   let tempDir: string
 
   beforeEach(async () => {
+    // some agent hosts set this, which would send every platform down the run-as-Node path
+    vi.stubEnv('ELECTRON_RUN_AS_NODE', '')
     tempDir = path.join(os.tmpdir(), `cypress-test-${Date.now()}`)
     await fs.promises.mkdir(tempDir, { recursive: true })
   })
@@ -51,6 +53,7 @@ describe('lib/util/trash', () => {
   afterEach(async () => {
     trashState.stub = undefined
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
     await fs.promises.rm(tempDir, { recursive: true, force: true })
   })
 
@@ -97,6 +100,23 @@ describe('lib/util/trash', () => {
       await expect(trash.folder(basePath)).rejects.toThrow('Failed to move item to trash')
       expect(fs.existsSync(path.resolve(basePath, 'a.txt'))).toBe(true)
       await fs.promises.rm(basePath, { recursive: true, force: true })
+    })
+
+    it('empties the directory without Electron\'s shell when running as Node', async () => {
+      vi.spyOn(os, 'platform').mockReturnValue('darwin')
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+      const basePath = path.join(tempDir, 'foo')
+
+      await populateDirectories(basePath)
+
+      const trashStub = vi.fn()
+
+      trashState.stub = trashStub
+
+      await trash.folder(basePath)
+      expect(trashStub).not.toHaveBeenCalled()
+      expectDirectoriesExist(basePath)
+      await fs.promises.rmdir(basePath)
     })
 
     it('completely removes directory on Linux', async () => {
