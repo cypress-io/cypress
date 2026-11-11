@@ -278,8 +278,8 @@ describe('stack_utils', () => {
       })
 
       it('splits a line at its last @', () => {
-        expect(normalize('boom', 'foo@bar@http://localhost/a.js:1:2')).toEqual(
-          'Error: boom\nfoo@bar@http://localhost/a.js:1:2',
+        expect(normalize('boom', 'foo@bar@')).toEqual(
+          'Error: boom\nfoo@bar@<unknown>',
         )
       })
 
