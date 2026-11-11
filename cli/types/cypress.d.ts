@@ -2667,15 +2667,17 @@ declare namespace Cypress {
     trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
 
     /**
-     * Type into a DOM element.
+     * Type into a DOM element. A number is converted to a string before typing.
      *
      * @see https://on.cypress.io/type
      * @example
      *    cy.get('input').type('Hello, World')
      *    // type "hello" + press Enter
      *    cy.get('input').type('hello{enter}')
+     *    // type "123"
+     *    cy.get('input').type(123)
      */
-    type(text: string, options?: Partial<TypeOptions>): Chainable<Subject>
+    type(text: string | number, options?: Partial<TypeOptions>): Chainable<Subject>
 
     /**
      * Uncheck checkbox(es).

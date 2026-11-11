@@ -91,6 +91,10 @@ Cypress.on('test:after:run', (attributes, test) => {
   cy.get('el').clear({ scrollBehavior: 'top' })
   cy.get('el').check({ scrollBehavior: 'bottom' })
   cy.get('el').type('hello', { scrollBehavior: 'center' })
+  cy.get('el').type(123) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.get('el').type(123, { delay: 0 })
+  cy.get('el').type({}) // $ExpectError
+  cy.get('el').type(true) // $ExpectError
   cy.get('el').trigger('mousedown', { scrollBehavior: 'nearest' })
   cy.get('el').click({ scrollBehavior: false })
   cy.get('el').click({ scrollBehavior: 'start' })

@@ -85,7 +85,6 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   it('can type numbers', () => {
-    // @ts-expect-error - numbers work in text inputs only and error in other inputs
     cy.get(':text:first').type(123).then(($text) => {
       expect($text).to.have.value('123')
     })

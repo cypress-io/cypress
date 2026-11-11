@@ -328,7 +328,6 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
-        // @ts-expect-error - we are testing invalid input
         cy.get('#date-without-value').type(1989)
       })
 
@@ -365,7 +364,6 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
-        // @ts-expect-error - we are testing invalid input
         cy.get('#month-without-value').type(6)
       })
 
@@ -415,7 +413,6 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
-        // @ts-expect-error - we are testing invalid input
         cy.get('#week-without-value').type(23)
       })
 
@@ -451,7 +448,6 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
-        // @ts-expect-error - we are testing invalid input
         cy.get('#time-without-value').type(9999)
       })
 
