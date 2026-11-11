@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.3.1
 
+**Bugfixes:**
+
+- Fixed an issue where, on Apple silicon Macs without Rosetta, `cypress run` could not move the previous run's videos, screenshots, and downloads to the Trash when [`trashAssetsBeforeRuns`](https://on.cypress.io/configuration#Folders--Files) was enabled. It warned `We failed to trash the existing run results` and left the old files in place. The Apple silicon binary also no longer includes programs built only for Intel Macs, so running it no longer triggers the macOS warning about apps that need Rosetta. Fixes [#24582](https://github.com/cypress-io/cypress/issues/24582) and [#35342](https://github.com/cypress-io/cypress/issues/35342).
+
 **Dependency Updates:**
 
 - Upgraded the transitive `@xmldom/xmldom` dependency of `plist` from `0.8.10` to `0.8.15` to address [XML Injection](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-15869636), [Uncontrolled Recursion](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-16134530), [ReDoS](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19498558), [Allocation of Resources Without Limits or Throttling](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499069), and [Inefficient Algorithmic Complexity](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499072) vulnerabilities reported in security scans. Addressed in [#35344](https://github.com/cypress-io/cypress/pull/35344).
