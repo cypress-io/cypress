@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.3.1
 
+**Misc:**
+
+- The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
+
 **Dependency Updates:**
 
 - Upgraded the transitive `@xmldom/xmldom` dependency of `plist` from `0.8.10` to `0.8.15` to address [XML Injection](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-15869636), [Uncontrolled Recursion](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-16134530), [ReDoS](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19498558), [Allocation of Resources Without Limits or Throttling](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499069), and [Inefficient Algorithmic Complexity](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499072) vulnerabilities reported in security scans. Addressed in [#35344](https://github.com/cypress-io/cypress/pull/35344).
