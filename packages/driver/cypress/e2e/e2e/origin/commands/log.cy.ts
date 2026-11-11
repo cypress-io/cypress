@@ -93,6 +93,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
       secondaryLogs[attrs.name]?.updatedAtTimestamps.push(attrs.updatedAtTimestamp)
     })
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- collects every cross-origin log event before the spec reads them
     cy.origin('http://www.foobar.com:3500', () => {
       Cypress.log({ name: 'log1' })
       const log2 = Cypress.log({ name: 'log2' })
@@ -161,6 +162,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         cy.state('isProtocolEnabled', false)
         logs = []
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- collects every cross-origin log event before the spec reads them
         cy.origin('http://www.foobar.com:3500', () => {
           Cypress.log({ name: 'log 1', message: 'log without snapshots' })?.end()
           Cypress.log({ name: 'log 2', message: 'log().snapshot()' })?.snapshot().end()
@@ -223,6 +225,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         cy.state('isProtocolEnabled', false)
         logs = []
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- collects every cross-origin log event before the spec reads them
         cy.origin('http://www.foobar.com:3500', () => {
           // add custom command to logs are associated to a command like typical cypress command logs would be
           // @ts-expect-error - `commandToRun` is a test-only custom command not declared on Chainable

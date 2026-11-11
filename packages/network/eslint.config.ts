@@ -1,8 +1,10 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  undeclaredWorkspaceImports(['test/**'], ['@packages/https-proxy']),
   {
     languageOptions: {
       parserOptions: {

@@ -1,5 +1,3 @@
-/// <reference path="../support/e2e.ts" />
-
 import dedent from 'dedent'
 
 describe('Config options', () => {

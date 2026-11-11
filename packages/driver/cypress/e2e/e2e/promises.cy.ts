@@ -1,4 +1,5 @@
-export {} // make typescript see this as a module
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
+export {}
 
 // `console` lives on the global scope rather than on `Window`
 const topWindow = () => window.top as Window & typeof globalThis
@@ -98,7 +99,7 @@ describe('promises', () => {
     })
 
     // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
-    return cy.foo()
+    cy.foo()
   })
 
   it('throws when instantiating a promise from a custom command', function (done) {
@@ -132,7 +133,7 @@ describe('promises', () => {
     })
 
     // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
-    return cy.foo()
+    cy.foo()
   })
 
   it('is okay to return promises from custom commands with no cy commands', () => {

@@ -46,7 +46,7 @@ interface ManageTabsOptions {
   browserCriClient: BrowserCriClient
   browserName
   host: string
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
   port: number
   protocolManager?: ProtocolManagerShape
   // Overrides CHILD_TARGET_INTERCEPTION_TIMEOUT_MS. Exposed for tests only.
@@ -70,7 +70,7 @@ interface TargetDestroyedOptions {
   browserClient: CriClient
   browserCriClient: BrowserCriClient
   event: Protocol.Target.TargetDestroyedEvent
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
 }
 
 // How long to wait for the page connection to confirm session-scoped Fetch
@@ -213,7 +213,7 @@ export class BrowserCriClient {
   gracefulShutdown?: boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   serviceWorkerBindings: Map<SessionId, ServiceWorkerBindingListener> = new Map()
-  onClose: Function | null = null
+  onClose: ((gracefulShutdown?: boolean) => void) | null = null
   /**
    * Cross-connection hold closing #34674's interception gap:
    *

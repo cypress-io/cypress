@@ -283,6 +283,7 @@ describe('command log', () => {
 
       testOptions('wait', { requestTimeout: 2000 }, 0, (options) => {
         // @ts-expect-error - requestTimeout is not part of the public options for the numeric overload
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- tests that cy.wait() does not mutate its options
         cy.wait(100, options)
       })
 

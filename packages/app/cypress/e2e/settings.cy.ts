@@ -204,11 +204,18 @@ describe('App: Settings', () => {
         })
       })
 
-      // makes sure all experiments have an i18n header and description available.
+      // An experiment without its own name and description falls back to its field name with no description.
       // @see https://github.com/cypress-io/cypress/issues/30126.
-      cy.get('[data-cy="settings-experiments"] [role="row"][data-cy^="experiment-"]').each((experimentRow) => {
-        cy.wrap(experimentRow[0]).get('[data-cy="experimentName"]').should('not.contain.text', 'settingsPage.')
-        cy.wrap(experimentRow[0]).get('[data-cy="experimentDescription"]').should('not.contain.text', 'settingsPage.')
+      cy.get('[data-cy="settings-experiments"] [role="row"][data-cy^="experiment-"]').each(($row) => {
+        const field = String($row.attr('data-cy')).slice('experiment-'.length)
+
+        cy.wrap($row).find('[data-cy="experimentName"]').invoke('text').then((name) => {
+          expect(name.trim(), `name for ${field}`).not.to.be.oneOf(['', field])
+        })
+
+        cy.wrap($row).find('[data-cy="experimentDescription"]').invoke('text').then((description) => {
+          expect(description.trim(), `description for ${field}`).not.to.be.empty
+        })
       })
     })
 
@@ -338,7 +345,7 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(200)
+      cy.location('hash').should('include', '/settings')
       cy.get('[data-cy="Device settings"]').click()
     })
 
@@ -363,7 +370,7 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(200)
+      cy.location('hash').should('include', '/settings')
       cy.get('[data-cy="Device settings"]').click()
     })
   })
@@ -460,43 +467,32 @@ describe('App: Settings', () => {
         cy.contains('Notify me when a run completes').should('be.visible')
         cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        // each preference is saved after a debounce
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled', 'errored'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
       })
 
       itSkipIfWindows('sends test notification', () => {

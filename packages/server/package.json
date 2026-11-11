@@ -102,7 +102,7 @@
     "image-size": "1.2.1",
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",
-    "jimp": "0.22.12",
+    "jimp": "1.6.1",
     "jose": "^4.15.5",
     "json-parse-even-better-errors": "^3.0.2",
     "lazy-ass": "1.6.0",
