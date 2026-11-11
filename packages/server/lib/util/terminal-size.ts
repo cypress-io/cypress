@@ -49,6 +49,7 @@ const getSize = (): Size => {
   return fromStream(process.stdout)
     ?? fromStream(process.stderr)
     ?? create(process.env.COLUMNS, process.env.LINES)
+    ?? create(process.env.FORCE_TTY_COLUMNS, process.env.FORCE_TTY_ROWS)
     ?? fromDevTty()
     ?? fromTput()
     ?? { ...DEFAULT_SIZE }

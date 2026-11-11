@@ -20,6 +20,8 @@ describe('lib/util/terminal-size', () => {
     vi.spyOn(env, 'get').mockReturnValue(undefined)
     vi.stubEnv('COLUMNS', '')
     vi.stubEnv('LINES', '')
+    vi.stubEnv('FORCE_TTY_COLUMNS', '')
+    vi.stubEnv('FORCE_TTY_ROWS', '')
   })
 
   afterEach(() => {
@@ -47,6 +49,22 @@ describe('lib/util/terminal-size', () => {
   it('uses COLUMNS and LINES when neither stream is a terminal', () => {
     vi.stubEnv('COLUMNS', '132')
     vi.stubEnv('LINES', '50')
+
+    expect(terminalSize.get()).toEqual({ columns: 132, rows: 50 })
+  })
+
+  it('uses the size forwarded by the CLI when the streams are piped', () => {
+    vi.stubEnv('FORCE_TTY_COLUMNS', '133')
+    vi.stubEnv('FORCE_TTY_ROWS', '41')
+
+    expect(terminalSize.get()).toEqual({ columns: 133, rows: 41 })
+  })
+
+  it('prefers COLUMNS and LINES over the size forwarded by the CLI', () => {
+    vi.stubEnv('COLUMNS', '132')
+    vi.stubEnv('LINES', '50')
+    vi.stubEnv('FORCE_TTY_COLUMNS', '133')
+    vi.stubEnv('FORCE_TTY_ROWS', '41')
 
     expect(terminalSize.get()).toEqual({ columns: 132, rows: 50 })
   })
