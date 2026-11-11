@@ -51,6 +51,21 @@ describe('server sent events', () => {
     }).should('deep.eq', ['1', '2', '3', '4', '5'])
   })
 
+  // https://github.com/cypress-io/cypress/issues/35256
+  // The stream is finite because the HTTP proxy reads the whole body before a
+  // response handler runs.
+  it('receives the stream when a response handler changes the content-type', () => {
+    cy.intercept('http://127.0.0.1:3039/sse/finite', (req) => {
+      req.on('response', (res) => {
+        res.headers['content-type'] = 'text/plain'
+      })
+    })
+
+    cy.window()
+    .then((win) => win.fetch('http://127.0.0.1:3039/sse/finite').then((res) => res.text()))
+    .should('equal', 'data: one\n\ndata: two\n\n')
+  })
+
   it('reads SSE framing from a fetch ReadableStream before cancelling', () => {
     cy.window().then((win) => {
       // the proxy only exempts a response from gzip compression when the

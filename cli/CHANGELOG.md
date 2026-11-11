@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [16.0.0](#16-0-0) where a [`cy.intercept()`](https://on.cypress.io/intercept) response handler that changed the `Location` or `Referrer-Policy` header of a redirect had no effect in Chromium-based browsers. The browser followed the redirect as the server sent it, to the server's URL and with the server's referrer policy. Fixes [#34704](https://github.com/cypress-io/cypress/issues/34704).
+- Fixed a regression in [16.0.0](#16-0-0) where a [`cy.intercept()`](https://on.cypress.io/intercept) response handler that changed the `Content-Type` header of a streamed response, such as `text/event-stream` or an `EventSource`, replaced the stream with an empty body in Chromium-based browsers. The stream now reaches the page with the new `Content-Type`. A handler that sets `res.body` still replaces the stream. Fixes [#35256](https://github.com/cypress-io/cypress/issues/35256).
 - [`.type()`](https://on.cypress.io/type) now accepts consecutive `{upArrow}` and `{downArrow}` sequences, such as `{upArrow}{upArrow}`, on `date`, `month`, `week`, `time`, and `datetime-local` inputs, and steps the value once per arrow. Previously, a single arrow worked but more than one in a row failed with an error saying the input required a valid date, month, week, time, or datetime. Fixed in [#35352](https://github.com/cypress-io/cypress/pull/35352).
 
 **Misc:**
