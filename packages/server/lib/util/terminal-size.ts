@@ -1,6 +1,5 @@
 import { execFileSync } from 'child_process'
 import fs from 'fs'
-import tty from 'tty'
 import * as env from './env'
 
 type Size = { columns: number, rows: number }
@@ -21,15 +20,18 @@ const fromStream = (stream?: NodeJS.WriteStream): Size | undefined => {
 const fromDevTty = (): Size | undefined => {
   if (process.platform === 'win32') return
 
+  let fd: number | undefined
+
   try {
-    const stream = new tty.WriteStream(fs.openSync('/dev/tty', fs.constants.O_RDONLY | fs.constants.O_NONBLOCK))
-    const size = create(stream.columns, stream.rows)
+    // A tty.WriteStream leaves file descriptors open after destroy(), so ask stty instead
+    fd = fs.openSync('/dev/tty', 'r')
+    const [rows, columns] = execFileSync('stty', ['size'], { encoding: 'utf8', stdio: [fd, 'pipe', 'ignore'], timeout: 500 }).trim().split(/\s+/)
 
-    stream.destroy()
-
-    return size
+    return create(columns, rows)
   } catch {
     return
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd)
   }
 }
 
