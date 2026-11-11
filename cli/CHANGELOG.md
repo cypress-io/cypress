@@ -3,7 +3,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where a failing assertion whose error message includes a very long text, such as `.should('contain.text', ...)` on an element with hundreds of thousands of characters, could take minutes to report the failure, making the run appear stuck. The failure is now reported as soon as the assertion times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
+- Fixed an issue where a test failure whose error message contains very long text, such as a failed [`.should('contain.text', ...)`](https://on.cypress.io/should) on an element with hundreds of thousands of characters, could take minutes to be reported, making the run appear stuck. The failure is now reported as soon as the command times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
 
 ## 16.3.0
 

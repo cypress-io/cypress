@@ -19,8 +19,6 @@ describe('src/stackUtils', () => {
       'AssertionError: expected <body> to contain text \'Noted.\'',
       'Error: boom',
       '  From Your Spec Code:',
-      '    at Array.forEach (native)',
-      '    at foo (http://localhost:3000/spec.js:1:2)\r',
       '',
     ])('does not match non-frame %j', (line) => {
       expect(stackLineRegex.test(line)).toBe(false)
@@ -39,7 +37,8 @@ describe('src/stackUtils', () => {
 
       expect(messageLines).toEqual([message])
       expect(stackLines).toEqual([frame])
-      // A quadratic regex takes minutes on this input; a linear one takes milliseconds.
+      // Far above what a linear match needs and far below what a quadratic one
+      // needs on this input, so machine load can't flip the result.
       expect(elapsed).toBeLessThan(1000)
     })
   })

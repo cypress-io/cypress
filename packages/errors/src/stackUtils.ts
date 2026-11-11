@@ -1,9 +1,10 @@
 import _ from 'lodash'
 import type { ErrorLike } from './errorTypes'
 
-// Error messages can embed very long lines (e.g. the full text of an element), so
-// this must stay linear: overlapping wildcards like `.*@?\(?.*` backtrack
-// quadratically on a long line that isn't a stack frame.
+// Error messages can embed very long lines, such as an element's full text, so
+// keep this linear. Two wildcards next to each other can split a line in many
+// ways, and the engine tries every split on a line that isn't a frame. The `\S`
+// gives the leading whitespace exactly one place to end.
 export const stackLineRegex = /^\s*(?:\S.*)?(?::\d+:\d+|<unknown>|\[native code\])\)?$/
 
 type MessageLines = [string[], string[]] & { messageEnded?: boolean }
