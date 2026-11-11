@@ -73,9 +73,6 @@ Certain side effects, like GraphQL mutations, do not fire from component tests, 
 
 ## Testing Style Guide
 
-### UI strings
-The App and Launchpad UI only ships in English, so components contain their UI strings directly. Tests that locate elements by their text or assert on content write the same text as string literals, rather than importing it from a shared module.
-
 ### Element Locators
 When relevant, element locators can assert something useful about the nature or context of the element in the DOM. Often for accessibility reasons it is important what elements are rendered. If there is nothing in particular that matters about the DOM, or if needed to disambiguate, then `data-cy` attributes can be used to locate elements.
 
