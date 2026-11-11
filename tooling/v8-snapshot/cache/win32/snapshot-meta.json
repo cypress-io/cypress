@@ -3363,6 +3363,7 @@
     "./packages/network-interception/cjs/core/http-intercept.js",
     "./packages/network-interception/cjs/core/network-interception-core.js",
     "./packages/network-interception/cjs/core/plan-subscriptions.js",
+    "./packages/network-interception/cjs/core/redirect-status.js",
     "./packages/network-interception/cjs/core/request-logging.js",
     "./packages/network-interception/cjs/exchange/network-exchange.js",
     "./packages/network-interception/cjs/policies/blocked-hosts.js",
@@ -3817,5 +3818,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8368f9c448abf14b6bca8449b85a0329dcac9ccd9083b0d4329be0d241cfe299"
+  "deferredHash": "387746f9a0e33b4cd87ed90ec81dd692cc59b3b23b6f5e6f732f771cb6bf2261"
 }
