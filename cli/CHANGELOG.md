@@ -1,4 +1,11 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.3.1
+
+**Dependency Updates:**
+
+- Upgraded the transitive `@xmldom/xmldom` dependency of `plist` from `0.8.10` to `0.8.15` to address [XML Injection](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-15869636), [Uncontrolled Recursion](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-16134530), [ReDoS](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19498558), [Allocation of Resources Without Limits or Throttling](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499069), and [Inefficient Algorithmic Complexity](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499072) vulnerabilities reported in security scans. Addressed in [#35344](https://github.com/cypress-io/cypress/pull/35344).
+- Upgraded the transitive `fast-uri` dependency of `ajv` from `3.0.3` to `3.1.9` to address [Directory Traversal](https://security.snyk.io/vuln/SNYK-JS-FASTURI-16642399), [Interpretation Conflict](https://security.snyk.io/vuln/SNYK-JS-FASTURI-16642394), [Improper Encoding or Escaping of Output](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19502739), [Improper Handling of URL Encoding](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19256869), [Improper Validation of Syntactic Correctness of Input](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19256871), [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19846649), [Encoding Error](https://security.snyk.io/vuln/SNYK-JS-FASTURI-21279303), and [Path Equivalence](https://security.snyk.io/vuln/SNYK-JS-FASTURI-21279301) vulnerabilities reported in security scans. Addressed in [#35346](https://github.com/cypress-io/cypress/pull/35346).
+
 ## 16.3.0
 
 **Performance:**
@@ -47,6 +54,7 @@
 **Misc:**
 
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted.
+- The TypeScript types for [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) no longer accept the `ensureScrollable` option, which only [`cy.scrollTo()`](https://on.cypress.io/scrollto) uses. `.scrollIntoView()` always ignored it, so TypeScript code that passes `ensureScrollable` to `.scrollIntoView()` now fails to compile. Remove the option to fix the error; scrolling behaves the same without it. Addressed in [#35331](https://github.com/cypress-io/cypress/pull/35331).
 - The error shown when [`cy.session()`](https://on.cypress.io/session) is passed an unknown option now lists every valid option, `cacheAcrossSpecs` and `validate`. Previously it listed only `validate`, suggesting that `cacheAcrossSpecs` was not a valid option. Addressed in [#35233](https://github.com/cypress-io/cypress/pull/35233).
 - The editor chooser now lists only the editors Cypress detects, and the **Custom** option has been removed. To use an editor that isn't listed, set the `LAUNCH_EDITOR` environment variable before starting Cypress. Addressed in [#35208](https://github.com/cypress-io/cypress/pull/35208).
 

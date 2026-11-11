@@ -40,9 +40,9 @@ describe('ng-generate @cypress/schematic:component', () => {
   })
 
   it('should not generate component which does exist already', async () => {
-    let tree = await schematicRunner.runSchematic('component', { name: 'foo', project: 'sandbox', skipImport: true }, appTree)
+    await schematicRunner.runSchematic('component', { name: 'foo', project: 'sandbox', skipImport: true }, appTree)
 
-    tree = await schematicRunner.runSchematic('component', { name: 'foo', project: 'sandbox', skipImport: true }, appTree)
+    const tree = await schematicRunner.runSchematic('component', { name: 'foo', project: 'sandbox', skipImport: true }, appTree)
 
     expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.ts').length).to.eq(1)
     expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.html').length).to.eq(1)

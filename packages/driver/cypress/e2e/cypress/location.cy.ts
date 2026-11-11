@@ -498,9 +498,7 @@ describe('src/cypress/location', () => {
 
       cases.forEach((c) => {
         it(c, function () {
-          let url = this.normalize('')
-
-          url = Location.qualifyWithBaseUrl(c, '')
+          const url = Location.qualifyWithBaseUrl(c, '')
 
           expect(url).to.eq(c)
         })
