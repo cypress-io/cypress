@@ -32,13 +32,6 @@ const makePlugins = (plugins) => {
       // If you notice that your icons are bigger than they should be, this
       // is probably why.
       scale: 1,
-      customCollections: {
-        // ~icons/cy/book_x16
-        cy: FileSystemIconLoader(path.resolve(__dirname, './src/assets/icons')),
-        // ~icons/logos/cursor
-        logos: FileSystemIconLoader(path.resolve(__dirname, './src/assets/logos')),
-        ...plugins.iconsOptions?.customCollections,
-      },
       iconCustomizer (collection, icon, props) {
         if (icon.includes('_x')) {
           const [, size] = icon.split('_x')
@@ -49,6 +42,15 @@ const makePlugins = (plugins) => {
         }
       },
       ...plugins.iconsOptions,
+      // After the iconsOptions spread, so a caller's collections are merged
+      // with the built-in ones instead of replacing them
+      customCollections: {
+        // ~icons/cy/book_x16
+        cy: FileSystemIconLoader(path.resolve(__dirname, './src/assets/icons')),
+        // ~icons/logos/cursor
+        logos: FileSystemIconLoader(path.resolve(__dirname, './src/assets/logos')),
+        ...plugins.iconsOptions?.customCollections,
+      },
     }),
     Components({
       resolvers: IconsResolver({
@@ -86,8 +88,7 @@ const makePlugins = (plugins) => {
  * @typedef PluginOptions
  * @type {object}
  * @property {import('@antfu/utils').ArgumentsType<typeof Icons>[0]=} iconsOptions
- * @property {import('@antfu/utils').ArgumentsType<typeof Components>[0]=} componentOptions
-
+ * @property {import('@antfu/utils').ArgumentsType<typeof Components>[0]=} componentsOptions
  *
  * @param {import('vite').UserConfig} config
  * @param {PluginOptions} plugins
@@ -138,8 +139,8 @@ export const makeConfig = (config = {}, plugins = {}) => {
       },
     },
 
-    // You cannot add or remove arbitrary options from shared plugins.
-    // Please use the PluginsOverride option for this.
+    // Shared plugins can't be replaced through `config`. Change their options
+    // through the PluginOptions argument instead.
     plugins: makePlugins(plugins),
     define: {
       'process.env': {
