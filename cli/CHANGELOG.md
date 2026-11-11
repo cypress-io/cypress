@@ -5,9 +5,11 @@
 
 - Fixed an issue where, on Apple silicon Macs without Rosetta, `cypress run` could not move the previous run's videos, screenshots, and downloads to the Trash when [`trashAssetsBeforeRuns`](https://on.cypress.io/configuration#Folders--Files) was enabled. It warned `We failed to trash the existing run results` and left the old files in place. The Apple silicon binary also no longer includes programs built only for Intel Macs, so running it no longer triggers the macOS warning about apps that need Rosetta. Fixes [#24582](https://github.com/cypress-io/cypress/issues/24582), [#30131](https://github.com/cypress-io/cypress/issues/30131) and [#35342](https://github.com/cypress-io/cypress/issues/35342).
 - On Windows, the tables that `cypress run` prints in an interactive console now fit the console's width, up to 100 columns. Previously they were always 100 columns wide, so they wrapped in narrower consoles. Output in CI is unchanged. Fixed in [#35348](https://github.com/cypress-io/cypress/pull/35348).
+- [`.type()`](https://on.cypress.io/type) now accepts consecutive `{upArrow}` and `{downArrow}` sequences, such as `{upArrow}{upArrow}`, on `date`, `month`, `week`, `time`, and `datetime-local` inputs, and steps the value once per arrow. Previously, a single arrow worked but more than one in a row failed with an error saying the input required a valid date, month, week, time, or datetime. Fixed in [#35352](https://github.com/cypress-io/cypress/pull/35352).
 
 **Misc:**
 
+- Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
 
 **Dependency Updates:**
