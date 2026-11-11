@@ -5,6 +5,7 @@
 
 - Fixed an issue where, on Apple silicon Macs without Rosetta, `cypress run` could not move the previous run's videos, screenshots, and downloads to the Trash when [`trashAssetsBeforeRuns`](https://on.cypress.io/configuration#Folders--Files) was enabled. It warned `We failed to trash the existing run results` and left the old files in place. The Apple silicon binary also no longer includes programs built only for Intel Macs, so running it no longer triggers the macOS warning about apps that need Rosetta. Fixes [#24582](https://github.com/cypress-io/cypress/issues/24582) and [#35342](https://github.com/cypress-io/cypress/issues/35342).
 - On Windows, the tables that `cypress run` prints in an interactive console now fit the console's width, up to 100 columns. Previously they were always 100 columns wide, so they wrapped in narrower consoles. Output in CI is unchanged. Fixed in [#35348](https://github.com/cypress-io/cypress/pull/35348).
+
 **Misc:**
 
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
