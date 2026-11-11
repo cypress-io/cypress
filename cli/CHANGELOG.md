@@ -3,7 +3,7 @@
 
 **Misc:**
 
-- The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted.
+- The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
 
 **Dependency Updates:**
 
