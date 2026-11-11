@@ -1,5 +1,3 @@
-/* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
-
 // Cypress resolves user-defined config values alongside its own, but `Cypress.Config`
 // enumerates only the options Cypress owns. Read the user-defined ones back through here.
 const userConfig = () => Cypress.config() as Record<string, any>
@@ -156,15 +154,15 @@ describe('per-test config', () => {
     describe('config in suite', {
       defaultCommandTimeout: 200,
     }, () => {
-      it('test', () => {
+      it('applies suite config to the first test', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })
 
-      it('test', () => {
+      it('applies suite config to the second test', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })
 
-      it('test', () => {
+      it('applies suite config to the third test', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })
     })
@@ -174,15 +172,15 @@ describe('per-test config', () => {
     context('config in suite', {
       defaultCommandTimeout: 200,
     }, () => {
-      it('test', () => {
+      it('applies suite config to the first test', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })
 
-      it('test', () => {
+      it('applies suite config to the second test', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })
 
-      it('test', () => {
+      it('applies suite config to the third test', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })
     })
@@ -258,7 +256,7 @@ describe('per-test config', () => {
     })
   })
 
-  describe('in multiple nested suites', () => {
+  describe('in multiple nested suites without outer config', () => {
     describe('config in suite', {
       foo: true,
     } as Cypress.SuiteConfigOverrides, () => {
@@ -270,7 +268,7 @@ describe('per-test config', () => {
       })
 
       describe('inner suite 2', { baz: true } as Cypress.SuiteConfigOverrides, () => {
-        it('has config.bar', () => {
+        it('has config.baz', () => {
           expect(userConfig().bar).not.ok
           expect(userConfig().baz).ok
           expect(userConfig().foo).ok
@@ -306,13 +304,15 @@ describe('per-test config', () => {
   })
 
   describe('xit, xdescribe', () => {
-    xit('should be skipped', {}, () => {})
-    xspecify('should be skipped', {}, () => {})
-    xdescribe('suite should be skipped', {}, () => {
+    xit('xit should be skipped', {}, () => {})
+
+    xspecify('xspecify should be skipped', {}, () => {})
+
+    xdescribe('xdescribe suite should be skipped', {}, () => {
       it('skipped')
     })
 
-    xcontext('suite should be skipped', {}, () => {
+    xcontext('xcontext suite should be skipped', {}, () => {
       it('skipped')
     })
 

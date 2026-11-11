@@ -1,6 +1,4 @@
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<LastUpdatedHeader />', () => {
   const popperContentSelector = '.v-popper__popper--shown'
@@ -14,8 +12,7 @@ describe('<LastUpdatedHeader />', () => {
 
     cy.findByTestId('last-updated-header').trigger('mouseenter')
 
-    const expectedTooltipText = defaultMessages.specPage.lastUpdated.tooltip.gitInfoAvailable
-    .replace('{0}', defaultMessages.specPage.lastUpdated.tooltip.gitStatus)
+    const expectedTooltipText = 'Git status of the spec files within this project'
 
     cy.get(popperContentSelector).should('have.text', expectedTooltipText)
 
@@ -29,8 +26,7 @@ describe('<LastUpdatedHeader />', () => {
 
     cy.findByTestId('last-updated-header').contains('Last updated').trigger('mouseenter')
 
-    const expectedTooltipText = defaultMessages.specPage.lastUpdated.tooltip.gitInfoUnavailable
-    .replace('{0}', defaultMessages.specPage.lastUpdated.tooltip.gitInfo)
+    const expectedTooltipText = 'Cypress is unable to detect git info for this project and has defaulted to showing file system data instead'
 
     cy.get(popperContentSelector).should('have.text', expectedTooltipText)
   })

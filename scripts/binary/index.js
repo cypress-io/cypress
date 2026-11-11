@@ -12,6 +12,7 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
 const rp = require('@cypress/request-promise')
+const semver = require('semver')
 
 const zip = require('./zip')
 const ask = require('./ask')
@@ -22,11 +23,13 @@ const questionsRemain = require('./util/questions-remain')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
-const { exec } = require('child_process')
+const { checkIfBinaryExistsOnCdn } = require('./check-binary-on-cdn')
 const xvfb = require('../../cli/lib/exec/xvfb').default
 const smoke = require('./smoke')
 const { needsSandbox } = require('../../cli/lib/tasks/verify')
 const execa = require('execa')
+
+const MANIFEST_URL = 'https://download.cypress.io/desktop.json'
 
 const log = function (msg) {
   const time = new Date()
@@ -124,19 +127,30 @@ const deploy = {
     const options = this.parseOptions(process.argv)
 
     const release = ({ version, commit }) => {
-      return upload.s3Manifest(version)
-      .then(() => {
-        if (commit) {
-          return commitVersion(version)
+      return this.getManifest()
+      .then((manifest) => {
+        const updatesManifest = !semver.lt(version, manifest.version)
+
+        if (!updatesManifest) {
+          console.log(`Leaving the manifest at ${chalk.yellow(manifest.version)}, since ${chalk.yellow(version)} is older.`)
         }
-      }).then(() => {
-        return success('Release Complete')
-      }).catch((err) => {
-        fail('Release Failed')
-        throw err
-      })
-      .then(() => {
-        return this.checkManifest({ version })
+
+        return Promise.resolve(updatesManifest && upload.s3Manifest(version))
+        .then(() => {
+          if (commit) {
+            return commitVersion(version)
+          }
+        }).then(() => {
+          return success('Release Complete')
+        }).catch((err) => {
+          fail('Release Failed')
+          throw err
+        })
+        .then(() => {
+          if (updatesManifest) {
+            return this.checkManifest({ version })
+          }
+        })
       })
       .then(() => {
         return this.checkDownloads({ version })
@@ -147,21 +161,14 @@ const deploy = {
     .then(release)
   },
 
+  getManifest () {
+    return rp.get(MANIFEST_URL).then(JSON.parse)
+  },
+
   checkManifest ({ version }) {
-    const checkManifest = () => {
-      const url = `https://download.cypress.io/desktop.json`
+    process.stdout.write(`Checking for ${chalk.yellow(version)} in the manifest at ${chalk.cyan(MANIFEST_URL)} ... `)
 
-      process.stdout.write(`Checking for ${chalk.yellow(version)} in the manifest at ${chalk.cyan(url)} ... `)
-
-      return rp.get(url)
-      .then((res) => {
-        const manifest = JSON.parse(res)
-
-        return manifest
-      })
-    }
-
-    return checkManifest().then((manifest) => {
+    return this.getManifest().then((manifest) => {
       const versionMatches = manifest.version === version
 
       process.stdout.write(`${versionMatches ? '✅' : '❌'}\n`)
@@ -292,7 +299,7 @@ const deploy = {
     await askMissingOptions(['version'])(options)
 
     // runSmokeTests
-    let usingXvfb = xvfb.isNeeded()
+    const usingXvfb = xvfb.isNeeded()
 
     try {
       if (usingXvfb) {
@@ -434,30 +441,7 @@ const deploy = {
     })
   },
 
-  async checkIfBinaryExistsOnCdn (args = process.argv) {
-    console.log('#checkIfBinaryExistsOnCdn')
-
-    const url = await uploadArtifactToS3([...args, '--dry-run', 'true'])
-
-    console.log(`Checking if ${url} exists...`)
-
-    const binaryExists = await rp.head(url)
-    .then(() => true)
-    .catch(() => false)
-
-    if (binaryExists) {
-      console.log('A binary was already built for this operating system and commit hash. Skipping binary build process...')
-      exec('circleci-agent step halt', (_, __, stdout) => {
-        console.log(stdout)
-      })
-
-      return
-    }
-
-    console.log('Binary does not yet exist. Continuing to build binary...')
-
-    return binaryExists
-  },
+  checkIfBinaryExistsOnCdn,
 }
 
 module.exports = _.bindAll(deploy, _.functions(deploy))

@@ -1,6 +1,5 @@
 const la = require('lazy-ass')
 
-/* eslint-env mocha */
 describe('s3-api', () => {
   context('hasOnlyStringValues', () => {
     const { hasOnlyStringValues } = require('../../binary/s3-api')

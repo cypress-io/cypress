@@ -23,8 +23,8 @@ declare namespace Cypress {
     (action: 'backend:request', fn: (...any) => void)
     (action: 'automation:request', fn: (...any) => void)
     (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
-    (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
-    (action: 'after:screenshot', config: {})
+    (action: 'before:screenshot', fn: (config: object, fn: () => void) => void)
+    (action: 'after:screenshot', config: object)
     (action: 'command:failed', fn: (command: CommandQueue, error: Error) => void): Cypress
     (action: 'page:loading', fn: (loading: boolean) => void)
     (action: 'test:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void)
@@ -44,6 +44,7 @@ declare namespace Cypress {
     (task: 'protocol:page:loading', input: any): Promise<void>
     (task: 'wait:for:prompt:ready'): Promise<{ success: boolean, error?: Error }>
     (task: 'preserve:run:state', runState: any): Promise<void>
+    (task: 'get:session', id: string): Promise<Cypress.ServerSessionData>
     (task: 'request:sent:with:credentials', args: { url?: string, resourceType: 'xhr' | 'fetch', credentialStatus: string | boolean }): Promise<void>
   }
 

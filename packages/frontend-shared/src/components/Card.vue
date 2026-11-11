@@ -62,8 +62,8 @@ import { computed } from 'vue'
 const props = withDefaults(defineProps<{
   title: string
   description: string
-  icon: FunctionalComponent<SVGAttributes, {}>
-  hoverIcon?: FunctionalComponent<SVGAttributes, {}>
+  icon: FunctionalComponent<SVGAttributes>
+  hoverIcon?: FunctionalComponent<SVGAttributes>
   variant: 'indigo' | 'jade'
   iconSize: 64 | 48
   disabled?: boolean

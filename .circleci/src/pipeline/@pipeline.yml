@@ -6,20 +6,19 @@ version: 2.1
 # - ./scripts/github-actions/update-browser-versions.js
 
 chrome-stable-version: &chrome-stable-version "156.0.8078.47"
-chrome-beta-version: &chrome-beta-version "157.0.8103.6"
+chrome-beta-version: &chrome-beta-version "158.0.8127.2"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "156.0.8078.47"
 firefox-stable-version: &firefox-stable-version "154.0"
-base-internal-trixie: &base-internal-trixie cypress/base-internal:24.15.0-trixie
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.15.0-yarn-berry
+base-internal-trixie: &base-internal-trixie cypress/base-internal:24.22.1-trixie
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.22.1-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
+# Oldest glibc the Linux binary supports
+base-internal-glibc-2-31: &base-internal-glibc-2-31 cypress/base-internal:24.22.1-glibc-2.31
 
 parameters:
-  publish-binary-branch:
-    type: string
-    default: main
   force-persist-artifacts:
     type: boolean
     default: false
@@ -27,7 +26,7 @@ parameters:
     type: boolean
     default: false
   # Opt-in Percy visual snapshots. Default false; set true via Trigger Pipeline
-  # (the setup config forwards it). Requires PERCY_TOKEN (test-runner:percy context).
+  # (inherited from the setup config). Requires PERCY_TOKEN (test-runner:percy context).
   percy-enabled:
     type: boolean
     default: false
@@ -109,9 +108,6 @@ parameters:
   run-npm-grep-tests:
     type: boolean
     default: true
-  run-npm-eslint-plugin-tests:
-    type: boolean
-    default: true
   run-npm-schematic-tests:
     type: boolean
     default: true
@@ -154,7 +150,7 @@ executors:
   # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check)
   node-slim:
     docker:
-      - image: cimg/node:24.15.0
+      - image: cimg/node:24.22.1
     resource_class: medium.gen2
     environment:
       PLATFORM: linux
@@ -228,7 +224,7 @@ commands:
             if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
               echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
             else
-              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "electron/"* ]]; then
+              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && ! "$CIRCLE_BRANCH" =~ ^v[0-9]+$ && "$CIRCLE_BRANCH" != "electron/"* ]]; then
                   export SHOULD_PERSIST_ARTIFACTS=true
               fi' >> "$BASH_ENV"
             fi
@@ -240,16 +236,6 @@ commands:
           command: |
             if [[ -z "$SHOULD_PERSIST_ARTIFACTS" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
-              circleci-agent step halt
-            fi
-
-  maybe_skip_binary_jobs:
-    steps:
-      - run:
-          name: Skip binary job if external PR
-          command: |
-            if [[ -z "$CIRCLE_TOKEN" ]]; then
-              echo "There is no CIRCLE_TOKEN set for this job. Cannot trigger binary build. Skipping job."
               circleci-agent step halt
             fi
 
@@ -324,6 +310,7 @@ commands:
                   mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
                   mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
+                  mv ~/cypress/scripts/node_modules /tmp/node_modules_cache/scripts_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
   install-webkit-deps:
@@ -407,6 +394,7 @@ commands:
               mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
               mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
               mv /tmp/node_modules_cache/system-tests_node_modules ~/cypress/system-tests/node_modules
+              mv /tmp/node_modules_cache/scripts_node_modules ~/cypress/scripts/node_modules
               mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
               rm -rf /tmp/node_modules_cache
             fi
@@ -565,19 +553,20 @@ commands:
           condition: <<parameters.only-cache-for-root-user>> # we don't move to /tmp since we don't need to worry about different users
           steps:
             - save_cache:
-                name: Saving node modules for root, cli, and all globbed workspace packages
+                name: Saving node modules for root, cli, system-tests, scripts, and all globbed workspace packages
                 key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
                   }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - node_modules
                   - cli/node_modules
                   - system-tests/node_modules
+                  - scripts/node_modules
                   - globbed_node_modules
       - unless:
           condition: <<parameters.only-cache-for-root-user>>
           steps:
             - save_cache:
-                name: Saving node modules for root, cli, and all globbed workspace packages
+                name: Saving node modules for root, cli, system-tests, scripts, and all globbed workspace packages
                 key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
                   }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
@@ -747,15 +736,20 @@ commands:
     description: Build better-sqlite3 for glibc 2.31
     steps:
       - setup_remote_docker
+      - restore_cache:
+          key: v{{ checksum ".circleci/cache-version.txt" }}-better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
+            checksum "node_modules/electron/package.json" }}
       - run:
           name: Build better-sqlite3 for glibc 2.31
+          environment:
+            GLIBC_IMAGE: *base-internal-glibc-2-31
           command: |
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:24.15.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder $GLIBC_IMAGE /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.7.0 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install node-gyp rebuild --force_build=1"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -763,7 +757,7 @@ commands:
               cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
             fi
       - save_cache:
-          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
+          key: v{{ checksum ".circleci/cache-version.txt" }}-better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
             checksum "node_modules/electron/package.json" }}
           paths:
             - better_sqlite3.node
@@ -771,6 +765,35 @@ commands:
           name: Clean up top level better-sqlite3 file
           command: |
             rm ~/cypress/better_sqlite3.node
+
+  test-binary-on-glibc-2-31:
+    description: Install the packaged binary on glibc 2.31 and load its native modules
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Verify the binary on glibc 2.31
+          environment:
+            GLIBC_IMAGE: *base-internal-glibc-2-31
+          command: |
+            set -ex
+            apt update && apt install -y docker.io
+            docker run -d --name glibc-tester --env CI=true $GLIBC_IMAGE /bin/bash -c "sleep 1000000000"
+            docker cp ~/cypress/cypress.zip glibc-tester:/root/cypress.zip
+            docker cp ~/cypress/cypress.tgz glibc-tester:/root/cypress.tgz
+            docker exec glibc-tester /bin/bash -c '
+              set -ex
+              source /root/.bashrc
+              CYPRESS_INSTALL_BINARY=/root/cypress.zip npm i -g /root/cypress.tgz
+              cypress verify
+              # better-sqlite3 loads lazily (Test Replay, Studio), so verify never touches it
+              EXE=$(find "$(cypress cache path)" -type f -path '*/Cypress/Cypress')
+              SQLITE_FILES=$(find "$(cypress cache path)" -name better_sqlite3.node)
+              test -n "$SQLITE_FILES"
+              for f in $SQLITE_FILES; do
+                ELECTRON_RUN_AS_NODE=1 "$EXE" -e "require(process.argv[1])" "$f"
+              done
+            '
+            docker rm -f glibc-tester
 
   run-driver-integration-tests:
     parameters:
@@ -1257,9 +1280,10 @@ commands:
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
-            # Prefer a `release/<version>` branch (current convention) and
-            # fall back to a bare `<version>` branch for older versions.
-            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || true
+            # Prefer a `release/<version>` branch (current convention), then a
+            # bare `<version>` branch for older versions, then a `v<major>`
+            # branch for previous-major maintenance releases.
+            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || git checkout "v${NEXT_VERSION%%.*}" || true
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
@@ -1550,32 +1574,11 @@ commands:
 
   check-if-binary-exists:
     steps:
-      - run-on-dependencies:
-          package: internal-scripts
-          command: build
       - run:
           name: Check if binary exists, exit if it does
           command: |
             source ./scripts/ensure-node.sh
-            yarn gulp e2eTestScaffold
             yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
-
-  run-on-dependencies:
-    parameters:
-      package:
-        description: Package to build all dependencies for. All dependencies in the
-          dependency chain must have a build script.
-        type: string
-      command:
-        description: Command to run on the dependencies.
-        type: string
-    steps:
-      - run:
-          name: Exec << parameters.command >> recursively on << parameters.package >>
-            dependencies.
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn lerna run <<parameters.command>> --scope=<<parameters.package>> --include-dependencies
 
   build-and-package-binary:
     steps:
@@ -1857,7 +1860,7 @@ jobs:
               echo ""
               echo "yarn.lock has duplicates that the local postinstall would collapse on its own,"
               echo "so the committed lockfile does not match the tree contributors actually install."
-              echo "Run 'yarn-deduplicate --strategy=highest' and commit the resulting yarn.lock."
+              echo "Run 'yarn dedupe-lockfile' and commit the resulting yarn.lock."
               exit 1
             fi
       - run:
@@ -2354,7 +2357,6 @@ jobs:
       docker_layer_caching: true
     resource_class: medium
     steps:
-      - maybe_skip_binary_jobs
       - run-binary-system-tests
   yarn-pnp-preprocessor-system-test:
     parallelism: 1
@@ -2368,7 +2370,6 @@ jobs:
       TEST_PROJECT_DIR: ./system-tests/projects/yarn-v4.15.0-pnp-dep-resolution
       USE_YARN_TO_INSTALL_CYPRESS_BINARY: true
     steps:
-      - maybe_skip_binary_jobs
       - attach_workspace:
           at: ~/
       # required node is set in the docker container already with yarn 4
@@ -2402,7 +2403,6 @@ jobs:
       TEST_PROJECT_DIR: ./system-tests/projects/svelte-webpack-configured
       USE_YARN_TO_INSTALL_CYPRESS_BINARY: true
     steps:
-      - maybe_skip_binary_jobs
       - attach_workspace:
           at: ~/
       - run:
@@ -2774,6 +2774,7 @@ jobs:
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+.gen2
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
       - halt-if-skipped:
@@ -2978,16 +2979,6 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/grep/test_results
 
-  npm-eslint-plugin-dev:
-    <<: *defaults
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-npm-eslint-plugin-tests >>
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/eslint-plugin-dev test
-
   npm-cypress-schematic:
     <<: *defaults
     steps:
@@ -3009,9 +3000,14 @@ jobs:
     resource_class: medium+.gen2
     steps:
       - restore_cached_workspace
+      # npm trusted publishing: npm exchanges this OIDC token for a short-lived publish
+      # token. Packages without a trusted publisher yet fall back to NPM_TOKEN from the
+      # context. https://docs.npmjs.com/trusted-publishers
       - run:
           name: Release packages after all jobs pass
-          command: yarn npm-release
+          command: |
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            yarn npm-release
 
   create-build-artifacts:
     <<: *defaults
@@ -3020,6 +3016,9 @@ jobs:
       resource_class:
         type: string
         default: xlarge.gen2
+      test-glibc-2-31:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -3035,61 +3034,14 @@ jobs:
       - build-and-package-binary
       - build-cypress-npm-package:
           executor: << parameters.executor >>
+      - when:
+          condition: << parameters.test-glibc-2-31 >>
+          steps:
+            - test-binary-on-glibc-2-31
       - setup_should_persist_artifacts
       - verify_should_persist_artifacts
       - upload-build-artifacts
       - post-install-comment
-
-  create-and-trigger-packaging-artifacts:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: small.gen2
-    resource_class: << parameters.resource_class >>
-    steps:
-      - maybe_skip_binary_jobs
-      - restore_cached_workspace
-      - check-if-binary-exists
-      - setup_should_persist_artifacts
-      - trigger-publish-binary-pipeline:
-          target-repo-branch: << pipeline.parameters.publish-binary-branch >>
-
-  get-published-artifacts:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium.gen2
-    resource_class: << parameters.resource_class >>
-    steps:
-      - maybe_skip_binary_jobs
-      - restore_cached_workspace
-      - run:
-          name: Check pipeline info
-          command: cat ~/triggered_pipeline.json
-      - setup_should_persist_artifacts
-      - run:
-          name: Download binary artifacts
-          command: |
-            source ./scripts/ensure-node.sh
-            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json --platformKey $(node ./scripts/get-platform-key.js)
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/cypress.zip
-            - cypress/cypress.tgz
-      - verify_should_persist_artifacts
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/binary-url.json
-            - cypress/npm-package-url.json
-      - post-install-comment:
-          package_url_path: ~/cypress/npm-package-url.json
-          binary_url_path: ~/cypress/binary-url.json
 
   # Alerts the author of the commit that broke the binary. Requires every binary
   # job at `terminal`, so it wakes up however they finished, then asks the API
@@ -3102,14 +3054,14 @@ jobs:
     resource_class: small.gen2
     steps:
       - run:
-          name: Comment on the commit if a binary job failed
+          name: Page on-call in Slack if a binary job failed
           command: |
             # This endpoint paginates and linux-x64 is already ~80 jobs, so a
             # dropped page would silently report no failures at all.
             ITEMS="[]"
             PAGE=""
             while :; do
-              RESP=$(curl -sfS -H "Circle-Token: $CIRCLE_TOKEN" \
+              RESP=$(curl -sfS \
                 "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?page-token=$PAGE")
               ITEMS=$(jq -n --argjson a "$ITEMS" --argjson b "$(echo "$RESP" | jq '.items')" '$a + $b')
               PAGE=$(echo "$RESP" | jq -r '.next_page_token // empty')
@@ -3131,20 +3083,15 @@ jobs:
             fi
 
             REPO="$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
-            AUTH="Authorization: token $GH_TOKEN"
-            # develop is squash-merged, so the commit author is the PR author.
-            # An unresolvable author still gets a comment, just without the tag.
-            LOGIN=$(curl -sS -H "$AUTH" \
-              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1" \
-              | jq -r '.author.login // empty') || true
+            COMMIT_URL="https://github.com/$REPO/commit/$CIRCLE_SHA1"
             # CIRCLE_BUILD_URL points at this notifier, which is green and tells
-            # the author nothing. Link the workflow holding the failed jobs.
+            # on-call nothing. Link the workflow holding the failed jobs.
             WORKFLOW_URL="https://app.circleci.com/workflow/$CIRCLE_WORKFLOW_ID"
-            BODY="${LOGIN:+@$LOGIN }:rotating_light: Binary jobs failed for this commit: **$FAILED** - [view the workflow]($WORKFLOW_URL)"
+            TEXT="<!subteam^${APP_FOUNDATIONS_ONCALL_SUBTEAM_ID}|app-foundations-oncall> :rotating_light: Binary jobs failed on *${CIRCLE_BRANCH}* (<${COMMIT_URL}|${CIRCLE_SHA1:0:10}>): *${FAILED}* - <${WORKFLOW_URL}|view the workflow>"
 
-            curl -sfS -X POST -H "$AUTH" \
-              "https://api.github.com/repos/$REPO/commits/$CIRCLE_SHA1/comments" \
-              --data "$(jq -n --arg b "$BODY" '{body:$b}')"
+            curl -sfS -X POST -H 'Content-Type: application/json' \
+              "$SLACK_WEBHOOK_URL" \
+              --data "$(jq -n --arg t "$TEXT" '{text:$t}')"
 
   test-kitchensink:
     <<: *defaults
@@ -3256,7 +3203,6 @@ jobs:
     docker:
       - image: *base-internal-minimum-node
     steps:
-      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir test-binary
       - run:
@@ -3298,7 +3244,6 @@ jobs:
     <<: *defaults
     resource_class: small.gen2
     steps:
-      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
       - run:
@@ -3334,7 +3279,6 @@ jobs:
     <<: *defaults
     resource_class: small.gen2
     steps:
-      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
@@ -3428,7 +3372,6 @@ jobs:
   test-binary-against-kitchensink:
     <<: *defaults
     steps:
-      - maybe_skip_binary_jobs
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: electron
@@ -3459,7 +3402,6 @@ jobs:
   test-binary-as-specific-user:
     <<: *defaults
     steps:
-      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny

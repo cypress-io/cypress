@@ -1,7 +1,5 @@
 import StandardModal from './StandardModal.vue'
 import Tooltip from './Tooltip.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { DialogOverlay } from '@headlessui/vue'
 import { ref } from 'vue'
 
@@ -20,11 +18,11 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       >{body}
       </StandardModal>)
 
-      cy.contains('a', defaultMessages.links.needHelp)
+      cy.contains('a', 'Need help')
       .should('be.visible')
       .and('have.attr', 'href', 'https://on.cypress.io')
 
-      cy.findByLabelText(defaultMessages.actions.close, {
+      cy.findByLabelText('Close', {
         selector: 'button',
       })
       .should('be.visible')
@@ -48,9 +46,9 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
         </StandardModal>,
       )
 
-      cy.contains('a', defaultMessages.links.needHelp).should('not.exist')
+      cy.contains('a', 'Need help').should('not.exist')
 
-      cy.findByLabelText(defaultMessages.actions.close, {
+      cy.findByLabelText('Close', {
         selector: 'button',
       })
       .should('be.visible')
@@ -147,7 +145,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       >{body}
       </StandardModal>)
 
-      cy.findByLabelText(defaultMessages.actions.close, {
+      cy.findByLabelText('Close', {
         selector: 'button',
       }).as('closeButton')
     })

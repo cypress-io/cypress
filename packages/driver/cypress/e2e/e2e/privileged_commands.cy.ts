@@ -114,9 +114,18 @@ describe('privileged commands', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
     })
 
+    it('passes when a command retries until its assertion passes', () => {
+      let attempts = 0
+
+      cy.readFile('cypress/fixtures/app.json').should(() => {
+        expect(++attempts).to.be.greaterThan(2)
+      })
+    })
+
     it('handles args being mutated', () => {
       const obj = { foo: 'bar' }
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- mutates the args while the privileged command is queued
       cy.wait(10).then(() => {
         obj.foo = 'baz'
       })
@@ -253,6 +262,7 @@ describe('privileged commands', () => {
               // that script from running
               cy.visit(`/aut-commands?appendToSpecFrame=true&strategy=${strategy}&command=${command}`)
               // wait 500ms then ensure the command did not run
+              // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the command never runs, so give it time to run first
               cy.wait(500).then(() => {
                 expect(ranCommand, `expected cy.${command}() not to run, but it did`).to.be.false
               })

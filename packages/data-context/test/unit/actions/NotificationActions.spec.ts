@@ -159,7 +159,7 @@ describe('NotificationActions', () => {
 
           actions.maybeSendRunNotification(run1, run2)
 
-          // @ts-expect-error
+          // @ts-expect-error - `status` is a plain string, not the lowercased status union
           expect(sendRunCompletedNotificationStub).toHaveBeenCalledWith(run2, status.toLocaleLowerCase())
         })
       })

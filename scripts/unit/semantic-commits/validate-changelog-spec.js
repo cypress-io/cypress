@@ -26,7 +26,7 @@ describe('semantic-pull-request/validate-changelog', () => {
     })
 
     it('returns all linked issues', () => {
-      let { message, links } = _getResolvedMessage('feat', 52, [39, 20])
+      const { message, links } = _getResolvedMessage('feat', 52, [39, 20])
 
       expect(message).to.eq('Addresses')
       expect(links).to.have.length(2)

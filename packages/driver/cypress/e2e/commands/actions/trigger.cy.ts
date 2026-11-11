@@ -72,7 +72,7 @@ describe('src/cy/commands/actions/trigger', () => {
     })
 
     it('sends through event options, overriding defaults', (done) => {
-      let options = {
+      const options = {
         clientX: 42,
         clientY: 24,
         pageX: 420,
@@ -219,7 +219,7 @@ describe('src/cy/commands/actions/trigger', () => {
     it('view should be AUT window', (done) => {
       cy.window().then((win) => {
         cy.get('input:first').then((jQueryElement) => {
-          let elem = jQueryElement.get(0)
+          const elem = jQueryElement.get(0)
 
           elem.addEventListener('mousedown', (event) => {
             expect(event.view).to.eql(win)
@@ -586,7 +586,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
-        let old = Cypress.config('animationDistanceThreshold')
+        const old = Cypress.config('animationDistanceThreshold')
 
         Cypress.config('animationDistanceThreshold', 1000)
 
@@ -856,7 +856,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('should trigger KeyboardEvent with .trigger inside Cypress event listener', (done) => {
         cy.window().then((win) => {
           cy.get('input:first').then((jQueryElement) => {
-            let elemHtml = jQueryElement.get(0)
+            const elemHtml = jQueryElement.get(0)
 
             elemHtml.addEventListener('keydown', (event) => {
               expect(event instanceof win['KeyboardEvent']).to.be.true
@@ -891,7 +891,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('should trigger MouseEvent with .trigger inside Cypress event listener', (done) => {
         cy.window().then((win) => {
           cy.get('input:first').then((jQueryElement) => {
-            let elem = jQueryElement.get(0)
+            const elem = jQueryElement.get(0)
 
             elem.addEventListener('mousedown', (event) => {
               expect(event instanceof win['MouseEvent']).to.be.true

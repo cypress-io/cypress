@@ -1,7 +1,5 @@
 import ChooseExternalEditorModal from './ChooseExternalEditorModal.vue'
 import { ChooseExternalEditorFragmentDoc } from '../generated/graphql-test'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('ChooseExternalEditorModal', () => {
   it('renders editors and UI elements work', () => {
@@ -18,15 +16,18 @@ describe('ChooseExternalEditorModal', () => {
       },
     })
 
-    cy.contains(defaultMessages.globalPage.externalEditorPreferences)
-    cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription1)
-    cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription2.replace('{0}', 'Settings'))
+    cy.contains('External editor preferences')
+    cy.contains('Select your preference for opening files on your system.')
+    cy.contains('You can change this later in the Settings page.')
 
-    cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
+    cy.findByTestId('launch-editor-hint').should('have.text', 'Editor not listed? Set LAUNCH_EDITOR and restart.')
+    .contains('a', 'LAUNCH_EDITOR').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference?utm_medium=Choose+External+Editor&utm_content=Launch+Editor+Hint&utm_source=Binary%3A+Launchpad')
+
+    cy.contains('Choose your editor...')
     .should('be.visible')
     .as('chooseEditor')
 
-    cy.contains('Need help').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference')
+    cy.contains('Need help').should('have.attr', 'href', 'https://on.cypress.io/file-opener-preference?utm_medium=Choose+External+Editor&utm_content=Need+Help&utm_source=Binary%3A+Launchpad')
 
     // initial
     cy.percySnapshot()
@@ -35,6 +36,7 @@ describe('ChooseExternalEditorModal', () => {
     cy.contains('On Computer').should('be.visible')
     cy.contains('Atom').should('be.visible')
     cy.contains('Vim').should('be.visible')
+    cy.contains('Custom').should('not.exist')
 
     cy.percySnapshot('open')
 
@@ -43,17 +45,5 @@ describe('ChooseExternalEditorModal', () => {
     cy.contains('Atom').should('not.exist')
 
     cy.percySnapshot('selected')
-
-    cy.get('[data-cy="custom-editor"]').should('not.exist')
-
-    cy.get('@chooseEditor').click()
-    cy.contains('Custom').click()
-    cy.get('[data-cy="custom-editor"]').should('exist')
-
-    cy.findByLabelText(defaultMessages.settingsPage.editor.customPathPlaceholder)
-    .type('test/path')
-    .should('have.value', 'test/path')
-
-    cy.percySnapshot('custom editor input')
   })
 })

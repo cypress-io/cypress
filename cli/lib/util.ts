@@ -44,7 +44,9 @@ const getFileSize = async (filename: string): Promise<any> => {
   return size
 }
 
-const isBrokenGtkDisplayRe = /Gtk: cannot open display/
+// When DISPLAY is set but nothing is listening on it, Electron prints either the Gtk
+// message or the X server one, depending on its version.
+const isBrokenGtkDisplayRe = /Gtk: cannot open display|Missing X server or \$DISPLAY/
 
 const stringify = (val: any): string => {
   return _.isObject(val) ? JSON.stringify(val) : val
@@ -389,6 +391,11 @@ const util = {
     return chalk.blue(...args)
   },
 
+  // Download and unzip progress use this to limit how often they update.
+  // In an interactive terminal each update redraws the install task list,
+  // so updating for every chunk or entry slows the install down.
+  progressThrottleMs: 100,
+
   calculateEta (percent: number, elapsed: number): number {
     // returns the number of seconds remaining
 
@@ -521,19 +528,19 @@ const util = {
 
     let result: string | undefined
 
-    if (process.env.hasOwnProperty(varName)) {
+    if (Object.prototype.hasOwnProperty.call(process.env, varName)) {
       debug(`Using ${varName} from environment variable`)
 
       result = process.env[varName]
-    } else if (process.env.hasOwnProperty(configVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarName)) {
       debug(`Using ${varName} from npm config`)
 
       result = process.env[configVarName]
-    } else if (process.env.hasOwnProperty(configVarNameLower)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarNameLower)) {
       debug(`Using ${varName.toLowerCase()} from npm config`)
 
       result = process.env[configVarNameLower]
-    } else if (process.env.hasOwnProperty(packageConfigVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 
       result = process.env[packageConfigVarName]

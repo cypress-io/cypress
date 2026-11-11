@@ -1,5 +1,3 @@
-it('should work', async () => {
-  const { default: lazyModule } = await import('./lazy.js')
-
-  expect(lazyModule.hello).eq('world')
+it('should work', () => {
+  cy.wrap(import('./lazy.js')).its('default.hello').should('eq', 'world')
 })

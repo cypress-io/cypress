@@ -3,7 +3,7 @@ import { logger } from '../../../src/runner/logger'
 import _ from 'lodash'
 
 describe('logger', () => {
-  let spyLog = sinon.spy(logger, 'log')
+  const spyLog = sinon.spy(logger, 'log')
 
   afterEach(() => {
     // reset after each unit test
@@ -44,7 +44,7 @@ describe('logger', () => {
   })
 
   describe('_logValues', () => {
-    let spyTrim = sinon.spy(_, 'trim')
+    const spyTrim = sinon.spy(_, 'trim')
 
     afterEach(() => {
       // reset after each unit test

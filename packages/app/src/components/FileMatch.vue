@@ -31,7 +31,7 @@
     <div class="rounded border h-[40px] w-full inline-flex items-center hocus-default focus-within-default truncate">
       <FileMatchButton
         :expanded="expanded"
-        :aria-label="t('components.fileSearch.expandToSearchByExtensions')"
+        aria-label="Search for files with extensions e.g. *.tsx, *.vue"
         @click="toggleExpanded()"
       >
         <span v-if="!expanded">{{ localExtensionPattern }}</span>
@@ -46,14 +46,14 @@
           v-if="expanded"
           v-model="localExtensionPattern"
           class="ml-[12px]"
-          :aria-label="t('components.fileSearch.byExtensionInput')"
-          :placeholder="t('components.fileSearch.byExtensionInput')"
+          aria-label="Extensions to include e.g. *.tsx, *.vue"
+          placeholder="Extensions to include e.g. *.tsx, *.vue"
         />
         <FileMatchInput
           v-else
           v-model="localPattern"
           aria-label="Search by filename"
-          :placeholder="t('components.fileSearch.byFilenameInput')"
+          placeholder="Search by filename..."
         />
       </div>
       <slot name="matches">
@@ -74,8 +74,8 @@
         <i-cy-magnifying-glass_x16 class="mr-[8px] ml-[12px] inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400" />
         <FileMatchInput
           v-model="localPattern"
-          :aria-label="t('components.fileSearch.byFilenameInput')"
-          :placeholder="t('components.fileSearch.byFilenameInput')"
+          aria-label="Search by filename..."
+          placeholder="Search by filename..."
         />
       </div>
     </div>
@@ -83,15 +83,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import FileMatchInput from './FileMatchInput.vue'
 import FileMatchButton from './FileMatchButton.vue'
 import FileMatchIndicator from './FileMatchIndicator.vue'
 import { computed } from 'vue'
 
 import { useToggle, useVModels } from '@vueuse/core'
-
-const { t } = useI18n()
 
 type Matches = {
   total: number
@@ -119,13 +116,11 @@ const indicatorText = computed(() => {
 
   if (localPattern.value) {
     // When the user has attempted to search anything
-    // "No Matches | 1 Match | { denominator } Matches"
-    return t('components.fileSearch.matchesIndicator', { count: numerator, denominator, numerator })
+    return numerator === 0 ? 'No matches' : `${numerator} of ${denominator} matches`
   }
 
   // When the user has attempted to search by file path
-  // "No Matches | {numerator} of {denominator} Matches"
-  return t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: numerator, denominator, numerator })
+  return numerator === 0 ? 'No matches' : numerator === 1 ? '1 match' : `${denominator} matches`
 })
 const [expanded, toggleExpanded] = useToggle(false)
 </script>

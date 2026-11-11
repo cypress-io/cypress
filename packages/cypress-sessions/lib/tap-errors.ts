@@ -63,6 +63,14 @@ export const TAP_ERROR_COPY = {
     solution: 'Start Cypress with `cypress open`, select a testing type and launch a browser, then try again.',
   },
   /**
+   * Raised when Cypress is running but its project could not load, so there is no
+   * session to drive. Starting Cypress again would only run a second one.
+   */
+  PROJECT_NOT_LOADED: {
+    description: `Cypress is running, but its project could not load, so there is no ${TAP_TARGET} to tap into.`,
+    solution: 'Run `cypress tap status` to see why. Fix the cause, then stop Cypress and start it again.',
+  },
+  /**
    * Raised when `--session` named a pid no record on disk matches.
    *
    * @deprecated - raise it with new SessionNotFoundTapError(), which writes its detail
@@ -266,7 +274,9 @@ export const TAP_ERROR_COPY = {
    *
    * @deprecated - raise it with new MissingCompanionOptionTapError(), which writes its copy
    */
-  MISSING_COMPANION_OPTION: {},
+  MISSING_COMPANION_OPTION: {
+    attachHelp: true,
+  },
   /**
    * Raised when a known input was given a value of the wrong type or range.
    *
@@ -484,8 +494,9 @@ export class SnapshotNotFoundTapError extends NotFoundTapError {
 
 /**
  * A flag that only means something alongside another one. Both are named here;
- * `remedy` is the throw site's, because what dropping either one leaves you with
- * is particular to the pair — a spec-wide view rather than one test's attempt.
+ * `remedy` comes from the dependency's `requires` in the command schema, because
+ * what dropping either one leaves you with is particular to the pair — a
+ * spec-wide view rather than one test's attempt.
  */
 export class MissingCompanionOptionTapError extends DetailedTapError {
   constructor (given: string, required: string, remedy: string) {

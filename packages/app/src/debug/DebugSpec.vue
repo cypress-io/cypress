@@ -28,7 +28,7 @@
               >
                 <button
                   class="rounded-md border-[1px] border-gray-100 p-[4px] group hocus:border-indigo-200"
-                  :aria-label="t('debugPage.openFile.openInIDE')"
+                  aria-label="Open in IDE"
                   @click="onClick"
                 >
                   <IconDocumentText
@@ -49,7 +49,7 @@
                   class="text-center text-sm max-w-[240px]"
                   data-cy="open-in-ide-tooltip"
                 >
-                  {{ t('debugPage.openFile.openInIDE') }}
+                  Open in IDE
                 </div>
               </template>
             </Tooltip>
@@ -61,7 +61,7 @@
             >
               <button
                 aria-disabled
-                :aria-label="t('debugPage.openFile.notFoundLocally')"
+                aria-label="Opening in IDE is disabled because the spec is not found in this project"
                 class="rounded-md border-[1px] border-gray-100 p-[4px]"
               >
                 <IconDocumentMinus
@@ -78,7 +78,7 @@
                   class="text-center text-sm max-w-[240px]"
                   data-cy="open-in-ide-disabled-tooltip"
                 >
-                  {{ t('debugPage.openFile.notFoundLocally') }}
+                  Opening in IDE is disabled because the spec is not found in this project
                 </div>
               </template>
             </Tooltip>
@@ -171,7 +171,7 @@
               </template>
               <!-- Wrapping this with a default template to avoid an unneeded space -->
               <template #default>
-                {{ t('debugPage.runFailures.btn') }}
+                Run Failures
               </template>
             </Button>
             <template
@@ -228,7 +228,6 @@ import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
-import { useI18n } from '@cy/i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
 import { posixify } from '../paths'
 import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
@@ -252,12 +251,10 @@ export interface TestResults {
   readonly instance: CloudRunInstance | null
 }
 
-const { t } = useI18n()
-
 const props = defineProps<{
   spec: Spec
-  testResults: {[thumbprint: string]: TestResults[]}
-  groups: {[groupId: string]: StatsMetadata_GroupsFragment }
+  testResults: { [thumbprint: string]: TestResults[] }
+  groups: { [groupId: string]: StatsMetadata_GroupsFragment }
   testingType: TestingTypeEnum
   foundLocally: boolean
   matchesCurrentTestingType: boolean
@@ -318,11 +315,15 @@ const groupsPerTest = computed(() => {
 
 const runAllFailuresState = computed(() => {
   if (!props.matchesCurrentTestingType) {
+    const failingTestCount = Object.keys(props.testResults).length
+
     return {
       disabled: true,
-      message: t('debugPage.runFailures.switchTestingTypeInfo', { n: Object.keys(props.testResults).length, testingType: props.testingType }),
+      message: failingTestCount === 1
+        ? `There is ${failingTestCount} ${props.testingType} test failing in this spec. To run it locally switch to ${props.testingType} testing.`
+        : `There are ${failingTestCount} ${props.testingType} tests failing in this spec. To run them locally switch to ${props.testingType} testing.`,
       cta: {
-        message: t('debugPage.runFailures.switchTestingTypeAction', { testingType: props.testingType }),
+        message: `Switch to ${props.testingType} testing`,
         action: () => emits('switchTestingType', props.testingType),
       },
     }
@@ -331,7 +332,7 @@ const runAllFailuresState = computed(() => {
   if (!props.foundLocally) {
     return {
       disabled: true,
-      message: t('debugPage.runFailures.notFoundLocally'),
+      message: 'Spec was not found locally',
     }
   }
 

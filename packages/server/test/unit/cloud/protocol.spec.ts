@@ -137,19 +137,19 @@ describe('lib/cloud/protocol', () => {
 
   it('uses event+listener composite key so same listener on multiple events does not leak wrappers', async () => {
     const mockCdpClient = new TestClient()
-    const onCalls: Array<{ event: string, listener: Function }> = []
-    const offCalls: Array<{ event: string, listener: Function }> = []
+    const onCalls: Array<{ event: string, listener: (...args: any[]) => void }> = []
+    const offCalls: Array<{ event: string, listener: (...args: any[]) => void }> = []
 
     const originalOn = mockCdpClient.on.bind(mockCdpClient)
     const originalOff = mockCdpClient.off.bind(mockCdpClient)
 
-    mockCdpClient.on = function (event: string, listener: Function) {
+    mockCdpClient.on = function (event: string, listener: (...args: any[]) => void) {
       onCalls.push({ event, listener })
 
       return originalOn(event, listener)
     }
 
-    mockCdpClient.off = function (event: string, listener: Function) {
+    mockCdpClient.off = function (event: string, listener: (...args: any[]) => void) {
       offCalls.push({ event, listener })
 
       return originalOff(event, listener)
@@ -231,7 +231,7 @@ describe('lib/cloud/protocol', () => {
     })
 
     expect(mockDatabase).toHaveBeenCalledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {
-      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+      nativeBinding: path.join(path.dirname(require.resolve('better-sqlite3/package.json')), 'build', 'Release', 'better_sqlite3.node'),
       verbose: expect.any(Function),
     })
 

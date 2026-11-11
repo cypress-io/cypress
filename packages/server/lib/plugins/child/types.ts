@@ -8,7 +8,7 @@ export interface PluginInvokeIds {
   invocationId: string
 }
 
-type PluginEventHandler = (...args: any[]) => any
+export type PluginEventHandler = (...args: any[]) => any
 
 export type TaskEventHandler = Record<string, PluginEventHandler>
 

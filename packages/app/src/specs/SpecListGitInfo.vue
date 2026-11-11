@@ -53,13 +53,10 @@
 import { gql } from '@urql/core'
 import type { SpecListRowFragment } from '../generated/graphql'
 import { computed } from 'vue'
-import { useI18n } from '@cy/i18n'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import DocumentIconPlus from '~icons/cy/document-plus_x16'
 import DocumentIconPlusMinus from '~icons/cy/document-plus-minus_x16'
 import CommitIcon from '~icons/cy/commit_x14'
-
-const { t } = useI18n()
 
 gql`
 fragment SpecListRow on GitInfo {
@@ -100,18 +97,15 @@ const classes = computed(() => {
 const tooltipMainText = computed(() => {
   switch (props.gql?.statusType) {
     case 'unmodified': return props.gql?.subject
-    case 'created': return t('file.git.created')
-    case 'modified': return t('file.git.modified')
+    case 'created': return 'Created'
+    case 'modified': return 'Modified'
     default: return null
   }
 })
 
 const tooltipSubtext = computed(() => {
   if (props.gql?.statusType === 'unmodified') {
-    return t('specPage.rows.gitTooltipSubtext', {
-      author: props.gql.author,
-      shortHash: props.gql.shortHash,
-    })
+    return `${props.gql.shortHash} by ${props.gql.author}`
   }
 
   return ''

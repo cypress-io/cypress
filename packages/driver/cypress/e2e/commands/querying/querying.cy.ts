@@ -95,8 +95,7 @@ describe('src/cy/commands/querying', () => {
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 100)
+        }, 100)
       })
 
       cy.on('command:retry', () => {
@@ -1230,14 +1229,12 @@ describe('src/cy/commands/querying', () => {
       const bText = 'Boruto'
 
       cy.contains('a, button', aText).then(($el) => {
-        $el as unknown as JQuery<HTMLAnchorElement>
         expect($el?.length).to.eq(1)
         expect($el).to.match('a')
         expect($el.text()).to.eq(aText)
       })
 
       cy.contains('a, button', bText).then(($el) => {
-        $el as unknown as JQuery<HTMLButtonElement>
         expect($el?.length).to.eq(1)
         expect($el).to.match('button')
         expect($el.text()).to.eq(bText)
@@ -1353,8 +1350,7 @@ describe('src/cy/commands/querying', () => {
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 50)
+        }, 50)
       })
 
       cy.on('command:retry', () => {
@@ -1369,7 +1365,7 @@ describe('src/cy/commands/querying', () => {
     // https://github.com/cypress-io/cypress/issues/8626
     it(`works correctly with ' character inside Regexp.`, () => {
       $(`<button>'</button>`).appendTo($('body'))
-      cy.contains(/\'/)
+      cy.contains(/'/)
     })
 
     // https://github.com/cypress-io/cypress/issues/19116
@@ -2074,7 +2070,7 @@ space
           const containsLog = this.logs[0]
           const assertionLog = this.logs[1]
 
-          expect(err.message).to.contain(`Expected not to find content: \'button\' but continuously found it.`)
+          expect(err.message).to.contain(`Expected not to find content: 'button' but continuously found it.`)
 
           expect(containsLog.get('state')).to.eq('passed')
           expect(containsLog.get('error')).to.be.undefined

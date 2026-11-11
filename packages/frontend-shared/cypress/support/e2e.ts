@@ -16,7 +16,6 @@ import type nock from 'nock'
 
 import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
 import { installCustomPercyCommand } from './customPercyCommand'
-import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
 import { logInternal } from './utils'
 import { tabUntil } from './tab-until'
@@ -62,7 +61,7 @@ export interface RemoteGraphQLBatchInterceptPayload<T> {
   result: T
 }
 
-export type RemoteGraphQLInterceptor <T = {[key: string]: any}> = (
+export type RemoteGraphQLInterceptor<T = { [key: string]: any }> = (
   obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>, options: Record<string, any>) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
 
 export type RemoteGraphQLBatchInterceptor<T = any> = (obj: RemoteGraphQLBatchInterceptPayload<T>, testState: Record<string, any>) => T | Promise<T>
@@ -108,10 +107,6 @@ export interface ValidateExternalLinkOptions {
 declare global {
   namespace Cypress {
     interface Chainable {
-      /**
-       * The i18n strings, provided for convenience when testing string values in e2e tests
-       */
-      i18n: typeof i18n
       /**
        * Calls a function block with the "ctx" object from the server,
        * and an object containing any options passed into the server context
@@ -216,8 +211,6 @@ declare global {
   }
 }
 
-cy.i18n = i18n
-
 before(() => {
   cy.task('setCyInCyVariables', { 'e2e_launchpadPort': undefined }).then(() => {
     taskInternal('__internal__before', undefined).then(({ launchpadPort }) => {
@@ -273,7 +266,7 @@ function openGlobalMode (options: OpenGlobalModeOptions = {}) {
   })
 }
 
-type WithPrefix<T extends string> = `${T}${string}`;
+type WithPrefix<T extends string> = `${T}${string}`
 
 function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = []) {
   if (!fixtureDirs.some((dir) => projectName.startsWith(dir))) {
@@ -334,7 +327,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         // Used to format a Cypress error in a way that makes sense to the cy-in-cy
         // open mode reporter. Typically we'll see all the details we need in the
         // terminal or in the Cypress UI components, but in the reporter we need to format it a bit
-        function formatError (e: Error & {messageMarkdown?: string, originalError?: Error}) {
+        function formatError (e: Error & { messageMarkdown?: string, originalError?: Error }) {
           if (e.messageMarkdown) {
             e.message = e.messageMarkdown
             if (e.originalError) {
@@ -480,8 +473,8 @@ function skipWelcome () {
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
 
 export type CyTaskResult<R> =
-  {value?: never, error: {name: string, message: string, stack?: string}} |
-  {value: UnwrapPromise<R>, error?: never}
+  { value?: never, error: { name: string, message: string, stack?: string } } |
+  { value: UnwrapPromise<R>, error?: never }
 
 function withRetryableCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => R | Promise<R>, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
   return withCtx(fn, { ...opts, retry: true })
@@ -572,7 +565,7 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
   })
 }
 
-function remoteGraphQLIntercept <T = any> (fn: RemoteGraphQLInterceptor<T>, remoteGraphQLOptions?: Record<string, any>) {
+function remoteGraphQLIntercept<T = any> (fn: RemoteGraphQLInterceptor<T>, remoteGraphQLOptions?: Record<string, any>) {
   return logInternal('remoteGraphQLIntercept', () => {
     return taskInternal('__internal_remoteGraphQLIntercept', {
       fn: fn.toString(),
@@ -581,7 +574,7 @@ function remoteGraphQLIntercept <T = any> (fn: RemoteGraphQLInterceptor<T>, remo
   })
 }
 
-function remoteGraphQLInterceptBatched <T = any> (fn: RemoteGraphQLBatchInterceptor<T>) {
+function remoteGraphQLInterceptBatched<T = any> (fn: RemoteGraphQLBatchInterceptor<T>) {
   return logInternal('remoteGraphQLInterceptBatched', () => {
     return taskInternal('__internal_remoteGraphQLInterceptBatched', fn.toString())
   })

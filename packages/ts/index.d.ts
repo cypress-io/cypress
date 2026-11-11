@@ -4,9 +4,9 @@
 /// <reference path="typedefs/cypress-request-promise.d.ts" />
 
 declare module 'http' {
-  import { Socket } from 'net'
-  import { Url } from 'url'
-  import { Duplex } from 'stream'
+  import type { Socket } from 'net'
+  import type { Url } from 'url'
+  import type { Duplex } from 'stream'
 
     type SocketCallback = (err: Optional<Error>, sock: Optional<Socket>) => void
 
@@ -55,6 +55,15 @@ declare module 'net' {
 }
 
 declare type Optional<T> = T | void
+
+declare module 'launch-editor' {
+  function launchEditor (
+    file: string,
+    specifiedEditor?: string,
+    onErrorCallback?: (fileName: string, errorMessage: string | null) => void,
+  ): void
+  export = launchEditor
+}
 
 declare module 'plist' {
   interface Plist {

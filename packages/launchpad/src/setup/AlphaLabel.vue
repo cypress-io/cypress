@@ -4,12 +4,5 @@
     <span class="sr-only">
       Support is in
     </span>
-    {{ t('versions.alpha') }}
-  </span>
+    Alpha</span>
 </template>
-
-<script lang="ts" setup>
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
-</script>

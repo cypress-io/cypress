@@ -2,7 +2,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
 
-const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
+const PROJECTS: { projectName: ProjectDirs[number], test: string }[] = [
   { projectName: 'angular-22', test: 'app.component' },
   { projectName: 'react-vite-ts-configured', test: 'App.cy' },
   { projectName: 'react18', test: 'App.cy' },
@@ -22,7 +22,8 @@ for (const { projectName, test } of PROJECTS) {
     beforeEach(() => {
       cy.scaffoldProject(projectName)
       cy.findBrowsers()
-    }),
+    })
+
     it(`While hovering on Mount(), shows component on AUT for ${projectName}`, () => {
       if (projectName === 'react18') {
         cy.openProject(projectName, ['--config-file', 'cypress-vite-default.config.ts', '--component'])

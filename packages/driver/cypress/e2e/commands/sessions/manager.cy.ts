@@ -112,7 +112,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
       const sessionsManager = new SessionsManager(CypressInstance, cy)
 
-      let activeSession = sessionsManager.getActiveSession('session_1')
+      const activeSession = sessionsManager.getActiveSession('session_1')
 
       expect(cySpy).to.be.calledOnce
       expect(activeSession).to.deep.eq(activeSessions['session_1'])
@@ -182,7 +182,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
   })
 
-  it('.saveSessionData()', async () => {
+  it('.saveSessionData()', () => {
     const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('save:session').resolves(null)
 
     const sessionsManager = new SessionsManager(CypressInstance, cy)
@@ -191,29 +191,29 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     const setup = cy.stub()
     const sess = { id: '1', setup }
 
-    await sessionsManager.saveSessionData(sess)
+    cy.wrap(sessionsManager.saveSessionData(sess)).then(() => {
+      expect(sessionsSpy).to.be.calledOnce
+      expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
 
-    expect(sessionsSpy).to.be.calledOnce
-    expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
-
-    expect(cypressSpy).to.be.calledOnceWith('save:session')
+      expect(cypressSpy).to.be.calledOnceWith('save:session')
+    })
   })
 
   describe('.sessions', () => {
-    it('sessions.clearAllSavedSessions()', async () => {
+    it('sessions.clearAllSavedSessions()', () => {
       const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:sessions', true).resolves(null)
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
       const sessionsSpy = cy.stub(sessionsManager, 'clearActiveSessions')
 
-      await sessionsManager.sessions.clearAllSavedSessions()
-
-      expect(sessionsSpy).to.be.calledOnce
-      expect(cypressSpy).to.be.calledOnceWith('clear:sessions', true)
+      cy.wrap(sessionsManager.sessions.clearAllSavedSessions()).then(() => {
+        expect(sessionsSpy).to.be.calledOnce
+        expect(cypressSpy).to.be.calledOnceWith('clear:sessions', true)
+      })
     })
 
     describe('.clearCurrentSessionData()', () => {
-      it('logs message when running tests', async () => {
+      it('logs message when running tests', () => {
         // Unable to cleanly mock localStorage or sessionStorage on Firefox,
         // so add dummy values and ensure they are cleared as expected.
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1141698
@@ -242,15 +242,15 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
         const clearCookiesSpy = cy.stub(sessionsManager.sessions, 'clearCookies')
 
-        await sessionsManager.sessions.clearCurrentSessionData()
-
-        expect(clearCookiesSpy).to.be.calledOnce
-        expect(window.localStorage).of.have.lengthOf(0)
-        expect(window.sessionStorage).of.have.lengthOf(0)
-        expect(CypressInstance.log).to.be.calledOnce
+        cy.wrap(sessionsManager.sessions.clearCurrentSessionData()).then(() => {
+          expect(clearCookiesSpy).to.be.calledOnce
+          expect(window.localStorage).of.have.lengthOf(0)
+          expect(window.sessionStorage).of.have.lengthOf(0)
+          expect(CypressInstance.log).to.be.calledOnce
+        })
       })
 
-      it('does not log message when setting up tests', async () => {
+      it('does not log message when setting up tests', () => {
         // Unable to cleanly mock localStorage or sessionStorage on Firefox,
         // so add dummy values and ensure they are cleared as expected.
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1141698
@@ -267,12 +267,12 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
         const clearCookiesSpy = cy.stub(sessionsManager.sessions, 'clearCookies')
 
-        await sessionsManager.sessions.clearCurrentSessionData()
-
-        expect(clearCookiesSpy).to.be.calledOnce
-        expect(window.localStorage).of.have.lengthOf(0)
-        expect(window.sessionStorage).of.have.lengthOf(0)
-        expect(CypressInstance.log).not.to.be.called
+        cy.wrap(sessionsManager.sessions.clearCurrentSessionData()).then(() => {
+          expect(clearCookiesSpy).to.be.calledOnce
+          expect(window.localStorage).of.have.lengthOf(0)
+          expect(window.sessionStorage).of.have.lengthOf(0)
+          expect(CypressInstance.log).not.to.be.called
+        })
       })
     })
 
@@ -281,7 +281,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         CypressInstance.state = cy.stub()
       })
 
-      it('resolves to the origins that had rendered HTML', async () => {
+      it('resolves to the origins that had rendered HTML', () => {
         cy.stub(CypressInstance, 'backend')
         .callThrough()
         .withArgs('get:rendered:html:origins')
@@ -293,10 +293,12 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
         cy.stub(sessionsManager.sessions, 'clearCookies').resolves([])
 
-        expect(await sessionsManager.clearSessionData()).to.deep.eq([window.location.origin])
+        cy.wrap(sessionsManager.clearSessionData()).then((result) => {
+          expect(result).to.deep.eq([window.location.origin])
+        })
       })
 
-      it('resolves to an empty list when no origins rendered HTML', async () => {
+      it('resolves to an empty list when no origins rendered HTML', () => {
         cy.stub(CypressInstance, 'backend')
         .callThrough()
         .withArgs('get:rendered:html:origins')
@@ -308,72 +310,74 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
         cy.stub(sessionsManager.sessions, 'clearCookies').resolves([])
 
-        expect(await sessionsManager.clearSessionData()).to.deep.eq([])
+        cy.wrap(sessionsManager.clearSessionData()).then((result) => {
+          expect(result).to.deep.eq([])
+        })
       })
     })
 
-    it('sessions.getCookies()', async () => {
+    it('sessions.getCookies()', () => {
       const cookies = [{ id: 'cookie' }]
       const cypressSpy = cy.stub(CypressInstance, 'automation').withArgs('get:cookies').resolves(cookies)
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
 
-      const sessionCookies = await sessionsManager.sessions.getCookies()
-
-      expect(cypressSpy).to.be.calledOnceWith('get:cookies', {})
-      expect(sessionCookies).to.deep.eq(cookies)
+      cy.wrap(sessionsManager.sessions.getCookies()).then((sessionCookies) => {
+        expect(cypressSpy).to.be.calledOnceWith('get:cookies', {})
+        expect(sessionCookies).to.deep.eq(cookies)
+      })
     })
 
-    it('sessions.setCookies()', async () => {
+    it('sessions.setCookies()', () => {
       const cypressSpy = cy.stub(CypressInstance, 'automation').withArgs('set:cookies')
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
 
-      await sessionsManager.sessions.setCookies({})
-
-      expect(cypressSpy).to.be.calledOnceWith('set:cookies', {})
+      cy.wrap(sessionsManager.sessions.setCookies({})).then(() => {
+        expect(cypressSpy).to.be.calledOnceWith('set:cookies', {})
+      })
     })
 
-    it('sessions.clearCookies()', async () => {
+    it('sessions.clearCookies()', () => {
       const cookies = [{ id: 'cookie' }]
       const cypressSpy = cy.stub(CypressInstance, 'automation').withArgs('clear:cookies').resolves([])
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
       const sessionsSpy = cy.stub(sessionsManager.sessions, 'getCookies').resolves(cookies)
 
-      await sessionsManager.sessions.clearCookies()
-
-      expect(sessionsSpy).to.be.calledOnce
-      expect(cypressSpy).to.be.calledOnceWith('clear:cookies', cookies)
+      cy.wrap(sessionsManager.sessions.clearCookies()).then(() => {
+        expect(sessionsSpy).to.be.calledOnce
+        expect(cypressSpy).to.be.calledOnceWith('clear:cookies', cookies)
+      })
     })
 
     // The server also empties its cookie jar on `clear:cookies`, and the jar
     // can hold cookies the browser no longer reports.
-    it('sessions.clearCookies() still clears when the browser reports no cookies', async () => {
+    it('sessions.clearCookies() still clears when the browser reports no cookies', () => {
       const cypressSpy = cy.stub(CypressInstance, 'automation').withArgs('clear:cookies').resolves([])
 
       const sessionsManager = new SessionsManager(CypressInstance, () => {})
 
       cy.stub(sessionsManager.sessions, 'getCookies').resolves([])
 
-      await sessionsManager.sessions.clearCookies()
-
-      expect(cypressSpy).to.be.calledOnceWith('clear:cookies', [])
+      cy.wrap(sessionsManager.sessions.clearCookies()).then(() => {
+        expect(cypressSpy).to.be.calledOnceWith('clear:cookies', [])
+      })
     })
 
-    it('sessions.getCurrentSessionData()', async () => {
+    it('sessions.getCurrentSessionData()', () => {
       const sessionsManager = new SessionsManager(Cypress, () => {})
       const cookiesSpy = cy.stub(sessionsManager.sessions, 'getCookies').resolves([{ id: 'cookie' }])
 
-      const sessData = await sessionsManager.sessions.getCurrentSessionData()
+      cy.wrap(sessionsManager.sessions.getCurrentSessionData()).then((sessData) => {
+        expect(sessData).to.deep.equal({
+          localStorage: [],
+          sessionStorage: [],
+          cookies: [{ id: 'cookie' }],
+        })
 
-      expect(sessData).to.deep.equal({
-        localStorage: [],
-        sessionStorage: [],
-        cookies: [{ id: 'cookie' }],
+        expect(cookiesSpy).to.be.calledOnce
       })
-
-      expect(cookiesSpy).to.be.calledOnce
     })
 
     it('sessions.getSession()', () => {

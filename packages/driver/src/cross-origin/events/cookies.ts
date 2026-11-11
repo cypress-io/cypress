@@ -43,7 +43,6 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
       // this event allows running a handler before stability is released.
       // this prevents subsequent commands from running until the cookies
       // are set via automation
-      // @ts-expect-error - once is not declared on $Cypress
       Cypress.once('before:stability:release', syncCookiesViaAutomation)
     }
   })
