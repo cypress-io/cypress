@@ -89,6 +89,7 @@ const makePlugins = (plugins) => {
  * @type {object}
  * @property {import('@antfu/utils').ArgumentsType<typeof Icons>[0]=} iconsOptions
  * @property {import('@antfu/utils').ArgumentsType<typeof Components>[0]=} componentsOptions
+ * @property {import('vite').PluginOption[]=} plugins
  *
  * @param {import('vite').UserConfig} config
  * @param {PluginOptions} plugins
