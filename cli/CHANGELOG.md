@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where a failed assertion whose error message was very long, such as [`.should('contain.text')`](https://on.cypress.io/should) on an element with a lot of text, took minutes to report, so the run looked stuck. The browser stopped responding while it processed the error, and `cypress run` paused again after printing the failure. The failure is now reported as soon as the assertion times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
+
 **Dependency Updates:**
 
 - Upgraded the transitive `@xmldom/xmldom` dependency of `plist` from `0.8.10` to `0.8.15` to address [XML Injection](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-15869636), [Uncontrolled Recursion](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-16134530), [ReDoS](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19498558), [Allocation of Resources Without Limits or Throttling](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499069), and [Inefficient Algorithmic Complexity](https://security.snyk.io/vuln/SNYK-JS-XMLDOMXMLDOM-19499072) vulnerabilities reported in security scans. Addressed in [#35344](https://github.com/cypress-io/cypress/pull/35344).
