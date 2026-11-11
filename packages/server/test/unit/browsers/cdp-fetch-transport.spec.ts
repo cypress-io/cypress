@@ -855,6 +855,133 @@ describe('CdpFetchTransport', () => {
       expect(encoded.body).toBe(Buffer.from('stubbed').toString('base64'))
     })
 
+    // https://github.com/cypress-io/cypress/issues/34704
+    // At a redirect pause Chrome follows the redirect as the origin sent it even
+    // when continueResponse overrides its headers, so a changed location or
+    // referrer-policy has to be fulfilled.
+    describe('encoding a redirect', () => {
+      const decodePausedResponse = (codec: ReturnType<typeof createCdpFetchCodec>, options: {
+        responseHeaders?: Protocol.Fetch.HeaderEntry[]
+        redirectPause?: boolean
+      } = {}) => {
+        const request: CdpFetchTransportRequest = {
+          id: 'network-1',
+          url: 'https://example.test/redirect',
+          method: 'GET',
+          headers: {},
+          initialPriority: 'High',
+          referrerPolicy: 'strict-origin-when-cross-origin',
+        }
+
+        codec.decodeRequest(request)
+
+        return codec.decodeResponse({
+          ...request,
+          requestId: 'fetch-request',
+          responseCode: 302,
+          responseStatusText: 'Found',
+          responseHeaders: options.responseHeaders ?? [
+            { name: 'Location', value: '/original' },
+            { name: 'Date', value: 'today' },
+          ],
+          ...(options.redirectPause ?? true ? { redirectPause: true } : {}),
+          originalBodyDigest: digestBody(Buffer.alloc(0)),
+        })
+      }
+
+      const toHeaderEntries = (headers: Record<string, string>) => Object.entries(headers).map(([name, value]) => ({ name, value }))
+
+      it.each([
+        { change: 'changed', headers: { location: '/rewritten', date: 'today' } },
+        { change: 'removed', headers: { date: 'today' } },
+      ])('fulfills a redirect whose location middleware $change', ({ headers }) => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        expect(response.headers).toStrictEqual({ location: '/original', date: 'today' })
+
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(true)
+        expect(encoded.responseCode).toBe(302)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+        expect(encoded.body).toBe('')
+      })
+
+      // Chrome applies a redirect's Referrer-Policy to the request it follows
+      // the redirect with, and ignores a continueResponse override of it.
+      it.each([
+        { change: 'added', originPolicy: undefined, policy: 'no-referrer' },
+        { change: 'changed', originPolicy: 'unsafe-url', policy: 'no-referrer' },
+        { change: 'removed', originPolicy: 'no-referrer', policy: undefined },
+      ])('fulfills a redirect whose referrer-policy middleware $change', ({ originPolicy, policy }) => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, {
+          responseHeaders: [
+            { name: 'Location', value: '/original' },
+            ...(originPolicy ? [{ name: 'Referrer-Policy', value: originPolicy }] : []),
+          ],
+        })
+
+        const headers = { location: '/original', ...(policy ? { 'referrer-policy': policy } : {}) }
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(true)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+        expect(encoded.body).toBe('')
+      })
+
+      // The origin's casing differs from the middleware view, which a plain
+      // string comparison of the header lists would mistake for a change.
+      it('continues a redirect that middleware passed through untouched', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        const encoded = codec.encodeResponse({ ...response, body: '' })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toBeUndefined()
+      })
+
+      it('continues a redirect when middleware changed a header that does not affect how it is followed', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        const headers = { 'location': '/original', 'date': 'today', 'x-custom': 'yes' }
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+      })
+
+      it('continues a redirect when middleware reported no headers', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: '',
+          headers: undefined,
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+      })
+
+      // Outside the redirect-received state Chrome applies continueResponse's
+      // headers before it decides whether to redirect. The transport decides
+      // which state a pause is in.
+      it('continues a response not paused as a redirect when middleware changes its location', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, { redirectPause: false })
+
+        const headers = { location: '/rewritten', date: 'today' }
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+      })
+    })
+
     // A body we cannot prove came from the origin has to be fulfilled, or a
     // rewrite would be silently dropped in favor of the origin bytes.
     it('fulfills a response pause with no origin body digest to compare against', () => {
@@ -1794,6 +1921,79 @@ describe('CdpFetchTransport', () => {
       })
 
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34704
+    // A redirect is fulfilled with an empty body whether or not its body would
+    // normally be read. EventSource bodies are streamed rather than read, so
+    // that case also checks a redirect never starts Network.streamResourceContent,
+    // even with streaming and capture enabled.
+    it.each([
+      { read: 'read', resourceType: 'Fetch', streamOptions: {} },
+      { read: 'skipped', resourceType: 'EventSource', streamOptions: { shouldStreamBody: () => true, shouldCaptureBody: () => true } },
+    ] as const)('fulfills a redirect whose location header middleware changed, when its body is $read', async ({ resourceType, streamOptions }) => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, ...streamOptions })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            location: '/rewritten',
+          },
+        }
+      })
+
+      await driveResponsePause(onRequestPaused, { requestId: 'fetch-request', networkId: 'network-1', resourceType }, {
+        statusCode: 302,
+        headers: [{ name: 'Location', value: '/original' }],
+      })
+
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 302,
+        responsePhrase: 'Found',
+        responseHeaders: [{ name: 'location', value: '/rewritten' }],
+        body: '',
+      })
+
+      expectNotCalledWith(client.send, 'Fetch.getResponseBody')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Network.streamResourceContent')
+    })
+
+    // Chrome pauses these at response-received, where continueResponse's
+    // headers take effect, so a changed location doesn't need a fulfill.
+    it.each([
+      { pause: 'a redirect status with no location', statusCode: 302, headers: [{ name: 'Date', value: 'today' }] },
+      { pause: 'a location on a non-redirect status', statusCode: 201, headers: [{ name: 'Location', value: '/created' }] },
+    ])('continues $pause when middleware changes the location', async ({ statusCode, headers }) => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return { ...response, headers: { ...response.headers, location: '/rewritten' } }
+      })
+
+      await driveResponsePause(onRequestPaused, { requestId: 'fetch-request', networkId: 'network-1' }, { statusCode, headers })
+
+      expectCalledWith(client.send, 'Fetch.getResponseBody', { requestId: 'fetch-request' })
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+
+      const [[, continued]] = callsMatching(client.send, ['Fetch.continueResponse'])
+
+      expect(continued).toMatchObject({ requestId: 'fetch-request', responseCode: statusCode })
+      expect(continued.responseHeaders).toContainEqual({ name: 'location', value: '/rewritten' })
     })
 
     it('matches request and response pauses by fetch request id', async () => {

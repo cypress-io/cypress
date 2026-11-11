@@ -5,6 +5,7 @@ import { PassThrough } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
+import { isRedirectStatus } from '@packages/network-interception'
 import { concatStream, httpUtils } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
@@ -505,8 +506,6 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   return this.networkInterceptionCore.copyCookiesFromResponse(this)
 }
 
-const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
-
 // TODO: this shouldn't really even be necessary?
 const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -514,7 +513,7 @@ const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const { statusCode, headers } = this.incomingRes
   const newUrl = headers['location']
 
-  const isRedirectNeeded = !REDIRECT_STATUS_CODES.includes(statusCode) || !newUrl
+  const isRedirectNeeded = !isRedirectStatus(statusCode) || !newUrl
 
   span?.setAttributes({
     isRedirectNeeded,
