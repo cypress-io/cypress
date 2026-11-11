@@ -206,6 +206,7 @@ Take a break, you deserve it! 👉😎👉
 
 A previous major is maintained on a `vN` branch. The [next version](./next-version.md) is worked out from the newest published version of that major, found through the nearest `vN.*` tag on the branch, so a `v15` build produces `15.Y.Z` without setting `NEXT_VERSION`. Follow the steps above, with these differences:
 
+- **Step 4**: a push to `vN` builds only Linux x64. Unless the weekly `vN` schedule already ran on the release sha, trigger a pipeline on it with `run-platform-workflows=true` to build the other four platforms.
 - **Step 6**: pass the branch the build ran on, because the pre-release npm package is stored under it:
 
     ```shell

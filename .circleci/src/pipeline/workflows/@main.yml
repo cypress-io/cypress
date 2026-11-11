@@ -432,8 +432,8 @@ linux-x64:
           - yarn-pnp-preprocessor-system-test: terminal
           - svelte-webpack-system-test: terminal
 
-# linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop or
-# release/* push. The two darwin workflows compete for leased self-hosted
+# linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop,
+# release/*, or vN push. The two darwin workflows compete for leased self-hosted
 # macOS hardware, and per-merge platform signal isn't actionable at that
 # frequency. linux-arm64 is cheap but rides the same gate so all platform
 # coverage lands in one sweep. A release branch is long-lived enough that a
@@ -458,6 +458,9 @@ linux-arm64:
                 - equal: [ develop, << pipeline.git.branch >> ]
                 - matches:
                     pattern: /^release\/\d+\.\d+\.\d+$/
+                    value: << pipeline.git.branch >>
+                - matches:
+                    pattern: /^v\d+$/
                     value: << pipeline.git.branch >>
   jobs:
     - node_modules_install:
