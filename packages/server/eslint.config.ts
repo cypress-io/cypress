@@ -1,4 +1,4 @@
-import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports, userNodeConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports, userNodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
@@ -11,6 +11,8 @@ export default [
     ...userNodeConfig,
     files: ['lib/plugins/child/**'],
   },
+  // Only the unit specs run on Vitest; integration and performance specs run on mocha
+  ...vitestConfig.map((block) => ({ ...block, files: ['test/unit/**'] })),
   {
     languageOptions: {
       parserOptions: {
