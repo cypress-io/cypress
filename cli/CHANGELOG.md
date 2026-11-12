@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.3.1
 
+**Performance:**
+
+- An assertion on a long string no longer makes the browser stop responding while Cypress formats the assertion for the Command Log. This happened when the string held many `![` sequences or long runs of whitespace, such as a large block of Markdown or preformatted text. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Bugfixes:**
 
 - Fixed an issue where a failed assertion whose error message was very long, such as [`.should('contain.text')`](https://on.cypress.io/should) on an element with a lot of text, took minutes to report, so the run looked stuck. The browser stopped responding while it processed the error, and `cypress run` paused again after printing the failure. The failure is now reported as soon as the assertion times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
