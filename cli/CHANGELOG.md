@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.3.1
 
+**Performance:**
+
+- [`cy.intercept()`](https://on.cypress.io/intercept) responds faster to requests that it stubs with a fixture or a static `body` but no `Content-Type` header. Fixed in [#35360](https://github.com/cypress-io/cypress/pull/35360).
+
 **Bugfixes:**
 
 - Fixed an issue where a failed assertion whose error message was very long, such as [`.should('contain.text')`](https://on.cypress.io/should) on an element with a lot of text, took minutes to report, so the run looked stuck. The browser stopped responding while it processed the error, and `cypress run` paused again after printing the failure. The failure is now reported as soon as the assertion times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
