@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- [`cy.intercept()`](https://on.cypress.io/intercept) responds faster to requests that it stubs with a fixture or a static `body` but no `Content-Type` header. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- [`cy.intercept()`](https://on.cypress.io/intercept) responds faster to requests that it stubs with a fixture or a static `body` but no `Content-Type` header. Fixed in [#35360](https://github.com/cypress-io/cypress/pull/35360).
 
 **Bugfixes:**
 
