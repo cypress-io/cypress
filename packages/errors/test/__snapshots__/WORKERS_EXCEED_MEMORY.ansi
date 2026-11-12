@@ -1,0 +1,3 @@
+[31mRunning [33m8[39m[31m workers may run out of memory: this machine has about [33m6144 MB[39m[31m available, enough for about [33m3[39m[31m.[39m
+[31m[39m
+[31mCypress will start all [33m8[39m[31m workers. Pass [95m--workers auto[39m[31m to let Cypress choose a count.[39m

@@ -146,6 +146,11 @@ describe('exec run', () => {
     it('adds --posix-exit-codes', () => {
       expect(run.processRunOptions({ posixExitCodes: true })).toEqual(expect.arrayContaining(['--posix-exit-codes']))
     })
+
+    it('adds --workers with a count or auto', () => {
+      expect(run.processRunOptions({ workers: 3 })).toEqual(expect.arrayContaining(['--workers', 3]))
+      expect(run.processRunOptions({ workers: 'auto' })).toEqual(expect.arrayContaining(['--workers', 'auto']))
+    })
   })
 
   describe('.start', () => {

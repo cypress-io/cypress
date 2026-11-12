@@ -152,6 +152,7 @@ const descriptions: any = {
   spec: 'runs specific spec file(s). defaults to "all"',
   tag: 'named tag(s) for recorded runs in Cypress Cloud',
   version: 'prints Cypress version',
+  workers: 'runs specs across this many local Cypress processes, or "auto" to pick a count from the available CPUs and memory',
 }
 
 const knownCommands = [
@@ -287,6 +288,7 @@ const addCypressRunCommand = (program: any): any => {
   .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
   .option('-s, --spec <spec>', text('spec'))
   .option('-t, --tag <tag>', text('tag'))
+  .option('--workers <count>', text('workers'))
 }
 
 const addCypressOpenCommand = (program: any): any => {
@@ -345,6 +347,10 @@ const castCypressOptions = (opts: any): any => {
 
   if (_.has(opts, 'port')) {
     castOpts.port = coerceAnyStringToInt(opts.port)
+  }
+
+  if (_.has(opts, 'workers') && opts.workers !== 'auto') {
+    castOpts.workers = coerceAnyStringToInt(opts.workers)
   }
 
   return castOpts

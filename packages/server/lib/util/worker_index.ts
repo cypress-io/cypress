@@ -1,0 +1,1 @@
+export const WORKER_INDEX_ENV = 'CYPRESS_WORKER_INDEX'

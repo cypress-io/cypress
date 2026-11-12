@@ -443,6 +443,16 @@ describe('visual error templates', () => {
         default: [{ parallel: 'true' }],
       }
     },
+    INVALID_WORKERS: () => {
+      return {
+        default: ['zero'],
+      }
+    },
+    WORKERS_EXCEED_MEMORY: () => {
+      return {
+        default: [8, 3, 6144],
+      }
+    },
     INCORRECT_CI_BUILD_ID_USAGE: () => {
       return {
         default: [{ ciBuildId: 'ciBuildId123' }],

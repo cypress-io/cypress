@@ -104,6 +104,10 @@ declare namespace CypressCommandLine {
      * Whether to display the Cypress Runner UI
      */
     runnerUi: boolean
+    /**
+     * Run specs across this many local Cypress processes, or "auto" to pick a count from the available CPUs and memory
+     */
+    workers: number | 'auto'
   }
 
   /**

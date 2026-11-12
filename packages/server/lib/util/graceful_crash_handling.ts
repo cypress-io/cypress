@@ -85,7 +85,7 @@ export const patchRunResultsAfterCrash = (
   }
 }
 
-const defaultStats = (error: Error): BaseReporterResults => {
+export const defaultStats = (error: Error): BaseReporterResults => {
   return {
     error: stripAnsi(error.message),
     stats: {

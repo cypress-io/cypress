@@ -695,6 +695,16 @@ describe('cli', () => {
       expect(run.start).toBeCalledWith({ posixExitCodes: true })
     })
 
+    it('calls run with --workers count', async () => {
+      await exec('run --workers 3')
+      expect(run.start).toBeCalledWith({ workers: '3' })
+    })
+
+    it('calls run with --workers auto', async () => {
+      await exec('run --workers auto')
+      expect(run.start).toBeCalledWith({ workers: 'auto' })
+    })
+
     describe('component-testing', () => {
       it('passes to run.start the correct args for component-testing', async () => {
         await exec('run --component --dev')

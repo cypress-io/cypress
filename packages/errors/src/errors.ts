@@ -474,6 +474,18 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/record-params-without-recording`
   },
+  INVALID_WORKERS: (arg1: unknown) => {
+    return errTemplate`\
+        The ${fmt.flag(`--workers`)} flag must be a whole number of 1 or more, or ${fmt.highlight(`auto`)}.
+
+        You passed: ${fmt.highlight(String(arg1))}`
+  },
+  WORKERS_EXCEED_MEMORY: (requested: number, recommended: number, availableMb: number) => {
+    return errTemplate`\
+        Running ${fmt.highlight(String(requested))} workers may run out of memory: this machine has about ${fmt.highlight(`${availableMb} MB`)} available, enough for about ${fmt.highlight(String(recommended))}.
+
+        Cypress will start all ${fmt.highlight(String(requested))} workers. Pass ${fmt.flag(`--workers auto`)} to let Cypress choose a count.`
+  },
   INCORRECT_CI_BUILD_ID_USAGE: (arg1: Record<string, string>) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--ci-build-id`)} flag but did not provide either a ${fmt.flag(`--group`)} or ${fmt.flag(`--parallel`)} flag.

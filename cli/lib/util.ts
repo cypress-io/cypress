@@ -222,7 +222,8 @@ const parseOpts = (opts: any): any => {
     'runnerUi',
     'runProject',
     'spec',
-    'tag')
+    'tag',
+    'workers')
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')

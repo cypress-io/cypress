@@ -219,6 +219,10 @@ type ExecOptions = {
    */
   outputPath?: string
   /**
+   * Split the run across this many local Cypress processes.
+   */
+  workers?: number | 'auto'
+  /**
    * Set a run tag.
    */
   tag?: string
@@ -557,6 +561,10 @@ function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) 
 
   if (options.passWithNoTests) {
     args.push('--pass-with-no-tests')
+  }
+
+  if (options.workers != null) {
+    args.push(`--workers=${options.workers}`)
   }
 
   if (options.posixExitCodes) {

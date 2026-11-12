@@ -8,6 +8,9 @@ import Bluebird from 'bluebird'
 import assert from 'assert'
 
 import recordMode from './record'
+import { readSpecDurations, resolveWorkerCount, specDurationsPath, startCoordinator, workerHooks, writeSpecDurations } from './run-workers'
+import * as ciProvider from '../util/ci_provider'
+import { randomUUID } from 'crypto'
 import * as errors from '../errors'
 import { Reporter } from '../reporter'
 import browserUtils from '../browsers'
@@ -843,17 +846,17 @@ function screenshotMetadata (data: any, resp: any) {
   }
 }
 
-async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManagerShape } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder'>) {
+async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManagerShape, isWorker?: boolean, collectRuns?: (ownRuns: any[]) => Promise<any[]> } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
-  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures, protocolManager } = options
+  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures, protocolManager, isWorker, collectRuns } = options
 
   const isHeadless = !headed
 
   browser.isHeadless = isHeadless
   browser.isHeaded = !isHeadless
 
-  if (!options.quiet) {
+  if (!options.quiet && !isWorker) {
     printResults.displayRunStarting({
       config,
       specs,
@@ -949,16 +952,21 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   const beforeRunSpan = telemetry.startSpan({ name: 'lifecycle:before:run' })
 
-  await runEvents.execute('before:run', beforeRunDetails)
+  if (!isWorker) {
+    await runEvents.execute('before:run', beforeRunDetails)
+  }
+
   beforeRunSpan?.end()
 
-  const runs = await iterateThroughSpecs({
+  const ownRuns = await iterateThroughSpecs({
     specs,
     config,
     runEachSpec,
     afterSpecRun,
     beforeSpecRun,
   })
+
+  const runs = collectRuns ? await collectRuns(ownRuns) : ownRuns
 
   const results: CypressRunResult = {
     status: 'finished',
@@ -988,10 +996,16 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   debug('final results of all runs: %o', publicResults)
 
-  await runEvents.execute('after:run', publicResults)
+  if (!isWorker) {
+    await runEvents.execute('after:run', publicResults)
+  }
+
   afterRunSpan?.end()
 
-  await writeOutput(outputPath, publicResults)
+  if (!isWorker) {
+    await writeOutput(outputPath, publicResults)
+  }
+
   runSpan?.end()
 
   return results
@@ -1106,6 +1120,8 @@ export interface ReadyOptions {
   testingType: TestingType
   webSecurity: boolean
   passWithNoTests: boolean
+  workers?: number | 'auto'
+  workerIndex?: number
 }
 
 async function ready (options: ReadyOptions) {
@@ -1128,6 +1144,17 @@ async function ready (options: ReadyOptions) {
   // project picker.
   options.projectRoot = options.projectRoot ?? String(options.cwd ?? process.cwd())
   const projectRoot = options.projectRoot
+  const isWorker = options.workerIndex != null
+
+  // recorded workers each join the same Cloud run as a separate machine
+  if (options.record && !isWorker && options.workers != null && options.workers !== 1) {
+    options.parallel = true
+
+    if (!options.ciBuildId && !ciProvider.provider()) {
+      options.ciBuildId = `local-${randomUUID()}`
+    }
+  }
+
   const { record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
@@ -1193,7 +1220,7 @@ async function ready (options: ReadyOptions) {
 
       return browser
     })(),
-    trashAssets(config),
+    isWorker ? undefined : trashAssets(config),
   ])
 
   const specs = project.ctx.project.specs
@@ -1236,11 +1263,20 @@ async function ready (options: ReadyOptions) {
     runChromePolicyCheck(onWarning)
   }
 
+  const workers = isWorker || options.workers == null ? 1 : await resolveWorkerCount(options.workers, specs.length)
+  const durationsFile = specDurationsPath(projectRoot)
+  const durations = workers > 1 && !record ? await readSpecDurations(durationsFile) : undefined
+  const coordinator = workers > 1 ? startCoordinator({ specs, workers, downloadsFolder: config.downloadsFolder, durations, record: record ? { ciBuildId } : undefined }) : undefined
+
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
+    const cloudHooks = { beforeSpecRun, afterSpecRun }
+    const coordinatorHooks = coordinator?.hooks(cloudHooks)
+    const hooks = isWorker ? workerHooks(cloudHooks) : coordinatorHooks ?? cloudHooks
+
     const results = await runSpecs({
       autoCancelAfterFailures,
-      beforeSpecRun,
-      afterSpecRun,
+      beforeSpecRun: hooks.beforeSpecRun,
+      afterSpecRun: hooks.afterSpecRun,
       projectRoot,
       socketId,
       parallel,
@@ -1265,9 +1301,11 @@ async function ready (options: ReadyOptions) {
       exit: options.exit,
       webSecurity: options.webSecurity,
       protocolManager: project.protocolManager,
+      isWorker,
+      collectRuns: coordinatorHooks?.collectRuns,
     })
 
-    if (!options.quiet) {
+    if (!options.quiet && !isWorker) {
       printResults.renderSummaryTable(runUrl, results)
       printResults.maybeLogCloudRecommendationMessage(results.runs || [], record)
     }
@@ -1300,6 +1338,14 @@ async function ready (options: ReadyOptions) {
       quiet: options.quiet,
       ctx: project.ctx,
     })
+  }
+
+  if (durations) {
+    const results = await runAllSpecs({ parallel: false })
+
+    await writeSpecDurations(durationsFile, durations, results.runs)
+
+    return results
   }
 
   // not recording, can't be parallel

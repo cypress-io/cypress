@@ -7,6 +7,7 @@
 // essentially do it all again when we boot the correct
 // mode.
 import type { ChildProcess } from 'child_process'
+import { WORKER_INDEX_ENV } from './util/worker_index'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import { toObject } from './util/args'
@@ -158,6 +159,21 @@ export = {
     }
 
     debug('from argv %o got options %o', argv, options)
+
+    // the plugins child is forked before run mode starts and inherits this
+    if (options.workers != null && options.workerIndex == null) {
+      process.env[WORKER_INDEX_ENV] = '0'
+    }
+
+    if (options.workerIndex != null) {
+      // the IPC channel closes when the coordinator dies, even from SIGKILL; shut down the same way SIGTERM does
+      process.once('disconnect', () => process.kill(process.pid, 'SIGTERM'))
+
+      // each Electron process gets its own Dock icon on macOS; one per run is enough
+      if (process.platform === 'darwin' && process.versions.electron) {
+        require('electron').app.setActivationPolicy('accessory')
+      }
+    }
 
     // @ts-expect-error TODO: Fix type that says attachRecordKey is not a function
     telemetry.exporter()?.attachRecordKey(options.key)

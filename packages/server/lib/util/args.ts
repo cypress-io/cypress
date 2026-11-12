@@ -61,6 +61,8 @@ const allowList = [
   'userNodePath',
   'userNodeVersion',
   'version',
+  'workerIndex',
+  'workers',
 ] as const
 
 /** Parsed CLI argv object returned by {@link toObject}. */
@@ -363,6 +365,7 @@ export function toObject (argv: string[]): ParsedCypressArgv {
     'smoke-test': 'smokeTest',
     'testing-type': 'testingType',
     'posix-exit-codes': 'posixExitCodes',
+    'worker-index': 'workerIndex',
   }
 
   // takes an array of args and converts

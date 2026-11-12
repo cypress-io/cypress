@@ -130,6 +130,10 @@ const processRunOptions = (options: any = {}): string[] => {
     args.push('--quiet')
   }
 
+  if (options.workers != null) {
+    args.push('--workers', options.workers)
+  }
+
   // if record is defined and we're not
   // already in ci mode, then send it up
   if (options.record != null) {
