@@ -404,6 +404,10 @@ exports[`cli > unknown option > shows help 1`] = `
                                      cypress.config.{js,ts,mjs,cjs}
     --global                         force Cypress into global mode as if it were
                                      globally installed
+    --headless                       starts a session for cypress tap to drive,
+                                     with the browser headless and the Cypress
+                                     window hidden so neither takes focus.
+                                     requires --e2e or --component, and --browser
     -p, --port <port>                runs Cypress on a specific port. overrides
                                      any value in cypress.config.{js,ts,mjs,cjs}.
     -P, --project <project-path>     path to the project

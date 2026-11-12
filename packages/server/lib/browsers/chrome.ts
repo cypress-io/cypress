@@ -412,8 +412,11 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
-const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal, storageOrigins)
+const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts, browser: Browser) => {
+  // A headless browser runs without the extension, so asking it to activate the tab only waits out a
+  // timeout before every screenshot. `cypress open --headless` is headless without being run mode.
+  const bringsPageToFront = options.isTextTerminal || browser.isHeadless
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, bringsPageToFront, storageOrigins)
 
   automation.use(cdpAutomation)
 
@@ -695,7 +698,7 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options, browser)
 
     // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
     // Fetch must be wired here on the browser (CDP) network path. The page is
@@ -748,7 +751,7 @@ export = {
 
     debug('attaching listeners to chrome %o', { url, options })
 
-    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options, browser)
 
     onReconnect = (client: CriClient) => {
       // if the client disconnects (e.g. due to a computer sleeping), update

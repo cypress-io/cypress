@@ -306,27 +306,38 @@ export class DataContext {
   }
 
   // The error on display that the record was written for, so dismissing some other error leaves the record alone
-  private _loadErrorIdForTap: string | null = null
+  private _loadErrorId: string | null = null
 
-  get loadErrorIdForTap () {
-    return this._loadErrorIdForTap
+  /**
+   * Whether `--headless` keeps the Cypress window hidden for the whole session and launches its browsers headless
+   */
+  get isHeadless () {
+    return this.isOpenMode && Boolean(this.modeOptions.headless)
+  }
+
+  get loadErrorId () {
+    return this._loadErrorId
   }
 
   /**
    * Records that the project could not load, for `cypress tap status` to report when the
-   * project never starts a session. Only errors that stop the project from starting belong
-   * here, which is why `onError`, also used for errors from a project that is running
-   * normally, does not call it. Without a project there is nothing for a session to describe.
+   * project never starts a session. That record, and the error printed by the caller, are how a
+   * `--headless` session reports a problem, since its window stays hidden. Only errors that stop
+   * the project from starting belong here, which is why `onError`, also used for errors from a
+   * project that is running normally, does not call it. Without a project there is nothing for
+   * a session to describe.
    */
-  reportLoadErrorToTap (error: CypressError | string) {
+  reportLoadError (error: CypressError | string) {
     const projectRoot = this.currentProject
 
     if (!this.isOpenMode || !projectRoot) {
       return
     }
 
-    // A message with no error behind it has nothing on display to dismiss
-    this._loadErrorIdForTap = typeof error === 'string' ? null : this.coreData.diagnostics?.error?.id ?? null
+    // Only the error on display can be dismissed. A message, or an error shown as a warning, is not it.
+    const shown = this.coreData.diagnostics?.error
+
+    this._loadErrorId = shown && shown.cypressError === error ? shown.id : null
 
     this._apis.projectApi.setSessionLoadError({
       projectRoot,
@@ -339,12 +350,12 @@ export class DataContext {
    * Withdraws the record of a load error once the error has been dismissed or the project
    * is loading again, so `cypress tap status` does not keep reporting it.
    */
-  clearLoadErrorForTap () {
+  clearLoadError () {
     if (!this.isOpenMode) {
       return
     }
 
-    this._loadErrorIdForTap = null
+    this._loadErrorId = null
 
     this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
   }

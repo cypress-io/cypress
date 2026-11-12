@@ -1,5 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.3.1
+## 16.4.0
+
+**Features:**
+
+- [`cypress open`](https://on.cypress.io/command-line#cypress-open) now accepts `--headless` to start a session for `cypress tap` to drive. The browser runs headless and the Cypress window stays hidden, so the session does not take focus from other apps while `cypress tap` commands control it, such as when an AI coding agent drives Cypress. `--headless` requires `--e2e` or `--component` and `--browser`, and skips the welcome screen. If the session cannot start, such as after a configuration error or when the browser cannot be found, Cypress prints the error and `cypress tap status` reports it, while the Cypress window stays hidden. [`cypress.open()`](https://on.cypress.io/module-api#cypress-open) accepts the same option as `headless: true`. Addressed in [#0000](https://github.com/cypress-io/cypress/pull/0000).
 
 **Performance:**
 

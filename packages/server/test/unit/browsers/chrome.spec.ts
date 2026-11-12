@@ -10,6 +10,7 @@ import utils from '../../../lib/browsers/utils'
 import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import * as protocol from '../../../lib/browsers/protocol'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
@@ -765,6 +766,29 @@ describe('lib/browsers/chrome', () => {
 
         expectCalledWith(pageCriClient.send, 'Page.getFrameTree')
       })
+    })
+  })
+
+  describe('#_setAutomation', () => {
+    const bringsPageToFront = async (isTextTerminal: boolean, isHeadless: boolean) => {
+      const create = vi.spyOn(CdpAutomation, 'create').mockResolvedValue({} as CdpAutomation)
+      const client = { send: vi.fn(), on: vi.fn(), off: vi.fn() }
+
+      await chrome._setAutomation(client as any, { use: vi.fn() } as any, vi.fn(), { isTextTerminal } as any, { isHeadless } as any)
+
+      return create.mock.lastCall?.[7]
+    }
+
+    it('brings the page to the front in run mode', async () => {
+      expect(await bringsPageToFront(true, false)).toBe(true)
+    })
+
+    it('brings the page to the front for a headless browser in open mode, which has no extension to ask', async () => {
+      expect(await bringsPageToFront(false, true)).toBe(true)
+    })
+
+    it('asks the extension to activate the tab for a headed browser in open mode', async () => {
+      expect(await bringsPageToFront(false, false)).toBe(false)
     })
   })
 

@@ -8,7 +8,7 @@ export class ErrorActions {
    * and nulls it out
    */
   clearError (id: string) {
-    const wasLoadError = this.ctx.loadErrorIdForTap === id
+    const wasLoadError = this.ctx.loadErrorId === id
 
     this.ctx.update((d) => {
       if (d.diagnostics.error?.id === id) {
@@ -17,7 +17,7 @@ export class ErrorActions {
     })
 
     if (wasLoadError) {
-      this.ctx.clearLoadErrorForTap()
+      this.ctx.clearLoadError()
     }
   }
 

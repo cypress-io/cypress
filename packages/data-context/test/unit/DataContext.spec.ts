@@ -120,7 +120,7 @@ describe('DataContext open mode error output', () => {
 
       error.details = `\u001b[31m${error.details}\u001b[39m`
 
-      projectCtx.reportLoadErrorToTap(error)
+      projectCtx.reportLoadError(error)
 
       const [args] = recorded(projectCtx).mock.calls[0] as [{ projectRoot: string, testingType: string, loadError: string }]
 
@@ -146,10 +146,34 @@ describe('DataContext open mode error output', () => {
       expect(recorded(projectCtx)).not.toHaveBeenCalled()
     })
 
+    describe('with --headless', () => {
+      const headlessProject = () => {
+        const projectCtx = createTestDataContext('open', { headless: true })
+
+        projectCtx.coreData.currentProject = '/projects/foo'
+
+        return projectCtx
+      }
+
+      it('records the error for cypress tap status and keeps the window hidden and the browsers headless', () => {
+        const projectCtx = headlessProject()
+
+        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
+
+        expect(recorded(projectCtx)).toHaveBeenCalledTimes(1)
+        expect(projectCtx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
+        expect(projectCtx.isHeadless).toBe(true)
+      })
+
+      it('does not count as headless in run mode', () => {
+        expect(createTestDataContext('run', { headless: true }).isHeadless).toBe(false)
+      })
+    })
+
     it('has nothing to record before a project is open', () => {
       const noProject = openProject(undefined)
 
-      noProject.reportLoadErrorToTap(requireError('boom'))
+      noProject.reportLoadError(requireError('boom'))
 
       expect(recorded(noProject)).not.toHaveBeenCalled()
     })
@@ -158,7 +182,7 @@ describe('DataContext open mode error output', () => {
       const runCtx = createTestDataContext('run')
 
       runCtx.coreData.currentProject = '/projects/foo'
-      runCtx.reportLoadErrorToTap(requireError('boom'))
+      runCtx.reportLoadError(requireError('boom'))
 
       expect(recorded(runCtx)).not.toHaveBeenCalled()
     })
@@ -168,7 +192,7 @@ describe('DataContext open mode error output', () => {
 
       recorded(projectCtx).mockImplementation(() => Promise.reject(new Error('disk full')))
 
-      expect(() => projectCtx.reportLoadErrorToTap(requireError('boom'))).not.toThrow()
+      expect(() => projectCtx.reportLoadError(requireError('boom'))).not.toThrow()
       await new Promise((resolve) => setImmediate(resolve))
     })
 
@@ -205,6 +229,18 @@ describe('DataContext open mode error output', () => {
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
       })
 
+      it('does not happen when an error on display is dismissed that is not the one recorded', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.onError(requireError('git information unavailable'))
+
+        // Shown as a warning, such as a browser that cannot be found, so it is not the error on display
+        projectCtx.reportLoadError(requireError('browser not found'))
+        projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+      })
+
       it('does not happen for an error that is not on display', () => {
         const projectCtx = openProject('/projects/foo')
 
@@ -227,7 +263,7 @@ describe('DataContext open mode error output', () => {
       it('is not done in run mode', () => {
         const runCtx = createTestDataContext('run')
 
-        runCtx.clearLoadErrorForTap()
+        runCtx.clearLoadError()
 
         expect(cleared(runCtx)).not.toHaveBeenCalled()
       })

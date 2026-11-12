@@ -1,6 +1,6 @@
 import _ from 'lodash'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
-import { BrowserWindow } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
 
@@ -12,6 +12,10 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   graphqlPort?: number
   contextMenu?: boolean
   partition?: string
+  /**
+   * Keeps the window hidden for its whole life: it is created hidden, and nothing shows it
+   */
+  keepHidden?: boolean
   /**
    * Synchronizes properties of browserwindow with local state
    */
@@ -27,6 +31,7 @@ type TrackStateMap = Record<'width' | 'height' | 'x' | 'y' | 'devTools', string>
 
 let windows = {}
 let recentlyCreatedWindow = false
+let keptHiddenWindow: BrowserWindow | undefined
 
 const getByType = (type: string) => {
   return windows[type]
@@ -70,10 +75,15 @@ export function removeAllExtensions (win: BrowserWindow) {
 
 export function reset () {
   windows = {}
+  keptHiddenWindow = undefined
 }
 
 export function showAll () {
-  return _.invoke(windows, 'showInactive')
+  return _.forEach(windows, (win: BrowserWindow) => {
+    if (win !== keptHiddenWindow) {
+      win.showInactive()
+    }
+  })
 }
 
 export function hideAllUnlessAnotherWindowIsFocused () {
@@ -91,8 +101,17 @@ export function isMainWindowFocused () {
   return getByType('INDEX').isFocused()
 }
 
+// Shows a window and gives it focus, unless it was created to stay hidden
+function showWindow (win: BrowserWindow | undefined) {
+  if (!win || win === keptHiddenWindow) {
+    return
+  }
+
+  win.show()
+}
+
 export function focusMainWindow () {
-  return getByType('INDEX').show()
+  return showWindow(getByType('INDEX'))
 }
 
 export function getByWebContents (webContents) {
@@ -151,6 +170,12 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
 
   const win = newBrowserWindow(options)
 
+  if (options.keepHidden) {
+    keptHiddenWindow = win
+    // Choosing Cypress in the macOS Dock or app switcher would bring up no window
+    app.dock?.hide()
+  }
+
   win.on('blur', function (...args) {
     return options.onBlur.apply(win, args)
   })
@@ -168,7 +193,8 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
   // the webview loses focus on navigation, so we
   // have to refocus it everytime top navigates in headless mode
   // https://github.com/cypress-io/cypress/issues/2190
-  if (options.show === false) {
+  // A kept-hidden window is the Launchpad, which no test types into
+  if (options.show === false && !options.keepHidden) {
     win.webContents.on('did-start-loading', () => {
       if (!win.isDestroyed()) {
         return win.focusOnWebView()
@@ -220,7 +246,7 @@ export async function open (projectRoot: string, options: WindowOpenOptions, new
   const knownWin = options.type && getByType(options.type)
 
   if (knownWin) {
-    knownWin.show()
+    showWindow(knownWin)
 
     return Promise.resolve(knownWin)
   }

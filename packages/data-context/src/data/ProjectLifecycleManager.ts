@@ -313,19 +313,26 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * An agent that names the project and testing type on the command line, and has a browser
-   * from `--browser` or from `defaultBrowser` in the config, has no one to dismiss the welcome
-   * screen that would otherwise launch the browser. The dismissal is not saved, so a person's
-   * first launch still sees the welcome.
+   * No person is there to answer the Launchpad: an agent drives Cypress, or `--headless` hid the window
    */
-  get isWelcomeBypassedForAgent () {
+  private get isUnattended () {
+    return this.ctx.isOpenMode && Boolean(this.ctx.modeOptions.headless || isAgentMode())
+  }
+
+  /**
+   * An unattended launch that names the project and testing type on the command line, and has a
+   * browser from `--browser` or from `defaultBrowser` in the config, has no one to dismiss the
+   * welcome screen that would otherwise launch the browser. The dismissal is not saved, so a
+   * person's first launch still sees the welcome.
+   */
+  get isWelcomeBypassed () {
     const { project, testingType, isBrowserGivenByCli } = this.ctx.modeOptions
 
     // Neither `cliBrowser` nor `modeOptions.browser` is evidence of this: a config reload copies the
     // active browser into both. `isBrowserGivenByCli` is set once, from the command line.
     const hasBrowser = Boolean(isBrowserGivenByCli || this.configDefaultBrowser)
 
-    return this.ctx.isOpenMode && isAgentMode() && Boolean(project && testingType && hasBrowser)
+    return this.isUnattended && Boolean(project && testingType && hasBrowser)
   }
 
   /**
@@ -376,7 +383,7 @@ export class ProjectLifecycleManager {
 
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
 
-      const hasWelcomeBeenDismissed = this.isWelcomeBypassedForAgent || Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
+      const hasWelcomeBeenDismissed = this.isWelcomeBypassed || Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
 
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
       // but if the user needs to dismiss a landing page, don't continue: dismissing it renders OpenBrowser
@@ -419,6 +426,12 @@ export class ProjectLifecycleManager {
       const error = e as CypressError
 
       this.ctx.onWarning(error)
+
+      // Without the browser it was asked for, nothing launches on its own, and no one can pick
+      // another in a window `--headless` keeps hidden, so the session cannot start
+      if (this.ctx.isHeadless) {
+        this.ctx.reportLoadError(error)
+      }
     }
   }
 
@@ -563,7 +576,7 @@ export class ProjectLifecycleManager {
       s.packageManager = packageManagerUsed
     })
 
-    this.ctx.clearLoadErrorForTap()
+    this.ctx.clearLoadError()
 
     this.verifyProjectRoot(projectRoot)
 
@@ -629,7 +642,7 @@ export class ProjectLifecycleManager {
     })
 
     if (testingType) {
-      this.ctx.clearLoadErrorForTap()
+      this.ctx.clearLoadError()
     }
 
     this._currentTestingType = testingType
@@ -864,23 +877,41 @@ export class ProjectLifecycleManager {
     if (testingType === 'e2e') {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
-      await this.completeE2ESetupForAgent()
+      await this.completeE2ESetupUnattended()
     } else if (testingType === 'component') {
       await this.ctx.actions.wizard.detectFrameworks()
       await this.ctx.actions.wizard.initialize()
+      this.reportComponentSetupForHeadless()
     }
   }
 
   /**
-   * The Launchpad's Continue button is what loads the new config after the e2e scaffold, so
-   * without it the project never starts. An agent has no one to press it, so it continues
-   * on its own, unless a file needs a person to merge changes into it.
+   * Component testing is set up through choices in the Launchpad's wizard, which a `--headless`
+   * session keeps hidden, so the session cannot start
    */
-  private async completeE2ESetupForAgent () {
+  private reportComponentSetupForHeadless () {
+    const { project, testingType } = this.ctx.modeOptions
+
+    if (!this.ctx.isHeadless || !project || testingType !== 'component') {
+      return
+    }
+
+    const message = 'Cypress could not start component testing for this project on its own, because it is not set up yet. Set it up by running `cypress open --component` without `--headless`, then start Cypress again.'
+
+    logError(message)
+    this.ctx.reportLoadError(message)
+  }
+
+  /**
+   * The Launchpad's Continue button is what loads the new config after the e2e scaffold, so
+   * without it the project never starts. An unattended session has no one to press it, so it
+   * continues on its own, unless a file needs a person to merge changes into it.
+   */
+  private async completeE2ESetupUnattended () {
     const { project, testingType } = this.ctx.modeOptions
     const scaffolded = this.ctx.coreData.scaffoldedFiles
 
-    if (!this.ctx.isOpenMode || !isAgentMode() || !project || testingType !== 'e2e' || !scaffolded) {
+    if (!this.isUnattended || !project || testingType !== 'e2e' || !scaffolded) {
       return
     }
 
@@ -896,7 +927,7 @@ export class ProjectLifecycleManager {
       const message = `Cypress could not finish setting up e2e testing for this project on its own, because these files need changes made by hand: ${needsAPerson.join(', ')}. Make the changes, then start Cypress again.`
 
       logError(message)
-      this.ctx.reportLoadErrorToTap(message)
+      this.ctx.reportLoadError(message)
 
       return
     }
@@ -965,7 +996,7 @@ export class ProjectLifecycleManager {
       this.ctx.onError(err, 'Cypress configuration error')
 
       if (stopsProject) {
-        this.ctx.reportLoadErrorToTap(err)
+        this.ctx.reportLoadError(err)
       }
     }
   }

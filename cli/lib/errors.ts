@@ -309,6 +309,11 @@ const invalidTestingType = {
   solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
 }
 
+const incompleteHeadlessOpen = {
+  description: '`cypress open --headless` starts a session for `cypress tap` to drive, with no Cypress window to choose a project, testing type or browser in, so it needs all three up front.',
+  solution: 'Pass `--e2e` or `--component`, and `--browser`, along with `--headless`. Pass `--project` too if Cypress is installed globally, and do not pass `--global`.',
+}
+
 const incompatibleTestTypeFlags = {
   description: '`--e2e` and `--component` cannot both be passed.',
   solution: 'Either pass `--e2e` or `--component`, but not both.',
@@ -496,6 +501,7 @@ export const errors = {
   incompatibleHeadlessFlags,
   invalidRunProjectPath,
   invalidTestingType,
+  incompleteHeadlessOpen,
   incompatibleTestTypeFlags,
   incompatibleTestingTypeAndFlag,
   invalidConfigFile,

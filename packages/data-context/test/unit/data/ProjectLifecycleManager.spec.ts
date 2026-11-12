@@ -154,6 +154,65 @@ describe('ProjectLifecycleManager', () => {
       expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
     })
 
+    describe('with --headless', () => {
+      const headlessCtx = (files: ReturnType<typeof scaffolded>, testingType: 'e2e' | 'component' = 'e2e') => {
+        const setup = setupCtx(files, { project: 'foo', testingType, headless: true })
+
+        setup.coreData.currentProject = '/projects/foo'
+        setup._apis.projectApi.setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined) as any
+
+        return setup
+      }
+
+      it('completes the e2e setup without an agent, since the window that has the Continue button is hidden', async () => {
+        const setup = headlessCtx(scaffolded('valid'))
+
+        await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+        expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
+        expect(setup._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+      })
+
+      it('reports a scaffolded file that needs changes made by a person, and keeps the window hidden', async () => {
+        const setup = headlessCtx(scaffolded('valid', 'changes'))
+
+        await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+        expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+        expect(setup._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+          loadError: expect.stringContaining('need changes made by hand'),
+        }))
+
+        expect(setup.isHeadless).toBe(true)
+      })
+
+      it('reports that component testing needs setting up, and keeps the window hidden', async () => {
+        const setup = headlessCtx([], 'component')
+
+        await setup.lifecycleManager.initializeProjectSetup('component')
+
+        const printed = consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
+
+        expect(printed).toContain('could not start component testing')
+        expect(setup._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+          loadError: expect.stringContaining('could not start component testing'),
+        }))
+
+        expect(setup.isHeadless).toBe(true)
+      })
+    })
+
+    it('leaves the component wizard to a person without --headless', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx([], { project: 'foo', testingType: 'component' })
+
+      await setup.lifecycleManager.initializeProjectSetup('component')
+
+      expect(setup.actions.wizard.initialize).toHaveBeenCalledTimes(1)
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
     it('leaves the Continue step to a person when CYPRESS_AGENT_MODE forces agent mode off', async () => {
       process.env.CLAUDECODE = '1'
       process.env.CYPRESS_AGENT_MODE = '0'
@@ -419,7 +478,7 @@ describe('ProjectLifecycleManager', () => {
         jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
 
         expect(agent.lifecycleManager.loadedFullConfig).toBeNull()
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
       })
 
       it('applies to a defaultBrowser in the config file\'s testing type before setupNodeEvents finishes', () => {
@@ -429,7 +488,7 @@ describe('ProjectLifecycleManager', () => {
 
         jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ e2e: { defaultBrowser: 'electron' } })
 
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
       })
 
       it('follows the full config once it exists, even when setupNodeEvents removed the defaultBrowser', () => {
@@ -440,13 +499,13 @@ describe('ProjectLifecycleManager', () => {
         jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
         jest.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: null } as unknown as FullConfig)
 
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
       })
 
       it('is not bypassed without --testingType', () => {
         process.env.CLAUDECODE = '1'
 
-        expect(agentCtx({ project: 'foo' }).lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agentCtx({ project: 'foo' }).lifecycleManager.isWelcomeBypassed).toBe(false)
       })
 
       it('is not bypassed without --browser or a defaultBrowser', () => {
@@ -454,7 +513,7 @@ describe('ProjectLifecycleManager', () => {
 
         const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
 
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
       })
 
       it('is not bypassed by a browser that a config reload copied into cliBrowser', async () => {
@@ -473,7 +532,7 @@ describe('ProjectLifecycleManager', () => {
         await agent.lifecycleManager.setInitialActiveBrowser()
 
         expect(agent.coreData.cliBrowser).not.toBeNull()
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
         expect(agent.actions.project.launchProject).not.toHaveBeenCalled()
       })
 
@@ -484,7 +543,57 @@ describe('ProjectLifecycleManager', () => {
 
         runCtx.coreData.cliBrowser = 'electron'
 
-        expect(runCtx.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(runCtx.lifecycleManager.isWelcomeBypassed).toBe(false)
+      })
+
+      describe('--headless', () => {
+        it('launches the project without an agent, since no one can dismiss the welcome screen', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true, headless: true })
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.lifecycleManager.isWelcomeBypassed).toBe(true)
+          expect(headless.actions.project.launchProject).toHaveBeenCalledTimes(1)
+        })
+
+        it('is not bypassed without a testing type', () => {
+          expect(agentCtx({ project: 'foo', isBrowserGivenByCli: true, headless: true }).lifecycleManager.isWelcomeBypassed).toBe(false)
+        })
+
+        it('is not bypassed in run mode', () => {
+          const runCtx = createDataContext({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: true, headless: true }, 'run')
+
+          expect(runCtx.lifecycleManager.isWelcomeBypassed).toBe(false)
+        })
+
+        it('reports the browser it was given when it cannot be found, and keeps the window hidden', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'nope', isBrowserGivenByCli: true, headless: true })
+
+          jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.isHeadless).toBe(true)
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('Browser not found'),
+          }))
+
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+        })
+
+        it('does not report a missing browser for cypress tap status without --headless', async () => {
+          process.env.CLAUDECODE = '1'
+
+          const agent = agentCtx()
+
+          jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          agent.coreData.currentProject = '/projects/foo'
+
+          await agent.lifecycleManager.setInitialActiveBrowser()
+
+          expect(agent._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+        })
       })
     })
 

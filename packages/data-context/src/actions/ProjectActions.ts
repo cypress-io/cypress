@@ -130,7 +130,7 @@ export class ProjectActions {
     })
 
     // The project a load error was recorded for is gone
-    this.ctx.clearLoadErrorForTap()
+    this.ctx.clearLoadError()
 
     // Also clear any data associated with the linked cloud project
     this.ctx.actions.cloudProject.clearCloudProject()
