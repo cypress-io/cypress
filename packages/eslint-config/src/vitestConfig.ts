@@ -6,7 +6,7 @@ import vitest from '@vitest/eslint-plugin'
  * Vitest. Spread it after `baseConfig`:
  * `export default [...baseConfig, ...vitestConfig]`.
  *
- * Only the plugin's recommended rules are on. `vitest/unbound-method`, its one
+ * Builds on the plugin's recommended rules. `vitest/unbound-method`, its one
  * rule that needs type information, is left out.
  */
 export const vitestConfig: Linter.Config[] = [

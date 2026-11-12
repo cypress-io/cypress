@@ -69,7 +69,7 @@ vi.mock('module', async () => {
           // a bit hacky, but pass in the version as the project path so we don't muck up the module cache
           const version = opts.paths[0]
 
-          // Ensure returned paths are absolute, since `getVite()` now uses `pathToFileURL()`.
+          // Return absolute paths, since `getVite()` passes them to `pathToFileURL()`.
           // Use a Windows filesystem path for the windows test case (`require.resolve` returns a path, not a URL).
           if (String(version).includes('windows')) {
             return `C:\\vite-${version}\\package.json`

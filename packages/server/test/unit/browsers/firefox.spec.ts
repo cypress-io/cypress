@@ -725,7 +725,6 @@ describe('lib/browsers/firefox', () => {
 
         const firstLaunch = firefox.open(browser as any, 'http://', options as any, automation as any)
 
-        // Handled now so the rejection isn't reported as unhandled before it is asserted below
         firstLaunch.catch(() => {})
 
         await vi.waitFor(() => expect(wdInstance.deleteSession).toHaveBeenCalledOnce())
