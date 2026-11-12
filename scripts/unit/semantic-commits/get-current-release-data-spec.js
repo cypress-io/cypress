@@ -4,6 +4,7 @@ const sinon = require('sinon')
 
 describe('semantic-commits/get-current-release-data', () => {
   let execSyncStub
+  let execFileSyncStub
   let getCurrentReleaseData
 
   const SHA_16_2_0 = 'db52e1e7720c445afdffac740185bcf2b08a9b8c'
@@ -20,20 +21,21 @@ describe('semantic-commits/get-current-release-data', () => {
       data: { buildInfo: { commitSha: 'sha-15.21.1', commitDate: 'date-15.21.1' } },
     }))
 
-    const ancestorStub = execSyncStub.withArgs(`git merge-base --is-ancestor ${SHA_16_2_0} HEAD`)
+    const ancestorStub = execFileSyncStub.withArgs('git', ['merge-base', '--is-ancestor', SHA_16_2_0, 'HEAD'])
 
     latestIsAncestor ? ancestorStub.returns('') : ancestorStub.throws(new Error('not an ancestor'))
 
-    const describeStub = execSyncStub.withArgs(sinon.match(/^git describe/))
+    const describeStub = execFileSyncStub.withArgs('git', ['describe', '--tags', '--abbrev=0', '--match', 'v[0-9]*'])
 
     tag ? describeStub.returns(`${tag}\n`) : describeStub.throws(new Error('No names found'))
   }
 
   beforeEach(() => {
     execSyncStub = sinon.stub()
+    execFileSyncStub = sinon.stub()
 
     getCurrentReleaseData = proxyquire('../../semantic-commits/get-current-release-data', {
-      child_process: { execSync: execSyncStub },
+      child_process: { execSync: execSyncStub, execFileSync: execFileSyncStub },
     }).getCurrentReleaseData
   })
 
