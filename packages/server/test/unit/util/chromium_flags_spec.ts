@@ -33,6 +33,12 @@ describe('lib/util/chromium_flags', () => {
 
       expect(disableFeatures).to.include('HttpsUpgrades')
     })
+
+    it('keeps unload events firing', () => {
+      const disableFeatures = DEFAULT_CHROME_FLAGS.find((flag) => flag.startsWith('--disable-features='))
+
+      expect(disableFeatures?.slice('--disable-features='.length).split(',')).to.include.members(['DeprecateUnload', 'DeprecateUnloadByBucket'])
+    })
   })
 
   describe('DEFAULT_ELECTRON_FLAGS', () => {
@@ -40,6 +46,12 @@ describe('lib/util/chromium_flags', () => {
       const disableFeatures = DEFAULT_ELECTRON_FLAGS.find((flag) => flag.name === '--disable-features')
 
       expect(disableFeatures?.value).to.include('HttpsUpgrades')
+    })
+
+    it('keeps unload events firing', () => {
+      const disableFeatures = DEFAULT_ELECTRON_FLAGS.find((flag) => flag.name === '--disable-features')
+
+      expect(disableFeatures?.value?.split(',')).to.include.members(['DeprecateUnload', 'DeprecateUnloadByBucket'])
     })
   })
 })

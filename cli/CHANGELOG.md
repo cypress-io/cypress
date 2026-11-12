@@ -3,6 +3,8 @@
 
 **Bugfixes:**
 
+- Fixed an issue where, in Chrome 158 and later, `cypress run` stopped with the error `* is not a valid URL` when it opened a second spec. Fixes [#35195](https://github.com/cypress-io/cypress/issues/35195).
+- Fixed an issue where, in Chrome 158 and later with [`injectDocumentDomain`](https://docs.cypress.io/app/references/configuration#e2e) enabled, navigating the application under test within [`cy.origin()`](https://on.cypress.io/origin) could fail with errors such as `Blocked a frame with origin` or `does not have permission to navigate the target frame`. Chrome 158 stopped firing `unload` events, which Cypress uses to track navigations. Fixed in [#35198](https://github.com/cypress-io/cypress/pull/35198).
 - Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
 
 **Misc:**

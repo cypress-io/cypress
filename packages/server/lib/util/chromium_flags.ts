@@ -1,6 +1,11 @@
 const disabledFeatures = [
-  // Uncomment to force the deprecation of unload events
-  // 'DeprecateUnloadByUserAndOrigin',
+  // Keep `unload` events firing (Chrome 158+ stops dispatching them). The
+  // driver listens for the AUT's `unload` to drop its listeners and record
+  // that the page went away; without it, navigations within `cy.origin()`
+  // leave that state stale when `injectDocumentDomain` is enabled.
+  // https://developer.chrome.com/docs/web-platform/deprecating-unload
+  'DeprecateUnload',
+  'DeprecateUnloadByBucket',
 
   // Hide toolbar button that opens dialog for controlling media sessions.
   'GlobalMediaControls',
