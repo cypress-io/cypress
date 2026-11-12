@@ -6,6 +6,7 @@ import { minify } from 'terser'
 import type { SnapshotScript } from './create-snapshot-script'
 import { createSnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
+import { assertLatin1, escapeNonLatin1 } from './escape-non-latin1'
 import { determineDeferred } from '../doctor/determine-deferred'
 import {
   backupName,
@@ -269,7 +270,7 @@ export class SnapshotGenerator {
         contents = this.updateSnapshotScriptContents(contents)
       }
 
-      this.snapshotScript = Buffer.from(contents)
+      this.snapshotScript = Buffer.from(escapeNonLatin1(contents))
       await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
 
       return
@@ -335,7 +336,7 @@ export class SnapshotGenerator {
       }),
     )
 
-    this.snapshotScript = result.snapshotScript
+    this.snapshotScript = Buffer.from(escapeNonLatin1(result.snapshotScript.toString()))
 
     // 3. Since we don't want the `mksnapshot` command to bomb with cryptic
     //    errors we verify that the generated script is snapshot-able.
@@ -369,7 +370,7 @@ export class SnapshotGenerator {
         throw new Error(`Failed to minify snapshot script. Writing unminified code to ${this.snapshotScriptPath}`)
       }
 
-      return fs.promises.writeFile(this.snapshotScriptPath, minified.code)
+      return fs.promises.writeFile(this.snapshotScriptPath, escapeNonLatin1(minified.code))
     }
 
     // 4. Write the snapshot script to the configured file
@@ -478,6 +479,8 @@ export class SnapshotGenerator {
       this._flags.has(Flag.MakeSnapshot),
       'Cannot makeSnapshot when MakeSnapshot flag is not set',
     )
+
+    assertLatin1(await fs.promises.readFile(this.snapshotScriptPath, 'utf8'), this.snapshotScriptPath)
 
     // 2. Run the `mksnapshot` binary providing it the path to our snapshot
     //    script
