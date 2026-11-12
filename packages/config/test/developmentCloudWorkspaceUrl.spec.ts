@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { resolveDevelopmentCloudWorkspaceNumber, resolveDevelopmentCloudWorkspaceUrl } from '../src/developmentWorkspaceUrl'
+import { resolveDevelopmentCloudWorkspaceNumber, resolveDevelopmentCloudWorkspaceUrl } from '../src/developmentCloudWorkspaceUrl'
 
 describe('resolveDevelopmentCloudWorkspaceNumber', () => {
   it.each([1, 2, 3, 4, 5])('resolves development workspace %s', (workspace) => {

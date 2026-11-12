@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveDevelopmentCloudWorkspaceNumber } from '../../lib/development-workspace'
+import { resolveDevelopmentCloudWorkspaceNumber } from '../../lib/development-cloud-workspace'
 
 describe('resolveDevelopmentCloudWorkspaceNumber', () => {
   it.each([1, 2, 3, 4, 5])('accepts workspace %s', (cloudWorkspaceNum) => {

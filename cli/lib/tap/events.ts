@@ -5,7 +5,7 @@ import util, { DEVELOPMENT_VERSION } from '../util'
 import { resolvedSessionIdentity } from '../cypress-sessions'
 import { detectAgent } from '@packages/agent-info'
 import type { ReportedInvocation } from './reported-invocation'
-import { resolveDevelopmentCloudWorkspaceNumber } from '../development-workspace'
+import { resolveDevelopmentCloudWorkspaceNumber } from '../development-cloud-workspace'
 
 const debug = Debug('cypress:cli:tap')
 

@@ -22,7 +22,7 @@ import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
 import { relativeToRepoRoot } from './relative-to-repo-root'
-import { resolveDevelopmentCloudWorkspaceNumber } from './development-workspace'
+import { resolveDevelopmentCloudWorkspaceNumber } from './development-cloud-workspace'
 
 const debug = Debug('cypress:cli')
 

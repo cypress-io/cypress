@@ -8,4 +8,4 @@ export { addProjectIdToCypressConfig, addToCypressConfig, addTestingTypeToCypres
 
 export * from './utils'
 
-export * from './developmentWorkspaceUrl'
+export * from './developmentCloudWorkspaceUrl'

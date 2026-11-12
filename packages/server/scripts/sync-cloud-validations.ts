@@ -3,7 +3,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import { resolveDevelopmentCloudWorkspaceUrl } from '../../config/src/developmentWorkspaceUrl'
+import { resolveDevelopmentCloudWorkspaceUrl } from '../../config/src/developmentCloudWorkspaceUrl'
 
 const log = (message: string) => {
   // eslint-disable-next-line no-console
