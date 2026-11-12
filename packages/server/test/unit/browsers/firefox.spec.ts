@@ -367,7 +367,6 @@ describe('lib/browsers/firefox', () => {
                 binary: '/path/to/binary',
                 args: [
                   '-new-instance',
-                  '-start-debugger-server',
                   '-no-remote',
                   ...(os.platform() !== 'linux' ? ['-foreground'] : []),
                 ],

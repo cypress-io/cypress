@@ -90,7 +90,7 @@
     "execa": "4.1.0",
     "express": "4.22.0",
     "find-process": "1.4.7",
-    "firefox-profile": "4.7.0",
+    "firefox-profile": "4.7.1",
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "9.1.0",
     "geckodriver": "6.1.0",
