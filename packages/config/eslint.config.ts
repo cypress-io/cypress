@@ -1,10 +1,11 @@
-import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...nodeConfig,
   undeclaredWorkspaceImports(['test/**'], ['@tooling/system-tests']),
+  ...vitestConfig,
   {
     languageOptions: {
       parserOptions: {
