@@ -1,4 +1,4 @@
-import { onMounted, watch } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import { telemetry } from '@packages/telemetry/browser/client'
 
@@ -7,7 +7,8 @@ let hasStarted = false
 /**
  * Times the first render of the specs list in this page load. The virtual list
  * only renders rows once it has measured its container, so the span ends with
- * the first render that shows a row, or at mount when there are no specs to show.
+ * the first render that shows a row, at mount when there are no specs to show,
+ * or at unmount if neither happened.
  */
 export function useSpecsListFirstRenderSpan ({ specCount, renderedRowCount }: { specCount: Ref<number>, renderedRowCount: Ref<number> }) {
   if (hasStarted) {
@@ -49,6 +50,14 @@ export function useSpecsListFirstRenderSpan ({ specCount, renderedRowCount }: { 
 
   onMounted(() => {
     if (specCount.value === 0) {
+      end()
+    }
+  })
+
+  // Leaving before the first row renders would otherwise drop the span, hiding the slowest loads
+  onBeforeUnmount(() => {
+    if (!ended) {
+      span.setAttribute('endedBeforeFirstRow', true)
       end()
     }
   })

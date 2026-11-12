@@ -97,10 +97,11 @@ describe('HtmlDataSource', () => {
   describe('#launchpadHtml', () => {
     let ctx: DataContext
     let readFile: jest.SpiedFunction<any>
-    let originalEnv: NodeJS.ProcessEnv
+    const envKeys = ['CYPRESS_INTERNAL_VITE_DEV', 'CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY'] as const
+    let originalEnv: Partial<Record<typeof envKeys[number], string>>
 
     beforeEach(() => {
-      originalEnv = { ...process.env }
+      originalEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]))
       delete process.env.CYPRESS_INTERNAL_VITE_DEV
       process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY = 'true'
 
@@ -110,7 +111,14 @@ describe('HtmlDataSource', () => {
 
     afterEach(() => {
       jest.restoreAllMocks()
-      process.env = originalEnv
+
+      for (const key of envKeys) {
+        if (originalEnv[key] === undefined) {
+          delete process.env[key]
+        } else {
+          process.env[key] = originalEnv[key]
+        }
+      }
     })
 
     it('bootstraps browser telemetry into the built launchpad page', async () => {
