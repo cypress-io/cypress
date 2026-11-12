@@ -52,6 +52,8 @@ export interface RemoteElementProps {
   focused: boolean
   focusable: boolean
   empty: boolean
+  // why the element isn't visible, for a failed visibility assertion's message
+  hiddenReason?: string
   // only what a retrying assertion asked for in RemoteReads
   styles?: Record<string, string>
   descendants?: Record<string, boolean>

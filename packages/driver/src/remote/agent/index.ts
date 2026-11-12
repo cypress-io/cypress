@@ -156,6 +156,8 @@ const describe = (el: HTMLElement, reads?: RemoteReads): RemoteElementProps => {
     return { node: el.nodeName, tagName: el.nodeName.toLowerCase(), id: '', classes: [], text: el.textContent ?? '', html: (el as Partial<HTMLElement>).innerHTML ?? '', value: undefined, attributes: {}, visible: true, checked: false, selected: false, disabled: false, focused: false, focusable: false, empty: !el.childNodes.length }
   }
 
+  const visible = $dom.isVisible(el)
+
   return {
     node: String($dom.stringify($el, 'short')),
     tagName: el.tagName.toLowerCase(),
@@ -165,7 +167,8 @@ const describe = (el: HTMLElement, reads?: RemoteReads): RemoteElementProps => {
     html: $el.html(),
     value: $el.val() as RemoteElementProps['value'],
     attributes: getAttributes(el),
-    visible: $dom.isVisible(el),
+    visible,
+    ...(!visible && { hiddenReason: $dom.getReasonIsHidden($el) }),
     checked: $el.is(':checked'),
     selected: $el.is(':selected'),
     disabled: $el.is(':disabled'),

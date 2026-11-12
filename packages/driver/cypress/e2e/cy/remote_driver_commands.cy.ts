@@ -256,6 +256,16 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
         throw new Error('expected the assertion to fail')
       })
     },
+    'be.visible on a hidden element says why': () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('This element `<li#two.item.two>` is not visible').and.include('Computed: `display: none`')
+      })
+
+      cy.get('#two').invoke('attr', 'style', 'display: none')
+      cy.get('#two', { timeout: 100 }).should('be.visible').then(() => {
+        throw new Error('expected the assertion to fail')
+      })
+    },
     'have.css': () => cy.get('#scroller').should('have.css', 'overflow', 'auto').and('not.have.css', 'display', 'none'),
     'have.css retries until the style changes': () => {
       cy.get('#scroller').invoke('attr', 'style', 'height: 50px; overflow: hidden')

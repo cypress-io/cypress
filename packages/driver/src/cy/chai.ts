@@ -75,10 +75,13 @@ chai.use((chai, u) => {
       switch (method) {
         case 'visible':
           if (!negated) {
-            // add reason hidden unless we expect the element to be hidden
-            const reason = $dom.getReasonIsHidden(obj)
+            // add reason hidden unless we expect the element to be hidden. A remote
+            // element's reason comes from the agent, since the element is in the AUT.
+            const reason = isRemoteElement(obj) ? obj.elements[0]?.hiddenReason : $dom.getReasonIsHidden(obj)
 
-            err.message += `\n\n${reason}`
+            if (reason) {
+              err.message += `\n\n${reason}`
+            }
           }
 
           break
