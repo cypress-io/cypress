@@ -1,14 +1,13 @@
 import FileMatch from './FileMatch.vue'
 import { ref } from 'vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { each } from 'lodash'
 
 /*----------  Selectors  ----------*/
 // Inputs
-const anyFilenameInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byFilenameInput}"]`
+const anyFilenameInputSelector = `[placeholder="Search by filename..."]`
 const filenameInputSelector = `${anyFilenameInputSelector}:first`
-const extensionInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byExtensionInput}"]`
+const extensionInputSelector = `[placeholder="Extensions to include e.g. *.tsx, *.vue"]`
 const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
 // File Match Indicator

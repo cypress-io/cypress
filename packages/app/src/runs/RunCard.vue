@@ -36,7 +36,7 @@
             :label="run.commitInfo?.branch"
             :title="run.commitInfo?.branch"
             :icon="IconTechnologyBranchH"
-            :icon-label="t('runs.card.branchName')"
+            icon-label="Branch Name:"
             class="hidden xl:inline-flex min-w-0"
             data-cy="runCard-branchName"
           />
@@ -78,7 +78,7 @@
               class="h-[16px] w-[16px] shrink-0 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
               :email="run.commitInfo?.authorEmail"
             />
-            <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>
+            <span class="sr-only">Commit Author:</span>
             <div
               class="hidden 2xl:block truncate"
               role="none"
@@ -99,7 +99,7 @@
               fill-color="gray-50"
               aria-hidden="true"
             />
-            <span class="sr-only">{{ t('runs.card.totalDuration') }}</span>
+            <span class="sr-only">Run Total Duration:</span>
             <div
               class="truncate"
               role="none"
@@ -119,20 +119,20 @@
             variant="outline-light"
             :disabled="!props.debugEnabled"
             size="24"
-            :aria-label="t(props.debugEnabled ? 'runs.card.debugDescription' : 'runs.card.noDebugAvailable', { runNumber: run.runNumber })"
+            :aria-label="props.debugEnabled ? `View debug for run ${run.runNumber}` : 'You can only debug runs for your most recent commits.'"
             @click="onDebugClick"
           >
             <IconObjectBug
               aria-hidden="true"
               class="h-[16px] w-[16px] mr-2 shrink-0"
             />
-            {{ t('runs.card.debugLabel') }}
+            Debug
           </Button>
           <template #popper>
             <div
               class="max-w-full break-words whitespace-normal"
             >
-              {{ t('runs.card.noDebugAvailable') }}
+              You can only debug runs for your most recent commits.
             </div>
           </template>
         </Tooltip>
@@ -143,7 +143,6 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql, useSubscription, useMutation } from '@urql/vue'
 import RunTag from './RunTag.vue'
@@ -158,8 +157,6 @@ import type { RunCardFragment } from '../generated/graphql'
 import { useRunDateTimeInterval } from '../debug/useRunDateTimeInterval'
 import { IconObjectBug, IconTimeClock, IconTechnologyBranchH } from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
-
-const { t } = useI18n()
 
 gql`
 fragment RunCard on CloudRun {

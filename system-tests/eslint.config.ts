@@ -1,5 +1,5 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
@@ -35,6 +35,9 @@ export default [
   // Fixture package.json files keep the layout and key order of the user
   // projects they stand in for
   ...jsonConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
+  // Fixtures are user projects with their own dependencies and Node, and
+  // n/no-extraneous-import crashes resolving their tsconfig files
+  ...nodeConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
   {
     languageOptions: {
       parserOptions: {
@@ -90,6 +93,11 @@ export default [
       // errors that system tests assert on, so their fixed waits are the
       // scenario under test
       'cypress/no-unnecessary-waiting': 'off',
+      // fixture specs exercise how the runner orders sibling hooks and how it
+      // reports a test that both returns a promise and takes `done`, so those
+      // patterns are the scenario under test
+      'mocha/no-sibling-hooks': 'off',
+      'mocha/no-return-and-callback': 'off',
       // import-x cannot parse the `.d.mts` types of @vitejs/plugin-vue
       'import-x/default': 'off',
       'import-x/namespace': 'off',
@@ -110,6 +118,17 @@ export default [
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       'no-debugger': 'off',
+    },
+  },
+  // The harness asserts with chai, and fixture projects keep specs wherever
+  // their custom spec patterns point, outside the shared test globs
+  chaiFriendlyConfig(['lib/**', ...fixtureDirs]),
+  {
+    // These configs reference `require` or `import.meta.resolve` as a bare
+    // statement, which throws unless they load in the module system under test
+    files: ['projects/config-cjs-and-esm/**/cypress.config.*'],
+    rules: {
+      'chai-friendly/no-unused-expressions': 'off',
     },
   },
   {

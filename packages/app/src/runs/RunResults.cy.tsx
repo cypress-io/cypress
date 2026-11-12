@@ -1,7 +1,5 @@
 import RunResults from './RunResults.vue'
 import { RunResultsFragmentDoc } from '../generated/graphql-test'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 
 describe('<RunResults />', () => {
@@ -12,10 +10,10 @@ describe('<RunResults />', () => {
 
     cloudRuns.forEach((cloudRun, i) => {
       cy.findByTestId(`run-result-${i}`).within(() => {
-        cy.get(`[title=${defaultMessages.runs.results.passed}]`).should('contain.text', cloudRun.totalPassed)
-        cy.get(`[title=${defaultMessages.runs.results.failed}]`).should('contain.text', cloudRun.totalFailed)
-        cy.get(`[title=${defaultMessages.runs.results.skipped}]`).should('contain.text', cloudRun.totalSkipped)
-        cy.get(`[title=${defaultMessages.runs.results.pending}]`).should('contain.text', cloudRun.totalPending)
+        cy.get('[title=passed]').should('contain.text', cloudRun.totalPassed)
+        cy.get('[title=failed]').should('contain.text', cloudRun.totalFailed)
+        cy.get('[title=skipped]').should('contain.text', cloudRun.totalSkipped)
+        cy.get('[title=pending]').should('contain.text', cloudRun.totalPending)
       })
     })
   })
@@ -46,17 +44,17 @@ describe('Flaky badge tests', () => {
 
   it('contains flaky badge', () => {
     mountingFragment(4)
-    cy.findByTestId('runResults-flakyBadge').contains(defaultMessages.specPage.flaky.badgeLabel)
+    cy.findByTestId('runResults-flakyBadge').contains('Flaky')
     cy.findByTestId('total-flaky-tests').contains(4)
   })
 
   it('responds to breakpoint with ', { viewportWidth: 1279 }, () => {
     mountingFragment(4, false)
-    cy.findByTestId('runResults-flakyBadge').contains(defaultMessages.specPage.flaky.badgeLabel).should('be.visible')
+    cy.findByTestId('runResults-flakyBadge').contains('Flaky').should('be.visible')
     cy.findByTestId('total-flaky-tests').contains(4)
 
     mountingFragment(4, true)
-    cy.findByTestId('runResults-flakyBadge').contains(defaultMessages.specPage.flaky.badgeLabel).should('not.be.visible')
+    cy.findByTestId('runResults-flakyBadge').contains('Flaky').should('not.be.visible')
     cy.findByTestId('total-flaky-tests').contains(4)
   })
 })

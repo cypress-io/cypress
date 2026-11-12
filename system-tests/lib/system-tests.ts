@@ -62,7 +62,7 @@ export type ItOptions = ExecOptions & {
   onRun?: (
     this: Mocha.Context,
     execFn: ExecFn,
-    browser: BrowserName
+    browser: BrowserName,
   ) => Promise<any> | any
   /**
    * Same as using `systemTests.it.only`.
@@ -760,16 +760,12 @@ function getBrowsers (browserPattern) {
     return DEFAULT_BROWSERS
   }
 
-  let selected = []
-
   const addBrowsers = _.clone(browserPattern)
   const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
 
-  if (removeBrowsers.length) {
-    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
-  } else {
-    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
-  }
+  const selected = removeBrowsers.length
+    ? _.without(DEFAULT_BROWSERS, ...removeBrowsers)
+    : _.intersection(DEFAULT_BROWSERS, addBrowsers)
 
   if (!selected.length) {
     throw new Error(`options.browser: "${browserPattern}" matched no browsers`)

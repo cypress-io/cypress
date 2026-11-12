@@ -681,11 +681,14 @@ describe('cy.intercept rewrites Set-Cookie headers', () => {
   })
 
   // chrome only: the CDP network path is Chromium-only, and Electron is
-  // excluded from it (isBrowserNetworkMode)
+  // excluded from it (isBrowserNetworkMode). The opt-in full-suite forceHttp1
+  // CI jobs export CYPRESS_forceHttp1=true; CLI config always beats env, so the
+  // explicit `forceHttp1: false` pins this spec to the browser network path.
   it('keeps Set-Cookie changes a cy.intercept response handler makes, including across a redirect', {
     browser: 'chrome',
     config: {
       baseUrl: `http://localhost:${httpPort}`,
+      forceHttp1: false,
     },
     spec: 'set_cookie_sync.cy.ts',
   })

@@ -37,8 +37,7 @@ export const vitestConfig: Linter.Config[] = [
       // Style: `toHaveBeenCalledOnce()` plus `toHaveBeenCalledWith()` asserts
       // the same thing
       'vitest/prefer-called-exactly-once-with': 'off',
-      // Style: the duplicates are distinct cases under copy-pasted names, and
-      // Vitest runs and reports each of them
+      // `baseConfig` already enforces this through `mocha/no-identical-title`
       'vitest/no-identical-title': 'off',
       // Without type information the rule rejects every title passed as a
       // variable, as table-driven specs do; the rest of its hits are wording

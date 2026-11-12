@@ -1,8 +1,10 @@
-import { baseConfig, jsonConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  undeclaredWorkspaceImports(['test/**'], ['@tooling/v8-snapshot']),
   ...vitestConfig,
   {
     languageOptions: {

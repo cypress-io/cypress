@@ -1087,8 +1087,8 @@ describe('lib/automation/screenshot', () => {
   let savedDetails
   let updatedDetails
   let screenshot
-  // left undefined; capture is stubbed and only forwards it
-  let automate
+  // capture is stubbed and only forwards it
+  const automate = undefined
 
   beforeEach(() => {
     details = {}

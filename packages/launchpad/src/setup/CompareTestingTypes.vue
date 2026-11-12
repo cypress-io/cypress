@@ -3,14 +3,14 @@
     <CompareTestingCard
       data-cy="end-to-end-comparison"
       class="border-r border-r-gray-100"
-      :title="t('welcomePage.compareTypes.content.e2eTitle') + ':'"
+      title="End-to-end tests:"
       :code="e2eCode"
       :list-items="e2eItems"
       code-fragment="cy.visit()"
     />
     <CompareTestingCard
       data-cy="component-comparison"
-      :title="t('welcomePage.compareTypes.content.componentTitle') + ':'"
+      title="Component tests:"
       :code="ctCode"
       :list-items="ctItems"
       code-fragment="cy.mount()"
@@ -20,9 +20,6 @@
 
 <script setup lang="ts">
 import CompareTestingCard from './CompareTestingCard.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const ctCode = `
 import BaseModal from './BaseModal'
@@ -52,14 +49,14 @@ it('only shows a modal on first visit', () => {
 `
 
 const e2eItems = [
-  t('welcomePage.compareTypes.content.e2eBullet1'),
-  t('welcomePage.compareTypes.content.e2eBullet2'),
-  t('welcomePage.compareTypes.content.e2eBullet3'),
+  'Visit URLs via',
+  'Test flows and functionality across multiple pages',
+  'Ideal for testing integrated flows in CD workflows',
 ]
 
 const ctItems = [
-  t('welcomePage.compareTypes.content.ctBullet1'),
-  t('welcomePage.compareTypes.content.ctBullet2'),
-  t('welcomePage.compareTypes.content.ctBullet3'),
+  'Import components via',
+  'Test individual components of a design system in isolation',
+  'Ideal for testing isolated flows and components in CI',
 ]
 </script>

@@ -1,5 +1,4 @@
 import type { SinonStub } from 'sinon'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 describe('Launchpad: Open Mode', () => {
@@ -24,14 +23,14 @@ describe('Launchpad: Open Mode', () => {
     it('shows Add Project when no projects have been added', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
-      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+      cy.get('h1').should('contain', 'Add project')
     })
 
     it('shows the projects page when a project is not specified', () => {
       cy.openGlobalMode()
       cy.addProject('todos')
       cy.visitLaunchpad()
-      cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+      cy.contains('Recent projects')
     })
 
     it('does not show Welcome screen on next Launchpad visit when it has already been dismissed', () => {
@@ -39,7 +38,7 @@ describe('Launchpad: Open Mode', () => {
       cy.skipWelcome()
       cy.visitLaunchpad({ showWelcome: true })
       cy.contains('button', 'Continue').should('not.exist')
-      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+      cy.get('h1').should('contain', 'Add project')
     })
   })
 
@@ -305,7 +304,7 @@ describe('Launchpad: Open Mode', () => {
       cy.visitLaunchpad()
 
       cy.contains('button', 'Docs').click()
-      cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
+      cy.contains('Getting started').should('be.visible')
     })
   })
 
@@ -378,7 +377,7 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('no-support-file')
     cy.openProject('no-support-file', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains(cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.contains('Cypress configuration error')
     cy.contains('Your project does not contain a default supportFile.')
     cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })

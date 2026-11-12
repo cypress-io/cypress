@@ -92,7 +92,7 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
 
   debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
 
-  let typeScriptPath: string | boolean | undefined | null = null
+  let typeScriptPath: string | boolean | undefined | null
 
   try {
     if (options.typescript === true) {
