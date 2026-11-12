@@ -8,17 +8,11 @@ export class ErrorActions {
    * and nulls it out
    */
   clearError (id: string) {
-    const wasLoadError = this.ctx.loadErrorId === id
-
     this.ctx.update((d) => {
       if (d.diagnostics.error?.id === id) {
         d.diagnostics.error = null
       }
     })
-
-    if (wasLoadError) {
-      this.ctx.clearLoadError()
-    }
   }
 
   /**

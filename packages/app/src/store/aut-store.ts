@@ -14,8 +14,8 @@ interface AutStoreState {
   isRunning: boolean
   scriptError: ScriptError
   /**
-   * Why the spec could not be loaded, such as a component spec its dev server failed to
-   * compile. The runner shows it as a failed test rather than over the AUT, so only
+   * Why the spec threw while it was loading, such as a component spec its dev server failed
+   * to compile. The runner shows it as a failed test rather than over the AUT, so only
    * `cypress tap` reads it.
    */
   specLoadError: string | null

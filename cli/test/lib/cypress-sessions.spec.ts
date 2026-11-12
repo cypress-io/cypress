@@ -340,6 +340,15 @@ describe('lib/cypress-sessions', () => {
       expect(selection.session.cdpBrowserWsUrl).toBe(CDP_WS_URL)
     })
 
+    it('throws PROJECT_NOT_LOADED for a session whose configuration broke after it started', async () => {
+      const port = await startFakeSession({ sessionId: SESSION_ID, respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: CDP_WS_URL, loadError: { message: 'Your configFile is invalid' } } })
+
+      mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      await expect(resolveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+    })
+
     it('throws SESSION_NOT_FOUND, naming the pid, when no record matches the filters', async () => {
       mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [111] })
@@ -573,6 +582,30 @@ describe('lib/cypress-sessions', () => {
       expect(selection.session.pid).toBe(111)
       expect(selection.reason).toBe('only')
       expect(selection.session.cdpBrowserWsUrl).toBeNull()
+    })
+
+    describe('for a session whose configuration broke after it started', () => {
+      const startBrokenSession = async () => {
+        const port = await startFakeSession({ respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: null, loadError: { message: 'Your configFile is invalid' } } })
+
+        mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+        stubKill({ alive: [111] })
+      }
+
+      it('throws PROJECT_NOT_LOADED, since whatever it runs comes from the configuration that is gone', async () => {
+        await startBrokenSession()
+
+        await expect(resolveLiveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+      })
+
+      it('resolves it with the error for a caller that reports it', async () => {
+        await startBrokenSession()
+
+        const selection = await resolveLiveSession({ cwd: PROJECT, allowLoadError: true })
+
+        expect(selection.session.pid).toBe(111)
+        expect(selection.session.loadError).toEqual({ message: 'Your configFile is invalid' })
+      })
     })
 
     it('carries the live CDP endpoint when a browser is attached', async () => {

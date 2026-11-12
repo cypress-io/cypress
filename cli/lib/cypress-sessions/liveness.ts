@@ -1,6 +1,6 @@
 import Debug from 'debug'
 
-import { sessionProbePath } from './record'
+import { isLoadError, sessionProbePath } from './record'
 import type { LiveSessionState, CypressSession } from './record'
 
 const debug = Debug('cypress:cli:cypress-sessions')
@@ -57,7 +57,9 @@ export const verifySessionRecord = async (record: CypressSession, timeoutMs: num
       return null
     }
 
-    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown, loadError?: { message?: unknown } | null }
+    // Safe because every field is read through a type check below, so a response of another
+    // shape, such as one from an older session, only drops the fields it lacks
+    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown, loadError?: unknown }
 
     if (live.sessionId !== record.sessionId) {
       return null
@@ -76,7 +78,7 @@ export const verifySessionRecord = async (record: CypressSession, timeoutMs: num
       machineId: typeof live.machineId === 'string' ? live.machineId : null,
       userId: typeof live.userId === 'string' ? live.userId : null,
       // A running session's record never carries one, so the probe is the only place it shows up
-      ...(typeof live.loadError?.message === 'string' ? { loadError: { message: live.loadError.message } } : {}),
+      ...(isLoadError(live.loadError) ? { loadError: { message: live.loadError.message } } : {}),
     }
   } catch (err) {
     debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)

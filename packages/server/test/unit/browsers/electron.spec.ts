@@ -1257,6 +1257,7 @@ describe('lib/browsers/electron', () => {
   describe('._launchChild window visibility', () => {
     const childShow = async (isTextTerminal: boolean, isHeadless: boolean) => {
       const parent = { getPosition: () => [4, 2] }
+      // Safe because only the options `create` was called with are read, never the window it returns
       const create = vi.spyOn(Windows, 'create').mockReturnValue({} as any)
 
       vi.spyOn(electron, '_launch').mockResolvedValue({} as any)

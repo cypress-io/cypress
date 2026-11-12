@@ -582,6 +582,33 @@ describe('ProjectLifecycleManager', () => {
           expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
         })
 
+        it('launches nothing, and reports why, for a browser cypress tap cannot drive', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true, headless: true })
+
+          jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser?.family).not.toBe('firefox')
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('`cypress tap` can only drive Chromium-based browsers'),
+          }))
+        })
+
+        it('launches a browser cypress tap cannot drive when not --headless', async () => {
+          process.env.CLAUDECODE = '1'
+
+          const agent = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true })
+
+          jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+
+          await agent.lifecycleManager.setInitialActiveBrowser()
+
+          expect(agent.coreData.activeBrowser).toEqual(browsers[3])
+        })
+
         it('does not report a missing browser for cypress tap status without --headless', async () => {
           process.env.CLAUDECODE = '1'
 
@@ -781,6 +808,7 @@ describe('ProjectLifecycleManager', () => {
     it('withdraws a load error for cypress tap status once the configuration loads again', async () => {
       // @ts-expect-error - private method
       const configManager = ctx.lifecycleManager.createConfigManager()
+      // Safe because the config manager keeps the options it was created with, private, as `options`
       const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
 
       jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)

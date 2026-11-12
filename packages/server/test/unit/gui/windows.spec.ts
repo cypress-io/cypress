@@ -187,6 +187,13 @@ describe('lib/gui/windows', () => {
       expect(win.focusOnWebView).not.toHaveBeenCalled()
     })
 
+    it('keeps dev tools closed for a hidden window, even when saved state has them open', () => {
+      Windows.create('/foo/', { devTools: true, show: false }, () => win)
+      Windows.create('/foo/', { devTools: true, show: false, keepHidden: true }, () => win)
+
+      expect(win.webContents.openDevTools).not.toHaveBeenCalled()
+    })
+
     it('opens dev tools if saved state is open', () => {
       Windows.create('/foo/', { devTools: true }, () => win)
       expect(win.webContents.openDevTools).toHaveBeenCalled()

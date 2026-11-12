@@ -693,6 +693,8 @@ describe('lib/exec/tap', () => {
         })
 
         expect(withTapConnection).not.toHaveBeenCalled()
+        // Every other command is refused such a session, so status has to ask for it
+        expect(resolveLiveSession).toHaveBeenCalledWith(expect.objectContaining({ allowLoadError: true }))
       })
 
       it('shows the error to a person reading the output', async () => {
@@ -840,7 +842,7 @@ describe('lib/exec/tap', () => {
 
       await tap.start(['status'], { session: 1234 })
 
-      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
+      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd(), allowLoadError: true })
     })
 
     it('exits 1 and renders the failure when the session is unreachable despite a browser', async () => {

@@ -55,7 +55,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   let selection
 
   try {
-    selection = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
+    selection = await resolveLiveSession({ session: options.session, cwd: process.cwd(), allowLoadError: true })
   } catch (err) {
     // No live session is a status a poller waits on, not a failure.
     if (isTapError(err) && NOT_CONNECTED_CODES.has(err.code)) {

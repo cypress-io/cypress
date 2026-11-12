@@ -774,6 +774,8 @@ describe('lib/browsers/chrome', () => {
       const create = vi.spyOn(CdpAutomation, 'create').mockResolvedValue({} as CdpAutomation)
       const client = { send: vi.fn(), on: vi.fn(), off: vi.fn() }
 
+      // Safe because `_setAutomation` only passes these through to the stubbed `create`, and reads
+      // `isTextTerminal` and `isHeadless`, the one field each of the last two provides
       await chrome._setAutomation(client as any, { use: vi.fn() } as any, vi.fn(), { isTextTerminal } as any, { isHeadless } as any)
 
       return create.mock.lastCall?.[7]

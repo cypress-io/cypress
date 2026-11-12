@@ -407,7 +407,9 @@ exports[`cli > unknown option > shows help 1`] = `
     --headless                       starts a session for cypress tap to drive,
                                      with the browser headless and the Cypress
                                      window hidden so neither takes focus.
-                                     requires --e2e or --component, and --browser
+                                     requires --e2e or --component, and
+                                     --browser. the session runs until its
+                                     process is stopped
     -p, --port <port>                runs Cypress on a specific port. overrides
                                      any value in cypress.config.{js,ts,mjs,cjs}.
     -P, --project <project-path>     path to the project

@@ -225,10 +225,6 @@ export class ProjectLifecycleManager {
           return
         }
 
-        // The configuration loaded, so an error that kept it from loading no longer applies.
-        // One found later in this pass, such as a dev server that cannot start, is recorded again.
-        this.ctx.clearLoadError()
-
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             projectRoot: this.projectRoot,
@@ -306,6 +302,12 @@ export class ProjectLifecycleManager {
             this.ctx.actions.project.pingBaseUrl().catch((err) => this.onLoadError(err, { stopsProject: false }))
           }
         }
+
+        // The project loaded again, so an error that kept it from loading no longer applies.
+        // Cleared only once the session has started, so a project that failed to start keeps
+        // its error until the session replaces it, instead of `cypress tap status` reporting
+        // nothing in between. A browser that cannot be found is recorded again just below.
+        this.ctx.clearLoadError()
 
         await this.setInitialActiveBrowser()
 
@@ -424,6 +426,17 @@ export class ProjectLifecycleManager {
       const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(nameOrPath)
 
       this.ctx.debug('browser found to set', browser.name)
+
+      // A hidden session only `cypress tap` can see, in a browser it cannot drive, is of no use
+      // to anyone, so nothing launches
+      if (this.ctx.isHeadless && browser.family !== 'chromium') {
+        const message = `Cypress could not start this \`--headless\` session in ${browser.displayName}, because \`cypress tap\` can only drive Chromium-based browsers, such as Chrome, Edge and Electron. Pass one of them with \`--browser\`, then start Cypress again.`
+
+        logError(message)
+        this.ctx.reportLoadError(message)
+
+        return
+      }
 
       this.ctx.actions.browser.setActiveBrowser(browser)
     } catch (e) {

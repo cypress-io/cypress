@@ -2236,6 +2236,18 @@ describe('tap CLI against a session whose configuration breaks', function () {
     expect(result.stdout).to.include('error')
     expect(result.stdout).to.include('this-configuration-is-broken')
   })
+
+  it('refuses the commands that drive the session, pointing them at status', async () => {
+    await session.waitForStatus((status) => status.status === 'error', 'the broken configuration reported')
+
+    const read = await session.tap(['dom'])
+    const run = await session.tap(['run', SPEC])
+
+    expect(read.exitCode).to.eq(1)
+    expect(failureOutput(read)).to.include(copyFor('PROJECT_NOT_LOADED'))
+    expect(run.exitCode).to.eq(1)
+    expect(failureOutput(run)).to.include(copyFor('PROJECT_NOT_LOADED'))
+  })
 })
 
 describe('tap CLI against a suite a hook took down', function () {

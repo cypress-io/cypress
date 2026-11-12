@@ -199,22 +199,15 @@ describe('DataContext open mode error output', () => {
     describe('withdrawing the record', () => {
       const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as jest.Mock
 
-      it('happens when the load error on display is dismissed', () => {
+      // Try again clears the error on display, then loads the configuration again: one that
+      // still fails reports the error again, and one that loads withdraws it once the project starts
+      it('does not happen when the load error on display is cleared to try loading again', () => {
         const projectCtx = openProject('/projects/foo')
 
         projectCtx.lifecycleManager.onLoadError(requireError('boom'))
         projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
 
-        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
-      })
-
-      it('does not happen when a different error is dismissed', () => {
-        const projectCtx = openProject('/projects/foo')
-
-        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
-        projectCtx.onError(requireError('something else'))
-        projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
-
+        expect(projectCtx.coreData.diagnostics.error).toBeNull()
         expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
@@ -227,26 +220,6 @@ describe('DataContext open mode error output', () => {
         await projectCtx.actions.project.clearCurrentProject()
 
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
-      })
-
-      it('does not happen when an error on display is dismissed that is not the one recorded', () => {
-        const projectCtx = openProject('/projects/foo')
-
-        projectCtx.onError(requireError('git information unavailable'))
-
-        // Shown as a warning, such as a browser that cannot be found, so it is not the error on display
-        projectCtx.reportLoadError(requireError('browser not found'))
-        projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
-
-        expect(cleared(projectCtx)).not.toHaveBeenCalled()
-      })
-
-      it('does not happen for an error that is not on display', () => {
-        const projectCtx = openProject('/projects/foo')
-
-        projectCtx.actions.error.clearError('Error-not-shown')
-
-        expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
       it('happens when a testing type is chosen and the diagnostics start over', () => {

@@ -86,6 +86,11 @@ export interface ResolveSessionOptions {
   session?: number
   cwd: string
   probeTimeoutMs?: number
+  /**
+   * Returns a session whose project stopped loading after it started, for `status` to report,
+   * instead of raising PROJECT_NOT_LOADED as every command that drives the session needs.
+   */
+  allowLoadError?: boolean
 }
 
 export interface ResolvedSessionIdentity {
@@ -171,12 +176,22 @@ const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionS
   return supported
 }
 
+// A session whose configuration broke after it started still answers, but whatever it runs
+// or shows comes from the configuration that is gone, the same as a project that never loaded
+const ensureProjectLoaded = (session: LiveSessionState, options: ResolveSessionOptions): void => {
+  if (session.loadError && !options.allowLoadError) {
+    throw new TapError('PROJECT_NOT_LOADED')
+  }
+}
+
 // Resolves a live session without requiring a browser; `status` reports
 // sessions that have no browser attached yet.
 export const resolveLiveSession = async (options: ResolveSessionOptions): Promise<LiveSessionSelection> => {
   const live = await liveMatches(options)
 
   const { session, reason } = selectSession(live, options)
+
+  ensureProjectLoaded(session, options)
 
   lastResolvedIdentity = { sessionId: session.sessionId, machineId: session.machineId, userId: session.userId }
 
@@ -197,6 +212,8 @@ export const resolveSession = async (options: ResolveSessionOptions): Promise<Se
   }
 
   const { session: selected, reason } = selectSession(ready, options)
+
+  ensureProjectLoaded(selected, options)
 
   lastResolvedIdentity = { sessionId: selected.sessionId, machineId: selected.machineId, userId: selected.userId }
 

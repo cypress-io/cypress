@@ -310,8 +310,10 @@ Stages:
 Statuses other than passed and failed are intermediate states, indicating that
 Cypress requires additional instruction or is still processing. Loading stays
 loading for as long as the spec takes to build, so a poller needs its own
-timeout; a spec that fails to build or load reports failed and carries the
-reason as error — it ran no tests, so it reports no counts either.
+timeout; a spec whose build fails reports failed and carries the reason as
+error — it ran no tests, so it reports no counts either. A spec that throws
+while loading, such as a component spec that fails to compile, also carries
+error, beside the counts of its run.
 
 From loading onwards the output carries \`startedAt\`, the spec every other field
 describes (null while loading). In the event of a rerun the previous spec's

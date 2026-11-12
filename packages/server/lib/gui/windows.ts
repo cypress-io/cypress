@@ -222,8 +222,9 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
     trackState(projectRoot, options.isTextTerminal, win, options.trackState)
   }
 
-  // open dev tools if they're true
-  if (options.devTools) {
+  // open dev tools if they're true. A hidden window keeps them closed: undocked, they
+  // would open a window of their own in front of whatever the person is doing.
+  if (options.devTools && options.show !== false) {
     // and possibly detach dev tools if true
     win.webContents.openDevTools()
   }

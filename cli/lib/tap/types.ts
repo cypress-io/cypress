@@ -77,7 +77,7 @@ export interface TapStatus {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
-  /** Why the spec could not run, when it failed to build, or why the project could not load, when the status is `error`. */
+  /** Why the spec could not run, when it failed to build or threw while loading, or why the project could not load, when the status is `error`. */
   error?: string
   /** The currently pinned command, if any. */
   pinned?: PinnedView

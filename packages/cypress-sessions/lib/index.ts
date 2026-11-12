@@ -111,6 +111,11 @@ const isValidTestingType = (value: any): value is SessionTestingType => {
   return value === 'e2e' || value === 'component' || value === null
 }
 
+/** Whether a value is a `loadError`, as a record or a live session's probe response carries it */
+export const isLoadError = (value: unknown): value is { message: string } => {
+  return typeof value === 'object' && value !== null && 'message' in value && typeof value.message === 'string'
+}
+
 export const isCompatibleRecord = (record: any): record is CypressSession => {
   return Boolean(record)
     && typeof record.schemaVersion === 'number'
@@ -123,6 +128,6 @@ export const isCompatibleRecord = (record: any): record is CypressSession => {
     && isValidTestingType(record.testingType)
     && (record.status === undefined || record.status === 'starting')
     && (record.serverPort !== 0 || record.status === 'starting')
-    && (record.loadError === undefined || typeof record.loadError?.message === 'string')
+    && (record.loadError === undefined || isLoadError(record.loadError))
     && (record.status !== 'starting' || record.loadError !== undefined)
 }
