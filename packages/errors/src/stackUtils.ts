@@ -31,8 +31,8 @@ export const getStackLines = (stack: string) => {
   return stackLines
 }
 
-// Anchored on the trailing location so matching stays linear; a pattern that
-// also matched the path and the frame prefix backtracks polynomially on long lines
+// Keep the path out of the regex: matching it alongside the frame prefix
+// backtracks catastrophically on long lines
 const stackLineLocationRegex = /:(\d+):(\d+)\)?$/
 const lineTerminatorRegex = /[\n\r\u2028\u2029]/
 

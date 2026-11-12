@@ -51,7 +51,7 @@ describe('src/stackUtils', () => {
       ['leading zeros', '(a:01:002)', { absolute: 'a', line: 1, column: 2 }],
       ['leading newline', '\n  at fn (/a.js:1:2)', { absolute: '/a.js', line: 1, column: 2 }],
       ['leading non-breaking space and BOM', '\u00a0\ufeffat fn (/a.js:1:2)', { absolute: '/a.js', line: 1, column: 2 }],
-      // The path starts after the last `(`, so nested or parenthesized segments end up in it or truncate it
+      // The path starts after the last `(`, so nested frames or parenthesized directories distort it
       ['eval frame', 'at eval (eval at <anonymous> (/a.js:1:2), <anonymous>:3:4)', { absolute: '/a.js:1:2), <anonymous>', line: 3, column: 4 }],
       ['parentheses in the path', '    at fn (C:\\Program Files (x86)\\proj\\a.js:1:2)', { absolute: 'x86)\\proj\\a.js', line: 1, column: 2 }],
     ])('parses %s', (_name, input, expected) => {
