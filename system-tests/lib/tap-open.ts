@@ -142,7 +142,7 @@ const runTap = (args: string[], cwd: string, cacheFolder = CACHE_FOLDER): Promis
           try {
             return JSON.parse(stdout) as T
           } catch (err) {
-            throw new Error(`tap ${args.join(' ')} did not print JSON.\nstdout: ${stdout}\nstderr: ${stderr}`)
+            throw new Error(`tap ${args.join(' ')} did not print JSON.\nstdout: ${stdout}\nstderr: ${stderr}`, { cause: err })
           }
         },
       })

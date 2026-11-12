@@ -1,6 +1,5 @@
 import SidebarNavigation from './SidebarNavigation.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import type { CloudRunStatus, SidebarNavigationFragment } from '../generated/graphql-test'
 import { SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
 import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
@@ -82,11 +81,11 @@ describe('SidebarNavigation', () => {
     mountComponent()
 
     cy.findByText('test-project').should('not.be.visible')
-    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
+    cy.findByLabelText('Expand sidebar', {
       selector: 'button',
     }).click()
 
-    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.expanded, {
+    cy.findByLabelText('Collapse sidebar', {
       selector: 'button',
     })
 
@@ -105,7 +104,7 @@ describe('SidebarNavigation', () => {
     cy.findByText('test-project').should('not.be.visible')
 
     // Expand
-    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
+    cy.findByLabelText('Expand sidebar', {
       selector: 'button',
     }).click()
 
@@ -118,7 +117,7 @@ describe('SidebarNavigation', () => {
     // Project title should not be visible anymore
     cy.findByText('test-project').should('not.be.visible')
     // Expand control should not be available
-    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
+    cy.findByLabelText('Expand sidebar', {
       selector: 'button',
     }).should('not.exist')
   })

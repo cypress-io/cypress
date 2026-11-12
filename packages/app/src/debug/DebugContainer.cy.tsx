@@ -1,8 +1,6 @@
 import type { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment } from '../generated/graphql-test'
 import { DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs, createCloudRun } from '@packages/data-context/test/graphql/stubCloudTypes'
@@ -54,7 +52,7 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setHasInitiallyLoaded()
       userProjectStatusStore.setProjectFlag('isUsingGit', true)
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
+      validateEmptyState(['Connect to Cypress Cloud', 'Connect to debug your tests', 'Cypress Cloud is built for teams who need to do testing at scale.'])
       cy.getByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
@@ -66,7 +64,7 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setProjectFlag('isUsingGit', true)
       userProjectStatusStore.setHasInitiallyLoaded()
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
+      validateEmptyState(['Connect to debug your tests', 'Cypress Cloud is built for teams who need to do testing at scale.'])
       cy.getByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
@@ -83,7 +81,7 @@ describe('<DebugContainer />', () => {
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.noRuns.title])
+      validateEmptyState(['Copy the command below to record your first run'])
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
@@ -359,6 +357,7 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-header').should('be.visible')
       cy.findByTestId('debug-testing-progress').should('be.visible')
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.get<DebugSpecsFragment>('@gql').then((gql) => {
         const run = getRun(gql)
@@ -374,6 +373,7 @@ describe('<DebugContainer />', () => {
         run.testsForReview.push(newTest)
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.findAllByTestId('debug-spec-item').should('have.length', 1)
       cy.get<CloudRun>('@run').then((run) => {
@@ -393,6 +393,7 @@ describe('<DebugContainer />', () => {
         cy.wrap(newSpecTest).as('newSpecTest')
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.findAllByTestId('debug-spec-item').should('have.length', 2)
       cy.get<CloudRun>('@run').then((run) => {
@@ -425,6 +426,7 @@ describe('<DebugContainer />', () => {
         cy.findAllByTestId('grouped-row').should('have.length', 2)
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- 0 unless raised to watch the transitions, see above
       cy.wait(waitTimeBetweenSimulatedEvents)
       cy.get<CloudRun>('@run').then((run) => {
         run.status = 'FAILED'

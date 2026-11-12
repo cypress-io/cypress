@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import type { AutSnapshot } from './iframe-model'
 import type { AutIframe } from './aut-iframe'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 interface SnapshotStoreState {
   messageTitle?: string
@@ -30,7 +29,7 @@ export const useSnapshotStore = defineStore({
     },
 
     pinSnapshot (snapshotProps: AutSnapshot) {
-      this.messageTitle = defaultMessages.runner.snapshot.pinnedTitle
+      this.messageTitle = 'Pinned'
       this.isSnapshotPinned = true
       this.snapshotProps = snapshotProps
       this.snapshot = {
@@ -47,7 +46,7 @@ export const useSnapshotStore = defineStore({
       this.$reset()
     },
 
-    showSnapshot (messageDescription: string = defaultMessages.runner.snapshot.defaultTitle) {
+    showSnapshot (messageDescription: string = 'DOM snapshot') {
       this.messageTitle = messageDescription
     },
 
@@ -93,7 +92,7 @@ export const useSnapshotStore = defineStore({
     },
 
     setTestsRunningError () {
-      this.messageTitle = defaultMessages.runner.snapshot.testsRunningError
+      this.messageTitle = 'Cannot show snapshot while tests are running'
     },
 
     setMessage (messageTitle: string) {
@@ -101,7 +100,7 @@ export const useSnapshotStore = defineStore({
     },
 
     setMissingSnapshotMessage () {
-      this.messageTitle = defaultMessages.runner.snapshot.snapshotMissingError
+      this.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
     },
   },
 })

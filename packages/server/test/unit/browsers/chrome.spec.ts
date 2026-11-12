@@ -1028,7 +1028,7 @@ describe('lib/browsers/chrome', () => {
     const registration = (registrationId: string, scopeURL: string, isDeleted = false) => ({ registrationId, scopeURL, isDeleted })
 
     function setup (options: object, url = 'https://example.com/__/#/specs/runner', snapshot: ReturnType<typeof registration>[] | null = []) {
-      const registrationListeners: Function[] = []
+      const registrationListeners: ((...args: any[]) => void)[] = []
 
       const pageCriClient = {
         send: vi.fn(async (command: string, _params?: unknown) => {
@@ -1038,10 +1038,10 @@ describe('lib/browsers/chrome', () => {
             registrationListeners.slice().forEach((listener) => listener({ registrations: snapshot }))
           }
         }),
-        on: vi.fn((eventName: string, listener: Function) => {
+        on: vi.fn((eventName: string, listener: (...args: any[]) => void) => {
           if (eventName === 'ServiceWorker.workerRegistrationUpdated') registrationListeners.push(listener)
         }),
-        off: vi.fn((eventName: string, listener: Function) => {
+        off: vi.fn((eventName: string, listener: (...args: any[]) => void) => {
           const index = registrationListeners.indexOf(listener)
 
           if (eventName === 'ServiceWorker.workerRegistrationUpdated' && index > -1) registrationListeners.splice(index, 1)

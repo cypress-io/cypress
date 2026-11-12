@@ -1,6 +1,4 @@
 import WizardLayout from './WizardLayout.vue'
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 
 describe('<WizardLayout />', () => {
   it('playground', { viewportWidth: 800, viewportHeight: 600 }, () => {
@@ -26,9 +24,9 @@ describe('<WizardLayout />', () => {
       </WizardLayout>
     ))
 
-    cy.contains('button', defaultMessages.setupPage.step.next).should('be.visible')
-    cy.contains('button', defaultMessages.setupPage.step.back).should('be.visible')
-    cy.contains('button', defaultMessages.setupPage.step.skip).should('be.visible')
+    cy.contains('button', 'Next step').should('be.visible')
+    cy.contains('button', 'Back').should('be.visible')
+    cy.contains('button', 'Skip').should('be.visible')
   })
 
   it('renders buttons with custom text', () => {

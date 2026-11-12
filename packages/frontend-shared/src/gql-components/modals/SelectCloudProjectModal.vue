@@ -2,8 +2,8 @@
   <StandardModal
     model-value
     :title="newProject
-      ? t('runs.connect.modal.selectProject.createProject')
-      : t('runs.connect.modal.title')"
+      ? 'Create project'
+      : 'Connect project'"
     help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
@@ -11,7 +11,7 @@
       v-if="!isOnline"
       class="mt-[24px]"
     >
-      {{ t('launchpadErrors.noInternet.message') }}
+      Check your internet connection to pull the latest data from Cypress Cloud.
     </NoInternetConnection>
     <div
       v-else
@@ -21,7 +21,7 @@
         v-if="graphqlError"
         :v-model="Boolean(graphqlError)"
         status="error"
-        :title="isInternalServerError ? t('runs.connect.errors.internalServerError.title') : t('runs.connect.errors.baseError.title')"
+        :title="isInternalServerError ? 'Cannot connect to Cypress Cloud' : 'Cypress Cloud error'"
         class="mb-[16px]"
         :icon="WarningIcon"
         :dismissible="isInternalServerError"
@@ -29,15 +29,10 @@
         <p v-if="!isInternalServerError">
           {{ graphqlError.message }}
         </p>
-        <i18n-t
-          v-else
-          scope="global"
-          keypath="runs.connect.errors.internalServerError.description"
-        >
-          <ExternalLink href="https://www.cypressstatus.com/">
-            {{ t('runs.connect.errors.internalServerError.link') }}
-          </ExternalLink>
-        </i18n-t>
+        <template v-else>
+          <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+          The request times out when trying to retrieve the info from Cypress Cloud. Please refresh the page to try again and visit our <ExternalLink href="https://www.cypressstatus.com/">Support Page</ExternalLink> if this behavior continues.
+        </template>
       </Alert>
       <Select
         v-model="pickedOrganization"
@@ -54,14 +49,14 @@
               id="organization-label"
               class=""
             >
-              {{ t('runs.connect.modal.selectProject.organization') }}
+              Organization
             </span>
             <ExternalLink
               v-if="organizationUrl"
               class="cursor-pointer text-right text-indigo-500 hover:underline"
               :href="organizationUrl"
             >
-              {{ t('runs.connect.modal.selectProject.manageOrgs') }}
+              Manage organizations
             </ExternalLink>
           </span>
         </template>
@@ -91,14 +86,14 @@
               id="project-label"
               class="text-gray-800"
             >
-              {{ t('runs.connect.modal.selectProject.project') }}
+              Project
               <span class="text-red-500">*</span>
             </p>
             <a
               class="cursor-pointer my-[8px] text-right text-indigo-500 hover:underline"
               @click="newProject = true"
             >
-              {{ t('runs.connect.modal.selectProject.createNewProject') }}
+              Create new
             </a>
           </div>
         </template>
@@ -117,20 +112,16 @@
             class="grow"
             for="projectName"
           >
-            <span class="text-gray-800">
-              {{ t('runs.connect.modal.selectProject.projectName') }}
-            </span>
+            <span class="text-gray-800">Project name</span>
             <span class="ml-[4px] text-red-500">*</span>
-            <span class="ml-[8px] text-gray-500">
-              {{ t('runs.connect.modal.selectProject.projectNameDisclaimer') }}
-            </span>
+            <span class="ml-[8px] text-gray-500">(You can change this later)</span>
           </label>
           <a
             v-if="projectOptions.length > 0"
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
-            {{ t('runs.connect.modal.selectProject.chooseExistingProject') }}
+            Choose an existing project
           </a>
         </div>
         <Input
@@ -144,16 +135,16 @@
         <Radio
           v-model:value="projectAccess"
           name="projectAccess"
-          :label="t('runs.connect.modal.selectProject.newProjectAccess')"
+          label="Project access"
           :options="[
             {
-              label: t('runs.connect.modal.selectProject.privateLabel'),
-              description: t('runs.connect.modal.selectProject.privateDescription'),
+              label: 'Private',
+              description: 'Only invited users can view recorded test results.',
               value: 'private',
             },
             {
-              label: t('runs.connect.modal.selectProject.publicLabel'),
-              description: t('runs.connect.modal.selectProject.publicDescription'),
+              label: 'Public',
+              description: 'Anyone can view recorded test results.',
               value: 'public',
             },
           ]"
@@ -174,15 +165,15 @@
           @click="createOrConnectProject"
         >
           {{ newProject
-            ? t('runs.connect.modal.selectProject.createProject')
-            : t('runs.connect.modal.selectProject.connectProject') }}
+            ? 'Create project'
+            : 'Connect project' }}
         </Button>
         <Button
           variant="outline"
           size="lg"
           @click="emit('cancel')"
         >
-          {{ t('runs.connect.modal.cancel') }}
+          Cancel
         </Button>
       </div>
     </template>
@@ -206,14 +197,12 @@ import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import { isEqual, sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 
-const { t } = useI18n()
 const online = useOnline()
 
 gql`
@@ -362,11 +351,11 @@ watch(projectOptions, (newVal, oldVal) => {
   immediate: true,
 })
 
-const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
+const orgPlaceholder = 'Pick an organization'
 const projectPlaceholder = computed(() => {
   return pickedOrganization.value
-    ? t('runs.connect.modal.selectProject.placeholderProjects')
-    : t('runs.connect.modal.selectProject.placeholderProjectsPending')
+    ? 'Pick a project'
+    : 'Pick an organization first'
 })
 
 const organizationUrl = computed(() => props.gql.cloudViewer?.cloudOrganizationsUrl)

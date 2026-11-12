@@ -676,7 +676,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
             try {
               expect(stripped).toEqual(libCode)
             } catch (err) {
-              throw new Error(`code from '${lib}' was different`)
+              throw new Error(`code from '${lib}' was different`, { cause: err })
             }
           })
         })

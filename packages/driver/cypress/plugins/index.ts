@@ -4,7 +4,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import Promise from 'bluebird'
 import wp from '@cypress/webpack-preprocessor'
-import Jimp from 'jimp'
+import { Jimp } from 'jimp'
 
 // required rather than imported: @packages/runner's check-ts is tslint only, so importing
 // its webpack config would make this package's tsc run the only gate on that file and on

@@ -6,7 +6,6 @@ const { expect } = require('chai')
 const uploadUtils = require('../../binary/util/upload')
 const s3helpers = require('../../binary/s3-api').s3helpers
 
-/* eslint-env mocha */
 /* global sinon */
 describe('move-binaries', () => {
   const moveBinaries = require('../../binary/move-binaries')

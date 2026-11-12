@@ -25,4 +25,4 @@ expect((new SampleClass()).prop).to.equal('prop')
   const value = await asyncFn()
 
   expect(value).to.equal('value')
-})
+})()

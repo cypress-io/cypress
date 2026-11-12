@@ -658,7 +658,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     } catch (err) {
       debugVerbose('failed to get aut frame:', err.stack)
 
-      throw new Error('Could not find AUT frame')
+      throw new Error('Could not find AUT frame', { cause: err })
     }
   }
 
@@ -802,7 +802,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         try {
           screenshot = await this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         } catch (err) {
-          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
+          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`, { cause: err })
         }
 
         return `data:image/png;base64,${screenshot.data}`

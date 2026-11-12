@@ -39,7 +39,7 @@ const AttemptHeader = ({ index, state }: { index: number, state: TestState }) =>
 
 interface AttemptProps {
   model: AttemptModel
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView }) => {
@@ -89,7 +89,7 @@ Attempt.displayName = 'Attempt'
 interface AttemptsProps {
   test: TestModel
   isSingleStudioTest?: boolean
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const Attempts: React.FC<AttemptsProps> = observer(({ test, isSingleStudioTest, scrollIntoView }: AttemptsProps) => {

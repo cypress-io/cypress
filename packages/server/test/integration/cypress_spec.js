@@ -1375,7 +1375,7 @@ describe('lib/cypress', () => {
         },
       }
 
-      return Promise.all([
+      await Promise.all([
         // make sure we have no user object
         user.set({}),
 
@@ -1385,6 +1385,13 @@ describe('lib/cypress', () => {
           this.projectId = 'abc123'
         }),
       ])
+
+      browsers.open.restore()
+
+      const ee = mockEE()
+
+      sinon.stub(launch, 'launch').returns(ee)
+      sinon.stub(Windows, 'create').returns(ee)
     })
 
     afterEach(() => {
@@ -1566,15 +1573,6 @@ describe('lib/cypress', () => {
 
         return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1')
       })
-    })
-
-    beforeEach(() => {
-      browsers.open.restore()
-
-      const ee = mockEE()
-
-      sinon.stub(launch, 'launch').returns(ee)
-      sinon.stub(Windows, 'create').returns(ee)
     })
 
     it('does not truncate a really long Cypress Cloud url', function () {

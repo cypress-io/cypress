@@ -826,28 +826,31 @@ export class Log {
   }
 
   wrapConsoleProps () {
-    const _this = this
+    // the wrapper passes its own `this` on to the original consoleProps, so it
+    // reads this log through these arrows
+    const get = (attr: string) => this.get(attr)
+    const getError = (err) => this.getError(err)
 
     const { consoleProps } = this.attributes
 
     this.attributes.consoleProps = function (...invokedArgs) {
       const consoleObj: Record<string, any> = {
-        name: _this.get('name'),
-        type: _this.get('event') ? 'event' : 'command',
+        name: get('name'),
+        type: get('event') ? 'event' : 'command',
       }
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
 
       // and finally add error if one exists
-      if (_this.get('error')) {
+      if (get('error')) {
         _.defaults(consoleObj, {
-          error: _this.getError(_this.get('error')),
+          error: getError(get('error')),
         })
       }
 
       // add note if no snapshot exists on command instruments
-      if ((_this.get('instrument') === 'command') && _this.get('snapshot') && !_this.get('snapshots')) {
+      if ((get('instrument') === 'command') && get('snapshot') && !get('snapshots')) {
         consoleObj.snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
       } else {
         delete consoleObj.snapshot

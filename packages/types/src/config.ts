@@ -1,4 +1,4 @@
-/// <reference path="../../../cli/types/cypress.d.ts" />
+/// <reference types="cypress" />
 
 import type { TestingType } from '.'
 

@@ -9,7 +9,6 @@ describe('csp-headers', () => {
     })
 
     cy.visit(route)
-    .wait(1000)
 
     // Next verify that inline scripts are allowed, because if they aren't, the CSP header is not getting stripped
     const inlineId = `__${Math.random()}`

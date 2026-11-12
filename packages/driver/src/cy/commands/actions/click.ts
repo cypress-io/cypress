@@ -46,7 +46,7 @@ type MouseActionOptions = {
   y: number
   userOptions: Record<string, any>
   onReady: (fromElViewport: ElViewportPosition, forceEl: ForceEl) => any
-  onTable: Function
+  onTable: (domEvents: any) => Record<number, () => unknown>
   defaultOptions?: Record<string, any>
 }
 

@@ -1,4 +1,5 @@
-export {} // make typescript see this as a module
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
+export {}
 
 // The scripts below are stringified and run inside the service worker, so `self` is typed
 // as its global scope. The webworker lib conflicts with the dom lib program-wide, so the

@@ -336,7 +336,7 @@ const warnByPath = (errPath, options: any = {}) => {
 }
 
 export class InternalCypressError extends Error {
-  onFail?: Function
+  onFail?: (err: Error) => void
   isRecovered?: boolean
 
   constructor (message) {
@@ -356,7 +356,7 @@ export class CypressError extends Error {
   triggerAction?: 'loginModal' | 'projectConnectModal' | null
   retry?: boolean
   userInvocationStack?: any
-  onFail?: Function
+  onFail?: (err: Error) => void
   isRecovered?: boolean
 
   constructor (message) {

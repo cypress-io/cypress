@@ -3809,7 +3809,7 @@ describe('Routes', () => {
             'Content-Encoding': 'gzip',
           })
 
-          return this.r({
+          this.r({
             url: 'http://www.google.com/app.js',
             gzip: true,
           })
@@ -4335,7 +4335,7 @@ describe('Routes', () => {
         // due to the reduced keep alive timeout
         this.timeout(1500)
 
-        return dns.lookup('localhost', { all: true }, (err, addresses) => {
+        dns.lookup('localhost', { all: true }, (err, addresses) => {
           if (err) {
             return done(err)
           }

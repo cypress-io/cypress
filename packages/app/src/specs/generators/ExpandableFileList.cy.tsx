@@ -16,6 +16,7 @@ const fileRowSelector = '[data-cy=file-list-row]'
 const allFiles = data as FileListItemFragment[]
 
 allFiles[1] = { ...allFiles[1], ...difficultFile }
+
 describe('<ExpandableFileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
   describe('with files', () => {
     const files = allFiles
