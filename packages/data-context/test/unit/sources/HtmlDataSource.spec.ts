@@ -94,6 +94,50 @@ describe('HtmlDataSource', () => {
     })
   })
 
+  describe('#launchpadHtml', () => {
+    let ctx: DataContext
+    let readFile: jest.SpiedFunction<any>
+    let originalEnv: NodeJS.ProcessEnv
+
+    beforeEach(() => {
+      originalEnv = { ...process.env }
+      delete process.env.CYPRESS_INTERNAL_VITE_DEV
+      process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY = 'true'
+
+      ctx = createTestDataContext('open')
+      readFile = jest.spyOn(ctx.fs, 'readFile').mockResolvedValue('<html><body><div id="app"></div></body></html>' as never)
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+      process.env = originalEnv
+    })
+
+    it('bootstraps browser telemetry into the built launchpad page', async () => {
+      const html = await ctx.html.launchpadHtml()
+
+      expect(readFile).toHaveBeenCalledWith(getPathToDist('launchpad', 'index.html'), 'utf8')
+      expect(html).toContain('window.__CYPRESS_TELEMETRY__ = {"context":{},"resources":{},"isVerbose":false}')
+      expect(html.indexOf('__CYPRESS_TELEMETRY__')).toBeLessThan(html.indexOf('<div id="app">'))
+    })
+
+    it('fetches the launchpad page from the Vite dev server when CYPRESS_INTERNAL_VITE_DEV is set', async () => {
+      process.env.CYPRESS_INTERNAL_VITE_DEV = '1'
+      process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT = '3333'
+      const fetch = jest.spyOn(ctx.util, 'fetch').mockResolvedValue({ text: async () => '<body>dev</body>' } as any)
+
+      await expect(ctx.html.launchpadHtml()).resolves.toContain('__CYPRESS_TELEMETRY__')
+      expect(fetch).toHaveBeenCalledWith('http://localhost:3333/__launchpad/index.html', { method: 'GET' })
+      expect(readFile).not.toHaveBeenCalled()
+    })
+
+    it('adds no bootstrap when telemetry is disabled', async () => {
+      delete process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY
+
+      await expect(ctx.html.launchpadHtml()).resolves.not.toContain('__CYPRESS_TELEMETRY__')
+    })
+  })
+
   describe('#makeServeConfig', () => {
     let ctx: DataContext
     let cachedConfig: Record<string, any>

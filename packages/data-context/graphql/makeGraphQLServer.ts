@@ -17,12 +17,16 @@ import debugLib from 'debug'
 import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
+import { telemetry } from '@packages/telemetry'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
+
 import { graphqlSchema } from './schema'
 import { runnerMutationRule, tapOperationRule } from './rootFieldRules'
 import { execute, Kind, locatedError, parse, specifiedRules, validate } from 'graphql'
 import type { DefinitionNode, DocumentNode, ExecutionResult, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
 
 const debug = debugLib(`cypress-verbose:graphql:operation`)
+const debugTelemetry = debugLib(`cypress:data-context:graphql:telemetry`)
 
 const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -101,6 +105,12 @@ export async function makeGraphQLServer () {
     }
   }
 
+  if (telemetry.isEnabled()) {
+    app.get('/__launchpad/index.html', (req, res, next) => {
+      getCtx().html.launchpadHtml().then((html) => res.type('html').send(html), next)
+    })
+  }
+
   app.get('/__launchpad/*', makeProxy())
 
   const ctx = getCtx()
@@ -152,7 +162,34 @@ export async function makeGraphQLServer () {
 
   ctx.actions.servers.setGqlSocketServer(gqlSocketServer)
 
+  if (telemetry.isEnabled()) {
+    socketSrv.of('/telemetry').on('connection', (socket) => {
+      socket.on('backend:request', handleTelemetrySocketRequest)
+    })
+  }
+
   return dfd.promise
+}
+
+/**
+ * Receives the spans the launchpad's websocket span exporter sends, which uses
+ * the same event shape as the runner socket.
+ */
+function handleTelemetrySocketRequest (eventName: unknown, payload: unknown, callback?: (res?: { error: Error }) => void) {
+  if (typeof callback !== 'function') {
+    return
+  }
+
+  if (eventName !== 'telemetry' || typeof payload !== 'string') {
+    // A plain object, since socket.io serializes an Error instance to {}
+    return callback({ error: { name: 'Error', message: `The launchpad telemetry socket cannot handle: ${String(eventName)}` } })
+  }
+
+  (telemetry.exporter() as OTLPTraceExporterCloud | undefined)?.send(payload, () => {}, (err) => {
+    debugTelemetry('error exporting telemetry data from launchpad %s', err)
+  })
+
+  callback()
 }
 
 interface GraphQLSocketPayload {
