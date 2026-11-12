@@ -7,8 +7,8 @@ let hasStarted = false
 /**
  * Times the first render of the specs list in this page load. The virtual list
  * only renders rows once it has measured its container, so the span ends with
- * the first render that shows a row, at mount when there are no specs to show,
- * or at unmount if neither happened.
+ * the first render that shows a row, or at mount when there are no specs to show.
+ * Leaving before either still ends it, so the slowest loads are not dropped.
  */
 export function useSpecsListFirstRenderSpan ({ specCount, renderedRowCount }: { specCount: Ref<number>, renderedRowCount: Ref<number> }) {
   if (hasStarted) {
@@ -54,7 +54,6 @@ export function useSpecsListFirstRenderSpan ({ specCount, renderedRowCount }: { 
     }
   })
 
-  // Leaving before the first row renders would otherwise drop the span, hiding the slowest loads
   onBeforeUnmount(() => {
     if (!ended) {
       span.setAttribute('endedBeforeFirstRow', true)

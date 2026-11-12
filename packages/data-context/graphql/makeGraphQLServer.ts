@@ -172,8 +172,8 @@ export async function makeGraphQLServer () {
 }
 
 /**
- * Receives the spans the launchpad's websocket span exporter sends, which uses
- * the same event shape as the runner socket.
+ * The browser's websocket span exporter sends spans as a `backend:request`
+ * event named `telemetry`, so that is the only event this accepts.
  */
 function handleTelemetrySocketRequest (eventName: unknown, payload: unknown, callback?: (res?: { error: Error }) => void) {
   if (typeof callback !== 'function') {

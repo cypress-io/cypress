@@ -52,7 +52,6 @@ describe('makeGraphQLServer with telemetry enabled', () => {
   describe('/telemetry socket namespace', () => {
     let socket: SocketShape
 
-    // Acknowledges with whatever the server passes to the callback
     const backendRequest = (eventName: string, payload: string) => {
       return new Promise<any>((resolve) => socket.emit('backend:request', eventName, payload, resolve))
     }
