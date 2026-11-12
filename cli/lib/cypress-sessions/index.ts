@@ -86,11 +86,6 @@ export interface ResolveSessionOptions {
   session?: number
   cwd: string
   probeTimeoutMs?: number
-  /**
-   * Returns a session whose project stopped loading after it started, for `status` to report,
-   * instead of raising PROJECT_NOT_LOADED as every command that drives the session needs.
-   */
-  allowLoadError?: boolean
 }
 
 export interface ResolvedSessionIdentity {
@@ -127,29 +122,52 @@ const selectSession = <T extends LiveSessionState>(candidates: T[], options: Res
   return { session: lowestPid(candidates), reason: 'arbitrary' }
 }
 
+// Whether the caller may be after a project that could not load: there is nothing usable to
+// drive, or, with no session named, nothing usable at the caller's directory. Cypress is
+// running, so reporting no session would have an agent start a second one.
+const mayBeAfterUnloaded = (usable: CypressSession[], { session, cwd }: ResolveSessionOptions): boolean => {
+  return usable.length === 0 || (session === undefined && !usable.some((record) => matchesProject(record, cwd)))
+}
+
+// The project that could not load which the caller is after, when `mayBeAfterUnloaded`: the
+// one named, any of them when nothing usable is left, otherwise the one at the caller's directory
+const soughtUnloaded = <T extends CypressSession>(usable: CypressSession[], unloaded: T[], { session, cwd }: ResolveSessionOptions): T | undefined => {
+  return unloaded.find((record) => matchesSession(record, session) && (usable.length === 0 || matchesProject(record, cwd)))
+}
+
+// A session whose configuration broke after it started still answers, but whatever it runs
+// or shows comes from the configuration that is gone. It is set aside like a project that
+// never loaded, and reported the same way when it is the one the caller is after.
+const setAsideBrokenSessions = (live: LiveSessionState[], options: ResolveSessionOptions): LiveSessionState[] => {
+  const loaded = live.filter((record) => !record.loadError)
+  const broken = mayBeAfterUnloaded(loaded, options) ? soughtUnloaded(loaded, live.filter((record) => record.loadError), options) : undefined
+
+  if (broken) {
+    // The session was found and answered, so the refusal is attributed to it
+    lastResolvedIdentity = { sessionId: broken.sessionId, machineId: broken.machineId, userId: broken.userId }
+
+    throw new TapError('PROJECT_NOT_LOADED')
+  }
+
+  return loaded
+}
+
 // Reads, filters by pid, and probes for liveness. Throws when nothing matches —
 // SESSION_NOT_FOUND for a pid that named nothing, NO_SESSION when none was asked
-// for — STALE_SESSION when matches exist but none responds, and
-// UNSUPPORTED_BROWSER when every one that does has a browser tap cannot drive.
-const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionState[]> => {
-  const { session, cwd, probeTimeoutMs } = options
+// for — STALE_SESSION when matches exist but none responds, PROJECT_NOT_LOADED when
+// the one sought broke after it started, and UNSUPPORTED_BROWSER when every one that
+// is left has a browser tap cannot drive. `allowLoadError` keeps broken sessions, for
+// `status` to report their error.
+const liveMatches = async (options: ResolveSessionOptions, allowLoadError = false): Promise<LiveSessionState[]> => {
+  const { session, probeTimeoutMs } = options
   const records = await readLiveSessions()
 
   // A project that failed to load has a starting record but no session to drive, so it is
   // never among the matches
   const matches = records.filter((record) => !isStartingRecord(record) && matchesSession(record, session))
 
-  // With nothing live to drive, or only sessions of other projects when none was named, a
-  // project that failed to load at the caller's directory is the one to report. Cypress is
-  // running, so telling an agent to start it would start a second one.
-  const noneAtCwd = session === undefined && !matches.some((record) => matchesProject(record, cwd))
-
-  if (matches.length === 0 || noneAtCwd) {
-    const starting = await readStartingSessions()
-
-    if (starting.some((record) => matchesSession(record, session) && (matches.length === 0 || matchesProject(record, cwd)))) {
-      throw new TapError('PROJECT_NOT_LOADED')
-    }
+  if (mayBeAfterUnloaded(matches, options) && soughtUnloaded(matches, await readStartingSessions(), options)) {
+    throw new TapError('PROJECT_NOT_LOADED')
   }
 
   if (matches.length === 0) {
@@ -164,10 +182,13 @@ const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionS
     throw new TapError('STALE_SESSION')
   }
 
+  const usable = allowLoadError ? live : setAsideBrokenSessions(live, options)
+
   // Dropped before selection so a session running an unsupported browser never
   // shadows one that can serve the command; when it is the only candidate the
-  // caller hears why rather than "no browser attached".
-  const supported = live.filter((record) => isTapSupportedBrowser(record.browserFamily))
+  // caller hears why rather than "no browser attached". A broken session stays
+  // for `status`, whose report of the error does not depend on the browser.
+  const supported = usable.filter((record) => record.loadError || isTapSupportedBrowser(record.browserFamily))
 
   if (supported.length === 0) {
     throw new TapError('UNSUPPORTED_BROWSER')
@@ -176,22 +197,13 @@ const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionS
   return supported
 }
 
-// A session whose configuration broke after it started still answers, but whatever it runs
-// or shows comes from the configuration that is gone, the same as a project that never loaded
-const ensureProjectLoaded = (session: LiveSessionState, options: ResolveSessionOptions): void => {
-  if (session.loadError && !options.allowLoadError) {
-    throw new TapError('PROJECT_NOT_LOADED')
-  }
-}
-
 // Resolves a live session without requiring a browser; `status` reports
-// sessions that have no browser attached yet.
-export const resolveLiveSession = async (options: ResolveSessionOptions): Promise<LiveSessionSelection> => {
-  const live = await liveMatches(options)
+// sessions that have no browser attached yet, and, with `allowLoadError`, sessions
+// whose configuration broke after they started.
+export const resolveLiveSession = async (options: ResolveSessionOptions, { allowLoadError = false }: { allowLoadError?: boolean } = {}): Promise<LiveSessionSelection> => {
+  const live = await liveMatches(options, allowLoadError)
 
   const { session, reason } = selectSession(live, options)
-
-  ensureProjectLoaded(session, options)
 
   lastResolvedIdentity = { sessionId: session.sessionId, machineId: session.machineId, userId: session.userId }
 
@@ -212,8 +224,6 @@ export const resolveSession = async (options: ResolveSessionOptions): Promise<Se
   }
 
   const { session: selected, reason } = selectSession(ready, options)
-
-  ensureProjectLoaded(selected, options)
 
   lastResolvedIdentity = { sessionId: selected.sessionId, machineId: selected.machineId, userId: selected.userId }
 

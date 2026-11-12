@@ -434,6 +434,20 @@ describe('lib/exec/tap', () => {
       expect(withTapConnection).toHaveBeenCalledTimes(1)
     })
 
+    it('carries the load error of a session whose project stopped loading', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([
+        liveSession({ pid: 111, loadError: { message: 'Your configFile is invalid' } }),
+        liveSession({ pid: 222 }),
+      ])
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+
+      const [broken, working] = JSON.parse(logger.print())
+
+      expect(broken.loadError).toBe('Your configFile is invalid')
+      expect(working).not.toHaveProperty('loadError')
+    })
+
     it('bounds the renderer probe with --timeout', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111 })])
 
@@ -694,7 +708,7 @@ describe('lib/exec/tap', () => {
 
         expect(withTapConnection).not.toHaveBeenCalled()
         // Every other command is refused such a session, so status has to ask for it
-        expect(resolveLiveSession).toHaveBeenCalledWith(expect.objectContaining({ allowLoadError: true }))
+        expect(resolveLiveSession).toHaveBeenCalledWith(expect.anything(), { allowLoadError: true })
       })
 
       it('shows the error to a person reading the output', async () => {
@@ -842,7 +856,7 @@ describe('lib/exec/tap', () => {
 
       await tap.start(['status'], { session: 1234 })
 
-      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd(), allowLoadError: true })
+      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() }, { allowLoadError: true })
     })
 
     it('exits 1 and renders the failure when the session is unreachable despite a browser', async () => {

@@ -805,18 +805,60 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.lifecycleManager._cachedFullConfig).toBeUndefined()
     })
 
-    it('withdraws a load error for cypress tap status once the configuration loads again', async () => {
+    // Withdrawn only after the session has started, so a project that failed to start keeps
+    // its error until the session replaces it, and before the browser is chosen, so a browser
+    // that cannot be found is recorded again
+    it('withdraws a load error for cypress tap status once the session has started again', async () => {
       // @ts-expect-error - private method
       const configManager = ctx.lifecycleManager.createConfigManager()
       // Safe because the config manager keeps the options it was created with, private, as `options`
       const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
 
-      jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
-      jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      const initialize = jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+      const chooseBrowser = jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      const cleared = ctx._apis.projectApi.clearSessionLoadError as jest.Mock
 
       await onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })
 
+      expect(cleared).toHaveBeenCalledTimes(1)
+      expect(initialize.mock.invocationCallOrder[0]).toBeLessThan(cleared.mock.invocationCallOrder[0])
+      expect(cleared.mock.invocationCallOrder[0]).toBeLessThan(chooseBrowser.mock.invocationCallOrder[0])
+    })
+  })
+
+  describe('onInitialConfigLoaded', () => {
+    const onInitialConfigLoaded = () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+
+      // Safe because the config manager keeps the options it was created with, private, as `options`
+      return (configManager as any).options.onInitialConfigLoaded as (config: Cypress.ConfigOptions) => void
+    }
+
+    // Such as Try again once a configuration that failed at startup is fixed, before a testing type is chosen
+    it('withdraws a load error when no testing type is chosen, since no session will replace it', () => {
+      onInitialConfigLoaded()({})
+
       expect(ctx._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
+    })
+
+    // Such as `--headless --e2e` whose scaffold needs a hand merge: a refresh that finds e2e still
+    // unconfigured drops the testing type, and the error says what setup is missing
+    it('leaves a setup error when the command line asked for a testing type a refresh dropped', () => {
+      ctx = createDataContext({ project: 'foo', testingType: 'e2e', headless: true })
+
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+    })
+
+    it('leaves a load error for the session to replace when a testing type is chosen', () => {
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._currentTestingType = 'e2e'
+
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
     })
   })
 

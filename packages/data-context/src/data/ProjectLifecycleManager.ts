@@ -25,6 +25,7 @@ import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { isAgentMode } from '@packages/agent-info'
+import { isTapSupportedBrowser } from '@packages/cypress-sessions'
 import { logError } from '@packages/stderr-filtering'
 import { telemetry } from '@packages/telemetry'
 
@@ -214,6 +215,15 @@ export class ProjectLifecycleManager {
       onError: this.onLoadError,
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
+
+        // With no testing type, no session will start to replace an error that kept the
+        // configuration from loading, so loading it is what withdraws the error. With one,
+        // `onFinalConfigLoaded` withdraws it once the session has started. A testing type the
+        // command line asked for counts even after a refresh dropped it for not being set up:
+        // the error then says what setup is missing, which loading the file does not fix.
+        if (!this._currentTestingType && !this.ctx.modeOptions.testingType) {
+          this.ctx.clearLoadError()
+        }
 
         this.ctx.emitter.toLaunchpad()
         this.ctx.emitter.toApp()
@@ -429,7 +439,7 @@ export class ProjectLifecycleManager {
 
       // A hidden session only `cypress tap` can see, in a browser it cannot drive, is of no use
       // to anyone, so nothing launches
-      if (this.ctx.isHeadless && browser.family !== 'chromium') {
+      if (this.ctx.isHeadless && !isTapSupportedBrowser(browser.family)) {
         const message = `Cypress could not start this \`--headless\` session in ${browser.displayName}, because \`cypress tap\` can only drive Chromium-based browsers, such as Chrome, Edge and Electron. Pass one of them with \`--browser\`, then start Cypress again.`
 
         logError(message)

@@ -349,6 +349,31 @@ describe('lib/cypress-sessions', () => {
       await expect(resolveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
     })
 
+    // Such as a `--headless` session whose browser could not be found or driven: telling
+    // the agent to launch a browser would hide the reason status reports
+    it('throws PROJECT_NOT_LOADED rather than NO_BROWSER_ATTACHED for a broken session that launched no browser', async () => {
+      const port = await startFakeSession({ sessionId: SESSION_ID, respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: null, loadError: { message: 'cypress tap can only drive Chromium-based browsers' } } })
+
+      mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      await expect(resolveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+    })
+
+    it('uses a working session at the cwd over a broken one elsewhere', async () => {
+      const brokenPort = await startFakeSession({ sessionId: 'broken', respondWith: { sessionId: 'broken', cdpBrowserWsUrl: CDP_WS_URL, loadError: { message: 'Your configFile is invalid' } } })
+      const workingPort = await startReadySession(SESSION_ID)
+
+      mockfs({ [SESSIONS_DIR]: {
+        '111.json': makeRecord({ pid: 111, serverPort: brokenPort, sessionId: 'broken', projectRoot: '/other/project' }),
+        '222.json': makeRecord({ pid: 222, serverPort: workingPort }),
+      } })
+
+      stubKill({ alive: [111, 222] })
+
+      expect((await resolveSession({ cwd: PROJECT })).session.pid).toBe(222)
+    })
+
     it('throws SESSION_NOT_FOUND, naming the pid, when no record matches the filters', async () => {
       mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [111] })
@@ -598,10 +623,31 @@ describe('lib/cypress-sessions', () => {
         await expect(resolveLiveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
       })
 
+      it('records the identity of the session it refused', async () => {
+        const port = await startFakeSession({ sessionId: 'refused-session', respondWith: { sessionId: 'refused-session', loadError: { message: 'Your configFile is invalid' } } })
+
+        mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port, sessionId: 'refused-session' }) } })
+        stubKill({ alive: [111] })
+
+        await expect(resolveLiveSession({ cwd: PROJECT })).rejects.toMatchObject({ code: 'PROJECT_NOT_LOADED' })
+        expect(resolvedSessionId()).toBe('refused-session')
+      })
+
+      it('resolves it with the error for a caller that reports it, even in a browser tap cannot drive', async () => {
+        const port = await startFakeSession({ respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: null, browserFamily: 'firefox', loadError: { message: 'Your configFile is invalid' } } })
+
+        mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+        stubKill({ alive: [111] })
+
+        const selection = await resolveLiveSession({ cwd: PROJECT }, { allowLoadError: true })
+
+        expect(selection.session.loadError).toEqual({ message: 'Your configFile is invalid' })
+      })
+
       it('resolves it with the error for a caller that reports it', async () => {
         await startBrokenSession()
 
-        const selection = await resolveLiveSession({ cwd: PROJECT, allowLoadError: true })
+        const selection = await resolveLiveSession({ cwd: PROJECT }, { allowLoadError: true })
 
         expect(selection.session.pid).toBe(111)
         expect(selection.session.loadError).toEqual({ message: 'Your configFile is invalid' })
