@@ -16,6 +16,7 @@ import {
   SpecOutputBuffer,
   SpecQueue,
   workerArgv,
+  workerEnv,
 } from '../../../lib/modes/run-workers'
 import type { RunResult } from '../../../lib/modes/results'
 
@@ -83,6 +84,23 @@ describe('lib/modes/run-workers', () => {
 
     it('leaves the build id to CI detection when there is none to share', () => {
       expect(workerArgv(['--record'], 1, {})).toEqual(['--record', '--parallel', '--worker-index', '1', '--port', '0'])
+    })
+  })
+
+  describe('workerEnv', () => {
+    it('gives each worker its index and downloads folder, and leaves the fixed debugging port to the coordinator', () => {
+      const env = workerEnv({ PATH: '/bin', ELECTRON_RUN_AS_NODE: '1', CYPRESS_REMOTE_DEBUGGING_PORT: '9222', FORCE_COLOR: '0' }, 2, '/project/downloads', true)
+
+      expect(env).toEqual({
+        PATH: '/bin',
+        FORCE_COLOR: '1',
+        CYPRESS_WORKER_INDEX: '2',
+        CYPRESS_DOWNLOADS_FOLDER: path.join('/project/downloads', 'worker-2'),
+      })
+    })
+
+    it('keeps the inherited FORCE_COLOR when stdout is not a terminal', () => {
+      expect(workerEnv({ FORCE_COLOR: '0' }, 1, '/d', false).FORCE_COLOR).toBe('0')
     })
   })
 

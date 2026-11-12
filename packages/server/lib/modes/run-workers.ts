@@ -213,6 +213,21 @@ export const crashedSpecResult = (spec: SpecWithRelativeRoot, error: Error): Run
   } as RunResult
 }
 
+export const workerEnv = (base: NodeJS.ProcessEnv, workerIndex: number, downloadsFolder: string, colors: boolean): NodeJS.ProcessEnv => {
+  const env: NodeJS.ProcessEnv = {
+    ...base,
+    FORCE_COLOR: colors ? '1' : base.FORCE_COLOR,
+    [WORKER_INDEX_ENV]: String(workerIndex),
+    CYPRESS_DOWNLOADS_FOLDER: path.join(downloadsFolder, `worker-${workerIndex}`),
+  }
+
+  delete env.ELECTRON_RUN_AS_NODE
+  // a fixed port is only free for one browser; it stays with the coordinator's
+  delete env.CYPRESS_REMOTE_DEBUGGING_PORT
+
+  return env
+}
+
 const flagsWithValue = new Set(['--workers', '--port', '-p', '--worker-index', '--ci-build-id'])
 
 export interface RecordSettings {
@@ -385,10 +400,6 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
 
   process.once('exit', onExit)
 
-  const env: NodeJS.ProcessEnv = { ...process.env, FORCE_COLOR: process.stdout.isTTY ? '1' : process.env.FORCE_COLOR }
-
-  delete env.ELECTRON_RUN_AS_NODE
-
   for (let index = 1; index <= spawnCount; index++) {
     const args = workerArgv(process.argv.slice(1), index, record)
 
@@ -398,11 +409,7 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
       stdio: ['ignore', 'pipe', 'inherit', 'ipc'],
       // keeps Dates and other non-JSON values in per-spec results intact
       serialization: 'advanced',
-      env: {
-        ...env,
-        [WORKER_INDEX_ENV]: String(index),
-        CYPRESS_DOWNLOADS_FOLDER: path.join(downloadsFolder, `worker-${index}`),
-      },
+      env: workerEnv(process.env, index, downloadsFolder, Boolean(process.stdout.isTTY)),
     })
 
     children.push(child)
