@@ -50,7 +50,7 @@
             v-if="runAllSpecsStore.isRunAllSpecsAllowed && !testingType.showTestingTypePromo.value"
             :spec-number="runAllSpecsStore.allSpecsRef.length"
             directory="all"
-            @runAllSpecs="runAllSpecsStore.runAllSpecs"
+            @run-all-specs="runAllSpecsStore.runAllSpecs"
           />
         </div>
         <div class="flex items-center justify-between truncate">
@@ -63,7 +63,7 @@
             :gql="props.gql"
             mode="LATEST_RUNS"
             data-cy="latest-runs-header"
-            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
+            @show-login-connect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
           />
         </div>
         <div class="hidden items-center justify-end truncate md:flex">
@@ -71,7 +71,7 @@
             :gql="props.gql"
             mode="AVG_DURATION"
             data-cy="average-duration-header"
-            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
+            @show-login-connect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
           />
         </div>
       </div>
@@ -110,7 +110,7 @@
           :is-leaf="row.data.isLeaf"
           :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
           :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
-          @toggleRow="row.data.toggle"
+          @toggle-row="row.data.toggle"
         >
           <template #file>
             <SpecItem
@@ -144,7 +144,7 @@
                 :directory="row.data.name"
                 class="opacity-0 run-all"
                 :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
-                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
+                @run-all-specs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
               />
             </RowDirectory>
           </template>
@@ -185,7 +185,7 @@
     <NoResults
       v-show="!specs.length"
       :search-term="specFilterModel"
-      :message="t('specPage.noResultsMessage')"
+      message="No specs matched your search:"
       class="mt-[56px]"
       @clear="handleClear"
     />
@@ -205,7 +205,6 @@ import { gql } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { SpecsList_GitInfoUpdatedDocument } from '../generated/graphql'
 import type { Specs_SpecsListFragment, SpecsListFragment } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import { buildSpecTree, useCollapsibleTree } from './tree/useCollapsibleTree'
 import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
@@ -242,7 +241,6 @@ const emit = defineEmits<{
 const { openLoginConnectModal } = useUserProjectStatusStore()
 
 const route = useRoute()
-const { t } = useI18n()
 const testingType = useTestingType()
 
 const isOnline = useOnline()

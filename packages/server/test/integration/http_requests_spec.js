@@ -43,7 +43,7 @@ const repoPackageJson = path.resolve(__dirname, '../../../../package.json')
 const traversalTo = (absolutePath) => `${'..%2F'.repeat(20)}${encodeURIComponent(absolutePath)}`
 
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
-const sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
+const sourceMapRegex = /\n\/\/# sourceMappingURL=.*/
 
 const replaceAbsolutePaths = (content) => {
   return content.replace(absolutePathRegex, '"/<path-to-project>')
@@ -2615,7 +2615,7 @@ describe('Routes', () => {
                 .get('/bar')
                 .reply(200, 'OK', {
                   'Content-Type': 'text/html',
-                  'content-security-policy': `foo \'bar\'; ${headerValue};`,
+                  'content-security-policy': `foo 'bar'; ${headerValue};`,
                 })
 
                 return this.rp({
@@ -3779,7 +3779,7 @@ describe('Routes', () => {
             'Content-Encoding': 'gzip',
           })
 
-          return this.r({
+          this.r({
             url: 'http://www.google.com/app.js',
             gzip: true,
           })
@@ -4305,7 +4305,7 @@ describe('Routes', () => {
         // due to the reduced keep alive timeout
         this.timeout(1500)
 
-        return dns.lookup('localhost', { all: true }, (err, addresses) => {
+        dns.lookup('localhost', { all: true }, (err, addresses) => {
           if (err) {
             return done(err)
           }

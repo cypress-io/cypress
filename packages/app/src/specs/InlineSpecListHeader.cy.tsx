@@ -1,7 +1,5 @@
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import { ref } from 'vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { defineStore } from 'pinia'
 
 describe('InlineSpecListHeader', () => {
@@ -30,7 +28,7 @@ describe('InlineSpecListHeader', () => {
     mountWithProps({ resultCount: 0 })
     const searchString = 'my/component.cy.tsx'
 
-    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    cy.findByLabelText('Search specs')
     // `force` necessary due to the field label being overlaid on top of the input
     .type(searchString, { delay: 0, force: true })
     .get('@specFilterModel').its('value').should('eq', searchString)
@@ -38,7 +36,7 @@ describe('InlineSpecListHeader', () => {
 
   it('should emit add spec', () => {
     mountWithProps({ resultCount: 0 })
-    cy.findAllByLabelText(defaultMessages.specPage.newSpecButton)
+    cy.findAllByLabelText('New spec')
     .click()
     .get('@new-spec')
     .should('have.been.called')
@@ -50,7 +48,7 @@ describe('InlineSpecListHeader', () => {
     cy.findByTestId('clear-search-button')
     .should('not.exist')
 
-    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    cy.findByLabelText('Search specs')
     // `force` necessary due to the field label being overlaid on top of the input
     .type('abcd', { delay: 0, force: true })
     .get('@specFilterModel').its('value').should('eq', 'abcd')

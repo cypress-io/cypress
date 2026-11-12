@@ -8,8 +8,8 @@
       prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"
       :prefix-icon="IconMagnifyingGlass"
       :model-value="props.modelValue"
-      :placeholder="t('specPage.searchPlaceholder')"
-      :aria-label="t('specPage.searchPlaceholder')"
+      placeholder="Search specs"
+      aria-label="Search specs"
       @input="onInput"
     >
       <template #suffix>
@@ -18,7 +18,7 @@
           type="button"
           data-cy="clear-search-button"
           class="border-transparent rounded-md flex outline-none h-[24px] mr-[16px] w-[24px] duration-300 items-center justify-center group hocus-default hocus:ring-0 hocus:bg-indigo-50"
-          :aria-label="t('specPage.clearSearch')"
+          aria-label="Clear search field"
           @click="clearInput"
         >
           <i-cy-delete_x16 class="icon-light-gray-50 icon-dark-gray-500 group-hocus:icon-dark-indigo-500" />
@@ -32,12 +32,12 @@
             class="bg-white border-transparent rounded-r flex h-full border-t border-b border-r mr-[1px] px-[16px] transition-all items-center matches-button group-hocus:bg-indigo-50 group-hocus:text-indigo-500"
           >
             <span v-if="props.modelValue">
-              {{ t('components.fileSearch.matchesIndicator', { count: specCount, denominator: specCount, numerator: resultCount}) }}
+              {{ matchesIndicator }}
             </span>
             <span v-else>
-              {{ t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: specCount, denominator: specCount}) }}
+              {{ matchesIndicatorEmptyFileSearch }}
             </span>
-            <span class="sr-only">{{ t(`createSpec.viewSpecPatternButton`) }} </span>
+            <span class="sr-only">View spec pattern </span>
           </span>
         </button>
       </template>
@@ -51,7 +51,7 @@
         @click="emit('showCreateSpecModal')"
       >
         <IconActionAddMedium class="mr-[8px]" />
-        {{ t('specPage.newSpecButton') }}
+        New spec
       </Button>
     </div>
   </div>
@@ -61,14 +61,12 @@
 </script>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import type { Ref } from 'vue'
-import { useI18n } from '@cy/i18n'
 import Button from '@cypress-design/vue-button'
 import Input from '@cy/components/Input.vue'
 import IconMagnifyingGlass from '~icons/cy/magnifying-glass_x16'
 import { IconActionAddMedium } from '@cypress-design/vue-icon'
-
-const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   modelValue: string
@@ -79,6 +77,14 @@ const props = withDefaults(defineProps<{
   resultCount: 0,
   specCount: 0,
   specsListInputRefFn: undefined,
+})
+
+const matchesIndicator = computed(() => {
+  return props.specCount === 0 ? 'No matches' : `${props.resultCount} of ${props.specCount} matches`
+})
+
+const matchesIndicatorEmptyFileSearch = computed(() => {
+  return props.specCount === 0 ? 'No matches' : props.specCount === 1 ? '1 match' : `${props.specCount} matches`
 })
 
 const emit = defineEmits<{

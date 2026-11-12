@@ -240,8 +240,6 @@ describe('src/cy/commands/actions/dblclick', () => {
 
           this.logs.push(log)
         })
-
-        null
       })
 
       it('throws when not a dom subject', (done) => {

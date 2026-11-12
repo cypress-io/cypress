@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-/// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
 const WEBPACK_ANGULAR: ProjectFixtureDir[] = [

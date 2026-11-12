@@ -3,19 +3,15 @@
     data-cy="settings-recordKey"
   >
     <template #title>
-      {{ t('settingsPage.recordKey.title') }}
+      Record key
     </template>
     <template #description>
-      <i18n-t
-        scope="global"
-        keypath="settingsPage.recordKey.description"
+      The Record Key configured for this project inside of Cypress Cloud.
+      <ExternalLink
+        :href="learnMoreUrl"
       >
-        <ExternalLink
-          href="https://on.cypress.io/what-is-a-record-key"
-        >
-          {{ t('links.learnMore') }}
-        </ExternalLink>
-      </i18n-t>
+        Learn more.
+      </ExternalLink>
     </template>
     <div
       v-if="recordKey"
@@ -36,7 +32,7 @@
         prefix-icon-class="icon-dark-gray-500"
         @click="openManageKeys"
       >
-        {{ t('settingsPage.recordKey.manageKeys') }}
+        Manage keys
       </Button>
     </div>
   </SettingsSection>
@@ -54,9 +50,7 @@ import IconExport from '~icons/cy/export_x16.svg'
 import type { RecordKeyFragment } from '../../generated/graphql'
 import SettingsSection from '../SettingsSection.vue'
 import CodeBox from './CodeBox.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment RecordKey on CloudRecordKey {
@@ -73,4 +67,6 @@ const props = defineProps<{
 const openManageKeys = useExternalLink(props.manageKeysUrl)
 
 const recordKey = computed(() => props.gql.key)
+
+const learnMoreUrl = getUrlWithParams({ url: 'https://on.cypress.io/what-is-a-record-key', params: { utm_medium: 'Settings', utm_campaign: 'Record Key' } })
 </script>

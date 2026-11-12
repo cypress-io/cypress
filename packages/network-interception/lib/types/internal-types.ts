@@ -79,7 +79,7 @@ export declare namespace NetEvent {
       data: D
     }
 
-    export interface Response extends Event<CyHttpMessages.IncomingResponse> {}
+    export type Response = Event<CyHttpMessages.IncomingResponse>
   }
 
   export namespace ToServer {

@@ -27,7 +27,7 @@ Runs on PRs targeting `develop` or `release/*` branches (excluding draft PRs).
 binary is the most expensive part of the pipeline, so it runs post-merge on
 `develop` (or the `vN` maintenance branch a PR targets) instead. There is no opt-in and no path-based override: a PR that
 changes binary or packaging code is not covered until it merges, and breakage is
-caught by the develop build. See `notify-binary-failure` below.
+caught by the post-merge build. See `notify-binary-failure` below.
 
 #### Full Workflow
 
@@ -40,7 +40,7 @@ Runs on pushes to `develop` and `release/*` branches. Includes everything from t
 | Linux x64 Build | Full build, packaging, and binary verification for Linux x64 |
 | Binary Creation | Builds, packages, and uploads the Linux x64 Electron binary and npm package |
 | Binary Verification | Tests the built Linux binary against kitchensink, recipes, and real-world apps |
-| Binary Failure Alerts | Comments on the commit, tagging its author, when a binary job fails |
+| Binary Failure Alerts | Pages `@app-foundations-oncall` in Slack when a binary job fails |
 | Release Preparation | Validates release readiness, prepares npm packages |
 
 Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows do not build on every `develop` or `release/*` push — see "Multi-Platform Builds" below.
@@ -56,7 +56,7 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 | PR opened/updated | Pull Request | Skipped for draft PRs |
 | Push to `develop` | Full | Linux x64 is path-filtered by changed files; binary builds and release gating always run. Other platforms run from the develop schedule, not this push |
 | Push to `release/*` | Full | Linux x64 runs the complete test suite and binary builds, unfiltered. Other platforms run from the release schedule |
-| Push to `vN` | Full | Path-filtered like a `develop` push; all five platforms run |
+| Push to `vN` | Full | Linux x64 is path-filtered like a `develop` push. Other platforms run from the weekly `vN` schedule, not this push |
 | Scheduled pipeline | Full | Nightly cron on `develop`, weekly build on `vN`; always unfiltered, even though they run on that branch |
 | Manual (CircleCI UI) | Configurable | Can run the full Linux x64 workflow, or all four scheduled platforms, on any branch; `run-all-jobs=true` forces everything on Linux x64 |
 
@@ -66,22 +66,13 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 - **`ready-to-release`** - Gate job that ensures all tests pass before release
 - **`npm-release`** - Publishes packages to npm (develop/release branches only)
 - **`create-build-artifacts`** - Builds, packages, and uploads the binary and npm package
-- **`notify-binary-failure`** - Comments on the commit when a binary job fails on
-  `develop` or a `vN` maintenance branch, tagging its author. It requires every binary job at `terminal`, so it
-  runs once they have all settled however they settled, then reads their real
-  statuses from the CircleCI API and exits quietly unless one of them is `failed` -
-  a cancelled or skipped job is not a breakage. Scope comes from the job's own
-  dependency list, so adding a binary job to its `requires:` block is all that is
-  needed to cover it.
-
-  `develop` is squash-merged, so the commit author is the author of the PR that
-  produced it, and the `@` tag notifies them whatever their GitHub notification
-  settings are. A commit whose author GitHub cannot resolve still gets a comment,
-  just without the tag.
-
-  It reads job statuses from the CircleCI API without a token, which works only
-  because the project is public, and needs `GH_TOKEN` from `test-runner:npm-release`
-  to post the comment.
+- **`notify-binary-failure`** - Pages `@app-foundations-oncall` in Slack when a
+  binary job fails on `develop` or a `vN` maintenance branch. It requires every
+  binary job at `terminal`, so it runs once they have all settled however they
+  settled, then reads their real statuses from the CircleCI API and exits quietly
+  unless one of them is `failed` - a cancelled or skipped job is not a breakage.
+  Scope comes from the job's own dependency list, so adding a binary job to its
+  `requires:` block is all that is needed to cover it.
 
 ## GitHub Actions
 

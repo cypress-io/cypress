@@ -1,4 +1,5 @@
 import { createRequire } from 'module'
+import { EventEmitter } from 'events'
 import express from 'express'
 import _ from 'lodash'
 import nock from 'nock'
@@ -151,7 +152,7 @@ afterAll(() => {
 describe('lib/server-base', () => {
   let config: any
   let server: TestServer
-  let fileServerMock: { close: () => void, port: () => number }
+  let fileServerMock: { close: Mock, port: () => number }
   let oldFileServer: any
   let createFileServer: Mock
 
@@ -171,7 +172,7 @@ describe('lib/server-base', () => {
     await cache.remove()
 
     fileServerMock = {
-      close () {},
+      close: vi.fn(),
       port () {
         return 1111
       },
@@ -1112,7 +1113,101 @@ describe('lib/server-base', () => {
           type: 'PORT_IN_USE_SHORT',
           message: expect.stringContaining(String(port)),
         })
+
+        // the file server created for the failed attempt is still listening,
+        // so it has to be closed rather than left holding its port
+        expect(fileServerMock.close).toHaveBeenCalled()
       })
+    })
+  })
+
+  describe('#_listen', () => {
+    // Stands in for an http.Server whose listen() always succeeds and whose
+    // address reports the next port. Keeps the port sequence deterministic so
+    // the browser-blocked-port retry can be exercised without a real bind.
+    function fakeListeningServer (ports: number[]) {
+      const srv: any = new EventEmitter()
+      let nextPort = 0
+
+      srv.listen = vi.fn((_port: number, _host: string, cb: () => void) => {
+        process.nextTick(cb)
+
+        return srv
+      })
+
+      // the server keeps reporting its last port after the sequence runs out,
+      // since teardown reads address() again
+      srv.address = vi.fn(() => ({ address: '127.0.0.1', family: 'IPv4', port: ports[Math.min(nextPort++, ports.length - 1)] }))
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb())
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      return srv
+    }
+
+    it('listens on the configured port when browsers allow it', async () => {
+      server._server = fakeListeningServer([54321])
+
+      await expect(server._listen(54321)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledWith(54321, '127.0.0.1', expect.any(Function))
+    })
+
+    it('redraws an ephemeral port that browsers block instead of failing to load it', async () => {
+      server._server = fakeListeningServer([10080, 54321])
+
+      await expect(server._listen(null)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledTimes(2)
+      expect(server._server.listen).toHaveBeenLastCalledWith(0, '127.0.0.1', expect.any(Function))
+      expect(server._server.close).toHaveBeenCalledTimes(1)
+    })
+
+    it('rejects a bind failure other than EADDRINUSE instead of leaving the run hanging', async () => {
+      const srv: any = new EventEmitter()
+
+      srv.listen = vi.fn(() => {
+        const err = Object.assign(new Error('listen EACCES: permission denied'), { code: 'EACCES' })
+
+        process.nextTick(() => srv.emit('error', err))
+
+        return srv
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toMatchObject({ code: 'EACCES' })
+    })
+
+    it('rejects with the close error instead of retrying when the blocked port cannot be released', async () => {
+      const srv = fakeListeningServer([10080, 54321])
+      const closeErr = Object.assign(new Error('close failed'), { code: 'EBADF' })
+
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb(closeErr))
+      })
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toBe(closeErr)
+
+      // a server that is still bound cannot listen again
+      expect(srv.listen).toHaveBeenCalledTimes(1)
+    })
+
+    it('gives up after repeated blocked ephemeral ports instead of listening forever', async () => {
+      server._server = fakeListeningServer(Array(10).fill(10080))
+
+      await expect(server._listen(null)).rejects.toMatchObject({
+        type: 'PORT_BLOCKED_BY_BROWSER',
+        message: expect.stringContaining('could not find a port that browsers allow'),
+      })
+
+      expect(server._server.listen).toHaveBeenCalledTimes(10)
     })
   })
 

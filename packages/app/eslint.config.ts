@@ -31,6 +31,14 @@ export default [
     },
   },
   {
+    // The tap component tests call TapManager's promise-based `exec` directly and
+    // queue no Cypress commands, only synchronous `cy.stub`s, so awaiting is correct
+    files: ['src/tap/**/*.cy.ts'],
+    rules: {
+      'cypress/no-async-tests': 'off',
+    },
+  },
+  {
     files: ['vite.config.mjs'],
     rules: {
       // import-x cannot parse the `.d.ts` types of @vitejs/plugin-legacy

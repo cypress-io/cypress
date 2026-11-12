@@ -11,25 +11,33 @@ import systeminformation from 'systeminformation'
 import { getPathToIcon } from '@packages/icons'
 import { getPathToExec, getPathToResources, getPathToVersion } from '../src/paths'
 
-const { ELECTRON_VERSION, packager } = vi.hoisted(() => {
+const { ELECTRON_VERSION, packager, downloadArtifact } = vi.hoisted(() => {
   return {
     ELECTRON_VERSION: '35.0.0',
     packager: vi.fn(),
+    downloadArtifact: vi.fn(),
   }
 })
 
-// `install.ts` requires `@electron/packager` dynamically so mksnapshot cannot
-// discover it, which also puts it out of reach of `vi.mock`. Seeding node's own
-// module cache is what keeps a unit test from packaging a real binary.
+// `install.ts` requires `@electron/packager` and `@electron/get` dynamically so
+// mksnapshot cannot discover them, which also puts them out of reach of
+// `vi.mock`. Seeding node's own module cache is what keeps a unit test from
+// downloading Electron or packaging a real binary.
 const installRequire = createRequire(new URL('../src/install.ts', import.meta.url))
-const packagerPath = installRequire.resolve('@electron/packager')
 
-installRequire.cache[packagerPath] = {
-  id: packagerPath,
-  filename: packagerPath,
-  loaded: true,
-  exports: packager,
-} as NodeJS.Module
+const seedRequireCache = (request: string, exports: unknown) => {
+  const filename = installRequire.resolve(request)
+
+  installRequire.cache[filename] = {
+    id: filename,
+    filename,
+    loaded: true,
+    exports,
+  } as NodeJS.Module
+}
+
+seedRequireCache('@electron/packager', packager)
+seedRequireCache('@electron/get', { downloadArtifact })
 
 vi.mock('@packages/root', () => {
   return {
@@ -128,6 +136,7 @@ describe('install', () => {
   beforeEach(() => {
     files = new Map()
     packager.mockReset()
+    downloadArtifact.mockReset()
 
     vi.mocked(createReadStream).mockImplementation((filePath) => {
       const contents = files.get(String(filePath))
@@ -267,6 +276,7 @@ describe('install', () => {
     beforeEach(() => {
       exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
       packager.mockResolvedValue(['/tmp/Cypress-out/Cypress'])
+      downloadArtifact.mockResolvedValue('/tmp/electron-cache/electron.zip')
     })
 
     for (const platform of ['darwin', 'linux', 'win32']) {
@@ -292,6 +302,7 @@ describe('install', () => {
         platform: 'linux',
         arch: 'x64',
         icon: getPathToIcon('cypress'),
+        electronZipDir: '/tmp/electron-cache',
       }))
 
       expect(exit).toHaveBeenCalled()

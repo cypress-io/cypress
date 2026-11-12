@@ -212,7 +212,7 @@ function needsFullPathResolve (p: string) {
 }
 
 type CacheDirectResult = {
-  moduleExports?: Object
+  moduleExports?: object
   definition?: ModuleDefinition
 }
 

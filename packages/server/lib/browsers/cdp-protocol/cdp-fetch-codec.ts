@@ -100,8 +100,13 @@ function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protoc
   // Compare case-insensitively on name and order-insensitively overall — CDP
   // pause events and the middleware view can fold the same headers back in a
   // different order and casing without that being a meaningful change.
+  // Set-Cookie keeps its order: when two lines set the same cookie, the later
+  // one wins, so a handler that only reorders them changes the cookie stored.
   const normalize = (entries: Protocol.Fetch.HeaderEntry[]) => {
-    return entries.map(({ name, value }) => `${name.toLowerCase()}: ${value}`).sort()
+    const lines = entries.map(({ name, value }) => `${name.toLowerCase()}: ${value}`)
+    const isSetCookie = (line: string) => line.startsWith('set-cookie: ')
+
+    return [...lines.filter((line) => !isSetCookie(line)).sort(), ...lines.filter(isSetCookie)]
   }
 
   const leftNorm = normalize(left)
@@ -120,9 +125,7 @@ function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protoc
  * stale length headers. The pause-header fallback describes the wire body, not
  * the decoded body we fulfill with, so its encoding headers are stripped too.
  */
-function toFulfilledHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
-  const middlewareHeaders = toResponseHeaders(headers)
-
+function toFulfilledHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
   if (middlewareHeaders) {
     return stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
   }
@@ -138,9 +141,7 @@ function toFulfilledHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetc
  * lowercased, re-folded reconstruction — the same "don't override what you
  * didn't touch" rule continueRequestHeaders applies at the request stage.
  */
-function toContinuedHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
-  const middlewareHeaders = toResponseHeaders(headers)
-
+function toContinuedHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
   if (!middlewareHeaders) {
     return undefined
   }
@@ -195,13 +196,18 @@ function toPausePostData (entries?: Protocol.Network.PostDataEntry[]): Buffer | 
   return Buffer.concat(entries.map(({ bytes }) => Buffer.from(bytes!, 'base64')))
 }
 
-function contentTypeOf (entries?: Protocol.Fetch.HeaderEntry[]): string | undefined {
+function headerValueOf (entries: Protocol.Fetch.HeaderEntry[] | undefined, headerName: string): string | undefined {
   const values = entries
-  ?.filter(({ name }) => name.toLowerCase() === 'content-type')
+  ?.filter(({ name }) => name.toLowerCase() === headerName)
   .map(({ value }) => value)
 
   return values?.length ? values.join(', ') : undefined
 }
+
+// Headers that decide where and how Chrome follows a redirect. Only these are
+// compared, because the pipeline drops hop-by-hop headers such as Connection,
+// so a full comparison would flag every HTTP/1.1 redirect as changed.
+const REDIRECT_FOLLOW_HEADERS = ['location', 'referrer-policy']
 
 /**
  * Fulfill only when continueResponse would leave the Network record out of
@@ -218,6 +224,14 @@ function contentTypeOf (entries?: Protocol.Fetch.HeaderEntry[]): string | undefi
  * Fetch.fulfillRequest:
  *   - the body, which no longer matches the origin bytes
  *   - the content-type, which mimeType and charset are derived from
+ *
+ * A redirect whose location or referrer-policy changed is fulfilled too. At a
+ * redirect pause, Chrome records overridden headers but follows the redirect
+ * as the origin sent it: to the origin's location, with the referrer policy
+ * the origin set. CDP cannot read a redirect's body, so it is fulfilled empty.
+ * A handler that removes the location therefore gets an empty body here, where
+ * the MITM path sends the origin's.
+ *
  * Spy-only, status, and other header intercepts stay on continueResponse.
  * If Chrome ever derives another Network.responseReceived field from a header
  * without recomputing it for overrides, that header joins the fulfill list.
@@ -229,20 +243,29 @@ function encodePausedResponse (
   { originalBodyDigest, ...pausedResponse }: CdpFetchTransportResponse,
   response: CdpFetchHttpResponse,
 ): CdpFetchTransportResponse {
+  const middlewareHeaders = toResponseHeaders(response.headers)
   const bodyModified = response.body !== undefined && !isOriginBody(response.body, originalBodyDigest)
-  const middlewareContentType = contentTypeOf(toResponseHeaders(response.headers))
+  const middlewareContentType = headerValueOf(middlewareHeaders, 'content-type')
   const contentTypeModified = middlewareContentType !== undefined
-    && middlewareContentType !== contentTypeOf(pausedResponse.responseHeaders)
+    && middlewareContentType !== headerValueOf(pausedResponse.responseHeaders, 'content-type')
 
-  const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined)
+  // A header the middleware removed counts as changed; middleware that
+  // reported no headers at all changed nothing.
+  const redirectModified = pausedResponse.redirectPause === true
+    && middlewareHeaders !== undefined
+    && REDIRECT_FOLLOW_HEADERS.some((headerName) => {
+      return headerValueOf(middlewareHeaders, headerName) !== headerValueOf(pausedResponse.responseHeaders, headerName)
+    })
+
+  const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined) || redirectModified
 
   return {
     ...pausedResponse,
     fulfilled,
     responseCode: response.statusCode ?? pausedResponse.responseCode,
     responseHeaders: fulfilled
-      ? toFulfilledHeaders(response.headers, pausedResponse.responseHeaders)
-      : toContinuedHeaders(response.headers, pausedResponse.responseHeaders),
+      ? toFulfilledHeaders(middlewareHeaders, pausedResponse.responseHeaders)
+      : toContinuedHeaders(middlewareHeaders, pausedResponse.responseHeaders),
     ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
   }
 }
@@ -384,7 +407,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,
-        responseHeaders: toFulfilledHeaders(response.headers),
+        responseHeaders: toFulfilledHeaders(toResponseHeaders(response.headers)),
         body: toResponseBody(response.body),
       }
 

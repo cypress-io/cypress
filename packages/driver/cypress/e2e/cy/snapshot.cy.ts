@@ -101,6 +101,7 @@ describe('driver/src/cy/snapshots', () => {
     it('does not cause images to be requested multiple times', function () {
       let timesRequested = 0
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the image is not requested again, so give a second request time to happen
       cy.intercept('/fixtures/media/cypress.png', () => {
         timesRequested++
       })
@@ -200,4 +201,5 @@ describe('driver/src/cy/snapshots', () => {
   })
 })
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}

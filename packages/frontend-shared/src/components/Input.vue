@@ -77,9 +77,9 @@ const inputAttrs = _.omit(attrs, 'class')
 const props = withDefaults(defineProps<{
   type?: InputHTMLAttributes['type']
   inputClasses?: string | string[] | Record<string, string>
-  prefixIcon?: FunctionalComponent<SVGAttributes, {}>
+  prefixIcon?: FunctionalComponent<SVGAttributes>
   prefixIconClasses?: string | string[] | Record<string, string>
-  suffixIcon?: FunctionalComponent<SVGAttributes, {}>
+  suffixIcon?: FunctionalComponent<SVGAttributes>
   suffixIconClasses?: string | string[] | Record<string, string>
   modelValue?: string
   style?: string

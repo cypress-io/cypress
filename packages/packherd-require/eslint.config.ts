@@ -1,9 +1,11 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  ...vitestConfig,
   {
     // inputs the specs bundle and load
     ignores: ['test/fixtures/**'],
