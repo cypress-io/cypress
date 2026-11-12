@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as errors from '../../../lib/errors'
 import {
   availableMemoryMb,
+  BlockPrinter,
   holdStdout,
   startCoordinator,
   orderByDuration,
@@ -254,6 +255,25 @@ describe('lib/modes/run-workers', () => {
       capture?.mockRestore()
 
       expect((await hooks.collectRuns([])).map((run) => run.spec.relative)).toEqual(['a.cy.ts'])
+    })
+  })
+
+  describe('BlockPrinter', () => {
+    it('prints blocks immediately, and in order after resume while paused', () => {
+      const written: string[] = []
+      const printer = new BlockPrinter((block) => written.push(block))
+
+      printer.print('a')
+      printer.pause()
+      printer.print('b')
+      printer.print('c')
+
+      expect(written).toEqual(['a'])
+
+      printer.resume()
+      printer.print('d')
+
+      expect(written).toEqual(['a', 'b', 'c', 'd'])
     })
   })
 })

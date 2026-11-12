@@ -300,6 +300,32 @@ export function holdStdout (): () => string {
   }
 }
 
+/** Prints whole blocks as they arrive, except while paused, when they wait and print in order on resume. */
+export class BlockPrinter {
+  private paused: string[] | undefined
+
+  constructor (private write: (block: string) => void) {}
+
+  print (block: string) {
+    if (this.paused) {
+      this.paused.push(block)
+    } else {
+      this.write(block)
+    }
+  }
+
+  pause () {
+    this.paused ??= []
+  }
+
+  resume () {
+    const blocks = this.paused ?? []
+
+    this.paused = undefined
+    blocks.forEach((block) => this.write(block))
+  }
+}
+
 type BeforeSpecRun = () => Promise<Claim>
 type AfterSpecRun = (spec: SpecWithRelativeRoot, results: RunResult, config?: unknown) => Promise<unknown> | unknown
 
@@ -337,7 +363,8 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
   let releaseOwnOutput: (() => string) | undefined
   let announced = false
 
-  const printBlock = (block: string) => write(block)
+  const printer = new BlockPrinter(write)
+  const printBlock = (block: string) => printer.print(block)
 
   // goes through the current stdout.write, so record mode's capture of this spec's output sees it
   const printOwnOutput = () => {
@@ -350,6 +377,7 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
 
   const onExit = () => {
     printOwnOutput()
+    printer.resume()
     children.forEach((child) => {
       if (child.exitCode === null) child.kill()
     })
@@ -434,9 +462,16 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
           return claim
         },
         async afterSpecRun (spec, results, config) {
-          printOwnOutput()
-          queue.complete(0, results)
-          await cloud.afterSpecRun?.(spec, results, config)
+          // keeps other workers' blocks out of the artifact upload log Cloud's afterSpecRun prints
+          printer.pause()
+
+          try {
+            printOwnOutput()
+            queue.complete(0, results)
+            await cloud.afterSpecRun?.(spec, results, config)
+          } finally {
+            printer.resume()
+          }
         },
         async collectRuns () {
           printOwnOutput()
