@@ -985,7 +985,8 @@ function getTestFromRunnable (runnable) {
 
     case 'test':
       return runnable
-    default: null
+    default:
+      break
   }
 }
 

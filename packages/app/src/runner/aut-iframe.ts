@@ -410,7 +410,7 @@ export class AutIframe {
 
     // create all containers (off-DOM)
     elementsToProcess.forEach(({ $el: $_el, dimensions }) => {
-      const container = this._addElementBoxModelLayers($_el, $body, dimensions)
+      const container = this._addElementBoxModelLayers($_el, dimensions)
 
       container.setAttribute('data-highlight-el', `true`)
       containers.push(container)
@@ -802,9 +802,7 @@ export class AutIframe {
     return box
   }
 
-  private _addElementBoxModelLayers ($el, $body, dimensions?: ReturnType<typeof getElementDimensions>) {
-    $body = $body || this.$('body')
-
+  private _addElementBoxModelLayers ($el, dimensions?: ReturnType<typeof getElementDimensions>) {
     const el = $el.get(0)
 
     // Use existing dimensions if provided to avoid redundant getComputedStyle calls

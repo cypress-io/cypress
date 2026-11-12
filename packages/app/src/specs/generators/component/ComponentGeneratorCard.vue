@@ -1,17 +1,15 @@
 <template>
   <CreateSpecCard
     :disabled="disabled"
-    :header="t('createSpec.component.importFromComponent.header')"
-    :description="t('createSpec.component.importFromComponent.description')"
+    header="Create from component"
+    description="Generate a basic component test for any of the components in this project."
     :icon="DocumentCodeIcon"
   />
 </template>
 
 <script lang="ts" setup>
 import CreateSpecCard from '../../CreateSpecCard.vue'
-import { useI18n } from '@cy/i18n'
 import DocumentCodeIcon from '~icons/cy/document-code_x48'
-const { t } = useI18n()
 
 defineProps<{
   disabled?: boolean

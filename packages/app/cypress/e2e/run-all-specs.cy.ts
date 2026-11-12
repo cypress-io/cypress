@@ -18,9 +18,7 @@ describe('run-all-specs', () => {
       return cy.findByTestId('run-all-specs-for-all').click()
     }
 
-    const command = cy.get('[data-cy=spec-item-directory]').contains(platformDir)
-
-    return command.realHover().then(() => {
+    return cy.get('[data-cy=spec-item-directory]').contains(platformDir).realHover().then(() => {
       cy.get(`[data-cy="run-all-specs-for-${platformDir.replace('\\', '\\\\')}"]`).click({ force: true })
     })
   }

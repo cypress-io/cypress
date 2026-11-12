@@ -1,5 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import RecordBanner from './RecordBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
@@ -22,8 +20,8 @@ describe('<RecordBanner />', () => {
       } as any,
     } as any
 
-    cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
-    cy.contains(defaultMessages.specPage.banners.record.content).should('be.visible')
+    cy.contains('Record your first run').should('be.visible')
+    cy.contains('Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools.').should('be.visible')
 
     cy.findByDisplayValue('npx cypress run --component --record --key abcd-efg-1234').should('be.visible')
 

@@ -1,17 +1,15 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import ConnectProjectBanner from './ConnectProjectBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<ConnectProjectBanner />', () => {
-  const cohortOption = { cohort: '', value: defaultMessages.specPage.banners.connectProject.content }
+  const cohortOption = { cohort: '', value: 'Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.' }
 
   it('should render expected content', () => {
     cy.mount({ render: () => <ConnectProjectBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
-    cy.contains(defaultMessages.specPage.banners.connectProject.title).should('be.visible')
-    cy.contains(defaultMessages.specPage.banners.connectProject.content).should('be.visible')
-    cy.contains(defaultMessages.specPage.banners.connectProject.buttonLabel).should('be.visible')
+    cy.contains('Connect your project to Cypress Cloud').should('be.visible')
+    cy.contains('Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.').should('be.visible')
+    cy.contains('Connect your project').should('be.visible')
 
     cy.percySnapshot()
   })

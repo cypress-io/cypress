@@ -10,7 +10,7 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 
 - **@packages/app** — The main Vue 3 front-end application for the Cypress browser-side UI (specs list, Test Replay, runner toolbar, Studio).
 - **@packages/launchpad** — Vue 3 Electron-rendered application shown when running `cypress open`; handles login, project selection, and configuration setup.
-- **@packages/frontend-shared** — Shared Vue 3 components, TailwindCSS config, composables, and i18n strings consumed by both `app` and `launchpad`.
+- **@packages/frontend-shared** — Shared Vue 3 components, TailwindCSS config, and composables consumed by both `app` and `launchpad`.
 - **@packages/reporter** — The test result reporter UI (command log, test tree) rendered inside the runner iframe.
 - **@packages/runner** — Legacy webpack bundler for `driver` and `reporter`; being phased out in favour of `app`.
 

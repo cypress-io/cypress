@@ -111,11 +111,14 @@ chai.use((chai, u) => {
     // Firefox returns [object Window] but Chrome returns [object Object]
     // So, we try throwing an error and check the error message.
     try {
+      /* eslint-disable @typescript-eslint/no-unused-expressions -- the reads are the probe */
       val && val.document
       val && val.inspect
+      /* eslint-enable @typescript-eslint/no-unused-expressions */
     } catch (e: any) {
-      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
-      e.message.indexOf('cross-origin') !== -1) { // firefox
+      // A getter can throw any value, not only an Error
+      if ((typeof e?.stack === 'string' && e.stack.includes('cross-origin')) || // chrome
+      (typeof e?.message === 'string' && e.message.includes('cross-origin'))) { // firefox
         return `[window]`
       }
     }
@@ -159,9 +162,12 @@ chai.use((chai, u) => {
     return message.replace(imageMarkdown, '``$&``')
   }
 
-  const replaceArgMessages = (args, str) => {
+  // Only the message templates (args[1] and args[2]) are rewritten. The
+  // expected and actual values (args[3] and args[4]) are user data, and
+  // rewriting them would change what the message displays.
+  const replaceArgMessages = (args: any[], str) => {
     return _.reduce(args, (memo: string[], value, index) => {
-      if (_.isString(value)) {
+      if ((index === 1 || index === 2) && _.isString(value)) {
         value = value
         .replace(allWordsBetweenCurlyBraces, '**$1**')
         .replace(allEscapedSingleQuotes, '__quote__')
@@ -244,15 +250,9 @@ chai.use((chai, u) => {
       }
 
       msg = msg || ''
-      msg = msg
-      .replace(/#\{this\}/g, () => {
-        return chaiUtils.objDisplay(val)
-      })
-      .replace(/#\{act\}/g, () => {
-        return chaiUtils.objDisplay(actual)
-      })
-      .replace(/#\{exp\}/g, () => {
-        return chaiUtils.objDisplay(expected)
+      // A single pass, so a tag inside an inserted value isn't substituted again
+      msg = msg.replace(/#\{(this|act|exp)\}/g, (_match, tag) => {
+        return chaiUtils.objDisplay(tag === 'this' ? val : tag === 'act' ? actual : expected)
       })
 
       return (flagMsg ? `${flagMsg}: ${msg}` : msg)

@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
   {
     files: ['**/*.{ts,js,jsx,tsx,vue}'],
     languageOptions: {

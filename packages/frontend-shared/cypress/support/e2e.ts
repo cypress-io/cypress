@@ -16,7 +16,6 @@ import type nock from 'nock'
 
 import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
 import { installCustomPercyCommand } from './customPercyCommand'
-import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
 import { logInternal } from './utils'
 import { tabUntil } from './tab-until'
@@ -108,10 +107,6 @@ export interface ValidateExternalLinkOptions {
 declare global {
   namespace Cypress {
     interface Chainable {
-      /**
-       * The i18n strings, provided for convenience when testing string values in e2e tests
-       */
-      i18n: typeof i18n
       /**
        * Calls a function block with the "ctx" object from the server,
        * and an object containing any options passed into the server context
@@ -215,8 +210,6 @@ declare global {
 
   }
 }
-
-cy.i18n = i18n
 
 before(() => {
   cy.task('setCyInCyVariables', { 'e2e_launchpadPort': undefined }).then(() => {

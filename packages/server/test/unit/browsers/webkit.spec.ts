@@ -214,6 +214,7 @@ describe('lib/browsers/webkit', () => {
     // webkit browserVersion, so the detection path resolves to a real version rather
     // than falling back to '0' (see cypress-io/cypress#33974 and #33969)
     it('detects a real version from the installed playwright-core', async () => {
+      // eslint-disable-next-line n/no-extraneous-require -- installed by playwright-webkit, which pins its version
       const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
       const browsersJson = JSON.parse(await fs.readFile(path.join(pwCorePath, 'browsers.json'), 'utf8'))
       const expectedVersion = browsersJson.browsers.find((b) => b.name === 'webkit').browserVersion

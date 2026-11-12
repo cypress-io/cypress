@@ -19,6 +19,7 @@ src/
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
+  nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
   vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
   reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
@@ -33,20 +34,22 @@ src/
 - Prefer adding an override here over repeating it in several packages. A rule only one package needs goes in that package's `eslint.config.ts`, after the shared configs.
 - Flat config replaces a rule's options rather than merging them. A package that redefines a rule already set here drops the shared options, so extend the shared block instead. `frontendOverrides`'s `no-restricted-imports` is the usual case.
 - `baseConfig`, `jsonConfig` and the other blocks are named exports; `src/index.ts` has no default export.
+- Test files lint unused expressions with `chai-friendly/no-unused-expressions` instead of `@typescript-eslint/no-unused-expressions`, so chai property assertions like `expect(x).to.be.true` pass. Test code outside the shared test globs (`test/`, `cypress/`, `*.spec.*`, `*.cy.*`) opts in with `chaiFriendlyConfig([...globs])` after `baseConfig`, as `scripts` and `system-tests` do. A disable comment in a test file has to name the `chai-friendly` rule.
 - The repo root has its own `eslint.config.ts`, which lints only repo-root files and ignores every subdirectory except the top level of `.claude/` and `.cursor/`, whose settings files belong to no workspace. Each workspace lints itself. `lerna run lint` only reaches workspaces, so the root `lint` and `lint:fix` scripts run `lint:root` first, which is how CI's `linux-lint` job covers the root files.
 
 ## Adding a workspace
 
 A new workspace lints itself with its own config:
 
-1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig` and, to lint JSON, `jsonConfig` after it:
+1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)):
 
    ```ts
-   import { baseConfig, jsonConfig } from '@packages/eslint-config'
+   import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 
    export default [
      ...baseConfig,
      ...jsonConfig,
+     ...nodeConfig,
    ]
    ```
 
@@ -75,6 +78,28 @@ It is built on `eslint-plugin-jsonc` and `eslint-plugin-package-json`, and every
 The first `eslint --fix` after a package opts in reorders its `package.json` top-level keys. That diff is expected.
 
 `eslint-plugin-jsonc` is pinned to v2, because v3 needs ESLint 9.38 or later. `eslint-plugin-package-json` is pinned to 0.x, because 1.x moves to `jsonc-eslint-parser` v3 and declares a peer dependency on `@eslint/json`. `@eslint/json` itself doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
+
+## `nodeConfig`
+
+`nodeConfig` checks the [runtime floors](../../AGENTS.md#runtime-targets) and declared dependencies of Node-side code. Spread it after `baseConfig` and `jsonConfig`. It is built on `eslint-plugin-n` and turns on:
+
+- `n/no-unsupported-features/node-builtins`, `n/no-unsupported-features/es-builtins` and `n/no-unsupported-features/es-syntax`: no Node API, built-in or syntax newer than the floor. They are off for `.d.ts` files, which emit no runtime code and whose DOM globals, such as `Storage`, the rules would read as Node's.
+- `n/no-extraneous-import` and `n/no-extraneous-require`: every package a file imports is declared in the nearest `package.json`. Declare a missing package rather than disabling the rule, and declare a sibling workspace the way the repo already does, as `"0.0.0-development"` in `devDependencies`. Never declare one that would close a dependency cycle: nx breaks a cycle by dropping one of its edges, and the next fresh `lerna run build` can then compile a package before one it imports (`https-proxy` built before `network` is the case that caught this). Spread `undeclaredWorkspaceImports(files, workspaces)` after `nodeConfig` instead, scoped to the files that import it. To check for a cycle, follow the other workspace's own dependencies back to yours. Use a hoisted package's existing version range so the lockfile doesn't resolve a second copy. A `require.resolve` that deliberately finds a package through another one, such as the user's project or `playwright-webkit`, gets an `eslint-disable-next-line` with the reason.
+
+`nodeConfig` also declares `globals.node`. The plugin only checks a global such as `process` or `Buffer` that resolves in scope, so without them a workspace that never declared Node globals, like `cli`, would skip every global-based check silently.
+
+`n/no-extraneous-*` also skips imports it can't resolve, which includes every workspace whose `main` points at build output that isn't built yet. Run `yarn lint` on a built tree, as CI does, or those hits stay hidden.
+
+The floor is set in `settings.n.version`, not read from each workspace's `engines`, because most workspaces declare none. `nodeConfig.ts` reads both floors from the files that own them:
+
+- **Bundled floor** (the default): `>=` the version in `.node-version`. Dev tooling runs on it, and the Electron main process runs on Electron's embedded Node, which for the pinned Electron is the same version. If an Electron bump ever leaves its Node below `.node-version`, lower this floor to it.
+- **User floor**: `engines.node` from `cli/package.json`. Spread `userNodeConfig` after `nodeConfig`, scoped with `files`, for code that runs on the user's Node. `cli` applies it to everything but `test/**`, whose specs CI runs on the dev Node. `server` applies it to `lib/plugins/child/**`, the config child process. Modules the child imports from outside that directory are still checked against the bundled floor.
+
+Every workspace opts in except the browser bundles, whose floor is the supported browsers rather than a Node version: `app`, `launchpad`, `frontend-shared`, `driver`, `reporter`, `runner`, `extension` and `example`, and the mount adapters `npm/react`, `npm/vue`, `npm/angular`, `npm/svelte` and `npm/mount-utils`. A Node package that also ships browser code keeps `nodeConfig` off those files by adding them to each block's `ignores`. Otherwise they would get Node globals, which stops `no-undef` from catching Node-only names in browser JS, and the Node floor. The browser files are `vite-dev-server`'s and `vite-plugin-cypress-esm`'s `client/**`, and `webpack-dev-server`'s `src/browser.ts` and `src/aut-runner.ts`. `system-tests` uses the same pattern to keep it out of `projects/**` and `project-fixtures/**`: fixtures are user projects with their own dependencies, and `n/no-extraneous-import` crashes resolving their `tsconfig.json` files.
+
+`n/no-process-exit` is left off: almost all of its hits are CLIs and scripts that exit on purpose. The plugin's optional `ts-declaration-location` peer is only needed by `n/no-sync`, which isn't enabled.
+
+`nodeConfig.ts` loads the plugin with `require` rather than `import`. Its types export a string-named `"module.exports"`, which TypeScript only parses from 5.6 and import-x's parser not at all. An `import` fails `check-ts` in every workspace whose `tsconfig` takes in its `eslint.config.ts`.
 
 ## Vue packages
 
@@ -110,6 +135,8 @@ graphql-eslint's processor refuses `.vue` files under flat config, and its docum
 
 ### Dependency pins
 
+- **`@eslint/js`, exact.** It is pinned to the `eslint` version in the lockfile, because `eslint` depends on that exact `@eslint/js` itself. Bump the two together; otherwise the lockfile carries two copies and the shared config applies one version's `recommended` rules under another `eslint`. Don't let it reach 10.x ahead of `eslint`: `@eslint/js` 10.0.1 and later declare a peer of `eslint@^10` and enable `preserve-caught-error`, which ESLint 9.33 doesn't have.
+- **`@typescript-eslint/no-restricted-imports`, not core.** `frontendOverrides` keeps the typescript-eslint rule, which is deprecated since 8.64, because core `no-restricted-imports` only accepts `allowTypeImports` from ESLint 9.37. On 9.33 the core rule rejects the option as a config error and every Vue file fails to lint. Switch to core once `eslint` reaches 9.37 or later.
 - **`graphql@16`, nested.** graphql-eslint v4 needs a `graphql@^16` peer at load time (it reads the `OperationTypeNode` enum, which graphql 15 only has as a type), while the app and server stay on `graphql@15`. This package depends on `graphql@16` itself and its `workspaces.nohoist` entry keeps `@graphql-eslint/eslint-plugin` and its tree in this package's `node_modules`. Hoisted to the root, the plugin would resolve `graphql@15`. Don't remove the nohoist entry, and don't move these dependencies to the root.
 - **`graphql` is left out of lockfile deduplication.** `@types/graphql-resolve-batch` depends on `graphql@>=14`, so `yarn-deduplicate --strategy=highest` would move it to graphql 16 types while `data-context` passes it graphql 15 values. `yarn dedupe-lockfile`, which `yarn check-lockfile`, the local postinstall and CI all use, passes `--exclude graphql`. A root resolution cannot fix this instead, because yarn keeps the `graphql@>=14` request in the lockfile either way.
 - **`@vue/compiler-sfc@3.5`, nested.** graphql-tag-pluck v8 needs `registerTS`, added in 3.3. Against the repo's 3.2.47 it silently drops every `.vue` document. The app packages keep 3.2.47.

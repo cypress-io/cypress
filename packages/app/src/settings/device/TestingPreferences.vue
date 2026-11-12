@@ -1,10 +1,10 @@
 <template>
   <SettingsSection>
     <template #title>
-      {{ t('settingsPage.testingPreferences.title') }}
+      Testing preferences
     </template>
     <template #description>
-      {{ t('settingsPage.testingPreferences.description') }}
+      Configure your testing environment with these flags
     </template>
     <div
       class="divide-y border rounded divide-gray-200 border-gray-100 px-[16px]"
@@ -30,13 +30,10 @@
 
 <script lang="ts" setup>
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import { gql, useMutation } from '@urql/vue'
 import { SetTestingPreferencesDocument } from '../../generated/graphql'
 import type { TestingPreferencesFragment } from '../../generated/graphql'
-
-const { t } = useI18n()
 
 gql`
 fragment TestingPreferences on Query {
@@ -59,8 +56,8 @@ const setPreferences = useMutation(SetTestingPreferencesDocument)
 
 const autoScrollingPreference = {
   id: 'autoScrollingEnabled',
-  title: t('settingsPage.testingPreferences.autoScrollingEnabled.title'),
-  description: t('settingsPage.testingPreferences.autoScrollingEnabled.description'),
+  title: 'Auto scrolling enabled',
+  description: 'Scroll behavior when running tests.',
 } as const
 
 function updatePref (value: boolean) {

@@ -23,12 +23,11 @@ const toMilliseconds = (duration: unknown) => {
   return Number.parseFloat(String(duration))
 }
 
-interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions> {
+interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollIntoViewOptions> {
   _log?: Log
   $el: JQuery
   $parent: any
   axis: string
-  offset?: object
 }
 
 interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
@@ -42,15 +41,9 @@ interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    scrollIntoView (subject, userOptions: Partial<Cypress.ScrollToOptions> = {}) {
+    scrollIntoView (subject, userOptions: Partial<Cypress.ScrollIntoViewOptions> = {}) {
       if (!_.isObject(userOptions)) {
         $errUtils.throwErrByPath('scrollIntoView.invalid_argument', { args: { arg: userOptions } })
-      }
-
-      // ensure the subject is not window itself
-      // cause how are you gonna scroll the window into view...
-      if (subject === state('window')) {
-        $errUtils.throwErrByPath('scrollIntoView.subject_is_window')
       }
 
       // throw if we're trying to scroll to multiple elements
@@ -66,9 +59,6 @@ export default (Commands, Cypress, cy, state) => {
         easing: 'swing',
         axis: 'xy',
       })
-
-      // figure out the options which actually change the behavior of clicks
-      let deltaOptions = $utils.filterOutOptions(options)
 
       // if we cannot parse an integer out of duration
       // which could be 500 or "500", then it's NaN...throw
@@ -100,7 +90,8 @@ export default (Commands, Cypress, cy, state) => {
         options.$parent.contentWindow = options.$parent
       }
 
-      deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
+      // figure out the options which actually change the behavior of the scroll
+      const deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
 
       options._log = Cypress.log({
         $el: options.$el,

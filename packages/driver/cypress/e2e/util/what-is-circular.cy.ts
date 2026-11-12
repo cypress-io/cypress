@@ -5,28 +5,28 @@ describe('what-is-circular', function () {
     expect(whatIsCircular(2)).to.eq(undefined)
   })
 
-  it('should return path for circular objects', function () {
+  it('should return path for circular objects with a sibling primitive', function () {
     const x: any = {}
 
     x.cyclic = { a: 1, x }
     expect(whatIsCircular(x)).to.deep.eq(['cyclic', 'x'])
   })
 
-  it('should return path for circular objects', function () {
+  it('should return path for circular objects with a sibling empty object', function () {
     const x: any = {}
 
     x.cyclic = { a: {}, x }
     expect(whatIsCircular(x)).to.deep.eq(['cyclic', 'x'])
   })
 
-  it('should return path for circular objects', function () {
+  it('should return path for circular objects referenced through a nested object', function () {
     const x: any = {}
 
     x.cyclic = { a: {}, indirect: { x } }
     expect(whatIsCircular(x)).to.deep.eq(['cyclic', 'indirect', 'x'])
   })
 
-  it('should return path for circular objects', function () {
+  it('should return path for deeply nested circular objects', function () {
     const a = {
       a: false,
       b: {
@@ -47,7 +47,7 @@ describe('what-is-circular', function () {
     expect(whatIsCircular(a)).to.deep.eq(['b', 'c', 'd', 'e'])
   })
 
-  it('should return path for circular objects', function () {
+  it('should return path for circular objects alongside arrays', function () {
     const x: any = {
       a: [
         {
@@ -95,14 +95,14 @@ describe('what-is-circular', function () {
     expect(whatIsCircular(x)).to.deep.eq(['a', '2'])
   })
 
-  it('should return undefined for non-circular objects', function () {
+  it('should return undefined for non-circular flat objects', function () {
     const x: any = {}
 
     x.cyclic = { a: 1, b: 2 }
     expect(whatIsCircular(x)).to.eq(undefined)
   })
 
-  it('should return undefined for non-circular objects', function () {
+  it('should return undefined for non-circular objects containing arrays', function () {
     const x: any = {
       a: [
         {
@@ -123,7 +123,7 @@ describe('what-is-circular', function () {
     expect(whatIsCircular(x)).to.eq(undefined)
   })
 
-  it('should return undefined for non-circular objects', function () {
+  it('should return undefined for non-circular objects that reuse a reference', function () {
     const x: any = {}
     const y = {}
 

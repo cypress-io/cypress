@@ -153,9 +153,8 @@ describe('lib/browsers/firefox', () => {
       vi.spyOn(utils, 'writeExtension').mockResolvedValue('/path/to/ext')
       vi.spyOn(utils, 'getPort').mockResolvedValue(1234)
       vi.spyOn(FirefoxProfile.prototype, 'setPreference')
-      vi.spyOn(FirefoxProfile.prototype, 'shouldDeleteOnExit')
       vi.spyOn(FirefoxProfile.prototype, 'path')
-      vi.spyOn(FirefoxProfile.prototype, 'encoded').mockImplementation((cb: Function) => {
+      vi.spyOn(FirefoxProfile.prototype, 'encoded').mockImplementation((cb: (err: any, encodedProfile: string) => void) => {
         cb(undefined, 'abcdef')
       })
 
@@ -380,7 +379,6 @@ describe('lib/browsers/firefox', () => {
                 binary: '/path/to/binary',
                 args: [
                   '-new-instance',
-                  '-start-debugger-server',
                   '-no-remote',
                   ...(os.platform() !== 'linux' ? ['-foreground'] : []),
                 ],
@@ -572,10 +570,77 @@ describe('lib/browsers/firefox', () => {
       expectNotCalledWith(setPreference, 'network.proxy.no_proxies_on')
     })
 
-    it('tears down the temporary profile when the browser is destroyed', async () => {
-      await firefox.open(browser as any, 'http://', options as any, automation as any)
+    describe('profile removal on exit', () => {
+      let rmSyncSpy: MockInstance
 
-      expectCalledWith(vi.mocked(FirefoxProfile.prototype.shouldDeleteOnExit), true)
+      beforeEach(() => {
+        rmSyncSpy = vi.spyOn(fsExtra, 'rmSync').mockReturnValue(undefined)
+
+        // Drop the dirs earlier tests in this file queued, so each test only sees its own launches
+        firefox._removeProfileDirsOnExit()
+        rmSyncSpy.mockClear()
+      })
+
+      it('removes the temporary profile with retries when the process exits', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        firefox._removeProfileDirsOnExit()
+
+        expect(rmSyncSpy).toHaveBeenCalledWith(
+          '/path/to/appData/firefox-stable/interactive',
+          expect.objectContaining({ recursive: true, force: true, maxRetries: expect.any(Number) }),
+        )
+      })
+
+      it('removes the profile of every Firefox launched in the process', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        vi.mocked(utils.getProfileDir).mockReturnValue('/path/to/appData/firefox-dev/interactive')
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        firefox._removeProfileDirsOnExit()
+
+        expect(rmSyncSpy).toHaveBeenCalledWith('/path/to/appData/firefox-stable/interactive', expect.anything())
+        expect(rmSyncSpy).toHaveBeenCalledWith('/path/to/appData/firefox-dev/interactive', expect.anything())
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/35293
+      it('does not print an error when the profile cannot be removed', async () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        rmSyncSpy.mockImplementation(() => {
+          throw Object.assign(new Error('EPERM: operation not permitted'), { code: 'EPERM', syscall: 'rm' })
+        })
+
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        expect(() => firefox._removeProfileDirsOnExit()).not.toThrow()
+        expect(warnSpy).not.toHaveBeenCalled()
+        expect(errorSpy).not.toHaveBeenCalled()
+      })
+
+      // firefox-profile's own delete-on-exit makes one attempt and prints the error with console.warn
+      it('leaves firefox-profile\'s own delete-on-exit turned off', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        const [profile] = vi.mocked(FirefoxProfile.prototype.path).mock.instances
+
+        expect(profile.willDeleteOnExit()).toBe(false)
+      })
+
+      it('removes the process listeners firefox-profile adds for each profile', async () => {
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        const [profile] = vi.mocked(FirefoxProfile.prototype.path).mock.instances
+        const onExit = Reflect.get(profile, 'onExit')
+        const onSigInt = Reflect.get(profile, 'onSigInt')
+
+        expect(onExit).toBeTypeOf('function')
+        expect(onSigInt).toBeTypeOf('function')
+        expect(process.listeners('exit')).not.toContain(onExit)
+        expect(process.listeners('SIGINT')).not.toContain(onSigInt)
+      })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/17896
@@ -632,6 +697,94 @@ describe('lib/browsers/firefox', () => {
       expect(result.kill).toBeInstanceOf(Function)
     })
 
+    describe('when the launch fails after the WebDriver session is created', () => {
+      beforeEach(() => {
+        wdInstance.sessionSubscribe = vi.fn().mockRejectedValue(new Error('No connection to WebDriver Bidi was established'))
+        wdInstance.deleteSession = vi.fn().mockResolvedValue(undefined)
+      })
+
+      it('deletes the session and throws FIREFOX_COULD_NOT_CONNECT', async () => {
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        expect(wdInstance.deleteSession).toHaveBeenCalledOnce()
+      })
+
+      it('kills firefox and geckodriver and still throws FIREFOX_COULD_NOT_CONNECT if deleting the session fails', async () => {
+        const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
+
+        wdInstance.deleteSession = vi.fn().mockRejectedValue(new Error('session already gone'))
+
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        expectCalledWith(kill, 1234)
+        expectCalledWith(kill, 5678)
+      })
+
+      it('kills firefox and geckodriver if deleting the session does not finish', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+        try {
+          const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
+
+          wdInstance.deleteSession = vi.fn().mockReturnValue(new Promise(() => {}))
+
+          const opened = expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+          await vi.waitFor(() => expect(wdInstance.deleteSession).toHaveBeenCalledOnce())
+          await vi.advanceTimersByTimeAsync(10000)
+          await opened
+
+          expectCalledWith(kill, 1234)
+          expectCalledWith(kill, 5678)
+        } finally {
+          vi.useRealTimers()
+        }
+      })
+
+      it('makes the next launch wait for the failed session to close', async () => {
+        const sessionClosed = Promise.withResolvers<void>()
+
+        wdInstance.deleteSession = vi.fn().mockReturnValue(sessionClosed.promise)
+
+        const firstLaunch = expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        await vi.waitFor(() => expect(wdInstance.deleteSession).toHaveBeenCalledOnce())
+
+        wdInstance.sessionSubscribe = vi.fn().mockResolvedValue(undefined)
+        const secondLaunch = firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        await vi.waitFor(() => expect(utils.getProfileDir).toHaveBeenCalledTimes(2))
+        await new Promise((resolve) => setTimeout(resolve, 50))
+
+        expect(webdriver.newSession).toHaveBeenCalledOnce()
+
+        sessionClosed.resolve()
+        await firstLaunch
+        await secondLaunch
+
+        expect(webdriver.newSession).toHaveBeenCalledTimes(2)
+      })
+
+      it('still throws FIREFOX_COULD_NOT_CONNECT if killing firefox fails', async () => {
+        vi.spyOn(process, 'kill').mockImplementation(() => {
+          throw new Error('EPERM')
+        })
+
+        wdInstance.deleteSession = vi.fn().mockRejectedValue(new Error('session already gone'))
+
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+      })
+    })
+
+    it('does not delete a session when the WebDriver session could not be created', async () => {
+      wdInstance.deleteSession = vi.fn()
+      vi.mocked(webdriver.newSession).mockRejectedValue(new Error('session not created'))
+
+      await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+      expect(wdInstance.deleteSession).not.toHaveBeenCalled()
+    })
+
     describe('profile/extension', () => {
       afterEach(() => {
         return mockfs.restore()
@@ -647,6 +800,40 @@ describe('lib/browsers/firefox', () => {
         await firefox.open(browser as any, 'http://', options as any, automation as any)
 
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).toBeUndefined()
+      })
+
+      it('does not remove session profiles it did not create before launching', async () => {
+        mockfs({
+          '/path/to/appData/firefox-stable/interactive/': {
+            'rust_mozprofileAbC123': { 'prefs.js': '' },
+          },
+        })
+
+        options.isTextTerminal = true
+
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileAbC123')).toBeDefined()
+      })
+
+      it('removes the failed session\'s profile when it has to kill firefox', async () => {
+        mockfs({
+          '/path/to/appData/firefox-stable/interactive/': {
+            'rust_mozprofileFailed': { 'prefs.js': '' },
+            'rust_mozprofileOther': { 'prefs.js': '' },
+          },
+        })
+
+        options.isTextTerminal = true
+        vi.spyOn(process, 'kill').mockReturnValue(true)
+        wdInstance.capabilities['moz:profile'] = '/path/to/appData/firefox-stable/interactive/rust_mozprofileFailed'
+        wdInstance.sessionSubscribe = vi.fn().mockRejectedValue(new Error('No connection to WebDriver Bidi was established'))
+        wdInstance.deleteSession = vi.fn().mockRejectedValue(new Error('session already gone'))
+
+        await expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileFailed')).toBeUndefined()
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/rust_mozprofileOther')).toBeDefined()
       })
 
       it('creates chrome/userChrome.css if not exist', async () => {
@@ -733,6 +920,21 @@ describe('lib/browsers/firefox', () => {
         expectCalledWith(kill, 5678)
         // makes sure the exit event is called to signal to the rest of cypress server that the processes are killed
         expectCalledWith(emit, 'exit')
+      })
+
+      it('kills geckodriver even if killing firefox throws', async () => {
+        const kill = vi.spyOn(process, 'kill').mockImplementation((pid) => {
+          if (pid === 1234) {
+            throw new Error('EPERM')
+          }
+
+          return true
+        })
+
+        const instance = await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        expect(() => instance.kill()).toThrow('EPERM')
+        expectCalledWith(kill, 5678)
       })
 
       it('swallows ESRCH in kill method if thrown', async () => {

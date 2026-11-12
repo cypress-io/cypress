@@ -521,7 +521,7 @@ export class SnapshotGenerator {
       const stderr = err.stderr?.toString().trim()
       const detail = stderr || err.toString()
 
-      throw new Error(`Failed \`mksnapshot\` command\n${detail}`)
+      throw new Error(`Failed \`mksnapshot\` command\n${detail}`, { cause: err })
     }
   }
 

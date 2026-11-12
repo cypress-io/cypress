@@ -4231,7 +4231,7 @@ declare namespace Cypress {
     ensureScrollable: boolean
   }
 
-  interface ScrollIntoViewOptions extends ScrollToOptions {
+  interface ScrollIntoViewOptions extends Omit<ScrollToOptions, 'ensureScrollable'> {
     /**
      * Amount to scroll after the element has been scrolled into view
      *
@@ -5131,8 +5131,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
     (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example
@@ -5735,8 +5737,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
     (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example

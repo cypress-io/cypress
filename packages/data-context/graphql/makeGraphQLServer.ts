@@ -20,7 +20,7 @@ import { useServer } from 'graphql-ws/lib/use/ws'
 import { graphqlSchema } from './schema'
 import { runnerMutationRule, tapOperationRule } from './rootFieldRules'
 import { execute, Kind, locatedError, parse, specifiedRules, validate } from 'graphql'
-import type { DefinitionNode, DocumentNode, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
+import type { DefinitionNode, DocumentNode, ExecutionResult, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
 
 const debug = debugLib(`cypress-verbose:graphql:operation`)
 
@@ -182,10 +182,10 @@ function makeGraphQLSocketHandler (validationRules: readonly ValidationRule[]) {
   const rules = [...specifiedRules, ...validationRules]
 
   // The rules are fixed here because socket.io passes every emitted argument to the handler.
-  return (uid: string, payload: string, callback: Function) => executeGraphQLSocketRequest(rules, uid, payload, callback)
+  return (uid: string, payload: string, callback: (result: ExecutionResult) => void) => executeGraphQLSocketRequest(rules, uid, payload, callback)
 }
 
-async function executeGraphQLSocketRequest (validationRules: readonly ValidationRule[], uid: string, payload: string, callback: Function) {
+async function executeGraphQLSocketRequest (validationRules: readonly ValidationRule[], uid: string, payload: string, callback: (result: ExecutionResult) => void) {
   if (typeof callback !== 'function') {
     return
   }

@@ -1,3 +1,4 @@
+/* eslint-disable cypress/no-unnecessary-waiting -- these specs test cy.wait itself, including waiting a fixed time */
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 declare global {

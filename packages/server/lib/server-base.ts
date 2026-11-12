@@ -30,6 +30,7 @@ import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import { allowDestroy } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+import { isUnsafePort } from '@packages/config'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import type { InitializeRoutes } from './routes'
@@ -67,6 +68,10 @@ const debug = Debug('cypress:server:server-base')
 
 const fullyQualifiedRe = /^https?:\/\//
 const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
+// listen(0) draws a fresh ephemeral port each attempt, so only a handful of
+// retries are needed to move off a port browsers block. The cap keeps a
+// misbehaving port range from looping forever.
+const MAX_PORT_ATTEMPTS = 10
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
@@ -371,9 +376,21 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // remote state's `<root>` strategy reads `_fileServer.port()`
     // synchronously, so the fileServer must exist before the primary
     // is computed.
-    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+    const fileServerInstance = await fileServer.create(fileServerFolder as string) as FileServer
 
-    const listenedPort = await this._listen(port)
+    this._fileServer = fileServerInstance
+
+    let listenedPort: number
+
+    try {
+      listenedPort = await this._listen(port)
+    } catch (err) {
+      // the file server is already listening when the runner server fails to
+      // start, and nothing else tears it down, so free its port here
+      await fileServerInstance.close()
+
+      throw err
+    }
 
     this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
@@ -929,30 +946,68 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   _listen (port: number | null | undefined): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          reject(this.portInUseErr(port))
+      let attempts = 0
+
+      const tryListen = () => {
+        attempts++
+
+        const onError = (err) => {
+          // if the server bombs before starting
+          // and the err no is EADDRINUSE
+          // then we know to display the custom err message
+          if (err.code === 'EADDRINUSE') {
+            return reject(this.portInUseErr(port))
+          }
+
+          // any other bind failure cannot be fixed by retrying, and leaving
+          // the promise pending would hang the run
+          reject(err)
         }
+
+        this.server.once('error', onError)
+
+        const listener = () => {
+          const address = this.server.address() as AddressInfo
+
+          this.server.removeListener('error', onError)
+
+          // Configuration validation rejects configured ports that browsers block.
+          // A randomly assigned port can still be blocked and must be redrawn.
+          if (isUnsafePort(address.port)) {
+            debug('discarding browser-blocked port %d', address.port)
+
+            this.server.close((closeErr?: Error) => {
+              if (closeErr) {
+                // the server is still bound, so a retry would fail with
+                // ERR_SERVER_ALREADY_LISTEN
+                debug('error closing server after discarding port %d: %o', address.port, closeErr)
+
+                return reject(closeErr)
+              }
+
+              if (attempts < MAX_PORT_ATTEMPTS) {
+                return tryListen()
+              }
+
+              // the port is already free, so surface the error instead of
+              // leaving the run waiting for a browser that can never connect
+              reject(errors.get('PORT_BLOCKED_BY_BROWSER'))
+            })
+
+            return
+          }
+
+          this.isListening = true
+
+          debug('Server listening on ', address)
+
+          resolve(address.port)
+        }
+
+        this.server.listen(port || 0, '127.0.0.1', listener)
       }
 
-      this.server.once('error', onError)
-
-      const listener = () => {
-        const address = this.server.address() as AddressInfo
-
-        this.isListening = true
-
-        debug('Server listening on ', address)
-
-        this.server.removeListener('error', onError)
-
-        resolve(address.port)
-      }
-
-      this.server.listen(port || 0, '127.0.0.1', listener)
+      tryListen()
     })
   }
 

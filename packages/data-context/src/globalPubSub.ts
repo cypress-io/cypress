@@ -27,7 +27,7 @@ export class GlobalPubSub extends EventEmitter {
   async emitThen (msg: string, ...args: any[]): Promise<void> {
     // @ts-expect-error - `_events` is EventEmitter's untyped internal listener map
     const events = this._events
-    const handlers = events[msg] as Function | Function[]
+    const handlers = events[msg] as (() => any) | Array<() => any>
 
     if (!handlers) {
       return Promise.resolve()

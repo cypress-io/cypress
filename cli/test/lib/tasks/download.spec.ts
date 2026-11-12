@@ -398,7 +398,7 @@ describe('lib/tasks/download', function () {
       })
 
       let wrotePartialFile = false
-      let attempts = 0
+      let attempts: number
 
       const createWriteStream = vi.spyOn(fs, 'createWriteStream').mockImplementation(() => {
         // Safe because download only pipes into the stream and listens for
