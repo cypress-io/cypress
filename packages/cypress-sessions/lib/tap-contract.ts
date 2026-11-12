@@ -284,7 +284,11 @@ session can be targeted by its PID in other commands using \`--session\`.
 
 tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
 A session running any other browser is listed as unsupported, and every other
-tap command refuses it.`,
+tap command refuses it.
+
+A session whose project stopped loading, for example because its configuration
+file became invalid, is listed as "could not load", with the reason as
+\`loadError\` in the JSON. Every tap command but \`status\` refuses it.`,
 } as const satisfies TapNativeCommandSchema
 
 const statusMeta = {

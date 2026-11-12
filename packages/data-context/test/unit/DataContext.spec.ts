@@ -233,6 +233,27 @@ describe('DataContext open mode error output', () => {
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
       })
 
+      it('happens for a given kind only when the error is of that kind', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.reportLoadError('component testing is not set up', 'setup')
+        projectCtx.clearLoadError(['config'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+
+        projectCtx.clearLoadError(['config', 'setup'])
+
+        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
+      it('does not happen for a given kind when no error is recorded', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.clearLoadError(['config'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+      })
+
       it('is not done in run mode', () => {
         const runCtx = createTestDataContext('run')
 

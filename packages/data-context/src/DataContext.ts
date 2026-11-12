@@ -49,6 +49,13 @@ const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
+/**
+ * What kept the project from loading: its configuration (including a dev server or
+ * `setupNodeEvents` that failed with it), a testing type that is not set up, or a
+ * browser that cannot be found or driven
+ */
+type LoadErrorKind = 'config' | 'setup' | 'browser'
+
 // A Cypress error keeps the first paragraph in `message` and the rest, such as the
 // stack trace of a config file that failed to load, in `details`. An error that did not
 // come from a template has only its stack to say where it came from.
@@ -312,6 +319,10 @@ export class DataContext {
     return this.isOpenMode && Boolean(this.modeOptions.headless)
   }
 
+  // What kind of load error the record describes, so each step of loading withdraws only the
+  // kind it resolves: a configuration that loads does not finish a setup or find a browser
+  private _loadErrorKind: LoadErrorKind | null = null
+
   /**
    * Records that the project could not load, for `cypress tap status` to report, whether it
    * never started a session or its configuration broke during one. That record, and the error
@@ -320,12 +331,14 @@ export class DataContext {
    * `onError`, also used for errors from a project that is running normally, does not call it.
    * Without a project there is nothing for a session to describe.
    */
-  reportLoadError (error: CypressError | string) {
+  reportLoadError (error: CypressError | string, kind: LoadErrorKind = 'config') {
     const projectRoot = this.currentProject
 
     if (!this.isOpenMode || !projectRoot) {
       return
     }
+
+    this._loadErrorKind = kind
 
     this._apis.projectApi.setSessionLoadError({
       projectRoot,
@@ -335,13 +348,20 @@ export class DataContext {
   }
 
   /**
-   * Withdraws the record of a load error once the project has loaded again or another one
-   * replaced it, so `cypress tap status` does not keep reporting it.
+   * Withdraws the record of a load error once whatever caused it is resolved, so `cypress tap
+   * status` does not keep reporting it. Given `kinds`, only an error of one of those kinds is
+   * withdrawn; without them, any is, as when another project or testing type replaces it.
    */
-  clearLoadError () {
+  clearLoadError (kinds?: LoadErrorKind[]) {
     if (!this.isOpenMode) {
       return
     }
+
+    if (kinds && (this._loadErrorKind === null || !kinds.includes(this._loadErrorKind))) {
+      return
+    }
+
+    this._loadErrorKind = null
 
     this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
   }

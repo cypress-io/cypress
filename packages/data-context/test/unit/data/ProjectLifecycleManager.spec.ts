@@ -582,6 +582,17 @@ describe('ProjectLifecycleManager', () => {
           expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
         })
 
+        it('withdraws a browser error once the browser it was given is found', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true, headless: true })
+
+          headless.coreData.currentProject = '/projects/foo'
+          headless.reportLoadError('Browser not found', 'browser')
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
+        })
+
         it('launches nothing, and reports why, for a browser cypress tap cannot drive', async () => {
           const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true, headless: true })
 
@@ -818,6 +829,9 @@ describe('ProjectLifecycleManager', () => {
       const chooseBrowser = jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
       const cleared = ctx._apis.projectApi.clearSessionLoadError as jest.Mock
 
+      ctx.coreData.currentProject = '/projects/foo'
+      ctx.reportLoadError('Your configFile is invalid')
+
       await onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })
 
       expect(cleared).toHaveBeenCalledTimes(1)
@@ -835,8 +849,18 @@ describe('ProjectLifecycleManager', () => {
       return (configManager as any).options.onInitialConfigLoaded as (config: Cypress.ConfigOptions) => void
     }
 
-    // Such as Try again once a configuration that failed at startup is fixed, before a testing type is chosen
-    it('withdraws a load error when no testing type is chosen, since no session will replace it', () => {
+    const recordError = (kind?: 'config' | 'setup' | 'browser') => {
+      ctx.coreData.currentProject = '/projects/foo'
+      ctx.reportLoadError('boom', kind)
+    }
+
+    // Such as Try again once a configuration that failed at startup is fixed. A testing type passed
+    // on the command line, such as `--e2e`, is applied only once the configuration first loads, so
+    // after a failure there is none and no session will replace the error.
+    it('withdraws a configuration error when no testing type is set, since no session will replace it', () => {
+      ctx = createDataContext({ project: 'foo', testingType: 'e2e' })
+      recordError('config')
+
       onInitialConfigLoaded()({})
 
       expect(ctx._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
@@ -844,17 +868,20 @@ describe('ProjectLifecycleManager', () => {
 
     // Such as `--headless --e2e` whose scaffold needs a hand merge: a refresh that finds e2e still
     // unconfigured drops the testing type, and the error says what setup is missing
-    it('leaves a setup error when the command line asked for a testing type a refresh dropped', () => {
-      ctx = createDataContext({ project: 'foo', testingType: 'e2e', headless: true })
+    it('leaves a setup or browser error, which loading the file does not fix', () => {
+      recordError('setup')
+      onInitialConfigLoaded()({})
 
+      recordError('browser')
       onInitialConfigLoaded()({})
 
       expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
     })
 
-    it('leaves a load error for the session to replace when a testing type is chosen', () => {
+    it('leaves a configuration error for the session to replace when a testing type is set', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._currentTestingType = 'e2e'
+      recordError('config')
 
       onInitialConfigLoaded()({})
 

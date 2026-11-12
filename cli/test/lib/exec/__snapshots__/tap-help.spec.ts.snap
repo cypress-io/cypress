@@ -258,6 +258,10 @@ tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
 A session running any other browser is listed as unsupported, and every other
 tap command refuses it.
 
+A session whose project stopped loading, for example because its configuration
+file became invalid, is listed as "could not load", with the reason as
+\`loadError\` in the JSON. Every tap command but \`status\` refuses it.
+
 Options:
   -s, --session <pid>  target a local Cypress session by its process id (PID)
   --json               print the raw JSON result instead of the human-readable

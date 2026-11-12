@@ -218,11 +218,10 @@ export class ProjectLifecycleManager {
 
         // With no testing type, no session will start to replace an error that kept the
         // configuration from loading, so loading it is what withdraws the error. With one,
-        // `onFinalConfigLoaded` withdraws it once the session has started. A testing type the
-        // command line asked for counts even after a refresh dropped it for not being set up:
-        // the error then says what setup is missing, which loading the file does not fix.
-        if (!this._currentTestingType && !this.ctx.modeOptions.testingType) {
-          this.ctx.clearLoadError()
+        // `onFinalConfigLoaded` withdraws it once the session has started. A setup or browser
+        // error stays: loading the file does not fix it.
+        if (!this._currentTestingType) {
+          this.ctx.clearLoadError(['config'])
         }
 
         this.ctx.emitter.toLaunchpad()
@@ -313,11 +312,11 @@ export class ProjectLifecycleManager {
           }
         }
 
-        // The project loaded again, so an error that kept it from loading no longer applies.
-        // Cleared only once the session has started, so a project that failed to start keeps
-        // its error until the session replaces it, instead of `cypress tap status` reporting
-        // nothing in between. A browser that cannot be found is recorded again just below.
-        this.ctx.clearLoadError()
+        // The configuration loaded with its testing type set up, so an error with either no
+        // longer applies. Withdrawn only once the session has started, so a project that failed
+        // to start keeps its error until the session replaces it, instead of `cypress tap status`
+        // reporting nothing in between. A browser error is for choosing the browser to settle.
+        this.ctx.clearLoadError(['config', 'setup'])
 
         await this.setInitialActiveBrowser()
 
@@ -443,11 +442,12 @@ export class ProjectLifecycleManager {
         const message = `Cypress could not start this \`--headless\` session in ${browser.displayName}, because \`cypress tap\` can only drive Chromium-based browsers, such as Chrome, Edge and Electron. Pass one of them with \`--browser\`, then start Cypress again.`
 
         logError(message)
-        this.ctx.reportLoadError(message)
+        this.ctx.reportLoadError(message, 'browser')
 
         return
       }
 
+      this.ctx.clearLoadError(['browser'])
       this.ctx.actions.browser.setActiveBrowser(browser)
     } catch (e) {
       const error = e as CypressError
@@ -457,7 +457,7 @@ export class ProjectLifecycleManager {
       // Without the browser it was asked for, nothing launches on its own, and no one can pick
       // another in a window `--headless` keeps hidden, so the session cannot start
       if (this.ctx.isHeadless) {
-        this.ctx.reportLoadError(error)
+        this.ctx.reportLoadError(error, 'browser')
       }
     }
   }
@@ -926,7 +926,7 @@ export class ProjectLifecycleManager {
     const message = 'Cypress could not start component testing for this project on its own, because it is not set up yet. Set it up by running `cypress open --component` without `--headless`, then start Cypress again.'
 
     logError(message)
-    this.ctx.reportLoadError(message)
+    this.ctx.reportLoadError(message, 'setup')
   }
 
   /**
@@ -954,7 +954,7 @@ export class ProjectLifecycleManager {
       const message = `Cypress could not finish setting up e2e testing for this project on its own, because these files need changes made by hand: ${needsAPerson.join(', ')}. Make the changes, then start Cypress again.`
 
       logError(message)
-      this.ctx.reportLoadError(message)
+      this.ctx.reportLoadError(message, 'setup')
 
       return
     }

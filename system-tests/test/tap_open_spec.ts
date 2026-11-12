@@ -2237,6 +2237,13 @@ describe('tap CLI against a session whose configuration breaks', function () {
     expect(result.stdout).to.include('this-configuration-is-broken')
   })
 
+  it('lists the session as one that could not load', async () => {
+    const broken = await session.waitForStatus((status) => status.status === 'error', 'the broken configuration reported')
+    const listed = (await session.tap(['--json', 'sessions'])).json<Array<{ pid: number, loadError?: string }>>()
+
+    expect(listed.find((entry) => entry.pid === broken.pid)?.loadError).to.include('this-configuration-is-broken')
+  })
+
   it('refuses the commands that drive the session, pointing them at status', async () => {
     await session.waitForStatus((status) => status.status === 'error', 'the broken configuration reported')
 
