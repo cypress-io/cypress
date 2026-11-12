@@ -298,7 +298,9 @@ Stages:
 - not connected: Cypress cannot be reached.
 - error: Cypress is running but could not load the project, for example because
   its configuration file is invalid. \`error\` carries the reason; fix the
-  project, then stop Cypress and start it again.
+  project, then stop Cypress and start it again. A configuration file that
+  becomes invalid after the project loaded also reports error, and needs the
+  same: fix it, then stop Cypress and start it again.
 - browser not selected: Cypress does not have a supported browser open.
 - spec not selected: Cypress has a browser open but no spec is selected.
 - loading: Cypress is loading the spec.
@@ -310,8 +312,8 @@ Stages:
 Statuses other than passed and failed are intermediate states, indicating that
 Cypress requires additional instruction or is still processing. Loading stays
 loading for as long as the spec takes to build, so a poller needs its own
-timeout; a spec whose build fails reports failed and carries the reason as
-error — it ran no tests, so it reports no counts either.
+timeout; a spec that fails to build or load reports failed and carries the
+reason as error — it ran no tests, so it reports no counts either.
 
 From loading onwards the output carries \`startedAt\`, the spec every other field
 describes (null while loading). In the event of a rerun the previous spec's

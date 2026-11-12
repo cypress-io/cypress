@@ -777,6 +777,19 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       expect(ctx.lifecycleManager._cachedFullConfig).toBeUndefined()
     })
+
+    it('withdraws a load error for cypress tap status once the configuration loads again', async () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+      const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
+
+      jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+      jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+
+      await onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('#getPackageManagerUsed', () => {

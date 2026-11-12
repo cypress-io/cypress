@@ -20,6 +20,7 @@ export function useEventManager () {
     }
 
     autStore.setScriptError(null)
+    autStore.setSpecLoadError(null)
     await UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun)
   }
 
@@ -36,6 +37,10 @@ export function useEventManager () {
 
     eventManager.on('script:error', (err) => {
       autStore.setScriptError(err)
+    })
+
+    eventManager.on('spec:load:error', (err) => {
+      autStore.setSpecLoadError(String(err))
     })
 
     eventManager.on('visit:failed', (payload) => {

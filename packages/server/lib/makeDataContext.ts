@@ -116,10 +116,10 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
     projectApi: {
       setSessionLoadError (args) {
-        return cypressSessions.addPendingSession(args)
+        return cypressSessions.setLoadError(args)
       },
       clearSessionLoadError () {
-        return cypressSessions.clearPending()
+        return cypressSessions.clearLoadError()
       },
       async launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
         await openProject.launch({ ...browser }, spec, options)

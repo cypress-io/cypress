@@ -46,6 +46,7 @@ export type SocketToDriverMap = {
 }
 
 export type DriverToLocalBus = {
+  'spec:load:error': unknown
   'visit:blank': { testIsolation?: boolean }
   'visit:failed': { status?: string, statusText: string, contentType?: () => string }
   'page:loading': boolean

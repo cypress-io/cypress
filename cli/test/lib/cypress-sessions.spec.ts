@@ -191,6 +191,21 @@ describe('lib/cypress-sessions', () => {
       expect(live!.userId).toBeNull()
     })
 
+    it('carries the load error of a session whose configuration broke after it started', async () => {
+      const port = await startFakeSession({ respondWith: { sessionId: SESSION_ID, loadError: { message: 'Your configFile is invalid' } } })
+      const live = await verifySessionRecord(recordFor(port))
+
+      expect(live!.loadError).toEqual({ message: 'Your configFile is invalid' })
+    })
+
+    it('drops a load error with no message, or one an older session omits', async () => {
+      const junkPort = await startFakeSession({ respondWith: { sessionId: SESSION_ID, loadError: { message: 42 } } })
+      const olderPort = await startFakeSession({ respondWith: { sessionId: SESSION_ID } })
+
+      expect(await verifySessionRecord(recordFor(junkPort))).not.toHaveProperty('loadError')
+      expect(await verifySessionRecord(recordFor(olderPort))).not.toHaveProperty('loadError')
+    })
+
     it('keeps the browser the session has open even when the CDP endpoint is unreachable', async () => {
       const deadCdpPort = await getClosedPort()
       const port = await startFakeSession({ respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: `ws://127.0.0.1:${deadCdpPort}/devtools/browser/abc`, browserName: 'Chrome', browserFamily: 'chromium' } })

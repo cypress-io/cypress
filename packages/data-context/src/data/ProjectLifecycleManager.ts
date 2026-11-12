@@ -225,6 +225,10 @@ export class ProjectLifecycleManager {
           return
         }
 
+        // The configuration loaded, so an error that kept it from loading no longer applies.
+        // One found later in this pass, such as a dev server that cannot start, is recorded again.
+        this.ctx.clearLoadError()
+
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             projectRoot: this.projectRoot,

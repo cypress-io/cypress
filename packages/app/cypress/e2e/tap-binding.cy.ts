@@ -1084,3 +1084,42 @@ describe('tap binding run lifecycle', () => {
     })
   })
 })
+
+// A component spec its dev server cannot compile fails to import, which the runner shows
+// as a generated failing test rather than over the AUT, unlike an e2e build failure.
+describe('tap binding against a component spec that does not compile', () => {
+  const BAD_SPEC = 'src/BadSyntax.cy.jsx'
+
+  beforeEach(() => {
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.findBrowsers()
+    cy.openProject('cypress-in-cypress', ['--component'])
+    cy.startAppServer('component')
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `describe('Bad spec', () => { it('has a syntax error', () => { expect(true).to.be.true }) }`)
+    }, { path: BAD_SPEC })
+  })
+
+  it('reports the spec as failed, carrying why it could not load instead of counts', () => {
+    // Opened from the list, since a runner URL can arrive before the list has the new spec
+    cy.visitApp()
+    cy.specsPageIsVisible()
+    cy.contains('BadSyntax.cy').click()
+    cy.waitForSpecToFinish({ failCount: 1 })
+
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run-state')
+
+      expect('result' in outcome, `run-state answered ${JSON.stringify(outcome)}`).to.eq(true)
+
+      const result = (outcome as { result: Record<string, any> }).result
+
+      expect(Object.keys(result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt', 'error'])
+      expect(result.spec).to.eq(BAD_SPEC)
+      expect(result.state).to.eq('failed')
+      expect(result.error).to.contain('SyntaxError')
+      expect(result.error, 'the stack is dropped').not.to.contain('\n    at ')
+    })
+  })
+})

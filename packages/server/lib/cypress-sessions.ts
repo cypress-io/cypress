@@ -49,12 +49,17 @@ const persist = (record: CypressSession): Promise<void> => {
 
 export const cypressSessions = {
   /**
-   * Records that the project could not load, so `cypress tap status` can say why instead of
-   * reporting that Cypress cannot be reached. The record names no server; `addSession`
-   * replaces it once one starts.
+   * Records that the project could not load, so `cypress tap status` can say why. Before the
+   * server starts, it writes a record that names no server, which `addSession` replaces once
+   * one starts; without it, status would report that Cypress cannot be reached. Once a session
+   * is running, the error goes on the live state the probe route serves instead, since the
+   * record on disk only has to find the session.
    */
-  async addPendingSession ({ projectRoot, testingType = null, loadError }: { projectRoot: string, testingType?: TestingType | null, loadError: string }): Promise<void> {
+  async setLoadError ({ projectRoot, testingType = null, loadError }: { projectRoot: string, testingType?: TestingType | null, loadError: string }): Promise<void> {
     if (currentState) {
+      currentState = { ...currentState, loadError: { message: loadError } }
+      debug('running cypress session has a load error')
+
       return
     }
 
@@ -80,13 +85,22 @@ export const cypressSessions = {
   },
 
   /**
-   * Removes the record written by `addPendingSession`, once the error it reports is gone.
-   * A record for a running session is not touched.
+   * Withdraws the error `setLoadError` recorded, once it is gone: from the live state of a
+   * running session, or by removing the record written before the server started.
    */
-  async clearPending (): Promise<void> {
+  async clearLoadError (): Promise<void> {
+    if (currentState) {
+      if (currentState.loadError) {
+        currentState = { ...currentState, loadError: undefined }
+        debug('running cypress session no longer has a load error')
+      }
+
+      return
+    }
+
     const pending = pendingId
 
-    if (pending === null || currentState) {
+    if (pending === null) {
       return
     }
 

@@ -57,7 +57,7 @@ export const verifySessionRecord = async (record: CypressSession, timeoutMs: num
       return null
     }
 
-    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown }
+    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown, loadError?: { message?: unknown } | null }
 
     if (live.sessionId !== record.sessionId) {
       return null
@@ -75,6 +75,8 @@ export const verifySessionRecord = async (record: CypressSession, timeoutMs: num
       browserFamily: typeof live.browserFamily === 'string' ? live.browserFamily : null,
       machineId: typeof live.machineId === 'string' ? live.machineId : null,
       userId: typeof live.userId === 'string' ? live.userId : null,
+      // A running session's record never carries one, so the probe is the only place it shows up
+      ...(typeof live.loadError?.message === 'string' ? { loadError: { message: live.loadError.message } } : {}),
     }
   } catch (err) {
     debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)

@@ -41,7 +41,11 @@ export interface CypressSession {
    * server to reach (`serverPort` is 0); the full record replaces it once the server starts.
    */
   status?: 'starting'
-  /** Why the project could not load, on a `starting` record whose load failed. */
+  /**
+   * Why the project could not load: on a `starting` record whose load failed, or in a running
+   * session's probe response when its configuration broke after it started. The record of a
+   * running session on disk never carries it.
+   */
   loadError?: { message: string }
 }
 

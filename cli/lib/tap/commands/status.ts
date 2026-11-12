@@ -68,6 +68,21 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   }
 
   const { session } = selection
+
+  // The project broke after it started, such as an edit that made its configuration throw.
+  // Whatever the browser shows ran under the configuration that is gone.
+  if (session.loadError) {
+    renderOutcome('status', {
+      status: 'error',
+      pid: session.pid,
+      projectRoot: session.projectRoot,
+      testingType: session.testingType,
+      error: session.loadError.message,
+    }, options.json)
+
+    return 0
+  }
+
   const browserAttached = session.cdpBrowserWsUrl !== null
 
   const base: TapStatus = {

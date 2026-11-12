@@ -99,11 +99,14 @@ export const tapManagerDataSource = {
     }
   },
 
-  // The spec's own build failure, as the app shows it over the AUT. Cleared at
-  // the start of every run, so it always belongs to the spec now selected.
+  // Why the spec could not run: a build failure the app shows over the AUT, or a
+  // spec that could not be loaded, such as a component spec that failed to compile.
+  // Both are cleared at the start of every run, so they belong to the spec now selected.
   getScriptError (): string | undefined {
     try {
-      return useAutStore().scriptError?.error
+      const autStore = useAutStore()
+
+      return autStore.scriptError?.error ?? autStore.specLoadError ?? undefined
     } catch {
       return undefined
     }

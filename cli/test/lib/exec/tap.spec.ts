@@ -677,6 +677,40 @@ describe('lib/exec/tap', () => {
       expect(output).not.toContain('not connected')
     })
 
+    describe('when the configuration broke after the session started', () => {
+      const broken = () => liveSession({ pid: 111, loadError: { message: 'Your configFile is invalid: /projects/app/cypress.config.js' } })
+
+      it('reports the error instead of the run the browser still shows', async () => {
+        mockLiveResolved(broken())
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print())).toEqual({
+          status: 'error',
+          pid: 111,
+          projectRoot: '/projects/app',
+          testingType: 'e2e',
+          error: 'Your configFile is invalid: /projects/app/cypress.config.js',
+        })
+
+        expect(withTapConnection).not.toHaveBeenCalled()
+      })
+
+      it('shows the error to a person reading the output', async () => {
+        mockLiveResolved(broken())
+
+        expect(await tap.start(['status'], {})).toBe(0)
+        expect(logger.print()).toContain('error')
+        expect(logger.print()).toContain('Your configFile is invalid')
+      })
+
+      it('reports it even when no browser is attached', async () => {
+        mockLiveResolved({ ...broken(), cdpBrowserWsUrl: null, browserName: null })
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print()).status).toBe('error')
+      })
+    })
+
     it('reports "browser not selected" without opening a connection when no browser is attached', async () => {
       mockLiveResolved(liveSession({ pid: 111, cdpBrowserWsUrl: null, browserName: null }))
 
