@@ -91,7 +91,7 @@ describe('net-stubbing util', () => {
       expect(parseContentType(body)).toEqual(expected)
     })
 
-    it('runs in linear time on adversarial input', () => {
+    it('stays fast on adversarial input', () => {
       const adversarial = '<>'.repeat(25_000)
       const start = performance.now()
 

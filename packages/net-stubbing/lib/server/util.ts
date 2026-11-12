@@ -35,17 +35,17 @@ const isLineTerminator = (ch: string) => {
  * single forward pass per half is enough.
  */
 function isHtmlLike (text: string) {
-  let lt = -1
+  let openStart = -1
   let openEnd = -1
 
   for (let i = 0; i < text.length; i++) {
     const ch = text[i]
 
     if (isLineTerminator(ch)) {
-      lt = -1
+      openStart = -1
     } else if (ch === '<') {
-      if (lt === -1) lt = i
-    } else if (ch === '>' && lt !== -1 && i >= lt + 2) {
+      if (openStart === -1) openStart = i
+    } else if (ch === '>' && openStart !== -1 && i >= openStart + 2) {
       openEnd = i
       break
     }
