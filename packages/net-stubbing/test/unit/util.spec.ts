@@ -54,7 +54,6 @@ describe('net-stubbing util', () => {
       expect(parseContentType()).toEqual('text/plain')
     })
 
-    // Expected values were recorded from the previous `/<.+>[\s\S]+<\/.+>/` check.
     it.each([
       ['empty string', '', 'text/plain'],
       ['plain text', 'hello world', 'text/plain'],

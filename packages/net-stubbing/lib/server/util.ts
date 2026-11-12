@@ -25,11 +25,10 @@ const isLineTerminator = (ch: string) => {
 }
 
 /**
- * Linear-time equivalent of `/<.+>[\s\S]+<\/.+>/.test(text)`: an opening
- * `<…>` and a later closing `</…>`, each confined to one line, with at least
- * one character between them. The regex backtracks polynomially on bodies
- * full of `<` without a matching `>`, and stubbed bodies are user fixtures
- * that can be large.
+ * Whether `text` has an opening `<…>` and a later closing `</…>`, each on a
+ * single line, with at least one character between them. Stubbed bodies are
+ * user fixtures that can be large, so this scans in linear time rather than
+ * using a backtracking regex.
  *
  * The earliest `<` on a line is always the best start for a tag, and the
  * earliest-ending opening tag leaves the most room for the closing one, so a
