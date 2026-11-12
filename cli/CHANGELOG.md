@@ -80,6 +80,7 @@
 - Upgraded `systeminformation` to `5.33.18` to address the [SNYK-JS-SYSTEMINFORMATION-21771271](https://security.snyk.io/vuln/SNYK-JS-SYSTEMINFORMATION-21771271) (CVE-2026-116576) vulnerability reported in security scans. Addresses [#35196](https://github.com/cypress-io/cypress/issues/35196).
 - Upgraded `node-forge` from `1.4.0` to `1.4.3` to address the [Improper Certificate Validation](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-22113978) vulnerability reported in security scans. Addressed in [#35279](https://github.com/cypress-io/cypress/pull/35279).
 - Upgraded `jimp` from `0.22.12` to `1.6.1` to address an [infinite loop](https://github.com/advisories/GHSA-5v7r-6r5c-r473) vulnerability (CVE-2026-31808) in its `file-type` dependency reported in security scans. This also removes `xml2js` `0.4.23`, which has a [prototype pollution](https://github.com/advisories/GHSA-776f-qx25-q3cc) vulnerability (CVE-2023-0842). Addresses [#35271](https://github.com/cypress-io/cypress/issues/35271).
+- Upgraded `@puppeteer/browsers` from `2.4.0` to `3.2.6` and `deepmerge-ts` from `7.1.0` to `8.0.2`, which `webdriver` uses, to address vulnerabilities reported in security scans. `@puppeteer/browsers` 3 removes `extract-zip`, `basic-ftp` and `ip-address` from the binary, which have no fixes in their current major versions, and `deepmerge-ts` 8 fixes a [stack exhaustion](https://github.com/advisories/GHSA-ggr8-5vv4-36mx) vulnerability (CVE-2026-40345). Addresses [#35273](https://github.com/cypress-io/cypress/issues/35273).
 
 ## 16.2.1
 
