@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- [`cy.intercept()`](https://on.cypress.io/intercept) responds faster to requests that it stubs with a fixture or a static `body` but no `Content-Type` header. While choosing the response's `Content-Type`, Cypress could spend seconds on a large text body containing many `<` or `>` characters, which delayed the response and could make the request time out. The `Content-Type` it picks is unchanged. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- [`cy.intercept()`](https://on.cypress.io/intercept) responds faster to requests that it stubs with a fixture or a static `body` but no `Content-Type` header. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 
 **Bugfixes:**
 
