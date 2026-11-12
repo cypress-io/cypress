@@ -113,7 +113,7 @@ Every workspace with `vitest` in its `package.json` spreads `vitestConfig` after
 
 On top of `recommended`:
 
-- `no-focused-tests`, `no-disabled-tests` and `hoisted-apis-on-top` are errors. A skipped test that has to stay needs an `eslint-disable-next-line vitest/no-disabled-tests` below its `NOTE:`, `TODO:` or `FIXME:` comment.
+- `no-focused-tests`, `no-disabled-tests` and `hoisted-apis-on-top` are errors. A skipped test that has to stay needs an `eslint-disable-next-line vitest/no-disabled-tests` below its `NOTE:`, `TODO:` or `FIXME:` comment, which `@cypress/dev/skip-comment` already requires. An intentional `.only` needs `eslint-disable-next-line vitest/no-focused-tests`. In a spec that uses Vitest's globals rather than importing `it` from `vitest`, `mocha/no-exclusive-tests` reports it as well, so list both rules in the directive.
 - `valid-expect` allows a second argument to `expect`, which Vitest takes as the failure message. It reports a chai property assertion such as `.to.be.true` as a matcher that was never called, so write those with a called matcher (`.toBe(true)`, `.toBeUndefined()`, `.toEqual(expect.anything())` for `.to.exist`).
 - `no-standalone-expect` accepts assertions in `beforeAll`, `beforeEach`, `afterEach` and `afterAll`, where a failure fails the tests the hook belongs to.
 - `expect-expect`, `no-conditional-expect`, `prefer-called-exactly-once-with`, `no-identical-title` and `valid-title` are off. `vitestConfig.ts` gives the reason for each.

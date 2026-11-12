@@ -59,7 +59,9 @@ describe('writeWithBackpressure', () => {
       expect(output.write).toHaveBeenCalledWith(Buffer.from('test'))
       expect(output.once).toHaveBeenCalledWith('drain', expect.any(Function))
 
-      await Promise.resolve()
+      // A macrotask runs after every pending microtask, so a promise that
+      // didn't wait for drain has settled by now
+      await new Promise((resolve) => setImmediate(resolve))
       expect(resolved).toBe(false)
 
       emitDrain?.()
