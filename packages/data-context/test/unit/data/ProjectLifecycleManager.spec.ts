@@ -582,6 +582,25 @@ describe('ProjectLifecycleManager', () => {
           expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
         })
 
+        // A config reload chooses the browser again: falling back to another the first time would
+        // have the reload launch it in place of the one asked for, and withdraw the error
+        it('falls back to no other browser, so a reload asks for the same one again and keeps the error', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'chrome', isBrowserGivenByCli: true, headless: true })
+          const ensure = jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+
+          headless.coreData.currentProject = '/projects/foo'
+          headless.coreData.cliBrowser = 'chrome'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser).toBeNull()
+          expect(ensure.mock.calls.map(([nameOrPath]) => nameOrPath)).toEqual(['chrome', 'chrome'])
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledTimes(2)
+          expect(headless._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+        })
+
         it('withdraws a browser error once the browser it was given is found', async () => {
           const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true, headless: true })
 
@@ -600,9 +619,12 @@ describe('ProjectLifecycleManager', () => {
           headless.coreData.currentProject = '/projects/foo'
 
           await headless.lifecycleManager.setInitialActiveBrowser()
+          // A config reload, which must not settle on some other browser
+          await headless.lifecycleManager.setInitialActiveBrowser()
 
-          expect(headless.coreData.activeBrowser?.family).not.toBe('firefox')
+          expect(headless.coreData.activeBrowser).toBeNull()
           expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
           expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
             loadError: expect.stringContaining('`cypress tap` can only drive Chromium-based browsers'),
           }))

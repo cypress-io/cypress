@@ -396,6 +396,13 @@ export class ProjectLifecycleManager {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
+      // A `--headless` session runs only the browser it was given. Falling back to another
+      // would have the next reload launch that one in its place and withdraw the error, so the
+      // session is left with no browser and keeps reporting why.
+      if (this.ctx.isHeadless && !this.ctx.coreData.activeBrowser) {
+        return
+      }
+
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
 
       const hasWelcomeBeenDismissed = this.isWelcomeBypassed || Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
