@@ -11,7 +11,8 @@ vi.mock('resolve-package-path', () => ({ default: resolvePackagePath }))
 const originalResolvePackagePath = (await vi.importActual<typeof import('resolve-package-path')>('resolve-package-path')).default
 
 describe('parsePsEnvLine', () => {
-  // The backtracking pattern parsePsEnvLine replaces, kept as the oracle for equivalence
+  // Oracle with the semantics parsePsEnvLine must keep. It backtracks polynomially,
+  // so only the short table inputs go through it.
   const parseWithRegex = (line: string) => {
     const match = line.trim().match(/(\d+)\s.*CYPRESS_API_URL=(\S+)\s/)
 
@@ -119,8 +120,9 @@ describe('parsePsEnvLine', () => {
   })
 
   it('only reads the pid from the start of the line', () => {
-    // `ps -o pid=,command=` always starts a line with the pid; the unanchored regex
-    // would also have taken digits from later in the line.
+    // `ps -o pid=,command=` starts every line with the pid, so digits later in the
+    // line are never read as one. The oracle is unanchored and would read them,
+    // which is why this case is not in the table.
     expect(parsePsEnvLine('node 12 CYPRESS_API_URL=https://a.example.com x')).toBeUndefined()
   })
 

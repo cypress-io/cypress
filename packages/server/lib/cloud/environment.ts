@@ -32,10 +32,10 @@ const LEADING_PID = /^(\d+)\s/
 const WHITESPACE = /\s/
 
 // Reads the pid and CYPRESS_API_URL value from one line of `ps eww -o pid=,command=`.
-// CI environments make these lines tens of KB, so this scans in linear time rather
-// than with a backtracking regex. When the key appears more than once, the last
-// occurrence wins, and the value must be followed by whitespace, so a value that
-// is the final token on the line is not read.
+// CI environments make these lines tens of KB, so every scan here is linear in the
+// line length. When the key appears more than once, the last occurrence wins, and
+// the value must be followed by whitespace, so a value that is the final token on
+// the line is not read.
 export const parsePsEnvLine = (line: string): { pid: string, envUrl: string } | undefined => {
   const trimmed = line.trim()
   const pidMatch = LEADING_PID.exec(trimmed)
@@ -61,7 +61,7 @@ export const parsePsEnvLine = (line: string): { pid: string, envUrl: string } | 
     if (!WHITESPACE.test(trimmed[valueStart])) {
       let valueEnd = valueStart + 1
 
-      // Stops at lastWhitespace at the latest
+      // Always terminates, because lastWhitespace lies after valueStart
       while (!WHITESPACE.test(trimmed[valueEnd])) {
         valueEnd++
       }
