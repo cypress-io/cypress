@@ -31,18 +31,36 @@ export const getStackLines = (stack: string) => {
   return stackLines
 }
 
+// Anchored on the trailing location so matching stays linear; a pattern that
+// also matched the path and the frame prefix backtracks polynomially on long lines
+const stackLineLocationRegex = /:(\d+):(\d+)\)?$/
+const lineTerminatorRegex = /[\n\r\u2028\u2029]/
+
 /**
- * Captures & returns the absolute path, line, and column from a stack trace line
+ * Captures & returns the absolute path, line, and column from a stack trace line.
+ * The path is whatever sits between the last `(` and the trailing `:line:column`.
  */
 export const parseStackLine = (line: string): null | { absolute: string, line: number, column: number } => {
-  const stackLineCapture = /^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/
-  const result = stackLineCapture.exec(line)
+  const frame = line.trimStart()
 
-  if (!result?.[1]) {
+  if (lineTerminatorRegex.test(frame)) {
     return null
   }
 
-  return { absolute: result[1], line: Number(result[2]), column: Number(result[3]) }
+  const location = stackLineLocationRegex.exec(frame)
+
+  if (!location) {
+    return null
+  }
+
+  const openParenIndex = frame.lastIndexOf('(', location.index)
+  const absolute = openParenIndex === -1 ? '' : frame.slice(openParenIndex + 1, location.index)
+
+  if (!absolute) {
+    return null
+  }
+
+  return { absolute, line: Number(location[1]), column: Number(location[2]) }
 }
 
 /**

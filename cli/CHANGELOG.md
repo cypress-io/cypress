@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.3.1
 
+**Performance:**
+
+- When your config file or a plugin throws an error whose stack trace contains a very long line, Cypress now shows the error and its code frame right away. Previously, finding the error's location in such a line could stop Cypress from responding for seconds or minutes. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Bugfixes:**
 
 - Fixed an issue where a failed assertion whose error message was very long, such as [`.should('contain.text')`](https://on.cypress.io/should) on an element with a lot of text, took minutes to report, so the run looked stuck. The browser stopped responding while it processed the error, and `cypress run` paused again after printing the failure. The failure is now reported as soon as the assertion times out. Fixes [#35335](https://github.com/cypress-io/cypress/issues/35335).
