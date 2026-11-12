@@ -75,7 +75,8 @@ export const s3helpers = {
         debug('AWS result in %s %s', bucket, prefix)
         debug('%o', result)
 
-        resolve(result.CommonPrefixes.map((val) => val.Prefix))
+        // S3 omits CommonPrefixes for an empty prefix, and the SDK swallows a throw from this callback
+        resolve((result.CommonPrefixes ?? []).map((val) => val.Prefix))
       })
     })
   },
