@@ -702,11 +702,14 @@ describe('lib/browsers/firefox', () => {
 
           wdInstance.deleteSession = vi.fn().mockReturnValue(new Promise(() => {}))
 
-          const opened = expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+          const opened = firefox.open(browser as any, 'http://', options as any, automation as any)
+
+          // Handled now so the rejection isn't reported as unhandled before it is asserted below
+          opened.catch(() => {})
 
           await vi.waitFor(() => expect(wdInstance.deleteSession).toHaveBeenCalledOnce())
           await vi.advanceTimersByTimeAsync(10000)
-          await opened
+          await expect(opened).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
 
           expectCalledWith(kill, 1234)
           expectCalledWith(kill, 5678)
@@ -720,7 +723,9 @@ describe('lib/browsers/firefox', () => {
 
         wdInstance.deleteSession = vi.fn().mockReturnValue(sessionClosed.promise)
 
-        const firstLaunch = expect(firefox.open(browser as any, 'http://', options as any, automation as any)).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
+        const firstLaunch = firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        firstLaunch.catch(() => {})
 
         await vi.waitFor(() => expect(wdInstance.deleteSession).toHaveBeenCalledOnce())
 
@@ -733,7 +738,7 @@ describe('lib/browsers/firefox', () => {
         expect(webdriver.newSession).toHaveBeenCalledOnce()
 
         sessionClosed.resolve()
-        await firstLaunch
+        await expect(firstLaunch).rejects.toMatchObject({ type: 'FIREFOX_COULD_NOT_CONNECT' })
         await secondLaunch
 
         expect(webdriver.newSession).toHaveBeenCalledTimes(2)
