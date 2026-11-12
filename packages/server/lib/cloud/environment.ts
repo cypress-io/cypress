@@ -27,6 +27,54 @@ const getProcessBranchForPid = async (pid: string) => {
   return currentProcessBranch
 }
 
+const CYPRESS_API_URL_KEY = 'CYPRESS_API_URL='
+const LEADING_PID = /^(\d+)\s/
+const WHITESPACE = /\s/
+
+// Reads the pid and CYPRESS_API_URL value from one line of `ps eww -o pid=,command=`.
+// CI environments make these lines tens of KB, so this scans in linear time rather
+// than with a backtracking regex. When the key appears more than once, the last
+// occurrence wins, and the value must be followed by whitespace, so a value that
+// is the final token on the line is not read.
+export const parsePsEnvLine = (line: string): { pid: string, envUrl: string } | undefined => {
+  const trimmed = line.trim()
+  const pidMatch = LEADING_PID.exec(trimmed)
+
+  if (!pidMatch) {
+    return undefined
+  }
+
+  const searchStart = pidMatch[0].length
+
+  let lastWhitespace = trimmed.length - 1
+
+  while (lastWhitespace >= searchStart && !WHITESPACE.test(trimmed[lastWhitespace])) {
+    lastWhitespace--
+  }
+
+  // The value needs at least one character before that trailing whitespace
+  let keyIndex = trimmed.lastIndexOf(CYPRESS_API_URL_KEY, lastWhitespace - CYPRESS_API_URL_KEY.length - 1)
+
+  while (keyIndex >= searchStart) {
+    const valueStart = keyIndex + CYPRESS_API_URL_KEY.length
+
+    if (!WHITESPACE.test(trimmed[valueStart])) {
+      let valueEnd = valueStart + 1
+
+      // Stops at lastWhitespace at the latest
+      while (!WHITESPACE.test(trimmed[valueEnd])) {
+        valueEnd++
+      }
+
+      return { pid: pidMatch[1], envUrl: trimmed.slice(valueStart, valueEnd) }
+    }
+
+    keyIndex = trimmed.lastIndexOf(CYPRESS_API_URL_KEY, keyIndex - 1)
+  }
+
+  return undefined
+}
+
 interface GetCypressEnvUrlFromProcessBranch {
   envUrl?: string
   error?: {
@@ -48,10 +96,10 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypres
       const { stdout } = await execAsync(`ps eww -p ${processBranch.join(',')} -o pid=,command=`)
 
       const pidEnvUrlMapping = stdout.split('\n').reduce((acc, line) => {
-        const cypressEnvUrl = line.trim().match(/(\d+)\s.*CYPRESS_API_URL=(\S+)\s/)
+        const parsed = parsePsEnvLine(line)
 
-        if (cypressEnvUrl) {
-          acc.set(cypressEnvUrl[1], cypressEnvUrl[2])
+        if (parsed) {
+          acc.set(parsed.pid, parsed.envUrl)
         }
 
         return acc
