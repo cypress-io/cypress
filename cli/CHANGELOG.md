@@ -4,6 +4,7 @@
 **Performance:**
 
 - When your config file or a plugin throws an error whose stack trace contains a very long line, Cypress now shows the error and its code frame right away. Previously, finding the error's location in such a line could stop Cypress from responding for seconds or minutes. Fixed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- [`cy.intercept()`](https://on.cypress.io/intercept) responds faster to requests that it stubs with a fixture or a static `body` but no `Content-Type` header. Fixed in [#35360](https://github.com/cypress-io/cypress/pull/35360).
 
 **Bugfixes:**
 

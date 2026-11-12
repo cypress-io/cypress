@@ -58,7 +58,7 @@ describe('@packages/driver/src/cypress/mocha', () => {
       hook.timeout(20)
 
       expect(await runOnce(hook)).to.equal(STOPPED)
-      expect(hook.timedOut).to.be.true
+      expect(hook.timedOut).toBe(true)
 
       hook.fn = () => Promise.resolve()
 
