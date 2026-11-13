@@ -56,6 +56,8 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     ...react.configs.flat.recommended,
     settings: {
       react: {
+        // Keep this explicit: on ESLint 10, eslint-plugin-react 7's 'detect'
+        // calls the removed `context.getFilename()` and crashes every lint run
         version: '18',
       },
     },

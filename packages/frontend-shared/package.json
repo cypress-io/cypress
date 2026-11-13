@@ -86,7 +86,7 @@
     "cypress-real-events": "1.15.0",
     "dayjs": "^1.11.23",
     "dedent": "^0.7.0",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "execa": "4.1.0",
     "floating-vue": "5.2.2",
     "fs-extra": "9.1.0",

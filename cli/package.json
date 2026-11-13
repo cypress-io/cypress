@@ -94,7 +94,7 @@
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.12",
     "dtslint": "4.2.1",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "execa-wrap": "1.4.0",
     "jiti": "^2.4.2",
     "mock-fs": "5.4.0",
