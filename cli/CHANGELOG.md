@@ -1,5 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.3.1
+## 16.4.0
+
+**Features:**
+
+- Component testing with webpack now supports `webpack-dev-server` 6 when your project provides it, which Angular 22.2 projects using `@angular-devkit/build-angular` do. `webpack-dev-server` 6 requires webpack `5.101.0` or newer, and Cypress reports an error naming both versions when an older webpack is installed. The `webpack-dev-server` bundled with Cypress is still version 5. Addresses [#34259](https://github.com/cypress-io/cypress/issues/34259).
 
 **Performance:**
 
@@ -32,6 +36,7 @@
 - Upgraded the transitive `fast-uri` dependency of `ajv` from `3.0.3` to `3.1.9` to address [Directory Traversal](https://security.snyk.io/vuln/SNYK-JS-FASTURI-16642399), [Interpretation Conflict](https://security.snyk.io/vuln/SNYK-JS-FASTURI-16642394), [Improper Encoding or Escaping of Output](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19502739), [Improper Handling of URL Encoding](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19256869), [Improper Validation of Syntactic Correctness of Input](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19256871), [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-FASTURI-19846649), [Encoding Error](https://security.snyk.io/vuln/SNYK-JS-FASTURI-21279303), and [Path Equivalence](https://security.snyk.io/vuln/SNYK-JS-FASTURI-21279301) vulnerabilities reported in security scans. Addressed in [#35346](https://github.com/cypress-io/cypress/pull/35346).
 - Upgraded the transitive `brace-expansion` dependency of `minimatch` from `1.1.12` to `1.1.21` to address [Infinite loop](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-15789759), [Inefficient Algorithmic Complexity](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-17706650), [Allocation of Resources Without Limits or Throttling](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-18313044), [Uncontrolled Recursion](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-20244948), and [ReDoS](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-20244950) vulnerabilities reported in security scans. Addressed in [#35349](https://github.com/cypress-io/cypress/pull/35349).
 - Upgraded `firefox-profile` from `4.7.0` to `4.7.1`, which upgrades the transitive `adm-zip` dependency from `0.5.10` to `0.6.1`, to address [Uncontrolled Resource Consumption](https://github.com/advisories/GHSA-xcpc-8h2w-3j85), [Memory Allocation with Excessive Size Value](https://github.com/advisories/GHSA-7q85-xj36-vmfc), [Incorrect Permission Assignment](https://github.com/advisories/GHSA-j5f4-cc29-5x44), [Data Amplification](https://github.com/advisories/GHSA-rcw4-f5rp-g42v), [Uncaught Exception](https://github.com/advisories/GHSA-8238-w5pm-2374), [Improper Link Resolution Before File Access](https://github.com/advisories/GHSA-vwc7-r8mq-g2x9), [Allocation of Resources Without Limits or Throttling](https://github.com/advisories/GHSA-c6fg-446q-cg94), and [Interpretation Conflict](https://github.com/advisories/GHSA-p634-w6r4-rjp2) vulnerabilities reported in security scans. Addressed in [#35289](https://github.com/cypress-io/cypress/pull/35289).
+- Upgraded `ws` from `8.22.1` to `8.23.0`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
 
 ## 16.3.0
 
