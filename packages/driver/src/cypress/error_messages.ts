@@ -1175,7 +1175,7 @@ export default {
 
           You passed: ${format(eventName)}`, 10)
       },
-      req_continue_fn_only: '\`req.continue\` requires the parameter to be a function',
+      req_continue_fn_only: '`req.continue` requires the parameter to be a function',
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
       defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
       setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
@@ -1451,7 +1451,7 @@ export default {
       docsUrl: 'https://on.cypress.io/request',
     },
     encoding_invalid: {
-      message: `${cmd('request')} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node\'s Buffer encoding.`,
+      message: `${cmd('request')} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node's Buffer encoding.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     gzip_invalid: {
@@ -1888,12 +1888,14 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
-      wrongArgOptionUnexpected: {
-        message: stripIndent`
-        ${cmd('session')} was passed an invalid option: **{{key}}**
-        Available options are: \`validate\`
-        `,
-        docsUrl: 'https://on.cypress.io/session',
+      wrongArgOptionUnexpected: ({ validOpts }: { validOpts: string[] }) => {
+        return {
+          message: stripIndent`
+          ${cmd('session')} was passed an invalid option: **{{key}}**
+          Available options are: ${[...validOpts].sort().map((opt) => `\`${opt}\``).join(', ')}
+          `,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgOptionInvalid: {
         message: stripIndent`
@@ -2161,7 +2163,7 @@ export default {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_week: {
-      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
+      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (01-53). You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     multiple_elements: {

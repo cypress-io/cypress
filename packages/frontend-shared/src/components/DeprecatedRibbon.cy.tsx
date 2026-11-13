@@ -1,5 +1,4 @@
 import DeprecatedRibbon from './DeprecatedRibbon.vue'
-import { defaultMessages } from '../locales/i18n'
 
 describe('<DeprecatedRibbon />', () => {
   it('renders the default deprecated label', { viewportWidth: 200, viewportHeight: 200 }, () => {
@@ -11,7 +10,7 @@ describe('<DeprecatedRibbon />', () => {
 
     cy.findByTestId('deprecated-ribbon')
     .should('be.visible')
-    .and('contain', defaultMessages.openBrowser.deprecatedRibbon)
+    .and('contain', 'Deprecated')
 
     cy.percySnapshot()
   })

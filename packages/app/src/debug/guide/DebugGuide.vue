@@ -4,9 +4,9 @@
     :medium="DEBUG_TAB_MEDIUM"
   >
     <template #header>
-      <PromoHeader :title="t('debugPage.emptyStates.connect.title')">
+      <PromoHeader title="Connect to debug your tests">
         <template #description>
-          {{ t('debugPage.emptyStates.connect.description') }}
+          Cypress Cloud is built for teams who need to do testing at scale.
         </template>
         <template #control>
           <CloudConnectButton
@@ -37,7 +37,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import CloudConnectButton from '../../runs/CloudConnectButton.vue'
 import { DEBUG_TAB_MEDIUM } from '../utils/constants'
 import Promo from '../../components/promo/Promo.vue'
@@ -45,8 +44,6 @@ import PromoHeader from '../../components/promo/PromoHeader.vue'
 import GuideCard1 from '../guide/GuideCard1.vue'
 import GuideCard2 from '../guide/GuideCard2.vue'
 import GuideCard3 from '../guide/GuideCard3.vue'
-
-const { t } = useI18n()
 
 defineProps<{
   campaign: string

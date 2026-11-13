@@ -58,15 +58,15 @@
             <template #popper>
               <div class="text-left p-2 text-gray-300 text-[14px] leading-[20px]">
                 <div class="font-medium text-white mb-2">
-                  {{ t('openBrowser.deprecatedTitle') }}
+                  Deprecated browser
                 </div>
-                {{ t('openBrowser.deprecatedBody') }}
+                Electron is deprecated as a test browser and will be removed in a future version of Cypress. Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.
                 <ExternalLink
                   href="https://on.cypress.io/launching-browsers"
                   class="text-indigo-300 hocus:text-indigo-200 block mt-2"
                   data-cy="deprecated-browser-link"
                 >
-                  {{ t('openBrowser.deprecatedLink') }}
+                  See supported browsers
                 </ExternalLink>
               </div>
             </template>
@@ -146,7 +146,7 @@
               @click="emit('focusBrowser')"
             >
               <ExportIcon class="mr-[8px] icon-dark-gray-500" />
-              {{ browserText.focus }}
+              Focus
             </Button>
             <Button
               size="40"
@@ -156,7 +156,7 @@
               @click="emit('closeBrowser')"
             >
               <PowerStandbyIcon class="mr-[8px] icon-dark-gray-500" />
-              {{ browserText.close }}
+              Close
             </Button>
           </template>
         </template>
@@ -171,14 +171,13 @@
         <ArrowRightIcon
           class="mr-[8px] icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
         />
-        {{ browserText.switchTestingType }}
+        Switch testing type
       </Button>
     </div>
   </form>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import Button from '@cypress-design/vue-button'
 import { computed } from 'vue'
 import { useMutation, gql, useSubscription } from '@urql/vue'
@@ -253,8 +252,6 @@ const emit = defineEmits<{
   (e: 'focusBrowser'): void
 }>()
 
-const { t } = useI18n()
-
 const browsers = computed(() => {
   return sortBrowsersByDeprecation(props.gql.browsers ?? [])
 })
@@ -280,21 +277,18 @@ const selectedBrowserName = computed(() => {
 })
 
 const browserText = computed(() => {
-  const tArgs = { browser: selectedBrowserName.value }
+  const browser = selectedBrowserName.value ?? ''
 
   return {
     e2e: {
-      start: t('openBrowser.startE2E', tArgs),
-      opening: t('openBrowser.openingE2E', tArgs),
+      start: `Start E2E Testing in ${browser}`,
+      opening: `Opening E2E Testing in ${browser}`,
     },
     component: {
-      start: t('openBrowser.startComponent', tArgs),
-      opening: t('openBrowser.openingComponent', tArgs),
+      start: `Start Component Testing in ${browser}`,
+      opening: `Opening Component Testing in ${browser}`,
     },
-    running: t('openBrowser.running', tArgs),
-    focus: t('openBrowser.focus'),
-    close: t('openBrowser.close'),
-    switchTestingType: t('openBrowser.switchTestingType'),
+    running: `Running ${browser}`,
   }
 })
 

@@ -1,4 +1,3 @@
-// @ts-ignore
 import pkg from '@packages/root'
 import debugLib from 'debug'
 import DataLoader from 'dataloader'
@@ -33,7 +32,6 @@ export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationR
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T : never
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
 
@@ -120,12 +118,12 @@ export class CloudDataSource {
       exchanges: [
         dedupExchange,
         cacheExchange({
-          // @ts-ignore
+          // @ts-expect-error - the introspected schema's literal types don't match graphcache's `IntrospectionData`
           schema: urqlSchema,
           ...urqlCacheKeys,
           updates: {
             Mutation: {
-              _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
+              _cloudCacheInvalidate: (parent, { args }: { args: Parameters<Cache['invalidate']> }, cache, info) => {
                 cache.invalidate(...args)
               },
             },

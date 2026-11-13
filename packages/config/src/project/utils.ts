@@ -318,7 +318,7 @@ export function relativeToProjectRoot (projectRoot: string, file: string) {
   }
 
   // captures leading slash(es), both forward slash and back slash
-  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
+  const leadingSlashRe = /^[/|\\]*(?![/|\\])/
 
   return file.replace(projectRoot, '').replace(leadingSlashRe, '')
 }

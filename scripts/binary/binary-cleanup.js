@@ -35,6 +35,34 @@ async function removeEmptyDirectories (directory) {
   }
 }
 
+// Snapshot metadata follows the dev install's hoisting, so on a case-insensitive filesystem a stale
+// path can hit a different file, e.g. mime 1's `mime/mime.js` resolving to mime 3's `mime/Mime.js`.
+const createExactCaseChecker = (baseDir) => {
+  const dirEntries = new Map()
+
+  const readDir = (dir) => {
+    if (!dirEntries.has(dir)) {
+      dirEntries.set(dir, fs.readdir(dir).catch(() => []))
+    }
+
+    return dirEntries.get(dir)
+  }
+
+  return async (relativePath) => {
+    let dir = baseDir
+
+    for (const segment of relativePath.split(/[\\/]/).filter((s) => s && s !== '.')) {
+      if (!(await readDir(dir)).includes(segment)) {
+        return false
+      }
+
+      dir = path.join(dir, segment)
+    }
+
+    return true
+  }
+}
+
 const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
@@ -55,6 +83,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/mocha-7.2.0/index.js',
     'packages/server/node_modules/webdriver/build/index.js',
     'packages/server/node_modules/@wdio/utils/build/node.js',
+    // jimp is deferred in the snapshot, so its dependencies are loaded from disk
+    'node_modules/jimp/dist/commonjs/index.js',
     // dependencies needed for geckodriver when running firefox in the binary
     'node_modules/pump/index.js',
     'node_modules/sprintf-js/src/sprintf.js',
@@ -99,7 +129,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'uglify-js',
         'esbuild',
         'enhanced-resolve/lib/createInnerCallback',
-        './addon/addon-native',
       ],
     })
 
@@ -175,11 +204,13 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
   // 4. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
+  const existsWithExactCase = createExactCaseChecker(buildAppDir)
+
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
     const typeScriptlessDependency = dependency.replace(/\.ts$/, '.js')
 
     // babel/runtime requires all of its dependencies in a very non-standard dynamic way. We will keep anything in babel/runtime
-    if (!keptDependencies.includes(typeScriptlessDependency.slice(2)) && !typeScriptlessDependency.includes('@babel/runtime')) {
+    if (!keptDependencies.includes(typeScriptlessDependency.slice(2)) && !typeScriptlessDependency.includes('@babel/runtime') && await existsWithExactCase(typeScriptlessDependency)) {
       await fs.remove(path.join(buildAppDir, typeScriptlessDependency))
     }
   }))
@@ -251,6 +282,7 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
 }
 
 module.exports = {
+  createExactCaseChecker,
   buildEntryPointAndCleanup,
   cleanupUnneededDependencies,
 }

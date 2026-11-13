@@ -22,7 +22,6 @@ describe('<TrackedBanner />', () => {
     })
 
     // Initially mount as visible
-    // @ts-ignore
     cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} hasBannerBeenShown={false} eventData={{} as any}/> })
 
     cy.get('[data-cy="banner"]').as('banner')
@@ -45,7 +44,6 @@ describe('<TrackedBanner />', () => {
     })
 
     // Initially mount as visible
-    // @ts-ignore
     cy.mount({ render: () => <TrackedBanner data-cy="banner" bannerId="test-banner" v-model={shown.value} dismissible hasBannerBeenShown={false} eventData={{} as any} /> })
 
     cy.get('[data-cy="banner"]').as('banner')
@@ -106,6 +104,7 @@ describe('<TrackedBanner />', () => {
 
       it('should debounce event recording', () => {
         eventData.cohort = 'COH'
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts no second event is recorded, so let the debounce window pass first
         cy.wait(250)
         cy.get('@recordEvent').should('have.been.calledOnce')
       })

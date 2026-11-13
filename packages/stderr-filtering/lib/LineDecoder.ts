@@ -39,7 +39,7 @@ export class LineDecoder {
   * [Symbol.iterator] (): Generator<string> {
     debugVerbose('iterating over lines in line decoder')
 
-    let nextLine: string | undefined = undefined
+    let nextLine: string | undefined
 
     do {
       nextLine = this.nextLine()
@@ -64,7 +64,7 @@ export class LineDecoder {
    */
   * end (chunk?: string) {
     this.buffer = `${this.buffer}${(chunk || '')}`
-    let nextLine: string | undefined = undefined
+    let nextLine: string | undefined
 
     do {
       nextLine = this.nextLine()

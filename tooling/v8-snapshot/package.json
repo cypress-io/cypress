@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
+    "@packages/v8-snapshot-require": "0.0.0-development",
     "@tooling/system-tests": "0.0.0-development",
     "chai-as-promised": "7.1.2",
     "cpr": "^3.0.1",

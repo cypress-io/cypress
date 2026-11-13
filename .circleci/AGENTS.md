@@ -38,7 +38,7 @@ This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-ar
 | Location | When you also need it |
 |----------|------------------------|
 | `pull-request.yml` exclusion list | Avoid the PR workflow running in parallel with the main workflows on the same branch |
-| `notify-binary-failure`'s `filters:` in `@main.yml` | Testing binary failure alerting on a branch — it is pinned to `develop`, so it never fires elsewhere |
+| `notify-binary-failure`'s `filters:` in `@main.yml` | Testing binary failure alerting on a branch — it is pinned to `develop` and `vN`, so it never fires elsewhere |
 | `generate-pipeline-parameters.sh` branch override | Force every path-filtered job to run even when changed files would not normally select them (or trigger manually with `run-all-jobs=true`) |
 | `&mainBuildFilters` in `@main.yml` | Binary/kitchensink/staging jobs in `linux-x64` that have an extra branch filter beyond the workflow `when:` |
 
@@ -50,18 +50,18 @@ After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `halt-if-skipped`), not in the workflow files, so they apply to every workflow below — not just the PR one.
 
-- **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-and-trigger-packaging-artifacts`, `get-published-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs, system tests, and `v8-integration-tests` are guarded, so a webhook push to `develop` runs only the ones its changed paths select.
-- **`windows` / `linux-arm64` / `darwin-*`**: none of these three run on a plain `develop` or `release/*` push — see "Scheduled platform CI" below for when they do. Inside them, `v8-integration-tests`, `driver-integration-memory-tests`, and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
+- **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-build-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs, system tests, and `v8-integration-tests` are guarded, so a webhook push to `develop` or a `vN` maintenance branch runs only the ones its changed paths select.
+- **`windows` / `linux-arm64` / `darwin-*`**: none of these four run on a plain `develop`, `release/*`, or `vN` push — see "Scheduled platform CI" below for when they do. Inside them, `v8-integration-tests`, `driver-integration-memory-tests`, and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
 
-`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop` and `release/*` they run only from a scheduled pipeline. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough.
+`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop`, `release/*`, and `vN` they run only from a scheduled pipeline or a manual trigger. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough.
 
 `npm-release` still runs only on `develop`, not on allowlisted feature branches.
 
-### Scheduled platform CI (develop and release/*)
+### Scheduled platform CI (develop, release/*, and vN)
 
 None of the four runs on every `develop` or `release/*` push. Windows moved for credit cost. The two `darwin-*` workflows moved to free leased self-hosted macOS hardware. `linux-arm64` costs almost nothing and moved for consistency, so all platform coverage lands in one sweep. Per-merge platform signal was not actionable anyway — `develop` passed 47 of 213 runs. A release branch is long-lived enough for a scheduled sweep to cover it the same way.
 
-**What exists today**: a CircleCI Scheduled Pipeline named "Platform Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` once per weekday at 02:00 UTC and sets `run-platform-workflows=true`. `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read that parameter. There is still no release-branch schedule: `release/*` pushes get zero platform coverage of any kind until one exists.
+**What exists today**: a CircleCI Scheduled Pipeline named "Platform Develop Branch Schedule" (id `40ddfea0-34c3-47ab-8557-6bdb150b4d8d`) runs on `develop` once per weekday at 02:00 UTC and sets `run-platform-workflows=true`. `windows`, `linux-arm64`, `darwin-x64`, and `darwin-arm64` all read that parameter. Each `vN` maintenance branch has a weekly scheduled build that sets the same parameter. There is still no release-branch schedule: `release/*` pushes get zero platform coverage of any kind until one exists.
 
 **Still needed**, to match the gates in `@main.yml`:
 

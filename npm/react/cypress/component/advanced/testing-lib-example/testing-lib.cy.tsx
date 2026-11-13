@@ -13,7 +13,6 @@ it('loads and displays greeting (testing-lib)', () => {
   mount(<Fetcher url={url} />)
 
   cy.findByText('Load Greeting')
-  .wait(1000)
   .click()
 
   cy.findByRole('heading').should('have.text', 'Hello there')

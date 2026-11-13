@@ -1,6 +1,6 @@
 # @cypress/puppeteer
 
-`@cypress/puppeteer` is a published npm package (public beta) that lets Cypress tests run Puppeteer code. Users register named message handlers in `setupNodeEvents` with `setup()`, then call them from specs with `cy.puppeteer(name, ...args)`. Each handler receives a Puppeteer `Browser` connected to the Cypress-launched browser. The main use case is multi-tab and multi-window work that Cypress can't do on its own.
+`@cypress/puppeteer` is a published npm package that lets Cypress tests run Puppeteer code. Users register named message handlers in `setupNodeEvents` with `setup()`, then call them from specs with `cy.puppeteer(name, ...args)`. Each handler receives a Puppeteer `Browser` connected to the Cypress-launched browser. The main use case is multi-tab and multi-window work that Cypress can't do on its own.
 
 ## Key Commands
 
@@ -34,9 +34,10 @@ yarn cypress:run -- --spec cypress/e2e/multi-tab.cy.ts   # already passes --brow
 
 ## Gotchas / Notes
 
-- Public beta — breaking changes may happen. Feedback goes to the GitHub discussion linked in the README.
+- Message handlers receive a raw Puppeteer `Browser`, so Puppeteer's breaking changes are this package's breaking changes. Ship a `puppeteer-core` major bump with a `breaking:` prefix and a `BREAKING CHANGE` footer, and add a migration table to the README like the one in "Upgrading to 1.0". Check `engines.node` too: the plugin runs on the user's Node (see the root `AGENTS.md` runtime targets), which rules out `puppeteer-core` v25 (ESM-only, Node 22.12+) while the CLI still supports Node `^22.0.0`.
 - Only Chromium-family browsers work; the task returns an error for any other `family`. Electron is supported.
+- Electron rejects `Target.createTarget`, so `browser.newPage()` fails there on every `puppeteer-core` version; only pages the app opens can be used. The package's e2e suite runs in Chrome only, which is why the README's "Creating a new tab" example carries an Electron caveat.
 - In headed Chromium (not Electron), the plugin reactivates the main Cypress tab through the Cypress extension after every handler. Google Chrome 137+ can't load that extension, so `setup` throws in `after:browser:launch` for `browser.name === 'chrome'` at major version 137+ when headed (see #31703). Chrome for Testing and Chromium have different `name`s and aren't blocked.
 - Errors cross the task boundary as `{ __error__: { name, message, stack } }` rather than as thrown errors, and `undefined` handler results become `null` because `cy.task()` rejects `undefined`. Keep both behaviors when changing `setup.ts` or `src/support/index.ts`.
-- `after:browser:launch` needs Cypress 13.6.0+, which is why `peerDependencies.cypress` is `>=13.6.0`.
+- `peerDependencies.cypress` is `>=14.0.0`. `after:browser:launch` alone only needs 13.6.0, but Cypress 13 supports Node 16 and the bundled `puppeteer-core` v24 needs Node 18. Cypress 14.0.0 is the first release whose supported Node range meets that, and its bundled Electron 33 works with v24.
 - When changing public behavior, update `README.md`, and keep its examples in sync with `cypress.config.ts` and `cypress/e2e/multi-tab.cy.ts`.

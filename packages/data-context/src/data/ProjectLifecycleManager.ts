@@ -440,14 +440,14 @@ export class ProjectLifecycleManager {
       return this._activeLifecycleRefresh
     }
 
-    // Capture the IIFE locally so the finally only clears the slot if it
+    // Capture the promise locally so the finally only clears the slot if it
     // still owns it. If `resetInternalState` (project switch) wipes
     // `_activeLifecycleRefresh` while this iteration is in flight, a fresh
     // chain may have taken its place — we don't want to clobber the new
     // chain's slot when this old one finally settles.
-    let invokedLifecycleRefresh!: Promise<void>
+    let invokedLifecycleRefresh: Promise<void> | undefined
 
-    invokedLifecycleRefresh = (async () => {
+    const runLifecycleRefresh = async () => {
       try {
         do {
           this._isLifecycleRefreshQueued = false
@@ -458,7 +458,9 @@ export class ProjectLifecycleManager {
           this._activeLifecycleRefresh = null
         }
       }
-    })()
+    }
+
+    invokedLifecycleRefresh = runLifecycleRefresh()
 
     this._activeLifecycleRefresh = invokedLifecycleRefresh
 
@@ -714,7 +716,7 @@ export class ProjectLifecycleManager {
     await this.resetInternalState()
   }
 
-  registerEvent (event: string, callback: Function) {
+  registerEvent (event: string, callback: (...args: any[]) => any) {
     return this._eventRegistrar.registerEvent(event, callback)
   }
 
@@ -795,7 +797,6 @@ export class ProjectLifecycleManager {
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!configFilePathSet) {
       this.setConfigFilePath(`cypress.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
-      configFilePathSet = true
     }
 
     this._projectMetaState = metaState

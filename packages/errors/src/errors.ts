@@ -733,6 +733,14 @@ export const AllCypressErrors = {
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
   },
+  PORT_BLOCKED_BY_BROWSER: () => {
+    return errTemplate`\
+        Cypress could not find a port that browsers allow
+
+        Chrome, Electron, Firefox and WebKit refuse to load any URL on the ports Cypress was randomly assigned, so the runner could never connect to Cypress
+
+        Set the ${fmt.highlightSecondary('port')} option in your Cypress configuration to a port browsers allow`
+  },
   FILE_SERVER_COULD_NOT_LISTEN: (attempts: number, err: Error) => {
     return errTemplate`\
         Cypress could not start its internal file server.
@@ -901,6 +909,17 @@ export const AllCypressErrors = {
 
       ${fmt.stackTrace(err)}
     `
+  },
+  CONFIG_PROCESS_EXITED_UNEXPECTEDLY: (code: number | null, signal: string | null, testingType?: string) => {
+    const exitedWith = signal ? `signal ${signal}` : code !== null ? `code ${code}` : 'no exit code or signal'
+    const oomHint = signal === 'SIGKILL'
+      ? fmt.off(`\n\nA SIGKILL usually means the operating system ran out of memory and killed the process.${testingType === 'component' ? ' In component testing this process also runs your dev server, which can use a lot of memory.' : ''}`)
+      : fmt.off('')
+
+    return errTemplate`\
+      The process that loads your ${fmt.highlight(`configFile`)} and runs your Node events exited unexpectedly (${fmt.highlightSecondary(exitedWith)}).${oomHint}
+
+      Cypress cannot run your Node events without this process.`
   },
   TRUSTED_CERTIFICATES_LOAD_ERROR: (filePathOrLabel: string, err: Error) => {
     return errTemplate`\
@@ -1883,8 +1902,8 @@ export const cloneErr = function (err: CypressError | GenericError, options: { h
     // revert back the distorted characters
     // in case there is an error in a child_process
     // that contains quotes
-    .replace(/\&\#x27;/g, '\'')
-    .replace(/\&quot\;/g, '"')
+    .replace(/&#x27;/g, '\'')
+    .replace(/&quot;/g, '"')
   }
 
   // and any own (custom) properties

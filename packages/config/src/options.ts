@@ -14,7 +14,7 @@ import * as validate from './validation'
  * - Ensure the config package tests pass with updated snapshots
  *
  * Additionally, for experiments:
- * - add name and description copy to `/packages/frontend-shared/src/locales/en-US.json`
+ * - add name and description copy to `/packages/app/src/settings/project/Experiments.vue`
  */
 
 const _BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
@@ -63,7 +63,7 @@ export type OverrideContext = 'suite' | 'test' | 'runtime' | undefined
 interface ConfigOption {
   name: string
   defaultValue?: any
-  validation: Function
+  validation: (key: string, value: any, opts: ValidationOptions) => validate.ValidationResult
   requireRestartOnChange?: 'server' | 'browser'
   /**
    * The list of test-time overrides levels supported by the configuration option. When undefined,
@@ -338,7 +338,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'port',
     defaultValue: null,
-    validation: validate.isNumber,
+    validation: validate.isValidPort,
   }, {
     name: 'projectId',
     defaultValue: null,

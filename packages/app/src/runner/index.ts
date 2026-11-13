@@ -268,8 +268,8 @@ function runSpecCT (config, spec: SpecFile) {
 function addIframe ({ $container, id, src, className }) {
   const $addedIframe = document.createElement('iframe')
 
-  $addedIframe.id = id,
-  $addedIframe.name = id,
+  $addedIframe.id = id
+  $addedIframe.name = id
   $addedIframe.className = className
 
   $container.appendChild($addedIframe)

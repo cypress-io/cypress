@@ -10,7 +10,19 @@
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
-    "@packages/electron": "0.0.0-development"
+    "@packages/electron": "0.0.0-development",
+    "@packages/server": "0.0.0-development",
+    "@tooling/system-tests": "0.0.0-development",
+    "@tooling/v8-snapshot": "0.0.0-development",
+    "chalk": "4.1.2",
+    "chokidar": "3.6.0",
+    "cross-fetch": "^3.1.5",
+    "esbuild": "^0.28.1",
+    "fast-json-stable-stringify": "^2.1.0",
+    "gulplog": "^1.0.0",
+    "js-yaml": "^4.1.0",
+    "simple-git": "^4.0.2",
+    "temp-dir": "^2.0.0"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",

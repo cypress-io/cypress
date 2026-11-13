@@ -2,6 +2,10 @@
   "name": "@packages/launchpad",
   "version": "0.0.0-development",
   "private": true,
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
     "check-ts": "vue-tsc --noEmit && yarn -s tslint",
@@ -9,15 +13,18 @@
     "clean-deps": "rimraf node_modules",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:open:ct": "yarn cypress:run-cypress-in-cypress gulp open --component --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
-    "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 TZ=America/New_York",
     "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --e2e --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
+    "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 TZ=America/New_York",
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
+    "lint": "eslint",
     "start": "echo 'run yarn dev from the root' && exit 1",
     "test": "yarn cypress:run:ct",
     "tslint": "tslint --config ../ts/tslint.json --project . --exclude ../graphql/src/gen/nxs.gen.ts",
     "watch": "echo 'run yarn dev from the root' && exit 1"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix"
   },
   "dependencies": {},
   "devDependencies": {
@@ -28,10 +35,13 @@
     "@headlessui/vue": "1.4.0",
     "@intlify/unplugin-vue-i18n": "4.0.0",
     "@packages/data-context": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
     "@packages/frontend-shared": "0.0.0-development",
     "@packages/network-interception": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/scaffold-config": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
+    "@packages/telemetry": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@percy/cypress": "^3.1.8",
     "@purge-icons/generated": "0.8.1",
@@ -48,10 +58,12 @@
     "cypress-real-events": "1.15.0",
     "dedent": "^0.7.0",
     "disparity": "^3.2.0",
+    "eslint": "^9.31.0",
     "fs-extra": "8.1.0",
     "globby": "^11.0.1",
     "graphql": "^15.5.1",
     "human-interval": "1.0.0",
+    "jiti": "^2.4.2",
     "sinon": "13.0.2",
     "tailwindcss": "^3.3.1",
     "vite": "^8.0.9",
@@ -62,10 +74,6 @@
     "vue-tsc": "^2.0.19",
     "vue3-file-selector": "^1.0.1"
   },
-  "files": [
-    "dist"
-  ],
-  "license": "MIT",
   "nx": {
     "implicitDependencies": [
       "@packages/frontend-shared",

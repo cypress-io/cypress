@@ -1,4 +1,3 @@
-/* eslint-disable no-dupe-class-members */
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '../store/mobx-runner-store'
@@ -33,7 +32,7 @@ const noop = () => {}
 let crossOriginOnMessageRef = (event: MessageEvent) => {
   return undefined
 }
-let crossOriginLogs: {[key: string]: Cypress.Log} = {}
+let crossOriginLogs: { [key: string]: Cypress.Log } = {}
 let hasMochaRunEnded: boolean = false
 
 // Posted by the cross-origin AUT injection before a spec bridge attaches to it.
@@ -216,10 +215,6 @@ export class EventManager {
       logCommand(testId, logId)
     })
 
-    this.reporterBus.on('set:user:editor', (editor) => {
-      this.ws.emit('set:user:editor', editor)
-    })
-
     this.reporterBus.on('runner:restart', rerun)
 
     const sendEventIfSnapshotProps = (testId, logId, event) => {
@@ -271,10 +266,6 @@ export class EventManager {
 
     this.reporterBus.on('open:login:connect:modal', (args) => {
       this.localBus.emit('open:login:connect:modal', args)
-    })
-
-    this.reporterBus.on('get:user:editor', (cb) => {
-      this.ws.emit('get:user:editor', cb)
     })
 
     this.reporterBus.on('open:file:unified', (file: FileDetails) => {
@@ -361,7 +352,6 @@ export class EventManager {
       this.ws.emit('aut:destroy:complete')
     })
 
-    // @ts-ignore
     const $window = this.$CypressDriver.$(window)
 
     // This is a test-only event. It's used to
@@ -722,8 +712,8 @@ export class EventManager {
           return
         }
 
-        // @ts-ignore
         // TODO: UNIFY-1318 - strongly typed event emitter.
+        // @ts-expect-error - the event args are an array, not the tuple emit expects
         return this.emit(event, ...args)
       })
     })

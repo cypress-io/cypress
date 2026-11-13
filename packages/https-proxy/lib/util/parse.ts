@@ -30,14 +30,13 @@ export function hostAndPort (reqUrl: string, headers: any, defaultPort: number) 
   const hostPort = parseHost(host, defaultPort)
 
   // this handles paths which include the full url. This could happen if it's a proxy
-  const m = reqUrl.match(/^http:\/\/([^\/]*)\/?(.*)$/)
+  const m = reqUrl.match(/^http:\/\/([^/]*)\/?(.*)$/)
 
   if (m) {
     const parsedUrl = parse(reqUrl)
 
     hostPort.host = parsedUrl.hostname
     hostPort.port = parsedUrl.port
-    reqUrl = parsedUrl.path
   }
 
   return hostPort

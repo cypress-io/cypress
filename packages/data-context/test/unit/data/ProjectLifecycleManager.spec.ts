@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import fs from 'fs-extra'
 import os from 'os'
@@ -23,7 +23,7 @@ function createDataContext (modeOptions?: Parameters<typeof createTestDataContex
   jest.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
   jest.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
 
-  // @ts-expect-error
+  // @ts-expect-error - `_projectRoot` is private
   context.lifecycleManager._projectRoot = 'foo'
 
   return context
@@ -698,7 +698,7 @@ describe('ProjectLifecycleManager', () => {
 
   describe('#eventProcessPid', () => {
     it('returns process id from config manager', () => {
-      // @ts-expect-error
+      // @ts-expect-error - a partial config manager stub on the private `_configManager`
       ctx.lifecycleManager._configManager = {
         eventProcessPid: 12399,
         destroy: () => {},
@@ -708,7 +708,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('does not throw if config manager is not initialized', () => {
-      // @ts-expect-error
+      // @ts-expect-error - `_configManager` is private
       ctx.lifecycleManager._configManager = undefined
       expect(ctx.lifecycleManager.eventProcessPid).toEqual(undefined)
     })

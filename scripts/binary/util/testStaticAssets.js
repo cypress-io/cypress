@@ -2,7 +2,7 @@ const la = require('lazy-ass')
 const fs = require('fs-extra')
 const _ = require('lodash')
 const glob = require('glob')
-const chalk = require('chalk').default
+const chalk = require('chalk')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
 
