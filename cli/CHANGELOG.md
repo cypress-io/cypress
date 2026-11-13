@@ -1626,7 +1626,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 
 **Misc:**
 
-- The [`SEMAPHORE_GIT_35377`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) environment variable from [Semaphore](https://semaphoreci.com/) CI is now captured to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
+- The [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) environment variable from [Semaphore](https://semaphoreci.com/) CI is now captured to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
 
 ## 13.7.3
 
