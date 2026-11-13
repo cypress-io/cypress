@@ -206,7 +206,7 @@ export interface EvaluateResult {
 }
 
 export interface ActionResult {
-  coords: { x: number, y: number }
+  coords: { top: number, left: number, topCenter: number, leftCenter: number, x: number, y: number }
 }
 
 export type AgentMethods = {
