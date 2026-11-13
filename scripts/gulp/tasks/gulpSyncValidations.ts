@@ -1,7 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 import crossFetch from 'cross-fetch'
-import { resolveDevelopmentCloudWorkspaceUrl } from '../../../packages/config/src/developmentWorkspaceUrl'
+import { resolveDevelopmentCloudWorkspaceUrl } from '../../../packages/config/src/developmentCloudWorkspaceUrl'
 
 const INTERNAL_CLOUD_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
 

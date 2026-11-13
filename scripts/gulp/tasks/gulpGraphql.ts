@@ -11,7 +11,7 @@ import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
 import { monorepoPaths } from '../monorepoPaths'
 import { spawned, universalSpawn } from '../utils/childProcessUtils'
 import { DEFAULT_INTERNAL_CLOUD_ENV } from '../gulpConstants'
-import { resolveDevelopmentCloudWorkspaceUrl } from '../../../packages/config/src/developmentWorkspaceUrl'
+import { resolveDevelopmentCloudWorkspaceUrl } from '../../../packages/config/src/developmentCloudWorkspaceUrl'
 
 export async function nexusCodegen () {
   return nexusTypegen({
