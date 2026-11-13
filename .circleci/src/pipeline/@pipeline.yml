@@ -2262,6 +2262,36 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
+  # Opens a project with 500 specs in `cypress open` so the open-mode startup
+  # spans, launchpad:mounted and specs:list:first:render, reach Honeycomb. Cloud
+  # only forwards spans that carry the Cypress project's record key.
+  open-mode-telemetry:
+    <<: *defaults
+    steps:
+      - when:
+          condition:
+            not:
+              or:
+                - << pipeline.parameters.run-app-ui-tests >>
+                - << pipeline.parameters.run-launchpad-tests >>
+          steps:
+            - run:
+                name: Skipping job — not relevant to changed files
+                command: circleci-agent step halt
+      - restore_cached_workspace
+      - run:
+          name: Report open-mode startup spans
+          command: |
+            if [[ ! -v MAIN_RECORD_KEY ]]; then
+              echo "No record key on external PRs, so Cloud would drop these spans"
+              circleci-agent step halt
+              exit 0
+            fi
+
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            CYPRESS_CONFIG_ENV=production \
+            node scripts/open-mode-telemetry.mts
+
   # Fast, Node-only parity check for the proxy middleware onion across both
   # network transports (browser CDP Fetch and the HTTP/1 MITM proxy) — mirrors
   # run_unit_suite() in scripts/validate-proxy-middleware-transport.sh.
