@@ -20,6 +20,7 @@ src/
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
+  typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
   vitestConfig.ts       Opt-in linting of Vitest specs (@vitest/eslint-plugin), for workspaces whose unit tests run on Vitest
   vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
   reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
@@ -102,6 +103,31 @@ Every workspace opts in except the browser bundles, whose floor is the supported
 `n/no-process-exit` is left off: almost all of its hits are CLIs and scripts that exit on purpose. The plugin's optional `ts-declaration-location` peer is only needed by `n/no-sync`, which isn't enabled.
 
 `nodeConfig.ts` loads the plugin with `require` rather than `import`. Its types export a string-named `"module.exports"`, which TypeScript only parses from 5.6 and import-x's parser not at all. An `import` fails `check-ts` in every workspace whose `tsconfig` takes in its `eslint.config.ts`.
+
+## `noFloatingPromisesConfig`
+
+`noFloatingPromisesConfig(files)` turns on `@typescript-eslint/no-floating-promises` for `files`: a promise must be awaited, returned, or given a rejection handler (`.catch()`, or `.then()` with two arguments), so a rejection can't go unobserved. Spread it after `baseConfig` and the workspace's `tsconfigRootDir` block:
+
+```ts
+noFloatingPromisesConfig(['lib/**/*.ts']),
+```
+
+The rule needs type information, so the block also gives `files` a project service. Type-aware parsing is what makes lint slower, so pass only the TypeScript source the rule is meant for, never the whole workspace. Every file in `files` must be in the workspace's `tsconfig.json`, or the parser reports it `was not found by the project service` (see [Adding a workspace](#adding-a-workspace)).
+
+Fix a hit by awaiting, returning or handling the promise. Use `void` only for fire-and-forget, with a comment saying why it can't reject or what happens if it does.
+
+These workspaces opt in, for their shipped source only:
+
+- `server`, `proxy`, `net-stubbing`, `network`, `https-proxy`, `socket`, `resolve-dist`: `lib/**/*.ts`
+- `launcher`: `index.ts` and `lib/**/*.ts`
+- `driver`: `index.ts` and `src/**/*.ts`
+- `data-context`: `src/**/*.ts` and `graphql/**/*.ts`
+- `scaffold-config`, `v8-snapshot-require`: `src/**/*.ts`
+- `config`: `src/**/*.ts` and `test/**/*.ts`
+- `reporter`: `src/**/*.{ts,tsx}` and `cypress/**/*.ts`
+- `icons`: `index.ts` and `index.mts`
+
+Specs are left out (`config` and `reporter` predate this and keep theirs): they commonly start a promise and assert on it later, so the hits are mostly noise, and giving them a project service would slow lint further. The other workspaces don't opt in yet; adding one means fixing its hits and measuring its lint time first.
 
 ## `vitestConfig`
 

@@ -260,7 +260,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return cohorts.getByName(name)
       },
       async insertCohort (cohort) {
-        cohorts.set(cohort)
+        await cohorts.set(cohort)
       },
     },
   })

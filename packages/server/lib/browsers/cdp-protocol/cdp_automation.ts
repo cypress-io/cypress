@@ -298,7 +298,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       headers: params.response.headers,
     }
 
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+    // The project's handler emits synchronously and returns a resolved promise
+    void this.automation.onRequestEvent?.('response:received', browserResponseReceived)
   }
 
   private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {

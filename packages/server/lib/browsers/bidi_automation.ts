@@ -525,7 +525,8 @@ export class BidiAutomation {
       headers: parsedHeaders,
     }
 
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+    // The project's handler emits synchronously and returns a resolved promise
+    void this.automation.onRequestEvent?.('response:received', browserResponseReceived)
   }
 
   private onFetchError = (params: NetworkFetchErrorParameters) => {

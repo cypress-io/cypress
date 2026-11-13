@@ -70,8 +70,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     debug('created request subscription %o', { eventName, request, subscription, handler })
 
-    // tslint:disable:no-floating-promises
-    emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+    // emitNetEvent fails the current test on error rather than rejecting
+    void emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
   }
 
   const getCanonicalInterception = (): Interception => {

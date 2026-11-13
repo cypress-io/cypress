@@ -1,4 +1,4 @@
-import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -21,18 +21,7 @@ export default [
       'no-restricted-syntax': 'off',
     },
   },
-  {
-    // no-floating-promises needs type information, so the shipped source gets a project service
-    files: ['src/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-floating-promises': 'error',
-    },
-  },
+  noFloatingPromisesConfig(['src/**/*.ts']),
   {
     // build output of tsconfig.browser.json
     ignores: ['browser/**/*'],
