@@ -653,6 +653,23 @@ describe('lib/cypress-sessions', () => {
         expect(selection.session.loadError).toEqual({ message: 'Your configFile is invalid' })
       })
 
+      it('reports the broken session at the cwd, not another project\'s, when none is healthy', async () => {
+        const otherPort = await startFakeSession({ sessionId: 'other', respondWith: { sessionId: 'other', cdpBrowserWsUrl: null, loadError: { message: 'Other project is invalid' } } })
+        const hereCwdPort = await startFakeSession({ sessionId: SESSION_ID, respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: null, loadError: { message: 'Your configFile is invalid' } } })
+
+        mockfs({ [SESSIONS_DIR]: {
+          '111.json': makeRecord({ pid: 111, serverPort: otherPort, sessionId: 'other', projectRoot: '/other/project' }),
+          '222.json': makeRecord({ pid: 222, serverPort: hereCwdPort }),
+        } })
+
+        stubKill({ alive: [111, 222] })
+
+        const selection = await resolveLiveSession({ cwd: PROJECT }, { allowLoadError: true })
+
+        expect(selection.session.pid).toBe(222)
+        expect(selection.session.loadError).toEqual({ message: 'Your configFile is invalid' })
+      })
+
       it('resolves a healthy session started since, for the caller that reports errors, over an older broken one at the same project', async () => {
         const brokenPort = await startFakeSession({ sessionId: 'broken', respondWith: { sessionId: 'broken', cdpBrowserWsUrl: null, loadError: { message: 'Your configFile is invalid' } } })
         const workingPort = await startFakeSession({ sessionId: SESSION_ID, respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: CDP_WS_URL } })

@@ -129,10 +129,10 @@ const mayBeAfterUnloaded = (usable: CypressSession[], { session, cwd }: ResolveS
   return usable.length === 0 || (session === undefined && !usable.some((record) => matchesProject(record, cwd)))
 }
 
-// The project that could not load which the caller is after, when `mayBeAfterUnloaded`: the
-// one named, any of them when nothing usable is left, otherwise the one at the caller's directory
-const soughtUnloaded = <T extends CypressSession>(usable: CypressSession[], unloaded: T[], { session, cwd }: ResolveSessionOptions): T | undefined => {
-  return unloaded.find((record) => matchesSession(record, session) && (usable.length === 0 || matchesProject(record, cwd)))
+// The projects that could not load which the caller may be after, when `mayBeAfterUnloaded`: the
+// one named, any of them when nothing usable is left, otherwise those at the caller's directory
+const soughtUnloaded = <T extends CypressSession>(usable: CypressSession[], unloaded: T[], { session, cwd }: ResolveSessionOptions): T[] => {
+  return unloaded.filter((record) => matchesSession(record, session) && (usable.length === 0 || matchesProject(record, cwd)))
 }
 
 // A session whose configuration broke after it started still answers, but whatever it runs
@@ -142,15 +142,17 @@ const soughtUnloaded = <T extends CypressSession>(usable: CypressSession[], unlo
 // older broken session never shadows a healthy one that was started since.
 const setAsideBrokenSessions = (live: LiveSessionState[], options: ResolveSessionOptions, allowLoadError: boolean): LiveSessionState[] => {
   const loaded = live.filter((record) => !record.loadError)
-  const broken = mayBeAfterUnloaded(loaded, options) ? soughtUnloaded(loaded, live.filter((record) => record.loadError), options) : undefined
+  const broken = mayBeAfterUnloaded(loaded, options) ? soughtUnloaded(loaded, live.filter((record) => record.loadError), options) : []
 
-  if (broken && allowLoadError) {
-    return [broken]
+  if (broken.length > 0 && allowLoadError) {
+    return broken
   }
 
-  if (broken) {
+  if (broken.length > 0) {
+    const [refused] = broken
+
     // The session was found and answered, so the refusal is attributed to it
-    lastResolvedIdentity = { sessionId: broken.sessionId, machineId: broken.machineId, userId: broken.userId }
+    lastResolvedIdentity = { sessionId: refused.sessionId, machineId: refused.machineId, userId: refused.userId }
 
     throw new TapError('PROJECT_NOT_LOADED')
   }
@@ -162,7 +164,7 @@ const setAsideBrokenSessions = (live: LiveSessionState[], options: ResolveSessio
 // SESSION_NOT_FOUND for a pid that named nothing, NO_SESSION when none was asked
 // for — STALE_SESSION when matches exist but none responds, PROJECT_NOT_LOADED when
 // the one sought broke after it started, and UNSUPPORTED_BROWSER when every one that
-// is left has a browser tap cannot drive. `allowLoadError` returns the broken session
+// is left has a browser tap cannot drive. `allowLoadError` returns the broken sessions
 // sought instead of throwing, for `status` to report its error.
 const liveMatches = async (options: ResolveSessionOptions, allowLoadError = false): Promise<LiveSessionState[]> => {
   const { session, probeTimeoutMs } = options
@@ -172,7 +174,7 @@ const liveMatches = async (options: ResolveSessionOptions, allowLoadError = fals
   // never among the matches
   const matches = records.filter((record) => !isStartingRecord(record) && matchesSession(record, session))
 
-  if (mayBeAfterUnloaded(matches, options) && soughtUnloaded(matches, await readStartingSessions(), options)) {
+  if (mayBeAfterUnloaded(matches, options) && soughtUnloaded(matches, await readStartingSessions(), options).length > 0) {
     throw new TapError('PROJECT_NOT_LOADED')
   }
 
