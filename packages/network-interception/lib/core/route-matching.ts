@@ -119,6 +119,9 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
     }
   }
 
+  // Route matchers are written against `url.parse`'s fields: a `path` with `'` and `|`
+  // percent-encoded, a `hostname` without IPv6 brackets, and a querystring-parsed `query`
+  // eslint-disable-next-line n/no-deprecated-api -- `http://[::1]/o'brien|x` must match the same routes
   const proxiedUrl = url.parse(req.proxiedUrl, true)
 
   _.assign(matchable, _.pick(proxiedUrl, ['hostname', 'path', 'pathname', 'port', 'query']))

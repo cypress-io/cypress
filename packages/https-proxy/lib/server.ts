@@ -3,7 +3,7 @@ import { allowDestroy, connect, httpUtils } from '@packages/network'
 import debugModule from 'debug'
 import https from 'https'
 import net from 'net'
-import { hostAndPort } from './util/parse'
+import { connectHostname, hostAndPort } from './util/parse'
 import semaphore from 'semaphore'
 import url from 'url'
 import type { CA } from './ca'
@@ -53,7 +53,7 @@ export class Server {
   connect (req: IncomingMessage, browserSocket: net.Socket, head: Buffer) {
     // the SNI server requires a hostname, so if the hostname is blank,
     // destroy the socket and fail fast
-    const { hostname } = url.parse(`https://${req.url}`)
+    const hostname = connectHostname(req.url)
 
     if (!hostname) {
       browserSocket.destroy()
@@ -184,7 +184,7 @@ export class Server {
     }
 
     // else spin up the SNI server
-    const { hostname } = url.parse(`https://${req.url}`)
+    const hostname = connectHostname(req.url)
 
     sslServer = sslServers[hostname]
 

@@ -51,6 +51,7 @@ export const nodeConfig: Linter.Config[] = [
       'n/no-unsupported-features/node-builtins': 'error',
       'n/no-unsupported-features/es-builtins': 'error',
       'n/no-unsupported-features/es-syntax': 'error',
+      'n/no-deprecated-api': 'error',
       'n/no-extraneous-import': 'error',
       'n/no-extraneous-require': 'error',
     },

@@ -114,6 +114,10 @@ export async function handleInterceptRequest (
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
     request.req.proxiedUrl = core.mergeIncomingRequestChanges(before, after, {
       baseUrl: request.req.proxiedUrl,
+      // Every intercepted request resolves its URL here, changed or not. `url.resolve`
+      // percent-encodes `'` and `|` and keeps an explicit default port, where `URL`
+      // leaves them as the browser sent them, which would change the URL sent upstream
+      // eslint-disable-next-line n/no-deprecated-api -- `http://host:80/o'brien|x` must reach upstream as it does today
       resolveUrl: (baseUrl, relativeUrl) => url.resolve(baseUrl, relativeUrl),
     })
   }
