@@ -266,7 +266,7 @@ const click = (context: AgentContext, args: ClickArgs): Bluebird<ActionResult> =
     mouse[event](coords.fromElViewport, forceEl)
     flagModifiers(args.options, false)
 
-    return { coords: _.pick(coords.fromAutWindow, 'x', 'y') }
+    return pickCoords(coords)
   })
 }
 
@@ -312,11 +312,12 @@ const type = (context: AgentContext, args: TypeArgs): Bluebird<ActionResult> => 
       force: args.options.force,
       ...handlers,
     } as any)
-    .then(() => ({ coords: _.pick(coords.fromAutWindow, 'x', 'y') }))
+    .then(() => pickCoords(coords))
   })
 }
 
-const pickCoords = (coords) => ({ coords: _.pick(coords.fromAutWindow, 'x', 'y') })
+// the same position the legacy driver logs, which Test Replay needs to mark where an action landed
+const pickCoords = (coords): ActionResult => ({ coords: _.pick(coords.fromAutWindow, 'top', 'left', 'topCenter', 'leftCenter', 'x', 'y') })
 
 const focus = (context: AgentContext, { steps, index }: ElementArgs) => {
   const el = resolveSubject(steps, index).get(0)
