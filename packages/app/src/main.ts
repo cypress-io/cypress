@@ -49,3 +49,9 @@ await makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute
 
   app.mount('#app')
 })
+
+telemetry.startSpan({
+  name: 'app:mounted',
+  parentSpan: telemetry.getSpan('cypress:app'),
+  opts: { startTime: now, attributes: { timeToScriptStartMs: Math.round(now) } },
+})?.end()
