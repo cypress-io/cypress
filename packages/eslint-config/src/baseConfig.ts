@@ -171,9 +171,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
       // `== null` is the idiomatic check for both null and undefined
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
-      // `eslint:recommended` enables these from ESLint 10, so they can go once it does
-      'no-useless-assignment': 'error',
-      'no-unassigned-vars': 'error',
       // Unused args and caught errors stay allowed: callbacks and interface
       // implementations often have to accept parameters they ignore. A leading
       // `_` keeps a variable that exists only to be type-checked, like `_typeCheck`
