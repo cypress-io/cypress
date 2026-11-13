@@ -52,8 +52,11 @@ describe('server sent events', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/35256
-  // The stream is finite because the HTTP proxy reads the whole body before a
-  // response handler runs.
+  // The stream ends for two reasons. The HTTP proxy path reads the whole body
+  // before it calls a response handler, so an endless stream never reaches the
+  // handler. The CDP path passes the stream through as it arrives, but
+  // res.text() only resolves once the stream ends.
+
   it('receives the stream when a response handler changes the content-type', () => {
     cy.intercept('http://127.0.0.1:3039/sse/finite', (req) => {
       req.on('response', (res) => {
