@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import fs from 'fs-extra'
 import path from 'path'
 import os from 'os'
@@ -72,7 +72,7 @@ describe('FileDataSource', () => {
 
           // Verify that the glob pattern is not impacted if it contains directories equivalent
           // to the working directory
-          let files = await fileDataSource.getFilesByGlob(
+          const files = await fileDataSource.getFilesByGlob(
             projectPath,
             `./cypress${projectPath}/nested-script.js`,
           )

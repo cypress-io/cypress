@@ -1,8 +1,6 @@
 import SpecsList from './SpecsList.vue'
 import type { SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { Specs_SpecsListFragmentDoc, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   let specs: Array<SpecsListFragment>
@@ -62,11 +60,11 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         .should('have.length.below', specs.length)
 
         cy.percySnapshot('full list')
-        const longestSpec = specs.reduce((acc, spec) =>
-          acc.relative.length < spec.relative.length ? spec : acc
-        , specs[0])
+        const longestSpec = specs.reduce((acc, spec) => {
+          return acc.relative.length < spec.relative.length ? spec : acc
+        }, specs[0])
 
-        cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+        cy.findByLabelText('Search specs')
         .as('specsListInput')
 
         cy.get('@specsListInput').type('garbage 🗑', { delay: 0 })
@@ -75,7 +73,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         .get('[data-cy-spec-list-directory]')
         .should('not.exist')
 
-        cy.contains(`${defaultMessages.specPage.noResultsMessage} garbage 🗑`)
+        cy.contains('No specs matched your search: garbage 🗑')
         .should('be.visible')
 
         cy.percySnapshot('no results')
@@ -137,7 +135,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         cy.get('[data-cy="spec-item"]').should('not.exist')
 
-        cy.contains(defaultMessages.createSpec.newSpec).click()
+        cy.contains('New spec').click()
         cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
       })
 
@@ -190,10 +188,10 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     describe('with a saved spec filter', () => {
       beforeEach(() => {
         mountWithTestingType({ specFilter: 'saved-search-term 🗑' })
-        cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+        cy.findByLabelText('Search specs')
         .as('searchField')
 
-        cy.findByLabelText(defaultMessages.specPage.clearSearch, { selector: 'button' })
+        cy.findByLabelText('Clear search field', { selector: 'button' })
         .as('searchFieldClearButton')
       })
 
@@ -204,12 +202,12 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         // this shouldn't match any results, so let's confirm none are shown
 
-        cy.contains('button', defaultMessages.createSpec.viewSpecPatternButton)
+        cy.contains('button', 'View spec pattern')
         .as('resultsCount')
         .should('contain.text', '0 of 50 matches')
 
         // confirm results clear correctly
-        cy.contains('button', defaultMessages.noResults.clearSearch).click()
+        cy.contains('button', 'Clear search').click()
 
         cy.get('@resultsCount')
         .should('contain.text', '50 matches')
@@ -236,8 +234,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.get('@searchField').type('{backspace}{backspace}')
         cy.wrap(setSpecFilterStub).should('have.been.calledWith', 'te')
         cy.get('@searchField').type('{backspace}{backspace}')
-        cy.wrap(setSpecFilterStub).should('have.been.calledWith', '')
-        cy.wait(100) // there's an intentional 50ms delay in the code, lets just wait it out
+        // the filter is saved, and the list refiltered, after a debounce; wait for
+        // the latest save so the snapshots show the unfiltered list
+        cy.wrap(setSpecFilterStub).its('lastCall.args.0').should('equal', '')
 
         // Specs List has a min width of ~650px in the app, so there's no need to snapshot below that
         cy.viewport(650, 850)

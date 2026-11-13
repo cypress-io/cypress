@@ -84,7 +84,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
@@ -104,7 +104,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
@@ -124,7 +124,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'Counter',
@@ -144,7 +144,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
@@ -167,7 +167,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
@@ -204,10 +204,10 @@ describe('spec-options', () => {
 
             // This stub simulates that the component we are generating a spec from is using Typescript.
             if (isTypescriptComponent) {
-              // @ts-ignore
+              // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
               jest.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
             } else {
-              // @ts-ignore
+              // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
               jest.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
             }
 
@@ -219,7 +219,7 @@ describe('spec-options', () => {
               codeGenPath: `${tmpPath}/${componentPath}`,
               codeGenType: 'component',
               isDefaultSpecPattern: false,
-              // @ts-expect-error
+              // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
               framework: CT_FRAMEWORKS[1],
               specPattern,
               specs,
@@ -330,7 +330,7 @@ describe('spec-options', () => {
               codeGenType: 'component',
               isDefaultSpecPattern: true,
               specPattern: [defaultSpecPattern.component],
-              // @ts-expect-error
+              // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
               framework: CT_FRAMEWORKS[1],
             })
 

@@ -4,7 +4,7 @@
     :banner-id="bannerId"
     data-cy="connect-project-banner"
     status="info"
-    :title="t('specPage.banners.connectProject.title')"
+    title="Connect your project to Cypress Cloud"
     class="mb-[16px]"
     :icon="ConnectIcon"
     dismissible
@@ -25,14 +25,13 @@
       data-cy="connect-project-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Create Project Banner' })"
     >
-      {{ t('specPage.banners.connectProject.buttonLabel') }}
+      Connect your project
     </Button>
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
-import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
@@ -45,7 +44,6 @@ defineProps<{
   cohortOption: CohortOption
 }>()
 
-const { t } = useI18n()
 const bannerId = BannerIds.ACI_082022_CONNECT_PROJECT
 
 </script>

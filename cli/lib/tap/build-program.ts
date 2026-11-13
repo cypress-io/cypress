@@ -3,7 +3,7 @@ import commander from 'commander'
 import { tapCliCommands } from './commands'
 import { DEFAULT_CDP_TIMEOUT_MS } from './cdp-timeout'
 import type { TapCliCommand } from './types'
-import { MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-sessions'
+import { MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownCommandTapError, UnknownOptionTapError, unmetDependency } from '@packages/cypress-sessions'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-sessions'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
@@ -24,6 +24,27 @@ const argumentsOf = (params: readonly TapCommandParamSchema[]): string => {
 
 const argumentDescriptions = (params: readonly TapCommandParamSchema[]): Record<string, string> => {
   return Object.fromEntries(params.map(({ name, description }) => [name, description]))
+}
+
+const longFlagOf = ({ name, type }: TapCommandOptionSchema): string => type === 'boolean' ? `--${name}` : `--${name} <${name}>`
+
+// commander renders a mandatory option exactly like an optional one, and has no
+// notion of one flag depending on another, so the help states both itself, in
+// the same trailing style as its `(default: …)`.
+const describeOption = ({ description, required, requires }: TapCommandOptionSchema): string => {
+  const unless = requires?.unless ? ` unless --${requires.unless}` : ''
+  const notes = [required && '(required)', requires && `(requires --${requires.option}${unless})`]
+
+  return [description, ...notes].filter(Boolean).join(' ')
+}
+
+// commander's default usage collapses every flag into `[options]`; a flag the
+// command cannot run without is spelled out so the usage line alone is enough
+// to build a valid invocation.
+const usageOf = (params: readonly TapCommandParamSchema[], options: readonly TapCommandOptionSchema[]): string => {
+  const requiredFlags = options.filter(({ required }) => required).map(longFlagOf)
+
+  return ['[options]', ...requiredFlags, argumentsOf(params)].filter(Boolean).join(' ')
 }
 
 const JSON_DESCRIPTION = 'print the raw JSON result instead of the human-readable rendering'
@@ -60,14 +81,13 @@ const declareOptions = (command: commander.Command, options: readonly TapCommand
   const json = options.find(({ name }) => name === 'json')
 
   for (const option of options.filter((candidate) => candidate !== json)) {
-    const { name, alias, type, required, description } = option
-    const lead = alias ? `-${alias}, ` : ''
-    const flags = type === 'boolean' ? `${lead}--${name}` : `${lead}--${name} <${name}>`
+    const lead = option.alias ? `-${option.alias}, ` : ''
+    const flags = `${lead}${longFlagOf(option)}`
 
-    if (required && type !== 'boolean') {
-      command.requiredOption(flags, description)
+    if (option.required) {
+      command.requiredOption(flags, describeOption(option))
     } else {
-      declareOption(command, flags, description, option.defaultValue)
+      declareOption(command, flags, describeOption(option), option.defaultValue)
     }
   }
 
@@ -186,6 +206,7 @@ const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?
   // Keep option values in opts() so schema names such as `command` cannot
   // collide with Command instance methods.
   command.storeOptionsAsProperties(false)
+  command.usage(usageOf(params, options))
 
   if (params.length) {
     command.arguments(argumentsOf(params))
@@ -202,7 +223,16 @@ const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?
     command.action(() => {
       rejectExcessArguments(name, params, command.args)
 
-      return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(command, options))
+      // Answered here as well as by the session, because a CLI-native command
+      // never reaches the session's checks.
+      const forwarded = forwardedOptions(command, options)
+      const unmet = unmetDependency(options, forwarded)
+
+      if (unmet) {
+        throw unmet
+      }
+
+      return dispatch(name, forwardedArgs(params, command.args), forwarded)
     })
   }
 }

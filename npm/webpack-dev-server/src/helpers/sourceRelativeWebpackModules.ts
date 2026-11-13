@@ -2,8 +2,17 @@ import Module from 'module'
 import path from 'path'
 import type { Frameworks, WebpackDevServerConfig } from '../devServer'
 import debugFn from 'debug'
+import semver from 'semver'
+import type webpack from 'webpack'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
+
+class CypressWebpackDevServerError extends Error {
+  constructor (message: string) {
+    super(message)
+    this.name = 'CypressWebpackDevServerError'
+  }
+}
 
 export type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any
@@ -22,7 +31,7 @@ export interface SourcedDependency {
 }
 
 export interface SourcedWebpack extends SourcedDependency {
-  module: Function
+  module: typeof webpack
   majorVersion: 4 | 5
 }
 
@@ -30,7 +39,7 @@ interface SourcedWebpackDevServer extends SourcedDependency {
   module: {
     new (...args: unknown[]): unknown
   }
-  majorVersion: 4 | 5
+  majorVersion: 4 | 5 | 6
 }
 
 interface SourcedHtmlWebpackPlugin extends SourcedDependency {
@@ -51,6 +60,7 @@ const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 // We ship webpack as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
 // serves as our fallback.
 const cypressWebpackPath = (config: WebpackDevServerConfig) => {
+  // eslint-disable-next-line n/no-extraneous-require -- resolved from the Cypress binary, which ships it
   return require.resolve('@cypress/webpack-batteries-included-preprocessor', {
     paths: [config.cypressConfig.cypressBinaryRoot],
   })
@@ -177,7 +187,7 @@ function sourceWebpack (config: WebpackDevServerConfig, framework: SourcedDepend
 
 // Source the webpack-dev-server module from the provided framework or projectRoot.
 // If none is found, we fallback to the version bundled with this package.
-export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpackMajorVersion: 4 | 5, framework?: SourcedDependency | null): SourcedWebpackDevServer {
+export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpack: SourcedWebpack, framework?: SourcedDependency | null): SourcedWebpackDevServer {
   const searchRoot = framework?.importPath ?? config.cypressConfig.projectRoot
 
   debug('WebpackDevServer: Attempting to source webpack-dev-server from %s', searchRoot)
@@ -204,9 +214,18 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpackM
   webpackDevServer.importPath = path.dirname(webpackDevServerJsonPath)
   webpackDevServer.packageJson = require(webpackDevServerJsonPath)
   webpackDevServer.module = require(webpackDevServer.importPath)
-  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [5])
+  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [5, 6])
 
   debug('WebpackDevServer: Successfully sourced webpack-dev-server - %o', webpackDevServer)
+
+  // Next.js's compiled webpack only reports '5' as its version, so the minimum can't be checked there
+  if (webpackDevServer.majorVersion === 6 && semver.valid(webpack.packageJson.version) && semver.lt(webpack.packageJson.version, '5.101.0')) {
+    throw new CypressWebpackDevServerError(
+      'Incompatible versions of webpack and webpack-dev-server!\n' +
+      `webpack-dev-server ${webpackDevServer.packageJson.version} requires webpack 5.101.0 or newer, but found webpack ${webpack.packageJson.version}.\n` +
+      'Upgrade webpack to 5.101.0 or newer, or install webpack-dev-server 5 to use with @cypress/webpack-dev-server.',
+    )
+  }
 
   return webpackDevServer
 }
@@ -224,6 +243,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
   let htmlWebpackPluginJsonPath: string
 
   try {
+    // eslint-disable-next-line n/no-extraneous-require -- sourced from the user's project, like webpack itself
     htmlWebpackPluginJsonPath = require.resolve('html-webpack-plugin/package.json', {
       paths: [searchRoot],
     })
@@ -251,9 +271,9 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     })
   }
 
-  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath),
+  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath)
   htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
 
   debug('HtmlWebpackPlugin: Successfully sourced html-webpack-plugin - %o', htmlWebpackPlugin)
@@ -265,7 +285,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
 export function sourceDefaultWebpackDependencies (config: WebpackDevServerConfig): SourceRelativeWebpackResult {
   const framework = sourceFramework(config)
   const webpack = sourceWebpack(config, framework)
-  const webpackDevServer = sourceWebpackDevServer(config, webpack.majorVersion, framework)
+  const webpackDevServer = sourceWebpackDevServer(config, webpack, framework)
   const htmlWebpackPlugin = sourceHtmlWebpackPlugin(config, framework, webpack)
 
   return {

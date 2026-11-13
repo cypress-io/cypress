@@ -1,6 +1,4 @@
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<DebugSpecLimitBanner />', () => {
   it('renders expected copy and link', () => {
@@ -11,9 +9,9 @@ describe('<DebugSpecLimitBanner />', () => {
       />
     ))
 
-    cy.contains(defaultMessages.debugPage.limit.title)
-    cy.contains(defaultMessages.debugPage.limit.message.split('|')[0].trim().replace('{n}', '120'))
-    cy.contains(defaultMessages.debugPage.limit.link)
+    cy.contains('Cypress renders up to 100 failed test results')
+    cy.contains('This run has 120 failed tests')
+    cy.contains('See all test results in Cypress Cloud')
 
     cy.get('a').should('have.attr', 'href')
     .and('match', /utm_medium/)

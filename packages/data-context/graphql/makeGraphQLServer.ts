@@ -17,12 +17,16 @@ import debugLib from 'debug'
 import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
+import { telemetry } from '@packages/telemetry'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
+
 import { graphqlSchema } from './schema'
 import { runnerMutationRule, tapOperationRule } from './rootFieldRules'
 import { execute, Kind, locatedError, parse, specifiedRules, validate } from 'graphql'
-import type { DefinitionNode, DocumentNode, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
+import type { DefinitionNode, DocumentNode, ExecutionResult, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
 
 const debug = debugLib(`cypress-verbose:graphql:operation`)
+const debugTelemetry = debugLib(`cypress:data-context:graphql:telemetry`)
 
 const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -101,6 +105,12 @@ export async function makeGraphQLServer () {
     }
   }
 
+  if (telemetry.isEnabled()) {
+    app.get('/__launchpad/index.html', (req, res, next) => {
+      getCtx().html.launchpadHtml().then((html) => res.type('html').send(html), next)
+    })
+  }
+
   app.get('/__launchpad/*', makeProxy())
 
   const ctx = getCtx()
@@ -152,7 +162,34 @@ export async function makeGraphQLServer () {
 
   ctx.actions.servers.setGqlSocketServer(gqlSocketServer)
 
+  if (telemetry.isEnabled()) {
+    socketSrv.of('/telemetry').on('connection', (socket) => {
+      socket.on('backend:request', handleTelemetrySocketRequest)
+    })
+  }
+
   return dfd.promise
+}
+
+/**
+ * The browser's websocket span exporter sends spans as a `backend:request`
+ * event named `telemetry`, so that is the only event this accepts.
+ */
+function handleTelemetrySocketRequest (eventName: unknown, payload: unknown, callback?: (res?: { error: Error }) => void) {
+  if (typeof callback !== 'function') {
+    return
+  }
+
+  if (eventName !== 'telemetry' || typeof payload !== 'string') {
+    // A plain object, since socket.io serializes an Error instance to {}
+    return callback({ error: { name: 'Error', message: `The launchpad telemetry socket cannot handle: ${String(eventName)}` } })
+  }
+
+  (telemetry.exporter() as OTLPTraceExporterCloud | undefined)?.send(payload, () => {}, (err) => {
+    debugTelemetry('error exporting telemetry data from launchpad %s', err)
+  })
+
+  callback()
 }
 
 interface GraphQLSocketPayload {
@@ -182,10 +219,10 @@ function makeGraphQLSocketHandler (validationRules: readonly ValidationRule[]) {
   const rules = [...specifiedRules, ...validationRules]
 
   // The rules are fixed here because socket.io passes every emitted argument to the handler.
-  return (uid: string, payload: string, callback: Function) => executeGraphQLSocketRequest(rules, uid, payload, callback)
+  return (uid: string, payload: string, callback: (result: ExecutionResult) => void) => executeGraphQLSocketRequest(rules, uid, payload, callback)
 }
 
-async function executeGraphQLSocketRequest (validationRules: readonly ValidationRule[], uid: string, payload: string, callback: Function) {
+async function executeGraphQLSocketRequest (validationRules: readonly ValidationRule[], uid: string, payload: string, callback: (result: ExecutionResult) => void) {
   if (typeof callback !== 'function') {
     return
   }
@@ -294,7 +331,7 @@ const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]) => {
 
     // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
     try {
-      // @ts-expect-error
+      // @ts-expect-error - express-graphql types `params` as optional and `query` as nullable; parse() throws on a missing query, which the catch handles
       document = parse(params.query)
     } catch {
       // error will be re-thrown in customParseFn below

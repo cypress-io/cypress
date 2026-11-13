@@ -295,6 +295,7 @@ const util = {
       return value ? '1' : '0'
     })
     .extend(this.getOriginalNodeOptions())
+    .extend(this.getTerminalSize())
     .value()
   },
 
@@ -314,6 +315,13 @@ const util = {
       FORCE_STDOUT_TTY: this.isTty(process.stdout.fd),
       FORCE_STDERR_TTY: this.isTty(process.stderr.fd),
     }
+  },
+
+  // On Windows the binary's stdio is always piped, so it cannot measure the terminal itself
+  getTerminalSize (): { FORCE_TTY_COLUMNS?: string, FORCE_TTY_ROWS?: string } {
+    const stream = [process.stdout, process.stderr].find((s) => s.isTTY && s.columns && s.rows)
+
+    return stream ? { FORCE_TTY_COLUMNS: String(stream.columns), FORCE_TTY_ROWS: String(stream.rows) } : {}
   },
 
   getEnvColors (): any {
@@ -390,6 +398,11 @@ const util = {
 
     return chalk.blue(...args)
   },
+
+  // Download and unzip progress use this to limit how often they update.
+  // In an interactive terminal each update redraws the install task list,
+  // so updating for every chunk or entry slows the install down.
+  progressThrottleMs: 100,
 
   calculateEta (percent: number, elapsed: number): number {
     // returns the number of seconds remaining

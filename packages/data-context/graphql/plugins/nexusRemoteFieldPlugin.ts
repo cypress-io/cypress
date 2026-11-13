@@ -31,7 +31,7 @@ export type RemoteFieldDefinitionConfig<TypeName extends string, FieldName exten
     args: core.ArgsValue<TypeName, FieldName>,
     ctx: DataContext,
     info: GraphQLResolveInfo,
-    index: number // Index, when resolving in a list. Useful to eager load the first "N" items
+    index: number, // Index, when resolving in a list. Useful to eager load the first "N" items
   ) => boolean)
   /**
    * The remote "query field" to delegate the query to
@@ -55,7 +55,7 @@ export type RemoteQueryArgsResolver<TypeName extends string, FieldName extends s
   source: core.SourceValue<TypeName>,
   args: core.ArgsValue<TypeName, FieldName>,
   ctx: DataContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => core.MaybePromise<CloudQueryArgs<RemoteField> | false>
 
 export const remoteFieldPlugin = plugin({

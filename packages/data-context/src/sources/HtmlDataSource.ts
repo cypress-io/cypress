@@ -29,7 +29,7 @@ export class HtmlDataSource {
 
     while (retryCount < MAX_APP_HTML_READ_ATTEMPTS) {
       try {
-        let html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        const html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
         const title = _.escape(this.ctx.project.projectTitle(this.ctx.currentProject || ''))
 
         // Pass a function, not a string, so `$&` and friends in the title are inserted literally
@@ -129,6 +129,33 @@ export class HtmlDataSource {
     return this.replaceBody(appHtml, serveConfig, isBrowserNetworkMode)
   }
 
+  /**
+   * The launchpad is otherwise served as static files, so this is only used to
+   * bootstrap browser telemetry when it is enabled
+   */
+  async launchpadHtml () {
+    const html = process.env.CYPRESS_INTERNAL_VITE_DEV
+      ? await (await this.ctx.util.fetch(`http://localhost:${process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}/__launchpad/index.html`, { method: 'GET' })).text()
+      : await this.ctx.fs.readFile(getPathToDist('launchpad', 'index.html'), 'utf8')
+
+    return html.replace('<body>', () => {
+      return `
+      <body>
+        <script>
+          ${this.telemetryBootstrap()}
+        </script>
+    `
+    })
+  }
+
+  private telemetryBootstrap () {
+    if (!telemetry.isEnabled()) {
+      return ''
+    }
+
+    return `window.__CYPRESS_TELEMETRY__ = ${JSON.stringify({ context: telemetry.getActiveContextObject(), resources: telemetry.getResources(), isVerbose: telemetry.isVerbose() })}`
+  }
+
   private replaceBody (html: string, serveConfig: object, isBrowserNetworkMode: boolean) {
     return html.replace('<body>', `
       <body>
@@ -140,7 +167,7 @@ export class HtmlDataSource {
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
           window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
-          ${telemetry.isEnabled() ? `window.__CYPRESS_TELEMETRY__ = ${JSON.stringify({ context: telemetry.getActiveContextObject(), resources: telemetry.getResources(), isVerbose: telemetry.isVerbose() })}` : ''}
+          ${this.telemetryBootstrap()}
           ${isBrowserNetworkMode ? `window.__CYPRESS_BROWSER_NETWORK_MODE__ = true;` : ''}
         </script>
     `)

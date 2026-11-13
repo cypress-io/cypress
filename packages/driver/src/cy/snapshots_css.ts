@@ -10,7 +10,7 @@ const screenStylesheetRe = /(screen|all)/
 
 const reduceText = (arr, fn) => {
   return _.reduce(arr, ((memo, item) => {
-    return memo += fn(item)
+    return memo + fn(item)
   }), '')
 }
 

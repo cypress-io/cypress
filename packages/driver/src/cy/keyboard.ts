@@ -30,7 +30,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 type SimulatedDefault = (
   el: HTMLElement,
   key: KeyDetails,
-  options: typeOptions
+  options: typeOptions,
 ) => void
 
 type KeyInfo = KeyDetails | ShortcutDetails
@@ -67,8 +67,10 @@ const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]{1,3})?/
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
-const isValidNumberInputChar = /[-+eE\d\.]/
-const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}$/
+const isValidNumberInputChar = /[-+eE\d.]/
+// Unanchored at the end so that each arrow in a run such as
+// {upArrow}{upArrow} is accepted on its own as typing reaches it
+const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}/
 
 const INITIAL_MODIFIERS = {
   alt: false,
@@ -387,7 +389,7 @@ const validateTyping = (
   el: HTMLElement,
   keys: KeyInfo[],
   currentIndex: number,
-  onFail: Function,
+  onFail: Log | ((err: Error) => unknown),
   skipCheckUntilIndex: number | undefined,
   force: boolean,
 ) => {
@@ -395,7 +397,7 @@ const validateTyping = (
   const allChars = joinKeyArrayToString(keys)
 
   if (skipCheckUntilIndex) {
-    return { skipCheckUntilIndex: skipCheckUntilIndex-- }
+    return { skipCheckUntilIndex }
   }
 
   debug('validateTyping:', chars, el)
@@ -695,16 +697,16 @@ interface typeOptions {
   release?: boolean
   _log?: Log
   delay?: number
-  onError?: Function
-  onEvent?: Function
-  onBeforeEvent?: Function
-  onFocusChange?: Function
-  onBeforeType?: Function
-  onAfterType?: Function
-  onValueChange?: Function
-  onEnterPressed?: Function
-  onNoMatchingSpecialChars?: Function
-  onBeforeSpecialCharAction?: Function
+  onError?: (...args: any[]) => unknown
+  onEvent?: (id: string, key: string, event: Event, dispatched: boolean) => unknown
+  onBeforeEvent?: (...args: any[]) => unknown
+  onFocusChange?: (...args: any[]) => unknown
+  onBeforeType?: (totalKeys: number) => unknown
+  onAfterType?: () => unknown
+  onValueChange?: (originalText: string, el: HTMLElement) => unknown
+  onEnterPressed?: (el: HTMLElement) => unknown
+  onNoMatchingSpecialChars?: (chars: string, allChars: string) => unknown
+  onBeforeSpecialCharAction?: (...args: any[]) => unknown
   prevValue?: string
 }
 

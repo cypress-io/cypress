@@ -786,7 +786,7 @@ describe('network stubbing', { retries: 15 }, function () {
         const url = uniqueRoute('/bar')
 
         testFail((err) => {
-          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter')
+          expect(err.message).to.include('When invoking `cy.intercept()` with a `RouteMatcher` as the second parameter, `url` can only be specified as the first parameter')
 
           done()
         })
@@ -799,7 +799,7 @@ describe('network stubbing', { retries: 15 }, function () {
         const url = uniqueRoute('/foo')
 
         testFail((err) => {
-          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter.')
+          expect(err.message).to.include('When invoking `cy.intercept()` with a `RouteMatcher` as the second parameter, a handler (function or `StaticResponse`) must be specified as the third parameter.')
 
           done()
         })
@@ -903,7 +903,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         it('errors on unknown prop', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('An unknown \`RouteMatcher\` property was passed: `wrong`')
+            expect(err.message).to.include('An unknown `RouteMatcher` property was passed: `wrong`')
 
             done()
           })

@@ -67,15 +67,12 @@ function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: st
 }
 
 export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: string, tree: Tree }) {
-  let components = []
-  let directories = []
-
   const projectPath = resolve(getSystemPath(normalize('')))
   const contents = readdirSync(resolve(`${projectPath}/${appPath}`), { withFileTypes: true })
 
   if (contents) {
-    components = contents.filter((file) => file['name'].endsWith(`component.ts`))
-    directories = contents.filter((file) => file.isDirectory())
+    const components = contents.filter((file) => file['name'].endsWith(`component.ts`))
+    const directories = contents.filter((file) => file.isDirectory())
 
     if (components) {
       components.map((component) => {

@@ -48,9 +48,7 @@
       <span
         v-if="isDetected"
         class="ml-[4px] text-gray-400 inline-block"
-      >
-        {{ t('setupPage.projectSetup.detected') }}
-      </span>
+      >(detected)</span>
     </template>
 
     <template #item-body="{ value: itemValue }">
@@ -62,9 +60,7 @@
       <span
         v-if="itemValue.isDetected"
         class="ml-[4px] text-gray-400 inline-block"
-      >
-        {{ t('setupPage.projectSetup.detected') }}
-      </span>
+      >(detected)</span>
     </template>
     <template #item-prefix="{ value: itemValue }">
       <!-- Raw SVG from a third-party component framework definition's `icon` option -->
@@ -98,12 +94,9 @@ import Select from '@cy/components/Select.vue'
 import type {
   SupportedBundlers,
 } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import AlphaLabel from './AlphaLabel.vue'
 import CommunityLabel from './CommunityLabel.vue'
 import FrameworkOptionsFooter from './FrameworkOptionsFooter.vue'
-
-const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   value?: string

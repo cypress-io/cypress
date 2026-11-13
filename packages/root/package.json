@@ -18,7 +18,7 @@
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
     "@rollup/plugin-json": "^6.1.0",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "rimraf": "^6.1.1",
     "rollup": "^4.52.0",

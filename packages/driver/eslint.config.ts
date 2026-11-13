@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...vitestConfig,
   {
     languageOptions: {
       parserOptions: {
@@ -16,6 +17,22 @@ export default [
     rules: {
       'no-restricted-properties': 'off',
       'no-restricted-syntax': 'off',
+    },
+  },
+  {
+    // The driver implements the commands: its specs assert on what they return, and
+    // its internals under src/cypress call `cy` methods like `cy.config` that the
+    // rule mistakes for commands
+    rules: {
+      'cypress/no-assigning-return-values': 'off',
+    },
+  },
+  {
+    // The vitest suites under test/unit/cypress match the shared `**/cypress/**`
+    // spec glob, but run in Node with no command queue, so async tests are correct
+    files: ['test/**'],
+    rules: {
+      'cypress/no-async-tests': 'off',
     },
   },
   {

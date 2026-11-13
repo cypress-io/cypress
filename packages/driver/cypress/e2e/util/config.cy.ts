@@ -222,7 +222,7 @@ describe('driver/src/cypress/validate_config', () => {
         })
       })
 
-      describe('when config override level is suite', () => {
+      describe('when the config option is read-only', () => {
         it('and config override is read-only', () => {
           const state = createState({
             duringUserTestExecution: false,

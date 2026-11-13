@@ -462,14 +462,6 @@
         "*.{ts,tsx,js,jsx}"
       ]
     },
-    "npm/eslint-plugin-dev": {
-      "entry": [
-        "lib/custom-rules/**/*.js"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
     "npm/webpack-dev-server": {
       "entry": [
         "src/browser.ts",
@@ -538,7 +530,8 @@
     },
     "npm/vite-dev-server": {
       "entry": [
-        "cypress/e2e/**/*.{ts,tsx,js,jsx}"
+        "cypress/e2e/**/*.{ts,tsx,js,jsx}",
+        "cypress/support/e2e.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
@@ -564,9 +557,6 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "jiti"
       ]
     },
     "npm/react": {
@@ -776,6 +766,7 @@
     "pgrep",
     "rm",
     "tar",
+    "tput",
     "tslint",
     "wc",
     "Xvfb"

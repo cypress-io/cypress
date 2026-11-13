@@ -18,7 +18,7 @@
     >
       <slot
         name="panel1"
-        :isDragging="panel1IsDragging"
+        :is-dragging="panel1IsDragging"
       />
 
       <div
@@ -38,7 +38,7 @@
            events on the panel while dragging to let resize hits pass through -->
       <slot
         name="panel2"
-        :isDragging="panel1IsDragging || panel2IsDragging || panel4IsDragging"
+        :is-dragging="panel1IsDragging || panel2IsDragging || panel4IsDragging"
       />
 
       <div
