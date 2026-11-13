@@ -6,6 +6,8 @@ import resolvePackagePath from 'resolve-package-path'
 
 const execAsync = promisify(exec)
 
+const PROCESS_BRANCH_ENV_MAX_BUFFER = 32 * 1024 * 1024
+
 // See https://whimsical.com/encryption-logic-BtJJkN7TxacK8kaHDgH1zM for more information on what this is doing
 const getProcessBranchForPid = async (pid: string) => {
   const { stdout } = await execAsync('ps -eo pid=,ppid=')
@@ -93,7 +95,9 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypres
   if (process.platform !== 'win32') {
     try {
       const processBranch = await getProcessBranchForPid(pid)
-      const { stdout } = await execAsync(`ps eww -p ${processBranch.join(',')} -o pid=,command=`)
+      // `ps eww` prints the full environment of every ancestor, which can
+      // outgrow exec's default buffer in CI environments with many variables
+      const { stdout } = await execAsync(`ps eww -p ${processBranch.join(',')} -o pid=,command=`, { maxBuffer: PROCESS_BRANCH_ENV_MAX_BUFFER })
 
       const pidEnvUrlMapping = stdout.split('\n').reduce((acc, line) => {
         const parsed = parsePsEnvLine(line)
@@ -111,7 +115,9 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypres
         envUrl = pidEnvUrlMapping.get(foundPid)
       }
     } catch (err) {
-      error = err
+      error = err instanceof Error
+        ? { name: err.name, message: err.message, stack: err.stack ?? '' }
+        : { name: 'Error', message: 'Reading the process tree failed with a non-Error value', stack: '' }
     }
   }
 
