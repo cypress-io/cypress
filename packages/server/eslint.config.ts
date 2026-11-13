@@ -40,6 +40,11 @@ export default [
     },
   },
   {
-    ignores: ['test/support/fixtures/server/**/*', 'lib/validations/**/*'],
+    ignores: [
+      'test/support/fixtures/server/**/*',
+      'lib/validations/**/*',
+      // The memory profiler writes here, relative to the cwd, when specs run from this package
+      'cypress/logs/**/*',
+    ],
   },
 ]
