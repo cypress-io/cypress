@@ -188,7 +188,7 @@
     "chrome-har-capturer": "0.14.2",
     "devtools-protocol": "0.0.1687809",
     "esbuild": "^0.28.1",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "eventsource": "2.0.2",
     "globals": "^15.12.0",
     "https-proxy-agent": "3.0.1",

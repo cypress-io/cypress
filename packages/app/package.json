@@ -69,7 +69,7 @@
     "dayjs": "^1.11.23",
     "debug": "^4.3.4",
     "disparity": "^3.2.0",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "fs-extra": "9.1.0",
     "fuzzysort": "^1.1.4",
     "graphql": "^15.5.1",
