@@ -13,6 +13,7 @@ import * as socketIo from '@packages/socket/browser/client'
 import {
   buildConnectReqHead,
   createProxySock,
+  parseProxyUrl,
   isRequestHttps,
   isResponseStatusCode200,
   regenerateRequestHead,
@@ -849,7 +850,7 @@ describe('lib/agent', function () {
 
   describe('.buildConnectReqHead', function () {
     it('builds the correct request', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', {} as url.Url)
+      const head = buildConnectReqHead('foo.bar', '1234', {})
 
       expect(head).toEqual([
         'CONNECT foo.bar:1234 HTTP/1.1',
@@ -861,7 +862,7 @@ describe('lib/agent', function () {
     it('can do Proxy-Authorization', function () {
       const head = buildConnectReqHead('foo.bar', '1234', {
         auth: 'baz:quux',
-      } as url.Url)
+      })
 
       expect(head).toEqual([
         'CONNECT foo.bar:1234 HTTP/1.1',
@@ -872,10 +873,55 @@ describe('lib/agent', function () {
     })
   })
 
+  describe('.parseProxyUrl', function () {
+    it('reads protocol, hostname and port', function () {
+      expect(parseProxyUrl('http://proxy.example.com:3128')).toEqual({
+        protocol: 'http:',
+        hostname: 'proxy.example.com',
+        port: '3128',
+        auth: null,
+      })
+    })
+
+    it('leaves the port empty for the default port, as createProxySock falls back to it', function () {
+      expect(parseProxyUrl('https://proxy.example.com:443').port).toEqual('')
+      expect(parseProxyUrl('http://proxy.example.com').port).toEqual('')
+    })
+
+    it('strips the brackets from an IPv6 host, which net.connect rejects', function () {
+      expect(parseProxyUrl('http://[::1]:3128').hostname).toEqual('::1')
+    })
+
+    it('percent-decodes the credentials', function () {
+      expect(parseProxyUrl('http://us%40er:p%3Ass@proxy:3128').auth).toEqual('us@er:p:ss')
+    })
+
+    it('reads a username without a password', function () {
+      expect(parseProxyUrl('http://user@proxy:3128').auth).toEqual('user')
+    })
+
+    it('matches url.parse on the fields the proxy code reads', function () {
+      for (const proxy of ['http://proxy:3128', 'https://u:p@proxy', 'http://[::1]:8080', 'http://localhost:4455/']) {
+        // eslint-disable-next-line n/no-deprecated-api -- the legacy parser is the reference
+        const legacy = url.parse(proxy)
+        const parsed = parseProxyUrl(proxy)
+
+        expect(parsed.protocol).toEqual(legacy.protocol)
+        expect(parsed.hostname).toEqual(legacy.hostname)
+        expect(parsed.auth).toEqual(legacy.auth)
+        expect(parsed.port || null).toEqual(legacy.port)
+      }
+    })
+
+    it('throws on a proxy that is not a URL', function () {
+      expect(() => parseProxyUrl('not a url')).toThrow(TypeError)
+    })
+  })
+
   describe('.createProxySock', function () {
     it('creates a `net` socket for an http url', function () {
       vi.spyOn(net, 'connect')
-      const proxy = url.parse('http://foo.bar:1234')
+      const proxy = parseProxyUrl('http://foo.bar:1234')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
@@ -888,7 +934,7 @@ describe('lib/agent', function () {
     it('creates a `tls` socket for an https url', function () {
       vi.spyOn(tls, 'connect')
 
-      const proxy = url.parse('https://foo.bar:1234')
+      const proxy = parseProxyUrl('https://foo.bar:1234')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
@@ -899,7 +945,7 @@ describe('lib/agent', function () {
     })
 
     it('throws on unsupported proxy protocol', function () {
-      const proxy = url.parse('socksv5://foo.bar:1234')
+      const proxy = parseProxyUrl('socksv5://foo.bar:1234')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, (err) => {
@@ -943,6 +989,7 @@ describe('lib/agent', function () {
         const { httpsAgent } = new CombinedAgent()
         const options = {
           href: 'https://foo.bar/',
+          // eslint-disable-next-line n/no-deprecated-api -- @cypress/request sets `uri` to a `url.parse` object
           uri: url.parse('https://foo.bar/'),
           _agentKey: 'foo.bar:443:',
         } as any

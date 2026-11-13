@@ -1,3 +1,4 @@
+/* eslint-disable n/no-deprecated-api -- getClientCertificateAgentOptionsForUrl takes the `url.parse` object @cypress/request sets as `uri` */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { ParsedUrl, UrlMatcher, UrlClientCertificates, ClientCertificateStore, clientCertificateStoreSingleton, ClientCertificates, loadClientCertificateConfig } from '../../lib/client-certificates'
 // import { clientCertificateStore } from '../../lib/agent'

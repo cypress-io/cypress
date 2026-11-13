@@ -78,7 +78,33 @@ type FamilyCache = {
   [host: string]: 4 | 6
 }
 
-export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
+/** The parts of a proxy URL that dialing a proxy and the CONNECT handshake read */
+export interface ProxyUrl {
+  protocol?: string | null
+  hostname?: string | null
+  port?: string | null
+  auth?: string | null
+}
+
+/**
+ * Parses a proxy URL into the `url.parse` shape the proxy code reads: `hostname`
+ * without the brackets `URL` keeps around an IPv6 address, which `net.connect`
+ * rejects, and `auth` percent-decoded, as it goes into a Basic credential.
+ */
+export const parseProxyUrl = (proxy: string): ProxyUrl => {
+  const { protocol, hostname, port, username, password } = new URL(proxy)
+  const user = decodeURIComponent(username)
+  const auth = password ? `${user}:${decodeURIComponent(password)}` : user
+
+  return {
+    protocol,
+    hostname: hostname.replace(/^\[(.*)\]$/, '$1'),
+    port,
+    auth: auth || null,
+  }
+}
+
+export function buildConnectReqHead (hostname: string, port: string, proxy: ProxyUrl) {
   const connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
 
   connectReq.push(`Host: ${hostname}:${port}`)
@@ -91,7 +117,7 @@ export function buildConnectReqHead (hostname: string, port: string, proxy: url.
 }
 
 interface CreateProxySockOpts {
-  proxy: url.Url
+  proxy: ProxyUrl
   shouldRetry?: boolean
 }
 
@@ -218,6 +244,9 @@ export class CombinedAgent {
       }) + options.path
     }
 
+    // Client certificate matching reads `path`, an explicit default `port` and an
+    // unbracketed IPv6 `hostname`, none of which `URL` provides
+    // eslint-disable-next-line n/no-deprecated-api -- `uri` must match the `url.parse` object @cypress/request sets it to
     const uri = options.uri = options.uri ?? url.parse(options.href)
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
@@ -295,7 +324,15 @@ class HttpAgent extends http.Agent {
   _addProxiedRequest (req: http.ClientRequest, options: RequestOptionsWithProxy) {
     debug(`Creating proxied request for ${options.href} through ${options.proxy}`)
 
-    const proxy = url.parse(options.proxy)
+    let proxy: ProxyUrl
+
+    try {
+      proxy = parseProxyUrl(options.proxy)
+    } catch (err) {
+      req.destroy(_.isError(err) ? err : new Error(String(err)))
+
+      return
+    }
 
     // set req.path to the full path so the proxy can resolve it
     req.path = options.href
@@ -389,7 +426,13 @@ class HttpsAgent extends https.Agent {
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
 
-    const proxy = url.parse(options.proxy)
+    let proxy: ProxyUrl
+
+    try {
+      proxy = parseProxyUrl(options.proxy)
+    } catch (err) {
+      return cb(_.isError(err) ? err : new Error(String(err)), undefined)
+    }
     const port = options.uri?.port || '443'
     const hostname = options.uri?.hostname || 'localhost'
 
