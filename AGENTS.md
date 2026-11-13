@@ -226,8 +226,8 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
 - **Type guards over `as`** — Narrow with a type guard, an `asserts` function or an `in` check rather than an `as` assertion, and explain any assertion that remains with a "Safe because" comment. See [Type Assertions](./guides/typescript.md#type-assertions).
 - **Unused vars**: Unused variables and imports are errors. Unused function parameters and caught errors are allowed, since callbacks often have to accept arguments they ignore. In packages on the flat config, prefix a variable that exists only to be type-checked with `_`.
-- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
-- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
+- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment). In a workspace that spreads `vitestConfig`, disable `vitest/no-focused-tests` instead, plus `mocha/no-exclusive-tests` in a spec that uses Vitest's globals rather than importing `it` from `vitest`.
+- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why. In a workspace that spreads `vitestConfig`, a skip that has to stay also needs `eslint-disable-next-line vitest/no-disabled-tests` below that comment.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
 

@@ -31,7 +31,7 @@ export class InterceptedRequest {
   /**
    * A callback that can be used to make the request go outbound through the rest of the request proxy steps.
    */
-  continueRequest: Function
+  continueRequest: () => void
   /**
    * Finish the current request with a response.
    */

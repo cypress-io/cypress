@@ -75,6 +75,5 @@ export interface ForCommandLog {
 /**
  * Driven port: CDP/BiDi session hooks (HTTP/2 program).
  */
-export interface ForBrowserNetworkAutomation {
-  // Expanded in HTTP/2 epics.
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- placeholder port, gains its members in the HTTP/2 work
+export interface ForBrowserNetworkAutomation {}

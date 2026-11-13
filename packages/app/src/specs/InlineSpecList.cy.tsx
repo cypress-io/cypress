@@ -1,8 +1,6 @@
 import type { Specs_InlineSpecListFragment } from '../generated/graphql-test'
 import { Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 let specs: Array<any> = []
 
@@ -72,13 +70,15 @@ describe('InlineSpecList', () => {
       const newSpecSelector = `[aria-label="New spec"]`
 
       cy.get(newSpecSelector).click()
-      cy.contains(defaultMessages.createSpec.newSpecModalTitle).should('be.visible')
+      cy.findByRole('heading', { name: 'Create new spec' }).should('be.visible')
 
-      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).should('be.visible')
-      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description).should('be.visible')
+      cy.contains('[data-cy=card-title]', 'Scaffold example specs').should('be.visible')
+      .closest('[data-cy=card]')
+      .should('contain', 'We\'ll generate several example specs to help guide you on how to write tests in Cypress.')
 
-      cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.header).should('be.visible')
-      cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.description).should('be.visible')
+      cy.contains('[data-cy=card-title]', 'Create new spec').should('be.visible')
+      .closest('[data-cy=card]')
+      .should('contain', 'We\'ll generate a template spec file which can be used to start testing your application.')
     })
 
     it('should handle spec refresh', () => {
@@ -158,10 +158,10 @@ describe('InlineSpecList', () => {
       cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
 
       mountInlineSpecList({ specFilter: 'saved-search-term 🗑' })
-      cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+      cy.findByLabelText('Search specs')
       .as('searchField')
 
-      cy.findByLabelText(defaultMessages.specPage.clearSearch, { selector: 'button' })
+      cy.findByLabelText('Clear search field', { selector: 'button' })
       .as('searchFieldClearButton')
     })
 
@@ -197,9 +197,7 @@ describe('InlineSpecList', () => {
 
   describe('Run all Specs', () => {
     const hoverRunAllSpecs = (directory: string, specNumber: number) => {
-      const command = cy.contains('[data-cy=directory-item]', directory)
-
-      return command.realHover().then(() => {
+      return cy.contains('[data-cy=directory-item]', directory).realHover().then(() => {
         cy.get('[data-cy=play-button]').should('exist')
         cy.get(`[data-cy="run-all-specs-for-${directory}"]`).realHover().then(() => {
           cy.get('[data-cy=tooltip-content]').should('contain.text', `Run ${specNumber} spec`)

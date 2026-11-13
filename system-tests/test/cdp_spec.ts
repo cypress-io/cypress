@@ -3,7 +3,7 @@ import systemTests from '../lib/system-tests'
 
 describe('e2e cdp', function () {
   systemTests.setup()
-  let restoreEnv: Function
+  let restoreEnv: () => void
 
   beforeEach(() => {
     restoreEnv = mockedEnv({

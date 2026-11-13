@@ -773,6 +773,7 @@ describe('Launchpad: Setup Project', () => {
         scaffoldAndOpenProject('config-with-ts-syntax-error')
         cy.visitLaunchpad()
         cy.get('[data-cy=error-header]').contains('Cypress configuration error')
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the intercept throws on extra MainLaunchpadQuery calls, so leave time for any to arrive
         cy.wait(1000)
       })
     })

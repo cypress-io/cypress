@@ -3,6 +3,7 @@ import path from 'path'
 import type { Frameworks, WebpackDevServerConfig } from '../devServer'
 import debugFn from 'debug'
 import semver from 'semver'
+import type webpack from 'webpack'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
 
@@ -30,7 +31,7 @@ export interface SourcedDependency {
 }
 
 export interface SourcedWebpack extends SourcedDependency {
-  module: Function
+  module: typeof webpack
   majorVersion: 4 | 5
 }
 
@@ -59,6 +60,7 @@ const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 // We ship webpack as part of '@cypress/webpack-batteries-included-preprocessor'. The path to this module
 // serves as our fallback.
 const cypressWebpackPath = (config: WebpackDevServerConfig) => {
+  // eslint-disable-next-line n/no-extraneous-require -- resolved from the Cypress binary, which ships it
   return require.resolve('@cypress/webpack-batteries-included-preprocessor', {
     paths: [config.cypressConfig.cypressBinaryRoot],
   })
@@ -241,6 +243,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
   let htmlWebpackPluginJsonPath: string
 
   try {
+    // eslint-disable-next-line n/no-extraneous-require -- sourced from the user's project, like webpack itself
     htmlWebpackPluginJsonPath = require.resolve('html-webpack-plugin/package.json', {
       paths: [searchRoot],
     })
@@ -268,9 +271,9 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     })
   }
 
-  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath),
-  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath),
+  htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
+  htmlWebpackPlugin.module = require(htmlWebpackPlugin.importPath)
   htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
 
   debug('HtmlWebpackPlugin: Successfully sourced html-webpack-plugin - %o', htmlWebpackPlugin)

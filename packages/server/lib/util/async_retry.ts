@@ -27,7 +27,7 @@ export function asyncRetry<
             throw e
           }
 
-          throw new AggregateError(errors)
+          throw new AggregateError(errors, undefined, { cause: e })
         }
 
         const delay = options.retryDelay ? options.retryDelay(attempt) : undefined

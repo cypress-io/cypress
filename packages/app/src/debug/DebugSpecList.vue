@@ -13,7 +13,7 @@
         :groups="spec.groups"
         :found-locally="spec.foundLocally"
         :matches-current-testing-type="spec.matchesCurrentTestingType"
-        @switchTestingType="switchTestingType"
+        @switch-testing-type="switchTestingType"
       />
     </TransitionGroupQuickFade>
   </div>

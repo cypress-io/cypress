@@ -31,7 +31,7 @@
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "node-forge": "^1.4.0",
+    "node-forge": "^1.4.3",
     "semaphore": "1.1.0"
   },
   "devDependencies": {
@@ -41,7 +41,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@types/semaphore": "1.1.4",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "tsx": "^4.23.12",
     "vitest": "^3.2.4"

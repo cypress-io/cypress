@@ -18,7 +18,6 @@ async function parseChangelog ({ changelogContent = null } = {}) {
     index++
     if (index >= changeLogLines.length) {
       sections[currentSection] = content
-      parseChangelog = false
       break
     }
 

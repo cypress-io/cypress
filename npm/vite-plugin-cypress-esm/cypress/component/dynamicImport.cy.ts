@@ -75,14 +75,14 @@ describe('dynamic imports', () => {
     cy.wrap(run())
   })
 
-  it('ignores import-like functions', async () => {
+  it('ignores import-like functions', () => {
     /*
      * This test will probably explode due to malformed syntax if the exclusion logic isn't working,
      * so the assertion here isn't really necessary but helps mark as a passing test
      */
 
-    const importLike = await import('./fixtures/import-like')
-
-    expect(importLike.custom_import('abc')).to.eql('123abc')
+    cy.wrap(import('./fixtures/import-like')).then((importLike) => {
+      expect(importLike.custom_import('abc')).to.eql('123abc')
+    })
   })
 })

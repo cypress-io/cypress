@@ -35,7 +35,7 @@ type SourcePosition = {
 const EMPTY_URL_AND_MAP = { url: null, map: null }
 
 type CallSite = NodeJS.CallSite & {
-  [index: string]: Function
+  [index: string]: (...args: any[]) => unknown
 } & {
   codeFrames: string[]
 }

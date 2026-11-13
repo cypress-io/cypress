@@ -7,9 +7,21 @@ import App from './App.vue'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
-import { createI18n } from '@cy/i18n'
 import { initHighlighter } from '@packages/frontend-shared/src/components/highlight'
 import { createPinia } from '@packages/frontend-shared/src/store'
+import { client } from '@packages/socket/browser/client'
+import { telemetry } from '@packages/telemetry/browser/client'
+
+const startTime = performance.now()
+
+telemetry.init({ namespace: 'cypress:launchpad' })
+
+if (window.__CYPRESS_TELEMETRY__) {
+  telemetry.attachWebSocket(client('/telemetry', {
+    path: '/__launchpad/socket',
+    transports: ['websocket'],
+  }))
+}
 
 const app = createApp(App)
 
@@ -19,7 +31,6 @@ app.use(Toast, {
   closeOnClick: false,
 })
 
-app.use(createI18n())
 app.use(createPinia())
 
 Promise.all([
@@ -38,4 +49,9 @@ Promise.all([
   initHighlighter(),
 ]).then(() => {
   app.mount('#app')
+
+  telemetry.startSpan({
+    name: 'launchpad:mounted',
+    opts: { startTime, attributes: { timeToScriptStartMs: Math.round(startTime) } },
+  })?.end()
 })

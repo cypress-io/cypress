@@ -104,6 +104,7 @@ describe('<TrackedBanner />', () => {
 
       it('should debounce event recording', () => {
         eventData.cohort = 'COH'
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts no second event is recorded, so let the debounce window pass first
         cy.wait(250)
         cy.get('@recordEvent').should('have.been.calledOnce')
       })

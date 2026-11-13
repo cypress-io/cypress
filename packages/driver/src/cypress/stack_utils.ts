@@ -21,7 +21,6 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 
 const whitespaceRegex = /^(\s*)*/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
-const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -482,6 +481,27 @@ const normalizeStackIndentation = (stack) => {
   return unsplitStack(messageLines, normalizedStackLines)
 }
 
+const normalizedWebKitStack = (stack: string) => {
+  const lines = stack.split('\n')
+
+  return lines.flatMap((line, index) => {
+    const atIndex = line.lastIndexOf('@')
+
+    if (atIndex === -1) return [line]
+
+    const functionName = line.slice(0, atIndex)
+    const location = line.slice(atIndex + 1)
+
+    // We patch WebKit's Error within the AUT as CyWebKitError, causing it to
+    // be presented within the stack. If we detect it within the stack, we remove it.
+    if (functionName === '__CyWebKitError') {
+      return index === lines.length - 1 ? [''] : []
+    }
+
+    return [`${functionName || '<unknown>'}@${location || '<unknown>'}`]
+  }).join('\n')
+}
+
 const normalizedStack = (err) => {
   // Firefox errors do not include the name/message in the stack, whereas
   // Chromium-based errors do, so we normalize them so that the stack
@@ -501,20 +521,7 @@ const normalizedStack = (err) => {
     // the output with other browsers, minimizing the visual impact to the stack traces we render
     // within the command log and console and ensuring that the stacks can be identified within
     // and parsed out of test snapshots that include them.
-    errStack = errStack.replaceAll(webkitStackLineRegex, (match, ...parts: string[]) => {
-      // We patch WebKit's Error within the AUT as CyWebKitError, causing it to
-      // be presented within the stack. If we detect it within the stack, we remove it.
-      if (parts[0] === '__CyWebKitError') {
-        return ''
-      }
-
-      return [
-        parts[0] || '<unknown>',
-        '@',
-        parts[1] || '<unknown>',
-        parts[2],
-      ].join('')
-    })
+    errStack = normalizedWebKitStack(errStack)
   }
 
   // the stack has already been normalized and normalizing the indentation

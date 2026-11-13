@@ -277,11 +277,11 @@ describe('cloudSpanExporter', () => {
         }
 
         exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-          expect(collector).to.not.be.undefined
+          expect(collector).toBeDefined()
           expect(body).toEqual('string')
           expect(contentType).toEqual('application/json')
-          expect(resolve).to.not.be.undefined
-          expect(reject).to.not.be.undefined
+          expect(resolve).toBeDefined()
+          expect(reject).toBeDefined()
           resolve()
         }
 
@@ -309,11 +309,11 @@ describe('cloudSpanExporter', () => {
         }
 
         exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-          expect(collector).to.not.be.undefined
+          expect(collector).toBeDefined()
           expect(body).toEqual(JSON.stringify('string'))
           expect(contentType).toEqual('application/json')
-          expect(resolve).to.not.be.undefined
-          expect(reject).to.not.be.undefined
+          expect(resolve).toBeDefined()
+          expect(reject).toBeDefined()
           resolve()
         }
 
@@ -342,7 +342,7 @@ describe('cloudSpanExporter', () => {
         }
 
         exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-          expect(collector).to.not.be.undefined
+          expect(collector).toBeDefined()
           expect(body).toEqual(JSON.stringify('string'))
           expect(contentType).toEqual('application/json')
           expect(resolve).toBeDefined()

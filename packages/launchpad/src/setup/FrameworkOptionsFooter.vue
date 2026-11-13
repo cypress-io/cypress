@@ -13,7 +13,7 @@
         :href="href"
         class="text-indigo-500 block hocus-link-default group"
       >
-        {{ t('setupPage.projectSetup.browseIntegrations') }}<i-cy-arrow-right_x16
+        Browse our list of third-party framework integrations<i-cy-arrow-right_x16
           class="ml-[4px] transform transition-transform ease-in translate-y-[-1px] duration-200 inline-block icon-dark-current group-hocus:translate-x-[2px]"
         />
       </ExternalLink>
@@ -22,13 +22,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Icon from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
-
-const { t } = useI18n()
 
 const href = getUrlWithParams({ url: 'https://on.cypress.io/component-integrations', params: {
   utm_medium: 'Select Framework Dropdown',
