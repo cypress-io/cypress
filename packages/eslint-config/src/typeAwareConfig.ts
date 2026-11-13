@@ -17,6 +17,9 @@ export const noFloatingPromisesConfig = (files: string[]): Linter.Config => {
     },
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
+      // With type information this rule type-checks every operand for a Vue
+      // `Ref`, and no workspace that opts in here is a Vue package
+      'vue/no-ref-as-operand': 'off',
     },
   }
 }

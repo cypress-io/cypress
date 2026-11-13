@@ -114,6 +114,8 @@ noFloatingPromisesConfig(['lib/**/*.ts']),
 
 The rule needs type information, so the block also gives `files` a project service. Type-aware parsing is what makes lint slower, so pass only the TypeScript source the rule is meant for, never the whole workspace. Every file in `files` must be in the workspace's `tsconfig.json`, or the parser reports it `was not found by the project service` (see [Adding a workspace](#adding-a-workspace)).
 
+The block also turns off `vue/no-ref-as-operand`, which `baseConfig` applies to every `.ts` file. Once a file has type information, that rule asks the type checker whether each operand is a Vue `Ref`, which slows lint in workspaces with no Vue code. Don't add the block to `app`, `launchpad` or `frontend-shared`, whose composables need the rule.
+
 Fix a hit by awaiting, returning or handling the promise. Use `void` only for fire-and-forget, with a comment saying why it can't reject or what happens if it does.
 
 These workspaces opt in, for their shipped source only:
