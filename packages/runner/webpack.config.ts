@@ -1,5 +1,6 @@
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { BundleStatsWebpackPlugin } from '@packages/web-config/bundle-stats'
 import path from 'path'
 import type webpack from 'webpack'
 
@@ -93,5 +94,5 @@ export default async function () {
     mainInjectionConfig,
     crossOriginConfig,
     crossOriginInjectionConfig,
-  ]
+  ].map((config) => ({ ...config, plugins: [...(config.plugins ?? []), new BundleStatsWebpackPlugin()] }))
 }

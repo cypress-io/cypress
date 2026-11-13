@@ -17,6 +17,7 @@
     "@babel/preset-env": "7.28.0",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
+    "@jridgewell/sourcemap-codec": "^1.5.5",
     "@packages/eslint-config": "0.0.0-development",
     "@svgr/webpack": "8.0.1",
     "arraybuffer-loader": "1.0.8",

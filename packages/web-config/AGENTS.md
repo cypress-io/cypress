@@ -3,6 +3,8 @@ This package centralizes web-related build configuration for the Cypress monorep
 **Architecture**
 
 - `webpack.config.base.ts` — Shared base webpack configuration (loaders, plugins, polyfills) used as a starting point by packages like `@packages/reporter` and `@packages/runner`
+- `bundle-stats.ts` — Shared stats format and the webpack plugin that records per-module bytes for `yarn bundle-report`; does nothing unless `CYPRESS_INTERNAL_BUNDLE_STATS_DIR` is set
+- `vite-plugin-bundle-stats.mts` — The Vite counterpart, loaded as native ESM by `@packages/frontend-shared/vite.config.mjs`. With the variable set it builds hidden source maps, attributes output bytes from them, and deletes the `.map` files, so the JS output matches a normal build
 - `tsconfig.json` — TypeScript config for the package; `scripts/type_check` runs `tsc --noEmit` against it
 
 **Gotchas / Notes**

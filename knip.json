@@ -210,7 +210,9 @@
     },
     "packages/web-config": {
       "entry": [
-        "webpack.config.base.ts"
+        "webpack.config.base.ts",
+        "bundle-stats.ts",
+        "vite-plugin-bundle-stats.mts"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",

@@ -12,6 +12,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 
 import PkgConfig from 'vite-plugin-package-config'
+import { bundleStatsVitePlugin } from '../web-config/vite-plugin-bundle-stats.mts'
 
 // @ts-expect-error - import.meta is only valid in an ES module, and this file is checked as a script
 const __filename = fileURLToPath(import.meta.url)
@@ -82,6 +83,7 @@ const makePlugins = (plugins) => {
     // @ts-expect-error - the CJS module puts its plugin on .default under Node ESM interop
     PkgConfig.default(),
     // OptimizationPersist(),
+    bundleStatsVitePlugin(),
     // For new plugins only! Merge options for shared plugins via PluginOptions.
     ...(plugins?.plugins || []),
   ])
