@@ -214,7 +214,7 @@ export class WebKitAutomation {
       }
 
       debug('received request %o', { browserPreRequest })
-      // Playwright ignores a listener's return value, so a failure is logged here
+      // Playwright ignores a listener's result, so a failure is logged here
       this.automation.onBrowserPreRequest?.(browserPreRequest)?.catch((error) => {
         debug('error adding browser pre-request %o', { requestId, error })
       })
@@ -225,17 +225,22 @@ export class WebKitAutomation {
 
       if (!requestId) return
 
-      const response = await request.response()
+      // Like 'request' above, Playwright ignores the listener's result, so failures are logged here
+      try {
+        const response = await request.response()
 
-      const responseReceived = {
-        requestId,
-        status: response?.status(),
-        headers: await response?.allHeaders(),
+        const responseReceived = {
+          requestId,
+          status: response?.status(),
+          headers: await response?.allHeaders(),
+        }
+
+        debug('received requestfinished %o', { responseReceived })
+
+        await this.automation.onRequestEvent?.('response:received', responseReceived)
+      } catch (error) {
+        debug('error handling requestfinished %o', { requestId, error })
       }
-
-      debug('received requestfinished %o', { responseReceived })
-
-      await this.automation.onRequestEvent?.('response:received', responseReceived)
     })
 
     // When a request fails (e.g. `req.destroy()` / `forceNetworkError` resets the

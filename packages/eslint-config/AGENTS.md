@@ -106,7 +106,7 @@ Every workspace opts in except the browser bundles, whose floor is the supported
 
 ## `noFloatingPromisesConfig`
 
-`noFloatingPromisesConfig(files)` turns on `@typescript-eslint/no-floating-promises` for `files`: a promise must be awaited, returned, or given a rejection handler (`.catch()`, or `.then()` with two arguments), so a rejection can't go unobserved. Spread it after `baseConfig` and the workspace's `tsconfigRootDir` block:
+`noFloatingPromisesConfig(files)` turns on `@typescript-eslint/no-floating-promises` for `files`: a promise must be awaited, returned, or given a rejection handler (`.catch()`, or `.then()` with two arguments), so a rejection can't go unobserved. It returns a single block, not an array, so add it after `baseConfig` and the workspace's `tsconfigRootDir` block without spreading it:
 
 ```ts
 noFloatingPromisesConfig(['lib/**/*.ts']),
@@ -118,7 +118,8 @@ Fix a hit by awaiting, returning or handling the promise. Use `void` only for fi
 
 These workspaces opt in, for their shipped source only:
 
-- `server`, `proxy`, `net-stubbing`, `network`, `https-proxy`, `socket`, `resolve-dist`: `lib/**/*.ts`
+- `server`, `proxy`, `net-stubbing`, `https-proxy`, `socket`, `resolve-dist`: `lib/**/*.ts`
+- `network`: `lib/*.ts`, matching its `tsconfig.json`
 - `launcher`: `index.ts` and `lib/**/*.ts`
 - `driver`: `index.ts` and `src/**/*.ts`
 - `data-context`: `src/**/*.ts` and `graphql/**/*.ts`

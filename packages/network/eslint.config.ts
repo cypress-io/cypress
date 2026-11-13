@@ -13,7 +13,7 @@ export default [
       },
     },
   },
-  noFloatingPromisesConfig(['lib/**/*.ts']),
+  noFloatingPromisesConfig(['lib/*.ts']),
   {
     // Specs may use sync fs and the other APIs restricted in shipped code
     files: ['test/**'],

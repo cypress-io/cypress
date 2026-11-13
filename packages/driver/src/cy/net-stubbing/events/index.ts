@@ -56,7 +56,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   }
 
   function sendStaticResponse (requestId: string, staticResponse: StaticResponse) {
-    // emitNetEvent fails the current test on error rather than rejecting
+    // emitNetEvent reports errors through cy.fail, and only rejects if cy.fail rethrows
     void emitNetEvent('send:static:response', {
       requestId,
       staticResponse: getBackendStaticResponse(staticResponse),

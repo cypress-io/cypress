@@ -2,8 +2,8 @@ import type { Linter } from 'eslint'
 
 /**
  * Reports promises that are neither awaited, returned nor handled, which
- * reject unobserved. Spread it after `baseConfig`, scoped to the TypeScript
- * files the workspace's `tsconfig.json` covers. The rule needs type
+ * reject unobserved. Add the block it returns after `baseConfig`, scoped to
+ * the TypeScript files the workspace's `tsconfig.json` covers. The rule needs type
  * information, so these files get a project service; keep `files` narrow,
  * since type-aware parsing is what makes lint slower.
  */

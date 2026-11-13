@@ -184,7 +184,7 @@ export class SocketBase implements SocketBroadcaster {
     automation.use({
       onPush: async (message, data) => {
         socketIo.emit('automation:push:message', message, data)
-        await cdpIo.emit('automation:push:message', message, data)
+        cdpIo.emit('automation:push:message', message, data)
       },
     })
 
