@@ -126,10 +126,10 @@ describe('parsePsEnvLine', () => {
     expect(parsePsEnvLine('node 12 CYPRESS_API_URL=https://a.example.com x')).toBeUndefined()
   })
 
-  describe('adversarial 50,000-character input', () => {
+  describe('50,000-character lines', () => {
     const LENGTH = 50_000
 
-    const adversarial = [
+    const longLines = [
       {
         name: 'digits and keys without trailing whitespace',
         line: `${'0'.repeat(LENGTH / 2)} ${'CYPRESS_API_URL=Y'.repeat(Math.ceil(LENGTH / 2 / 17))}`,
@@ -157,7 +157,7 @@ describe('parsePsEnvLine', () => {
       },
     ]
 
-    it.each(adversarial)('$name', ({ line, expected }) => {
+    it.each(longLines)('$name', ({ line, expected }) => {
       expect(line.length).toBeGreaterThanOrEqual(LENGTH)
 
       const start = performance.now()
