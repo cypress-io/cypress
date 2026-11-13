@@ -8,6 +8,7 @@ import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
+import { FRAGMENT_MESSAGES_OVER_BYTES } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
 import * as protocol from '../../../lib/browsers/protocol'
 import { cypressSessions } from '../../../lib/cypress-sessions'
 
@@ -505,6 +506,24 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(criClient.send, 'Fetch.enable')
       expectCalledWith(criClient.on, 'Fetch.requestPaused', expect.any(Function))
       expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+    })
+
+    it('sends messages over the fragmenting threshold to the extra target as fragments', async () => {
+      const originalSend = vi.fn()
+      const criClient = {
+        send: stub(),
+        on: vi.fn(),
+        _ws: { send: originalSend },
+      }
+
+      options.CriConstructor.mockReturnValue(criClient)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      criClient._ws.send('a'.repeat(FRAGMENT_MESSAGES_OVER_BYTES + 1))
+
+      expect(originalSend.mock.calls.length).toBeGreaterThan(1)
     })
 
     it('does not throw if Fetch.enable on extra target throws', async () => {
