@@ -132,6 +132,7 @@ const descriptions: any = {
   group: 'a named group for recorded runs in Cypress Cloud',
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
+  openHeadless: 'starts a session for cypress tap to drive, with the browser headless and the Cypress window hidden so neither takes focus. requires --e2e or --component, and --browser. the session runs until its process is stopped',
   inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
   session: 'target a local Cypress session by its process id (PID)',
@@ -303,6 +304,7 @@ const addCypressOpenCommand = (program: any): any => {
   .option('-e, --env <env>', text('env'))
   .option('-x, --expose <expose>', text('expose'))
   .option('--global', text('global'))
+  .option('--headless', text('openHeadless'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))
 }

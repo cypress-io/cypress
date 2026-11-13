@@ -112,7 +112,10 @@ export = {
       },
     }
 
-    return _.extend(common, this.platformArgs())
+    const args = _.extend(common, this.platformArgs())
+
+    // Applied after the platform args, which set `show: true`
+    return getCtx()?.isHeadless ? { ...args, show: false, keepHidden: true } : args
   },
 
   platformArgs () {

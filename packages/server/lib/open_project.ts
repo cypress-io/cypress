@@ -174,12 +174,12 @@ export class OpenProject extends EventEmitter {
     }
 
     // if we don't have the isHeaded property
-    // then we're in interactive mode and we
-    // can assume its a headed browser
+    // then we're in interactive mode, where
+    // it is headed unless `--headless` was passed
     // TODO: we should clean this up
     if (!_.has(browser, 'isHeaded')) {
-      browser.isHeaded = true
-      browser.isHeadless = false
+      browser.isHeadless = Boolean(this._ctx?.isHeadless)
+      browser.isHeaded = !browser.isHeadless
     }
 
     await this.projectBase.setCurrentSpecAndBrowser(spec, browser, useBrowserNetworkInterception)

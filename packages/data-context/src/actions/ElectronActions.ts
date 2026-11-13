@@ -44,6 +44,11 @@ export class ElectronActions {
   }
 
   showBrowserWindow () {
+    // `--headless` keeps the window and its Dock icon hidden for the whole session
+    if (this.ctx.isHeadless) {
+      return
+    }
+
     this.electron.browserWindow?.show()
 
     if (this.isMac) {

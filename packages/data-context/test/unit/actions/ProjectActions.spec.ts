@@ -281,6 +281,67 @@ describe('ProjectActions', () => {
           expect(ctx.actions.project.switchTestingTypesAndRelaunch).toHaveBeenCalledWith('e2e')
           expect(ctx._apis.projectApi.runSpec).toHaveBeenCalled()
         })
+
+        // The testing type is set for a moment only to pick a browser for it, then set back.
+        // An error that kept the project from loading is still there, so it must still be reported.
+        it('keeps a recorded load error through the brief switch it makes to pick a browser', async () => {
+          jest.spyOn(ctx.lifecycleManager, 'setCurrentTestingType').mockRestore()
+          jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+          jest.spyOn(ctx.actions.project, 'switchTestingTypesAndRelaunch').mockResolvedValue(undefined)
+          const setTestingType = jest.fn()
+
+          // @ts-expect-error - only the call that switches the testing type is needed
+          ctx.lifecycleManager._configManager = { setTestingType }
+
+          ctx.reportLoadError('Your configFile is invalid')
+
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
+
+          // The spec ran, after the switch to its testing type and back
+          expect(result).toMatchObject({ testingType: 'e2e' })
+          expect(setTestingType.mock.calls).toEqual([['e2e'], ['component']])
+          expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+        })
+      })
+
+      // Such as a `--headless` session whose requested browser could not be found or driven, which
+      // chooses no other browser in its place
+      describe('no browser to run in', () => {
+        beforeEach(() => {
+          ctx.coreData.activeBrowser = null
+          jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+          jest.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(true)
+        })
+
+        it('says so instead of launching, when no browser is running yet', async () => {
+          const launch = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+
+          ctx._apis.projectApi.launchProject = launch
+          ctx.coreData.currentTestingType = 'e2e'
+          ctx.coreData.app.browserStatus = 'closed'
+
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
+
+          expect(result).toEqual({
+            code: 'GENERAL_ERROR',
+            detailMessage: expect.stringContaining('Cypress has no browser to run the spec in'),
+          })
+
+          expect(launch).not.toHaveBeenCalled()
+        })
+
+        it('says so before switching testing types', async () => {
+          ctx.coreData.currentTestingType = 'component'
+
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
+
+          expect(result).toEqual({
+            code: 'GENERAL_ERROR',
+            detailMessage: expect.stringContaining('Cypress has no browser to run the spec in'),
+          })
+
+          expect(ctx.actions.project.switchTestingTypesAndRelaunch).not.toHaveBeenCalled()
+        })
       })
 
       describe('testing type does not need to change', () => {

@@ -108,9 +108,9 @@ describe('lib/cypress-sessions', () => {
     })
   })
 
-  describe('.addPendingSession', () => {
+  describe('.setLoadError', () => {
     it('writes a starting record that names no server and carries the load error', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', testingType: 'component', loadError: 'Your configFile is invalid' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', testingType: 'component', loadError: 'Your configFile is invalid' })
 
       expect(await fs.readJson(recordPath)).toEqual(expect.objectContaining({
         schemaVersion: 1,
@@ -124,7 +124,7 @@ describe('lib/cypress-sessions', () => {
     })
 
     it('is replaced by the session record when the server starts', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'boom' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
       await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
 
       const record = await fs.readJson(recordPath)
@@ -136,38 +136,69 @@ describe('lib/cypress-sessions', () => {
 
     it('does not replace a record for a running session', async () => {
       await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'boom' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
 
-      expect((await fs.readJson(recordPath)).serverPort).toBe(4455)
+      const record = await fs.readJson(recordPath)
+
+      expect(record.serverPort).toBe(4455)
+      expect(record.loadError).toBeUndefined()
+    })
+
+    it('puts the error on the live state of a running session, which the probe serves', async () => {
+      await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'Your configFile is invalid' })
+
+      expect(cypressSessions.getCurrent()).toEqual(expect.objectContaining({
+        serverPort: 4455,
+        loadError: { message: 'Your configFile is invalid' },
+      }))
+    })
+
+    it('is withdrawn from the live state of a running session by clearLoadError', async () => {
+      await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
+      await cypressSessions.clearLoadError()
+
+      expect(cypressSessions.getCurrent()?.loadError).toBeUndefined()
+      expect(JSON.parse(JSON.stringify(cypressSessions.getCurrent()))).not.toHaveProperty('loadError')
+    })
+
+    it('keeps the browser the running session has open when the error comes and goes', async () => {
+      await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
+      cypressSessions.setBrowser({ displayName: 'Chrome', family: 'chromium' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
+      await cypressSessions.clearLoadError()
+
+      expect(cypressSessions.getCurrent()?.browserName).toBe('Chrome')
     })
 
     it('is removed with the session on shutdown', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'boom' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
       await cypressSessions.remove()
 
       expect(await fs.pathExists(recordPath)).toBe(false)
     })
 
-    it('is withdrawn by clearPending once the error is gone', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'boom' })
-      await cypressSessions.clearPending()
+    it('is withdrawn by clearLoadError once the error is gone', async () => {
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
+      await cypressSessions.clearLoadError()
 
       expect(await fs.pathExists(recordPath)).toBe(false)
     })
 
-    it('is not touched by clearPending when a session is running', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'boom' })
+    it('is not touched by clearLoadError when a session is running', async () => {
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
       await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
-      await cypressSessions.clearPending()
+      await cypressSessions.clearLoadError()
 
       expect((await fs.readJson(recordPath)).serverPort).toBe(4455)
     })
 
-    it('is not withdrawn by a clearPending that began before a newer pending record was written', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'first' })
+    it('is not withdrawn by a clearLoadError that began before a newer pending record was written', async () => {
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'first' })
 
-      const clearing = cypressSessions.clearPending()
-      const writing = cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'second' })
+      const clearing = cypressSessions.clearLoadError()
+      const writing = cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'second' })
 
       await Promise.all([clearing, writing])
 
@@ -175,10 +206,10 @@ describe('lib/cypress-sessions', () => {
     })
 
     it('is not removed by a remove that began before a newer pending record was written', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'first' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'first' })
 
       const removing = cypressSessions.remove()
-      const writing = cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'second' })
+      const writing = cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'second' })
 
       await Promise.all([removing, writing])
 
@@ -186,11 +217,11 @@ describe('lib/cypress-sessions', () => {
     })
 
     it('has nothing to withdraw when no pending record was written', async () => {
-      await expect(cypressSessions.clearPending()).resolves.toBeUndefined()
+      await expect(cypressSessions.clearLoadError()).resolves.toBeUndefined()
     })
 
     it('leaves no temp files behind', async () => {
-      await cypressSessions.addPendingSession({ projectRoot: '/some/project', loadError: 'boom' })
+      await cypressSessions.setLoadError({ projectRoot: '/some/project', loadError: 'boom' })
 
       expect(await fs.readdir(path.dirname(recordPath))).toEqual([`${process.pid}.json`])
     })

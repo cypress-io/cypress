@@ -441,6 +441,9 @@ class $Cypress {
         }
       })
       .catch((error) => {
+        // The runner reports this as a failed test, which does not tell `cypress tap` that the
+        // spec itself threw while loading
+        this.emit('spec:load:error', error)
         this.runner.onSpecError('error')({ error })
       })
       .then(() => {

@@ -284,7 +284,11 @@ session can be targeted by its PID in other commands using \`--session\`.
 
 tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
 A session running any other browser is listed as unsupported, and every other
-tap command refuses it.`,
+tap command refuses it.
+
+A session whose project stopped loading, for example because its configuration
+file became invalid, is listed as "could not load", with the reason as
+\`loadError\` in the JSON. Every tap command but \`status\` refuses it.`,
 } as const satisfies TapNativeCommandSchema
 
 const statusMeta = {
@@ -298,7 +302,9 @@ Stages:
 - not connected: Cypress cannot be reached.
 - error: Cypress is running but could not load the project, for example because
   its configuration file is invalid. \`error\` carries the reason; fix the
-  project, then stop Cypress and start it again.
+  project, then stop Cypress and start it again. A configuration file that
+  becomes invalid after the project loaded also reports error, and needs the
+  same: fix it, then stop Cypress and start it again.
 - browser not selected: Cypress does not have a supported browser open.
 - spec not selected: Cypress has a browser open but no spec is selected.
 - loading: Cypress is loading the spec.
@@ -311,7 +317,9 @@ Statuses other than passed and failed are intermediate states, indicating that
 Cypress requires additional instruction or is still processing. Loading stays
 loading for as long as the spec takes to build, so a poller needs its own
 timeout; a spec whose build fails reports failed and carries the reason as
-error — it ran no tests, so it reports no counts either.
+error — it ran no tests, so it reports no counts either. A spec that throws
+while loading, such as a component spec that fails to compile, also carries
+error, beside the counts of its run.
 
 From loading onwards the output carries \`startedAt\`, the spec every other field
 describes (null while loading). In the event of a rerun the previous spec's

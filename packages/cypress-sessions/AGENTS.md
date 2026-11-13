@@ -39,6 +39,11 @@ yarn workspace @packages/cypress-sessions test
   no `loadError`, and `isStartingRecord` tells the two apart. The CLI never probes
   one. `cypress tap status` reports its error, and the other commands report that the
   project could not load and point to `status`.
+- A running session whose configuration breaks keeps its record on disk unchanged. The
+  error goes on the live state instead, as `loadError` in the probe response, and
+  `cypress tap status` reports it until the configuration loads again. Cypress stops
+  watching the configuration file after a load error, so that takes a person
+  choosing Try again in the Cypress window, or a restart.
 
 **Gotchas / Notes**
 

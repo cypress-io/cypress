@@ -161,6 +161,14 @@ describe('lib/open_project', () => {
       })
     })
 
+    it('launches the browser headless with --headless', async () => {
+      vi.spyOn(getCtx(), 'isHeadless', 'get').mockReturnValue(true)
+
+      await openProject.launch(browser, spec)
+
+      expect(browsersOpen().mock.lastCall![0]).toEqual(expect.objectContaining({ isHeaded: false, isHeadless: true }))
+    })
+
     describe('spec events', () => {
       beforeEach(() => {
         vi.spyOn(runEvents, 'execute').mockResolvedValue(undefined)

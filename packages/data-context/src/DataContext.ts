@@ -49,6 +49,13 @@ const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
+/**
+ * What kept the project from loading: its configuration (including a dev server or
+ * `setupNodeEvents` that failed with it), a testing type that is not set up, or a
+ * browser that cannot be found or driven
+ */
+type LoadErrorKind = 'config' | 'setup' | 'browser'
+
 // A Cypress error keeps the first paragraph in `message` and the rest, such as the
 // stack trace of a config file that failed to load, in `details`. An error that did not
 // come from a template has only its stack to say where it came from.
@@ -305,28 +312,33 @@ export class DataContext {
     logError(e)
   }
 
-  // The error on display that the record was written for, so dismissing some other error leaves the record alone
-  private _loadErrorIdForTap: string | null = null
-
-  get loadErrorIdForTap () {
-    return this._loadErrorIdForTap
+  /**
+   * Whether `--headless` keeps the Cypress window hidden for the whole session and launches its browsers headless
+   */
+  get isHeadless () {
+    return this.isOpenMode && Boolean(this.modeOptions.headless)
   }
 
+  // What kind of load error the record describes, so each step of loading withdraws only the
+  // kind it resolves: a configuration that loads does not finish a setup or find a browser
+  private _loadErrorKind: LoadErrorKind | null = null
+
   /**
-   * Records that the project could not load, for `cypress tap status` to report when the
-   * project never starts a session. Only errors that stop the project from starting belong
-   * here, which is why `onError`, also used for errors from a project that is running
-   * normally, does not call it. Without a project there is nothing for a session to describe.
+   * Records that the project could not load, for `cypress tap status` to report, whether it
+   * never started a session or its configuration broke during one. That record, and the error
+   * printed by the caller, are how a `--headless` session reports a problem, since its window
+   * stays hidden. Only errors that stop the project from loading belong here, which is why
+   * `onError`, also used for errors from a project that is running normally, does not call it.
+   * Without a project there is nothing for a session to describe.
    */
-  reportLoadErrorToTap (error: CypressError | string) {
+  reportLoadError (error: CypressError | string, kind: LoadErrorKind = 'config') {
     const projectRoot = this.currentProject
 
     if (!this.isOpenMode || !projectRoot) {
       return
     }
 
-    // A message with no error behind it has nothing on display to dismiss
-    this._loadErrorIdForTap = typeof error === 'string' ? null : this.coreData.diagnostics?.error?.id ?? null
+    this._loadErrorKind = kind
 
     this._apis.projectApi.setSessionLoadError({
       projectRoot,
@@ -336,15 +348,20 @@ export class DataContext {
   }
 
   /**
-   * Withdraws the record of a load error once the error has been dismissed or the project
-   * is loading again, so `cypress tap status` does not keep reporting it.
+   * Withdraws the record of a load error once whatever caused it is resolved, so `cypress tap
+   * status` does not keep reporting it. Given `kinds`, only an error of one of those kinds is
+   * withdrawn; without them, any is, as when another project replaces it.
    */
-  clearLoadErrorForTap () {
+  clearLoadError (kinds?: LoadErrorKind[]) {
     if (!this.isOpenMode) {
       return
     }
 
-    this._loadErrorIdForTap = null
+    if (kinds && (this._loadErrorKind === null || !kinds.includes(this._loadErrorKind))) {
+      return
+    }
+
+    this._loadErrorKind = null
 
     this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
   }

@@ -434,6 +434,20 @@ describe('lib/exec/tap', () => {
       expect(withTapConnection).toHaveBeenCalledTimes(1)
     })
 
+    it('carries the load error of a session whose project stopped loading', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([
+        liveSession({ pid: 111, loadError: { message: 'Your configFile is invalid' } }),
+        liveSession({ pid: 222 }),
+      ])
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+
+      const [broken, working] = JSON.parse(logger.print())
+
+      expect(broken.loadError).toBe('Your configFile is invalid')
+      expect(working).not.toHaveProperty('loadError')
+    })
+
     it('bounds the renderer probe with --timeout', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111 })])
 
@@ -677,6 +691,42 @@ describe('lib/exec/tap', () => {
       expect(output).not.toContain('not connected')
     })
 
+    describe('when the configuration broke after the session started', () => {
+      const broken = () => liveSession({ pid: 111, loadError: { message: 'Your configFile is invalid: /projects/app/cypress.config.js' } })
+
+      it('reports the error instead of the run the browser still shows', async () => {
+        mockLiveResolved(broken())
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print())).toEqual({
+          status: 'error',
+          pid: 111,
+          projectRoot: '/projects/app',
+          testingType: 'e2e',
+          error: 'Your configFile is invalid: /projects/app/cypress.config.js',
+        })
+
+        expect(withTapConnection).not.toHaveBeenCalled()
+        // Every other command is refused such a session, so status has to ask for it
+        expect(resolveLiveSession).toHaveBeenCalledWith(expect.anything(), { allowLoadError: true })
+      })
+
+      it('shows the error to a person reading the output', async () => {
+        mockLiveResolved(broken())
+
+        expect(await tap.start(['status'], {})).toBe(0)
+        expect(logger.print()).toContain('error')
+        expect(logger.print()).toContain('Your configFile is invalid')
+      })
+
+      it('reports it even when no browser is attached', async () => {
+        mockLiveResolved({ ...broken(), cdpBrowserWsUrl: null, browserName: null })
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print()).status).toBe('error')
+      })
+    })
+
     it('reports "browser not selected" without opening a connection when no browser is attached', async () => {
       mockLiveResolved(liveSession({ pid: 111, cdpBrowserWsUrl: null, browserName: null }))
 
@@ -806,7 +856,7 @@ describe('lib/exec/tap', () => {
 
       await tap.start(['status'], { session: 1234 })
 
-      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
+      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() }, { allowLoadError: true })
     })
 
     it('exits 1 and renders the failure when the session is unreachable despite a browser', async () => {

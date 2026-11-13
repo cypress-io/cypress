@@ -55,7 +55,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   let selection
 
   try {
-    selection = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
+    selection = await resolveLiveSession({ session: options.session, cwd: process.cwd() }, { allowLoadError: true })
   } catch (err) {
     // No live session is a status a poller waits on, not a failure.
     if (isTapError(err) && NOT_CONNECTED_CODES.has(err.code)) {
@@ -68,6 +68,21 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   }
 
   const { session } = selection
+
+  // The project broke after it started, such as an edit that made its configuration throw.
+  // Whatever the browser shows ran under the configuration that is gone.
+  if (session.loadError) {
+    renderOutcome('status', {
+      status: 'error',
+      pid: session.pid,
+      projectRoot: session.projectRoot,
+      testingType: session.testingType,
+      error: session.loadError.message,
+    }, options.json)
+
+    return 0
+  }
+
   const browserAttached = session.cdpBrowserWsUrl !== null
 
   const base: TapStatus = {

@@ -154,6 +154,65 @@ describe('ProjectLifecycleManager', () => {
       expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
     })
 
+    describe('with --headless', () => {
+      const headlessCtx = (files: ReturnType<typeof scaffolded>, testingType: 'e2e' | 'component' = 'e2e') => {
+        const setup = setupCtx(files, { project: 'foo', testingType, headless: true })
+
+        setup.coreData.currentProject = '/projects/foo'
+        setup._apis.projectApi.setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined) as any
+
+        return setup
+      }
+
+      it('completes the e2e setup without an agent, since the window that has the Continue button is hidden', async () => {
+        const setup = headlessCtx(scaffolded('valid'))
+
+        await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+        expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
+        expect(setup._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+      })
+
+      it('reports a scaffolded file that needs changes made by a person, and keeps the window hidden', async () => {
+        const setup = headlessCtx(scaffolded('valid', 'changes'))
+
+        await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+        expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+        expect(setup._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+          loadError: expect.stringContaining('need changes made by hand'),
+        }))
+
+        expect(setup.isHeadless).toBe(true)
+      })
+
+      it('reports that component testing needs setting up, and keeps the window hidden', async () => {
+        const setup = headlessCtx([], 'component')
+
+        await setup.lifecycleManager.initializeProjectSetup('component')
+
+        const printed = consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
+
+        expect(printed).toContain('could not start component testing')
+        expect(setup._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+          loadError: expect.stringContaining('could not start component testing'),
+        }))
+
+        expect(setup.isHeadless).toBe(true)
+      })
+    })
+
+    it('leaves the component wizard to a person without --headless', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx([], { project: 'foo', testingType: 'component' })
+
+      await setup.lifecycleManager.initializeProjectSetup('component')
+
+      expect(setup.actions.wizard.initialize).toHaveBeenCalledTimes(1)
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
     it('leaves the Continue step to a person when CYPRESS_AGENT_MODE forces agent mode off', async () => {
       process.env.CLAUDECODE = '1'
       process.env.CYPRESS_AGENT_MODE = '0'
@@ -419,7 +478,7 @@ describe('ProjectLifecycleManager', () => {
         jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
 
         expect(agent.lifecycleManager.loadedFullConfig).toBeNull()
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
       })
 
       it('applies to a defaultBrowser in the config file\'s testing type before setupNodeEvents finishes', () => {
@@ -429,7 +488,7 @@ describe('ProjectLifecycleManager', () => {
 
         jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ e2e: { defaultBrowser: 'electron' } })
 
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(true)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
       })
 
       it('follows the full config once it exists, even when setupNodeEvents removed the defaultBrowser', () => {
@@ -440,13 +499,13 @@ describe('ProjectLifecycleManager', () => {
         jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
         jest.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: null } as unknown as FullConfig)
 
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
       })
 
       it('is not bypassed without --testingType', () => {
         process.env.CLAUDECODE = '1'
 
-        expect(agentCtx({ project: 'foo' }).lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agentCtx({ project: 'foo' }).lifecycleManager.isWelcomeBypassed).toBe(false)
       })
 
       it('is not bypassed without --browser or a defaultBrowser', () => {
@@ -454,7 +513,7 @@ describe('ProjectLifecycleManager', () => {
 
         const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
 
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
       })
 
       it('is not bypassed by a browser that a config reload copied into cliBrowser', async () => {
@@ -473,7 +532,7 @@ describe('ProjectLifecycleManager', () => {
         await agent.lifecycleManager.setInitialActiveBrowser()
 
         expect(agent.coreData.cliBrowser).not.toBeNull()
-        expect(agent.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
         expect(agent.actions.project.launchProject).not.toHaveBeenCalled()
       })
 
@@ -484,7 +543,117 @@ describe('ProjectLifecycleManager', () => {
 
         runCtx.coreData.cliBrowser = 'electron'
 
-        expect(runCtx.lifecycleManager.isWelcomeBypassedForAgent).toBe(false)
+        expect(runCtx.lifecycleManager.isWelcomeBypassed).toBe(false)
+      })
+
+      describe('--headless', () => {
+        it('launches the project without an agent, since no one can dismiss the welcome screen', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true, headless: true })
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.lifecycleManager.isWelcomeBypassed).toBe(true)
+          expect(headless.actions.project.launchProject).toHaveBeenCalledTimes(1)
+        })
+
+        it('is not bypassed without a testing type', () => {
+          expect(agentCtx({ project: 'foo', isBrowserGivenByCli: true, headless: true }).lifecycleManager.isWelcomeBypassed).toBe(false)
+        })
+
+        it('is not bypassed in run mode', () => {
+          const runCtx = createDataContext({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: true, headless: true }, 'run')
+
+          expect(runCtx.lifecycleManager.isWelcomeBypassed).toBe(false)
+        })
+
+        it('reports the browser it was given when it cannot be found, and keeps the window hidden', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'nope', isBrowserGivenByCli: true, headless: true })
+
+          jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.isHeadless).toBe(true)
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('Browser not found'),
+          }))
+
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+        })
+
+        // A config reload chooses the browser again: falling back to another the first time would
+        // have the reload launch it in place of the one asked for, and withdraw the error
+        it('falls back to no other browser, so a reload asks for the same one again and keeps the error', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'chrome', isBrowserGivenByCli: true, headless: true })
+          const ensure = jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+
+          headless.coreData.currentProject = '/projects/foo'
+          headless.coreData.cliBrowser = 'chrome'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser).toBeNull()
+          expect(ensure.mock.calls.map(([nameOrPath]) => nameOrPath)).toEqual(['chrome', 'chrome'])
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledTimes(2)
+          expect(headless._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+        })
+
+        it('withdraws a browser error once the browser it was given is found', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true, headless: true })
+
+          headless.coreData.currentProject = '/projects/foo'
+          headless.reportLoadError('Browser not found', 'browser')
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
+        })
+
+        it('launches nothing, and reports why, for a browser cypress tap cannot drive', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true, headless: true })
+
+          jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+          // A config reload, which must not settle on some other browser
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser).toBeNull()
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('`cypress tap` can only drive Chromium-based browsers'),
+          }))
+        })
+
+        it('launches a browser cypress tap cannot drive when not --headless', async () => {
+          process.env.CLAUDECODE = '1'
+
+          const agent = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true })
+
+          jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+
+          await agent.lifecycleManager.setInitialActiveBrowser()
+
+          expect(agent.coreData.activeBrowser).toEqual(browsers[3])
+        })
+
+        it('does not report a missing browser for cypress tap status without --headless', async () => {
+          process.env.CLAUDECODE = '1'
+
+          const agent = agentCtx()
+
+          jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          agent.coreData.currentProject = '/projects/foo'
+
+          await agent.lifecycleManager.setInitialActiveBrowser()
+
+          expect(agent._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+        })
       })
     })
 
@@ -667,6 +836,78 @@ describe('ProjectLifecycleManager', () => {
       expect(setInitialActiveBrowserSpy).not.toHaveBeenCalled()
       // @ts-expect-error - private field
       expect(ctx.lifecycleManager._cachedFullConfig).toBeUndefined()
+    })
+
+    // Withdrawn only after the session has started, so a project that failed to start keeps
+    // its error until the session replaces it, and before the browser is chosen, so a browser
+    // that cannot be found is recorded again
+    it('withdraws a load error for cypress tap status once the session has started again', async () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+      // Safe because the config manager keeps the options it was created with, private, as `options`
+      const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
+
+      const initialize = jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+      const chooseBrowser = jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      const cleared = ctx._apis.projectApi.clearSessionLoadError as jest.Mock
+
+      ctx.coreData.currentProject = '/projects/foo'
+      ctx.reportLoadError('Your configFile is invalid')
+
+      await onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })
+
+      expect(cleared).toHaveBeenCalledTimes(1)
+      expect(initialize.mock.invocationCallOrder[0]).toBeLessThan(cleared.mock.invocationCallOrder[0])
+      expect(cleared.mock.invocationCallOrder[0]).toBeLessThan(chooseBrowser.mock.invocationCallOrder[0])
+    })
+  })
+
+  describe('onInitialConfigLoaded', () => {
+    const onInitialConfigLoaded = () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+
+      // Safe because the config manager keeps the options it was created with, private, as `options`
+      return (configManager as any).options.onInitialConfigLoaded as (config: Cypress.ConfigOptions) => void
+    }
+
+    const recordError = (kind?: 'config' | 'setup' | 'browser') => {
+      ctx.coreData.currentProject = '/projects/foo'
+      ctx.reportLoadError('boom', kind)
+    }
+
+    // Such as Try again once a configuration that failed at startup is fixed. A testing type passed
+    // on the command line, such as `--e2e`, is applied only once the configuration first loads, so
+    // after a failure there is none and no session will replace the error.
+    it('withdraws a configuration error when no testing type is set, since no session will replace it', () => {
+      ctx = createDataContext({ project: 'foo', testingType: 'e2e' })
+      recordError('config')
+
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
+    })
+
+    // Such as `--headless --e2e` whose scaffold needs a hand merge: a refresh that finds e2e still
+    // unconfigured drops the testing type, and the error says what setup is missing
+    it('leaves a setup or browser error, which loading the file does not fix', () => {
+      recordError('setup')
+      onInitialConfigLoaded()({})
+
+      recordError('browser')
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+    })
+
+    it('leaves a configuration error for the session to replace when a testing type is set', () => {
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._currentTestingType = 'e2e'
+      recordError('config')
+
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
     })
   })
 

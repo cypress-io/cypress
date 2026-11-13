@@ -120,7 +120,7 @@ describe('DataContext open mode error output', () => {
 
       error.details = `\u001b[31m${error.details}\u001b[39m`
 
-      projectCtx.reportLoadErrorToTap(error)
+      projectCtx.reportLoadError(error)
 
       const [args] = recorded(projectCtx).mock.calls[0] as [{ projectRoot: string, testingType: string, loadError: string }]
 
@@ -146,10 +146,34 @@ describe('DataContext open mode error output', () => {
       expect(recorded(projectCtx)).not.toHaveBeenCalled()
     })
 
+    describe('with --headless', () => {
+      const headlessProject = () => {
+        const projectCtx = createTestDataContext('open', { headless: true })
+
+        projectCtx.coreData.currentProject = '/projects/foo'
+
+        return projectCtx
+      }
+
+      it('records the error for cypress tap status and keeps the window hidden and the browsers headless', () => {
+        const projectCtx = headlessProject()
+
+        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
+
+        expect(recorded(projectCtx)).toHaveBeenCalledTimes(1)
+        expect(projectCtx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
+        expect(projectCtx.isHeadless).toBe(true)
+      })
+
+      it('does not count as headless in run mode', () => {
+        expect(createTestDataContext('run', { headless: true }).isHeadless).toBe(false)
+      })
+    })
+
     it('has nothing to record before a project is open', () => {
       const noProject = openProject(undefined)
 
-      noProject.reportLoadErrorToTap(requireError('boom'))
+      noProject.reportLoadError(requireError('boom'))
 
       expect(recorded(noProject)).not.toHaveBeenCalled()
     })
@@ -158,7 +182,7 @@ describe('DataContext open mode error output', () => {
       const runCtx = createTestDataContext('run')
 
       runCtx.coreData.currentProject = '/projects/foo'
-      runCtx.reportLoadErrorToTap(requireError('boom'))
+      runCtx.reportLoadError(requireError('boom'))
 
       expect(recorded(runCtx)).not.toHaveBeenCalled()
     })
@@ -168,29 +192,22 @@ describe('DataContext open mode error output', () => {
 
       recorded(projectCtx).mockImplementation(() => Promise.reject(new Error('disk full')))
 
-      expect(() => projectCtx.reportLoadErrorToTap(requireError('boom'))).not.toThrow()
+      expect(() => projectCtx.reportLoadError(requireError('boom'))).not.toThrow()
       await new Promise((resolve) => setImmediate(resolve))
     })
 
     describe('withdrawing the record', () => {
       const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as jest.Mock
 
-      it('happens when the load error on display is dismissed', () => {
+      // Try again clears the error on display, then loads the configuration again: one that
+      // still fails reports the error again, and one that loads withdraws it once the project starts
+      it('does not happen when the load error on display is cleared to try loading again', () => {
         const projectCtx = openProject('/projects/foo')
 
         projectCtx.lifecycleManager.onLoadError(requireError('boom'))
         projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
 
-        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
-      })
-
-      it('does not happen when a different error is dismissed', () => {
-        const projectCtx = openProject('/projects/foo')
-
-        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
-        projectCtx.onError(requireError('something else'))
-        projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
-
+        expect(projectCtx.coreData.diagnostics.error).toBeNull()
         expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
@@ -205,29 +222,46 @@ describe('DataContext open mode error output', () => {
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
       })
 
-      it('does not happen for an error that is not on display', () => {
-        const projectCtx = openProject('/projects/foo')
-
-        projectCtx.actions.error.clearError('Error-not-shown')
-
-        expect(cleared(projectCtx)).not.toHaveBeenCalled()
-      })
-
-      it('happens when a testing type is chosen and the diagnostics start over', () => {
+      // `tap run` sets the testing type for a moment to pick a browser for it, then sets it back.
+      // Loading the testing type is what can resolve the error, and withdraws it then.
+      it('does not happen when the testing type is only set, without loading it', () => {
         const projectCtx = openProject('/projects/foo')
 
         // @ts-expect-error - only the call that switches the testing type is needed
         projectCtx.lifecycleManager._configManager = { setTestingType: jest.fn() }
 
+        projectCtx.reportLoadError('Your configFile is invalid')
         projectCtx.lifecycleManager.setCurrentTestingType('component')
+        projectCtx.lifecycleManager.setCurrentTestingType('e2e')
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+      })
+
+      it('happens for a given kind only when the error is of that kind', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.reportLoadError('component testing is not set up', 'setup')
+        projectCtx.clearLoadError(['config'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+
+        projectCtx.clearLoadError(['config', 'setup'])
 
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
+      it('does not happen for a given kind when no error is recorded', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.clearLoadError(['config'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
       it('is not done in run mode', () => {
         const runCtx = createTestDataContext('run')
 
-        runCtx.clearLoadErrorForTap()
+        runCtx.clearLoadError()
 
         expect(cleared(runCtx)).not.toHaveBeenCalled()
       })

@@ -12,6 +12,12 @@ export interface SessionRow {
   browserAttached?: boolean
   browserSupported?: boolean
   rendererResponsive?: boolean
+  loadError?: string
+}
+
+// A project that stopped loading is named as such, since every command but status refuses it
+const projectCell = (session: SessionRow): string => {
+  return session.loadError ? `${session.projectRoot} (could not load)` : session.projectRoot
 }
 
 // An open browser reads by its name alone only when tap can actually drive it;
@@ -61,7 +67,7 @@ export const sessionColumns = (sessions: SessionRow[]): string[] => {
   const rows = sessions.map((session) => {
     return [
       String(session.pid),
-      session.projectRoot,
+      projectCell(session),
       session.testingType ?? '—',
       browserCell(session),
     ]
@@ -70,7 +76,7 @@ export const sessionColumns = (sessions: SessionRow[]): string[] => {
   return columns(['PID', 'PROJECT', 'TYPE', 'BROWSER'], rows, (cells, index) => {
     return [
       chalk.bold(cells[0]),
-      cells[1],
+      sessions[index].loadError ? color.warn(cells[1]) : cells[1],
       cells[2],
       browserColor(sessions[index])(cells[3]),
     ]

@@ -247,5 +247,44 @@ describe('exec open', function () {
     it('throws if --config-file is false', () => {
       expect(() => open.processOpenOptions({ configFile: 'false' })).toThrow()
     })
+
+    describe('--headless', () => {
+      it('spawns with --headless before the testing type', async () => {
+        await open.start({ headless: true, project: '/path/to/project', browser: 'chrome', e2e: true })
+        expect(spawnStart).toHaveBeenCalledWith(['--browser', 'chrome', '--project', '/path/to/project', '--headless', '--testing-type', 'e2e'], expect.anything())
+      })
+
+      it('accepts a testingType from the module API', () => {
+        expect(open.processOpenOptions({ headless: true, project: '/path/to/project', browser: 'chrome', testingType: 'component' })).toContain('--headless')
+      })
+
+      it('uses the current directory as the project when not installed globally', () => {
+        vi.mocked(util.isInstalledGlobally).mockReturnValue(false)
+
+        expect(open.processOpenOptions({ headless: true, browser: 'chrome', e2e: true })).toContain('--headless')
+      })
+
+      it.each([
+        ['a testing type', { project: '/path/to/project', browser: 'chrome' }],
+        ['a browser', { project: '/path/to/project', e2e: true }],
+        ['a project', { browser: 'chrome', e2e: true }],
+      ])('throws without %s', (_label, options) => {
+        expect(() => open.processOpenOptions({ headless: true, ...options })).toThrow(expect.objectContaining({ details: expect.objectContaining({ description: expect.stringContaining('--headless') }) }))
+      })
+
+      it('throws with --global', () => {
+        vi.mocked(util.isInstalledGlobally).mockReturnValue(false)
+
+        expect(() => open.processOpenOptions({ headless: true, global: true, browser: 'chrome', e2e: true })).toThrow()
+      })
+
+      it('throws with --global even when a project is given', () => {
+        expect(() => open.processOpenOptions({ headless: true, global: true, project: '/path/to/project', browser: 'chrome', e2e: true })).toThrow()
+      })
+
+      it('does not pass --headless when it is false', () => {
+        expect(open.processOpenOptions({ headless: false, project: '/path/to/project' })).not.toContain('--headless')
+      })
+    })
   })
 })

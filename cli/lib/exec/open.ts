@@ -4,8 +4,8 @@ import Debug from 'debug'
 import util from '../util'
 import { start as spawnStart } from './spawn'
 import { start as verifyStart } from '../tasks/verify'
-import { processTestingType, checkConfigFile } from './shared'
-import { exitWithError } from '../errors'
+import { processTestingType, checkConfigFile, throwInvalidOptionError } from './shared'
+import { errors, exitWithError } from '../errors'
 import logger from '../logger'
 
 const debug = Debug('cypress:cli')
@@ -73,7 +73,17 @@ const processOpenOptions = (options: any = {}): string[] => {
     args.push('--inspectBrk')
   }
 
-  args.push(...processTestingType(options))
+  const testingTypeArgs = processTestingType(options)
+
+  if (options.headless) {
+    if (options.global || !options.project || !testingTypeArgs.length || !options.browser) {
+      throwInvalidOptionError(errors.incompleteHeadlessOpen)
+    }
+
+    args.push('--headless')
+  }
+
+  args.push(...testingTypeArgs)
 
   debug('opening from options %j', options)
   debug('command line arguments %j', args)

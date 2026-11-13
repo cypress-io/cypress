@@ -2198,6 +2198,65 @@ describe('tap CLI against a spec that cannot be built', function () {
  * A before-all that throws takes its whole suite with it. Skipped is the one
  * outcome the counts strip shows only when it is non-zero.
  */
+/**
+ * A configuration that breaks after the project loaded leaves the server, and the
+ * browser showing the last run, up and answering, so only the `error` stage says
+ * the project is broken. Cypress stops watching the file once it fails to load, so
+ * the session stays broken until it is restarted.
+ */
+describe('tap CLI against a session whose configuration breaks', function () {
+  this.timeout(SUITE_TIMEOUT_MS)
+
+  let session: TapSession
+
+  before(async () => {
+    session = await openTapSession('tap-retries')
+    await session.runSpec(SPEC)
+
+    await fs.writeFile(path.join(session.projectRoot, 'cypress.config.js'), `throw new Error('this-configuration-is-broken')\n`)
+  })
+
+  after(async () => {
+    await session?.kill()
+  })
+
+  it('reports the error instead of the run the browser still shows', async () => {
+    const broken = await session.waitForStatus((status) => status.status === 'error', 'the broken configuration reported')
+
+    expect(broken.error, 'the reason the project stopped loading').to.include('this-configuration-is-broken')
+    expect(broken.pid).to.be.a('number')
+    expect(broken.spec, 'the last run no longer describes the project').to.be.undefined
+    expect(broken.results).to.be.undefined
+  })
+
+  it('renders the error for humans', async () => {
+    const result = await session.tap(['status'])
+
+    expect(result.exitCode).to.eq(0)
+    expect(result.stdout).to.include('error')
+    expect(result.stdout).to.include('this-configuration-is-broken')
+  })
+
+  it('lists the session as one that could not load', async () => {
+    const broken = await session.waitForStatus((status) => status.status === 'error', 'the broken configuration reported')
+    const listed = (await session.tap(['--json', 'sessions'])).json<Array<{ pid: number, loadError?: string }>>()
+
+    expect(listed.find((entry) => entry.pid === broken.pid)?.loadError).to.include('this-configuration-is-broken')
+  })
+
+  it('refuses the commands that drive the session, pointing them at status', async () => {
+    await session.waitForStatus((status) => status.status === 'error', 'the broken configuration reported')
+
+    const read = await session.tap(['dom'])
+    const run = await session.tap(['run', SPEC])
+
+    expect(read.exitCode).to.eq(1)
+    expect(failureOutput(read)).to.include(copyFor('PROJECT_NOT_LOADED'))
+    expect(run.exitCode).to.eq(1)
+    expect(failureOutput(run)).to.include(copyFor('PROJECT_NOT_LOADED'))
+  })
+})
+
 describe('tap CLI against a suite a hook took down', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 

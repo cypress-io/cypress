@@ -105,7 +105,10 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
         return fn(message, data)
       }
       case 'focus:browser:window': {
-        win.show()
+        // A headless browser window is hidden on purpose
+        if (!options.browser.isHeadless) {
+          win.show()
+        }
 
         return
       }
@@ -286,7 +289,8 @@ export = {
       // in run mode, force new windows to automatically open with show: false
       // this prevents window.open inside of javascript client code to cause a new BrowserWindow instance to open
       // https://github.com/cypress-io/cypress/issues/123
-      show: !options.isTextTerminal,
+      // A headless browser's windows stay hidden in open mode too
+      show: !options.isTextTerminal && !options.browser.isHeadless,
     })
 
     const win = Windows.create(projectRoot, electronOptions)

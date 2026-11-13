@@ -21,6 +21,19 @@ describe('lib/tap/render/sessions', () => {
     ].join('\n'))
   })
 
+  // Every command but status refuses it, so it must not read as a session to pick
+  it('marks a project that stopped loading after the session started', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true, loadError: 'Your configFile is invalid' },
+    ])
+
+    expect(output).toBe([
+      'SESSIONS (1)',
+      '  PID  PROJECT                         TYPE  BROWSER',
+      '  111  /projects/app (could not load)  e2e   Chrome',
+    ].join('\n'))
+  })
+
   // An attached browser whose page will not answer is the state every other
   // command fails in, so the row has to say so rather than read as healthy.
   it('marks an attached browser whose renderer is not answering', () => {
