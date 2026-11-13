@@ -2,13 +2,7 @@ import type { Request } from 'express'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 import { isLocalhost } from '@packages/network-tools'
 
-import { CLOUD_URLS } from '../src/util/cloudUrls'
-
-const CYPRESS_CLOUD_ORIGINS: ReadonlySet<string> = new Set([
-  CLOUD_URLS.development,
-  CLOUD_URLS.staging,
-  CLOUD_URLS.production,
-])
+import { CLOUD_URLS, resolveCloudEnv, resolveCloudUrl } from '../src/util/cloudUrls'
 
 function isOwnOrigin (origin: string, expectedPort: number): boolean {
   try {
@@ -51,8 +45,18 @@ export const corsOriginDelegate: CorsOptionsDelegate<Request> = (req, callback) 
     return callback(null, allowed)
   }
 
-  if (origin && req.path === '/cloud-notification' && CYPRESS_CLOUD_ORIGINS.has(origin)) {
-    return callback(null, allowed)
+  const isCloudNotification = origin !== undefined && req.path === '/cloud-notification'
+
+  if (isCloudNotification) {
+    const apiEnvironment = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
+    // The API can direct notifications to a local dashboard even when GraphQL uses staging.
+    const usesDevelopmentService = resolveCloudEnv() === 'development' || apiEnvironment === 'development'
+    const developmentOrigin = usesDevelopmentService ? resolveCloudUrl('development') : CLOUD_URLS.development
+    const isCypressCloudOrigin = origin === developmentOrigin || origin === CLOUD_URLS.staging || origin === CLOUD_URLS.production
+
+    if (isCypressCloudOrigin) {
+      return callback(null, allowed)
+    }
   }
 
   return callback(null, denied)
