@@ -39,7 +39,7 @@
     "@packages/stderr-filtering": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@urql/core": "2.4.4",
-    "@urql/exchange-graphcache": "4.4.0",
+    "@urql/exchange-graphcache": "4.3.6",
     "ast-types": "^0.14.2",
     "chalk": "4.1.2",
     "chokidar": "3.6.0",
