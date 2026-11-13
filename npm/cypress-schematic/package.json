@@ -43,7 +43,7 @@
     "@tooling/system-tests": "0.0.0-development",
     "@types/mocha": "8.0.3",
     "@types/node": "^24.10.1",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"

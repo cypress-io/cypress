@@ -42,7 +42,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "cross-env": "7.0.3",
     "dedent": "^0.7.0",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "vite-8": "npm:vite@^8.0.9",
     "vitest": "3.2.7"

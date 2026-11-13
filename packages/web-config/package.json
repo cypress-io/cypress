@@ -29,7 +29,7 @@
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.8.1",
     "css-modules-typescript-loader": "4.0.1",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "html-webpack-plugin": "5.5.3",
     "jiti": "^2.4.2",
     "mini-css-extract-plugin": "2.9.1",
