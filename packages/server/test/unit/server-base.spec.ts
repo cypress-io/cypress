@@ -1602,6 +1602,52 @@ describe('lib/server-base', () => {
       )
     })
 
+    it('calls proxy.ws with an IPv6 host without its brackets', () => {
+      const req = {
+        connection: {
+          encrypted: false,
+        },
+        url: '/',
+        headers: {
+          host: '[::1]:3000',
+        },
+      }
+
+      server.proxyWebsockets(proxy, '/foo', req, socket, head)
+
+      expect(proxy.ws).toHaveBeenCalledWith(
+        req,
+        socket,
+        head,
+        expect.objectContaining({
+          target: {
+            host: '::1',
+            port: '3000',
+            protocol: 'http:',
+          },
+        }),
+        expect.any(Function),
+      )
+    })
+
+    it('ends the socket instead of proxying a Host header that is not a host', () => {
+      const req = {
+        connection: {
+          encrypted: false,
+        },
+        url: '/',
+        headers: {
+          host: 'not a host',
+        },
+      }
+
+      socket.writable = true
+      server.proxyWebsockets(proxy, '/foo', req, socket, head)
+
+      expect(proxy.ws).not.toHaveBeenCalled()
+      expect(socket.end).toHaveBeenCalled()
+    })
+
     it('ends the socket if its writable and there is no __cypress.remoteHost', () => {
       const req = {
         url: '/',

@@ -9,6 +9,7 @@ import stream from 'stream'
 import duplexify from 'duplexify'
 import { agent } from '@packages/network'
 import * as statusCode from './util/status_code'
+import { unbracket } from './util/unbracket'
 import { streamBuffer } from './util/stream_buffer'
 
 const debug = debugModule('cypress:server:request')
@@ -577,10 +578,9 @@ export class Request {
       cookies = [cookies]
     }
 
-    const parsedUrl = url.parse(resUrl)
-    const defaultDomain = parsedUrl.hostname
+    const defaultDomain = unbracket(new URL(resUrl).hostname)
 
-    debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
+    debug('setting cookies on browser %o', { url: resUrl, defaultDomain, cookies })
 
     return Promise.map(cookies as string[], (cyCookie) => {
       let cookie: any = tough.Cookie.parse(cyCookie, { loose: true } as tough.Cookie.ParseOptions)
@@ -682,6 +682,7 @@ export class Request {
         return false
       }
 
+      // eslint-disable-next-line n/no-deprecated-api -- a Location such as `/o'brien|x` must resolve as @cypress/request's redirect.js resolves it
       const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
       // and when we know we should follow the redirect
@@ -787,6 +788,7 @@ export class Request {
         const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
 
         options.followRedirect = function (incomingRes) {
+          // eslint-disable-next-line n/no-deprecated-api -- a Location such as `/o'brien|x` must resolve as @cypress/request's redirect.js resolves it
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
           // normalize the url
@@ -820,6 +822,7 @@ export class Request {
         if ((options.followRedirect === false) && resp.headers.location) {
           // resolve the new location head against
           // the current url
+          // eslint-disable-next-line n/no-deprecated-api -- a Location such as `/o'brien|x` must resolve as it does in `redirects`
           resp.redirectedToUrl = url.resolve(options.url!, resp.headers.location)
         }
 

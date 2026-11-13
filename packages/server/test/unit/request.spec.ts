@@ -189,6 +189,24 @@ describe('lib/request', () => {
     })
   })
 
+  describe('#setCookiesOnBrowser', () => {
+    it('sets a host-only cookie on an IPv6 host without its brackets', async () => {
+      const automationFn = makeAutomationFn()
+
+      await (request as any).setCookiesOnBrowser({ headers: { 'set-cookie': 'one=1' } }, 'http://[::1]:3000/', automationFn)
+
+      expect(automationFn).toHaveBeenCalledWith('set:cookie', expect.objectContaining({ name: 'one', domain: '::1', hostOnly: true }))
+    })
+
+    it('sets a host-only cookie on the request hostname', async () => {
+      const automationFn = makeAutomationFn()
+
+      await (request as any).setCookiesOnBrowser({ headers: { 'set-cookie': 'one=1' } }, 'http://Example.com:8080/path', automationFn)
+
+      expect(automationFn).toHaveBeenCalledWith('set:cookie', expect.objectContaining({ name: 'one', domain: 'example.com', hostOnly: true }))
+    })
+  })
+
   describe('#setDefaults', () => {
     it('delaysRemaining to retryIntervals clone', () => {
       const retryIntervals = [1, 2, 3, 4]

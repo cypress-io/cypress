@@ -5,11 +5,11 @@ import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
-import urlUtil from 'url'
 import { debug as launcherDebug } from '@packages/launcher/lib/browsers'
 import { doubleEscape } from '@packages/launcher/lib/windows'
 import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
+import { unbracket } from '../util/unbracket'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
@@ -560,13 +560,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const ps = options.proxyServer
 
   if (ps) {
-    const parsedProxy = urlUtil.parse(ps)
-    const { hostname, protocol } = parsedProxy
-    let { port } = parsedProxy
-
-    if (port == null) {
-      port = protocol === 'https:' ? '443' : '80'
-    }
+    const parsedProxy = new URL(ps)
+    const hostname = unbracket(parsedProxy.hostname)
+    const port = parsedProxy.port || (parsedProxy.protocol === 'https:' ? '443' : '80')
 
     _.extend(defaultLaunchOptions.preferences, {
       'network.proxy.allow_hijacking_localhost': true,

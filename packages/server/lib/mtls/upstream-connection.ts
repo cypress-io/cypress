@@ -1,7 +1,7 @@
 import net from 'net'
 import tls from 'tls'
-import url from 'url'
-import { buildConnectReqHead, createProxySock, getProxyOrTargetOverrideForUrl, isResponseStatusCode200 } from '@packages/network'
+import { buildConnectReqHead, createProxySock, getProxyOrTargetOverrideForUrl, isResponseStatusCode200, parseProxyUrl } from '@packages/network'
+import { unbracket } from '../util/unbracket'
 import type { UpstreamConnectOptions, UpstreamConnection } from './mtls-bridge'
 
 const HEADERS_END = Buffer.from('\r\n\r\n')
@@ -77,14 +77,6 @@ export function connectUpstream (options: UpstreamConnectOptions, deadlineMs = U
   return Promise.race([connecting, deadline]).finally(() => clearTimeout(timer))
 }
 
-/**
- * `URL.hostname` keeps the brackets around an IPv6 literal, but `net.isIP` and `net.connect`
- * both want it bare. The bracketed form stays in the URL used for proxy resolution.
- */
-function unbracket (hostname: string): string {
-  return hostname.startsWith('[') && hostname.endsWith(']') ? hostname.slice(1, -1) : hostname
-}
-
 function dial (hostname: string, port: number): Promise<net.Socket> {
   const href = `https://${hostname}:${port}`
   const proxy = getProxyOrTargetOverrideForUrl(href)
@@ -101,9 +93,9 @@ function dial (hostname: string, port: number): Promise<net.Socket> {
 }
 
 function dialThroughProxy (hostname: string, port: number, proxy: string): Promise<net.Socket> {
-  const parsed = url.parse(proxy)
-
   return new Promise((resolve, reject) => {
+    const parsed = parseProxyUrl(proxy)
+
     const onProxySock = (err?: Error, socket?: net.Socket) => {
       if (err || !socket) {
         return reject(err ?? new Error('no socket from upstream proxy'))

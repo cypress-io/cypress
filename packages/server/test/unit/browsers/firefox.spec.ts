@@ -531,6 +531,26 @@ describe('lib/browsers/firefox', () => {
       }))
     })
 
+    it('falls back to the scheme\'s default proxy port', async () => {
+      options.proxyServer = 'http://proxy-server'
+
+      await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+      expectCalledWith(vi.mocked(webdriver.newSession), matchSubset({
+        capabilities: {
+          alwaysMatch: {
+            'moz:firefoxOptions': {
+              prefs: {
+                'network.proxy.http': 'proxy-server',
+                'network.proxy.http_port': 80,
+                'network.proxy.ssl_port': 80,
+              },
+            },
+          },
+        },
+      }))
+    })
+
     it('does not set proxy-related preferences if not specified', async () => {
       await firefox.open(browser as any, 'http://', options as any, automation as any)
 

@@ -54,6 +54,27 @@ describe('lib/util/ensure-url', function () {
         expect(callsWith(stub, 80, 'foo.bar.invalid')).toHaveLength(1)
       })
     })
+
+    it('dials an IPv6 host without its brackets', function () {
+      const stub = stubGetAddressFor(3000, '::1', () => Promise.resolve() as any)
+
+      return isListening('http://[::1]:3000').then(() => {
+        expect(callsWith(stub, 3000, '::1')).toHaveLength(1)
+      })
+    })
+
+    it('dials the default https port when the URL gives its default port or none', async function () {
+      const stub = stubGetAddressFor(443, 'foo.bar.invalid', () => Promise.resolve() as any)
+
+      await isListening('https://foo.bar.invalid:443')
+      await isListening('https://foo.bar.invalid')
+
+      expect(callsWith(stub, 443, 'foo.bar.invalid')).toHaveLength(2)
+    })
+
+    it('rejects a URL that does not parse', async function () {
+      await expect(isListening('http://foo bar.invalid')).rejects.toThrow(TypeError)
+    })
   })
 
   describe('with a proxy', function () {

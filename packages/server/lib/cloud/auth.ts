@@ -4,7 +4,7 @@ const express = require('express')
 const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
-const url = require('url')
+const querystring = require('querystring')
 
 const machineId = require('./machine_id')
 import { id as randomId } from '../util/random'
@@ -42,11 +42,11 @@ const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent
     authState = randomId(32)
   }
 
-  const authUrl = url.parse(baseLoginUrl)
+  const authUrl = new URL(baseLoginUrl)
 
   return machineId.machineId()
   .then((id) => {
-    authUrl.query = {
+    let query: Record<string, unknown> = {
       port,
       state: authState,
       machineId: id,
@@ -55,20 +55,24 @@ const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent
     }
 
     if (remoteOrigin) {
-      authUrl.query.remoteOrigin = remoteOrigin
+      query.remoteOrigin = remoteOrigin
     }
 
     if (utmMedium) {
-      authUrl.query = {
+      query = {
         utm_source: utmSource,
         utm_medium: utmMedium,
         utm_campaign: authFlow.campaign,
         utm_content: utmContent,
-        ...authUrl.query,
+        ...query,
       }
     }
 
-    return authUrl.format()
+    // `querystring` keeps a missing machine ID as an empty value, where `URLSearchParams`
+    // would send the string `null`
+    authUrl.search = querystring.stringify(query)
+
+    return authUrl.href
   })
 }
 
@@ -81,9 +85,7 @@ const buildFullSignupUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConte
 }
 
 const getOriginFromUrl = (originalUrl) => {
-  const parsedUrl = url.parse(originalUrl)
-
-  return url.format(_.pick(parsedUrl, ['protocol', 'slashes', 'hostname', 'port']))
+  return new URL(originalUrl).origin
 }
 
 /**

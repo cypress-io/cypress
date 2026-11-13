@@ -103,6 +103,15 @@ describe('lib/cloud/auth', function () {
       })
     })
 
+    it('sends a missing machine ID as an empty value', function () {
+      vi.spyOn(machineId, 'machineId').mockResolvedValue(null)
+
+      return auth._internal.buildFullLoginUrl(BASE_URL, server)
+      .then((url) => {
+        expect(url).toBe(FULL_LOGIN_URL.replace('machineId=abc123', 'machineId='))
+      })
+    })
+
     it('does not regenerate the state code', function () {
       return auth._internal.buildFullLoginUrl(BASE_URL, server)
       .then(() => {

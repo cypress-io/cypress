@@ -60,8 +60,10 @@ describe('lib/util/suppress_warnings', function () {
 
     suppress()
 
+    // eslint-disable-next-line n/no-deprecated-api -- the deprecated constructor is what emits the warning under test
     new Buffer(0)
 
+    // eslint-disable-next-line n/no-deprecated-api -- the deprecated constructor is what emits the warning under test
     new Buffer('asdf')
 
     expect(emitWarning).not.toHaveBeenCalled()

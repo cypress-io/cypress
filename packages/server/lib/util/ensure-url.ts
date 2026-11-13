@@ -2,8 +2,8 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import rp from '@cypress/request-promise'
-import * as url from 'url'
 import { agent, connect, shouldProxyForUrl } from '@packages/network'
+import { unbracket } from './unbracket'
 
 const debug = debugModule('cypress:server:ensure-url')
 
@@ -50,13 +50,16 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
 
 export const isListening = (urlStr: string) => {
   // takes a urlStr and verifies the hostname + port is listening
-  const parsedUrl = url.parse(urlStr)
-  const { hostname, protocol } = parsedUrl
-  let { port } = parsedUrl
+  let parsedUrl: URL
 
-  if (port == null) {
-    port = protocol === 'https:' ? '443' : '80'
+  try {
+    parsedUrl = new URL(urlStr)
+  } catch (err) {
+    return Bluebird.reject(err)
   }
+
+  const hostname = unbracket(parsedUrl.hostname)
+  const port = parsedUrl.port || (parsedUrl.protocol === 'https:' ? '443' : '80')
 
   if (process.env.HTTP_PROXY && shouldProxyForUrl(urlStr)) {
     // cannot make arbitrary connections behind a proxy, attempt HTTP/HTTPS.

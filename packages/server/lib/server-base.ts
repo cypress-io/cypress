@@ -4,6 +4,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import * as ensureUrl from './util/ensure-url'
+import { unbracket } from './util/unbracket'
 import type { Express } from 'express'
 import express from 'express'
 import http from 'http'
@@ -223,6 +224,15 @@ interface OpenServerOptions {
   getCurrentBrowser: () => Browser
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
+}
+
+// A Host header that isn't a valid host leaves nothing to proxy to
+const hostnameOfHostHeader = (host: string): string | undefined => {
+  try {
+    return unbracket(new URL(`http://${host}`).hostname)
+  } catch {
+    return undefined
+  }
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
@@ -1051,12 +1061,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     const host = req.headers.host
+    const hostname = host ? hostnameOfHostHeader(host) : undefined
 
-    if (host) {
+    if (hostname) {
       // get the protocol using req.connection.encrypted
-      // get the port & hostname from host header
-      const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
-      const { hostname, protocol } = url.parse(fullUrl)
+      // get the port from host header
+      const protocol = req.connection.encrypted ? 'https:' : 'http:'
+      const fullUrl = `${protocol}//${host}`
       const { port } = parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
@@ -1310,6 +1321,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // nuke any hashes from our url since
     // those those are client only and do
     // not apply to http requests
+    // A relative local file such as `index.html#top` keeps the escaping `url.parse` gives it
+    // eslint-disable-next-line n/no-deprecated-api -- `index.html#top` has no base for `URL`
     urlStr = url.parse(urlStr)
     urlStr.hash = null
     urlStr = urlStr.format()
@@ -1364,8 +1377,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         const state = this._remoteStates.set(urlStr, options)
 
-        // TODO: Update url.resolve signature to not use deprecated methods
+        // `URL` can't resolve against an empty base, and `url.resolve` percent-encodes the
+        // `'` and `|` that `URL` leaves alone, which would change the URL the AUT visits
+        // eslint-disable-next-line n/no-deprecated-api -- `o'brien.html` must be visited as today
         urlFile = state?.fileServer ? url.resolve(state.fileServer, urlStr) : url.resolve('', urlStr)
+        // eslint-disable-next-line n/no-deprecated-api -- `o'brien.html` must be visited as today
         urlStr = state?.origin ? url.resolve(state.origin, urlStr) : url.resolve('', urlStr)
       }
 
@@ -1529,6 +1545,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
           const curr = newUrl != null ? newUrl : urlStr
 
+          // eslint-disable-next-line n/no-deprecated-api -- a Location such as `/o'brien|x` must resolve as @cypress/request's redirect.js resolves it
           newUrl = url.resolve(curr, next)
 
           redirects.push([status, newUrl].join(': '))

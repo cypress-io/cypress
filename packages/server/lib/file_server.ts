@@ -14,6 +14,10 @@ import type { AddressInfo } from 'net'
 
 const debug = debugModule('cypress:server:file_server')
 
+// The proxy forwards an origin-form path, so the query and hash are all that need cutting
+// off before `send` maps it to a file
+const stripQueryAndHash = (reqUrl: string) => reqUrl.split(/[?#]/)[0]
+
 export type FileServer = {
   token: string
   port: () => number
@@ -42,11 +46,14 @@ const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse,
   // it does not understand query params
   // and make sure we decode the uri which swaps out
   // %20 with white space
+  // On Windows, `url.parse` reads the drive letter as a scheme and drops it, which is
+  // the path the visit error reports
+  // eslint-disable-next-line n/no-deprecated-api -- `C:\\proj\\index.html` must keep its reported form
   const file = decodeURI(url.parse(path.join(...args)).pathname as string)
 
   res.setHeader('x-cypress-file-path', encodeURI(file))
 
-  return send(req, url.parse(req.url as string).pathname as string, {
+  return send(req, stripQueryAndHash(req.url ?? ''), {
     root: path.resolve(fileServerFolder),
   })
   .on('error', (err) => {

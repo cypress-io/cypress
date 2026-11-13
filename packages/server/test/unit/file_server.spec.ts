@@ -168,6 +168,43 @@ describe('lib/file_server', () => {
       expect(body).toBe('world')
     })
 
+    const getPath = (requestPath: string) => {
+      return new Promise<{ statusCode?: number, headers: http.IncomingHttpHeaders, body: string }>((resolve, reject) => {
+        http.get({ host: '127.0.0.1', port: server.port(), path: requestPath, headers: { 'x-cypress-authorization': server.token } }, (res) => {
+          let body = ''
+
+          res.on('data', (chunk) => body += chunk)
+          res.on('end', () => resolve({ statusCode: res.statusCode, headers: res.headers, body }))
+        }).on('error', reject)
+      })
+    }
+
+    it('serves a file requested with a query string', async () => {
+      const { statusCode, headers, body } = await getPath('/hello.txt?foo=bar&baz')
+
+      expect(statusCode).toBe(200)
+      expect(body).toBe('world')
+      expect(headers['x-cypress-file-path']).toBe(encodeURI(path.join(tmpDir, 'hello.txt')))
+    })
+
+    it('serves a file whose path is percent-encoded or has characters url.parse escapes', async () => {
+      await fs.promises.mkdir(path.join(tmpDir, 'a b'))
+      await fs.promises.writeFile(path.join(tmpDir, 'a b', `o'b|r.txt`), 'quoted')
+
+      const { statusCode, body } = await getPath(`/a%20b/o'b|r.txt?x=1`)
+
+      expect(statusCode).toBe(200)
+      expect(body).toBe('quoted')
+    })
+
+    it('reports a missing file without its query string', async () => {
+      const { statusCode, headers } = await getPath('/missing.txt?foo=bar')
+
+      expect(statusCode).toBe(404)
+      expect(headers['x-cypress-file-server-error']).toBe('true')
+      expect(headers['x-cypress-file-path']).toBe(encodeURI(path.join(tmpDir, 'missing.txt')))
+    })
+
     it('rejects requests missing the authorization token with a 401', async () => {
       const statusCode = await new Promise<number | undefined>((resolve, reject) => {
         http.get(`${server.address()}/hello.txt`, (res) => {
