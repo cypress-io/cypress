@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...compatConfig,
   {
     languageOptions: {
       parserOptions: {

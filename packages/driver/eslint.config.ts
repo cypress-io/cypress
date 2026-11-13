@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...compatConfig,
   ...vitestConfig,
   {
     languageOptions: {

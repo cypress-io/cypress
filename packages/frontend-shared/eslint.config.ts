@@ -1,9 +1,10 @@
-import { baseConfig, frontendOverrides, graphqlConfig, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
+import { baseConfig, compatConfig, frontendOverrides, graphqlConfig, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...compatConfig,
   ...vueTsxOverrides,
   ...frontendOverrides,
   ...graphqlConfig(),

@@ -15,6 +15,7 @@ yarn workspace @packages/eslint-config lint
 src/
   baseConfig.ts         Core flat-config with TypeScript, import, and stylistic rules
   cliOverrides.ts       Overrides applied for CLI/Node.js contexts
+  compatConfig.ts       Opt-in browser-API compatibility checks (eslint-plugin-compat) for the browser bundles' shipped source
   frontendOverrides.ts  Rules shared by app, launchpad and frontend-shared, such as type-only imports from data-context in .vue files
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
@@ -42,7 +43,7 @@ src/
 
 A new workspace lints itself with its own config:
 
-1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), and `vitestConfig` if its unit tests run on Vitest:
+1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), or `compatConfig` if it is one that ships to the supported browsers (see [`compatConfig`](#compatconfig)), and `vitestConfig` if its unit tests run on Vitest:
 
    ```ts
    import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
@@ -102,6 +103,30 @@ Every workspace opts in except the browser bundles, whose floor is the supported
 `n/no-process-exit` is left off: almost all of its hits are CLIs and scripts that exit on purpose. The plugin's optional `ts-declaration-location` peer is only needed by `n/no-sync`, which isn't enabled.
 
 `nodeConfig.ts` loads the plugin with `require` rather than `import`. Its types export a string-named `"module.exports"`, which TypeScript only parses from 5.6 and import-x's parser not at all. An `import` fails `check-ts` in every workspace whose `tsconfig` takes in its `eslint.config.ts`.
+
+## `compatConfig`
+
+`compatConfig` checks the browser bundles against the browser [runtime floor](../../AGENTS.md#runtime-targets), the counterpart of `nodeConfig` for code that ships to the browser. Spread it after `baseConfig` and `jsonConfig`. It is built on `eslint-plugin-compat` and turns on `compat/compat`, which reports a browser or ES API that one of the target browsers lacks.
+
+- **Targets** come from `browser-bundles.browserslistrc` at the repo root, through `settings.browserslistOpts.config`. The file's name keeps browserslist from discovering it: any `.browserslistrc`, `browserslist` file or `browserslist` key in a `package.json` above a build switches webpack's default target from `web` to `browserslist`, which breaks `@packages/extension`'s build, and changes the output of the `autoprefixer: {}` PostCSS configs in app, launchpad, frontend-shared and reporter. Read the file by path from anything else that needs the floor. A missing file fails the lint run instead of falling back to browserslist's defaults.
+- **Files**: shipped source only, `src/**` and `injection/**`, minus `*.cy.*`, `*.spec.*`, `*.test.*` and `.d.ts`. Specs run in whatever browser Cypress launches for them, so the floor doesn't apply.
+- **`lintAllEsApis`** is on, so ES built-ins are checked as well as web APIs. The plugin would otherwise skip them in any directory with a babel config.
+
+The bundlers don't read the file yet. Their targets are set separately in `packages/web-config/webpack.config.base.ts` (`preset-env` at `chrome: 64`), app's `vite.config.mjs` (`build.target: 'ES2022'`, plugin-legacy at `last 3 major versions`), and the PostCSS configs (browserslist's defaults). Moving them onto this file would change shipped output, so it is a change of its own.
+
+Opted in: `driver`, `app`, `frontend-shared`, `launchpad`, `reporter` and `runner`. Not opted in:
+
+- `extension` only ever loads in Chrome and Firefox, so the Safari part of the floor doesn't apply to it.
+- `example` is generated from `cypress-example-kitchensink`, where it would have to be fixed.
+- The mount adapters (`npm/react`, `npm/vue`, `npm/angular`, `npm/svelte`, `npm/mount-utils`) and the browser files of `vite-dev-server`, `vite-plugin-cypress-esm` and `webpack-dev-server` also run on the floor but haven't been opted in yet.
+
+**The check has coverage gaps, so it doesn't replace verifying a new API on caniuse or MDN.** A clean run only means the plugin knows of no problem:
+
+- Its ES built-ins come from an old `@mdn/browser-compat-data` snapshot (through `ast-metadata-inferer`), so newer ones such as `Promise.withResolvers`, `Promise.try`, `Map.groupBy`, `Iterator.from` and `Set.prototype.union` are never reported, even below the version that added them.
+- Some web APIs are missing too: `window.showOpenFilePicker()` passes, though Safari and Firefox lack it.
+- It checks API calls, not syntax, and treats an API behind a feature check (`if ('getBattery' in navigator)`) as guarded.
+
+A hit that is intentional, such as an API used only behind a feature check the plugin doesn't recognise, takes `// eslint-disable-next-line compat/compat -- <reason>`.
 
 ## `vitestConfig`
 
