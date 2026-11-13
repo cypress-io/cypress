@@ -652,6 +652,23 @@ describe('lib/cypress-sessions', () => {
         expect(selection.session.pid).toBe(111)
         expect(selection.session.loadError).toEqual({ message: 'Your configFile is invalid' })
       })
+
+      it('resolves a healthy session started since, for the caller that reports errors, over an older broken one at the same project', async () => {
+        const brokenPort = await startFakeSession({ sessionId: 'broken', respondWith: { sessionId: 'broken', cdpBrowserWsUrl: null, loadError: { message: 'Your configFile is invalid' } } })
+        const workingPort = await startFakeSession({ sessionId: SESSION_ID, respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: CDP_WS_URL } })
+
+        mockfs({ [SESSIONS_DIR]: {
+          '111.json': makeRecord({ pid: 111, serverPort: brokenPort, sessionId: 'broken' }),
+          '222.json': makeRecord({ pid: 222, serverPort: workingPort }),
+        } })
+
+        stubKill({ alive: [111, 222] })
+
+        const selection = await resolveLiveSession({ cwd: PROJECT }, { allowLoadError: true })
+
+        expect(selection.session.pid).toBe(222)
+        expect(selection.session.loadError).toBeUndefined()
+      })
     })
 
     it('carries the live CDP endpoint when a browser is attached', async () => {

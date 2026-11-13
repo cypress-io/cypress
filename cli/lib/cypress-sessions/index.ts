@@ -137,10 +137,16 @@ const soughtUnloaded = <T extends CypressSession>(usable: CypressSession[], unlo
 
 // A session whose configuration broke after it started still answers, but whatever it runs
 // or shows comes from the configuration that is gone. It is set aside like a project that
-// never loaded, and reported the same way when it is the one the caller is after.
-const setAsideBrokenSessions = (live: LiveSessionState[], options: ResolveSessionOptions): LiveSessionState[] => {
+// never loaded, and reported the same way when it is the one the caller is after. With
+// `allowLoadError`, the one the caller is after is returned alone instead of refused, so an
+// older broken session never shadows a healthy one that was started since.
+const setAsideBrokenSessions = (live: LiveSessionState[], options: ResolveSessionOptions, allowLoadError: boolean): LiveSessionState[] => {
   const loaded = live.filter((record) => !record.loadError)
   const broken = mayBeAfterUnloaded(loaded, options) ? soughtUnloaded(loaded, live.filter((record) => record.loadError), options) : undefined
+
+  if (broken && allowLoadError) {
+    return [broken]
+  }
 
   if (broken) {
     // The session was found and answered, so the refusal is attributed to it
@@ -156,8 +162,8 @@ const setAsideBrokenSessions = (live: LiveSessionState[], options: ResolveSessio
 // SESSION_NOT_FOUND for a pid that named nothing, NO_SESSION when none was asked
 // for — STALE_SESSION when matches exist but none responds, PROJECT_NOT_LOADED when
 // the one sought broke after it started, and UNSUPPORTED_BROWSER when every one that
-// is left has a browser tap cannot drive. `allowLoadError` keeps broken sessions, for
-// `status` to report their error.
+// is left has a browser tap cannot drive. `allowLoadError` returns the broken session
+// sought instead of throwing, for `status` to report its error.
 const liveMatches = async (options: ResolveSessionOptions, allowLoadError = false): Promise<LiveSessionState[]> => {
   const { session, probeTimeoutMs } = options
   const records = await readLiveSessions()
@@ -182,7 +188,7 @@ const liveMatches = async (options: ResolveSessionOptions, allowLoadError = fals
     throw new TapError('STALE_SESSION')
   }
 
-  const usable = allowLoadError ? live : setAsideBrokenSessions(live, options)
+  const usable = setAsideBrokenSessions(live, options, allowLoadError)
 
   // Dropped before selection so a session running an unsupported browser never
   // shadows one that can serve the command; when it is the only candidate the
