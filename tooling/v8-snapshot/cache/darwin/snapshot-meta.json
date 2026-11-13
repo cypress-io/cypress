@@ -1610,8 +1610,8 @@
     "./node_modules/adm-zip/methods/index.js",
     "./node_modules/adm-zip/methods/inflater.js",
     "./node_modules/adm-zip/util/constants.js",
+    "./node_modules/adm-zip/util/decoder.js",
     "./node_modules/adm-zip/util/errors.js",
-    "./node_modules/adm-zip/util/fileSystem.js",
     "./node_modules/adm-zip/zipEntry.js",
     "./node_modules/adm-zip/zipFile.js",
     "./node_modules/aggregate-error/index.js",
@@ -3819,5 +3819,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "1a076d8e5adade513f1f9cf255e0ce4fab73ca31c7826f7b3d3d9f7b3525600e"
+  "deferredHash": "1adda79ca159d6d5561bbc40b604b7cdd9236dedd9c7a6c6d645f477d4034f02"
 }
