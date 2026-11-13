@@ -1,5 +1,6 @@
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { HOST_MODULES_GLOBAL, HOST_MODULE_SPECIFIERS } from '@packages/types/src/host-modules'
 import path from 'path'
 import type webpack from 'webpack'
 
@@ -29,6 +30,8 @@ const mainConfig: webpack.Configuration = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
   },
+  externalsType: 'window',
+  externals: Object.fromEntries(HOST_MODULE_SPECIFIERS.map((specifier) => [specifier, [HOST_MODULES_GLOBAL, specifier]])),
 }
 
 mainConfig.resolve = {

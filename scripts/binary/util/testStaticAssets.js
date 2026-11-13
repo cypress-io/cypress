@@ -18,11 +18,14 @@ const testStaticAssets = async (buildResourcePath) => {
         // indicates eval source maps were included, which cause cross-origin errors
         '//# sourceURL=cypress://',
         // make sure webpack is not run with NODE_ENV=development
-        'react.development.js',
+        'use-sync-external-store-shim.development.js',
+        // React is read from the app's copy, so the runner must not bundle its own
+        '__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED',
       ],
       goodStrings: [
         // make sure webpack is run with NODE_ENV=production
-        'react.production.min.js',
+        'use-sync-external-store-shim.production.min.js',
+        '__CYPRESS_HOST_MODULES__',
       ],
       testAssetStrings: [
         [
