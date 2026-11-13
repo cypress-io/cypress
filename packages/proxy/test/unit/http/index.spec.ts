@@ -455,7 +455,7 @@ describe('http', function () {
         },
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request and response stubs, not a full CypressIncomingRequest / CypressOutgoingResponse
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'http://localhost:1234/__/does-not-exist', headers: {} }, res)
 
       expect(shortCircuit).toHaveBeenCalledOnce()

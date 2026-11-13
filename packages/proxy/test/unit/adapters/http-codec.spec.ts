@@ -184,7 +184,7 @@ describe('proxyHttpCodec', () => {
       expect(res.statusCode).to.equal(404)
       expect(res.headers).to.deep.equal({ 'content-type': 'text/plain' })
       expect(res.body).to.equal('Not Found')
-      expect(res.writableFinished).to.be.true
+      expect(res.writableFinished).toBe(true)
     })
 
     it('is not written for a response that came through the origin fetch', () => {
@@ -203,8 +203,8 @@ describe('proxyHttpCodec', () => {
 
       expect(res.statusCode).to.equal(200)
       expect(res.headers).to.deep.equal({})
-      expect(res.body).to.be.undefined
-      expect(res.writableFinished).to.be.false
+      expect(res.body).toBeUndefined()
+      expect(res.writableFinished).toBe(false)
     })
 
     it('is not written when the pipeline already wrote the client response', () => {
@@ -221,7 +221,7 @@ describe('proxyHttpCodec', () => {
       })
 
       expect(res.statusCode).to.equal(200)
-      expect(res.body).to.be.undefined
+      expect(res.body).toBeUndefined()
     })
 
     it('is not written by a codec that does not opt into synthesized writes', () => {
@@ -239,8 +239,8 @@ describe('proxyHttpCodec', () => {
       })
 
       expect(res.statusCode).to.equal(200)
-      expect(res.body).to.be.undefined
-      expect(res.writableFinished).to.be.false
+      expect(res.body).toBeUndefined()
+      expect(res.writableFinished).toBe(false)
     })
   })
 })
