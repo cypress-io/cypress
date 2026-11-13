@@ -64,6 +64,8 @@
     "graphql": "^15.5.1",
     "human-interval": "1.0.0",
     "jiti": "^2.4.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "sinon": "13.0.2",
     "tailwindcss": "^3.3.1",
     "vite": "^8.0.9",

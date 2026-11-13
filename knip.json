@@ -163,7 +163,8 @@
         "*.{ts,tsx,js,jsx,mjs}"
       ],
       "ignoreDependencies": [
-        "@graphql-typed-document-node/core"
+        "@graphql-typed-document-node/core",
+        "react"
       ]
     },
     "packages/example": {
