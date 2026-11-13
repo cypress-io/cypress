@@ -17,7 +17,7 @@ import debugLib from 'debug'
 import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
-import { telemetry } from '@packages/telemetry'
+import { getSpanNames, telemetry } from '@packages/telemetry'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 
 import { graphqlSchema } from './schema'
@@ -183,6 +183,10 @@ function handleTelemetrySocketRequest (eventName: unknown, payload: unknown, cal
   if (eventName !== 'telemetry' || typeof payload !== 'string') {
     // A plain object, since socket.io serializes an Error instance to {}
     return callback({ error: { name: 'Error', message: `The launchpad telemetry socket cannot handle: ${String(eventName)}` } })
+  }
+
+  if (debugTelemetry.enabled) {
+    debugTelemetry('exporting spans from launchpad: %s', getSpanNames(payload).join(', '))
   }
 
   (telemetry.exporter() as OTLPTraceExporterCloud | undefined)?.send(payload, () => {}, (err) => {
