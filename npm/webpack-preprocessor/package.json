@@ -51,7 +51,7 @@
     "babel-loader": "^10.0.0",
     "chalk": "3.0.0",
     "cypress": "0.0.0-development",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "fs-extra": "^10.1.0",
     "globals": "^15.12.0",
     "globby": "^11.1.0",

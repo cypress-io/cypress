@@ -766,6 +766,7 @@
     "pgrep",
     "rm",
     "tar",
+    "tput",
     "tslint",
     "wc",
     "Xvfb"

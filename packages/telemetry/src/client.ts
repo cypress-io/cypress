@@ -4,6 +4,7 @@ import { Telemetry as TelemetryClass, TelemetryNoop } from './telemetry/index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 declare global {
@@ -18,10 +19,10 @@ let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 /**
  * Initialize the telemetry singleton
  * @param namespace - namespace to apply to the singleton
- * @param config - object containing the version
+ * @param config - object containing the version, defaults to the version of the server that served the page
  * @returns void
  */
-const init = ({ namespace, config }: { namespace: string, config: { version: string } }): void => {
+const init = ({ namespace, config }: { namespace: string, config?: { version: string } }): void => {
   // If we don't have cypress_telemetry setup on window don't even bother making the global instance
   if (!window.__CYPRESS_TELEMETRY__) {
     return
@@ -44,7 +45,7 @@ const init = ({ namespace, config }: { namespace: string, config: { version: str
       browserDetectorSync,
     ],
     rootContextObject: context,
-    version: config?.version,
+    version: config?.version ?? String(resources[SemanticResourceAttributes.SERVICE_VERSION] ?? ''),
     exporter,
     // Because otel is lame we need to use the simple span processor instead of the batch processor
     // or we risk losing spans when the browser navigates.

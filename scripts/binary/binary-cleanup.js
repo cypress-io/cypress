@@ -258,6 +258,8 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     // better-sqlite3 loads these ahead of build/Release; the Linux ones need a newer glibc than Cypress supports
     path.join(buildAppDir, '**', 'better-sqlite3', 'prebuilds'),
     path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
+    // x86_64-only, and only mocha's watch CLI reaches it, which Cypress never runs
+    path.join(buildAppDir, '**', 'mocha-7.2.0', 'node_modules', 'fsevents'),
     path.join(buildAppDir, '**', '*.cc'),
     path.join(buildAppDir, '**', '*.o'),
     path.join(buildAppDir, '**', '*.c'),
