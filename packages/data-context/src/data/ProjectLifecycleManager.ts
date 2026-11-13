@@ -371,6 +371,8 @@ export class ProjectLifecycleManager {
    *  2. The value of `defaultBrowser` in `cypress.config`.
    *  3. The last browser selected in `open` mode (by name and channel) for this project.
    *  4. The first browser found.
+   * A `--headless` session stops at the first: when its `--browser` cannot be found or driven,
+   * it is left with no `activeBrowser`.
    */
   async setInitialActiveBrowser () {
     // if we no longer have a project, just return
@@ -407,7 +409,7 @@ export class ProjectLifecycleManager {
 
       const hasWelcomeBeenDismissed = this.isWelcomeBypassed || Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
 
-      // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
+      // only launch if the browser was successfully set; otherwise fall through to choose another
       // but if the user needs to dismiss a landing page, don't continue: dismissing it renders OpenBrowser
       // in the launchpad, whose auto-launch opens the active browser once the config is ready
       if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
@@ -674,10 +676,6 @@ export class ProjectLifecycleManager {
         }
       }
     })
-
-    if (testingType) {
-      this.ctx.clearLoadError()
-    }
 
     this._currentTestingType = testingType
 

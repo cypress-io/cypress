@@ -350,7 +350,7 @@ export class DataContext {
   /**
    * Withdraws the record of a load error once whatever caused it is resolved, so `cypress tap
    * status` does not keep reporting it. Given `kinds`, only an error of one of those kinds is
-   * withdrawn; without them, any is, as when another project or testing type replaces it.
+   * withdrawn; without them, any is, as when another project replaces it.
    */
   clearLoadError (kinds?: LoadErrorKind[]) {
     if (!this.isOpenMode) {

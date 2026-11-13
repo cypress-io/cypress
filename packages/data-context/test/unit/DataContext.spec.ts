@@ -222,15 +222,19 @@ describe('DataContext open mode error output', () => {
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
       })
 
-      it('happens when a testing type is chosen and the diagnostics start over', () => {
+      // `tap run` sets the testing type for a moment to pick a browser for it, then sets it back.
+      // Loading the testing type is what can resolve the error, and withdraws it then.
+      it('does not happen when the testing type is only set, without loading it', () => {
         const projectCtx = openProject('/projects/foo')
 
         // @ts-expect-error - only the call that switches the testing type is needed
         projectCtx.lifecycleManager._configManager = { setTestingType: jest.fn() }
 
+        projectCtx.reportLoadError('Your configFile is invalid')
         projectCtx.lifecycleManager.setCurrentTestingType('component')
+        projectCtx.lifecycleManager.setCurrentTestingType('e2e')
 
-        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
       it('happens for a given kind only when the error is of that kind', () => {

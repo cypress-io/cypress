@@ -596,6 +596,7 @@ export class ProjectActions {
         this.ctx.lifecycleManager.setCurrentTestingType(targetTestingType)
         await this.ctx.lifecycleManager.setInitialActiveBrowser()
         this.ctx.lifecycleManager.setCurrentTestingType(originalTestingType)
+        this.requireActiveBrowser()
 
         // This is the magic sauce - we now have a browser selected, so this will toggle
         // the testing type, trigger specs to update, and launch the browser
@@ -628,7 +629,7 @@ export class ProjectActions {
         await this.ctx.lifecycleManager.setInitialActiveBrowser()
 
         await this.api.launchProject(
-          this.ctx.coreData.activeBrowser!,
+          this.requireActiveBrowser(),
           {
             name: '',
             absolute: '',
@@ -658,7 +659,7 @@ export class ProjectActions {
         throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${specPath}`)
       }
 
-      const browser = this.ctx.coreData.activeBrowser!
+      const browser = this.requireActiveBrowser()
 
       // Hooray, everything looks good and we're all set up
       // Try to launch the requested spec by navigating to it in the browser
@@ -679,6 +680,18 @@ export class ProjectActions {
         detailMessage: err.message,
       }
     }
+  }
+
+  // Choosing a browser can leave none, as when no browser is found, or when a `--headless`
+  // session's `--browser` cannot be found or driven and none is chosen in its place
+  private requireActiveBrowser () {
+    const browser = this.ctx.coreData.activeBrowser
+
+    if (!browser) {
+      throw new RunSpecError('GENERAL_ERROR', 'Cypress has no browser to run the spec in.')
+    }
+
+    return browser
   }
 
   async debugCloudRun (runNumber: number) {
