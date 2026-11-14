@@ -104,7 +104,7 @@
     "systeminformation": "^5.33.16",
     "temp-dir": "^2.0.0",
     "tree-kill": "1.2.2",
-    "ws": "5.2.4"
+    "ws": "8.21.0"
   },
   "nx": {
     "targets": {
