@@ -221,7 +221,7 @@
     "fast-xml-parser": "^4.5.4",
     "filesize": "10.1.6",
     "fs-extra": "9.1.0",
-    "glob": "7.1.6",
+    "glob": "10.5.0",
     "globals": "^15.14.0",
     "graphql": "^15.5.1",
     "gulp": "4.0.2",
