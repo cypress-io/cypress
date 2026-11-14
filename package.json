@@ -218,7 +218,7 @@
     "electron-builder": "^25.1.8",
     "eslint": "^10.14.0",
     "execa": "4.1.0",
-    "fast-xml-parser": "^4.5.4",
+    "fast-xml-parser": "^5.0.0",
     "filesize": "10.1.6",
     "fs-extra": "9.1.0",
     "glob": "7.1.6",
