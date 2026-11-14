@@ -24,7 +24,7 @@
     "typescript": "~5.9.2"
   },
   "peerDependencies": {
-    "@angular/common": ">=21.0.0",
+    "@angular/common": ">=21.2.26",
     "@angular/core": ">=21.0.0",
     "@angular/platform-browser": ">=21.0.0",
     "rxjs": ">=7.8.0"
