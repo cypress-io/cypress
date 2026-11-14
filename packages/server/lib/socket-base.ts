@@ -17,7 +17,7 @@ import type { SameSiteContext, SerializableAutomationCookie } from './automation
 import { cookieJar, automationCookieToToughCookie } from './automation/cookie/jar'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
-import { telemetry } from '@packages/telemetry'
+import { getSpanNames, telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
 import { openExternal } from './gui/links'
 
@@ -32,6 +32,7 @@ type StartListeningCallbacks = {
 }
 
 const debug = Debug('cypress:server:socket-base')
+const debugTelemetry = Debug('cypress:server:telemetry')
 
 function getInterceptRegistration (options: StartListeningOptions): ForInterceptRegistration {
   return options.interceptRegistration
@@ -582,8 +583,12 @@ export class SocketBase implements SocketBroadcaster {
               case 'run:privileged':
                 return privilegedCommandsManager.runPrivilegedCommand(config, args[0])
               case 'telemetry':
+                if (debugTelemetry.enabled) {
+                  debugTelemetry('exporting spans from the browser: %s', getSpanNames(args[0]).join(', '))
+                }
+
                 return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
-                  debug('error exporting telemetry data from browser %s', err)
+                  debugTelemetry('error exporting telemetry data from browser %s', err)
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
