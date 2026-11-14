@@ -3,8 +3,9 @@ import jsonc from 'eslint-plugin-jsonc'
 import packageJson from 'eslint-plugin-package-json'
 import * as jsoncParser from 'jsonc-eslint-parser'
 
-// Only the rules are taken from the preset: its blocks carry their own `files`
-// globs, which would lint tsconfig and VS Code files past the `ignores` below
+// Spread as config blocks, the preset would lint tsconfig and VS Code files
+// past the `ignores` below, and its last block, which has no `files` glob,
+// would apply JSON rules to every file the workspace lints
 const recommendedWithJsonRules: Linter.RulesRecord = Object.assign(
   {},
   ...jsonc.configs['recommended-with-json'].map((block) => block.rules),
