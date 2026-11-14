@@ -156,5 +156,11 @@ export const shouldStreamResponseBody = (event: Protocol.Fetch.RequestPausedEven
     return false
   }
 
+  // Media players read a range's opening bytes and then cancel or seek, so a
+  // content-length covering the whole file must not hold the pause until it arrives.
+  if (event.resourceType === 'Media') {
+    return true
+  }
+
   return !isProvablyFinite(event)
 }
