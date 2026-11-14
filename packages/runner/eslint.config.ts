@@ -3,7 +3,8 @@ import { baseConfig, compatConfig, jsonConfig } from '@packages/eslint-config'
 export default [
   ...baseConfig,
   ...jsonConfig,
-  ...compatConfig,
+  // Shipped entry points outside the shared src/** glob
+  ...compatConfig.map((block) => ({ ...block, files: [...(block.files ?? []), 'unified-runner.tsx'] })),
   {
     languageOptions: {
       parserOptions: {

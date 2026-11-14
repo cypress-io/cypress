@@ -16,14 +16,16 @@ export const compatConfig: Linter.Config[] = [
   {
     // Shipped source only: specs run in the browser Cypress launches for them,
     // not on the floor
-    files: ['src/**/*.{js,jsx,ts,tsx,vue}', 'injection/**/*.{js,jsx,ts,tsx}'],
-    ignores: ['**/*.{cy,spec,test}.{js,jsx,ts,tsx}', '**/*.d.ts'],
+    files: [
+      'src/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue}',
+      'injection/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}',
+    ],
+    ignores: ['**/*.{cy,spec,test}.*', '**/*.d.{ts,mts,cts}'],
     plugins: {
       compat,
     },
     settings: {
-      // Read by path because browserslist doesn't discover the file by name;
-      // see the comment at the top of it
+      // By path: see the comment at the top of the file for why
       browserslistOpts: {
         config: browserslistConfig,
       },

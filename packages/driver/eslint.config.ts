@@ -3,7 +3,8 @@ import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, vitestC
 export default [
   ...baseConfig,
   ...jsonConfig,
-  ...compatConfig,
+  // Shipped entry points outside the shared src/** glob
+  ...compatConfig.map((block) => ({ ...block, files: [...(block.files ?? []), 'index.ts'] })),
   ...vitestConfig,
   {
     languageOptions: {
