@@ -2,7 +2,7 @@ import zlib from 'zlib'
 import _ from 'lodash'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
-import { isAnsweredByCypress, isCypressServerOrigin, isInternalCypressRoute, cypressInternalLoopbackToken } from '../../../lib/adapters/internal-routes'
+import { isAnsweredByCypress, isCypressServerOrigin, isInternalCypressRoute, isLoopbackHost, cypressInternalLoopbackToken } from '../../../lib/adapters/internal-routes'
 import { createServeInternalRoutesMiddleware } from '../../../lib/adapters/serve-internal-routes'
 
 // sinon's `calledWithMatch` compares objects partially at every depth and
@@ -76,6 +76,27 @@ describe('lib/adapters/internal-routes', () => {
 
     expect(isCypressServerOrigin('http://localhost:1234/__/', withoutProxyUrl)).toBe(true)
     expect(isCypressServerOrigin('/__/', withoutProxyUrl)).toBe(true)
+  })
+
+  describe('isLoopbackHost', () => {
+    it('matches loopback names on the listen port', () => {
+      for (const host of ['localhost:1234', '127.0.0.1:1234', '127.1.2.3:1234', '[::1]:1234', 'app.localhost:1234']) {
+        expect(isLoopbackHost(host, 1234), host).toBe(true)
+      }
+    })
+
+    it('matches a loopback name without a port on port 80', () => {
+      expect(isLoopbackHost('localhost', 80)).toBe(true)
+    })
+
+    it('rejects other hosts, other ports, and missing values', () => {
+      for (const host of ['other.example.com:1234', 'localhost:4000', 'localhost', 'localhost.example.com:1234', '', undefined]) {
+        expect(isLoopbackHost(host, 1234), String(host)).toBe(false)
+      }
+
+      expect(isLoopbackHost('localhost:1234', undefined)).toBe(false)
+      expect(isLoopbackHost('[::1', 1234)).toBe(false)
+    })
   })
 })
 
@@ -395,6 +416,27 @@ describe('lib/adapters/serve-internal-routes', () => {
     const headers = serverRequest.create.mock.calls[0][0].headers
 
     expect(headers).not.toHaveProperty(['accept-encoding'])
+  })
+
+  it('keeps referer and origin on the loopback', async () => {
+    // the storage pages and the runner-only posts resolve trust from them
+    const { middleware, serverRequest } = createMiddleware()
+    const next = vi.fn()
+
+    await middleware({
+      id: 'req-1',
+      url: 'https://cross-origin.test/__cypress/automation/getLocalStorage',
+      method: 'GET',
+      headers: {
+        referer: 'http://localhost:1234/__cypress/iframes/spec.cy.js',
+        origin: 'http://localhost:1234',
+      },
+    }, next)
+
+    expect(serverRequest.create.mock.calls[0][0].headers).toMatchObject({
+      referer: 'http://localhost:1234/__cypress/iframes/spec.cy.js',
+      origin: 'http://localhost:1234',
+    })
   })
 
   it('decodes a gzip response body and drops the content-encoding header', async () => {

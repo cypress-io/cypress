@@ -319,13 +319,22 @@ describe('Routes', () => {
     })
 
     it('routes config.clientRoute to serve cypress client app html', function () {
-      return this.rp('http://localhost:2020/__')
+      return this.rp(`${this.proxy}/__`)
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
         expect(res.body).to.match(/window.__Cypress__ = true/)
 
         expect(res.headers['origin-agent-cluster']).to.eq('?0')
+      })
+    })
+
+    it('serves the \'not launched through Cypress\' page for an origin that is neither this server nor the primary', function () {
+      return this.rp('http://localhost:2020/__')
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/This browser was not launched through Cypress\./)
       })
     })
 
@@ -339,7 +348,7 @@ describe('Routes', () => {
     })
 
     it('sets title to projectName', function () {
-      return this.rp('http://localhost:2020/__')
+      return this.rp(`${this.proxy}/__`)
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
@@ -429,8 +438,8 @@ describe('Routes', () => {
       })
     })
 
-    it('routes when baseUrl is set', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
+    it('routes at the primary origin', function () {
+      return this.setup('http://localhost:9999/app')
       .then(() => {
         return this.rp('http://localhost:9999/__')
         .then((res) => {
