@@ -21,10 +21,8 @@ export function injectBundle (namespace: string) {
   document.head.appendChild(preload)
   document.head.appendChild(link)
 
-  // The runner bundle reads React and MobX from the host modules, so they must
-  // be published before it executes. Importing them lazily keeps React out of
-  // the entry chunk, so it is parsed alongside the runner rather than before
-  // the app mounts.
+  // Lazy so React stays out of the entry chunk and is parsed alongside the
+  // runner, not before the app mounts.
   import('./hostModules').then(({ publishHostModules }) => {
     publishHostModules()
 
