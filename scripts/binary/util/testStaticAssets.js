@@ -44,6 +44,17 @@ const testStaticAssets = async (buildResourcePath) => {
       minLineCount: 5000,
     }),
     testPackageStaticAssets({
+      // the React that the app publishes to the runner must be the production build
+      assetGlob: `${buildResourcePath}/packages/app/dist/assets/hostModules-*.js`,
+      goodStrings: [
+        'Minified React error #',
+      ],
+      badStrings: [
+        // only React's development builds carry the full message text
+        'Invalid hook call',
+      ],
+    }),
+    testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,
       goodStrings: [
         'action("app:window:before:load",window)',
