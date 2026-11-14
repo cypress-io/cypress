@@ -7,6 +7,7 @@ import type { SnapshotScript } from './create-snapshot-script'
 import { createSnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
 import { assertLatin1, escapeNonLatin1 } from './escape-non-latin1'
+import { shiftGeneratedColumns } from '../sourcemap/shift-generated-columns'
 import { determineDeferred } from '../doctor/determine-deferred'
 import {
   backupName,
@@ -270,7 +271,7 @@ export class SnapshotGenerator {
         contents = this.updateSnapshotScriptContents(contents)
       }
 
-      this.snapshotScript = Buffer.from(escapeNonLatin1(contents))
+      this.snapshotScript = Buffer.from(escapeNonLatin1(contents).code)
       await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
 
       return
@@ -302,6 +303,7 @@ export class SnapshotGenerator {
     }
 
     let result: SnapshotScript
+    const processedSourcemapPath = this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map')
 
     try {
       // 2. Create the initial snapshot script using whatever info we
@@ -318,7 +320,7 @@ export class SnapshotGenerator {
         nodeModulesOnly: this.nodeModulesOnly,
         sourcemap: true,
         baseSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'base.snapshot.js.map'),
-        processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
+        processedSourcemapExternalPath: processedSourcemapPath,
         nodeEnv: this.nodeEnv,
         cypressInternalEnv: this.cypressInternalEnv,
         supportTypeScript: this.nodeModulesOnly,
@@ -336,7 +338,16 @@ export class SnapshotGenerator {
       }),
     )
 
-    this.snapshotScript = Buffer.from(escapeNonLatin1(result.snapshotScript.toString()))
+    const unescapedScript = result.snapshotScript.toString()
+    const { code, edits } = escapeNonLatin1(unescapedScript)
+
+    this.snapshotScript = Buffer.from(code)
+
+    if (edits.length > 0 && fileExistsSync(processedSourcemapPath)) {
+      const sourceMap = await fs.promises.readFile(processedSourcemapPath, 'utf8')
+
+      await fs.promises.writeFile(processedSourcemapPath, shiftGeneratedColumns(sourceMap, unescapedScript, edits))
+    }
 
     // 3. Since we don't want the `mksnapshot` command to bomb with cryptic
     //    errors we verify that the generated script is snapshot-able.
@@ -363,6 +374,8 @@ export class SnapshotGenerator {
 
       const minified = await minify(this.snapshotScript!.toString(), {
         sourceMap: false,
+        // Otherwise terser turns `\uXXXX` escapes back into the characters
+        format: { ascii_only: true },
       })
 
       if (!minified.code) {
@@ -370,7 +383,7 @@ export class SnapshotGenerator {
         throw new Error(`Failed to minify snapshot script. Writing unminified code to ${this.snapshotScriptPath}`)
       }
 
-      return fs.promises.writeFile(this.snapshotScriptPath, escapeNonLatin1(minified.code))
+      return fs.promises.writeFile(this.snapshotScriptPath, escapeNonLatin1(minified.code).code)
     }
 
     // 4. Write the snapshot script to the configured file
