@@ -9,6 +9,9 @@ const config = makeConfig({
   optimizeDeps: {
     include: [
       'ansi-to-html',
+      'react',
+      'react-dom',
+      'react-dom/client',
       'fuzzysort',
       '@cypress-design/**',
       '@cypress-design/vue-button',

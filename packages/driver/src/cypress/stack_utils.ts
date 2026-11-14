@@ -550,7 +550,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     // stacks in development builds look like:
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
-    //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
+    //     at cypressErr (http://localhost:8888/__cypress/runner/cypress_runner.js:173123:17)
     return line.includes('cy[name]')
     || line.includes('Chainer.prototype[key]')
     || line.includes('cy.<computed>')

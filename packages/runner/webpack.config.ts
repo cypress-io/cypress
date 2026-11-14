@@ -38,7 +38,8 @@ const mainConfig: webpack.Configuration = {
 // but run against the app's copies, so all three packages must resolve the
 // same versions.
 function assertHostModuleVersionsMatch () {
-  const packageNames = [...new Set(HOST_MODULE_SPECIFIERS.map((specifier) => specifier.split('/')[0]))]
+  const packageName = (specifier: string) => specifier.split('/').slice(0, specifier.startsWith('@') ? 2 : 1).join('/')
+  const packageNames = [...new Set(HOST_MODULE_SPECIFIERS.map(packageName))]
   const consumers = ['app', 'runner', 'reporter']
 
   for (const name of packageNames) {

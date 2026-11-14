@@ -17,11 +17,11 @@ const testStaticAssets = async (buildResourcePath) => {
         'webpack-livereload-plugin',
         // indicates eval source maps were included, which cause cross-origin errors
         '//# sourceURL=cypress://',
-        // make sure webpack is run with NODE_ENV=production: only the production
-        // config's DefinePlugin replaces every reference
-        'process.env.NODE_ENV',
-        // React is read from the app's copy, so the runner must not bundle its own
-        '__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED',
+        // React and MobX are read from the app's copies, so the runner must not
+        // bundle its own: these are React's license headers and a MobX core global
+        'react.production.min.js',
+        'react-dom.production.min.js',
+        '__mobxInstanceCount',
       ],
       // each host module must be read through its webpack external, not bundled
       goodStrings: [
@@ -34,6 +34,11 @@ const testStaticAssets = async (buildResourcePath) => {
         [
           (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
           'sourcemaps were detected, ensure `web-config/webpack.config.base.ts` does not have sourcemaps enabled in production',
+        ],
+        [
+          // only the production config's DefinePlugin replaces these comparisons
+          (str) => !/process\.env\.NODE_ENV\s*[!=]==?/.test(str),
+          'process.env.NODE_ENV comparisons were found, ensure webpack is run with NODE_ENV=production',
         ],
       ],
       minLineCount: 5000,
