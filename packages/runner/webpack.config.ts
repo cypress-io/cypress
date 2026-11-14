@@ -24,7 +24,7 @@ babelLoader.options.plugins.push(prismPlugin)
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
-    cypress_runner: [path.resolve(__dirname, 'src/index.ts')],
+    cypress_runner: [path.resolve(__dirname, 'src/assert-host-modules.ts'), path.resolve(__dirname, 'src/index.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -32,6 +32,28 @@ const mainConfig: webpack.Configuration = {
   },
   externalsType: 'window',
   externals: Object.fromEntries(HOST_MODULE_SPECIFIERS.map((specifier) => [specifier, [HOST_MODULES_GLOBAL, specifier]])),
+}
+
+// The runner and reporter compile against their own react, react-dom and mobx
+// but run against the app's copies, so all three packages must resolve the
+// same versions.
+function assertHostModuleVersionsMatch () {
+  const packageNames = [...new Set(HOST_MODULE_SPECIFIERS.map((specifier) => specifier.split('/')[0]))]
+  const consumers = ['app', 'runner', 'reporter']
+
+  for (const name of packageNames) {
+    const versions = consumers.map((consumer) => {
+      const manifest = require.resolve(`${name}/package.json`, { paths: [path.resolve(__dirname, '..', consumer)] })
+
+      return { consumer, version: require(manifest).version as string }
+    })
+
+    if (new Set(versions.map(({ version }) => version)).size > 1) {
+      const found = versions.map(({ consumer, version }) => `${consumer}: ${version}`).join(', ')
+
+      throw new Error(`${name} must resolve to one version for app, runner and reporter, which share it at runtime. Found ${found}`)
+    }
+  }
 }
 
 mainConfig.resolve = {
@@ -78,6 +100,8 @@ const crossOriginInjectionConfig: webpack.Configuration = {
 }
 
 export default async function () {
+  assertHostModuleVersionsMatch()
+
   await waitUntilIconsBuilt()
 
   const cyIcons = await import('@packages/icons')

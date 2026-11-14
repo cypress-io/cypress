@@ -1,5 +1,9 @@
 export const dfd = Promise.withResolvers<void>()
 
+// A load failure can reject this before the runner awaits it. The handler keeps
+// that from being reported as unhandled; the runner still sees the rejection.
+dfd.promise.catch(() => {})
+
 export function injectBundle (namespace: string) {
   const src = `/${namespace}/runner/cypress_runner.js`
 
