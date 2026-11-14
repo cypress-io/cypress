@@ -1,10 +1,11 @@
-import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...nodeConfig,
   undeclaredWorkspaceImports(['test/**'], ['@packages/https-proxy']),
+  ...vitestConfig,
   {
     languageOptions: {
       parserOptions: {
@@ -12,6 +13,7 @@ export default [
       },
     },
   },
+  noFloatingPromisesConfig(['lib/*.ts']),
   {
     // Specs may use sync fs and the other APIs restricted in shipped code
     files: ['test/**'],

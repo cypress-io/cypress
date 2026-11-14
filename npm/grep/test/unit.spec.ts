@@ -175,6 +175,7 @@ describe('utils', () => {
     })
 
     // TODO: would need to change the tokenizer
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('parses tag1 but not tag2', () => {
       const parsed = parseTagsGrep('@tag1-@tag2')
 

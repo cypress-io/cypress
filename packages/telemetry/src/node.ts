@@ -1,11 +1,12 @@
 import type { Span } from '@opentelemetry/api'
 import type { startSpanOptions, findActiveSpanOptions, contextObject } from './telemetry/index'
 import {
-  envDetectorSync, hostDetectorSync, osDetectorSync, processDetectorSync,
+  envDetectorSync, hostDetectorSync, osDetectorSync,
 } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { circleCiDetectorSync } from './detectors/circleCiDetectorSync'
+import { processDetectorSync } from './detectors/processDetectorSync'
 import { enabledValues, Telemetry as TelemetryClass, TelemetryNoop } from './telemetry/index'
 import { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'
 import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'

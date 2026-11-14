@@ -1,9 +1,10 @@
-import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...nodeConfig,
+  ...vitestConfig,
   {
     languageOptions: {
       parserOptions: {
@@ -19,18 +20,7 @@ export default [
       'no-restricted-syntax': 'off',
     },
   },
-  {
-    // no-floating-promises needs type information, so the shipped source gets a project service
-    files: ['index.ts', 'index.mts'],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-floating-promises': 'error',
-    },
-  },
+  noFloatingPromisesConfig(['index.ts', 'index.mts']),
   {
     // `tsc -p tsconfig.cjs.json` emits the CJS entry and its declarations next to the source
     ignores: ['index.js', 'index.d.ts'],

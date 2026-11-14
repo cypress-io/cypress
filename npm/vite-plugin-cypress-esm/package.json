@@ -37,7 +37,7 @@
     "@tanstack/react-query": "4.36.1",
     "@types/picomatch": "2.3.0",
     "@vitejs/plugin-react": "4.6.0",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",

@@ -34,6 +34,7 @@ export const patchPromiseThen = (processType: string | undefined = process.type,
     return false
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises -- defineProperty returns `prototype`, which is typed as a promise but isn't one
   Object.defineProperty(prototype, 'then', {
     value: createPromiseThen(prototype.then),
     writable: true,
