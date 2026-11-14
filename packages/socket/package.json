@@ -59,7 +59,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "devtools-protocol": "0.0.1687809",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "resolve-pkg": "2.0.0",
     "rimraf": "6.1.1",

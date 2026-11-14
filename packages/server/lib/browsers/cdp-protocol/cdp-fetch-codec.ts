@@ -232,6 +232,10 @@ const REDIRECT_FOLLOW_HEADERS = ['location', 'referrer-policy']
  * A handler that removes the location therefore gets an empty body here, where
  * the MITM path sends the origin's.
  *
+ * A stream-shaped response (bodySkipped) whose content-type changed is
+ * continued instead: fulfilling needs the body, and its body was never read.
+ * Its Network record keeps the wire mimeType, which Test Replay then sees.
+ *
  * Spy-only, status, and other header intercepts stay on continueResponse.
  * If Chrome ever derives another Network.responseReceived field from a header
  * without recomputing it for overrides, that header joins the fulfill list.
@@ -257,7 +261,8 @@ function encodePausedResponse (
       return headerValueOf(middlewareHeaders, headerName) !== headerValueOf(pausedResponse.responseHeaders, headerName)
     })
 
-  const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined) || redirectModified
+  // A skipped body was never read, so its placeholder cannot replace the stream.
+  const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined && !pausedResponse.bodySkipped) || redirectModified
 
   return {
     ...pausedResponse,

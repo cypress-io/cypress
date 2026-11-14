@@ -538,7 +538,8 @@ export class ProjectLifecycleManager {
 
     this.ctx.update((s) => {
       s.currentProject = projectRoot
-      s.currentProjectGitInfo?.destroy()
+      // destroy swallows the watcher's close errors, so it can't reject
+      void s.currentProjectGitInfo?.destroy()
       s.currentProjectGitInfo = new GitDataSource({
         isRunMode: this.ctx.isRunMode,
         projectRoot,

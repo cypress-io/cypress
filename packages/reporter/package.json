@@ -38,7 +38,7 @@
     "cross-env": "7.0.3",
     "cypress-multi-reporters": "1.4.0",
     "cypress-real-events": "1.15.0",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "express": "4.21.0",
     "jiti": "^2.4.2",
     "lodash": "^4.17.21",

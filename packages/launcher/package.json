@@ -40,7 +40,7 @@
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/which": "3.0.4",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "mock-fs": "5.4.0",
     "typescript": "~5.4.5",
