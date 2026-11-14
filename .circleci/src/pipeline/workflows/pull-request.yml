@@ -208,6 +208,13 @@ jobs:
       filters: &runLaunchpadTests pipeline.parameters.run-launchpad-tests == true
       requires:
         - ready-to-test
+  # Not in all-jobs-passed: it only reports telemetry, so a Cloud outage
+  # should not block the PR.
+  - open-mode-telemetry:
+      context: test-runner:cypress-record-key
+      filters: pipeline.parameters.run-app-ui-tests == true or pipeline.parameters.run-launchpad-tests == true
+      requires:
+        - ready-to-test
   - run-launchpad-component-tests-chrome:
       context:
         [

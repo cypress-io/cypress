@@ -13,6 +13,8 @@ import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-
 
 export { OTLPTraceExporterIpc, OTLPTraceExporterCloud, Span }
 
+export { getSpanNames } from './span-names'
+
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
 /**
