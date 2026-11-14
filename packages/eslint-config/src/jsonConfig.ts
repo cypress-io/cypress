@@ -3,6 +3,13 @@ import jsonc from 'eslint-plugin-jsonc'
 import packageJson from 'eslint-plugin-package-json'
 import * as jsoncParser from 'jsonc-eslint-parser'
 
+// Only the rules are taken from the preset: its blocks carry their own `files`
+// globs, which would lint tsconfig and VS Code files past the `ignores` below
+const recommendedWithJsonRules: Linter.RulesRecord = Object.assign(
+  {},
+  ...jsonc.configs['recommended-with-json'].map((block) => block.rules),
+)
+
 /**
  * Opt-in JSON linting. Spread it after `baseConfig`, which registers the
  * `@stylistic` plugin and supplies `eol-last`:
@@ -27,7 +34,7 @@ export const jsonConfig: Linter.Config[] = [
       parser: jsoncParser,
     },
     rules: {
-      ...jsonc.configs['recommended-with-json'].rules,
+      ...recommendedWithJsonRules,
 
       'jsonc/indent': ['error', 2],
       'jsonc/key-spacing': 'error',
