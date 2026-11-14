@@ -1,4 +1,4 @@
-import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -12,6 +12,7 @@ export default [
       },
     },
   },
+  noFloatingPromisesConfig(['index.ts', 'lib/**/*.ts']),
   // `build-prod` compiles in place, next to the sources
   {
     ignores: ['index.js', 'lib/**/*.js'],
