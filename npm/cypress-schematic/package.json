@@ -50,7 +50,7 @@
   },
   "peerDependencies": {
     "@angular/cli": ">=21.0.0",
-    "@angular/core": ">=21.0.0",
+    "@angular/core": ">=21.2.26",
     "cypress": "^16.0.0"
   },
   "publishConfig": {
