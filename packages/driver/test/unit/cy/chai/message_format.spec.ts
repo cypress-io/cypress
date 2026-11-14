@@ -6,8 +6,8 @@ import { describe, it, expect } from 'vitest'
 
 import { escapeMarkdown, formatMessageTemplate, removeOrKeepSingleQuotesBetweenStars } from '../../../../src/cy/chai/message_format'
 
-// Generous enough not to flake on a slow CI box. The inputs below took
-// seconds or minutes with the regexes these helpers replace.
+// Generous enough not to flake on a slow CI box, yet far below what a
+// quadratic pass over these inputs takes.
 const LINEAR_TIME_BOUND_MS = 200
 
 const timed = <T>(fn: () => T): T => {

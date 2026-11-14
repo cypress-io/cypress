@@ -1,6 +1,6 @@
 // Assertion messages embed values from the user's app and tests, so these
-// helpers scan with indexOf rather than regexes that restart at every failed
-// match position, which is quadratic or worse on a long adversarial value.
+// helpers scan with indexOf. A regex that retries from every failed match
+// position takes quadratic time or worse on a long value.
 
 const allPropertyWordsBetweenSingleQuotes = /('.*?')/g
 const allBetweenFourStars = /\*\*.*\*\*/
@@ -17,15 +17,15 @@ const whitespace = /\s/g
 const valueHasLeadingOrTrailingWhitespace = /\*\*'\s|\s'\*\*/
 const lineTerminator = /([\n\r\u2028\u2029])/
 
-// The scanners below replace patterns built on `.`, which never matches a
-// line terminator, so they work one line at a time to keep matches on a line.
+// A placeholder or image never spans a line break, so the scanners work one
+// line at a time.
 const mapLines = (str: string, fn: (line: string) => string): string => {
   // The capture group keeps the terminators at the odd indices
   return str.split(lineTerminator).map((part, i) => i % 2 ? part : fn(part)).join('')
 }
 
-// Bolds every `#{name}` placeholder. Like `/#{.+?}/g`, the name needs at least
-// one character and that first character may itself be `}`.
+// Bolds every `#{name}` placeholder. The name needs at least one character,
+// and that first character may itself be `}`.
 const boldPlaceholdersInLine = (line: string): string => {
   let out = ''
   let pos = 0
@@ -48,8 +48,8 @@ const boldPlaceholdersInLine = (line: string): string => {
 }
 
 // Wraps every `![alt](src)` in double backticks so it renders as code instead
-// of an image. Like `/!\[.*?\]\(.*?\)/g`, the alt text runs to the first `](`
-// and so may contain `]`, and the source runs to the first `)` after that.
+// of an image. The alt text runs to the first `](`, so it may contain `]`, and
+// the source runs to the first `)` after that.
 const escapeImagesInLine = (line: string): string => {
   let out = ''
   let pos = 0
@@ -83,7 +83,8 @@ const keepTrailingWhitespace = (str: string): string => {
   return parts.map((part, i) => {
     if (i === parts.length - 1) return part
 
-    // trimEnd strips the same characters `\s` matches
+    // trimEnd strips the same characters as `\s`, so both sides of a value
+    // agree on what counts as whitespace
     const text = part.trimEnd()
 
     return `${text}${'&nbsp;'.repeat(part.length - text.length)}__quote__**`
@@ -100,31 +101,31 @@ export const formatMessageTemplate = (template: string): string => {
   return boldPlaceholders(template)
   .replace(allEscapedSingleQuotes, '__quote__')
   .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
-  // when a value has ** in it, **** are sometimes created after the process above.
-  // remove them with this.
+  // Bolding text that is already bold leaves `****`
   .replace(allQuadStars, '**')
 }
 
-// remove any single quotes between our **,
-// except escaped quotes, empty strings and number strings.
+// Removes the single quotes from the values between `**`. Escaped quotes stay,
+// as do the quotes of an empty string or a number string such as '42', so
+// those still read as strings.
 export const removeOrKeepSingleQuotesBetweenStars = (message: string): string => {
-  // remove any single quotes between our **, preserving escaped quotes
-  // and if an empty string, put the quotes back
   return message.replace(allBetweenFourStars, (match) => {
     if (valueHasLeadingOrTrailingWhitespace.test(match)) {
-      // Strings like '   love' have whitespace on one side only, so each side
-      // is handled whether or not it has any.
+      // Keep the quotes and turn the whitespace into `&nbsp;` so a value's
+      // leading or trailing whitespace stays visible. Both sides are handled
+      // even when only one has whitespace, as in '   love'.
       match = keepTrailingWhitespace(match.replace(leadingWhitespaces, (match) => {
         return match.replace(`**'`, '**__quote__')
         .replace(whitespace, '&nbsp;')
       }))
     }
 
+    // Quotes to keep become `__quote__` so the next pass can strip the rest
     return match
-    .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
-    .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
-    .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
+    .replace(allEscapedSingleQuotes, '__quote__')
+    .replace(allNumberStrings, '__quote__$1__quote__')
+    .replace(allEmptyStrings, '__quote____quote__')
     .replace(allSingleQuotes, '')
-    .replace(allQuoteMarkers, '\'') // put escaped quotes back
+    .replace(allQuoteMarkers, '\'')
   })
 }
