@@ -47,6 +47,11 @@ const scaffoldProject = async (specCount: number): Promise<string> => {
   return projectRoot
 }
 
+// The Cypress group is detached, so an interrupt that reaches only this script is
+// passed on to it, and the temporary project is still removed
+let interruptedBy: NodeJS.Signals | undefined
+let stopActive: (() => void) | undefined
+
 const openOnce = (projectRoot: string, iteration: number): Promise<void> => {
   const child = spawn(process.execPath, [cliBin, 'open', '--dev', '--project', projectRoot, '--e2e', '--browser', 'electron'], {
     cwd: repoRoot,
@@ -99,6 +104,7 @@ const openOnce = (projectRoot: string, iteration: number): Promise<void> => {
     }, ITERATION_TIMEOUT_MS)
 
     timers.push(timeout)
+    stopActive = stop
 
     const onLine = (output: string) => {
       const line = stripVTControlCharacters(output)
@@ -130,6 +136,11 @@ const openOnce = (projectRoot: string, iteration: number): Promise<void> => {
     // 'close' waits for stdout and stderr to drain, so lines printed while exiting are still read
     child.on('close', (code, signal) => {
       timers.forEach(clearTimeout)
+      stopActive = undefined
+
+      if (interruptedBy) {
+        return reject(new Error(`iteration ${iteration}: interrupted by ${interruptedBy}`))
+      }
 
       if (exportError) {
         return reject(new Error(`iteration ${iteration}: ${exportError}`))
@@ -163,13 +174,24 @@ const main = async () => {
     throw new Error('CYPRESS_RECORD_KEY must be set: without a record key the telemetry exporter drops every span')
   }
 
+  for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+    process.on(signal, () => {
+      interruptedBy = signal
+      stopActive?.()
+    })
+  }
+
   const projectRoot = await scaffoldProject(specCount)
 
   console.log(`Opening ${projectRoot} (${specCount} specs) ${iterations} times`)
 
   try {
-    for (let i = 1; i <= iterations; i++) {
+    for (let i = 1; i <= iterations && !interruptedBy; i++) {
       await openOnce(projectRoot, i)
+    }
+
+    if (interruptedBy) {
+      throw new Error(`interrupted by ${interruptedBy}`)
     }
   } finally {
     await fs.rm(projectRoot, { recursive: true, force: true })
