@@ -9,8 +9,8 @@ const browserslistConfig = path.resolve(__dirname, '../../../browser-bundles.bro
  * ships to the browser. Spread it after `baseConfig` in a browser bundle's
  * `eslint.config.ts`.
  *
- * Targets come from `browser-bundles.browserslistrc` at the repo root, the
- * browser floor from AGENTS.md "Runtime targets".
+ * Targets come from `browser-bundles.browserslistrc` at the repo root, read by
+ * path for the reason given in that file's header.
  */
 export const compatConfig: Linter.Config[] = [
   {
@@ -25,14 +25,11 @@ export const compatConfig: Linter.Config[] = [
       compat,
     },
     settings: {
-      // By path: see the comment at the top of the file for why
       browserslistOpts: {
         config: browserslistConfig,
       },
-      // The bundlers transpile syntax, but only app's plugin-legacy polyfills
-      // built-ins, and only for its own targets. So ES APIs such as
-      // `Array.prototype.toSorted` are checked too. Without this the plugin
-      // skips them whenever it finds a babel config near the file.
+      // The plugin assumes a babel config means ES built-ins are polyfilled, but
+      // only app's plugin-legacy polyfills any, and only for its own targets
       lintAllEsApis: true,
     },
     rules: {
