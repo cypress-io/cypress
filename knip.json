@@ -164,7 +164,8 @@
       ],
       "ignoreDependencies": [
         "@graphql-typed-document-node/core",
-        "react"
+        "react",
+        "react-dom"
       ]
     },
     "packages/example": {
