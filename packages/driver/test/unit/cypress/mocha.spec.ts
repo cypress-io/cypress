@@ -3,6 +3,8 @@
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import * as mocha from 'mocha'
+import Bluebird from 'bluebird'
+import '../../../src/config/bluebird'
 
 import $Mocha from '../../../src/cypress/mocha'
 import { $Cy } from '../../../src/cypress/cy'
@@ -91,7 +93,7 @@ describe('@packages/driver/src/cypress/mocha', () => {
     expect(onError).not.toHaveBeenCalled()
   })
 
-  describe('a late completion from a retried hook\'s timed-out attempt', () => {
+  describe('runnable promise completion and stale attempts', () => {
     // Stands in for the cy instance, so each run goes through Cypress's real runnable
     // wrapper as it does in a spec.
     const makeCy = () => {
@@ -121,6 +123,144 @@ describe('@packages/driver/src/cypress/mocha', () => {
 
       return runOnce(hook)
     }
+
+    it('waits for queued commands after the returned promise settles', async () => {
+      const cy = makeCy()
+      let releaseQueue: () => void = () => {}
+      const queuePromise = new Promise<void>((resolve) => releaseQueue = resolve)
+      const hook = new Hook('returned promise and queued commands', () => {
+        cy.queue.length = 1
+        cy.state('promise', queuePromise)
+
+        return Promise.resolve()
+      })
+
+      hook.timeout(1000)
+      let finished = false
+      const attempt = runAttempt(hook, cy).then((result) => {
+        finished = true
+
+        return result
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      const completedBeforeQueue = finished
+
+      releaseQueue()
+      expect(await attempt).to.equal('finished')
+      expect(completedBeforeQueue).to.be.false
+    })
+
+    for (const lateQueue of [false, true]) {
+      it(`settles a canceled ${lateQueue ? 'later' : 'initial'} queue without waiting for mocha timeout`, async () => {
+        const cy = makeCy()
+        const queuePromise = new Bluebird<void>(() => {})
+        const hook = new Hook('canceled native-promise runnable', () => {
+          if (!lateQueue) {
+            cy.state('promise', queuePromise)
+          }
+
+          return Promise.resolve().then(() => {
+            cy.state('promise', queuePromise)
+          })
+        })
+
+        hook.timeout(1000)
+        const attempt = runAttempt(hook, cy)
+
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        queuePromise.cancel()
+        const result = await attempt
+
+        hook.clearTimeout()
+        expect(result).to.equal(STOPPED)
+        expect(hook.timedOut).to.be.false
+      })
+    }
+
+    it('observes a later queue cancellation while native work is still pending', async () => {
+      const cy: any = makeCy()
+      const queuePromise = new Bluebird<void>(() => {})
+      const hook = new Hook('later queue canceled during native work', neverSettles)
+
+      hook.timeout(1000)
+      const attempt = runAttempt(hook, cy)
+
+      cy.queue.run = () => queuePromise
+
+      ;(globalThis as any).cy = cy
+
+      try {
+        $Cy.prototype.runQueue.call(cy)
+        queuePromise.cancel()
+        const result = await attempt
+
+        hook.clearTimeout()
+        expect(result).to.equal(STOPPED)
+        expect(hook.timedOut).to.be.false
+      } finally {
+        delete (globalThis as any).cy
+      }
+    })
+
+    it('reports an early queue rejection without waiting for the custom promise', async () => {
+      const cy = makeCy()
+      let releaseCustom: () => void = () => {}
+      const customPromise = new Promise<void>((resolve) => releaseCustom = resolve)
+      const queuePromise = Promise.reject(new Error('queue failed'))
+
+      queuePromise.catch(() => {}) // this synthetic queue has no real cy.fail listener
+      const hook = new Hook('early queue rejection', () => {
+        cy.queue.length = 1
+        cy.state('promise', queuePromise)
+
+        return customPromise
+      })
+
+      hook.timeout(1000)
+      const result = await runAttempt(hook, cy)
+
+      releaseCustom()
+      expect(result).to.equal('queue failed')
+    })
+
+    it('reopens only a naturally idle queue while the custom promise is pending', () => {
+      for (const idle of [true, false]) {
+        const cy: any = makeCy()
+
+        cy.queue.stopped = true
+        cy.queue.enqueue = vi.fn()
+        cy.Cypress = { action: vi.fn() }
+        cy.state('promise', 'previous queue')
+        cy.state('queueIdle', idle)
+        cy.state('runnablePromise', { isPending: () => true })
+
+        ;($Cy.prototype as any).enqueue.call(cy, { attributes: {} })
+        expect(cy.queue.reset).toHaveBeenCalledTimes(idle ? 1 : 0)
+        expect(cy.state('promise')).to.equal(idle ? undefined : 'previous queue')
+      }
+    })
+
+    it('does not reopen an idle queue after an explicit stop', () => {
+      const cy: any = makeCy()
+
+      cy.queue.stopped = true
+      cy.queue.enqueue = vi.fn()
+      cy.Cypress = { action: vi.fn() }
+      cy.state('queueIdle', true)
+      cy.state('runnablePromise', { isPending: () => true })
+      $Cy.prototype.stop.call(cy)
+
+      ;($Cy.prototype as any).enqueue.call(cy, { attributes: {} })
+      expect(cy.queue.reset).not.toHaveBeenCalled()
+    })
+
+    it('still completes an async runnable without commands', async () => {
+      const cy = makeCy()
+      const hook = new Hook('native promise only', () => Promise.resolve())
+
+      expect(await runAttempt(hook, cy)).to.equal('finished')
+    })
 
     it('does not fail the retry when a returned promise settles afterward', async () => {
       const cy = makeCy()
