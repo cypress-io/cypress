@@ -28,8 +28,18 @@ export function injectBundle (namespace: string) {
 
     script.src = src
     script.type = 'text/javascript'
+    // The browser fires `load` even when the bundle throws while it evaluates,
+    // so check for the global the bundle assigns last.
     script.onload = () => {
-      dfd.resolve()
+      if (window.UnifiedRunner) {
+        dfd.resolve()
+      } else {
+        dfd.reject(new Error(`${src} loaded but did not define window.UnifiedRunner`))
+      }
+    }
+
+    script.onerror = () => {
+      dfd.reject(new Error(`Failed to load ${src}`))
     }
 
     document.head.appendChild(script)

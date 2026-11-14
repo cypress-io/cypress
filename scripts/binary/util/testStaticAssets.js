@@ -17,14 +17,13 @@ const testStaticAssets = async (buildResourcePath) => {
         'webpack-livereload-plugin',
         // indicates eval source maps were included, which cause cross-origin errors
         '//# sourceURL=cypress://',
-        // make sure webpack is not run with NODE_ENV=development
-        'use-sync-external-store-shim.development.js',
+        // make sure webpack is run with NODE_ENV=production: only the production
+        // config's DefinePlugin replaces every reference
+        'process.env.NODE_ENV',
         // React is read from the app's copy, so the runner must not bundle its own
         '__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED',
       ],
       goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
-        'use-sync-external-store-shim.production.min.js',
         '__CYPRESS_HOST_MODULES__',
       ],
       testAssetStrings: [
