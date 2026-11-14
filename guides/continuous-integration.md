@@ -76,7 +76,7 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 
 ## GitHub Actions
 
-GitHub Actions handle automation, security scanning, and repository maintenance.
+GitHub Actions handle automation, PR validation, and compliance.
 
 ### Automation
 
@@ -85,25 +85,11 @@ GitHub Actions handle automation, security scanning, and repository maintenance.
 | **Update Browser Versions** | Daily at 8am UTC | Checks for new Chrome stable/beta versions and creates PRs to update CI config |
 | **Update V8 Snapshot Cache** | Daily + release branch pushes | Regenerates V8 snapshots to maintain startup performance |
 
-### Security
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| **Snyk SCA Scan** | PRs to develop/release | Scans dependencies for known vulnerabilities |
-| **Snyk Static Analysis** | PRs to develop/release | Performs code security analysis |
-
 ### PR Validation
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | **Semantic Pull Request** | PR opened/edited | Validates PR title follows conventional commit format and has changelog entry |
-
-### Repository Maintenance
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| **Stale Issues/PRs** | Daily at 1:30am UTC | Marks inactive issues/PRs as stale after 180 days, closes after 14 more days |
-| **Triage Workflows** | Issue/PR opened | Adds external contributor items to the triage project board |
 
 ### Compliance
 
