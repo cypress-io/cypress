@@ -35,9 +35,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
-      - run: npm install
+          sparse-checkout: |
+            scripts/github-actions/semantic-pull-request
+            scripts/semantic-commits
+      - run: npm install --ignore-scripts
         working-directory: scripts/github-actions/semantic-pull-request/
       - name: Lint PR Title and Cypress Changelog Entry
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
