@@ -2,6 +2,8 @@ export * from './baseConfig'
 
 export * from './cliOverrides'
 
+export * from './compatConfig'
+
 export * from './frontendOverrides'
 
 export * from './graphqlConfig'
