@@ -21,8 +21,8 @@ export function injectBundle (namespace: string) {
   document.head.appendChild(preload)
   document.head.appendChild(link)
 
-  // Lazy so React stays out of the entry chunk and is parsed alongside the
-  // runner, not before the app mounts.
+  // Lazy so React stays out of the entry chunk, which is parsed before main.ts
+  // starts running.
   import('./hostModules').then(({ publishHostModules }) => {
     publishHostModules()
 

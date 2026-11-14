@@ -23,8 +23,12 @@ const testStaticAssets = async (buildResourcePath) => {
         // React is read from the app's copy, so the runner must not bundle its own
         '__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED',
       ],
+      // each host module must be read through its webpack external, not bundled
       goodStrings: [
-        '__CYPRESS_HOST_MODULES__',
+        'window["__CYPRESS_HOST_MODULES__"]["react"]',
+        'window["__CYPRESS_HOST_MODULES__"]["react-dom"]',
+        'window["__CYPRESS_HOST_MODULES__"]["react-dom/client"]',
+        'window["__CYPRESS_HOST_MODULES__"]["mobx"]',
       ],
       testAssetStrings: [
         [

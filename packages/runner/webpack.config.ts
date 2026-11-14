@@ -44,8 +44,13 @@ function assertHostModuleVersionsMatch () {
   for (const name of packageNames) {
     const versions = consumers.map((consumer) => {
       const manifest = require.resolve(`${name}/package.json`, { paths: [path.resolve(__dirname, '..', consumer)] })
+      const { version } = require(manifest)
 
-      return { consumer, version: require(manifest).version as string }
+      if (typeof version !== 'string') {
+        throw new Error(`${manifest} has no version`)
+      }
+
+      return { consumer, version }
     })
 
     if (new Set(versions.map(({ version }) => version)).size > 1) {
