@@ -12,6 +12,8 @@ export * from './jsonConfig'
 
 export * from './nodeConfig'
 
+export * from './typeAwareConfig'
+
 export * from './vitestConfig'
 
 export * from './vueTsxOverrides'

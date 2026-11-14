@@ -1,4 +1,4 @@
-import { baseConfig, compatConfig, jsonConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -12,6 +12,7 @@ export default [
       },
     },
   },
+  noFloatingPromisesConfig(['index.ts', 'src/**/*.ts']),
   {
     // Specs may use sync fs and the other APIs restricted in shipped code
     files: ['cypress/**', 'test/**'],

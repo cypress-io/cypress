@@ -1,4 +1,4 @@
-import { baseConfig, compatConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -11,18 +11,7 @@ export default [
       },
     },
   },
-  {
-    // no-floating-promises needs type information, so the files tsconfig.json covers get a project service
-    files: ['src/**/*.{ts,tsx}', 'cypress/**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-floating-promises': 'error',
-    },
-  },
+  noFloatingPromisesConfig(['src/**/*.{ts,tsx}', 'cypress/**/*.ts']),
   {
     files: ['tailwind.config.js'],
     languageOptions: {

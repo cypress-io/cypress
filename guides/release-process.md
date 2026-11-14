@@ -67,6 +67,14 @@ of Cypress. You can see the progress of the test projects by opening the status 
 
 ![Screenshot of status checks](https://i.imgur.com/AsQwzgO.png)
 
+### Releasing a previous major
+
+A previous major is maintained on a `vN` branch, for example `v15`. The [next version](./next-version.md) is worked out from the newest published version of that major, found through the nearest `vN.*` tag on the branch, so a `v15` build produces `15.Y.Z` without setting `NEXT_VERSION`.
+
+Follow the same steps below. Where a step differs, it has a **Previous major** note. Most of the differences keep the `latest` npm tag, the download manifest, the `cypress/included:latest` image and the latest GitHub release on the current major.
+
+The `@cypress/`-namespaced npm packages are only released from `develop`. A fix to one of them reaches previous-major users through a `develop` release, as long as that package's `cypress` peer range still includes the previous major.
+
 ### Steps to Publish a New Version
 
 In the following instructions, "X.Y.Z" is used to denote the [next version of Cypress being published](./next-version.md).
@@ -101,6 +109,8 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
      - Sometimes a test can get stuck in a failing state between attempts on the `windows` workflow. In these cases, kicking off a full run of the workflow can help get it into a passing state.
      - If the `linux-x64` workflow fails due to a flaky test but percy finalizes the build, you *must* restart the workflow from the failed steps. Restarting the entire workflow after a finalized Percy build can cause Percy to fail the next attempt with a "Build has already been finalized" error, requiring pushing a new commit to start fresh.
 
+    **Previous major**: a push to `vN` builds only Linux x64. Unless the weekly `vN` schedule already ran on the release sha, trigger a pipeline on it with `run-platform-workflows=true` to build the other four platforms.
+
 5. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. If you have setup your credentials under a different profile than `prod`, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.
 
 6. Use the `prepare-release-artifacts` script (Mac/Linux only) to prepare the latest commit to a stable release. When you run this script, the following happens:
@@ -115,6 +125,12 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
     You can pass `--dry-run` to see the commands this would run under the hood.
 
+    **Previous major**: pass the branch the build ran on, because the pre-release npm package is stored under it:
+
+    ```shell
+    yarn prepare-release-artifacts --sha <commit sha> --version <new target version> --branch vN
+    ```
+
 7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in interactively with `npm login`, as the npm service account. The login prompts for a 2FA one-time password, so the service account must have 2FA enabled.
    If you are not already a Cypress package maintainer, contact a team member who is to get you added.
 
@@ -122,6 +138,12 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
     ```shell
     npm publish /tmp/cypress-prod.tgz --tag dev
+    ```
+
+    **Previous major**: publish under the `latest-vN` tag instead of `dev`, so `dev` and `latest` keep pointing at the current major. Every release of that major reuses the tag, so leave it in place afterwards.
+
+    ```shell
+    npm publish /tmp/cypress-prod.tgz --tag latest-vN
     ```
 
 9. Double-check that the new version has been published under the `dev` tag using `npm view cypress dist-tags`. The `latest` tag should still point to the previous version. Example output:
@@ -132,6 +154,8 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     ```
 
     **Note**: It may take several minutes for `npm view` to reflect the latest version info.
+
+    **Previous major**: check that `latest-vN` points to the new version and that `latest` and `dev` haven't moved.
 
 10. Test `cypress@X.Y.Z` to make sure everything is working.
     - Install the new version: `npm install -g cypress@X.Y.Z`
@@ -148,6 +172,8 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 
+    **Previous major**: the changelog is ordered by version, so the entry goes below the current major's sections, above the previous release of the same major.
+
 12. Create new Docker images in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) with the new Cypress version and the latest stable browsers. Create one PR in which you update [factory/.env](https://github.com/cypress-io/cypress-docker-images/blob/master/factory/.env):
     - `CYPRESS_VERSION` — the new Cypress version.
     - `CHROME_VERSION` and `CHROME_FOR_TESTING_VERSION` — look each up separately. They come from different sources, so their latest stable versions often differ.
@@ -157,7 +183,9 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
     Find each version at the link in the comment above it in `factory/.env`. If a browser is already on its latest stable version, say so in the PR description so reviewers know it was checked. Don't change `FACTORY_VERSION` or the factory CHANGELOG for these updates. Ensure the Docker images are reviewed and have passing tests before proceeding.
 
-13. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
+    **Previous major**: don't touch `factory/.env`, since that would move `cypress/included:latest` back to the previous major. Instead, update only `CYPRESS_VERSION` in `factory/maintenance/N.env`, for example [factory/maintenance/15.env](https://github.com/cypress-io/cypress-docker-images/blob/master/factory/maintenance/15.env). Its browsers are pinned, so leave every other version alone. The PR's CI fails until the version is on npm, so rerun it after step 8. See [Maintenance releases](https://github.com/cypress-io/cypress-docker-images/blob/master/CONTRIBUTING.md#maintenance-releases).
+
+13. **Skip for a previous major**, since this would move `latest` back to the previous major. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
 
     ```shell
     npm dist-tag add cypress@X.Y.Z
@@ -169,9 +197,11 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     yarn binary-release --version X.Y.Z
     ```
 
+    **Previous major**: run it as usual. It leaves `desktop.json` on the current major when the released version is older, and prints `Leaving the manifest at <current version>`. It still checks that the version is downloadable.
+
 15. Merge the documentation PR from step 11 and the new docker image PR created in step 12 to release the image.
 
-16. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](../packages/example/README.md).
+16. **Skip for a previous major.** If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](../packages/example/README.md).
     - Build `@packages/example` with `yarn workspace @packages/example build`
     - Inspect the contents of `./packages/example/build` before deploying, and ensure it looks correct
     - Run `yarn workspace @packages/example deploy`. This adds changes from `cypress-example-kitchensink` to a commit in the `gh-pages` branch, which will deploy to production with its own CI.
@@ -185,7 +215,11 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     git push origin vX.Y.Z
     ```
 
+    **Previous major**: fetch and check `origin/vN` instead of `origin/develop`.
+
 18. Create a new [GitHub release](https://github.com/cypress-io/cypress/releases). Choose the tag you created previously and add contents to match previous releases.
+
+    **Previous major**: uncheck "Set as the latest release", or pass `--latest=false` to `gh release create`, so the current major stays the latest release.
 
 19. Add a comment to each GH issue that has been resolved with the new published version. Download the `releaseData.json` artifact from the `verify-release-readiness` CircleCI job and run the following command inside of [cypress-io/release-automations][release-automations]:
 
@@ -206,31 +240,6 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 24. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. This token is separate from the interactive login used to publish `cypress`. If an npm token was created when logging in, please delete this token now.
 
 Take a break, you deserve it! 👉😎👉
-
-## Releasing a previous major
-
-A previous major is maintained on a `vN` branch. The [next version](./next-version.md) is worked out from the newest published version of that major, found through the nearest `vN.*` tag on the branch, so a `v15` build produces `15.Y.Z` without setting `NEXT_VERSION`. Follow the steps above, with these differences:
-
-- **Step 4**: a push to `vN` builds only Linux x64. Unless the weekly `vN` schedule already ran on the release sha, trigger a pipeline on it with `run-platform-workflows=true` to build the other four platforms.
-- **Step 6**: pass the branch the build ran on, because the pre-release npm package is stored under it:
-
-    ```shell
-    yarn prepare-release-artifacts --sha <commit sha> --version <new target version> --branch v15
-    ```
-
-- **Step 8**: publish under a `latest-vN` tag rather than `dev`, so `dev` and `latest` keep pointing at the current major:
-
-    ```shell
-    npm publish /tmp/cypress-prod.tgz --tag latest-v15
-    ```
-
-- **Step 12**: skip it. `cypress-docker-images` only builds the current version, and changing `factory/.env` would move the `cypress/included:latest` tag back to the previous major.
-- **Step 13**: skip it. Never run `npm dist-tag add` without a tag name for a previous-major version, since that moves `latest`.
-- **Step 14**: run `binary-release` as usual. It leaves `desktop.json` on the current major when the released version is older, and only checks that the version is downloadable.
-- **Step 16**: skip it.
-- **Step 17**: tag the commit on `v15` instead of `develop` (`git fetch origin v15` and check `origin/v15`).
-
-The `@cypress/`-namespaced npm packages are only released from `develop`. A fix to one of them reaches previous-major users through a `develop` release, as long as that package's `cypress` peer range still includes the previous major.
 
 [release-automations]: https://github.com/cypress-io/release-automations
 [cypress-example-kitchensink]: https://github.com/cypress-io/cypress-example-kitchensink
