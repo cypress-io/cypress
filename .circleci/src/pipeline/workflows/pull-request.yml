@@ -28,21 +28,26 @@ jobs:
   # Internal PRs — install and build run immediately, unless a bot pushed.
   # Bots can't join the GitHub teams that restrict our contexts, and jobs after
   # an approval run as the approver. The install runs the bot's dependency changes.
+  # The install has one variant per case because CircleCI drops a job whose
+  # requires are all filtered out.
+  - node_modules_install:
+      build-better-sqlite3: true
+      filters: pipeline.parameters.bot-approval-required == false and not (pipeline.git.branch matches /^pull\/[0-9]+/)
   - approve-bot-pr:
       type: approval
       filters: pipeline.parameters.bot-approval-required == true
   - node_modules_install:
+      name: bot-node-modules-install
       build-better-sqlite3: true
       requires:
         - approve-bot-pr
-      filters:
-        branches:
-          ignore: /^pull\/[0-9]+/
+      filters: pipeline.parameters.bot-approval-required == true
   - build:
       name: internal-pr-build
       context: test-runner:env-canary
       requires:
         - node_modules_install
+        - bot-node-modules-install
       filters:
         branches:
           ignore: /^pull\/[0-9]+/

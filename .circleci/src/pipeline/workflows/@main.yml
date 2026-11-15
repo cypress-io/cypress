@@ -18,17 +18,25 @@ linux-x64:
   jobs:
     # Bots can't join the GitHub teams that restrict our contexts, and jobs after
     # an approval run as the approver. The install runs the bot's dependency changes.
+    # The install has one variant per case because CircleCI drops a job whose
+    # requires are all filtered out.
+    - node_modules_install:
+        build-better-sqlite3: true
+        filters: &humanPushFilter pipeline.parameters.bot-approval-required == false
     - approve-bot-pr:
         type: approval
         filters: &botApprovalFilter pipeline.parameters.bot-approval-required == true
     - node_modules_install:
+        name: bot-node-modules-install
         build-better-sqlite3: true
         requires:
           - approve-bot-pr
+        filters: *botApprovalFilter
     - build:
         context: test-runner:env-canary
         requires:
           - node_modules_install
+          - bot-node-modules-install
     - check-lockfile:
         requires:
           - build
@@ -515,8 +523,16 @@ linux-arm64:
         executor: linux-arm64
         resource_class: arm.medium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: linux-arm64-bot-node-modules-install
+        executor: linux-arm64
+        resource_class: arm.medium
+        only-cache-for-root-user: true
         requires:
           - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: linux-arm64-build
@@ -525,6 +541,7 @@ linux-arm64:
         resource_class: arm.medium
         requires:
           - linux-arm64-node-modules-install
+          - linux-arm64-bot-node-modules-install
 
     - create-build-artifacts:
         name: linux-arm64-create-build-artifacts
@@ -565,8 +582,16 @@ darwin-x64:
         executor: darwin-amd64
         resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: darwin-x64-bot-node-modules-install
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
+        only-cache-for-root-user: true
         requires:
           - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: darwin-x64-build
@@ -575,6 +600,7 @@ darwin-x64:
         resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-node-modules-install
+          - darwin-x64-bot-node-modules-install
 
     - create-build-artifacts:
         name: darwin-x64-create-build-artifacts
@@ -621,8 +647,16 @@ darwin-arm64:
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: darwin-arm64-bot-node-modules-install
+        executor: darwin-arm64
+        resource_class: cypress-io/m1-macstadium
+        only-cache-for-root-user: true
         requires:
           - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: darwin-arm64-build
@@ -631,6 +665,7 @@ darwin-arm64:
         resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-node-modules-install
+          - darwin-arm64-bot-node-modules-install
 
     - create-build-artifacts:
         name: darwin-arm64-create-build-artifacts
@@ -677,8 +712,16 @@ windows:
         executor: windows
         resource_class: windows.medium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: windows-bot-node-modules-install
+        executor: windows
+        resource_class: windows.medium
+        only-cache-for-root-user: true
         requires:
           - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: windows-build
@@ -687,6 +730,7 @@ windows:
         resource_class: windows.large
         requires:
           - windows-node-modules-install
+          - windows-bot-node-modules-install
 
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
