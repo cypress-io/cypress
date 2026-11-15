@@ -127,37 +127,27 @@ describe('lib/cloud/auth', function () {
       })
     })
 
-    it('includes remoteOrigin in the auth URL when provided', function () {
-      return auth._internal.buildFullSignupUrl(
-        BASE_URL,
-        server,
-        'UTM Source',
-        'UTM Medium',
-        'UTM Content',
-        'https://github.com/cypress-io/cypress.git',
-      )
-      .then((url) => {
-        expect(url).toContain('remoteOrigin=')
-        expect(decodeURIComponent(url)).toContain(
-          'https://github.com/cypress-io/cypress.git',
-        )
-      })
-    })
+    it('sends only the fixed login fields, never a git remote or project path', function () {
+      return Promise.all([
+        auth._internal.buildFullLoginUrl(BASE_URL, server, 'UTM Source', 'UTM Medium', 'UTM Content'),
+        auth._internal.buildFullSignupUrl(BASE_URL, server, 'UTM Source', 'UTM Medium', 'UTM Content'),
+      ])
+      .then((urls) => {
+        for (const url of urls) {
+          const keys = [...new URL(url).searchParams.keys()].sort()
 
-    it('includes remoteOrigin in the login URL when provided', function () {
-      return auth._internal.buildFullLoginUrl(
-        BASE_URL,
-        server,
-        'UTM Source',
-        'UTM Medium',
-        'UTM Content',
-        'https://github.com/cypress-io/cypress.git',
-      )
-      .then((url) => {
-        expect(url).toContain('remoteOrigin=')
-        expect(decodeURIComponent(url)).toContain(
-          'https://github.com/cypress-io/cypress.git',
-        )
+          expect(keys).toEqual([
+            'cypressVersion',
+            'machineId',
+            'platform',
+            'port',
+            'state',
+            'utm_campaign',
+            'utm_content',
+            'utm_medium',
+            'utm_source',
+          ])
+        }
       })
     })
   })
@@ -232,7 +222,7 @@ describe('lib/cloud/auth', function () {
       await auth.startSignup(() => {}, 'code')
 
       expect(user.getBaseSignupUrl).toHaveBeenCalledOnce()
-      expect(auth._internal.launchServer).toHaveBeenCalledWith('www.foo.bar', expect.any(Function), 'code', undefined, undefined, 'signup', undefined)
+      expect(auth._internal.launchServer).toHaveBeenCalledWith('www.foo.bar', expect.any(Function), 'code', undefined, undefined, 'signup')
       expect(auth._internal.stopServer).toHaveBeenCalledOnce()
     })
 
