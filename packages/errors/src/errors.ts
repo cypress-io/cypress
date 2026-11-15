@@ -1050,7 +1050,7 @@ export const AllCypressErrors = {
 
         ${fmt.stringify(browsers)}
 
-        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine. It does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine, and it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
 
         To run your tests in a specific browser, remove that value and pass the browser by name instead:
 
