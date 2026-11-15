@@ -11,8 +11,12 @@ type Range = { start: number, end: number }
 type Node = Range & { type: string }
 type Context = 'string' | 'regex' | 'template' | 'tagged-template' | 'identifier'
 
-/** A replacement made by {@link escapeNonLatin1}: `delta` code units were added at `index` of the original source. */
-export type Edit = { index: number, delta: number }
+/**
+ * A replacement made by {@link escapeNonLatin1}: `delta` code units were added
+ * at `index` of the original source, or, with `lineBreak`, the line terminator
+ * at `index` became a `\n`.
+ */
+export type Edit = { index: number, delta: number, lineBreak?: true }
 
 function unicodeEscape (char: string) {
   return `\\u${char.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`
@@ -173,6 +177,8 @@ export function escapeNonLatin1 (source: string): { code: string, edits: Edit[] 
 
     if (replacement.length !== match.length) {
       edits.push({ index: offset, delta: replacement.length - match.length })
+    } else if (replacement.endsWith('\n')) {
+      edits.push({ index: offset + backslashes.length, delta: 0, lineBreak: true })
     }
 
     return replacement

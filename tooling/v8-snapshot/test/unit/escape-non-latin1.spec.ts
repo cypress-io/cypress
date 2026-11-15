@@ -103,11 +103,12 @@ describe('escapeNonLatin1', () => {
     expect(() => escape('class A { #\u{1D465} = 1 }')).to.throw(/astral character in an identifier/)
   })
 
-  it('reports where each replacement changed the length', () => {
+  it('reports where each replacement changed the length or added a line break', () => {
     const source = 'a = "\u2019" // \u2028\nb = "\\\u2028"'
 
     expect(escapeNonLatin1(source).edits).to.deep.equal([
       { index: 5, delta: 5 },
+      { index: 11, delta: 0, lineBreak: true },
       { index: 18, delta: -2 },
     ])
   })
