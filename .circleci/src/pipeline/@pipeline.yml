@@ -42,6 +42,11 @@ parameters:
   run-platform-workflows:
     type: boolean
     default: false
+  # Set by generate-pipeline-parameters.sh when a bot pushed the commit;
+  # gates every workflow behind approve-bot-pr.
+  bot-approval-required:
+    type: boolean
+    default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PR
   # branches and on webhook pushes to develop. Default true so that any pipeline
   # whose continuation omits them runs everything.

@@ -16,8 +16,15 @@ linux-x64:
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
   jobs:
+    # Bots can't join the GitHub teams that restrict our contexts, and jobs after
+    # an approval run as the approver. The install runs the bot's dependency changes.
+    - approve-bot-pr:
+        type: approval
+        filters: &botApprovalFilter pipeline.parameters.bot-approval-required == true
     - node_modules_install:
         build-better-sqlite3: true
+        requires:
+          - approve-bot-pr
     - build:
         context: test-runner:env-canary
         requires:
@@ -499,11 +506,17 @@ linux-arm64:
                     pattern: /^v\d+$/
                     value: << pipeline.git.branch >>
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: linux-arm64-node-modules-install
         executor: linux-arm64
         resource_class: arm.medium
         only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
 
     - build:
         name: linux-arm64-build
@@ -543,11 +556,17 @@ linux-arm64:
 darwin-x64:
   when: *scheduled-platform-filters
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: darwin-x64-node-modules-install
         executor: darwin-amd64
         resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
 
     - build:
         name: darwin-x64-build
@@ -593,11 +612,17 @@ darwin-x64:
 darwin-arm64:
   when: *scheduled-platform-filters
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
 
     - build:
         name: darwin-arm64-build
@@ -643,11 +668,17 @@ darwin-arm64:
 windows:
   when: *scheduled-platform-filters
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
         resource_class: windows.medium
         only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
 
     - build:
         name: windows-build
