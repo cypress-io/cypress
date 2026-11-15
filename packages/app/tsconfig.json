@@ -22,9 +22,7 @@
       "@cy/store/*": ["../frontend-shared/src/store/*"],
       "@packages/*": ["../*"],
       // see src/runner/react-untyped.d.ts
-      "react": ["./src/runner/react-untyped.d.ts"],
-      "react-dom": ["./src/runner/react-untyped.d.ts"],
-      "react-dom/client": ["./src/runner/react-untyped.d.ts"]
+      "#host/*": ["./src/runner/react-untyped.d.ts"]
     },
     "target": "ES2022",
     "types": [
