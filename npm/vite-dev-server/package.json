@@ -44,7 +44,7 @@
     "dedent": "^0.7.0",
     "eslint": "^10.14.0",
     "jiti": "^2.4.2",
-    "vite-8": "npm:vite@^8.0.9",
+    "vite-8": "npm:vite@^8.3.8",
     "vitest": "3.2.7"
   },
   "peerDependencies": {
