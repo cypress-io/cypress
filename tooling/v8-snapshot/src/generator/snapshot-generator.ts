@@ -271,6 +271,7 @@ export class SnapshotGenerator {
         contents = this.updateSnapshotScriptContents(contents)
       }
 
+      // Only a script cached before escaping existed changes here, and its source map is left unshifted
       this.snapshotScript = Buffer.from(escapeNonLatin1(contents).code)
       await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
 
@@ -383,7 +384,9 @@ export class SnapshotGenerator {
         throw new Error(`Failed to minify snapshot script. Writing unminified code to ${this.snapshotScriptPath}`)
       }
 
-      return fs.promises.writeFile(this.snapshotScriptPath, escapeNonLatin1(minified.code).code)
+      assertLatin1(minified.code, this.snapshotScriptPath)
+
+      return fs.promises.writeFile(this.snapshotScriptPath, minified.code)
     }
 
     // 4. Write the snapshot script to the configured file

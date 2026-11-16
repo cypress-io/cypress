@@ -1,4 +1,5 @@
-import { decode, encode } from 'source-map-js/lib/base64-vlq'
+import { decode, encode } from '@jridgewell/sourcemap-codec'
+import type { SourceMapLine } from '@jridgewell/sourcemap-codec'
 import type { Edit } from '../generator/escape-non-latin1'
 
 type ColumnEdit = { column: number, delta: number, lineBreak?: true }
@@ -27,36 +28,34 @@ function editsByLine (script: string, edits: Edit[]) {
  * Splits one line of mappings at the line breaks in `lineEdits` and moves each
  * segment's generated column by the edits before it.
  */
-function shiftLine (mappings: string, lineEdits: ColumnEdit[]): string[] {
-  const shift = (column: number) => column + lineEdits.reduce((sum, edit) => edit.column < column ? sum + edit.delta : sum, 0)
-  const breaks = lineEdits.filter((edit) => edit.lineBreak).map((edit) => edit.column)
-  const lines: string[][] = [[]]
-  let column = 0
-  let previousShifted = 0
+function shiftLine (mappings: string, lineEdits: ColumnEdit[]): string {
+  // Decoding and encoding a line on its own keeps the other fields' deltas, which both start from zero
+  const lines: SourceMapLine[] = [[]]
+  let next = 0
+  let offset = 0
+  let lineStart = 0
 
-  for (const segment of mappings ? mappings.split(',') : []) {
-    // The first field of a segment is its generated column, relative to the previous segment on the line
-    const decoded: { value: number, rest: number } = { value: 0, rest: 0 }
+  for (const segment of decode(mappings)[0] ?? []) {
+    for (; next < lineEdits.length && lineEdits[next].column < segment[0]; next++) {
+      const edit = lineEdits[next]
 
-    decode(segment, 0, decoded)
-    column += decoded.value
+      if (edit.lineBreak) {
+        lines.push([])
+        lineStart = edit.column + offset + 1
+      }
 
-    const lineIndex = breaks.filter((breakColumn) => breakColumn < column).length
-    const lineStart = lineIndex === 0 ? 0 : shift(breaks[lineIndex - 1]) + 1
-    const shifted = shift(column) - lineStart
-
-    while (lines.length <= lineIndex) {
-      lines.push([])
-      previousShifted = 0
+      offset += edit.delta
     }
 
-    lines[lineIndex].push(`${encode(shifted - previousShifted)}${segment.slice(decoded.rest)}`)
-    previousShifted = shifted
+    segment[0] += offset - lineStart
+    lines[lines.length - 1].push(segment)
   }
 
-  while (lines.length <= breaks.length) lines.push([])
+  for (; next < lineEdits.length; next++) {
+    if (lineEdits[next].lineBreak) lines.push([])
+  }
 
-  return lines.map((segments) => segments.join(','))
+  return encode(lines)
 }
 
 /**
@@ -69,10 +68,10 @@ export function shiftGeneratedColumns (sourceMap: string, script: string, edits:
   const map = JSON.parse(sourceMap)
   const byLine = editsByLine(script, edits)
 
-  map.mappings = map.mappings.split(';').flatMap((mappings: string, line: number) => {
+  map.mappings = map.mappings.split(';').map((mappings: string, line: number) => {
     const lineEdits = byLine.get(line)
 
-    return lineEdits ? shiftLine(mappings, lineEdits) : [mappings]
+    return lineEdits ? shiftLine(mappings, lineEdits) : mappings
   }).join(';')
 
   return JSON.stringify(map)
