@@ -1,5 +1,5 @@
 diff --git a/node_modules/socket.io-parser/build/cjs/binary.js b/node_modules/socket.io-parser/build/cjs/binary.js
-index 4ddc2c2..cce16b3 100644
+index 4ddc2c2..a77abfe 100644
 --- a/node_modules/socket.io-parser/build/cjs/binary.js
 +++ b/node_modules/socket.io-parser/build/cjs/binary.js
 @@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
@@ -26,7 +26,7 @@ index 4ddc2c2..cce16b3 100644
      if (!data)
          return data;
      if ((0, is_binary_js_1.isBinary)(data)) {
-@@ -26,21 +29,30 @@ function _deconstructPacket(data, buffers, toJSON) {
+@@ -26,21 +29,32 @@ function _deconstructPacket(data, buffers, toJSON) {
          buffers.push(data);
          return placeholder;
      }
@@ -50,7 +50,9 @@ index 4ddc2c2..cce16b3 100644
      else if (typeof data === "object" && !(data instanceof Date)) {
          if (data.toJSON && typeof data.toJSON === "function" && !toJSON) {
 -            return _deconstructPacket(data.toJSON(), buffers, true);
-+            return _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
++            const json = _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
++            retvals.set(data, json);
++            return json;
          }
          const newData = {};
 +        retvals.set(data, newData);
@@ -61,7 +63,7 @@ index 4ddc2c2..cce16b3 100644
              }
          }
          return newData;
-@@ -56,11 +68,11 @@ function _deconstructPacket(data, buffers, toJSON) {
+@@ -56,11 +70,11 @@ function _deconstructPacket(data, buffers, toJSON) {
   * @public
   */
  function reconstructPacket(packet, buffers) {
@@ -75,7 +77,7 @@ index 4ddc2c2..cce16b3 100644
      if (!data)
          return data;
      if (data && data._placeholder === true) {
-@@ -74,15 +86,19 @@ function _reconstructPacket(data, buffers) {
+@@ -74,15 +88,19 @@ function _reconstructPacket(data, buffers) {
              throw new Error("illegal attachments");
          }
      }
@@ -216,7 +218,7 @@ index a530652..28341d2 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm-debug/binary.js b/node_modules/socket.io-parser/build/esm-debug/binary.js
-index 302ee22..a826584 100644
+index 302ee22..d7aefb3 100644
 --- a/node_modules/socket.io-parser/build/esm-debug/binary.js
 +++ b/node_modules/socket.io-parser/build/esm-debug/binary.js
 @@ -1,4 +1,7 @@
@@ -241,7 +243,7 @@ index 302ee22..a826584 100644
      if (!data)
          return data;
      if (isBinary(data)) {
-@@ -22,21 +25,30 @@ function _deconstructPacket(data, buffers, toJSON) {
+@@ -22,21 +25,32 @@ function _deconstructPacket(data, buffers, toJSON) {
          buffers.push(data);
          return placeholder;
      }
@@ -265,7 +267,9 @@ index 302ee22..a826584 100644
      else if (typeof data === "object" && !(data instanceof Date)) {
          if (data.toJSON && typeof data.toJSON === "function" && !toJSON) {
 -            return _deconstructPacket(data.toJSON(), buffers, true);
-+            return _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
++            const json = _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
++            retvals.set(data, json);
++            return json;
          }
          const newData = {};
 +        retvals.set(data, newData);
@@ -276,7 +280,7 @@ index 302ee22..a826584 100644
              }
          }
          return newData;
-@@ -52,11 +64,11 @@ function _deconstructPacket(data, buffers, toJSON) {
+@@ -52,11 +66,11 @@ function _deconstructPacket(data, buffers, toJSON) {
   * @public
   */
  export function reconstructPacket(packet, buffers) {
@@ -290,7 +294,7 @@ index 302ee22..a826584 100644
      if (!data)
          return data;
      if (data && data._placeholder === true) {
-@@ -70,15 +82,19 @@ function _reconstructPacket(data, buffers) {
+@@ -70,15 +84,19 @@ function _reconstructPacket(data, buffers) {
              throw new Error("illegal attachments");
          }
      }
@@ -426,7 +430,7 @@ index 0c654dd..c7b10ea 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm/binary.js b/node_modules/socket.io-parser/build/esm/binary.js
-index 302ee22..a826584 100644
+index 302ee22..d7aefb3 100644
 --- a/node_modules/socket.io-parser/build/esm/binary.js
 +++ b/node_modules/socket.io-parser/build/esm/binary.js
 @@ -1,4 +1,7 @@
@@ -451,7 +455,7 @@ index 302ee22..a826584 100644
      if (!data)
          return data;
      if (isBinary(data)) {
-@@ -22,21 +25,30 @@ function _deconstructPacket(data, buffers, toJSON) {
+@@ -22,21 +25,32 @@ function _deconstructPacket(data, buffers, toJSON) {
          buffers.push(data);
          return placeholder;
      }
@@ -475,7 +479,9 @@ index 302ee22..a826584 100644
      else if (typeof data === "object" && !(data instanceof Date)) {
          if (data.toJSON && typeof data.toJSON === "function" && !toJSON) {
 -            return _deconstructPacket(data.toJSON(), buffers, true);
-+            return _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
++            const json = _deconstructPacket(data.toJSON(), buffers, known, retvals, true);
++            retvals.set(data, json);
++            return json;
          }
          const newData = {};
 +        retvals.set(data, newData);
@@ -486,7 +492,7 @@ index 302ee22..a826584 100644
              }
          }
          return newData;
-@@ -52,11 +64,11 @@ function _deconstructPacket(data, buffers, toJSON) {
+@@ -52,11 +66,11 @@ function _deconstructPacket(data, buffers, toJSON) {
   * @public
   */
  export function reconstructPacket(packet, buffers) {
@@ -500,7 +506,7 @@ index 302ee22..a826584 100644
      if (!data)
          return data;
      if (data && data._placeholder === true) {
-@@ -70,15 +82,19 @@ function _reconstructPacket(data, buffers) {
+@@ -70,15 +84,19 @@ function _reconstructPacket(data, buffers) {
              throw new Error("illegal attachments");
          }
      }
