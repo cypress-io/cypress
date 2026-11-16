@@ -33,8 +33,8 @@ async function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
   const packages = {} as {
     loadConfig: (phase: 'development', dir: string) => Promise<any>
-    getNextJsBaseWebpackConfig: Function
-    nextLoadJsConfig: Function
+    getNextJsBaseWebpackConfig: (dir: string, options: Record<string, unknown>) => Promise<Configuration>
+    nextLoadJsConfig: (dir: string, nextConfig: unknown) => Promise<{ jsConfig: unknown, resolvedBaseUrl: unknown }>
     getSupportedBrowsers: (dir: string, isDevelopment: boolean, nextJsConfig: any) => Promise<string[] | undefined>
   }
 
@@ -55,7 +55,7 @@ async function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
 
     packages.loadConfig = require(loadConfigPath).default
   } catch (e: any) {
-    throw new Error(`Failed to load "next/dist/server/config" with error: ${e.message ?? e}`)
+    throw new Error(`Failed to load "next/dist/server/config" with error: ${e.message ?? e}`, { cause: e })
   }
 
   try {
@@ -63,7 +63,7 @@ async function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
 
     packages.getNextJsBaseWebpackConfig = require(getNextJsBaseWebpackConfigPath).default
   } catch (e: any) {
-    throw new Error(`Failed to load "next/dist/build/webpack-config" with error: ${ e.message ?? e}`)
+    throw new Error(`Failed to load "next/dist/build/webpack-config" with error: ${ e.message ?? e}`, { cause: e })
   }
 
   try {
@@ -71,7 +71,7 @@ async function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
 
     packages.nextLoadJsConfig = require(loadJsConfigPath).default
   } catch (e: any) {
-    throw new Error(`Failed to load "next/dist/build/load-jsconfig" with error: ${ e.message ?? e}`)
+    throw new Error(`Failed to load "next/dist/build/load-jsconfig" with error: ${ e.message ?? e}`, { cause: e })
   }
 
   // Does not exist prior to Next 13.
@@ -80,7 +80,7 @@ async function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
 
     packages.getSupportedBrowsers = require(getUtilsPath).getSupportedBrowsers ?? (() => Promise.resolve([]))
   } catch (e: any) {
-    throw new Error(`Failed to load "next/dist/build/utils" with error: ${ e.message ?? e}`)
+    throw new Error(`Failed to load "next/dist/build/utils" with error: ${ e.message ?? e}`, { cause: e })
   }
 
   return packages
@@ -222,7 +222,7 @@ const originalModuleLoad = (Module as ModuleClass)._load
 function sourceNextWebpackDeps (devServerConfig: WebpackDevServerConfig) {
   const framework = sourceFramework(devServerConfig)!
   const webpack = sourceNextWebpack(devServerConfig, framework)
-  const webpackDevServer = sourceWebpackDevServer(devServerConfig, webpack.majorVersion, framework)
+  const webpackDevServer = sourceWebpackDevServer(devServerConfig, webpack, framework)
   const htmlWebpackPlugin = sourceHtmlWebpackPlugin(devServerConfig, framework, webpack)
 
   return {

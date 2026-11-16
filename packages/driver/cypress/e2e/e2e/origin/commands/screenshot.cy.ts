@@ -266,6 +266,7 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
           },
         })
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the screenshot timeout to fire
         cy.wait(200)
       })
     })
@@ -297,6 +298,7 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
           },
         })
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the screenshot timeout to fire
         cy.wait(400)
       })
     })
@@ -326,6 +328,7 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
         cy.screenshot()
 
         // wait to ensure the timeout error has time to process
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the screenshot timeout to fire
         cy.wait(100)
       })
     })
@@ -357,6 +360,7 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
         cy.screenshot({ disableTimersAndAnimations: false })
 
         // wait to ensure the timeout error has time to process
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the screenshot timeout to fire
         cy.wait(100)
       })
     })

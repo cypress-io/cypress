@@ -5,10 +5,10 @@
     <template
       #title
     >
-      {{ t('settingsPage.editor.title') }}
+      External editor
     </template>
     <template #description>
-      {{ t('settingsPage.editor.description') }}
+      External editor to use for editing code opened when using Cypress.
     </template>
 
     <ChooseExternalEditor
@@ -23,7 +23,6 @@
 <script lang="ts" setup>
 import SettingsSection from '../SettingsSection.vue'
 import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/ChooseExternalEditor.vue'
-import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
 import { ExternalEditorSettings_SetPreferredEditorBinaryDocument } from '../../generated/graphql'
 import type { ExternalEditorSettingsFragment } from '../../generated/graphql'
@@ -35,8 +34,6 @@ mutation ExternalEditorSettings_SetPreferredEditorBinary ($value: String!) {
     ...ExternalEditorSettings
   }
 }`
-
-const { t } = useI18n()
 
 const setPreferredBinaryEditor = useMutation(ExternalEditorSettings_SetPreferredEditorBinaryDocument)
 

@@ -32,7 +32,7 @@ describe.skip('Declarative rendering', () => {
 
   it('can add an item', () => {
     // Safe because the component mounted in beforeEach gets its data from data()
-    const vm = Cypress.vue as ComponentPublicInstance<{}, {}, ReturnType<typeof data>>
+    const vm = Cypress.vue as ComponentPublicInstance<object, object, ReturnType<typeof data>>
 
     vm.todos.push({ text: 'Test using Cypress' })
     cy.get('li').should('have.length', 4)

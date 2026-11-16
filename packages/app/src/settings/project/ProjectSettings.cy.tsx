@@ -1,5 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { ProjectSettingsFragmentDoc } from '../../generated/graphql-test'
 import ProjectSettings from './ProjectSettings.vue'
 
@@ -16,6 +14,6 @@ describe('<ProjectSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.experiments.title).should('be.visible')
+    cy.findByText('Experiments').should('be.visible')
   })
 })

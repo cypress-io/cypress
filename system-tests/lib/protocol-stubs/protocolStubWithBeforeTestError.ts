@@ -54,5 +54,5 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     //throw new Error('error in responseEndedWithEmptyBody')
   }
 
-  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => {}
+  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => void
 }

@@ -4,7 +4,7 @@ import { itHandlesFileOpening } from '../support/utils'
 
 describe('spec title', () => {
   let runner: EventEmitter
-  let start: Function
+  let start: (spec: Cypress.Cypress['spec']) => void
 
   beforeEach(() => {
     runner = new EventEmitter()

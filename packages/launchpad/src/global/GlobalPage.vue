@@ -10,7 +10,7 @@
       v-if="filteredProjects.length"
       class="mb-[16px] text-gray-800"
     >
-      {{ t('globalPage.recentProjectsHeader') }}
+      Recent projects
     </h1>
     <div
       :class="{ 'md:grid md:grid-cols-2 md:gap-[24px] mb-0': filteredProjects?.length > 1 }"
@@ -20,9 +20,9 @@
         :key="project.id"
         :gql="project"
         class="mb-[24px] md:mb-0"
-        @removeProject="handleRemoveProject"
-        @openInFinder="handleOpenInFinder"
-        @openInIDE="handleOpenInIDE"
+        @remove-project="handleRemoveProject"
+        @open-in-finder="handleOpenInFinder"
+        @open-in-i-d-e="handleOpenInIDE"
       />
     </div>
   </template>
@@ -42,7 +42,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
@@ -133,5 +132,4 @@ const filteredProjects = computed(() => {
 
 const match = ref('')
 const isChooseEditorOpen = ref(false)
-const { t } = useI18n()
 </script>

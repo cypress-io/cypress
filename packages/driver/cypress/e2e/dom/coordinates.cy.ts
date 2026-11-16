@@ -3,8 +3,6 @@ import $elements from '../../../src/dom/elements'
 
 const { $ } = Cypress
 
-export {}
-
 describe('src/dom/coordinates', () => {
   beforeEach(function () {
     cy.visit('/fixtures/generic.html').then(() => {

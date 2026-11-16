@@ -108,6 +108,8 @@ export class EarlyExitTerminator {
   private pendingRunnable: any
   private intermediateStats: ReporterResults | undefined
 
+  exitErrorType: string | undefined
+
   constructor () {
     this.terminator = Promise.withResolvers<BaseReporterResults>()
   }
@@ -134,6 +136,8 @@ export class EarlyExitTerminator {
 
       return
     }
+
+    this.exitErrorType = error.type
 
     // eslint-disable-next-line no-console
     console.log('')

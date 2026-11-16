@@ -43,20 +43,21 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "puppeteer-core": "^21.2.1"
+    "puppeteer-core": "^24.43.1"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
     "@types/node": "^24.10.1",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "express": "4.21.0",
+    "jiti": "^2.4.2",
     "rimraf": "^6.1.1",
     "semantic-release": "25.0.8",
     "typescript": "5.4.5",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "cypress": ">=13.6.0"
+    "cypress": ">=14.0.0"
   },
   "publishConfig": {
     "access": "public"

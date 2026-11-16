@@ -1,4 +1,4 @@
-import { InvalidValueTapError, MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownOptionTapError } from './contract'
+import { InvalidValueTapError, MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownOptionTapError, unmetDependency } from './contract'
 import type { TapCommandOptionSchema, TapCommandParamSchema } from './contract'
 
 type ExpectedType = TapCommandParamSchema['type']
@@ -140,6 +140,14 @@ export const coerceCommandOptions = (name: string, options: readonly TapCommandO
     }
 
     coerced[option.name] = result.value
+  }
+
+  // Only what the caller passed counts toward a dependency, never a default.
+  const supplied = Object.fromEntries(Object.keys(raw).map((option) => [option, coerced[option]]))
+  const unmet = unmetDependency(options, supplied)
+
+  if (unmet) {
+    return { ok: false, error: unmet }
   }
 
   return { ok: true, options: coerced }

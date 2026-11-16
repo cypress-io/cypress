@@ -8,7 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         @restart="cancelSpecNameCreation"
-        @updateTitle="(value) => emits('update:title', value)"
+        @update-title="(value) => emits('update:title', value)"
       />
     </template>
 
@@ -25,14 +25,14 @@
         </div>
         <ExpandableFileChooser
           v-else-if="!result"
-          v-model:extensionPattern="extensionPattern"
+          v-model:extension-pattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
         >
           <template #item="{ file }">
             <ReactComponentList
               :file="file"
-              @selectItem="makeSpec"
+              @select-item="makeSpec"
             />
           </template>
         </ExpandableFileChooser>
@@ -53,7 +53,7 @@
             prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="emits('close')"
           >
-            {{ t('createSpec.successPage.runSpecButton') }}
+            Okay, run the spec
           </Button>
           <Button
             size="lg"
@@ -62,7 +62,7 @@
             variant="outline"
             @click="emits('restart')"
           >
-            {{ t('createSpec.successPage.createAnotherSpecButton') }}
+            Create another spec
           </Button>
         </StandardModalFooter>
         <div
@@ -75,7 +75,6 @@
 </template>
 <script setup lang="ts">
 import { useVModels, whenever } from '@vueuse/core'
-import { useI18n } from '@cy/i18n'
 import ExpandableFileChooser from '../ExpandableFileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
@@ -94,7 +93,6 @@ const props = defineProps<{
   title: string
   gql: ComponentGeneratorStepOne_CodeGenGlobFragment
 }>()
-const { t } = useI18n()
 const emits = defineEmits<{
   (event: 'update:title', value: string): void
   (event: 'update:description', value: string): void
@@ -103,7 +101,7 @@ const emits = defineEmits<{
 }>()
 const { title } = useVModels(props, emits)
 
-title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
+title.value = 'Choose a component'
 
 gql`
 query ReactComponentGeneratorStepOne($glob: String!) {
@@ -163,11 +161,11 @@ const generatedSpecError = ref()
 const generateSpecFromSource = ref()
 
 whenever(result, () => {
-  title.value = t('createSpec.successPage.header')
+  title.value = 'Great! The spec was successfully added'
 })
 
 whenever(generatedSpecError, () => {
-  title.value = t('createSpec.component.importTemplateSpec.header')
+  title.value = 'Create new spec'
 })
 
 const makeSpec = async ({ file, item }) => {

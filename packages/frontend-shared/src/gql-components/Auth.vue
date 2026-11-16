@@ -15,14 +15,14 @@
           class=" icon-light-white"
         />
       </template>
-      {{ t('topNav.login.actionTryAgain') }}
+      Try again
     </Button>
     <Button
       variant="outline"
       size="lg"
       @click="handleCancel"
     >
-      {{ t('topNav.login.actionCancel') }}
+      Cancel
     </Button>
   </div>
   <div v-else-if="props.showLogout">
@@ -30,7 +30,7 @@
       class="bg-white border-rounded outline-transparent border-gray-100 border w-full py-[8px] text-[14px] text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
       @click="handleLogout"
     >
-      {{ t('topNav.login.actionLogout') }}
+      Log out
     </button>
   </div>
   <div v-else>
@@ -48,7 +48,7 @@
           class="animate-spin icon-dark-white icon-light-gray-400"
         />
       </template>
-      {{ browserOpened ? t('topNav.login.actionWaiting') : t('topNav.login.actionOpening') }}
+      {{ browserOpened ? 'Waiting for browser...' : 'Opening browser' }}
     </Button>
     <Button
       v-else
@@ -84,13 +84,10 @@ import type {
   AuthFragment,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
-import { useI18n } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import type { AuthFlow } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const userProjectStatusStore = useUserProjectStatusStore()
-
-const { t } = useI18n()
 
 const isOnline = useOnline()
 
@@ -307,10 +304,10 @@ const handleTryAgain = async () => {
 
 const buttonText = computed(() => {
   const strings = {
-    login: t('topNav.login.actionLogin'),
-    signup: t('topNav.login.actionSignup'),
-    connectProject: t('runs.connect.modal.selectProject.connectProject'),
-    continue: t('topNav.login.actionContinue'),
+    login: 'Log in',
+    signup: 'Sign up',
+    connectProject: 'Connect project',
+    continue: 'Continue',
   }
 
   if (showConnectButton.value) {

@@ -1374,6 +1374,14 @@ describe('tap CLI reading a pinned snapshot', function () {
     expect(failureOutput(result)).to.include(copyFor('INVALID_OPTIONS'))
   })
 
+  it('exits 1 naming the missing ID, with the pin help, when given only one of the pair', async () => {
+    const result = await session.tap(['pin', '--test-id', testId])
+
+    expect(result.exitCode).to.eq(1)
+    expect(failureOutput(result)).to.include('You passed the --test-id flag without also passing the --command-id flag.')
+    expect(failureOutput(result)).to.include('Usage: cypress tap pin [options]')
+  })
+
   it('exits 1 with SNAPSHOT_NOT_FOUND and names the snapshots there are', async () => {
     const result = await session.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'midway'])
 

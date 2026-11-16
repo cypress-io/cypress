@@ -13,7 +13,7 @@ interface RunOriginFnOptions {
   file?: string
   fn: string
   skipConfigValidation: boolean
-  state: {}
+  state: Record<string, unknown>
   logCounter: number
 }
 
@@ -22,7 +22,7 @@ interface serializedRunnable {
   type: string
   title: string
   parent: serializedRunnable
-  ctx: {}
+  ctx: Record<string, unknown>
   _currentRetry: number
   _timeout: number
   titlePath: string

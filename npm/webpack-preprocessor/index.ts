@@ -168,7 +168,7 @@ const quietErrorMessage = (err: Error) => {
  */
 interface PreprocessorOptions {
   webpackOptions?: webpack.Configuration
-  watchOptions?: Object
+  watchOptions?: object
   typescript?: string
   additionalEntries?: string[]
 }

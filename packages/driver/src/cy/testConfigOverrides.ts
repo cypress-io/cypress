@@ -14,7 +14,7 @@ type ResolvedTestConfigOverride = {
   /**
    * The test config overrides that will apply to the test if it passes validation.
    */
-  unverifiedTestConfig: Object
+  unverifiedTestConfig: object
   /**
    * The current runnable level of test config overrides that are being applied.
    * Used for accurate error reporting.
@@ -29,7 +29,7 @@ type TestConfig = {
   // to indicate the suite or test should run for that browser(s).
   overrides: Record<string, any>
   invocationDetails: {
-    stack: Object
+    stack: object
   }
 }
 

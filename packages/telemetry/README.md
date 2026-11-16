@@ -104,6 +104,10 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 
 ```
 
+The server attaches the record key from `--key`, or from `CYPRESS_RECORD_KEY` when `--key` is not given. `cypress open` has no `--key` option, so open mode only exports spans when `CYPRESS_RECORD_KEY` is set.
+
+Spans that only exist in open mode, such as `launchpad:mounted` and `specs:list:first:render`, reach Honeycomb from the `open-mode-telemetry` CI job. It runs `node scripts/open-mode-telemetry.mts`, which opens a generated project with 500 specs several times and closes Cypress once the server has received those spans.
+
 When developing Cypress locally it is possible to override the telemetry endpoint and send unencrypted data to your own honeycomb instance. This is recommended when verifying newly added spans and any sort of local telemetry development.
 
 ```js

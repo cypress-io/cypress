@@ -336,7 +336,7 @@ const warnByPath = (errPath, options: any = {}) => {
 }
 
 export class InternalCypressError extends Error {
-  onFail?: Function
+  onFail?: (err: Error) => void
   isRecovered?: boolean
 
   constructor (message) {
@@ -356,7 +356,7 @@ export class CypressError extends Error {
   triggerAction?: 'loginModal' | 'projectConnectModal' | null
   retry?: boolean
   userInvocationStack?: any
-  onFail?: Function
+  onFail?: (err: Error) => void
   isRecovered?: boolean
 
   constructor (message) {
@@ -400,7 +400,7 @@ const replaceErrMsgTokens = (errMessage, args) => {
   const replace = (str, argValue, argKey) => {
     // Use a replacer function so `$` sequences in the (user-controlled) arg are
     // inserted literally rather than treated as special replacement patterns.
-    return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), () => argValue)
+    return str.replace(new RegExp(`\\{\\{${argKey}\\}\\}`, 'g'), () => argValue)
   }
 
   const getMsg = function (args = {}) {

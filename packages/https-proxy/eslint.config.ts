@@ -1,8 +1,10 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  ...vitestConfig,
   {
     languageOptions: {
       parserOptions: {
@@ -10,4 +12,5 @@ export default [
       },
     },
   },
+  noFloatingPromisesConfig(['lib/**/*.ts']),
 ]

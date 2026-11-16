@@ -1244,6 +1244,7 @@ describe('lib/browsers/electron', () => {
   })
 
   // TODO: these all need to be updated
+  // eslint-disable-next-line vitest/no-disabled-tests
   describe.skip('._launchChild', () => {
     let childWin: any
     let event: any

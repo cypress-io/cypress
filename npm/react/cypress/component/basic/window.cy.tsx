@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-export class Component extends React.Component {
+class Component extends React.Component {
   constructor (props: object) {
     super(props)
     console.log(

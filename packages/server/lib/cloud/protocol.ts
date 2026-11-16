@@ -131,7 +131,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   async connectToBrowser (cdpClient: CDPClient) {
     // Keyed by event name then by original listener so that the same function
     // registered for multiple events doesn't collide and leak wrappers.
-    const listenerMap = new Map<string, Map<Function, Function>>()
+    const listenerMap = new Map<string, Map<(event: any) => void, (event: any) => Promise<void>>>()
 
     const newCdpClient: CDPClient = {
       ...cdpClient,
@@ -162,7 +162,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         const wrapper = eventListeners?.get(listener)
 
         if (wrapper) {
-          cdpClient.off(event, wrapper as any)
+          cdpClient.off(event, wrapper)
           eventListeners!.delete(listener)
           if (eventListeners!.size === 0) {
             listenerMap.delete(event)

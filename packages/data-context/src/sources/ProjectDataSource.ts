@@ -119,7 +119,7 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   if (!paths[0]) return ''
 
   function getPathParts (pathname: string) {
-    return pathname.split(/[\/\\]/g)
+    return pathname.split(/[/\\]/g)
   }
 
   const lcp = getPathParts(paths[0])

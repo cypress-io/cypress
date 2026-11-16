@@ -41,7 +41,7 @@ const asterisksRegex = /^\*\*(.+?)\*\*$/gs
 // `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
 // `expected **foo** to have length above **1** but got **0**`
 // `Custom message expected **<span>** to exist in the DOM`
-const assertionRegex = /^.*?expected | to[^\*]+| not[^\*]+| with[^\*]+|,? but[^\*]+/g
+const assertionRegex = /^.*?expected | to[^*]+| not[^*]+| with[^*]+|,? but[^*]+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
@@ -331,7 +331,7 @@ interface CommandProps {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
   groupId?: number
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
@@ -635,7 +635,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
             testId={model.testId}
             commandId={model.id}
             // if the err is recovered and the current command is a log group, nest the test error within the group
-            groupLevel={model.group && model.hasChildren ? ++groupLevel : groupLevel}
+            groupLevel={model.group && model.hasChildren ? groupLevel + 1 : groupLevel}
           />
         </li>
       )}

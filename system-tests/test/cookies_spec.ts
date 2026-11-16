@@ -562,3 +562,134 @@ describe('cookie jar stays in sync after cookies are set outside the proxy', () 
     spec: 'rotated_cookie.cy.ts',
   })
 })
+
+// https://github.com/cypress-io/cypress/issues/34902
+//
+// Chrome applies a response's Set-Cookie headers before pausing it for Fetch
+// interception, and neither continuing nor fulfilling the response undoes that.
+// The browser's cookie store has to match the headers the handler leaves.
+// Electron and Firefox stay on the HTTP proxy, which applies those headers itself.
+describe('cy.intercept rewrites Set-Cookie headers', () => {
+  const onServer = (app) => {
+    app.use(parser())
+
+    app.get('/cookie_sync/login', (req, res) => {
+      res.cookie('session', 'plain', { path: '/' })
+
+      return res.redirect('/cookie_sync/dashboard')
+    })
+
+    app.get('/cookie_sync/dashboard', (req, res) => {
+      return res.type('html').send(`<html><body><div id="session">session: ${req.cookies.session || 'none'}</div></body></html>`)
+    })
+
+    // a redirect that revokes a session cookie the browser already holds
+    app.get('/cookie_sync/revoke', (req, res) => {
+      res.setHeader('Set-Cookie', 'session=; Max-Age=0; Path=/')
+
+      return res.redirect('/cookie_sync/dashboard')
+    })
+
+    // overwrites a cookie on a path this request doesn't match
+    app.get('/cookie_sync/other_path', (req, res) => {
+      res.setHeader('Set-Cookie', 'scoped=origin; Path=/cookie_sync/elsewhere')
+
+      return res.type('html').end()
+    })
+
+    app.get('/cookie_sync/domain', (req, res) => {
+      res.setHeader('Set-Cookie', `a=origin; Domain=${req.query.domain}; Path=/`)
+
+      return res.type('html').send('<html><body></body></html>')
+    })
+
+    app.get('/cookie_sync/plain', (req, res) => {
+      res.setHeader('Set-Cookie', 'tracking=1; Path=/')
+
+      return res.type('html').end()
+    })
+
+    // reached cross-site from the page, so Chrome blocks this SameSite=Lax cookie
+    app.get('/cookie_sync/cross_site', (req, res) => {
+      if (req.headers.origin) {
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin)
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+      }
+
+      res.setHeader('Set-Cookie', 'tracking=1; Path=/; SameSite=Lax')
+
+      return res.type('html').end()
+    })
+
+    // sets cookies, so a handler that also replaces the body fulfills the
+    // response instead of continuing it
+    app.get('/cookie_sync/page', (req, res) => {
+      res.cookie('kept', 'origin', { path: '/' })
+      res.cookie('dropped', 'origin', { path: '/' })
+
+      return res.type('html').send('<html><body><div id="page">origin</div></body></html>')
+    })
+
+    app.get('/cookie_sync/no_cookies', (req, res) => {
+      return res.type('html').send('<html><body></body></html>')
+    })
+
+    // Chrome refuses SameSite=None without Secure, so `blocked` never reaches the store
+    app.get('/cookie_sync/blocked', (req, res) => {
+      res.setHeader('Set-Cookie', ['blocked=1; Path=/; SameSite=None', 'kept=origin; Path=/'])
+
+      return res.type('html').end()
+    })
+
+    // Chrome stores repeated=1 and refuses the SameSite=None repeated=2 that follows it
+    app.get('/cookie_sync/blocked_repeat', (req, res) => {
+      res.setHeader('Set-Cookie', ['repeated=1; Path=/', 'repeated=2; Path=/; SameSite=None'])
+
+      return res.type('html').end()
+    })
+
+    // a spec rewrites req.url from /cookie_sync/original to this route on another
+    // host, so /cookie_sync/original itself is never requested. Reached
+    // cross-site from the page, so the cookies need SameSite=None and the
+    // response needs credentialed CORS.
+    app.get('/cookie_sync/rewritten', (req, res) => {
+      if (req.headers.origin) {
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin)
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+      }
+
+      res.setHeader('Set-Cookie', ['foo=origin; Path=/; SameSite=None; Secure', 'bar=origin; Path=/; SameSite=None; Secure'])
+
+      return res.type('html').send('<html><body><div id="page">rewritten</div></body></html>')
+    })
+  }
+
+  systemTests.setup({
+    servers: [{
+      onServer,
+      port: httpPort,
+    }],
+    settings: {
+      e2e: {},
+      // co.uk is a public suffix, so Chrome stores a Domain=co.uk cookie
+      // host-only. github.io would do too, but it is HSTS-preloaded.
+      hosts: {
+        '*.foo.com': '127.0.0.1',
+        'co.uk': '127.0.0.1',
+      },
+    },
+  })
+
+  // chrome only: the CDP network path is Chromium-only, and Electron is
+  // excluded from it (isBrowserNetworkMode). The opt-in full-suite forceHttp1
+  // CI jobs export CYPRESS_forceHttp1=true; CLI config always beats env, so the
+  // explicit `forceHttp1: false` pins this spec to the browser network path.
+  it('keeps Set-Cookie changes a cy.intercept response handler makes, including across a redirect', {
+    browser: 'chrome',
+    config: {
+      baseUrl: `http://localhost:${httpPort}`,
+      forceHttp1: false,
+    },
+    spec: 'set_cookie_sync.cy.ts',
+  })
+})

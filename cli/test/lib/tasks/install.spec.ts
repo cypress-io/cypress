@@ -300,7 +300,7 @@ describe('/lib/tasks/install', function () {
 
         await install.start({ buildInfo })
         expect(unzip.start).toHaveBeenCalledWith(expect.objectContaining({
-          installDir: expect.stringMatching(/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/),
+          installDir: expect.stringMatching(/beta-1\.2\.3-aBranchName-3b7f0b5c$/),
         }))
       })
     })

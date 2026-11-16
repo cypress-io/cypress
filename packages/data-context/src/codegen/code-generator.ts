@@ -163,7 +163,7 @@ export async function hasNonExampleSpec (testTemplateDir: string, specs: string[
 
   const templateFiles = await allFilesInDir(testTemplateDir)
 
-  const specInTemplates = (spec: String): boolean => {
+  const specInTemplates = (spec: string): boolean => {
     debug(`hasNonExampleSpec - checking for spec ${spec}`)
 
     return templateFiles.some((templateFile) => templateFile.substring(testTemplateDir.length + 1) === spec)

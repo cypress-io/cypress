@@ -1,13 +1,10 @@
 import type { SinonStub } from 'sinon'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import type Sinon from 'sinon'
 import { dayjs } from '../../src/runs/utils/day'
 import { cyBrowserMozillaFirefoxX16, cyBrowserChromeX16 } from '@cypress-design/icon-registry'
 
 const pkg = require('@packages/root')
-
-const loginText = defaultMessages.topNav.login
 
 const isWindows = Cypress.platform === 'win32'
 
@@ -454,7 +451,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.getByRole('dialog', { name: 'Login successful', native: false }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
-          cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile' })
+          cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile?utm_medium=Nav&utm_campaign=Profile&utm_source=Binary%3A+App' })
 
           // The dialog can be closed at this point by either the header close button or the Continue button
           // The Continue button is tested here
@@ -462,6 +459,7 @@ describe('App Top Nav Workflows', () => {
           cy.getByRole('button', { name: expectedNextStepText }).click()
         })
       }
+
       context('with no project id', () => {
         it('shows "connect project" button after login if no project id is set', () => {
           cy.scaffoldProject('component-tests')
@@ -535,8 +533,8 @@ describe('App Top Nav Workflows', () => {
 
           logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
 
-          cy.contains('[data-cy=standard-modal] h2', defaultMessages.specPage.banners.record.title).should('be.visible')
-          cy.contains('[data-cy=standard-modal]', defaultMessages.specPage.banners.record.content).should('be.visible')
+          cy.contains('[data-cy=standard-modal] h2', 'Record your first run').should('be.visible')
+          cy.contains('[data-cy=standard-modal]', 'Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools.').should('be.visible')
           cy.contains('button', 'Copy').should('be.visible')
         })
 
@@ -560,13 +558,13 @@ describe('App Top Nav Workflows', () => {
 
           cy.getByRole('dialog', { native: false }).within(() => {
             cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
-            cy.contains(loginText.titleBrowserError).should('be.visible')
-            cy.contains(loginText.bodyBrowserError).should('be.visible')
-            cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
+            cy.contains('Browser error').should('be.visible')
+            cy.contains('The browser could not be opened.').should('be.visible')
+            cy.contains('Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:').should('be.visible')
 
             // in this state, there is no retry UI, we ask the user to visit the auth url on their own
-            cy.contains('button', loginText.actionTryAgain).should('not.be.visible')
-            cy.contains('button', loginText.actionCancel).should('not.be.visible')
+            cy.contains('button', 'Try again').should('not.be.visible')
+            cy.contains('button', 'Cancel').should('not.be.visible')
           })
         })
 
@@ -589,12 +587,12 @@ describe('App Top Nav Workflows', () => {
           })
 
           cy.getByRole('dialog', { native: false }).within(() => {
-            cy.contains(loginText.titleFailed).should('be.visible')
-            cy.contains(loginText.bodyError).should('be.visible')
+            cy.contains('Login failed').should('be.visible')
+            cy.contains('An error occurred while attempting to log in:').should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
 
-            cy.contains('button', loginText.actionTryAgain).should('be.visible').as('tryAgain')
-            cy.contains('button', loginText.actionCancel).should('be.visible')
+            cy.contains('button', 'Try again').should('be.visible').as('tryAgain')
+            cy.contains('button', 'Cancel').should('be.visible')
           })
 
           // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
@@ -613,8 +611,8 @@ describe('App Top Nav Workflows', () => {
 
           cy.get('@tryAgain').click()
 
-          cy.getByRole('dialog', { name: loginText.titleInitial, native: false }).within(() => {
-            cy.contains(loginText.actionWaiting).should('be.visible')
+          cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).within(() => {
+            cy.contains('Waiting for browser...').should('be.visible')
           })
         })
 
@@ -637,16 +635,16 @@ describe('App Top Nav Workflows', () => {
           })
 
           cy.getByRole('dialog', { native: false }).within(() => {
-            cy.contains(loginText.titleFailed).should('be.visible')
-            cy.contains(loginText.bodyError).should('be.visible')
+            cy.contains('Login failed').should('be.visible')
+            cy.contains('An error occurred while attempting to log in:').should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
           })
 
           // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-          cy.getByRole('dialog', { name: loginText.titleFailed, native: false }).within(() => {
-            cy.contains('button', loginText.actionTryAgain).should('be.visible')
-            cy.contains('button', loginText.actionCancel).click()
+          cy.getByRole('dialog', { name: 'Login failed', native: false }).within(() => {
+            cy.contains('button', 'Try again').should('be.visible')
+            cy.contains('button', 'Cancel').click()
           })
 
           cy.withCtx((ctx, o) => {
@@ -667,7 +665,7 @@ describe('App Top Nav Workflows', () => {
             expect(ctx._apis.authApi.logIn).to.have.been.called
           })
 
-          cy.getByRole('dialog', { name: loginText.titleInitial, native: false }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).should('be.visible')
         })
 
         it('closing modal correctly clears error state', () => {
@@ -689,11 +687,11 @@ describe('App Top Nav Workflows', () => {
           })
 
           cy.getByRole('dialog', { native: false }).within(() => {
-            cy.contains(loginText.titleFailed).should('be.visible')
-            cy.contains(loginText.bodyError).should('be.visible')
+            cy.contains('Login failed').should('be.visible')
+            cy.contains('An error occurred while attempting to log in:').should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
 
-            cy.findByLabelText(defaultMessages.actions.close).click()
+            cy.findByLabelText('Close').click()
           })
 
           cy.withCtx((ctx, o) => {
@@ -713,7 +711,7 @@ describe('App Top Nav Workflows', () => {
             expect(ctx._apis.authApi.logIn).to.have.been.called
           })
 
-          cy.getByRole('dialog', { name: loginText.titleInitial, native: false }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).should('be.visible')
         })
       })
     })
@@ -900,7 +898,6 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.verifyE2ESelected()
-    cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
 
@@ -919,6 +916,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.verifyE2ESelected()
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the prompt never opens, so give it time to open first
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })

@@ -3,6 +3,13 @@ import { useScrollIntoView } from './useScrollIntoView'
 import type { AppState } from './app-state'
 import scroller from './scroller'
 
+// The hook queues its requestAnimationFrame in the effect that marks it mounted,
+// so a frame queued after that runs after the hook's callback
+const afterHookAnimationFrame = () => {
+  cy.get('[data-cy="mounted-status"]').should('have.text', 'mounted')
+  cy.window().then((win) => new Cypress.Promise<void>((resolve) => win.requestAnimationFrame(() => resolve())))
+}
+
 // Test component to render the hook
 const TestComponent = ({ appState, testState, isStudioActive }: {
   appState: AppState
@@ -88,8 +95,6 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
     cy.get('@scrollIntoViewSpy').should('have.been.called')
   })
 
@@ -107,8 +112,6 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
     cy.get('@scrollIntoViewSpy').should('have.been.called')
   })
 
@@ -126,8 +129,7 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
+    afterHookAnimationFrame()
     cy.get('@scrollIntoViewSpy').should('not.have.been.called')
   })
 
@@ -146,8 +148,7 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
+    afterHookAnimationFrame()
     cy.get('@scrollIntoViewSpy').should('not.have.been.called')
   })
 
@@ -165,8 +166,7 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
+    afterHookAnimationFrame()
     cy.get('@scrollIntoViewSpy').should('not.have.been.called')
   })
 
@@ -235,8 +235,6 @@ describe('useScrollIntoView', () => {
         />,
       )
 
-      // Wait for requestAnimationFrame to execute
-      cy.wait(50)
       cy.get('@scrollIntoViewSpy').should('have.been.called')
     })
   })
@@ -268,8 +266,6 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
     cy.get('@scrollIntoViewSpy').should('have.been.called')
 
     // Verify it was called with the correct element
@@ -292,8 +288,6 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
     cy.get('@scrollIntoViewSpy').should('have.been.called')
   })
 
@@ -311,8 +305,6 @@ describe('useScrollIntoView', () => {
       />,
     )
 
-    // Wait for requestAnimationFrame to execute
-    cy.wait(50)
     cy.get('@scrollIntoViewSpy').should('have.been.called') // Should be called because isRunning is true
   })
 })

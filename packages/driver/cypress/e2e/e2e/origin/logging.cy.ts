@@ -136,6 +136,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
         })
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the async error to fire
       cy.wait(300)
     })
 
