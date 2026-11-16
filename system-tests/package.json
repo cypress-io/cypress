@@ -30,7 +30,7 @@
     "**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix"
   },
   "devDependencies": {
-    "@babel/core": "7.28.0",
+    "@babel/core": "7.29.6",
     "@babel/preset-env": "7.28.0",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "^4.0.0",
