@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Network stress</title>
+  <style>
+    body { font: 14px/1.4 system-ui, sans-serif; margin: 24px; }
+    #responses { columns: 4; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Network stress</h1>
+  <p>
+    Loads <code>count</code> responses of <code>bytes</code> each from <code>/api/&lt;kind&gt;</code>,
+    <code>concurrency</code> at a time, over <code>transport</code> (fetch or xhr). With
+    <code>upload</code> set, POSTs that many bytes to <code>/api/upload</code> instead.
+  </p>
+  <button id="start" type="button">Start</button>
+  <dl>
+    <dt>Done</dt><dd id="done">0</dd>
+    <dt>Bytes</dt><dd id="bytes">0</dd>
+    <dt>Errors</dt><dd id="errors">0</dd>
+  </dl>
+  <ol id="responses"></ol>
+
+  <script>
+    const params = new URLSearchParams(location.search)
+    const count = Number(params.get('count') ?? 1)
+    const bytes = Number(params.get('bytes') ?? 100)
+    const concurrency = Number(params.get('concurrency') ?? 6)
+    const kind = params.get('kind') ?? 'json'
+    const transport = params.get('transport') ?? 'fetch'
+    const upload = params.has('upload')
+
+    const doneEl = document.getElementById('done')
+    const bytesEl = document.getElementById('bytes')
+    const errorsEl = document.getElementById('errors')
+    const list = document.getElementById('responses')
+
+    let done = 0
+    let totalBytes = 0
+    let errors = 0
+
+    const url = (id) => upload ? `/api/upload?id=${id}` : `/api/${kind}?bytes=${bytes}&id=${id}`
+
+    const uploadBody = () => 'x'.repeat(bytes)
+
+    const viaFetch = async (id) => {
+      const res = await fetch(url(id), upload ? { method: 'POST', body: uploadBody() } : undefined)
+
+      return { status: res.status, text: await res.text() }
+    }
+
+    const viaXhr = (id) => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+
+        xhr.open(upload ? 'POST' : 'GET', url(id))
+        xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText })
+        xhr.onerror = () => reject(new Error(`request ${id} failed`))
+        xhr.send(upload ? uploadBody() : null)
+      })
+    }
+
+    // Parse a JSON body, as an app would, so its cost is part of every run
+    const sizeOf = (text) => {
+      if (upload) {
+        return JSON.parse(text).received
+      }
+
+      if (kind === 'json') {
+        JSON.parse(text)
+      }
+
+      return text.length
+    }
+
+    const load = async (id) => {
+      try {
+        const { status, text } = await (transport === 'xhr' ? viaXhr(id) : viaFetch(id))
+
+        if (status !== 200) {
+          throw new Error(`request ${id} answered ${status}`)
+        }
+
+        const size = sizeOf(text)
+        const item = document.createElement('li')
+
+        item.className = 'response'
+        item.dataset.id = id
+        item.dataset.bytes = size
+        item.textContent = `#${id}: ${size} bytes`
+        list.append(item)
+
+        totalBytes += size
+      } catch (err) {
+        errors++
+        errorsEl.textContent = errors
+      }
+
+      done++
+      doneEl.textContent = done
+      bytesEl.textContent = totalBytes
+    }
+
+    const start = async () => {
+      let next = 0
+      const worker = async () => {
+        while (next < count) {
+          await load(next++)
+        }
+      }
+
+      await Promise.all(Array.from({ length: Math.min(concurrency, count) }, worker))
+    }
+
+    document.getElementById('start').addEventListener('click', start)
+  </script>
+</body>
+</html>
