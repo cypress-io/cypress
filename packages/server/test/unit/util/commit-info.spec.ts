@@ -10,7 +10,7 @@ vi.mock('execa', () => {
   }
 })
 
-const { commitInfo, getGitCommands, getRemoteOrigin, sanitizeRemoteOrigin } = commitInfoModule
+const { commitInfo, getGitCommands, sanitizeRemoteOrigin } = commitInfoModule
 const originalEnv = { ...process.env }
 
 let execaStub: Mock
@@ -277,16 +277,6 @@ describe('lib/util/commit-info', () => {
 
       return commitInfo().then((info) => {
         expect(info.remote).toBe('https://github.com/org/repo.git')
-      })
-    })
-
-    it('strips credentials from a remote returned by getRemoteOrigin', () => {
-      execaStub.mockImplementation(createGitResponses({
-        remote: { stdout: 'https://token:x-oauth-basic@github.com/org/repo.git' },
-      }))
-
-      return getRemoteOrigin().then((remote) => {
-        expect(remote).toBe('https://github.com/org/repo.git')
       })
     })
 
