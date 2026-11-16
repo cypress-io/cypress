@@ -678,6 +678,28 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     validateFetchHandlers({ listenerCount: 1 })
   })
 
+  // Chrome's update check refetches the script without passing through the
+  // pause Cypress intercepts on, so the installed script has to be the bytes the
+  // server sends. Otherwise every update check installs a new version, which a
+  // worker that calls skipWaiting() and clients.claim() swaps in mid-test.
+  it('does not install a new version when an unchanged script is checked for updates', () => {
+    cy.visit('fixtures/empty.html')
+    cy.window().then((win) => {
+      return win.navigator.serviceWorker.register('/fixtures/service-worker-update-check.js')
+      .then(() => win.navigator.serviceWorker.ready)
+    })
+    .then((registration) => {
+      let updateFound = false
+
+      registration.addEventListener('updatefound', () => {
+        updateFound = true
+      })
+
+      return registration.update().then(() => ({ updateFound, installing: registration.installing }))
+    })
+    .should('deep.equal', { updateFound: false, installing: null })
+  })
+
   it('supports async fetch handler', () => {
     const script = () => {
       self.addEventListener('fetch', async function (event) {

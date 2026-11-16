@@ -791,6 +791,7 @@ export = {
       // new one before this runs again.
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
       browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
+      pageCriClient.serviceWorkerInstrumentation = options.serviceWorkerInstrumentation
 
       // The runner document is served on the AUT's origin, so a root-scoped
       // worker the origin registered in an earlier session is entitled to

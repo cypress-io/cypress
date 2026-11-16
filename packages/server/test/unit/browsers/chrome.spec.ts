@@ -290,6 +290,18 @@ describe('lib/browsers/chrome', () => {
       expect(browserCriClient.reenableChildTargetInterception).toBeUndefined()
     })
 
+    it('hands the service worker instrumentation to the page client on the browser (CDP) network path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBe('(function __cypressInstrument () {})()')
+    })
+
+    it('does not hand the page client service worker instrumentation on the MITM path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBeUndefined()
+    })
+
     it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', async () => {
       await chrome.open({ isHeadless: true } as any, 'http://', openOpts as any, automation)
 

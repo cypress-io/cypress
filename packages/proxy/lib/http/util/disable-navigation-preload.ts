@@ -42,10 +42,11 @@ declare const self: GlobalLike
  * needs its own seam:
  * - Worker realm (`self.registration.navigationPreload`, inside the service
  *   worker's own script): closed by `DISABLE_NAVIGATION_PRELOAD_EXPRESSION`
- *   below. `service-worker-injector.ts` prepends it to every service worker
- *   script fetched through the pipeline, ahead of any user code, so it wins
- *   the race against that worker's own install/activate for any script the
- *   pipeline refetches.
+ *   below. `getServiceWorkerInstrumentationExpression` in
+ *   `service-worker-injector.ts` includes it, and the browser connection
+ *   evaluates that on every service worker that starts paused for the
+ *   debugger, ahead of any user code, so it wins the race against that
+ *   worker's own install/activate.
  * - Window realm (`registration.navigationPreload`, from the page — e.g.
  *   immediately after `serviceWorker.register()`): `enable()` is closed
  *   deterministically by `DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION`
@@ -54,8 +55,8 @@ declare const self: GlobalLike
  *   is active.
  *   That same expression also sweeps `serviceWorkerContainer.
  *   getRegistrations()` to `disable()` a persisted registration from an
- *   earlier run (whose script the pipeline never refetches, so the worker
- *   realm expression never reaches it) — but the sweep runs at the start of
+ *   earlier run (whose worker may already be running before Cypress attaches,
+ *   so the worker realm expression never reaches it) — but the sweep runs at the start of
  *   the navigation that document-start script is evaluated for, and a
  *   persisted worker may already have served that same navigation's preload
  *   response by then. It only reliably prevents preload on that worker's
