@@ -98,9 +98,18 @@ describe('escapeNonLatin1', () => {
     expect(() => escape('var s = String.raw`a\u2019b`')).to.throw(/inside a tagged template.*at line 1, column 21/)
   })
 
-  it('throws for an astral char in an identifier', () => {
-    expect(() => escape('var \u{1D465} = 1')).to.throw(/astral character in an identifier/)
-    expect(() => escape('class A { #\u{1D465} = 1 }')).to.throw(/astral character in an identifier/)
+  it('escapes an astral char in an identifier as a code point escape', () => {
+    const source = 'var \u{1D465} = 1; class A { #\u{1D465} = 2; get () { return this.#\u{1D465} } } \u{1D465} + new A().get()'
+    const escaped = escape(source)
+
+    expect(escaped).to.equal('var \\u{1D465} = 1; class A { #\\u{1D465} = 2; get () { return this.#\\u{1D465} } } \\u{1D465} + new A().get()')
+    expect(evaluate(escaped)).to.equal(3)
+  })
+
+  it('names the location of the first char when the script cannot be parsed', () => {
+    const source = `var s = "\u2019"${'+"a"'.repeat(100000)}`
+
+    expect(() => escape(source)).to.throw(/Could not parse the snapshot script .* at line 1, column 10/)
   })
 
   it('reports where each replacement changed the length or added a line break', () => {

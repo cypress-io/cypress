@@ -4,6 +4,7 @@ const NON_LATIN1 = /[^\0-\xff]/
 const BACKSLASHES_THEN_NON_LATIN1 = /(\\*)([^\0-\xff])/g
 const LINE_SEPARATORS = /[\u2028\u2029]/
 const SURROGATE = /[\ud800-\udfff]/
+const HIGH_SURROGATE = /[\ud800-\udbff]/
 // The non-Latin-1 code points of the ECMAScript WhiteSpace production
 const WHITESPACE = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/
 
@@ -16,6 +17,10 @@ export type Edit = { index: number, delta: number, lineBreak?: true }
 
 function unicodeEscape (char: string) {
   return `\\u${char.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`
+}
+
+function codePointEscape (source: string, index: number) {
+  return `\\u{${(source.codePointAt(index) ?? 0).toString(16).toUpperCase()}}`
 }
 
 function describeLocation (source: string, index: number) {
@@ -68,13 +73,22 @@ function leafContext (node: Node, inTaggedTemplate: boolean): Context | undefine
  */
 function classify (source: string, indexes: number[]) {
   const comments: Range[] = []
-  const ast = parse(source, {
-    ecmaVersion: 'latest',
-    sourceType: 'script',
-    allowHashBang: true,
-    allowReturnOutsideFunction: true,
-    onComment: (_block, _text, start, end) => comments.push({ start, end }),
-  })
+  let ast: Node
+
+  try {
+    ast = parse(source, {
+      ecmaVersion: 'latest',
+      sourceType: 'script',
+      allowHashBang: true,
+      allowReturnOutsideFunction: true,
+      onComment: (_block, _text, start, end) => comments.push({ start, end }),
+    })
+  } catch (err) {
+    throw new Error(
+      `Could not parse the snapshot script to escape its characters above U+00FF, the first at ${describeLocation(source, indexes[0])}: ${err instanceof Error ? err.message : err}`,
+      { cause: err },
+    )
+  }
 
   const contexts = new Map<number, Context>()
 
@@ -114,10 +128,12 @@ function classify (source: string, indexes: number[]) {
 }
 
 /**
- * Rewrites every character above U+00FF without changing what the script does:
- * as a `\uXXXX` escape (a surrogate pair for astral chars) inside literals,
- * identifiers and comments, and as a plain space or newline when it is
- * whitespace or a line terminator between tokens or in a comment.
+ * Rewrites every character above U+00FF without changing the values, matches
+ * or control flow of the script: as a `\uXXXX` escape (a surrogate pair for
+ * astral chars, `\u{...}` in identifiers) inside literals, identifiers and
+ * comments, and as a plain space or newline when it is whitespace or a line
+ * terminator between tokens or in a comment. Source text read back through
+ * `Function#toString` or `RegExp#source` shows the escapes.
  */
 export function escapeNonLatin1 (source: string): { code: string, edits: Edit[] } {
   const indexes: number[] = []
@@ -153,7 +169,10 @@ export function escapeNonLatin1 (source: string): { code: string, edits: Edit[] 
       case 'tagged-template':
         return fail(index, 'inside a tagged template, whose tag can read the raw text. If the tag only reads the cooked strings, write the character as a \\uXXXX escape in the source')
       case 'identifier':
-        return SURROGATE.test(char) ? fail(index, 'astral character in an identifier') : unicodeEscape(char)
+        if (!SURROGATE.test(char)) return unicodeEscape(char)
+
+        // Identifiers reject surrogate-pair escapes, so the whole code point goes in the high surrogate's `\u{...}`
+        return HIGH_SURROGATE.test(char) ? codePointEscape(source, index) : ''
       default:
         // A line terminator ends a `//` comment, whose trailing backslashes are kept, and counts as a newline for automatic semicolon insertion
         if (isLineSeparator) return `${backslashes}\n`
