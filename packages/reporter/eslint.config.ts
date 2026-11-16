@@ -1,9 +1,10 @@
-import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, reactConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...compatConfig,
+  reactConfig(['**/*.{js,jsx,ts,tsx}']),
   {
     languageOptions: {
       parserOptions: {

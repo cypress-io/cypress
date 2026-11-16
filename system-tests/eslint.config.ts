@@ -1,8 +1,9 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig, reactConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
+const fixtureJsxFiles = fixtureDirs.map((dir) => `${dir}/*.{jsx,tsx}`)
 
 const plugins = Object.assign({}, ...baseConfig.map((config) => config.plugins ?? {}))
 
@@ -86,8 +87,6 @@ export default [
       'no-restricted-properties': 'off',
       'no-restricted-syntax': 'off',
       'prefer-const': 'off',
-      'react/no-deprecated': 'off',
-      'react/prop-types': 'off',
       'vue/require-default-prop': 'off',
       // fixture specs produce the timings, videos, command logs and mid-wait
       // errors that system tests assert on, so their fixed waits are the
@@ -118,6 +117,16 @@ export default [
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       'no-debugger': 'off',
+    },
+  },
+  // Every JSX file under the fixtures belongs to a React or Next.js project
+  reactConfig(fixtureJsxFiles),
+  {
+    files: fixtureJsxFiles,
+    rules: {
+      // some fixtures mount with the legacy `ReactDOM.render`, which React 18
+      // still runs, the way apps written before `createRoot` do
+      '@eslint-react/dom-no-render': 'off',
     },
   },
   // The harness asserts with chai, and fixture projects keep specs wherever

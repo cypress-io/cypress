@@ -13,26 +13,26 @@ export default function User (props: { id: string }) {
 
   useEffect(() => {
     // ignore responses for an id that is no longer current
-    let ignore = false
+    const controller = new AbortController()
 
     setUser(null)
     setError(null)
 
-    fetch(`/${props.id}`)
+    fetch(`/${props.id}`, { signal: controller.signal })
     .then((response) => response.json())
     .then((data: UserData) => {
-      if (!ignore) {
+      if (!controller.signal.aborted) {
         setUser(data)
       }
     })
     .catch((err: Error) => {
-      if (!ignore) {
+      if (!controller.signal.aborted) {
         setError(err.message)
       }
     })
 
     return () => {
-      ignore = true
+      controller.abort()
     }
   }, [props.id])
 

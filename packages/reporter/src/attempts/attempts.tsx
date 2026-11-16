@@ -45,6 +45,7 @@ interface AttemptProps {
 const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView }) => {
   const [isMounted, setIsMounted] = useState(false)
 
+  // eslint-disable-next-line @eslint-react/exhaustive-deps -- runs after every render, scrolling from the second one on
   useEffect(() => {
     if (isMounted) {
       scrollIntoView()

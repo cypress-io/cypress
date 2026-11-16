@@ -22,7 +22,7 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **Cypress**: `eslint-plugin-cypress` recommended rules
 - **Mocha**: `eslint-plugin-mocha` recommended rules for testing
 - **Vue**: `eslint-plugin-vue` recommended rules
-- **React**: `eslint-plugin-react` recommended rules (React 18+)
+- **React**: `@eslint-react/eslint-plugin` recommended rules (React 18), opt-in via `reactConfig`
 - **Stylistic**: `@stylistic/eslint-plugin` with custom formatting rules
 - **Import**: `eslint-plugin-import-x` for import/export validation
 - **GraphQL**: `@graphql-eslint/eslint-plugin` for `gql` template literals, opt-in via `graphqlConfig`
@@ -50,7 +50,7 @@ Some recommended rules are turned off because the codebase still has many violat
 - Vue component rules
 - Cypress-specific rules
 
-Re-enabling them, one rule or a small group at a time, is tracked in [cypress-io/cypress#35250](https://github.com/cypress-io/cypress/issues/35250). `react/react-in-jsx-scope` and `react/jsx-uses-react` are also off in that block, but for good: they don't apply to React 18's JSX transform.
+Re-enabling them, one rule or a small group at a time, is tracked in [cypress-io/cypress#35250](https://github.com/cypress-io/cypress/issues/35250).
 
 ## Usage
 
