@@ -128,6 +128,7 @@
   },
   "resolutions": {
     "**/@electron/get": "^4.0.1",
+    "**/@graphql-codegen/plugin-helpers/lodash": "4.18.1",
     "**/@graphql-tools/delegate": "8.2.1",
     "**/@lerna/create/minimatch": "3.1.3",
     "**/@nx/devkit/minimatch": "9.0.7",
@@ -216,7 +217,7 @@
     "del": "3.0.0",
     "electron": "43.8.4",
     "electron-builder": "^25.1.8",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "execa": "4.1.0",
     "fast-xml-parser": "^4.5.4",
     "filesize": "10.1.6",

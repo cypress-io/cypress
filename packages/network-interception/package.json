@@ -36,7 +36,7 @@
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
     "@types/minimatch": "^3.0.3",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "rimraf": "6.1.1",
     "vitest": "^3.2.4"

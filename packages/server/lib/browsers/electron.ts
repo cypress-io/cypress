@@ -490,6 +490,8 @@ export = {
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
     browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
+    }).catch((error) => {
+      debug('failed to set user agent through CDP, relying on the session %o', { error })
     })
 
     return webContents.session.setUserAgent(userAgent)
