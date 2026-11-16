@@ -525,7 +525,9 @@ export class BidiAutomation {
       headers: parsedHeaders,
     }
 
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+    this.automation.onRequestEvent?.('response:received', browserResponseReceived)?.catch((error) => {
+      debugVerbose('error handling response:received %o', { requestId: params.request.request, error })
+    })
   }
 
   private onFetchError = (params: NetworkFetchErrorParameters) => {

@@ -128,6 +128,7 @@
   },
   "resolutions": {
     "**/@electron/get": "^4.0.1",
+    "**/@graphql-codegen/plugin-helpers/lodash": "4.18.1",
     "**/@graphql-tools/delegate": "8.2.1",
     "**/@lerna/create/minimatch": "3.1.3",
     "**/@nx/devkit/minimatch": "9.0.7",
