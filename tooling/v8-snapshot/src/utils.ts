@@ -281,21 +281,33 @@ export function installedElectronResourcesFilePath (
 const commonJsModuleRx = /(at Object.__commonJS\.)([^(]+)([^ :]+) *:(\d+)(.+)/
 
 /**
- * Formats and caches `err.stack` without source-map-support, whose hook throws
- * on the stray `sourceMappingURL`s inside the vm-run snapshot script and would
- * replace the error being reported.
+ * Runs `fn` with V8's default stack formatting. A host `Error.prepareStackTrace`
+ * such as ts-node's source-map-support also formats errors created in vm
+ * contexts, and throws on the stray `sourceMappingURL`s inside the snapshot
+ * script.
  * @category snapshot
  */
-export function formatStackWithoutSourceMaps (err: unknown) {
+export function withDefaultStackTraces<T> (fn: () => T): T {
   const prepareStackTrace = Error.prepareStackTrace
 
   Error.prepareStackTrace = (error, callSites) => `${error}${callSites.map((callSite) => `\n    at ${callSite}`).join('')}`
   try {
-    // Not `instanceof Error`: errors thrown in the vm come from another realm
-    return typeof err === 'object' && err !== null && 'stack' in err ? err.stack : undefined
+    return fn()
   } finally {
     Error.prepareStackTrace = prepareStackTrace
   }
+}
+
+/**
+ * Formats and caches `err.stack` so later reads don't go through a host
+ * `Error.prepareStackTrace`, see {@link withDefaultStackTraces}.
+ * @category snapshot
+ */
+export function formatStackWithoutSourceMaps (err: unknown) {
+  return withDefaultStackTraces(() => {
+    // Not `instanceof Error`: errors thrown in the vm come from another realm
+    return typeof err === 'object' && err !== null && 'stack' in err ? err.stack : undefined
+  })
 }
 
 /**
