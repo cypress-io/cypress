@@ -182,8 +182,9 @@ describe('lib/cloud/auth', function () {
       vi.spyOn(auth._internal, 'launchNativeAuth').mockResolvedValue(undefined)
       vi.spyOn(auth._internal, 'stopServer').mockImplementation(() => {})
 
-      await auth.start(() => {}, 'code')
+      await auth.start(() => {}, 'Binary: Launchpad', 'Nav', 'Log In')
 
+      expect(auth._internal.launchServer).toHaveBeenCalledWith('www.foo.bar', expect.any(Function), 'Binary: Launchpad', 'Nav', 'Log In', 'login')
       expect(auth._internal.stopServer).toHaveBeenCalledOnce()
     })
 
