@@ -1,5 +1,6 @@
 import { URL } from 'url'
 import { telemetry } from '@packages/telemetry'
+import { isLocalhost } from '@packages/network-tools'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import { CookiesHelper } from '../http/util/cookies'
 import { doesTopNeedToBeSimulated } from '../http/util/top-simulation'
@@ -12,10 +13,12 @@ const CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS = 5000
 function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
   if (mw.res.wantsInjection !== 'fullCrossOrigin') return
 
-  const defaultDomain = (new URL(mw.req.proxiedUrl)).hostname
+  const url = new URL(mw.req.proxiedUrl)
+  const defaultDomain = url.hostname
 
   mw.simulatedCookies = mw.getCookieJar()
-  .getCookies(mw.req.proxiedUrl)
+  // browsers treat localhost as a secure context, so its pages read Secure cookies over http
+  .getCookies(mw.req.proxiedUrl, undefined, { secure: url.protocol === 'https:' || isLocalhost(url) })
   .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
   // document.cookie never reads HttpOnly values; it only needs to know they exist so it can't replace them
   .map((cookie) => (cookie.httpOnly ? { ...cookie, value: '' } : cookie))
