@@ -143,14 +143,17 @@ describe('AuthActions', () => {
       expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
 
-    it('does not set user when resetAuthState is called during login', async () => {
+    it('ignores a login that completes after resetAuthState', async () => {
+      let completeLogin: (user: AuthenticatedUserShape) => void = () => {}
+
       jest.mocked(ctx._apis.authApi.logIn).mockImplementation(
-        () => new Promise<AuthenticatedUserShape>(() => {}),
+        () => new Promise<AuthenticatedUserShape>((resolve) => completeLogin = resolve),
       )
 
       const loginPromise = actions.login('Binary: App', 'In-App')
 
       actions.resetAuthState()
+      completeLogin({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
 
       await loginPromise
       expect(ctx.coreData.user).toBeNull()

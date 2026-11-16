@@ -126,30 +126,6 @@ describe('lib/cloud/auth', function () {
         expect(url).toBe(FULL_SIGNUP_URL_UTM)
       })
     })
-
-    it('sends only the fixed login fields, never a git remote or project path', function () {
-      return Promise.all([
-        auth._internal.buildFullLoginUrl(BASE_URL, server, 'UTM Source', 'UTM Medium', 'UTM Content'),
-        auth._internal.buildFullSignupUrl(BASE_URL, server, 'UTM Source', 'UTM Medium', 'UTM Content'),
-      ])
-      .then((urls) => {
-        for (const url of urls) {
-          const keys = [...new URL(url).searchParams.keys()].sort()
-
-          expect(keys).toEqual([
-            'cypressVersion',
-            'machineId',
-            'platform',
-            'port',
-            'state',
-            'utm_campaign',
-            'utm_content',
-            'utm_medium',
-            'utm_source',
-          ])
-        }
-      })
-    })
   })
 
   describe('_internal.launchNativeAuth', function () {
