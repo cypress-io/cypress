@@ -87,7 +87,7 @@
     "jimp": "1.6.1",
     "jiti": "^2.4.2",
     "jquery": "3.7.1",
-    "js-cookie": "3.0.5",
+    "js-cookie": "3.0.7",
     "jsdom": "^26.0.0",
     "json-stable-stringify": "1.0.1",
     "lodash": "^4.17.21",
