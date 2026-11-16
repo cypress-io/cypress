@@ -1,4 +1,4 @@
-import { baseConfig, graphqlConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
+import { baseConfig, graphqlConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -13,6 +13,7 @@ export default [
       },
     },
   },
+  noFloatingPromisesConfig(['src/**/*.ts', 'graphql/**/*.ts']),
   {
     // Tests and build scripts may use sync fs and the other APIs restricted in shipped code
     files: ['test/**', 'scripts/**'],

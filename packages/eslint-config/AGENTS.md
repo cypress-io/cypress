@@ -15,11 +15,13 @@ yarn workspace @packages/eslint-config lint
 src/
   baseConfig.ts         Core flat-config with TypeScript, import, and stylistic rules
   cliOverrides.ts       Overrides applied for CLI/Node.js contexts
+  compatConfig.ts       Opt-in browser-API compatibility checks (eslint-plugin-compat) for the browser bundles' shipped source
   frontendOverrides.ts  Rules shared by app, launchpad and frontend-shared, such as type-only imports from data-context in .vue files
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
+  typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
   vitestConfig.ts       Opt-in linting of Vitest specs (@vitest/eslint-plugin), for workspaces whose unit tests run on Vitest
   vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
   reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
@@ -42,7 +44,7 @@ src/
 
 A new workspace lints itself with its own config:
 
-1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), and `vitestConfig` if its unit tests run on Vitest:
+1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), or `compatConfig` if it is one that ships to the supported browsers (see [`compatConfig`](#compatconfig)), and `vitestConfig` if its unit tests run on Vitest:
 
    ```ts
    import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
@@ -79,7 +81,9 @@ It is built on `eslint-plugin-jsonc` and `eslint-plugin-package-json`, and every
 
 The first `eslint --fix` after a package opts in reorders its `package.json` top-level keys. That diff is expected.
 
-`eslint-plugin-jsonc` is on v2. v3 needs ESLint 9.38 or later, which the installed ESLint 10 meets, so it can move. `eslint-plugin-package-json` is pinned to 0.x, because 1.x moves to `jsonc-eslint-parser` v3 and declares a peer dependency on `@eslint/json`. `@eslint/json` itself doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
+`jsonConfig` takes only the rules from `eslint-plugin-jsonc`'s `recommended-with-json`, merged across the preset's blocks. Spreading the preset would add its own `files` globs, which make ESLint lint `tsconfig*.json` and `.vscode/**` regardless of the `ignores` above. `eslint-plugin-jsonc`, `eslint-plugin-package-json` and `jsonc-eslint-parser` share one `jsonc-eslint-parser` major, so move them together. The plugin no longer re-exports the parser, so `jsonConfig` imports it directly.
+
+`eslint-plugin-package-json` lists `@eslint/json` as an optional peer, which `jsonConfig` doesn't install. `@eslint/json` doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
 
 ## `nodeConfig`
 
@@ -102,6 +106,63 @@ Every workspace opts in except the browser bundles, whose floor is the supported
 `n/no-process-exit` is left off: almost all of its hits are CLIs and scripts that exit on purpose. The plugin's optional `ts-declaration-location` peer is only needed by `n/no-sync`, which isn't enabled.
 
 `nodeConfig.ts` loads the plugin with `require` rather than `import`. Its types export a string-named `"module.exports"`, which TypeScript only parses from 5.6 and import-x's parser not at all. An `import` fails `check-ts` in every workspace whose `tsconfig` takes in its `eslint.config.ts`.
+
+## `compatConfig`
+
+`compatConfig` checks the browser bundles against the browser [runtime floor](../../AGENTS.md#runtime-targets), the counterpart of `nodeConfig` for code that ships to the browser. Spread it after `baseConfig` and `jsonConfig`. It is built on `eslint-plugin-compat` and turns on `compat/compat`, which reports a browser or ES API that one of the target browsers lacks.
+
+- **Targets** come from `browser-bundles.browserslistrc` at the repo root, through `settings.browserslistOpts.config`. The file's name keeps browserslist from discovering it: any `.browserslistrc`, `browserslist` file or `browserslist` key in a `package.json` above a build switches webpack's default target from `web` to `browserslist`, which breaks `@packages/extension`'s build, and changes the output of the `autoprefixer: {}` PostCSS configs in app, launchpad, frontend-shared and reporter. Read the file by path from anything else that needs the floor. A missing file fails the lint run instead of falling back to browserslist's defaults. A `BROWSERSLIST` environment variable takes precedence over the file, so unset it before trusting a clean run.
+- **Files**: shipped source only, `src/**` and `injection/**`, minus `*.cy.*`, `*.spec.*`, `*.test.*` and `.d.ts`. Specs run in whatever browser Cypress launches for them, so the floor doesn't apply. A workspace with shipped entry points outside those directories adds them when it spreads the config, as `runner` does for `unified-runner.tsx` and `driver` for `index.ts`:
+
+  ```ts
+  ...compatConfig.map((block) => ({ ...block, files: [...(block.files ?? []), 'unified-runner.tsx'] })),
+  ```
+- **`lintAllEsApis`** is on, so ES built-ins are checked as well as web APIs. The plugin would otherwise skip them in any directory with a babel config.
+
+The bundlers don't read the file yet. Their targets are set separately in `packages/web-config/webpack.config.base.ts` (`preset-env` at `chrome: 64`), app's `vite.config.mjs` (`build.target: 'ES2022'`, plugin-legacy at `last 3 major versions`), and the PostCSS configs (browserslist's defaults). Moving them onto this file would change shipped output, so it is a change of its own.
+
+Opted in: `driver`, `app`, `frontend-shared`, `reporter` and `runner`. Not opted in:
+
+- `launchpad` only renders in Electron's own window, so its floor is the pinned Electron's Chromium, not the supported browsers. The components it shares with `app` are checked through `frontend-shared`.
+- `extension` only ever loads in Chrome and Firefox, so the Safari part of the floor doesn't apply to it.
+- `example` is generated from `cypress-example-kitchensink`, where it would have to be fixed.
+- The mount adapters (`npm/react`, `npm/vue`, `npm/angular`, `npm/svelte`, `npm/mount-utils`) and the browser files of `vite-dev-server`, `vite-plugin-cypress-esm` and `webpack-dev-server` also run on the floor but haven't been opted in yet.
+
+**The check has coverage gaps, so it doesn't replace verifying a new API on caniuse or MDN.** A clean run only means the plugin knows of no problem:
+
+- Its ES built-ins come from an old `@mdn/browser-compat-data` snapshot (through `ast-metadata-inferer`), so newer ones such as `Promise.withResolvers`, `Promise.try`, `Map.groupBy`, `Iterator.from` and `Set.prototype.union` are never reported, even below the version that added them.
+- Some web APIs are missing too: `window.showOpenFilePicker()` passes, though Safari and Firefox lack it.
+- It checks API calls, not syntax, and treats an API behind a feature check (`if ('getBattery' in navigator)`) as guarded.
+
+A hit that is intentional, such as an API used only behind a feature check the plugin doesn't recognise, takes `// eslint-disable-next-line compat/compat -- <reason>`.
+
+## `noFloatingPromisesConfig`
+
+`noFloatingPromisesConfig(files)` turns on `@typescript-eslint/no-floating-promises` for `files`: a promise must be awaited, returned, or given a rejection handler (`.catch()`, or `.then()` with two arguments), so a rejection can't go unobserved. It returns a single block, not an array, so add it after `baseConfig` and the workspace's `tsconfigRootDir` block without spreading it:
+
+```ts
+noFloatingPromisesConfig(['lib/**/*.ts']),
+```
+
+The rule needs type information, so the block also gives `files` a project service. Type-aware parsing is what makes lint slower, so pass only the TypeScript source the rule is meant for, never the whole workspace. Every file in `files` must be in the workspace's `tsconfig.json`, or the parser reports it `was not found by the project service` (see [Adding a workspace](#adding-a-workspace)).
+
+The block also turns off `vue/no-ref-as-operand`, which `baseConfig` applies to every `.ts` file. Once a file has type information, that rule asks the type checker whether each operand is a Vue `Ref`, which slows lint in workspaces with no Vue code. Don't add the block to `app`, `launchpad` or `frontend-shared`, whose composables need the rule.
+
+Fix a hit by awaiting, returning or handling the promise. Use `void` only for fire-and-forget, with a comment saying why it can't reject or what happens if it does.
+
+These workspaces opt in, for their shipped source only:
+
+- `server`, `proxy`, `net-stubbing`, `https-proxy`, `socket`, `resolve-dist`: `lib/**/*.ts`
+- `network`: `lib/*.ts`, matching its `tsconfig.json`
+- `launcher`: `index.ts` and `lib/**/*.ts`
+- `driver`: `index.ts` and `src/**/*.ts`
+- `data-context`: `src/**/*.ts` and `graphql/**/*.ts`
+- `scaffold-config`, `v8-snapshot-require`: `src/**/*.ts`
+- `config`: `src/**/*.ts` and `test/**/*.ts`
+- `reporter`: `src/**/*.{ts,tsx}` and `cypress/**/*.ts`
+- `icons`: `index.ts` and `index.mts`
+
+Specs are left out (`config` and `reporter` predate this and keep theirs): they commonly start a promise and assert on it later, so the hits are mostly noise, and giving them a project service would slow lint further. The other workspaces don't opt in yet; adding one means fixing its hits and measuring its lint time first.
 
 ## `vitestConfig`
 

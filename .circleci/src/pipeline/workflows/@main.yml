@@ -73,6 +73,10 @@ linux-x64:
     - server-performance-tests:
         requires:
           - build
+    - open-mode-telemetry:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - system-tests-node-modules-install:
         context: test-runner:performance-tracking
         requires:

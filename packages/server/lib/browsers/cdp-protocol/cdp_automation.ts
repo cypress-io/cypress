@@ -298,7 +298,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       headers: params.response.headers,
     }
 
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+    this.automation.onRequestEvent?.('response:received', browserResponseReceived)?.catch((error) => {
+      debugVerbose('error handling response:received %o', { requestId: params.requestId, error })
+    })
   }
 
   private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {

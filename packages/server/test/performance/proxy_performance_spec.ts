@@ -9,7 +9,9 @@ import cp from 'child_process'
 import Debug from 'debug'
 import fse from 'fs-extra'
 import fs from 'fs'
+import getPort from 'get-port'
 import http2 from 'http2'
+import type { AddressInfo } from 'net'
 import os from 'os'
 import path from 'path'
 import _ from 'lodash'
@@ -119,42 +121,20 @@ const URLS_UNDER_TEST = [
 
 const start = Number(new Date()) / 1000
 
-const PROXY_PORT = process.env.PROXY_PORT || 45678
-const HTTPS_PROXY_PORT = process.env.HTTPS_PROXY_PORT || 45681
-const CY_PROXY_PORT = 45680
-// the proxy-disabled ServerBase must bind a port to open(), but the browser
-// never connects to it — interception happens over the CDP connection
-const PROXY_DISABLED_CY_SERVER_PORT = 45682
+// every listener binds port 0 by default: any fixed port inside Linux's
+// ephemeral range (32768-60999) can already be held by an outbound socket
+const ports = {
+  proxy: Number(process.env.PROXY_PORT) || 0,
+  httpsProxy: Number(process.env.HTTPS_PROXY_PORT) || 0,
+  cyProxy: 0,
+  latencyOrigin: 0,
+}
 
 // HTTP/2's win is eliminating HTTP/1.1 connection queueing, which requires
 // per-request latency — near-zero on CI, so the hosted page can't show the win
 // there. This origin injects the latency as a per-response delay instead.
-const HTTP2_LATENCY_ORIGIN_PORT = 45333
 const HTTP2_LATENCY_ORIGIN_DELAY_MS = 50
-const HTTP2_LATENCY_ORIGIN_URL = `https://localhost:${HTTP2_LATENCY_ORIGIN_PORT}/index1000.html`
-
-// Chrome's debug port is randomized per launch, so the range has to stay clear
-// of every fixed port this spec binds. A collision leaves Chrome unable to
-// bind, and runHar's ECONNREFUSED retry reuses the same port — so the run
-// hangs to the timeout instead of recovering.
-const CDP_PORT_RANGE_START = 46000
-const CDP_PORT_RANGE_SIZE = 10000
-
-const FIXED_PORTS = {
-  PROXY_PORT,
-  HTTPS_PROXY_PORT,
-  CY_PROXY_PORT,
-  PROXY_DISABLED_CY_SERVER_PORT,
-  HTTP2_LATENCY_ORIGIN_PORT,
-}
-
-// enforced rather than commented: PROXY_PORT/HTTPS_PROXY_PORT come from the
-// environment, so the invariant can be broken from outside this file
-Object.entries(FIXED_PORTS).forEach(([name, port]) => {
-  if (Number(port) >= CDP_PORT_RANGE_START && Number(port) < CDP_PORT_RANGE_START + CDP_PORT_RANGE_SIZE) {
-    throw new Error(`${name} (${port}) falls inside the randomized Chrome debug-port range ${CDP_PORT_RANGE_START}-${CDP_PORT_RANGE_START + CDP_PORT_RANGE_SIZE - 1}; pick a port outside it`)
-  }
-})
+const latencyOriginUrl = () => `https://localhost:${ports.latencyOrigin}/index1000.html`
 
 const TEST_CASES: TestCase[] = [
   // these first 4 cases don't involve Cypress, don't need to run every time
@@ -300,11 +280,11 @@ const startLatencyOrigin = (cert: string, key: string) => {
     res.end(html)
   })
 
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<number>((resolve, reject) => {
     // explicit loopback bind + loud failure: a soft conflict (another
     // process on the IPv4 side) would otherwise misroute every request
     server.on('error', reject)
-    server.listen(HTTP2_LATENCY_ORIGIN_PORT, '127.0.0.1', () => resolve())
+    server.listen(0, '127.0.0.1', () => resolve((server.address() as AddressInfo).port))
   })
 }
 
@@ -503,8 +483,8 @@ interface RunBrowserTestOptions {
   captureTimeoutMs?: number
 }
 
-const runBrowserTest = (urlUnderTest: string, testCase: TestCase, { onHar, onWire, captureTimeoutMs }: RunBrowserTestOptions = {}) => {
-  const cdpPort = CDP_PORT_RANGE_START + Math.floor(Math.random() * CDP_PORT_RANGE_SIZE)
+const runBrowserTest = async (urlUnderTest: string, testCase: TestCase, { onHar, onWire, captureTimeoutMs }: RunBrowserTestOptions = {}) => {
+  const cdpPort = await getPort()
 
   const browser = {
     isHeadless: true,
@@ -533,7 +513,7 @@ const runBrowserTest = (urlUnderTest: string, testCase: TestCase, { onHar, onWir
   }
 
   if (testCase.cyProxy) {
-    args.push(`--proxy-server=http://localhost:${CY_PROXY_PORT}`)
+    args.push(`--proxy-server=http://localhost:${ports.cyProxy}`)
     // Chrome implicitly bypasses proxies for loopback hosts; subtract the
     // implicit bypass (as production Cypress does) so the synthetic latency
     // origin still routes through the proxy
@@ -541,15 +521,15 @@ const runBrowserTest = (urlUnderTest: string, testCase: TestCase, { onHar, onWir
   }
 
   if (testCase.upstreamProxy && !testCase.cyProxy) {
-    args.push(`--proxy-server=http://localhost:${PROXY_PORT}`)
+    args.push(`--proxy-server=http://localhost:${ports.proxy}`)
   } else if (testCase.httpsUpstreamProxy && !testCase.cyProxy) {
-    args.push(`--proxy-server=https://localhost:${HTTPS_PROXY_PORT}`)
+    args.push(`--proxy-server=https://localhost:${ports.httpsProxy}`)
   }
 
   if (testCase.upstreamProxy && testCase.cyProxy) {
-    process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://localhost:${PROXY_PORT}`
+    process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://localhost:${ports.proxy}`
   } else if (testCase.httpsUpstreamProxy && testCase.cyProxy) {
-    process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `https://localhost:${HTTPS_PROXY_PORT}`
+    process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `https://localhost:${ports.httpsProxy}`
   } else {
     delete process.env.HTTPS_PROXY
     delete process.env.HTTP_PROXY
@@ -730,14 +710,23 @@ describe('Proxy Performance', function () {
         return ca.generateServerCertificateKeys('localhost')
       })
       .then(([cert, key]) => {
+        const proxy = new DebuggingProxy()
+        const httpsProxy = new DebuggingProxy({
+          https: { cert, key },
+        })
+
         return Promise.join(
-          new DebuggingProxy().start(PROXY_PORT),
+          proxy.start(ports.proxy).then(() => {
+            ports.proxy = proxy.server.address().port
+          }),
 
-          new DebuggingProxy({
-            https: { cert, key },
-          }).start(HTTPS_PROXY_PORT),
+          httpsProxy.start(ports.httpsProxy).then(() => {
+            ports.httpsProxy = httpsProxy.server.address().port
+          }),
 
-          startLatencyOrigin(cert, key),
+          startLatencyOrigin(cert, key).then((port) => {
+            ports.latencyOrigin = port
+          }),
 
           setupFullConfigWithDefaults({
             projectRoot: '/tmp/a',
@@ -745,7 +734,7 @@ describe('Proxy Performance', function () {
               supportFile: false,
             },
           }, getFilesByGlob).then((config) => {
-            config.port = CY_PROXY_PORT
+            config.port = ports.cyProxy
 
             // turn off morgan
             config.morgan = false
@@ -762,6 +751,8 @@ describe('Proxy Performance', function () {
               // --proxy-server, and an https origin reaches it by CONNECT —
               // which the server refuses until a launch resolves it onto the
               // MITM path, as ProjectBase does before launching a proxy browser
+              ports.cyProxy = cyServer._port()
+
               await cyServer.setNetworkMode(false)
 
               // killing Chrome between measurements resets browser<->proxy
@@ -780,7 +771,9 @@ describe('Proxy Performance', function () {
             }, getFilesByGlob)
           })
           .then((config) => {
-            config.port = PROXY_DISABLED_CY_SERVER_PORT
+            // the browser never connects to this server — interception
+            // happens over the CDP connection — but open() has to bind a port
+            config.port = 0
             config.morgan = false
 
             proxyDisabledServer = new ServerBase(config)
@@ -963,7 +956,7 @@ describe('Proxy Performance', function () {
     })
   })
 
-  describe(`${HTTP2_LATENCY_ORIGIN_URL} (synthetic latency origin)`, function () {
+  describe('synthetic latency origin', function () {
     this.retries(15)
     // each test here is a paired measurement — two full captures per attempt
     this.timeout(2 * HTTP2_LATENCY_CAPTURE_TIMEOUT_MS + (30 * 1000))
@@ -979,7 +972,7 @@ describe('Proxy Performance', function () {
       console.table(testCases)
 
       return Promise.map(testCases, (testCase) => {
-        testCase['URL'] = HTTP2_LATENCY_ORIGIN_URL
+        testCase['URL'] = latencyOriginUrl()
 
         return performance.track('Proxy Performance', testCase)
       })
@@ -990,11 +983,11 @@ describe('Proxy Performance', function () {
       let proxyDisabledWire!: WireEvidence
 
       // paired and time-adjacent: both sides re-measured on every retry
-      const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, mitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
+      const mitmResults = await runBrowserTest(latencyOriginUrl(), mitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
         mitmWire = wire
       } })
 
-      const proxyDisabledResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, proxyDisabledCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
+      const proxyDisabledResults = await runBrowserTest(latencyOriginUrl(), proxyDisabledCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
         proxyDisabledWire = wire
       } })
 
@@ -1015,8 +1008,8 @@ describe('Proxy Performance', function () {
 
       let wireEvidence!: WireEvidence
 
-      const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, pairedMitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS })
-      const results = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, proxyDisabledNoH2Case, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
+      const mitmResults = await runBrowserTest(latencyOriginUrl(), pairedMitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS })
+      const results = await runBrowserTest(latencyOriginUrl(), proxyDisabledNoH2Case, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
         wireEvidence = wire
       } })
 
