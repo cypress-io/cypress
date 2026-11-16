@@ -91,7 +91,7 @@
     "mocked-env": "1.2.4",
     "mockery": "2.1.0",
     "morgan": "1.9.1",
-    "multer": "2.0.2",
+    "multer": "2.1.1",
     "nock": "13.2.9",
     "ospath": "1.2.2",
     "proxyquire": "2.1.3",
