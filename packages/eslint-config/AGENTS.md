@@ -81,7 +81,9 @@ It is built on `eslint-plugin-jsonc` and `eslint-plugin-package-json`, and every
 
 The first `eslint --fix` after a package opts in reorders its `package.json` top-level keys. That diff is expected.
 
-`eslint-plugin-jsonc` is on v2. v3 needs ESLint 9.38 or later, which the installed ESLint 10 meets, so it can move. `eslint-plugin-package-json` is pinned to 0.x, because 1.x moves to `jsonc-eslint-parser` v3 and declares a peer dependency on `@eslint/json`. `@eslint/json` itself doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
+`jsonConfig` takes only the rules from `eslint-plugin-jsonc`'s `recommended-with-json`, merged across the preset's blocks. Spreading the preset would add its own `files` globs, which make ESLint lint `tsconfig*.json` and `.vscode/**` regardless of the `ignores` above. `eslint-plugin-jsonc`, `eslint-plugin-package-json` and `jsonc-eslint-parser` share one `jsonc-eslint-parser` major, so move them together. The plugin no longer re-exports the parser, so `jsonConfig` imports it directly.
+
+`eslint-plugin-package-json` lists `@eslint/json` as an optional peer, which `jsonConfig` doesn't install. `@eslint/json` doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
 
 ## `nodeConfig`
 

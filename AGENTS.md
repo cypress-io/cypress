@@ -279,6 +279,10 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 - Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
+### Dependency Updates
+
+Whether you're bumping a dependency or reviewing a Renovate PR, follow [Code Review of Dependency Updates](./CONTRIBUTING.md#code-review-of-dependency-updates). Read the changelog for every version in the range, not just the target release, and don't trust semver to flag breaking changes. Check the dependency's `engines.node` against the floor of the runtime that loads it (see [Runtime targets](#runtime-targets)), not the dev Node version.
+
 ## CI/CD
 
 - **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs, v8 snapshot validation).
