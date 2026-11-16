@@ -280,22 +280,47 @@ export function installedElectronResourcesFilePath (
 // at Object.__commonJS../node_modules/mute-stream/mute.js (/Volumes/d/dev/cy/perf-tr1/v8-snapshot/example-multi/cache/snapshot.js:10555:43)
 const commonJsModuleRx = /(at Object.__commonJS\.)([^(]+)([^ :]+) *:(\d+)(.+)/
 
+const stackTraceWithoutSourceMaps = (error: unknown, callSites: NodeJS.CallSite[]) => {
+  return `${error}${callSites.map((callSite) => `\n    at ${callSite}`).join('')}`
+}
+
 /**
- * Formats and caches `err.stack` without source-map-support, whose hook throws
- * on the stray `sourceMappingURL`s inside the vm-run snapshot script and would
- * replace the error being reported.
+ * Disables source-map-support stack rewriting for snapshot generation. Its hook
+ * throws on the stray `sourceMappingURL`s inside the vm-run snapshot script and
+ * would replace the error being reported.
+ * @category snapshot
+ */
+export function useStackTracesWithoutSourceMaps () {
+  Error.prepareStackTrace = stackTraceWithoutSourceMaps
+}
+
+/**
+ * Returns `err.stack` after {@link useStackTracesWithoutSourceMaps} is active.
  * @category snapshot
  */
 export function formatStackWithoutSourceMaps (err: unknown) {
-  const prepareStackTrace = Error.prepareStackTrace
-
-  Error.prepareStackTrace = (error, callSites) => `${error}${callSites.map((callSite) => `\n    at ${callSite}`).join('')}`
-  try {
-    // Not `instanceof Error`: errors thrown in the vm come from another realm
-    return typeof err === 'object' && err !== null && 'stack' in err ? err.stack : undefined
-  } finally {
-    Error.prepareStackTrace = prepareStackTrace
+  // Not `instanceof Error`: errors thrown in the vm come from another realm
+  if (typeof err !== 'object' || err === null || !('stack' in err)) {
+    return undefined
   }
+
+  const { stack } = err
+
+  return typeof stack === 'string' ? stack : undefined
+}
+
+function logErrorWithoutSourceMaps (err: unknown) {
+  const stack = formatStackWithoutSourceMaps(err)
+
+  if (stack != null) {
+    // eslint-disable-next-line no-console
+    console.error(stack)
+
+    return
+  }
+
+  // eslint-disable-next-line no-console
+  console.error(err)
 }
 
 /**
@@ -312,8 +337,7 @@ export function prettyPrintError (err: Error, baseDirPath: string) {
         commonJsModuleRx.test(err.stack))
     )
   ) {
-    // eslint-disable-next-line no-console
-    console.error(err)
+    logErrorWithoutSourceMaps(err)
 
     return
   }

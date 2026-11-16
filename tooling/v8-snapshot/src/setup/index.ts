@@ -4,9 +4,11 @@ import { generateMetadata } from './generate-metadata'
 import minimist from 'minimist'
 import { generateEntry } from './generate-entry'
 import { installSnapshot } from './install-snapshot'
-import { formatStackWithoutSourceMaps } from '../utils'
+import { formatStackWithoutSourceMaps, useStackTracesWithoutSourceMaps } from '../utils'
 
 const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource, supportCypressInCypress, useExistingSnapshotScript, updateSnapshotScriptContents }: { cypressAppPath?: string, integrityCheckSource?: string, supportCypressInCypress?: boolean, useExistingSnapshotScript?: boolean, updateSnapshotScriptContents?: (contents: string) => string } = {}) => {
+  useStackTracesWithoutSourceMaps()
+
   try {
     const args = minimist(process.argv.slice(2))
     const config = createConfig({ env: args.env, cypressAppPath, integrityCheckSource, supportCypressInCypress, useExistingSnapshotScript, updateSnapshotScriptContents })
@@ -20,9 +22,10 @@ const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource, supportC
 
     return snapshotFileLocation
   } catch (err) {
-    formatStackWithoutSourceMaps(err)
+    const stack = formatStackWithoutSourceMaps(err)
+
     // eslint-disable-next-line no-console
-    console.error(err)
+    console.error(stack ?? err)
     // eslint-disable-next-line no-console
     console.error(`Snapshot generation has failed. If you continue to see this error, you can generate snapshots from scratch by running:
 
