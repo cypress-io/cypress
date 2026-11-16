@@ -17,11 +17,19 @@ const startCypress = async () => {
     // One off require calls to tsx are needed for now to prevent side effects when building the binary.
     const { patchPromiseThen } = require('./lib/util/patch_promise_then')
     const { initializeStartTime } = require('./lib/util/performance_benchmark')
+    const { getStartBundlePaths, loadStartBundle } = require('./lib/util/start_bundle')
 
     unregister()
 
     patchPromiseThen()
     initializeStartTime()
+
+    // The binary build replaces start-cypress.js with a single bundle of the main process
+    if (require('fs').existsSync(getStartBundlePaths(__dirname).bundlePath)) {
+      await loadStartBundle(__dirname)
+
+      return
+    }
 
     // No typescript requires before this point please
     // typescript isn't interpreted until the start cypress file
