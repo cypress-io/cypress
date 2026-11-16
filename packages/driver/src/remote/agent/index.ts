@@ -55,7 +55,7 @@ import type {
   ResolveResult,
   TypeArgs,
 } from '../protocol'
-import { AGENT_GLOBAL } from '../protocol'
+import { AGENT_GLOBAL, PROTOCOL_ELEMENT_ID_REQUEST, PROTOCOL_ELEMENT_ID_RESPONSE } from '../protocol'
 
 const RETRY_INTERVAL = 16
 
@@ -148,7 +148,27 @@ const getAttributes = (el: HTMLElement) => {
   return attributes
 }
 
-const describe = (el: HTMLElement, reads?: RemoteReads): RemoteElementProps => {
+// The agent's world can't call into the page's, but both see the element's events, and the
+// capture code answers this one synchronously
+const requestProtocolElementId = (el: HTMLElement): string | undefined => {
+  let protocolElementId: string | undefined
+
+  const onResponse = (event: Event) => {
+    const detail = Reflect.get(event, 'detail')
+
+    if (typeof detail === 'string') {
+      protocolElementId = detail
+    }
+  }
+
+  el.addEventListener(PROTOCOL_ELEMENT_ID_RESPONSE, onResponse)
+  el.dispatchEvent(new Event(PROTOCOL_ELEMENT_ID_REQUEST, { bubbles: true, composed: true }))
+  el.removeEventListener(PROTOCOL_ELEMENT_ID_RESPONSE, onResponse)
+
+  return protocolElementId
+}
+
+const describe = (el: HTMLElement, reads: RemoteReads | undefined, isProtocolEnabled: boolean): RemoteElementProps => {
   const $el = $(el)
 
   // a shadow root from .shadow() is a node but not an element
@@ -175,6 +195,7 @@ const describe = (el: HTMLElement, reads?: RemoteReads): RemoteElementProps => {
     focused: $dom.isFocused(el),
     focusable: $dom.isFocusable($el),
     empty: $el.is(':empty'),
+    ...(isProtocolEnabled && { protocolElementId: requestProtocolElementId(el) }),
     ...(reads && {
       styles: _.fromPairs(reads.styles.map((name) => [name, $el.css(name)])),
       descendants: _.fromPairs(reads.descendants.map((selector) => [selector, $el.has(selector).length > 0])),
@@ -182,8 +203,8 @@ const describe = (el: HTMLElement, reads?: RemoteReads): RemoteElementProps => {
   }
 }
 
-const resolve = ({ steps, reads }: ResolveArgs): ResolveResult => {
-  return { elements: runSteps(steps).toArray().map((el) => describe(el, reads)) }
+const resolve = (context: AgentContext, { steps, reads }: ResolveArgs): ResolveResult => {
+  return { elements: runSteps(steps).toArray().map((el) => describe(el, reads, context.isProtocolEnabled)) }
 }
 
 // The server reads the element by reference to ask CDP which frame it owns, or
@@ -693,7 +714,7 @@ const serializeError = (err: any): AgentError => {
 }
 
 const methods = {
-  resolve: (context: AgentContext, args: ResolveArgs) => resolve(args),
+  resolve: (context: AgentContext, args: ResolveArgs) => resolve(context, args),
   click,
   type,
   clearLocalStorage,

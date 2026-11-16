@@ -21,11 +21,12 @@ export const flushRemoteErrors = (Cypress: AgentCypress) => {
 }
 
 // what callAgent uses of Cypress
-type AgentCypress = Pick<ICypress, 'config' | 'browser' | 'action'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
+type AgentCypress = Pick<ICypress, 'config' | 'browser' | 'action' | 'state'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
 
 const getContext = (Cypress: AgentCypress): AgentContext => {
   return {
     browser: Cypress.browser,
+    isProtocolEnabled: !!Cypress.state('isProtocolEnabled'),
     config: {
       visibilityStrategy: Cypress.config('visibilityStrategy'),
       scrollBehavior: Cypress.config('scrollBehavior'),
@@ -138,7 +139,7 @@ export const extendRemoteSubject = (cmd: string, subject: unknown, step: QuerySt
 }
 
 // A cy.visit callback runs in the AUT's own window, so it's sent as source and can't close over test values
-export const serializeCallback = (fn: Function) => {
+export const serializeCallback = (fn: (...args: any[]) => unknown) => {
   const source = fn.toString()
 
   // a method shorthand such as `onLoad (win) {}` is only valid source as an object member
