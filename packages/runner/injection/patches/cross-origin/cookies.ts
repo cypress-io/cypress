@@ -16,7 +16,10 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   if (!documentCookieString || !documentCookieString.trim().length) return []
 
   return documentCookieString.split(';').map((cookieString) => {
-    const [name, value] = cookieString.split('=')
+    // a cookie without a name has no '=', and a value may contain one
+    const separator = cookieString.indexOf('=')
+    const name = separator === -1 ? '' : cookieString.slice(0, separator)
+    const value = cookieString.slice(separator + 1)
 
     const cookieDomain = location.hostname
 
@@ -101,7 +104,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       const cookie = parseDocumentCookie(stringValue, pathname)
 
       // the server drops writes that break these rules, so keep them out of document.cookie too
-      if (!cookie || !meetsDocumentCookieRules(cookie, isSecure)) return getDocumentCookieValue()
+      if (!cookie || !meetsDocumentCookieRules(cookie, isSecure, domain)) return getDocumentCookieValue()
 
       const stored = { name: cookie.key, domain: cookie.domain || domain, path: cookie.path || '/' }
       const isBlocked = cookieJar.getAllCookies().some((existing) => {

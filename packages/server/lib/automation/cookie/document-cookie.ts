@@ -34,9 +34,9 @@ const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
 
 const resolveDomain = (cookie: Cookie, url: URL): Cookie | undefined => {
   try {
-    // the shared jar does not reject public suffixes, so a throwaway one resolves
-    // the domain and applies tough-cookie's domain and HttpOnly rules
-    return new ToughCookieJar(undefined, { rejectPublicSuffixes: true }).setCookieSync(cookie, url.href, { http: false })
+    // a throwaway jar resolves the domain and applies tough-cookie's domain and
+    // HttpOnly rules without storing anything
+    return new ToughCookieJar(undefined, { rejectPublicSuffixes: false }).setCookieSync(cookie, url.href, { http: false })
   } catch (err) {
     debug('ignoring document.cookie write %s: %s', cookie, err.message)
 
@@ -56,7 +56,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
   const parsed = parseDocumentCookie(cookieString, pageUrl.pathname)
   const isSecure = isSecureUrl(pageUrl)
 
-  if (!parsed || !meetsDocumentCookieRules(parsed, isSecure)) return
+  if (!parsed || !meetsDocumentCookieRules(parsed, isSecure, pageUrl.hostname)) return
 
   const cookie = resolveDomain(parsed, pageUrl)
 
@@ -64,11 +64,15 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
   const stored = { name: cookie.key, domain: cookie.domain, path: cookie.path }
 
+  const isStored = (c: Cookie) => c.key === stored.name && c.domain === stored.domain && c.path === stored.path
+  let replaced: Cookie | undefined
+
   try {
     const existing = await automation.getCookies({ name: cookie.key })
 
     if (existing.some((c) => isBlockedByExisting(c, stored, isSecure))) return
 
+    replaced = cookieJar.getAllCookies().find(isStored)
     cookieJar.setCookie(cookie, pageUrl.href, 'strict', { http: false })
   } catch (err) {
     // a failed lookup leaves no way to tell whether the write is allowed
@@ -77,5 +81,14 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
     return
   }
 
-  await automation.setCookie(toughCookieToAutomationCookie(cookie, pageUrl.hostname))
+  try {
+    await automation.setCookie(toughCookieToAutomationCookie(cookie, pageUrl.hostname))
+  } catch (err) {
+    // the browser does not have the cookie, so the server-side jar must not either
+    cookieJar.removeCookie(stored)
+
+    if (replaced) cookieJar.setCookie(replaced, pageUrl.href, 'strict')
+
+    throw err
+  }
 }

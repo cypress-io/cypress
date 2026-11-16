@@ -62,6 +62,35 @@ describe('lib/automation/cookie/document-cookie', () => {
       expect(browserCookie()).toMatchObject({ path: '/account', maxAge: 60 })
     })
 
+    it('a Domain with no registrable part when it is the page host', async () => {
+      await write('foo=bar; Domain=localhost', 'http://localhost:3500/')
+      await write('foo=bar; Domain=127.0.0.1', 'http://127.0.0.1:3500/')
+      await write('foo=bar; Domain=web', 'http://web:3000/')
+      await write('foo=bar; Domain=github.io', 'https://github.io/')
+
+      expect(automation.setCookie.mock.calls.map(([cookie]) => cookie.domain)).toEqual(['localhost', '127.0.0.1', 'web', 'github.io'])
+    })
+
+    it('a Domain in its canonical form', async () => {
+      await write('foo=bar; Domain=[::1]', 'http://[::1]:3500/')
+      await write('foo=bar; Domain=WWW.Foobar.com')
+
+      expect(automation.setCookie.mock.calls.map(([cookie]) => cookie.domain)).toEqual(['::1', 'www.foobar.com'])
+    })
+
+    it('a parent Domain on a special-use TLD', async () => {
+      await write('foo=bar; Domain=app.test', 'http://www.app.test/')
+      await write('foo=bar; Domain=app.localhost', 'http://x.app.localhost:3500/')
+
+      expect(automation.setCookie.mock.calls.map(([cookie]) => cookie.domain)).toEqual(['app.test', 'app.localhost'])
+    })
+
+    it('a __Host- cookie with Path=/ from a page at /', async () => {
+      await write('__Host-foo=bar; Secure; Path=/', 'https://www.foobar.com/')
+
+      expect(browserCookie()).toMatchObject({ name: '__Host-foo', path: '/' })
+    })
+
     it('a Secure cookie from an https page', async () => {
       await write('foo=bar; Secure; SameSite=None')
 
@@ -136,6 +165,24 @@ describe('lib/automation/cookie/document-cookie', () => {
 
     it('a cookie for a public suffix', () => expectIgnored('foo=bar; Domain=com'))
 
+    it('a Domain with no registrable part that is not the page host', async () => {
+      await expectIgnored('foo=bar; Domain=localhost', 'http://app.localhost:3500/')
+      await expectIgnored('foo=bar; Domain=test', 'http://www.app.test/')
+      await expectIgnored('foo=bar; Domain=web', 'http://api.web:3000/')
+      await expectIgnored('foo=bar; Domain=github.io', 'https://user.github.io/')
+    })
+
+    it('a string with a control character anywhere in it', async () => {
+      await expectIgnored('foo=bar\nbaz=qux')
+      await expectIgnored('foo=bar\rbaz')
+      await expectIgnored('foo=bar\u0000baz')
+      await expectIgnored('=foo\nbar')
+      await expectIgnored('foo=bar; Path=/\u0001')
+      await expectIgnored('foo=bar; Other=\u007f')
+    })
+
+    it('a __Host- cookie without a Path, even from a page at /', () => expectIgnored('__Host-foo=bar; Secure', 'https://www.foobar.com/'))
+
     it('a cookie for part of an IP address', () => expectIgnored('foo=bar; Domain=0.0.1', 'http://127.0.0.1:3500/'))
 
     it('an HttpOnly cookie', () => expectIgnored('foo=bar; HttpOnly'))
@@ -175,6 +222,26 @@ describe('lib/automation/cookie/document-cookie', () => {
       existing = [{ name: 'foo', domain: 'foobar.com', path: '/', httpOnly: false, secure: true }]
 
       await expectIgnored('foo=baz; Path=/account', 'http://www.foobar.com/')
+    })
+  })
+
+  describe('when the browser refuses the cookie', () => {
+    beforeEach(() => {
+      automation.setCookie.mockRejectedValue(new Error('refused'))
+    })
+
+    it('rejects and leaves the server-side jar without it', async () => {
+      await expect(write('foo=bar')).rejects.toThrow('refused')
+
+      expect(cookieJar.getAllCookies()).toEqual([])
+    })
+
+    it('keeps the cookie it would have replaced', async () => {
+      cookieJar.setCookie('foo=bar; Path=/', 'https://www.foobar.com/', 'strict')
+
+      await expect(write('foo=baz; Path=/')).rejects.toThrow('refused')
+
+      expect(cookieJar.getAllCookies().map(({ key, value }) => ({ key, value }))).toEqual([{ key: 'foo', value: 'bar' }])
     })
   })
 

@@ -1,4 +1,4 @@
-import { Cookie, defaultPath, domainMatch, pathMatch } from 'tough-cookie'
+import { Cookie, canonicalDomain, defaultPath, domainMatch, getPublicSuffix, pathMatch } from 'tough-cookie'
 
 // Shared with the cross-origin AUT injection, so both apply the rules a browser
 // applies to a document.cookie write that tough-cookie does not.
@@ -7,6 +7,28 @@ const MAX_NAME_VALUE_BYTES = 4096
 const MAX_ATTRIBUTE_BYTES = 1024
 
 const byteLength = (value: string) => new TextEncoder().encode(value).length
+
+// every control character but a tab
+const hasControlCharacter = (value: string) => {
+  return Array.from(value).some((character) => {
+    const code = character.charCodeAt(0)
+
+    return (code < 0x20 && code !== 0x09) || code === 0x7f
+  })
+}
+
+const isIpAddress = (domain: string) => domain.includes(':') || /^\d{1,3}(\.\d{1,3}){3}$/.test(domain)
+
+const hasRegistrableDomain = (domain: string) => {
+  if (!domain.includes('.') || isIpAddress(domain)) return false
+
+  try {
+    return getPublicSuffix(domain) !== null
+  } catch {
+    // tough-cookie throws for special-use TLDs such as .test and .localhost, which are not public suffixes
+    return true
+  }
+}
 
 const isOversizedAttribute = (attribute: string) => byteLength(attribute.slice(attribute.indexOf('=') + 1).trim()) > MAX_ATTRIBUTE_BYTES
 
@@ -29,6 +51,9 @@ interface StoredCookie {
  * undefined for a string a browser would ignore.
  */
 export const parseDocumentCookie = (cookieString: string, pathname: string): Cookie | undefined => {
+  // browsers ignore the whole write, where tough-cookie cuts it at a line break
+  if (hasControlCharacter(cookieString)) return
+
   const [pair, ...attributes] = cookieString.split(';')
   // browsers ignore an oversized attribute and keep the rest of the cookie
   const cookie = Cookie.parse([pair, ...attributes.filter((attribute) => !isOversizedAttribute(attribute))].join(';'), { loose: true })
@@ -50,7 +75,14 @@ export const parseDocumentCookie = (cookieString: string, pathname: string): Coo
     cookie.sameSite = 'lax'
   }
 
-  cookie.path = cookie.path || defaultPath(pathname)
+  if (cookie.domain) {
+    cookie.domain = canonicalDomain(cookie.domain)
+  }
+
+  if (!cookie.path) {
+    cookie.path = defaultPath(pathname)
+    cookie.pathIsDefault = true
+  }
 
   return cookie
 }
@@ -59,7 +91,11 @@ export const parseDocumentCookie = (cookieString: string, pathname: string): Coo
  * Whether a page may set the parsed cookie through `document.cookie`. The
  * cookie's `domain` must still be what the write's Domain attribute gave it.
  */
-export const meetsDocumentCookieRules = (cookie: Pick<Cookie, 'key' | 'value' | 'secure' | 'sameSite' | 'domain' | 'path'>, isSecure: boolean) => {
+export const meetsDocumentCookieRules = (cookie: Pick<Cookie, 'key' | 'value' | 'secure' | 'sameSite' | 'domain' | 'path' | 'pathIsDefault'>, isSecure: boolean, hostname: string) => {
+  // a Domain with no registrable part, such as an IP address, a single label or a
+  // public suffix, is only allowed when it is the page's own host
+  if (cookie.domain && cookie.domain !== canonicalDomain(hostname) && !hasRegistrableDomain(cookie.domain)) return false
+
   // a nameless cookie's value can't pass for a prefixed name
   if (!cookie.key && /^__(secure|host|http)-/i.test(cookie.value)) return false
 
@@ -72,7 +108,7 @@ export const meetsDocumentCookieRules = (cookie: Pick<Cookie, 'key' | 'value' | 
     return cookie.sameSite !== 'none' && !/^__(secure|host)-/i.test(name)
   }
 
-  return isSecure && (!/^__host-/i.test(name) || (!cookie.domain && cookie.path === '/'))
+  return isSecure && (!/^__host-/i.test(name) || (!cookie.domain && cookie.path === '/' && !cookie.pathIsDefault))
 }
 
 // document.cookie can't replace an HttpOnly cookie, and an insecure page can't shadow a Secure one
