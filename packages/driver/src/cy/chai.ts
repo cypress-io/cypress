@@ -12,25 +12,10 @@ import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
 import * as chaiInspect from './chai/inspect'
+import { escapeMarkdown, formatMessageTemplate, removeOrKeepSingleQuotesBetweenStars } from './chai/message_format'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
 
-// all words between single quotes
-const allPropertyWordsBetweenSingleQuotes = /('.*?')/g
-
-const allBetweenFourStars = /\*\*.*\*\*/
-const allNumberStrings = /'([0-9]+)'/g
-const allEmptyStrings = /''/g
-const allSingleQuotes = /'/g
-const allEscapedSingleQuotes = /\\'/g
-const allQuoteMarkers = /__quote__/g
-const allWordsBetweenCurlyBraces = /(#{.+?})/g
-const allQuadStars = /\*\*\*\*/g
-const leadingWhitespaces = /\*\*'\s*/g
-const trailingWhitespaces = /\s*'\*\*/g
-const whitespace = /\s/g
-const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/
-const imageMarkdown = /!\[.*?\]\(.*?\)/g
 const doubleslashRe = /\\\\/g
 const escapedDoubleslashRe = /__double_slash__/g
 
@@ -128,54 +113,13 @@ chai.use((chai, u) => {
   const escapeDoubleSlash = (str: string) => str.replace(doubleslashRe, '__double_slash__')
   const restoreDoubleSlash = (str: string) => str.replace(escapedDoubleslashRe, '\\\\')
 
-  // remove any single quotes between our **,
-  // except escaped quotes, empty strings and number strings.
-  const removeOrKeepSingleQuotesBetweenStars = (message) => {
-    // remove any single quotes between our **, preserving escaped quotes
-    // and if an empty string, put the quotes back
-    return message.replace(allBetweenFourStars, (match) => {
-      if (valueHasLeadingOrTrailingWhitespaces.test(match)) {
-        // Above we used \s+, but below we use \s*.
-        // It's because of the strings like '   love' that have empty spaces on one side only.
-        match = match
-        .replace(leadingWhitespaces, (match) => {
-          return match.replace(`**'`, '**__quote__')
-          .replace(whitespace, '&nbsp;')
-        })
-        .replace(trailingWhitespaces, (match) => {
-          return match.replace(`'**`, '__quote__**')
-          .replace(whitespace, '&nbsp;')
-        })
-      }
-
-      return match
-      .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
-      .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
-      .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
-      .replace(allSingleQuotes, '')
-      .replace(allQuoteMarkers, '\'') // put escaped quotes back
-    })
-  }
-
-  const escapeMarkdown = (message) => {
-    return message.replace(imageMarkdown, '``$&``')
-  }
-
   // Only the message templates (args[1] and args[2]) are rewritten. The
   // expected and actual values (args[3] and args[4]) are user data, and
   // rewriting them would change what the message displays.
   const replaceArgMessages = (args: any[], str) => {
     return _.reduce(args, (memo: string[], value, index) => {
       if ((index === 1 || index === 2) && _.isString(value)) {
-        value = value
-        .replace(allWordsBetweenCurlyBraces, '**$1**')
-        .replace(allEscapedSingleQuotes, '__quote__')
-        .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
-        // when a value has ** in it, **** are sometimes created after the process above.
-        // remove them with this.
-        .replace(allQuadStars, '**')
-
-        memo.push(value)
+        memo.push(formatMessageTemplate(value))
       } else {
         memo.push(value)
       }
