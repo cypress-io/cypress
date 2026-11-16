@@ -6,8 +6,7 @@ const CHROME_STABLE_KEY = 'chrome-stable-version'
 const CHROME_BETA_KEY = 'chrome-beta-version'
 const CHROME_FOR_TESTING_STABLE_KEY = 'chrome-for-testing-stable-version'
 const FIREFOX_STABLE_KEY = 'firefox-stable-version'
-// Mozilla's "released devel" channel — what they market as "Beta" — pinned via
-// the firefox:beta channel registered in @packages/launcher's known-browsers list.
+// Mozilla's "released devel" channel, marketed as Beta. Cypress detects it as firefox:dev.
 const FIREFOX_BETA_KEY = 'firefox-beta-version'
 
 // This is the path to the CircleCI file that contains the browser version anchors

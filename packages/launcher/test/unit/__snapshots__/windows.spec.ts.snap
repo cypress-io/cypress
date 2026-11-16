@@ -107,20 +107,6 @@ exports[`windows browser detection > detects Firefox local installs 1`] = `
   },
   {
     "binary": [
-      "firefox-beta",
-      "firefox",
-    ],
-    "channel": "beta",
-    "displayName": "Firefox Beta",
-    "family": "firefox",
-    "name": "firefox",
-    "path": "C:/Users/flotwig/AppData/Local/Firefox Beta/firefox.exe",
-    "validator": [Function],
-    "version": "400",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
-  },
-  {
-    "binary": [
       "firefox-developer-edition",
       "firefox",
     ],
@@ -220,20 +206,6 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "validator": [Function],
     "version": "72",
     "versionRegex": /\\^Mozilla Firefox \\(\\[\\^\\\\sab\\]\\+\\)\\$/m,
-  },
-  {
-    "binary": [
-      "firefox-beta",
-      "firefox",
-    ],
-    "channel": "beta",
-    "displayName": "Firefox Beta",
-    "family": "firefox",
-    "name": "firefox",
-    "path": "C:/Program Files/Firefox Beta/firefox.exe",
-    "validator": [Function],
-    "version": "152",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [

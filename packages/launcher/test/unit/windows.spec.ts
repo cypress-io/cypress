@@ -95,11 +95,6 @@ describe('windows browser detection', () => {
         path: 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe',
         version: '73',
       },
-      // 64-bit beta edition
-      {
-        path: 'C:/Program Files/Firefox Beta/firefox.exe',
-        version: '152',
-      },
       // 64-bit nightly edition
       {
         path: 'C:/Program Files/Firefox Nightly/firefox.exe',
@@ -236,7 +231,7 @@ describe('windows browser detection', () => {
     // mock uninstalling Firefox in the Program Files directory
     const foundFirefoxInstalls = _.remove(mockBrowsers, (browser) => browser.path.includes('Firefox'))
 
-    expect(foundFirefoxInstalls).toHaveLength(5)
+    expect(foundFirefoxInstalls).toHaveLength(4)
 
     // mock installing Firefox in the local app data directory
     mockBrowsers.push({
@@ -254,11 +249,6 @@ describe('windows browser detection', () => {
       version: '300',
     })
 
-    mockBrowsers.push({
-      path: `${HOMEDIR}/AppData/Local/Firefox Beta/firefox.exe`,
-      version: '400',
-    })
-
     const firefoxBrowsers = _.filter(knownBrowsers, { family: 'firefox' })
 
     const mappedBrowsers = []
@@ -272,7 +262,7 @@ describe('windows browser detection', () => {
       })
     }
 
-    expect(mappedBrowsers.map((browser) => browser.version).sort()).toEqual(['100', '200', '300', '400'])
+    expect(mappedBrowsers.map((browser) => browser.version).sort()).toEqual(['100', '200', '300'])
     expect(mappedBrowsers).toMatchSnapshot()
   })
 

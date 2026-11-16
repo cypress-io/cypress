@@ -859,7 +859,7 @@ commands:
                 firefox-version: << parameters.firefox-version >>
       - when:
           condition:
-            equal: [ firefox:beta, << parameters.browser >> ]
+            equal: [ firefox:dev, << parameters.browser >> ]
           steps:
             - install-browsers:
                 install-firefox: true
@@ -2727,13 +2727,15 @@ jobs:
           browser: firefox
           guard: << pipeline.parameters.run-driver-tests >>
 
+  # Cypress detects Mozilla Beta as firefox:dev: Beta and Developer Edition
+  # report the same `--version` format
   driver-integration-tests-firefox-beta:
     <<: *defaults
     resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
-          browser: firefox:beta
+          browser: firefox:dev
           guard: << pipeline.parameters.run-driver-tests >>
 
   # electron is deprecated as a test browser, so it stays on the HTTP/1 MITM
