@@ -44,7 +44,7 @@
     "jiti": "^2.4.2",
     "mock-fs": "5.4.0",
     "typescript": "~5.4.5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0"
   },
   "nx": {
     "implicitDependencies": [

@@ -271,7 +271,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "~5.4.5",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.0",
     "yaml": "2.8.0",
     "yarn-deduplicate": "3.1.0"
   },

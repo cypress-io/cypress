@@ -41,7 +41,7 @@
     "jiti": "^2.4.2",
     "resolve-pkg": "2.0.0",
     "tsx": "^4.23.12",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0"
   },
   "nx": {
     "targets": {

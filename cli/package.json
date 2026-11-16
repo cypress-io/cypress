@@ -108,7 +108,7 @@
     "tslib": "^2.8.1",
     "tsx": "4.23.12",
     "typescript": "~5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0"
   },
   "files": [
     "bin",

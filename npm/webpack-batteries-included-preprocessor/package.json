@@ -74,7 +74,7 @@
     "typescript": "^6.0.0",
     "typescript-v5": "npm:typescript@~5.4.5",
     "typescript-v7": "npm:typescript@^7.0.0",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0"
   },
   "peerDependencies": {
     "@cypress/webpack-preprocessor": "^6.0.4"

@@ -54,7 +54,7 @@
     "rimraf": "^6.1.1",
     "semantic-release": "25.0.8",
     "typescript": "5.4.5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0"
   },
   "peerDependencies": {
     "cypress": ">=14.0.0"

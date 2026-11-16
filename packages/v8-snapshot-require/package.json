@@ -34,7 +34,7 @@
     "@tooling/packherd": "0.0.0-development",
     "eslint": "^10.14.0",
     "jiti": "^2.4.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0"
   },
   "nx": {}
 }

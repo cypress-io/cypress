@@ -207,7 +207,7 @@
     "supertest": "4.0.2",
     "ts-loader": "^9.5.7",
     "tsconfig-paths": "3.10.1",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.0",
     "webpack": "^5.88.2",
     "ws": "5.2.4",
     "xvfb-maybe": "0.2.1",

@@ -45,7 +45,7 @@
     "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "vite-8": "npm:vite@^8.0.9",
-    "vitest": "3.2.7"
+    "vitest": "4.1.0"
   },
   "peerDependencies": {
     "cypress": ">=16.0.0",
