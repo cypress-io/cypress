@@ -281,10 +281,30 @@ export function installedElectronResourcesFilePath (
 const commonJsModuleRx = /(at Object.__commonJS\.)([^(]+)([^ :]+) *:(\d+)(.+)/
 
 /**
+ * Formats and caches `err.stack` without source-map-support, whose hook throws
+ * on the stray `sourceMappingURL`s inside the vm-run snapshot script and would
+ * replace the error being reported.
+ * @category snapshot
+ */
+export function formatStackWithoutSourceMaps (err: unknown) {
+  const prepareStackTrace = Error.prepareStackTrace
+
+  Error.prepareStackTrace = (error, callSites) => `${error}${callSites.map((callSite) => `\n    at ${callSite}`).join('')}`
+  try {
+    // Not `instanceof Error`: errors thrown in the vm come from another realm
+    return typeof err === 'object' && err !== null && 'stack' in err ? err.stack : undefined
+  } finally {
+    Error.prepareStackTrace = prepareStackTrace
+  }
+}
+
+/**
  * Pretty prints errors related to module's being included in the snapshot.
  * @category snapshot
  */
 export function prettyPrintError (err: Error, baseDirPath: string) {
+  formatStackWithoutSourceMaps(err)
+
   if (
     !(
       err.stack != null &&
