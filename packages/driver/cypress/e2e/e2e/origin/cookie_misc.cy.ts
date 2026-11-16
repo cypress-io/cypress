@@ -320,6 +320,21 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  it('cy.clearCookie() clears a document.cookie write without a Path', () => {
+    cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+    cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+    cy.origin(`https://app.foobar.com:3503`, () => {
+      cy.document().then((doc) => {
+        doc.cookie = 'key=value'
+      })
+
+      cy.getCookie('key').its('path').should('eq', '/fixtures')
+      cy.clearCookie('key')
+      cy.document().its('cookie').should('not.include', 'key=value')
+      cy.getCookie('key').should('be.null')
+    })
+  })
+
   describe('document.cookie with HttpOnly cookies', () => {
     beforeEach(() => {
       cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)

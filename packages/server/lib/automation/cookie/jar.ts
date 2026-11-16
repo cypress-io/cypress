@@ -117,16 +117,18 @@ export class CookieJar {
     return this._cookieJar.setCookieSync(cookie, url, { sameSiteContext, http })
   }
 
-  removeCookie (cookieData: CookieData) {
-    // have to use the internal memstore. looks like an async api, but
-    // it's actually synchronous
-    // @ts-expect-error - store is internal to tough-cookie and not on CookieJar's public type
-    this._cookieJar.store.removeCookie(
-      cookieData.domain,
-      cookieData.path || '/',
-      cookieData.name,
-      () => {},
-    )
+  // without a path, removes the cookie at every path
+  removeCookie ({ name, domain, path }: CookieData) {
+    const paths = path ? [path] : this.getAllCookies()
+    .filter((cookie) => cookie.key === name && cookie.domain === domain)
+    .map((cookie) => cookie.path)
+
+    paths.forEach((cookiePath) => {
+      // have to use the internal memstore. looks like an async api, but
+      // it's actually synchronous
+      // @ts-expect-error - store is internal to tough-cookie and not on CookieJar's public type
+      this._cookieJar.store.removeCookie(domain, cookiePath, name, () => {})
+    })
   }
 
   removeAllCookies () {
