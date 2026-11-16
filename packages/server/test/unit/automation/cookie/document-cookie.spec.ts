@@ -245,6 +245,47 @@ describe('lib/automation/cookie/document-cookie', () => {
     })
   })
 
+  describe('while the browser has not answered', () => {
+    const jarValues = () => cookieJar.getAllCookies().map(({ key, value }) => ({ key, value }))
+
+    it('holds the cookie in the server-side jar', async () => {
+      let answer: (cookies: typeof existing) => void = () => {}
+
+      automation.getCookies.mockReturnValue(new Promise((resolve) => answer = resolve))
+
+      const written = write('foo=bar')
+
+      expect(jarValues()).toEqual([{ key: 'foo', value: 'bar' }])
+
+      answer([])
+      await written
+    })
+
+    it('takes the cookie back out when an existing cookie blocks the write', async () => {
+      cookieJar.setCookie('foo=bar; Path=/', 'https://www.foobar.com/', 'strict')
+      existing = [{ name: 'foo', domain: 'www.foobar.com', path: '/', httpOnly: true, secure: false }]
+
+      await write('foo=baz; Path=/')
+
+      expect(jarValues()).toEqual([{ key: 'foo', value: 'bar' }])
+    })
+
+    it('leaves a later write to the same cookie in place when the earlier one is refused', async () => {
+      let refuse: (err: Error) => void = () => {}
+
+      automation.setCookie.mockReturnValueOnce(new Promise((_resolve, reject) => refuse = reject))
+
+      const earlier = write('foo=bar; Path=/')
+
+      await write('foo=baz; Path=/')
+
+      refuse(new Error('refused'))
+      await expect(earlier).rejects.toThrow('refused')
+
+      expect(jarValues()).toEqual([{ key: 'foo', value: 'baz' }])
+    })
+  })
+
   it('ignores the write when the existing cookie lookup fails', async () => {
     automation.getCookies.mockRejectedValue(new Error('no automation client'))
 

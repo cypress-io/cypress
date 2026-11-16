@@ -64,30 +64,45 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
   const stored = { name: cookie.key, domain: cookie.domain, path: cookie.path }
 
-  const isStored = (c: Cookie) => c.key === stored.name && c.domain === stored.domain && c.path === stored.path
-  let replaced: Cookie | undefined
+  const findStored = () => cookieJar.getAllCookies().find((c) => c.key === stored.name && c.domain === stored.domain && c.path === stored.path)
+  const replaced = findStored()
+  let written: Cookie | undefined
+
+  try {
+    // set before the browser answers, so a request the page makes right after the write carries the cookie
+    cookieJar.setCookie(cookie, pageUrl.href, 'strict', { http: false })
+    written = findStored()
+  } catch (err) {
+    debug('ignoring document.cookie write %s: %s', cookieString, err.message)
+
+    return
+  }
+
+  const undo = () => {
+    // a later write to the same cookie owns the entry now
+    if (findStored() !== written) return
+
+    cookieJar.removeCookie(stored)
+
+    if (replaced) cookieJar.setCookie(replaced, pageUrl.href, 'strict')
+  }
 
   try {
     const existing = await automation.getCookies({ name: cookie.key })
 
-    if (existing.some((c) => isBlockedByExisting(c, stored, isSecure))) return
-
-    replaced = cookieJar.getAllCookies().find(isStored)
-    cookieJar.setCookie(cookie, pageUrl.href, 'strict', { http: false })
+    if (existing.some((c) => isBlockedByExisting(c, stored, isSecure))) return undo()
   } catch (err) {
     // a failed lookup leaves no way to tell whether the write is allowed
     debug('ignoring document.cookie write %s: %s', cookieString, err.message)
 
-    return
+    return undo()
   }
 
   try {
     await automation.setCookie(toughCookieToAutomationCookie(cookie, pageUrl.hostname))
   } catch (err) {
     // the browser does not have the cookie, so the server-side jar must not either
-    cookieJar.removeCookie(stored)
-
-    if (replaced) cookieJar.setCookie(replaced, pageUrl.href, 'strict')
+    undo()
 
     throw err
   }
