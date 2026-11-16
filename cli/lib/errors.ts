@@ -310,8 +310,8 @@ const invalidTestingType = {
 }
 
 const incompleteHeadlessOpen = {
-  description: '`cypress open --headless` starts a session for `cypress tap` to drive, with no Cypress window to choose a project, testing type or browser in, so it needs all three up front.',
-  solution: 'Pass `--e2e` or `--component`, and `--browser`, along with `--headless`. Pass `--project` too if Cypress is installed globally, and do not pass `--global`.',
+  description: '`cypress open --headless` starts a session for `cypress tap` to drive, with no Cypress window to choose a project or testing type in, so it needs both up front.',
+  solution: 'Pass `--e2e` or `--component` along with `--headless`. Pass `--project` too if Cypress is installed globally, and do not pass `--global`.',
 }
 
 const incompatibleTestTypeFlags = {

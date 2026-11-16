@@ -266,10 +266,16 @@ describe('exec open', function () {
 
       it.each([
         ['a testing type', { project: '/path/to/project', browser: 'chrome' }],
-        ['a browser', { project: '/path/to/project', e2e: true }],
         ['a project', { browser: 'chrome', e2e: true }],
       ])('throws without %s', (_label, options) => {
         expect(() => open.processOpenOptions({ headless: true, ...options })).toThrow(expect.objectContaining({ details: expect.objectContaining({ description: expect.stringContaining('--headless') }) }))
+      })
+
+      it('does not require --browser, leaving the browser to defaultBrowser in the config', () => {
+        const args = open.processOpenOptions({ headless: true, project: '/path/to/project', e2e: true })
+
+        expect(args).toContain('--headless')
+        expect(args).not.toContain('--browser')
       })
 
       it('throws with --global', () => {

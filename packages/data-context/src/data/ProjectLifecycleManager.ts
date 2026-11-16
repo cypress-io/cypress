@@ -371,8 +371,8 @@ export class ProjectLifecycleManager {
    *  2. The value of `defaultBrowser` in `cypress.config`.
    *  3. The last browser selected in `open` mode (by name and channel) for this project.
    *  4. The first browser found.
-   * A `--headless` session stops at the first: when its `--browser` cannot be found or driven,
-   * it is left with no `activeBrowser`.
+   * A `--headless` session stops after the second: when its browser cannot be found or driven, or
+   * none was given, it is left with no `activeBrowser`.
    */
   async setInitialActiveBrowser () {
     // if we no longer have a project, just return
@@ -422,6 +422,17 @@ export class ProjectLifecycleManager {
       }
     }
 
+    // Nobody can pick a browser in the window `--headless` keeps hidden, and a remembered or first-found
+    // one may be a browser `cypress tap` cannot drive
+    if (this.ctx.isHeadless) {
+      const message = 'Cypress could not start this `--headless` session, because no browser was given. Pass `--browser`, or set `defaultBrowser` in your Cypress config, then start Cypress again.'
+
+      logError(message)
+      this.ctx.reportLoadError(message, 'browser')
+
+      return
+    }
+
     // lastBrowser is cached per-project.
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
     const browsers = await this.ctx.browser.allBrowsers()
@@ -448,7 +459,7 @@ export class ProjectLifecycleManager {
       // A hidden session only `cypress tap` can see, in a browser it cannot drive, is of no use
       // to anyone, so nothing launches
       if (this.ctx.isHeadless && !isTapSupportedBrowser(browser.family)) {
-        const message = `Cypress could not start this \`--headless\` session in ${browser.displayName}, because \`cypress tap\` can only drive Chromium-based browsers, such as Chrome, Edge and Electron. Pass one of them with \`--browser\`, then start Cypress again.`
+        const message = `Cypress could not start this \`--headless\` session in ${browser.displayName}, because \`cypress tap\` can only drive Chromium-based browsers, such as Chrome, Edge and Electron. Pass one of them with \`--browser\`, or set it as \`defaultBrowser\` in your Cypress config, then start Cypress again.`
 
         logError(message)
         this.ctx.reportLoadError(message, 'browser')

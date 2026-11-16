@@ -630,6 +630,36 @@ describe('ProjectLifecycleManager', () => {
           }))
         })
 
+        it('launches the defaultBrowser from the config when --browser is not given', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', headless: true })
+
+          jest.spyOn(headless.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
+          headless.coreData.cliBrowser = null
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.cliBrowser).toBe('electron')
+          expect(headless.coreData.activeBrowser).not.toBeNull()
+          expect(headless.actions.project.launchProject).toHaveBeenCalledTimes(1)
+          expect(headless._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+        })
+
+        it('reports the missing browser, and falls back to no other, when neither --browser nor defaultBrowser is given', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', headless: true })
+
+          headless.coreData.cliBrowser = null
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser).toBeNull()
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('no browser was given'),
+          }))
+        })
+
         it('launches a browser cypress tap cannot drive when not --headless', async () => {
           process.env.CLAUDECODE = '1'
 

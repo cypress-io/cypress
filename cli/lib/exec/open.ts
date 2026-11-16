@@ -76,7 +76,7 @@ const processOpenOptions = (options: any = {}): string[] => {
   const testingTypeArgs = processTestingType(options)
 
   if (options.headless) {
-    if (options.global || !options.project || !testingTypeArgs.length || !options.browser) {
+    if (options.global || !options.project || !testingTypeArgs.length) {
       throwInvalidOptionError(errors.incompleteHeadlessOpen)
     }
 
